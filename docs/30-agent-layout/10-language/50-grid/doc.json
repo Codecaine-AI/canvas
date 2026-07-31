@@ -6,13 +6,7 @@
   "blocks": {
     "b-grid-root": {
       "id": "b-grid-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-grid-title-1",
-        "b-grid-body-2",
-        "b-grid-code-3",
-        "b-grid-canvas-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "The descriptive grid pattern: RxC identical cells filled in row-major order, with one gap= value repeated exactly; cells keep row and column identity, anchoring later placement.",
         "format": "mdx",
@@ -24,12 +18,17 @@
           "lattice",
           "row-major"
         ]
-      }
+      },
+      "children": [
+        "b-grid-title-1",
+        "b-grid-body-2",
+        "b-grid-code-3",
+        "b-grid-canvas-4"
+      ]
     },
     "b-grid-title-1": {
       "id": "b-grid-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -37,12 +36,12 @@
         {
           "insert": "grid — a repeated-cell lattice"
         }
-      ]
+      ],
+      "children": []
     },
     "b-grid-body-2": {
       "id": "b-grid-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -66,12 +65,12 @@
         {
           "insert": " — the one shared gap repeated exactly between cells. Children are item lines in row-major order; the count must fit the lattice (more than (R−1)×C, at most R×C). Cells keep their row and column identity, and that skeleton anchors everything placed later. On the live board, same size plus the same gap signals peers: choose the gap from content and corridor needs, then copy exact geometry across the group. The crowding diagnostic warns below about 80px between side-by-side sibling boxes or 96px between stacked siblings; those measurements are the physical floor for wires and labels, not prescribed spacing."
         }
-      ]
+      ],
+      "children": []
     },
     "b-grid-code-3": {
       "id": "b-grid-code-3",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -79,16 +78,17 @@
         {
           "insert": "section 1 text=table label=\"grid 2x3 gap=32\"\n  grid 2x3 gap=32\n    item 2 text=c1 type=process size=M\n    item 3 text=c2 type=process size=M\n    item 4 text=c3 type=process size=M\n    item 5 text=c4 type=process size=M\n    item 6 text=c5 type=process size=M\n    item 7 text=c6 type=process size=M\n\narrows"
         }
-      ]
+      ],
+      "children": []
     },
     "b-grid-canvas-4": {
       "id": "b-grid-canvas-4",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/example-grid.canvas.json",
         "title": "grid 2x3 gap=32 — six identical cells"
-      }
+      },
+      "children": []
     }
   }
 }

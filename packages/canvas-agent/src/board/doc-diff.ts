@@ -230,7 +230,6 @@ function connectionPatch(
   if (baseline.arrow !== draft.arrow) patch.arrow = draft.arrow;
   if (!structurallyEqual(baseline.from, draft.from)) patch.from = cloneEndpoint(draft.from);
   if (!structurallyEqual(baseline.to, draft.to)) patch.to = cloneEndpoint(draft.to);
-  if (baseline.role !== draft.role) patch.role = draft.role;
   // Waypoints are stored agent steering, but the reducer re-derives them from
   // endpoint movement on every replay (see the module doc). Emit the channel
   // only when that derivation would NOT already land on the draft's value: a

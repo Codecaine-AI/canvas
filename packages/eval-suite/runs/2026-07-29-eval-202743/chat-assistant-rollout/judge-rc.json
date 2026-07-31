@@ -1,0 +1,830 @@
+{
+  "axis": "rc",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 4,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "A customer converses with the assistant through both web and mobile chat surfaces.",
+        "brief_evidence": "“A customer converses with the assistant through our web and mobile chat surfaces.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 · Channels & input safety",
+            "observation": "Visible Customer and “Web + mobile chat” icons represent the actor and both requested chat surfaces."
+          },
+          {
+            "source": "json",
+            "locator": "objects live.customer and live.channels",
+            "observation": "The visible objects are labeled “Customer” and “Web + mobile chat.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "On every turn, the assistant gathers the required context before answering.",
+        "brief_evidence": "“On every turn, the assistant gathers what it needs before answering”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 · Turn context assembly",
+            "observation": "The note sends profile, transcript, and searched articles to model context, and the numbered sections place context assembly before guarded reply."
+          },
+          {
+            "source": "json",
+            "locator": "live.context.note and section titles 2 and 3; connections",
+            "observation": "Context assembly and reply are visibly numbered in order, but the connections array is empty and no text states that this happens on every turn."
+          }
+        ],
+        "note": "The before-answer ordering is suggested, but the “on every turn” constraint is missing."
+      },
+      {
+        "id": "R3",
+        "requirement": "The long-term profile contains preferences, past issues, and prior resolutions accumulated across earlier conversations.",
+        "brief_evidence": "“the customer's long-term profile — preferences, past issues, prior resolutions accumulated across earlier conversations”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 · Turn context assembly",
+            "observation": "A memory/database icon and the phrase “Profile” visibly represent profile context."
+          },
+          {
+            "source": "json",
+            "locator": "live.profile and live.context.note",
+            "observation": "The profile is present, but no visible object enumerates preferences, past issues, prior resolutions, or accumulation across earlier conversations."
+          }
+        ],
+        "note": "The profile exists, but its stated contents and cross-conversation nature are not shown."
+      },
+      {
+        "id": "R4",
+        "requirement": "The current conversation so far is included in the context for the turn.",
+        "brief_evidence": "“the current conversation so far”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 note",
+            "observation": "The visible text “Profile + transcript + searched help articles → model context” includes the transcript in model context."
+          },
+          {
+            "source": "json",
+            "locator": "live.context.note.text",
+            "observation": "The rendered note explicitly includes “transcript” as an input to model context."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "The most relevant help-center articles are found by searching the support corpus and included in the turn context.",
+        "brief_evidence": "“the most relevant help-center articles found by searching the support corpus”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 note",
+            "observation": "The note includes “searched help articles” as input to model context."
+          },
+          {
+            "source": "json",
+            "locator": "live.context.note.text",
+            "observation": "Searching and help articles are visible, but neither relevance selection nor the support corpus is identified."
+          }
+        ],
+        "note": "Article search is present, but the “most relevant” qualifier and support-corpus source are missing."
+      },
+      {
+        "id": "R6",
+        "requirement": "A model call produces the reply from the assembled context.",
+        "brief_evidence": "“A model call produces the reply from that assembled context.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 2 and 3",
+            "observation": "Section 2 sends the assembled inputs to “model context,” followed by Section 3’s “Guarded model reply.”"
+          },
+          {
+            "source": "json",
+            "locator": "live.context.note, live.reply.note, and numbered parent sections",
+            "observation": "The rendered notes and section ordering visibly encode assembled model context followed by a model reply."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "When a reply requires an action, the assistant invokes integrations with the billing and account systems.",
+        "brief_evidence": "“When the reply requires an action, such as issuing a refund or changing a subscription, the assistant invokes integrations with the billing and account systems”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 · Guarded reply & actions",
+            "observation": "The visible note states “credentialed billing/account actions.”"
+          },
+          {
+            "source": "json",
+            "locator": "live.reply.note.text",
+            "observation": "Billing and account actions are explicitly named in the rendered reply/action note."
+          }
+        ],
+        "note": "The diagram uses a compact note rather than separate integration components, which is acceptable for requirement coverage."
+      },
+      {
+        "id": "R8",
+        "requirement": "Credentials for billing and account integrations live in a managed secrets vault.",
+        "brief_evidence": "“the credentials for those integrations live in a managed secrets vault”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Inspected Section 3 and all other visible sections",
+            "observation": "The board says actions are credentialed but shows no managed secrets vault or equivalent visible statement."
+          },
+          {
+            "source": "json",
+            "locator": "Searched all objects, connections, and annotations",
+            "observation": "No rendered object text contains “vault,” “secret,” or a managed credential store; connections and annotations are empty."
+          }
+        ],
+        "note": "Credential use is mentioned, but the required storage location is not represented."
+      },
+      {
+        "id": "R9",
+        "requirement": "Integration credentials are fetched separately for each invocation.",
+        "brief_evidence": "“are fetched per invocation”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Inspected Section 3 · Guarded reply & actions",
+            "observation": "No fetch operation or per-invocation credential behavior is visible."
+          },
+          {
+            "source": "json",
+            "locator": "Searched object text and empty connections array",
+            "observation": "No object states credentials are fetched per invocation, and no edge depicts such a fetch."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "Integration credentials are never stored with the assistant itself.",
+        "brief_evidence": "“never stored with the assistant itself”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Inspected the complete board, especially Section 3",
+            "observation": "No visible note or boundary states that the assistant does not store credentials."
+          },
+          {
+            "source": "json",
+            "locator": "Searched all rendered object text",
+            "observation": "No text represents the prohibition on storing credentials with the assistant."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "A safety layer screens the customer's input.",
+        "brief_evidence": "“A safety layer screens both the customer's input”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 · Channels & input safety",
+            "observation": "A red shield icon is visibly labeled “Input safety.”"
+          },
+          {
+            "source": "json",
+            "locator": "live.input_guard",
+            "observation": "The rendered guardrail icon has text “Input safety” and is placed in the channels/input-safety section."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "A safety layer screens the assistant's outgoing reply.",
+        "brief_evidence": "“and the assistant's outgoing reply”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 · Guarded reply & actions",
+            "observation": "The note says “Guarded model reply,” suggesting output protection."
+          },
+          {
+            "source": "json",
+            "locator": "live.reply.note; connections",
+            "observation": "No text explicitly says output screening, and there is no rendered output-safety component or edge because connections are empty."
+          }
+        ],
+        "note": "A guarded reply is recognizable, but explicit screening of the outgoing reply is not shown."
+      },
+      {
+        "id": "R13",
+        "requirement": "A reply screened out by safety is replaced with a safe fallback.",
+        "brief_evidence": "“A screened-out reply is replaced with a safe fallback”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 note",
+            "observation": "The single guarded-reply note visibly pairs “Guarded model reply” with “safe fallback.”"
+          },
+          {
+            "source": "json",
+            "locator": "live.reply.note.text",
+            "observation": "The rendered note explicitly contains both guarded reply and safe fallback in the reply path."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Repeated safety triggers hand the conversation to a human support agent.",
+        "brief_evidence": "“repeated safety triggers ... hand the conversation to a human support agent”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Inspected Sections 1, 3, and 8",
+            "observation": "Human handoff and safety metrics are visible, but no repeated-trigger condition is attached to handoff."
+          },
+          {
+            "source": "json",
+            "locator": "live.reply.note, roll.monitor.note, and empty connections",
+            "observation": "No rendered text or edge states that repeated safety triggers cause human handoff."
+          }
+        ],
+        "note": "The outcome exists, but its required repeated-safety-trigger condition does not."
+      },
+      {
+        "id": "R15",
+        "requirement": "An explicit customer request hands the conversation to a human support agent.",
+        "brief_evidence": "“or an explicit customer request hand the conversation to a human support agent”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Inspected Customer/Channels section and Section 3 handoff note",
+            "observation": "No visible statement connects an explicit customer request to human handoff."
+          },
+          {
+            "source": "json",
+            "locator": "Searched all object text and connections",
+            "observation": "The only handoff text is generic “human handoff”; the connections array is empty."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "Human handoff includes the transcript, profile context, and what has already been attempted.",
+        "brief_evidence": "“together with the transcript, the profile context, and what has already been attempted”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Inspected Section 3 · Guarded reply & actions",
+            "observation": "The note mentions human handoff but does not identify any handoff payload."
+          },
+          {
+            "source": "json",
+            "locator": "live.reply.note and all objects/connections",
+            "observation": "No rendered text or edge carries transcript, profile context, or attempted actions to handoff."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "After a conversation ends, an extraction pass reviews its transcript.",
+        "brief_evidence": "“After a conversation ends, an extraction pass reviews the transcript”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 · Conversation distillation",
+            "observation": "The note starts with “Transcript →” and produces distilled facts."
+          },
+          {
+            "source": "json",
+            "locator": "life.extract.note; connections",
+            "observation": "Transcript processing is visible, but no text states that it runs after conversation completion, and no completed-conversation edge exists."
+          }
+        ],
+        "note": "Transcript extraction is recognizable, but its post-conversation timing is missing."
+      },
+      {
+        "id": "R18",
+        "requirement": "The extraction writes durable profile facts as a distillation rather than storing the raw transcript as profile memory.",
+        "brief_evidence": "“writes durable facts into the customer's profile — a distillation, not a raw log”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 note",
+            "observation": "The note states “Transcript → distilled, sourced profile facts.”"
+          },
+          {
+            "source": "json",
+            "locator": "life.extract.note.text",
+            "observation": "Distilled profile facts are explicit, but durability and the prohibition against raw-log profile storage are not explicit."
+          }
+        ],
+        "note": "The distillation target is present; durability and “not a raw log” are only implied."
+      },
+      {
+        "id": "R19",
+        "requirement": "A new fact that contradicts an older fact supersedes the older one.",
+        "brief_evidence": "“A new fact that contradicts an older one supersedes it”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Inspected Section 4 · Conversation distillation",
+            "observation": "No contradiction handling, replacement, precedence, or supersession behavior is visible."
+          },
+          {
+            "source": "json",
+            "locator": "Searched all object text, connections, and annotations",
+            "observation": "No rendered structure represents superseding an older contradictory fact."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Each fact records its source conversation so it can be traced to where it was learned.",
+        "brief_evidence": "“with the source conversation recorded so any fact can be traced to where it was learned”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 note",
+            "observation": "The phrase “sourced profile facts” visibly indicates provenance."
+          },
+          {
+            "source": "json",
+            "locator": "life.extract.note.text",
+            "observation": "The note says facts are sourced but does not explicitly identify the source conversation or guarantee traceability for every fact."
+          }
+        ],
+        "note": "Generic sourcing is present, but source-conversation recording and fact-level traceability are not fully stated."
+      },
+      {
+        "id": "R21",
+        "requirement": "Raw conversations older than the retention window leave the live store for cold storage.",
+        "brief_evidence": "“Raw conversations older than the retention window leave the live store for cold storage”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5 · Retention & compliance",
+            "observation": "The note states “Expired transcripts → cold archive.”"
+          },
+          {
+            "source": "json",
+            "locator": "life.retention.note.text",
+            "observation": "Expiry and movement to cold archive are visible, but the raw nature of the transcripts and departure from the live store are not explicit."
+          }
+        ],
+        "note": "The retention transition is present, but its live-store boundary is omitted."
+      },
+      {
+        "id": "R22",
+        "requirement": "Cold-stored conversations remain recoverable for compliance review.",
+        "brief_evidence": "“where they remain recoverable for compliance review”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5 · Retention & compliance",
+            "observation": "The section is explicitly titled “Retention & compliance,” and the note names a cold archive."
+          },
+          {
+            "source": "json",
+            "locator": "life.retention section and life.retention.note",
+            "observation": "Compliance context and cold archive are visible, but recoverability for review is not stated."
+          }
+        ],
+        "note": "Compliance archiving is recognizable, but recoverability is missing."
+      },
+      {
+        "id": "R23",
+        "requirement": "Cold-stored conversations are never pulled into a live turn.",
+        "brief_evidence": "“but are never pulled into a live turn”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Inspected Sections 2 and 5",
+            "observation": "The board does not state that cold history is excluded from live-turn context."
+          },
+          {
+            "source": "json",
+            "locator": "life.retention.note, live.context.note, connections, and annotations",
+            "observation": "No exclusion note or edge restriction is rendered; connections and annotations are empty."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "Challenger variants run alongside the production champion.",
+        "brief_evidence": "“proposing challenger variants ... that run alongside the production champion”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 · Champion & challengers",
+            "observation": "The section and note visibly present “champion + challengers” together."
+          },
+          {
+            "source": "json",
+            "locator": "roll.config section and roll.config.note",
+            "observation": "Champion and challengers are jointly represented in the rollout configuration."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "A challenger can vary the prompt, retrieval policy, or model choice.",
+        "brief_evidence": "“a different prompt, retrieval policy, or model choice”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 note",
+            "observation": "The note lists “Prompt • retrieval policy • model.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.config.note.text",
+            "observation": "All three stated variant dimensions are rendered."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "Variant definitions are maintained as versioned configuration.",
+        "brief_evidence": "“Variant definitions are versioned configuration”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 note",
+            "observation": "The note begins “Versioned config: champion + challengers.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.config.note.text",
+            "observation": "Versioned configuration is explicitly visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "A rollout changes configuration rather than redeploying the service.",
+        "brief_evidence": "“so a rollout changes configuration rather than redeploying the service”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 · Champion & challengers",
+            "observation": "The rollout is visibly described through versioned configuration."
+          },
+          {
+            "source": "json",
+            "locator": "roll.config.note and all other object text",
+            "observation": "Configuration is represented, but no visible statement excludes service redeployment."
+          }
+        ],
+        "note": "Configuration-based rollout is shown, but the no-redeployment constraint is absent."
+      },
+      {
+        "id": "R28",
+        "requirement": "A small sampled share of live conversations is served by a challenger instead of the champion.",
+        "brief_evidence": "“A small sampled share of live conversations is served by a challenger instead of the champion.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 note",
+            "observation": "The note states “Sampled traffic serves one variant.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.config.note.text",
+            "observation": "Sampling and single-variant service are visible, but the sample is not identified as small or explicitly assigned to the challenger instead of champion."
+          }
+        ],
+        "note": "The sampling mechanism is present, but its size and challenger-over-champion routing semantics are incomplete."
+      },
+      {
+        "id": "R29",
+        "requirement": "Automated judges score completed conversations from both champion and challenger variants.",
+        "brief_evidence": "“A panel of automated judges scores completed champion and challenger conversations”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 · Evaluation & approval",
+            "observation": "The note visibly identifies automated judges and an experiment report."
+          },
+          {
+            "source": "json",
+            "locator": "roll.eval.note.text and empty connections",
+            "observation": "No rendered text or edge specifies completed conversations or that both champion and challenger conversations are scored."
+          }
+        ],
+        "note": "Automated evaluation is present, but its completion boundary and two evaluated populations are missing."
+      },
+      {
+        "id": "R30",
+        "requirement": "Automated judges score resolution, factual grounding against the profile and cited articles, and tone.",
+        "brief_evidence": "“on resolution, factual grounding against the profile and the cited articles, and tone”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 note",
+            "observation": "The note lists “resolution • grounding • tone.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.eval.note.text",
+            "observation": "All three top-level criteria are present, but grounding is not explicitly checked against both profile facts and cited articles."
+          }
+        ],
+        "note": "The metric names are covered, but the required grounding references are omitted."
+      },
+      {
+        "id": "R31",
+        "requirement": "Judge verdicts accumulate into a separate experiment report for each challenger.",
+        "brief_evidence": "“their verdicts accumulate into an experiment report per challenger”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 note",
+            "observation": "The note explicitly states “Experiment report per challenger.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.eval.note.text",
+            "observation": "Per-challenger reporting is visible, but accumulation of judge verdicts into that report is not explicitly encoded."
+          }
+        ],
+        "note": "The report and per-challenger scope are present; verdict accumulation is missing."
+      },
+      {
+        "id": "R32",
+        "requirement": "Promotion can proceed only after a challenger clears the evaluation bar.",
+        "brief_evidence": "“when a challenger clears the bar”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 · Evaluation & approval",
+            "observation": "Evaluation criteria and promotion approval appear together in the same note."
+          },
+          {
+            "source": "json",
+            "locator": "roll.eval.note.text",
+            "observation": "No visible threshold, pass condition, or “clears the bar” gate is stated."
+          }
+        ],
+        "note": "Evaluation precedes approval conceptually, but the required score/bar gate is absent."
+      },
+      {
+        "id": "R33",
+        "requirement": "A product owner reviews the challenger report and approves or rejects promotion, so promotion is gated on a person rather than scores alone.",
+        "brief_evidence": "“Promotion is gated on people, not just scores: ... a product owner reviews the report and approves or rejects promotion.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 note",
+            "observation": "The same visible note contains “Experiment report per challenger” and “Product owner approves or rejects promotion.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.eval.note.text",
+            "observation": "Human approval and rejection are explicit, but report review and the “not just scores” exclusivity are not explicitly stated."
+          }
+        ],
+        "note": "The essential human decision is shown, while the review action and scores-alone prohibition are implicit."
+      },
+      {
+        "id": "R34",
+        "requirement": "Approval makes the challenger the new champion.",
+        "brief_evidence": "“Approval makes the challenger the new champion”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 · Live monitoring & rollback",
+            "observation": "The note states “Approved challenger becomes champion.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.monitor.note.text",
+            "observation": "The approval-to-champion outcome is explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "The displaced champion is retained so one rollback step can restore it.",
+        "brief_evidence": "“the displaced champion is retained so a single rollback step can restore it”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 note",
+            "observation": "The note states “prior champion enables one-step rollback.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.monitor.note.text",
+            "observation": "The prior champion and one-step rollback capability are explicitly represented."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "Live quality monitoring operates independently of the experiment.",
+        "brief_evidence": "“Live quality monitoring runs independently of the experiment”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Separate Sections 7 and 8",
+            "observation": "Evaluation/approval and live monitoring are in distinct sections, and the monitoring note begins “Independent live metrics by variant.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.eval, roll.monitor, and roll.monitor.note",
+            "observation": "Experiment evaluation and monitoring have separate visible regions, with monitoring explicitly labeled independent."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R37",
+        "requirement": "Live monitoring tracks resolution rate, human-handoff rate, and safety triggers separately for each variant.",
+        "brief_evidence": "“it tracks resolution rate, human-handoff rate, and safety triggers per variant”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 note",
+            "observation": "The note states “Independent live metrics by variant: resolution • handoff • safety.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.monitor.note.text",
+            "observation": "Per-variant scope and all three requested monitoring dimensions are visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R38",
+        "requirement": "A challenger that regresses on any monitored metric is pulled from traffic immediately rather than waiting for the experiment to conclude.",
+        "brief_evidence": "“a challenger that regresses on any of these is pulled from traffic immediately rather than waiting for its experiment to conclude”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 note",
+            "observation": "The note states “Any regression → pull challenger immediately.”"
+          },
+          {
+            "source": "json",
+            "locator": "roll.monitor.note.text",
+            "observation": "The rendered statement covers any regression, the challenger endpoint, and immediate pull behavior; placement in independent monitoring makes the no-wait semantics clear."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.5775,
+    "caps_applied": [
+      {
+        "cap": 6,
+        "requirement_id": "R8",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R9",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R10",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R14",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R15",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R16",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R19",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R23",
+        "reason": "system-defining requirement is absent"
+      }
+    ],
+    "strongest_covered_cluster": "The staged-rollout cluster is strongest: versioned champion/challenger configuration, variant dimensions, automated evaluation criteria, per-challenger reports, product-owner approval, promotion, independent per-variant monitoring, immediate regression pull, and one-step rollback are all represented at least recognizably.",
+    "most_consequential_gap": "Credential security and safety escalation semantics are the largest gaps: the managed vault, per-invocation secret fetch, no local credential storage, repeated-trigger/request handoff conditions, and required handoff context are absent.",
+    "coverage_summary": "The board captures the main context-to-reply concept, profile distillation and cold archive at a summary level, and most of the staged-rollout lifecycle. However, it omits several system-defining security, handoff, memory-conflict, and live/cold boundary requirements, while many remaining operational qualifiers are only implied. Weighted credit is 41 of 71, so the board cannot replace the brief as a requirements acceptance record.",
+    "score": 4
+  },
+  "usage": {
+    "input_tokens": 10476,
+    "output_tokens": 8583
+  },
+  "flags": [
+    "SCORE-RECOMPUTED"
+  ]
+}

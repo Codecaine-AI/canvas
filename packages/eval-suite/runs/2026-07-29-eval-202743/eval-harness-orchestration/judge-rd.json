@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board is readable with effort, matching the 6–6.5 anchor because its spacious, clearly sectioned layout is offset by several long cross-board detours and relatively small text at the full-board viewing scale.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7.5,
+        "note": "Most nodes and label chips have generous clear space, though the very large canvas makes labels small at arm's length and a few chips sit close to long edge runs."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Six bordered, titled regions make stage membership immediately clear, and each region generally maintains a coherent left-to-right procedural reading."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Arrowheads, colors, styles, and labels are mostly clear, but the purple “valid verdicts” route and blue “narrate crossings” route form long perimeter-style mega-detours that require substantial eye travel and backtracking."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 7,
+        "note": "Air strongly dominates and most sections hold only a few nodes, but the bounded-execution and evidence-grading regions each contain roughly six elements and concentrate more visual traffic than the other sections."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 6802,
+    "output_tokens": 445
+  },
+  "flags": []
+}

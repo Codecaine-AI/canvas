@@ -33,14 +33,14 @@ describe("ShapeSearchPopover search filtering", () => {
   it("filters entries as the user types, case-insensitively (labels + def keywords)", () => {
     const { container } = render(<ShapeSearchPopover />);
     const input = container.querySelector("input") as HTMLInputElement;
-    fireEvent.change(input, { target: { value: "database" } });
+    fireEvent.change(input, { target: { value: "chevron" } });
     // P4 catalog unification: search matches the def-declared keywords too —
-    // "database" hits Database (label) AND Cylinder (horizontal), whose def
-    // keywords include "database".
+    // "chevron" appears in no label but is an arrow-shape def keyword, so it
+    // hits both arrow direction variants.
     const labels = [...container.querySelectorAll("[data-shape-entry]")].map((b) =>
       b.getAttribute("aria-label"),
     );
-    expect(labels).toEqual(["Database", "Cylinder (horizontal)"]);
+    expect(labels).toEqual(["Left arrow", "Right arrow"]);
   });
 
   it("matches def-declared catalog keywords that appear in no label", () => {

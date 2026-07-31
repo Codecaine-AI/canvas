@@ -7,16 +7,15 @@ import {
   SHAPE_SEARCH_ENTRIES,
 } from "../catalog";
 
-// Wave C: restructured to exactly 3 sections (Basic/Flowchart/Advanced),
-// mirroring FigJam's actual picker model — see docs/10-system-design/
-// 20-figjam-parity/doc.json. Recents/Connections/"Other libraries" (the
-// pre-schema placeholder scaffolding) are gone; connectors remain a
-// dock-only tool, never a Shapes-panel entry.
+// Operational-maps surface trim: the picker's default face is the icon grid
+// (the 30-glyph semantic vocabulary, registry order) with the eight
+// universal shapes as a compact utility group. Connectors remain a dock-only
+// tool, never a Shapes-panel entry.
 describe("shape-catalog data shape", () => {
-  it("defines exactly the 3 sectioned categories, in order: Basic, Flowchart, Advanced", () => {
+  it("defines exactly the 2 sectioned categories, in order: Icons, Shapes", () => {
     const ids = SHAPE_CATALOG.map((c) => c.id);
-    expect(ids).toEqual(["basic", "flowchart", "advanced"]);
-    expect(SHAPE_CATALOG.map((c) => c.label)).toEqual(["Basic", "Flowchart", "Advanced"]);
+    expect(ids).toEqual(["icons", "shapes"]);
+    expect(SHAPE_CATALOG.map((c) => c.label)).toEqual(["Icons", "Shapes"]);
   });
 
   it("every category has at least one entry, and every entry has a unique id", () => {
@@ -42,65 +41,38 @@ describe("shape-catalog data shape", () => {
     }
   });
 
-  it("Basic has exactly the 13 geometric entries, in order, with correct directions (icon glyphs live only in Advanced)", () => {
-    const basic = SHAPE_CATALOG.find((c) => c.id === "basic")!;
-    expect(basic.entries.map((e) => e.id)).toEqual([
-      "basic-square",
-      "basic-ellipse",
-      "basic-decision-diamond",
-      "basic-triangle-up",
-      "basic-triangle-down",
-      "basic-rounded-rect",
-      "basic-pentagon",
-      "basic-octagon",
-      "basic-plus",
-      "basic-arrow-left",
-      "basic-arrow-right",
-      "basic-chevron",
-      "basic-star",
-    ]);
-    expect(basic.entries.find((e) => e.id === "basic-triangle-up")?.direction).toBe("up");
-    expect(basic.entries.find((e) => e.id === "basic-triangle-down")?.direction).toBe("down");
-    expect(basic.entries.find((e) => e.id === "basic-arrow-left")?.direction).toBe("left");
-    expect(basic.entries.find((e) => e.id === "basic-arrow-right")?.direction).toBe("right");
-    expect(basic.entries.find((e) => e.id === "basic-chevron")?.direction).toBe("right");
-    expect(basic.entries.every((e) => e.objectType !== "icon")).toBe(true);
-  });
-
-  it("Flowchart has exactly the 16 entries from the brief, in order, with correct directions", () => {
-    const flowchart = SHAPE_CATALOG.find((c) => c.id === "flowchart")!;
-    expect(flowchart.entries.map((e) => e.id)).toEqual([
-      "flow-parallelogram-right",
-      "flow-parallelogram-left",
-      "flow-database",
-      "flow-cylinder-horizontal",
-      "flow-page-corner",
-      "flow-folder",
-      "flow-document",
-      "flow-document-stack",
-      "flow-predefined-process",
-      "flow-off-page-connector",
-      "flow-trapezoid",
-      "flow-manual-input",
-      "flow-hexagon",
-      "flow-internal-storage",
-      "flow-or-junction",
-      "flow-summing-junction",
-    ]);
-    expect(flowchart.entries.find((e) => e.id === "flow-parallelogram-right")?.direction).toBe("right");
-    expect(flowchart.entries.find((e) => e.id === "flow-parallelogram-left")?.direction).toBe("left");
-  });
-
-  it("Advanced has exactly the 26 icon glyphs, each inserting type: 'icon' with the matching glyph id and its display name as the label", () => {
-    const advanced = SHAPE_CATALOG.find((c) => c.id === "advanced")!;
-    expect(advanced.entries.length).toBe(26);
-    expect(advanced.entries.length).toBe(ICON_GLYPH_IDS.length);
-    for (const glyphId of ICON_GLYPH_IDS) {
-      const entry = advanced.entries.find((e) => e.icon === glyphId);
-      expect(entry).toBeTruthy();
-      expect(entry!.objectType).toBe("icon");
-      expect(entry!.label.length).toBeGreaterThan(0);
+  it("Icons has all 30 glyphs in registry order, each inserting type: 'icon' with the matching glyph id and its display name as the label", () => {
+    const icons = SHAPE_CATALOG.find((c) => c.id === "icons")!;
+    expect(icons.entries.length).toBe(30);
+    expect(icons.entries.length).toBe(ICON_GLYPH_IDS.length);
+    expect(icons.entries.map((e) => e.icon)).toEqual([...ICON_GLYPH_IDS]);
+    for (const [index, glyphId] of ICON_GLYPH_IDS.entries()) {
+      const entry = icons.entries[index]!;
+      expect(entry.icon).toBe(glyphId);
+      expect(entry.objectType).toBe("icon");
+      expect(entry.label.length).toBeGreaterThan(0);
     }
+  });
+
+  it("Shapes has exactly the 10 entries of the universal core (direction variants fanned out), in order, with correct directions", () => {
+    const shapes = SHAPE_CATALOG.find((c) => c.id === "shapes")!;
+    expect(shapes.entries.map((e) => e.id)).toEqual([
+      "shape-square",
+      "shape-rounded-rect",
+      "shape-predefined-process",
+      "shape-decision-diamond",
+      "shape-triangle-up",
+      "shape-triangle-down",
+      "shape-ellipse",
+      "shape-arrow-left",
+      "shape-arrow-right",
+      "shape-octagon",
+    ]);
+    expect(shapes.entries.find((e) => e.id === "shape-triangle-up")?.direction).toBe("up");
+    expect(shapes.entries.find((e) => e.id === "shape-triangle-down")?.direction).toBe("down");
+    expect(shapes.entries.find((e) => e.id === "shape-arrow-left")?.direction).toBe("left");
+    expect(shapes.entries.find((e) => e.id === "shape-arrow-right")?.direction).toBe("right");
+    expect(shapes.entries.every((e) => e.objectType !== "icon")).toBe(true);
   });
 
   it("no entry maps to a connector-family type — connectors are dock-only, never a Shapes-panel entry", () => {

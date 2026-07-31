@@ -334,7 +334,7 @@ export function editorSnapshot(session: LayoutSession): EditorStateSnapshot {
     selection: session.scopeResolution.scopeObjectIds.map((id) => {
       const object = byId.get(id);
       // The FOLDED name (./placeable-types.ts): the selection list names the
-      // same types the gestures accept, so a glyph reads `cloud` rather than
+      // same types the gestures accept, so a glyph reads `memory` rather than
       // the document's `icon` carrier.
       return {
         id,

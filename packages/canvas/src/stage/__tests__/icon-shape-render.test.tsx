@@ -51,9 +51,9 @@ function iconObject(id: string, icon: string, index: number): InteractiveCanvasO
 }
 
 const ICON_OBJECTS: InteractiveCanvasObject[] = [
-  iconObject("icon-cpu", "cpu", 0),
-  iconObject("icon-database", "database", 1),
-  iconObject("icon-globe", "globe", 2),
+  iconObject("icon-model", "model", 0),
+  iconObject("icon-memory", "memory", 1),
+  iconObject("icon-server", "server", 2),
 ];
 
 function iconDocument(objects: InteractiveCanvasObject[]): InteractiveCanvasDocument {
@@ -83,7 +83,7 @@ function expectGlyphFillAndInk(svg: Element | null, fill: string, stroke: string
 }
 
 describe("Wave C render smoke: the `icon` object type", () => {
-  it("renders IconShapeBody for each sampled glyph (cpu/database/globe)", () => {
+  it("renders IconShapeBody for each sampled glyph (model/memory/server)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
       for (const object of ICON_OBJECTS) {
@@ -101,9 +101,9 @@ describe("Wave C render smoke: the `icon` object type", () => {
   it("renders the label BELOW the glyph", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
-      const node = container.querySelector('[data-canvas-object-id="icon-cpu"]');
+      const node = container.querySelector('[data-canvas-object-id="icon-model"]');
       const label = node?.querySelector(".interactive-canvas-label-below-icon");
-      expect(label?.textContent).toBe("icon-cpu label");
+      expect(label?.textContent).toBe("icon-model label");
       // No plain (non-below-icon) label span should also render for icon shapes.
       const plainLabel = node?.querySelector(".interactive-canvas-object-label:not(.interactive-canvas-label-below-icon)");
       expect(plainLabel).toBeNull();
@@ -113,7 +113,7 @@ describe("Wave C render smoke: the `icon` object type", () => {
   it("applies the interactive-canvas-object-icon class", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
-      const node = container.querySelector('[data-canvas-object-id="icon-cpu"]') as HTMLElement | null;
+      const node = container.querySelector('[data-canvas-object-id="icon-model"]') as HTMLElement | null;
       expect(node?.className.trim()).toBe("interactive-canvas-object interactive-canvas-object-icon");
     });
   });
@@ -121,7 +121,7 @@ describe("Wave C render smoke: the `icon` object type", () => {
   it("sizes the glyph svg to the icon body without fixed pixel attributes", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
-      const svg = container.querySelector('[data-canvas-object-id="icon-cpu"] [data-canvas-icon-glyph="cpu"]') as
+      const svg = container.querySelector('[data-canvas-object-id="icon-model"] [data-canvas-icon-glyph="model"]') as
         | SVGSVGElement
         | null;
       expect(svg).toBeTruthy();
@@ -136,7 +136,7 @@ describe("Wave C render smoke: the `icon` object type", () => {
   it("renders the default (gray) pick as glyph-interior fill + saturated stroke (P1/D13 — no fixed colors)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const { container } = render(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
-      const svg = container.querySelector('[data-canvas-object-id="icon-cpu"] [data-canvas-icon-glyph="cpu"]');
+      const svg = container.querySelector('[data-canvas-object-id="icon-model"] [data-canvas-icon-glyph="model"]');
       // gray shape cells: ink #757575 strokes the glyph, fill #E6E6E6 paints glyph interiors.
       expectGlyphFillAndInk(svg, "#E6E6E6", "#757575");
     });
@@ -145,37 +145,37 @@ describe("Wave C render smoke: the `icon` object type", () => {
   it("renders every pick as glyph-interior fill + ink stroke", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const softObject: InteractiveCanvasObject = {
-        ...iconObject("icon-blue", "shield", 0),
+        ...iconObject("icon-blue", "guardrail", 0),
         color: "blue",
       };
       const boldObject: InteractiveCanvasObject = {
-        ...iconObject("icon-bold", "gear", 1),
+        ...iconObject("icon-bold", "config", 1),
         color: "red",
       };
       const { container } = render(
         <InteractiveCanvasViewer document={iconDocument([softObject, boldObject])} />,
       );
-      const softSvg = container.querySelector('[data-canvas-object-id="icon-blue"] [data-canvas-icon-glyph="shield"]');
-      expectGlyphFillAndInk(softSvg, "#C2E5FF", "#0D99FF");
-      const boldSvg = container.querySelector('[data-canvas-object-id="icon-bold"] [data-canvas-icon-glyph="gear"]');
-      expectGlyphFillAndInk(boldSvg, "#FFC7C2", "#F24822");
+      const softSvg = container.querySelector('[data-canvas-object-id="icon-blue"] [data-canvas-icon-glyph="guardrail"]');
+      expectGlyphFillAndInk(softSvg, "#CDDFFF", "#1A5CDF");
+      const boldSvg = container.querySelector('[data-canvas-object-id="icon-bold"] [data-canvas-icon-glyph="config"]');
+      expectGlyphFillAndInk(boldSvg, "#FFD2CC", "#D5322F");
     });
   });
 
   it("skips the fill layer for all-open line-art icons", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const lineArtObject = iconObject("icon-code", "code", 0);
-      const closedObject = iconObject("icon-cpu-closed", "cpu", 1);
+      const lineArtObject = iconObject("icon-tool", "tool", 0);
+      const closedObject = iconObject("icon-model-closed", "model", 1);
       const { container } = render(
         <InteractiveCanvasViewer document={iconDocument([lineArtObject, closedObject])} />,
       );
 
-      const lineArtSvg = container.querySelector('[data-canvas-object-id="icon-code"] [data-canvas-icon-glyph="code"]');
+      const lineArtSvg = container.querySelector('[data-canvas-object-id="icon-tool"] [data-canvas-icon-glyph="tool"]');
       expect(lineArtSvg).toBeTruthy();
       expect(lineArtSvg?.querySelector("[data-canvas-icon-fill-layer]")).toBeNull();
       expect(lineArtSvg?.querySelector("[data-canvas-icon-ink-layer]")).toBeTruthy();
 
-      const closedSvg = container.querySelector('[data-canvas-object-id="icon-cpu-closed"] [data-canvas-icon-glyph="cpu"]');
+      const closedSvg = container.querySelector('[data-canvas-object-id="icon-model-closed"] [data-canvas-icon-glyph="model"]');
       expect(closedSvg).toBeTruthy();
       expect(closedSvg?.querySelector("[data-canvas-icon-fill-layer]")).toBeTruthy();
       expect(closedSvg?.querySelector("[data-canvas-icon-ink-layer]")).toBeTruthy();

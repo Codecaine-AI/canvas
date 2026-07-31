@@ -1,0 +1,708 @@
+{
+  "axis": "sf",
+  "scenario": "code-review-agents",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 7,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system is a multi-agent automated code-review pipeline for pull requests.",
+        "brief_evidence": "Title: \"Multi-agent automated code review\"; the pipeline begins from a pull request event and produces review findings and a verdict.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed purpose identifies \"A staged pull-request code-review procedure\" that fans review out to five specialist reviewers and publishes a policy verdict.",
+        "note": "The overall domain and purpose are accurately communicated."
+      },
+      {
+        "brief_element": "The main end-to-end flow begins when a pull request event reaches intake, proceeds through eligibility gating, context construction, planning and parallel specialist review, aggregation, verification, and publication of comments and a verdict.",
+        "brief_evidence": "The brief narrates the lifecycle from \"beginning when a pull request event reaches the intake service\" through context building, planner dispatch, aggregation, verification, and publication.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction gives the ordered progression: pull request event, regions 1 through 4, a green arrow labeled \"verified findings\" into publication region 5, and intermediate labels \"eligible change\", \"ranked context\", and \"parallel findings\". Its uncertainty list says the pale connectors for the early stages have no clearly visible arrowheads.",
+        "note": "All main stages and payloads survive, but direction for several early handoffs depends on numbered layout rather than explicit arrowheads, and aggregator versus verifier ownership is collapsed."
+      },
+      {
+        "brief_element": "The pull request event reaches an intake service.",
+        "brief_evidence": "\"beginning when a pull request event reaches the intake service\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A component named \"Pull request event\" triggers region \"1 · Intake & eligibility,\" and the primary progression says the event reaches intake and eligibility handling.",
+        "note": "The event-to-intake behavior is recovered, but a distinct intake service component is not identified."
+      },
+      {
+        "brief_element": "Intake resolves the pull request diff.",
+        "brief_evidence": "\"Intake resolves the diff\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 1 includes \"Resolve & gate\" and the bullet \"Diff, files, policy, build.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Intake resolves the changed files.",
+        "brief_evidence": "\"Intake resolves the diff, changed files\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 1 includes the bullet \"Diff, files, policy, build.\"",
+        "note": "The shortened word \"files\" adequately communicates changed-file resolution in this context."
+      },
+      {
+        "brief_element": "Intake resolves repository review policy.",
+        "brief_evidence": "\"repository review policy\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 1 includes \"Diff, files, policy, build.\"",
+        "note": "Recovered, although \"repository\" is implicit rather than repeated."
+      },
+      {
+        "brief_element": "Intake resolves build status.",
+        "brief_evidence": "\"and build status\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 1 includes \"Diff, files, policy, build.\"",
+        "note": "Recovered in abbreviated form."
+      },
+      {
+        "brief_element": "Draft pull requests are rejected before model work.",
+        "brief_evidence": "\"It rejects draft pull requests ... before invoking any model work.\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 1 says \"Reject drafts,\" and the reconstruction describes rejection before an \"eligible change\" proceeds to context and review.",
+        "note": "Draft rejection is explicit; the boundary that this occurs before any model invocation is implied by ordering rather than stated directly."
+      },
+      {
+        "brief_element": "Vendored paths are excluded before model work.",
+        "brief_evidence": "\"excludes vendored ... paths before invoking any model work\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 1 says \"Skip vendored/generated,\" and the failure-path reconstruction says vendored material is excluded from review.",
+        "note": "The exclusion is clear, while the explicit pre-model-work boundary is only implied by placement."
+      },
+      {
+        "brief_element": "Generated paths are excluded before model work.",
+        "brief_evidence": "\"excludes ... generated paths before invoking any model work\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 1 says \"Skip vendored/generated,\" and the failure-path reconstruction says generated material is excluded from review.",
+        "note": "The exclusion is clear, while the explicit pre-model-work boundary is only implied by placement."
+      },
+      {
+        "brief_element": "For an eligible change, a context builder assembles the review context.",
+        "brief_evidence": "\"For an eligible change, the context builder assembles\" the listed material.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The connector payload is labeled \"eligible change,\" followed by region \"2 · Context assembly — Rank context.\"",
+        "note": "The eligible-change handoff and context-assembly responsibility are recovered, but a distinct component named context builder is not."
+      },
+      {
+        "brief_element": "The context includes diff hunks.",
+        "brief_evidence": "\"assembles diff hunks\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 2 lists \"Diff + surrounding source.\"",
+        "note": "Diff content is recovered, but hunk-level granularity is not explicit."
+      },
+      {
+        "brief_element": "The context includes surrounding source.",
+        "brief_evidence": "\"surrounding source\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 2 lists \"Diff + surrounding source.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "The context includes related tests.",
+        "brief_evidence": "\"related tests\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 2 lists \"Tests + ownership.\"",
+        "note": "Tests are present, but their relationship to the touched code is not explicit."
+      },
+      {
+        "brief_element": "The context includes ownership metadata.",
+        "brief_evidence": "\"ownership metadata\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 2 lists \"Tests + ownership.\"",
+        "note": "Ownership is recovered, but its status as metadata is abbreviated."
+      },
+      {
+        "brief_element": "The context includes prior review history for the touched files.",
+        "brief_evidence": "\"prior review history for the touched files\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 2 lists \"Prior review history.\"",
+        "note": "Review history is present, but the touched-file scope is not explicit."
+      },
+      {
+        "brief_element": "A context budget forces material to be ranked.",
+        "brief_evidence": "\"Its budget forces it to rank the material\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 2 is labeled \"Rank context,\" and the reconstruction says context is ranked and truncated.",
+        "note": "Ranking is explicit, but the context budget as its cause and governing constraint is not explicitly recovered."
+      },
+      {
+        "brief_element": "Lower-value context is truncated when necessary.",
+        "brief_evidence": "\"truncate lower-value context\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 2 says \"Truncate low-value items.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Every dropped context item is recorded.",
+        "brief_evidence": "\"record everything it drops\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 2 says \"Log every drop.\"",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "A planner partitions the change into review units.",
+        "brief_evidence": "\"The planner partitions the change into review units\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 3 says \"Plan + fan out\" and \"Partition review units.\"",
+        "note": "The behavior is recovered, but the planner is not represented as a distinct component."
+      },
+      {
+        "brief_element": "The planner dispatches specialist reviewers concurrently over shared context.",
+        "brief_evidence": "\"dispatches ... reviewers concurrently over the shared context\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 3 says \"5 specialist reviewers in parallel\" and \"Shared context + read-only tools.\"",
+        "note": "Concurrency and shared context are explicit."
+      },
+      {
+        "brief_element": "One specialist performs correctness review.",
+        "brief_evidence": "\"correctness ... reviewers\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry names a correctness reviewer; the board only communicates \"5 specialist reviewers.\"",
+        "note": "The count survives, but this specialist responsibility does not."
+      },
+      {
+        "brief_element": "One specialist performs security review.",
+        "brief_evidence": "\"security ... reviewers\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reviewer list is not named, but the over-budget mode explicitly says \"correctness + security only.\"",
+        "note": "Security review is inferable as a supported review mode, but no normal-path security reviewer is separately identified."
+      },
+      {
+        "brief_element": "One specialist performs performance review.",
+        "brief_evidence": "\"performance ... reviewers\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry names or assigns a performance reviewer.",
+        "note": "The generic five-reviewer count does not recover this responsibility."
+      },
+      {
+        "brief_element": "One specialist performs test-coverage review.",
+        "brief_evidence": "\"test-coverage ... reviewers\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry names or assigns a test-coverage reviewer.",
+        "note": "The generic five-reviewer count does not recover this responsibility."
+      },
+      {
+        "brief_element": "One specialist performs API-compatibility review.",
+        "brief_evidence": "\"API-compatibility reviewers\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry names or assigns an API-compatibility reviewer.",
+        "note": "The generic five-reviewer count does not recover this responsibility."
+      },
+      {
+        "brief_element": "Each reviewer returns findings with a current-file location.",
+        "brief_evidence": "\"Each reviewer returns findings with a current-file location\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 3 says \"Findings: location, severity, rationale, confidence.\"",
+        "note": "Location is explicit, but the requirement that it be a current-file location is not stated at the reviewer output."
+      },
+      {
+        "brief_element": "Each finding includes severity.",
+        "brief_evidence": "\"severity\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 3 lists severity among the finding fields.",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Each finding includes rationale.",
+        "brief_evidence": "\"rationale\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 3 lists rationale among the finding fields.",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Each finding includes confidence.",
+        "brief_evidence": "\"confidence\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 3 lists confidence among the finding fields.",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Reviewers may call a read-only repository-search tool.",
+        "brief_evidence": "\"Reviewers may call read-only repository search\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 3 says reviewers have \"read-only tools.\"",
+        "note": "Read-only tool access survives, but repository search is not individually identified."
+      },
+      {
+        "brief_element": "Reviewers may call a read-only symbol-lookup tool.",
+        "brief_evidence": "\"symbol lookup\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry names symbol lookup; only generic \"read-only tools\" are shown.",
+        "note": "The specific capability is not recoverable."
+      },
+      {
+        "brief_element": "Reviewers may call a read-only test-history tool.",
+        "brief_evidence": "\"test-history tools\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry names a test-history tool; only generic \"read-only tools\" are shown.",
+        "note": "The specific capability is not recoverable."
+      },
+      {
+        "brief_element": "Tool use is constrained by a per-review call budget.",
+        "brief_evidence": "\"within a per-review call budget\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 3 says \"Tool cap → return partial results.\"",
+        "note": "A tool allowance is clear, but its per-review scope and call-count nature are not explicit."
+      },
+      {
+        "brief_element": "A reviewer that exhausts its tool allowance returns the findings already available.",
+        "brief_evidence": "\"A reviewer that exhausts this allowance returns its available findings\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 3 states \"Tool cap → return partial results,\" and the failure reconstruction gives the outcome \"Partial results are returned.\"",
+        "note": "The degraded result behavior is recovered, but \"partial results\" is less precise than returning all currently available findings."
+      },
+      {
+        "brief_element": "Exhausting the tool allowance must not delay the run.",
+        "brief_evidence": "\"rather than delaying the run\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The cap leads directly to returning partial results.",
+        "note": "Non-blocking behavior is strongly implied, but the no-delay constraint is not explicitly stated."
+      },
+      {
+        "brief_element": "An aggregator merges results from the parallel reviewers.",
+        "brief_evidence": "\"The aggregator merges the parallel results\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 4 is \"Aggregate & validate — Merge + verify,\" receiving the payload \"parallel findings.\"",
+        "note": "The merging stage and input are recovered, but a distinct aggregator component is not identified."
+      },
+      {
+        "brief_element": "The aggregator deduplicates overlapping findings.",
+        "brief_evidence": "\"deduplicates overlapping findings\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 4 says \"Dedupe overlaps.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "The aggregator reconciles conflicting severities.",
+        "brief_evidence": "\"reconciles conflicting severities\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 4 says \"reconcile severity.\"",
+        "note": "Severity reconciliation is explicit, but the conflict condition is abbreviated."
+      },
+      {
+        "brief_element": "The aggregator withholds low-confidence findings.",
+        "brief_evidence": "\"withholds low-confidence findings\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 4 says \"Withhold low confidence,\" and publication posts only surviving findings.",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "The aggregator checks the current branch head.",
+        "brief_evidence": "\"It checks the current branch head\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 4 says \"Drop stale locations at current head.\"",
+        "note": "A current-head validation is communicated, though the explicit branch-head check operation and aggregator ownership are compressed."
+      },
+      {
+        "brief_element": "Any finding whose location no longer exists at the current head is dropped.",
+        "brief_evidence": "\"drops any finding whose location no longer exists\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 4 says \"Drop stale locations at current head,\" and the failure reconstruction gives removal as the outcome.",
+        "note": "Recovered accurately."
+      },
+      {
+        "brief_element": "A verifier rechecks every high-severity finding against the actual source before publication.",
+        "brief_evidence": "\"Before publication, the verifier rechecks every high-severity finding against the actual source.\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 4 says \"Recheck every high-severity finding,\" followed by a \"verified findings\" arrow into publication.",
+        "note": "The mandatory pre-publication recheck is recovered, but a distinct verifier component and the explicit actual-source target are absent."
+      },
+      {
+        "brief_element": "An unverified high-severity finding is demoted.",
+        "brief_evidence": "\"An unverified finding is demoted\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 4 says \"Unverified → demote, never post.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "An unverified finding is not posted.",
+        "brief_evidence": "\"instead of posted\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 4 says \"Unverified → demote, never post,\" and region 5 says only surviving findings are posted.",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "Avoiding false-positive pull-request comments is the team's highest-priority failure concern.",
+        "brief_evidence": "\"because false positives on a pull request are the failure the team most wants to avoid\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states that false positives are the team's highest-priority failure concern.",
+        "note": "The demotion behavior is present, but its explicit operational priority and rationale are lost."
+      },
+      {
+        "brief_element": "Surviving findings become inline comments.",
+        "brief_evidence": "\"Surviving findings become inline comments\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 5 says \"Inline comments + summary verdict\" and \"Only surviving findings are posted.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "The pipeline publishes a summary verdict.",
+        "brief_evidence": "\"and a summary verdict\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 5 says \"Inline comments + summary verdict.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Repository policy determines the publication outcome.",
+        "brief_evidence": "\"Depending on repository policy\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 5 says \"Policy: request changes, approve, or advisory,\" and intake resolves policy.",
+        "note": "The policy dependency is communicated."
+      },
+      {
+        "brief_element": "The pipeline can request changes.",
+        "brief_evidence": "\"can request changes\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 5 lists \"request changes\" as a policy outcome.",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "The pipeline can approve.",
+        "brief_evidence": "\"approve\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 5 lists \"approve\" as a policy outcome.",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "The pipeline can remain advisory.",
+        "brief_evidence": "\"or remain advisory\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 5 lists \"advisory\" as a policy outcome.",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Author replies return to the calibration process.",
+        "brief_evidence": "\"Author replies ... return to the calibration process.\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A payload labeled \"replies & disputes\" leads from publication toward region 6, whose bullets include \"Author replies\" and calibration.",
+        "note": "The feedback source and destination are recovered, though connector direction is visually inferred."
+      },
+      {
+        "brief_element": "Human reviewer disagreements return to the calibration process.",
+        "brief_evidence": "\"human reviewer disagreements return to the calibration process\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 6 says \"reviewer disagreements,\" and the inter-region payload is \"replies & disputes.\"",
+        "note": "Disagreements are present, but the reviewers are not explicitly identified as human."
+      },
+      {
+        "brief_element": "A finding resolved as wrong is recorded.",
+        "brief_evidence": "\"A finding resolved as wrong is recorded\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 6 says \"Wrong findings are recorded.\"",
+        "note": "Recording is explicit, but the condition that the finding has been resolved as wrong is shortened."
+      },
+      {
+        "brief_element": "A calibration store retains calibration information.",
+        "brief_evidence": "\"the calibration store adjusts\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies a calibration store or any persistent store; only a generic \"Feedback & calibration\" region is present.",
+        "note": "The calibration behavior survives, but its state-owning component and persistence boundary do not."
+      },
+      {
+        "brief_element": "Calibration adjusts the confidence threshold for the affected finding class.",
+        "brief_evidence": "\"adjusts the confidence threshold for that finding class\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 6 says \"Calibrate by finding class\" and \"Adjust future confidence thresholds.\"",
+        "note": "Recovered accurately."
+      },
+      {
+        "brief_element": "The adjusted confidence threshold applies to later reviews.",
+        "brief_evidence": "\"in later reviews\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction describes \"future confidence thresholds,\" and a dashed route labeled \"calibrated thresholds\" feeds aggregate and validate.",
+        "note": "The future-run feedback effect is clear."
+      },
+      {
+        "brief_element": "A head-change monitor watches for force-pushes and new commits.",
+        "brief_evidence": "\"A head-change monitor ... when a force-push or new commit arrives\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 7 says \"Watch branch head\" and names \"New commit or force-push\" as the trigger.",
+        "note": "The monitoring behavior and triggers are recovered, but no distinct head-change monitor component is identified."
+      },
+      {
+        "brief_element": "A force-push or new commit cancels an in-flight review.",
+        "brief_evidence": "\"cancels an in-flight review when a force-push or new commit arrives\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 7 says \"New commit or force-push cancels in-flight work.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "A head change starts a fresh review against the new head.",
+        "brief_evidence": "\"starts a fresh review against the new head\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 7 says \"Restart against the new head,\" and the red dashed route is labeled \"cancel + restart at new head\" back toward intake.",
+        "note": "Recovered accurately."
+      },
+      {
+        "brief_element": "Partial work from the obsolete run is discarded.",
+        "brief_evidence": "\"discards partial work\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 7 says \"Discard partial results.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Results must never be published against the wrong or obsolete diff.",
+        "brief_evidence": "\"rather than publishing it against the wrong diff\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 7 explicitly says \"Never publish against an obsolete diff.\"",
+        "note": "Recovered exactly in equivalent wording."
+      },
+      {
+        "brief_element": "A telemetry service tracks review-operation metrics.",
+        "brief_evidence": "\"The telemetry service tracks\" the listed metrics.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 8 is \"Telemetry & budget — Observe + degrade\" and lists the metrics.",
+        "note": "The telemetry responsibility is recovered, but a distinct telemetry service component is not."
+      },
+      {
+        "brief_element": "Telemetry tracks cost.",
+        "brief_evidence": "\"tracks cost\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 lists \"Cost, latency, tokens by reviewer.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Telemetry tracks latency.",
+        "brief_evidence": "\"latency\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 lists \"Cost, latency, tokens by reviewer.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Telemetry tracks token usage by reviewer.",
+        "brief_evidence": "\"token usage by reviewer\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 lists \"Cost, latency, tokens by reviewer.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Telemetry tracks cancellation rate.",
+        "brief_evidence": "\"cancellation rate\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 lists \"Cancellation rate.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Telemetry tracks the accepted-versus-dismissed rate of published findings.",
+        "brief_evidence": "\"accepted-versus-dismissed rate of published findings\"",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 8 lists \"Accepted vs dismissed findings.\"",
+        "note": "The measured categories survive, but the fact that this is a rate specifically over published findings is not explicit."
+      },
+      {
+        "brief_element": "Each repository has a daily review budget.",
+        "brief_evidence": "\"When a repository exceeds its daily review budget\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 lists \"Daily repository budget.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Intake applies the over-budget degraded mode to subsequent runs.",
+        "brief_evidence": "\"intake degrades subsequent runs\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A dashed route labeled \"over budget: correctness + security only\" points toward intake, and the reconstruction says operation continues with limited scope.",
+        "note": "Routing to intake and degradation are clear, but the explicit subsequent-run timing is not stated."
+      },
+      {
+        "brief_element": "Over-budget runs perform correctness review only among the retained review types.",
+        "brief_evidence": "\"degrades subsequent runs to correctness and security review only\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 and the dashed route both say \"correctness + security only.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "Over-budget runs perform security review only among the retained review types.",
+        "brief_evidence": "\"degrades subsequent runs to correctness and security review only\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 and the dashed route both say \"correctness + security only.\"",
+        "note": "Recovered directly."
+      },
+      {
+        "brief_element": "The diagram must make clear how failures and feedback affect the review lifecycle.",
+        "brief_evidence": "\"The diagram should make clear how failures and feedback affect the review lifecycle.\"",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction recovers draft rejection, exclusions, context truncation, tool-cap degradation, confidence and stale-location filtering, high-severity verification, the head-change restart loop, the calibration loop, and the over-budget degradation loop.",
+        "note": "The major failure, recovery, degradation, and feedback behaviors are communicated, despite some component-boundary and connector-direction ambiguity."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "The title-strip prefix \"2026-07-29-eval-202743\" may be a run identifier, evaluation identifier, timestamp, or version.",
+        "reconstruction_evidence": "The uncertainty list observes the title strip \"2026-07-29-eval-202743 · code-review-agents\" and enumerates those possible interpretations.",
+        "why_unsupported": "The brief provides no date-like identifier, run identifier, evaluation identifier, timestamp, or version. The reconstruction correctly marks these only as uncertain possibilities rather than asserting one."
+      },
+      {
+        "claim": "Cost and latency are tracked by reviewer, in addition to token usage.",
+        "reconstruction_evidence": "The telemetry component is reconstructed from the phrase \"Cost, latency, tokens by reviewer.\"",
+        "why_unsupported": "The brief explicitly qualifies only token usage with \"by reviewer\"; it does not clearly require cost and latency to be broken down by reviewer. The board wording reasonably permits the broader reading, but that extra granularity is not guaranteed by the brief."
+      },
+      {
+        "claim": "Unverified findings in general are demoted and never posted.",
+        "reconstruction_evidence": "The constraints state \"Unverified findings are demoted and never posted,\" based on region 4's \"Unverified → demote, never post.\"",
+        "why_unsupported": "In the brief, mandatory source verification is specifically applied to high-severity findings. The broader rule for every possible unverified finding is not stated, although it does not materially conflict with the described high-severity path."
+      }
+    ],
+    "strongest_transmitted_behavior": "The failure-sensitive operational lifecycle is transmitted especially well: stale and low-confidence findings are filtered, high-severity findings are rechecked and unverified ones are not posted, head changes cancel and restart work against the new head, and daily-budget exhaustion degrades later work to correctness and security.",
+    "most_consequential_loss": "The five specialist reviewers are not identified by responsibility—correctness, security, performance, test coverage, and API compatibility—and several architectural ownership boundaries are collapsed into numbered regions rather than distinct planner, aggregator, verifier, calibration-store, monitor, and telemetry components. Early main-flow direction also relies on numbering because several connector arrowheads are not visible.",
+    "overall_summary": "The reconstruction preserves the system purpose, complete lifecycle shape, publication policy, principal filtering and verification behavior, feedback calibration, cancellation/restart recovery, telemetry, and budget degradation. It is highly usable for design discussion, but not fully implementation-ready: specialist responsibilities and specific tool capabilities are missing, persistent/service ownership is blurred, and multiple early handoffs require directional inference. There are no system-defining contradictions, but the accumulated ownership and specificity losses keep it below the complete-critical-path standard of an 8.",
+    "score": 7
+  },
+  "usage": {
+    "input_tokens": 13378,
+    "output_tokens": 13213
+  },
+  "flags": []
+}

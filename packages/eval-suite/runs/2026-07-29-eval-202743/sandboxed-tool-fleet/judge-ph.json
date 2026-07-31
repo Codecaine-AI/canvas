@@ -1,0 +1,222 @@
+{
+  "axis": "ph",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean overall. Across 127 tool calls, there was exactly one failed call: the first finalize was blocked by a frame-slack warning. The failure rate was 0.79%, the longest failure run was 1, and the next call directly applied the prescribed fit_section fix. There were no schema, parse, malformed-field, or repeated validation errors, and session metadata reports no retries.",
+      "failed_call_count": 1,
+      "rejected_call_count": 1,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 123,
+          "transcript_excerpt": "Finalize blocked; the run continues:\n- W1 frame-slack: io-persistence is 1400×500 around children needing 848×200 — 76% of the frame is unused, 516px of it on the right",
+          "finding": "The sole failed/rejected call was a blocked finalize, not a schema or parse error. It produced a single-call failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 124,
+          "transcript_excerpt": "APPLIED · fit_section io-persistence\nDELTA\n  io-persistence  1640,1340 1400×500 → 1660,1440 880×240\nLINTS · clean",
+          "finding": "The blocked finalize was corrected on the immediately following call using the exact strategy suggested by the warning."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 126,
+          "transcript_excerpt": "Committed: Built a clean left-to-right fleet map covering fair placement, warm/cold provisioning, lifecycle and lease enforcement, per-call controls, ephemeral output handling, host quarantine, quotas, and operations monitoring. (57 patch operations).",
+          "finding": "Finalize succeeded after one corrective call; there was no repeated rejected-finalize class."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "The session used four explicit framed looks, concentrated during routing QA and final whole-board QA. The looks were followed by adjustments where defects were present, and the final fit_section change was verified with another whole-board render before committing. This is a genuine perception loop, though close-ups were sparse relative to the amount of dense edge-routing work and began only after substantial construction.",
+      "render_count": 4,
+      "adjustment_round_count": 3,
+      "render_adjust_render_loop_count": 3,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 71,
+          "transcript_excerpt": "LOOK · 1 render · framed e-host-provision+e-pool-ready\nDIAGNOSTICS · 1 error · 0 warnings\n  E1 covered-content: label \"cold miss · boot and wait\" chip on e-host-provision lies on e-pool-ready's path for 30px",
+          "finding": "A focused look inspected the two recently routed warm/cold provisioning edges and exposed a concrete label-path collision."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 72,
+          "transcript_excerpt": "APPLIED · move_label e-host-provision → along 0.4, offset -40\nLINTS · +0 −1\n  − E1 covered-content  (resolved)",
+          "finding": "The agent adjusted the exact defect shown by the preceding framed render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 91,
+          "transcript_excerpt": "LOOK · 1 render · framed 5 ids\nDIAGNOSTICS · 0 errors · 3 warnings",
+          "finding": "A second close-up framed the dense leased/idle/draining and heartbeat region during routing work."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 94,
+          "transcript_excerpt": "APPLIED · reroute e-heartbeat-leased\nLINTS · +0 −1\n  − W1 covered-content  (resolved)",
+          "finding": "The close-up findings led to spacing, label-position, and route adjustments through turns 92–94, ending with the remaining warning resolved."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 122,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame\nDIAGNOSTICS · clean",
+          "finding": "The agent performed whole-board QA before attempting finalize."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 125,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame\nDIAGNOSTICS · clean",
+          "finding": "After the finalize warning prompted fit_section, the agent rendered the whole board again and verified a clean diagnostic state before committing."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was handled constructively. Nine APPLIED results introduced at least one error-severity lint, but the agent changed spacing, routes, anchors, label positions, text length, or section geometry to resolve them. No identical lint was re-fired for more than three consecutive turns without a strategy change, so there was no lint fight. The final render was clean, and no warnings were overridden or committed silently.",
+      "lint_error_count": 9,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 33,
+          "transcript_excerpt": "+ E1 containment: reclaimer extends 60px outside its section lease-enforcement",
+          "finding": "An error-severity containment lint appeared when the reclaimer was placed."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 34,
+          "transcript_excerpt": "APPLIED · resize lease-enforcement → 880×440\nLINTS · +0 −1\n  − E1 containment  (resolved)",
+          "finding": "The containment error was fixed on the next call rather than ignored or re-fired."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 67,
+          "transcript_excerpt": "LINTS · +4 −0\n  + E1 covered-content\n  + E2 covered-content\n  + E3 covered-content\n  + W1 broken-edges",
+          "finding": "A dense routing operation produced several lint findings, but it was followed by route and label strategy changes rather than repeated identical guesses."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 68,
+          "transcript_excerpt": "APPLIED · reroute e-host-provision\nLINTS · +1 −4\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − W1 broken-edges  (resolved)",
+          "finding": "The agent removed all four findings from the prior call with a reroute; the one new warning was subsequently handled."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 113,
+          "transcript_excerpt": "+ W1 clipped-text: timeout-note: sticky body clips at 180×120",
+          "finding": "The clipped sticky warning was not overridden."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 115,
+          "transcript_excerpt": "APPLIED · resize timeout-note → 300×200\nLINTS · +0 −1\n  − W2 clipped-text  (resolved)",
+          "finding": "After one insufficient intermediate resize, the agent increased the note to the measured required height and cleared the clipping warning."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 125,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA showed no lint errors or warnings, so there was no warning override requiring a verbatim summary reason."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary is broad but supported by the stage diff and final render. The diff contains explicit placement and quota gates, warm-hit and cold-boot branches, all six lifecycle states, heartbeat/clock/reclaimer enforcement, per-call resource and network controls, output/artifact/ephemeral-state components, host quarantine, and four operations-monitoring components. The final pre-commit render reported clean diagnostics. No seen defect was committed undeclared.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 126,
+          "line": "Built a clean left-to-right fleet map covering fair placement, warm/cold provisioning, lifecycle and lease enforcement, per-call controls, ephemeral output handling, host quarantine, quotas, and operations monitoring.",
+          "assessment": "Honest and supported by the 57-operation diff and the clean final render. Each named area has concrete sections, objects, or connections in the committed board."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 121,
+          "transcript_excerpt": "Requests pass through tenant concurrency and aggregate-runtime admission, then take either an immediate compatible warm-pool hit or a capacity-aware cold boot on a healthy host.",
+          "finding": "The description accurately reflects the committed quota gate and separate warm-pool and healthy-host provisioning routes."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 122,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The initial whole-board QA supported the summary's use of “clean,” although finalize later identified a frame-slack warning not present in this diagnostic output."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 124,
+          "transcript_excerpt": "APPLIED · fit_section io-persistence\nLINTS · clean",
+          "finding": "The frame-slack issue discovered by finalize was actually fixed rather than omitted from the summary."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 125,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Post-fix whole-board QA confirmed a clean state immediately before the successful commit."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The committed diff contains 57 patch operations, while the transcript contains 127 total tool calls. The work was substantial and generally purposeful, with no add-delete-rebuild cycle and no repeated NO-OP thrash. There was some localized label and route tuning, but each sequence responded to changing lint and used different strategies. The main economy blemish is wall time: 936.2 seconds, or 15.6 minutes, slightly exceeded the 15-minute session budget. The 300-turn budget was not approached and finalize was reached.",
+      "operation_count": 57,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 15.6,
+      "over_budget_session_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 19,
+          "transcript_excerpt": "APPLIED · space_out horizontal gap 100\nLINTS · +0 −1\n  − W1 crowding  (resolved)",
+          "finding": "A bulk spacing operation efficiently corrected the initial lifecycle crowding rather than moving every object separately."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 61,
+          "transcript_excerpt": "APPLIED · move_label e-quota-pool → along 0.72, offset -40\nLINTS · +1 −1",
+          "finding": "This localized tuning briefly worsened a warning into an error, but the next label-position strategy at turn 62 resolved it; it was not an add-delete-rebuild cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 124,
+          "transcript_excerpt": "APPLIED · fit_section io-persistence",
+          "finding": "The sole blocked-finalize issue was resolved with one proportionate operation."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 126,
+          "transcript_excerpt": "(57 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The task reached finalize well below the 300-turn limit."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, container collision, proxy failure, or other declared infrastructure failure appears in the payload. The sole session committed normally and no session is excluded.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 8.5
+  },
+  "usage": {
+    "input_tokens": 57506,
+    "output_tokens": 3332
+  },
+  "flags": []
+}

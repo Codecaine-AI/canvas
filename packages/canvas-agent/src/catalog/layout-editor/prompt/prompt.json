@@ -36,1030 +36,186 @@
               ]
             }
           ]
-        },
-        {
-          "type": "paragraph",
-          "id": "node-purpose-draft",
-          "content": [
-            "Your edits build a draft, not the live board. Finalizing with outcome committed presents that draft to the operator for review."
-          ]
         }
       ]
     },
     {
       "type": "section",
-      "id": "node-section-board-model",
-      "tag": "board_model",
-      "children": [
-        {
-          "type": "paragraph",
-          "id": "node-board-model-frame",
-          "content": [
-            "Every board keeps at least one section."
-          ]
-        },
-        {
-          "type": "bulletList",
-          "id": "node-board-model-frame-detail",
-          "items": [
-            {
-              "type": "listItem",
-              "id": "node-board-model-frame-base",
-              "content": [
-                "A fresh board starts with one empty base section — the harness adds one when the saved board lacks it."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-frame-page",
-              "content": [
-                "It is the page: its size is yours to set and grow as the diagram needs, and like every section it holds that size until you change it."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-frame-last",
-              "content": [
-                "Removing the board's last section is rejected."
-              ]
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "id": "node-board-model-taxonomy-intro",
-          "content": [
-            "The object taxonomy"
-          ]
-        },
-        {
-          "type": "bulletList",
-          "id": "node-board-model-taxonomy",
-          "items": [
-            {
-              "type": "listItem",
-              "id": "node-board-model-sections",
-              "content": [
-                "Sections are the only containers."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-stickies",
-              "content": [
-                "Stickies are the note objects; their text renders as simple markdown."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-nodes",
-              "content": [
-                "Objects — shapes and icons — are the placeable diagram nodes."
-              ],
-              "children": [
-                {
-                  "type": "bulletList",
-                  "id": "node-board-model-nodes-detail",
-                  "items": [
-                    {
-                      "type": "listItem",
-                      "id": "node-board-model-nodes-fields",
-                      "content": [
-                        "They carry their own type, geometry, text, and color, but they are not containers."
-                      ]
-                    },
-                    {
-                      "type": "listItem",
-                      "id": "node-board-model-nodes-rosters",
-                      "content": [
-                        "The capabilities block carries the full type, color, and glyph rosters with per-kind meaning — use it instead of guessing vocabulary."
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-connections",
-              "content": [
-                "Connections are routed wires between objects."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-annotations",
-              "content": [
-                "Annotations are comments anchored to an object — the operator's, and your own."
-              ],
-              "children": [
-                {
-                  "type": "bulletList",
-                  "id": "node-board-model-annotations-detail",
-                  "items": [
-                    {
-                      "type": "listItem",
-                      "id": "node-board-model-annotations-handling",
-                      "content": [
-                        "The operator's arrive in the <requests> block of your state."
-                      ],
-                      "children": [
-                        {
-                          "type": "bulletList",
-                          "id": "node-board-model-annotations-handling-detail",
-                          "items": [
-                            {
-                              "type": "listItem",
-                              "id": "node-board-model-annotations-handling-answer",
-                              "content": [
-                                "Answer each by editing board content, then dispose it with resolve_request."
-                              ]
-                            },
-                            {
-                              "type": "listItem",
-                              "id": "node-board-model-annotations-handling-visibility",
-                              "content": [
-                                "The disposal is how the operator sees what you did with it."
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "listItem",
-                      "id": "node-board-model-annotations-authoring",
-                      "content": [
-                        "add_annotation opens your own thread on an object."
-                      ],
-                      "children": [
-                        {
-                          "type": "bulletList",
-                          "id": "node-board-model-annotations-authoring-detail",
-                          "items": [
-                            {
-                              "type": "listItem",
-                              "id": "node-board-model-annotations-authoring-purpose",
-                              "content": [
-                                "A way to ask about one specific thing without stopping to wait for the answer."
-                              ]
-                            },
-                            {
-                              "type": "listItem",
-                              "id": "node-board-model-annotations-authoring-reply",
-                              "content": [
-                                "reply_annotation says one more thing in a thread that is still open, and resolve_request is the only call that closes one."
-                              ]
-                            }
-                          ]
-                        }
-                      ]
-                    },
-                    {
-                      "type": "listItem",
-                      "id": "node-board-model-annotations-digest",
-                      "content": [
-                        "Annotations never appear in the board digest."
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-fields",
-              "content": [
-                "Object text, section title chips, and connection labels render from fields on their owners."
-              ],
-              "children": [
-                {
-                  "type": "bulletList",
-                  "id": "node-board-model-fields-detail",
-                  "items": [
-                    {
-                      "type": "listItem",
-                      "id": "node-board-model-fields-standalone",
-                      "content": [
-                        "Chips and labels are not standalone objects."
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "id": "node-board-model-invariant",
-          "content": [
-            "Beyond the root frame, nothing is ever section-less — every idea lives in a section."
-          ]
-        },
-        {
-          "type": "paragraph",
-          "id": "node-board-model-grid",
-          "content": [
-            "Every geometry number you write lands on a 20 grid."
-          ]
-        },
-        {
-          "type": "bulletList",
-          "id": "node-board-model-grid-detail",
-          "items": [
-            {
-              "type": "listItem",
-              "id": "node-board-model-grid-snap",
-              "content": [
-                "Positions, sizes, nudges, spacing gaps, and waypoint coordinates are all rounded to the nearest 20 before they land — snapped, never rejected."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-grid-applied",
-              "content": [
-                "The result reports the numbers that actually applied, so read them back and compute the next gesture from those."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-grid-think",
-              "content": [
-                "Think in twenties: a box is 300×60 at 240,480, a nudge is ±20, a corridor opens to 120, and 187×63 at 241,477 is a number you never had a reason to write."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-grid-exempt",
-              "content": [
-                "Endpoint positions along a face, label placement along a wire, and text metrics are fractions and measurements rather than grid units."
-              ]
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "id": "node-board-model-description",
-          "content": [
-            "The board also carries a description: a short markdown account of what the diagram represents, its pieces, and how it reads."
-          ]
-        },
-        {
-          "type": "bulletList",
-          "id": "node-board-model-description-detail",
-          "items": [
-            {
-              "type": "listItem",
-              "id": "node-board-model-description-meaning",
-              "content": [
-                "The board shows what is there; the description says what it means."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-description-standing",
-              "content": [
-                "It is the standing record of intent between runs, and update_description replaces it."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-description-title",
-              "content": [
-                "The board carries a title too, which set_board_title renames — title and description are the pair that say what this board is."
-              ]
-            }
-          ]
-        },
-        {
-          "type": "paragraph",
-          "id": "node-board-model-diagnostics",
-          "content": [
-            "Six diagnostics run on every edit: covered-content, containment, broken-edges, unreadable-labels, crowding, and clipped-text."
-          ]
-        },
-        {
-          "type": "bulletList",
-          "id": "node-board-model-diagnostics-list",
-          "items": [
-            {
-              "type": "listItem",
-              "id": "node-board-model-diagnostics-frame-slack",
-              "content": [
-                "A committed finalize runs one more, frame-slack, which asks whether a frame is far larger than its children need."
-              ],
-              "children": [
-                {
-                  "type": "bulletList",
-                  "id": "node-board-model-diagnostics-frame-slack-detail",
-                  "items": [
-                    {
-                      "type": "listItem",
-                      "id": "node-board-model-diagnostics-frame-slack-timing",
-                      "content": [
-                        "A finishing question, so it is never raised mid-build."
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-diagnostics-errors",
-              "content": [
-                "All findings — E* errors and W* warnings — in your edited scope block a committed finalize and must be fixed."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-diagnostics-warnings",
-              "content": [
-                "Warnings are not overridable at commit: fix every scoped W* before finalizing."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-diagnostics-fixes",
-              "content": [
-                "A finding names what is wrong and where; the fix is yours to choose."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-board-model-diagnostics-in-result",
-              "content": [
-                "Some gestures also check their own work as it lands — a resize or match_size that leaves the text no room says so under its own APPLIED line."
-              ],
-              "children": [
-                {
-                  "type": "bulletList",
-                  "id": "node-board-model-diagnostics-in-result-detail",
-                  "items": [
-                    {
-                      "type": "listItem",
-                      "id": "node-board-model-diagnostics-in-result-report-only",
-                      "content": [
-                        "Those notes are report-only: the edit still landed, and nothing was rejected."
-                      ]
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "type": "section",
-      "id": "node-section-state-grammar",
+      "id": "node-section-state-structure",
       "tag": "state_structure",
       "children": [
         {
           "type": "paragraph",
-          "id": "node-state-grammar-intro",
+          "id": "node-state-purpose",
           "content": [
             "All board state reaches you as plain text in a fixed grammar, plus attached board renders whose first image shows the board as it stands now."
           ]
         },
         {
           "type": "paragraph",
-          "id": "node-state-grammar-snapshot",
+          "id": "node-state-fresh",
           "content": [
-            "Every request opens with a <state> block re-derived from the live board that instant — the whole digest, everything you have applied, the cumulative diff, every open finding, and the request queue — so it is never a snapshot and can never go stale under you."
+            "Every request opens with a <state> block re-derived from the live board that instant — never a snapshot, and never stale under you."
           ]
         },
         {
           "type": "paragraph",
-          "id": "node-state-grammar-state-sections",
+          "id": "node-state-skeleton-intro",
           "content": [
-            "Its parts are named: <instruction> the ask, <board> the digest, <recent_ops> the operations you have applied, newest last, <diff> the cumulative base→draft change, <lints> the findings, <requests> the queue, <views> the board as it stands now and the three most recent changes attached beneath it, and <recent_conversation> the most recent messages of the run — a capped tail, since the state block above always carries the current picture."
+            "Its shape, top to bottom:"
           ]
         },
         {
-          "type": "paragraph",
-          "id": "node-state-grammar-description",
-          "content": [
-            "The board description rides in the same block. It changes only when you replace it with update_description, so it never goes stale under you the way geometry does."
-          ]
-        },
-        {
-          "type": "paragraph",
-          "id": "node-state-grammar-read-literally",
-          "content": [
-            "Read the grammar literally. Each block below is one block of board state: the headline you will see, and what it carries."
-          ]
-        },
-        {
-          "type": "section",
-          "id": "node-state-grammar-block-applied",
-          "tag": "state_block",
-          "attrs": {
-            "name": "APPLIED"
-          },
-          "children": [
+          "type": "bulletList",
+          "id": "node-state-skeleton",
+          "items": [
             {
-              "type": "paragraph",
-              "id": "node-state-grammar-applied",
+              "type": "listItem",
+              "id": "node-state-skeleton-instruction",
               "content": [
-                "`APPLIED · place_shape api-gw 240,480 280×100` — the headline of a call that changed the draft, with any warning note under it."
+                "<instruction> — the operator's ask, with follow-ups joining it there"
               ]
             },
             {
-              "type": "bulletList",
-              "id": "node-state-grammar-applied-detail",
-              "items": [
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-applied-verb",
-                  "content": [
-                    "The verb is the gesture you performed — place_shape, move_to, resize, match_size, space_out, change_color, shift_segment — so the ops ledger reads back as an editing session."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-applied-numbers",
-                  "content": [
-                    "The numbers are the ones that landed after the grid snap, not the ones you asked for, which is what makes this line worth reading before the next gesture."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-applied-warning",
-                  "content": [
-                    "A note under the headline is report-only — a box left too small for its text, a facing cleared by a shape swap — and the edit still landed."
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "section",
-          "id": "node-state-grammar-block-digest",
-          "tag": "state_block",
-          "attrs": {
-            "name": "BOARD digest"
-          },
-          "children": [
-            {
-              "type": "paragraph",
-              "id": "node-state-grammar-digest",
+              "type": "listItem",
+              "id": "node-state-skeleton-board",
               "content": [
-                "Three children: <description> is the board description markdown; <objects> is an indented object tree where indentation is containment; <edges> is one line per connector. An empty child is a self-closing tag."
-              ]
-            },
-            {
-              "type": "bulletList",
-              "id": "node-state-grammar-digest-detail",
-              "items": [
+                "<board> "
+              ],
+              "children": [
                 {
-                  "type": "listItem",
-                  "id": "node-state-grammar-digest-order",
-                  "content": [
-                    "The tree runs the base section, then sections, nodes, and stickies inside it."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-digest-scope",
-                  "content": [
-                    "The whole board is in the <board> block of your state on every request; an operation result reports only what it changed."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-digest-object-lines",
-                  "content": [
-                    "Object lines read id type \"text\" [color] x,y w×h [k=v …], with set fields like locked, dir, icon, and layout appearing only when present."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-digest-defaults",
-                  "content": [
-                    "The # legend line at the top of <objects> and of <edges> declares each part's line grammar and elided defaults (color gray, sticky yellow; edge solid gray arrow=forward; shape per type)."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-digest-edge-lines",
-                  "content": [
-                    "Edge lines read id from→to \"label\" plus non-default extras (style, color, arrow, role, anchors, pos, wp)."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-digest-text",
-                  "content": [
-                    "Text is never truncated — whitespace collapses to single spaces, but every word is there."
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "section",
-          "id": "node-state-grammar-block-delta",
-          "tag": "state_block",
-          "attrs": {
-            "name": "DELTA"
-          },
-          "children": [
-            {
-              "type": "paragraph",
-              "id": "node-state-grammar-delta",
-              "content": [
-                "What the operation changed, derived by comparing the documents."
-              ]
-            },
-            {
-              "type": "bulletList",
-              "id": "node-state-grammar-delta-detail",
-              "items": [
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-delta-reconciled",
-                  "content": [
-                    "Reconciled membership and steering changes therefore appear like your own edits."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-delta-line-forms",
-                  "content": [
-                    "Line forms:"
-                  ],
-                  "children": [
+                  "type": "bulletList",
+                  "id": "node-bullet-list-1",
+                  "items": [
                     {
-                      "type": "bulletList",
-                      "id": "node-state-grammar-delta-forms",
-                      "items": [
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-delta-add",
-                          "content": [
-                            "`+ id …` add"
-                          ]
-                        },
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-delta-remove",
-                          "content": [
-                            "`− id` remove"
-                          ]
-                        },
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-delta-move",
-                          "content": [
-                            "`id x,y → x,y` move"
-                          ]
-                        },
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-delta-resize",
-                          "content": [
-                            "`id x,y w×h → x,y w×h` resize"
-                          ]
-                        },
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-delta-field",
-                          "content": [
-                            "`id field before → after` for text/color/parentId/style/locked and edge label/style/color/arrow/role"
-                          ]
-                        },
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-delta-route",
-                          "content": [
-                            "`id route a→b → c→d` for endpoint reassignment"
-                          ]
-                        },
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-delta-steering",
-                          "content": [
-                            "`id anchors|pos|wp … → …` for steering"
-                          ]
-                        }
+                      "type": "listItem",
+                      "id": "node-list-item-1",
+                      "content": [
+                        "the whole digest: <description> what it means, <objects> the indented tree, <edges> the wires"
                       ]
                     }
                   ]
                 }
               ]
-            }
-          ]
-        },
-        {
-          "type": "section",
-          "id": "node-state-grammar-block-board-diff",
-          "tag": "state_block",
-          "attrs": {
-            "name": "BOARD DIFF"
-          },
-          "children": [
+            },
             {
-              "type": "paragraph",
-              "id": "node-state-grammar-board-diff",
+              "type": "listItem",
+              "id": "node-state-skeleton-diff",
               "content": [
-                "The <diff> block's cumulative base→draft change list, one line per changed entity."
+                "<diff> — the cumulative base→draft change, always exactly what committing would ship"
               ]
             },
             {
-              "type": "bulletList",
-              "id": "node-state-grammar-board-diff-detail",
-              "items": [
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-board-diff-lines",
-                  "content": [
-                    "Lines read `addSection id`, `updateObject id  moved · recolored · …`, `removeConnection id`."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-board-diff-truth",
-                  "content": [
-                    "Built from the exact edits a committed finalize will propose, so this block always equals what committing would ship."
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "section",
-          "id": "node-state-grammar-block-lints",
-          "tag": "state_block",
-          "attrs": {
-            "name": "LINTS"
-          },
-          "children": [
-            {
-              "type": "paragraph",
-              "id": "node-state-grammar-lints",
+              "type": "listItem",
+              "id": "node-state-skeleton-lints",
               "content": [
-                "The diagnostics delta and the committed-finalize gate."
+                "<lints> — every open finding, grouped under <errors> and <warnings>"
               ]
             },
             {
-              "type": "bulletList",
-              "id": "node-state-grammar-lints-detail",
-              "items": [
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-lints-delta",
-                  "content": [
-                    "An operation returns `LINTS · +new −resolved`."
-                  ],
-                  "children": [
-                    {
-                      "type": "bulletList",
-                      "id": "node-state-grammar-lints-delta-detail",
-                      "items": [
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-lints-delta-contents",
-                          "content": [
-                            "The findings it opened, each in prose, and the ids it resolved."
-                          ]
-                        },
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-lints-delta-look",
-                          "content": [
-                            "The <lints> block carries every open finding, recomputed every request and grouped under <errors> and <warnings>."
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-lints-unchanged",
-                  "content": [
-                    "`LINTS · +0 −0 (N open)` when nothing changed."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-lints-clean",
-                  "content": [
-                    "`LINTS · clean` when nothing changed and nothing is open."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-lints-block-finalize",
-                  "content": [
-                    "Every open E* or W* in your edited scope blocks a committed finalize, including a frame-slack finding raised at finalize."
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "section",
-          "id": "node-state-grammar-block-routes",
-          "tag": "state_block",
-          "attrs": {
-            "name": "ROUTES"
-          },
-          "children": [
-            {
-              "type": "paragraph",
-              "id": "node-state-grammar-routes",
+              "type": "listItem",
+              "id": "node-state-skeleton-recent-ops",
               "content": [
-                "`id anchors a→b path A ─(s0 h y=240)→ (s1 v x=520) ─(s2 h y=300)→ B through none|ids`"
+                "<recent_ops> — every call you have made this run, newest last"
               ]
             },
             {
-              "type": "bulletList",
-              "id": "node-state-grammar-routes-detail",
-              "items": [
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-routes-polyline",
-                  "content": [
-                    "The true routed polyline for every connection the operation added, steered, endpoint-reassigned, or re-routed because an endpoint object moved or resized."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-routes-segments",
-                  "content": [
-                    "The path prints as numbered segments: `sN` is one straight run of the wire, `h` pinned at that y, `v` pinned at that x."
-                  ],
-                  "children": [
-                    {
-                      "type": "bulletList",
-                      "id": "node-state-grammar-routes-segments-detail",
-                      "items": [
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-routes-segments-index",
-                          "content": [
-                            "That printed number is exactly what shift_segment writes — shift_segment on s1 with a new x slides the run printed as `(s1 v x=520)` and nothing else."
-                          ]
-                        },
-                        {
-                          "type": "listItem",
-                          "id": "node-state-grammar-routes-segments-stable",
-                          "content": [
-                            "Indices are never renumbered, so a segment you cannot see quoted is one the router did not draw."
-                          ]
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-routes-chaining",
-                  "content": [
-                    "Every routing call returns the edge's fresh polyline in its own result; read it before sending another shift, and never take the next segment numbers from the digest above it."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-routes-through",
-                  "content": [
-                    "`through` names any boxes the wire crosses."
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "section",
-          "id": "node-state-grammar-block-measures",
-          "tag": "state_block",
-          "attrs": {
-            "name": "MEASURES"
-          },
-          "children": [
-            {
-              "type": "paragraph",
-              "id": "node-state-grammar-measures",
+              "type": "listItem",
+              "id": "node-state-skeleton-requests",
               "content": [
-                "`MEASURES · section home 0,0 480×360` and the rows beneath it — what a region a `look` framed actually measures."
+                "<requests> — the operator's open threads, part of the instruction"
               ]
             },
             {
-              "type": "bulletList",
-              "id": "node-state-grammar-measures-detail",
-              "items": [
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-measures-gaps",
-                  "content": [
-                    "`gaps x` and `gaps y` give the clear corridor between each neighbouring pair on that axis, named by the two ids."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-measures-pitch",
-                  "content": [
-                    "`pitch x` and `pitch y` give the repeat between rows and columns, which is where an uneven rhythm shows itself."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-measures-free",
-                  "content": [
-                    "`free` gives a framing section's unused margins on each side, and `ink` the share of the region its boxes paint."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-measures-source",
-                  "content": [
-                    "It arrives with every region a `look` frames, so spacing is read off this block rather than derived from the digest."
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "section",
-          "id": "node-state-grammar-block-requests",
-          "tag": "state_block",
-          "attrs": {
-            "name": "REQUESTS"
-          },
-          "children": [
-            {
-              "type": "paragraph",
-              "id": "node-state-grammar-requests",
+              "type": "listItem",
+              "id": "node-state-skeleton-views",
               "content": [
-                "The queue, as the <requests> block of your state and as `REQUESTS · none` or `REQUESTS · k/n disposed` from resolve_request, one line per entry."
+                "<views> — the attached renders: the board as it stands now first, then the most recent changes"
               ]
             },
             {
-              "type": "bulletList",
-              "id": "node-state-grammar-requests-detail",
-              "items": [
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-requests-open",
-                  "content": [
-                    "`Rn open target — \"body\"` while open."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-requests-disposed",
-                  "content": [
-                    "`Rn done|declined \"note\"` once disposed."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-requests-reply",
-                  "content": [
-                    "A reply_annotation posts into the thread and leaves the entry open, so the line stays `Rn open` until resolve_request disposes it."
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "section",
-          "id": "node-state-grammar-block-views",
-          "tag": "state_block",
-          "attrs": {
-            "name": "VIEWS"
-          },
-          "children": [
-            {
-              "type": "paragraph",
-              "id": "node-state-grammar-views",
+              "type": "listItem",
+              "id": "node-state-skeleton-conversation",
               "content": [
-                "The <views> block names the attached images: first the board as it stands now, then up to three renders from the changes immediately before the current one, newest first and each captioned with the gesture summary that made it."
-              ]
-            },
-            {
-              "type": "bulletList",
-              "id": "node-state-grammar-views-detail",
-              "items": [
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-views-history",
-                  "content": [
-                    "If current-board rendering fails after an edit, the block reports the degradation and keeps the previous current-board render."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-views-look",
-                  "content": [
-                    "`look`'s framed close-ups are returned with the tool result and stay visible in the recent conversation tail; they are not added to the state change history."
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "section",
-          "id": "node-state-grammar-block-rejection",
-          "tag": "state_block",
-          "attrs": {
-            "name": "NO-OP and ERROR"
-          },
-          "children": [
-            {
-              "type": "paragraph",
-              "id": "node-state-grammar-rejection",
-              "content": [
-                "A call that leaves the draft alone says which it was."
-              ]
-            },
-            {
-              "type": "bulletList",
-              "id": "node-state-grammar-rejection-detail",
-              "items": [
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-rejection-no-op",
-                  "content": [
-                    "`NO-OP · …` when the request was legal and there was nothing to do."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-rejection-error",
-                  "content": [
-                    "`ERROR · …` when it was not."
-                  ]
-                },
-                {
-                  "type": "listItem",
-                  "id": "node-state-grammar-rejection-recover",
-                  "content": [
-                    "Read the lines, fix the call, send it again."
-                  ]
-                }
+                "<recent_conversation> — the capped message tail; the <state> block above is always the current picture"
               ]
             }
           ]
         },
         {
           "type": "paragraph",
-          "id": "node-state-grammar-delivery",
+          "id": "node-state-grammar-pointer",
+          "content": [
+            "The state carries bare values; the grammar for reading every block — line formats, elided defaults, result headers — is the <state_grammar> block of your context."
+          ]
+        },
+        {
+          "type": "paragraph",
+          "id": "node-state-results",
           "content": [
             "An operation result is sized to the operation: its APPLIED line, its DELTA, its lint delta, and ROUTES for any wire it moved — the standing picture is not restated there, because the <state> block above it already carries the current one."
           ]
         },
         {
           "type": "bulletList",
-          "id": "node-state-grammar-delivery-list",
+          "id": "node-state-operational",
           "items": [
             {
               "type": "listItem",
-              "id": "node-state-grammar-delivery-pacing",
+              "id": "node-state-operational-notes",
+              "content": [
+                "A note under an APPLIED headline is report-only: the edit landed, and nothing was rejected."
+              ]
+            },
+            {
+              "type": "listItem",
+              "id": "node-state-operational-readback",
+              "content": [
+                "The numbers in a result are the ones that landed after the grid snap — read them back and compute the next gesture from those."
+              ]
+            },
+            {
+              "type": "listItem",
+              "id": "node-state-operational-refusals",
+              "content": [
+                "A NO-OP or ERROR result changes nothing — read the line, fix the call, send it again."
+              ]
+            },
+            {
+              "type": "listItem",
+              "id": "node-state-cadence-cap",
               "content": [
                 "Send at most {{toolCallCap}} tool call(s) in one message."
               ],
               "children": [
                 {
                   "type": "bulletList",
-                  "id": "node-state-grammar-delivery-pacing-detail",
+                  "id": "node-state-cadence-cap-detail",
                   "items": [
                     {
                       "type": "listItem",
-                      "id": "node-state-grammar-delivery-pacing-independent",
-                      "content": [
-                        "Share a message only among genuinely independent gestures planned from the same board state, with none reading what another writes; an allowance of one simply means every call rides alone."
-                      ]
-                    },
-                    {
-                      "type": "listItem",
-                      "id": "node-state-grammar-delivery-pacing-dependent",
+                      "id": "node-state-cadence-dependent",
                       "content": [
                         "Send one at a time whenever the next gesture depends on a result: sizing or fit work, route work chained from a returned polyline, lint fixes, and anything reacting to a warning."
                       ]
                     },
                     {
                       "type": "listItem",
-                      "id": "node-state-grammar-delivery-pacing-boundary",
+                      "id": "node-state-cadence-independent",
+                      "content": [
+                        "Share a message only among genuinely independent gestures planned from the same board state, with none reading what another writes; an allowance of one simply means every call rides alone."
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "id": "node-state-cadence-together",
                       "content": [
                         "Results for the whole message arrive together, so after the first call moves the board, every remaining call runs from a plan made against a board that no longer exists."
                       ]
                     },
                     {
                       "type": "listItem",
-                      "id": "node-state-grammar-delivery-pacing-alone",
+                      "id": "node-state-cadence-solo",
                       "content": [
                         "`look` and `finalize` each ride alone in their own message: `look` behind edits frames a board the same message is still changing, while `finalize` is the run's last word."
                       ]
@@ -1070,41 +226,20 @@
             },
             {
               "type": "listItem",
-              "id": "node-state-grammar-delivery-look",
+              "id": "node-state-look",
               "content": [
-                "`look` is the close-up — it frames exactly one region and returns that region rendered and measured, alongside the digest, the cumulative base→draft diff, the open findings, the routed truth for every connection, and the request queue; the result image stays visible in the recent conversation tail, and the board itself always arrives with your <state> block, never from `look`."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-state-grammar-delivery-frames",
-              "content": [
-                "One knob frames the region: `view` names one or more section, object, or connection ids — a lone section id takes that section close up, and any other set frames the union of everything named, routed edges included, with a ring of context around it."
+                "`look` is the close-up: it frames exactly one region, named by `view` ids, and returns it rendered and measured — the board itself always arrives with your <state> block, never from `look`."
               ],
               "children": [
                 {
                   "type": "bulletList",
-                  "id": "node-state-grammar-delivery-frames-detail",
+                  "id": "node-state-look-detail",
                   "items": [
                     {
                       "type": "listItem",
-                      "id": "node-state-grammar-delivery-frames-measured",
-                      "content": [
-                        "Whatever a region is framed by, it comes back rendered and with its MEASURES block — the per-pair gaps, the row and column pitch, a section's free margins, the ink share."
-                      ]
-                    },
-                    {
-                      "type": "listItem",
-                      "id": "node-state-grammar-delivery-frames-smallest",
+                      "id": "node-state-look-smallest",
                       "content": [
                         "Name the smallest set that answers the question — one object for its placement, an edge's two endpoints for the corridor it routes through, a handful of ids for a cluster."
-                      ]
-                    },
-                    {
-                      "type": "listItem",
-                      "id": "node-state-grammar-delivery-frames-combine",
-                      "content": [
-                        "Framing is `look`'s alone, since an edit takes no view argument and returns no picture."
                       ]
                     }
                   ]
@@ -1113,21 +248,14 @@
             },
             {
               "type": "listItem",
-              "id": "node-state-grammar-delivery-pointer",
-              "content": [
-                "The first image attached beneath every <state> block is the board as it stands now, followed by up to three prior change renders; `look` carries the board text with it and returns its framed views and measurements in the tool result for close study."
-              ]
-            },
-            {
-              "type": "listItem",
-              "id": "node-state-grammar-delivery-cadence",
+              "id": "node-state-look-when",
               "content": [
                 "Edit from the small results and the current first image; use `look` when judgment needs a close-up or a measured region."
               ]
             },
             {
               "type": "listItem",
-              "id": "node-state-grammar-delivery-failures",
+              "id": "node-state-delivery-failures",
               "content": [
                 "A failed or missing `look` render is explained in its result text; a failed current-board render is explained in <views> — judge from what actually arrived."
               ]

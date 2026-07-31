@@ -6,7 +6,7 @@
   "blocks": {
     "b-appendix-root": {
       "id": "b-appendix-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "concepts": [
           "MPL-2.0",
@@ -42,7 +42,7 @@
     },
     "b-appendix-heading-1": {
       "id": "b-appendix-heading-1",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -55,7 +55,7 @@
     },
     "b-appendix-intro-2": {
       "id": "b-appendix-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -107,7 +107,7 @@
     },
     "b-appendix-heading-vendor-3": {
       "id": "b-appendix-heading-vendor-3",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -120,7 +120,7 @@
     },
     "b-appendix-vendor-p1-4": {
       "id": "b-appendix-vendor-p1-4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -220,7 +220,7 @@
     },
     "b-appendix-vendor-p2-5": {
       "id": "b-appendix-vendor-p2-5",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -443,7 +443,7 @@
     },
     "b-appendix-vendor-filetree-6": {
       "id": "b-appendix-vendor-filetree-6",
-      "flavour": "file-tree",
+      "type": "file-tree",
       "props": {
         "entries": [
           {
@@ -481,7 +481,7 @@
     },
     "b-appendix-vendor-constraint-7": {
       "id": "b-appendix-vendor-constraint-7",
-      "flavour": "constraint",
+      "type": "constraint",
       "props": {
         "severity": "hard",
         "title": "MPL-2.0 file-level boundary"
@@ -517,7 +517,7 @@
     },
     "b-appendix-heading-uiprim-8": {
       "id": "b-appendix-heading-uiprim-8",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -530,7 +530,7 @@
     },
     "b-appendix-uiprim-p1-9": {
       "id": "b-appendix-uiprim-p1-9",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -726,7 +726,7 @@
     },
     "b-appendix-heading-extraction-10": {
       "id": "b-appendix-heading-extraction-10",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -739,7 +739,7 @@
     },
     "b-appendix-extraction-p1-11": {
       "id": "b-appendix-extraction-p1-11",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -832,7 +832,7 @@
     },
     "b-appendix-heading-bdr-12": {
       "id": "b-appendix-heading-bdr-12",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -845,7 +845,7 @@
     },
     "b-appendix-bdr-p1-13": {
       "id": "b-appendix-bdr-p1-13",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -945,7 +945,7 @@
     },
     "b-appendix-bdr-assumption-14": {
       "id": "b-appendix-bdr-assumption-14",
-      "flavour": "assumption",
+      "type": "assumption",
       "props": {
         "confidence": "medium",
         "title": "Some constants are flagged extrapolations"
@@ -982,7 +982,7 @@
     },
     "b-appendix-heading-testing-15": {
       "id": "b-appendix-heading-testing-15",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -995,7 +995,7 @@
     },
     "b-appendix-testing-p1-16": {
       "id": "b-appendix-testing-p1-16",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1171,7 +1171,7 @@
     },
     "b-appendix-testing-block-17": {
       "id": "b-appendix-testing-block-17",
-      "flavour": "testing",
+      "type": "testing",
       "props": {
         "title": "Unit tests for logic, DOM/geometry assertions for rendering — never screenshots"
       },
@@ -1304,7 +1304,7 @@
     },
     "b-appendix-closing-18": {
       "id": "b-appendix-closing-18",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {

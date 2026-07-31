@@ -66,7 +66,7 @@ describe("reply_annotation", () => {
     );
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · replyAnnotation doc-1");
+    expect(result.text).toContain("APPLIED · reply_annotation doc-1");
     const thread = threadOf(session, "doc-1");
     expect(thread.replies).toHaveLength(1);
     expect(thread.replies[0]!.author).toBe("agent");
@@ -136,7 +136,7 @@ describe("set_board_title", () => {
     const result = toolSetBoardTitle(session, "  Onboarding flow  ", emitSessionEvent);
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · updateTitle");
+    expect(result.text).toContain("APPLIED · set_board_title");
     expect(result.text).toContain('DELTA · title "Synthetic" → "Onboarding flow"');
     // Trimmed, matching the human reducer.
     expect(session.draft.title).toBe("Onboarding flow");

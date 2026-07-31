@@ -1,12 +1,7 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import type { KernelTraceSessionDetail } from "@agent-kernel/viewer-core";
-import {
-  CLAMP,
-  readStringAttr,
-  type DetailBlockProvider,
-  type DetailBlockSpec,
-} from "@agent-kernel/viewer-ui";
-import { TranscriptRenderStrip } from "./TranscriptMedia";
+import type { DetailBlockProvider } from "@agent-kernel/viewer-ui";
+import type { CanvasViewerExtensionContext } from "../../viewer-extension";
 import {
   indexTranscriptToolCalls,
   useSessionTranscript,
@@ -30,11 +25,15 @@ export interface CanvasTraceExtensions {
 
 export function useCanvasTraceExtensions(
   detail: KernelTraceSessionDetail | null,
+  apiBase: string,
+  createProvider: (
+    context: CanvasViewerExtensionContext,
+  ) => DetailBlockProvider,
 ): CanvasTraceExtensions {
   const containerId = detail
     ? detail.session.containerId || detail.session.id
     : null;
-  const transcriptState = useSessionTranscript(containerId);
+  const transcriptState = useSessionTranscript(containerId, apiBase);
   const transcript =
     transcriptState.status === "ready" ? transcriptState.transcript : null;
 
@@ -46,76 +45,22 @@ export function useCanvasTraceExtensions(
     [transcript],
   );
 
-  /** The transcript tool call behind a tool_call span, joined by tool_use_id. */
-  const transcriptEntryFor = useCallback(
-    (
-      span: Parameters<DetailBlockProvider>[0],
-    ): TranscriptToolCallEntry | null => {
-      const eventType = readStringAttr(span, "event_type");
-      if (eventType !== "tool_call_start" && eventType !== "tool_call_end") {
-        return null;
-      }
-      const toolUseId = readStringAttr(span, "tool_use_id");
-      return (toolUseId && toolCallIndex.get(toolUseId)) || null;
-    },
-    [toolCallIndex],
-  );
-
-  const detailBlockProvider: DetailBlockProvider = useCallback(
-    (span) => {
-      if (!containerId || transcriptState.status !== "ready") return [];
-      const entry = transcriptEntryFor(span);
-      if (!entry) return [];
-
-      const blocks: DetailBlockSpec[] = [];
-      if (entry.turn.thinking) {
-        blocks.push({
-          id: "canvas:thinking",
-          slot: "input",
-          order: -100,
-          caption: "Thinking",
-          body: entry.turn.thinking,
-          language: "text",
-          clamp: CLAMP.tight,
-        });
-      }
-
-      const program = entry.call.params?.program;
-      if (
-        entry.call.toolName === "propose_program" &&
-        typeof program === "string"
-      ) {
-        blocks.push({
-          id: "canvas:program",
-          slot: "input",
-          order: -50,
-          caption: "Program",
-          body: program,
-          language: "text",
-          clamp: CLAMP.block,
-        });
-      }
-
-      const images = entry.call.images ?? [];
-      if (images.length > 0) {
-        blocks.push({
-          id: "canvas:renders",
-          slot: "media",
-          caption: images.length === 1 ? "Render" : "Renders",
-          node: (
-            <TranscriptRenderStrip
-              images={images}
-              toolName={entry.call.toolName}
-              turnIndex={entry.turn.index}
-              containerId={containerId}
-            />
-          ),
-        });
-      }
-
-      return blocks;
-    },
-    [containerId, transcriptState.status, transcriptEntryFor],
+  const detailBlockProvider = useMemo(
+    () =>
+      createProvider({
+        apiBase,
+        transcript:
+          containerId && transcriptState.status === "ready"
+            ? { containerId, toolCallIndex }
+            : undefined,
+      }),
+    [
+      apiBase,
+      containerId,
+      createProvider,
+      toolCallIndex,
+      transcriptState.status,
+    ],
   );
 
   return { detailBlockProvider };

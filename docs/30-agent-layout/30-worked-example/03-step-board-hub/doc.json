@@ -6,13 +6,7 @@
   "blocks": {
     "b-step3-root": {
       "id": "b-step3-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-step3-title-1",
-        "b-step3-body-2",
-        "b-step3-code-3",
-        "b-step3-canvas-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "Step 3 of the worked example: one structural batch establishes the upper and lower sections, followed by separate Runner loop and Board — hub content batches.",
         "format": "mdx",
@@ -24,12 +18,17 @@
           "auto-fit",
           "database"
         ]
-      }
+      },
+      "children": [
+        "b-step3-title-1",
+        "b-step3-body-2",
+        "b-step3-code-3",
+        "b-step3-canvas-4"
+      ]
     },
     "b-step3-title-1": {
       "id": "b-step3-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -37,23 +36,23 @@
         {
           "insert": "Step 3 — The board hub below"
         }
-      ]
+      ],
+      "children": []
     },
     "b-step3-body-2": {
       "id": "b-step3-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The agent studies the latest step-2 result, then sends a structural batch that shortens Runner loop and establishes Board — hub beneath it. After judging that skeleton render, it updates the Runner loop nodes as one group and judges their section view. A final batch fills Board — hub with three database peers that copy one size, baseline, and repeated group gap. The 16px grid quantizes the coordinates; peer uniformity carries the meaning. Because Runner loop is explicitly resized in the skeleton batch, that size wins there. Board — hub remains eligible to auto-fit after geometry-derived membership adopts epochs, artifacts, and saves. Each result pushes a fresh BOARD digest alongside APPLIED, DELTA, cumulative BOARD DIFF, LINTS, and REQUESTS; document changes push a full-board render, and the content calls request the relevant section close-up. No connection is touched, so ROUTES remains absent. Any crowding finding is the corridor floor, not a spacing style target."
         }
-      ]
+      ],
+      "children": []
     },
     "b-step3-code-3": {
       "id": "b-step3-code-3",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "json"
       },
@@ -61,16 +60,17 @@
         {
           "insert": "[\n  {\n    \"ops\": [\n      {\n        \"type\": \"addSection\",\n        \"section\": {\n          \"id\": \"board\",\n          \"text\": \"Board — hub\",\n          \"color\": \"gray\",\n          \"geometry\": { \"x\": 304, \"y\": 416, \"width\": 720, \"height\": 160 }\n        }\n      },\n      {\n        \"type\": \"updateSection\",\n        \"sectionId\": \"loop\",\n        \"patch\": {\n          \"geometry\": { \"x\": 304, \"y\": 0, \"width\": 720, \"height\": 320 }\n        }\n      }\n    ]\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"cli\",\n        \"patch\": {\n          \"geometry\": { \"x\": 336, \"y\": 144, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"sched\",\n        \"patch\": {\n          \"geometry\": { \"x\": 512, \"y\": 144, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"workers\",\n        \"patch\": {\n          \"geometry\": { \"x\": 688, \"y\": 144, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"match\",\n        \"patch\": {\n          \"geometry\": { \"x\": 864, \"y\": 144, \"width\": 112, \"height\": 64 }\n        }\n      }\n    ],\n    \"view\": \"loop\"\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"epochs\",\n          \"type\": \"database\",\n          \"text\": \"epochs\",\n          \"geometry\": { \"x\": 448, \"y\": 464, \"width\": 112, \"height\": 96 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"artifacts\",\n          \"type\": \"database\",\n          \"text\": \"artifacts\",\n          \"geometry\": { \"x\": 608, \"y\": 464, \"width\": 112, \"height\": 96 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"saves\",\n          \"type\": \"database\",\n          \"text\": \"saves\",\n          \"geometry\": { \"x\": 768, \"y\": 464, \"width\": 112, \"height\": 96 }\n        }\n      }\n    ],\n    \"view\": \"board\"\n  }\n]"
         }
-      ]
+      ],
+      "children": []
     },
     "b-step3-canvas-4": {
       "id": "b-step3-canvas-4",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/step-3.canvas.json",
         "title": "Step 3 — The board hub below"
-      }
+      },
+      "children": []
     }
   }
 }

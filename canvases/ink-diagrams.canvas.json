@@ -64,7 +64,7 @@
     },
     {
       "id": "send-input-1-message-a",
-      "type": "parallelogram",
+      "type": "icon",
       "text": "Send Input 1 Message",
       "color": "red",
       "parentId": "section-input-adapter",
@@ -75,13 +75,13 @@
         "height": 96
       },
       "style": {
-        "shape": "parallelogram"
+        "shape": "icon"
       },
-      "direction": "right"
+      "icon": "send"
     },
     {
       "id": "write-code-to-call-api",
-      "type": "hexagon",
+      "type": "process",
       "text": "Write Code to Call API",
       "color": "green",
       "parentId": "section-input-adapter",
@@ -92,12 +92,12 @@
         "height": 96
       },
       "style": {
-        "shape": "hexagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "tell-agent-calls-incorrect",
-      "type": "hexagon",
+      "type": "process",
       "text": "Tell Agent Calls are Incorrect",
       "color": "yellow",
       "parentId": "section-input-adapter",
@@ -108,12 +108,12 @@
         "height": 96
       },
       "style": {
-        "shape": "hexagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "process-input-to-api-calls",
-      "type": "hexagon",
+      "type": "process",
       "text": "Process Input to API Calls",
       "color": "green",
       "parentId": "section-input-adapter",
@@ -124,12 +124,12 @@
         "height": 96
       },
       "style": {
-        "shape": "hexagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "go-to-next-input",
-      "type": "hexagon",
+      "type": "process",
       "text": "Go To Next Input",
       "color": "yellow",
       "parentId": "section-input-adapter",
@@ -140,7 +140,7 @@
         "height": 96
       },
       "style": {
-        "shape": "hexagon"
+        "shape": "rounded-rect"
       }
     },
     {
@@ -225,7 +225,7 @@
     },
     {
       "id": "send-input-1-message-b",
-      "type": "parallelogram",
+      "type": "icon",
       "text": "Send Input 1 Message",
       "color": "red",
       "parentId": "section-output-adapter",
@@ -236,13 +236,13 @@
         "height": 96
       },
       "style": {
-        "shape": "parallelogram"
+        "shape": "icon"
       },
-      "direction": "right"
+      "icon": "send"
     },
     {
       "id": "send-ink-api-response-1",
-      "type": "parallelogram",
+      "type": "icon",
       "text": "Send INK API Response 1",
       "color": "red",
       "parentId": "section-output-adapter",
@@ -253,13 +253,13 @@
         "height": 96
       },
       "style": {
-        "shape": "parallelogram"
+        "shape": "icon"
       },
-      "direction": "right"
+      "icon": "send"
     },
     {
       "id": "send-expected-response-1",
-      "type": "parallelogram",
+      "type": "icon",
       "text": "Send Expected Response 1",
       "color": "red",
       "parentId": "section-output-adapter",
@@ -270,13 +270,13 @@
         "height": 96
       },
       "style": {
-        "shape": "parallelogram"
+        "shape": "icon"
       },
-      "direction": "right"
+      "icon": "send"
     },
     {
       "id": "write-code-to-convert",
-      "type": "hexagon",
+      "type": "process",
       "text": "Write Code to Convert INK API Response to Expected Output",
       "color": "green",
       "parentId": "section-output-adapter",
@@ -287,12 +287,12 @@
         "height": 144
       },
       "style": {
-        "shape": "hexagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "tell-agent-output-incorrect",
-      "type": "hexagon",
+      "type": "process",
       "text": "Tell Agent Output Response is Incorrect",
       "color": "yellow",
       "parentId": "section-output-adapter",
@@ -303,12 +303,12 @@
         "height": 112
       },
       "style": {
-        "shape": "hexagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "process-ink-api-response",
-      "type": "hexagon",
+      "type": "process",
       "text": "Process INK API Response to Output Format",
       "color": "green",
       "parentId": "section-output-adapter",
@@ -319,12 +319,12 @@
         "height": 144
       },
       "style": {
-        "shape": "hexagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "go-to-next-case",
-      "type": "hexagon",
+      "type": "process",
       "text": "Go To Next Case",
       "color": "yellow",
       "parentId": "section-output-adapter",
@@ -335,7 +335,7 @@
         "height": 112
       },
       "style": {
-        "shape": "hexagon"
+        "shape": "rounded-rect"
       }
     },
     {
@@ -593,7 +593,6 @@
       "label": "What API needs to be called?",
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray"
     },
     {
@@ -608,7 +607,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -623,7 +621,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -638,7 +635,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -654,7 +650,6 @@
       "label": "No",
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "gray",
       "waypoints": [
         [
@@ -675,7 +670,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "gray",
       "waypoints": [
         [
@@ -697,7 +691,6 @@
       "label": "Yes",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "gray"
     },
     {
@@ -713,7 +706,6 @@
       "label": "No",
       "style": "dashed",
       "arrow": "forward",
-      "role": "decision",
       "color": "gray"
     },
     {
@@ -728,7 +720,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -744,7 +735,6 @@
       "label": "Yes",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "gray"
     },
     {
@@ -763,7 +753,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray"
     },
     {
@@ -778,7 +767,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray",
       "waypoints": [
         [
@@ -807,7 +795,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray",
       "waypoints": [
         [
@@ -832,7 +819,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -847,7 +833,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -862,7 +847,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -878,7 +862,6 @@
       "label": "No",
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "gray",
       "waypoints": [
         [
@@ -899,7 +882,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "gray",
       "waypoints": [
         [
@@ -921,7 +903,6 @@
       "label": "Yes",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "gray"
     },
     {
@@ -937,7 +918,6 @@
       "label": "No",
       "style": "dashed",
       "arrow": "forward",
-      "role": "decision",
       "color": "gray"
     },
     {
@@ -952,7 +932,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -968,7 +947,6 @@
       "label": "Yes",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "gray"
     },
     {
@@ -983,7 +961,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray",
       "waypoints": [
         [
@@ -1008,7 +985,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray",
       "waypoints": [
         [
@@ -1037,7 +1013,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray",
       "waypoints": [
         [
@@ -1070,7 +1045,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray",
       "waypoints": [
         [

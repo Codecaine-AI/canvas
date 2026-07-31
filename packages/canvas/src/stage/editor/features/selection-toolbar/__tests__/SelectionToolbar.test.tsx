@@ -543,7 +543,7 @@ describe("SelectionToolbar connector current-value icons", () => {
       "M5.5 9H15",
       "M3 9L7 6.5V11.5Z",
     ]);
-    expect(actionIconSvg(container, "color").querySelector("circle")?.getAttribute("fill")).toBe("#0D99FF");
+    expect(actionIconSvg(container, "color").querySelector("circle")?.getAttribute("fill")).toBe("#1A5CDF");
   });
 
   it("remounts the toolbar pill on selection identity changes but not position changes", () => {

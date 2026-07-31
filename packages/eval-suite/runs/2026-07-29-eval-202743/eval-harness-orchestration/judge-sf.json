@@ -1,0 +1,394 @@
+{
+  "axis": "sf",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 5,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system is an offline evaluation harness that executes scenario suites against an AI system and grades the results.",
+        "brief_evidence": "“how our offline evaluation harness executes scenario suites against an AI system and grades the results”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed purpose identifies “an evaluation-harness orchestration procedure” that executes scenarios against an isolated system, grades outputs, assembles a scorecard, and compares it with a baseline.",
+        "note": "The domain and overall purpose are accurately recovered."
+      },
+      {
+        "brief_element": "Each run starts from a pinned suite.",
+        "brief_evidence": "“Each run starts from a pinned suite”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The first reconstructed component is “Pinned suite,” and the “Pinned run preparation” flow begins with that component.",
+        "note": "The starting point and pinning concept are clear."
+      },
+      {
+        "brief_element": "The pinned suite contains frozen scenario definitions.",
+        "brief_evidence": "“a pinned suite containing frozen scenario definitions”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Immutable scenario versions” as being selected by the pinned suite and records the constraint that the run is pinned to immutable scenario versions.",
+        "note": "“Immutable scenario versions” faithfully communicates frozen definitions."
+      },
+      {
+        "brief_element": "The pinned suite contains a fingerprint of the tested revision, configuration, prompt versions, and rubric versions.",
+        "brief_evidence": "“a fingerprint of the tested revision, configuration, prompt versions, and rubric versions”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A “Run fingerprint” component is recovered and supplied to bounded execution, but no reconstruction entry identifies its constituent tested revision, configuration, prompt versions, or rubric versions.",
+        "note": "The fingerprint exists, but the compatibility-defining fields inside it are omitted."
+      },
+      {
+        "brief_element": "Scenario wording changes require new scenario versions rather than editing existing scenarios in place.",
+        "brief_evidence": "“Because wording changes invalidate historical comparisons, scenarios receive new versions instead of being edited in place.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction recovers “Immutable scenario versions” and a pinned-run constraint, but it does not state that wording changes invalidate comparisons or that a changed scenario must receive a new version.",
+        "note": "Immutability is communicated, but the explicit versioning rule and its comparison rationale are not."
+      },
+      {
+        "brief_element": "A scheduler fans scenario work out to a bounded pool of workers.",
+        "brief_evidence": "“A scheduler fans work out to a bounded pool of workers”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Bounded scheduler” sends a directed edge labeled “bounded fan-out” to the “Worker pool.”",
+        "note": "Scheduler ownership and bounded fan-out are explicit."
+      },
+      {
+        "brief_element": "Workers target an isolated instance of the system under test.",
+        "brief_evidence": "“targeting an isolated instance of the system under test”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The worker pool sends “scenario steps” to a server labeled “Isolated SUT,” and the reconstruction records isolation as an execution constraint.",
+        "note": "The isolated execution target is directly recoverable."
+      },
+      {
+        "brief_element": "Evaluation workers must never target the shared production instance.",
+        "brief_evidence": "“never the shared production instance”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The target is explicitly labeled “Isolated SUT,” but no reconstruction entry names the shared production instance or expresses an explicit prohibition against using it.",
+        "note": "Isolation strongly suggests the boundary, but the categorical production exclusion is not directly stated."
+      },
+      {
+        "brief_element": "Each worker performs a scenario's steps in order.",
+        "brief_evidence": "“Each worker performs a scenario's steps in order”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The worker pool sends an edge labeled “scenario steps” to the isolated SUT, but no reconstruction entry states or depicts within-scenario step ordering.",
+        "note": "Scenario execution is shown, but ordered execution is not recoverable."
+      },
+      {
+        "brief_element": "Each worker captures the full transcript.",
+        "brief_evidence": "“captures both the full transcript”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A component labeled “Transcript + artifact” receives a line from the worker area, but the reconstruction does not establish that the transcript is full rather than partial.",
+        "note": "Transcript capture is present; completeness is omitted."
+      },
+      {
+        "brief_element": "Each worker captures the final artifact.",
+        "brief_evidence": "“and final artifact”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The worker-pool area points to “Transcript + artifact,” which then supplies the completed-scenario grading flow.",
+        "note": "Artifact capture and downstream use are clear, although the adjacent edge's “retry” label creates avoidable ambiguity."
+      },
+      {
+        "brief_element": "Infrastructure failures trigger retries.",
+        "brief_evidence": "“Infrastructure failures trigger retries”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry connects “Infrastructure fault” to a retry route. The only visible “retry” discussed by the reconstruction points from the worker area into “Transcript + artifact,” and the reconstruction explicitly says it cannot determine what is retried or why.",
+        "note": "The required trigger-to-recovery relationship is not recoverable."
+      },
+      {
+        "brief_element": "Failures caused by the tested system's behavior are recorded.",
+        "brief_evidence": "“failures caused by the tested system's behavior are recorded”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A worker branch labeled “behavior failure” reaches “Product regression,” but no reconstruction entry shows that the failure is written into the scenario result or another record.",
+        "note": "The failure category is visible, but its required recording behavior is not."
+      },
+      {
+        "brief_element": "After recording a tested-system behavior failure, the worker continues.",
+        "brief_evidence": "“recorded before the worker continues”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry shows the worker continuing after the “Product regression” outcome or places recording before continuation.",
+        "note": "The non-terminal continuation semantics are absent."
+      },
+      {
+        "brief_element": "Results preserve the distinction between infrastructure failures and failures caused by tested-system behavior.",
+        "brief_evidence": "“Results preserve that distinction”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies separate “Infrastructure fault” and “Product regression” branches, but neither branch is visibly joined to a result record that preserves the classification.",
+        "note": "The categories are distinguished visually, but persistence of that distinction in results is not shown."
+      },
+      {
+        "brief_element": "Operational faults must not masquerade as product regressions.",
+        "brief_evidence": "“so operational faults cannot masquerade as product regressions”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Separate infrastructure-fault and behavior-failure/product-regression nodes communicate two categories, but the reconstruction contains no classification guard, result schema, or downstream handling that guarantees they remain separate.",
+        "note": "The intended conceptual distinction survives, but the operational guarantee does not."
+      },
+      {
+        "brief_element": "Completed scenarios enter grading immediately.",
+        "brief_evidence": "“Completed scenarios enter grading immediately.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“Transcript + artifact” sends a route labeled “completed scenario” directly to “Globally bounded graders,” but no reconstruction evidence expresses immediacy as a timing constraint.",
+        "note": "Direct handoff is shown; immediate scheduling is only implied."
+      },
+      {
+        "brief_element": "Independent graders score separate criteria.",
+        "brief_evidence": "“Independent graders score separate criteria”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies plural “Globally bounded graders” and an annotation “criterion verdicts,” but it explicitly notes that the graders' internal coordination cannot be determined.",
+        "note": "Multiple criterion grading is suggested, but independence and one-criterion separation are not explicit."
+      },
+      {
+        "brief_element": "The independent criterion graders operate concurrently.",
+        "brief_evidence": "“concurrently”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states or visibly establishes concurrent criterion grading.",
+        "note": "Plural graders do not by themselves communicate concurrency."
+      },
+      {
+        "brief_element": "Grading is subject to a global concurrency limit.",
+        "brief_evidence": "“under a global concurrency limit”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The grading component is explicitly labeled “Globally bounded graders,” and the reconstruction records that graders are globally bounded.",
+        "note": "The global bound is clear, even though its numeric value is intentionally unspecified."
+      },
+      {
+        "brief_element": "An artifact-only grader receives the artifact without the original request.",
+        "brief_evidence": "“an artifact-only grader receives no original request”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction recovers an “Artifact-only grader” that sends a “blind score,” but no edge explicitly shows its artifact input or excludes the original request.",
+        "note": "The role name communicates artifact-only grading, but the input boundary is not fully depicted."
+      },
+      {
+        "brief_element": "Withholding the original request prevents the artifact-only grader from anchoring on it.",
+        "brief_evidence": "“and therefore avoids anchoring on it”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The artifact-only grader's output is labeled “blind score,” but the reconstruction does not identify anchoring avoidance or connect that property specifically to withholding the request.",
+        "note": "Blindness is communicated at a high level; the stated rationale is omitted."
+      },
+      {
+        "brief_element": "Every verdict includes supporting evidence.",
+        "brief_evidence": "“Every verdict includes supporting evidence.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Verdicts are labeled “Evidence-backed verdicts” and must pass through an “Evidence required” guardrail before the “valid verdicts” route reaches assembly.",
+        "note": "The evidence requirement is one of the clearest transmitted behaviors."
+      },
+      {
+        "brief_element": "A verdict without evidence is invalid.",
+        "brief_evidence": "“A verdict without evidence is invalid”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Evidence required” guardrail receives “validate evidence,” and its failure route is labeled “invalid → retry.”",
+        "note": "Evidence absence is operationalized as invalidity."
+      },
+      {
+        "brief_element": "An invalid verdict is retried.",
+        "brief_evidence": "“is retried”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A dashed route labeled “invalid → retry” returns from the evidence guardrail toward “Globally bounded graders.”",
+        "note": "The retry loop is explicit and directed."
+      },
+      {
+        "brief_element": "If the retry also fails to supply evidence, the verdict is flagged.",
+        "brief_evidence": "“and is flagged if the retry also fails.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A route labeled “retry fails” reaches “Flag after retry,” but the failure-path reconstruction describes the outcome as “The run is flagged after retry,” rather than unambiguously flagging the verdict.",
+        "note": "The second-failure flag exists, but the ownership of the flag is ambiguous and is overstated as run-level in one reconstruction entry."
+      },
+      {
+        "brief_element": "An assembler merges valid verdicts into a scorecard.",
+        "brief_evidence": "“An assembler merges valid verdicts into a scorecard”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “valid verdicts” route enters “Merge valid verdicts,” which points to “Run scorecard.”",
+        "note": "Assembly inputs, operation, and output are all clear."
+      },
+      {
+        "brief_element": "The assembled scorecard is compared with a chosen baseline.",
+        "brief_evidence": "“and compares it with a chosen baseline”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Both “Run scorecard” and “Chosen baseline” feed the “Fingerprints match?” comparison decision.",
+        "note": "The two comparison inputs and compatibility gate are visible."
+      },
+      {
+        "brief_element": "The comparison narrates score movements that cross a defined threshold.",
+        "brief_evidence": "“narrating movements that cross a defined threshold”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A “Movement threshold” configuration sends a route labeled “narrate crossings” to “Threshold movements.”",
+        "note": "Threshold-based movement narration is explicitly represented."
+      },
+      {
+        "brief_element": "Comparison is permitted only when both runs share the same fingerprint.",
+        "brief_evidence": "“Comparison is permitted only when both runs share the same fingerprint.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The run scorecard and chosen baseline enter “Fingerprints match?” and only a “match” branch reaches threshold movements, but the reconstruction notes that no non-match outcome is drawn.",
+        "note": "The positive compatibility gate is clear; explicit rejection or termination for mismatch is absent."
+      },
+      {
+        "brief_element": "The harness retains every artifact.",
+        "brief_evidence": "“The harness retains every artifact”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "contradicted",
+        "reconstruction_evidence": "The archive “Artifacts, transcripts & verdicts” is reached only through “Threshold movements” on a “retain run” edge. Since only the fingerprint “match” branch reaches threshold movements and no mismatch branch exists, the reconstructed process does not retain every run's artifacts.",
+        "note": "Retention is incorrectly made dependent on successful compatible comparison rather than applying to every run."
+      },
+      {
+        "brief_element": "The harness retains every transcript.",
+        "brief_evidence": "“transcript” in “retains every artifact, transcript, and verdict”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "contradicted",
+        "reconstruction_evidence": "The retention archive names transcripts, but its only recovered incoming route comes after matched comparison and threshold movements.",
+        "note": "The retained data type is correct, but the universal retention boundary is contradicted by the depicted routing."
+      },
+      {
+        "brief_element": "The harness retains every verdict.",
+        "brief_evidence": "“and verdict” in “retains every artifact, transcript, and verdict”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "contradicted",
+        "reconstruction_evidence": "The archive explicitly includes verdicts, but the reconstructed retention flow is downstream of a successful fingerprint match rather than unconditional.",
+        "note": "The archive contents are right; the condition under which they are retained is wrong."
+      },
+      {
+        "brief_element": "Retention permits disputed scores to be re-examined.",
+        "brief_evidence": "“so disputed scores can be re-examined”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies dispute handling or re-examination of scores from retained evidence.",
+        "note": "The archive is present, but its audit and dispute-resolution purpose is omitted."
+      },
+      {
+        "brief_element": "Promoting a run makes that run the baseline.",
+        "brief_evidence": "“promoting a run makes it the baseline”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Promote run” sends an edge labeled “promote” to “Future baseline.”",
+        "note": "Promotion clearly changes the run's role to a baseline."
+      },
+      {
+        "brief_element": "A promoted run becomes the baseline for future compatible runs.",
+        "brief_evidence": "“for future compatible runs”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The promotion target is labeled “Future baseline,” and a separate fingerprint-match gate defines compatible comparison, but no visible feedback path connects the future baseline to subsequent compatible runs.",
+        "note": "Future-baseline status is clear; its reuse by later compatible runs is not explicitly connected."
+      },
+      {
+        "brief_element": "The primary end-to-end flow is a pinned run moving through bounded execution, evidence-backed grading, compatible baseline comparison, retention, and optional promotion.",
+        "brief_evidence": "“The diagram should make clear how a pinned run moves from bounded execution through evidence-backed grading and compatible baseline comparison” together with the preceding retention and promotion requirements.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction recovers an ordered path from “Pinned suite” through “Bounded scheduler,” “Worker pool,” “Transcript + artifact,” “Globally bounded graders,” evidence validation, “Merge valid verdicts,” “Run scorecard,” fingerprint comparison, retention, and “Future baseline.” However, the worker-to-artifact edge is ambiguously labeled “retry,” and retention is routed only after matched comparison.",
+        "note": "The overall architecture is recognizable end to end, but two important transitions are not implementation-safe."
+      },
+      {
+        "brief_element": "The operational story must keep infrastructure failures distinct from product regressions throughout execution and results.",
+        "brief_evidence": "“while keeping infrastructure failures distinct from product regressions”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Distinct “Infrastructure fault” and “Product regression” branches are recovered, but infrastructure retry, behavior-failure recording and continuation, and persistence of the distinction in results are absent.",
+        "note": "The categories are visually separated, but the required differentiated handling is incomplete."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "The run fingerprint is derived after the immutable scenario versions.",
+        "reconstruction_evidence": "The “Run fingerprint” responsibility says it is “derived after the immutable scenario versions,” and the pinned-run flow orders “Immutable scenario versions” before “Run fingerprint.”",
+        "why_unsupported": "The brief says the pinned suite contains both frozen scenarios and a fingerprint. It does not state that the fingerprint is derived from or temporally produced after the scenario versions."
+      },
+      {
+        "claim": "The worker-to-transcript-and-artifact route is a retry flow.",
+        "reconstruction_evidence": "The reconstructed “Execution artifact to grading” flow lists “Worker pool, retry, Transcript + artifact,” while the uncertainty list notes that the line is labeled “retry.”",
+        "why_unsupported": "The brief says workers capture transcripts and artifacts, while infrastructure failures trigger retries. It does not support treating normal artifact capture as the retry route, and the reconstruction cannot identify a retry trigger for this edge."
+      },
+      {
+        "claim": "A tested-system behavior failure necessarily has the terminal or categorical outcome “Product regression.”",
+        "reconstruction_evidence": "The failure path routes “behavior failure” to a lightning node labeled “Product regression” and calls that the outcome.",
+        "why_unsupported": "The brief requires behavior failures to be recorded and kept distinct from infrastructure faults; it does not state that each individual behavior failure is conclusively a product regression or terminal outcome."
+      },
+      {
+        "claim": "The entire run, rather than the invalid verdict, is flagged when the evidence retry fails.",
+        "reconstruction_evidence": "The retry-failure path gives the outcome “The run is flagged after retry.”",
+        "why_unsupported": "The brief grammatically and operationally applies invalidation, retry, and subsequent flagging to the verdict, not to the whole run."
+      },
+      {
+        "claim": "Promotion occurs only after retained materials are reviewed by a human.",
+        "reconstruction_evidence": "The constraints state, “Promotion occurs only after retained materials are reviewed by a human,” based on an archive-to-human “review” edge.",
+        "why_unsupported": "The brief states that promoting a run makes it the baseline, but it does not require human review or make retained-material review a precondition for promotion."
+      }
+    ],
+    "strongest_transmitted_behavior": "The evidence-backed grading path is transmitted most strongly: completed scenarios reach globally bounded graders, verdicts must include evidence, invalid verdicts loop to retry, a second failure is flagged, and only valid verdicts proceed to scorecard assembly.",
+    "most_consequential_loss": "Failure handling and retention semantics are not faithfully recoverable. Infrastructure faults have no trigger-to-retry route, behavior failures are not shown as recorded before continuation, and retention of every artifact, transcript, and verdict is contradicted by routing the archive only after a successful compatible comparison.",
+    "overall_summary": "The reconstruction clearly communicates the evaluation domain, major components, bounded execution, isolated SUT, evidence validation, scorecard assembly, fingerprint-gated comparison, threshold narration, and promotion. The primary architecture is recognizable, but it is not safe as an implementation plan: ordered scenario execution and concurrent independent criterion grading are under-specified; the fingerprint contents are omitted; the execution retry semantics are ambiguous; infrastructure and product failures lack their required differentiated recovery behavior; and universal retention is depicted as conditional on successful comparison. Because the board contradicts a system-defining retention boundary and leaves a critical failure/recovery path unrecoverable, the score is capped at 5.",
+    "score": 5
+  },
+  "usage": {
+    "input_tokens": 12544,
+    "output_tokens": 10593
+  },
+  "flags": []
+}

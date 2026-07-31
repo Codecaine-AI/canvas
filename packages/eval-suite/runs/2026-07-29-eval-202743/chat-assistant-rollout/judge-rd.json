@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at 6.5 because its spacious, clearly sectioned layout is readable with modest effort, but the complete absence of connecting edges makes the operational sequence and relationships harder to follow than the numbering alone can resolve.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 8,
+        "note": "Sections and most content blocks have generous surrounding air, though the narrow note in section 2 forces excessive line wrapping."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Eight outlined, titled regions make membership immediately clear, with only section 1 presenting multiple components without an explicit internal reading order."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 4,
+        "note": "Failure: no edges, arrowheads, or relationship labels connect the numbered regions or the components in section 1, so flow must be inferred from numbering and prose."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 8.5,
+        "note": "Ink density is low and decomposition is strong, with most regions containing a single spacious note and section 1 containing only three icons."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7436,
+    "output_tokens": 505
+  },
+  "flags": []
+}

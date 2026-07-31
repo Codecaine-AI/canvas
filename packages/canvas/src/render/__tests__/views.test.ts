@@ -82,7 +82,7 @@ function farEndpointDocument(): InteractiveCanvasDocument {
       {
         id: "far-icon",
         type: "icon",
-        icon: "bolt",
+        icon: "event",
         text: "Bolt",
         geometry: { x: 4000, y: 600, width: 120, height: 120 },
         style: { shape: "icon" },

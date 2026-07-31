@@ -1,0 +1,953 @@
+{
+  "axis": "rc",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 5,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "Source adapters pull knowledge from document stores, wikis, ticket systems, and code repositories.",
+        "brief_evidence": "“Source adapters pull from document stores, wikis, ticket systems, and code repositories”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 · Sources & arrivals",
+            "observation": "A Source adapters icon appears beside a visible note reading “Docs · wikis · tickets · code + ACLs.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[src-adapters], objects[src-note]",
+            "observation": "The visible objects are labeled “Source adapters” and “Docs · wikis · tickets · code + ACLs.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "Source adapters pull on schedules and change notifications.",
+        "brief_evidence": "“on schedules and change notifications”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 · Sources & arrivals",
+            "observation": "The arrival component is visibly labeled “Scheduled + changed arrivals” and follows Source adapters."
+          },
+          {
+            "source": "json",
+            "locator": "objects[src-arrivals], connections[e-src-arrive]",
+            "observation": "The source adapter connects forward to “Scheduled + changed arrivals” via the edge labeled “sync.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "An arrival may be either a first import or an update.",
+        "brief_evidence": "“An arrival may be a first import or an update”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 and the arrival-to-normalization path",
+            "observation": "The board shows scheduled and changed arrivals, but no visible distinction between first import and update."
+          },
+          {
+            "source": "json",
+            "locator": "Search of all object text and connection labels for “first,” “import,” and “update”",
+            "observation": "No visible object or edge label states the first-import/update alternatives."
+          }
+        ],
+        "note": "Changed arrivals are shown, but the explicit first-import case is missing."
+      },
+      {
+        "id": "R4",
+        "requirement": "Each source's access rules travel with the arriving content.",
+        "brief_evidence": "“each source's access rules travel with it”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Edge from Scheduled + changed arrivals to Extract + normalize",
+            "observation": "The forward edge is visibly labeled “content + ACLs.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-arrive-extract]",
+            "observation": "The arrival-to-extraction connection has label “content + ACLs” and a forward arrow."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "Extraction normalizes source formats.",
+        "brief_evidence": "“Extraction normalizes formats”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 · Normalize & version",
+            "observation": "The first process is visibly labeled “Extract + normalize.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[proc-extract]",
+            "observation": "A rendered process object has text “Extract + normalize.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "Extraction removes boilerplate.",
+        "brief_evidence": "“and removes boilerplate”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 · Normalize & version",
+            "observation": "Extraction is labeled only “Extract + normalize”; no boilerplate-removal note or step is visible."
+          },
+          {
+            "source": "json",
+            "locator": "Search of all object text and connection labels for “boilerplate” or equivalent removal language",
+            "observation": "No rendered label represents boilerplate removal."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "Unparseable documents enter quarantine with failure context.",
+        "brief_evidence": "“Unparseable documents enter quarantine with failure context”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed red path from Extract + normalize to Parse quarantine",
+            "observation": "The failure edge is visibly labeled “unparseable + context” and terminates at “Parse quarantine.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-extract-quarantine], objects[fail-quarantine]",
+            "observation": "A dashed forward edge labeled “unparseable + context” connects extraction to “Parse quarantine.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "The rest of a batch continues when an unparseable document is quarantined.",
+        "brief_evidence": "“while the rest of the batch continues”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Extraction success and quarantine branches",
+            "observation": "The board shows a quarantine branch and a normal path, but no visible label states that the remainder of the same batch continues."
+          },
+          {
+            "source": "json",
+            "locator": "Search of failure-path labels and notes for “rest,” “continue,” or batch-continuation semantics",
+            "observation": "No rendered object or connection records continuation of the unaffected batch."
+          }
+        ],
+        "note": "A normal path coexists with quarantine, but the stated per-batch continuation guarantee is not explicit."
+      },
+      {
+        "id": "R9",
+        "requirement": "A content hash classifies every document as new, changed, or unchanged.",
+        "brief_evidence": "“A content hash classifies each document as new, changed, or unchanged.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 decision after Extract + normalize",
+            "observation": "A decision labeled “Content changed?” is visible, but neither content hashing nor the three new/changed/unchanged outcomes are shown."
+          },
+          {
+            "source": "json",
+            "locator": "objects[proc-hash] and its incident connections",
+            "observation": "The decision object is “Content changed?” and has only one outgoing edge labeled “process.”"
+          }
+        ],
+        "note": "Change detection is recognizable, but the hash mechanism and complete three-way classification are missing."
+      },
+      {
+        "id": "R10",
+        "requirement": "Unchanged content bypasses expensive processing.",
+        "brief_evidence": "“Unchanged content bypasses expensive processing.”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Content changed? decision and outgoing paths",
+            "observation": "Only a “process” path toward chunking is visible; there is no unchanged/bypass branch."
+          },
+          {
+            "source": "json",
+            "locator": "Connections from objects[proc-hash]",
+            "observation": "The only outgoing connection is e-hash-chunk; no edge is labeled unchanged, bypass, or skip."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "A changed document supersedes its previous version.",
+        "brief_evidence": "“A changed document supersedes its previous version”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Normalize/version and publication sections",
+            "observation": "No visible previous-version or supersession step appears."
+          },
+          {
+            "source": "json",
+            "locator": "Search of all rendered text and connections for “supersede” or “previous version”",
+            "observation": "No matching visual representation exists."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "Stale derived records belonging to a superseded version are deleted.",
+        "brief_evidence": "“whose stale derived records are deleted”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Normalize/version and publication sections",
+            "observation": "No deletion path, stale-record label, or cleanup component is visible."
+          },
+          {
+            "source": "json",
+            "locator": "Search of objects and connections for “stale,” “delete,” or cleanup semantics",
+            "observation": "No rendered structure represents stale-derived-record deletion."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "The chunker splits normalized content into fragments.",
+        "brief_evidence": "“The chunker splits normalized content”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 · Chunk & embed",
+            "observation": "The normal processing path enters a visible “Chunk + preserve metadata” process before embedding."
+          },
+          {
+            "source": "json",
+            "locator": "objects[enrich-chunk], connections[e-hash-chunk]",
+            "observation": "A forward “process” edge enters the rendered chunking process."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Chunking uses overlap.",
+        "brief_evidence": "“with overlap”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Chunk + preserve metadata process",
+            "observation": "The chunking label does not mention overlap, and no overlap note is visible."
+          },
+          {
+            "source": "json",
+            "locator": "Search of rendered object and edge text for “overlap”",
+            "observation": "No overlap representation exists."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "Every fragment preserves headings.",
+        "brief_evidence": "“preserves headings ... on every fragment”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Chunk + preserve metadata process",
+            "observation": "The process says “preserve metadata,” but headings are not named."
+          },
+          {
+            "source": "json",
+            "locator": "objects[enrich-chunk]",
+            "observation": "The visible text is generic and does not enumerate headings."
+          }
+        ],
+        "note": "Generic metadata preservation is recognizable but does not establish that headings are retained on every fragment."
+      },
+      {
+        "id": "R16",
+        "requirement": "Every fragment preserves source identity.",
+        "brief_evidence": "“preserves ... source identity ... on every fragment”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Chunk + preserve metadata process",
+            "observation": "Generic metadata preservation is shown, but source identity is not named."
+          },
+          {
+            "source": "json",
+            "locator": "objects[enrich-chunk]",
+            "observation": "The rendered object states only “Chunk + preserve metadata.”"
+          }
+        ],
+        "note": "The specific source-identity field and every-fragment scope are not explicit."
+      },
+      {
+        "id": "R17",
+        "requirement": "Every fragment preserves permissions.",
+        "brief_evidence": "“preserves ... permissions ... on every fragment”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Arrival edge and chunking process",
+            "observation": "ACLs visibly arrive with content and chunking preserves generic metadata, but no label states that ACLs are copied to every fragment."
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-arrive-extract], objects[enrich-chunk]",
+            "observation": "The board combines “content + ACLs” with “preserve metadata,” without an explicit per-fragment permissions statement."
+          }
+        ],
+        "note": "Permission propagation is suggested but the required every-fragment guarantee is not explicit."
+      },
+      {
+        "id": "R18",
+        "requirement": "Every fragment carries a version stamp.",
+        "brief_evidence": "“and a version stamp on every fragment”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Chunking and version-consistent publication sections",
+            "observation": "The board refers to metadata and version-consistent publication, but no version-stamp field on every fragment is visible."
+          },
+          {
+            "source": "json",
+            "locator": "objects[enrich-chunk], objects[sec-publish]",
+            "observation": "Visible labels imply metadata and versions generally but do not state per-fragment version stamps."
+          }
+        ],
+        "note": "Version awareness is present, but the fragment-level stamp requirement is only implied."
+      },
+      {
+        "id": "R19",
+        "requirement": "The embedding service accepts rate-limited batches.",
+        "brief_evidence": "“The embedding service accepts rate-limited batches.”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 · Chunk & embed",
+            "observation": "The embedding component is labeled “Rate-limited embedding,” and its incoming edge is labeled “batches.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[enrich-embed], connections[e-chunk-embed]",
+            "observation": "The rendered object and incoming forward edge together state rate-limited batch embedding."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Workers retry transient embedding failures.",
+        "brief_evidence": "“Workers retry transient failures”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed orange path from embedding to Failure handling",
+            "observation": "A “transient failure” edge enters “Retry transient failures.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-embed-retry], objects[fail-retry]",
+            "observation": "The dashed forward failure path explicitly represents transient retry behavior."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Persistently failing embedding batches are sent to a dead-letter store.",
+        "brief_evidence": "“then send persistently failing batches to a dead-letter store”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Failure handling section",
+            "observation": "A path labeled “persistent · inputs + attempts” runs from retry processing to “Dead-letter batches.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-retry-dlq], objects[fail-dlq]",
+            "observation": "A dashed forward edge links retry to the dead-letter batch store."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "The dead-letter store retains failed inputs and attempt history.",
+        "brief_evidence": "“with inputs and attempt history”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Edge entering Dead-letter batches",
+            "observation": "The edge is visibly labeled “persistent · inputs + attempts.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-retry-dlq]",
+            "observation": "The rendered edge label explicitly records inputs and attempts."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "Dead-lettered batches can be reprocessed.",
+        "brief_evidence": "“for reprocessing”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dead-letter batches and surrounding failure paths",
+            "observation": "The dead-letter store has no visible outbound reprocessing or replay path."
+          },
+          {
+            "source": "json",
+            "locator": "Connections incident to objects[fail-dlq] and search for “reprocess” or “replay”",
+            "observation": "No outgoing connection or rendered text represents reprocessing."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "Each completed version writes vectors to a vector index.",
+        "brief_evidence": "“Each completed version writes vectors to a vector index”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Embedding-to-publication path",
+            "observation": "A forward edge labeled “vectors” runs from rate-limited embedding to “Vector index” inside the version-consistent publish section."
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-embed-vector], objects[pub-vector]",
+            "observation": "The vector-write relationship is explicit and directed."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "Each completed version writes fragment text and metadata to a document store.",
+        "brief_evidence": "“fragment text and metadata to a document store”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 · Version-consistent publish",
+            "observation": "A document icon labeled “Fragments + metadata” is visible, but it has no incoming write edge and is not explicitly called a document store."
+          },
+          {
+            "source": "json",
+            "locator": "objects[pub-doc] and connections list",
+            "observation": "The publication object exists, but no connection terminates at pub-doc."
+          }
+        ],
+        "note": "The target content is represented, but the completed-version write relationship and explicit store role are incomplete."
+      },
+      {
+        "id": "R26",
+        "requirement": "Each completed version writes terms to a keyword index.",
+        "brief_evidence": "“and terms to a keyword index”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 · Version-consistent publish",
+            "observation": "A “Keyword index” component is visible, but no incoming edge labeled terms or write connects to it."
+          },
+          {
+            "source": "json",
+            "locator": "objects[pub-keyword] and connections list",
+            "observation": "The keyword index exists as a rendered object but has no publication connection."
+          }
+        ],
+        "note": "The component is present, but the required terms-write relationship is not shown."
+      },
+      {
+        "id": "R27",
+        "requirement": "Publication succeeds only when the vector index, document store, and keyword index all reflect the same version.",
+        "brief_evidence": "“Publication succeeds only when all three reflect the same version”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 and its edge to retrieval",
+            "observation": "The section is titled “Version-consistent publish,” contains all three stores, and serves retrieval through “consistent version only,” but no gate visibly checks all three stores."
+          },
+          {
+            "source": "json",
+            "locator": "objects[sec-publish], connections[e-publish-query]",
+            "observation": "Visible labels express version consistency, while the individual store-write/check relationships are incomplete."
+          }
+        ],
+        "note": "Same-version publication is communicated at section level, but the all-three success condition is not fully encoded."
+      },
+      {
+        "id": "R28",
+        "requirement": "Partial writes remain unavailable to serving.",
+        "brief_evidence": "“partial writes remain unavailable”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Edge from Version-consistent publish to Permission-aware retrieval",
+            "observation": "The only publication-to-serving edge is visibly labeled “consistent version only.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-publish-query]",
+            "observation": "A forward serving edge explicitly restricts retrieval to a consistent version."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "Partial writes are repaired or rolled back before serving.",
+        "brief_evidence": "“and are repaired or rolled back before serving”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Publication and failure-handling sections",
+            "observation": "No partial-publication repair or rollback path is visible; the only rollback label concerns prior index generations."
+          },
+          {
+            "source": "json",
+            "locator": "Search of publication-related objects and connections for repair/rollback",
+            "observation": "No rendered publication repair or rollback structure exists."
+          }
+        ],
+        "note": "Generation rollback elsewhere does not represent repair or rollback of partial three-store writes."
+      },
+      {
+        "id": "R30",
+        "requirement": "The retrieval service rewrites a user question into one or more searches.",
+        "brief_evidence": "“rewrites it into one or more searches”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5 · Permission-aware retrieval",
+            "observation": "User question flows to “Rewrite searches,” then onward through an edge labeled “parallel searches.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[qry-question], objects[qry-rewrite], connections[e-question-rewrite], connections[e-rewrite-fuse]",
+            "observation": "The directed query-rewrite-search sequence is explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "Retrieval runs vector and keyword lookups in parallel.",
+        "brief_evidence": "“runs vector and keyword lookups in parallel”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Publication stores and Section 5 retrieval flow",
+            "observation": "Vector and keyword indices are visible upstream, while the search edge is labeled “parallel searches” and the retrieval process begins “Hybrid lookup.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[pub-vector], objects[pub-keyword], objects[qry-fuse], connections[e-rewrite-fuse], connections[e-publish-query]",
+            "observation": "The combined visible encoding identifies hybrid parallel search over the published indices."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "Retrieval fuses and reranks the lookup candidates.",
+        "brief_evidence": "“fuses and reranks candidates”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Retrieval process in Section 5",
+            "observation": "The process is visibly labeled “Hybrid lookup · fuse · rerank · ACL.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[qry-fuse]",
+            "observation": "The rendered process explicitly names fuse and rerank."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R33",
+        "requirement": "The asking user's permissions are applied before context reaches generation.",
+        "brief_evidence": "“applies the asking user's permissions before context reaches the generation service”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Retrieval-to-answer path",
+            "observation": "ACL is the final named operation in the retrieval process, which then sends “ranked evidence” to the grounded-evidence decision before generation."
+          },
+          {
+            "source": "json",
+            "locator": "objects[qry-fuse], connections[e-fuse-confidence], objects[ans-grounded]",
+            "observation": "The directed ordering places ACL processing before evidence reaches the generation output."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "Generation answers only from retrieved evidence.",
+        "brief_evidence": "“Generation answers only from retrieved evidence”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 · Grounded answer",
+            "observation": "“Ranked evidence” enters “Enough grounded evidence?” and only the yes branch reaches “Grounded answer + citations.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-fuse-confidence], objects[ans-confidence], connections[e-confidence-answer]",
+            "observation": "The explicit directed gate requires grounded evidence before the answer component."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "Generation returns citations.",
+        "brief_evidence": "“and returns citations”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Grounded answer output",
+            "observation": "The generation icon is visibly labeled “Grounded answer + citations.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[ans-grounded]",
+            "observation": "The rendered answer object explicitly includes citations."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "If context is thin or every reranker score is low, the system says it does not know.",
+        "brief_evidence": "“If context is thin or every reranker score is low, it says it does not know.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Grounded-answer decision and lower-right branch",
+            "observation": "A decision asks “Enough grounded evidence?” and its unlabeled alternate branch reaches “Say ‘I don’t know’.” The specific thin-context and all-low-score conditions are not named."
+          },
+          {
+            "source": "json",
+            "locator": "objects[ans-confidence], connections[e-confidence-idk], objects[ans-idk]",
+            "observation": "The fallback destination is explicit, but e-confidence-idk has no visible condition label."
+          }
+        ],
+        "note": "Low-evidence fallback is represented, but the two stated trigger conditions and the no-branch label are incomplete."
+      },
+      {
+        "id": "R37",
+        "requirement": "Feedback records thumb signals.",
+        "brief_evidence": "“Feedback records thumb signals”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 · Feedback & coverage",
+            "observation": "The feedback component is labeled “Thumbs + citation utility.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[fb-signals]",
+            "observation": "The rendered feedback object explicitly includes thumbs."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R38",
+        "requirement": "Feedback records the usefulness of cited fragments.",
+        "brief_evidence": "“the usefulness of cited fragments”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 · Feedback & coverage",
+            "observation": "The feedback component explicitly says “citation utility.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[fb-signals]",
+            "observation": "The visible object text represents usefulness of citations."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R39",
+        "requirement": "Feedback records unanswered questions.",
+        "brief_evidence": "“and unanswered questions”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Feedback section and I-don't-know branch",
+            "observation": "No visible edge connects unanswered or I-don't-know questions to feedback, and the feedback label omits unanswered questions."
+          },
+          {
+            "source": "json",
+            "locator": "Connections from objects[ans-idk] and search for “unanswered”",
+            "observation": "ans-idk has no outgoing feedback connection, and no rendered text mentions unanswered questions."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R40",
+        "requirement": "Coverage gaps resulting from feedback return to ingestion priorities.",
+        "brief_evidence": "“the resulting coverage gaps return to ingestion priorities”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Purple dashed feedback loop",
+            "observation": "Feedback flows to “Coverage gaps,” then a dashed arrow labeled “prioritize ingestion” returns to Sources & arrivals."
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-feedback-gaps], connections[e-gaps-priority]",
+            "observation": "Directed feedback-to-gap and gap-to-ingestion-priority relationships are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R41",
+        "requirement": "An embedding-model change triggers a rebuild coordinator.",
+        "brief_evidence": "“When the embedding model changes, a rebuild coordinator”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 9 · Embedding-model rebuild",
+            "observation": "“Embedding model change” connects through a forward edge labeled “trigger” to “Rebuild coordinator.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[reb-model-change], connections[e-rebuild-start], objects[reb-coordinator]",
+            "observation": "The trigger relationship is explicit and directed."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R42",
+        "requirement": "The coordinator re-embeds the corpus in the background into a new index generation.",
+        "brief_evidence": "“re-embeds the corpus in the background into a new index generation”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Embedding-model rebuild lane",
+            "observation": "The coordinator flows through “Re-embed full corpus” to “New index generation,” but no label says the rebuild is in the background."
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-rebuild-corpus], objects[reb-corpus], connections[e-rebuild-new], objects[reb-new-gen]",
+            "observation": "Full-corpus re-embedding into a new generation is explicit; background execution is not rendered."
+          }
+        ],
+        "note": "The rebuild target and corpus scope are covered, but the background operational qualifier is missing."
+      },
+      {
+        "id": "R43",
+        "requirement": "Live queries remain on the current generation until the rebuild is complete and consistent.",
+        "brief_evidence": "“Live queries remain on the current generation until the rebuild is complete and consistent.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 9 and 10",
+            "observation": "A “Current generation” component is visible and the new generation reaches promotion only through “complete + consistent,” but no live-query connection targets the current generation."
+          },
+          {
+            "source": "json",
+            "locator": "objects[gen-current], connections[e-new-promote], connections incident to gen-current",
+            "observation": "The completeness condition is rendered, while gen-current has no serving/query connection."
+          }
+        ],
+        "note": "The promotion gate and current-generation concept are present, but continued live-query routing is not established."
+      },
+      {
+        "id": "R44",
+        "requirement": "Switchover atomically promotes the new generation.",
+        "brief_evidence": "“Switchover atomically promotes the new generation”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 10 · Atomic generation switchover",
+            "observation": "The new index generation connects forward to a process labeled “Atomic promote” through a “complete + consistent” edge."
+          },
+          {
+            "source": "json",
+            "locator": "connections[e-new-promote], objects[gen-promote]",
+            "observation": "The directed connection and rendered process explicitly communicate atomic promotion."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R45",
+        "requirement": "The prior generation remains available for rollback.",
+        "brief_evidence": "“while the prior generation remains available for rollback”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 10 · Atomic generation switchover",
+            "observation": "A retained archive-style component is visibly labeled “Prior generation · rollback.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[gen-prior]",
+            "observation": "The rendered object unambiguously names both the prior generation and rollback purpose."
+          }
+        ],
+        "note": "A note or labeled component can fully represent the availability-for-rollback requirement even without a dedicated edge."
+      }
+    ],
+    "coverage_fraction": 0.6753,
+    "caps_applied": [
+      {
+        "cap": 6,
+        "requirement_id": "R8",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R10",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R11",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R12",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R29",
+        "reason": "system-defining requirement is absent"
+      }
+    ],
+    "strongest_covered_cluster": "The permission-aware query and grounded-answer cluster is strongest: question rewriting, parallel hybrid retrieval, fusion, reranking, ACL application, evidence gating, citations, and the I-don't-know fallback are all present, with only the exact low-confidence trigger qualifiers incomplete.",
+    "most_consequential_gap": "Version lifecycle and publication recovery are the largest gap: unchanged bypass, changed-version supersession, stale-derived-record deletion, and repair or rollback of partial three-store writes are absent, while the all-three same-version publication contract is only partial.",
+    "coverage_summary": "The board clearly covers the end-to-end architecture, source/ACL arrival, normalization, chunking and embedding, major failure stores, permission-aware retrieval, grounded answers, feedback prioritization, and atomic index-generation rebuilding. However, several system-defining version and recovery semantics are missing, and multiple detailed qualifiers are only implied. Weighted coverage is 52.0 of 77.0, or 0.6753; this maps to RC 5, and the absent system-defining requirements also impose a maximum of 6.",
+    "score": 5
+  },
+  "usage": {
+    "input_tokens": 14743,
+    "output_tokens": 10066
+  },
+  "flags": []
+}

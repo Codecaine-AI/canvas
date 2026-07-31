@@ -6,7 +6,7 @@
   "blocks": {
     "b-flog-root": {
       "id": "b-flog-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "covers": "Transient dogfood log for the 2026-07-10 docs-content session: every friction point found while authoring, tagged with its lane (1 = docs content, 2 = docs-system, 3 = canvas code) and its resolution. Deliverable back to the docs-system project; retired when the session lands.",
         "format": "mdx",
@@ -52,7 +52,7 @@
     },
     "b-flog-title-1": {
       "id": "b-flog-title-1",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -65,7 +65,7 @@
     },
     "b-flog-intro-2": {
       "id": "b-flog-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -76,7 +76,7 @@
     },
     "b-flog-f0-h": {
       "id": "b-flog-f0-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -89,7 +89,7 @@
     },
     "b-flog-f0-p": {
       "id": "b-flog-f0-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -100,7 +100,7 @@
     },
     "b-flog-f1-h": {
       "id": "b-flog-f1-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -113,7 +113,7 @@
     },
     "b-flog-f1-p": {
       "id": "b-flog-f1-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -124,7 +124,7 @@
     },
     "b-flog-f2-h": {
       "id": "b-flog-f2-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -137,7 +137,7 @@
     },
     "b-flog-f2-p": {
       "id": "b-flog-f2-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -148,7 +148,7 @@
     },
     "b-flog-f3-h": {
       "id": "b-flog-f3-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -161,7 +161,7 @@
     },
     "b-flog-f3-p": {
       "id": "b-flog-f3-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -172,7 +172,7 @@
     },
     "b-flog-f4-h": {
       "id": "b-flog-f4-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -185,7 +185,7 @@
     },
     "b-flog-f4-p": {
       "id": "b-flog-f4-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -196,7 +196,7 @@
     },
     "b-flog-f5-h": {
       "id": "b-flog-f5-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -209,7 +209,7 @@
     },
     "b-flog-f5-p": {
       "id": "b-flog-f5-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -220,7 +220,7 @@
     },
     "b-flog-f6-h": {
       "id": "b-flog-f6-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -233,7 +233,7 @@
     },
     "b-flog-f6-p": {
       "id": "b-flog-f6-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -244,7 +244,7 @@
     },
     "b-flog-f7-h": {
       "id": "b-flog-f7-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -257,7 +257,7 @@
     },
     "b-flog-f7-p": {
       "id": "b-flog-f7-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -268,7 +268,7 @@
     },
     "b-flog-f8-h": {
       "id": "b-flog-f8-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -281,7 +281,7 @@
     },
     "b-flog-f8-p": {
       "id": "b-flog-f8-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -292,7 +292,7 @@
     },
     "b-flog-f9-h": {
       "id": "b-flog-f9-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -305,7 +305,7 @@
     },
     "b-flog-f9-p": {
       "id": "b-flog-f9-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -316,7 +316,7 @@
     },
     "b-flog-f10-h": {
       "id": "b-flog-f10-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -329,7 +329,7 @@
     },
     "b-flog-f10-p": {
       "id": "b-flog-f10-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -340,7 +340,7 @@
     },
     "b-flog-f11-h": {
       "id": "b-flog-f11-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -353,7 +353,7 @@
     },
     "b-flog-f11-p": {
       "id": "b-flog-f11-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -364,7 +364,7 @@
     },
     "b-flog-f12-h": {
       "id": "b-flog-f12-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -377,7 +377,7 @@
     },
     "b-flog-f12-p": {
       "id": "b-flog-f12-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -388,7 +388,7 @@
     },
     "b-flog-f13-h": {
       "id": "b-flog-f13-h",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -401,7 +401,7 @@
     },
     "b-flog-f13-p": {
       "id": "b-flog-f13-p",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {

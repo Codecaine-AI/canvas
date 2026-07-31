@@ -1,0 +1,181 @@
+{
+  "axis": "ph",
+  "scenario": "agent-session-orchestration",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: 89 total tool calls produced zero ERROR results, zero rejected calls, and no retries. All operations either applied successfully or returned successful LOOK/finalize results. There were no parse, schema-validation, or repeated error-class fights.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 38,
+          "transcript_excerpt": "APPLIED · place_shape rehydrate predefined-process 1720,860 280×100 ... + E1 containment",
+          "finding": "The operation applied with a lint error; this was not a failed call."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 39,
+          "transcript_excerpt": "APPLIED · move_to rehydrate → (1660, 860) ... − E1 containment (resolved)",
+          "finding": "The sole lint error was corrected on the next call without any tool failure."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 88,
+          "transcript_excerpt": "Committed: Built a nine-part long-lived agent-session orchestration map ... (46 patch operations).",
+          "finding": "Finalize succeeded on the first attempt; the session reached a committed outcome without retry."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Two explicit framed page-level renders were used during QA. The first render at turn 85 exposed the stale page-frame text; the agent adjusted it at turn 86 and verified the result with another render at turn 87, yielding one clear render-adjust-render loop. However, the large nine-section board was built almost entirely without regional close-ups, so dense/detail work was not accompanied by framed looks during construction.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... page-frame section \"2026-07-29-eval-202743 · agent-session-orchestration\"",
+          "finding": "The first QA render showed that the outer page-frame heading still used the generated scenario name despite the board title having been changed."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "transcript_excerpt": "APPLIED · update_text page-frame ... → \"Long-lived Agent Session Orchestration\"",
+          "finding": "The agent made a targeted adjustment based on the immediately preceding render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 87,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... page-frame section \"Long-lived Agent Session Orchestration\" ... DIAGNOSTICS · clean",
+          "finding": "The second QA render verified the adjustment and a clean diagnostic state."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint handling was disciplined. One E1 containment error and several W1 crowding, unreadable-label, and covered-content warnings appeared under APPLIED operations; every one was resolved through movement or label-position changes. No lint class re-fired for more than three consecutive turns without a strategy change, and no warning remained open at commit. Therefore there were no warning overrides requiring a verbatim summary reason.",
+      "lint_error_count": 1,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 38,
+          "transcript_excerpt": "+ E1 containment: rehydrate extends 20px outside its section recovery",
+          "finding": "A containment error was introduced by an applied placement."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 39,
+          "transcript_excerpt": "− E1 containment (resolved)",
+          "finding": "The containment error was fixed immediately on the following turn."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 45,
+          "transcript_excerpt": "+ W1 crowding: stop-stream and uncertain-checkpoint sit 60px apart",
+          "finding": "The warning remained open only while the new object's text was added, then was resolved by moving the object at turn 47."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 81,
+          "transcript_excerpt": "− W1 unreadable-labels (resolved)",
+          "finding": "The model-to-stream label warning was resolved after two purposeful label-position adjustments, not fought repeatedly."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 87,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA confirmed that no lint errors or warnings were silently overridden."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary accurately describes the nine added sections and their represented topics. The stage diff contains sections for admission, execution, streaming, durability, recovery, interruption, child sessions, quotas, and retention, matching the summary's enumerated coverage. The wording says the map covers these subjects rather than claiming every interaction is fully connected, so it is not materially inflated. No defect seen by the agent remained undeclared at commit; final diagnostics were clean.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 88,
+          "line": "Built a nine-part long-lived agent-session orchestration map covering admission, execution and streaming, durable checkpoints, recovery, interruption, child sessions, quotas, and fork retention.",
+          "assessment": "Honest and supported by the diff: nine named sections and corresponding objects were added for all listed areas."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 87,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 46 ops ... addSection admission ... addSection retention ... DIAGNOSTICS · clean",
+          "finding": "The final diff and render substantiate the summary's nine-part construction claim and show no open diagnostic defect."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 88,
+          "transcript_excerpt": "Built a nine-part long-lived agent-session orchestration map covering admission, execution and streaming, durable checkpoints, recovery, interruption, child sessions, quotas, and fork retention.",
+          "finding": "The commit message does not claim unsupported removals, rebalancing, or complete implementation of every requested edge."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session used 46 committed patch operations over 572.5 seconds (9.54 minutes), comfortably within the 15-minute and 300-turn budgets. The workflow was somewhat granular—many shapes were placed and then labeled in separate calls—but remained proportionate to a large nine-section systems map. Movement and label changes responded to active lint or QA findings; there were no add-delete-rebuild cycles, repeated NO-OPs, or other operation thrash.",
+      "operation_count": 46,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 9.54,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 47,
+          "transcript_excerpt": "APPLIED · move_to uncertain-checkpoint → (2800, 860) ... − W1 crowding (resolved)",
+          "finding": "The move was a direct lint correction rather than arbitrary repositioning or rebuild thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 83,
+          "transcript_excerpt": "APPLIED · move_label e-live-client → along 0.5, offset 40 ... − W1 covered-content (resolved)",
+          "finding": "The adjustment was targeted and closed the warning immediately."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 88,
+          "transcript_excerpt": "Committed ... (46 patch operations).",
+          "finding": "The agent finalized successfully well before either the wall-time or turn budget was exhausted."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure, stuck ACTIVE session, container collision, proxy death, or harness termination was declared or visible. The only session committed normally and is fully included in scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 88,
+          "transcript_excerpt": "Committed: Built a nine-part long-lived agent-session orchestration map ...",
+          "finding": "Normal successful finalization confirms there is no session to exclude as INVALID(infra)."
+        }
+      ]
+    },
+    "score": 8.5
+  },
+  "usage": {
+    "input_tokens": 33398,
+    "output_tokens": 2429
+  },
+  "flags": []
+}

@@ -29,11 +29,17 @@ const REPO_ROOT = resolve(VIEWER_DIR, "../../../..");
  */
 const AGENT_KERNEL_DIR = resolve(REPO_ROOT, "../agent-kernel");
 const PROMPT_KIT_DIR = resolve(REPO_ROOT, "../prompt-kit");
+// prompt-kit's annotation UX comes from @codecaine-ai/annotations, another
+// sibling source checkout (linked through prompt-kit's node_modules). It
+// needs the same treatment — a prebundled linked dep is served from a stale
+// cache and never hot-reloads.
+const ANNOTATIONS_DIR = resolve(REPO_ROOT, "../annotations");
 const LINKED_AGENT_KERNEL_PACKAGES = [
   "@agent-kernel/viewer-core",
   "@agent-kernel/viewer-ui",
   "@agent-kernel/viewer-shell",
   "@codecaine-ai/prompt-kit",
+  "@codecaine-ai/annotations",
 ];
 
 const HARNESS_TARGET = "http://127.0.0.1:4820";
@@ -56,7 +62,7 @@ export default defineConfig({
     port: 4830,
     strictPort: true,
     fs: {
-      allow: [REPO_ROOT, AGENT_KERNEL_DIR, PROMPT_KIT_DIR],
+      allow: [REPO_ROOT, AGENT_KERNEL_DIR, PROMPT_KIT_DIR, ANNOTATIONS_DIR],
     },
     proxy: {
       "/api": {

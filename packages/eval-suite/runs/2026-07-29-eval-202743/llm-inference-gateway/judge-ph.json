@@ -1,0 +1,187 @@
+{
+  "axis": "ph",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean on call validity: 114 tool calls produced zero ERROR results, no rejected resolve/finalize calls, no failed-call runs, and no repeated schema or validation error class. The single NO-OP at turn 100 is not a failure. Session metadata reports zero retries.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 100,
+          "transcript_excerpt": "NO-OP · change_color spend — the board already matches this, so nothing changed.",
+          "finding": "Legal NO-OP, excluded from failed-call counts; it was not repeated."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 113,
+          "transcript_excerpt": "Committed: Built the inference-gateway diagram covering admission deadlines, policy-aware caching and routing, protected capacity, pre-stream fallback, streaming failure semantics, and accounting/shadow-eval flows.",
+          "finding": "Finalize succeeded on the first attempt; there were no rejected calls."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Only one explicit framed look occurred, at the end of the build. It was a useful QA frame over five dense routing-related IDs and reported clean diagnostics, but it was followed immediately by finalize, so there was no edit → framed render → adjustment → framed recheck loop. Dense routing work during turns 69–111 was handled from lint and route text rather than interleaved close-up renders.",
+      "render_count": 1,
+      "adjustment_round_count": 0,
+      "render_adjust_render_loop_count": 0,
+      "single_render_session_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 112,
+          "transcript_excerpt": "LOOK · 1 render · framed 5 ids ... DIAGNOSTICS · clean",
+          "finding": "The sole framed render was a targeted QA look at sec_prepare, sec_route, sec_capacity, e_breaker_router, and e_cache_hit_stream."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 113,
+          "transcript_excerpt": "finalize ... outcome: \"committed\"",
+          "finding": "The agent finalized immediately after the only look, with no render-driven adjustment or second render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 101,
+          "transcript_excerpt": "LINTS · +4 −0 ... label \"health · latency · queue · probes\" ...",
+          "finding": "A dense multi-edge region began an extended adjustment sequence without a framed close-up during the work itself."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "All emitted lint errors and warnings were ultimately cleared; the final look reported “DIAGNOSTICS · clean,” so there was no warning override to justify in the summary. Most lint was fixed promptly. However, the breaker-to-router label produced a genuine lint fight: turns 101–111 repeatedly moved or shortened the same label while covered-content lint re-fired for more than three consecutive adjustment turns, without changing the route strategy.",
+      "lint_error_count": 28,
+      "lint_fight_count": 1,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 38,
+          "transcript_excerpt": "LINTS · +1 −0\n  + E1 containment: failfast extends 60px outside its section sec_failure",
+          "finding": "The containment error was addressed immediately by moving and resizing the object; it was not fought."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 101,
+          "transcript_excerpt": "LINTS · +4 −0\n  + E1 covered-content ...\n  + E2 covered-content ...\n  + E3 covered-content ...\n  + W1 covered-content ...",
+          "finding": "Start of the breaker-router label skirmish."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 103,
+          "transcript_excerpt": "move_label e_breaker_router → along 0.28, offset 80 ... + E1 ... covers admit ... + E2 ... covers deadlineq",
+          "finding": "The same label-overlap class re-fired after another label-position guess."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 107,
+          "transcript_excerpt": "move_label e_breaker_router → along 0.5, offset 80 ... + E1 covered-content: label \"health · latency · queue · probes\" chip ... covers cache",
+          "finding": "Repeated label-only adjustments continued to move the same defect among nearby targets."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 111,
+          "transcript_excerpt": "move_label e_breaker_router → along 0.46, offset 60 ... LINTS · +0 −1 ... resolved",
+          "finding": "The lint fight eventually ended with the outstanding overlap resolved."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 112,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA found no open lint, so no warnings were silently overridden."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The one commit summary accurately describes the major systems present in the stage diff: admission/deadline handling, cache and tier router, protected hosted/self-hosted capacity, pre-stream retry/fail-fast behavior, streaming failure semantics, and accounting/shadow-evaluation objects. It does not claim lint cleanliness or visual perfection, and the final QA reported clean diagnostics. No seen defect was committed undeclared.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 113,
+          "line": "Built the inference-gateway diagram covering admission deadlines, policy-aware caching and routing, protected capacity, pre-stream fallback, streaming failure semantics, and accounting/shadow-eval flows.",
+          "assessment": "Honest and supported by the diff: corresponding sections, objects, and connections are present for each listed area."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 112,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 49 ops ... DIAGNOSTICS · clean",
+          "finding": "The final readback supports the summary and shows no known open diagnostic defect."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 113,
+          "transcript_excerpt": "Built the inference-gateway diagram covering admission deadlines, policy-aware caching and routing, protected capacity, pre-stream fallback, streaming failure semantics, and accounting/shadow-eval flows.",
+          "finding": "The summary is scoped to implemented coverage and makes no inflated rebalancing or perfection claim."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The committed result contains 49 patch operations, while the transcript contains 114 tool calls. There was no add-delete-rebuild cycle and the only NO-OP was not repeated. Nevertheless, the session was not economical: repeated label-position probing, especially turns 101–111, added avoidable work, and wall time was 22.78 minutes, exceeding the 15-minute session budget by about 7.78 minutes. The session did reach finalize well below the 300-turn ceiling.",
+      "operation_count": 49,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 22.78,
+      "over_budget_session_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 100,
+          "transcript_excerpt": "NO-OP · change_color spend — the board already matches this, so nothing changed.",
+          "finding": "A single harmless NO-OP; it was not repeated and therefore is not thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 101,
+          "transcript_excerpt": "connect e_breaker_router ... LINTS · +4 −0",
+          "finding": "This began an extended label-adjustment sequence that reduced operational economy."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 111,
+          "transcript_excerpt": "move_label e_breaker_router → along 0.46, offset 60 ... resolved",
+          "finding": "The repeated probing finally converged without an add-delete-rebuild cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 113,
+          "transcript_excerpt": "Committed ... (49 patch operations).",
+          "finding": "The session finalized successfully, but metadata wall time was 1366.8 seconds, over the 15-minute budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The sole session committed normally, had no retry, and therefore remains fully included in PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 113,
+          "transcript_excerpt": "The proposal is now awaiting operator review.",
+          "finding": "Normal successful session termination; no harness death, collision, or proxy failure."
+        }
+      ]
+    },
+    "score": 5
+  },
+  "usage": {
+    "input_tokens": 44685,
+    "output_tokens": 2725
+  },
+  "flags": []
+}

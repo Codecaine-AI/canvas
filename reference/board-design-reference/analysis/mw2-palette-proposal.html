@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Palette proposals &mdash; current / muted / jewel / hot rod</title>
+<style>
+  :root { --paper:#F6F3ED; --ink:#2B2A26; --muted:#6B6961; --rule:#DDD9D0; --card:#FFFFFF; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:48px 44px 96px; background:var(--paper); color:var(--ink);
+         font:15px/1.55 -apple-system,"Inter","Helvetica Neue",sans-serif; }
+  h1 { font-size:28px; margin:0 0 4px; letter-spacing:-0.02em; }
+  h2 { font-size:18px; margin:56px 0 12px; letter-spacing:-0.01em; }
+  .sub { color:var(--muted); margin:0 0 8px; max-width:78ch; }
+  code,.mono { font:12px/1.4 "SF Mono",ui-monospace,Menlo,monospace; }
+
+  .anchors { display:flex; flex-wrap:wrap; gap:10px; margin-top:16px; }
+  .anchor { width:104px; }
+  .anchor .swatch { height:52px; border-radius:6px; border:1px solid rgba(0,0,0,.12); }
+  .anchor .lbl { font-size:11px; margin-top:5px; }
+  .anchor .hex { font-size:11px; color:var(--muted); }
+
+  table.cmp { border-collapse:collapse; width:100%; margin-top:16px; }
+  table.cmp th, table.cmp td { padding:10px 10px; text-align:left; vertical-align:top; }
+  table.cmp thead th { font-size:11px; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--muted); border-bottom:2px solid var(--ink); padding-bottom:8px; }
+  table.cmp tbody tr { border-bottom:1px solid var(--rule); }
+  .slot { font-weight:600; white-space:nowrap; }
+  .slot .new-name { display:block; font-weight:400; font-size:12px; color:var(--muted); }
+  .roles { display:flex; gap:6px; }
+  .role { width:70px; }
+  .role .sw { height:40px; border-radius:5px; border:1px solid rgba(0,0,0,.10); }
+  .role .cap { font-size:9.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-top:4px; }
+  .role .hex { font-size:10.5px; }
+  .role .lch { font-size:9.5px; color:var(--muted); white-space:nowrap; }
+  td.divider { border-left:2px solid var(--rule); }
+
+  .scenes { display:flex; gap:20px; flex-wrap:wrap; margin-top:16px; }
+  .scene-wrap { flex:1 1 430px; min-width:400px; }
+  .scene-wrap .scene-title { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); margin-bottom:8px; }
+  .board { position:relative; height:310px; border-radius:10px; background:var(--board);
+            border:1px solid rgba(0,0,0,.14); overflow:hidden; }
+  .section { position:absolute; left:20px; top:28px; width:268px; height:196px;
+              background:var(--wash-green); border-radius:8px; }
+  .board .chip { position:absolute; left:20px; top:11px; padding:2px 10px;
+    background:var(--fill-green); border:1.5px solid var(--ink-green);
+    border-radius:5px; font-size:11px; font-weight:600; color:#000; }
+  .sticky { position:absolute; width:88px; height:88px; padding:8px; font-size:10.5px; line-height:1.35;
+             color:#000; box-shadow:0 1px 3px rgba(0,0,0,.18); border-radius:2px; }
+  .shape { position:absolute; border-radius:8px; border:4px solid; display:flex; align-items:center;
+            justify-content:center; font-size:11px; font-weight:600; color:#000; text-align:center; padding:6px; }
+  .conn { position:absolute; height:2.5px; }
+  .conn::after { content:""; position:absolute; right:-1px; top:-4.75px; border:6px solid transparent;
+    border-right:none; border-left:9px solid; border-left-color:inherit; }
+
+  table.safety { border-collapse:collapse; margin-top:12px; }
+  table.safety th, table.safety td { padding:5px 12px 5px 0; text-align:left; font-size:13px; }
+  table.safety th { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .fail { color:#BF3F3D; font-weight:600; }
+  .pass { color:#238744; font-weight:600; }
+  .stroke-demo { display:inline-block; width:52px; height:0; border-top:2.5px solid; vertical-align:middle; margin-right:8px; }
+  .demo-cell { background:#F5F5F5; border-radius:4px; padding:6px 8px; }
+
+  .note { background:var(--card); border:1px solid var(--rule); border-radius:8px;
+           padding:16px 20px; margin-top:12px; max-width:86ch; }
+  .note p { margin:6px 0; }
+
+  .pick-cell { cursor:pointer; position:relative; }
+  .pick-cell:hover { background:rgba(43,42,38,.045); }
+  .pick-cell.selected { background:#FFFFFF; box-shadow:inset 0 0 0 2px #2B2A26; border-radius:8px; }
+  .pick-cell.selected::after { content:"✓"; position:absolute; top:6px; right:9px; font-size:13px; font-weight:700; color:#2B2A26; }
+  .col-head { cursor:pointer; }
+  .col-head:hover { color:var(--ink); text-decoration:underline; text-underline-offset:3px; }
+  .blend-bar { display:flex; gap:12px; align-items:center; margin:12px 0 4px; }
+  .blend-bar button { font:13px -apple-system,"Inter",sans-serif; padding:6px 14px; border-radius:6px;
+    border:1px solid var(--rule); background:#FFFFFF; cursor:pointer; }
+  .blend-bar button:hover { border-color:#2B2A26; }
+  .blend-strip { display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; }
+  .tile { width:96px; }
+  .tile .duo { display:flex; height:40px; border-radius:5px; overflow:hidden; border:1px solid rgba(0,0,0,.12); }
+  .tile .duo i { flex:1; }
+  .tile .lbl { font-size:11px; margin-top:4px; font-weight:600; }
+  .tile .opt { color:var(--muted); font-size:10px; }
+  .tile.unpicked { opacity:.55; }
+  #blendJson pre { background:#FFFFFF; border:1px solid var(--rule); border-radius:8px; padding:12px;
+    font-size:11px; overflow:auto; max-height:320px; }
+
+</style>
+</head>
+<body>
+
+<h1>Palette proposals &mdash; current / muted / jewel / hot rod</h1>
+<p class="sub">Three re-aims of the 10-pick canvas palette. <strong>Option A (muted MW2)</strong> anchors every hue to the Modern&nbsp;Warfare&nbsp;2 camo assets &mdash; verdict: reads too dull. <strong>Option B (jewel)</strong> sits between A and the current candy palette: same deep, uniform lightness ladder as A, but chroma pushed back up into a jewel register &mdash; carmine, ember, gold, emerald, cobalt &mdash; rich and luminous without going neon. <strong>Option C (hot rod)</strong> answers "B is still too dull": brighter and cleaner &mdash; racing red, flame orange, kelly green, and a deep rich cobalt blue &mdash; bright-and-clean emblem color, not candy and not metal-flake. Same 10 slot ids, same ink&nbsp;/&nbsp;fill&nbsp;/&nbsp;wash roles in every option; documents store swatch ids, so no migration either way.</p>
+<p class="sub mono">Ladders &mdash; A: ink L 0.520, C 0.055&ndash;0.111 &middot; B: ink L 0.550, C 0.094&ndash;0.165 &middot; C: ink L 0.575, C 0.098&ndash;0.210 (flame/gold ride L 0.615/0.625 where the sRGB gamut opens; cobalt dips to L 0.520 for depth) &middot; current: ink L 0.56&ndash;0.76, C 0.095&ndash;0.254. Fills: A 0.900 / B 0.895 / C 0.900. All values in sRGB gamut.</p>
+
+<h2>In context: the same board, four palettes</h2>
+<p class="sub">Green section + chip, yellow and blue stickies, green / red / orange shapes at the universal 4px stroke, gray connectors.</p>
+<div class="scenes">
+<div class="scene-wrap">
+    <div class="scene-title">Current</div>
+    <div class="board" style="--board:#F5F5F5; --ink-green:#14AE5C; --fill-green:#DDF8E2; --wash-green:#EBFFEE;--ink-red:#F24822; --fill-red:#FFC7C2;--sticky-yellow:#FFE299; --sticky-blue:#A8DAFF;--ink-orange:#EB7500; --fill-orange:#FFE0C2;--ink-gray:#757575;">
+      <div class="section"></div>
+      <div class="chip">Raid planning</div>
+      <div class="sticky" style="left:36px; top:62px; background: var(--sticky-yellow);">Loadout notes &mdash; suppressor + FMJ</div>
+      <div class="sticky" style="left:138px; top:62px; background: var(--sticky-blue);">Overwatch rotates at wave 3</div>
+      <div class="shape" style="left:52px; top:168px; width:116px; height:50px; background: var(--fill-green); border-color: var(--ink-green);">Breach team</div>
+      <div class="shape" style="left:300px; top:84px; width:118px; height:52px; background: var(--fill-red); border-color: var(--ink-red);">Hard blocker</div>
+      <div class="shape" style="left:300px; top:200px; width:118px; height:52px; background: var(--fill-orange); border-color: var(--ink-orange);">Fallback route</div>
+      <div class="conn" style="left:174px; top:190px; width:114px; background: var(--ink-gray); border-left-color: var(--ink-gray);"></div>
+      <div class="conn" style="left:174px; top:238px; width:114px; background: var(--ink-gray); border-left-color: var(--ink-gray);"></div>
+    </div>
+  </div>
+<div class="scene-wrap">
+    <div class="scene-title">A &mdash; muted MW2</div>
+    <div class="board" style="--board:#F5F5F5; --ink-green:#5B7243; --fill-green:#D5E4C8; --wash-green:#F4F8F1;--ink-red:#9F4C4C; --fill-red:#FBD3D1;--sticky-yellow:#E2D2A6; --sticky-blue:#C1D3F4;--ink-orange:#92592F; --fill-orange:#F7D7C2;--ink-gray:#6B6961;">
+      <div class="section"></div>
+      <div class="chip">Raid planning</div>
+      <div class="sticky" style="left:36px; top:62px; background: var(--sticky-yellow);">Loadout notes &mdash; suppressor + FMJ</div>
+      <div class="sticky" style="left:138px; top:62px; background: var(--sticky-blue);">Overwatch rotates at wave 3</div>
+      <div class="shape" style="left:52px; top:168px; width:116px; height:50px; background: var(--fill-green); border-color: var(--ink-green);">Breach team</div>
+      <div class="shape" style="left:300px; top:84px; width:118px; height:52px; background: var(--fill-red); border-color: var(--ink-red);">Hard blocker</div>
+      <div class="shape" style="left:300px; top:200px; width:118px; height:52px; background: var(--fill-orange); border-color: var(--ink-orange);">Fallback route</div>
+      <div class="conn" style="left:174px; top:190px; width:114px; background: var(--ink-gray); border-left-color: var(--ink-gray);"></div>
+      <div class="conn" style="left:174px; top:238px; width:114px; background: var(--ink-gray); border-left-color: var(--ink-gray);"></div>
+    </div>
+  </div>
+<div class="scene-wrap">
+    <div class="scene-title">B &mdash; jewel</div>
+    <div class="board" style="--board:#F5F5F5; --ink-green:#238744; --fill-green:#C4E7CA; --wash-green:#F0F8F1;--ink-red:#BF3F3D; --fill-red:#FFCFCB;--sticky-yellow:#E9CE94; --sticky-blue:#B8D2FE;--ink-orange:#B25201; --fill-orange:#FDD2BB;--ink-gray:#6D717E;">
+      <div class="section"></div>
+      <div class="chip">Raid planning</div>
+      <div class="sticky" style="left:36px; top:62px; background: var(--sticky-yellow);">Loadout notes &mdash; suppressor + FMJ</div>
+      <div class="sticky" style="left:138px; top:62px; background: var(--sticky-blue);">Overwatch rotates at wave 3</div>
+      <div class="shape" style="left:52px; top:168px; width:116px; height:50px; background: var(--fill-green); border-color: var(--ink-green);">Breach team</div>
+      <div class="shape" style="left:300px; top:84px; width:118px; height:52px; background: var(--fill-red); border-color: var(--ink-red);">Hard blocker</div>
+      <div class="shape" style="left:300px; top:200px; width:118px; height:52px; background: var(--fill-orange); border-color: var(--ink-orange);">Fallback route</div>
+      <div class="conn" style="left:174px; top:190px; width:114px; background: var(--ink-gray); border-left-color: var(--ink-gray);"></div>
+      <div class="conn" style="left:174px; top:238px; width:114px; background: var(--ink-gray); border-left-color: var(--ink-gray);"></div>
+    </div>
+  </div>
+<div class="scene-wrap">
+    <div class="scene-title">C &mdash; hot rod</div>
+    <div class="board" style="--board:#F5F5F5; --ink-green:#019142; --fill-green:#C5E9CB; --wash-green:#F0F8F2;--ink-red:#D5322F; --fill-red:#FFD2CC;--sticky-yellow:#E7CF94; --sticky-blue:#B9D2FF;--ink-orange:#C86701; --fill-orange:#FDD5BA;--ink-gray:#757980;">
+      <div class="section"></div>
+      <div class="chip">Raid planning</div>
+      <div class="sticky" style="left:36px; top:62px; background: var(--sticky-yellow);">Loadout notes &mdash; suppressor + FMJ</div>
+      <div class="sticky" style="left:138px; top:62px; background: var(--sticky-blue);">Overwatch rotates at wave 3</div>
+      <div class="shape" style="left:52px; top:168px; width:116px; height:50px; background: var(--fill-green); border-color: var(--ink-green);">Breach team</div>
+      <div class="shape" style="left:300px; top:84px; width:118px; height:52px; background: var(--fill-red); border-color: var(--ink-red);">Hard blocker</div>
+      <div class="shape" style="left:300px; top:200px; width:118px; height:52px; background: var(--fill-orange); border-color: var(--ink-orange);">Fallback route</div>
+      <div class="conn" style="left:174px; top:190px; width:114px; background: var(--ink-gray); border-left-color: var(--ink-gray);"></div>
+      <div class="conn" style="left:174px; top:238px; width:114px; background: var(--ink-gray); border-left-color: var(--ink-gray);"></div>
+    </div>
+  </div>
+</div>
+
+<h2>Cell by cell</h2>
+<table class="cmp">
+  <thead><tr>
+    <th>Pick</th>
+    <th class="col-head" data-opt="current" title="Pick Current for every row">Current &mdash; ink / fill / sticky / wash</th>
+    <th class="col-head divider" data-opt="A" title="Pick A for every row">A &mdash; muted MW2</th>
+    <th class="col-head divider" data-opt="B" title="Pick B for every row">B &mdash; jewel</th>
+    <th class="col-head divider" data-opt="C" title="Pick C for every row">C &mdash; hot rod</th>
+  </tr></thead>
+  <tbody>
+<tr data-slot="gray">
+      <td class="slot">gray<span class="new-name">A → Gunmetal Stone</span><span class="new-name">B → Slate</span><span class="new-name">C → Chrome</span></td>
+      <td class="pick-cell" data-opt="current"><div class="roles"><div class="role"><div class="sw" style="background:#757575"></div><div class="cap">ink</div><div class="hex mono">#757575</div><div class="lch mono">0.56 0 &mdash;</div></div><div class="role"><div class="sw" style="background:#E6E6E6"></div><div class="cap">fill</div><div class="hex mono">#E6E6E6</div><div class="lch mono">0.92 0 &mdash;</div></div><div class="role"><div class="sw" style="background:#E6E6E6"></div><div class="cap">sticky</div><div class="hex mono">#E6E6E6</div><div class="lch mono">0.92 0 &mdash;</div></div><div class="role"><div class="sw" style="background:#F9F9F9"></div><div class="cap">wash</div><div class="hex mono">#F9F9F9</div><div class="lch mono">0.98 0 &mdash;</div></div></div></td>
+      <td class="pick-cell divider" data-opt="A"><div class="roles"><div class="role"><div class="sw" style="background:#6B6961"></div><div class="cap">ink</div><div class="hex mono">#6B6961</div><div class="lch mono">0.52 0.01 95</div></div><div class="role"><div class="sw" style="background:#DFDEDA"></div><div class="cap">fill</div><div class="hex mono">#DFDEDA</div><div class="lch mono">0.90 0.01 95</div></div><div class="role"><div class="sw" style="background:#DFDEDA"></div><div class="cap">sticky</div><div class="hex mono">#DFDEDA</div><div class="lch mono">0.90 0.01 95</div></div><div class="role"><div class="sw" style="background:#F8F7F4"></div><div class="cap">wash</div><div class="hex mono">#F8F7F4</div><div class="lch mono">0.98 0.00 91</div></div></div></td>
+      <td class="pick-cell divider" data-opt="B"><div class="roles"><div class="role"><div class="sw" style="background:#6D717E"></div><div class="cap">ink</div><div class="hex mono">#6D717E</div><div class="lch mono">0.55 0.02 272</div></div><div class="role"><div class="sw" style="background:#DADCE2"></div><div class="cap">fill</div><div class="hex mono">#DADCE2</div><div class="lch mono">0.89 0.01 271</div></div><div class="role"><div class="sw" style="background:#DADCE2"></div><div class="cap">sticky</div><div class="hex mono">#DADCE2</div><div class="lch mono">0.89 0.01 271</div></div><div class="role"><div class="sw" style="background:#F4F6F9"></div><div class="cap">wash</div><div class="hex mono">#F4F6F9</div><div class="lch mono">0.97 0.00 258</div></div></div></td>
+      <td class="pick-cell divider" data-opt="C"><div class="roles"><div class="role"><div class="sw" style="background:#757980"></div><div class="cap">ink</div><div class="hex mono">#757980</div><div class="lch mono">0.58 0.01 262</div></div><div class="role"><div class="sw" style="background:#DBDEE3"></div><div class="cap">fill</div><div class="hex mono">#DBDEE3</div><div class="lch mono">0.90 0.01 261</div></div><div class="role"><div class="sw" style="background:#DBDEE3"></div><div class="cap">sticky</div><div class="hex mono">#DBDEE3</div><div class="lch mono">0.90 0.01 261</div></div><div class="role"><div class="sw" style="background:#F4F6F9"></div><div class="cap">wash</div><div class="hex mono">#F4F6F9</div><div class="lch mono">0.97 0.00 258</div></div></div></td>
+    </tr><tr data-slot="red">
+      <td class="slot">red<span class="new-name">A → Red Tiger</span><span class="new-name">B → Carmine</span><span class="new-name">C → Racing Red</span></td>
+      <td class="pick-cell" data-opt="current"><div class="roles"><div class="role"><div class="sw" style="background:#F24822"></div><div class="cap">ink</div><div class="hex mono">#F24822</div><div class="lch mono">0.64 0.21 34</div></div><div class="role"><div class="sw" style="background:#FFC7C2"></div><div class="cap">fill</div><div class="hex mono">#FFC7C2</div><div class="lch mono">0.88 0.06 24</div></div><div class="role"><div class="sw" style="background:#FFAFA3"></div><div class="cap">sticky</div><div class="hex mono">#FFAFA3</div><div class="lch mono">0.83 0.10 29</div></div><div class="role"><div class="sw" style="background:#FFF5F5"></div><div class="cap">wash</div><div class="hex mono">#FFF5F5</div><div class="lch mono">0.98 0.01 17</div></div></div></td>
+      <td class="pick-cell divider" data-opt="A"><div class="roles"><div class="role"><div class="sw" style="background:#9F4C4C"></div><div class="cap">ink</div><div class="hex mono">#9F4C4C</div><div class="lch mono">0.52 0.11 22</div></div><div class="role"><div class="sw" style="background:#FBD3D1"></div><div class="cap">fill</div><div class="hex mono">#FBD3D1</div><div class="lch mono">0.90 0.05 21</div></div><div class="role"><div class="sw" style="background:#F6C5C2"></div><div class="cap">sticky</div><div class="hex mono">#F6C5C2</div><div class="lch mono">0.87 0.06 22</div></div><div class="role"><div class="sw" style="background:#FEF4F4"></div><div class="cap">wash</div><div class="hex mono">#FEF4F4</div><div class="lch mono">0.97 0.01 17</div></div></div></td>
+      <td class="pick-cell divider" data-opt="B"><div class="roles"><div class="role"><div class="sw" style="background:#BF3F3D"></div><div class="cap">ink</div><div class="hex mono">#BF3F3D</div><div class="lch mono">0.55 0.16 25</div></div><div class="role"><div class="sw" style="background:#FFCFCB"></div><div class="cap">fill</div><div class="hex mono">#FFCFCB</div><div class="lch mono">0.89 0.05 24</div></div><div class="role"><div class="sw" style="background:#FEBFB9"></div><div class="cap">sticky</div><div class="hex mono">#FEBFB9</div><div class="lch mono">0.86 0.07 25</div></div><div class="role"><div class="sw" style="background:#FFF3F1"></div><div class="cap">wash</div><div class="hex mono">#FFF3F1</div><div class="lch mono">0.97 0.01 29</div></div></div></td>
+      <td class="pick-cell divider" data-opt="C"><div class="roles"><div class="role"><div class="sw" style="background:#D5322F"></div><div class="cap">ink</div><div class="hex mono">#D5322F</div><div class="lch mono">0.57 0.20 27</div></div><div class="role"><div class="sw" style="background:#FFD2CC"></div><div class="cap">fill</div><div class="hex mono">#FFD2CC</div><div class="lch mono">0.90 0.05 27</div></div><div class="role"><div class="sw" style="background:#FFBFB7"></div><div class="cap">sticky</div><div class="hex mono">#FFBFB7</div><div class="lch mono">0.86 0.08 27</div></div><div class="role"><div class="sw" style="background:#FEF3F1"></div><div class="cap">wash</div><div class="hex mono">#FEF3F1</div><div class="lch mono">0.97 0.01 30</div></div></div></td>
+    </tr><tr data-slot="orange">
+      <td class="slot">orange<span class="new-name">A → Coyote</span><span class="new-name">B → Ember</span><span class="new-name">C → Flame</span></td>
+      <td class="pick-cell" data-opt="current"><div class="roles"><div class="role"><div class="sw" style="background:#EB7500"></div><div class="cap">ink</div><div class="hex mono">#EB7500</div><div class="lch mono">0.69 0.17 53</div></div><div class="role"><div class="sw" style="background:#FFE0C2"></div><div class="cap">fill</div><div class="hex mono">#FFE0C2</div><div class="lch mono">0.92 0.05 66</div></div><div class="role"><div class="sw" style="background:#FFE0C2"></div><div class="cap">sticky</div><div class="hex mono">#FFE0C2</div><div class="lch mono">0.92 0.05 66</div></div><div class="role"><div class="sw" style="background:#FFF7F0"></div><div class="cap">wash</div><div class="hex mono">#FFF7F0</div><div class="lch mono">0.98 0.01 64</div></div></div></td>
+      <td class="pick-cell divider" data-opt="A"><div class="roles"><div class="role"><div class="sw" style="background:#92592F"></div><div class="cap">ink</div><div class="hex mono">#92592F</div><div class="lch mono">0.52 0.09 55</div></div><div class="role"><div class="sw" style="background:#F7D7C2"></div><div class="cap">fill</div><div class="hex mono">#F7D7C2</div><div class="lch mono">0.90 0.05 55</div></div><div class="role"><div class="sw" style="background:#F7D7C2"></div><div class="cap">sticky</div><div class="hex mono">#F7D7C2</div><div class="lch mono">0.90 0.05 55</div></div><div class="role"><div class="sw" style="background:#FCF5F1"></div><div class="cap">wash</div><div class="hex mono">#FCF5F1</div><div class="lch mono">0.97 0.01 52</div></div></div></td>
+      <td class="pick-cell divider" data-opt="B"><div class="roles"><div class="role"><div class="sw" style="background:#B25201"></div><div class="cap">ink</div><div class="hex mono">#B25201</div><div class="lch mono">0.55 0.15 50</div></div><div class="role"><div class="sw" style="background:#FDD2BB"></div><div class="cap">fill</div><div class="hex mono">#FDD2BB</div><div class="lch mono">0.89 0.06 50</div></div><div class="role"><div class="sw" style="background:#FDD2BB"></div><div class="cap">sticky</div><div class="hex mono">#FDD2BB</div><div class="lch mono">0.89 0.06 50</div></div><div class="role"><div class="sw" style="background:#FEF3EE"></div><div class="cap">wash</div><div class="hex mono">#FEF3EE</div><div class="lch mono">0.97 0.01 46</div></div></div></td>
+      <td class="pick-cell divider" data-opt="C"><div class="roles"><div class="role"><div class="sw" style="background:#C86701"></div><div class="cap">ink</div><div class="hex mono">#C86701</div><div class="lch mono">0.62 0.15 55</div></div><div class="role"><div class="sw" style="background:#FDD5BA"></div><div class="cap">fill</div><div class="hex mono">#FDD5BA</div><div class="lch mono">0.90 0.06 56</div></div><div class="role"><div class="sw" style="background:#FDD5BA"></div><div class="cap">sticky</div><div class="hex mono">#FDD5BA</div><div class="lch mono">0.90 0.06 56</div></div><div class="role"><div class="sw" style="background:#FDF4EE"></div><div class="cap">wash</div><div class="hex mono">#FDF4EE</div><div class="lch mono">0.97 0.01 56</div></div></div></td>
+    </tr><tr data-slot="yellow">
+      <td class="slot">yellow<span class="new-name">A → Desert Gold</span><span class="new-name">B → Gold</span><span class="new-name">C → Gold Leaf</span></td>
+      <td class="pick-cell" data-opt="current"><div class="roles"><div class="role"><div class="sw" style="background:#E8A302"></div><div class="cap">ink</div><div class="hex mono">#E8A302</div><div class="lch mono">0.76 0.16 78</div></div><div class="role"><div class="sw" style="background:#FFECBD"></div><div class="cap">fill</div><div class="hex mono">#FFECBD</div><div class="lch mono">0.95 0.06 89</div></div><div class="role"><div class="sw" style="background:#FFE299"></div><div class="cap">sticky</div><div class="hex mono">#FFE299</div><div class="lch mono">0.92 0.10 89</div></div><div class="role"><div class="sw" style="background:#FFFBF0"></div><div class="cap">wash</div><div class="hex mono">#FFFBF0</div><div class="lch mono">0.99 0.02 90</div></div></div></td>
+      <td class="pick-cell divider" data-opt="A"><div class="roles"><div class="role"><div class="sw" style="background:#7B672E"></div><div class="cap">ink</div><div class="hex mono">#7B672E</div><div class="lch mono">0.52 0.08 90</div></div><div class="role"><div class="sw" style="background:#EADDBB"></div><div class="cap">fill</div><div class="hex mono">#EADDBB</div><div class="lch mono">0.90 0.05 90</div></div><div class="role"><div class="sw" style="background:#E2D2A6"></div><div class="cap">sticky</div><div class="hex mono">#E2D2A6</div><div class="lch mono">0.87 0.06 90</div></div><div class="role"><div class="sw" style="background:#FAF7EF"></div><div class="cap">wash</div><div class="hex mono">#FAF7EF</div><div class="lch mono">0.98 0.01 90</div></div></div></td>
+      <td class="pick-cell divider" data-opt="B"><div class="roles"><div class="role"><div class="sw" style="background:#906B00"></div><div class="cap">ink</div><div class="hex mono">#906B00</div><div class="lch mono">0.55 0.11 85</div></div><div class="role"><div class="sw" style="background:#F0DAAC"></div><div class="cap">fill</div><div class="hex mono">#F0DAAC</div><div class="lch mono">0.90 0.06 85</div></div><div class="role"><div class="sw" style="background:#E9CE94"></div><div class="cap">sticky</div><div class="hex mono">#E9CE94</div><div class="lch mono">0.86 0.08 86</div></div><div class="role"><div class="sw" style="background:#FAF5EC"></div><div class="cap">wash</div><div class="hex mono">#FAF5EC</div><div class="lch mono">0.97 0.01 82</div></div></div></td>
+      <td class="pick-cell divider" data-opt="C"><div class="roles"><div class="role"><div class="sw" style="background:#A88200"></div><div class="cap">ink</div><div class="hex mono">#A88200</div><div class="lch mono">0.63 0.13 88</div></div><div class="role"><div class="sw" style="background:#F0DCAD"></div><div class="cap">fill</div><div class="hex mono">#F0DCAD</div><div class="lch mono">0.90 0.06 88</div></div><div class="role"><div class="sw" style="background:#E7CF94"></div><div class="cap">sticky</div><div class="hex mono">#E7CF94</div><div class="lch mono">0.86 0.08 88</div></div><div class="role"><div class="sw" style="background:#F9F5ED"></div><div class="cap">wash</div><div class="hex mono">#F9F5ED</div><div class="lch mono">0.97 0.01 85</div></div></div></td>
+    </tr><tr data-slot="green">
+      <td class="slot">green<span class="new-name">A → Olive Drab</span><span class="new-name">B → Emerald</span><span class="new-name">C → Kelly</span></td>
+      <td class="pick-cell" data-opt="current"><div class="roles"><div class="role"><div class="sw" style="background:#14AE5C"></div><div class="cap">ink</div><div class="hex mono">#14AE5C</div><div class="lch mono">0.66 0.17 152</div></div><div class="role"><div class="sw" style="background:#DDF8E2"></div><div class="cap">fill</div><div class="hex mono">#DDF8E2</div><div class="lch mono">0.95 0.04 151</div></div><div class="role"><div class="sw" style="background:#DDF8E2"></div><div class="cap">sticky</div><div class="hex mono">#DDF8E2</div><div class="lch mono">0.95 0.04 151</div></div><div class="role"><div class="sw" style="background:#EBFFEE"></div><div class="cap">wash</div><div class="hex mono">#EBFFEE</div><div class="lch mono">0.98 0.03 150</div></div></div></td>
+      <td class="pick-cell divider" data-opt="A"><div class="roles"><div class="role"><div class="sw" style="background:#5B7243"></div><div class="cap">ink</div><div class="hex mono">#5B7243</div><div class="lch mono">0.52 0.07 130</div></div><div class="role"><div class="sw" style="background:#D5E4C8"></div><div class="cap">fill</div><div class="hex mono">#D5E4C8</div><div class="lch mono">0.90 0.04 130</div></div><div class="role"><div class="sw" style="background:#D5E4C8"></div><div class="cap">sticky</div><div class="hex mono">#D5E4C8</div><div class="lch mono">0.90 0.04 130</div></div><div class="role"><div class="sw" style="background:#F4F8F1"></div><div class="cap">wash</div><div class="hex mono">#F4F8F1</div><div class="lch mono">0.97 0.01 131</div></div></div></td>
+      <td class="pick-cell divider" data-opt="B"><div class="roles"><div class="role"><div class="sw" style="background:#238744"></div><div class="cap">ink</div><div class="hex mono">#238744</div><div class="lch mono">0.55 0.14 150</div></div><div class="role"><div class="sw" style="background:#C4E7CA"></div><div class="cap">fill</div><div class="hex mono">#C4E7CA</div><div class="lch mono">0.89 0.05 150</div></div><div class="role"><div class="sw" style="background:#C4E7CA"></div><div class="cap">sticky</div><div class="hex mono">#C4E7CA</div><div class="lch mono">0.89 0.05 150</div></div><div class="role"><div class="sw" style="background:#F0F8F1"></div><div class="cap">wash</div><div class="hex mono">#F0F8F1</div><div class="lch mono">0.97 0.01 149</div></div></div></td>
+      <td class="pick-cell divider" data-opt="C"><div class="roles"><div class="role"><div class="sw" style="background:#019142"></div><div class="cap">ink</div><div class="hex mono">#019142</div><div class="lch mono">0.57 0.16 150</div></div><div class="role"><div class="sw" style="background:#C5E9CB"></div><div class="cap">fill</div><div class="hex mono">#C5E9CB</div><div class="lch mono">0.90 0.06 150</div></div><div class="role"><div class="sw" style="background:#C5E9CB"></div><div class="cap">sticky</div><div class="hex mono">#C5E9CB</div><div class="lch mono">0.90 0.06 150</div></div><div class="role"><div class="sw" style="background:#F0F8F2"></div><div class="cap">wash</div><div class="hex mono">#F0F8F2</div><div class="lch mono">0.97 0.01 154</div></div></div></td>
+    </tr><tr data-slot="teal">
+      <td class="slot">teal<span class="new-name">A → Juniper</span><span class="new-name">B → Deep Teal</span><span class="new-name">C → Teal</span></td>
+      <td class="pick-cell" data-opt="current"><div class="roles"><div class="role"><div class="sw" style="background:#369E94"></div><div class="cap">ink</div><div class="hex mono">#369E94</div><div class="lch mono">0.64 0.10 186</div></div><div class="role"><div class="sw" style="background:#C6FAF6"></div><div class="cap">fill</div><div class="hex mono">#C6FAF6</div><div class="lch mono">0.95 0.05 190</div></div><div class="role"><div class="sw" style="background:#C6FAF6"></div><div class="cap">sticky</div><div class="hex mono">#C6FAF6</div><div class="lch mono">0.95 0.05 190</div></div><div class="role"><div class="sw" style="background:#EAFDFB"></div><div class="cap">wash</div><div class="hex mono">#EAFDFB</div><div class="lch mono">0.98 0.02 189</div></div></div></td>
+      <td class="pick-cell divider" data-opt="A"><div class="roles"><div class="role"><div class="sw" style="background:#43746A"></div><div class="cap">ink</div><div class="hex mono">#43746A</div><div class="lch mono">0.52 0.06 179</div></div><div class="role"><div class="sw" style="background:#C6E6DF"></div><div class="cap">fill</div><div class="hex mono">#C6E6DF</div><div class="lch mono">0.90 0.03 181</div></div><div class="role"><div class="sw" style="background:#C6E6DF"></div><div class="cap">sticky</div><div class="hex mono">#C6E6DF</div><div class="lch mono">0.90 0.03 181</div></div><div class="role"><div class="sw" style="background:#F1F9F7"></div><div class="cap">wash</div><div class="hex mono">#F1F9F7</div><div class="lch mono">0.98 0.01 180</div></div></div></td>
+      <td class="pick-cell divider" data-opt="B"><div class="roles"><div class="role"><div class="sw" style="background:#008282"></div><div class="cap">ink</div><div class="hex mono">#008282</div><div class="lch mono">0.55 0.09 195</div></div><div class="role"><div class="sw" style="background:#B8E7E6"></div><div class="cap">fill</div><div class="hex mono">#B8E7E6</div><div class="lch mono">0.89 0.05 195</div></div><div class="role"><div class="sw" style="background:#B8E7E6"></div><div class="cap">sticky</div><div class="hex mono">#B8E7E6</div><div class="lch mono">0.89 0.05 195</div></div><div class="role"><div class="sw" style="background:#ECF9F8"></div><div class="cap">wash</div><div class="hex mono">#ECF9F8</div><div class="lch mono">0.97 0.01 191</div></div></div></td>
+      <td class="pick-cell divider" data-opt="C"><div class="roles"><div class="role"><div class="sw" style="background:#018A8B"></div><div class="cap">ink</div><div class="hex mono">#018A8B</div><div class="lch mono">0.57 0.10 196</div></div><div class="role"><div class="sw" style="background:#BAE9E8"></div><div class="cap">fill</div><div class="hex mono">#BAE9E8</div><div class="lch mono">0.90 0.05 195</div></div><div class="role"><div class="sw" style="background:#BAE9E8"></div><div class="cap">sticky</div><div class="hex mono">#BAE9E8</div><div class="lch mono">0.90 0.05 195</div></div><div class="role"><div class="sw" style="background:#EDF8F8"></div><div class="cap">wash</div><div class="hex mono">#EDF8F8</div><div class="lch mono">0.97 0.01 197</div></div></div></td>
+    </tr><tr data-slot="blue">
+      <td class="slot">blue<span class="new-name">A → Blue Tiger</span><span class="new-name">B → Cobalt</span><span class="new-name">C → Cobalt</span></td>
+      <td class="pick-cell" data-opt="current"><div class="roles"><div class="role"><div class="sw" style="background:#0D99FF"></div><div class="cap">ink</div><div class="hex mono">#0D99FF</div><div class="lch mono">0.67 0.18 249</div></div><div class="role"><div class="sw" style="background:#C2E5FF"></div><div class="cap">fill</div><div class="hex mono">#C2E5FF</div><div class="lch mono">0.91 0.05 240</div></div><div class="role"><div class="sw" style="background:#A8DAFF"></div><div class="cap">sticky</div><div class="hex mono">#A8DAFF</div><div class="lch mono">0.87 0.07 241</div></div><div class="role"><div class="sw" style="background:#F5FBFF"></div><div class="cap">wash</div><div class="hex mono">#F5FBFF</div><div class="lch mono">0.98 0.01 237</div></div></div></td>
+      <td class="pick-cell divider" data-opt="A"><div class="roles"><div class="role"><div class="sw" style="background:#536992"></div><div class="cap">ink</div><div class="hex mono">#536992</div><div class="lch mono">0.52 0.07 262</div></div><div class="role"><div class="sw" style="background:#D0DFF8"></div><div class="cap">fill</div><div class="hex mono">#D0DFF8</div><div class="lch mono">0.90 0.04 261</div></div><div class="role"><div class="sw" style="background:#C1D3F4"></div><div class="cap">sticky</div><div class="hex mono">#C1D3F4</div><div class="lch mono">0.86 0.05 263</div></div><div class="role"><div class="sw" style="background:#F3F7FD"></div><div class="cap">wash</div><div class="hex mono">#F3F7FD</div><div class="lch mono">0.97 0.01 258</div></div></div></td>
+      <td class="pick-cell divider" data-opt="B"><div class="roles"><div class="role"><div class="sw" style="background:#3B6FC5"></div><div class="cap">ink</div><div class="hex mono">#3B6FC5</div><div class="lch mono">0.55 0.15 260</div></div><div class="role"><div class="sw" style="background:#C9DEFF"></div><div class="cap">fill</div><div class="hex mono">#C9DEFF</div><div class="lch mono">0.90 0.05 259</div></div><div class="role"><div class="sw" style="background:#B8D2FE"></div><div class="cap">sticky</div><div class="hex mono">#B8D2FE</div><div class="lch mono">0.86 0.07 261</div></div><div class="role"><div class="sw" style="background:#F1F6FF"></div><div class="cap">wash</div><div class="hex mono">#F1F6FF</div><div class="lch mono">0.97 0.01 262</div></div></div></td>
+      <td class="pick-cell divider" data-opt="C"><div class="roles"><div class="role"><div class="sw" style="background:#1A5CDF"></div><div class="cap">ink</div><div class="hex mono">#1A5CDF</div><div class="lch mono">0.52 0.21 262</div></div><div class="role"><div class="sw" style="background:#CDDFFF"></div><div class="cap">fill</div><div class="hex mono">#CDDFFF</div><div class="lch mono">0.90 0.05 262</div></div><div class="role"><div class="sw" style="background:#B9D2FF"></div><div class="cap">sticky</div><div class="hex mono">#B9D2FF</div><div class="lch mono">0.86 0.07 262</div></div><div class="role"><div class="sw" style="background:#F1F6FE"></div><div class="cap">wash</div><div class="hex mono">#F1F6FE</div><div class="lch mono">0.97 0.01 260</div></div></div></td>
+    </tr><tr data-slot="violet">
+      <td class="slot">violet<span class="new-name">A → Smoke</span><span class="new-name">B → Violet</span><span class="new-name">C → Violet</span></td>
+      <td class="pick-cell" data-opt="current"><div class="roles"><div class="role"><div class="sw" style="background:#9747FF"></div><div class="cap">ink</div><div class="hex mono">#9747FF</div><div class="lch mono">0.60 0.25 298</div></div><div class="role"><div class="sw" style="background:#DCCCFF"></div><div class="cap">fill</div><div class="hex mono">#DCCCFF</div><div class="lch mono">0.87 0.07 299</div></div><div class="role"><div class="sw" style="background:#DCCCFF"></div><div class="cap">sticky</div><div class="hex mono">#DCCCFF</div><div class="lch mono">0.87 0.07 299</div></div><div class="role"><div class="sw" style="background:#F8F5FF"></div><div class="cap">wash</div><div class="hex mono">#F8F5FF</div><div class="lch mono">0.98 0.01 300</div></div></div></td>
+      <td class="pick-cell divider" data-opt="A"><div class="roles"><div class="role"><div class="sw" style="background:#6E6187"></div><div class="cap">ink</div><div class="hex mono">#6E6187</div><div class="lch mono">0.52 0.06 300</div></div><div class="role"><div class="sw" style="background:#E1D9F2"></div><div class="cap">fill</div><div class="hex mono">#E1D9F2</div><div class="lch mono">0.90 0.03 300</div></div><div class="role"><div class="sw" style="background:#E1D9F2"></div><div class="cap">sticky</div><div class="hex mono">#E1D9F2</div><div class="lch mono">0.90 0.03 300</div></div><div class="role"><div class="sw" style="background:#F7F6FB"></div><div class="cap">wash</div><div class="hex mono">#F7F6FB</div><div class="lch mono">0.98 0.01 295</div></div></div></td>
+      <td class="pick-cell divider" data-opt="B"><div class="roles"><div class="role"><div class="sw" style="background:#7D59C0"></div><div class="cap">ink</div><div class="hex mono">#7D59C0</div><div class="lch mono">0.55 0.16 297</div></div><div class="role"><div class="sw" style="background:#DFD6FB"></div><div class="cap">fill</div><div class="hex mono">#DFD6FB</div><div class="lch mono">0.89 0.05 296</div></div><div class="role"><div class="sw" style="background:#DFD6FB"></div><div class="cap">sticky</div><div class="hex mono">#DFD6FB</div><div class="lch mono">0.89 0.05 296</div></div><div class="role"><div class="sw" style="background:#F6F4FE"></div><div class="cap">wash</div><div class="hex mono">#F6F4FE</div><div class="lch mono">0.97 0.01 295</div></div></div></td>
+      <td class="pick-cell divider" data-opt="C"><div class="roles"><div class="role"><div class="sw" style="background:#855DCF"></div><div class="cap">ink</div><div class="hex mono">#855DCF</div><div class="lch mono">0.57 0.17 297</div></div><div class="role"><div class="sw" style="background:#E1D8FC"></div><div class="cap">fill</div><div class="hex mono">#E1D8FC</div><div class="lch mono">0.90 0.05 297</div></div><div class="role"><div class="sw" style="background:#E1D8FC"></div><div class="cap">sticky</div><div class="hex mono">#E1D8FC</div><div class="lch mono">0.90 0.05 297</div></div><div class="role"><div class="sw" style="background:#F6F4FD"></div><div class="cap">wash</div><div class="hex mono">#F6F4FD</div><div class="lch mono">0.97 0.01 296</div></div></div></td>
+    </tr><tr data-slot="pink">
+      <td class="slot">pink<span class="new-name">A → Dust Rose</span><span class="new-name">B → Orchid</span><span class="new-name">C → Flamingo</span></td>
+      <td class="pick-cell" data-opt="current"><div class="roles"><div class="role"><div class="sw" style="background:#F849C1"></div><div class="cap">ink</div><div class="hex mono">#F849C1</div><div class="lch mono">0.69 0.24 343</div></div><div class="role"><div class="sw" style="background:#FFC2EC"></div><div class="cap">fill</div><div class="hex mono">#FFC2EC</div><div class="lch mono">0.88 0.09 338</div></div><div class="role"><div class="sw" style="background:#FFC2EC"></div><div class="cap">sticky</div><div class="hex mono">#FFC2EC</div><div class="lch mono">0.88 0.09 338</div></div><div class="role"><div class="sw" style="background:#FFF0FA"></div><div class="cap">wash</div><div class="hex mono">#FFF0FA</div><div class="lch mono">0.97 0.02 338</div></div></div></td>
+      <td class="pick-cell divider" data-opt="A"><div class="roles"><div class="role"><div class="sw" style="background:#8A5673"></div><div class="cap">ink</div><div class="hex mono">#8A5673</div><div class="lch mono">0.52 0.08 346</div></div><div class="role"><div class="sw" style="background:#F3D4E4"></div><div class="cap">fill</div><div class="hex mono">#F3D4E4</div><div class="lch mono">0.90 0.04 345</div></div><div class="role"><div class="sw" style="background:#F3D4E4"></div><div class="cap">sticky</div><div class="hex mono">#F3D4E4</div><div class="lch mono">0.90 0.04 345</div></div><div class="role"><div class="sw" style="background:#FCF4F8"></div><div class="cap">wash</div><div class="hex mono">#FCF4F8</div><div class="lch mono">0.97 0.01 345</div></div></div></td>
+      <td class="pick-cell divider" data-opt="B"><div class="roles"><div class="role"><div class="sw" style="background:#AD4586"></div><div class="cap">ink</div><div class="hex mono">#AD4586</div><div class="lch mono">0.55 0.15 345</div></div><div class="role"><div class="sw" style="background:#F8CEE5"></div><div class="cap">fill</div><div class="hex mono">#F8CEE5</div><div class="lch mono">0.89 0.06 344</div></div><div class="role"><div class="sw" style="background:#F8CEE5"></div><div class="cap">sticky</div><div class="hex mono">#F8CEE5</div><div class="lch mono">0.89 0.06 344</div></div><div class="role"><div class="sw" style="background:#FDF2F8"></div><div class="cap">wash</div><div class="hex mono">#FDF2F8</div><div class="lch mono">0.97 0.01 343</div></div></div></td>
+      <td class="pick-cell divider" data-opt="C"><div class="roles"><div class="role"><div class="sw" style="background:#B74D85"></div><div class="cap">ink</div><div class="hex mono">#B74D85</div><div class="lch mono">0.57 0.15 350</div></div><div class="role"><div class="sw" style="background:#F9D1E3"></div><div class="cap">fill</div><div class="hex mono">#F9D1E3</div><div class="lch mono">0.90 0.05 349</div></div><div class="role"><div class="sw" style="background:#F9D1E3"></div><div class="cap">sticky</div><div class="hex mono">#F9D1E3</div><div class="lch mono">0.90 0.05 349</div></div><div class="role"><div class="sw" style="background:#FDF3F7"></div><div class="cap">wash</div><div class="hex mono">#FDF3F7</div><div class="lch mono">0.97 0.01 351</div></div></div></td>
+    </tr>
+<tr data-slot="white">
+  <td class="slot">white<span class="new-name">chip only changes</span></td>
+  <td class="pick-cell" data-opt="current"><div class="roles"><div class="role"><div class="sw" style="background:#FFFFFF"></div><div class="cap">fill</div><div class="hex mono">#FFFFFF</div><div class="lch mono">1.00 0 &mdash;</div></div><div class="role"><div class="sw" style="background:#E6E6E6"></div><div class="cap">chip fill</div><div class="hex mono">#E6E6E6</div><div class="lch mono">0.92 0 &mdash;</div></div><div class="role"><div class="sw" style="background:#C4C4C4"></div><div class="cap">chip brdr</div><div class="hex mono">#C4C4C4</div><div class="lch mono">0.82 0 &mdash;</div></div><div class="role"><div class="sw" style="background:#757575"></div><div class="cap">stroke</div><div class="hex mono">#757575</div><div class="lch mono">0.56 0 &mdash;</div></div></div></td>
+  <td class="pick-cell divider" data-opt="A"><div class="roles"><div class="role"><div class="sw" style="background:#FFFFFF"></div><div class="cap">fill</div><div class="hex mono">#FFFFFF</div><div class="lch mono">1.00 0 &mdash;</div></div><div class="role"><div class="sw" style="background:#DFDEDA"></div><div class="cap">chip fill</div><div class="hex mono">#DFDEDA</div><div class="lch mono">0.90 0.01 95</div></div><div class="role"><div class="sw" style="background:#C0BDB7"></div><div class="cap">chip brdr</div><div class="hex mono">#C0BDB7</div><div class="lch mono">0.80 0.01 85</div></div><div class="role"><div class="sw" style="background:#6B6961"></div><div class="cap">stroke</div><div class="hex mono">#6B6961</div><div class="lch mono">0.52 0.01 95</div></div></div></td>
+  <td class="pick-cell divider" data-opt="B"><div class="roles"><div class="role"><div class="sw" style="background:#FFFFFF"></div><div class="cap">fill</div><div class="hex mono">#FFFFFF</div><div class="lch mono">1.00 0 &mdash;</div></div><div class="role"><div class="sw" style="background:#DADCE2"></div><div class="cap">chip fill</div><div class="hex mono">#DADCE2</div><div class="lch mono">0.89 0.01 271</div></div><div class="role"><div class="sw" style="background:#BEC1CA"></div><div class="cap">chip brdr</div><div class="hex mono">#BEC1CA</div><div class="lch mono">0.81 0.01 271</div></div><div class="role"><div class="sw" style="background:#6D717E"></div><div class="cap">stroke</div><div class="hex mono">#6D717E</div><div class="lch mono">0.55 0.02 272</div></div></div></td>
+  <td class="pick-cell divider" data-opt="C"><div class="roles"><div class="role"><div class="sw" style="background:#FFFFFF"></div><div class="cap">fill</div><div class="hex mono">#FFFFFF</div><div class="lch mono">1.00 0 &mdash;</div></div><div class="role"><div class="sw" style="background:#DBDEE3"></div><div class="cap">chip fill</div><div class="hex mono">#DBDEE3</div><div class="lch mono">0.90 0.01 261</div></div><div class="role"><div class="sw" style="background:#C1C4CB"></div><div class="cap">chip brdr</div><div class="hex mono">#C1C4CB</div><div class="lch mono">0.82 0.01 267</div></div><div class="role"><div class="sw" style="background:#757980"></div><div class="cap">stroke</div><div class="hex mono">#757980</div><div class="lch mono">0.58 0.01 262</div></div></div></td>
+</tr>
+  </tbody>
+</table>
+
+<h2>Your blend</h2>
+<p class="sub">Click any cell in the table above to pick that option for its row &mdash; click again to unpick, or click a column header to take the whole column. Unpicked rows fall back to Current. Picks persist in this browser; Copy JSON exports the full role table of your selections.</p>
+<div class="blend-bar">
+  <span id="blendCount" class="mono"></span>
+  <button id="blendCopy" type="button">Copy JSON</button>
+  <button id="blendClear" type="button">Clear picks</button>
+</div>
+<div class="scenes">
+<div class="scene-wrap">
+    <div class="scene-title">Your blend</div>
+    <div class="board" id="blendBoard" style="--board:#F5F5F5; --ink-green:#14AE5C; --fill-green:#DDF8E2; --wash-green:#EBFFEE;--ink-red:#F24822; --fill-red:#FFC7C2;--sticky-yellow:#FFE299; --sticky-blue:#A8DAFF;--ink-orange:#EB7500; --fill-orange:#FFE0C2;--ink-gray:#757575;">
+      <div class="section"></div>
+      <div class="chip">Raid planning</div>
+      <div class="sticky" style="left:36px; top:62px; background: var(--sticky-yellow);">Loadout notes &mdash; suppressor + FMJ</div>
+      <div class="sticky" style="left:138px; top:62px; background: var(--sticky-blue);">Overwatch rotates at wave 3</div>
+      <div class="shape" style="left:52px; top:168px; width:116px; height:50px; background: var(--fill-green); border-color: var(--ink-green);">Breach team</div>
+      <div class="shape" style="left:300px; top:84px; width:118px; height:52px; background: var(--fill-red); border-color: var(--ink-red);">Hard blocker</div>
+      <div class="shape" style="left:300px; top:200px; width:118px; height:52px; background: var(--fill-orange); border-color: var(--ink-orange);">Fallback route</div>
+      <div class="conn" style="left:174px; top:190px; width:114px; background: var(--ink-gray); border-left-color: var(--ink-gray);"></div>
+      <div class="conn" style="left:174px; top:238px; width:114px; background: var(--ink-gray); border-left-color: var(--ink-gray);"></div>
+    </div>
+  </div>
+</div>
+<div class="blend-strip" id="blendStrip"></div>
+<details style="margin-top:14px"><summary class="mono" style="cursor:pointer">blend JSON</summary><div id="blendJson"><pre id="blendJsonPre" class="mono"></pre></div></details>
+
+<h2>Line-safety on the #F5F5F5 board (WCAG ratio, 2px stroke test)</h2>
+<table class="safety">
+  <thead><tr><th>Pick</th><th>Current ink</th><th></th><th>A ink</th><th></th><th>B ink</th><th></th><th>C ink</th><th></th></tr></thead>
+  <tbody>
+<tr><td>gray</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#757575"></span><span class="mono">#757575</span></td><td class="pass">4.23</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#6B6961"></span><span class="mono">#6B6961</span></td><td class="pass">5.04</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#6D717E"></span><span class="mono">#6D717E</span></td><td class="pass">4.47</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#757980"></span><span class="mono">#757980</span></td><td class="pass">4.01</td></tr><tr><td>red</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#F24822"></span><span class="mono">#F24822</span></td><td class="pass">3.36</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#9F4C4C"></span><span class="mono">#9F4C4C</span></td><td class="pass">5.33</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#BF3F3D"></span><span class="mono">#BF3F3D</span></td><td class="pass">4.82</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#D5322F"></span><span class="mono">#D5322F</span></td><td class="pass">4.45</td></tr><tr><td>orange</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#EB7500"></span><span class="mono">#EB7500</span></td><td class="fail">2.72</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#92592F"></span><span class="mono">#92592F</span></td><td class="pass">5.22</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#B25201"></span><span class="mono">#B25201</span></td><td class="pass">4.70</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#C86701"></span><span class="mono">#C86701</span></td><td class="pass">3.57</td></tr><tr><td>yellow</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#E8A302"></span><span class="mono">#E8A302</span></td><td class="fail">1.99</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#7B672E"></span><span class="mono">#7B672E</span></td><td class="pass">5.04</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#906B00"></span><span class="mono">#906B00</span></td><td class="pass">4.49</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#A88200"></span><span class="mono">#A88200</span></td><td class="pass">3.29</td></tr><tr><td>green</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#14AE5C"></span><span class="mono">#14AE5C</span></td><td class="fail">2.66</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#5B7243"></span><span class="mono">#5B7243</span></td><td class="pass">4.90</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#238744"></span><span class="mono">#238744</span></td><td class="pass">4.17</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#019142"></span><span class="mono">#019142</span></td><td class="pass">3.75</td></tr><tr><td>teal</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#369E94"></span><span class="mono">#369E94</span></td><td class="fail">2.97</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#43746A"></span><span class="mono">#43746A</span></td><td class="pass">4.88</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#008282"></span><span class="mono">#008282</span></td><td class="pass">4.27</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#018A8B"></span><span class="mono">#018A8B</span></td><td class="pass">3.85</td></tr><tr><td>blue</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#0D99FF"></span><span class="mono">#0D99FF</span></td><td class="fail">2.74</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#536992"></span><span class="mono">#536992</span></td><td class="pass">5.06</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#3B6FC5"></span><span class="mono">#3B6FC5</span></td><td class="pass">4.52</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#1A5CDF"></span><span class="mono">#1A5CDF</span></td><td class="pass">5.29</td></tr><tr><td>violet</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#9747FF"></span><span class="mono">#9747FF</span></td><td class="pass">4.13</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#6E6187"></span><span class="mono">#6E6187</span></td><td class="pass">5.17</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#7D59C0"></span><span class="mono">#7D59C0</span></td><td class="pass">4.74</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#855DCF"></span><span class="mono">#855DCF</span></td><td class="pass">4.31</td></tr><tr><td>pink</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#F849C1"></span><span class="mono">#F849C1</span></td><td class="fail">2.87</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#8A5673"></span><span class="mono">#8A5673</span></td><td class="pass">5.26</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#AD4586"></span><span class="mono">#AD4586</span></td><td class="pass">4.85</td><td class="demo-cell"><span class="stroke-demo" style="border-color:#B74D85"></span><span class="mono">#B74D85</span></td><td class="pass">4.36</td></tr>
+  </tbody>
+</table>
+<p class="sub">Threshold: 3:1 (WCAG non-text contrast). Six of nine current inks miss it. Every A ink clears 4.88, every B ink clears 4.17, every C ink clears 3.29 &mdash; all three fix the legibility gap; C spends the most contrast headroom on saturation and stays legal. Black object text on every A/B fill and sticky measures 14.9&ndash;15.8:1.</p>
+
+<h2>How the options differ</h2>
+<div class="note">
+  <p><strong>Same discipline, more voltage.</strong> B keeps the one-lightness-per-role ladder (ink L&nbsp;0.550, fill 0.895, sticky 0.860, wash 0.972) so no pick shouts &mdash; but ink chroma rises from A&rsquo;s 0.055&ndash;0.111 to 0.094&ndash;0.165, roughly the midpoint between A and the current palette&rsquo;s 0.095&ndash;0.254.</p>
+  <p><strong>Hues shift from earth to gem.</strong> A&rsquo;s camo hues (orange&nbsp;55&deg; brown, yellow&nbsp;90&deg; olive-gold, green&nbsp;130&deg; olive) move to jewel positions in B: carmine&nbsp;25&deg;, ember&nbsp;50&deg;, gold&nbsp;85&deg;, emerald&nbsp;150&deg;, deep teal&nbsp;195&deg;, cobalt&nbsp;260&deg;, violet&nbsp;297&deg;, orchid&nbsp;345&deg;. Gray flips from warm gunmetal to cool slate (270&deg;) to complement the jewel tones.</p>
+  <p><strong>Yellow and teal are gamut-limited.</strong> At L&nbsp;0.55, sRGB tops out at C&nbsp;0.113 for gold and 0.094 for teal &mdash; the ladder takes the max available rather than lightening the ink, so those two stay slightly quieter than their neighbors by physics, not by choice.</p>
+  <p><strong>C &mdash; hot rod, in short.</strong> B&rsquo;s hues kept (red 27&deg;, flame 55&deg;, gold 88&deg;, kelly 150&deg;, teal 195&deg;, cobalt 262&deg;, violet 297&deg;, flamingo 350&deg;) but chroma raised to the top of what sRGB allows at ink depth: Racing Red C&nbsp;0.200, Cobalt C&nbsp;0.210 at a deeper L&nbsp;0.520 &mdash; the one deliberate ladder break, so the main blue reads truly rich. Flamingo stays the quietest chromatic pick; if pink should go further toward neutral (or be retired from the picker), that is a one-cell decision.</p>
+  <p><strong>Unchanged in all options:</strong> slot ids, role structure, resolvers, black object text, white&rsquo;s borrowed gray stroke. To apply either: swap the table cells in <code>packages/canvas/src/theme/palette.ts</code> and update the lock table in <code>palette.test.ts</code>.</p>
+</div>
+
+<script>
+(function(){
+  var KEY='palette-blend-picks-v1';
+  var PAL={"current": {"gray": {"name": "gray", "ink": "#757575", "fill": "#E6E6E6", "sticky": "#E6E6E6", "wash": "#F9F9F9"}, "red": {"name": "red", "ink": "#F24822", "fill": "#FFC7C2", "sticky": "#FFAFA3", "wash": "#FFF5F5"}, "orange": {"name": "orange", "ink": "#EB7500", "fill": "#FFE0C2", "sticky": "#FFE0C2", "wash": "#FFF7F0"}, "yellow": {"name": "yellow", "ink": "#E8A302", "fill": "#FFECBD", "sticky": "#FFE299", "wash": "#FFFBF0"}, "green": {"name": "green", "ink": "#14AE5C", "fill": "#DDF8E2", "sticky": "#DDF8E2", "wash": "#EBFFEE"}, "teal": {"name": "teal", "ink": "#369E94", "fill": "#C6FAF6", "sticky": "#C6FAF6", "wash": "#EAFDFB"}, "blue": {"name": "blue", "ink": "#0D99FF", "fill": "#C2E5FF", "sticky": "#A8DAFF", "wash": "#F5FBFF"}, "violet": {"name": "violet", "ink": "#9747FF", "fill": "#DCCCFF", "sticky": "#DCCCFF", "wash": "#F8F5FF"}, "pink": {"name": "pink", "ink": "#F849C1", "fill": "#FFC2EC", "sticky": "#FFC2EC", "wash": "#FFF0FA"}, "white": {"name": "White", "fill": "#FFFFFF", "chipFill": "#E6E6E6", "chipBorder": "#C4C4C4", "stroke": "#757575"}}, "A": {"gray": {"name": "Gunmetal Stone", "ink": "#6B6961", "fill": "#DFDEDA", "sticky": "#DFDEDA", "wash": "#F8F7F4"}, "red": {"name": "Red Tiger", "ink": "#9F4C4C", "fill": "#FBD3D1", "sticky": "#F6C5C2", "wash": "#FEF4F4"}, "orange": {"name": "Coyote", "ink": "#92592F", "fill": "#F7D7C2", "sticky": "#F7D7C2", "wash": "#FCF5F1"}, "yellow": {"name": "Desert Gold", "ink": "#7B672E", "fill": "#EADDBB", "sticky": "#E2D2A6", "wash": "#FAF7EF"}, "green": {"name": "Olive Drab", "ink": "#5B7243", "fill": "#D5E4C8", "sticky": "#D5E4C8", "wash": "#F4F8F1"}, "teal": {"name": "Juniper", "ink": "#43746A", "fill": "#C6E6DF", "sticky": "#C6E6DF", "wash": "#F1F9F7"}, "blue": {"name": "Blue Tiger", "ink": "#536992", "fill": "#D0DFF8", "sticky": "#C1D3F4", "wash": "#F3F7FD"}, "violet": {"name": "Smoke", "ink": "#6E6187", "fill": "#E1D9F2", "sticky": "#E1D9F2", "wash": "#F7F6FB"}, "pink": {"name": "Dust Rose", "ink": "#8A5673", "fill": "#F3D4E4", "sticky": "#F3D4E4", "wash": "#FCF4F8"}, "white": {"name": "White", "fill": "#FFFFFF", "chipFill": "#DFDEDA", "chipBorder": "#C0BDB7", "stroke": "#6B6961"}}, "B": {"gray": {"name": "Slate", "ink": "#6D717E", "fill": "#DADCE2", "sticky": "#DADCE2", "wash": "#F4F6F9"}, "red": {"name": "Carmine", "ink": "#BF3F3D", "fill": "#FFCFCB", "sticky": "#FEBFB9", "wash": "#FFF3F1"}, "orange": {"name": "Ember", "ink": "#B25201", "fill": "#FDD2BB", "sticky": "#FDD2BB", "wash": "#FEF3EE"}, "yellow": {"name": "Gold", "ink": "#906B00", "fill": "#F0DAAC", "sticky": "#E9CE94", "wash": "#FAF5EC"}, "green": {"name": "Emerald", "ink": "#238744", "fill": "#C4E7CA", "sticky": "#C4E7CA", "wash": "#F0F8F1"}, "teal": {"name": "Deep Teal", "ink": "#008282", "fill": "#B8E7E6", "sticky": "#B8E7E6", "wash": "#ECF9F8"}, "blue": {"name": "Cobalt", "ink": "#3B6FC5", "fill": "#C9DEFF", "sticky": "#B8D2FE", "wash": "#F1F6FF"}, "violet": {"name": "Violet", "ink": "#7D59C0", "fill": "#DFD6FB", "sticky": "#DFD6FB", "wash": "#F6F4FE"}, "pink": {"name": "Orchid", "ink": "#AD4586", "fill": "#F8CEE5", "sticky": "#F8CEE5", "wash": "#FDF2F8"}, "white": {"name": "White", "fill": "#FFFFFF", "chipFill": "#DADCE2", "chipBorder": "#BEC1CA", "stroke": "#6D717E"}}, "C": {"gray": {"name": "Chrome", "ink": "#757980", "fill": "#DBDEE3", "sticky": "#DBDEE3", "wash": "#F4F6F9"}, "red": {"name": "Racing Red", "ink": "#D5322F", "fill": "#FFD2CC", "sticky": "#FFBFB7", "wash": "#FEF3F1"}, "orange": {"name": "Flame", "ink": "#C86701", "fill": "#FDD5BA", "sticky": "#FDD5BA", "wash": "#FDF4EE"}, "yellow": {"name": "Gold Leaf", "ink": "#A88200", "fill": "#F0DCAD", "sticky": "#E7CF94", "wash": "#F9F5ED"}, "green": {"name": "Kelly", "ink": "#019142", "fill": "#C5E9CB", "sticky": "#C5E9CB", "wash": "#F0F8F2"}, "teal": {"name": "Teal", "ink": "#018A8B", "fill": "#BAE9E8", "sticky": "#BAE9E8", "wash": "#EDF8F8"}, "blue": {"name": "Cobalt", "ink": "#1A5CDF", "fill": "#CDDFFF", "sticky": "#B9D2FF", "wash": "#F1F6FE"}, "violet": {"name": "Violet", "ink": "#855DCF", "fill": "#E1D8FC", "sticky": "#E1D8FC", "wash": "#F6F4FD"}, "pink": {"name": "Flamingo", "ink": "#B74D85", "fill": "#F9D1E3", "sticky": "#F9D1E3", "wash": "#FDF3F7"}, "white": {"name": "White", "fill": "#FFFFFF", "chipFill": "#DBDEE3", "chipBorder": "#C1C4CB", "stroke": "#757980"}}};
+  var SLOTS=['gray','red','orange','yellow','green','teal','blue','violet','pink','white'];
+  var OPT_LABEL={current:'Current',A:'A · muted',B:'B · jewel',C:'C · hot rod'};
+  var picks={};
+  try{ picks=JSON.parse(localStorage.getItem(KEY)||'{}')||{}; }catch(e){ picks={}; }
+  var board=document.getElementById('blendBoard');
+  var strip=document.getElementById('blendStrip');
+  var counter=document.getElementById('blendCount');
+  var pre=document.getElementById('blendJsonPre');
+
+  function entry(slot){ return PAL[picks[slot]||'current'][slot]; }
+
+  function exportObj(){
+    var o={};
+    SLOTS.forEach(function(s){
+      var opt=picks[s]||'current';
+      var e={}; var src=PAL[opt][s];
+      for(var k in src) e[k]=src[k];
+      e.option=opt;
+      o[s]=e;
+    });
+    return o;
+  }
+
+  function apply(){
+    document.querySelectorAll('tr[data-slot]').forEach(function(tr){
+      var slot=tr.getAttribute('data-slot');
+      tr.querySelectorAll('.pick-cell').forEach(function(td){
+        td.classList.toggle('selected', picks[slot]===td.getAttribute('data-opt'));
+      });
+    });
+    var g=entry('green'), r=entry('red'), o=entry('orange'), y=entry('yellow'), bl=entry('blue'), gr=entry('gray');
+    board.style.setProperty('--ink-green',g.ink);   board.style.setProperty('--fill-green',g.fill);
+    board.style.setProperty('--wash-green',g.wash);
+    board.style.setProperty('--ink-red',r.ink);     board.style.setProperty('--fill-red',r.fill);
+    board.style.setProperty('--ink-orange',o.ink);  board.style.setProperty('--fill-orange',o.fill);
+    board.style.setProperty('--sticky-yellow',y.sticky);
+    board.style.setProperty('--sticky-blue',bl.sticky);
+    board.style.setProperty('--ink-gray',gr.ink);
+    strip.innerHTML=SLOTS.map(function(s){
+      var opt=picks[s]; var e=PAL[opt||'current'][s];
+      var a=e.ink||e.stroke, b=e.fill;
+      return '<div class="tile'+(opt?'':' unpicked')+'">'
+        +'<div class="duo"><i style="background:'+a+'"></i><i style="background:'+b+'"></i></div>'
+        +'<div class="lbl">'+s+'</div><div class="opt">'+(opt?OPT_LABEL[opt]:'— current')+'</div></div>';
+    }).join('');
+    counter.textContent=Object.keys(picks).length+' / 10 rows picked';
+    pre.textContent=JSON.stringify(exportObj(),null,2);
+    try{ localStorage.setItem(KEY,JSON.stringify(picks)); }catch(e){}
+  }
+
+  document.querySelector('table.cmp').addEventListener('click',function(ev){
+    var th=ev.target.closest('th.col-head');
+    if(th){
+      var opt=th.getAttribute('data-opt');
+      SLOTS.forEach(function(s){ picks[s]=opt; });
+      apply(); return;
+    }
+    var td=ev.target.closest('.pick-cell');
+    if(!td) return;
+    var slot=td.closest('tr').getAttribute('data-slot');
+    var opt=td.getAttribute('data-opt');
+    if(picks[slot]===opt) delete picks[slot]; else picks[slot]=opt;
+    apply();
+  });
+  document.getElementById('blendClear').addEventListener('click',function(){ picks={}; apply(); });
+  document.getElementById('blendCopy').addEventListener('click',function(){
+    var txt=JSON.stringify(exportObj(),null,2);
+    var b=document.getElementById('blendCopy');
+    function done(ok){
+      b.textContent=ok?'Copied ✓':'Copy failed — use the JSON below';
+      setTimeout(function(){ b.textContent='Copy JSON'; },1600);
+    }
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){done(true);},function(){done(false);});
+    } else { done(false); }
+  });
+  apply();
+})();
+</script>
+</body>
+</html>

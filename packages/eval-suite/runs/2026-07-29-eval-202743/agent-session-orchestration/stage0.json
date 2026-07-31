@@ -1,0 +1,749 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-29-eval-202743.agent-session-orchestration",
+  "title": "Long-lived Agent Session Orchestration",
+  "description": "# Long-lived agent session orchestration\n\nA lifecycle and systems diagram showing how a shared control plane places durable AI-agent sessions, runs the turn loop on runner hosts, streams output while persisting an identical event history, checkpoints immutable content-addressed state, and resumes or recovers work on any eligible host.\n\nRead left-to-right across the top for admission and execution, then downward through durable state, recovery, session trees and quotas, and lifecycle operations. Solid arrows carry primary control or data; dashed arrows show recovery, propagation, and operational feedback.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3264,
+    "height": 2064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Long-lived Agent Session Orchestration",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3200,
+        "height": 2000
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "admission",
+      "type": "section",
+      "text": "1 · API admission & placement",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 140,
+        "width": 880,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "execution",
+      "type": "section",
+      "text": "2 · Runner turn loop",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1100,
+        "y": 140,
+        "width": 880,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "streaming",
+      "type": "section",
+      "text": "3 · Streaming & reattachment",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2080,
+        "y": 140,
+        "width": 880,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "durability",
+      "type": "section",
+      "text": "4 · Event log & checkpoints",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 740,
+        "width": 880,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "recovery",
+      "type": "section",
+      "text": "5 · Suspension, resume & recovery",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1100,
+        "y": 740,
+        "width": 880,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "interrupt",
+      "type": "section",
+      "text": "6 · Cancel & uncertain outcomes",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2080,
+        "y": 740,
+        "width": 880,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "session-tree",
+      "type": "section",
+      "text": "7 · Child sessions & propagation",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 1340,
+        "width": 880,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "quotas",
+      "type": "section",
+      "text": "8 · Tree & workspace quotas",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1100,
+        "y": 1340,
+        "width": 880,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "retention",
+      "type": "section",
+      "text": "9 · Forking & retention",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2080,
+        "y": 1340,
+        "width": 880,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "api-gateway",
+      "type": "icon",
+      "text": "Session API",
+      "color": "gray",
+      "parentId": "admission",
+      "geometry": {
+        "x": 220,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "workspace-auth",
+      "type": "icon",
+      "text": "Auth + workspace",
+      "color": "red",
+      "parentId": "admission",
+      "geometry": {
+        "x": 560,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "scheduler",
+      "type": "icon",
+      "text": "Session scheduler",
+      "color": "teal",
+      "parentId": "admission",
+      "geometry": {
+        "x": 800,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "runner-host",
+      "type": "icon",
+      "text": "Runner host",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1200,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "turn-orchestrator",
+      "type": "icon",
+      "text": "Turn orchestrator",
+      "color": "teal",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1460,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "model-tools",
+      "type": "icon",
+      "text": "Model + tools",
+      "color": "pink",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1760,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "client-stream",
+      "type": "icon",
+      "text": "Client stream",
+      "color": "yellow",
+      "parentId": "streaming",
+      "geometry": {
+        "x": 2180,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "message"
+    },
+    {
+      "id": "live-stream",
+      "type": "icon",
+      "text": "Live output",
+      "color": "green",
+      "parentId": "streaming",
+      "geometry": {
+        "x": 2440,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "send"
+    },
+    {
+      "id": "replay-buffer",
+      "type": "icon",
+      "text": "Replay from ACK",
+      "color": "green",
+      "parentId": "streaming",
+      "geometry": {
+        "x": 2700,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "queue"
+    },
+    {
+      "id": "event-log",
+      "type": "icon",
+      "text": "Durable event log",
+      "color": "gray",
+      "parentId": "durability",
+      "geometry": {
+        "x": 220,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "checkpoint",
+      "type": "icon",
+      "text": "Turn checkpoint",
+      "color": "white",
+      "parentId": "durability",
+      "geometry": {
+        "x": 480,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "snapshot-store",
+      "type": "icon",
+      "text": "Snapshot chain",
+      "color": "blue",
+      "parentId": "durability",
+      "geometry": {
+        "x": 740,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "suspend-release",
+      "type": "icon",
+      "text": "Suspend + release",
+      "color": "gray",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 1200,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "wait"
+    },
+    {
+      "id": "heartbeat",
+      "type": "icon",
+      "text": "Heartbeat + rescue",
+      "color": "gray",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 1460,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "rehydrate",
+      "type": "predefined-process",
+      "text": "Rehydrate latest checkpoint",
+      "color": "gray",
+      "parentId": "recovery",
+      "geometry": {
+        "x": 1660,
+        "y": 860,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "cancel-signal",
+      "type": "icon",
+      "text": "Cancel / interrupt",
+      "color": "red",
+      "parentId": "interrupt",
+      "geometry": {
+        "x": 2180,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "stop-stream",
+      "type": "process",
+      "text": "Stop stream + abandon calls",
+      "color": "gray",
+      "parentId": "interrupt",
+      "geometry": {
+        "x": 2440,
+        "y": 860,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "uncertain-checkpoint",
+      "type": "icon",
+      "text": "Resumable checkpoint",
+      "color": "white",
+      "parentId": "interrupt",
+      "geometry": {
+        "x": 2800,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "spawn-child",
+      "type": "predefined-process",
+      "text": "Spawn scoped child",
+      "color": "gray",
+      "parentId": "session-tree",
+      "geometry": {
+        "x": 220,
+        "y": 1460,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "child-budget",
+      "type": "icon",
+      "text": "Scoped child budget",
+      "color": "yellow",
+      "parentId": "session-tree",
+      "geometry": {
+        "x": 600,
+        "y": 1460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "coin"
+    },
+    {
+      "id": "child-reaper",
+      "type": "icon",
+      "text": "Orphan reaper",
+      "color": "red",
+      "parentId": "session-tree",
+      "geometry": {
+        "x": 800,
+        "y": 1460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "usage-meter",
+      "type": "icon",
+      "text": "Tree + workspace usage",
+      "color": "gray",
+      "parentId": "quotas",
+      "geometry": {
+        "x": 1200,
+        "y": 1460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "quota-gate",
+      "type": "icon",
+      "text": "Aggregate quota gate",
+      "color": "red",
+      "parentId": "quotas",
+      "geometry": {
+        "x": 1460,
+        "y": 1460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "pause-decision",
+      "type": "icon",
+      "text": "User decision to resume",
+      "color": "yellow",
+      "parentId": "quotas",
+      "geometry": {
+        "x": 1720,
+        "y": 1460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "fork-checkpoint",
+      "type": "predefined-process",
+      "text": "Fork earlier checkpoint",
+      "color": "gray",
+      "parentId": "retention",
+      "geometry": {
+        "x": 2180,
+        "y": 1460,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "shared-content",
+      "type": "icon",
+      "text": "Shared content",
+      "color": "white",
+      "parentId": "retention",
+      "geometry": {
+        "x": 2560,
+        "y": 1460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "reachability-gc",
+      "type": "icon",
+      "text": "Reachability GC",
+      "color": "gray",
+      "parentId": "retention",
+      "geometry": {
+        "x": 2800,
+        "y": 1460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-api-auth",
+      "from": {
+        "objectId": "api-gateway",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "workspace-auth",
+        "anchor": "left"
+      },
+      "label": "authenticate",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e-auth-scheduler",
+      "from": {
+        "objectId": "workspace-auth",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "scheduler",
+        "anchor": "left"
+      },
+      "label": "place",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-scheduler-runner",
+      "from": {
+        "objectId": "scheduler",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "runner-host",
+        "anchor": "left"
+      },
+      "label": "place session",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-runner-orchestrator",
+      "from": {
+        "objectId": "runner-host",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "turn-orchestrator",
+        "anchor": "left"
+      },
+      "label": "run",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-orchestrator-model",
+      "from": {
+        "objectId": "turn-orchestrator",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "model-tools",
+        "anchor": "left"
+      },
+      "label": "turn loop",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-model-live",
+      "from": {
+        "objectId": "model-tools",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "live-stream",
+        "anchor": "left"
+      },
+      "label": "stream tokens",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.3,
+        "offset": -20
+      }
+    },
+    {
+      "id": "e-live-client",
+      "from": {
+        "objectId": "live-stream",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "client-stream",
+        "anchor": "right"
+      },
+      "label": "deliver",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 40
+      }
+    }
+  ],
+  "annotations": []
+}

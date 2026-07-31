@@ -75,13 +75,13 @@ export function toolReplyAnnotation(
       annotation.id === annotationId
         ? { ...annotation, replies: [...annotation.replies, reply] }
         : annotation),
-  }, `replyAnnotation ${annotationId}`);
+  }, `reply_annotation ${annotationId}`);
   syncSessionRequests(session);
   emitAnnotations(session, emit);
 
   return {
     text: [
-      `APPLIED · replyAnnotation ${annotationId}`,
+      `APPLIED · reply_annotation ${annotationId}`,
       `DELTA · reply on ${targetText(thread.target)}`
       + `  agent — ${JSON.stringify(reply.body)}`,
       formatRequestsBlock(session.requests),

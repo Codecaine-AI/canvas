@@ -1,9 +1,9 @@
 /**
- * Section ② wiring gate: the style-guide and capabilities loaders inject their
- * static corpora; the layout-editor context sidecar assembles the two tagged
- * blocks in declaration order and appends a caption line naming the delivered
- * reference images; and the kernel config registers exactly those two custom
- * loaders.
+ * Section ② wiring gate: the capabilities, state-grammar, and style-guide
+ * loaders inject their static corpora; the layout-editor context sidecar
+ * assembles the three tagged blocks in declaration order and appends a
+ * caption line naming the delivered reference images; and the kernel config
+ * registers exactly those three custom loaders.
  *
  * The board-state / editor-state / user-requests loaders retired when the
  * layout-editor's state/ sidecar took over the working picture, so what remains of
@@ -29,6 +29,16 @@ import {
   type RequestQueueEntry,
 } from "../src/service/session/snapshots/user-requests";
 import { formatCapabilities } from "../src/service/loaders/capabilities";
+import {
+  formatStateGrammar,
+  stateGrammarLoader,
+} from "../src/service/loaders/state-grammar";
+import {
+  DIGEST_DEFAULTS_LEGEND,
+  DIGEST_GRAMMAR,
+  DIGEST_ROUTE_LEGEND,
+} from "../src/board/digest";
+import { FINISHING_RULES, LAYOUT_RULES } from "../src/board/lints";
 import { context as layoutEditorContext } from "../src/catalog/layout-editor/context";
 
 const RESOLVE_CTX = { cwd: "/" };
@@ -157,6 +167,74 @@ describe("style-guide loader", () => {
   });
 });
 
+describe("state-grammar loader", () => {
+  test("quotes the digest line grammars verbatim — the key cannot drift", async () => {
+    const result = await stateGrammarLoader.resolve({ kind: "state-grammar" }, RESOLVE_CTX);
+    expect(result.status).toBe("ok");
+    expect(result.content).toContain(DIGEST_GRAMMAR);
+    expect(result.content).toContain(DIGEST_DEFAULTS_LEGEND);
+    expect(result.content).toContain(DIGEST_ROUTE_LEGEND);
+  });
+
+  test("names the full lint roster from the registry, finishing rules included", () => {
+    const content = formatStateGrammar();
+    for (const rule of FINISHING_RULES) {
+      expect(content, rule.id).toContain(rule.id);
+    }
+    expect(content).toContain(
+      `always-on rules: ${LAYOUT_RULES.map((rule) => rule.id).join(", ")}`,
+    );
+  });
+
+  test("keys every state child and the two result families", () => {
+    const content = formatStateGrammar();
+    for (const tag of [
+      "board",
+      "recent_ops",
+      "diff",
+      "lints",
+      "requests",
+      "views",
+      "recent_conversation",
+      "results",
+      "look",
+    ]) {
+      expect(content, tag).toContain(`<${tag}>`);
+      expect(content, tag).toContain(`</${tag}>`);
+    }
+  });
+
+  test("keys the result headers and the edge extras", () => {
+    const content = formatStateGrammar();
+    for (const header of [
+      "APPLIED ·",
+      "DELTA —",
+      "LINTS · +new −resolved",
+      "ROUTES —",
+      "REQUESTS · none | k/n disposed",
+      "NO-OP ·",
+      "DIAGNOSTICS",
+      "MEASURES ·",
+      "LOOK ·",
+    ]) {
+      expect(content, header).toContain(header);
+    }
+    expect(content).toContain("lp=along[@offset]");
+    expect(content).toContain("author=");
+    expect(content).not.toContain(" icon,");
+  });
+
+  test("is static: same bytes every resolve", async () => {
+    const a = await stateGrammarLoader.resolve({ kind: "state-grammar" }, RESOLVE_CTX);
+    const b = await stateGrammarLoader.resolve(
+      { kind: "state-grammar" },
+      { cwd: "/elsewhere", sessionData: { boardState: "ignored" } },
+    );
+    expect(a.content).toBe(b.content);
+    expect(a.content).toBe(formatStateGrammar());
+  });
+});
+
 describe("request queue rendering", () => {
   test("formats every target kind and status, and marks the empty queue", () => {
     const entries: RequestQueueEntry[] = [
@@ -204,14 +282,13 @@ describe("request queue rendering", () => {
       },
     ];
     const text = formatRequestQueue(entries);
-    expect(text).toContain("resolve_request");
-    expect(text).toContain('  R1 open  object:task  human — "Keep this as the entry point"');
+    expect(text).toContain('R1 open  object:task  human — "Keep this as the entry point"');
     // Disposed entries carry the note, not the body.
-    expect(text).toContain('  R2 done "relabeled the edge"');
-    expect(text).toContain('  R3 declined "area is reserved for the legend"');
+    expect(text).toContain('R2 done "relabeled the edge"');
+    expect(text).toContain('R3 declined "area is reserved for the legend"');
     // Region targets render their rect; whitespace collapses but nothing is elided.
     expect(text).toContain(
-      '  R4 open  region:400,34 200×120  human — "Add an outcomes list here"',
+      'R4 open  region:400,34 200×120  human — "Add an outcomes list here"',
     );
     expect(formatRequestQueue([])).toBe(USER_REQUESTS_EMPTY);
   });
@@ -233,9 +310,9 @@ describe("request queue rendering", () => {
       },
     ]);
 
-    expect(text).toContain('  R1 open  object:task  human — "Split this into two steps"');
-    expect(text).toContain('      ↳ agent — "Which two?"');
-    expect(text).toContain('      ↳ human — "prep and run"');
+    expect(text).toContain('R1 open  object:task  human — "Split this into two steps"');
+    expect(text).toContain('    ↳ agent — "Which two?"');
+    expect(text).toContain('    ↳ human — "prep and run"');
   });
 
   test("labels a thread the agent opened by its author", () => {
@@ -252,7 +329,7 @@ describe("request queue rendering", () => {
       },
     ]);
 
-    expect(text).toContain('  R1 open  object:task  agent — "Is this the retry path?"');
+    expect(text).toContain('R1 open  object:task  agent — "Is this the retry path?"');
   });
 });
 
@@ -264,11 +341,12 @@ const EXEMPLAR_CAPTION =
   "a finished board in the house style — a taste reference, not this board";
 
 describe("layout-editor context sidecar", () => {
-  test("declares only the two reference loaders, in block order", () => {
+  test("declares only the three reference loaders, in block order", () => {
     // The working-picture loaders retired: board / editor / requests are
     // rendered fresh into section ③ by state/, never pinned here.
     expect(layoutEditorContext.loaders.map((decl) => decl.kind)).toEqual([
       "capabilities",
+      "state-grammar",
       "style-guide",
     ]);
   });
@@ -276,6 +354,7 @@ describe("layout-editor context sidecar", () => {
   test("assemble wraps each loaded input in its tagged block", async () => {
     const loaded: LoadedMap = [
       loadedInput("capabilities", formatCapabilities()),
+      loadedInput("state-grammar", formatStateGrammar()),
       loadedInput("style-guide", formatStyleGuide()),
     ];
     const assembled = await layoutEditorContext.assemble(loaded, {} as SpawnContext);
@@ -285,12 +364,14 @@ describe("layout-editor context sidecar", () => {
       .map((line) => (line.length > 0 ? `    ${line}` : line))
       .join("\n");
     expect(assembled).toContain(`<capabilities>\n${indented(formatCapabilities())}\n</capabilities>`);
+    expect(assembled).toContain(`<state_grammar>\n${indented(formatStateGrammar())}\n</state_grammar>`);
     expect(assembled).toContain("<style_guide>\n");
     for (const topic of STYLE_TOPICS) {
       expect(assembled).toContain(`<${topic.id.replaceAll("-", "_")}>`);
     }
     // Block order matches declaration order.
-    expect(assembled.indexOf("<capabilities>")).toBeLessThan(assembled.indexOf("<style_guide>"));
+    expect(assembled.indexOf("<capabilities>")).toBeLessThan(assembled.indexOf("<state_grammar>"));
+    expect(assembled.indexOf("<state_grammar>")).toBeLessThan(assembled.indexOf("<style_guide>"));
     // Nothing that moved to the state side is emitted here any more.
     expect(assembled).not.toContain("<board_state>");
     expect(assembled).not.toContain("<editor_state>");
@@ -399,7 +480,7 @@ describe("layout-editor context sidecar", () => {
 });
 
 describe("kernel loader registration", () => {
-  test("kernel.ts registers exactly the two section-② loaders", () => {
+  test("kernel.ts registers exactly the three section-② loaders", () => {
     // Booting a kernel here would touch trace.db, so this gate reads the
     // wiring statically.
     const source = require("node:fs").readFileSync(
@@ -408,7 +489,7 @@ describe("kernel loader registration", () => {
     ) as string;
     const loadersEntry = source.match(/loaders: \[[^\]]*\]/);
     expect(loadersEntry).not.toBeNull();
-    for (const loader of ["capabilitiesLoader", "styleGuideLoader"]) {
+    for (const loader of ["capabilitiesLoader", "stateGrammarLoader", "styleGuideLoader"]) {
       expect(loadersEntry![0], loader).toContain(loader);
     }
     for (const retired of [

@@ -33,31 +33,12 @@ const FAMILY: Partial<Record<InteractiveCanvasObjectType, Family>> = {
   section: "containers",
   process: "flowchart",
   decision: "flowchart",
-  document: "flowchart",
-  database: "flowchart",
-  "document-stack": "flowchart",
   "predefined-process": "flowchart",
-  "off-page-connector": "flowchart",
-  "manual-input": "flowchart",
-  "internal-storage": "flowchart",
-  "or-junction": "flowchart",
-  "summing-junction": "flowchart",
-  "cylinder-horizontal": "flowchart",
-  "page-corner": "flowchart",
   rectangle: "geometric",
   ellipse: "geometric",
   triangle: "geometric",
-  parallelogram: "geometric",
-  pentagon: "geometric",
-  hexagon: "geometric",
   octagon: "geometric",
-  star: "geometric",
-  plus: "geometric",
-  chevron: "geometric",
-  trapezoid: "geometric",
-  pill: "geometric",
   "arrow-shape": "geometric",
-  folder: "geometric",
   sticky: "notes",
   icon: "special",
 };
@@ -114,11 +95,10 @@ function positiveDefaultSize(type: InteractiveCanvasObjectType): {
 
 /**
  * The type bands show exactly the names a gesture accepts, so the sheet and the
- * `type` enum can never disagree. Two kinds of name are therefore absent: the
- * `icon` carrier — glyphs are types of their own and get their own band below —
- * and any shape a glyph outranked in the collision audit (./placeable-types.ts),
- * which is read-only. `section` and `sticky` stay: they are placed by their own
- * gestures, not by a `type` pick.
+ * `type` enum can never disagree. One kind of name is therefore absent: the
+ * `icon` carrier — glyphs are types of their own and get their own band below.
+ * `section` and `sticky` stay: they are placed by their own gestures, not by a
+ * `type` pick.
  */
 function specimenTypes(): InteractiveCanvasObjectType[] {
   const placeableShapes = new Set<string>(PLACEABLE_SHAPE_TYPES);
@@ -157,7 +137,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
 
     objects.push(
       draftPlacedObject(
-        "pill",
+        "process",
         {
           x: 0,
           y: nextBandY,
@@ -188,12 +168,12 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
         : type;
 
       objects.push(draftPlacedObject(type, geometry, { id, text }));
-      // A separate, label-styled pill keeps glyph-only and very small shapes
+      // A separate, label-styled rounded chip keeps glyph-only and very small shapes
       // identifiable without maintaining another list of renderer exceptions.
       const labelWidth = labelWidths[index]!;
       objects.push(
         draftPlacedObject(
-          "pill",
+          "process",
           {
             x: geometry.x + (width - labelWidth) / 2,
             y: geometry.y + height + SPECIMEN_LABEL_GAP_Y,
@@ -231,7 +211,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
   const bandLabel = (id: string, text: string): void => {
     objects.push(
       draftPlacedObject(
-        "pill",
+        "process",
         { x: 0, y: nextBandY, width: FAMILY_LABEL_WIDTH, height: FAMILY_LABEL_HEIGHT },
         { id, text, color: "blue" },
       ),
@@ -293,7 +273,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
     const toId = `demo-to-${index}`;
     objects.push(
       draftPlacedObject(
-        "pill",
+        "process",
         { x, y, ...DEMO_NODE },
         { id: fromId, text: "", color: "white" },
       ),
@@ -309,7 +289,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
     } else {
       objects.push(
         draftPlacedObject(
-          "pill",
+          "process",
           { x: x + DEMO_SPAN, y, ...DEMO_NODE },
           { id: toId, text: "", color: "white" },
         ),

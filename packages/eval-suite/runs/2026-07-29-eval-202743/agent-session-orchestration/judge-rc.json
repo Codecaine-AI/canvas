@@ -1,0 +1,888 @@
+{
+  "axis": "rc",
+  "scenario": "agent-session-orchestration",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 4,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The platform runs long-lived AI agent sessions through a shared control plane.",
+        "brief_evidence": "“our platform runs long-lived AI agent sessions through a shared control plane”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Entire board, especially sections 1–9",
+            "observation": "The board is titled “Long-lived Agent Session Orchestration” and shows API, scheduler, runner, durability, recovery, quota, and retention areas."
+          },
+          {
+            "source": "json",
+            "locator": "objects page-frame and section objects admission through retention",
+            "observation": "The title and nine lifecycle sections represent the platform scope, but no visible region or component is identified as a shared control plane."
+          }
+        ],
+        "note": "Long-lived session orchestration is clear, but the shared-control-plane boundary is not explicitly represented."
+      },
+      {
+        "id": "R2",
+        "requirement": "A client opens a session at the API tier.",
+        "brief_evidence": "“A client opens a session at the API tier”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 · API admission & placement",
+            "observation": "A “Session API” component is visible, but there is no client component or session-open arrow entering it."
+          },
+          {
+            "source": "json",
+            "locator": "object api-gateway and connections array",
+            "observation": "api-gateway is labeled “Session API”; the first connection starts at the API and goes to authentication, with no client-to-API connection."
+          }
+        ],
+        "note": "The API tier is represented, but the client opening the session is not."
+      },
+      {
+        "id": "R3",
+        "requirement": "The API tier authenticates the user.",
+        "brief_evidence": "“which authenticates the user”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Session API to Auth + workspace",
+            "observation": "A directed arrow labeled “authenticate” runs from “Session API” to “Auth + workspace.”"
+          },
+          {
+            "source": "json",
+            "locator": "connection e-api-auth",
+            "observation": "The solid forward connection from api-gateway to workspace-auth is labeled “authenticate.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "The API tier resolves the workspace and its quotas.",
+        "brief_evidence": "“resolves the workspace and its quotas”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 1 and 8",
+            "observation": "“Auth + workspace” and a separate “Tree + workspace quotas” section are visible, but no resolution relationship connects them."
+          },
+          {
+            "source": "json",
+            "locator": "objects workspace-auth, usage-meter, quota-gate; connections array",
+            "observation": "Workspace and quota concepts exist as labels, but the only admission connections are authenticate, place, and place session."
+          }
+        ],
+        "note": "Workspace and quota concepts appear, but API-time workspace/quota resolution is not shown."
+      },
+      {
+        "id": "R5",
+        "requirement": "The API tier asks the session scheduler for placement.",
+        "brief_evidence": "“asks the session scheduler for placement”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Auth + workspace to Session scheduler",
+            "observation": "A directed arrow labeled “place” leads into “Session scheduler.”"
+          },
+          {
+            "source": "json",
+            "locator": "connection e-auth-scheduler",
+            "observation": "The solid forward connection from workspace-auth to scheduler is labeled “place.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "The scheduler selects a runner host with sufficient capacity while honoring workspace residency and isolation requirements.",
+        "brief_evidence": "“selects a runner host with enough capacity while honoring workspace residency and isolation requirements”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 1–2, Session scheduler to Runner host",
+            "observation": "A directed “place session” arrow selects a runner host, but no capacity, residency, or isolation qualifiers are visible."
+          },
+          {
+            "source": "json",
+            "locator": "connection e-scheduler-runner and all object texts",
+            "observation": "e-scheduler-runner represents placement; searches of visible labels find no “capacity,” “residency,” or “isolation.”"
+          }
+        ],
+        "note": "Host selection is shown, but all three placement constraints are missing."
+      },
+      {
+        "id": "R7",
+        "requirement": "On the selected host, the orchestrator repeatedly assembles each model request from system context, conversation history, and the permitted tool surface.",
+        "brief_evidence": "“On that host, the orchestrator repeatedly assembles a model request from system context, conversation history, and the permitted tool surface.”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 · Runner turn loop",
+            "observation": "The section contains Runner host, Turn orchestrator, and Model + tools, but no request-assembly step or the three stated inputs."
+          },
+          {
+            "source": "json",
+            "locator": "objects in parent execution and connections e-runner-orchestrator/e-orchestrator-model",
+            "observation": "Visible labels are limited to “run” and “turn loop”; no system context, conversation history, permitted tool surface, or request assembly is encoded."
+          }
+        ],
+        "note": "The orchestrator exists, but the required request construction and its inputs are not represented."
+      },
+      {
+        "id": "R8",
+        "requirement": "The orchestrator calls the model, receives and executes tool calls, appends tool results, and starts the next turn until the agent finishes or reaches its turn or token ceiling.",
+        "brief_evidence": "“It calls the model, receives and executes tool calls, appends their results, and begins the next turn until the agent finishes or reaches its turn or token ceiling.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, Turn orchestrator to Model + tools",
+            "observation": "A forward arrow labeled “turn loop” reaches “Model + tools,” indicating repeated model/tool activity."
+          },
+          {
+            "source": "json",
+            "locator": "object model-tools and connection e-orchestrator-model",
+            "observation": "The combined component and “turn loop” connection omit receipt, execution, result append, return direction, finish condition, and turn/token ceilings."
+          }
+        ],
+        "note": "Only a generic turn loop involving model and tools is shown."
+      },
+      {
+        "id": "R9",
+        "requirement": "Turn output streams to the client as it is produced.",
+        "brief_evidence": "“Turn output streams to the client as it is produced”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 2–3",
+            "observation": "A “stream tokens” arrow leads from Model + tools to Live output, followed by a directed “deliver” arrow to Client stream."
+          },
+          {
+            "source": "json",
+            "locator": "connections e-model-live and e-live-client",
+            "observation": "Both streaming connections are solid and forward, visibly encoding production and delivery to the client."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "The identical output stream is committed to a durable event log.",
+        "brief_evidence": "“while the identical stream is committed to a durable event log”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 3 and 4",
+            "observation": "Live output and Durable event log are visible in separate sections, with no line or note connecting them and no “identical” encoding."
+          },
+          {
+            "source": "json",
+            "locator": "connections array and object event-log",
+            "observation": "No connection targets event-log; the only stream edges target live-stream and client-stream."
+          }
+        ],
+        "note": "The durable log exists as an isolated icon, but stream commitment and identity are not represented."
+      },
+      {
+        "id": "R11",
+        "requirement": "Disconnecting the client does not terminate session work.",
+        "brief_evidence": "“A disconnected client does not terminate the work. The session continues”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 · Streaming & reattachment",
+            "observation": "The section shows client stream, live output, and replay from ACK, but no disconnect state or continuation behavior."
+          },
+          {
+            "source": "json",
+            "locator": "objects under streaming and all connections",
+            "observation": "No visible label mentions disconnect, continued execution, or non-termination."
+          }
+        ],
+        "note": "This key disconnection failure semantic is not shown."
+      },
+      {
+        "id": "R12",
+        "requirement": "A returning client replays missed events from its last acknowledged position and then reattaches to the live stream.",
+        "brief_evidence": "“a returning client reattaches to the live stream after replaying missed events from its last acknowledged position”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3",
+            "observation": "A “Replay from ACK” component appears beside Live output and Client stream, but it has no connecting arrows or ordering."
+          },
+          {
+            "source": "json",
+            "locator": "object replay-buffer and connections array",
+            "observation": "replay-buffer is labeled “Replay from ACK,” but no connection originates from the event log or reaches the client/live stream."
+          }
+        ],
+        "note": "Replay from an acknowledgment is named, but missed-event retrieval, reattachment, and replay-before-live ordering are not encoded."
+      },
+      {
+        "id": "R13",
+        "requirement": "Every completed turn creates a durable checkpoint.",
+        "brief_evidence": "“Every completed turn also creates a durable checkpoint”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 · Event log & checkpoints",
+            "observation": "A component labeled “Turn checkpoint” is visible."
+          },
+          {
+            "source": "json",
+            "locator": "object checkpoint and connections array",
+            "observation": "The checkpoint object is present, but no edge from the turn loop or completion event establishes creation on every completed turn."
+          }
+        ],
+        "note": "A turn checkpoint is represented, but the universal completed-turn trigger is not."
+      },
+      {
+        "id": "R14",
+        "requirement": "Each checkpoint contains conversation state, tool results, and workspace file state.",
+        "brief_evidence": "“containing conversation state, tool results, and the workspace file state”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4",
+            "observation": "The checkpoint is labeled only “Turn checkpoint”; none of the required contents are listed."
+          },
+          {
+            "source": "json",
+            "locator": "object checkpoint and all visible object texts",
+            "observation": "No visible label enumerates conversation state, tool results, or workspace file state as checkpoint contents."
+          }
+        ],
+        "note": "Checkpoint contents are entirely unspecified."
+      },
+      {
+        "id": "R15",
+        "requirement": "Checkpoints are content-addressed snapshots whose parent is the prior snapshot, forming immutable history and deduplicating unchanged content rather than rewriting a mutable copy.",
+        "brief_evidence": "“The checkpoint is a content-addressed snapshot whose parent is the prior snapshot, producing an immutable history that deduplicates unchanged content instead of rewriting a mutable copy.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 4 and 9",
+            "observation": "“Snapshot chain” and “Shared content” visibly suggest chained snapshots and sharing."
+          },
+          {
+            "source": "json",
+            "locator": "objects snapshot-store and shared-content; connections array",
+            "observation": "No parent links or visible labels specify content addressing, immutability, deduplication, or prohibition of mutable rewriting."
+          }
+        ],
+        "note": "Snapshot chaining and shared content are recognizable, but most storage semantics are unstated."
+      },
+      {
+        "id": "R16",
+        "requirement": "Idle sessions and sessions suspended on demand release their runners while retaining their snapshot chains.",
+        "brief_evidence": "“Idle sessions and sessions suspended on demand release their runners but retain their snapshot chains.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 4–5",
+            "observation": "“Suspend + release” and “Snapshot chain” are visible, but there is no relationship between them and no idle-session case."
+          },
+          {
+            "source": "json",
+            "locator": "objects suspend-release and snapshot-store; connections array",
+            "observation": "Both concepts exist as isolated objects; no connection encodes runner release with chain retention."
+          }
+        ],
+        "note": "Demand suspension/release is named, but idle handling and retained-state semantics are incomplete."
+      },
+      {
+        "id": "R17",
+        "requirement": "Resume may occur on another host, which rehydrates the latest snapshot before continuing.",
+        "brief_evidence": "“Resume may occur on another host, which rehydrates the latest snapshot before continuing.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5",
+            "observation": "A process labeled “Rehydrate latest checkpoint” is visible."
+          },
+          {
+            "source": "json",
+            "locator": "object rehydrate and connections array",
+            "observation": "The latest-checkpoint rehydration step exists, but there is no another-host target, resume edge, or before-continuing sequence."
+          }
+        ],
+        "note": "Latest-state rehydration is shown; host migration and continuation ordering are not."
+      },
+      {
+        "id": "R18",
+        "requirement": "A heartbeat monitor detects crashed runners, returns their capacity to the scheduler, and rescues affected sessions from the last checkpoint.",
+        "brief_evidence": "“A heartbeat monitor detects crashed runners, returns their capacity to the scheduler, and rescues affected sessions from the last checkpoint.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5",
+            "observation": "A “Heartbeat + rescue” icon and “Rehydrate latest checkpoint” process are visible."
+          },
+          {
+            "source": "json",
+            "locator": "objects heartbeat and rehydrate; connections array",
+            "observation": "No edges connect the heartbeat monitor to the runner, scheduler, or checkpoint, and capacity return is not labeled."
+          }
+        ],
+        "note": "Heartbeat/rescue is named, but crash detection, scheduler capacity return, and checkpoint-based rescue flow are not fully represented."
+      },
+      {
+        "id": "R19",
+        "requirement": "Crash recovery replays at most the turn that was in flight.",
+        "brief_evidence": "“Recovery replays at most the turn that was in flight”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5 · Suspension, resume & recovery",
+            "observation": "No replay bound or in-flight-turn notation appears."
+          },
+          {
+            "source": "json",
+            "locator": "objects under recovery and all connection labels",
+            "observation": "Search of visible text finds no “in flight,” “at most,” or recovery replay constraint."
+          }
+        ],
+        "note": "The bounded replay guarantee is absent."
+      },
+      {
+        "id": "R20",
+        "requirement": "Every tool call capable of changing external state carries an idempotency key in case it completed before a crash.",
+        "brief_evidence": "“every tool call that can change external state carries an idempotency key in case that call completed before the crash”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 2, 5, and 6",
+            "observation": "Model + tools, recovery, and interruption areas contain no idempotency-key label or external-state distinction."
+          },
+          {
+            "source": "json",
+            "locator": "object model-tools and all visible texts/connections",
+            "observation": "No object or edge mentions idempotency, external state, or possibly completed crash-time calls."
+          }
+        ],
+        "note": "The principal duplicate-side-effect safety mechanism is missing."
+      },
+      {
+        "id": "R21",
+        "requirement": "Cancellation or interruption can arrive during a turn.",
+        "brief_evidence": "“Cancellation or interruption can also arrive during a turn.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 · Cancel & uncertain outcomes",
+            "observation": "The section includes a prominent “Cancel / interrupt” component alongside turn-interruption handling steps."
+          },
+          {
+            "source": "json",
+            "locator": "object cancel-signal and parent section interrupt",
+            "observation": "The visible labels establish cancellation/interruption as part of in-turn outcome handling."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "On cancellation or interruption, the orchestrator stops the model stream.",
+        "brief_evidence": "“The orchestrator stops the model stream”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6",
+            "observation": "The process following “Cancel / interrupt” is labeled “Stop stream + abandon calls.”"
+          },
+          {
+            "source": "json",
+            "locator": "object stop-stream",
+            "observation": "The visible process text explicitly includes “Stop stream.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "On cancellation or interruption, the orchestrator abandons in-flight tool calls where possible.",
+        "brief_evidence": "“abandons in-flight tool calls where possible”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6",
+            "observation": "The process is labeled “Stop stream + abandon calls.”"
+          },
+          {
+            "source": "json",
+            "locator": "object stop-stream",
+            "observation": "The visible text explicitly represents abandonment of calls in the cancel/interruption area."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "If termination of an in-flight tool call cannot be confirmed, its uncertain outcome is recorded.",
+        "brief_evidence": "“records their uncertain outcome when it cannot confirm termination”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section title “6 · Cancel & uncertain outcomes”",
+            "observation": "The section title identifies uncertain outcomes, but no recording step or cannot-confirm condition is shown."
+          },
+          {
+            "source": "json",
+            "locator": "section interrupt and objects cancel-signal, stop-stream, uncertain-checkpoint",
+            "observation": "Only the section title contains “uncertain outcomes”; no visible object or edge says the outcome is recorded."
+          }
+        ],
+        "note": "Uncertainty is acknowledged, but the conditional recording requirement is not represented."
+      },
+      {
+        "id": "R25",
+        "requirement": "Cancellation or interruption commits a resumable checkpoint before releasing the runner.",
+        "brief_evidence": "“commits a resumable checkpoint before releasing the runner”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 and Section 5",
+            "observation": "A “Resumable checkpoint” object and a separate “Suspend + release” object are visible, but no ordering arrow connects them."
+          },
+          {
+            "source": "json",
+            "locator": "objects uncertain-checkpoint and suspend-release; connections array",
+            "observation": "No connection encodes checkpoint commit before runner release."
+          }
+        ],
+        "note": "The checkpoint endpoint exists, but commit semantics and required ordering are missing."
+      },
+      {
+        "id": "R26",
+        "requirement": "An agent may spawn child sessions for independent subtasks.",
+        "brief_evidence": "“An agent may spawn child sessions for independent subtasks.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 · Child sessions & propagation",
+            "observation": "A process labeled “Spawn scoped child” represents spawning a child session."
+          },
+          {
+            "source": "json",
+            "locator": "object spawn-child",
+            "observation": "The visible text identifies child spawning but does not state that the subtask is independent."
+          }
+        ],
+        "note": "Child spawning is clear; independence of the subtask is not."
+      },
+      {
+        "id": "R27",
+        "requirement": "Each child receives scoped context and a budget drawn from its parent's remaining allowance.",
+        "brief_evidence": "“Each child receives scoped context and a budget drawn from its parent's remaining allowance”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7",
+            "observation": "“Spawn scoped child” and “Scoped child budget” are visible."
+          },
+          {
+            "source": "json",
+            "locator": "objects spawn-child and child-budget; connections array",
+            "observation": "No edge or text shows budget transfer from the parent's remaining allowance, and scoped context is only indirectly suggested by “scoped child.”"
+          }
+        ],
+        "note": "Scope and child budget are named, but their contents and derivation from the parent are incomplete."
+      },
+      {
+        "id": "R28",
+        "requirement": "A child runs concurrently and returns its result through the parent orchestrator.",
+        "brief_evidence": "“runs concurrently, and returns its result through the parent orchestrator”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 2 and 7",
+            "observation": "The child-session section is isolated from the Turn orchestrator; no concurrency or result-return arrow is visible."
+          },
+          {
+            "source": "json",
+            "locator": "object spawn-child, object turn-orchestrator, connections array",
+            "observation": "There is no connection between child-session objects and the parent orchestrator and no concurrent-run label."
+          }
+        ],
+        "note": "Neither concurrent execution nor result return is represented."
+      },
+      {
+        "id": "R29",
+        "requirement": "Cancellation and failure propagate through the session tree.",
+        "brief_evidence": "“Cancellation and failure propagate through the session tree”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section title “7 · Child sessions & propagation”",
+            "observation": "The title mentions propagation, but no session-tree topology, cancellation path, or failure path is drawn."
+          },
+          {
+            "source": "json",
+            "locator": "section session-tree and connections array",
+            "observation": "The section label carries generic propagation; there are no edges among parent and child sessions."
+          }
+        ],
+        "note": "Propagation is named generically, but its signals, direction, and tree behavior are not represented."
+      },
+      {
+        "id": "R30",
+        "requirement": "A reaper terminates any child that survives after its parent is gone.",
+        "brief_evidence": "“a reaper terminates any child that survives after its parent is gone”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7",
+            "observation": "A guardrail component labeled “Orphan reaper” is visible in the child-session lifecycle area."
+          },
+          {
+            "source": "json",
+            "locator": "object child-reaper",
+            "observation": "The visible “Orphan reaper” label unambiguously represents cleanup of children orphaned by a missing parent."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "Quota enforcement aggregates token spend, wall-clock time, tool-call counts, and concurrent sessions across both the session tree and the workspace.",
+        "brief_evidence": "“Quota enforcement therefore aggregates token spend, wall-clock time, tool-call counts, and concurrent sessions across the tree as well as across the workspace.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 · Tree & workspace quotas",
+            "observation": "“Tree + workspace usage” and “Aggregate quota gate” represent aggregation at both scopes."
+          },
+          {
+            "source": "json",
+            "locator": "objects usage-meter and quota-gate",
+            "observation": "No visible label enumerates token spend, wall-clock time, tool-call counts, or concurrent sessions."
+          }
+        ],
+        "note": "Aggregation scope is represented, but none of the four required quota dimensions is identified."
+      },
+      {
+        "id": "R32",
+        "requirement": "Exhausting an allowance pauses the affected session for a user decision instead of silently truncating its work.",
+        "brief_evidence": "“Exhausting an allowance pauses the affected session for a user decision instead of silently truncating its work”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8",
+            "observation": "An “Aggregate quota gate” and “User decision to resume” are visible."
+          },
+          {
+            "source": "json",
+            "locator": "objects quota-gate and pause-decision; connections array",
+            "observation": "There is no edge showing exhaustion causing pause, and no visible statement that silent truncation is prohibited."
+          }
+        ],
+        "note": "The quota gate and user decision are present, but trigger, pause behavior, and non-truncation guarantee are incomplete."
+      },
+      {
+        "id": "R33",
+        "requirement": "Held children remain accounted for while the parent waits for a user decision.",
+        "brief_evidence": "“held children remain accounted for while the parent waits”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 7–8",
+            "observation": "Child budget, usage, and user decision components are present but disconnected; no held-child or waiting-parent accounting is shown."
+          },
+          {
+            "source": "json",
+            "locator": "objects child-budget, usage-meter, pause-decision and connections array",
+            "observation": "No visible text or relationship encodes continued accounting for held children."
+          }
+        ],
+        "note": "The accounting rule during a parent hold is absent."
+      },
+      {
+        "id": "R34",
+        "requirement": "The event log records every request, model response, tool call and result, checkpoint reference, budget decision, and lifecycle transition.",
+        "brief_evidence": "“The event log records each request, model response, tool call and result, checkpoint reference, budget decision, and lifecycle transition.”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 · Event log & checkpoints",
+            "observation": "A “Durable event log” icon is visible, but no record types or incoming event lines are shown."
+          },
+          {
+            "source": "json",
+            "locator": "object event-log and connections array",
+            "observation": "event-log has no connections, annotations, or visible text enumerating the required event classes."
+          }
+        ],
+        "note": "The log component exists, but none of its required recorded contents is represented."
+      },
+      {
+        "id": "R35",
+        "requirement": "The event log supports forensic reconstruction and replay while feeding usage metering and per-session cost accounting.",
+        "brief_evidence": "“It supports forensic reconstruction and replay while feeding usage metering and per-session cost accounting.”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 3, 4, and 8",
+            "observation": "Replay from ACK, Durable event log, and Tree + workspace usage are visible, but they are not connected; forensic reconstruction and per-session cost are not labeled."
+          },
+          {
+            "source": "json",
+            "locator": "objects replay-buffer, event-log, usage-meter; connections array",
+            "observation": "No edge leaves event-log for replay or metering, and no visible object mentions forensic reconstruction or per-session cost accounting."
+          }
+        ],
+        "note": "Replay and usage concepts appear separately, but the event-log outputs and two stated purposes are largely missing."
+      },
+      {
+        "id": "R36",
+        "requirement": "Deleting a session makes its unreferenced snapshot chain eligible for reachability-based collection.",
+        "brief_evidence": "“Snapshot retention follows reachability: deleting a session makes its unreferenced chain eligible for collection”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 9 · Forking & retention",
+            "observation": "A component labeled “Reachability GC” represents reachability-based collection."
+          },
+          {
+            "source": "json",
+            "locator": "object reachability-gc and connections array",
+            "observation": "No deletion event, unreferenced-chain condition, or edge from snapshot chain to GC is shown."
+          }
+        ],
+        "note": "The collection mechanism is named, but its deletion and unreferenced-chain eligibility conditions are absent."
+      },
+      {
+        "id": "R37",
+        "requirement": "A snapshot retained by a fork remains alive.",
+        "brief_evidence": "“but a snapshot retained by a fork remains alive”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 9",
+            "observation": "“Fork earlier checkpoint,” “Shared content,” and “Reachability GC” are colocated."
+          },
+          {
+            "source": "json",
+            "locator": "objects fork-checkpoint, shared-content, reachability-gc; connections array",
+            "observation": "No reference edge or visible retention rule states that fork-reachable snapshots survive collection."
+          }
+        ],
+        "note": "Relevant components are present, but liveness through fork reachability is not explicitly represented."
+      },
+      {
+        "id": "R38",
+        "requirement": "Forking from an earlier checkpoint creates a divergent history with its own future checkpoints without duplicating shared content.",
+        "brief_evidence": "“Forking from an earlier checkpoint creates a divergent history with its own future checkpoints, without duplicating shared content.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 9",
+            "observation": "“Fork earlier checkpoint” and “Shared content” represent the fork origin and content sharing."
+          },
+          {
+            "source": "json",
+            "locator": "objects fork-checkpoint and shared-content; connections array",
+            "observation": "No branch topology, divergent future checkpoint chain, or non-duplication relationship is drawn."
+          }
+        ],
+        "note": "Forking and shared content are named, but divergent history and future checkpoint structure are missing."
+      },
+      {
+        "id": "R39",
+        "requirement": "Orchestrator deployments account for sessions that outlive a software release.",
+        "brief_evidence": "“Orchestrator deployments must account for sessions that outlive a release”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Entire board, including all nine sections",
+            "observation": "No deployment, release-version, old-host, or upgrade lifecycle area is visible."
+          },
+          {
+            "source": "json",
+            "locator": "all objects, annotations, and connections",
+            "observation": "Search of visible labels finds no release, deployment, version, upgrade, or replacement concept; annotations is empty."
+          }
+        ],
+        "note": "Release-spanning session operation is entirely omitted."
+      },
+      {
+        "id": "R40",
+        "requirement": "Hosts running the old version stop accepting placements and drain active sessions through completion, suspension, or a safe checkpoint before replacement.",
+        "brief_evidence": "“hosts running the old version stop accepting placements and drain their active sessions through completion, suspension, or a safe checkpoint before replacement”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 1, 2, 5, and entire board",
+            "observation": "Placement, runner, suspension, and checkpoint concepts exist, but no old-version host, placement stop, drain path, or replacement ordering is shown."
+          },
+          {
+            "source": "json",
+            "locator": "objects runner-host, scheduler, suspend-release, checkpoint and all connections",
+            "observation": "There are no deployment-drain objects or edges; the scheduler-to-runner edge only says “place session.”"
+          }
+        ],
+        "note": "The coordinated shutdown and safe replacement contract is absent."
+      },
+      {
+        "id": "R41",
+        "requirement": "The diagram makes clear how streaming execution, durable state, recovery, branching, quotas, and coordinated shutdown interact throughout a session's lifetime.",
+        "brief_evidence": "“The diagram should make clear how streaming execution, durable state, recovery, branching, quotas, and coordinated shutdown interact throughout a session's lifetime.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Entire board",
+            "observation": "Streaming, durable state, recovery, child sessions, quotas, and forking each have labeled sections, but almost all lower sections are isolated and coordinated shutdown is absent."
+          },
+          {
+            "source": "json",
+            "locator": "all section objects and connections array",
+            "observation": "Nine thematic regions exist, but all seven connections are confined to the top admission/execution/streaming path; no connections integrate durability, recovery, branching, quotas, or shutdown."
+          }
+        ],
+        "note": "Most requested domains are named, but their lifetime interactions are not made clear and coordinated shutdown is missing."
+      }
+    ],
+    "coverage_fraction": 0.4605,
+    "caps_applied": [
+      {
+        "cap": 6,
+        "requirement_id": "R7",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R10",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R11",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R19",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R20",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R28",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R33",
+        "reason": "system-defining requirement is absent"
+      },
+      {
+        "cap": 6,
+        "requirement_id": "R40",
+        "reason": "system-defining requirement is absent"
+      }
+    ],
+    "strongest_covered_cluster": "The strongest cluster is the top-row admission-to-streaming path: authentication, scheduler placement, runner/orchestrator/model progression, token streaming, and client delivery are connected with labeled forward arrows. Cancellation handling also clearly names stream stopping, call abandonment, and a resumable checkpoint.",
+    "most_consequential_gap": "The most consequential gap is the absence of connected operational semantics outside the top row: durable stream commitment, disconnect continuation, bounded crash replay with idempotency, child result/propagation flows, and release-safe deployment draining are either absent or shown only as isolated labels.",
+    "coverage_summary": "The board covers the principal components and a coherent admission/execution/streaming path, and it names many requested durability, recovery, quota, child-session, and retention concepts. However, most lower lifecycle sections contain isolated components without the relationships, conditions, ordering, or failure guarantees required by the brief. Weighted coverage is 35/76 = 0.4605, placing the result at the rubric's score-4 anchor. Multiple absent system-defining requirements invoke a score cap of 6, but the uncapped coverage score is already lower.",
+    "score": 4
+  },
+  "usage": {
+    "input_tokens": 12918,
+    "output_tokens": 10146
+  },
+  "flags": []
+}

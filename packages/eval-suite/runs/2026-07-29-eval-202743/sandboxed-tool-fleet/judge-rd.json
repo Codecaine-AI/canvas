@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at the 6–6.5 anchor because its spacious, clearly sectioned layout remains readable with effort, but small text, several very long routed edges, and one note obstructing edge traffic prevent fluent arm’s-length reading.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Most nodes and label chips have generous surrounding air, but the small type and tight vicinity of the “renew · keep valid” chip near the Lease enforcement header slow arm’s-length reading."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Outlined, titled regions clearly separate placement, lifecycle, lease enforcement, controls, outputs, and monitoring, with each region maintaining a generally coherent system-map or procedure genre."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Arrowheads, colors, and chips usually clarify direction, but multiple cross-region perimeter-scale routes require long backtracking, and the yellow timeout note visibly obstructs the blue durable-files route."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 7,
+        "note": "Air remains the majority of the board and most sections contain manageable node counts, though the lifecycle area holds six state boxes plus several long return paths in one region."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8809,
+    "output_tokens": 509
+  },
+  "flags": []
+}

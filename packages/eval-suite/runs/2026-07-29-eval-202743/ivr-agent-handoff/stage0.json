@@ -1,0 +1,828 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-29-eval-202743.ivr-agent-handoff",
+  "title": "2026-07-29-eval-202743 · ivr-agent-handoff",
+  "description": "# Phone support with AI agent handoff\n\nThis diagram shows the inbound-call journey from caller-number lookup through greeting, consent, intent capture, AI self-service, and human escalation.\n\n- **Identity and greeting:** ANI drives a customer lookup; matched callers receive a personalized greeting, while failed or unmatched lookups receive a generic greeting.\n- **Consent and intent:** recording/transcription consent is captured before a speech-first menu identifies intent, with keypad fallback when recognition is unreliable.\n- **AI self-service:** routine intents go to the AI voice agent, which reads account facts through a read-only service and uses only authorized actions.\n- **Human handoff:** unresolved requests, explicit requests for a person, and low-confidence risk flags enter the human queue with transcript, account context, intent, and completed work. A support agent takes the call within target, or the caller is offered a callback.\n- **Quality loop:** recordings and transcripts from unresolved or abandoned calls are reviewed, and the resulting policy adjusts which intents the AI may handle.\n\nRead left to right across the upper flow, then downward into greeting, quality review, or human handoff branches; the dashed orange connection is the policy feedback loop.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1664,
+    "height": 1064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-29-eval-202743 · ivr-agent-handoff",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3200,
+        "height": 2000
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "entry",
+      "type": "section",
+      "text": "1 · Inbound & identity",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 160,
+        "width": 760,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "intent",
+      "type": "section",
+      "text": "2 · Consent & intent",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 980,
+        "y": 160,
+        "width": 760,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "ai",
+      "type": "section",
+      "text": "3 · AI self-service",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1840,
+        "y": 160,
+        "width": 720,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "handoff",
+      "type": "section",
+      "text": "4 · Human handoff",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1840,
+        "y": 840,
+        "width": 720,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "quality",
+      "type": "section",
+      "text": "5 · Quality review & policy loop",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 980,
+        "y": 840,
+        "width": 720,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "inbound",
+      "type": "icon",
+      "text": "Inbound call",
+      "color": "gray",
+      "parentId": "entry",
+      "geometry": {
+        "x": 140,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "voice"
+    },
+    {
+      "id": "lookup",
+      "type": "icon",
+      "text": "Caller lookup",
+      "color": "gray",
+      "parentId": "entry",
+      "geometry": {
+        "x": 360,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "account-match",
+      "type": "decision",
+      "text": "Account found?",
+      "color": "gray",
+      "parentId": "entry",
+      "geometry": {
+        "x": 560,
+        "y": 300,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "consent",
+      "type": "icon",
+      "text": "Consent capture",
+      "color": "red",
+      "parentId": "intent",
+      "geometry": {
+        "x": 1040,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "intent-menu",
+      "type": "icon",
+      "text": "Speech / keypad intent",
+      "color": "gray",
+      "parentId": "intent",
+      "geometry": {
+        "x": 1280,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "voice"
+    },
+    {
+      "id": "intent-reliable",
+      "type": "decision",
+      "text": "Intent reliable?",
+      "color": "gray",
+      "parentId": "intent",
+      "geometry": {
+        "x": 1220,
+        "y": 500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "voice-agent",
+      "type": "icon",
+      "text": "AI voice agent",
+      "color": "teal",
+      "parentId": "ai",
+      "geometry": {
+        "x": 1900,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "facts",
+      "type": "icon",
+      "text": "Read-only account facts",
+      "color": "gray",
+      "parentId": "ai",
+      "geometry": {
+        "x": 2140,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "actions",
+      "type": "icon",
+      "text": "Authorized actions",
+      "color": "gray",
+      "parentId": "ai",
+      "geometry": {
+        "x": 2380,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "tool"
+    },
+    {
+      "id": "human-queue",
+      "type": "icon",
+      "text": "Human queue",
+      "color": "green",
+      "parentId": "handoff",
+      "geometry": {
+        "x": 1900,
+        "y": 980,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "queue"
+    },
+    {
+      "id": "wait-target",
+      "type": "decision",
+      "text": "Agent available in target?",
+      "color": "gray",
+      "parentId": "handoff",
+      "geometry": {
+        "x": 2100,
+        "y": 1120,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "callback",
+      "type": "icon",
+      "text": "Offer callback",
+      "color": "gray",
+      "parentId": "handoff",
+      "geometry": {
+        "x": 2400,
+        "y": 980,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "voice"
+    },
+    {
+      "id": "call-records",
+      "type": "icon",
+      "text": "Recordings + transcripts",
+      "color": "white",
+      "parentId": "quality",
+      "geometry": {
+        "x": 1040,
+        "y": 980,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "review",
+      "type": "icon",
+      "text": "Quality review",
+      "color": "yellow",
+      "parentId": "quality",
+      "geometry": {
+        "x": 1440,
+        "y": 980,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "policy",
+      "type": "icon",
+      "text": "Allowed intent policy",
+      "color": "gray",
+      "parentId": "quality",
+      "geometry": {
+        "x": 1280,
+        "y": 1220,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "support-agent",
+      "type": "icon",
+      "text": "Support agent",
+      "color": "yellow",
+      "parentId": "handoff",
+      "geometry": {
+        "x": 2380,
+        "y": 1220,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "greeting",
+      "type": "section",
+      "text": "1b · Greeting & context",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 840,
+        "width": 760,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "personal-greeting",
+      "type": "icon",
+      "text": "Personalized greeting",
+      "color": "yellow",
+      "parentId": "greeting",
+      "geometry": {
+        "x": 180,
+        "y": 980,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "message"
+    },
+    {
+      "id": "generic-greeting",
+      "type": "icon",
+      "text": "Generic greeting",
+      "color": "yellow",
+      "parentId": "greeting",
+      "geometry": {
+        "x": 560,
+        "y": 980,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "message"
+    },
+    {
+      "id": "handoff-payload",
+      "type": "sticky",
+      "text": "Handoff: transcript · account · intent · work done",
+      "color": "yellow",
+      "parentId": "handoff",
+      "geometry": {
+        "x": 1880,
+        "y": 1140,
+        "width": 180,
+        "height": 240
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-inbound-lookup",
+      "from": {
+        "objectId": "inbound",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "lookup",
+        "anchor": "left"
+      },
+      "label": "ANI",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-lookup-match",
+      "from": {
+        "objectId": "lookup",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "account-match",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-match-personal",
+      "from": {
+        "objectId": "account-match",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "personal-greeting",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          700,
+          760
+        ],
+        [
+          240,
+          760
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.2,
+        "offset": -120
+      }
+    },
+    {
+      "id": "e-match-generic",
+      "from": {
+        "objectId": "account-match",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "generic-greeting",
+        "anchor": "top"
+      },
+      "label": "no / lookup failed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray",
+      "waypoints": [
+        [
+          700,
+          620
+        ],
+        [
+          520,
+          620
+        ],
+        [
+          520,
+          900
+        ],
+        [
+          620,
+          900
+        ],
+        [
+          620,
+          980
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.8,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-personal-consent",
+      "from": {
+        "objectId": "personal-greeting",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "consent",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          300,
+          700
+        ],
+        [
+          920,
+          700
+        ],
+        [
+          920,
+          360
+        ],
+        [
+          1040,
+          360
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.25,
+        "offset": -60
+      }
+    },
+    {
+      "id": "e-generic-consent",
+      "from": {
+        "objectId": "generic-greeting",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "consent",
+        "anchor": "left"
+      },
+      "label": "generic",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray",
+      "waypoints": [
+        [
+          820,
+          1040
+        ],
+        [
+          820,
+          500
+        ],
+        [
+          980,
+          500
+        ],
+        [
+          980,
+          360
+        ],
+        [
+          1040,
+          360
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.55,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-consent-menu",
+      "from": {
+        "objectId": "consent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "intent-menu",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-menu-reliable",
+      "from": {
+        "objectId": "intent-menu",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "intent-reliable",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-reliable-ai",
+      "from": {
+        "objectId": "intent-reliable",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "voice-agent",
+        "anchor": "left"
+      },
+      "label": "routine intent",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-ai-facts",
+      "from": {
+        "objectId": "voice-agent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "facts",
+        "anchor": "left"
+      },
+      "label": "read",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-facts-actions",
+      "from": {
+        "objectId": "facts",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "actions",
+        "anchor": "left"
+      },
+      "label": "act",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-ai-handoff",
+      "from": {
+        "objectId": "voice-agent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "human-queue",
+        "anchor": "top"
+      },
+      "label": "unresolved / person / risk",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-queue-wait",
+      "from": {
+        "objectId": "human-queue",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "wait-target",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-wait-agent",
+      "from": {
+        "objectId": "wait-target",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "support-agent",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-wait-callback",
+      "from": {
+        "objectId": "wait-target",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "callback",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-consent-records",
+      "from": {
+        "objectId": "consent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "call-records",
+        "anchor": "top"
+      },
+      "label": "record + transcribe",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-records-review",
+      "from": {
+        "objectId": "call-records",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "review",
+        "anchor": "left"
+      },
+      "label": "unresolved / abandoned",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-review-policy",
+      "from": {
+        "objectId": "review",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "policy",
+        "anchor": "top"
+      },
+      "label": "adjust scope",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-policy-ai",
+      "from": {
+        "objectId": "policy",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "voice-agent",
+        "anchor": "top"
+      },
+      "label": "allowed intents",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          1800,
+          1280
+        ],
+        [
+          1800,
+          100
+        ],
+        [
+          1960,
+          100
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.1,
+        "offset": -40
+      }
+    }
+  ],
+  "annotations": []
+}

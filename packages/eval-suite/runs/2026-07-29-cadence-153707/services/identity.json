@@ -1,0 +1,34 @@
+{
+  "run_id": "2026-07-29-cadence-153707",
+  "written_at": "2026-07-29T20:37:09.157Z",
+  "git": {
+    "revision": "49d293dc",
+    "dirty": true
+  },
+  "hashes": {
+    "prompt": "3acbe92e",
+    "lint": "d6b4248b",
+    "style": "3446d051",
+    "surface": "dd6c1ce8"
+  },
+  "services": [
+    {
+      "name": "eval file API",
+      "pid": 93877,
+      "port": 61453,
+      "origin": "http://127.0.0.1:61453",
+      "started_at": "2026-07-29T20:37:07.631Z",
+      "health_checked_at": "2026-07-29T20:37:08.145Z",
+      "log": "packages/eval-suite/runs/2026-07-29-cadence-153707/services/file-api.log"
+    },
+    {
+      "name": "eval harness",
+      "pid": 93949,
+      "port": 61456,
+      "origin": "http://127.0.0.1:61456",
+      "started_at": "2026-07-29T20:37:08.147Z",
+      "health_checked_at": "2026-07-29T20:37:09.157Z",
+      "log": "packages/eval-suite/runs/2026-07-29-cadence-153707/services/harness.log"
+    }
+  ]
+}

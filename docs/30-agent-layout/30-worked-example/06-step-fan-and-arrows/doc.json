@@ -6,13 +6,7 @@
   "blocks": {
     "b-step6-root": {
       "id": "b-step6-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-step6-title-1",
-        "b-step6-body-2",
-        "b-step6-code-3",
-        "b-step6-canvas-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "Step 6 of the worked example: one reviewed content batch reshapes Score gate and adds two outcomes, then a separate connection batch wires the completed nodes.",
         "format": "mdx",
@@ -24,12 +18,17 @@
           "routing",
           "pill"
         ]
-      }
+      },
+      "children": [
+        "b-step6-title-1",
+        "b-step6-body-2",
+        "b-step6-code-3",
+        "b-step6-canvas-4"
+      ]
     },
     "b-step6-title-1": {
       "id": "b-step6-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -37,58 +36,41 @@
         {
           "insert": "Step 6 — Fan out, wire the arrows"
         }
-      ]
+      ],
+      "children": []
     },
     "b-step6-body-2": {
       "id": "b-step6-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "With the board’s sections established, the agent finishes Score gate content before wiring it. The first call adjusts "
-        },
-        {
-          "insert": "score",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " content by tightening objdiff, qa, and regress and adding the absorb and reject pills. The outcomes copy one size and baseline below their centered parent; Score gate then auto-fits from the changed children. The agent judges that pushed render before the second call adds all ten connections, with every endpoint already present. The retry edge and saves-to-objdiff edge are direct connection declarations; the production router chooses their paths, and ROUTES reports the true polylines and crossed boxes. Each result returns APPLIED, a fresh BOARD digest, document-derived DELTA, cumulative BOARD DIFF, LINTS, REQUESTS, and a fresh full-board render. The connection call additionally returns ROUTES for all ten new edges. Because "
-        },
-        {
-          "insert": "view",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " names score, the same response also pushes a score-section close-up."
+          "insert": "With the board’s sections established, the agent finishes Score gate content before wiring it. The first call adjusts score content by tightening objdiff, qa, and regress and adding the absorb and reject rectangles. The outcomes copy one size and baseline below their centered parent; Score gate then auto-fits from the changed children. The agent judges that pushed render before the second call adds all ten connections, with every endpoint already present. The retry edge and saves-to-objdiff edge are direct connection declarations; the production router chooses their paths, and ROUTES reports the true polylines and crossed boxes. Each result returns APPLIED, a fresh BOARD digest, document-derived DELTA, cumulative BOARD DIFF, LINTS, REQUESTS, and a fresh full-board render. The connection call additionally returns ROUTES for all ten new edges. Because view names score, the same response also pushes a score-section close-up."
         }
-      ]
+      ],
+      "children": []
     },
     "b-step6-code-3": {
       "id": "b-step6-code-3",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "json"
       },
       "text": [
         {
-          "insert": "[\n  {\n    \"ops\": [\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"objdiff\",\n        \"patch\": {\n          \"geometry\": { \"x\": 848, \"y\": 96, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"qa\",\n        \"patch\": {\n          \"geometry\": { \"x\": 848, \"y\": 192, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"regress\",\n        \"patch\": {\n          \"geometry\": { \"x\": 848, \"y\": 288, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"absorb\",\n          \"type\": \"pill\",\n          \"text\": \"absorb\",\n          \"geometry\": { \"x\": 800, \"y\": 480, \"width\": 64, \"height\": 32 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"reject\",\n          \"type\": \"pill\",\n          \"text\": \"reject\",\n          \"geometry\": { \"x\": 944, \"y\": 480, \"width\": 64, \"height\": 32 }\n        }\n      }\n    ],\n    \"view\": \"score\"\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-1-cli-sched\",\n          \"from\": { \"objectId\": \"cli\" },\n          \"to\": { \"objectId\": \"sched\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-2-sched-workers\",\n          \"from\": { \"objectId\": \"sched\" },\n          \"to\": { \"objectId\": \"workers\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-3-workers-match\",\n          \"from\": { \"objectId\": \"workers\" },\n          \"to\": { \"objectId\": \"match\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-4-match-objdiff\",\n          \"from\": { \"objectId\": \"match\" },\n          \"to\": { \"objectId\": \"objdiff\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-5-objdiff-qa\",\n          \"from\": { \"objectId\": \"objdiff\" },\n          \"to\": { \"objectId\": \"qa\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-6-qa-regress\",\n          \"from\": { \"objectId\": \"qa\" },\n          \"to\": { \"objectId\": \"regress\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-7-regress-absorb\",\n          \"from\": { \"objectId\": \"regress\" },\n          \"to\": { \"objectId\": \"absorb\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-8-regress-reject\",\n          \"from\": { \"objectId\": \"regress\" },\n          \"to\": { \"objectId\": \"reject\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-9-match-workers\",\n          \"from\": { \"objectId\": \"match\" },\n          \"to\": { \"objectId\": \"workers\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-10-saves-objdiff\",\n          \"from\": { \"objectId\": \"saves\" },\n          \"to\": { \"objectId\": \"objdiff\" }\n        }\n      }\n    ],\n    \"view\": \"score\"\n  }\n]"
+          "insert": "[\n  {\n    \"ops\": [\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"objdiff\",\n        \"patch\": {\n          \"geometry\": { \"x\": 848, \"y\": 96, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"qa\",\n        \"patch\": {\n          \"geometry\": { \"x\": 848, \"y\": 192, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"regress\",\n        \"patch\": {\n          \"geometry\": { \"x\": 848, \"y\": 288, \"width\": 112, \"height\": 64 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"absorb\",\n          \"type\": \"rectangle\",\n          \"text\": \"absorb\",\n          \"geometry\": { \"x\": 800, \"y\": 480, \"width\": 64, \"height\": 32 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"reject\",\n          \"type\": \"rectangle\",\n          \"text\": \"reject\",\n          \"geometry\": { \"x\": 944, \"y\": 480, \"width\": 64, \"height\": 32 }\n        }\n      }\n    ],\n    \"view\": \"score\"\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-1-cli-sched\",\n          \"from\": { \"objectId\": \"cli\" },\n          \"to\": { \"objectId\": \"sched\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-2-sched-workers\",\n          \"from\": { \"objectId\": \"sched\" },\n          \"to\": { \"objectId\": \"workers\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-3-workers-match\",\n          \"from\": { \"objectId\": \"workers\" },\n          \"to\": { \"objectId\": \"match\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-4-match-objdiff\",\n          \"from\": { \"objectId\": \"match\" },\n          \"to\": { \"objectId\": \"objdiff\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-5-objdiff-qa\",\n          \"from\": { \"objectId\": \"objdiff\" },\n          \"to\": { \"objectId\": \"qa\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-6-qa-regress\",\n          \"from\": { \"objectId\": \"qa\" },\n          \"to\": { \"objectId\": \"regress\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-7-regress-absorb\",\n          \"from\": { \"objectId\": \"regress\" },\n          \"to\": { \"objectId\": \"absorb\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-8-regress-reject\",\n          \"from\": { \"objectId\": \"regress\" },\n          \"to\": { \"objectId\": \"reject\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-9-match-workers\",\n          \"from\": { \"objectId\": \"match\" },\n          \"to\": { \"objectId\": \"workers\" }\n        }\n      },\n      {\n        \"type\": \"addConnection\",\n        \"connection\": {\n          \"id\": \"conn-10-saves-objdiff\",\n          \"from\": { \"objectId\": \"saves\" },\n          \"to\": { \"objectId\": \"objdiff\" }\n        }\n      }\n    ],\n    \"view\": \"score\"\n  }\n]"
         }
-      ]
+      ],
+      "children": []
     },
     "b-step6-canvas-4": {
       "id": "b-step6-canvas-4",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/step-6.canvas.json",
         "title": "Step 6 — Fan out, wire the arrows"
-      }
+      },
+      "children": []
     }
   }
 }

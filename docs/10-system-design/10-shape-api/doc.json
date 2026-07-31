@@ -6,7 +6,7 @@
   "blocks": {
     "b-shape-api-root": {
       "id": "b-shape-api-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "concepts": [
           "ObjectDef",
@@ -73,7 +73,7 @@
     },
     "b-sapi-title-1": {
       "id": "b-sapi-title-1",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -86,7 +86,7 @@
     },
     "b-sapi-intro-1": {
       "id": "b-sapi-intro-1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -170,7 +170,7 @@
     },
     "b-sapi-intro-2": {
       "id": "b-sapi-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -240,7 +240,7 @@
     },
     "b-sapi-h2-registry": {
       "id": "b-sapi-h2-registry",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -253,7 +253,7 @@
     },
     "b-sapi-registry-p1": {
       "id": "b-sapi-registry-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -352,20 +352,20 @@
     },
     "b-sapi-code-objectdef": {
       "id": "b-sapi-code-objectdef",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/object-def.ts (doc comments trimmed)\nexport type ObjectHandles = \"all\" | \"corners\" | \"none\";\nexport type ObjectDragCapture = \"descendants\" | \"none\";\nexport interface TextEditingSpec {\n  editable: boolean;\n  markdown?: boolean;\n}\nexport type ObjectColorRole = \"shape\" | \"sticky\" | \"section\";\nexport type ObjectButtonBorderPolicy = \"painted\" | \"suppressed\";\n\nexport interface ObjectDef {\n  /** Registry key — the object `type` (every registered def's kind is an InteractiveCanvasObjectType). */\n  kind: string;\n  /** The object's world-layer renderer (receives the same props as stage/ObjectShape). */\n  render: ComponentType<ObjectRenderProps>;\n  /** This kind's global-CSS rules — CanvasStage composes its style tag from every registered def's css. */\n  css: string;\n  /** Per-type creation/placement defaults — stamped VERBATIM from state/schema/object-defaults.ts. */\n  defaults: ObjectTypeDefaults;\n  /** Palette role table this kind's color pick renders through (P1, §3.5). */\n  colorRole: ObjectColorRole;\n  buttonBorder: ObjectButtonBorderPolicy;   // \"painted\" | \"suppressed\"\n  /** The kind's geometric outline (P3, D4): anchors, anchor dots, outline snap,\n      and pointer hit-testing (D16) all derive from it. */\n  outline: OutlineSpec;\n  handles: ObjectHandles;\n  dragCapture: ObjectDragCapture;\n  /** Where and how this kind's `object.text` renders AND is edited (D3/D6/D14).\n      Absent = the kind renders no object text at all (plus / or-junction / summing-junction). */\n  textSlot?: TextSlot;\n  textEditing: TextEditingSpec;\n  /** This kind's selection toolbar: data-only control list. */\n  toolbar?: ToolbarSpec;\n  /** Picker metadata (P4, O7) — absent for kinds the Shapes panel never lists. */\n  catalog?: ObjectCatalogMeta;\n}"
+          "insert": "// packages/canvas/src/objects/object-def.ts (doc comments trimmed)\nexport type ObjectHandles = \"all\" | \"corners\" | \"none\";\nexport type ObjectDragCapture = \"descendants\" | \"none\";\nexport interface TextEditingSpec {\n  editable: boolean;\n  markdown?: boolean;\n}\nexport type ObjectColorRole = \"shape\" | \"sticky\" | \"section\";\nexport type ObjectButtonBorderPolicy = \"painted\" | \"suppressed\";\n\nexport interface ObjectDef {\n  /** Registry key — the object `type` (every registered def's kind is an InteractiveCanvasObjectType). */\n  kind: string;\n  /** The object's world-layer renderer (receives the same props as stage/ObjectShape). */\n  render: ComponentType<ObjectRenderProps>;\n  /** This kind's global-CSS rules — CanvasStage composes its style tag from every registered def's css. */\n  css: string;\n  /** Per-type creation/placement defaults — stamped VERBATIM from state/schema/object-defaults.ts. */\n  defaults: ObjectTypeDefaults;\n  /** Palette role table this kind's color pick renders through (P1, §3.5). */\n  colorRole: ObjectColorRole;\n  buttonBorder: ObjectButtonBorderPolicy;   // \"painted\" | \"suppressed\"\n  /** The kind's geometric outline (P3, D4): anchors, anchor dots, outline snap,\n      and pointer hit-testing (D16) all derive from it. */\n  outline: OutlineSpec;\n  handles: ObjectHandles;\n  dragCapture: ObjectDragCapture;\n  /** Where and how this kind's `object.text` renders AND is edited (D3/D6/D14).\n      Absent = the kind renders no object text at all. */\n  textSlot?: TextSlot;\n  textEditing: TextEditingSpec;\n  /** This kind's selection toolbar: data-only control list. */\n  toolbar?: ToolbarSpec;\n  /** Picker metadata (P4, O7) — absent for kinds the Shapes panel never lists. */\n  catalog?: ObjectCatalogMeta;\n}"
         }
       ],
       "children": []
     },
     "b-sapi-registry-p2": {
       "id": "b-sapi-registry-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -555,7 +555,7 @@
     },
     "b-sapi-registry-p3": {
       "id": "b-sapi-registry-p3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -602,7 +602,7 @@
     },
     "b-sapi-code-connectordef": {
       "id": "b-sapi-code-connectordef",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
@@ -615,7 +615,7 @@
     },
     "b-sapi-h3-shapedef": {
       "id": "b-sapi-h3-shapedef",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -628,7 +628,7 @@
     },
     "b-sapi-shapedef-p1": {
       "id": "b-sapi-shapedef-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -653,7 +653,7 @@
     },
     "b-sapi-code-shapedef": {
       "id": "b-sapi-code-shapedef",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
@@ -666,7 +666,7 @@
     },
     "b-sapi-shapedef-p2": {
       "id": "b-sapi-shapedef-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -831,7 +831,7 @@
     },
     "b-sapi-h2-text": {
       "id": "b-sapi-h2-text",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -844,7 +844,7 @@
     },
     "b-sapi-text-p1": {
       "id": "b-sapi-text-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -905,7 +905,7 @@
     },
     "b-sapi-code-textslot": {
       "id": "b-sapi-code-textslot",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
@@ -918,7 +918,7 @@
     },
     "b-sapi-text-p2": {
       "id": "b-sapi-text-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -979,7 +979,7 @@
     },
     "b-sapi-code-presets": {
       "id": "b-sapi-code-presets",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
@@ -992,127 +992,18 @@
     },
     "b-sapi-text-p3": {
       "id": "b-sapi-text-p3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "Preset assignments in the shipped defs: most shapes take the "
-        },
-        {
-          "insert": "\"center\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " default (15px/700, centered, dark — D6's baseline); the icon glyph family takes "
-        },
-        {
-          "insert": "\"below\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; sticky takes "
-        },
-        {
-          "insert": "\"inset-body\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; section takes "
-        },
-        {
-          "insert": "\"title-chip\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", whose chip counter-scales sub-linearly when zoomed out ("
-        },
-        {
-          "insert": "titleChipScale()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/text-slots.ts",
-              "symbol": "titleChipScale"
-            }
-          }
-        },
-        {
-          "insert": " = "
-        },
-        {
-          "insert": "(1/zoom)^0.6",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " capped at 6×, geometry in "
-        },
-        {
-          "insert": "TITLE_CHIP",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/text-slots.ts",
-              "symbol": "TITLE_CHIP"
-            }
-          }
-        },
-        {
-          "insert": "); arrow-shape and chevron declare "
-        },
-        {
-          "insert": "rectTextSlot",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " functions (text centers in the body excluding head/notch — replacing the old "
-        },
-        {
-          "insert": "labelStyle",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " margin hacks). Pure glyphs — plus, or-junction, summing-junction — declare "
-        },
-        {
-          "insert": "text: \"none\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ": no slot, and "
-        },
-        {
-          "insert": "textEditing.editable",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is false, so they refuse the editor."
+          "insert": "Preset assignments in the shipped defs: most shapes take the \"center\" default (15px/700, centered, dark — D6's baseline); the icon glyph family takes \"below\"; sticky takes \"inset-body\"; section takes \"title-chip\", whose chip counter-scales sub-linearly when zoomed out (titleChipScale() = (1/zoom)^0.6 capped at 6×, geometry in TITLE_CHIP); arrow-shape and chevron declare rectTextSlot functions (text centers in the body excluding head/notch — replacing the old labelStyle margin hacks). No shipped def declares text: \"none\" today, but the capability remains: no slot, and textEditing.editable is false, so they refuse the editor."
         }
       ],
       "children": []
     },
     "b-sapi-h2-outline": {
       "id": "b-sapi-h2-outline",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1125,7 +1016,7 @@
     },
     "b-sapi-outline-p1": {
       "id": "b-sapi-outline-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1190,20 +1081,20 @@
     },
     "b-sapi-code-outlinespec": {
       "id": "b-sapi-code-outlinespec",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/geometry.ts\nexport type OutlineSpec =\n  | { kind: \"bbox\" }\n  | { kind: \"polygon\"; points: (bounds: CanvasBounds, object: InteractiveCanvasObject) => CanvasPoint[] }\n  | { kind: \"ellipse\" };\n\n// One shared spec object per outline family — a true-outline def declares its\n// `outline` by referencing the SAME exported const the dispatch tables use\n// (identity-asserted by objects/__tests__/geometry-def-agreement.test.ts):\nexport const BBOX_OUTLINE: OutlineSpec = { kind: \"bbox\" };\nexport const ELLIPSE_OUTLINE: OutlineSpec = { kind: \"ellipse\" };\nexport const DIAMOND_OUTLINE: OutlineSpec = { kind: \"polygon\", points: diamondPoints };\nexport const TRIANGLE_OUTLINE: OutlineSpec = {\n  kind: \"polygon\",\n  points: (bounds, object) => trianglePoints(bounds, object.direction === \"down\" ? \"down\" : \"up\"),\n};\n// … PILL_OUTLINE / ARROW_SHAPE_OUTLINE / PARALLELOGRAM_OUTLINE / PENTAGON_OUTLINE /\n//   OCTAGON_OUTLINE / STAR_OUTLINE / PLUS_OUTLINE / CHEVRON_OUTLINE /\n//   OFF_PAGE_CONNECTOR_OUTLINE / TRAPEZOID_OUTLINE / MANUAL_INPUT_OUTLINE /\n//   HEXAGON_OUTLINE / JUNCTION_OUTLINE (= ELLIPSE_OUTLINE, deliberately the same object)\n\n/** True-outline dispatch by object TYPE (16 keys); everything else falls back to bbox. */\nexport const OUTLINES_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, OutlineSpec>>;\n\n/** Secondary dispatch by `style.shape` — ONLY pill/diamond/ellipse, exactly the three\n    the pre-P3 outlineShapeFor() switch consulted style for. */\nexport const OUTLINES_BY_STYLE_SHAPE: Partial<\n  Record<NonNullable<CanvasObjectStyle[\"shape\"]>, OutlineSpec>\n> = {\n  pill: PILL_OUTLINE,\n  diamond: DIAMOND_OUTLINE,\n  ellipse: ELLIPSE_OUTLINE,\n};"
+          "insert": "// packages/canvas/src/objects/geometry.ts\nexport type OutlineSpec =\n  | { kind: \"bbox\" }\n  | { kind: \"polygon\"; points: (bounds: CanvasBounds, object: InteractiveCanvasObject) => CanvasPoint[] }\n  | { kind: \"ellipse\" };\n\n// One shared spec object per outline family — a true-outline def declares its\n// `outline` by referencing the SAME exported const the dispatch tables use\n// (identity-asserted by objects/__tests__/geometry-def-agreement.test.ts):\nexport const BBOX_OUTLINE: OutlineSpec = { kind: \"bbox\" };\nexport const ELLIPSE_OUTLINE: OutlineSpec = { kind: \"ellipse\" };\nexport const DIAMOND_OUTLINE: OutlineSpec = { kind: \"polygon\", points: diamondPoints };\nexport const TRIANGLE_OUTLINE: OutlineSpec = {\n  kind: \"polygon\",\n  points: (bounds, object) => trianglePoints(bounds, object.direction === \"down\" ? \"down\" : \"up\"),\n};\n// … ELLIPSE_OUTLINE / DIAMOND_OUTLINE / TRIANGLE_OUTLINE / ARROW_SHAPE_OUTLINE / OCTAGON_OUTLINE …\n//   OCTAGON_OUTLINE / STAR_OUTLINE / PLUS_OUTLINE / CHEVRON_OUTLINE /\n//   OFF_PAGE_CONNECTOR_OUTLINE / TRAPEZOID_OUTLINE / MANUAL_INPUT_OUTLINE /\n\n/** True-outline dispatch by object TYPE (16 keys); everything else falls back to bbox. */\nexport const OUTLINES_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, OutlineSpec>>;\n\n/** Secondary dispatch by `style.shape` — ONLY diamond/ellipse, exactly the style keys the old switch honored\n    the pre-P3 outlineShapeFor() switch consulted style for. */\nexport const OUTLINES_BY_STYLE_SHAPE: Partial<\n  Record<NonNullable<CanvasObjectStyle[\"shape\"]>, OutlineSpec>\n> = {\n  diamond: DIAMOND_OUTLINE,\n  ellipse: ELLIPSE_OUTLINE,\n};"
         }
       ],
       "children": []
     },
     "b-sapi-outline-p2": {
       "id": "b-sapi-outline-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1237,20 +1128,20 @@
     },
     "b-sapi-code-outlinespecfor": {
       "id": "b-sapi-code-outlinespecfor",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/geometry.ts — verbatim, including the ordering contract\n/**\n * Resolves the outline spec for an object. The ordering reproduces the\n * pre-P3 `outlineShapeFor()` switch VERBATIM — including its quirks — so\n * connection geometry is byte-identical (rationalizing dispatch is P4):\n *\n *   1. `type === \"arrow-shape\"` wins over everything;\n *   2. `type === \"pill\"` wins over a mismatched diamond/ellipse style\n *      (the old switch's pill check preceded the style-diamond check);\n *   3. a pill/diamond/ellipse `style.shape` override wins over the\n *      remaining TYPE checks (the old switch's style checks sat ABOVE the\n *      W5 type checks — e.g. `type: \"triangle\"` + `style.shape: \"diamond\"`\n *      resolves DIAMOND, while `type: \"process\"` + `style.shape:\n *      \"triangle\"` stays BBOX because triangle is never a style key);\n *   4. the type table;\n *   5. bbox fallback.\n *\n * NOTE this is deliberately NOT `objectDefFor`'s render-shape dispatch —\n * hit-testing (D16) and connection geometry stay consistent with each other\n * by both using THIS lookup. TODO(P4): unify outline dispatch with render\n * dispatch when defs consolidate.\n */\nexport function outlineSpecFor(object: InteractiveCanvasObject): OutlineSpec {\n  if (object.type === \"arrow-shape\") return ARROW_SHAPE_OUTLINE;\n  if (object.type === \"pill\") return PILL_OUTLINE;\n  const styleShape = object.style?.shape;\n  const styleSpec = styleShape === undefined ? undefined : OUTLINES_BY_STYLE_SHAPE[styleShape];\n  if (styleSpec) return styleSpec;\n  return OUTLINES_BY_TYPE[object.type] ?? BBOX_OUTLINE;\n}"
+          "insert": "// packages/canvas/src/objects/geometry.ts — verbatim, including the ordering contract\n/**\n * Resolves the outline spec for an object. The ordering reproduces the\n * pre-P3 `outlineShapeFor()` switch VERBATIM — including its quirks — so\n * connection geometry is byte-identical (rationalizing dispatch is P4):\n *\n *   1. `type === \"arrow-shape\"` wins over everything;\n *   3. a diamond/ellipse `style.shape` override wins over the\n *      remaining TYPE checks (the old switch's style checks sat ABOVE the\n *      W5 type checks — e.g. `type: \"triangle\"` + `style.shape: \"diamond\"`\n *      resolves DIAMOND, while `type: \"process\"` + `style.shape:\n *      \"triangle\"` stays BBOX because triangle is never a style key);\n *   4. the type table;\n *   5. bbox fallback.\n *\n * NOTE this is deliberately NOT `objectDefFor`'s render-shape dispatch —\n * hit-testing (D16) and connection geometry stay consistent with each other\n * by both using THIS lookup. TODO(P4): unify outline dispatch with render\n * dispatch when defs consolidate.\n */\nexport function outlineSpecFor(object: InteractiveCanvasObject): OutlineSpec {\n  if (object.type === \"arrow-shape\") return ARROW_SHAPE_OUTLINE;\n  const styleShape = object.style?.shape;\n  const styleSpec = styleShape === undefined ? undefined : OUTLINES_BY_STYLE_SHAPE[styleShape];\n  if (styleSpec) return styleSpec;\n  return OUTLINES_BY_TYPE[object.type] ?? BBOX_OUTLINE;\n}"
         }
       ],
       "children": []
     },
     "b-sapi-anchors-p1": {
       "id": "b-sapi-anchors-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1349,7 +1240,7 @@
     },
     "b-sapi-anchors-p2": {
       "id": "b-sapi-anchors-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1442,7 +1333,7 @@
     },
     "b-sapi-hit-p1": {
       "id": "b-sapi-hit-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1535,7 +1426,7 @@
     },
     "b-sapi-decision-outline-hit": {
       "id": "b-sapi-decision-outline-hit",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Clicks respect the declared outline; drag-select, drop targets, and snapping deliberately stay bbox"
@@ -1558,7 +1449,7 @@
     },
     "b-sapi-h2-color": {
       "id": "b-sapi-h2-color",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1571,7 +1462,7 @@
     },
     "b-sapi-color-p1": {
       "id": "b-sapi-color-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1643,7 +1534,7 @@
     },
     "b-sapi-code-colors": {
       "id": "b-sapi-code-colors",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
@@ -1656,7 +1547,7 @@
     },
     "b-sapi-code-roster": {
       "id": "b-sapi-code-roster",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -1669,7 +1560,7 @@
     },
     "b-sapi-color-p2": {
       "id": "b-sapi-color-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1777,7 +1668,7 @@
     },
     "b-sapi-code-swatch": {
       "id": "b-sapi-code-swatch",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
@@ -1790,20 +1681,20 @@
     },
     "b-sapi-code-color-hexes": {
       "id": "b-sapi-code-color-hexes",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "text"
       },
       "text": [
         {
-          "insert": "Authoritative role hexes:\n\nhue     ink      shape fill  sticky fill  section wash\ngray    #757575  #E6E6E6    #E6E6E6     #F9F9F9\nred     #F24822  #FFC7C2    #FFAFA3     #FFF5F5\norange  #EB7500  #FFE0C2    #FFE0C2     #FFF7F0\nyellow  #E8A302  #FFECBD    #FFE299     #FFFBF0\ngreen   #14AE5C  #DDF8E2    #DDF8E2     #EBFFEE\nteal    #369E94  #C6FAF6    #C6FAF6     #EAFDFB\nblue    #0D99FF  #C2E5FF    #A8DAFF     #F5FBFF\nviolet  #9747FF  #DCCCFF    #DCCCFF     #F8F5FF\npink    #F849C1  #FFC2EC    #FFC2EC     #FFF0FA\nwhite   #757575  #FFFFFF    #FFFFFF     #FFFFFF\n\nWhite uses #757575 for strokes/connectors; its picker preview remains #FFFFFF with the existing contrast ring. The white section chip uses #E6E6E6 fill and #C4C4C4 border so it remains visible on white wash."
+          "insert": "Authoritative role hexes:\n\nhue     ink      shape fill  sticky fill  section wash\ngray    #757575  #E6E6E6    #E6E6E6     #F9F9F9\nred     #D5322F  #FFD2CC    #FFBFB7     #FEF3F1\norange  #EB7500  #FFE0C2    #FFE0C2     #FFF7F0\nyellow  #E8A302  #FFECBD    #FFE299     #FFFBF0\ngreen   #019142  #C5E9CB    #C5E9CB     #F0F8F2\nteal    #369E94  #C6FAF6    #C6FAF6     #EAFDFB\nblue    #1A5CDF  #CDDFFF    #B9D2FF     #F1F6FE\nviolet  #9747FF  #DCCCFF    #DCCCFF     #F8F5FF\npink    #B74D85  #F9D1E3    #F9D1E3     #FDF3F7\nwhite   #757980  #FFFFFF    #FFFFFF     #FFFFFF\n\nWhite uses #757980 for strokes/connectors; its picker preview remains #FFFFFF with the existing contrast ring. The white section chip uses #DBDEE3 fill and #C1C4CB border so it remains visible on white wash."
         }
       ],
       "children": []
     },
     "b-sapi-color-p3": {
       "id": "b-sapi-color-p3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1842,7 +1733,7 @@
           "insert": "); there is no borderless color treatment. White keeps a visible "
         },
         {
-          "insert": "#757575",
+          "insert": "#757980",
           "attributes": {
             "code": true
           }
@@ -1919,7 +1810,7 @@
     },
     "b-sapi-color-p4": {
       "id": "b-sapi-color-p4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2044,7 +1935,7 @@
     },
     "b-sapi-constraint-closed-roster": {
       "id": "b-sapi-constraint-closed-roster",
-      "flavour": "constraint",
+      "type": "constraint",
       "props": {
         "severity": "hard",
         "title": "The color roster is closed: 10 picks, no custom colors, ever"
@@ -2153,7 +2044,7 @@
     },
     "b-sapi-h2-tree": {
       "id": "b-sapi-h2-tree",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -2166,7 +2057,7 @@
     },
     "b-sapi-filetree": {
       "id": "b-sapi-filetree",
-      "flavour": "file-tree",
+      "type": "file-tree",
       "props": {
         "entries": [
           {
@@ -2253,7 +2144,7 @@
     },
     "b-sapi-h2-howto": {
       "id": "b-sapi-h2-howto",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -2266,187 +2157,66 @@
     },
     "b-sapi-howto-p1": {
       "id": "b-sapi-howto-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "All behavior lives in ONE new file — a ShapeDef. The remaining touches are one-line entries in closed vocabularies and registries, each guided by a compile error or a test failure (the old duplication — catalog labels, four parallel default switches, the routing-layer "
-        },
-        {
-          "insert": "outlineShapeFor()",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " switch, per-shape editor placement — is gone; those all derive from the def now). Here is a real, complete, shipping def to copy — the hexagon:"
+          "insert": "All behavior lives in ONE new file — a ShapeDef. The remaining touches are one-line entries in closed vocabularies and registries, each guided by a compile error or a test failure (the old duplication — catalog labels, four parallel default switches, the routing-layer outlineShapeFor() switch, per-shape editor placement — is gone; those all derive from the def now). Here is a real, complete, shipping def to copy — the octagon:"
         }
       ],
       "children": []
     },
     "b-sapi-code-def-template": {
       "id": "b-sapi-code-def-template",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "tsx"
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/shapes/flowchart/hexagon.tsx — complete file (comments trimmed)\n\"use client\";\n\nimport type { CanvasPoint } from \"../../../state/geometry\";\nimport { HEXAGON_OUTLINE, hexagonPoints } from \"../../geometry\";\nimport { shapeObjectDef } from \"../base\";\nimport type { ShapeDef } from \"../shape-def\";\n\nfunction pointsAttribute(points: CanvasPoint[]): string {\n  return points.map((point) => `${point.x},${point.y}`).join(\" \");\n}\n\nexport const hexagonShapeDef: ShapeDef = {\n  type: \"hexagon\",\n  shape: \"hexagon\",\n  outline: HEXAGON_OUTLINE, // the SAME exported spec object the geometry tables use\n  silhouette: {\n    className: \"interactive-canvas-object-hexagon\",\n    silhouette: ({ object, colors, strokeWidth }) => {\n      const points = pointsAttribute(\n        hexagonPoints({ x: 0, y: 0, width: object.geometry.width, height: object.geometry.height }),\n      );\n      return (\n        <svg\n          aria-hidden=\"true\"\n          className=\"interactive-canvas-true-outline-silhouette\"\n          data-canvas-shape-silhouette=\"hexagon\"\n          viewBox={`0 0 ${object.geometry.width} ${object.geometry.height}`}\n          preserveAspectRatio=\"none\"\n          style={{ position: \"absolute\", inset: 0, width: \"100%\", height: \"100%\", overflow: \"visible\" }}\n        >\n          <polygon\n            points={points}\n            fill={colors.fill}\n            stroke={colors.border ?? undefined}\n            strokeWidth={strokeWidth}\n            strokeLinejoin=\"round\"\n          />\n        </svg>\n      );\n    },\n  },\n  css: `\n        .interactive-canvas-object-hexagon {\n          align-items: center;\n          justify-content: center;\n          text-align: center;\n          border: none;\n          border-radius: 0;\n          background: transparent !important;\n          box-shadow: none;\n          overflow: visible;\n        }\n`,\n  catalog: { label: \"Hexagon\", keywords: [\"hexagon\", \"polygon\", \"six-sided\", \"preparation\"] },\n};\n\nexport const hexagonDef = shapeObjectDef(hexagonShapeDef);"
+          "insert": "// packages/canvas/src/objects/shapes/basic/octagon.tsx — complete file (comments trimmed)\n\"use client\";\n\nimport type { CanvasPoint } from \"../../../state/geometry\";\nimport { OCTAGON_OUTLINE, octagonPoints } from \"../../geometry\";\nimport { shapeObjectDef } from \"../base\";\nimport type { ShapeDef } from \"../shape-def\";\n\nfunction pointsAttribute(points: CanvasPoint[]): string {\n  return points.map((point) => `${point.x},${point.y}`).join(\" \");\n}\n\nexport const octagonShapeDef: ShapeDef = {\n  type: \"octagon\",\n  shape: \"octagon\",\n  buttonBorder: \"suppressed\",\n  outline: OCTAGON_OUTLINE,\n  silhouette: {\n    className: \"interactive-canvas-object-octagon\",\n    silhouette: ({ object, colors, strokeWidth }) => {\n      const points = pointsAttribute(\n        octagonPoints({ x: 0, y: 0, width: object.geometry.width, height: object.geometry.height }),\n      );\n      return (\n        <svg\n          aria-hidden=\"true\"\n          className=\"interactive-canvas-true-outline-silhouette\"\n          data-canvas-shape-silhouette=\"octagon\"\n          viewBox={`0 0 ${object.geometry.width} ${object.geometry.height}`}\n          preserveAspectRatio=\"none\"\n          style={{ position: \"absolute\", inset: 0, width: \"100%\", height: \"100%\", overflow: \"visible\" }}\n        >\n          <polygon\n            points={points}\n            fill={colors.fill}\n            stroke={colors.border}\n            strokeWidth={strokeWidth}\n            strokeLinejoin=\"round\"\n          />\n        </svg>\n      );\n    },\n  },\n    css: `\n        .interactive-canvas-object-octagon {\n          border: none;\n          border-radius: 0;\n          background: transparent !important;\n          box-shadow: none;\n          overflow: visible;\n        }\n`,\n  catalog: { label: \"Octagon\", keywords: [\"octagon\", \"polygon\", \"eight-sided\"] },\n};\n\nexport const octagonDef = shapeObjectDef(octagonShapeDef);"
         }
       ],
       "children": []
     },
     "b-sapi-howto-p2": {
       "id": "b-sapi-howto-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "Note what the file does NOT contain: no toolbar, no handles, no defaults, no text slot ("
-        },
-        {
-          "insert": "\"center\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is the omission default), no editor code — "
-        },
-        {
-          "insert": "shapeObjectDef",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " stamps all of that. The registration lines, quoted exactly as they exist for hexagon today:"
+          "insert": "Note what the file does NOT contain: no toolbar, no handles, no defaults, no text slot (\"center\" is the omission default), no editor code — shapeObjectDef stamps all of that. The registration lines, quoted exactly as they exist for octagon today:"
         }
       ],
       "children": []
     },
     "b-sapi-code-registration": {
       "id": "b-sapi-code-registration",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
       "text": [
         {
-          "insert": "// 1. state/schema/object-types.ts — add the literal to the closed type union:\n  | \"hexagon\"\n\n// 2. state/schema/style.ts — add the same-named render-shape variant to CanvasObjectStyle[\"shape\"]:\n  | \"hexagon\"\n\n// 3. state/schema/validate.ts — add the branch to the isCanvasObjectType guard:\n  value === \"hexagon\" ||\n\n// 4. state/schema/object-defaults.ts — add the row to OBJECT_TYPE_DEFAULTS\n//    (exhaustive Record — the compiler errors until this exists):\n  hexagon: { geometry: { x: 160, y: 160, width: 150, height: 100 }, shape: \"hexagon\", label: \"Hexagon\" },\n\n// 5. objects/object-def.ts — register the def (import + both tables):\nimport { hexagonDef } from \"./shapes/flowchart/hexagon\";\n// in DEFS_BY_RENDER_SHAPE:\n  hexagon: hexagonDef,\n// in OBJECT_DEFS (stylesheet order):\n  hexagonDef,\n\n// 6. objects/catalog.ts — place the entry in a picker section (label/keywords derive from the def):\n  entry(\"flow-hexagon\", \"hexagon\"),\n\n// 7. stage/editor/components/shape-previews.tsx — picker glyph (derives from the outline builder):\nconst HexagonIcon = polygonIcon(hexagonPoints(PREVIEW_BOUNDS));\n  \"flow-hexagon\": HexagonIcon,"
+          "insert": "// 1. state/schema/object-types.ts — add the literal to the closed type union:\n  | \"octagon\"\n\n// 2. state/schema/style.ts — add the same-named render-shape variant to CanvasObjectStyle[\"shape\"]:\n  | \"octagon\"\n\n// 3. state/schema/validate.ts — add the branch to the isCanvasObjectType guard:\n  value === \"octagon\" ||\n\n// 4. state/schema/object-defaults.ts — add the row to OBJECT_TYPE_DEFAULTS\n//    (exhaustive Record — the compiler errors until this exists):\n  octagon: { geometry: { x: 160, y: 160, width: 150, height: 100 }, shape: \"octagon\", label: \"Octagon\" },\n\n// 5. objects/object-def.ts — register the def (import + both tables):\nimport { octagonDef } from \"./shapes/flowchart/octagon\";\n// in DEFS_BY_RENDER_SHAPE:\n  octagon: octagonDef,\n// in OBJECT_DEFS (stylesheet order):\n  octagonDef,\n\n// 6. objects/catalog.ts — place the entry in a picker section (label/keywords derive from the def):\n  entry(\"flow-octagon\", \"octagon\"),\n\n// 7. stage/editor/components/shape-previews.tsx — picker glyph (derives from the outline builder):\nconst OctagonIcon = polygonIcon(octagonPoints(PREVIEW_BOUNDS));\n  \"flow-octagon\": OctagonIcon,"
         }
       ],
       "children": []
     },
     "b-sapi-howto-p3": {
       "id": "b-sapi-howto-p3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "Optionally, a true outline (skip both steps and the shape ships with correct bbox anchors — "
-        },
-        {
-          "insert": "shapeObjectDef",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " stamps "
-        },
-        {
-          "insert": "BBOX_OUTLINE",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "): add a points builder + exported spec const to "
-        },
-        {
-          "insert": "objects/geometry.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts"
-            }
-          }
-        },
-        {
-          "insert": " (hexagon's is "
-        },
-        {
-          "insert": "hexagonPoints",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " + "
-        },
-        {
-          "insert": "HEXAGON_OUTLINE",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "), list it in "
-        },
-        {
-          "insert": "OUTLINES_BY_TYPE",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and reference the SAME const from the def's "
-        },
-        {
-          "insert": "outline",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " field. Two tests police the whole recipe: "
-        },
-        {
-          "insert": "objects/__tests__/geometry-def-agreement.test.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " asserts the def's outline is identity-equal to the dispatch table's spec, and "
-        },
-        {
-          "insert": "objects/__tests__/type-defaults.test.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " asserts the def's stamped defaults match the reducer's row. Run "
-        },
-        {
-          "insert": "bun test packages/canvas",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and the compiler/tests walk you through anything missed."
+          "insert": "Optionally, a true outline (skip both steps and the shape ships with correct bbox anchors — shapeObjectDef stamps BBOX_OUTLINE): add a points builder + exported spec const to objects/geometry.ts (octagon's is octagonPoints + octagon_OUTLINE), list it in OUTLINES_BY_TYPE, and reference the SAME const from the def's outline field. Two tests police the whole recipe: objects/__tests__/geometry-def-agreement.test.ts asserts the def's outline is identity-equal to the dispatch table's spec, and objects/__tests__/type-defaults.test.ts asserts the def's stamped defaults match the reducer's row. Run bun test packages/canvas and the compiler/tests walk you through anything missed."
         }
       ],
       "children": []
     },
     "b-sapi-constraint-closed-vocab": {
       "id": "b-sapi-constraint-closed-vocab",
-      "flavour": "constraint",
+      "type": "constraint",
       "props": {
         "severity": "hard",
         "title": "Shape vocabulary is closed and typed, not freeform SVG"
@@ -2488,7 +2258,7 @@
     },
     "b-sapi-closing": {
       "id": "b-sapi-closing",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {

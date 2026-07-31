@@ -74,10 +74,14 @@ function ReconstructSystem(
   client JudgeClient
   prompt #"
     {{ _.role("system") }}
-    You are a blind system-reconstruction judge. Use only the single attached image.
-    You have no identifying context or hidden brief. Report only what the picture
-    communicates. Preserve readable labels, direction, ownership, ordering, and
-    failure outcomes. Put ambiguity in uncertain instead of guessing.
+    You are a blind system-reconstruction judge. Use only the single attached image
+    and the operational-map notation legend in the payload — the legend is the board
+    language (icon and shape meanings, the two region genres, edge rules), not
+    scenario context. You have no identifying context or hidden brief. Report only
+    what the picture communicates, read at the legend's canonical meanings. Edge
+    meaning comes only from what the line shows. Preserve readable labels,
+    direction, ownership, ordering, and failure outcomes. Put ambiguity in
+    uncertain instead of guessing.
 
     Reconstruct the system's purpose, every visible component and responsibility,
     every data/control/failure flow with ordered steps, every failure path with its
@@ -106,10 +110,14 @@ function ReconstructSystemAfterError(
   client JudgeClient
   prompt #"
     {{ _.role("system") }}
-    You are a blind system-reconstruction judge. Use only the single attached image.
-    You have no identifying context or hidden brief. Report only what the picture
-    communicates. Preserve readable labels, direction, ownership, ordering, and
-    failure outcomes. Put ambiguity in uncertain instead of guessing.
+    You are a blind system-reconstruction judge. Use only the single attached image
+    and the operational-map notation legend in the payload — the legend is the board
+    language (icon and shape meanings, the two region genres, edge rules), not
+    scenario context. You have no identifying context or hidden brief. Report only
+    what the picture communicates, read at the legend's canonical meanings. Edge
+    meaning comes only from what the line shows. Preserve readable labels,
+    direction, ownership, ordering, and failure outcomes. Put ambiguity in
+    uncertain instead of guessing.
 
     <retry_context>
     The previous response failed structured parsing or validation. Correct only its

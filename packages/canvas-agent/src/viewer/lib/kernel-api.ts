@@ -26,18 +26,3 @@ export function traceSessionDetailPath(id: string): string {
 export function catalogAgentDetailPath(name: string): string {
   return `${AGENT_API_BASE}${KERNEL_CATALOG_PATHS.agentDetail(name)}`;
 }
-
-/**
- * Session transcript — the pi-session jsonl surfaced as thinking / tool
- * params / result text / rendered images, mounted beside the kernel read API
- * on the harness. The viewer feature-detects it: until the harness serves
- * these routes the fetch 404s and the pages simply skip the transcript layer
- * (see use-transcript.ts).
- */
-export function transcriptPath(containerId: string): string {
-  return `${AGENT_API_BASE}/kernel/sessions/${encodeURIComponent(containerId)}/transcript`;
-}
-
-export function transcriptImagePath(containerId: string, imageId: string): string {
-  return `${transcriptPath(containerId)}/images/${encodeURIComponent(imageId)}`;
-}

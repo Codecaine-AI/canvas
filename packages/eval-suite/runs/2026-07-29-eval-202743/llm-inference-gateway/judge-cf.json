@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 7,
+  "verdict": {
+    "score": 7,
+    "score_rationale": "This lands on the 7 anchor because it is a composed, registry-aware operational map with clean routing and mostly steady registers, but the oversized vertical dead band and sparse final section keep it from reading as fully finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6.5,
+        "note": "The upper and middle clusters use the width intentionally, but a conspicuous empty band separates them from section 8, and substantial unused space remains below that section."
+      },
+      {
+        "name": "color",
+        "score": 8,
+        "note": "Registry colors are applied consistently: human is yellow, router teal, cache blue, send/eval green, guardrails red, and infrastructure plus shape-core steps gray."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 7.5,
+        "note": "No crosshair junctions or obvious waypoint terminations are visible, though the long overlapping gray and dashed return routes across the center create mild routing ambiguity."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 7,
+        "note": "Panel headers, major rows, and icon-caption pairs generally align, but density drops abruptly in the widely spaced audit row and the large gap above it weakens the overall rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7428,
+    "output_tokens": 550
+  },
+  "flags": []
+}

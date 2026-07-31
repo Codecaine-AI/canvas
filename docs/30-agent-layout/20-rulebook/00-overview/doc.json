@@ -6,25 +6,7 @@
   "blocks": {
     "b-rulebook-root": {
       "id": "b-rulebook-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-rulebook-title-1",
-        "b-rulebook-intro-2",
-        "b-rulebook-naming-3",
-        "b-rulebook-rules-heading-4",
-        "b-rulebook-idx-r1-5",
-        "b-rulebook-idx-r2-6",
-        "b-rulebook-idx-r3-7",
-        "b-rulebook-idx-r4-8",
-        "b-rulebook-idx-r5-9",
-        "b-rulebook-idx-r6-10",
-        "b-rulebook-idx-r7-11",
-        "b-rulebook-idx-r8-12",
-        "b-rulebook-idx-r9-13",
-        "b-rulebook-idx-r10-14",
-        "b-rulebook-lab-heading-19",
-        "b-rulebook-lab-body-20"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "R1-R10 as documentation lenses over the layout agent's actual mechanisms: the single aesthetic topic, six-phase workflow, entity capabilities, automatic op-path behavior, and the layout diagnostics.",
         "format": "mdx",
@@ -43,12 +25,29 @@
           "automatic layout behavior",
           "lint diagnostics"
         ]
-      }
+      },
+      "children": [
+        "b-rulebook-title-1",
+        "b-rulebook-intro-2",
+        "b-rulebook-naming-3",
+        "b-rulebook-rules-heading-4",
+        "b-rulebook-idx-r1-5",
+        "b-rulebook-idx-r2-6",
+        "b-rulebook-idx-r3-7",
+        "b-rulebook-idx-r4-8",
+        "b-rulebook-idx-r5-9",
+        "b-rulebook-idx-r6-10",
+        "b-rulebook-idx-r7-11",
+        "b-rulebook-idx-r8-12",
+        "b-rulebook-idx-r9-13",
+        "b-rulebook-idx-r10-14",
+        "b-rulebook-lab-heading-19",
+        "b-rulebook-lab-body-20"
+      ]
     },
     "b-rulebook-title-1": {
       "id": "b-rulebook-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -56,12 +55,12 @@
         {
           "insert": "The layout rulebook: corpus rules R1-R10"
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-intro-2": {
       "id": "b-rulebook-intro-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -90,12 +89,12 @@
         {
           "insert": " aesthetic topic and by the constraints inside the six workflow phases. The system prompt's four top-level sections are purpose, board_model, state_grammar, and workflow; phase constraints carry the operational rules. Corpus evidence remains cited inline; the runtime surfaces named below own behavior."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-naming-3": {
       "id": "b-rulebook-naming-3",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -188,12 +187,12 @@
         {
           "insert": " JSON."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-rules-heading-4": {
       "id": "b-rulebook-rules-heading-4",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -201,12 +200,12 @@
         {
           "insert": "The ten rules"
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-idx-r1-5": {
       "id": "b-rulebook-idx-r1-5",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -224,12 +223,12 @@
         {
           "insert": " — object geometry is quantized to the agent's 20 grid; the grid is a snap unit, not a spacing prescription."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-idx-r2-6": {
       "id": "b-rulebook-idx-r2-6",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -247,12 +246,12 @@
         {
           "insert": " — each peer group repeats one exact gap, the ladder names every rung from 48px section padding up to the 160px section gutter, and the crowding warning supplies the corridor floor rather than a target gap."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-idx-r3-7": {
       "id": "b-rulebook-idx-r3-7",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -270,12 +269,12 @@
         {
           "insert": " — sections supply grouping and addressability, children keep air from borders, and a frame is closed around its contents with fit_section when the region is done."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-idx-r4-8": {
       "id": "b-rulebook-idx-r4-8",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -293,12 +292,12 @@
         {
           "insert": " — repeated peers share the largest required size, one exact gap, and centers on a line, copied from digest geometry."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-idx-r5-9": {
       "id": "b-rulebook-idx-r5-9",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -316,12 +315,12 @@
         {
           "insert": " — peer alignment is a deliberate visual signal, copied exactly and judged from each pushed render."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-idx-r6-10": {
       "id": "b-rulebook-idx-r6-10",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -339,12 +338,12 @@
         {
           "insert": " — a parent centers over peer children while their repeated gap leaves a readable wire corridor."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-idx-r7-11": {
       "id": "b-rulebook-idx-r7-11",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -362,12 +361,12 @@
         {
           "insert": " — content-sized side regions keep air around their contents and live in sections rather than stretching across unused space."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-idx-r8-12": {
       "id": "b-rulebook-idx-r8-12",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -385,12 +384,12 @@
         {
           "insert": " — content determines size from one shared 288×96 target, peers match the largest member, and deliberate size differences communicate importance or exception."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-idx-r9-13": {
       "id": "b-rulebook-idx-r9-13",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -408,12 +407,12 @@
         {
           "insert": " — returns use flow-facing anchors, direct labels, and minimally steered routes through clear corridors."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-idx-r10-14": {
       "id": "b-rulebook-idx-r10-14",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -431,12 +430,12 @@
         {
           "insert": " — abstract align, fan, and lattice relations are not operation fields; complete geometry carries the placement and fresh digests plus renders carry the evidence."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-lab-heading-19": {
       "id": "b-rulebook-lab-heading-19",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -444,12 +443,12 @@
         {
           "insert": "Rulebook scope"
         }
-      ]
+      ],
+      "children": []
     },
     "b-rulebook-lab-body-20": {
       "id": "b-rulebook-lab-body-20",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -468,7 +467,8 @@
         {
           "insert": " demonstrate the resulting composition patterns."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

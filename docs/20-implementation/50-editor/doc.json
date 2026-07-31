@@ -6,7 +6,7 @@
   "blocks": {
     "b-editor-root": {
       "id": "b-editor-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "format": "mdx",
         "type": "overview",
@@ -96,7 +96,7 @@
     },
     "b-editor-intro-1": {
       "id": "b-editor-intro-1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -146,7 +146,7 @@
     },
     "b-editor-heading-editor-vs-viewer-2": {
       "id": "b-editor-heading-editor-vs-viewer-2",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -159,7 +159,7 @@
     },
     "b-editor-editor-desc-3": {
       "id": "b-editor-editor-desc-3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -288,7 +288,7 @@
     },
     "b-editor-editor-composition-4": {
       "id": "b-editor-editor-composition-4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -471,7 +471,7 @@
     },
     "b-editor-heading-viewport-7": {
       "id": "b-editor-heading-viewport-7",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -484,7 +484,7 @@
     },
     "b-editor-use-canvas-viewport-desc-10": {
       "id": "b-editor-use-canvas-viewport-desc-10",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -590,7 +590,7 @@
     },
     "b-editor-use-canvas-viewport-wheel-11": {
       "id": "b-editor-use-canvas-viewport-wheel-11",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -647,7 +647,7 @@
     },
     "b-editor-use-canvas-viewport-pan-12": {
       "id": "b-editor-use-canvas-viewport-pan-12",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -699,7 +699,7 @@
     },
     "b-editor-heading-hotkeys-13": {
       "id": "b-editor-heading-hotkeys-13",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -712,7 +712,7 @@
     },
     "b-editor-hotkeys-intro-14": {
       "id": "b-editor-hotkeys-intro-14",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -852,7 +852,7 @@
     },
     "b-editor-hotkey-v-15": {
       "id": "b-editor-hotkey-v-15",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -871,7 +871,7 @@
     },
     "b-editor-hotkey-h-16": {
       "id": "b-editor-hotkey-h-16",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -890,7 +890,7 @@
     },
     "b-editor-hotkey-c-17": {
       "id": "b-editor-hotkey-c-17",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -909,7 +909,7 @@
     },
     "b-editor-hotkey-p-18": {
       "id": "b-editor-hotkey-p-18",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -928,7 +928,7 @@
     },
     "b-editor-hotkey-d-19": {
       "id": "b-editor-hotkey-d-19",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -947,7 +947,7 @@
     },
     "b-editor-hotkey-s-21": {
       "id": "b-editor-hotkey-s-21",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -966,7 +966,7 @@
     },
     "b-editor-hotkey-o-22": {
       "id": "b-editor-hotkey-o-22",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -985,7 +985,7 @@
     },
     "b-editor-hotkey-u-23": {
       "id": "b-editor-hotkey-u-23",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1004,7 +1004,7 @@
     },
     "b-editor-hotkey-b-24": {
       "id": "b-editor-hotkey-b-24",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1023,7 +1023,7 @@
     },
     "b-editor-hotkey-m-25": {
       "id": "b-editor-hotkey-m-25",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1042,7 +1042,7 @@
     },
     "b-editor-hotkey-delete-26": {
       "id": "b-editor-hotkey-delete-26",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1070,7 +1070,7 @@
     },
     "b-editor-hotkey-cmd-d-27": {
       "id": "b-editor-hotkey-cmd-d-27",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1098,7 +1098,7 @@
     },
     "b-editor-hotkey-cmd-c-28": {
       "id": "b-editor-hotkey-cmd-c-28",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1117,7 +1117,7 @@
     },
     "b-editor-hotkey-cmd-v-29": {
       "id": "b-editor-hotkey-cmd-v-29",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1142,7 +1142,7 @@
     },
     "b-editor-hotkey-arrows-30": {
       "id": "b-editor-hotkey-arrows-30",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1179,7 +1179,7 @@
     },
     "b-editor-hotkey-cmd-z-31": {
       "id": "b-editor-hotkey-cmd-z-31",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1204,7 +1204,7 @@
     },
     "b-editor-hotkey-shift-cmd-z-32": {
       "id": "b-editor-hotkey-shift-cmd-z-32",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1229,7 +1229,7 @@
     },
     "b-editor-hotkey-escape-33": {
       "id": "b-editor-hotkey-escape-33",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1248,7 +1248,7 @@
     },
     "b-editor-hotkey-cmd-0-34": {
       "id": "b-editor-hotkey-cmd-0-34",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1267,7 +1267,7 @@
     },
     "b-editor-hotkey-cmd-plus-35": {
       "id": "b-editor-hotkey-cmd-plus-35",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1286,7 +1286,7 @@
     },
     "b-editor-hotkey-cmd-minus-36": {
       "id": "b-editor-hotkey-cmd-minus-36",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1305,7 +1305,7 @@
     },
     "b-editor-scoping-note-37": {
       "id": "b-editor-scoping-note-37",
-      "flavour": "implementation",
+      "type": "implementation",
       "props": {
         "title": "Hotkey scoping: no-op while typing"
       },
@@ -1381,7 +1381,7 @@
     },
     "b-editor-testing-note-38": {
       "id": "b-editor-testing-note-38",
-      "flavour": "testing",
+      "type": "testing",
       "props": {
         "title": "Editor test suite"
       },
@@ -1667,7 +1667,7 @@
     },
     "b-editor-closing-39": {
       "id": "b-editor-closing-39",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1728,7 +1728,7 @@
     },
     "b-editor-text-editing-para": {
       "id": "b-editor-text-editing-para",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1832,7 +1832,7 @@
     },
     "b-editor-color-para": {
       "id": "b-editor-color-para",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1867,7 +1867,7 @@
     },
     "b-editor-heading-title-0": {
       "id": "b-editor-heading-title-0",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -1880,7 +1880,7 @@
     },
     "b-editor-heading-pipeline-40": {
       "id": "b-editor-heading-pipeline-40",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1893,7 +1893,7 @@
     },
     "b-editor-heading-pipeline-pure-41": {
       "id": "b-editor-heading-pipeline-pure-41",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1906,7 +1906,7 @@
     },
     "b-editor-pipeline-pure-42": {
       "id": "b-editor-pipeline-pure-42",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2087,7 +2087,7 @@
     },
     "b-editor-pipeline-decision-43": {
       "id": "b-editor-pipeline-decision-43",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "The dispatcher is pure; effects live at the hook edge"
@@ -2155,7 +2155,7 @@
     },
     "b-editor-heading-pipeline-dom-44": {
       "id": "b-editor-heading-pipeline-dom-44",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2168,7 +2168,7 @@
     },
     "b-editor-pipeline-dom-45": {
       "id": "b-editor-pipeline-dom-45",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2284,7 +2284,7 @@
     },
     "b-editor-heading-pipeline-hit-46": {
       "id": "b-editor-heading-pipeline-hit-46",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2297,7 +2297,7 @@
     },
     "b-editor-pipeline-hit-47": {
       "id": "b-editor-pipeline-hit-47",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2365,7 +2365,7 @@
     },
     "b-editor-heading-pipeline-raf-48": {
       "id": "b-editor-heading-pipeline-raf-48",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2378,7 +2378,7 @@
     },
     "b-editor-pipeline-raf-49": {
       "id": "b-editor-pipeline-raf-49",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2462,7 +2462,7 @@
     },
     "b-editor-heading-pipeline-feedback-50": {
       "id": "b-editor-heading-pipeline-feedback-50",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2475,7 +2475,7 @@
     },
     "b-editor-pipeline-feedback-51": {
       "id": "b-editor-pipeline-feedback-51",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2641,7 +2641,7 @@
     },
     "b-editor-heading-pipeline-hover-52": {
       "id": "b-editor-heading-pipeline-hover-52",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2654,7 +2654,7 @@
     },
     "b-editor-pipeline-hover-53": {
       "id": "b-editor-pipeline-hover-53",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2699,7 +2699,7 @@
     },
     "b-editor-heading-feature-slices-60": {
       "id": "b-editor-heading-feature-slices-60",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -2712,7 +2712,7 @@
     },
     "b-editor-feature-slices-intro-61": {
       "id": "b-editor-feature-slices-intro-61",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2754,7 +2754,7 @@
     },
     "b-editor-heading-slice-selection-62": {
       "id": "b-editor-heading-slice-selection-62",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2767,7 +2767,7 @@
     },
     "b-editor-slice-selection-63": {
       "id": "b-editor-slice-selection-63",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2947,7 +2947,7 @@
     },
     "b-editor-heading-slice-move-64": {
       "id": "b-editor-heading-slice-move-64",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2960,7 +2960,7 @@
     },
     "b-editor-slice-move-65": {
       "id": "b-editor-slice-move-65",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3079,7 +3079,7 @@
     },
     "b-editor-heading-slice-place-66": {
       "id": "b-editor-heading-slice-place-66",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -3092,7 +3092,7 @@
     },
     "b-editor-slice-place-67": {
       "id": "b-editor-slice-place-67",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3207,7 +3207,7 @@
     },
     "b-editor-heading-slice-snapping-68": {
       "id": "b-editor-heading-slice-snapping-68",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -3220,7 +3220,7 @@
     },
     "b-editor-slice-snapping-69": {
       "id": "b-editor-slice-snapping-69",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3484,7 +3484,7 @@
     },
     "b-editor-heading-slice-toolbar-70": {
       "id": "b-editor-heading-slice-toolbar-70",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -3497,7 +3497,7 @@
     },
     "b-editor-slice-toolbar-71": {
       "id": "b-editor-slice-toolbar-71",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3587,7 +3587,7 @@
     },
     "b-editor-heading-slice-context-72": {
       "id": "b-editor-heading-slice-context-72",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -3600,7 +3600,7 @@
     },
     "b-editor-slice-context-73": {
       "id": "b-editor-slice-context-73",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3664,7 +3664,7 @@
     },
     "b-editor-heading-slice-text-74": {
       "id": "b-editor-heading-slice-text-74",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -3677,7 +3677,7 @@
     },
     "b-editor-heading-slice-inspector-75": {
       "id": "b-editor-heading-slice-inspector-75",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -3690,7 +3690,7 @@
     },
     "b-editor-slice-inspector-76": {
       "id": "b-editor-slice-inspector-76",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3748,7 +3748,7 @@
     },
     "b-editor-heading-slice-section-fit-77": {
       "id": "b-editor-heading-slice-section-fit-77",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -3761,7 +3761,7 @@
     },
     "b-editor-slice-section-fit-78": {
       "id": "b-editor-slice-section-fit-78",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {

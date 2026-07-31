@@ -6,7 +6,21 @@
   "blocks": {
     "b-kernel-root": {
       "id": "b-kernel-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
+      "props": {
+        "covers": "The live canvas-agent session lifecycle: scope resolution, draft page-frame injection, per-run boot perception, the thirty-two-tool gesture runtime, typed-gesture lowering, tiered operation results, painted-extent cameras, static rendering, finalize gates, and the proposal handoff to the studio.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "layout session",
+          "tiered perception",
+          "typed operations",
+          "CanvasAgentPatchOperation",
+          "painted-extent camera",
+          "static SVG renderer",
+          "proposal-ready"
+        ]
+      },
       "children": [
         "b-kernel-title-1",
         "b-kernel-lede-2",
@@ -54,26 +68,11 @@
         "b-kernel-decisions-heading-66",
         "b-kernel-decisions-table-67",
         "b-kernel-decisions-seam-68"
-      ],
-      "props": {
-        "covers": "The live canvas-agent session lifecycle: scope resolution, draft page-frame injection, per-run boot perception, the thirty-two-tool gesture runtime, typed-gesture lowering, tiered operation results, painted-extent cameras, static rendering, finalize gates, and the proposal handoff to the studio.",
-        "format": "mdx",
-        "type": "design",
-        "concepts": [
-          "layout session",
-          "tiered perception",
-          "typed operations",
-          "CanvasAgentPatchOperation",
-          "painted-extent camera",
-          "static SVG renderer",
-          "proposal-ready"
-        ]
-      }
+      ]
     },
     "b-kernel-title-1": {
       "id": "b-kernel-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -81,34 +80,34 @@
         {
           "insert": "Agent kernel architecture"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-lede-2": {
       "id": "b-kernel-lede-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The kernel hosts a scoped, draft-based canvas editing session. The model begins with a current textual and visual snapshot, edits the draft through typed single-operation mutators, receives the standing board picture with every turn's state block, spends look on a deliberate close-up of one region, and can finish only by proposing a cumulative document diff or ending without a proposal."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-assumptions-3": {
       "id": "b-kernel-assumptions-3",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The saved canvas document is the baseline and the session draft is the working truth. Geometry, containment, routing, diagnostics, and renders are recomputed from documents; the model never edits an intermediate layout representation. The operator remains the authority that accepts or rejects a proposal."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-shape-heading-4": {
       "id": "b-kernel-shape-heading-4",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -116,12 +115,12 @@
         {
           "insert": "Session lifecycle"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-shape-body-5": {
       "id": "b-kernel-shape-body-5",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -140,12 +139,12 @@
         {
           "insert": ". Selecting a section includes its stored descendants. The resolution records the exact in-scope object ids, their bounding frame, and the number of connections crossing the scope boundary."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-shape-code-6": {
       "id": "b-kernel-shape-code-6",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -153,12 +152,12 @@
         {
           "insert": "createSession\n  → read + hash baseline\n  → resolve selected object ids\n  → create draft and inject a page frame when needed\n  → merge annotations into the request queue\n  → boot current text context + images\n  → run model against the thirty-two tools\n  → proposal-ready | abandoned | error\n  → operator accepts or rejects a proposal"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-shape-promote-7": {
       "id": "b-kernel-shape-promote-7",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -178,12 +177,12 @@
         {
           "insert": " ensures the draft has a root section locked as background. If the saved document has no such frame, the harness derives one from the document size or object bounds, gives it the conventional id page-frame when available, and inserts it into the draft. The frame is the page boundary. No section resizes itself, and the page frame cannot be removed through the model surface; like any section, it can be resized or fitted on request."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-host-heading-8": {
       "id": "b-kernel-host-heading-8",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -191,12 +190,12 @@
         {
           "insert": "Per-run boot perception"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-host-body-9": {
       "id": "b-kernel-host-body-9",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -216,12 +215,12 @@
         {
           "insert": " pairs board-state text with three boot images: a painted-extent full-board render, the house-style exemplar, and the vocabulary contact sheet. The exemplar and contact-sheet results are cached after their first process-local render attempts. A board-render failure is noted in board_state, and unavailable images are omitted rather than failing the spawn."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-host-d5-decision-10": {
       "id": "b-kernel-host-d5-decision-10",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -241,23 +240,23 @@
         {
           "insert": " hook delivers the current board PNG first, the exemplar PNG second, and the vocabulary contact-sheet PNG third. The contact sheet renders and labels every object type, every icon glyph, every color, and connection demonstrations including a wire that ends on a section. Missing image payloads are omitted without changing the tagged text blocks."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-host-context-11": {
       "id": "b-kernel-host-context-11",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. Workflow contains five nested phase blocks—orientate, plan, build, qa, and finalize—and each phase carries objective, steps, and constraints. The phases run as a loop navigated by state rather than by turn count: a phase with nothing to do is skipped, and a problem found late sends the run back to the phase that can fix it. There is no separate rules section; phase constraints own those requirements. Build is sections-first: the section skeleton goes down first, content fills one section at a time with each render judged, a finished region closes with fit_section, then connections, labels, and styling follow.\n\nFive tagged blocks form the boot text, with every child line indented four spaces: editor_state describes the instruction, baseline, selection, resolved scope frame, boundary-edge count, and optional viewport; user_requests is the status-bearing annotation queue; capabilities is material then gestures — the four kind blocks (sections, stickies, objects, connections) each with description, named functionality topics, generated vocabulary or fields where applicable, and tips, naming no tools; followed by one gestures block holding a child per verb group, derived from the registration roster; style_guide contains the single nested aesthetic topic; and board_state contains the full, untruncated board digest followed by the current lint report. The object roster lists bare type names so the agent chooses geometry; icon glyphs and colors are enumerated one per line. During editing the standing picture is pushed rather than fetched: each turn's state block carries the live board digest, the cumulative diff, the current findings, the request queue, and a render of the board as it stands, so recall costs no tool call and look is spent on a close-up instead."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-session-heading-12": {
       "id": "b-kernel-session-heading-12",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -265,12 +264,12 @@
         {
           "insert": "The thirty-two-tool runtime"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-session-body-13": {
       "id": "b-kernel-session-body-13",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -315,45 +314,45 @@
         {
           "insert": ", with the twenty-five mutators under operations/ and look, the annotation threads, request disposal, board title, description, and finalize under workflow/. The runtime looks up the current layout session from the kernel run context. A mutator's wire schema is exactly its own gesture fields, sealed against keys it does not declare: an edit takes no view argument and returns no picture, because framing is look's alone. Every mutator declares sequential execution, so call order is guaranteed."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-session-tools-14": {
       "id": "b-kernel-session-tools-14",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Each typed mutator names exactly one operation and accepts its operation-specific fields and nothing else. One call applies one edit, and an advisory per-turn allowance — one tool call by default, raisable to three — keeps a single message from planning several gestures against a board its own first call is about to change. look is the separate read-only call: it frames exactly one region, view naming a section or a single object and at cropping to a world rect, either/or per call, and returns that region rendered and measured. It never returns the board, which arrives with the state block instead."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-session-delta-15": {
       "id": "b-kernel-session-delta-15",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "resolve_request({ id, status, note }) disposes one open queue entry as done or declined. The note is required and the response is the updated REQUESTS block only. Queue entries retain their stable R-number and do not disappear merely because an annotation is removed from the draft."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-session-whole-program-16": {
       "id": "b-kernel-session-whole-program-16",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "finalize({ outcome, message }) is terminal on success. outcome committed builds a proposal for operator review after rechecking its gates. outcome none marks the session abandoned, emits the abandonment reason, and ends without a proposal. A rejected finalize call leaves the run active so the model can correct the draft or queue."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-diff-heading-17": {
       "id": "b-kernel-diff-heading-17",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -361,12 +360,12 @@
         {
           "insert": "Model operations and the studio wire"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-diff-body-18": {
       "id": "b-kernel-diff-body-18",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -385,12 +384,12 @@
         {
           "insert": " holds the neutral delta vocabulary a document diff is allowed to speak — added, changed, removed per entity kind, plus the one section-fit shape a resolver produces. It is deliberately not the tool roster: move_to, move_by, align, and space_out all land in the document as the same geometry change, so a diff cannot recover which gesture produced it. Twenty-five gesture specs own per-operation state validation, and OpContext owns lowering onto the internal patch grammar."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-diff-move-19": {
       "id": "b-kernel-diff-move-19",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -398,34 +397,34 @@
         {
           "insert": "place     place_section · place_sticky · place_shape · clone · connect\narrange   move_to · move_by · resize · match_size · align · space_out\ncontent   update_text · change_color · change_shape\nsections  fit_section · change_section_border · lock · unlock\nedges     style_edge · change_connection · reroute · shift_segment · reset_route · move_label\ndelete    delete\n\ndelta     addSection · updateSection · removeSection · fitSection\n          addSticky · updateSticky · removeSticky\n          addObject · updateObject · removeObject\n          addConnection · updateConnection · removeConnection"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-diff-add-20": {
       "id": "b-kernel-diff-add-20",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The top block is the gesture roster the model calls; the bottom block is the delta vocabulary a diff speaks back. Place gestures imply their entity type and take no type field except place_shape, which accepts the folded roster: the shape types with the icon glyphs merged in under their own names, so placing database places that icon. The one name the two rosters shared goes to the glyph, and the flowchart shape it displaced keeps a read-only outbound name, database-shape. Gestures verify that their target is the expected kind; a wrong-kind target produces a steering error naming the gesture that does fit."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-diff-arrow-21": {
       "id": "b-kernel-diff-arrow-21",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The tool schema catches field presence, types, enums, id format, and complete {x, y, width, height} geometry before execute runs. Per-operation state validation checks existence, entity kind, and board invariants; failures return error lines only, with no mutation, perception, or event. Non-fatal observations appear as notes under APPLIED. Duplicate ids, self-loops, and missing targets are validation errors; a duplicate edge over an existing from→to pair applies with a warning, and an empty fit is a no-op. A connection endpoint must already exist on the draft, and the validation error names its field, so objects go down before the edge that joins them. An operation applies or it does not: atomicity belongs to the call, not to validator orchestration."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-diff-section-22": {
       "id": "b-kernel-diff-section-22",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -444,34 +443,34 @@
         {
           "insert": ". Locks are enforced, not merely advised: a frame's own locked value refuses that frame's mutation in either mode, an ancestor locked all gates every descendant, and an edge is gated when either endpoint sits inside a locked-all closure — a background lock pins one frame's box and never gates an edge. Every refusal names the frame holding the lock and unlock as the one call that lifts it. Placements are ungated, because a new id cannot be under a lock and membership reconcile already refuses to adopt into a locked-all section."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-diff-parent-constraint-23": {
       "id": "b-kernel-diff-parent-constraint-23",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The operation context lowers every gesture onto the internal patch grammar (addObject, updateObject, removeObject and their connection siblings), stamping implied types where a kind is structural. classifyDelta performs the inverse classification when cumulative diffs are rendered back as neutral delta verbs — a document diff cannot recover which gesture produced it."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-diff-waypoints-constraint-24": {
       "id": "b-kernel-diff-waypoints-constraint-24",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Below this boundary, the canvas and studio continue to speak the six CanvasAgentPatchOperation kinds: add, update, and remove for objects and connections. Sections and stickies are ordinary objects on that wire. Keeping the six-operation wire means the draft applier, document differ, studio accept path, and canvas reducer share one mechanical format while the model receives safer kind-specific steering."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-diff-d1-decision-25": {
       "id": "b-kernel-diff-d1-decision-25",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -491,12 +490,12 @@
         {
           "insert": " emits the ordered internal six-operation list. Derived parentId membership and read-only annotations are omitted so the live canvas can derive or keep them; endpoint anchors, endpoint positions, and waypoints are stored connection fields — agent steering, not derived routing — and are diffed and carried in the proposal."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-apply-heading-26": {
       "id": "b-kernel-apply-heading-26",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -504,56 +503,56 @@
         {
           "insert": "Operation results and deliberate perception"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-apply-put-27": {
       "id": "b-kernel-apply-put-27",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Before execute, the runtime validates the tool schema. The shared factory then resolves the session and snapshots its draft; a state-validation failure returns ERROR with no mutation, perception, or event. The apply stage can return a no-op note and stop. A changing call reconciles waypoints and then membership from geometry, commits the new draft through the one choke point that assigns it and captures fresh board pixels in the same move, derives DELTA and the lint delta, reports routes for a touched connection, and emits one run-UX event. The result text carries no image of its own; the refreshed render reaches the model on the next state block. At every turn end the session also publishes that current-board raster as an app:board-render trace event, which the kernel harness consumes to show turn-by-turn board progress in the trace viewer; the publication is fire-and-forget, so a failure there never touches the run. Adds start with parentId null and object updates strip parentId because containment derives from geometry."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-apply-action-28": {
       "id": "b-kernel-apply-action-28",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "fit_section reads the named frame's children from a membership-reconciled draft, computes the fitted geometry, and lands it as an ordinary geometry update on that one section. No ancestor is touched: fitting is a finishing move, and a cascade would compress a parent around whichever children happen to exist — cascading fit is auto-fit at smaller scope, and the whole point of the explicit gesture is that geometry moves only where it is named. A childless section returns a no-op note. Because the result lowers to a plain section geometry patch, nothing below the lowering line needs a special case."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-apply-handle-29": {
       "id": "b-kernel-apply-handle-29",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The factory derives DELTA by comparing the before and after documents rather than echoing the call. Consequently it reports direct edits together with grid-snapped or fitted geometry, reconciled parentId, endpoint reassignment, anchors, endpoint positions, and waypoint changes. The snap is about what lands, not about the arguments: a relative gesture snaps the coordinate the box ends up on, so a nudge off an off-grid box lands on the grid rather than staying off it. The APPLIED line names the operation, and any non-fatal observations follow as notes."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-apply-dispatch-30": {
       "id": "b-kernel-apply-dispatch-30",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "look is the framed close-up. One call frames exactly one region: view names a section or a single object, at crops to a world rect, and the two are either/or — sending both, or neither, is refused with the two legal calls spelled out concretely so the model re-sends rather than re-reads a rule. The framed region comes back as a 1400px render and a MEASURES block — per-pair gaps on each axis, row and column pitch, the section's free rect, and ink share — beside the standing text truth: a fresh BOARD digest, the cumulative baseline-to-draft BOARD DIFF rendered from the same diffDocuments operations that a committed finalize proposes, the complete lint list in prose, routed truth, and the full request queue. It mutates nothing and emits no run event. The board itself is never a look result: the 1600px board render rides the state block, refreshed by every commit, followed by up to three prior post-change renders. Each raster a look produces is logged on the session and noted as a lightweight ref in the agent's state object, while the image itself stays visible in the recent conversation tail."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-apply-downstream-31": {
       "id": "b-kernel-apply-downstream-31",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -572,12 +571,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-camera-heading-45": {
       "id": "b-kernel-camera-heading-45",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -585,34 +584,34 @@
         {
           "insert": "Painted-extent camera contract"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-camera-body-46": {
       "id": "b-kernel-camera-body-46",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "paintedBounds measures what the renderer paints, not just object rectangles. Its union includes object geometry, icon caption bands, section title chips, production-routed connection polylines, and connection label chips. renderBoardView frames the full painted union with padding and then expands to fit section title chips at the view's effective zoom."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-camera-d3-decision-47": {
       "id": "b-kernel-camera-d3-decision-47",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "renderSectionView frames the named section, its descendants, and fully internal connections. It retains every object or connection whose painted extent intersects the camera and retains the true endpoint objects needed to route those connections. A connection crossing the section boundary is drawn to the frame edge and visibly clipped by the SVG viewBox; it is never dropped. Routing always uses the whole document as the obstacle set, so a camera does not change the route."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-camera-fidelity-48": {
       "id": "b-kernel-camera-fidelity-48",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -631,12 +630,12 @@
         {
           "insert": ", which is the session harness's only named-view seam."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-docs-heading-49": {
       "id": "b-kernel-docs-heading-49",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -644,34 +643,34 @@
         {
           "insert": "Static rendering and raster safety"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-docs-d4-decision-50": {
       "id": "b-kernel-docs-d4-decision-50",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "The static renderer emits deterministic, self-contained SVG without React, DOM APIs, external styles, or foreignObject. It uses the production connector router, the canvas palette and stroke rules, the same text slots as the live stage, and true silhouettes for document, database, folder, document-stack, cylinder-horizontal, internal-storage, page-corner, and predefined-process."
+          "insert": "The static renderer emits deterministic, self-contained SVG without React, DOM APIs, external styles, or foreignObject. It uses the production connector router, the canvas palette and stroke rules, the same text slots as the live stage, and a true silhouette for predefined-process (the one shape whose look is not a plain outline)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-docs-body-51": {
       "id": "b-kernel-docs-body-51",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Text wrapping and ellipsis use generated Inter advance tables for the regular and true wght-700 instances. Sticky notes are laid out from the same markdown parser into matching heading, bullet, bold, code, indentation, and line-box structure. The harness rasterizes SVG with resvg and bundled Inter. Before entering native code it validates the root viewport, caps raster dimensions, and rejects degenerate or wholly off-viewport nested SVG and filtered elements; the SVG renderer also omits rasterizer-unsafe features from off-camera elements."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-review-heading-40": {
       "id": "b-kernel-review-heading-40",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -679,56 +678,56 @@
         {
           "insert": "Finalize gates and proposal handoff"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-review-invoke-41": {
       "id": "b-kernel-review-invoke-41",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "A committed finalize runs the finishing registry—the six always-on diagnostics plus frame-slack, which asks whether a frame is far larger than its children need—then filters them to the baseline scope plus draft-created objects. Every finding surviving in that edited scope blocks finalization, warnings included: the call is refused, the run stays active, and the model fixes what it raised before calling again. Crowding is a warning-tier corridor floor for sibling nodes: 80px side by side and 48px stacked. Both are the clearance a routed wire and its chip physically need, not a preferred gap; stacked peers sit closer because a wire between them usually runs along the gap rather than across it."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-review-progress-42": {
       "id": "b-kernel-review-progress-42",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Every user-authored request must also be done or declined, and open entries block finalization beside the scoped diagnostics; a thread the agent itself opened is a question left for the operator to answer on their own time, so it never traps the run. If the draft matches the baseline and no proposal already exists, there is nothing to propose and the committed finalize is rejected."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-review-preview-43": {
       "id": "b-kernel-review-preview-43",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "On pass, finalize calls diffDocuments, stores the resulting six-operation patch with the model's summary and the scoped lint report, sets the session status to proposal-ready, and emits the proposal-ready event. outcome none sets status abandoned and emits the abandoned event. Those event names and proposal operation shapes are the stable service-to-studio wire."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-review-verdict-44": {
       "id": "b-kernel-review-verdict-44",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Accept re-reads the saved canvas. If the baseline hash still matches, the store returns the proposal's CanvasAgentPatchOperation array to the studio. If the file changed, accept permits the handoff only when every baseline-scoped object still exists with the same geometry; otherwise it returns a conflict and the operator must run against the current board. Reject marks the session rejected without returning a patch."
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-decisions-heading-66": {
       "id": "b-kernel-decisions-heading-66",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -736,12 +735,12 @@
         {
           "insert": "Code ownership"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-decisions-table-67": {
       "id": "b-kernel-decisions-table-67",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -749,12 +748,12 @@
         {
           "insert": "service/session/store.ts                       lifecycle, scope state, run, accept/reject\nservice/session/board-trace.ts                 the app:board-render turn event\nservice/session/snapshots/context.ts           page frame, boot snapshots, lint scope\nservice/session/perception/boot.ts             board render, exemplar, vocabulary contact sheet\nservice/session/perception/live-draft-view.ts  the one draft-commit choke point and its board raster\nservice/session/perception/perception.ts       the operation and look result envelopes\nservice/session/perception/op-surface.ts       neutral delta vocabulary, delta classification\nservice/session/tools/operations/              twenty-five gesture specs by verb group, the shared\n                                               mutator factory, and the lowering helpers\nservice/session/tools/workflow/                look, annotation threads, request disposal, board\n                                               title, description, finalize gates\nservice/session/tools/schemas.ts               sealed payloads, patches, generated vocabulary\nservice/session/tools/grid.ts                  the agent's 20 grid\nservice/session/tools/creation-defaults.ts     what a bare placement lands as\ncatalog/layout-editor/                         model prompt, context sidecar, capabilities, state\n                                               block, thirty-two tool declarations\nboard/                                         digest, lint registries, document diff, scope\nprotocol.ts                                    the wire vocabulary shared with the host\nviewer/                                        the run viewer, over the service's HTTP routes\ncanvas/src/render/                             painted bounds, named views, static SVG"
         }
-      ]
+      ],
+      "children": []
     },
     "b-kernel-decisions-seam-68": {
       "id": "b-kernel-decisions-seam-68",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -786,7 +785,8 @@
         {
           "insert": " is the wire vocabulary shared with the host — session DTOs, event shapes, and the delta report, as types only, with no runtime, pipeline, or kernel imports. The harness routes and the studio client both import from it, so the two ends of the wire cannot drift."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

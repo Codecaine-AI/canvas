@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at 6.5 because its registry-aware palette, clear operational vocabulary, and clean routing feel deliberate, but oversized sparse containers and broad dead bands prevent the composition from reading as fully finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5.5,
+        "note": "Fail: the large Operations monitoring container is dramatically underfilled, and substantial vertical gaps between the middle and lower sections leave conspicuous dead bands."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Teal agents and orchestrators, red guardrails, green send paths, blue durable-state routing, yellow event treatment, and gray infrastructure largely follow the registry consistently."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 8,
+        "note": "No crosshair junctions, waypoint markers, or orphaned badges are visible; long routed lines remain mostly explicit and terminate with readable arrowheads."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "Rows within the lifecycle and monitoring sections align cleanly, but density swings from crowded long-wire clusters to very sparse containers, and the yellow timeout note awkwardly interrupts the lower composition."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8801,
+    "output_tokens": 497
+  },
+  "flags": []
+}

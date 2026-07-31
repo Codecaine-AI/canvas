@@ -49,10 +49,8 @@ export const triangleShapeDef: ShapeDef = {
     },
   },
   /*
-   * Moved from CanvasStage's grouped rule (triangle shares its selector group
-   * there with folder/document-stack/cylinder-horizontal/parallelogram/
-   * pentagon/octagon/star/plus/chevron/off-page-connector/trapezoid/
-   * manual-input/hexagon/or-junction/summing-junction).
+   * Moved from CanvasStage's grouped rule (triangle shares this
+   * transparent-button treatment with octagon).
    */
   css: `
         .interactive-canvas-object-triangle {

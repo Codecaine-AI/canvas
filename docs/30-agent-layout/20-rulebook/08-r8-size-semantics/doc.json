@@ -6,14 +6,7 @@
   "blocks": {
     "b-r8-root": {
       "id": "b-r8-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-r8-title-1",
-        "b-r8-card-2",
-        "b-r8-target-5",
-        "b-r8-body-3",
-        "b-r8-sticky-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "Size follows content and communicates role: every node starts from one shared target rectangle, peers match the largest member, larger boxes signal importance, and off-target sizes signal exceptions; the capabilities roster keys no size to an object type.",
         "format": "mdx",
@@ -27,12 +20,18 @@
           "explicit geometry",
           "sticky sizing"
         ]
-      }
+      },
+      "children": [
+        "b-r8-title-1",
+        "b-r8-card-2",
+        "b-r8-target-5",
+        "b-r8-body-3",
+        "b-r8-sticky-4"
+      ]
     },
     "b-r8-title-1": {
       "id": "b-r8-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -40,12 +39,12 @@
         {
           "insert": "R8 — Size semantics"
         }
-      ]
+      ],
+      "children": []
     },
     "b-r8-card-2": {
       "id": "b-r8-card-2",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "Size is information"
       },
@@ -53,23 +52,23 @@
         {
           "insert": "Size each box for what it says, then make peers match the largest member. Use a larger box only as a deliberate importance signal and an off-register size only as a deliberate exception."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r8-target-5": {
       "id": "b-r8-target-5",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Sizing starts from a stated target rather than from a blank page: a node aims for 288×96 and is never narrower than 224. That target belongs to every node equally — it is a rectangle to grow from, not a cap and not a lookup keyed by object type. Grow whichever dimension the label needs, then use match_size to match peers to the largest member without hand-copying its dimensions. What a box says decides its size; what kind of thing it is decides nothing."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r8-body-3": {
       "id": "b-r8-body-3",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -101,18 +100,19 @@
         {
           "insert": " lists bare type names, icon glyphs, and colors without default sizes, leaving every finite rectangle to the agent. The roster and the target do separate jobs: the roster refuses to attach a size to a type, and the target gives every node the same content-first place to start. The rectangles that result quantize to the agent's 20 grid after the semantic size has been chosen. No diagnostic assigns an importance class or preferred extent."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r8-sticky-4": {
       "id": "b-r8-sticky-4",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Stickies have no documentation-level base size or override. Size a note for its markdown content and role, keep it inside the section it explains, and use the pushed render to judge readability. Short labels belong on objects; summaries, legends, callouts, explanations, and open questions belong on stickies."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

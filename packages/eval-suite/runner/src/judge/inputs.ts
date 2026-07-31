@@ -19,6 +19,15 @@ const SHARED_JUDGE_RULES = [
   "Every score must include the axis output contract and concrete evidence.",
   "Exclude declared infrastructure failures from scoring.",
   "Visual axes are scored absolutely against their rubric anchors; no comparison or reference board exists.",
+  "Boards are operational maps: icons carry the components, the small shape core carries steps and branches, and an edge means only what its line shows — label, arrowhead, style.",
+].join("\n");
+
+const OPERATIONAL_MAP_NOTATION = [
+  "Notation legend — the operational-map board language (scenario-independent):",
+  "Icons name components and stores at fixed meanings: agent (autonomous agent), model (LLM/model call), human (person in the loop), orchestrator (coordination and spawn hierarchy), memory (store read/written across turns), knowledge (reference corpus or knowledge base), queue (queue or stream of work), server (infrastructure/service), terminal (CLI or exec surface), config (configuration), api (external API or connection point), message (conversation or message surface), send (emit/dispatch), event (trigger), guardrail (safety gate), monitor (observation/tracing), judge (eval or verdict step), document (produced artifact), documents (multiple documents: reports, corpora, batches), search (retrieval/lookup), tool (capability an agent can invoke), wait (blocking wait, join, timeout), lock (lease, claim, mutual exclusion), eval (experiment or test harness), activity (traces/telemetry), archive (cold storage), key (secrets/credentials), coin (cost/budget), package (build artifact or deployment), voice (audio boundary where a human talks to the system).",
+  "The shape core names steps and branches: rectangle = message or payload container; rounded rectangle (process) = a step; predefined process = a delegated step (spawned sub-agent, subroutine, enqueued task); decision diamond = a branch; ellipse = start/end terminator; octagon = stop; arrow = routing outcome; triangle = directional marker.",
+  "Any region of a board reads in one of two genres. System map: nodes are components, edges are standing relationships (reads, writes, feeds, informs) and time is not an axis. Procedure: nodes are steps, edges mean 'then', branch outcomes ride as on-line text, back-edges are loops, and time is the axis. Genres mix per region; a crossover edge (a procedure step touching a store) joins them.",
+  "Edges say only what the line shows: label, arrowhead, and line style. Do not assume hidden semantics; put unreadable or ambiguous edge meaning in uncertain.",
 ].join("\n");
 
 export interface JudgeImageInput {
@@ -355,7 +364,13 @@ export async function gatherScenarioJudgeInputs(
     const sfBlindMissing: string[] = [];
     missingPath(finalPngPath, "final PNG", sfBlindMissing);
     const sfBlind = prepared(
-      "Reconstruct the single attached image. Report only what the picture communicates.",
+      [
+        "Reconstruct the single attached image. Report only what the picture communicates,",
+        "read through the notation legend below. The legend is the board language, not",
+        "scenario context.",
+        "",
+        OPERATIONAL_MAP_NOTATION,
+      ].join("\n"),
       [{ label: "board", path: finalPngPath }],
       sfBlindMissing,
     );

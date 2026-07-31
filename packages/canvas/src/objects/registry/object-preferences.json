@@ -1,0 +1,233 @@
+[
+  {
+    "name": "rectangle",
+    "meaning": "A plain box — a message or payload container",
+    "scenarios": ["messages, payloads, and containers that are not process steps"],
+    "color": "gray"
+  },
+  {
+    "name": "process",
+    "meaning": "A rounded rectangle — one step in a procedure",
+    "scenarios": ["a single action or stage in a walkthrough or pipeline"],
+    "color": "gray"
+  },
+  {
+    "name": "decision",
+    "meaning": "A branch — the flow forks on a condition",
+    "scenarios": ["yes/no gates", "routing on the outcome of a check"],
+    "color": "gray"
+  },
+  {
+    "name": "predefined-process",
+    "meaning": "A delegated step — work handed to another flow",
+    "scenarios": ["spawned sub-agents, subroutines, enqueued tasks"],
+    "color": "gray"
+  },
+  {
+    "name": "triangle",
+    "meaning": "A directional marker — points up or down via `direction`",
+    "scenarios": ["pointing a reader up or down a flow or hierarchy"],
+    "color": "gray"
+  },
+  {
+    "name": "ellipse",
+    "meaning": "A start or end terminator",
+    "scenarios": ["the entry and exit points of a procedure"],
+    "color": "gray"
+  },
+  {
+    "name": "arrow-shape",
+    "meaning": "A routing outcome — points left or right via `direction`",
+    "scenarios": ["marking where a branch's outcome flows next"],
+    "color": "gray"
+  },
+  {
+    "name": "octagon",
+    "meaning": "A stop",
+    "scenarios": ["hard stops, aborts, terminal failure states"],
+    "color": "gray"
+  },
+  {
+    "name": "agent",
+    "meaning": "An autonomous agent — plans and acts on its own",
+    "scenarios": ["main agents, sub-agents, workers in a pool"],
+    "color": "teal"
+  },
+  {
+    "name": "model",
+    "meaning": "An LLM or model call",
+    "scenarios": ["model invocations, completions, embedding calls"],
+    "color": "pink"
+  },
+  {
+    "name": "human",
+    "meaning": "A person in the loop",
+    "scenarios": ["approvals, reviews, human handoffs"],
+    "color": "yellow"
+  },
+  {
+    "name": "orchestrator",
+    "meaning": "The coordinator that spawns and directs other agents",
+    "scenarios": ["coordination, spawn hierarchies, schedulers"],
+    "color": "teal"
+  },
+  {
+    "name": "memory",
+    "meaning": "A store an agent reads from or writes to across turns",
+    "scenarios": [
+      "long/short-term memory, knowledge bases, vector stores",
+      "the target of state-read / state-write edges"
+    ],
+    "color": "blue"
+  },
+  {
+    "name": "knowledge",
+    "meaning": "A reference corpus or knowledge base",
+    "scenarios": ["docs corpora, wikis, curated reference material"],
+    "color": "blue"
+  },
+  {
+    "name": "queue",
+    "meaning": "A queue or stream of work items",
+    "scenarios": ["task queues, streams, backlogs between stages"],
+    "color": "green"
+  },
+  {
+    "name": "server",
+    "meaning": "Infrastructure and services",
+    "scenarios": ["backends, deployments, hosted services"],
+    "color": "gray"
+  },
+  {
+    "name": "terminal",
+    "meaning": "A CLI, runner, or exec surface",
+    "scenarios": ["shells, CI runners, exec sandboxes"],
+    "color": "gray"
+  },
+  {
+    "name": "config",
+    "meaning": "Configuration and settings",
+    "scenarios": ["config files, flags, environment setup"],
+    "color": "gray"
+  },
+  {
+    "name": "api",
+    "meaning": "An external API or connection point",
+    "scenarios": ["third-party APIs, endpoints, integration seams"],
+    "color": "gray"
+  },
+  {
+    "name": "message",
+    "meaning": "A conversation or message surface",
+    "scenarios": ["chat threads, transcripts, message payloads"],
+    "color": "yellow"
+  },
+  {
+    "name": "send",
+    "meaning": "Emit or dispatch",
+    "scenarios": ["outbound sends, notifications, publishes"],
+    "color": "green"
+  },
+  {
+    "name": "event",
+    "meaning": "A trigger or event",
+    "scenarios": ["webhooks, triggers, scheduled firings"],
+    "color": "yellow"
+  },
+  {
+    "name": "guardrail",
+    "meaning": "A safety gate",
+    "scenarios": ["input/output filters, policy checks, blocked-content gates"],
+    "color": "red"
+  },
+  {
+    "name": "monitor",
+    "meaning": "Observation and tracing",
+    "scenarios": ["dashboards, traces, telemetry watchpoints"],
+    "color": "gray"
+  },
+  {
+    "name": "judge",
+    "meaning": "An eval or verdict step",
+    "scenarios": ["LLM judges, scoring passes, accept/reject verdicts"],
+    "color": "pink"
+  },
+  {
+    "name": "document",
+    "meaning": "A produced artifact",
+    "scenarios": ["reports, generated files, single deliverables"],
+    "color": "white"
+  },
+  {
+    "name": "documents",
+    "meaning": "Multiple documents",
+    "scenarios": ["reports, corpora, batches of files"],
+    "color": "white"
+  },
+  {
+    "name": "activity",
+    "meaning": "Traces, telemetry, run activity",
+    "scenarios": ["run logs, activity feeds, execution traces"],
+    "color": "gray"
+  },
+  {
+    "name": "archive",
+    "meaning": "Cold storage or retired state",
+    "scenarios": ["archives, snapshots, retired runs"],
+    "color": "gray"
+  },
+  {
+    "name": "key",
+    "meaning": "Secrets, credentials, auth",
+    "scenarios": ["API keys, tokens, credential stores"],
+    "color": "yellow"
+  },
+  {
+    "name": "coin",
+    "meaning": "Cost, billing, budgets",
+    "scenarios": ["token spend, budgets, billing meters"],
+    "color": "yellow"
+  },
+  {
+    "name": "package",
+    "meaning": "A build artifact, bundle, or deployment",
+    "scenarios": ["builds, releases, deployable bundles"],
+    "color": "gray"
+  },
+  {
+    "name": "voice",
+    "meaning": "A voice channel — the audio boundary where a human talks to the system",
+    "scenarios": ["voice sessions, speech-to-text / text-to-speech seams, call surfaces"],
+    "color": "gray"
+  },
+  {
+    "name": "search",
+    "meaning": "Retrieval, lookup, similarity search",
+    "scenarios": ["retrieval steps, lookups, similarity queries"],
+    "color": "gray"
+  },
+  {
+    "name": "tool",
+    "meaning": "A capability an agent can invoke — distinct from api and config",
+    "scenarios": ["tool calls, function invocations, agent capabilities"],
+    "color": "gray"
+  },
+  {
+    "name": "wait",
+    "meaning": "A blocking wait, join barrier, or timeout",
+    "scenarios": ["joins, barriers, debounces, timeouts"],
+    "color": "gray"
+  },
+  {
+    "name": "lock",
+    "meaning": "A lease, claim, or mutual exclusion — key stays secrets",
+    "scenarios": ["leases, claims, single-writer locks"],
+    "color": "gray"
+  },
+  {
+    "name": "eval",
+    "meaning": "An experiment, eval set, or test harness",
+    "scenarios": ["eval suites, experiments, regression harnesses"],
+    "color": "green"
+  }
+]

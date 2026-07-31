@@ -46,9 +46,9 @@ const LONG_LABEL_TEXT = "Adapt Question\nBased on Interview\nHistory";
 const LONG_SECTION_TITLE = "Adapt Question Based on Interview History";
 const LONG_STICKY_TEXT = "# Heading\n- bullet one\n- bullet two\n**bold** text";
 const RETIRED_ICON_GALLERY_VARIANTS = [
-  { glyph: "person", label: "person" },
-  { glyph: "chat", label: "chat" },
-  { glyph: "cpu", label: "cpu" },
+  { glyph: "human", label: "human" },
+  { glyph: "message", label: "message" },
+  { glyph: "model", label: "model" },
 ] as const satisfies readonly { glyph: NonNullable<InteractiveCanvasObject["icon"]>; label: string }[];
 
 export function GalleryPage({ onBack }: GalleryPageProps) {
@@ -328,7 +328,7 @@ function makeGalleryObject(
       height: geometryOverrides.height ?? defaults.geometry.height,
     },
     style: { shape: defaults.shape },
-    ...(type === "icon" ? { icon: options?.icon ?? "gear" } : null),
+    ...(type === "icon" ? { icon: options?.icon ?? "config" } : null),
     ...(type === "section" ? { layout: { mode: "free" as const, padding: 32, gap: 24 } } : null),
   };
 }

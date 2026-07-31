@@ -1,0 +1,83 @@
+{
+  "$comment": "The palette applied to packages/canvas/src/theme/palette.ts on 2026-07-29 — Ford's blend picked in mw2-palette-proposal.html. option = which proposal column the row came from (current = FigJam classic, C = hot rod).",
+  "gray": {
+    "name": "gray",
+    "ink": "#757575",
+    "fill": "#E6E6E6",
+    "sticky": "#E6E6E6",
+    "wash": "#F9F9F9",
+    "option": "current"
+  },
+  "red": {
+    "name": "Racing Red",
+    "ink": "#D5322F",
+    "fill": "#FFD2CC",
+    "sticky": "#FFBFB7",
+    "wash": "#FEF3F1",
+    "option": "C"
+  },
+  "orange": {
+    "name": "orange",
+    "ink": "#EB7500",
+    "fill": "#FFE0C2",
+    "sticky": "#FFE0C2",
+    "wash": "#FFF7F0",
+    "option": "current"
+  },
+  "yellow": {
+    "name": "yellow",
+    "ink": "#E8A302",
+    "fill": "#FFECBD",
+    "sticky": "#FFE299",
+    "wash": "#FFFBF0",
+    "option": "current"
+  },
+  "green": {
+    "name": "Kelly",
+    "ink": "#019142",
+    "fill": "#C5E9CB",
+    "sticky": "#C5E9CB",
+    "wash": "#F0F8F2",
+    "option": "C"
+  },
+  "teal": {
+    "name": "teal",
+    "ink": "#369E94",
+    "fill": "#C6FAF6",
+    "sticky": "#C6FAF6",
+    "wash": "#EAFDFB",
+    "option": "current"
+  },
+  "blue": {
+    "name": "Cobalt",
+    "ink": "#1A5CDF",
+    "fill": "#CDDFFF",
+    "sticky": "#B9D2FF",
+    "wash": "#F1F6FE",
+    "option": "C"
+  },
+  "violet": {
+    "name": "violet",
+    "ink": "#9747FF",
+    "fill": "#DCCCFF",
+    "sticky": "#DCCCFF",
+    "wash": "#F8F5FF",
+    "option": "current"
+  },
+  "pink": {
+    "name": "Flamingo",
+    "ink": "#B74D85",
+    "fill": "#F9D1E3",
+    "sticky": "#F9D1E3",
+    "wash": "#FDF3F7",
+    "option": "C"
+  },
+  "white": {
+    "name": "White",
+    "fill": "#FFFFFF",
+    "chipFill": "#DBDEE3",
+    "chipBorder": "#C1C4CB",
+    "stroke": "#757980",
+    "option": "C"
+  }
+}

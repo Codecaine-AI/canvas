@@ -6,13 +6,7 @@
   "blocks": {
     "b-step5-root": {
       "id": "b-step5-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-step5-title-1",
-        "b-step5-body-2",
-        "b-step5-code-3",
-        "b-step5-canvas-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "Step 5 of the worked example: an empty apply_ops batch with a score view performs a no-document-change review of whether the intended cross-section centerline reads clearly.",
         "format": "mdx",
@@ -24,12 +18,17 @@
           "section close-up",
           "cross-section review"
         ]
-      }
+      },
+      "children": [
+        "b-step5-title-1",
+        "b-step5-body-2",
+        "b-step5-code-3",
+        "b-step5-canvas-4"
+      ]
     },
     "b-step5-title-1": {
       "id": "b-step5-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -37,12 +36,12 @@
         {
           "insert": "Step 5 — Review the hero row"
         }
-      ]
+      ],
+      "children": []
     },
     "b-step5-body-2": {
       "id": "b-step5-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -66,12 +65,12 @@
         {
           "insert": " requests a section close-up. No document change occurs: the result still pushes APPLIED, a fresh BOARD digest, an empty DELTA, the cumulative BOARD DIFF, the lint delta, and REQUESTS, plus the Score gate close-up, but it does not produce a fresh full-board render or ROUTES for untouched connections. The close-up and the current full-board view let the agent judge whether alignment is carrying a deliberate peer signal. In this frozen artifact, cli centers at y=186 while objdiff centers at y=148, so the cross-section centerline is not satisfied; a later document-changing batch needs complete updateObject geometry before the agent can claim alignment."
         }
-      ]
+      ],
+      "children": []
     },
     "b-step5-code-3": {
       "id": "b-step5-code-3",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "json"
       },
@@ -79,16 +78,17 @@
         {
           "insert": "{\n  \"ops\": [],\n  \"view\": \"score\"\n}"
         }
-      ]
+      ],
+      "children": []
     },
     "b-step5-canvas-4": {
       "id": "b-step5-canvas-4",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/step-5.canvas.json",
         "title": "Step 5 — Line up the hero row"
-      }
+      },
+      "children": []
     }
   }
 }

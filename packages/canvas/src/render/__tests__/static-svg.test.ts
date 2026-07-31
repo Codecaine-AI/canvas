@@ -127,8 +127,8 @@ describe("renderDocumentToSvg", () => {
     expect(count(svg, "<feDropShadow ")).toBe(1);
     expect(count(svg, "url(#render-fixture-sticky-shadow)")).toBe(1);
     // Section tint + chip colors from the palette's blue section cells.
-    expect(svg).toContain('fill="#F5FBFF"');
-    expect(svg).toContain('fill="#C2E5FF"');
+    expect(svg).toContain('fill="#F1F6FE"');
+    expect(svg).toContain('fill="#CDDFFF"');
     // Object text renders.
     expect(svg).toContain(">Start</tspan>");
     expect(svg).toContain(">OK?</tspan>");
@@ -247,7 +247,7 @@ describe("renderDocumentToSvg", () => {
 
   it("mirrors the stage's layer order: sections < connectors < objects < title chips", () => {
     const { svg } = renderDocumentToSvg(fixtureDocument(), { background: "transparent" });
-    const sectionTint = svg.indexOf('fill="#F5FBFF"'); // section backdrop
+    const sectionTint = svg.indexOf('fill="#F1F6FE"'); // section backdrop
     const connectorPath = svg.indexOf("<path ");
     const objectText = svg.indexOf(">Start</tspan>");
     const titleChip = svg.indexOf("Zone &lt;A&gt;");
@@ -266,7 +266,7 @@ describe("renderDocumentToSvg", () => {
         {
           id: "i1",
           type: "icon",
-          icon: "bolt",
+          icon: "event",
           text: "Bolt",
           geometry: { x: 0, y: 0, width: 120, height: 120 },
           style: { shape: "icon" },
@@ -275,7 +275,7 @@ describe("renderDocumentToSvg", () => {
       connections: [],
     };
     const { svg } = renderDocumentToSvg(doc, { background: "transparent" });
-    const glyph = ICON_GLYPHS.bolt;
+    const glyph = ICON_GLYPHS.event;
     // Nested glyph svg with the registry's viewBox and stroke semantics.
     expect(svg).toContain(`<svg x="0" y="0" width="120" height="120" viewBox="0 0 ${glyph.viewBoxSize} ${glyph.viewBoxSize}"`);
     expect(svg).toContain('stroke-linecap="round"');

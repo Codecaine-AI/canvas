@@ -35,31 +35,12 @@ export const ALL_OBJECT_TYPES = [
   "process",
   "decision",
   "sticky",
-  "document",
-  "database",
   "section",
-  "pill",
   "arrow-shape",
   "predefined-process",
   "ellipse",
   "triangle",
-  "parallelogram",
-  "pentagon",
   "octagon",
-  "star",
-  "plus",
-  "chevron",
-  "folder",
-  "document-stack",
-  "off-page-connector",
-  "trapezoid",
-  "manual-input",
-  "hexagon",
-  "internal-storage",
-  "or-junction",
-  "summing-junction",
-  "cylinder-horizontal",
-  "page-corner",
   "icon",
 ] as const satisfies readonly InteractiveCanvasObjectType[];
 
@@ -68,33 +49,14 @@ type ShapeName = NonNullable<CanvasObjectStyle["shape"]>;
 export const ALL_SHAPES = [
   "rounded-rect",
   "diamond",
-  "pill",
   "note",
   "marker",
-  "document",
-  "database",
   "section",
   "arrow-shape",
   "predefined-process",
   "ellipse",
   "triangle",
-  "parallelogram",
-  "pentagon",
   "octagon",
-  "star",
-  "plus",
-  "chevron",
-  "folder",
-  "document-stack",
-  "off-page-connector",
-  "trapezoid",
-  "manual-input",
-  "hexagon",
-  "internal-storage",
-  "or-junction",
-  "summing-junction",
-  "cylinder-horizontal",
-  "page-corner",
   "icon",
 ] as const satisfies readonly ShapeName[];
 
@@ -196,7 +158,7 @@ function buildAllTypesDoc(): InteractiveCanvasDocument {
       object.text = "Title section";
       object.color = "blue";
     }
-    if (type === "icon") object.icon = "gear";
+    if (type === "icon") object.icon = "config";
     if (type === "sticky") object.author = "zz";
     return object;
   });
@@ -251,16 +213,16 @@ function buildAllShapesDoc(): InteractiveCanvasDocument {
   for (const shape of ALL_SHAPES) {
     variants.push({ slug: `base-${shape}`, shape });
   }
-  for (const shape of ["arrow-shape", "chevron", "parallelogram"] as const) {
+  for (const shape of ["arrow-shape"] as const) {
     variants.push({ slug: `dir-left-${shape}`, shape, direction: "left" });
     variants.push({ slug: `dir-right-${shape}`, shape, direction: "right" });
   }
   variants.push({ slug: "dir-up-triangle", shape: "triangle", direction: "up" });
   variants.push({ slug: "dir-down-triangle", shape: "triangle", direction: "down" });
-  variants.push({ slug: "icon-chat-h80", shape: "icon", height: 80, extraText: "Body icon chat h80", icon: "chat" });
-  variants.push({ slug: "icon-chat-h120", shape: "icon", height: 120, extraText: "Body icon chat h120", icon: "chat" });
-  variants.push({ slug: "icon-person-h80", shape: "icon", height: 80, extraText: "Body icon person h80", icon: "person" });
-  for (const shape of ["document", "database", "icon", "arrow-shape"] as const) {
+  variants.push({ slug: "icon-message-h80", shape: "icon", height: 80, extraText: "Body icon message h80", icon: "message" });
+  variants.push({ slug: "icon-message-h120", shape: "icon", height: 120, extraText: "Body icon message h120", icon: "message" });
+  variants.push({ slug: "icon-human-h80", shape: "icon", height: 80, extraText: "Body icon human h80", icon: "human" });
+  for (const shape of ["ellipse", "octagon", "icon", "arrow-shape"] as const) {
     // P1 — color-pick coverage per silhouette family: a soft pick with a
     // strokeWidth override, a borderless bold pick, and a second soft hue.
     variants.push({
@@ -290,7 +252,7 @@ function buildAllShapesDoc(): InteractiveCanvasDocument {
     };
     if (variant.color) object.color = variant.color;
     if (variant.direction) object.direction = variant.direction;
-    if (variant.shape === "icon") object.icon = variant.icon ?? "gear";
+    if (variant.shape === "icon") object.icon = variant.icon ?? "config";
     if (variant.extraText) object.text = `${object.text}\n${variant.extraText}`;
     return object;
   });

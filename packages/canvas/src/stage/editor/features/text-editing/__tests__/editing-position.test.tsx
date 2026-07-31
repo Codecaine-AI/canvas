@@ -288,15 +288,6 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
         }),
         expected: { x: 35, y: 12, width: 70, height: 120 * 0.48 - 120 * 0.1 },
       },
-      {
-        object: makeObject({
-          id: "pill-center",
-          type: "pill",
-          geometry: { x: 0, y: 0, width: 200, height: 64 },
-          style: { shape: "pill" },
-        }),
-        expected: { x: 32, y: 12, width: 136, height: 40 },
-      },
     ];
 
     for (const { object, expected } of cases) {
@@ -383,24 +374,11 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     expectAtRestMatchesEditor(object);
   });
 
-  it("chevron: text rect uses the symmetric safe band", () => {
-    const object = makeObject({
-      id: "c1",
-      type: "chevron",
-      direction: "right",
-      geometry: { x: 0, y: 0, width: 160, height: 120 },
-      style: { shape: "chevron" },
-    });
-    const { resolved } = expectEditorOnSlot(object);
-    expect(resolved.rect).toEqual({ x: 46, y: 8, width: 68, height: 104 });
-    expectAtRestMatchesEditor(object);
-  });
-
-  it("person icon: below-glyph band grows downward from a pinned glyph area", () => {
+  it("human icon: below-glyph band grows downward from a pinned glyph area", () => {
     const object = makeObject({
       id: "pe1",
       type: "icon",
-      icon: "person",
+      icon: "human",
       geometry: { x: 10, y: 20, width: 120, height: 140 },
       style: { shape: "icon" },
     });
@@ -424,11 +402,11 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     expect(webkitLineClamp(label!)).toBe("");
   });
 
-  it("person icon: below-glyph editor draft grows downward and recenters to draft width", () => {
+  it("human icon: below-glyph editor draft grows downward and recenters to draft width", () => {
     const object = makeObject({
       id: "pe-draft",
       type: "icon",
-      icon: "person",
+      icon: "human",
       geometry: { x: 10, y: 20, width: 120, height: 140 },
       style: { shape: "icon" },
     });
@@ -441,11 +419,11 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     expect(editor.style.overflow).toBe("hidden");
   });
 
-  it("chat icon: below-glyph band", () => {
+  it("message icon: below-glyph band", () => {
     const object = makeObject({
       id: "ch1",
       type: "icon",
-      icon: "chat",
+      icon: "message",
       geometry: { x: 10, y: 20, width: 180, height: 110 },
       style: { shape: "icon" },
     });
@@ -464,7 +442,7 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     const object = makeObject({
       id: "i1",
       type: "icon",
-      icon: "gear",
+      icon: "config",
       geometry: { x: 0, y: 0, width: 120, height: 120 },
       style: { shape: "icon" },
     });
@@ -543,14 +521,4 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     expect(editor.style.transform).toBe(`scale(${resolved.scale})`);
   });
 
-  it("kinds without a text slot render no editor (plus)", () => {
-    const object = makeObject({
-      id: "pl1",
-      type: "plus",
-      geometry: { x: 0, y: 0, width: 120, height: 120 },
-      style: { shape: "plus" },
-    });
-    const view = render(<TextEditingOverlay textEditing={apiFor(object)} zoom={1} />);
-    expect(view.container.querySelector("[data-canvas-text-editor]")).toBeNull();
-  });
 });

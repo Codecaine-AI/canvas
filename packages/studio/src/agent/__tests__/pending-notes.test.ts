@@ -48,7 +48,7 @@ const document: InteractiveCanvasDocument = {
   objects: [
     object("card", "process", "Token card"),
     object("section", "section", "Billing"),
-    object("empty", "database", "  "),
+    object("empty", "rectangle", "  "),
   ],
   connections: [],
   annotations: [
@@ -99,7 +99,7 @@ describe("pendingNotes", () => {
         id: "empty-text",
         body: "Body for empty-text",
         target: { kind: "object", objectId: "empty" },
-        targetLabel: "Database",
+        targetLabel: "Rectangle",
         createdBy: "human",
         status: "open",
         replies: [],
@@ -131,7 +131,7 @@ describe("targetLabelForSelection", () => {
     ).toBe('Section "Billing"');
     expect(
       targetLabelForSelection(document, { kind: "objects", objectIds: ["empty"] }),
-    ).toBe("Database");
+    ).toBe("Rectangle");
   });
 
   it.each([

@@ -6,7 +6,7 @@
   "blocks": {
     "b-routing-root": {
       "id": "b-routing-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "covers": "The complete connector slice at packages/canvas/src/connectors/: the def (connectors are not objects), elbow routing and anchor resolution, waypoint reconciliation, bend editing, the connection cascade, creation/reconnect gestures and the Connector Mode tool, the gesture/overlay vocabulary, the MPL pathfinding island, and the four render components.",
         "format": "mdx",
@@ -79,7 +79,7 @@
     },
     "b-routing-title-1": {
       "id": "b-routing-title-1",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -92,7 +92,7 @@
     },
     "b-routing-intro-2": {
       "id": "b-routing-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -166,7 +166,7 @@
     },
     "b-routing-heading-elbow-3": {
       "id": "b-routing-heading-elbow-3",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -179,7 +179,7 @@
     },
     "b-routing-elbow-p1-4": {
       "id": "b-routing-elbow-p1-4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -275,7 +275,7 @@
     },
     "b-routing-elbow-p2-5": {
       "id": "b-routing-elbow-p2-5",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -431,7 +431,7 @@
     },
     "b-routing-elbow-p3-6": {
       "id": "b-routing-elbow-p3-6",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -488,7 +488,7 @@
     },
     "b-routing-heading-anchor-7": {
       "id": "b-routing-heading-anchor-7",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -501,7 +501,7 @@
     },
     "b-routing-anchor-p1-8": {
       "id": "b-routing-anchor-p1-8",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -654,7 +654,7 @@
     },
     "b-routing-anchor-p2-9": {
       "id": "b-routing-anchor-p2-9",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -693,7 +693,7 @@
     },
     "b-routing-heading-waypoint-10": {
       "id": "b-routing-heading-waypoint-10",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -706,7 +706,7 @@
     },
     "b-routing-waypoint-p1-11": {
       "id": "b-routing-waypoint-p1-11",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -804,7 +804,7 @@
     },
     "b-routing-waypoint-p2-12": {
       "id": "b-routing-waypoint-p2-12",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -842,7 +842,7 @@
     },
     "b-routing-waypoint-p3-13": {
       "id": "b-routing-waypoint-p3-13",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -853,7 +853,7 @@
     },
     "b-routing-heading-overlay-14": {
       "id": "b-routing-heading-overlay-14",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -866,7 +866,7 @@
     },
     "b-routing-overlay-p1-15": {
       "id": "b-routing-overlay-p1-15",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1030,117 +1030,18 @@
     },
     "b-routing-overlay-p2-16": {
       "id": "b-routing-overlay-p2-16",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " (now in "
-        },
-        {
-          "insert": "objects/geometry.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", ported from upstream "
-        },
-        {
-          "insert": "getAnchors",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") computes 4 cardinal port candidates (N/S/E/W of an object's center, offset "
-        },
-        {
-          "insert": "ANCHOR_OFFSET_PX",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "ANCHOR_OFFSET_PX"
-            }
-          }
-        },
-        {
-          "insert": " outside the bound) and projects each onto the object's real outline — not its bounding box — via "
-        },
-        {
-          "insert": "outlinePolygon",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "outlinePolygon"
-            }
-          }
-        },
-        {
-          "insert": " and a center-to-candidate line/outline intersection. Which outline that is comes from the def-declared "
-        },
-        {
-          "insert": "OutlineSpec",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "OutlineSpec"
-            }
-          }
-        },
-        {
-          "insert": " resolved by "
-        },
-        {
-          "insert": "outlineSpecFor",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "outlineSpecFor"
-            }
-          }
-        },
-        {
-          "insert": ": true (non-bounding-box) outlines cover pill/stadium, diamond, arrow-shape, and the W5 parity set (ellipse, triangle, parallelogram, pentagon, octagon, star, plus, chevron, off-page-connector, trapezoid, manual-input, hexagon, and the or/summing junction circles); every other object type falls back to its axis-aligned bounding rect, matching upstream's own conservative fallback. The same anchors also feed the selected-object anchor dots ("
-        },
-        {
-          "insert": "AnchorDots",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
-              "symbol": "AnchorDots"
-            }
-          }
-        },
-        {
-          "insert": ") and hit-testing (D16), so attachment, affordance, and clicks can never disagree."
+          "insert": "getConnectionAnchors (now in objects/geometry.ts, ported from upstream getAnchors) computes 4 cardinal port candidates (N/S/E/W of an object's center, offset ANCHOR_OFFSET_PX outside the bound) and projects each onto the object's real outline — not its bounding box — via outlinePolygon and a center-to-candidate line/outline intersection. Which outline that is comes from the def-declared OutlineSpec resolved by outlineSpecFor: true (non-bounding-box) outlines cover pill/stadium, diamond, arrow-shape, and the true-outline set (ellipse, triangle, octagon, arrow-shape, decision); every other object type falls back to its axis-aligned bounding rect, matching upstream's own conservative fallback. The same anchors also feed the selected-object anchor dots (AnchorDots) and hit-testing (D16), so attachment, affordance, and clicks can never disagree."
         }
       ],
       "children": []
     },
     "b-routing-overlay-p3-17": {
       "id": "b-routing-overlay-p3-17",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1178,7 +1079,7 @@
     },
     "b-routing-constraint-vendor-18": {
       "id": "b-routing-constraint-vendor-18",
-      "flavour": "constraint",
+      "type": "constraint",
       "props": {
         "title": "MPL-2.0 provenance is file-level and must stay demarcated",
         "severity": "hard"
@@ -1284,7 +1185,7 @@
     },
     "b-routing-testing-19": {
       "id": "b-routing-testing-19",
-      "flavour": "testing",
+      "type": "testing",
       "props": {
         "title": "Connector test suite"
       },
@@ -1423,7 +1324,7 @@
     },
     "b-routing-closing-20": {
       "id": "b-routing-closing-20",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1489,7 +1390,7 @@
     },
     "b-routing-elbow-p4-21": {
       "id": "b-routing-elbow-p4-21",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1527,7 +1428,7 @@
     },
     "b-routing-anchor-p3-22": {
       "id": "b-routing-anchor-p3-22",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1563,7 +1464,7 @@
     },
     "b-routing-heading-bends-23": {
       "id": "b-routing-heading-bends-23",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1576,7 +1477,7 @@
     },
     "b-routing-bends-p1-24": {
       "id": "b-routing-bends-p1-24",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1598,7 +1499,7 @@
     },
     "b-routing-bends-p2-25": {
       "id": "b-routing-bends-p2-25",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1637,7 +1538,7 @@
     },
     "b-routing-bends-p3-26": {
       "id": "b-routing-bends-p3-26",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1699,7 +1600,7 @@
     },
     "b-connectors-heading-def-27": {
       "id": "b-connectors-heading-def-27",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1712,7 +1613,7 @@
     },
     "b-connectors-def-p1-28": {
       "id": "b-connectors-def-p1-28",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1803,7 +1704,7 @@
     },
     "b-connectors-def-p2-29": {
       "id": "b-connectors-def-p2-29",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1825,7 +1726,7 @@
     },
     "b-connectors-def-p3-30": {
       "id": "b-connectors-def-p3-30",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1916,7 +1817,7 @@
     },
     "b-connectors-def-p4-31": {
       "id": "b-connectors-def-p4-31",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2010,7 +1911,7 @@
     },
     "b-connectors-heading-gestures-32": {
       "id": "b-connectors-heading-gestures-32",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -2023,7 +1924,7 @@
     },
     "b-connectors-gestures-p1-33": {
       "id": "b-connectors-gestures-p1-33",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2103,7 +2004,7 @@
     },
     "b-connectors-gestures-p2-34": {
       "id": "b-connectors-gestures-p2-34",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2162,7 +2063,7 @@
     },
     "b-connectors-gestures-p3-35": {
       "id": "b-connectors-gestures-p3-35",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2240,7 +2141,7 @@
     },
     "b-connectors-heading-mode-36": {
       "id": "b-connectors-heading-mode-36",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -2253,7 +2154,7 @@
     },
     "b-connectors-mode-p1-37": {
       "id": "b-connectors-mode-p1-37",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2310,7 +2211,7 @@
     },
     "b-connectors-mode-p2-38": {
       "id": "b-connectors-mode-p2-38",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2376,7 +2277,7 @@
     },
     "b-connectors-mode-p3-39": {
       "id": "b-connectors-mode-p3-39",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2437,7 +2338,7 @@
     },
     "b-connectors-heading-vocabulary-40": {
       "id": "b-connectors-heading-vocabulary-40",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -2450,7 +2351,7 @@
     },
     "b-connectors-vocabulary-p1-41": {
       "id": "b-connectors-vocabulary-p1-41",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2535,7 +2436,7 @@
     },
     "b-connectors-vocabulary-p2-42": {
       "id": "b-connectors-vocabulary-p2-42",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2593,7 +2494,7 @@
     },
     "b-connectors-vocabulary-p3-43": {
       "id": "b-connectors-vocabulary-p3-43",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2660,7 +2561,7 @@
     },
     "b-connectors-heading-rendering-44": {
       "id": "b-connectors-heading-rendering-44",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -2673,7 +2574,7 @@
     },
     "b-connectors-rendering-p1-45": {
       "id": "b-connectors-rendering-p1-45",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2801,7 +2702,7 @@
     },
     "b-connectors-rendering-p2-46": {
       "id": "b-connectors-rendering-p2-46",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2879,7 +2780,7 @@
     },
     "b-connectors-heading-preview-47": {
       "id": "b-connectors-heading-preview-47",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -2892,7 +2793,7 @@
     },
     "b-connectors-preview-p1-48": {
       "id": "b-connectors-preview-p1-48",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2970,7 +2871,7 @@
     },
     "b-connectors-preview-p2-49": {
       "id": "b-connectors-preview-p2-49",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3066,7 +2967,7 @@
     },
     "b-connectors-preview-p3-50": {
       "id": "b-connectors-preview-p3-50",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {

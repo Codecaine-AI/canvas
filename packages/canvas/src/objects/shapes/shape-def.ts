@@ -57,10 +57,10 @@ export interface SilhouetteSpec {
 /**
  * Where this shape's `object.text` renders and is edited (D3/D6): a preset
  * from objects/text-slots.ts, or `"none"` for pure glyphs that carry no
- * visible text (plus, or-junction, summing-junction — these are also not
- * text-editable). Omit for the shape default, the "center" preset.
- * Replaces the old TextZoneSpec kinds and the per-shape `labelStyle` margin
- * hacks (arrow/chevron declare rect-function slots instead).
+ * visible text (such glyphs are also not text-editable). Omit for the shape
+ * default, the "center" preset. Replaces the old TextZoneSpec kinds and the
+ * per-shape `labelStyle` margin hacks (arrow declares a rect-function slot
+ * instead).
  */
 export type ShapeTextSpec = TextSlot | "none";
 

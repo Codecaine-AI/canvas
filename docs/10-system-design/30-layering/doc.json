@@ -6,7 +6,21 @@
   "blocks": {
     "b-layering-root": {
       "id": "b-layering-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
+      "props": {
+        "covers": "The geometric section-layering model: parentId as a reconciled geometry cache, derived section paint order, hit-testing agreement, gesture reconcile points, and the v2-flow bug that motivated the layer cake.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "section membership",
+          "parentId",
+          "SECTION_CAPTURE_OVERLAP_THRESHOLD",
+          "section header layer",
+          "paintOrderedObjects",
+          "hit testing",
+          "migrateSectionMembership"
+        ]
+      },
       "children": [
         "b-layering-title-1",
         "b-layering-intro-2",
@@ -46,26 +60,11 @@
         "b-layering-edge-set-parent-32",
         "b-layering-tests-heading-33",
         "b-layering-tests-body-34"
-      ],
-      "props": {
-        "covers": "The geometric section-layering model: parentId as a reconciled geometry cache, derived section paint order, hit-testing agreement, gesture reconcile points, and the v2-flow bug that motivated the layer cake.",
-        "format": "mdx",
-        "type": "design",
-        "concepts": [
-          "section membership",
-          "parentId",
-          "SECTION_CAPTURE_OVERLAP_THRESHOLD",
-          "section header layer",
-          "paintOrderedObjects",
-          "hit testing",
-          "migrateSectionMembership"
-        ]
-      }
+      ]
     },
     "b-layering-title-1": {
       "id": "b-layering-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -73,12 +72,12 @@
         {
           "insert": "The layer cake: geometric section layering"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-intro-2": {
       "id": "b-layering-intro-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -121,12 +120,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-mental-model-heading-3": {
       "id": "b-layering-mental-model-heading-3",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -134,23 +133,23 @@
         {
           "insert": "Mental model"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-mental-model-body-4": {
       "id": "b-layering-mental-model-body-4",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Sections stack like a layer cake. The biggest containing thing is the bottom layer; everything it contains stacks above it. Users do not push section backdrops forward or backward by hand. They move geometry, and geometry decides membership and section depth."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-derived-decision-5": {
       "id": "b-layering-derived-decision-5",
-      "flavour": "decision",
-      "children": [],
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Layering is derived from geometry"
@@ -168,12 +167,12 @@
         {
           "insert": " cache and the same paint order regardless of how the objects arrived there."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-predicate-heading-6": {
       "id": "b-layering-predicate-heading-6",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -181,12 +180,12 @@
         {
           "insert": "Membership predicate"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-predicate-body-7": {
       "id": "b-layering-predicate-body-7",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -220,12 +219,12 @@
         {
           "insert": " of the object's own area. The threshold is 0.6, so exact 60% overlap qualifies and anything below it stays outside."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-parent-cache-decision-8": {
       "id": "b-layering-parent-cache-decision-8",
-      "flavour": "decision",
-      "children": [],
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "parentId is a persisted cache"
@@ -243,12 +242,12 @@
         {
           "insert": " exists so drag capture, validation, and persistence have a cheap membership answer. It is not an authoring surface. Geometry-mutating actions reconcile it instead of asking callers to maintain it manually."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-retention-constraint-9": {
       "id": "b-layering-retention-constraint-9",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "severity": "hard",
         "title": "Locked-all sections do not adopt new members"
@@ -266,12 +265,12 @@
         {
           "insert": " retains existing members so locked content does not leak out during reconcile. The same section never adopts a new free object; the object must qualify for another unlocked section or remain parentless."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-acyclic-observation-10": {
       "id": "b-layering-acyclic-observation-10",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "Strictly-larger sections make cycles impossible"
       },
@@ -279,12 +278,12 @@
         {
           "insert": "Area strictly increases on every parent hop, so the geometric resolver cannot create a cycle. The guard also prevents the pathological case where a huge frame that is 68% covered by a smaller section becomes the smaller section's child."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-stack-heading-11": {
       "id": "b-layering-stack-heading-11",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -292,12 +291,12 @@
         {
           "insert": "Derived stack"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-stack-body-12": {
       "id": "b-layering-stack-body-12",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -329,12 +328,12 @@
         {
           "insert": ": section bodies at z 0, connector SVG at z 1, objects at z 2, section headers at z 3, and world overlay at z 4."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-stack-code-13": {
       "id": "b-layering-stack-code-13",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -342,12 +341,12 @@
         {
           "insert": "sections:\n  depth ascending\n  area descending\n  schema index ascending\nnon-sections:\n  schema order\ncss tiers:\n  section bodies z 0\n  connector SVG z 1\n  objects z 2\n  section headers z 3\n  world overlay z 4"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-section-headers-heading-35": {
       "id": "b-layering-section-headers-heading-35",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -355,12 +354,12 @@
         {
           "insert": "Floating section headers"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-section-headers-body-36": {
       "id": "b-layering-section-headers-body-36",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -375,12 +374,12 @@
         {
           "insert": ", so it could paint under content or be clipped by its own body."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-section-headers-render-37": {
       "id": "b-layering-section-headers-render-37",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -447,12 +446,12 @@
         {
           "insert": " for double-click rename."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-section-headers-hit-testing-38": {
       "id": "b-layering-section-headers-hit-testing-38",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -485,21 +484,21 @@
         {
           "insert": " also runs a first pass over chip rects, so a click on a visible title chip selects its section even when the chip overlaps a foreign object."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-demo-canvas-14": {
       "id": "b-layering-demo-canvas-14",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "title": "Layer cake visualization",
         "canvasId": "layer-cake"
-      }
+      },
+      "children": []
     },
     "b-layering-reconcile-heading-15": {
       "id": "b-layering-reconcile-heading-15",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -507,12 +506,12 @@
         {
           "insert": "Reconcile lifecycle"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-reconcile-body-16": {
       "id": "b-layering-reconcile-body-16",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -527,12 +526,12 @@
         {
           "insert": " until the gesture commits."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-reconcile-load-17": {
       "id": "b-layering-reconcile-load-17",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -563,12 +562,12 @@
         {
           "insert": " are explicitly exempt and restore stored documents verbatim."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-reconcile-reducer-18": {
       "id": "b-layering-reconcile-reducer-18",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -589,12 +588,12 @@
         {
           "insert": " selects discrete geometry-mutating actions, and development builds run a second reconcile as an idempotence invariant."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-reconcile-gesture-19": {
       "id": "b-layering-reconcile-gesture-19",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -633,12 +632,12 @@
         {
           "insert": ". The drag or resize itself owns the undo entry, so one gesture remains one undo step."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-live-divergence-constraint-20": {
       "id": "b-layering-live-divergence-constraint-20",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "severity": "hard",
         "title": "Only live gesture frames may diverge"
@@ -665,12 +664,12 @@
         {
           "insert": ", the reducer is responsible for restoring the cache before the state leaves the action."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-hit-testing-heading-21": {
       "id": "b-layering-hit-testing-heading-21",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -678,12 +677,12 @@
         {
           "insert": "Hit testing and drops"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-hit-testing-body-22": {
       "id": "b-layering-hit-testing-body-22",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -730,12 +729,12 @@
         {
           "insert": ", so overlapping sections and objects resolve consistently."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-drop-body-23": {
       "id": "b-layering-drop-body-23",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -778,12 +777,12 @@
         {
           "insert": " is gone."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-case-heading-24": {
       "id": "b-layering-case-heading-24",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -791,12 +790,12 @@
         {
           "insert": "Case study: v2-flow"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-case-body-25": {
       "id": "b-layering-case-body-25",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -815,21 +814,21 @@
         {
           "insert": ". A large \"Section\" was drawn around existing content, but nothing adopted the sections under it. All six sections stayed depth-1 siblings, and array-order tie-breaking painted the newest large section on top, fully burying Memory Bank, Memory Actions, Structure, and Probing Response."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-case-canvas-26": {
       "id": "b-layering-case-canvas-26",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "title": "V2 Flow section layering case study",
         "canvasId": "v2-flow"
-      }
+      },
+      "children": []
     },
     "b-layering-case-fix-27": {
       "id": "b-layering-case-fix-27",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -849,12 +848,12 @@
         {
           "insert": ", an idempotent transform in the canvas-doc migration tool."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-edge-heading-28": {
       "id": "b-layering-edge-heading-28",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -862,12 +861,12 @@
         {
           "insert": "Edge cases and non-goals"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-edge-hidden-29": {
       "id": "b-layering-edge-hidden-29",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -890,12 +889,12 @@
         {
           "insert": " still allows geometric adoption because only the section frame is locked."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-edge-strict-30": {
       "id": "b-layering-edge-strict-30",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -903,12 +902,12 @@
         {
           "insert": "Strictly-larger is required even when overlap is high. It is both the acyclicity proof and the guard against smaller sections accidentally owning bigger frames."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-edge-manual-31": {
       "id": "b-layering-edge-manual-31",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -916,12 +915,12 @@
         {
           "insert": "There are no manual z-reorder operations for section backdrops in this model. To change the stack, change geometry so a different section qualifies as the smallest containing parent."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-edge-set-parent-32": {
       "id": "b-layering-edge-set-parent-32",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -943,12 +942,12 @@
         {
           "insert": " action still exists as a guarded reducer path, but live move/drop no longer commits membership through it. Gesture commit is doc-wide geometric reconcile."
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-tests-heading-33": {
       "id": "b-layering-tests-heading-33",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -956,12 +955,12 @@
         {
           "insert": "Test pointers"
         }
-      ]
+      ],
+      "children": []
     },
     "b-layering-tests-body-34": {
       "id": "b-layering-tests-body-34",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1032,7 +1031,8 @@
         {
           "insert": " for the on-disk parentId transform."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

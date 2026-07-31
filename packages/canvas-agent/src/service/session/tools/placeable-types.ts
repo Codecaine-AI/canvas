@@ -4,47 +4,29 @@
  *
  * The model never sees that split
  * (docs/30-agent-layout/50-tool-surface/10-gestures §Place, "Icons are shape
- * types"): placing `"database"` and placing `"cloud"` are the same
- * gesture with a different pick. So the model-facing roster is
+ * types"): placing `"memory"` and placing `"decision"` are the same gesture
+ * with a different pick. The NAMES come from the object-preference registry
+ * (packages/canvas/src/objects/registry) — the single roster shared by the
+ * picker, the agent's <vocabulary> listing, and the lints — so the model-facing
+ * roster is
  *
- *     PLACEABLE_TYPES = icon glyphs ∪ (shape types − collisions)
+ *     PLACEABLE_TYPES = the registry's names, shapes first, then glyphs
  *
  * and every crossing of the tool boundary goes through `toDocumentFields`
  * (inbound: place_shape / change_shape) or `fromDocumentFields` (outbound:
  * digest, delta, diff, capabilities). Nothing else should ever read or write
  * the `icon` field next to a `type`.
  *
- * ---------------------------------------------------------------------------
- * Collision table — who keeps the bare name
- * ---------------------------------------------------------------------------
- *
- * | glyph      | shape it collides with | bare name goes to | the loser reads as |
- * |------------|------------------------|-------------------|--------------------|
- * | `database` | `database`             | the GLYPH         | `database-shape`   |
- *
- * `database` is the ONLY id shared by the two rosters (audited at import time
- * below — a future overlap throws rather than silently shadowing). The spec
- * settles it by example: "placing `"database"` places that icon the same way
- * placing `"diamond"` places a diamond". So the bare name is the glyph's, and
- * the flowchart shape — the filled cylinder in
- * objects/shapes/flowchart/database.tsx — keeps only a READ-ONLY outbound name,
- * `database-shape`. Boards that already hold one (drawn in the UI, or made
- * before this rule) still digest and diff losslessly, and `fromDocumentFields`
- * stays total; but the shape is not in `PLACEABLE_TYPES`, so `place_shape` and
- * `change_shape` will not accept it.
- *
- * The mirror decision exists too, and a future collision may want it: a glyph
- * whose shape twin is genuinely a different drawing keeps the shape on the bare
- * name and reaches the glyph as `<glyph>-icon`. Whichever way a collision goes,
- * exactly one of the pair is placeable and the other is read-only, so no name
- * ever means two things.
+ * A registry name is a glyph or a shape type, never both: the glyph and shape
+ * rosters are audited disjoint at import time (a future overlap throws rather
+ * than silently shadowing — rename one side, the registry cannot alias).
  *
  * ---------------------------------------------------------------------------
  * Two names in `SHAPE_OBJECT_TYPES` that are NOT placeable
  * ---------------------------------------------------------------------------
  *
- * `"icon"` — the document's carrier type — is deliberately dropped from the
- * roster even though `SHAPE_OBJECT_TYPES` contains it. Placing a bare `icon`
+ * `"icon"` — the document's carrier type — is deliberately absent from the
+ * registry even though `SHAPE_OBJECT_TYPES` contains it. Placing a bare `icon`
  * produces an object the validator rejects outright (`validate.ts` — "Icon
  * requires a known glyph id"), and offering the carrier type would put the
  * exact split this module exists to hide back on the tool surface. Glyphs are
@@ -55,80 +37,34 @@ import { CANVAS_ICON_GLYPHS } from "@codecaine-ai/canvas/schema";
 import type { CanvasIconGlyph, InteractiveCanvasObjectType } from "@codecaine-ai/canvas/schema";
 import { StringEnum } from "@mariozechner/pi-ai";
 
+import { OBJECT_PREFERENCES } from "../../../../../canvas/src/objects/registry";
 import { SHAPE_OBJECT_TYPES } from "../perception/op-surface";
 
 /** The document type that carries a glyph — never a placeable name. */
 const ICON_CARRIER: InteractiveCanvasObjectType = "icon";
 
-/** Suffix a glyph wears when the shape it collides with keeps the bare name. */
-const GLYPH_SUFFIX = "-icon";
-
-/** Suffix a shape wears when the glyph it collides with takes the bare name. */
-const SHAPE_SUFFIX = "-shape";
-
 // ---------------------------------------------------------------------------
-// The audited collision table
+// The folded roster — the registry's names, classified against the schema
 // ---------------------------------------------------------------------------
 
-/**
- * Which roster keeps the bare name when a glyph id and a shape type are the
- * same word:
- *
- * - `"glyph-wins"` — the bare name places the ICON. The shape is not placeable
- *   and travels outbound only, as `<type>-shape`.
- * - `"shape-wins"` — the bare name places the SHAPE. The glyph stays placeable
- *   under `<glyph>-icon`.
- */
-type CollisionDecision = "glyph-wins" | "shape-wins";
-
-interface GlyphCollision {
-  readonly glyph: CanvasIconGlyph;
-  readonly decision: CollisionDecision;
-  /** Why the decision went that way — the audit, in code. */
-  readonly reason: string;
-}
-
-/** Every glyph id that a shape type also owns, with its recorded decision. */
-export const GLYPH_COLLISIONS = [
-  {
-    glyph: "database",
-    decision: "glyph-wins",
-    reason:
-      "A glyph is placed by its own bare name, so where a glyph and a shape type collide the glyph keeps the bare name and the icon owns \"database\" (docs/30-agent-layout/50-tool-surface/10-gestures §Place); the flowchart cylinder is the same pictogram drawn as a filled node, and it stays readable as database-shape.",
-  },
-] as const satisfies readonly GlyphCollision[];
-
-/** Glyphs that yielded the bare name and are reached under `-icon`. */
-type SuffixedGlyph = Extract<(typeof GLYPH_COLLISIONS)[number], { decision: "shape-wins" }>["glyph"];
-/** Shape types that yielded the bare name to a glyph and are read-only. */
-type YieldedShape = Extract<(typeof GLYPH_COLLISIONS)[number], { decision: "glyph-wins" }>["glyph"];
-
-// ---------------------------------------------------------------------------
-// The folded roster
-// ---------------------------------------------------------------------------
-
-/**
- * Shape types the model may place: the object roster minus the carrier type and
- * minus any type whose name a glyph took.
- */
+/** Shape types the model may place: the object roster minus the carrier type. */
 export type PlaceableShapeType = Exclude<
   InteractiveCanvasObjectType,
-  "section" | "sticky" | "icon" | YieldedShape
+  "section" | "sticky" | "icon"
 >;
 
-/** Glyphs the model may place, under their own name or a suffixed one. */
-export type PlaceableGlyphType =
-  | Exclude<CanvasIconGlyph, SuffixedGlyph>
-  | `${SuffixedGlyph}${typeof GLYPH_SUFFIX}`;
+/** Glyphs the model may place, each under its own name. */
+export type PlaceableGlyphType = CanvasIconGlyph;
 
 /** One entry of the model-facing `type` vocabulary. */
 export type PlaceableTypeName = PlaceableShapeType | PlaceableGlyphType;
 
-/** A folded name that only ever travels outbound (a shape a glyph outranked). */
-export type ReadOnlyTypeName = `${YieldedShape}${typeof SHAPE_SUFFIX}`;
-
-/** Every folded name the mapping understands, placeable or read-only. */
-export type FoldedTypeName = PlaceableTypeName | ReadOnlyTypeName;
+/**
+ * Every folded name the mapping understands. With the glyph and shape rosters
+ * disjoint there are no suffixed collision names left, so the folded
+ * vocabulary IS the placeable one.
+ */
+export type FoldedTypeName = PlaceableTypeName;
 
 /** The document fields a folded name lowers to. */
 export interface DocumentTypeFields {
@@ -136,78 +72,27 @@ export interface DocumentTypeFields {
   readonly icon?: CanvasIconGlyph;
 }
 
-const COLLISION_BY_NAME = new Map<string, CollisionDecision>(
-  GLYPH_COLLISIONS.map((entry) => [entry.glyph, entry.decision]),
-);
+const GLYPH_SET: ReadonlySet<string> = new Set<string>(CANVAS_ICON_GLYPHS);
 
-/** The folded name a glyph wears — suffixed only where the shape kept the id. */
-function foldedGlyphName(glyph: CanvasIconGlyph): FoldedTypeName {
-  return (
-    COLLISION_BY_NAME.get(glyph) === "shape-wins" ? `${glyph}${GLYPH_SUFFIX}` : glyph
-  ) as FoldedTypeName;
-}
+/** Registry names that are shape types, in registry (roster) order. */
+export const PLACEABLE_SHAPE_TYPES: readonly PlaceableShapeType[] = OBJECT_PREFERENCES
+  .map((entry) => entry.name)
+  .filter((name): name is PlaceableShapeType => !GLYPH_SET.has(name));
 
-/** The folded name a shape type wears — suffixed only where a glyph took the id. */
-function foldedShapeName(type: InteractiveCanvasObjectType): FoldedTypeName {
-  return (
-    COLLISION_BY_NAME.get(type) === "glyph-wins" ? `${type}${SHAPE_SUFFIX}` : type
-  ) as FoldedTypeName;
-}
+/** Registry names that are glyphs, in registry (roster) order. */
+export const PLACEABLE_GLYPH_TYPES: readonly PlaceableGlyphType[] = OBJECT_PREFERENCES
+  .map((entry) => entry.name)
+  .filter((name): name is PlaceableGlyphType => GLYPH_SET.has(name));
 
-/** Shape types, in the defaults table's order, minus the carrier and the yielded ids. */
-export const PLACEABLE_SHAPE_TYPES: readonly PlaceableShapeType[] = [...SHAPE_OBJECT_TYPES].filter(
-  (type): type is PlaceableShapeType =>
-    type !== ICON_CARRIER && COLLISION_BY_NAME.get(type) !== "glyph-wins",
-);
-
-/** Glyph names the model may place, in glyph-roster order. */
-export const PLACEABLE_GLYPH_TYPES: readonly PlaceableGlyphType[] = CANVAS_ICON_GLYPHS.map(
-  (glyph) => foldedGlyphName(glyph) as PlaceableGlyphType,
-);
-
-/** The model-facing `type` roster: shapes with the glyph roster folded in. */
+/** The model-facing `type` roster: shapes first, then the glyphs. */
 export const PLACEABLE_TYPES: readonly PlaceableTypeName[] = [
   ...PLACEABLE_SHAPE_TYPES,
   ...PLACEABLE_GLYPH_TYPES,
 ];
 
-/** Folded names the mapping resolves but the tool surface never offers. */
-export const READ_ONLY_TYPE_NAMES: readonly ReadOnlyTypeName[] = GLYPH_COLLISIONS.filter(
-  (entry) => entry.decision === "glyph-wins",
-).map((entry) => `${entry.glyph}${SHAPE_SUFFIX}` as ReadOnlyTypeName);
-
 // ---------------------------------------------------------------------------
 // The bidirectional map
 // ---------------------------------------------------------------------------
-
-/** Every shape type the mapping resolves inbound: the placeable ones plus the read-only names. */
-const SHAPE_NAME_ENTRIES: ReadonlyArray<readonly [string, DocumentTypeFields]> = [
-  ...SHAPE_OBJECT_TYPES,
-]
-  .filter((type) => type !== ICON_CARRIER)
-  .map((type) => [
-    foldedShapeName(type as InteractiveCanvasObjectType),
-    { type: type as InteractiveCanvasObjectType },
-  ] as const);
-
-const TO_DOCUMENT = new Map<string, DocumentTypeFields>([
-  ...SHAPE_NAME_ENTRIES,
-  ...CANVAS_ICON_GLYPHS.map(
-    (glyph) => [foldedGlyphName(glyph), { type: ICON_CARRIER, icon: glyph }] as const,
-  ),
-]);
-
-const FROM_GLYPH = new Map<string, FoldedTypeName>(
-  CANVAS_ICON_GLYPHS.map((glyph) => [glyph, foldedGlyphName(glyph)]),
-);
-
-/** Document types whose outbound name is not the type itself. */
-const FROM_SHAPE = new Map<string, FoldedTypeName>(
-  GLYPH_COLLISIONS.filter((entry) => entry.decision === "glyph-wins").map((entry) => [
-    entry.glyph,
-    `${entry.glyph}${SHAPE_SUFFIX}` as FoldedTypeName,
-  ]),
-);
 
 const PLACEABLE_TYPE_SET: ReadonlySet<string> = new Set<string>(PLACEABLE_TYPES);
 
@@ -217,25 +102,26 @@ export function isPlaceableType(value: unknown): value is PlaceableTypeName {
 }
 
 /**
- * Lower a folded name onto the document fields it names. Accepts the
- * read-only names too, so an outbound name can always be re-lowered (a
- * `fromDocumentFields` result is always a legal argument here). Throws on a
+ * Lower a folded name onto the document fields it names. Accepts any name the
+ * two schema rosters resolve (a `fromDocumentFields` result is always a legal
+ * argument here, so an outbound name can always be re-lowered). Throws on a
  * name outside the mapping — the schema is the gate, this is the assertion.
  */
 export function toDocumentFields(placeableType: FoldedTypeName): DocumentTypeFields {
-  const fields = TO_DOCUMENT.get(placeableType);
-  if (fields === undefined) {
-    throw new Error(`Unknown placeable type: ${placeableType}`);
+  if (GLYPH_SET.has(placeableType)) {
+    return { type: ICON_CARRIER, icon: placeableType as CanvasIconGlyph };
   }
-  return fields;
+  if (placeableType !== ICON_CARRIER && SHAPE_OBJECT_TYPES.has(placeableType)) {
+    return { type: placeableType as InteractiveCanvasObjectType };
+  }
+  throw new Error(`Unknown placeable type: ${placeableType}`);
 }
 
 /**
  * Fold document fields back into one name. Total by construction:
  *
- * - `{ type: "icon", icon }` is the glyph's folded name;
- * - a shape type is its own name, unless a glyph took that name — then it is
- *   the read-only `<type>-shape` (see the collision table);
+ * - `{ type: "icon", icon }` is the glyph's own name;
+ * - a shape type is its own name;
  * - `section` / `sticky` pass through under their own names (they are not
  *   placeable via `place_shape`, but outbound renderers hand this function
  *   whatever a document holds);
@@ -247,10 +133,11 @@ export function fromDocumentFields(
   fields: DocumentTypeFields | { type: InteractiveCanvasObjectType; icon?: string },
 ): FoldedTypeName | InteractiveCanvasObjectType {
   if (fields.type !== ICON_CARRIER) {
-    return FROM_SHAPE.get(fields.type) ?? fields.type;
+    return fields.type;
   }
-  const folded = fields.icon === undefined ? undefined : FROM_GLYPH.get(fields.icon);
-  return folded ?? ICON_CARRIER;
+  return fields.icon !== undefined && GLYPH_SET.has(fields.icon)
+    ? (fields.icon as FoldedTypeName)
+    : ICON_CARRIER;
 }
 
 /** The glyph a folded name draws, or `undefined` for a plain shape type. */
@@ -259,31 +146,58 @@ export function glyphForPlaceableType(placeableType: FoldedTypeName): CanvasIcon
 }
 
 // ---------------------------------------------------------------------------
-// Import-time audit — the collision table must match the rosters it describes
+// Import-time audit — the registry and the schema rosters must agree
 // ---------------------------------------------------------------------------
 
-const auditedCollisions = CANVAS_ICON_GLYPHS.filter((glyph) => SHAPE_OBJECT_TYPES.has(glyph));
-const recordedCollisions = GLYPH_COLLISIONS.map((entry) => entry.glyph);
-if ([...auditedCollisions].sort().join(",") !== [...recordedCollisions].sort().join(",")) {
+// Disjoint rosters: one string, one drawing. A glyph id that a shape type also
+// owns would make a bare name mean two things, so it fails loudly here —
+// rename the glyph or the shape before it ships.
+const overlapping = CANVAS_ICON_GLYPHS.filter((glyph) => SHAPE_OBJECT_TYPES.has(glyph));
+if (overlapping.length > 0) {
   throw new Error(
-    "Glyph/shape collision table is stale: the rosters collide on " +
-      `[${auditedCollisions.join(", ")}] but placeable-types.ts records ` +
-      `[${recordedCollisions.join(", ")}]. Audit the new collision and record which ` +
-      "roster keeps the bare name.",
+    `Glyph ids collide with shape types: [${overlapping.join(", ")}]. The rosters must be `
+      + "disjoint — one string names one drawing. Rename one side.",
+  );
+}
+
+// Every registry name resolves to exactly one document lowering.
+const unresolved = OBJECT_PREFERENCES
+  .map((entry) => entry.name)
+  .filter(
+    (name) => name === ICON_CARRIER || (!GLYPH_SET.has(name) && !SHAPE_OBJECT_TYPES.has(name)),
+  );
+if (unresolved.length > 0) {
+  throw new Error(
+    `object-preferences.json names outside both schema rosters: [${unresolved.join(", ")}]. `
+      + "Every registry name must be a glyph id or a placeable shape type.",
+  );
+}
+
+// Every glyph is placeable — a glyph missing from the registry would render in
+// documents but be unreachable and undocumented on the tool surface.
+const unregistered = CANVAS_ICON_GLYPHS.filter((glyph) => !PLACEABLE_TYPE_SET.has(glyph));
+if (unregistered.length > 0) {
+  throw new Error(
+    `Glyphs missing from object-preferences.json: [${unregistered.join(", ")}]. Every glyph `
+      + "needs a registry entry (meaning, scenarios, color).",
+  );
+}
+
+// And so is every shape type the schema still carries (minus the carrier and
+// the kinds with their own gestures) — the schema roster and the registry move
+// together.
+const unlisted = [...SHAPE_OBJECT_TYPES].filter(
+  (type) => type !== ICON_CARRIER && !PLACEABLE_TYPE_SET.has(type),
+);
+if (unlisted.length > 0) {
+  throw new Error(
+    `Shape types missing from object-preferences.json: [${unlisted.join(", ")}]. Every `
+      + "placeable shape needs a registry entry (meaning, scenarios, color).",
   );
 }
 
 if (PLACEABLE_TYPE_SET.size !== PLACEABLE_TYPES.length) {
   throw new Error("The folded type roster contains duplicates.");
-}
-
-// A suffixed name that some other roster member already answers to would let
-// one string mean two drawings, which is the whole thing this module prevents.
-if (TO_DOCUMENT.size !== SHAPE_NAME_ENTRIES.length + CANVAS_ICON_GLYPHS.length) {
-  throw new Error(
-    "A folded name resolves to two different document types — a suffixed "
-      + "collision name shadows a real roster id. Rename the suffix or the type.",
-  );
 }
 
 // ---------------------------------------------------------------------------
@@ -293,8 +207,6 @@ if (TO_DOCUMENT.size !== SHAPE_NAME_ENTRIES.length + CANVAS_ICON_GLYPHS.length) 
 /**
  * The `type` enum every place/swap gesture declares. Lives here rather than in
  * schemas.ts so the roster and the enum that publishes it cannot drift apart.
- * Read-only names are absent by construction: a model may only ask for what it
- * can place.
  */
 export const PlaceableType = StringEnum([...PLACEABLE_TYPES], {
   description: "The shape or icon to draw. Icons are types: pick the glyph name.",

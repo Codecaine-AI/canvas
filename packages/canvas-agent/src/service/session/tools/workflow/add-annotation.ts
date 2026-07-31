@@ -73,14 +73,14 @@ export function toolAddAnnotation(
   commitDraft(
     session,
     { ...session.draft, annotations: [...annotations, annotation] },
-    `addAnnotation ${annotation.id}`,
+    `add_annotation ${annotation.id}`,
   );
   syncSessionRequests(session);
   emitAnnotations(session, emit);
 
   return {
     text: [
-      `APPLIED · addAnnotation ${annotation.id}`,
+      `APPLIED · add_annotation ${annotation.id}`,
       `DELTA · thread ${annotation.id} opened on ${targetText(annotation.target)}`
       + `  agent — ${JSON.stringify(annotation.body)}`,
       formatRequestsBlock(session.requests),

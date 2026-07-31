@@ -6,7 +6,21 @@
   "blocks": {
     "b-r2-root": {
       "id": "b-r2-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
+      "props": {
+        "covers": "Spacing is semantic and local: one exact gap repeats within a peer group, a wider exact gutter repeats between sections, the ladder names each rung from section padding up through the section gutter, and the crowding lint marks the minimum arrow corridor rather than a target spacing amount.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "uniform gaps",
+          "spacing rungs",
+          "peer signaling",
+          "section gutters",
+          "ink density",
+          "arrow corridors",
+          "crowding lint"
+        ]
+      },
       "children": [
         "b-r2-title-1",
         "b-r2-card-2",
@@ -21,26 +35,11 @@
         "b-r2-loose-6",
         "b-r2-cluster-7",
         "b-r2-classify-8"
-      ],
-      "props": {
-        "covers": "Spacing is semantic and local: one exact gap repeats within a peer group, a wider exact gutter repeats between sections, the ladder names each rung from section padding up through the section gutter, and the crowding lint marks the minimum arrow corridor rather than a target spacing amount.",
-        "format": "mdx",
-        "type": "reference",
-        "concepts": [
-          "uniform gaps",
-          "spacing rungs",
-          "peer signaling",
-          "section gutters",
-          "ink density",
-          "arrow corridors",
-          "crowding lint"
-        ]
-      }
+      ]
     },
     "b-r2-title-1": {
       "id": "b-r2-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -48,12 +47,12 @@
         {
           "insert": "R2 — The spacing ladder"
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-card-2": {
       "id": "b-r2-card-2",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "One repeated gap per group"
       },
@@ -61,12 +60,12 @@
         {
           "insert": "Choose a gap wide enough for the group's content, wires, and labels, then repeat it exactly. The repetition is the signal that the members are peers."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-rungs-heading-9": {
       "id": "b-r2-rungs-heading-9",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -74,12 +73,12 @@
         {
           "insert": "The rungs"
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-rung-pad-10": {
       "id": "b-r2-rung-pad-10",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -87,12 +86,12 @@
         {
           "insert": "Section padding — 48px of air between a section border and the nearest child, on every side. It is the shortest rung: a frame sits closer to its own children than any two peers sit to each other, which is what makes the frame read as theirs."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-rung-sibling-11": {
       "id": "b-r2-rung-sibling-11",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -100,12 +99,12 @@
         {
           "insert": "Sibling gaps — 144px between side-by-side peers, 72px between stacked peers. Against a 288×96 node that is half a node width across and three quarters of a node height down, so a row repeats on a 432px pitch and a column on a 168px pitch."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-rung-section-12": {
       "id": "b-r2-rung-section-12",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -113,12 +112,12 @@
         {
           "insert": "Section-to-section gutters — 144px across, 160px down. The horizontal gutter matches the sibling gap because separate columns already read as separate; the vertical gutter is more than twice the stacked sibling gap, and that jump is what tells a reader where one section ends and the next begins."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-rung-shape-13": {
       "id": "b-r2-rung-shape-13",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -126,12 +125,12 @@
         {
           "insert": "What the ladder adds up to — a board whose node area is about 15% of its board area. Air is the majority of a finished board; hold the rungs, keep two or three nodes in a section, and that ratio arrives on its own. A board reading well above it was built by tightening the rungs."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-flush-3": {
       "id": "b-r2-flush-3",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -139,12 +138,12 @@
         {
           "insert": "Uniformity carries meaning: same size plus the same gap says that nodes are peers. A near-match reads as an accidental exception."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-packed-4": {
       "id": "b-r2-packed-4",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -152,12 +151,12 @@
         {
           "insert": "Content comes first: size each box for its label with comfortable padding, then make peers match the largest member before setting the repeated pitch."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-spaced-5": {
       "id": "b-r2-spaced-5",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -165,12 +164,12 @@
         {
           "insert": "Copy instead of estimating: use a peer's exact digest size and pitch so the next member lands on the same register and gap."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-loose-6": {
       "id": "b-r2-loose-6",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -178,12 +177,12 @@
         {
           "insert": "Every label and routed wire owns clear air. Within a section, centers stay on one line; between sections, use one wider gutter and repeat that gutter too."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-cluster-7": {
       "id": "b-r2-cluster-7",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -191,12 +190,12 @@
         {
           "insert": "The crowding warning marks the corridor floor for sibling nodes: under 80px side by side or under 48px stacked. These thresholds protect route clearance; they are not preferred spacing values — the rungs above are."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r2-classify-8": {
       "id": "b-r2-classify-8",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -241,7 +240,8 @@
         {
           "insert": ", and covered-content lints measure corridor, chip fit, and collisions. The plan phase explicitly says the crowding warning is a floor, not the target."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

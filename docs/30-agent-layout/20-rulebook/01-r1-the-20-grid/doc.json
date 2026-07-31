@@ -6,13 +6,7 @@
   "blocks": {
     "b-r1-root": {
       "id": "b-r1-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-r1-title-1",
-        "b-r1-card-2",
-        "b-r1-enforce-3",
-        "b-r1-evidence-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "The 20 grid is geometry quantization: every number a gesture writes to board geometry lands on a multiple of 20, while spacing is chosen from content and repeated peer geometry rather than from a grid-derived target.",
         "format": "mdx",
@@ -22,12 +16,17 @@
           "snapping",
           "route lattice"
         ]
-      }
+      },
+      "children": [
+        "b-r1-title-1",
+        "b-r1-card-2",
+        "b-r1-enforce-3",
+        "b-r1-evidence-4"
+      ]
     },
     "b-r1-title-1": {
       "id": "b-r1-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -35,12 +34,12 @@
         {
           "insert": "R1 — The 20 grid"
         }
-      ]
+      ],
+      "children": []
     },
     "b-r1-card-2": {
       "id": "b-r1-card-2",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "Geometry lands on the 20 grid"
       },
@@ -48,12 +47,12 @@
         {
           "insert": "Object geometry uses the agent's 20 grid as a snap unit. It does not prescribe a gap, corridor width, or pitch: choose those for the content and flow, then express the resulting rectangles on-grid."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r1-enforce-3": {
       "id": "b-r1-enforce-3",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -99,12 +98,12 @@
         {
           "insert": " enumerates which fields quantize and which are exempt. R1 is that quantization and nothing more: it decides where a number lands, never how much air the layout gets."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r1-evidence-4": {
       "id": "b-r1-evidence-4",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -119,7 +118,8 @@
         {
           "insert": " rectangle. Operation results and looks report the post-snap geometry in their digest rows, which is the value to read when matching peers."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

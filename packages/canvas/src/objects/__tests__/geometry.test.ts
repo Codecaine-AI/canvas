@@ -1,6 +1,5 @@
 import { describe, expect, it } from "bun:test";
 import {
-  chevronPoints,
   connectionBoundsForObject,
   getConnectionAnchors,
   inscribedTextRect,
@@ -15,16 +14,6 @@ function rectObject(overrides: Partial<InteractiveCanvasObject> = {}): Interacti
     type: "process",
     text: "Rect",
     geometry: { x: 0, y: 0, width: 100, height: 100 },
-    ...overrides,
-  };
-}
-
-function pillObject(overrides: Partial<InteractiveCanvasObject> = {}): InteractiveCanvasObject {
-  return {
-    id: "pill-1",
-    type: "pill",
-    text: "Pill",
-    geometry: { x: 0, y: 0, width: 200, height: 80 },
     ...overrides,
   };
 }
@@ -55,7 +44,7 @@ function iconObject(overrides: Partial<InteractiveCanvasObject> = {}): Interacti
   return {
     id: "chip-1",
     type: "icon",
-    icon: "cpu",
+    icon: "model",
     text: "Chip",
     geometry: { x: 0, y: 0, width: 60, height: 60 },
     style: { shape: "icon" },
@@ -63,7 +52,7 @@ function iconObject(overrides: Partial<InteractiveCanvasObject> = {}): Interacti
   };
 }
 
-/** Generic 100x100-bounds object factory for the W5 FigJam parity shape set (Wave A). */
+/** Generic 100x100-bounds object factory for the universal shape core. */
 function shapeObject(
   type: InteractiveCanvasObject["type"],
   overrides: Partial<InteractiveCanvasObject> = {},
@@ -100,20 +89,11 @@ describe("outlinePolygon", () => {
     ]);
   });
 
-  it("returns a rounded stadium polygon for a pill object (not the raw bbox corners)", () => {
-    const object = pillObject();
-    const polygon = outlinePolygon(object);
-    // A pill's polygon should NOT contain the sharp bbox corner (0,0) since
-    // the left cap is a semicircle centered at (radius, cy).
-    expect(polygon).not.toContainEqual({ x: 0, y: 0 });
-    expect(polygon.length).toBeGreaterThan(4);
-  });
-
   it("returns a 7-point chevron for an arrow-shape object", () => {
     const object = arrowShapeObject();
     const polygon = outlinePolygon(object);
     expect(polygon.length).toBe(7);
-    // The tip of a right-pointing chevron should reach the right edge at mid-height.
+    // The tip of a right-pointing arrow should reach the right edge at mid-height.
     expect(polygon).toContainEqual({ x: 200, y: 50 });
   });
 
@@ -183,18 +163,6 @@ describe("inscribedTextRect", () => {
     });
   });
 
-  it("guards pill text against stadium caps", () => {
-    expect(inscribedTextRect(pillObject({
-      geometry: { x: 0, y: 0, width: 200, height: 64 },
-      style: { shape: "pill" },
-    }))).toEqual({
-      x: 32,
-      y: 12,
-      width: 136,
-      height: 40,
-    });
-  });
-
   it("returns closed-form per-shape center rects", () => {
     const width = 200;
     const height = 120;
@@ -206,20 +174,6 @@ describe("inscribedTextRect", () => {
       y2: number;
     }> = [
       { type: "predefined-process", x1: width * 0.047 + 10, x2: width - (width * 0.047 + 10), y1: 12, y2: height - 12 },
-      { type: "star", x1: width * 0.27, x2: width * 0.73, y1: height * 0.42, y2: height * 0.72 },
-      { type: "database", x1: width * 0.06, x2: width * 0.94, y1: height * 0.34, y2: height * 0.8 },
-      { type: "document", x1: width * 0.09, x2: width * 0.91, y1: height * 0.06, y2: height * 0.78 },
-      { type: "document-stack", x1: width * 0.1, x2: width * 0.96, y1: height * 0.1, y2: height * 0.78 },
-      { type: "folder", x1: width * 0.06, x2: width * 0.94, y1: height * 0.3, y2: height * 0.92 },
-      { type: "cylinder-horizontal", x1: width * 0.2, x2: width * 0.8, y1: height * 0.12, y2: height * 0.88 },
-      { type: "page-corner", x1: width * 0.05, x2: width * 0.94, y1: height * 0.26, y2: height * 0.94 },
-      { type: "internal-storage", x1: width * 0.15 + 8, x2: width * 0.94, y1: height * 0.15 + 8, y2: height * 0.92 },
-      { type: "parallelogram", x1: width * 0.18 + 8, x2: width * 0.82 - 8, y1: height * 0.06, y2: height * 0.94 },
-      { type: "trapezoid", x1: width * 0.2 + 8, x2: width * 0.8 - 8, y1: height * 0.14, y2: height * 0.92 },
-      { type: "hexagon", x1: width * 0.22 + 8, x2: width * 0.78 - 8, y1: height * 0.1, y2: height * 0.9 },
-      { type: "off-page-connector", x1: width * 0.08, x2: width * 0.92, y1: height * 0.06, y2: height * 0.58 },
-      { type: "manual-input", x1: width * 0.08, x2: width * 0.92, y1: height * 0.25 + 8, y2: height * 0.92 },
-      { type: "pentagon", x1: width * 0.22, x2: width * 0.78, y1: height * 0.24, y2: height * 0.88 },
       { type: "octagon", x1: width * 0.19, x2: width * 0.81, y1: height * 0.19, y2: height * 0.81 },
     ];
 
@@ -236,7 +190,7 @@ describe("inscribedTextRect", () => {
   });
 });
 
-describe("outlinePolygon: W5 FigJam parity shape set (Wave A)", () => {
+describe("outlinePolygon: the universal shape core", () => {
   it("returns a dense 32-point ellipse polygon inscribed in the bounds", () => {
     const object = shapeObject("ellipse");
     const polygon = outlinePolygon(object);
@@ -260,125 +214,16 @@ describe("outlinePolygon: W5 FigJam parity shape set (Wave A)", () => {
     expect(polygon).toContainEqual({ x: 50, y: 100 });
   });
 
-  it("returns a 4-point parallelogram skewed per PARALLELOGRAM_SKEW_RATIO (18%)", () => {
-    const object = shapeObject("parallelogram");
-    const polygon = outlinePolygon(object);
-    expect(polygon.length).toBe(4);
-    // direction "right" (default): top edge shifted right by 18% of width.
-    expect(polygon).toContainEqual({ x: 18, y: 0 });
-    expect(polygon).toContainEqual({ x: 82, y: 100 });
-  });
-
-  it("returns a 5-point pentagon, point-up", () => {
-    const object = shapeObject("pentagon");
-    const polygon = outlinePolygon(object);
-    expect(polygon.length).toBe(5);
-    expect(polygon[0]).toEqual({ x: 50, y: 0 });
-  });
-
   it("returns an 8-point octagon, flat-top", () => {
     const object = shapeObject("octagon");
     const polygon = outlinePolygon(object);
     expect(polygon.length).toBe(8);
   });
 
-  it("returns a 10-point star, point-up, with alternating outer/inner radii", () => {
-    const object = shapeObject("star");
-    const polygon = outlinePolygon(object);
-    expect(polygon.length).toBe(10);
-    expect(polygon[0]).toEqual({ x: 50, y: 0 });
-  });
-
-  it("returns a 12-point plus/cross polygon", () => {
-    const object = shapeObject("plus");
-    const polygon = outlinePolygon(object);
-    expect(polygon.length).toBe(12);
-    // Top of the vertical bar is centered and inset by half the bar thickness.
-    const top = polygon.filter((p) => p.y === 0);
-    expect(top.length).toBe(2);
-    expect(top.map((p) => p.x).sort((a, b) => a - b)[0]).toBeCloseTo(100 / 3, 5);
-    expect(top.map((p) => p.x).sort((a, b) => a - b)[1]).toBeCloseTo(200 / 3, 5);
-  });
-
-  it("returns a 6-point fat chevron (distinct from arrow-shape's 7-point sliver)", () => {
-    const object = shapeObject("chevron");
-    const polygon = outlinePolygon(object);
-    expect(polygon.length).toBe(6);
-    // The pointed head of a right-pointing chevron reaches the right edge at mid-height.
-    expect(polygon).toContainEqual({ x: 100, y: 50 });
-  });
-
-  it("chevronPoints mirrors left vs right direction", () => {
-    const bounds = { x: 0, y: 0, width: 100, height: 100 };
-    const right = chevronPoints(bounds, "right");
-    const left = chevronPoints(bounds, "left");
-    expect(right).toContainEqual({ x: 100, y: 50 });
-    expect(left).toContainEqual({ x: 0, y: 50 });
-  });
-
-  it("returns a 5-point off-page-connector (downward pentagon)", () => {
-    const object = shapeObject("off-page-connector");
-    const polygon = outlinePolygon(object);
-    expect(polygon).toEqual([
-      { x: 0, y: 0 },
-      { x: 100, y: 0 },
-      { x: 100, y: 60 },
-      { x: 50, y: 100 },
-      { x: 0, y: 60 },
-    ]);
-  });
-
-  it("returns a 4-point trapezoid inset 20% on each top corner", () => {
-    const object = shapeObject("trapezoid");
-    const polygon = outlinePolygon(object);
-    expect(polygon).toEqual([
-      { x: 20, y: 0 },
-      { x: 80, y: 0 },
-      { x: 100, y: 100 },
-      { x: 0, y: 100 },
-    ]);
-  });
-
-  it("returns a 4-point manual-input shape with a slanted top edge", () => {
-    const object = shapeObject("manual-input");
-    const polygon = outlinePolygon(object);
-    expect(polygon).toEqual([
-      { x: 0, y: 25 },
-      { x: 100, y: 0 },
-      { x: 100, y: 100 },
-      { x: 0, y: 100 },
-    ]);
-  });
-
-  it("returns a 6-point flat-top hexagon", () => {
-    const object = shapeObject("hexagon");
-    const polygon = outlinePolygon(object);
-    expect(polygon.length).toBe(6);
-    const rightPoint = polygon.find((p) => Math.abs(p.x - 100) < 1e-6);
-    const leftPoint = polygon.find((p) => Math.abs(p.x - 0) < 1e-6);
-    expect(rightPoint?.y).toBeCloseTo(50, 5);
-    expect(leftPoint?.y).toBeCloseTo(50, 5);
-  });
-
-  it("returns a dense circular polygon for or-junction and summing-junction (shared 'junction' outline)", () => {
-    const orJunction = outlinePolygon(shapeObject("or-junction"));
-    const summingJunction = outlinePolygon(shapeObject("summing-junction"));
-    expect(orJunction.length).toBe(32);
-    expect(summingJunction.length).toBe(32);
-    expect(orJunction).toEqual(summingJunction);
-  });
-
-  it("falls back to the bounding-rect outline for bbox-fallback W5 types, extended for below-slot icon text", () => {
-    for (const type of [
-      "folder",
-      "document-stack",
-      "cylinder-horizontal",
-      "page-corner",
-      "icon",
-      "internal-storage",
-    ] as const) {
+  it("falls back to the bounding-rect outline for bbox-fallback types, extended for below-slot icon text", () => {
+    for (const type of ["icon"] as const) {
       const polygon = outlinePolygon(shapeObject(type));
-      const bottom = type === "icon" ? 124 : 100;
+      const bottom = 124;
       expect(polygon).toEqual([
         { x: 0, y: 0 },
         { x: 100, y: 0 },
@@ -389,7 +234,7 @@ describe("outlinePolygon: W5 FigJam parity shape set (Wave A)", () => {
   });
 });
 
-describe("getConnectionAnchors: W5 FigJam parity shape set (Wave A)", () => {
+describe("getConnectionAnchors: the universal shape core", () => {
   it("produces a top anchor exactly at the apex for an up-pointing triangle (x = 0.5 fraction of width)", () => {
     const object = shapeObject("triangle");
     const anchors = getConnectionAnchors(object);
@@ -455,7 +300,7 @@ describe("getConnectionAnchors", () => {
 
   it("uses the external below-text band for bbox outline and bottom anchor only", () => {
     const object = shapeObject("icon", {
-      icon: "person",
+      icon: "human",
       text: "Adapt Question Based on Interview History",
       geometry: { x: 10, y: 20, width: 120, height: 140 },
       style: { shape: "icon" },
@@ -478,15 +323,6 @@ describe("getConnectionAnchors", () => {
     });
     expect(anchors[2]!.point).toEqual({ x: 10, y: 90 });
     expect(anchors[3]!.point).toEqual({ x: 130, y: 90 });
-  });
-
-  it("produces anchors on the true pill outline (top/bottom anchors sit above/below the flat edge center, not the bbox corner)", () => {
-    const object = pillObject(); // 200x80, radius=40
-    const anchors = getConnectionAnchors(object);
-    const points = anchors.map((a) => a.point);
-    // Top anchor: candidate ray straight up from center (100,40) to (100,-10);
-    // outline crosses at (100, 0) since that's on the flat top edge.
-    expect(points.some((p) => Math.abs(p.x - 100) < 1e-6 && Math.abs(p.y - 0) < 1e-6)).toBe(true);
   });
 });
 

@@ -104,18 +104,20 @@ describe("place gestures", () => {
     const session = makeTestSession(boardWith(), ["page"]);
 
     const result = runOp(session, "place_shape", {
-      id: "cloud",
-      type: "cloud",
+      id: "store",
+      type: "memory",
       at: [400, 400],
     });
 
     expect(result.isError).toBeUndefined();
     // The model never sees {type:"icon", icon}; the folded name is what the
     // summary reports, both directions of the mapping agreeing.
-    expect(result.text).toContain("APPLIED · place_shape cloud cloud 400,400 120×120");
-    expect(session.draft.objects.find((object) => object.id === "cloud")).toMatchObject({
+    expect(result.text).toContain("APPLIED · place_shape store memory 400,400 120×120");
+    expect(session.draft.objects.find((object) => object.id === "store")).toMatchObject({
       type: "icon",
-      icon: "cloud",
+      icon: "memory",
+      // The registry's preferred color for memory lands with the placement.
+      color: "blue",
       geometry: { x: 400, y: 400, width: 120, height: 120 },
     });
   });
@@ -139,11 +141,11 @@ describe("place gestures", () => {
 
 describe("clone", () => {
   const source = {
-    ...box("source", 100, 100, 240, 160, "chevron"),
+    ...box("source", 100, 100, 240, 160, "arrow-shape"),
     text: "Source",
     color: "teal" as const,
     direction: "left" as const,
-    style: { shape: "chevron" as const, strokeWidth: 6 },
+    style: { shape: "arrow-shape" as const, strokeWidth: 6 },
   };
 
   test("copies kind, size, color, direction and style, and lands at the paste offset", () => {
@@ -155,11 +157,11 @@ describe("clone", () => {
     // The UI pastes at +24/+24; on the agent grid that is +20/+20.
     expect(result.text).toContain("APPLIED · clone copy from source 120,120 240×160");
     expect(session.draft.objects.find((object) => object.id === "copy")).toMatchObject({
-      type: "chevron",
+      type: "arrow-shape",
       text: "Source",
       color: "teal",
       direction: "left",
-      style: { shape: "chevron", strokeWidth: 6 },
+      style: { shape: "arrow-shape", strokeWidth: 6 },
       geometry: { x: 120, y: 120, width: 240, height: 160 },
     });
   });
@@ -168,7 +170,7 @@ describe("clone", () => {
     const icon = {
       ...box("db", 300, 300, 120, 120, "icon"),
       text: "Store",
-      icon: "database" as const,
+      icon: "memory" as const,
     };
     const session = makeTestSession(boardWith(icon), ["page"]);
 
@@ -183,7 +185,7 @@ describe("clone", () => {
     expect(result.text).toContain("APPLIED · clone db-2 from db 640,300 120×120");
     expect(session.draft.objects.find((object) => object.id === "db-2")).toMatchObject({
       type: "icon",
-      icon: "database",
+      icon: "memory",
       text: "Cache",
     });
     expect(session.draft.objects.find((object) => object.id === "db")?.text).toBe("Store");

@@ -6,13 +6,7 @@
   "blocks": {
     "b-r3-root": {
       "id": "b-r3-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-r3-title-1",
-        "b-r3-card-2",
-        "b-r3-body-3",
-        "b-r3-evidence-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "Sections are the grouping and addressability mechanism: every idea has a section, content keeps clear air from its frame, and a finished section closes around its children when explicitly fitted.",
         "format": "mdx",
@@ -24,12 +18,17 @@
           "air",
           "explicit fit"
         ]
-      }
+      },
+      "children": [
+        "b-r3-title-1",
+        "b-r3-card-2",
+        "b-r3-body-3",
+        "b-r3-evidence-4"
+      ]
     },
     "b-r3-title-1": {
       "id": "b-r3-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -37,12 +36,12 @@
         {
           "insert": "R3 — Section trim"
         }
-      ]
+      ],
+      "children": []
     },
     "b-r3-card-2": {
       "id": "b-r3-card-2",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "Everything has a section"
       },
@@ -50,12 +49,12 @@
         {
           "insert": "A section is the only container and the board's addressable grouping unit. Give every piece of content a home and keep air between children and the frame. A frame holds the space it is given; close it around its children with an explicit fit when the region is finished."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r3-body-3": {
       "id": "b-r3-body-3",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -101,18 +100,19 @@
         {
           "insert": " lint blocks children outside their section and content outside the locked page frame, and its suggestion points to the fit operation."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r3-evidence-4": {
       "id": "b-r3-evidence-4",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Workflow: create the complete section skeleton before placing content. Fill one section at a time in reading order and judge its render before moving to the next; children move, and the frame closes around them when you fit it."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

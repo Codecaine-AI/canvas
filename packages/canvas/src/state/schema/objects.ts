@@ -54,17 +54,17 @@ export type InteractiveCanvasObject = {
    */
   locked?: "all" | "background";
   /**
-   * Pointing/skew direction for direction-aware shapes (W2, generalized W5):
-   * `arrow-shape` | `chevron` | `parallelogram` accept "left" | "right"
-   * (soft-default "right" when omitted/invalid); `triangle` accepts
-   * "up" | "down" (soft-default "up"). Absent/ignored for every other type.
+   * Pointing direction for direction-aware shapes (W2, generalized W5):
+   * `arrow-shape` accepts "left" | "right" (soft-default "right" when
+   * omitted/invalid); `triangle` accepts "up" | "down" (soft-default "up").
+   * Absent/ignored for every other type.
    */
   direction?: CanvasShapeDirection;
   /** `type: "sticky"` only (W2) — rendered bottom-left at 12px/40% black. */
   author?: string;
   /**
-   * `type: "icon"` only (W5) — REQUIRED glyph selector, one of the 26
-   * Advanced-tier ids in `CanvasIconGlyph`. Missing/unknown is a hard
+   * `type: "icon"` only (W5) — REQUIRED glyph selector, one of the 30
+   * roster ids in `CanvasIconGlyph`. Missing/unknown is a hard
    * validation error (mirrors the `section` title/tint precedent above),
    * since an icon object with no glyph can't be rendered at all.
    */

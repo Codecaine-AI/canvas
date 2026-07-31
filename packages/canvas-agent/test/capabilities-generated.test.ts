@@ -1,8 +1,9 @@
 /**
  * Capabilities block gate. The checked-in generated fragments stay
- * byte-identical to scripts/generate-capabilities.ts, every validator roster
- * value is documented, and every registered gesture is declared inside its
- * verb-group block — with nothing declared that is not registered. The loader
+ * byte-identical to scripts/generate-capabilities.ts, the <vocabulary> XML
+ * walks the object-preference registry in roster order, and every registered
+ * gesture is declared inside its verb-group block — with nothing declared
+ * that is not registered. The loader
  * serves the assembled material-then-gestures text as one static context
  * block.
  */
@@ -11,17 +12,10 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { CANVAS_COLORS } from "@codecaine-ai/canvas/schema";
-import type { InteractiveCanvasObjectType } from "@codecaine-ai/canvas/schema";
-import { OBJECT_TYPE_DEFAULTS } from "../../canvas/src/state/schema/object-defaults";
 
+import { OBJECT_PREFERENCES } from "../../canvas/src/objects/registry";
 import { renderVocabularyModule } from "../scripts/generate-capabilities";
-import {
-  GLYPH_COLLISIONS,
-  PLACEABLE_GLYPH_TYPES,
-  PLACEABLE_SHAPE_TYPES,
-  PLACEABLE_TYPES,
-  READ_ONLY_TYPE_NAMES,
-} from "../src/service/session/tools/placeable-types";
+import { PLACEABLE_TYPES } from "../src/service/session/tools/placeable-types";
 import {
   CAPABILITIES_CONNECTION_FIELDS_GENERATED,
   CAPABILITIES_OBJECTS_GENERATED,
@@ -73,53 +67,52 @@ describe("capabilities generated fragments", () => {
     expect(readFileSync(GENERATED_FILE, "utf8")).toBe(renderVocabularyModule());
   });
 
-  test("every placeable shape type appears in the emitted roster, sizeless", () => {
-    const lines = CAPABILITIES_OBJECTS_GENERATED.split("\n").map((entry) => entry.trimStart());
-    for (const type of Object.keys(OBJECT_TYPE_DEFAULTS)) {
-      const line = lines.find((entry) => entry === type || entry.startsWith(`${type} —`));
-      if (type === "section" || type === "sticky") {
-        expect(line, `${type} belongs to its own kind section, not the object roster`).toBeUndefined();
-        continue;
-      }
-      if (type === "icon") {
-        // The carrier type is folded away: glyphs are types of their own
-        // (src/service/session/placeable-types.ts), so "icon" is not a name
-        // the model can place or read.
-        expect(line, "the icon carrier type never reaches the roster").toBeUndefined();
-        continue;
-      }
-      if (!(PLACEABLE_SHAPE_TYPES as readonly string[]).includes(type)) {
-        // A shape whose bare name a glyph took in the collision audit: it is
-        // read-only, so neither the shape nor its outbound name is offered.
-        // (The bare name IS on the roster — as the glyph's line.)
-        expect(READ_ONLY_TYPE_NAMES as readonly string[], type).toContain(`${type}-shape`);
-        expect(lines, type).not.toContain(`${type}-shape`);
-        continue;
-      }
+  test("renders one <object> element per registry entry, in roster order", () => {
+    const names = CAPABILITIES_OBJECTS_GENERATED.split("\n")
+      .map((line) => /^<object name="([^"]+)" preferred_color="([^"]+)">$/.exec(line))
+      .filter((match): match is RegExpExecArray => match !== null);
 
-      expect(line, type).toBeDefined();
-      expect(line!, type).not.toMatch(/\d+×\d+/);
+    expect(names.map((match) => match[1])).toEqual(
+      OBJECT_PREFERENCES.map((entry) => entry.name),
+    );
+    for (const [offset, entry] of OBJECT_PREFERENCES.entries()) {
+      expect(names[offset]![2], entry.name).toBe(entry.color);
     }
   });
 
-  test("the roster is exactly the folded placeable vocabulary", () => {
-    const listed = CAPABILITIES_OBJECTS_GENERATED.split("\n")
-      .filter((line) => line.startsWith("        "))
-      .map((line) => line.trimStart().split(" —")[0]!.split(" (")[0]!);
+  test("the vocabulary is exactly the placeable roster — nothing offered is undocumented", () => {
+    const listed = OBJECT_PREFERENCES.map((entry) => entry.name);
     expect([...listed].sort()).toEqual([...PLACEABLE_TYPES].sort());
   });
 
-  test("field contracts the contact sheet cannot show stay on their roster lines", () => {
-    const lines = CAPABILITIES_OBJECTS_GENERATED.split("\n");
-    const lineFor = (type: InteractiveCanvasObjectType): string =>
-      lines.find((entry) => entry.trimStart().startsWith(`${type} —`)) ?? "";
-    for (const type of ["arrow-shape", "chevron", "parallelogram", "triangle"] as const) {
-      expect(lineFor(type), type).toContain("`direction`");
+  test("every entry carries its meaning and one dash bullet per scenario", () => {
+    const body = CAPABILITIES_OBJECTS_GENERATED;
+    for (const entry of OBJECT_PREFERENCES) {
+      const open = body.indexOf(`<object name="${entry.name}" `);
+      const close = body.indexOf("</object>", open);
+      expect(open, entry.name).toBeGreaterThanOrEqual(0);
+      const element = body.slice(open, close);
+      expect(element, entry.name).toContain(`<meaning>${entry.meaning}</meaning>`);
+      for (const scenario of entry.scenarios) {
+        expect(element, entry.name).toContain(`- ${scenario}`);
+      }
     }
   });
 
-  test("no `icon` field contract survives anywhere in the block", () => {
-    expect(formatCapabilities()).not.toContain("`icon`");
+  test("the carrier type and the kinds with their own gestures never reach the vocabulary", () => {
+    for (const name of ["icon", "section", "sticky"]) {
+      expect(CAPABILITIES_OBJECTS_GENERATED, name).not.toContain(`<object name="${name}"`);
+    }
+  });
+
+  test("the color guidance sentence sits adjacent to the object listing", () => {
+    const lines = CAPABILITIES_OBJECTS_GENERATED.split("\n");
+    const lastElement = lines.lastIndexOf("</object>");
+    expect(lastElement).toBeGreaterThan(-1);
+    expect(lines[lastElement + 1]).toBe(
+      "keep each object's preferred color; depart only when the object would sit "
+        + "illegibly in its container",
+    );
   });
 
   test("every canvas color is listed out, one per line", () => {
@@ -129,37 +122,6 @@ describe("capabilities generated fragments", () => {
     const trimmed = lines.map((line) => line.trimStart());
     for (const color of CANVAS_COLORS) {
       expect(trimmed, color).toContain(color);
-    }
-  });
-
-  test("every placeable glyph is a type under the icons group, one per line", () => {
-    const lines = CAPABILITIES_OBJECTS_GENERATED.split("\n");
-    const groupAt = lines.findIndex((line) => line.trimStart().startsWith("icons —"));
-    expect(groupAt).toBeGreaterThan(-1);
-    for (const [offset, placeableType] of PLACEABLE_GLYPH_TYPES.entries()) {
-      expect(lines[groupAt + 1 + offset]!.trimStart(), placeableType).toStartWith(placeableType);
-    }
-    // The group is the last one, so the glyph list runs to the colors header.
-    expect(lines[groupAt + 1 + PLACEABLE_GLYPH_TYPES.length]).toStartWith("colors");
-  });
-
-  test("a collision offers the winner's bare name and nothing for the loser", () => {
-    const listed = CAPABILITIES_OBJECTS_GENERATED.split("\n").map((line) => line.trimStart());
-    for (const collision of GLYPH_COLLISIONS) {
-      // Whoever won, the bare name is on the roster once and means one drawing.
-      expect(listed, collision.glyph).toContain(collision.glyph);
-      expect(
-        listed.filter((line) => line === collision.glyph).length,
-        collision.glyph,
-      ).toBe(1);
-      if (collision.decision === "glyph-wins") {
-        // The bare name is the glyph's; the shape it outranked is read-only.
-        expect(listed, collision.glyph).not.toContain(`${collision.glyph}-shape`);
-        expect(listed, collision.glyph).not.toContain(`${collision.glyph}-icon`);
-      } else {
-        // The bare name is the shape's; the glyph is reachable beside it.
-        expect(listed, collision.glyph).toContain(`${collision.glyph}-icon`);
-      }
     }
   });
 
@@ -220,8 +182,10 @@ describe("capabilities assembly", () => {
     // fit_section is the one gesture a kind block still names, because "a
     // frame never fits itself, and this is what closes it" is a fact about
     // sections, not a tool reference. Whole words only: "connections" is not a
-    // mention of connect, and "resizes" is not a mention of resize.
-    const allowed = new Set(["fit_section"]);
+    // mention of connect, and "resizes" is not a mention of resize. `lock` is
+    // allowed because it is also a placeable glyph NAME — the vocabulary's
+    // <object name="lock"> element is an object entry, not a tool reference.
+    const allowed = new Set(["fit_section", "lock"]);
     for (const tool of operationTools.map((entry) => entry.name)) {
       if (allowed.has(tool)) continue;
       expect(material, tool).not.toMatch(new RegExp(`\\b${tool}\\b`));

@@ -46,13 +46,9 @@ export const octagonShapeDef: ShapeDef = {
     },
   },
   /*
-   * Moved from CanvasStage's grouped rule (octagon shares its selector group
-   * there with folder/document-stack/cylinder-horizontal/triangle/
-   * parallelogram/pentagon/star/plus/chevron/off-page-connector/trapezoid/
-   * manual-input/hexagon/or-junction/summing-junction — 17 selectors total).
-   * Paint declarations moved here; octagon carries no additional per-shape
-   * follow-up rule in the legacy block (unlike folder/document-stack/
-   * triangle/off-page-connector/manual-input/star, which do).
+   * Moved from CanvasStage's grouped rule (octagon shares this
+   * transparent-button treatment with triangle). Paint declarations moved
+   * here; octagon carries no additional per-shape follow-up rule.
    */
   css: `
         .interactive-canvas-object-octagon {

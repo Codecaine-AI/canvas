@@ -65,9 +65,8 @@ describe("request queue lifecycle", () => {
     const session = sessionWithQueue();
 
     const snapshot = userRequestsSnapshot(session);
-    expect(snapshot).toContain("resolve_request");
-    expect(snapshot).toContain('  R1 open  object:task  human — "Split this into two steps"');
-    expect(snapshot).toContain('  R2 open  object:other  human — "Recolor the other box"');
+    expect(snapshot).toContain('R1 open  object:task  human — "Split this into two steps"');
+    expect(snapshot).toContain('R2 open  object:other  human — "Recolor the other box"');
 
     const empty = makeTestSession(makeDocument([box("solo", 0, 0)]), ["solo"]);
     syncSessionRequests(empty);
@@ -90,7 +89,7 @@ describe("request queue lifecycle", () => {
       ["R2", "open"],
       ["R3", "open"],
     ]);
-    expect(userRequestsSnapshot(session)).toContain('  R1 done "split it"');
+    expect(userRequestsSnapshot(session)).toContain('R1 done "split it"');
   });
 });
 
@@ -255,7 +254,7 @@ describe("add_annotation", () => {
     );
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · addAnnotation annotation-1");
+    expect(result.text).toContain("APPLIED · add_annotation annotation-1");
     expect(result.text).toContain(
       'DELTA · thread annotation-1 opened on object:task  agent'
       + ' — "Is this the retry path, or the happy path?"',

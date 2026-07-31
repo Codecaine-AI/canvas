@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 4.5,
+  "verdict": {
+    "score": 4.5,
+    "score_rationale": "The board lands between the composition-fails and flat anchors because its orderly panel grid remains readable, but extensive dead space, yellow-note monotony, and widespread substitution of prose boxes for operational-map objects leave it visibly unfinished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 4,
+        "note": "Fail: the eight panels occupy the frame, but most contain large empty interiors, with especially broad unused bands around sections 3–6 and beneath the content."
+      },
+      {
+        "name": "color",
+        "score": 4,
+        "note": "Fail: nearly every process is rendered as the same yellow note regardless of semantics, overwhelming the few registry-true yellow, red, and blue icons."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 8,
+        "note": "Pass: no crosshair junctions, waypoint terminations, floating badges, or ambiguous wire merges are visible."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 5.5,
+        "note": "Fail: panel headers and outer registers are orderly, but inconsistent note sizes, sparse icon use, and uneven internal placement create accidental rather than deliberate density variation."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7428,
+    "output_tokens": 399
+  },
+  "flags": []
+}

@@ -3,8 +3,9 @@
 Standing, repeatable evaluation for the layout agent. Scenarios are briefs for real
 systems; the agent builds each board from a blank base canvas through the run's own
 harness — spawned on an ephemeral port at run start, stopped at run end, never a
-service some earlier run left behind. Run it on any change to the prompt, capabilities,
-styles, lints, perception, or model config; diff the scorecards. Entry point:
+service some earlier run left behind. Run it on any change to the prompt, the object-preference
+registry and its vocabulary context, styles, lints, perception, or model config; diff
+the scorecards. Entry point:
 `make eval`.
 
 | file | what |
@@ -24,8 +25,8 @@ ephemeral ports at run start and stopped at run end), BAML judges, scorecard ass
 | ivr-agent-handoff | 1 | build | 1600×1000 |
 | eval-harness-orchestration | 2 | build | 1920×1200 |
 | sandboxed-tool-fleet | 2 | build | 1920×1200 |
+| chat-assistant-rollout | 3 | build | 2240×1400 |
 | rag-ingestion-retrieval | 3 | build | 2240×1400 |
-| trace-ingestion-pipeline | 3 | build | 2240×1400 |
 | code-review-agents | 4 | build | 2560×1600 |
 | llm-inference-gateway | 4 | build | 2560×1600 |
 | agent-session-orchestration | 5 | build | 3200×2000 |

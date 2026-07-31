@@ -32,7 +32,7 @@ export function toolUpdateDescription(
   }
 
   const previous = session.draft.description;
-  const label = "updateDescription";
+  const label = "update_description";
   commitDraft(session, { ...session.draft, description }, label);
   const diagnostics = runDiagnostics(session.draft);
   emit(session, {

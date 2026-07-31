@@ -6,13 +6,7 @@
   "blocks": {
     "b-step7-root": {
       "id": "b-step7-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-step7-title-1",
-        "b-step7-body-2",
-        "b-step7-code-3",
-        "b-step7-canvas-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "Step 7 of the worked example: a four-operation content batch turns the board stores into a 2×2 peer group, adds cache, reviews pushed state, and names every surviving warning in the gated finalize.",
         "format": "mdx",
@@ -25,12 +19,17 @@
           "locality",
           "stability"
         ]
-      }
+      },
+      "children": [
+        "b-step7-title-1",
+        "b-step7-body-2",
+        "b-step7-code-3",
+        "b-step7-canvas-4"
+      ]
     },
     "b-step7-title-1": {
       "id": "b-step7-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -38,12 +37,12 @@
         {
           "insert": "Step 7 — The edit: one more store"
         }
-      ]
+      ],
+      "children": []
     },
     "b-step7-body-2": {
       "id": "b-step7-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -76,12 +75,12 @@
         {
           "insert": " proposes the same cumulative operations shown in BOARD DIFF for operator review. This message names every warning that survives on the frozen board; a reference-quality board would open those corridors and eliminate the anti-parallel pair."
         }
-      ]
+      ],
+      "children": []
     },
     "b-step7-code-3": {
       "id": "b-step7-code-3",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "json"
       },
@@ -89,16 +88,17 @@
         {
           "insert": "{\n  \"ops\": [\n    {\n      \"type\": \"updateObject\",\n      \"objectId\": \"epochs\",\n      \"patch\": {\n        \"geometry\": { \"x\": 384, \"y\": 448, \"width\": 48, \"height\": 48 }\n      }\n    },\n    {\n      \"type\": \"updateObject\",\n      \"objectId\": \"artifacts\",\n      \"patch\": {\n        \"geometry\": { \"x\": 464, \"y\": 448, \"width\": 48, \"height\": 48 }\n      }\n    },\n    {\n      \"type\": \"updateObject\",\n      \"objectId\": \"saves\",\n      \"patch\": {\n        \"geometry\": { \"x\": 384, \"y\": 528, \"width\": 48, \"height\": 48 }\n      }\n    },\n    {\n      \"type\": \"addObject\",\n      \"object\": {\n        \"id\": \"cache\",\n        \"type\": \"database\",\n        \"text\": \"cache\",\n        \"geometry\": { \"x\": 464, \"y\": 528, \"width\": 48, \"height\": 48 }\n      }\n    }\n  ],\n  \"view\": \"board\"\n}"
         }
-      ]
+      ],
+      "children": []
     },
     "b-step7-canvas-4": {
       "id": "b-step7-canvas-4",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/step-7.canvas.json",
         "title": "Step 7 — The edit: one more store"
-      }
+      },
+      "children": []
     }
   }
 }

@@ -104,15 +104,7 @@ export function formatRequestThread(entry: RequestQueueEntry): string[] {
 /** Section ③'s <requests> body: one thread per entry, or the empty marker. */
 export function formatRequestQueue(entries: readonly RequestQueueEntry[]): string {
   if (entries.length === 0) return USER_REQUESTS_EMPTY;
-  const lines = [
-    "annotation threads on this board — answer a user thread by editing board content, then"
-    + ' dispose it with resolve_request  # Rn open target author — "body" | ↳ author — "reply"'
-    + ' | Rn done|declined "note"',
-  ];
-  for (const entry of entries) {
-    for (const line of formatRequestThread(entry)) lines.push(`  ${line}`);
-  }
-  return lines.join("\n");
+  return entries.flatMap((entry) => formatRequestThread(entry)).join("\n");
 }
 
 /**

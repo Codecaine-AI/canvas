@@ -23,9 +23,9 @@ export { CENTER_TEXT_INSET_PX };
  *                  (icon)
  *  - "inset-body"  padded multi-line body area (sticky)
  *  - "title-chip"  floating chip, top-left, zoom counter-scale (section)
- *  - { rect }      escape hatch: object-local rect function (arrow/chevron
- *                  center text in the body excluding head/notch — replacing
- *                  the old labelStyle margin hacks; code block's body area)
+ *  - { rect }      escape hatch: object-local rect function (arrow centers
+ *                  text in the body excluding the head — replacing the old
+ *                  labelStyle margin hacks)
  */
 
 /** Object-local rectangle (px, relative to the object's top-left corner). */

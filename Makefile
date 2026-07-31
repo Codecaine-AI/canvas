@@ -7,7 +7,7 @@
 # in-app — they're the standalone viewer, `make traces`.) The harness we
 # started is stopped when the app exits.
 studio:
-	bun install
+	cd .. && bun install
 	@if curl -sf http://127.0.0.1:4820/health >/dev/null 2>&1; then \
 		echo "agent harness: already running on :4820 — leaving it"; \
 		VITE_STUDIO_DEV_PAGES=1 bun run --cwd packages/studio studio; \
@@ -28,7 +28,7 @@ studio-evals:
 # studio's agent proxy fronts it, so the browser only ever talks to the
 # studio origin). Kernel runtime state lives in .agent-kernel/ (gitignored).
 harness:
-	bun install
+	cd .. && bun install
 	bun run dev:harness
 
 # Run the browser-based development server, harness alongside (dev mode
@@ -50,7 +50,9 @@ studio-web:
 # pattern as the studio targets; a harness we started is stopped when the
 # viewer exits). On macOS the browser window opens itself once vite is up.
 traces:
-	bun install
+	# Deps install at the Core meta-workspace root (workspace:* deps do not
+	# resolve from this repo alone — see Core/DEVELOPMENT.md).
+	cd .. && bun install
 	@if [ "$$(uname)" = "Darwin" ]; then \
 		( for i in $$(seq 1 30); do \
 			curl -sf http://localhost:4830/ >/dev/null 2>&1 && { open http://localhost:4830; exit 0; }; \

@@ -27,9 +27,9 @@ const document: InteractiveCanvasDocument = {
       style: { shape: "rounded-rect" },
     },
     {
-      id: "person-a",
+      id: "human-a",
       type: "icon",
-      icon: "person",
+      icon: "human",
       text: "Hello text",
       geometry: { x: 10, y: 20, width: 120, height: 140 },
       style: { shape: "icon" },
@@ -42,19 +42,12 @@ const document: InteractiveCanvasDocument = {
       geometry: { x: 40, y: 400, width: 480, height: 360 },
       style: { shape: "section" },
     },
-    {
-      id: "plus-a",
-      type: "plus",
-      text: "Plus",
-      geometry: { x: 700, y: 100, width: 120, height: 120 },
-      style: { shape: "plus" },
-    },
   ],
   connections: [
     {
       id: "connection-a",
       from: { objectId: "shape-a", anchor: "right" },
-      to: { objectId: "person-a", anchor: "left" },
+      to: { objectId: "human-a", anchor: "left" },
       label: "Old connector label",
       style: "solid",
       arrow: "forward",
@@ -123,7 +116,7 @@ describe("useTextEditing object targets (single unified text field, D3/D11)", ()
     const { result, dispatch } = setup();
 
     act(() => {
-      result.current.openObjectTextEditor("person-a");
+      result.current.openObjectTextEditor("human-a");
     });
     act(() => {
       result.current.setObjectTextEditValue("a\nb\nc");
@@ -135,7 +128,7 @@ describe("useTextEditing object targets (single unified text field, D3/D11)", ()
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(dispatch).toHaveBeenCalledWith({
       type: "canvas.updateObject",
-      objectId: "person-a",
+      objectId: "human-a",
       patch: { text: "a\nb\nc" },
     });
     const action = dispatch.mock.calls[0][0] as Extract<CanvasAction, { type: "canvas.updateObject" }>;
@@ -162,16 +155,6 @@ describe("useTextEditing object targets (single unified text field, D3/D11)", ()
     });
   });
 
-  it("refuses to open the editor for a def without a text slot (plus)", () => {
-    const { result } = setup();
-
-    act(() => {
-      result.current.openObjectTextEditor("plus-a");
-    });
-
-    expect(result.current.objectTextEditId).toBeNull();
-    expect(result.current.objectTextEditTarget).toBeUndefined();
-  });
 });
 
 describe("useTextEditing connector labels", () => {

@@ -44,8 +44,8 @@ export interface TextEditingApi {
  * signal (overlay.editObjectTextId) can target a freshly created object
  * before it exists in the rendered document. Existing objects should open
  * through openObjectTextEditor so the def's `textEditing.editable` flag is
- * respected (pure glyph shapes — plus / or-junction / summing-junction —
- * render no text and refuse the editor).
+ * respected (a def without a text slot renders no text and refuses the
+ * editor).
  */
 export function useTextEditing({ document, dispatch }: UseTextEditingArgs): TextEditingApi {
   const [labelEditConnectionId, setLabelEditConnectionId] = useState<string | null>(null);

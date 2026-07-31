@@ -138,8 +138,6 @@ export const changeColor = defineOperationTool({
  */
 const DIRECTIONS_BY_TYPE: Readonly<Record<string, readonly string[]>> = {
   "arrow-shape": ["left", "right"],
-  parallelogram: ["left", "right"],
-  chevron: ["left", "right"],
   triangle: ["up", "down"],
 };
 
@@ -150,8 +148,6 @@ const DIRECTIONS_BY_TYPE: Readonly<Record<string, readonly string[]>> = {
  */
 const DEFAULT_DIRECTION_BY_TYPE: Readonly<Record<string, string>> = {
   "arrow-shape": "right",
-  parallelogram: "right",
-  chevron: "right",
   triangle: "up",
 };
 
@@ -192,7 +188,7 @@ function shapeSwapPatch(
     if (patch.direction !== undefined) {
       notes.push(
         `direction "${patch.direction}" dropped — a ${nextType} has no facing;`
-        + " only arrow-shape, parallelogram, chevron (left/right) and triangle (up/down) do",
+        + " only arrow-shape (left/right) and triangle (up/down) do",
       );
     } else if (current.direction !== undefined) {
       notes.push(`direction "${current.direction}" cleared — a ${nextType} has no facing`);

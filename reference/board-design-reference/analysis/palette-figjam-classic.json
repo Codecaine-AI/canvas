@@ -1,0 +1,83 @@
+{
+  "$comment": "The classic FigJam-derived palette — the full pre-blend table that shipped in packages/canvas/src/theme/palette.ts before the 2026-07-29 hot-rod blend. Same schema as palette-blend-applied.json; kept as the revert/reference point.",
+  "gray": {
+    "name": "gray",
+    "ink": "#757575",
+    "fill": "#E6E6E6",
+    "sticky": "#E6E6E6",
+    "wash": "#F9F9F9",
+    "option": "figjam-classic"
+  },
+  "red": {
+    "name": "red",
+    "ink": "#F24822",
+    "fill": "#FFC7C2",
+    "sticky": "#FFAFA3",
+    "wash": "#FFF5F5",
+    "option": "figjam-classic"
+  },
+  "orange": {
+    "name": "orange",
+    "ink": "#EB7500",
+    "fill": "#FFE0C2",
+    "sticky": "#FFE0C2",
+    "wash": "#FFF7F0",
+    "option": "figjam-classic"
+  },
+  "yellow": {
+    "name": "yellow",
+    "ink": "#E8A302",
+    "fill": "#FFECBD",
+    "sticky": "#FFE299",
+    "wash": "#FFFBF0",
+    "option": "figjam-classic"
+  },
+  "green": {
+    "name": "green",
+    "ink": "#14AE5C",
+    "fill": "#DDF8E2",
+    "sticky": "#DDF8E2",
+    "wash": "#EBFFEE",
+    "option": "figjam-classic"
+  },
+  "teal": {
+    "name": "teal",
+    "ink": "#369E94",
+    "fill": "#C6FAF6",
+    "sticky": "#C6FAF6",
+    "wash": "#EAFDFB",
+    "option": "figjam-classic"
+  },
+  "blue": {
+    "name": "blue",
+    "ink": "#0D99FF",
+    "fill": "#C2E5FF",
+    "sticky": "#A8DAFF",
+    "wash": "#F5FBFF",
+    "option": "figjam-classic"
+  },
+  "violet": {
+    "name": "violet",
+    "ink": "#9747FF",
+    "fill": "#DCCCFF",
+    "sticky": "#DCCCFF",
+    "wash": "#F8F5FF",
+    "option": "figjam-classic"
+  },
+  "pink": {
+    "name": "pink",
+    "ink": "#F849C1",
+    "fill": "#FFC2EC",
+    "sticky": "#FFC2EC",
+    "wash": "#FFF0FA",
+    "option": "figjam-classic"
+  },
+  "white": {
+    "name": "White",
+    "fill": "#FFFFFF",
+    "chipFill": "#E6E6E6",
+    "chipBorder": "#C4C4C4",
+    "stroke": "#757575",
+    "option": "figjam-classic"
+  }
+}

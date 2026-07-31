@@ -14,35 +14,17 @@ export type CanvasObjectStyle = {
   shape?:
     | "rounded-rect"
     | "diamond"
-    | "pill"
     | "note"
     | "marker"
-    | "document"
-    | "database"
     // W2 — FigJam sections + V2 Flow shape vocabulary:
     | "section"
     | "arrow-shape"
     | "predefined-process"
-    // W5 — FigJam parity shape set (Wave A), one same-named variant per new type:
+    // The universal shape core (operational-maps surface trim), one
+    // same-named variant per type:
     | "ellipse"
     | "triangle"
-    | "parallelogram"
-    | "pentagon"
     | "octagon"
-    | "star"
-    | "plus"
-    | "chevron"
-    | "folder"
-    | "document-stack"
-    | "off-page-connector"
-    | "trapezoid"
-    | "manual-input"
-    | "hexagon"
-    | "internal-storage"
-    | "or-junction"
-    | "summing-junction"
-    | "cylinder-horizontal"
-    | "page-corner"
     | "icon";
   /**
    * Stroke width in logical px. Overrides the universal FigJam shape stroke

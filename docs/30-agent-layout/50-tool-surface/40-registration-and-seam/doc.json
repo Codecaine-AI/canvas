@@ -6,7 +6,21 @@
   "blocks": {
     "b-ts-se-root": {
       "id": "b-ts-se-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
+      "props": {
+        "covers": "The catalog/service seam: how the kernel discovers a bundle's tools by filename convention, why boot dry-runs registration without a bound runtime, how the real runtime is bound per spawn, and the invariants that keep the registered surface honest — pinned order, an import-inert entry point, single-source rosters with a two-way completeness guard, the store-to-tools cycle, the eval surface hash, and the tool-call cap.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "catalog seam",
+          "bundle discovery",
+          "dry-run registration",
+          "toolRuntime binding",
+          "registration order",
+          "surface hash",
+          "tool-call cap"
+        ]
+      },
       "children": [
         "b-ts-se-title-1",
         "b-ts-se-lede-2",
@@ -29,26 +43,11 @@
         "b-ts-se-fingerprint-heading-19",
         "b-ts-se-fingerprint-body-20",
         "b-ts-se-cap-21"
-      ],
-      "props": {
-        "covers": "The catalog/service seam: how the kernel discovers a bundle's tools by filename convention, why boot dry-runs registration without a bound runtime, how the real runtime is bound per spawn, and the invariants that keep the registered surface honest — pinned order, an import-inert entry point, single-source rosters with a two-way completeness guard, the store-to-tools cycle, the eval surface hash, and the tool-call cap.",
-        "format": "mdx",
-        "type": "reference",
-        "concepts": [
-          "catalog seam",
-          "bundle discovery",
-          "dry-run registration",
-          "toolRuntime binding",
-          "registration order",
-          "surface hash",
-          "tool-call cap"
-        ]
-      }
+      ]
     },
     "b-ts-se-title-1": {
       "id": "b-ts-se-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -56,23 +55,23 @@
         {
           "insert": "Registration and the catalog seam"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-lede-2": {
       "id": "b-ts-se-lede-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The tool surface has one home, and it is service-side: the gesture descriptors and the workflow calls both live under the session's tools folder, each carrying its own name, label, description, and sealed parameter schema. The agent catalog contributes registration mechanics and nothing else. The seam between them is load-bearing rather than incidental, because the kernel never reaches the agent bundle through the module graph — it discovers the bundle on disk."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-discovery-heading-3": {
       "id": "b-ts-se-discovery-heading-3",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -80,12 +79,12 @@
         {
           "insert": "How the kernel finds the tools"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-discovery-body-4": {
       "id": "b-ts-se-discovery-body-4",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -113,12 +112,12 @@
         {
           "insert": " folder entry, checked in that order. The sidecar must export a register function, either as the default export or under the name tools. Nothing about this resolution is configured; the layout is the configuration."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-shadow-5": {
       "id": "b-ts-se-shadow-5",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "A flat tools.ts must never exist beside the folder"
       },
@@ -126,23 +125,23 @@
         {
           "insert": "Because the file form is checked first, a stray flat tools.ts would silently shadow the folder: the kernel would resolve it, register whatever it declared, and the folder's roster would simply never load. There is no error and no warning at the registry — the surface would just be wrong, and the first symptom would be a model that cannot find a tool the code plainly defines. The rule is therefore absolute rather than stylistic: one form, and it is the folder."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-dryrun-6": {
       "id": "b-ts-se-dryrun-6",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "At registry boot the kernel dry-runs the registration function to harvest the bundle's tool allowlist. It calls the function with a stub registrar whose registerTool only records names and whose hook installer does nothing, and — the part that shapes the code — with no runtime at all, so the runtime parameter is undefined. No session exists at that point, and none could: the allowlist has to be known before any spawn."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-dryrun-defer-7": {
       "id": "b-ts-se-dryrun-defer-7",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "Registration is side-effect-free, and the runtime lookup is deferred"
       },
@@ -164,12 +163,12 @@
         {
           "insert": " is called inside each tool's execute rather than once at registration: it defers \"is a runtime bound?\" to call time, where the answer is yes, and fails loudly there if the harness somehow bound none. Checking at registration would fail every boot."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-bind-8": {
       "id": "b-ts-se-bind-8",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -189,12 +188,12 @@
         {
           "insert": ". Each runtime method resolves which layout session it belongs to internally, through the kernel run context, so the catalog sidecar stays a thin declaration-and-dispatch layer with no session knowledge of its own. The seam therefore needs exactly three things: a path-stable, import-inert entry point; the runtime interface as the contract; and service-side implementations behind it."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-principle-9": {
       "id": "b-ts-se-principle-9",
-      "flavour": "decision",
-      "children": [],
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "The catalog registers what the service defines"
@@ -203,12 +202,12 @@
         {
           "insert": "No tool declares anything on the catalog side. Every descriptor — gesture or workflow call — carries its own name, label, description, and parameter schema service-side, and the catalog forwards them verbatim. The alternative, per-tool files on the catalog side, would put half of each tool's truth in the swappable bundle and half behind the runtime interface, and every schema change would then be a two-file edit across the seam. Keeping declarations service-side means the bundle can be swapped without the tool surface moving."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-loops-heading-10": {
       "id": "b-ts-se-loops-heading-10",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -216,23 +215,23 @@
         {
           "insert": "Two loops and a result hook"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-loops-body-11": {
       "id": "b-ts-se-loops-body-11",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Registration is two loops over two rosters, in the order the model meets the tools: the gestures first, then the workflow calls. A gesture's execute dispatches by name into the runtime's single operation entry point; a workflow tool invokes itself against the runtime, and finalize alone carries the flag that ends the run. Both paths convert their result into the kernel's content-block shape, lifting any rendered PNGs into image blocks. One sanctioned result hook mirrors a tool's error bit onto the persisted message, overriding only that bit and leaving the executed result's content and details untouched."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-loops-code-12": {
       "id": "b-ts-se-loops-code-12",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -240,12 +239,12 @@
         {
           "insert": "service/session/tools/\n  operations/   gesture descriptors  → operationTools\n  workflow/     everything else      → workflowTools\n  runtime.ts    the LayoutToolRuntime contract\n  create-runtime.ts  the binding the store hands the kernel\n\ncatalog/layout-editor/tools/\n  index.ts      the two registration loops + the result hook\n  runtime.ts    requireRuntime, toToolResult\n\nboot     dry-run registration, runtime === undefined → allowlist\nspawn    createToolRuntime(...) bound into the kernel config\ncall     requireRuntime(runtime).operation(name, params)"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-invariants-heading-13": {
       "id": "b-ts-se-invariants-heading-13",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -253,12 +252,12 @@
         {
           "insert": "The invariants"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-inv-order-14": {
       "id": "b-ts-se-inv-order-14",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "Registration order is pinned"
       },
@@ -279,23 +278,23 @@
         {
           "insert": " asserts that exact sequence by driving registration through a recording registrar, and asserts two things no single tool file can show: that every root schema is a sealed object, and that no mutator declares a viewing argument, which lives on look alone. Order is not cosmetic — it is the order the model reads the surface in, and the surface it is given at boot."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-inv-inert-15": {
       "id": "b-ts-se-inv-inert-15",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The entry point keeps both its default and its named export, because the kernel accepts either and a rename on one side would break discovery silently. It also stays import-inert: importing it declares tools and installs a hook, and does nothing else. The dry-run already imports the full descriptor tree, so keeping the entry point inert costs nothing at boot and is what makes the harvest safe."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-inv-single-source-16": {
       "id": "b-ts-se-inv-single-source-16",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -329,12 +328,12 @@
         {
           "insert": " plays the same role for the calls that are not gestures. A tool added to a group module is not on the surface until it is listed in its roster, and the tests read the rosters too, so a roster edit propagates rather than drifts."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-inv-guard-17": {
       "id": "b-ts-se-inv-guard-17",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "The capabilities guard runs both ways"
       },
@@ -355,12 +354,12 @@
         {
           "insert": " keys hand-written consequence prose by tool name and checks completeness in both directions at import: a registered tool with no prose throws, and prose for a tool nobody registers throws too. Documentation that has drifted from the surface is a build failure rather than a lie the model reads — which matters more here than anywhere else, because this text is what the model believes its tools do."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-inv-cycle-18": {
       "id": "b-ts-se-inv-cycle-18",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "The store-to-tools cycle, and the shape that keeps it safe"
       },
@@ -368,12 +367,12 @@
         {
           "insert": "There is a cycle between the session store and the tool surface, and it is deliberate. The store value-imports the runtime binding, because it is what hands the kernel a bound runtime at spawn; the tool files import the session only as a type, because they need its shape and never construct one. A type-only edge carries no runtime dependency, so the cycle never resolves at load time. Any change that turns one of those type imports into a value import turns a compile-time relationship into a load-order problem."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-fingerprint-heading-19": {
       "id": "b-ts-se-fingerprint-heading-19",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -381,12 +380,12 @@
         {
           "insert": "The surface hash and run comparability"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-fingerprint-body-20": {
       "id": "b-ts-se-fingerprint-body-20",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -406,12 +405,12 @@
         {
           "insert": ". Its purpose is negative: a roster change that somehow skipped the prompt would otherwise look comparable to the run before it. Because the hash is over file contents, it also moves on a pure reorganization that leaves the wire surface identical — the first run after one reads as surface-incomparable, and that is the intended conservative answer rather than a defect."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-se-cap-21": {
       "id": "b-ts-se-cap-21",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -431,7 +430,8 @@
         {
           "insert": " and threaded into the spawn. It is advisory: the cap is prose the model reads, not something registration or dispatch enforces, and a multi-call message is simply that many independent trips through the same pipeline. The default allowance of one means every call rides alone, and the prompt's own guidance is that a message may be shared only among genuinely independent gestures planned from the same board state — with look and finalize always alone. What makes chaining within a turn workable at a wider allowance is the routing contract: every edge gesture returns a fresh numbered polyline, so a second correction aims at the result just read rather than at a digest the first correction made stale."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

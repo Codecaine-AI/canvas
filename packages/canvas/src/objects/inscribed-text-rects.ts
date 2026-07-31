@@ -6,13 +6,6 @@ import type {
   InteractiveCanvasObjectType,
 } from "../state/schema";
 import type { LocalRect } from "./text-slots";
-import { CENTER_TEXT_INSET_PX } from "./text-slot-constants";
-import {
-  OFF_PAGE_CONNECTOR_GEOMETRY,
-  MANUAL_INPUT_GEOMETRY,
-  PARALLELOGRAM_SKEW_RATIO,
-  TRAPEZOID_TOP_INSET_RATIO,
-} from "./shape-geometry-constants";
 
 export type InscribedTextRectResolver = (object: InteractiveCanvasObject) => LocalRect;
 
@@ -51,17 +44,6 @@ function triangleTextRect(object: InteractiveCanvasObject): LocalRect {
   };
 }
 
-function pillTextRect(object: InteractiveCanvasObject): LocalRect {
-  const { width, height } = object.geometry;
-  const xInset = Math.max(CENTER_TEXT_INSET_PX.x, height / 2);
-  return {
-    x: xInset,
-    y: CENTER_TEXT_INSET_PX.y,
-    width: Math.max(0, width - xInset * 2),
-    height: Math.max(0, height - CENTER_TEXT_INSET_PX.y * 2),
-  };
-}
-
 function rectFromRanges(x1: number, x2: number, y1: number, y2: number): LocalRect {
   return {
     x: x1,
@@ -77,87 +59,10 @@ const INSCRIBED_TEXT_RECTS_BY_TYPE: Partial<
   decision: diamondTextRect,
   ellipse: ellipseTextRect,
   triangle: triangleTextRect,
-  pill: pillTextRect,
   "predefined-process": (object) => {
     const { width, height } = object.geometry;
     const xInset = width * 0.047 + 10;
     return rectFromRanges(xInset, width - xInset, 12, height - 12);
-  },
-  star: (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.27, width * 0.73, height * 0.42, height * 0.72);
-  },
-  database: (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.06, width * 0.94, height * 0.34, height * 0.8);
-  },
-  document: (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.09, width * 0.91, height * 0.06, height * 0.78);
-  },
-  "document-stack": (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.1, width * 0.96, height * 0.1, height * 0.78);
-  },
-  folder: (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.06, width * 0.94, height * 0.3, height * 0.92);
-  },
-  "cylinder-horizontal": (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.2, width * 0.8, height * 0.12, height * 0.88);
-  },
-  "page-corner": (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.05, width * 0.94, height * 0.26, height * 0.94);
-  },
-  "internal-storage": (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.15 + 8, width * 0.94, height * 0.15 + 8, height * 0.92);
-  },
-  parallelogram: (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(
-      width * PARALLELOGRAM_SKEW_RATIO + 8,
-      width * (1 - PARALLELOGRAM_SKEW_RATIO) - 8,
-      height * 0.06,
-      height * 0.94,
-    );
-  },
-  trapezoid: (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(
-      width * TRAPEZOID_TOP_INSET_RATIO + 8,
-      width * (1 - TRAPEZOID_TOP_INSET_RATIO) - 8,
-      height * 0.14,
-      height * 0.92,
-    );
-  },
-  hexagon: (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.22 + 8, width * 0.78 - 8, height * 0.1, height * 0.9);
-  },
-  "off-page-connector": (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(
-      width * 0.08,
-      width * 0.92,
-      height * 0.06,
-      height * (OFF_PAGE_CONNECTOR_GEOMETRY.shoulderRatio - 0.02),
-    );
-  },
-  "manual-input": (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(
-      width * 0.08,
-      width * 0.92,
-      height * MANUAL_INPUT_GEOMETRY.dropRatio + 8,
-      height * 0.92,
-    );
-  },
-  pentagon: (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.22, width * 0.78, height * 0.24, height * 0.88);
   },
   octagon: (object) => {
     const { width, height } = object.geometry;
@@ -171,7 +76,6 @@ const INSCRIBED_TEXT_RECTS_BY_STYLE_SHAPE: Partial<
   diamond: diamondTextRect,
   ellipse: ellipseTextRect,
   triangle: triangleTextRect,
-  pill: pillTextRect,
 };
 
 /**
@@ -180,8 +84,6 @@ const INSCRIBED_TEXT_RECTS_BY_STYLE_SHAPE: Partial<
  * inset exactly.
  */
 export function inscribedTextRect(object: InteractiveCanvasObject): LocalRect | null {
-  if (object.type === "pill") return pillTextRect(object);
-
   const styleShape = object.style?.shape;
   const styleResolver =
     styleShape === undefined ? undefined : INSCRIBED_TEXT_RECTS_BY_STYLE_SHAPE[styleShape];

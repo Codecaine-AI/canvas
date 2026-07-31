@@ -7,36 +7,16 @@ export type InteractiveCanvasObjectType =
   | "process"
   | "decision"
   | "sticky"
-  // D16 — expanded vocabulary for the reference diagrams (checkpoint 5):
-  | "document"
-  | "database"
   // W2 — FigJam sections + V2 Flow shape vocabulary:
   | "section"
-  | "pill"
   | "arrow-shape"
   | "predefined-process"
-  // W5 — FigJam parity shape set (Wave A): 19 native Basic/Flowchart primitives
-  // plus the icon-glyph family, per docs/10-system-design/20-figjam-parity's
-  // "Missing shape specs" and the Wave A implementation brief.
+  // The universal shape core (operational-maps surface trim): eight placeable
+  // marks readable without a legend, plus section/sticky/icon. Icons carry the
+  // semantic vocabulary (objects/shapes/icon/icon-glyphs.ts roster).
   | "ellipse"
   | "triangle"
-  | "parallelogram"
-  | "pentagon"
   | "octagon"
-  | "star"
-  | "plus"
-  | "chevron"
-  | "folder"
-  | "document-stack"
-  | "off-page-connector"
-  | "trapezoid"
-  | "manual-input"
-  | "hexagon"
-  | "internal-storage"
-  | "or-junction"
-  | "summing-junction"
-  | "cylinder-horizontal"
-  | "page-corner"
   | "icon";
 
 // (The legacy color enums — InteractiveCanvasTone, CanvasPaletteToken,
@@ -48,51 +28,55 @@ export type InteractiveCanvasObjectType =
  * Directional field shared by every direction-aware shape (W5). Individual
  * types only accept a subset of these 4 values — see `direction` on
  * `InteractiveCanvasObject` and the per-type soft-default validation in
- * `validateInteractiveCanvasDocument` (arrow-shape/parallelogram/chevron:
- * "left" | "right", default "right"; triangle: "up" | "down", default "up").
+ * `validateInteractiveCanvasDocument` (arrow-shape: "left" | "right",
+ * default "right"; triangle: "up" | "down", default "up").
  */
 export type CanvasShapeDirection = "left" | "right" | "up" | "down";
 
 /**
- * Chevron/arrow-shape pointing direction (W2). Kept as a back-compat alias of
- * the generalized `CanvasShapeDirection` (W5) for any external reference to
+ * Arrow-shape pointing direction (W2). Kept as a back-compat alias of the
+ * generalized `CanvasShapeDirection` (W5) for any external reference to
  * this name; arrow-shape's own accepted values are still just left|right.
  */
 export type CanvasArrowShapeDirection = CanvasShapeDirection;
 
 /**
- * Icon glyph selector for `type: "icon"` (W5) — the Advanced-tier FigJam
- * component family, 26 stroke-outline glyphs rendered in a 24x24 viewBox
- * with the label below. Exact ids per the Wave A
- * implementation brief; Wave B2 owns the actual glyph-path registry.
+ * Icon glyph selector for `type: "icon"` — the operational-map glyph corpus,
+ * 30 stroke-outline glyphs rendered with the label below. Ids mirror
+ * ICON_GLYPH_IDS in objects/shapes/icon/icon-glyphs.ts (roster order);
+ * the glyph-path registry lives beside the icon object def.
  */
 export const CANVAS_ICON_GLYPHS = [
+  "agent",
+  "model",
+  "human",
+  "orchestrator",
+  "memory",
+  "knowledge",
+  "queue",
+  "server",
+  "terminal",
+  "config",
+  "api",
+  "message",
+  "send",
+  "event",
+  "guardrail",
+  "monitor",
+  "judge",
+  "document",
+  "documents",
   "activity",
   "archive",
   "key",
-  "chat",
-  "cloud",
-  "cpu",
-  "database",
-  "display",
-  "mail",
-  "file",
-  "code",
-  "bolt",
-  "pin",
-  "phone",
-  "package",
   "coin",
-  "shield",
-  "send",
-  "server",
-  "cube",
-  "gear",
-  "drive",
-  "terminal",
-  "person",
-  "wallet",
-  "globe",
+  "package",
+  "voice",
+  "search",
+  "tool",
+  "wait",
+  "lock",
+  "eval",
 ] as const;
 
 export type CanvasIconGlyph = (typeof CANVAS_ICON_GLYPHS)[number];

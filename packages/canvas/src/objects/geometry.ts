@@ -86,29 +86,6 @@ function diamondPoints(bounds: CanvasBounds): CanvasPoint[] {
   ];
 }
 
-/** Pill/stadium outline approximated as a polygon: two half-circle fans (8 segments each) joined by the straight sides. Dense enough for anchor/nearest-point purposes. */
-function pillPoints(bounds: CanvasBounds): CanvasPoint[] {
-  const radius = Math.min(bounds.height, bounds.width) / 2;
-  const cy = bounds.y + bounds.height / 2;
-  const leftCx = bounds.x + radius;
-  const rightCx = bounds.x + bounds.width - radius;
-  if (rightCx <= leftCx || radius <= 0) return rectPoints(bounds);
-
-  const points: CanvasPoint[] = [];
-  const segments = 8;
-  // Right semicircle: -90deg to +90deg (through 0deg, i.e. the right side).
-  for (let i = 0; i <= segments; i += 1) {
-    const angle = -Math.PI / 2 + (Math.PI * i) / segments;
-    points.push({ x: rightCx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) });
-  }
-  // Left semicircle: 90deg to 270deg.
-  for (let i = 0; i <= segments; i += 1) {
-    const angle = Math.PI / 2 + (Math.PI * i) / segments;
-    points.push({ x: leftCx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) });
-  }
-  return points;
-}
-
 // ---------------------------------------------------------------------------
 // W5 — FigJam parity shape set (Wave A). Everything below this banner and
 // down to arrowShapePoints (upstream-derived, unchanged) is NEW code written
@@ -117,7 +94,7 @@ function pillPoints(bounds: CanvasBounds): CanvasPoint[] {
 // shape specs" section.
 // ---------------------------------------------------------------------------
 
-/** Ellipse outline as a dense parametric polygon (same segment-fan style as pillPoints), true axis-aligned ellipse inscribed in the bounds. */
+/** Ellipse outline as a dense parametric polygon (segment fan), true axis-aligned ellipse inscribed in the bounds. */
 export function ellipsePoints(bounds: CanvasBounds): CanvasPoint[] {
   const rx = bounds.width / 2;
   const ry = bounds.height / 2;
@@ -151,29 +128,6 @@ export function trianglePoints(bounds: CanvasBounds, direction: "up" | "down"): 
   ];
 }
 
-/** Fraction of width the top/bottom edge shifts for a skewed parallelogram (Wave A brief: ~18%, flagged approximate pending a pixel-reference check). */
-const PARALLELOGRAM_SKEW_RATIO = 0.18;
-
-/** Skewed quadrilateral. "right": top edge shifted right relative to the bottom. "left": horizontally mirrored. */
-export function parallelogramPoints(bounds: CanvasBounds, direction: "left" | "right"): CanvasPoint[] {
-  const { x, y, width, height } = bounds;
-  const skew = width * PARALLELOGRAM_SKEW_RATIO;
-  if (direction === "left") {
-    return [
-      { x, y },
-      { x: x + width - skew, y },
-      { x: x + width, y: y + height },
-      { x: x + skew, y: y + height },
-    ];
-  }
-  return [
-    { x: x + skew, y },
-    { x: x + width, y },
-    { x: x + width - skew, y: y + height },
-    { x, y: y + height },
-  ];
-}
-
 /** N-point regular polygon centered in `bounds`, independently scaled on x/y to fill a non-square bbox. `startAngle` in radians, measured from the +x axis, matching standard trig convention (angle 0 = due "east/right", -PI/2 = "up"). */
 function regularPolygonPoints(bounds: CanvasBounds, sides: number, startAngle: number): CanvasPoint[] {
   const cx = bounds.x + bounds.width / 2;
@@ -188,136 +142,9 @@ function regularPolygonPoints(bounds: CanvasBounds, sides: number, startAngle: n
   return points;
 }
 
-/** Pentagon: 5-point regular polygon, point-up (first vertex straight up from center). */
-export function pentagonPoints(bounds: CanvasBounds): CanvasPoint[] {
-  return regularPolygonPoints(bounds, 5, -Math.PI / 2);
-}
-
 /** Octagon: 8-point regular polygon, flat-top orientation (no vertex due north/south — the first edge is horizontal across the top). */
 export function octagonPoints(bounds: CanvasBounds): CanvasPoint[] {
   return regularPolygonPoints(bounds, 8, -Math.PI / 2 + Math.PI / 8);
-}
-
-/** Inner-radius fraction of a star's points relative to its outer radius (Wave A brief: ~0.4x, flagged approximate pending a pixel-reference check). */
-const STAR_INNER_RADIUS_RATIO = 0.4;
-
-/** 5-point star: 10 alternating outer/inner vertices, outer radius touching the bbox edge, point-up. */
-export function starPoints(bounds: CanvasBounds): CanvasPoint[] {
-  const cx = bounds.x + bounds.width / 2;
-  const cy = bounds.y + bounds.height / 2;
-  const rx = bounds.width / 2;
-  const ry = bounds.height / 2;
-  const points: CanvasPoint[] = [];
-  const spikes = 5;
-  const totalVertices = spikes * 2;
-  for (let i = 0; i < totalVertices; i += 1) {
-    const angle = -Math.PI / 2 + (Math.PI * i) / spikes;
-    const scale = i % 2 === 0 ? 1 : STAR_INNER_RADIUS_RATIO;
-    points.push({ x: cx + rx * scale * Math.cos(angle), y: cy + ry * scale * Math.sin(angle) });
-  }
-  return points;
-}
-
-/** Fraction of the smaller bbox dimension used as the plus/cross bar thickness (Wave A brief: ~1/3). */
-const PLUS_BAR_THICKNESS_RATIO = 1 / 3;
-
-/** 12-point cross/plus polygon: a horizontal bar and vertical bar of equal thickness crossing at the object's center. */
-export function plusPoints(bounds: CanvasBounds): CanvasPoint[] {
-  const { x, y, width, height } = bounds;
-  const thickness = Math.min(width, height) * PLUS_BAR_THICKNESS_RATIO;
-  const cx = x + width / 2;
-  const cy = y + height / 2;
-  const left = cx - thickness / 2;
-  const right = cx + thickness / 2;
-  const top = cy - thickness / 2;
-  const bottom = cy + thickness / 2;
-  return [
-    { x: left, y },
-    { x: right, y },
-    { x: right, y: top },
-    { x: x + width, y: top },
-    { x: x + width, y: bottom },
-    { x: right, y: bottom },
-    { x: right, y: y + height },
-    { x: left, y: y + height },
-    { x: left, y: bottom },
-    { x, y: bottom },
-    { x, y: top },
-    { x: left, y: top },
-  ];
-}
-
-/**
- * Fat chevron (Figma CHEVRON, distinct from arrow-shape's thinner 7-point
- * sliver) — 6-point "fast-forward"-style pointer: a notched tail (concave V
- * cut into the back edge) and a pointed head (V point at the front), per the
- * Wave A brief's "blocky fast-forward pointer" description. `direction`
- * mirrors arrow-shape's left|right (default "right").
- */
-export function chevronPoints(bounds: CanvasBounds, direction: "left" | "right"): CanvasPoint[] {
-  const { x, y, width, height } = bounds;
-  const notchWidth = width * 0.25;
-  if (direction === "left") {
-    return [
-      { x: x + width, y },
-      { x: x + notchWidth, y },
-      { x, y: y + height / 2 },
-      { x: x + notchWidth, y: y + height },
-      { x: x + width, y: y + height },
-      { x: x + width - notchWidth, y: y + height / 2 },
-    ];
-  }
-  return [
-    { x, y },
-    { x: x + width - notchWidth, y },
-    { x: x + width, y: y + height / 2 },
-    { x: x + width - notchWidth, y: y + height },
-    { x, y: y + height },
-    { x: x + notchWidth, y: y + height / 2 },
-  ];
-}
-
-/** Off-page connector: downward-pointing pentagon (Figma's own `SHIELD` shapeType — see the parity doc's naming note). Exact vertices per the Wave A brief. */
-export function offPageConnectorPoints(bounds: CanvasBounds): CanvasPoint[] {
-  const { x, y, width, height } = bounds;
-  return [
-    { x, y },
-    { x: x + width, y },
-    { x: x + width, y: y + height * 0.6 },
-    { x: x + width / 2, y: y + height },
-    { x, y: y + height * 0.6 },
-  ];
-}
-
-/** Fraction each top corner insets inward for a trapezoid (Wave A brief: 20% each side). */
-const TRAPEZOID_TOP_INSET_RATIO = 0.2;
-
-/** Trapezoid: wider bottom edge, narrower top edge, symmetric about the vertical center line. */
-export function trapezoidPoints(bounds: CanvasBounds): CanvasPoint[] {
-  const { x, y, width, height } = bounds;
-  const inset = width * TRAPEZOID_TOP_INSET_RATIO;
-  return [
-    { x: x + inset, y },
-    { x: x + width - inset, y },
-    { x: x + width, y: y + height },
-    { x, y: y + height },
-  ];
-}
-
-/** Manual input: rectangle with a slanted top edge (top-left higher than top-right). Exact vertices per the Wave A brief. */
-export function manualInputPoints(bounds: CanvasBounds): CanvasPoint[] {
-  const { x, y, width, height } = bounds;
-  return [
-    { x, y: y + height * 0.25 },
-    { x: x + width, y },
-    { x: x + width, y: y + height },
-    { x, y: y + height },
-  ];
-}
-
-/** Hexagon: 6-point regular hexagon, flat-top orientation (flowchart "preparation" symbol convention), independently x/y-scaled to fill the bbox. */
-export function hexagonPoints(bounds: CanvasBounds): CanvasPoint[] {
-  return regularPolygonPoints(bounds, 6, 0);
 }
 
 /**
@@ -396,7 +223,7 @@ export const DIAMOND_OUTLINE: OutlineSpec = { kind: "polygon", points: diamondPo
 
 /**
  * Direction-aware: `object.direction` is up/down for triangle and left/right
- * for arrow-shape/chevron/parallelogram (validated in schema.ts's
+ * for arrow-shape (validated in schema.ts's
  * validateInteractiveCanvasDocument); the `=== "down"` / `=== "left"` checks
  * narrow it to the 2-value subset each polygon builder expects.
  */
@@ -405,88 +232,34 @@ export const TRIANGLE_OUTLINE: OutlineSpec = {
   points: (bounds, object) => trianglePoints(bounds, object.direction === "down" ? "down" : "up"),
 };
 
-export const PILL_OUTLINE: OutlineSpec = { kind: "polygon", points: pillPoints };
-
 export const ARROW_SHAPE_OUTLINE: OutlineSpec = {
   kind: "polygon",
   points: (bounds, object) => arrowShapePoints(bounds, object.direction === "left" ? "left" : "right"),
 };
 
-export const PARALLELOGRAM_OUTLINE: OutlineSpec = {
-  kind: "polygon",
-  points: (bounds, object) =>
-    parallelogramPoints(bounds, object.direction === "left" ? "left" : "right"),
-};
-
-export const PENTAGON_OUTLINE: OutlineSpec = { kind: "polygon", points: pentagonPoints };
-
 export const OCTAGON_OUTLINE: OutlineSpec = { kind: "polygon", points: octagonPoints };
 
-export const STAR_OUTLINE: OutlineSpec = { kind: "polygon", points: starPoints };
-
-export const PLUS_OUTLINE: OutlineSpec = { kind: "polygon", points: plusPoints };
-
-export const CHEVRON_OUTLINE: OutlineSpec = {
-  kind: "polygon",
-  points: (bounds, object) => chevronPoints(bounds, object.direction === "left" ? "left" : "right"),
-};
-
-export const OFF_PAGE_CONNECTOR_OUTLINE: OutlineSpec = {
-  kind: "polygon",
-  points: offPageConnectorPoints,
-};
-
-export const TRAPEZOID_OUTLINE: OutlineSpec = { kind: "polygon", points: trapezoidPoints };
-
-export const MANUAL_INPUT_OUTLINE: OutlineSpec = { kind: "polygon", points: manualInputPoints };
-
-export const HEXAGON_OUTLINE: OutlineSpec = { kind: "polygon", points: hexagonPoints };
-
-/** Or-junction / summing-junction: always circular/compact — the +/x overlay glyph is a rendering nuance, not part of the connection outline. Deliberately the SAME spec object as ELLIPSE_OUTLINE (junctionPoints === ellipsePoints before P3). */
-export const JUNCTION_OUTLINE: OutlineSpec = ELLIPSE_OUTLINE;
-
 /**
- * True-outline dispatch by object TYPE (16 keys). Every other
+ * True-outline dispatch by object TYPE. Every other
  * InteractiveCanvasObjectType falls back through OUTLINES_BY_STYLE_SHAPE to
- * BBOX_OUTLINE.
- *
- * W5 (Wave A) set the true-outline tier per the implementation brief's
- * per-type "outline tier" column. Internal-storage is TRUE-tier too but its
- * outline IS a plain rect (interior rule lines don't change the outline), so
- * it stays on the bbox default. folder/document-stack/cylinder-horizontal/
- * page-corner/icon are intentionally NOT here — the brief marks them
- * bbox-fallback, same tier as document: corner radius
- * (and interior detailing) doesn't change where a line from the center
- * crosses the border for any of our practical shape sizes.
+ * BBOX_OUTLINE. Icon is intentionally NOT here — its connection outline is
+ * the plain box (bbox fallback, same tier as sticky/section).
  */
 export const OUTLINES_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, OutlineSpec>> = {
   "arrow-shape": ARROW_SHAPE_OUTLINE,
-  pill: PILL_OUTLINE,
   ellipse: ELLIPSE_OUTLINE,
   triangle: TRIANGLE_OUTLINE,
-  parallelogram: PARALLELOGRAM_OUTLINE,
-  pentagon: PENTAGON_OUTLINE,
   octagon: OCTAGON_OUTLINE,
-  star: STAR_OUTLINE,
-  plus: PLUS_OUTLINE,
-  chevron: CHEVRON_OUTLINE,
-  "off-page-connector": OFF_PAGE_CONNECTOR_OUTLINE,
-  trapezoid: TRAPEZOID_OUTLINE,
-  "manual-input": MANUAL_INPUT_OUTLINE,
-  hexagon: HEXAGON_OUTLINE,
-  "or-junction": JUNCTION_OUTLINE,
-  "summing-junction": JUNCTION_OUTLINE,
 };
 
 /**
- * Secondary dispatch by `style.shape` — ONLY pill/diamond/ellipse, exactly
- * the three the pre-P3 outlineShapeFor() switch consulted style for (a
+ * Secondary dispatch by `style.shape` — ONLY diamond/ellipse, exactly
+ * the pair the pre-P3 outlineShapeFor() switch consulted style for (a
  * pre-W5 type like plain "rectangle"/"process" can carry a shape override).
  */
 export const OUTLINES_BY_STYLE_SHAPE: Partial<
   Record<NonNullable<CanvasObjectStyle["shape"]>, OutlineSpec>
 > = {
-  pill: PILL_OUTLINE,
   diamond: DIAMOND_OUTLINE,
   ellipse: ELLIPSE_OUTLINE,
 };
@@ -497,15 +270,13 @@ export const OUTLINES_BY_STYLE_SHAPE: Partial<
  * connection geometry is byte-identical (rationalizing dispatch is P4):
  *
  *   1. `type === "arrow-shape"` wins over everything;
- *   2. `type === "pill"` wins over a mismatched diamond/ellipse style
- *      (the old switch's pill check preceded the style-diamond check);
- *   3. a pill/diamond/ellipse `style.shape` override wins over the
+ *   2. a diamond/ellipse `style.shape` override wins over the
  *      remaining TYPE checks (the old switch's style checks sat ABOVE the
  *      W5 type checks — e.g. `type: "triangle"` + `style.shape: "diamond"`
  *      resolves DIAMOND, while `type: "process"` + `style.shape:
  *      "triangle"` stays BBOX because triangle is never a style key);
- *   4. the type table;
- *   5. bbox fallback.
+ *   3. the type table;
+ *   4. bbox fallback.
  *
  * NOTE this is deliberately NOT `objectDefFor`'s render-shape dispatch —
  * hit-testing (D16) and connection geometry stay consistent with each other
@@ -514,7 +285,6 @@ export const OUTLINES_BY_STYLE_SHAPE: Partial<
  */
 export function outlineSpecFor(object: InteractiveCanvasObject): OutlineSpec {
   if (object.type === "arrow-shape") return ARROW_SHAPE_OUTLINE;
-  if (object.type === "pill") return PILL_OUTLINE;
   const styleShape = object.style?.shape;
   const styleSpec = styleShape === undefined ? undefined : OUTLINES_BY_STYLE_SHAPE[styleShape];
   if (styleSpec) return styleSpec;
@@ -532,7 +302,7 @@ export function outlinePolygonForSpec(
   return rectPoints(bounds);
 }
 
-/** Closed outline polygon for `object`, in its real shape where we model one (rect/pill/diamond/arrow-shape/the W5 FigJam parity set), falling back to the axis-aligned bounds rect otherwise. */
+/** Closed outline polygon for `object`, in its real shape where we model one (rect/diamond/ellipse/triangle/octagon/arrow-shape), falling back to the axis-aligned bounds rect otherwise. */
 export function outlinePolygon(object: InteractiveCanvasObject): CanvasPoint[] {
   return outlinePolygonForSpec(outlineSpecFor(object), connectionBoundsForObject(object), object);
 }

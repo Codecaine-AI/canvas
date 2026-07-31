@@ -1,0 +1,739 @@
+{
+  "axis": "sf",
+  "scenario": "agent-session-orchestration",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 4,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The platform runs long-lived AI agent sessions through a shared control plane.",
+        "brief_evidence": "“how our platform runs long-lived AI agent sessions through a shared control plane”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstructed purpose is “Long-lived Agent Session Orchestration,” and it identifies a Session API, Session scheduler, Runner host, and Turn orchestrator.",
+        "note": "The long-lived session domain and orchestration purpose survive, but the shared-control-plane boundary is not explicitly recovered."
+      },
+      {
+        "brief_element": "A client opens a session at the API tier.",
+        "brief_evidence": "“A client opens a session at the API tier”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Session API” as the API admission point, but no client-to-API session-opening edge is reported.",
+        "note": "The API entry component is clear, but the initiating client action is not shown."
+      },
+      {
+        "brief_element": "The API tier authenticates the user.",
+        "brief_evidence": "“which authenticates the user”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "Flow “API authentication” is ordered Session API → Auth + workspace on an arrow labeled “authenticate.”",
+        "note": "Authentication before placement is explicit."
+      },
+      {
+        "brief_element": "The API tier resolves the workspace and its quotas.",
+        "brief_evidence": "“resolves the workspace and its quotas”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "A component labeled “Auth + workspace” occurs before the scheduler, and a later quota region contains “Tree + workspace usage” and “Aggregate quota gate.”",
+        "note": "Workspace handling and quota concepts are present, but quota resolution at admission is not connected or ordered."
+      },
+      {
+        "brief_element": "The API tier asks the session scheduler for placement.",
+        "brief_evidence": "“asks the session scheduler for placement”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "Flow “Admission placement” is Auth + workspace → Session scheduler on a directed edge labeled “place.”",
+        "note": "The request for scheduler placement is directly communicated."
+      },
+      {
+        "brief_element": "The scheduler selects a runner host with enough capacity.",
+        "brief_evidence": "“The scheduler selects a runner host with enough capacity”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "Flow “Session host placement” is Session scheduler → Runner host on an edge labeled “place session.” No reconstruction entry states a capacity-selection condition.",
+        "note": "Placement onto a runner is recovered, but capacity-aware selection is missing."
+      },
+      {
+        "brief_element": "Placement honors workspace residency requirements.",
+        "brief_evidence": "“while honoring workspace residency”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for residency-aware scheduling.",
+        "note": "A critical placement constraint is absent."
+      },
+      {
+        "brief_element": "Placement honors workspace isolation requirements.",
+        "brief_evidence": "“and isolation requirements”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for isolation-aware scheduling.",
+        "note": "The scheduler's isolation constraint is absent."
+      },
+      {
+        "brief_element": "On the selected host, the orchestrator repeatedly assembles a model request.",
+        "brief_evidence": "“On that host, the orchestrator repeatedly assembles a model request”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "Runner host → Turn orchestrator is labeled “run,” and Turn orchestrator → Model + tools is labeled “turn loop.” No request-assembly step is reconstructed.",
+        "note": "Host-local iterative orchestration is suggested, but model-request assembly is not communicated."
+      },
+      {
+        "brief_element": "The model request includes system context.",
+        "brief_evidence": "“from system context”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for system context as a request input.",
+        "note": "One of the three request inputs is absent."
+      },
+      {
+        "brief_element": "The model request includes conversation history.",
+        "brief_evidence": "“conversation history”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for conversation history as a request input.",
+        "note": "Conversation history is not connected to request construction."
+      },
+      {
+        "brief_element": "The model request includes the permitted tool surface.",
+        "brief_evidence": "“and the permitted tool surface”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "The reconstruction has a combined “Model + tools” component, but no matching entry states that the orchestrator supplies a permission-scoped tool surface.",
+        "note": "Tool existence is visible, but tool authorization or scoping is not."
+      },
+      {
+        "brief_element": "The orchestrator calls the model.",
+        "brief_evidence": "“It calls the model”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The Turn orchestrator sends a directed “turn loop” edge to “Model + tools.”",
+        "note": "The model invocation is communicated at a combined model-and-tools abstraction."
+      },
+      {
+        "brief_element": "The orchestrator receives and executes tool calls.",
+        "brief_evidence": "“receives and executes tool calls”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "A “Model + tools” component is described as performing the model-and-tool portion of a turn, but no return edge or explicit tool-call execution sequence is reconstructed.",
+        "note": "Tool activity is named but its ownership and control path are ambiguous."
+      },
+      {
+        "brief_element": "The orchestrator appends tool results.",
+        "brief_evidence": "“appends their results”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for appending tool results to the turn context or history.",
+        "note": "The feedback from tools into subsequent inference is absent."
+      },
+      {
+        "brief_element": "The orchestrator begins the next turn after appending tool results.",
+        "brief_evidence": "“and begins the next turn”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The edge from Turn orchestrator to Model + tools is labeled “turn loop,” but no visible feedback edge or ordered next-turn route is reconstructed.",
+        "note": "Iteration is implied by the label, not operationally shown."
+      },
+      {
+        "brief_element": "The turn loop ends when the agent finishes.",
+        "brief_evidence": "“until the agent finishes”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for an agent-finished branch or terminal outcome.",
+        "note": "Normal completion is not modeled."
+      },
+      {
+        "brief_element": "The turn loop stops at a turn ceiling.",
+        "brief_evidence": "“or reaches its turn ... ceiling”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for a turn-count ceiling.",
+        "note": "One loop bound is absent."
+      },
+      {
+        "brief_element": "The turn loop stops at a token ceiling.",
+        "brief_evidence": "“or reaches its ... token ceiling”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies an “Aggregate quota gate” and tree/workspace usage, but no token-ceiling branch or turn-loop termination is shown.",
+        "note": "General quotas survive, but the token ceiling's effect on execution does not."
+      },
+      {
+        "brief_element": "Turn output streams to the client as it is produced.",
+        "brief_evidence": "“Turn output streams to the client as it is produced”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "“Model + tools” emits a green line labeled “stream tokens,” and “Live output” sends a directed “deliver” edge into “Client stream.”",
+        "note": "Live client delivery is the strongest fully visible execution behavior, although the model-to-live-output endpoint is slightly ambiguous."
+      },
+      {
+        "brief_element": "The identical output stream is committed to a durable event log.",
+        "brief_evidence": "“while the identical stream is committed to a durable event log”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "missed",
+        "reconstruction_evidence": "A “Durable event log” component is listed, but the reconstruction explicitly reports no connecting edges in its region and no stream-to-log flow.",
+        "note": "The required dual-write identity between client output and durable log is not communicated."
+      },
+      {
+        "brief_element": "Client disconnection does not terminate session work.",
+        "brief_evidence": "“A disconnected client does not terminate the work. The session continues”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for a disconnect branch or continued execution after disconnection.",
+        "note": "The core decoupling of execution lifetime from connection lifetime is absent."
+      },
+      {
+        "brief_element": "A returning client reattaches to the live stream.",
+        "brief_evidence": "“a returning client reattaches to the live stream”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies a “Streaming & reattachment” region, “Client stream,” and “Replay from ACK,” but reports no edge establishing reattachment.",
+        "note": "The concept is labeled but not recoverable as a control flow."
+      },
+      {
+        "brief_element": "Before reattaching, the client replays missed events from its last acknowledged position.",
+        "brief_evidence": "“after replaying missed events from its last acknowledged position”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A standalone component is labeled “Replay from ACK,” but the uncertainty list says its trigger, source, destination, and ordering are not shown.",
+        "note": "The ACK concept survives; missed-event replay and replay-before-live ordering do not."
+      },
+      {
+        "brief_element": "Every completed turn creates a durable checkpoint.",
+        "brief_evidence": "“Every completed turn also creates a durable checkpoint”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "A document component labeled “Turn checkpoint” appears in the event-log and checkpoint region, but no completion-to-checkpoint edge is reconstructed.",
+        "note": "The artifact is present without the every-turn creation rule."
+      },
+      {
+        "brief_element": "A checkpoint contains conversation state.",
+        "brief_evidence": "“containing conversation state”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for conversation state as checkpoint content.",
+        "note": "Checkpoint payload is unspecified."
+      },
+      {
+        "brief_element": "A checkpoint contains tool results.",
+        "brief_evidence": "“tool results”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for tool results as checkpoint content.",
+        "note": "Checkpoint payload is unspecified."
+      },
+      {
+        "brief_element": "A checkpoint contains workspace file state.",
+        "brief_evidence": "“and the workspace file state”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for workspace file state in checkpoints.",
+        "note": "A major recoverable-state boundary is absent."
+      },
+      {
+        "brief_element": "Checkpoints are content-addressed snapshots.",
+        "brief_evidence": "“The checkpoint is a content-addressed snapshot”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Turn checkpoint,” “Snapshot chain,” and “Shared content,” but does not recover content addressing.",
+        "note": "Snapshot storage is present, but its addressing model is not."
+      },
+      {
+        "brief_element": "Each snapshot's parent is the prior snapshot, producing immutable history.",
+        "brief_evidence": "“whose parent is the prior snapshot, producing an immutable history”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A store component is labeled “Snapshot chain,” but no parent edge or immutability rule is reconstructed.",
+        "note": "A chain is named without its parent relation or immutability semantics."
+      },
+      {
+        "brief_element": "Snapshots deduplicate unchanged content rather than rewriting a mutable copy.",
+        "brief_evidence": "“deduplicates unchanged content instead of rewriting a mutable copy”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The forking region contains “Shared content,” but the uncertainty list says no edge specifies what content is shared.",
+        "note": "Sharing is suggested, while deduplication and the non-mutable-copy constraint are not explicit."
+      },
+      {
+        "brief_element": "Idle sessions release their runners while retaining snapshot chains.",
+        "brief_evidence": "“Idle sessions ... release their runners but retain their snapshot chains”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A “Suspend + release” component and a “Snapshot chain” component are present, but no idle trigger or retention relationship connects them.",
+        "note": "Resource release is named; idle behavior and retained state are not shown together."
+      },
+      {
+        "brief_element": "Sessions suspended on demand release their runners while retaining snapshot chains.",
+        "brief_evidence": "“sessions suspended on demand release their runners but retain their snapshot chains”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“Suspend + release” is visible, but the recovery-region uncertainty states that no lines establish its relationship to rehydration or retained checkpoints.",
+        "note": "Suspension and release survive as labels, not as a complete state transition."
+      },
+      {
+        "brief_element": "A suspended session may resume on another host.",
+        "brief_evidence": "“Resume may occur on another host”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for cross-host resumption.",
+        "note": "Host mobility is absent."
+      },
+      {
+        "brief_element": "Resume rehydrates the latest snapshot before continuing.",
+        "brief_evidence": "“which rehydrates the latest snapshot before continuing”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A predefined process is labeled “Rehydrate latest checkpoint,” but no arrows establish that it occurs before resumed execution.",
+        "note": "The recovery operation is named, while its ordering and continuation path are missing."
+      },
+      {
+        "brief_element": "A heartbeat monitor detects crashed runners.",
+        "brief_evidence": "“A heartbeat monitor detects crashed runners”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A monitor component is labeled “Heartbeat + rescue,” but no runner-to-monitor or crash-detection edge is shown.",
+        "note": "Heartbeat rescue is recognizable, but detection ownership and trigger are ambiguous."
+      },
+      {
+        "brief_element": "After a runner crash, its capacity is returned to the scheduler.",
+        "brief_evidence": "“returns their capacity to the scheduler”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for returning failed-runner capacity to the scheduler.",
+        "note": "Scheduler capacity recovery is absent."
+      },
+      {
+        "brief_element": "Affected sessions are rescued from the last checkpoint.",
+        "brief_evidence": "“rescues affected sessions from the last checkpoint”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“Heartbeat + rescue” and “Rehydrate latest checkpoint” are co-located, but the uncertainty list says no ordered recovery flow connects them.",
+        "note": "The necessary concepts are visible without a recoverable failure route."
+      },
+      {
+        "brief_element": "Crash recovery replays at most the turn that was in flight.",
+        "brief_evidence": "“Recovery replays at most the turn that was in flight”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for the one-in-flight-turn replay bound.",
+        "note": "The recovery duplication boundary is absent."
+      },
+      {
+        "brief_element": "Every externally state-changing tool call carries an idempotency key.",
+        "brief_evidence": "“every tool call that can change external state carries an idempotency key”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for idempotency keys or externally state-changing tool calls.",
+        "note": "The principal duplicate-effect safeguard is missing."
+      },
+      {
+        "brief_element": "The idempotency key handles a tool call that completed before a crash.",
+        "brief_evidence": "“in case that call completed before the crash”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for post-crash uncertainty about previously completed tool calls.",
+        "note": "The rationale and failure case for idempotency are absent."
+      },
+      {
+        "brief_element": "Cancellation or interruption can arrive during a turn.",
+        "brief_evidence": "“Cancellation or interruption can also arrive during a turn”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A component labeled “Cancel / interrupt” appears in the cancellation region, but no edge places it during the active turn loop.",
+        "note": "The trigger is named without timing or attachment to execution."
+      },
+      {
+        "brief_element": "On cancellation, the orchestrator stops the model stream.",
+        "brief_evidence": "“The orchestrator stops the model stream”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A process is labeled “Stop stream + abandon calls,” but no arrow connects it to “Cancel / interrupt” or assigns it to the orchestrator.",
+        "note": "The action is readable, while trigger and ownership are not."
+      },
+      {
+        "brief_element": "On cancellation, the orchestrator abandons in-flight tool calls where possible.",
+        "brief_evidence": "“abandons in-flight tool calls where possible”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The process label “Stop stream + abandon calls” names abandonment, but does not identify in-flight tool calls or the conditional “where possible” behavior.",
+        "note": "The broad action survives, but its scope and degraded behavior do not."
+      },
+      {
+        "brief_element": "If termination cannot be confirmed, the uncertain tool-call outcome is recorded.",
+        "brief_evidence": "“records their uncertain outcome when it cannot confirm termination”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for recording an uncertain tool-call outcome.",
+        "note": "A critical cancellation failure outcome is absent."
+      },
+      {
+        "brief_element": "Cancellation commits a resumable checkpoint before releasing the runner.",
+        "brief_evidence": "“commits a resumable checkpoint before releasing the runner”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A “Resumable checkpoint” component is present, but the uncertainty list states that no arrows show whether cancellation produces it; no before-release ordering is recovered.",
+        "note": "The artifact survives, but the safety sequence does not."
+      },
+      {
+        "brief_element": "An agent may spawn child sessions for independent subtasks.",
+        "brief_evidence": "“An agent may spawn child sessions for independent subtasks”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A predefined process is labeled “Spawn scoped child,” but no relation to a parent agent or independent subtask is shown.",
+        "note": "Child spawning is explicit; parent ownership and purpose are not."
+      },
+      {
+        "brief_element": "Each child receives scoped context.",
+        "brief_evidence": "“Each child receives scoped context”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The process label “Spawn scoped child” suggests scoping, but no context artifact or assignment edge is reconstructed.",
+        "note": "Scoping is named but scoped context is not operationally communicated."
+      },
+      {
+        "brief_element": "Each child's budget is drawn from its parent's remaining allowance.",
+        "brief_evidence": "“a budget drawn from its parent's remaining allowance”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A coin component is labeled “Scoped child budget,” but the uncertainty list says no edge shows budget assignment or propagation direction.",
+        "note": "A child budget exists, but parent-derived accounting is absent."
+      },
+      {
+        "brief_element": "Child sessions run concurrently.",
+        "brief_evidence": "“runs concurrently”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for concurrent child execution.",
+        "note": "Concurrency semantics are absent."
+      },
+      {
+        "brief_element": "A child returns its result through the parent orchestrator.",
+        "brief_evidence": "“returns its result through the parent orchestrator”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for a child-to-parent result path.",
+        "note": "The child completion and integration path is absent."
+      },
+      {
+        "brief_element": "Cancellation propagates through the session tree.",
+        "brief_evidence": "“Cancellation ... propagate[s] through the session tree”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "The reconstruction identifies cancellation and child-session regions separately, but no matching propagation edge exists.",
+        "note": "Tree-wide cancellation behavior is not recoverable."
+      },
+      {
+        "brief_element": "Failure propagates through the session tree.",
+        "brief_evidence": "“and failure propagate through the session tree”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for failure propagation among parent and child sessions.",
+        "note": "Tree failure semantics are absent."
+      },
+      {
+        "brief_element": "A reaper terminates children that survive after their parent is gone.",
+        "brief_evidence": "“a reaper terminates any child that survives after its parent is gone”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "An “Orphan reaper” component is present, but the uncertainty list says no trigger condition is shown.",
+        "note": "The component's name suggests the behavior, but the parent-gone trigger and termination route are not explicit."
+      },
+      {
+        "brief_element": "Quota enforcement aggregates token spend across the session tree and workspace.",
+        "brief_evidence": "“aggregates token spend ... across the tree as well as across the workspace”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The quota region contains “Tree + workspace usage” and “Aggregate quota gate,” but no metric list or connecting edge is shown.",
+        "note": "Aggregation scope survives; token-spend accounting is not explicit."
+      },
+      {
+        "brief_element": "Quota enforcement aggregates wall-clock time across the session tree and workspace.",
+        "brief_evidence": "“wall-clock time ... across the tree as well as across the workspace”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“Tree + workspace usage” and “Aggregate quota gate” imply aggregate usage, but no reconstruction entry identifies wall-clock time.",
+        "note": "The specific quota dimension is missing."
+      },
+      {
+        "brief_element": "Quota enforcement aggregates tool-call counts across the session tree and workspace.",
+        "brief_evidence": "“tool-call counts ... across the tree as well as across the workspace”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Aggregate tree/workspace quota components are present, but no reconstruction entry identifies tool-call counts.",
+        "note": "The specific quota dimension is missing."
+      },
+      {
+        "brief_element": "Quota enforcement aggregates concurrent-session counts across the session tree and workspace.",
+        "brief_evidence": "“concurrent sessions across the tree as well as across the workspace”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Aggregate tree/workspace quota components are present, but no reconstruction entry identifies concurrent-session accounting.",
+        "note": "The scope is recognizable, but this capacity-related quota is unspecified."
+      },
+      {
+        "brief_element": "Exhausting an allowance pauses the affected session.",
+        "brief_evidence": "“Exhausting an allowance pauses the affected session”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "The uncertainty list states that no branch or arrow shows the quota threshold or denial outcome.",
+        "note": "The quota exhaustion outcome is absent."
+      },
+      {
+        "brief_element": "A paused quota-exhausted session waits for a user decision rather than being silently truncated.",
+        "brief_evidence": "“for a user decision instead of silently truncating its work”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A human component is labeled “User decision to resume,” but no edge connects quota exhaustion, pause, or resumption.",
+        "note": "Human intervention survives, but the pause-not-truncate guarantee does not."
+      },
+      {
+        "brief_element": "Held children remain accounted for while the parent waits.",
+        "brief_evidence": "“held children remain accounted for while the parent waits”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for accounting held children during a parent's quota pause.",
+        "note": "This anti-evasion accounting rule is absent."
+      },
+      {
+        "brief_element": "The event log records each request.",
+        "brief_evidence": "“The event log records each request”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "A “Durable event log” component exists, but no reconstruction entry specifies request records or a write edge.",
+        "note": "The log exists without its event schema."
+      },
+      {
+        "brief_element": "The event log records each model response.",
+        "brief_evidence": "“model response”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for model responses being written to the durable event log.",
+        "note": "The event type is absent."
+      },
+      {
+        "brief_element": "The event log records each tool call and result.",
+        "brief_evidence": "“tool call and result”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for tool calls and results being logged.",
+        "note": "A key forensic and recovery record is absent."
+      },
+      {
+        "brief_element": "The event log records each checkpoint reference.",
+        "brief_evidence": "“checkpoint reference”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "The event log and turn checkpoint are co-located, but no edge or reconstruction claim says checkpoint references are logged.",
+        "note": "Spatial grouping does not establish the record relationship."
+      },
+      {
+        "brief_element": "The event log records each budget decision.",
+        "brief_evidence": "“budget decision”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for budget decisions in the event log.",
+        "note": "The event type is absent."
+      },
+      {
+        "brief_element": "The event log records each lifecycle transition.",
+        "brief_evidence": "“and lifecycle transition”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for lifecycle transitions being logged.",
+        "note": "The event type is absent."
+      },
+      {
+        "brief_element": "The event log supports forensic reconstruction and replay.",
+        "brief_evidence": "“It supports forensic reconstruction and replay”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies a durable event log and a separate “Replay from ACK” component, but no relationship establishes forensic reconstruction or replay from the log.",
+        "note": "The pieces are named without the log's downstream responsibilities."
+      },
+      {
+        "brief_element": "The event log feeds usage metering.",
+        "brief_evidence": "“while feeding usage metering”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "A “Tree + workspace usage” component exists, but no edge from the durable event log is reconstructed.",
+        "note": "Metering exists as a concept, but its event-log source is missing."
+      },
+      {
+        "brief_element": "The event log feeds per-session cost accounting.",
+        "brief_evidence": "“and per-session cost accounting”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for per-session cost accounting.",
+        "note": "This event-log consumer is absent."
+      },
+      {
+        "brief_element": "Snapshot retention follows reachability.",
+        "brief_evidence": "“Snapshot retention follows reachability”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "An archive component is explicitly labeled “Reachability GC,” and the reconstruction constrains forking and recovery in checkpoint terms.",
+        "note": "The governing retention mechanism is directly named."
+      },
+      {
+        "brief_element": "Deleting a session makes its unreferenced snapshot chain eligible for collection.",
+        "brief_evidence": "“deleting a session makes its unreferenced chain eligible for collection”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“Reachability GC” and “Snapshot chain” are present, but no deletion trigger or eligibility edge is reconstructed.",
+        "note": "Collection by reachability is visible; deletion semantics are not."
+      },
+      {
+        "brief_element": "A snapshot retained by a fork remains alive.",
+        "brief_evidence": "“but a snapshot retained by a fork remains alive”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“Fork earlier checkpoint,” “Shared content,” and “Reachability GC” are grouped, but the uncertainty list says retention ownership is not specified.",
+        "note": "The relevant concepts survive without the keep-alive relationship."
+      },
+      {
+        "brief_element": "Forking from an earlier checkpoint creates a divergent history with its own future checkpoints.",
+        "brief_evidence": "“Forking from an earlier checkpoint creates a divergent history with its own future checkpoints”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A delegated process is labeled “Fork earlier checkpoint,” but no branch or separate future checkpoint chain is reconstructed.",
+        "note": "Fork origin is explicit; divergent future history is not."
+      },
+      {
+        "brief_element": "Forking does not duplicate shared content.",
+        "brief_evidence": "“without duplicating shared content”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A “Shared content” component appears beside the fork component, but no edge states that forked histories share rather than duplicate it.",
+        "note": "Shared content is named, but the no-duplication guarantee is ambiguous."
+      },
+      {
+        "brief_element": "Orchestrator deployments account for sessions that outlive a release.",
+        "brief_evidence": "“Orchestrator deployments must account for sessions that outlive a release”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for deployment-version overlap or sessions outliving releases.",
+        "note": "The coordinated deployment boundary is entirely absent."
+      },
+      {
+        "brief_element": "Hosts running the old version stop accepting new placements.",
+        "brief_evidence": "“hosts running the old version stop accepting placements”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry exists for old-version host placement exclusion.",
+        "note": "The drain admission rule is absent."
+      },
+      {
+        "brief_element": "Old-version hosts drain active sessions through completion, suspension, or a safe checkpoint before replacement.",
+        "brief_evidence": "“drain their active sessions through completion, suspension, or a safe checkpoint before replacement”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "Although suspension and checkpoint components exist, no deployment drain flow, alternatives, or replacement boundary is reconstructed.",
+        "note": "The coordinated shutdown procedure and its safe terminal outcomes are missing."
+      },
+      {
+        "brief_element": "The system must show how streaming execution, durable state, recovery, branching, quotas, and coordinated shutdown interact throughout a session lifetime.",
+        "brief_evidence": "“make clear how streaming execution, durable state, recovery, branching, quotas, and coordinated shutdown interact throughout a session's lifetime”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction recognizes separate regions and components for streaming, event/checkpoint state, recovery, children, quotas, and forking, but reports no connecting edges in regions 4–9 and contains no coordinated-shutdown component.",
+        "note": "Most thematic areas are labeled, but their interactions and the release-drain lifecycle are not recoverable."
+      }
+    ],
+    "unsupported_claims": [],
+    "strongest_transmitted_behavior": "The admission and primary execution spine is the clearest behavior: Session API authenticates through the workspace gate, requests scheduler placement, places onto a runner host, starts the turn orchestrator, invokes the model-and-tools turn loop, and delivers live output to the client.",
+    "most_consequential_loss": "The board does not connect its many durability and lifecycle components into operational paths. In particular, it fails to communicate the identical stream-to-event-log write, completed-turn checkpoint creation, disconnect/replay ordering, crash rescue and idempotency behavior, cancellation's uncertain-outcome sequence, child propagation, quota-exhaustion branch, or deployment draining.",
+    "overall_summary": "The reconstruction recovers the domain, major named components, the API-to-runner happy path, a coarse model/tool loop, and live client streaming. It also exposes most major feature areas by label, including checkpoints, recovery, children, quotas, forking, and reachability GC. However, most of those areas are unconnected groupings rather than recoverable procedures or relationships. Component ownership, ordering, failure triggers, degraded outcomes, and recovery guarantees frequently require inference, and coordinated shutdown is missing entirely. Engineers could use the board to discuss the intended feature landscape and happy path, but they could not derive a dependable implementation or operational model without substantial clarification.",
+    "score": 4
+  },
+  "usage": {
+    "input_tokens": 12402,
+    "output_tokens": 12605
+  },
+  "flags": [
+    "SCORE-RECOMPUTED"
+  ]
+}

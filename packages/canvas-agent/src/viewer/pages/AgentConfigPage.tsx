@@ -167,25 +167,20 @@ export function AgentConfigPage() {
             {promptHash}
           </span>
         ) : null}
-        <div className="ml-auto flex min-w-0 items-center gap-3">
-          <span className="truncate text-[11px] text-muted-foreground">
-            Edits write to the agent catalog on disk
-          </span>
-          <button
-            aria-pressed={styleSidebar.open}
-            className="shrink-0 rounded-[2px] border border-border px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
-            onClick={() =>
-              setStyleSidebar((current) => ({
-                ...current,
-                open: !current.open,
-              }))
-            }
-            title="Toggle style sidebar"
-            type="button"
-          >
-            Style
-          </button>
-        </div>
+        <button
+          aria-pressed={styleSidebar.open}
+          className="ml-auto shrink-0 rounded-[2px] border border-border px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
+          onClick={() =>
+            setStyleSidebar((current) => ({
+              ...current,
+              open: !current.open,
+            }))
+          }
+          title="Toggle style sidebar"
+          type="button"
+        >
+          Style
+        </button>
       </header>
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <div className="min-w-0 flex-1 overflow-hidden p-3">

@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "ivr-agent-handoff",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board matches the 6–6.5 anchor because its spacious grouped regions remain readable, but small text, several label-and-line tight spots, and multiple long inter-region detours require effort to follow.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Most nodes and chips have generous surrounding air, but labels such as “generic,” “record + transcribe,” and “unresolved / person / risk” sit close to active edge traffic, while the small type weakens arm’s-length reading."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Six clearly bordered, titled regions make membership immediately visible, though the flow between regions is less immediate and the Human handoff region mixes queue, decision, note, callback, and agent elements in a somewhat irregular reading path."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Arrowheads, colors, and many labels help, but the blue return runs and the dashed orange “allowed intents” route make long perimeter detours, and several branching lines require backtracking to determine their source and destination."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 8,
+        "note": "Air is clearly the majority of the board and most sections contain only two to four principal nodes, with no region approaching the crowded seven-node condition."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7330,
+    "output_tokens": 445
+  },
+  "flags": []
+}

@@ -107,7 +107,7 @@ describe("formatBoardDigest", () => {
     };
     const digest = formatBoardDigest(makeDocument([page, inner, task, sticky], [edge]));
 
-    expect(digest.startsWith("BOARD  # indent = containment")).toBe(true);
+    expect(digest.startsWith("BOARD\n")).toBe(true);
     expect(digest).toContain('  page section "Page frame" 0,0 640×480 locked=background');
     expect(digest).toContain('    inner section "Inner" blue 32,64 320×240');
     expect(digest).toContain('      task process "Do the thing" teal 64,128 184×96');
@@ -121,7 +121,6 @@ describe("formatBoardDigest", () => {
       label: "next",
       style: "dashed" as const,
       color: "red" as const,
-      role: "escalation",
       from: { objectId: "alpha", anchor: "right" as const },
       to: { objectId: "beta", anchor: "top" as const, position: [0.5, 0] as [number, number] },
       waypoints: [[10, 20], [40, 20]] as Array<[number, number]>,
@@ -129,7 +128,7 @@ describe("formatBoardDigest", () => {
     const shape = {
       ...box("alpha", 0, 0, 160, 96, "arrow-shape"),
       direction: "left" as const,
-      style: { shape: "chevron" as const },
+      style: { shape: "diamond" as const },
     };
     const sticky = {
       ...box("beta", 320, 0, 176, 128, "sticky"),
@@ -139,12 +138,12 @@ describe("formatBoardDigest", () => {
     const digest = formatBoardDigest(makeDocument([shape, sticky], [edge]));
 
     expect(digest).toContain(
-      "  alpha arrow-shape \"alpha\" 0,0 160×96 shape=chevron dir=left",
+      "  alpha arrow-shape \"alpha\" 0,0 160×96 shape=diamond dir=left",
     );
     // Explicit default color (sticky yellow) is elided; author renders.
     expect(digest).toContain('  beta sticky "beta" 320,0 176×128 author="Ford"');
     expect(digest).toContain(
-      '  alpha-beta alpha→beta "next" dashed red role="escalation" anchors=right→top pos=auto→0.5,0 wp=10,20→40,20',
+      '  alpha-beta alpha→beta "next" dashed red anchors=right→top pos=auto→0.5,0 wp=10,20→40,20',
     );
   });
 

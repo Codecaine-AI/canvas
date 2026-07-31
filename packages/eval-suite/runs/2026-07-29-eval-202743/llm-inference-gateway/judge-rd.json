@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at 6.5 because its spacious, clearly titled regions remain readable with effort, but several long overlapping detours and small labels prevent fluent arm’s-length tracing.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Most nodes and label chips have generous surrounding space, but the central horizontal routing corridor stacks gray, red, and orange runs tightly and places chips such as “expired · reject · retry” close to edge traffic."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Eight bordered, titled regions make membership immediately visible, and the procedure-heavy failure and streaming regions are distinguishable from component-oriented regions without tracing every edge."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5,
+        "note": "This is the main failure: red and gray routes overlap for a long central span, the orange dashed fallback makes a large perimeter-like detour, and multiple cross-region lines require substantial backtracking despite generally visible arrowheads and labels."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 7.5,
+        "note": "Air remains the majority of the canvas and most sections contain only two to four nodes, though the overall board is very broad and some labels become visually small at the full-board viewing scale."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7436,
+    "output_tokens": 427
+  },
+  "flags": []
+}

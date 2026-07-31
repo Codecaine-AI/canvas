@@ -2,8 +2,9 @@
  * Text renderings of a real InteractiveCanvasDocument for model-visible board
  * state: an indented object tree (indentation = containment) and global edges.
  * Lossless over the op-writable surface — every writable field is either
- * rendered when set or covered by the header-declared elided defaults
- * (test/digest-completeness.test.ts is the gate). User annotations are NOT
+ * rendered when set or covered by the declared elided defaults, taught in the
+ * <state_grammar> context block (test/digest-completeness.test.ts is the
+ * gate). User annotations are NOT
  * part of the digest; they travel in the separate <user_requests> block.
  *
  * The type column speaks the FOLDED vocabulary (service/session/
@@ -22,27 +23,28 @@ import { fromDocumentFields } from "../service/session/tools/placeable-types";
 import { formatNumberedRoute } from "./edge-route";
 import { kindOf, pageFrameOf } from "./helpers";
 
-/** Elided defaults, declared once in the digest header so elision is lossless. */
+/**
+ * The digest itself carries bare values — no legend lines. Its grammar is
+ * taught by the <state_grammar> context block, which quotes the three
+ * constants below verbatim so the reading key can never drift from the lines
+ * this file renders. Elision stays lossless: every elided field is covered by
+ * the declared defaults.
+ */
 export const DIGEST_DEFAULTS_LEGEND =
   "elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type";
 
 /**
- * Declared once in the header so the numbered-segment notation on every edge
- * line is self-teaching: `sN` is the segment index `shift_segment` takes,
- * `h`/`v` its orientation, and the printed coordinate is the one a shift
- * rewrites (a horizontal segment is pinned by its y, a vertical one by its x).
+ * The numbered-segment notation: `sN` is the segment index `shift_segment`
+ * takes, `h`/`v` its orientation, and the printed coordinate is the one a
+ * shift rewrites (a horizontal segment is pinned by its y, a vertical one by
+ * its x).
  */
 export const DIGEST_ROUTE_LEGEND =
   "edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index";
 
-const DIGEST_GRAMMAR =
-  '# indent = containment · id type "text" [color] x,y w×h [k=v…]';
-
-const OBJECTS_DIGEST_LEGEND =
-  `${DIGEST_GRAMMAR} · elided defaults: color gray (sticky yellow) · shape per type`;
-
-const EDGES_DIGEST_LEGEND =
-  '# id from→to "label" + extras · elided defaults: solid gray arrow=forward · route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index';
+/** The object-line grammar. */
+export const DIGEST_GRAMMAR =
+  'id type "text" [color] x,y w×h [k=v…]';
 
 function fmt(value: number): string {
   return String(Math.round(value));
@@ -97,8 +99,8 @@ function objectExtras(object: InteractiveCanvasObject): string[] {
 }
 
 function objectLine(object: InteractiveCanvasObject, depth: number): string {
-  // The FOLDED name, never the raw `type`: a glyph object is `cloud`, not
-  // `icon` with an `icon=cloud` extra beside it. The glyph is not a second
+  // The FOLDED name, never the raw `type`: a glyph object is `memory`, not
+  // `icon` with an `icon=memory` extra beside it. The glyph is not a second
   // field the model has to read — the name IS the drawing.
   const parts = [object.id, fromDocumentFields(object), JSON.stringify(oneLine(object.text))];
   if (object.color !== undefined && object.color !== defaultColorFor(object)) {
@@ -167,9 +169,6 @@ function edgeExtras(connection: InteractiveCanvasConnection): string[] {
   if (connection.arrow !== undefined && connection.arrow !== "forward") {
     extras.push(`arrow=${connection.arrow}`);
   }
-  if (connection.role !== undefined) {
-    extras.push(`role=${JSON.stringify(oneLine(connection.role))}`);
-  }
   if (connection.from.anchor !== undefined || connection.to.anchor !== undefined) {
     extras.push(`anchors=${endpointAnchor(connection, "from")}→${endpointAnchor(connection, "to")}`);
   }
@@ -216,25 +215,23 @@ function edgeLine(
 }
 
 export function formatBoardObjectsDigest(document: InteractiveCanvasDocument): string {
-  const frameNote = pageFrameOf(document) ? "" : " · no base section";
-  return [`${OBJECTS_DIGEST_LEGEND}${frameNote}`, ...objectTreeLines(document)].join("\n");
+  const lines = objectTreeLines(document);
+  if (!pageFrameOf(document)) lines.unshift("(no base section)");
+  return lines.join("\n");
 }
 
 export function formatBoardEdgesDigest(document: InteractiveCanvasDocument): string {
   if (document.connections.length === 0) return "";
-  return [
-    EDGES_DIGEST_LEGEND,
-    ...document.connections.map((connection) => edgeLine(connection, document)),
-  ].join("\n");
+  return document.connections
+    .map((connection) => edgeLine(connection, document))
+    .join("\n");
 }
 
 export function formatBoardDigest(document: InteractiveCanvasDocument): string {
   const lines: string[] = [];
   const frame = pageFrameOf(document);
   const frameNote = frame ? "" : " · no base section";
-  lines.push(
-    `BOARD${frameNote}  ${DIGEST_GRAMMAR} · ${DIGEST_DEFAULTS_LEGEND} · ${DIGEST_ROUTE_LEGEND}`,
-  );
+  lines.push(`BOARD${frameNote}`);
 
   lines.push(...objectTreeLines(document).map((line) => `  ${line}`));
 

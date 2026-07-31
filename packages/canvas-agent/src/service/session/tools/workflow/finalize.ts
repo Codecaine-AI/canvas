@@ -12,7 +12,7 @@ import {
 import type { AgentProposal } from "../../../../protocol";
 import { diffDocuments } from "../../../../board/doc-diff";
 import { FINISHING_RULES } from "../../../../board/lints";
-import { formatDiagnostics, runDiagnostics } from "../../../../board/lints/run";
+import { diagnosticLines, formatDiagnostics, runDiagnostics } from "../../../../board/lints/run";
 import { describePatchOperation } from "../../apply-ops";
 import { scopedDiagnostics } from "../../snapshots/context";
 import type { SessionEventSink } from "../../perception/perception";
@@ -65,9 +65,8 @@ export function toolFinalize(
       isError: true,
       text: [
         "Finalize blocked; the run continues:",
-        ...blocking.map((diagnostic) =>
-          `- ${diagnostic.id} ${diagnostic.rule}: ${diagnostic.message}`
-          + (diagnostic.suggestion ? ` (${diagnostic.suggestion})` : "")),
+        ...blocking.flatMap((diagnostic) =>
+          diagnosticLines(diagnostic).map((line) => `- ${line}`)),
         ...openRequests.map((request) =>
           `- ${formatRequestLine(request)}  (dispose with resolve_request)`),
       ].join("\n"),

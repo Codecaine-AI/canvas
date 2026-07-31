@@ -54,6 +54,10 @@ export function createCatalogRoutes(kernel: KernelInstance<unknown>) {
           return { error: `Agent ${params.agent} not found in catalog` };
         }
         if (!result.ok) {
+          if ("currentHash" in result) {
+            set.status = 409;
+            return { ok: false, currentHash: result.currentHash };
+          }
           set.status = 400;
           return { ok: false, errors: result.errors };
         }

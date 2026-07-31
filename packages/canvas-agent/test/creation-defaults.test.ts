@@ -47,7 +47,7 @@ describe("creation defaults (D5)", () => {
   test("folded type names resolve to their kind", () => {
     expect(creationKindFor("process")).toBe("shape");
     expect(creationKindFor("diamond" as string)).toBe("shape");
-    expect(creationKindFor("cloud")).toBe("icon");
+    expect(creationKindFor("memory")).toBe("icon");
     expect(creationKindFor("section")).toBe("section");
     expect(creationKindFor("sticky")).toBe("sticky");
     expect(creationKindFor("icon")).toBe("icon");
@@ -55,9 +55,15 @@ describe("creation defaults (D5)", () => {
     expect(creationKindFor("not-a-type")).toBe("shape");
   });
 
-  test("creationDefaultFor reads the row for a placeable type", () => {
+  test("creationDefaultFor reads the kind row, with the registry's preferred color", () => {
+    // `process` prefers gray — the registry pick and the kind row agree.
     expect(creationDefaultFor("process")).toEqual(CREATION_DEFAULTS.shape);
-    expect(creationDefaultFor("cloud")).toEqual(CREATION_DEFAULTS.icon);
+    // A glyph takes the icon SIZE row but its own registry color: memory is blue.
+    expect(creationDefaultFor("memory")).toEqual({
+      size: CREATION_DEFAULTS.icon.size,
+      color: "blue",
+    });
+    // Names outside the registry keep the kind row untouched.
     expect(creationDefaultFor("sticky")).toEqual(CREATION_DEFAULTS.sticky);
   });
 });

@@ -6,17 +6,7 @@
   "blocks": {
     "b-r6-root": {
       "id": "b-r6-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-r6-title-1",
-        "b-r6-card-2",
-        "b-r6-detect-3",
-        "b-r6-register-4",
-        "b-r6-clearance-5",
-        "b-r6-pitch-6",
-        "b-r6-centering-7",
-        "b-r6-evidence-8"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "Parent-child composition centers the parent over peer children, repeats one child gap and size, and reserves a readable corridor for direct labeled edges.",
         "format": "mdx",
@@ -30,12 +20,21 @@
           "direct edge labels",
           "arrow corridor"
         ]
-      }
+      },
+      "children": [
+        "b-r6-title-1",
+        "b-r6-card-2",
+        "b-r6-detect-3",
+        "b-r6-register-4",
+        "b-r6-clearance-5",
+        "b-r6-pitch-6",
+        "b-r6-centering-7",
+        "b-r6-evidence-8"
+      ]
     },
     "b-r6-title-1": {
       "id": "b-r6-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -43,12 +42,12 @@
         {
           "insert": "R6 — fan: hub over children"
         }
-      ]
+      ],
+      "children": []
     },
     "b-r6-card-2": {
       "id": "b-r6-card-2",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "The hub centers over its children"
       },
@@ -56,12 +55,12 @@
         {
           "insert": "Center the parent over its children. Make peer children the same size, repeat one exact gap, align their centers, and leave enough air for each labeled edge to read."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r6-detect-3": {
       "id": "b-r6-detect-3",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -86,12 +85,12 @@
         {
           "insert": " supplies parent centering, peer uniformity, air, and wire guidance. There is no fan operation, automatic fan pass, or dedicated fan diagnostic. Build the containing section in the section skeleton, place the parent and children in that section's content batch, judge the render, and add their connections during the connection step:"
         }
-      ]
+      ],
+      "children": []
     },
     "b-r6-register-4": {
       "id": "b-r6-register-4",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -99,12 +98,12 @@
         {
           "insert": "Children that play the same role share one size and one repeated gap, with centers on a line. Copy the first child's digest geometry to place its peers."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r6-clearance-5": {
       "id": "b-r6-clearance-5",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -112,12 +111,12 @@
         {
           "insert": "Open the parent-to-child corridor for routed wires and their labels. Crowding warns below the sibling corridor floor; covered-content and unreadable-labels catch collisions and chip-fit failures. The warning floor is not the target."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r6-pitch-6": {
       "id": "b-r6-pitch-6",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -125,12 +124,12 @@
         {
           "insert": "Label the parent-child relationships directly on their edges. Use faces that point along the flow, keep two runs from sharing a line, and inspect the returned ROUTES block for crossings through boxes."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r6-centering-7": {
       "id": "b-r6-centering-7",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -138,18 +137,19 @@
         {
           "insert": "Center the parent over the children as a group. If unequal child content forces a wider member, resize the peer set first and then recalculate the group midpoint from the exact digest geometry."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r6-evidence-8": {
       "id": "b-r6-evidence-8",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Verification: inspect the section close-up for the peer signal, then the full-board render for flow and balance. The latest BOARD digest and ROUTES block, not a remembered earlier turn, are the geometric truth."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

@@ -42,32 +42,31 @@ describe("v2-flow canvas JSON", () => {
     for (const object of v2FlowDocument.objects) {
       counts.set(object.type, (counts.get(object.type) ?? 0) + 1);
     }
-    expect(v2FlowDocument.objects).toHaveLength(40);
+    expect(v2FlowDocument.objects).toHaveLength(39);
     // Sections: page frame + Interview Inputs + General + Questions + Q1/Q2/QN
     // + Interview Flow + Memory Bank + Memory Actions + Structure
     // + Probing Response = 12
     expect(counts.get("section")).toBe(12);
     // Stickies: overall-context, base-question-text, memory-bank = 3
     expect(counts.get("sticky")).toBe(3);
-    // Pills: overall-context + (Q1/Q2/QN x2) = 7
-    expect(counts.get("pill")).toBe(7);
-    // Icons include migrated chip/person/chat visuals plus existing icon glyph objects.
-    expect(counts.get("icon")).toBe(10);
+    // Rectangles: the 7 former label pills + the emphasis box (the pill type
+    // retired in the operational-maps surface trim).
+    expect(counts.get("rectangle")).toBe(8);
+    // Icons carry the operational-map vocabulary after migration.
+    expect(counts.get("icon")).toBe(5);
     const glyphCounts = new Map<string, number>();
     for (const object of v2FlowDocument.objects) {
       if (object.type === "icon") {
         glyphCounts.set(object.icon ?? "", (glyphCounts.get(object.icon ?? "") ?? 0) + 1);
       }
     }
-    expect(glyphCounts.get("cpu")).toBe(4);
-    expect(glyphCounts.get("chat")).toBe(2);
-    expect(glyphCounts.get("person")).toBe(2);
+    expect(glyphCounts.get("model")).toBe(3);
+    expect(glyphCounts.get("message")).toBe(1);
+    expect(glyphCounts.get("human")).toBe(1);
     // Predefined process: New/Update/Delete/No Change Memory + Get Next Question = 5
     expect(counts.get("predefined-process")).toBe(5);
-    // Arrow shapes (chevrons): 3 left + 3 right = 6
+    // Arrow shapes: 3 left + 3 right = 6
     expect(counts.get("arrow-shape")).toBe(6);
-    // Emphasis box modeled as rectangle/rounded-rect
-    expect(counts.get("rectangle")).toBe(1);
   });
 
   it("has a non-trivial connector network", () => {
@@ -124,14 +123,16 @@ describe("v2-flow canvas JSON", () => {
     }
   });
 
-  it("pills migrated to the bold white pick (FigJam white fill + gray border)", () => {
-    const pills = v2FlowDocument.objects.filter((object) => object.type === "pill");
-    expect(pills.length).toBe(7);
-    for (const pill of pills) {
-      expect(pill.color).toBe("white");
-      expect(resolveShapeColors("white")).toEqual({ fill: "#FFFFFF", border: "#757575" });
+  it("former label pills migrated to white rectangles (FigJam white fill + gray border)", () => {
+    const labelChips = v2FlowDocument.objects.filter(
+      (object) => object.type === "rectangle" && object.id.startsWith("pill-"),
+    );
+    expect(labelChips.length).toBe(7);
+    for (const chip of labelChips) {
+      expect(chip.color).toBe("white");
+      expect(resolveShapeColors("white")).toEqual({ fill: "#FFFFFF", border: "#757980" });
       // No explicit strokeWidth — FigJam's universal 4px default applies.
-      expect(resolveObjectStrokeWidth(pill.style)).toBe(4);
+      expect(resolveObjectStrokeWidth(chip.style)).toBe(4);
     }
   });
 
@@ -152,16 +153,15 @@ describe("v2-flow canvas JSON", () => {
     for (const button of buttons) {
       expect(button.color).toBe("blue");
     }
-    expect(resolveShapeColors("blue")).toEqual({ fill: "#C2E5FF", border: "#0D99FF" });
+    expect(resolveShapeColors("blue")).toEqual({ fill: "#CDDFFF", border: "#1A5CDF" });
   });
 
-  it("the emphasis box migrated to soft red and keeps the user-thickened 8px stroke", () => {
+  it("the emphasis box migrated to soft red on the universal stroke", () => {
     const emphasisBox = v2FlowDocument.objects.find(
       (object) => object.id === "emphasis-box-research-objective",
     );
     expect(emphasisBox?.color).toBe("red");
-    expect(emphasisBox?.style?.strokeWidth).toBe(8);
-    expect(resolveObjectStrokeWidth(emphasisBox?.style)).toBe(8);
+    expect(resolveObjectStrokeWidth(emphasisBox?.style)).toBe(4);
   });
 
   it("stickies migrated to picks that resolve to the exact classic sticky hexes", () => {
@@ -174,50 +174,41 @@ describe("v2-flow canvas JSON", () => {
       (object) => object.id === "sticky-base-question-text",
     );
     expect(greenSticky?.color).toBe("green");
-    expect(resolveStickyFill("green")).toBe("#DDF8E2");
+    expect(resolveStickyFill("green")).toBe("#C5E9CB");
     const redSticky = v2FlowDocument.objects.find((object) => object.id === "sticky-memory-bank");
     expect(redSticky?.color).toBe("red");
-    expect(resolveStickyFill("red")).toBe("#FFAFA3");
+    expect(resolveStickyFill("red")).toBe("#FFBFB7");
   });
 
-  it("explicit fan junction waypoints share their trunk points", () => {
+  it("explicit fan trunk waypoints survive only on the probing-question fan and the enough-context riser", () => {
     const connectionById = (id: string) =>
       v2FlowDocument.connections.find((connection) => connection.id === id);
-    const firstWaypoint = (id: string) => connectionById(id)?.waypoints?.[0];
-    const expectSharedFirstWaypoint = (ids: string[]) => {
-      const reference = firstWaypoint(ids[0]!);
-      expect(reference).toBeDefined();
-      for (const id of ids) {
-        expectWaypointClose(firstWaypoint(id), reference as Waypoint);
-      }
-    };
 
-    // These fan groups now rely on auto-routing instead of explicit waypoint arrays.
-    for (const id of [
+    const withWaypoints = v2FlowDocument.connections
+      .filter((connection) => connection.waypoints !== undefined)
+      .map((connection) => connection.id)
+      .sort();
+    expect(withWaypoints).toEqual([
       "conn-get-next-question-to-enough-context",
-      "conn-get-next-question-to-null-response",
-      "conn-get-next-question-to-user-safety-refusal",
+      "conn-not-enough-context-to-generate-probing-question",
+      "conn-possible-user-refusal-to-generate-probing-question",
+      "conn-unclear-message-to-generate-probing-question",
+    ]);
+
+    // The three probing-question branches share their trunk x coordinates.
+    const fanIds = [
       "conn-not-enough-context-to-generate-probing-question",
       "conn-unclear-message-to-generate-probing-question",
       "conn-possible-user-refusal-to-generate-probing-question",
-    ]) {
-      expect(connectionById(id)?.waypoints).toBeUndefined();
+    ];
+    const reference = connectionById(fanIds[0]!)?.waypoints;
+    expect(reference).toBeDefined();
+    for (const id of fanIds) {
+      const waypoints = connectionById(id)?.waypoints;
+      expect(waypoints).toBeDefined();
+      expect(waypoints?.[0]?.[0]).toBeCloseTo(reference![0]![0], 6);
+      expect(waypoints?.[1]?.[0]).toBeCloseTo(reference![1]![0], 6);
     }
-
-    // The remaining explicit emphasis-box branches keep their shared trunk joins;
-    // the other branches now rely on auto-routing.
-    for (const id of [
-      "conn-emphasis-box-to-enough-context",
-      "conn-emphasis-box-to-null-response",
-    ]) {
-      expect(connectionById(id)?.waypoints).toBeUndefined();
-    }
-    expect(connectionById("conn-emphasis-box-to-user-safety-refusal")?.waypoints).toBeDefined();
-    expectSharedFirstWaypoint([
-      "conn-emphasis-box-to-not-enough-context",
-      "conn-emphasis-box-to-unclear-message",
-      "conn-emphasis-box-to-possible-user-refusal",
-    ]);
   });
 
   it("has no duplicate object or connection ids", () => {

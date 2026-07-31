@@ -61,7 +61,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "chat"
+      "icon": "message"
     },
     {
       "id": "section-ml-session-tasks",
@@ -592,7 +592,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "chat"
+      "icon": "message"
     },
     {
       "id": "rect-prompt-code",
@@ -642,7 +642,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "cpu"
+      "icon": "model"
     },
     {
       "id": "section-layer1-tools",
@@ -740,7 +740,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "person"
+      "icon": "human"
     },
     {
       "id": "section-layer2",
@@ -773,7 +773,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "cpu"
+      "icon": "model"
     },
     {
       "id": "section-layer2-tools",
@@ -825,7 +825,7 @@
     },
     {
       "id": "pill-more-tools",
-      "type": "pill",
+      "type": "rectangle",
       "text": "…",
       "color": "gray",
       "parentId": "section-layer2-tools",
@@ -836,7 +836,7 @@
         "height": 48
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
@@ -1051,7 +1051,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green"
     },
     {
@@ -1066,7 +1065,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -1081,7 +1079,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -1100,7 +1097,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -1119,7 +1115,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray"
     },
     {
@@ -1134,7 +1129,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "green"
     },
     {
@@ -1149,7 +1143,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -1168,7 +1161,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray"
     },
     {
@@ -1183,7 +1175,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "orange"
     },
     {
@@ -1198,7 +1189,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -1213,7 +1203,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "output",
       "color": "gray"
     },
     {
@@ -1228,7 +1217,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "blue",
       "waypoints": [
         [
@@ -1249,7 +1237,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -1268,7 +1255,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray",
       "waypoints": [
         [
@@ -1297,7 +1283,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "orange"
     },
     {
@@ -1316,7 +1301,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green"
     },
     {
@@ -1331,7 +1315,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "yellow"
     },
     {
@@ -1346,7 +1329,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "yellow"
     },
     {
@@ -1365,7 +1347,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "blue",
       "waypoints": [
         [
@@ -1386,7 +1367,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "gray"
     },
     {
@@ -1409,7 +1389,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -1432,7 +1411,6 @@
       },
       "style": "dashed",
       "arrow": "none",
-      "role": "sequence",
       "color": "gray"
     }
   ],

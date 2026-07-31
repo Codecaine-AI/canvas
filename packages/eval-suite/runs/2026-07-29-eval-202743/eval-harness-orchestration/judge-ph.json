@@ -1,0 +1,228 @@
+{
+  "axis": "ph",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "The session had 131 tool calls and one failed call: the first finalize was blocked by two frame-slack warnings. The failure rate was approximately 0.76%, the longest failure run was 1, and the agent changed the board on the immediately following call. There were no schema/parse-validation errors, repeated error classes, or session-level retries.",
+      "failed_call_count": 1,
+      "rejected_call_count": 1,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 126,
+          "transcript_excerpt": "Finalize blocked; the run continues:\n- W1 frame-slack: comparison is 980×620 around children needing 848×200 — 72% of the frame is unused\n- W2 frame-slack: retention is 900×620 around children needing 728×200 — 74% of the frame is unused",
+          "finding": "This blocked finalize is the sole failed/rejected call. It formed a one-call failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 127,
+          "transcript_excerpt": "APPLIED · resize comparison → 980×320",
+          "finding": "The first warning was addressed on the call immediately after the blocked finalize."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 128,
+          "transcript_excerpt": "APPLIED · resize retention → 900×320",
+          "finding": "The second frame-slack warning was also corrected directly, without retrying the same failing finalize first."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "transcript_excerpt": "Committed: Built a six-stage offline evaluation harness showing immutable pinned inputs, bounded isolated execution, distinct infrastructure and product failures, evidence-gated grading, fingerprint-compatible comparison, and retained baseline promotion.",
+          "finding": "The second finalize succeeded after the corrective edits."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Two explicit framed looks were made, both over the page-frame during final QA. The first was followed by section-size adjustments and then a second render, giving one clear render→adjust→render loop. The agent also reacted continuously to measured lint and route diagnostics during construction. However, no close-up looks targeted the dense execution or grading regions while their labels and routes were being iterated, so the perception practice falls short of the 9–10 anchors.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 125,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame\nDIAGNOSTICS · clean",
+          "finding": "This was the first explicit QA render. It covered the entire page-frame rather than a dense subregion."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 126,
+          "transcript_excerpt": "W1 frame-slack: comparison is 980×620 around children needing 848×200\nW2 frame-slack: retention is 900×620 around children needing 728×200",
+          "finding": "The subsequent finalize exposed measurable excess frame slack that remained after the first QA render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 127,
+          "transcript_excerpt": "APPLIED · resize comparison → 980×320",
+          "finding": "The agent adjusted a defect identified after the first render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 128,
+          "transcript_excerpt": "APPLIED · resize retention → 900×320",
+          "finding": "The second affected section was adjusted in the same QA round."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame\nDIAGNOSTICS · clean",
+          "finding": "This completed one render→adjust→render loop and confirmed clean diagnostics before the successful commit."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 76,
+          "transcript_excerpt": "LINTS · +6 −0\n  + E1 covered-content\n  + E2 covered-content\n  + E3 covered-content\n  + E4 covered-content",
+          "finding": "Dense route work generated multiple simultaneous defects, but the agent relied on standing-state diagnostics and did not call a close-up look on the execution/grading route region."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Approximately 20 lint-error occurrences were emitted during routing and label placement, along with numerous warnings. They were fixed rather than overridden, and the committed state reported clean diagnostics. No identical lint was re-fired for more than three consecutive turns without a strategy change: the agent alternated label movement, shortening/removal, object movement, and rerouting. There were therefore no lint fights or warning overrides requiring summary reasons.",
+      "lint_error_count": 20,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 68,
+          "transcript_excerpt": "LINTS · +2 −0\n  + E1 covered-content: label \"capture outputs\" chip on e-workers-capture overlaps label \"infra failure\" chip on e-workers-infra\n  + E2 covered-content: label \"infra failure\" chip on e-workers-infra lies on e-workers-capture's path",
+          "finding": "The first routing error cluster was acknowledged through immediate label and object-position changes."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 73,
+          "transcript_excerpt": "APPLIED · move_to infra-fault → (1480, 560)\nLINTS · +0 −3\n  − W1 covered-content, − W2 covered-content, − W3 covered-content  (resolved)",
+          "finding": "The agent changed strategy from label-only movement to moving the object, resolving the remaining cluster."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 76,
+          "transcript_excerpt": "LINTS · +6 −0\n  + E1 covered-content\n  + E2 covered-content\n  + E3 covered-content\n  + E4 covered-content\n  + W1 covered-content\n  + W2 covered-content",
+          "finding": "A large lint burst occurred when connecting capture to graders."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 78,
+          "transcript_excerpt": "APPLIED · reroute e-capture-graders\nLINTS · +0 −2\n  − E1 covered-content, − E2 broken-edges  (resolved)",
+          "finding": "The agent used a new waypoint route and fully resolved the burst within two corrective calls."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 94,
+          "transcript_excerpt": "LINTS · +6 −0\n  + E1 covered-content\n  + E2 covered-content\n  + E3 covered-content\n  + E4 covered-content\n  + W1 covered-content\n  + W2 broken-edges",
+          "finding": "The attempted reverse retry edge produced another major lint cluster."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 95,
+          "transcript_excerpt": "APPLIED · delete e-infra-retry (connection)\nLINTS · +0 −6\n  − E1 covered-content, − E2 covered-content, − E3 covered-content, − E4 covered-content, − W1 covered-content, − W2 broken-edges  (resolved)",
+          "finding": "The bad edge was removed immediately instead of fighting the same diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA showed no open lint errors or warnings, so there was no silent warning override."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "There was one commit, and its summary is supported by the stage diff and final board inventory. The diff contains six named sections; immutable pinned inputs and a run fingerprint; bounded scheduler, workers, and isolated SUT; separate infrastructure-fault and product-regression objects; evidence validation, retry, and flag paths; fingerprint compatibility and threshold movement; and archive, promotion, and future-baseline objects. The summary does not claim a cosmetic fix or unsupported mechanism, and no seen defect was knowingly committed: final diagnostics were clean.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "line": "Built a six-stage offline evaluation harness showing immutable pinned inputs, bounded isolated execution, distinct infrastructure and product failures, evidence-gated grading, fingerprint-compatible comparison, and retained baseline promotion.",
+          "assessment": "Honest and materially matched by the diff: six sections and corresponding objects/connections support each listed capability."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 124,
+          "transcript_excerpt": "Shows a pinned, fingerprinted evaluation run moving left-to-right through immutable scenario inputs, bounded execution against an isolated system under test, evidence-backed grading, scorecard assembly, compatible baseline comparison, and retention/promotion.",
+          "finding": "The detailed board description is consistent with the eventual commit summary and the stage diff."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 125,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 54 ops\n  addSection inputs\n  addSection execution\n  addSection grading\n  addSection assembly\n  addSection comparison\n  addSection retention",
+          "finding": "The six-stage claim is directly supported by the six added sections."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 125,
+          "transcript_excerpt": "infra-fault event \"Infrastructure fault\" yellow\nproduct-regression event \"Product regression\" red\nevidence-gate guardrail \"Evidence required\" red\ncompatibility decision \"Fingerprints match?\"\nfuture-baseline document \"Future baseline\"",
+          "finding": "The principal semantic claims in the summary are represented by concrete committed objects."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "No lint defect visible to the agent remained at commit time."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The transcript contains 131 tool calls producing 54 committed patch operations. Wall time was 784.8 seconds (13.08 minutes), within the 15-minute session budget, and finalize was reached well before the 300-turn limit. Most extra calls were purposeful lint-driven adjustments. There was one localized add-then-delete cycle for the reverse infrastructure-retry edge, plus one harmless NO-OP; neither became repeated thrashing.",
+      "operation_count": 131,
+      "thrash_cycle_count": 1,
+      "wall_time_minutes": 13.08,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 94,
+          "transcript_excerpt": "APPLIED · connect e-infra-retry infra-fault→workers\nLINTS · +6 −0",
+          "finding": "A retry edge was added and immediately proved mechanically unsuitable."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 95,
+          "transcript_excerpt": "APPLIED · delete e-infra-retry (connection)",
+          "finding": "This completes one localized add-then-delete cycle. The agent did not rebuild the same edge and instead changed representation."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 97,
+          "transcript_excerpt": "NO-OP · move_label e-workers-infra — the board already matches this, so nothing changed.",
+          "finding": "There was one NO-OP, but it was not repeated on the same target and therefore does not constitute NO-OP thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "transcript_excerpt": "Committed: ... (54 patch operations).",
+          "finding": "The session completed successfully within 13.08 minutes and without approaching the 300-turn budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, kernel collision, proxy failure, or other declared infrastructure failure occurred. The only failed call was a normal lint-blocked finalize and is scored against the agent. No session was excluded.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 54088,
+    "output_tokens": 3774
+  },
+  "flags": []
+}

@@ -29,15 +29,15 @@ const EXPECTED: Record<
   }
 > = {
   gray: { swatch: "#757575", shapeFill: "#E6E6E6", sticky: "#E6E6E6", wash: "#F9F9F9", ink: "#757575", chipFill: "#E6E6E6", chipBorder: "#757575" },
-  red: { swatch: "#F24822", shapeFill: "#FFC7C2", sticky: "#FFAFA3", wash: "#FFF5F5", ink: "#F24822", chipFill: "#FFC7C2", chipBorder: "#F24822" },
+  red: { swatch: "#D5322F", shapeFill: "#FFD2CC", sticky: "#FFBFB7", wash: "#FEF3F1", ink: "#D5322F", chipFill: "#FFD2CC", chipBorder: "#D5322F" },
   orange: { swatch: "#EB7500", shapeFill: "#FFE0C2", sticky: "#FFE0C2", wash: "#FFF7F0", ink: "#EB7500", chipFill: "#FFE0C2", chipBorder: "#EB7500" },
   yellow: { swatch: "#E8A302", shapeFill: "#FFECBD", sticky: "#FFE299", wash: "#FFFBF0", ink: "#E8A302", chipFill: "#FFECBD", chipBorder: "#E8A302" },
-  green: { swatch: "#14AE5C", shapeFill: "#DDF8E2", sticky: "#DDF8E2", wash: "#EBFFEE", ink: "#14AE5C", chipFill: "#DDF8E2", chipBorder: "#14AE5C" },
+  green: { swatch: "#019142", shapeFill: "#C5E9CB", sticky: "#C5E9CB", wash: "#F0F8F2", ink: "#019142", chipFill: "#C5E9CB", chipBorder: "#019142" },
   teal: { swatch: "#369E94", shapeFill: "#C6FAF6", sticky: "#C6FAF6", wash: "#EAFDFB", ink: "#369E94", chipFill: "#C6FAF6", chipBorder: "#369E94" },
-  blue: { swatch: "#0D99FF", shapeFill: "#C2E5FF", sticky: "#A8DAFF", wash: "#F5FBFF", ink: "#0D99FF", chipFill: "#C2E5FF", chipBorder: "#0D99FF" },
+  blue: { swatch: "#1A5CDF", shapeFill: "#CDDFFF", sticky: "#B9D2FF", wash: "#F1F6FE", ink: "#1A5CDF", chipFill: "#CDDFFF", chipBorder: "#1A5CDF" },
   violet: { swatch: "#9747FF", shapeFill: "#DCCCFF", sticky: "#DCCCFF", wash: "#F8F5FF", ink: "#9747FF", chipFill: "#DCCCFF", chipBorder: "#9747FF" },
-  pink: { swatch: "#F849C1", shapeFill: "#FFC2EC", sticky: "#FFC2EC", wash: "#FFF0FA", ink: "#F849C1", chipFill: "#FFC2EC", chipBorder: "#F849C1" },
-  white: { swatch: "#FFFFFF", shapeFill: "#FFFFFF", sticky: "#FFFFFF", wash: "#FFFFFF", ink: "#757575", chipFill: "#E6E6E6", chipBorder: "#C4C4C4" },
+  pink: { swatch: "#B74D85", shapeFill: "#F9D1E3", sticky: "#F9D1E3", wash: "#FDF3F7", ink: "#B74D85", chipFill: "#F9D1E3", chipBorder: "#B74D85" },
+  white: { swatch: "#FFFFFF", shapeFill: "#FFFFFF", sticky: "#FFFFFF", wash: "#FFFFFF", ink: "#757980", chipFill: "#DBDEE3", chipBorder: "#C1C4CB" },
 };
 
 describe("state/schema/colors — the 10-id CanvasColor vocabulary", () => {

@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 7,
+  "verdict": {
+    "score": 7,
+    "score_rationale": "The board lands at the 7 anchor because it is a readable, deliberately structured operational map with mostly disciplined registry vocabulary and clean routing, but large empty bands and uneven panel density keep it from feeling fully finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6.5,
+        "note": "Failing: the ten numbered sections occupy most of the width, but the broad gap above the rebuild row and the substantial empty area beneath it leave conspicuous dead bands."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Mostly registry-disciplined teal, pink, blue, green, yellow, and gray are used consistently, though the yellow document-source block and prominent purple feedback routing read as visible departures."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 7.5,
+        "note": "No crosshair junctions or obvious waypoint markers are visible, but several very long dashed return paths and tightly bent connectors expose the routing construction more than a polished pin-up would."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 7,
+        "note": "Panel headers and primary rows hold clear horizontal registers, but sparse sections 8–10, oversized containers, and inconsistent internal density weaken the overall rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7745,
+    "output_tokens": 524
+  },
+  "flags": []
+}

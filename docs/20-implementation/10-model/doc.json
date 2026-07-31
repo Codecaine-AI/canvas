@@ -6,7 +6,7 @@
   "blocks": {
     "b-model-root": {
       "id": "b-model-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "concepts": [
           "InteractiveCanvasDocument",
@@ -37,31 +37,12 @@
         "b-model-schema-object-types-list-process",
         "b-model-schema-object-types-list-decision",
         "b-model-schema-object-types-list-sticky",
-        "b-model-schema-object-types-list-document",
-        "b-model-schema-object-types-list-database",
         "b-model-schema-object-types-list-section",
-        "b-model-schema-object-types-list-pill",
         "b-model-schema-object-types-list-arrow-shape",
         "b-model-schema-object-types-list-predefined-process",
         "b-model-schema-object-types-list-ellipse",
         "b-model-schema-object-types-list-triangle",
-        "b-model-schema-object-types-list-parallelogram",
-        "b-model-schema-object-types-list-pentagon",
         "b-model-schema-object-types-list-octagon",
-        "b-model-schema-object-types-list-star",
-        "b-model-schema-object-types-list-plus",
-        "b-model-schema-object-types-list-chevron",
-        "b-model-schema-object-types-list-folder",
-        "b-model-schema-object-types-list-document-stack",
-        "b-model-schema-object-types-list-off-page-connector",
-        "b-model-schema-object-types-list-trapezoid",
-        "b-model-schema-object-types-list-manual-input",
-        "b-model-schema-object-types-list-hexagon",
-        "b-model-schema-object-types-list-internal-storage",
-        "b-model-schema-object-types-list-or-junction",
-        "b-model-schema-object-types-list-summing-junction",
-        "b-model-schema-object-types-list-cylinder-horizontal",
-        "b-model-schema-object-types-list-page-corner",
         "b-model-schema-object-types-list-icon",
         "b-model-schema-p3",
         "b-model-schema-color-heading",
@@ -85,12 +66,6 @@
         "b-model-type-sticky",
         "b-model-type-sticky-p1",
         "b-model-type-sticky-p2",
-        "b-model-type-document",
-        "b-model-type-document-p1",
-        "b-model-type-document-p2",
-        "b-model-type-database",
-        "b-model-type-database-p1",
-        "b-model-type-database-p2",
         "b-model-type-section",
         "b-model-type-section-p1",
         "b-model-type-section-lock-decision",
@@ -99,8 +74,6 @@
         "b-model-type-section-p3a-title-zoom",
         "b-model-type-section-capture",
         "b-model-type-section-p4",
-        "b-model-type-pill",
-        "b-model-type-pill-p1",
         "b-model-type-arrow-shape",
         "b-model-type-arrow-shape-p1",
         "b-model-type-arrow-shape-p2",
@@ -113,57 +86,9 @@
         "b-model-type-triangle",
         "b-model-type-triangle-p1",
         "b-model-type-triangle-p2",
-        "b-model-type-parallelogram",
-        "b-model-type-parallelogram-p1",
-        "b-model-type-parallelogram-p2",
-        "b-model-type-pentagon",
-        "b-model-type-pentagon-p1",
-        "b-model-type-pentagon-p2",
         "b-model-type-octagon",
         "b-model-type-octagon-p1",
         "b-model-type-octagon-p2",
-        "b-model-type-star",
-        "b-model-type-star-p1",
-        "b-model-type-star-p2",
-        "b-model-type-plus",
-        "b-model-type-plus-p1",
-        "b-model-type-plus-p2",
-        "b-model-type-chevron",
-        "b-model-type-chevron-p1",
-        "b-model-type-chevron-p2",
-        "b-model-type-folder",
-        "b-model-type-folder-p1",
-        "b-model-type-folder-p2",
-        "b-model-type-document-stack",
-        "b-model-type-document-stack-p1",
-        "b-model-type-document-stack-p2",
-        "b-model-type-off-page-connector",
-        "b-model-type-off-page-connector-p1",
-        "b-model-type-off-page-connector-p2",
-        "b-model-type-trapezoid",
-        "b-model-type-trapezoid-p1",
-        "b-model-type-trapezoid-p2",
-        "b-model-type-manual-input",
-        "b-model-type-manual-input-p1",
-        "b-model-type-manual-input-p2",
-        "b-model-type-hexagon",
-        "b-model-type-hexagon-p1",
-        "b-model-type-hexagon-p2",
-        "b-model-type-internal-storage",
-        "b-model-type-internal-storage-p1",
-        "b-model-type-internal-storage-p2",
-        "b-model-type-or-junction",
-        "b-model-type-or-junction-p1",
-        "b-model-type-or-junction-p2",
-        "b-model-type-summing-junction",
-        "b-model-type-summing-junction-p1",
-        "b-model-type-summing-junction-p2",
-        "b-model-type-cylinder-horizontal",
-        "b-model-type-cylinder-horizontal-p1",
-        "b-model-type-cylinder-horizontal-p2",
-        "b-model-type-page-corner",
-        "b-model-type-page-corner-p1",
-        "b-model-type-page-corner-p2",
         "b-model-type-icon",
         "b-model-type-icon-p1",
         "b-model-type-icon-p2",
@@ -216,7 +141,7 @@
     },
     "b-model-heading-title": {
       "id": "b-model-heading-title",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -229,7 +154,7 @@
     },
     "b-model-intro-1": {
       "id": "b-model-intro-1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -249,7 +174,7 @@
     },
     "b-model-heading-schema": {
       "id": "b-model-heading-schema",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -262,7 +187,7 @@
     },
     "b-model-schema-p1": {
       "id": "b-model-schema-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -387,7 +312,7 @@
     },
     "b-model-schema-p2": {
       "id": "b-model-schema-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -576,7 +501,7 @@
     },
     "b-model-schema-records-intro": {
       "id": "b-model-schema-records-intro",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -587,7 +512,7 @@
     },
     "b-model-code-object": {
       "id": "b-model-code-object",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
@@ -600,20 +525,20 @@
     },
     "b-model-code-connection": {
       "id": "b-model-code-connection",
-      "flavour": "code",
+      "type": "code",
       "props": {
         "language": "ts"
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/state/schema/connections.ts\nexport type CanvasConnectionStyle = \"solid\" | \"dashed\";\n\nexport type CanvasArrowDirection = \"none\" | \"forward\" | \"back\" | \"both\";\n\nexport type CanvasConnectionEndpoint = {\n  objectId: string;\n  anchor?: \"top\" | \"right\" | \"bottom\" | \"left\" | \"center\";\n  /**\n   * Relative anchor point on the endpoint object's bounds, as\n   * [0..1, 0..1] fractions of (width, height) from the top-left corner.\n   * Optional — when present, used by A* routing as a more precise anchor\n   * than the coarse `anchor` side; when absent, routing falls back to\n   * `anchor` / auto-picked sides.\n   */\n  position?: [number, number];\n};\n\nexport type InteractiveCanvasConnection = {\n  id: string;\n  from: CanvasConnectionEndpoint;\n  to: CanvasConnectionEndpoint;\n  label?: string;\n  style?: CanvasConnectionStyle;\n  arrow?: CanvasArrowDirection;\n  role?: string;\n  /** Stroke color pick — a swatch id from the closed 10-id roster. */\n  color?: CanvasColor;\n  /** Optional world-space polyline override. */\n  waypoints?: Array<[number, number]>;\n};"
+          "insert": "// packages/canvas/src/state/schema/connections.ts\nexport type CanvasConnectionStyle = \"solid\" | \"dashed\";\n\nexport type CanvasArrowDirection = \"none\" | \"forward\" | \"back\" | \"both\";\n\nexport type CanvasConnectionEndpoint = {\n  objectId: string;\n  anchor?: \"top\" | \"right\" | \"bottom\" | \"left\" | \"center\";\n  /**\n   * Relative anchor point on the endpoint object's bounds, as\n   * [0..1, 0..1] fractions of (width, height) from the top-left corner.\n   * Optional — when present, used by A* routing as a more precise anchor\n   * than the coarse `anchor` side; when absent, routing falls back to\n   * `anchor` / auto-picked sides.\n   */\n  position?: [number, number];\n};\n\nexport type InteractiveCanvasConnection = {\n  id: string;\n  from: CanvasConnectionEndpoint;\n  to: CanvasConnectionEndpoint;\n  label?: string;\n  style?: CanvasConnectionStyle;\n  arrow?: CanvasArrowDirection;\n  /** Stroke color pick — a swatch id from the closed 10-id roster. */\n  color?: CanvasColor;\n  /** Optional world-space polyline override. */\n  waypoints?: Array<[number, number]>;\n};"
         }
       ],
       "children": []
     },
     "b-model-schema-connection-style-overhaul": {
       "id": "b-model-schema-connection-style-overhaul",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -685,7 +610,7 @@
     },
     "b-model-schema-connection-style-migration": {
       "id": "b-model-schema-connection-style-migration",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -763,7 +688,7 @@
     },
     "b-model-schema-connection-color-creation": {
       "id": "b-model-schema-connection-color-creation",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -833,7 +758,7 @@
     },
     "b-model-schema-connection-waypoints": {
       "id": "b-model-schema-connection-waypoints",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -868,7 +793,7 @@
     },
     "b-model-schema-object-types-heading": {
       "id": "b-model-schema-object-types-heading",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -881,7 +806,7 @@
     },
     "b-model-schema-object-types-list-container": {
       "id": "b-model-schema-object-types-list-container",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -909,7 +834,7 @@
     },
     "b-model-schema-object-types-list-process": {
       "id": "b-model-schema-object-types-list-process",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -928,7 +853,7 @@
     },
     "b-model-schema-object-types-list-decision": {
       "id": "b-model-schema-object-types-list-decision",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -947,7 +872,7 @@
     },
     "b-model-schema-object-types-list-sticky": {
       "id": "b-model-schema-object-types-list-sticky",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -982,47 +907,9 @@
       ],
       "children": []
     },
-    "b-model-schema-object-types-list-document": {
-      "id": "b-model-schema-object-types-list-document",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "document",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — added in D16, expanded vocabulary for reference diagrams."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-database": {
-      "id": "b-model-schema-object-types-list-database",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "database",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — added in D16, expanded vocabulary for reference diagrams."
-        }
-      ],
-      "children": []
-    },
     "b-model-schema-object-types-list-section": {
       "id": "b-model-schema-object-types-list-section",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1075,28 +962,9 @@
       ],
       "children": []
     },
-    "b-model-schema-object-types-list-pill": {
-      "id": "b-model-schema-object-types-list-pill",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "pill",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — added in W2, FigJam sections + V2 Flow shape vocabulary."
-        }
-      ],
-      "children": []
-    },
     "b-model-schema-object-types-list-arrow-shape": {
       "id": "b-model-schema-object-types-list-arrow-shape",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1124,7 +992,7 @@
     },
     "b-model-schema-object-types-list-predefined-process": {
       "id": "b-model-schema-object-types-list-predefined-process",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1143,7 +1011,7 @@
     },
     "b-model-schema-object-types-list-ellipse": {
       "id": "b-model-schema-object-types-list-ellipse",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1156,7 +1024,7 @@
     },
     "b-model-schema-object-types-list-triangle": {
       "id": "b-model-schema-object-types-list-triangle",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1167,35 +1035,9 @@
       ],
       "children": []
     },
-    "b-model-schema-object-types-list-parallelogram": {
-      "id": "b-model-schema-object-types-list-parallelogram",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "parallelogram — added in W5; a skewed quadrilateral with a left/right direction (defaults to right)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-pentagon": {
-      "id": "b-model-schema-object-types-list-pentagon",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "pentagon — added in W5; a 5-point regular polygon."
-        }
-      ],
-      "children": []
-    },
     "b-model-schema-object-types-list-octagon": {
       "id": "b-model-schema-object-types-list-octagon",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1206,191 +1048,9 @@
       ],
       "children": []
     },
-    "b-model-schema-object-types-list-star": {
-      "id": "b-model-schema-object-types-list-star",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "star — added in W5; a 5-point star polygon."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-plus": {
-      "id": "b-model-schema-object-types-list-plus",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "plus — added in W5; a 12-point cross polygon; renders no visible label text."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-chevron": {
-      "id": "b-model-schema-object-types-list-chevron",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "chevron — added in W5; a fat-chevron polygon distinct from arrow-shape, with a left/right direction (defaults to right)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-folder": {
-      "id": "b-model-schema-object-types-list-folder",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "folder — added in W5; a manila-folder silhouette with a tab notch."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-document-stack": {
-      "id": "b-model-schema-object-types-list-document-stack",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "document-stack — added in W5; offset duplicate document silhouettes suggesting multiple stacked files."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-off-page-connector": {
-      "id": "b-model-schema-object-types-list-off-page-connector",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "off-page-connector — added in W5; a downward-pointing pentagon."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-trapezoid": {
-      "id": "b-model-schema-object-types-list-trapezoid",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "trapezoid — added in W5; a 4-point trapezoid (manual-operation flowchart symbol)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-manual-input": {
-      "id": "b-model-schema-object-types-list-manual-input",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "manual-input — added in W5; a rectangle with a slanted top edge."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-hexagon": {
-      "id": "b-model-schema-object-types-list-hexagon",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "hexagon — added in W5; a 6-point regular hexagon (flowchart preparation symbol)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-internal-storage": {
-      "id": "b-model-schema-object-types-list-internal-storage",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "internal-storage — added in W5; a rectangle with interior top-row and left-column rule lines."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-or-junction": {
-      "id": "b-model-schema-object-types-list-or-junction",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "or-junction — added in W5; a circle with an inscribed \"+\"; renders no visible label text."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-summing-junction": {
-      "id": "b-model-schema-object-types-list-summing-junction",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "summing-junction — added in W5; a circle with an inscribed \"x\"; renders no visible label text."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-cylinder-horizontal": {
-      "id": "b-model-schema-object-types-list-cylinder-horizontal",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "cylinder-horizontal — added in W5; a horizontal-orientation cylinder, distinct from database's vertical cylinder."
-        }
-      ],
-      "children": []
-    },
-    "b-model-schema-object-types-list-page-corner": {
-      "id": "b-model-schema-object-types-list-page-corner",
-      "flavour": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "page-corner — added in W5; the dog-eared/folded-corner page silhouette document used before W5."
-        }
-      ],
-      "children": []
-    },
     "b-model-schema-object-types-list-icon": {
       "id": "b-model-schema-object-types-list-icon",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1403,102 +1063,18 @@
     },
     "b-model-schema-p3": {
       "id": "b-model-schema-p3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "That's 31 object types in total (the early text and source-node types were retired along the way). The D16 wave (document, database) expanded the vocabulary for reference-style architecture diagrams; the W2 wave (section, pill, arrow-shape, predefined-process) added FigJam-parity sections plus the V2 Flow shape set; D21 folded the retired Person/Chat/Chip catalog entries into the "
-        },
-        {
-          "insert": "icon",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": " type with glyphs "
-        },
-        {
-          "insert": "person",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasIconGlyph"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "chat",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasIconGlyph"
-            }
-          }
-        },
-        {
-          "insert": ", and "
-        },
-        {
-          "insert": "cpu",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasIconGlyph"
-            }
-          }
-        },
-        {
-          "insert": ". The W5 wave (ellipse, triangle, parallelogram, pentagon, octagon, star, plus, chevron, folder, document-stack, off-page-connector, trapezoid, manual-input, hexagon, internal-storage, or-junction, summing-junction, cylinder-horizontal, page-corner, icon) closed out FigJam's Basic/Flowchart/Advanced picker tiers — 19 native shape primitives plus one icon-glyph family ("
-        },
-        {
-          "insert": "icon",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": ", parameterized by a required "
-        },
-        {
-          "insert": "icon",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasIconGlyph"
-            }
-          }
-        },
-        {
-          "insert": " field drawn from a 26-value CanvasIconGlyph enum) covering the Advanced tier's 26 component icons in one type instead of 26 bespoke ones."
+          "insert": "That is 11 object types in total. The operational-maps trim retired the flowchart shape zoo — semantic nouns moved to the icon glyph vocabulary, and the shape core kept only the universal marks."
         }
       ],
       "children": []
     },
     "b-model-schema-color-heading": {
       "id": "b-model-schema-color-heading",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1511,7 +1087,7 @@
     },
     "b-model-schema-color-p1": {
       "id": "b-model-schema-color-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1645,7 +1221,7 @@
     },
     "b-model-schema-color-migration": {
       "id": "b-model-schema-color-migration",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1782,7 +1358,7 @@
     },
     "b-model-schema-validator-heading": {
       "id": "b-model-schema-validator-heading",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1795,7 +1371,7 @@
     },
     "b-model-schema-validator-p1": {
       "id": "b-model-schema-validator-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1898,7 +1474,7 @@
     },
     "b-model-heading-object-ref": {
       "id": "b-model-heading-object-ref",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1911,7 +1487,7 @@
     },
     "b-model-object-ref-intro": {
       "id": "b-model-object-ref-intro",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1968,7 +1544,7 @@
     },
     "b-model-object-ref-stale": {
       "id": "b-model-object-ref-stale",
-      "flavour": "observation",
+      "type": "observation",
       "props": {
         "title": "Walkthrough maintenance note"
       },
@@ -2018,7 +1594,7 @@
     },
     "b-model-type-container": {
       "id": "b-model-type-container",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2031,7 +1607,7 @@
     },
     "b-model-type-container-p1": {
       "id": "b-model-type-container-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2099,7 +1675,7 @@
     },
     "b-model-type-container-p2": {
       "id": "b-model-type-container-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2199,7 +1775,7 @@
     },
     "b-model-type-container-fit": {
       "id": "b-model-type-container-fit",
-      "flavour": "constraint",
+      "type": "constraint",
       "props": {
         "severity": "soft",
         "title": "fitSectionToChildren resizes only section objects"
@@ -2313,7 +1889,7 @@
     },
     "b-model-type-process": {
       "id": "b-model-type-process",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2326,7 +1902,7 @@
     },
     "b-model-type-process-p1": {
       "id": "b-model-type-process-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2409,7 +1985,7 @@
     },
     "b-model-type-process-p2": {
       "id": "b-model-type-process-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2513,7 +2089,7 @@
     },
     "b-model-type-decision": {
       "id": "b-model-type-decision",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2526,7 +2102,7 @@
     },
     "b-model-type-decision-p1": {
       "id": "b-model-type-decision-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2576,7 +2152,7 @@
     },
     "b-model-type-decision-p2": {
       "id": "b-model-type-decision-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2639,7 +2215,7 @@
     },
     "b-model-type-sticky": {
       "id": "b-model-type-sticky",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2652,7 +2228,7 @@
     },
     "b-model-type-sticky-p1": {
       "id": "b-model-type-sticky-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2760,7 +2336,7 @@
     },
     "b-model-type-sticky-p2": {
       "id": "b-model-type-sticky-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2911,221 +2487,9 @@
       ],
       "children": []
     },
-    "b-model-type-document": {
-      "id": "b-model-type-document",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "document"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-document-p1": {
-      "id": "b-model-type-document-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in the D16 wave for reference-style architecture diagrams — represents a file/document. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 160, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "\"document\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-document-p2": {
-      "id": "b-model-type-document-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "W5 replaced the dog-eared-page silhouette with a wavy bottom edge, drawn via "
-        },
-        {
-          "insert": "documentWavyPath",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/flowchart/document.tsx",
-              "symbol": "documentWavyPath"
-            }
-          }
-        },
-        {
-          "insert": " — a rectangle whose bottom edge follows a shallow sine-like curve, proportioned by "
-        },
-        {
-          "insert": "DOCUMENT_GEOMETRY",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/flowchart/document.tsx",
-              "symbol": "DOCUMENT_GEOMETRY"
-            }
-          }
-        },
-        {
-          "insert": "'s waveShoulderYRatio (0.82) and waveCrestYRatio (0.96). The old dog-ear/folded-corner notch (CSS clip-path polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%)) moved verbatim to the new "
-        },
-        {
-          "insert": "page-corner",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": " type, which now owns that silhouette exactly. document is still bbox-fallback for connection-anchor purposes (the wavy edge is not modeled as a true outline). Uses the shared base trim otherwise: label top-left, body below it."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-database": {
-      "id": "b-model-type-database",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "database"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-database-p1": {
-      "id": "b-model-type-database-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in D16 — represents a data store. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 140, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "\"database\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-database-p2": {
-      "id": "b-model-type-database-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Also rendered via the SVG "
-        },
-        {
-          "insert": "ShapeSilhouette",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " path (a cylinder: a body path plus a top ellipse), but — unlike the icon glyph family's \"label below icon\" treatment — its label/body render centered over the silhouette ("
-        },
-        {
-          "insert": "justify-content: center; padding-top: 14%",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": ") rather than below it."
-        }
-      ],
-      "children": []
-    },
     "b-model-type-section": {
       "id": "b-model-type-section",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -3138,7 +2502,7 @@
     },
     "b-model-type-section-p1": {
       "id": "b-model-type-section-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3248,7 +2612,7 @@
     },
     "b-model-type-section-lock-decision": {
       "id": "b-model-type-section-lock-decision",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Section lock is a two-mode field with legacy-boolean migration"
@@ -3327,7 +2691,7 @@
     },
     "b-model-type-section-p2": {
       "id": "b-model-type-section-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3413,7 +2777,7 @@
     },
     "b-model-type-section-p3": {
       "id": "b-model-type-section-p3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3479,7 +2843,7 @@
     },
     "b-model-type-section-p3a-title-zoom": {
       "id": "b-model-type-section-p3a-title-zoom",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3582,7 +2946,7 @@
     },
     "b-model-type-section-capture": {
       "id": "b-model-type-section-capture",
-      "flavour": "constraint",
+      "type": "constraint",
       "props": {
         "severity": "hard",
         "title": "Section membership is persisted parentId, auto-managed on drop"
@@ -3664,7 +3028,7 @@
     },
     "b-model-type-section-p4": {
       "id": "b-model-type-section-p4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3775,111 +3139,9 @@
       ],
       "children": []
     },
-    "b-model-type-pill": {
-      "id": "b-model-type-pill",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "pill"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-pill-p1": {
-      "id": "b-model-type-pill-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W2 — a true stadium/pill shape from the V2 Flow vocabulary. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 200, height: 64 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "style.shape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": " "
-        },
-        {
-          "insert": "\"pill\"",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/style.ts"
-            }
-          }
-        },
-        {
-          "insert": ". Rendered with "
-        },
-        {
-          "insert": "border-radius: 999px",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": " (a true stadium — "
-        },
-        {
-          "insert": "SHAPE_CORNER_RADII_PX.pill",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/misc/pill.tsx"
-            }
-          }
-        },
-        {
-          "insert": "'s doc comment notes the real radius is "
-        },
-        {
-          "insert": "height / 2",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/misc/pill.tsx"
-            }
-          }
-        },
-        {
-          "insert": ", left to the browser via the 999px shorthand rather than computed per-object). Label and body centered."
-        }
-      ],
-      "children": []
-    },
     "b-model-type-arrow-shape": {
       "id": "b-model-type-arrow-shape",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -3892,7 +3154,7 @@
     },
     "b-model-type-arrow-shape-p1": {
       "id": "b-model-type-arrow-shape-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -3945,7 +3207,7 @@
     },
     "b-model-type-arrow-shape-p2": {
       "id": "b-model-type-arrow-shape-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -4086,7 +3348,7 @@
     },
     "b-model-type-predefined-process": {
       "id": "b-model-type-predefined-process",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -4099,7 +3361,7 @@
     },
     "b-model-type-predefined-process-p1": {
       "id": "b-model-type-predefined-process-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -4149,7 +3411,7 @@
     },
     "b-model-type-predefined-process-p2": {
       "id": "b-model-type-predefined-process-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -4224,7 +3486,7 @@
     },
     "b-model-type-ellipse": {
       "id": "b-model-type-ellipse",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -4237,7 +3499,7 @@
     },
     "b-model-type-ellipse-p1": {
       "id": "b-model-type-ellipse-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -4262,7 +3524,7 @@
     },
     "b-model-type-ellipse-p2": {
       "id": "b-model-type-ellipse-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -4287,7 +3549,7 @@
     },
     "b-model-type-triangle": {
       "id": "b-model-type-triangle",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -4300,7 +3562,7 @@
     },
     "b-model-type-triangle-p1": {
       "id": "b-model-type-triangle-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -4339,7 +3601,7 @@
     },
     "b-model-type-triangle-p2": {
       "id": "b-model-type-triangle-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -4362,149 +3624,9 @@
       ],
       "children": []
     },
-    "b-model-type-parallelogram": {
-      "id": "b-model-type-parallelogram",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "parallelogram"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-parallelogram-p1": {
-      "id": "b-model-type-parallelogram-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a skewed quadrilateral, skewed right or left via the type-only "
-        },
-        {
-          "insert": "direction",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasShapeDirection"
-            }
-          }
-        },
-        {
-          "insert": " field (soft-defaults to \"right\"). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 160, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"parallelogram\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-parallelogram-p2": {
-      "id": "b-model-type-parallelogram-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "True-outline type via "
-        },
-        {
-          "insert": "parallelogramPoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "parallelogramPoints"
-            }
-          }
-        },
-        {
-          "insert": ", skew a fixed fraction of width (approximate, pending a pixel-reference check against FigJam). Text slot is centered."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-pentagon": {
-      "id": "b-model-type-pentagon",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "pentagon"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-pentagon-p1": {
-      "id": "b-model-type-pentagon-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a 5-point regular polygon (one point up). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 140, height: 140 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"pentagon\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-pentagon-p2": {
-      "id": "b-model-type-pentagon-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "True-outline type via "
-        },
-        {
-          "insert": "pentagonPoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "pentagonPoints"
-            }
-          }
-        },
-        {
-          "insert": ". Text slot is centered."
-        }
-      ],
-      "children": []
-    },
     "b-model-type-octagon": {
       "id": "b-model-type-octagon",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -4517,7 +3639,7 @@
     },
     "b-model-type-octagon-p1": {
       "id": "b-model-type-octagon-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -4542,7 +3664,7 @@
     },
     "b-model-type-octagon-p2": {
       "id": "b-model-type-octagon-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -4565,891 +3687,9 @@
       ],
       "children": []
     },
-    "b-model-type-star": {
-      "id": "b-model-type-star",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "star"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-star-p1": {
-      "id": "b-model-type-star-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a 5-point star polygon (10 alternating outer/inner vertices). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 140, height: 140 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"star\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-star-p2": {
-      "id": "b-model-type-star-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "True-outline type via "
-        },
-        {
-          "insert": "starPoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "starPoints"
-            }
-          }
-        },
-        {
-          "insert": ", inner radius a fixed fraction of outer (approximate, pending a pixel-reference check). Text slot is small and centered."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-plus": {
-      "id": "b-model-type-plus",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "plus"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-plus-p1": {
-      "id": "b-model-type-plus-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a 12-point cross/plus polygon (equal-width horizontal and vertical bars). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 120, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"plus\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-plus-p2": {
-      "id": "b-model-type-plus-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "True-outline type via "
-        },
-        {
-          "insert": "plusPoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "plusPoints"
-            }
-          }
-        },
-        {
-          "insert": ". Renders no visible label text — the cross's usable text area is too small, so the label is accessibility-only (hidesVisibleText)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-chevron": {
-      "id": "b-model-type-chevron",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "chevron"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-chevron-p1": {
-      "id": "b-model-type-chevron-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — FigJam's \"fat chevron arrow\", pointing left or right via the type-only "
-        },
-        {
-          "insert": "direction",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasShapeDirection"
-            }
-          }
-        },
-        {
-          "insert": " field (soft-defaults to \"right\"). Distinct from arrow-shape: the two silhouettes diverged enough in FigJam's own picker to justify separate types rather than a shared weight field. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 160, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"chevron\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-chevron-p2": {
-      "id": "b-model-type-chevron-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "True-outline type via "
-        },
-        {
-          "insert": "chevronPoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "chevronPoints"
-            }
-          }
-        },
-        {
-          "insert": ", proportioned by "
-        },
-        {
-          "insert": "CHEVRON_GEOMETRY",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/basic/chevron.tsx",
-              "symbol": "CHEVRON_GEOMETRY"
-            }
-          }
-        },
-        {
-          "insert": "'s notchWidthRatio (0.25). Text slot is centered, offset away from the notch."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-folder": {
-      "id": "b-model-type-folder",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "folder"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-folder-p1": {
-      "id": "b-model-type-folder-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a manila-folder silhouette: a rectangle with a small tab notch on the top edge. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 140, height: 110 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"folder\", tab width proportioned by "
-        },
-        {
-          "insert": "FOLDER_GEOMETRY",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/flowchart/folder.tsx",
-              "symbol": "FOLDER_GEOMETRY"
-            }
-          }
-        },
-        {
-          "insert": "'s tabWidthRatio (0.38)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-folder-p2": {
-      "id": "b-model-type-folder-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Bbox-fallback outline (the tab notch doesn't perturb connection anchors). Text slot is centered in the main body, below the tab."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-document-stack": {
-      "id": "b-model-type-document-stack",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "document-stack"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-document-stack-p1": {
-      "id": "b-model-type-document-stack-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — FigJam's \"multiple documents (stacked)\" symbol: offset duplicate wavy-document outlines behind the primary. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 160, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"document-stack\", offset proportioned by "
-        },
-        {
-          "insert": "DOCUMENT_STACK_GEOMETRY",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/flowchart/document-stack.tsx",
-              "symbol": "DOCUMENT_STACK_GEOMETRY"
-            }
-          }
-        },
-        {
-          "insert": "'s offsetPx (6)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-document-stack-p2": {
-      "id": "b-model-type-document-stack-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Bbox-fallback outline. Text slot is centered on the front-most document silhouette."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-off-page-connector": {
-      "id": "b-model-type-off-page-connector",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "off-page-connector"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-off-page-connector-p1": {
-      "id": "b-model-type-off-page-connector-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a downward-pointing pentagon (FigJam's SHIELD shapeType). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 120, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"off-page-connector\", point proportioned by "
-        },
-        {
-          "insert": "OFF_PAGE_CONNECTOR_GEOMETRY",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/flowchart/off-page-connector.tsx",
-              "symbol": "OFF_PAGE_CONNECTOR_GEOMETRY"
-            }
-          }
-        },
-        {
-          "insert": "'s shoulderRatio (0.6)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-off-page-connector-p2": {
-      "id": "b-model-type-off-page-connector-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "True-outline type via "
-        },
-        {
-          "insert": "offPageConnectorPoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "offPageConnectorPoints"
-            }
-          }
-        },
-        {
-          "insert": ". Text slot is centered in the upper rectangular band, above the point."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-trapezoid": {
-      "id": "b-model-type-trapezoid",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "trapezoid"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-trapezoid-p1": {
-      "id": "b-model-type-trapezoid-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a 4-point trapezoid (FigJam's \"manual operation\" symbol): wider bottom edge, narrower symmetric top edge. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 150, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"trapezoid\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-trapezoid-p2": {
-      "id": "b-model-type-trapezoid-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "True-outline type via "
-        },
-        {
-          "insert": "trapezoidPoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "trapezoidPoints"
-            }
-          }
-        },
-        {
-          "insert": ". Text slot is centered."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-manual-input": {
-      "id": "b-model-type-manual-input",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "manual-input"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-manual-input-p1": {
-      "id": "b-model-type-manual-input-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a rectangle with a slanted top edge (top-left corner dropped). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 150, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"manual-input\", drop proportioned by "
-        },
-        {
-          "insert": "MANUAL_INPUT_GEOMETRY",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/flowchart/manual-input.tsx",
-              "symbol": "MANUAL_INPUT_GEOMETRY"
-            }
-          }
-        },
-        {
-          "insert": "'s dropRatio (0.25)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-manual-input-p2": {
-      "id": "b-model-type-manual-input-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "True-outline type via "
-        },
-        {
-          "insert": "manualInputPoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "manualInputPoints"
-            }
-          }
-        },
-        {
-          "insert": ". Text slot is centered in the lower rectangular band, below the slanted edge."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-hexagon": {
-      "id": "b-model-type-hexagon",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "hexagon"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-hexagon-p1": {
-      "id": "b-model-type-hexagon-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a 6-point regular hexagon, flat-top orientation (FigJam's \"preparation\" symbol). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 150, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"hexagon\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-hexagon-p2": {
-      "id": "b-model-type-hexagon-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "True-outline type via "
-        },
-        {
-          "insert": "hexagonPoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "hexagonPoints"
-            }
-          }
-        },
-        {
-          "insert": ". Text slot is centered."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-internal-storage": {
-      "id": "b-model-type-internal-storage",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "internal-storage"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-internal-storage-p1": {
-      "id": "b-model-type-internal-storage-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a rectangle with two additional straight rule lines drawn inside near the top and left edges (FigJam's \"internal storage\" symbol). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 150, height: 110 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"internal-storage\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-internal-storage-p2": {
-      "id": "b-model-type-internal-storage-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Outline is a plain rect — the interior rule lines are decoration only and don't perturb where a connector crosses the border. Text slot is centered in the remaining lower-right cell, below the top rule and right of the left rule."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-or-junction": {
-      "id": "b-model-type-or-junction",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "or-junction"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-or-junction-p1": {
-      "id": "b-model-type-or-junction-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a circle with an inscribed \"+\" (FigJam's OR flowchart junction). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 100, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"or-junction\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-or-junction-p2": {
-      "id": "b-model-type-or-junction-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Ellipse-silhouette true-outline type (shares the \"junction\" outline tier with summing-junction, both via "
-        },
-        {
-          "insert": "ellipsePoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "ellipsePoints"
-            }
-          }
-        },
-        {
-          "insert": "). The inscribed \"+\" is drawn from cardinal lines at 50%/50%, distinguishing it from summing-junction's \"x\". Renders no visible label text (accessibility-only)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-summing-junction": {
-      "id": "b-model-type-summing-junction",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "summing-junction"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-summing-junction-p1": {
-      "id": "b-model-type-summing-junction-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a circle with an inscribed \"x\" (FigJam's summing-junction flowchart symbol). Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 100, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"summing-junction\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-summing-junction-p2": {
-      "id": "b-model-type-summing-junction-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Ellipse-silhouette true-outline type, same tier as or-junction. The inscribed \"x\" is drawn from diagonal lines at roughly 14.64%/85.36% (cos 45° scaled), distinguishing it from or-junction's \"+\". Renders no visible label text (accessibility-only)."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-cylinder-horizontal": {
-      "id": "b-model-type-cylinder-horizontal",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "cylinder-horizontal"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-cylinder-horizontal-p1": {
-      "id": "b-model-type-cylinder-horizontal-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — a horizontal-orientation cylinder (FigJam's ENG_QUEUE shapeType), distinct from database's vertical cylinder. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 150, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"cylinder-horizontal\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-cylinder-horizontal-p2": {
-      "id": "b-model-type-cylinder-horizontal-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Bbox-fallback outline (like database). Text slot is centered on the silhouette."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-page-corner": {
-      "id": "b-model-type-page-corner",
-      "flavour": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "page-corner"
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-page-corner-p1": {
-      "id": "b-model-type-page-corner-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Added in W5 — the dog-eared/folded-corner page silhouette document used before W5 (FigJam's ENG_FILE shapeType), now split into its own type since document moved to a wavy-bottom silhouette instead. Default geometry "
-        },
-        {
-          "insert": "{ x: 160, y: 160, width: 160, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"page-corner\"."
-        }
-      ],
-      "children": []
-    },
-    "b-model-type-page-corner-p2": {
-      "id": "b-model-type-page-corner-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Rendered with the same CSS clip-path dog-ear notch document used to carry: polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%), asymmetric border radius (2px 8px 8px 8px). Bbox-fallback outline. Text slot is centered on the silhouette."
-        }
-      ],
-      "children": []
-    },
     "b-model-type-icon": {
       "id": "b-model-type-icon",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -5462,7 +3702,7 @@
     },
     "b-model-type-icon-p1": {
       "id": "b-model-type-icon-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -5501,7 +3741,7 @@
     },
     "b-model-type-icon-p2": {
       "id": "b-model-type-icon-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -5540,7 +3780,7 @@
     },
     "b-model-heading-layout-conventions": {
       "id": "b-model-heading-layout-conventions",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -5553,7 +3793,7 @@
     },
     "b-model-layout-conventions-p1": {
       "id": "b-model-layout-conventions-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -5718,7 +3958,7 @@
     },
     "b-model-layout-conventions-p2": {
       "id": "b-model-layout-conventions-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -5799,7 +4039,7 @@
     },
     "b-model-layout-conventions-p3": {
       "id": "b-model-layout-conventions-p3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -5851,7 +4091,7 @@
     },
     "b-model-layout-conventions-p4": {
       "id": "b-model-layout-conventions-p4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -5992,7 +4232,7 @@
     },
     "b-model-heading-actions": {
       "id": "b-model-heading-actions",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -6005,7 +4245,7 @@
     },
     "b-model-actions-p1": {
       "id": "b-model-actions-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -6085,7 +4325,7 @@
     },
     "b-model-actions-list-select": {
       "id": "b-model-actions-list-select",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6104,7 +4344,7 @@
     },
     "b-model-actions-list-setTool": {
       "id": "b-model-actions-list-setTool",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6132,7 +4372,7 @@
     },
     "b-model-actions-list-updateDocumentTitle": {
       "id": "b-model-actions-list-updateDocumentTitle",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6155,7 +4395,7 @@
     },
     "b-model-actions-list-addObject": {
       "id": "b-model-actions-list-addObject",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6206,7 +4446,7 @@
     },
     "b-model-actions-list-addObjects": {
       "id": "b-model-actions-list-addObjects",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6225,7 +4465,7 @@
     },
     "b-model-actions-list-updateObject": {
       "id": "b-model-actions-list-updateObject",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6244,7 +4484,7 @@
     },
     "b-model-actions-list-updateObjectGeometries": {
       "id": "b-model-actions-list-updateObjectGeometries",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6263,7 +4503,7 @@
     },
     "b-model-actions-list-reconcileSectionMembership": {
       "id": "b-model-actions-list-reconcileSectionMembership",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6318,7 +4558,7 @@
     },
     "b-model-actions-list-resizeObject": {
       "id": "b-model-actions-list-resizeObject",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6337,7 +4577,7 @@
     },
     "b-model-actions-list-moveSelection": {
       "id": "b-model-actions-list-moveSelection",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6356,7 +4596,7 @@
     },
     "b-model-actions-list-duplicateSelection": {
       "id": "b-model-actions-list-duplicateSelection",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6375,7 +4615,7 @@
     },
     "b-model-actions-list-deleteSelection": {
       "id": "b-model-actions-list-deleteSelection",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6394,7 +4634,7 @@
     },
     "b-model-actions-list-addConnection": {
       "id": "b-model-actions-list-addConnection",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6431,7 +4671,7 @@
     },
     "b-model-actions-list-updateConnection": {
       "id": "b-model-actions-list-updateConnection",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6495,7 +4735,7 @@
     },
     "b-model-actions-list-deleteConnection": {
       "id": "b-model-actions-list-deleteConnection",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6514,7 +4754,7 @@
     },
     "b-model-actions-list-quickConnect": {
       "id": "b-model-actions-list-quickConnect",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6533,7 +4773,7 @@
     },
     "b-model-actions-list-addAnnotation": {
       "id": "b-model-actions-list-addAnnotation",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6552,7 +4792,7 @@
     },
     "b-model-actions-list-setObjectType": {
       "id": "b-model-actions-list-setObjectType",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6598,7 +4838,7 @@
     },
     "b-model-actions-list-setParent": {
       "id": "b-model-actions-list-setParent",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6617,7 +4857,7 @@
     },
     "b-model-actions-list-alignSelection": {
       "id": "b-model-actions-list-alignSelection",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6650,7 +4890,7 @@
     },
     "b-model-actions-list-distributeSelection": {
       "id": "b-model-actions-list-distributeSelection",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6669,7 +4909,7 @@
     },
     "b-model-actions-list-fitContainerToChildren": {
       "id": "b-model-actions-list-fitContainerToChildren",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6697,7 +4937,7 @@
     },
     "b-model-actions-list-undo": {
       "id": "b-model-actions-list-undo",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6716,7 +4956,7 @@
     },
     "b-model-actions-list-redo": {
       "id": "b-model-actions-list-redo",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6735,7 +4975,7 @@
     },
     "b-model-actions-list-reset": {
       "id": "b-model-actions-list-reset",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -6754,7 +4994,7 @@
     },
     "b-model-actions-p2": {
       "id": "b-model-actions-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -6783,74 +5023,18 @@
     },
     "b-model-actions-updateConnection-semantics": {
       "id": "b-model-actions-updateConnection-semantics",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "handleUpdateConnection",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/actions/connections.ts",
-              "symbol": "handleUpdateConnection"
-            }
-          }
-        },
-        {
-          "insert": " derives history from the patch shape after validation: endpoint changes record "
-        },
-        {
-          "insert": "Reconnected connector",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", a patch whose only key is "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " records "
-        },
-        {
-          "insert": "Edited connector label",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and style/arrow/color/role/waypoint edits record "
-        },
-        {
-          "insert": "Updated connector",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". Endpoint changes also clear any explicit "
-        },
-        {
-          "insert": "waypoints",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " unless the patch supplies replacement waypoints."
+          "insert": "handleUpdateConnection derives history from the patch shape after validation: endpoint changes record Reconnected connector, a patch whose only key is label records Edited connector label, and style/arrow/color/waypoint edits record Updated connector. Endpoint changes also clear any explicit waypoints unless the patch supplies replacement waypoints."
         }
       ],
       "children": []
     },
     "b-model-actions-quickConnect-duplicate-source": {
       "id": "b-model-actions-quickConnect-duplicate-source",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -6908,7 +5092,7 @@
     },
     "b-model-decision-single-reducer": {
       "id": "b-model-decision-single-reducer",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Single reducer as mutation authority"
@@ -6987,7 +5171,7 @@
     },
     "b-model-decision-waypoints": {
       "id": "b-model-decision-waypoints",
-      "flavour": "observation",
+      "type": "observation",
       "props": {
         "title": "Waypoint reconciliation rides inside the reducer"
       },
@@ -7029,7 +5213,7 @@
     },
     "b-model-heading-geometry": {
       "id": "b-model-heading-geometry",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -7042,7 +5226,7 @@
     },
     "b-model-geometry-p1": {
       "id": "b-model-geometry-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -7153,7 +5337,7 @@
     },
     "b-model-geometry-p2": {
       "id": "b-model-geometry-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -7202,7 +5386,7 @@
     },
     "b-model-heading-spectre-ref": {
       "id": "b-model-heading-spectre-ref",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -7215,7 +5399,7 @@
     },
     "b-model-spectre-ref-p1": {
       "id": "b-model-spectre-ref-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -7262,7 +5446,7 @@
     },
     "b-model-constraint-single-authority": {
       "id": "b-model-constraint-single-authority",
-      "flavour": "constraint",
+      "type": "constraint",
       "props": {
         "severity": "hard",
         "title": "All mutation goes through reduceInteractiveCanvasState"
@@ -7312,7 +5496,7 @@
     },
     "b-model-testing-coverage": {
       "id": "b-model-testing-coverage",
-      "flavour": "testing",
+      "type": "testing",
       "props": {
         "title": "Model layer test coverage"
       },
@@ -7374,7 +5558,7 @@
     },
     "b-model-closing-p1": {
       "id": "b-model-closing-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {

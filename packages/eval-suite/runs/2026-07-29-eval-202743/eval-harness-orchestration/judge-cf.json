@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 7,
+  "verdict": {
+    "score": 7,
+    "score_rationale": "This lands on the 7 anchor because it is a composed, readable operational map with disciplined iconography and clean routing, but the broad empty lower band, uneven panel density, and a few color-semantic departures keep it from feeling fully exhibition-ready.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6.5,
+        "note": "The six-stage layout spans the width intentionally, but a conspicuous empty band occupies much of the frame below the lower panels, while the long inter-row wire further emphasizes the vertical gap."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Most registry colors are disciplined—teal agents/orchestration, pink grader, red guardrail, white documents, gray infrastructure, and yellow human/event forms—but the red product-regression lightning departs from the event registry and the extensive purple/blue routing adds visual competition."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 8.5,
+        "note": "No crosshair junctions, waypoint artifacts, or floating badges are visible; routed lines generally terminate cleanly with clear arrowheads, though several long perimeter routes remain visually prominent."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 7,
+        "note": "Panel headers and the two-row grid establish strong registers, but density varies unevenly—stage 3 is crowded, stage 4 is sparse, and long spanning connectors weaken the otherwise orderly rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 6794,
+    "output_tokens": 600
+  },
+  "flags": []
+}

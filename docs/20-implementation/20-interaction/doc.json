@@ -6,7 +6,7 @@
   "blocks": {
     "b-interaction-root": {
       "id": "b-interaction-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "concepts": [
           "pointer vocabulary",
@@ -41,7 +41,7 @@
     },
     "b-interaction-title-1": {
       "id": "b-interaction-title-1",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -54,7 +54,7 @@
     },
     "b-interaction-intro-2": {
       "id": "b-interaction-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -120,7 +120,7 @@
     },
     "b-interaction-heading-vocabulary-25": {
       "id": "b-interaction-heading-vocabulary-25",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -133,7 +133,7 @@
     },
     "b-interaction-vocabulary-body-26": {
       "id": "b-interaction-vocabulary-body-26",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -327,7 +327,7 @@
     },
     "b-interaction-vocabulary-thresholds-27": {
       "id": "b-interaction-vocabulary-thresholds-27",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -500,7 +500,7 @@
     },
     "b-interaction-heading-hit-testing-28": {
       "id": "b-interaction-heading-hit-testing-28",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -513,7 +513,7 @@
     },
     "b-interaction-hit-testing-body-29": {
       "id": "b-interaction-hit-testing-body-29",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -625,7 +625,7 @@
     },
     "b-interaction-hit-testing-outline-30": {
       "id": "b-interaction-hit-testing-outline-30",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -647,7 +647,7 @@
     },
     "b-interaction-heading-frame-coalescer-31": {
       "id": "b-interaction-heading-frame-coalescer-31",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -660,7 +660,7 @@
     },
     "b-interaction-frame-coalescer-body-32": {
       "id": "b-interaction-frame-coalescer-body-32",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -732,7 +732,7 @@
     },
     "b-interaction-heading-clipboard-19": {
       "id": "b-interaction-heading-clipboard-19",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -745,7 +745,7 @@
     },
     "b-interaction-clipboard-body-20": {
       "id": "b-interaction-clipboard-body-20",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -901,7 +901,7 @@
     },
     "b-interaction-heading-edge-pan-21": {
       "id": "b-interaction-heading-edge-pan-21",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -914,7 +914,7 @@
     },
     "b-interaction-edge-pan-body-22": {
       "id": "b-interaction-edge-pan-body-22",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1148,7 +1148,7 @@
     },
     "b-interaction-testing-23": {
       "id": "b-interaction-testing-23",
-      "flavour": "testing",
+      "type": "testing",
       "props": {
         "title": "Interaction test suite"
       },
@@ -1285,7 +1285,7 @@
     },
     "b-interaction-closing-24": {
       "id": "b-interaction-closing-24",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {

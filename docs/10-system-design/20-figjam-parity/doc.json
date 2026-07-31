@@ -6,8 +6,7 @@
   "blocks": {
     "b-figjam-parity-figjam-shape-parity-map-1": {
       "id": "b-figjam-parity-figjam-shape-parity-map-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -15,12 +14,12 @@
         {
           "insert": "FigJam Shape Parity Map"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-this-doc-measures-our-canvas-engine-s-sh-2": {
       "id": "b-figjam-parity-this-doc-measures-our-canvas-engine-s-sh-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -39,12 +38,12 @@
         {
           "insert": " \"FigJam visual parity is ground truth\" decision). The picker has three tiers, and they map onto our schema very differently:"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-native-code-ref-shapetype-packages-canv-3": {
       "id": "b-figjam-parity-native-code-ref-shapetype-packages-canv-3",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -103,12 +102,12 @@
         {
           "insert": " variants are compared against below."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-connectors-3-line-arrow-elbow-arrow-4": {
       "id": "b-figjam-parity-connectors-3-line-arrow-elbow-arrow-4",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -153,12 +152,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-advanced-26-these-are-components-5": {
       "id": "b-figjam-parity-advanced-26-these-are-components-5",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -240,12 +239,12 @@
         {
           "insert": ")."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-every-row-below-gets-one-of-three-verdic-6": {
       "id": "b-figjam-parity-every-row-below-gets-one-of-three-verdic-6",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -264,12 +263,12 @@
         {
           "insert": "), not against type names that merely sound similar:"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-bold-have-geometry-and-role-match-m-7": {
       "id": "b-figjam-parity-bold-have-geometry-and-role-match-m-7",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -283,12 +282,12 @@
         {
           "insert": " — geometry and role match; minor styling deltas (fixed radius, palette) are noted but don't demote the verdict."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-bold-have-but-wrong-we-render-someth-8": {
       "id": "b-figjam-parity-bold-have-but-wrong-we-render-someth-8",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -302,12 +301,12 @@
         {
           "insert": " — we render something for this slot, but its silhouette, geometry, or behavior diverges enough that it isn't a faithful stand-in."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-bold-missing-no-reasonable-mapping-e-9": {
       "id": "b-figjam-parity-bold-missing-no-reasonable-mapping-e-9",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -321,12 +320,12 @@
         {
           "insert": " — no reasonable mapping exists today."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-see-doc-ref-shape-api-structure-10-syst-10": {
       "id": "b-figjam-parity-see-doc-ref-shape-api-structure-10-syst-10",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -358,12 +357,12 @@
         {
           "insert": " for exhaustive per-type rendering detail. This doc is the gap analysis that sits between them."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-gap-table-11": {
       "id": "b-figjam-parity-gap-table-11",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -371,12 +370,12 @@
         {
           "insert": "Gap table"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-reconciling-the-shared-brief-s-59-item-p-12": {
       "id": "b-figjam-parity-reconciling-the-shared-brief-s-59-item-p-12",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -418,12 +417,12 @@
         {
           "insert": " union at all, and are handled in their own subsection and strategy note below."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-basic-13": {
       "id": "b-figjam-parity-basic-13",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -431,12 +430,12 @@
         {
           "insert": "Basic"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-basic-table-14": {
       "id": "b-figjam-parity-basic-table-14",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -444,12 +443,12 @@
         {
           "insert": "FigJam name               shapeType          verdict  our mapping                     notes\n------------------------  -----------------  -------  ------------------------------  -----------------------------------------------------------------------------------------------------------------------------------------\nSquare (rounded corners)  SQUARE             HAVE     rounded-rect (default)          our fixed 8px radius vs Figma's tighter square corner; close enough\nCircle                    ELLIPSE            HAVE     ellipse                         true ellipse inscribed in the bounding box, true-outline anchors (W5)\nDiamond                   DIAMOND            HAVE     decision (style.shape:diamond)  CSS clip-path 4-point diamond, true outline anchors\nTriangle (up)             TRIANGLE_UP        HAVE     triangle (direction:up)         isosceles triangle polygon, true-outline anchors (W5)\nTriangle (down)           TRIANGLE_DOWN      HAVE     triangle (direction:down)       same primitive as TRIANGLE_UP, flipped via the direction field (W5)\nRounded rectangle (wide)  ROUNDED_RECTANGLE  HAVE     rectangle/process (default)     same rounded-rect as square, just wider aspect\nPentagon                  PENTAGON           HAVE     pentagon                        5-point regular polygon, true-outline anchors (W5)\nOctagon                   OCTAGON            HAVE     octagon                         8-point regular polygon, true-outline anchors (W5)\nPlus/cross                PLUS               HAVE     plus                            12-point cross polygon, true-outline anchors; renders no visible label text (a11y-only) (W5)\nBlock arrow (left)        ARROW_LEFT         HAVE     arrow-shape (direction:left)    bodyHeightRatio raised 0.53->0.60 in W5 so the body reads blockier; approximate pending pixel sample\nBlock arrow (right)       ARROW_RIGHT        HAVE     arrow-shape (direction:right)   same bodyHeightRatio 0.60 update as ARROW_LEFT; approximate pending pixel sample\nFat chevron arrow         CHEVRON            HAVE     chevron                         landed as its own object type distinct from arrow-shape, not a weight variant (W5)\nStar                      STAR               HAVE     star                            5-point star polygon, true-outline anchors; inner-radius ratio flagged approximate pending pixel-reference check (W5)\nSpeech bubble             SPEECH_BUBBLE      HAVE     icon (glyph: chat)              Chat catalog entry stamps type icon with glyph chat after D21"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-block-arrow-left-arrow-left-our-co-15": {
       "id": "b-figjam-parity-block-arrow-left-arrow-left-our-co-15",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -503,12 +502,12 @@
         {
           "insert": ") — FigJam's block arrow is a blockier, full-height arrow body; the W5 bump closes most of the former thin-sliver silhouette gap (still flagged approximate pending a live pixel sample). Same geometry as the right-pointing variant."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-block-arrow-right-arrow-right-same-16": {
       "id": "b-figjam-parity-block-arrow-right-arrow-right-same-16",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -534,12 +533,12 @@
         {
           "insert": " flipped, not two independently-tuned shapes."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-speech-bubble-is-have-not-have-but-wron-17": {
       "id": "b-figjam-parity-speech-bubble-is-have-not-have-but-wron-17",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -561,12 +560,12 @@
         {
           "insert": " mapping; there is no separate speech-bubble object type after D21."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-flowchart-18": {
       "id": "b-figjam-parity-flowchart-18",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -574,12 +573,12 @@
         {
           "insert": "Flowchart"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-flowchart-table-19": {
       "id": "b-figjam-parity-flowchart-table-19",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -587,12 +586,12 @@
         {
           "insert": "FigJam name                         shapeType            verdict  our mapping                      notes\n----------------------------------  -------------------  -------  -------------------------------  ----------------------------------------------------------------------------------------------------------------------\nParallelogram (skew right)          PARALLELOGRAM_RIGHT  HAVE     parallelogram (direction:right)  skewPx a fixed fraction of width; flagged approximate pending pixel-reference check (W5)\nParallelogram (skew left)           PARALLELOGRAM_LEFT   HAVE     parallelogram (direction:left)   same skew-ratio approximation as PARALLELOGRAM_RIGHT (W5)\nCylinder vertical (database/drum)   ENG_DATABASE         HAVE     database                         true geometric cylinder: closed barrel path + ellipse lid, matches FigJam's silhouette closely\nCylinder horizontal                 ENG_QUEUE            HAVE     cylinder-horizontal              dedicated horizontal-orientation cylinder primitive, bbox-fallback outline (W5)\nPage with folded corner             ENG_FILE             HAVE     page-corner                      the old dog-ear/folded-corner notch moved verbatim from document to this new dedicated type (W5)\nFolder (tabbed)                     ENG_FOLDER           HAVE     folder                           rectangle with a tab notch on the top edge, bbox-fallback outline (W5)\nDocument (wavy bottom edge)         DOCUMENT_SINGLE      HAVE     document                         document now renders a genuine wavy/sinusoidal bottom edge via documentWavyPath; the dog-ear moved to page-corner (W5)\nMultiple documents (stacked)        DOCUMENT_MULTIPLE    HAVE     document-stack                   offset duplicate wavy-document outlines behind the primary, bbox-fallback outline (W5)\nPredefined process                  PREDEFINED_PROCESS   HAVE     predefined-process               rounded-rect + two inset vertical bars near left/right edges, matches the FigJam symbol\nOff-page connector (pentagon down)  SHIELD               HAVE     off-page-connector               downward-pointing pentagon, true-outline anchors (W5)\nTrapezoid (manual operation)        TRAPEZOID            HAVE     trapezoid                        4-point trapezoid polygon, true-outline anchors (W5)\nManual input (slanted top edge)     MANUAL_INPUT         HAVE     manual-input                     rectangle with a slanted top edge, true-outline anchors (W5)\nHexagon (preparation)               HEXAGON              HAVE     hexagon                          6-point regular hexagon, flat-top orientation, true-outline anchors (W5)\nInternal storage                    INTERNAL_STORAGE     HAVE     internal-storage                 rect + top row + left column rule lines; outline is a plain rect (interior rules don't perturb it) (W5)\nOr-junction (circle with +)         OR                   HAVE     or-junction                      ellipse-silhouette with an inscribed '+'; renders no visible label text (a11y-only) (W5)\nSumming junction (circle with X)    SUMMING_JUNCTION     HAVE     summing-junction                 ellipse-silhouette with an inscribed 'x'; renders no visible label text (a11y-only) (W5)"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-page-with-folded-corner-eng-file-our-20": {
       "id": "b-figjam-parity-page-with-folded-corner-eng-file-our-20",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -640,12 +639,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-document-wavy-bottom-edge-document-s-21": {
       "id": "b-figjam-parity-document-wavy-bottom-edge-document-s-21",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -693,12 +692,12 @@
         {
           "insert": " type."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-off-page-connector-shield-figma-s-own-23": {
       "id": "b-figjam-parity-off-page-connector-shield-figma-s-own-23",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -715,12 +714,12 @@
         {
           "insert": " shapeType — an odd tooltip/enum-name pairing worth double-checking against a live FigJam instance before implementing, since it doesn't obviously correspond to a shield glyph the way the Advanced tier's own \"Shield\" icon does."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-connectors-24": {
       "id": "b-figjam-parity-connectors-24",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -728,12 +727,12 @@
         {
           "insert": "Connectors"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-connectors-table-25": {
       "id": "b-figjam-parity-connectors-table-25",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -741,12 +740,12 @@
         {
           "insert": "FigJam name               line type            verdict              our mapping                            notes\n------------------------  -------------------  -------------------  -------------------------------------  --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\nStraight line (no arrow)  line, no arrowheads  HAVE                 connection style:solid, arrow:none     orthogonal router snaps aligned endpoints to an exact straight run; zero arrowhead markers\nStraight arrow            line, one arrowhead  HAVE-BUT-DEVIATES    connection style:solid, arrow:forward  routing and the single filled triangle arrowhead are solid, but Figma exposes 12 ConnectorStrokeCap variants and independent start/end caps; we expose only none/forward/back/both using that one marker\nElbow arrow               ELBOWED connector    HAVE-BUT-DEVIATES    routed orthogonal connector            elbow-only routing is now the default router behavior, not a style value; bend pills edit persisted waypoints, snap-to-straight clears them, reconnect resets bends, and default connector color deliberately stays gray rather than tinting from the source object"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-straight-arrow-the-routing-and-arrow-pl-26": {
       "id": "b-figjam-parity-straight-arrow-the-routing-and-arrow-pl-26",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -799,12 +798,12 @@
         {
           "insert": "-colored) with no per-connection choice of cap style. Creation now has two surfaces: select mode keeps selection-only off-bounds anchor dots, while the dedicated Connector Mode hover-reveals dots on any object, ignores the zoom gate, supports body-drag with auto-picked source anchors, and stays sticky for chained creation. This closes the FigJam-parity gap for FigJam's connector tool behavior. At rest, connector labels are 16px/700 midpoint chips."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-advanced-27": {
       "id": "b-figjam-parity-advanced-27",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -812,12 +811,12 @@
         {
           "insert": "Advanced"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-advanced-table-28": {
       "id": "b-figjam-parity-advanced-table-28",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -825,12 +824,12 @@
         {
           "insert": "FigJam name                          verdict  our mapping             notes\n-----------------------------------  -------  ----------------------  ------------------------------------------------------------------------------------------------------------\nActivity/monitor panel (pulse line)  HAVE     icon (glyph: activity)  dedicated icon-glyph family (W5) — see notes below on the 5 previously-mismatched rows\nArchive box                          HAVE     icon (glyph: archive)   -\nKey                                  HAVE     icon (glyph: key)       -\nChat bubble (outline)                HAVE     icon (glyph: chat)      uses the chat glyph after D21\nCloud                                HAVE     icon (glyph: cloud)     -\nCPU/chip                             HAVE     icon (glyph: cpu)       uses the cpu glyph after D21\nDatabase (stacked discs)             HAVE     icon (glyph: database)  superseded the old database-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nDisplay/monitor                      HAVE     icon (glyph: display)   -\nEnvelope/mail                        HAVE     icon (glyph: mail)      -\nFile/document                        HAVE     icon (glyph: file)      superseded the old document-shape-tier stand-in; icon is correctly sized/scoped for this tier now (W5)\nCode (angle brackets)                HAVE     icon (glyph: code)      icon is correctly sized/scoped for this tier now (W5)\nLightning bolt                       HAVE     icon (glyph: bolt)      -\nLocation pin                         HAVE     icon (glyph: pin)       -\nMobile phone                         HAVE     icon (glyph: phone)     -\nPackage (3D box, tape)               HAVE     icon (glyph: package)   -\nDollar coin                          HAVE     icon (glyph: coin)      -\nShield                               HAVE     icon (glyph: shield)    distinct from the Flowchart SHIELD shapeType (off-page-connector); this is the Advanced-tier component icon\nPaper plane/send                     HAVE     icon (glyph: send)      -\nServer stack (2 rows)                HAVE     icon (glyph: server)    -\nCube (3D)                            HAVE     icon (glyph: cube)      -\nGear                                 HAVE     icon (glyph: gear)      -\nHard drive/disk enclosure            HAVE     icon (glyph: drive)     -\nTerminal window                      HAVE     icon (glyph: terminal)  -\nPerson/user                          HAVE     icon (glyph: person)    uses the person glyph after D21\nWallet/card holder                   HAVE     icon (glyph: wallet)    -\nGlobe                                HAVE     icon (glyph: globe)     -"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-bold-database-our-database-is-a-true-30": {
       "id": "b-figjam-parity-bold-database-our-database-is-a-true-30",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -844,12 +843,12 @@
         {
           "insert": ": our database is a true vertical-cylinder flowchart primitive (ENG_DATABASE tier), same over-scaled mismatch pattern: right silhouette family, wrong tier — Advanced wants a small stacked-disc chip icon, not the full shape."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-bold-file-document-same-tier-mismatch-31": {
       "id": "b-figjam-parity-bold-file-document-same-tier-mismatch-31",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -926,12 +925,12 @@
         {
           "insert": " type."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-the-26-advanced-items-are-figjam-compo-34": {
       "id": "b-figjam-parity-the-26-advanced-items-are-figjam-compo-34",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -974,12 +973,12 @@
         {
           "insert": " field drawn from the 26-value CanvasIconGlyph enum, so the chat, cpu, database, file, code, and person concepts are glyphs rather than bespoke object types."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-missing-shape-specs-35": {
       "id": "b-figjam-parity-missing-shape-specs-35",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -987,12 +986,12 @@
         {
           "insert": "Missing shape specs"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-each-spec-below-follows-the-shape-api-s-36": {
       "id": "b-figjam-parity-each-spec-below-follows-the-shape-api-s-36",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1054,12 +1053,12 @@
         {
           "insert": " field rather than two separate left/right types. Trivially-similar shapes (a triangle that just points the other way, a parallelogram skewed the other way) are grouped into one spec with a direction-style field, for the same reason."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-ellipse-37": {
       "id": "b-figjam-parity-ellipse-37",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1067,12 +1066,12 @@
         {
           "insert": "Ellipse"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-ellipse-geometry-38": {
       "id": "b-figjam-parity-ellipse-geometry-38",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Ellipse geometry"
       },
@@ -1116,12 +1115,12 @@
         {
           "insert": " trick (border-radius alone can't give true elliptical connection-anchor projection when the object isn't a perfect square)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-160x120-wide-oval-same-de-39": {
       "id": "b-figjam-parity-default-size-160x120-wide-oval-same-de-39",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1213,12 +1212,12 @@
         {
           "insert": ")."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-triangle-40": {
       "id": "b-figjam-parity-triangle-40",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1226,12 +1225,12 @@
         {
           "insert": "Triangle"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-triangle-geometry-41": {
       "id": "b-figjam-parity-triangle-geometry-41",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Triangle geometry"
       },
@@ -1329,12 +1328,12 @@
         {
           "insert": " chevron."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-140x120-text-slot-centered-42": {
       "id": "b-figjam-parity-default-size-140x120-text-slot-centered-42",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1404,12 +1403,12 @@
         {
           "insert": " usage and mirror it)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-parallelogram-43": {
       "id": "b-figjam-parity-parallelogram-43",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1417,12 +1416,12 @@
         {
           "insert": "Parallelogram"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-parallelogram-geometry-44": {
       "id": "b-figjam-parity-parallelogram-geometry-44",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Parallelogram geometry"
       },
@@ -1499,12 +1498,12 @@
             "italic": true
           }
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-160x100-text-slot-centered-45": {
       "id": "b-figjam-parity-default-size-160x100-text-slot-centered-45",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1546,12 +1545,12 @@
         {
           "insert": " field mirroring arrow-shape's pattern."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-pentagon-and-octagon-46": {
       "id": "b-figjam-parity-pentagon-and-octagon-46",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1559,12 +1558,12 @@
         {
           "insert": "Pentagon and octagon"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-regular-polygon-geometry-47": {
       "id": "b-figjam-parity-regular-polygon-geometry-47",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Regular polygon geometry"
       },
@@ -1618,12 +1617,12 @@
         {
           "insert": "). Octagon: 8-point regular polygon, flat-top orientation (matching FigJam's tile), same parametric construction with i in 0..7."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-140x140-square-ish-matchi-48": {
       "id": "b-figjam-parity-default-size-140x140-square-ish-matchi-48",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1647,12 +1646,12 @@
         {
           "insert": " (not worth grouping into one field — they're a different point count and a shared \"regular-polygon with N sides\" field would be over-engineering for exactly two consumers)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-star-49": {
       "id": "b-figjam-parity-star-49",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1660,12 +1659,12 @@
         {
           "insert": "Star"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-star-geometry-50": {
       "id": "b-figjam-parity-star-geometry-50",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Star geometry"
       },
@@ -1679,12 +1678,12 @@
             "italic": true
           }
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-140x140-text-slot-centered-51": {
       "id": "b-figjam-parity-default-size-140x140-text-slot-centered-51",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1708,12 +1707,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-plus-cross-52": {
       "id": "b-figjam-parity-plus-cross-52",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1721,12 +1720,12 @@
         {
           "insert": "Plus / cross"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-plus-geometry-53": {
       "id": "b-figjam-parity-plus-geometry-53",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Plus geometry"
       },
@@ -1734,12 +1733,12 @@
         {
           "insert": "A 12-point cross/plus polygon: a horizontal bar and vertical bar of equal thickness crossing at the object's center, thickness a fixed fraction of the smaller bounding-box dimension (~1/3, matching FigJam's proportions)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-120x120-square-a-plus-re-54": {
       "id": "b-figjam-parity-default-size-120x120-square-a-plus-re-54",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1763,12 +1762,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-block-arrow-and-fat-chevron-55": {
       "id": "b-figjam-parity-block-arrow-and-fat-chevron-55",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1776,12 +1775,12 @@
         {
           "insert": "Block arrow and fat chevron"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-our-existing-code-ref-arrow-shape-packa-56": {
       "id": "b-figjam-parity-our-existing-code-ref-arrow-shape-packa-56",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1861,12 +1860,12 @@
         {
           "insert": ", proportioned by CHEVRON_GEOMETRY.notchWidthRatio) to justify separate types instead of a shared field."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-folder-57": {
       "id": "b-figjam-parity-folder-57",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1874,12 +1873,12 @@
         {
           "insert": "Folder"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-folder-geometry-58": {
       "id": "b-figjam-parity-folder-geometry-58",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Folder geometry"
       },
@@ -1910,12 +1909,12 @@
         {
           "insert": " wavy SVG path (one path, not a rect + separate tab overlay)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-140x110-text-slot-centered-59": {
       "id": "b-figjam-parity-default-size-140x110-text-slot-centered-59",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1962,12 +1961,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-wavy-bottom-document-60": {
       "id": "b-figjam-parity-wavy-bottom-document-60",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -1975,12 +1974,12 @@
         {
           "insert": "Wavy-bottom document"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-wavy-document-geometry-61": {
       "id": "b-figjam-parity-wavy-document-geometry-61",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Wavy document geometry"
       },
@@ -2046,12 +2045,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-150x110-text-slot-centered-62": {
       "id": "b-figjam-parity-default-size-150x110-text-slot-centered-62",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2130,12 +2129,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-multiple-documents-stacked-63": {
       "id": "b-figjam-parity-multiple-documents-stacked-63",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2143,12 +2142,12 @@
         {
           "insert": "Multiple documents (stacked)"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-stacked-documents-geometry-64": {
       "id": "b-figjam-parity-stacked-documents-geometry-64",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Stacked documents geometry"
       },
@@ -2165,12 +2164,12 @@
         {
           "insert": " elements sharing the same wave-bottom geometry, back-to-front."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-160x120-slightly-larger-th-65": {
       "id": "b-figjam-parity-default-size-160x120-slightly-larger-th-65",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2194,12 +2193,12 @@
         {
           "insert": ", depends on Spec 9 landing first (or duplicates its own local wave geometry independently if sequencing requires)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-off-page-connector-66": {
       "id": "b-figjam-parity-off-page-connector-66",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2207,12 +2206,12 @@
         {
           "insert": "Off-page connector"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-off-page-connector-geometry-67": {
       "id": "b-figjam-parity-off-page-connector-geometry-67",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Off-page connector geometry"
       },
@@ -2274,12 +2273,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-120x100-text-slot-centered-68": {
       "id": "b-figjam-parity-default-size-120x100-text-slot-centered-68",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2330,12 +2329,12 @@
         {
           "insert": " since that invites confusion with the Advanced tier's actual shield icon)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-trapezoid-69": {
       "id": "b-figjam-parity-trapezoid-69",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2343,12 +2342,12 @@
         {
           "insert": "Trapezoid"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-trapezoid-geometry-70": {
       "id": "b-figjam-parity-trapezoid-geometry-70",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Trapezoid geometry"
       },
@@ -2392,12 +2391,12 @@
         {
           "insert": " — a ~20% inset on the top edge only."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-150x100-text-slot-centered-71": {
       "id": "b-figjam-parity-default-size-150x100-text-slot-centered-71",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2421,12 +2420,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-manual-input-72": {
       "id": "b-figjam-parity-manual-input-72",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2434,12 +2433,12 @@
         {
           "insert": "Manual input"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-manual-input-geometry-73": {
       "id": "b-figjam-parity-manual-input-geometry-73",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Manual input geometry"
       },
@@ -2483,12 +2482,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-150x100-text-slot-centered-74": {
       "id": "b-figjam-parity-default-size-150x100-text-slot-centered-74",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2512,12 +2511,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-hexagon-75": {
       "id": "b-figjam-parity-hexagon-75",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2525,12 +2524,12 @@
         {
           "insert": "Hexagon"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-hexagon-geometry-76": {
       "id": "b-figjam-parity-hexagon-geometry-76",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Hexagon geometry"
       },
@@ -2538,12 +2537,12 @@
         {
           "insert": "A 6-point regular hexagon, flat-top orientation (matching the flowchart \"preparation\" symbol convention), inscribed in the bounding box with independent x/y radius scaling to fill non-square aspect ratios."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-150x100-flowchart-hexagons-77": {
       "id": "b-figjam-parity-default-size-150x100-flowchart-hexagons-77",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2567,12 +2566,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-internal-storage-78": {
       "id": "b-figjam-parity-internal-storage-78",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2580,12 +2579,12 @@
         {
           "insert": "Internal storage"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-internal-storage-geometry-79": {
       "id": "b-figjam-parity-internal-storage-geometry-79",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Internal storage geometry"
       },
@@ -2611,12 +2610,12 @@
         {
           "insert": "'s two vertical bars."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-140x100-text-slot-centered-80": {
       "id": "b-figjam-parity-default-size-140x100-text-slot-centered-80",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2667,12 +2666,12 @@
         {
           "insert": " — same \"rect + inset rule marks\" pattern, different mark placement)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-or-junction-and-summing-junction-81": {
       "id": "b-figjam-parity-or-junction-and-summing-junction-81",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 3
       },
@@ -2680,12 +2679,12 @@
         {
           "insert": "Or-junction and summing junction"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-junction-geometry-82": {
       "id": "b-figjam-parity-junction-geometry-82",
-      "flavour": "requirement",
-      "children": [],
+      "type": "requirement",
       "props": {
         "title": "Junction geometry"
       },
@@ -2720,12 +2719,12 @@
         {
           "insert": " pairs on top of the circle, sized to ~60% of the circle's diameter."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-default-size-90x90-small-these-are-ju-83": {
       "id": "b-figjam-parity-default-size-90x90-small-these-are-ju-83",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2758,12 +2757,12 @@
         {
           "insert": " field."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-where-our-model-diverges-from-figma-s-84": {
       "id": "b-figjam-parity-where-our-model-diverges-from-figma-s-84",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -2771,11 +2770,12 @@
         {
           "insert": "Where our model diverges from Figma's"
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-trim-scale-intentionally-exceeds-th-91": {
       "id": "b-figjam-parity-trim-scale-intentionally-exceeds-th-91",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Trim scale intentionally exceeds the measured baseline"
@@ -2817,7 +2817,7 @@
     },
     "b-figjam-parity-toolbar-control-sets-deliberately-sim-92": {
       "id": "b-figjam-parity-toolbar-control-sets-deliberately-sim-92",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Toolbar control sets deliberately simplified — no text-formatting tier"
@@ -2914,7 +2914,7 @@
     },
     "b-figjam-parity-one-color-per-object-93": {
       "id": "b-figjam-parity-one-color-per-object-93",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "One color per object"
@@ -2976,19 +2976,18 @@
     },
     "b-figjam-parity-beyond-the-shape-by-shape-gaps-above-a-85": {
       "id": "b-figjam-parity-beyond-the-shape-by-shape-gaps-above-a-85",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Beyond the shape-by-shape gaps above, a few structural differences run through the whole model — these aren't fixable by adding one more shape type, they're differences in philosophy or scope between the two engines."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-closed-enum-vs-typed-union-same-philosophy-diffe-86": {
       "id": "b-figjam-parity-closed-enum-vs-typed-union-same-philosophy-diffe-86",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "Closed enum vs. typed union — same philosophy, different vocabulary size"
       },
@@ -3060,12 +3059,12 @@
         {
           "insert": " covering the glyph concepts on top."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-no-rotation-anywhere-87": {
       "id": "b-figjam-parity-no-rotation-anywhere-87",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "No rotation, anywhere"
       },
@@ -3142,12 +3141,12 @@
         {
           "insert": " (and rotation generally across all node types) has no counterpart here at all — every shape spec above assumes an unrotated, axis-aligned object."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-connection-endpoints-vs-magnets-88": {
       "id": "b-figjam-parity-connection-endpoints-vs-magnets-88",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "Connection endpoints vs. magnets"
       },
@@ -3301,12 +3300,12 @@
         {
           "insert": ", fell back to its axis-aligned bounding-box outline for anchor projection. Since W5, that true-outline tier is much broader than the old four-shape note: ellipse, triangle, pentagon, octagon, star, off-page-connector, trapezoid, manual-input, hexagon, or-junction, and summing-junction also participate. Section interiors are intentionally not inside-tier connector targets, but their anchors and outlines still snap."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-one-arrowhead-vs-twelve-stroke-caps-89": {
       "id": "b-figjam-parity-one-arrowhead-vs-twelve-stroke-caps-89",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "One arrowhead vs. twelve stroke caps"
       },
@@ -3463,12 +3462,12 @@
         {
           "insert": " schema style values; the router itself is elbow/orthogonal by default, with explicit waypoints from bend editing as the override."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-corner-radius-baked-into-the-shape-vs-a-live-fig-90": {
       "id": "b-figjam-parity-corner-radius-baked-into-the-shape-vs-a-live-fig-90",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "Corner radius: baked into the shape vs. a live Figma property"
       },
@@ -3623,11 +3622,12 @@
         {
           "insert": ", not just a token change."
         }
-      ]
+      ],
+      "children": []
     },
     "b-figjam-parity-root": {
       "id": "b-figjam-parity-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "covers": "Gap analysis mapping FigJam's default shape picker (30 shapeType values + 3 connector presets + 26 Advanced component icons) against this engine's 17 object types, with full specs for every missing shape.",
         "format": "mdx",
@@ -3642,6 +3642,7 @@
       },
       "children": [
         "b-figjam-parity-figjam-shape-parity-map-1",
+        "b-figjam-current-state",
         "b-figjam-parity-this-doc-measures-our-canvas-engine-s-sh-2",
         "b-figjam-parity-native-code-ref-shapetype-packages-canv-3",
         "b-figjam-parity-connectors-3-line-arrow-elbow-arrow-4",
@@ -3735,8 +3736,8 @@
     },
     "b-figjam-parity-missing-specs-w5-status-36b": {
       "id": "b-figjam-parity-missing-specs-w5-status-36b",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
+      "props": {},
       "text": [
         {
           "insert": "Status: every spec below shipped in the W5 implementation wave — "
@@ -3769,7 +3770,21 @@
           "insert": "."
         }
       ],
-      "props": {}
+      "children": []
+    },
+    "b-figjam-current-state": {
+      "id": "b-figjam-current-state",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "Parity was achieved, then deliberately unwound"
+      },
+      "text": [
+        {
+          "insert": "The operational-maps trim retired most of the flowchart shapes this analysis specified (pill, pentagon, hexagon, parallelogram, trapezoid, page-corner, document, document-stack, database, cylinder, folder, off-page connector, manual input, internal storage, the junctions, star, plus, chevron): semantic nouns moved to the icon glyph vocabulary and the placeable surface is the 11-type core documented in Operational maps — the diagram language. FigJam shape-roster parity is no longer a goal. This doc remains the record of the parity analysis and the build specs it produced; read it as history, not as the live surface."
+        }
+      ],
+      "children": []
     }
   }
 }

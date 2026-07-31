@@ -6,15 +6,7 @@
   "blocks": {
     "b-hug-root": {
       "id": "b-hug-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-hug-title-1",
-        "b-hug-body-2",
-        "b-hug-code-3",
-        "b-hug-canvas-4",
-        "b-hug-contrast-body-5",
-        "b-hug-contrast-canvas-6"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "The descriptive hug= pattern: a direct child of a split keeps its natural content size and pins to a corner of its band instead of stretching to fill it — shown with and without the pin.",
         "format": "mdx",
@@ -25,12 +17,19 @@
           "natural size",
           "split children"
         ]
-      }
+      },
+      "children": [
+        "b-hug-title-1",
+        "b-hug-body-2",
+        "b-hug-code-3",
+        "b-hug-canvas-4",
+        "b-hug-contrast-body-5",
+        "b-hug-contrast-canvas-6"
+      ]
     },
     "b-hug-title-1": {
       "id": "b-hug-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -38,12 +37,12 @@
         {
           "insert": "hug= — pinned lanes"
         }
-      ]
+      ],
+      "children": []
     },
     "b-hug-body-2": {
       "id": "b-hug-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -58,34 +57,34 @@
         {
           "insert": ": the child keeps its natural content size and pins to that corner of its band instead of stretching to fill it."
         }
-      ]
+      ],
+      "children": []
     },
     "b-hug-code-3": {
       "id": "b-hug-code-3",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
       "text": [
         {
-          "insert": "row 1|3\n  section 1 text=rail label=\"Lane hug=NW\" hug=NW\n    group\n      item 2 text=one type=pill size=S at=N\n      item 3 text=two type=pill size=S at=C\n      item 4 text=three type=pill size=S at=S\n  section 5 text=stage label=\"Stage\"\n    item 6 text=content type=process size=L at=C\n\narrows"
+          "insert": "row 1|3\n  section 1 text=rail label=\"Lane hug=NW\" hug=NW\n    group\n      item 2 text=one type=rectangle size=S at=N\n      item 3 text=two type=rectangle size=S at=C\n      item 4 text=three type=rectangle size=S at=S\n  section 5 text=stage label=\"Stage\"\n    item 6 text=content type=process size=L at=C\n\narrows"
         }
-      ]
+      ],
+      "children": []
     },
     "b-hug-canvas-4": {
       "id": "b-hug-canvas-4",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/example-hug.canvas.json",
         "title": "hug=NW — the rail pinned at its natural size"
-      }
+      },
+      "children": []
     },
     "b-hug-contrast-body-5": {
       "id": "b-hug-contrast-body-5",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -100,16 +99,17 @@
         {
           "insert": " — the rail stretches across its whole band:"
         }
-      ]
+      ],
+      "children": []
     },
     "b-hug-contrast-canvas-6": {
       "id": "b-hug-contrast-canvas-6",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/example-hug-contrast.canvas.json",
         "title": "No hug — the rail stretches to fill its band"
-      }
+      },
+      "children": []
     }
   }
 }

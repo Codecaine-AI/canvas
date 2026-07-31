@@ -1,0 +1,174 @@
+{
+  "axis": "ph",
+  "scenario": "code-review-agents",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: 52 total tool calls produced zero ERROR results, zero rejected calls, and zero retries. All calls were APPLIED, LOOK, or a successful finalize. There were no malformed-schema repetitions, failed-call runs, or repeated error classes.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · set_board_title",
+          "finding": "The first tool call applied successfully; there was no pre-APPLIED failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 51,
+          "transcript_excerpt": "Committed: Built the complete multi-agent code-review lifecycle, including validation safeguards, feedback calibration, head-change restarts, telemetry, and budget-driven reviewer degradation. (27 patch operations).",
+          "finding": "Finalize succeeded on the first attempt; no blocked or rejected finalize occurred."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Three explicit framed looks were used, all late in routing/QA rather than interleaved throughout the dense sticky-note build. The strongest loop was turns 44–48: a framed edge-region look exposed the remaining covered-content error, turn 45 adjusted the label, further routing work was completed, and turn 48 verified the whole page with clean diagnostics. Turns 48–50 also provided a final render-read-render QA pass around the description update. This is healthy QA perception, but not the throughout-build close-up cadence required by the 9–10 anchors.",
+      "render_count": 3,
+      "adjustment_round_count": 2,
+      "render_adjust_render_loop_count": 2,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 44,
+          "transcript_excerpt": "LOOK · 1 render · framed e-feedback-thresholds+e-head-restart+e-aggregate-publish ... DIAGNOSTICS · 1 error · 0 warnings ... label \"calibrated thresholds\" chip on e-feedback-thresholds lies on e-head-restart's path for 30px",
+          "finding": "The agent framed exactly the dense routing region under active work and read a concrete remaining defect."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 45,
+          "transcript_excerpt": "APPLIED · move_label e-feedback-thresholds → along 0.72, offset 0 ... − E1 covered-content (resolved)",
+          "finding": "Immediate render-driven adjustment resolved the defect found in the preceding close-up."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 48,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "Whole-board QA verified the routing adjustments and clean diagnostic state."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 50,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... BOARD DIFF · base → draft · 27 ops ... DIAGNOSTICS · clean",
+          "finding": "A final post-description QA render confirmed the committed draft remained diagnostically clean."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was handled constructively. Six newly introduced error-level lint findings appeared during routing: two at turn 40, three at turn 42, and one at turn 46. Each set was resolved through rerouting, label movement, or endpoint strategy changes. Numerous clipped-text warnings appeared while creating default-size stickies, but every warning was fixed by resizing or shortening text before commit. No lint repeated for more than three consecutive turns without a strategy change, and no warning was overridden or silently committed.",
+      "lint_error_count": 6,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "LINTS · +1 −0 ... W1 clipped-text: intake-note ... needs 180×481",
+          "finding": "The first clipped-text warning was not ignored; turns 12–13 resized and shortened the note until the warning resolved."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 40,
+          "transcript_excerpt": "LINTS · +2 −0 ... E1 covered-content ... E2 covered-content",
+          "finding": "Two routing errors were introduced, then both were resolved on the next call by rerouting at turn 41."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 42,
+          "transcript_excerpt": "LINTS · +4 −0 ... E1 covered-content ... E2 covered-content ... E3 covered-content ... W1 broken-edges",
+          "finding": "The head-restart connection introduced three errors and one warning; turn 43 changed the route and resolved three findings, while the remaining label collision was inspected and fixed at turns 44–45."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 46,
+          "transcript_excerpt": "LINTS · +2 −0 ... E1 covered-content ... W1 broken-edges",
+          "finding": "The budget edge introduced one error and one warning; turn 47 changed its intake anchor and resolved both."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 50,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA showed no open errors or warnings, so there was no warning override requiring a commit-summary reason."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The sole commit summary accurately describes the stage diff. The diff contains the complete top-row intake/context/planning/aggregation flow; validation safeguards in the aggregate note; feedback calibration and its dashed return edge; head-change cancellation/restart; telemetry; and a budget-degradation edge returning to intake. The wording is broad but supported, with no claimed fix absent from the diff. No defect the agent saw remained undeclared at commit: final QA reported clean diagnostics.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 51,
+          "line": "Built the complete multi-agent code-review lifecycle, including validation safeguards, feedback calibration, head-change restarts, telemetry, and budget-driven reviewer degradation.",
+          "assessment": "Honest and supported by the 27-operation diff: eight lifecycle sections, validation and calibration content, restart and budget-control edges, and telemetry content are all present."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 48,
+          "transcript_excerpt": "EDGES ... e-feedback-thresholds ... e-head-restart ... e-budget-degrade ... DIAGNOSTICS · clean",
+          "finding": "The pre-commit whole-board read directly supports the summary's calibration, restart, and budget-degradation claims."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 50,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 27 ops ... DIAGNOSTICS · clean",
+          "finding": "Final QA matched the subsequently committed 27-operation diff and showed no seen defect requiring disclosure."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session completed in about 6.49 minutes, comfortably within the 15-minute limit, and finalized well below the 300-turn budget. The committed diff contains 27 patch operations. There were no add-delete-rebuild cycles and no repeated NO-OPs. Some sticky creation required predictable place-resize-shorten sequences, but these were forward lint-resolution steps rather than thrash.",
+      "operation_count": 27,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 6.49,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "APPLIED · resize intake-note → 320×240 ... needs 320×301",
+          "finding": "The initial resize was insufficient, but the next turn changed strategy by shortening the text; this is a short correction sequence, not build-delete-rebuild thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 47,
+          "transcript_excerpt": "APPLIED · change_connection e-budget-degrade ... anchors bottom→bottom → bottom→left ... − E1 covered-content, − W1 broken-edges (resolved)",
+          "finding": "A proportionate one-step endpoint change resolved both routing findings."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 51,
+          "transcript_excerpt": "Committed ... (27 patch operations).",
+          "finding": "The session reached finalize successfully without exhausting time or turn budgets."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The single session completed normally, had zero retries, and committed successfully, so no session is excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 8.5
+  },
+  "usage": {
+    "input_tokens": 26421,
+    "output_tokens": 2619
+  },
+  "flags": []
+}

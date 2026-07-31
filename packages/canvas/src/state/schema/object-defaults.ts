@@ -52,38 +52,16 @@ export const OBJECT_TYPE_DEFAULTS: Readonly<
   process: { geometry: { x: 160, y: 160, width: 184, height: 96 }, shape: "rounded-rect", label: "Process" },
   decision: { geometry: { x: 160, y: 160, width: 160, height: 112 }, shape: "diamond", label: "Decision" },
   sticky: { geometry: { x: 180, y: 180, width: 176, height: 128 }, shape: "note", label: "Sticky" },
-  document: { geometry: { x: 160, y: 160, width: 160, height: 120 }, shape: "document", label: "Document" },
-  database: { geometry: { x: 160, y: 160, width: 140, height: 120 }, shape: "database", label: "Database" },
   // W2 — sections default large (they're meant to wrap other objects, so a
   // container-like footprint reads better than a shape-sized default).
   section: { geometry: { x: 80, y: 80, width: 480, height: 360 }, shape: "section", label: "Section" },
-  pill: { geometry: { x: 160, y: 160, width: 200, height: 64 }, shape: "pill", label: "Pill" },
   // W2 — arrow-shape default matches the reference proportions (361x100
   // logical) at a comfortable placement size.
   "arrow-shape": { geometry: { x: 160, y: 160, width: 361, height: 100 }, shape: "arrow-shape", label: "Arrow" },
   "predefined-process": { geometry: { x: 160, y: 160, width: 200, height: 100 }, shape: "predefined-process", label: "Predefined Process" },
-  // W5 — FigJam parity shape set (Wave A): sizes per the implementation
-  // brief's size table (docs/10-system-design/20-figjam-parity's "Missing
-  // shape specs" section, cross-checked against this brief's overrides).
   ellipse: { geometry: { x: 160, y: 160, width: 160, height: 120 }, shape: "ellipse", label: "Ellipse" },
   triangle: { geometry: { x: 160, y: 160, width: 140, height: 120 }, shape: "triangle", label: "Triangle" },
-  parallelogram: { geometry: { x: 160, y: 160, width: 160, height: 100 }, shape: "parallelogram", label: "Parallelogram" },
-  pentagon: { geometry: { x: 160, y: 160, width: 140, height: 140 }, shape: "pentagon", label: "Pentagon" },
   octagon: { geometry: { x: 160, y: 160, width: 140, height: 140 }, shape: "octagon", label: "Octagon" },
-  star: { geometry: { x: 160, y: 160, width: 140, height: 140 }, shape: "star", label: "Star" },
-  plus: { geometry: { x: 160, y: 160, width: 120, height: 120 }, shape: "plus", label: "Plus" },
-  chevron: { geometry: { x: 160, y: 160, width: 160, height: 120 }, shape: "chevron", label: "Chevron" },
-  folder: { geometry: { x: 160, y: 160, width: 140, height: 110 }, shape: "folder", label: "Folder" },
-  "document-stack": { geometry: { x: 160, y: 160, width: 160, height: 120 }, shape: "document-stack", label: "Document Stack" },
-  "off-page-connector": { geometry: { x: 160, y: 160, width: 120, height: 100 }, shape: "off-page-connector", label: "Off-page Connector" },
-  trapezoid: { geometry: { x: 160, y: 160, width: 150, height: 100 }, shape: "trapezoid", label: "Trapezoid" },
-  "manual-input": { geometry: { x: 160, y: 160, width: 150, height: 100 }, shape: "manual-input", label: "Manual Input" },
-  hexagon: { geometry: { x: 160, y: 160, width: 150, height: 100 }, shape: "hexagon", label: "Hexagon" },
-  "internal-storage": { geometry: { x: 160, y: 160, width: 150, height: 110 }, shape: "internal-storage", label: "Internal Storage" },
-  "or-junction": { geometry: { x: 160, y: 160, width: 100, height: 100 }, shape: "or-junction", label: "Or Junction" },
-  "summing-junction": { geometry: { x: 160, y: 160, width: 100, height: 100 }, shape: "summing-junction", label: "Summing Junction" },
-  "cylinder-horizontal": { geometry: { x: 160, y: 160, width: 150, height: 100 }, shape: "cylinder-horizontal", label: "Cylinder (Horizontal)" },
-  "page-corner": { geometry: { x: 160, y: 160, width: 160, height: 120 }, shape: "page-corner", label: "Page Corner" },
   icon: { geometry: { x: 160, y: 160, width: 120, height: 120 }, shape: "icon", label: "Icon" },
 };
 

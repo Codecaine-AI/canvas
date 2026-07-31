@@ -27,19 +27,28 @@ import { LAYOUT_RULES } from "../src/board/lints";
 
 const CORPUS_DIR = join(import.meta.dir, "..", "..", "..", "canvases");
 
-/** Ceilings, not expectations: measured, and only ever revised downward. */
+/**
+ * Ceilings, not expectations: measured, and only ever revised downward — with
+ * one recorded exception. The section-child-color POLICY lint
+ * (docs/specs/operational-maps §Decisions, color guidance) fires on the
+ * pre-migration corpus (19 blue-in-blue placements: gc-decomp-harness 16,
+ * ink-diagrams 2, v2-flow 1), because these boards predate the
+ * preferred-color policy. The operational-maps board migration and its
+ * per-board review are expected to bring these back down; treat today's
+ * numbers as the new ratchet, falling only.
+ */
 const CEILING: Record<string, number> = {
   "agent-flows-2": 3,
   "bubba-voice": 6,
   "claude-code-researcher": 0,
-  "gc-decomp-harness": 19,
-  "ink-diagrams": 17,
+  "gc-decomp-harness": 35,
+  "ink-diagrams": 19,
   "intent-classification-1": 2,
   "intent-classification-2": 7,
-  "v2-flow": 5,
+  "v2-flow": 6,
 };
 
-const TOTAL_CEILING = 59;
+const TOTAL_CEILING = 78;
 
 function corpus(): { name: string; document: InteractiveCanvasDocument }[] {
   return readdirSync(CORPUS_DIR)

@@ -145,51 +145,54 @@
     },
     {
       "id": "pill-tool-a",
-      "type": "pill",
+      "type": "icon",
       "text": "Tool A",
       "color": "violet",
       "parentId": "section-tools",
       "geometry": {
         "x": 592,
-        "y": 288,
+        "y": 272,
         "width": 352,
-        "height": 64
+        "height": 96
       },
       "style": {
-        "shape": "pill"
-      }
+        "shape": "icon"
+      },
+      "icon": "tool"
     },
     {
       "id": "pill-tool-b",
-      "type": "pill",
+      "type": "icon",
       "text": "Tool B",
       "color": "violet",
       "parentId": "section-tools",
       "geometry": {
         "x": 592,
-        "y": 384,
+        "y": 368,
         "width": 352,
-        "height": 64
+        "height": 96
       },
       "style": {
-        "shape": "pill"
-      }
+        "shape": "icon"
+      },
+      "icon": "tool"
     },
     {
       "id": "pill-tool-c",
-      "type": "pill",
+      "type": "icon",
       "text": "Tool C",
       "color": "violet",
       "parentId": "section-tools",
       "geometry": {
         "x": 592,
-        "y": 480,
+        "y": 464,
         "width": 352,
-        "height": 64
+        "height": 96
       },
       "style": {
-        "shape": "pill"
-      }
+        "shape": "icon"
+      },
+      "icon": "tool"
     },
     {
       "id": "section-memory",
@@ -209,7 +212,7 @@
     },
     {
       "id": "db-short-term-memory",
-      "type": "database",
+      "type": "icon",
       "text": "Short Term Memory",
       "color": "violet",
       "parentId": "section-memory",
@@ -220,12 +223,13 @@
         "height": 224
       },
       "style": {
-        "shape": "database"
-      }
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "db-long-term-memory",
-      "type": "database",
+      "type": "icon",
       "text": "Long Term Memory",
       "color": "violet",
       "parentId": "section-memory",
@@ -236,8 +240,9 @@
         "height": 224
       },
       "style": {
-        "shape": "database"
-      }
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "section-executor",
@@ -257,7 +262,7 @@
     },
     {
       "id": "cyl-actions-taken",
-      "type": "cylinder-horizontal",
+      "type": "icon",
       "text": "Actions Taken",
       "color": "violet",
       "parentId": "section-executor",
@@ -268,8 +273,9 @@
         "height": 160
       },
       "style": {
-        "shape": "cylinder-horizontal"
-      }
+        "shape": "icon"
+      },
+      "icon": "queue"
     },
     {
       "id": "section-executor-loop",
@@ -474,16 +480,27 @@
       "to": {
         "objectId": "node-format-prompt",
         "anchor": "right",
-        "position": [1, 0.3333333333333333]
+        "position": [
+          1,
+          0.3333333333333333
+        ]
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "context",
       "color": "blue",
       "waypoints": [
-        [768, 640],
-        [1200, 640],
-        [1200, 1152]
+        [
+          768,
+          640
+        ],
+        [
+          1200,
+          640
+        ],
+        [
+          1200,
+          1152
+        ]
       ]
     },
     {
@@ -495,16 +512,27 @@
       "to": {
         "objectId": "node-format-prompt",
         "anchor": "right",
-        "position": [1, 0.6666666666666666]
+        "position": [
+          1,
+          0.6666666666666666
+        ]
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "context",
       "color": "blue",
       "waypoints": [
-        [1664, 672],
-        [1232, 672],
-        [1232, 1184]
+        [
+          1664,
+          672
+        ],
+        [
+          1232,
+          672
+        ],
+        [
+          1232,
+          1184
+        ]
       ]
     },
     {
@@ -519,10 +547,12 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "context",
       "color": "violet",
       "waypoints": [
-        [960, 864]
+        [
+          960,
+          864
+        ]
       ]
     },
     {
@@ -537,11 +567,16 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "violet",
       "waypoints": [
-        [1776, 2016],
-        [1776, 864]
+        [
+          1776,
+          2016
+        ],
+        [
+          1776,
+          864
+        ]
       ]
     },
     {
@@ -553,11 +588,13 @@
       "to": {
         "objectId": "node-format-prompt",
         "anchor": "left",
-        "position": [0, 0.3333333333333333]
+        "position": [
+          0,
+          0.3333333333333333
+        ]
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "gray"
     },
     {
@@ -572,7 +609,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -587,7 +623,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -603,7 +638,6 @@
       "label": "Yes",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "gray"
     },
     {
@@ -619,7 +653,6 @@
       "label": "No",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "gray"
     },
     {
@@ -634,7 +667,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -649,7 +681,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -664,7 +695,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -679,7 +709,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -694,7 +723,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -709,7 +737,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -721,15 +748,23 @@
       "to": {
         "objectId": "node-format-prompt",
         "anchor": "left",
-        "position": [0, 0.6666666666666666]
+        "position": [
+          0,
+          0.6666666666666666
+        ]
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "red",
       "waypoints": [
-        [752, 2208],
-        [752, 1184]
+        [
+          752,
+          2208
+        ],
+        [
+          752,
+          1184
+        ]
       ]
     },
     {
@@ -744,7 +779,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "output",
       "color": "gray"
     }
   ],

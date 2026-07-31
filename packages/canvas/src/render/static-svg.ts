@@ -25,10 +25,8 @@
  * real Inter advance widths (render/text-metrics.ts over the generated glyph
  * table), sticky text lays out as its markdown line boxes
  * (render/sticky-text.ts mirroring objects/sticky/markdown.tsx), and the
- * flowchart types whose live defs draw custom inline-SVG silhouettes
- * (document, database, folder, document-stack, cylinder-horizontal,
- * internal-storage, page-corner, predefined-process) draw the same
- * silhouette geometry here. Icon objects render their real Nucleo glyph via
+ * types whose live defs draw custom inline-SVG silhouettes
+ * (predefined-process) draw the same silhouette geometry here. Icon objects render their real Nucleo glyph via
  * the pure registry (objects/shapes/icon/icon-glyphs.ts), falling back to a
  * neutral rounded rect only for unknown glyph ids. Known approximations:
  * measurement ignores kerning/ligatures (marginally conservative), and the
@@ -430,38 +428,16 @@ function arrowShapeTextRect(object: InteractiveCanvasObject): LocalRect {
   };
 }
 
-/** Mirrors chevronTextRect in objects/shapes/basic/chevron.tsx. */
-function chevronTextRect(object: InteractiveCanvasObject): LocalRect {
-  const x1 = object.geometry.width * 0.25 + 6;
-  const x2 = object.geometry.width * 0.75 - 6;
-  return {
-    x: x1,
-    y: 8,
-    width: Math.max(0, x2 - x1),
-    height: Math.max(0, object.geometry.height - 16),
-  };
-}
-
 const ARROW_SHAPE_TEXT_SLOT = rectTextSlot(arrowShapeTextRect);
-const CHEVRON_TEXT_SLOT = rectTextSlot(chevronTextRect);
-
-/** Types whose defs declare text: "none" (pure glyphs — see plus/or-junction/summing-junction defs). */
-const NO_TEXT_TYPES = new Set<InteractiveCanvasObject["type"]>([
-  "plus",
-  "or-junction",
-  "summing-junction",
-]);
 
 /**
- * The slot this object's text renders into, or null for the pure-glyph types.
- * Exported alongside the wrap/clamp primitives so off-renderer fit checks
- * resolve the SAME slot the renderer paints into.
+ * The slot this object's text renders into, or null when the type renders no
+ * text. Exported alongside the wrap/clamp primitives so off-renderer fit
+ * checks resolve the SAME slot the renderer paints into.
  */
 export function textSlotForObject(object: InteractiveCanvasObject): TextSlot | null {
-  if (NO_TEXT_TYPES.has(object.type)) return null;
   if (object.type === "icon") return BELOW_TEXT_SLOT;
   if (object.type === "arrow-shape") return ARROW_SHAPE_TEXT_SLOT;
-  if (object.type === "chevron") return CHEVRON_TEXT_SLOT;
   return CENTER_TEXT_SLOT;
 }
 
@@ -734,180 +710,25 @@ function renderIconGlyph(
 }
 
 // ---------------------------------------------------------------------------
-// Custom flowchart silhouettes — the eight types whose live defs draw their
-// own inline-SVG (or CSS) silhouette instead of an outline-module polygon.
-// Geometry is mirrored from each def (the def modules are .tsx/React and
-// cannot be imported here); each helper carries a pointer to its source of
-// truth. The live inline SVGs draw in object-local px with the stroke
-// centered on the path, so these emit the same paths translated to world
-// coordinates. Anchor/overlap geometry stays bbox in both worlds — only the
-// drawn shape differs from the base rounded rect.
+// Custom silhouettes — types whose live defs draw their own inline-SVG (or
+// CSS) silhouette instead of an outline-module polygon. Geometry is mirrored
+// from each def (the def modules are .tsx/React and cannot be imported
+// here); each helper carries a pointer to its source of truth. The live
+// inline SVGs draw in object-local px with the stroke centered on the path,
+// so these emit the same paths translated to world coordinates.
+// Anchor/overlap geometry stays bbox in both worlds — only the drawn shape
+// differs from the base rounded rect.
 // ---------------------------------------------------------------------------
 
 type ShapePaint = { fill: string; border: string };
 type WorldRect = { x: number; y: number; width: number; height: number };
 
-/** Mirrors DOCUMENT_GEOMETRY in objects/shapes/flowchart/document.tsx. */
-const DOCUMENT_GEOMETRY = { waveShoulderYRatio: 0.82, waveCrestYRatio: 0.96 } as const;
-/** Mirrors DOCUMENT_STACK_GEOMETRY in objects/shapes/flowchart/document-stack.tsx. */
-const DOCUMENT_STACK_OFFSET_RATIO = 0.06;
-const DOCUMENT_STACK_BACK_PAGE_OPACITY = 0.82;
-/** Mirrors FOLDER_GEOMETRY in objects/shapes/flowchart/folder.tsx. */
-const FOLDER_GEOMETRY = { tabWidthRatio: 0.38, tabTopRatio: 0.08, tabBottomRatio: 0.24 } as const;
 /** Mirrors PREDEFINED_PROCESS_GEOMETRY in objects/shapes/flowchart/predefined-process.tsx. */
 const PREDEFINED_PROCESS_GEOMETRY = {
   cornerRadiusPx: 5,
   barWidthPx: 4,
   barInsetRatio: 0.047,
 } as const;
-/** Internal-storage rule inset — mirrors the 15% left/top rules in objects/shapes/flowchart/internal-storage.tsx. */
-const INTERNAL_STORAGE_RULE_INSET_RATIO = 0.15;
-/** Page-corner fold — mirrors the clip-path polygon in objects/shapes/flowchart/page-corner.tsx. */
-const PAGE_CORNER_FOLD = { foldXRatio: 0.76, foldYRatio: 0.24 } as const;
-
-/** Mirrors documentWavyPath in objects/shapes/flowchart/document.tsx, in world coordinates. */
-function documentWavyPath(x: number, y: number, width: number, height: number): string {
-  const right = x + width;
-  const shoulderY = y + height * DOCUMENT_GEOMETRY.waveShoulderYRatio;
-  const crestY = y + height * DOCUMENT_GEOMETRY.waveCrestYRatio;
-  return [
-    `M ${fmt(x)} ${fmt(y)}`,
-    `L ${fmt(right)} ${fmt(y)}`,
-    `L ${fmt(right)} ${fmt(shoulderY)}`,
-    `C ${fmt(x + width * 0.83)} ${fmt(shoulderY)} ${fmt(x + width * 0.83)} ${fmt(crestY)} ${fmt(x + width * 0.66)} ${fmt(crestY)}`,
-    `C ${fmt(x + width * 0.5)} ${fmt(crestY)} ${fmt(x + width * 0.5)} ${fmt(shoulderY)} ${fmt(x + width * 0.33)} ${fmt(shoulderY)}`,
-    `C ${fmt(x + width * 0.16)} ${fmt(shoulderY)} ${fmt(x + width * 0.16)} ${fmt(crestY)} ${fmt(x)} ${fmt(crestY)}`,
-    "Z",
-  ].join(" ");
-}
-
-function silhouettePath(
-  d: string,
-  paint: ShapePaint,
-  strokeWidth: number,
-  extra?: Record<string, string | number | undefined>,
-): string {
-  return tag("path", {
-    d,
-    fill: paint.fill,
-    stroke: paint.border,
-    "stroke-width": strokeWidth,
-    ...extra,
-  });
-}
-
-/** Wavy-bottom document (objects/shapes/flowchart/document.tsx). */
-function renderDocumentSilhouette(rect: WorldRect, paint: ShapePaint, strokeWidth: number): string {
-  return silhouettePath(
-    documentWavyPath(rect.x, rect.y, rect.width, rect.height),
-    paint,
-    strokeWidth,
-    { "stroke-linejoin": "round" },
-  );
-}
-
-/** Two offset wavy pages, back page dimmed (objects/shapes/flowchart/document-stack.tsx). */
-function renderDocumentStackSilhouette(
-  rect: WorldRect,
-  paint: ShapePaint,
-  strokeWidth: number,
-): string {
-  const offsetX = rect.width * DOCUMENT_STACK_OFFSET_RATIO;
-  const offsetY = rect.height * DOCUMENT_STACK_OFFSET_RATIO;
-  const pageWidth = rect.width - offsetX;
-  const pageHeight = rect.height - offsetY;
-  return (
-    silhouettePath(documentWavyPath(rect.x, rect.y, pageWidth, pageHeight), paint, strokeWidth, {
-      "stroke-linejoin": "round",
-      opacity: DOCUMENT_STACK_BACK_PAGE_OPACITY,
-    }) +
-    silhouettePath(
-      documentWavyPath(rect.x + offsetX, rect.y + offsetY, pageWidth, pageHeight),
-      paint,
-      strokeWidth,
-      { "stroke-linejoin": "round" },
-    )
-  );
-}
-
-/** Cylinder: lid ellipse over a curved-cap body (objects/shapes/flowchart/database.tsx). */
-function renderDatabaseSilhouette(rect: WorldRect, paint: ShapePaint, strokeWidth: number): string {
-  const left = rect.x + rect.width * 0.04;
-  const right = rect.x + rect.width * 0.96;
-  const lidY = rect.y + rect.height * 0.22;
-  const lidControlY = rect.y + rect.height * 0.12;
-  const bottomY = rect.y + rect.height * 0.78;
-  const bottomControlY = rect.y + rect.height * 0.88;
-  const bodyPath = [
-    `M ${fmt(left)} ${fmt(lidY)}`,
-    `C ${fmt(left)} ${fmt(lidControlY)} ${fmt(right)} ${fmt(lidControlY)} ${fmt(right)} ${fmt(lidY)}`,
-    `L ${fmt(right)} ${fmt(bottomY)}`,
-    `C ${fmt(right)} ${fmt(bottomControlY)} ${fmt(left)} ${fmt(bottomControlY)} ${fmt(left)} ${fmt(bottomY)}`,
-    "Z",
-  ].join(" ");
-  return (
-    silhouettePath(bodyPath, paint, strokeWidth) +
-    tag("ellipse", {
-      cx: rect.x + rect.width * 0.5,
-      cy: lidY,
-      rx: rect.width * 0.46,
-      ry: rect.height * 0.12,
-      fill: paint.fill,
-      stroke: paint.border,
-      "stroke-width": strokeWidth,
-    })
-  );
-}
-
-/** Tab + body outline (objects/shapes/flowchart/folder.tsx). */
-function renderFolderSilhouette(rect: WorldRect, paint: ShapePaint, strokeWidth: number): string {
-  const tabWidth = rect.width * FOLDER_GEOMETRY.tabWidthRatio;
-  const tabTop = rect.height * FOLDER_GEOMETRY.tabTopRatio;
-  const tabBottom = rect.height * FOLDER_GEOMETRY.tabBottomRatio;
-  const d = [
-    `M ${fmt(rect.x)} ${fmt(rect.y + tabTop)}`,
-    `H ${fmt(rect.x + tabWidth)}`,
-    `V ${fmt(rect.y + tabBottom)}`,
-    `H ${fmt(rect.x + rect.width)}`,
-    `V ${fmt(rect.y + rect.height)}`,
-    `H ${fmt(rect.x)}`,
-    "Z",
-  ].join(" ");
-  return silhouettePath(d, paint, strokeWidth, { "stroke-linejoin": "round" });
-}
-
-/** Rounded-cap body + two open side curves (objects/shapes/flowchart/cylinder-horizontal.tsx). */
-function renderCylinderHorizontalSilhouette(
-  rect: WorldRect,
-  paint: ShapePaint,
-  strokeWidth: number,
-): string {
-  const px = (value: number) => rect.x + (rect.width * value) / 100;
-  const py = (value: number) => rect.y + (rect.height * value) / 100;
-  const outerPath = [
-    `M ${fmt(px(18))} ${fmt(py(5))}`,
-    `H ${fmt(px(82))}`,
-    `C ${fmt(px(92))} ${fmt(py(5))} ${fmt(px(98))} ${fmt(py(25))} ${fmt(px(98))} ${fmt(py(50))}`,
-    `C ${fmt(px(98))} ${fmt(py(75))} ${fmt(px(92))} ${fmt(py(95))} ${fmt(px(82))} ${fmt(py(95))}`,
-    `H ${fmt(px(18))}`,
-    `C ${fmt(px(8))} ${fmt(py(95))} ${fmt(px(2))} ${fmt(py(75))} ${fmt(px(2))} ${fmt(py(50))}`,
-    `C ${fmt(px(2))} ${fmt(py(25))} ${fmt(px(8))} ${fmt(py(5))} ${fmt(px(18))} ${fmt(py(5))}`,
-    "Z",
-  ].join(" ");
-  const sideCurve = (edge: number, bulge: number, inner: number) =>
-    [
-      `M ${fmt(px(edge))} ${fmt(py(5))}`,
-      `C ${fmt(px(bulge))} ${fmt(py(5))} ${fmt(px(inner))} ${fmt(py(25))} ${fmt(px(inner))} ${fmt(py(50))}`,
-      `C ${fmt(px(inner))} ${fmt(py(75))} ${fmt(px(bulge))} ${fmt(py(95))} ${fmt(px(edge))} ${fmt(py(95))}`,
-    ].join(" ");
-  const openCurve = (d: string) =>
-    tag("path", { d, fill: "none", stroke: paint.border, "stroke-width": strokeWidth });
-  return (
-    silhouettePath(outerPath, paint, strokeWidth, { "stroke-linejoin": "round" }) +
-    openCurve(sideCurve(18, 28, 34)) +
-    openCurve(sideCurve(82, 72, 66))
-  );
-}
 
 /** The base rounded rect of the bbox tier (CSS border-box border → half-stroke inset). */
 function bboxRoundedRect(
@@ -927,41 +748,6 @@ function bboxRoundedRect(
     stroke: paint.border,
     "stroke-width": strokeWidth,
   });
-}
-
-/**
- * Base rect + inset "L" divider rules (objects/shapes/flowchart/
- * internal-storage.tsx): each rule is a border-colored bar at 15% of the
- * padding box (the border-box inset by the CSS border, i.e. the stroke),
- * half a predefined-process bar thick.
- */
-function renderInternalStorageSilhouette(
-  rect: WorldRect,
-  paint: ShapePaint,
-  strokeWidth: number,
-): string {
-  const ruleThickness = PREDEFINED_PROCESS_GEOMETRY.barWidthPx / 2;
-  const innerX = rect.x + strokeWidth;
-  const innerY = rect.y + strokeWidth;
-  const innerWidth = Math.max(0, rect.width - strokeWidth * 2);
-  const innerHeight = Math.max(0, rect.height - strokeWidth * 2);
-  return (
-    bboxRoundedRect(rect, paint, strokeWidth, BASE_CORNER_RADIUS_PX) +
-    tag("rect", {
-      x: innerX + innerWidth * INTERNAL_STORAGE_RULE_INSET_RATIO,
-      y: innerY,
-      width: ruleThickness,
-      height: innerHeight,
-      fill: paint.border,
-    }) +
-    tag("rect", {
-      x: innerX,
-      y: innerY + innerHeight * INTERNAL_STORAGE_RULE_INSET_RATIO,
-      width: innerWidth,
-      height: ruleThickness,
-      fill: paint.border,
-    })
-  );
 }
 
 /**
@@ -994,54 +780,6 @@ function renderPredefinedProcessSilhouette(
   );
 }
 
-/**
- * Rect with the top-right corner folded off (objects/shapes/flowchart/
- * page-corner.tsx clip-path). The live CSS clip cuts the button's border
- * along the fold, so the diagonal edge shows bare fill with no stroke —
- * mirrored here by filling the full fold polygon and stroking only the
- * un-clipped perimeter. Drawn on the half-stroke-inset rect like every
- * CSS-border shape; the live corner radii (2/8px) are approximated square.
- */
-function renderPageCornerSilhouette(
-  rect: WorldRect,
-  paint: ShapePaint,
-  strokeWidth: number,
-): string {
-  const inset = strokeWidth / 2;
-  const left = rect.x + inset;
-  const top = rect.y + inset;
-  const right = rect.x + rect.width - inset;
-  const bottom = rect.y + rect.height - inset;
-  const width = Math.max(0, right - left);
-  const height = Math.max(0, bottom - top);
-  const foldX = left + width * PAGE_CORNER_FOLD.foldXRatio;
-  const foldY = top + height * PAGE_CORNER_FOLD.foldYRatio;
-  const fillPath = [
-    `M ${fmt(left)} ${fmt(top)}`,
-    `L ${fmt(foldX)} ${fmt(top)}`,
-    `L ${fmt(right)} ${fmt(foldY)}`,
-    `L ${fmt(right)} ${fmt(bottom)}`,
-    `L ${fmt(left)} ${fmt(bottom)}`,
-    "Z",
-  ].join(" ");
-  const borderPath = [
-    `M ${fmt(right)} ${fmt(foldY)}`,
-    `L ${fmt(right)} ${fmt(bottom)}`,
-    `L ${fmt(left)} ${fmt(bottom)}`,
-    `L ${fmt(left)} ${fmt(top)}`,
-    `L ${fmt(foldX)} ${fmt(top)}`,
-  ].join(" ");
-  return (
-    tag("path", { d: fillPath, fill: paint.fill }) +
-    tag("path", {
-      d: borderPath,
-      fill: "none",
-      stroke: paint.border,
-      "stroke-width": strokeWidth,
-    })
-  );
-}
-
 /** Dispatch for the custom silhouettes; null falls through to the shared tiers. */
 function renderCustomSilhouette(
   renderShape: string,
@@ -1050,22 +788,8 @@ function renderCustomSilhouette(
   strokeWidth: number,
 ): string | null {
   switch (renderShape) {
-    case "document":
-      return renderDocumentSilhouette(rect, paint, strokeWidth);
-    case "document-stack":
-      return renderDocumentStackSilhouette(rect, paint, strokeWidth);
-    case "database":
-      return renderDatabaseSilhouette(rect, paint, strokeWidth);
-    case "folder":
-      return renderFolderSilhouette(rect, paint, strokeWidth);
-    case "cylinder-horizontal":
-      return renderCylinderHorizontalSilhouette(rect, paint, strokeWidth);
-    case "internal-storage":
-      return renderInternalStorageSilhouette(rect, paint, strokeWidth);
     case "predefined-process":
       return renderPredefinedProcessSilhouette(rect, paint, strokeWidth);
-    case "page-corner":
-      return renderPageCornerSilhouette(rect, paint, strokeWidth);
     default:
       return null;
   }
@@ -1118,23 +842,7 @@ function renderShapeBody(
     if (glyphMarkup !== null) return glyphMarkup;
   }
 
-  // Pill/stadium: a perfect rounded rect beats the outline module's 8-segment
-  // polygon approximation.
-  if (object.type === "pill" || renderShape === "pill") {
-    const radius = Math.min(geometry.width, geometry.height) / 2;
-    return tag("rect", {
-      x: geometry.x,
-      y: geometry.y,
-      width: geometry.width,
-      height: geometry.height,
-      rx: radius,
-      fill: colors.fill,
-      stroke: colors.border,
-      "stroke-width": strokeWidth,
-    });
-  }
-
-  // Custom flowchart silhouettes — types whose live defs draw inline-SVG/CSS
+  // Custom silhouettes — types whose live defs draw inline-SVG/CSS
   // silhouettes rather than an outline-module polygon.
   const custom = renderCustomSilhouette(renderShape, geometry, colors, strokeWidth);
   if (custom !== null) return custom;
@@ -1142,7 +850,7 @@ function renderShapeBody(
   const spec = outlineSpecFor(object);
 
   if (spec.kind === "ellipse") {
-    const body = tag("ellipse", {
+    return tag("ellipse", {
       cx: geometry.x + geometry.width / 2,
       cy: geometry.y + geometry.height / 2,
       rx: geometry.width / 2,
@@ -1151,35 +859,12 @@ function renderShapeBody(
       stroke: colors.border,
       "stroke-width": strokeWidth,
     });
-    // Junction overlay glyphs (or-junction "+", summing-junction "x") —
-    // mirrors the silhouettes in objects/shapes/flowchart/{or,summing}-junction.tsx.
-    if (object.type === "or-junction") {
-      const cx = geometry.x + geometry.width / 2;
-      const cy = geometry.y + geometry.height / 2;
-      return (
-        body +
-        tag("line", { x1: cx, y1: geometry.y, x2: cx, y2: geometry.y + geometry.height, stroke: colors.border, "stroke-width": strokeWidth }) +
-        tag("line", { x1: geometry.x, y1: cy, x2: geometry.x + geometry.width, y2: cy, stroke: colors.border, "stroke-width": strokeWidth })
-      );
-    }
-    if (object.type === "summing-junction") {
-      const x1 = geometry.x + geometry.width * 0.1464;
-      const x2 = geometry.x + geometry.width * 0.8536;
-      const y1 = geometry.y + geometry.height * 0.1464;
-      const y2 = geometry.y + geometry.height * 0.8536;
-      return (
-        body +
-        tag("line", { x1, y1, x2, y2, stroke: colors.border, "stroke-width": strokeWidth }) +
-        tag("line", { x1, y1: y2, x2, y2: y1, stroke: colors.border, "stroke-width": strokeWidth })
-      );
-    }
-    return body;
   }
 
   if (spec.kind === "polygon") {
     const points = outlinePolygonForSpec(spec, geometry, object);
-    // Arrow-shape/chevron silhouettes use round joins in the app.
-    const roundJoin = object.type === "arrow-shape" || object.type === "chevron";
+    // The arrow-shape silhouette uses round joins in the app.
+    const roundJoin = object.type === "arrow-shape";
     return tag("polygon", {
       points: polygonPointsAttribute(points),
       fill: colors.fill,

@@ -1,77 +1,77 @@
 /** Exact model-visible digest text pins (nested tree + EDGES; lossless op-writable surface) plus the lint-report pins. */
 export const DIGEST_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
-  "digest-rich": `BOARD  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "digest-rich": `BOARD
   page section "Page frame" 0,0 640×480 locked=background
     inner section "Inner" blue 32,64 320×240
       task process "Do the thing" teal 64,128 184×96
     note sticky "Remember this" 400,64 160×160
 EDGES
   task-note task→note "see" dashed · task ─(s0 h y=176)→ ─(s1 h y=176)→ (s2 v x=324) ─(s3 h y=144)→ ─(s4 h y=144)→ note`,
-  "digest-annotations": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "digest-annotations": `BOARD · no base section
   task rectangle "task" 0,0 160×96
   other rectangle "other" 320,0 160×96
 EDGES
   task-other task→other — · task ─(s0 h y=48)→ other`,
-  "digest-frameless": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "digest-frameless": `BOARD · no base section
   only rectangle "only" 0,0 160×96
 EDGES
   (none)`,
-  "digest-solo-section": `BOARD  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "digest-solo-section": `BOARD
   solo section "Solo" 0,0 480×320
     (empty)
 EDGES
   (none)`,
-  "digest-clipping": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "digest-clipping": `BOARD · no base section
   wordy rectangle "multi line xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" 0,0 160×96
 EDGES
   (none)`,
-  "perception-labeled-gap": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "perception-labeled-gap": `BOARD · no base section
   alpha rectangle "alpha" 0,0 160×96
   beta rectangle "beta" 208,0 160×96
 EDGES
   edge alpha→beta "go" · alpha ─(s0 h y=48)→ beta`,
-  "perception-single": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "perception-single": `BOARD · no base section
   alpha rectangle "alpha" 0,0 160×96
 EDGES
   (none)`,
-  "perception-object-delta": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "perception-object-delta": `BOARD · no base section
   alpha rectangle "alpha" 0,0 160×96
   beta rectangle "beta" 320,0 160×96
   gamma rectangle "gamma" 640,0 160×96
 EDGES
   (none)`,
-  "perception-membership": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "perception-membership": `BOARD · no base section
   section-a section "section-a" 0,0 400×320
     child rectangle "child" 80,112 160×96
   section-b section "section-b" 500,0 400×320
     (empty)
 EDGES
   (none)`,
-  "perception-connections": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "perception-connections": `BOARD · no base section
   alpha rectangle "alpha" 0,0 160×96
   beta rectangle "beta" 480,0 160×96
   gamma rectangle "gamma" 960,0 160×96
 EDGES
   alpha-beta alpha→beta "before" · alpha ─(s0 h y=48)→ beta
   beta-gamma beta→gamma — · beta ─(s0 h y=48)→ gamma`,
-  "perception-clean-pair": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "perception-clean-pair": `BOARD · no base section
   alpha rectangle "alpha" 0,0 160×96
   beta rectangle "beta" 480,0 160×96
 EDGES
   (none)`,
-  "perception-two-overlaps": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "perception-two-overlaps": `BOARD · no base section
   a1 rectangle "a1" 0,0 160×96
   a2 rectangle "a2" 40,0 160×96
   b1 rectangle "b1" 2000,0 160×96
   b2 rectangle "b2" 2040,0 160×96
 EDGES
   (none)`,
-  "perception-quickfix": `BOARD · no base section  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "perception-quickfix": `BOARD · no base section
   alpha rectangle "alpha" 0,0 160×96
   beta rectangle "beta" 204,0 160×96
 EDGES
   edge alpha→beta "X" · alpha ─(s0 h y=48)→ beta`,
-  "comprehensive-all-blocks": `BOARD  # indent = containment · id type "text" [color] x,y w×h [k=v…] · elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type · edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+  "comprehensive-all-blocks": `BOARD
   page-all section "All fields page" violet 0,0 1280×900 locked=background
     nested-frame section "Nested locked" 32,32 320×240 locked=background
       (empty)

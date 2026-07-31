@@ -6,12 +6,7 @@
   "blocks": {
     "b-r10-root": {
       "id": "b-r10-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-r10-title-1",
-        "b-r10-card-2",
-        "b-r10-body-3"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "The operation language carries concrete geometry rather than abstract align, fan, grid, or gap constraints; the aesthetic supplies relational intent, while fresh digests and renders provide the evidence used to judge it.",
         "format": "mdx",
@@ -23,12 +18,16 @@
           "fresh BOARD digest",
           "render judgment"
         ]
-      }
+      },
+      "children": [
+        "b-r10-title-1",
+        "b-r10-card-2",
+        "b-r10-body-3"
+      ]
     },
     "b-r10-title-1": {
       "id": "b-r10-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -36,12 +35,12 @@
         {
           "insert": "R10 — What the language refuses to say"
         }
-      ]
+      ],
+      "children": []
     },
     "b-r10-card-2": {
       "id": "b-r10-card-2",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "Relations are not operation fields"
       },
@@ -49,12 +48,12 @@
         {
           "insert": "The operation surface expresses concrete entities, and every geometry edit uses a complete finite rectangle. It has no align, fan, lattice, equal-gap, or importance-size field; those meanings come from deliberate repeated geometry, section structure, labels, and color."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r10-body-3": {
       "id": "b-r10-body-3",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -105,7 +104,8 @@
         {
           "insert": ", one or the other and never both — while the board render itself rides the state block, so the whole picture arrives without being asked for. No diagnostic enforces abstract peer alignment or equal-gap intent: the always-on diagnostics guard physical readability, and the renders remain the composition judge."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

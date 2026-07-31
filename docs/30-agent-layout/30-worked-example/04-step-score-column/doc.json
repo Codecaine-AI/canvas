@@ -6,13 +6,7 @@
   "blocks": {
     "b-step4-root": {
       "id": "b-step4-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-step4-title-1",
-        "b-step4-body-2",
-        "b-step4-code-3",
-        "b-step4-canvas-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "Step 4 of the worked example: a section-skeleton batch makes room for Score gate, followed by one reviewed content batch for each touched section.",
         "format": "mdx",
@@ -24,12 +18,17 @@
           "section-first",
           "auto-fit"
         ]
-      }
+      },
+      "children": [
+        "b-step4-title-1",
+        "b-step4-body-2",
+        "b-step4-code-3",
+        "b-step4-canvas-4"
+      ]
     },
     "b-step4-title-1": {
       "id": "b-step4-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -37,12 +36,12 @@
         {
           "insert": "Step 4 — A score column"
         }
-      ]
+      ],
+      "children": []
     },
     "b-step4-body-2": {
       "id": "b-step4-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -57,12 +56,12 @@
         {
           "insert": " section and explicitly reflows the three existing frames so every planned piece already has a home. After judging that skeleton render, it updates Config, Runner loop, Board — hub, and Score gate in separate calls, in reading order, judging the requested section close-up after each. Same-role peers copy geometry and one repeated gap; content, hierarchy, and the planned left-to-right flow determine the sizes and positions. Because the existing section resizes are explicit, those sizes win in the skeleton batch. Score gate remains eligible to auto-fit after geometry-derived membership adopts objdiff, qa, and regress. Every successful call includes a fresh BOARD digest; DELTA records the local reflow, fitted frame geometry, and reconciled parentId values, while BOARD DIFF remains cumulative. LINTS reports findings added or resolved, REQUESTS remains current, and every document change produces a fresh full-board render. Crowding owns the minimum arrow-corridor clearance; the compact column is not exempt from that warning floor."
         }
-      ]
+      ],
+      "children": []
     },
     "b-step4-code-3": {
       "id": "b-step4-code-3",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "json"
       },
@@ -70,16 +69,17 @@
         {
           "insert": "[\n  {\n    \"ops\": [\n      {\n        \"type\": \"addSection\",\n        \"section\": {\n          \"id\": \"score\",\n          \"text\": \"Score gate\",\n          \"color\": \"gray\",\n          \"geometry\": { \"x\": 784, \"y\": 0, \"width\": 240, \"height\": 576 }\n        }\n      },\n      {\n        \"type\": \"updateSection\",\n        \"sectionId\": \"config\",\n        \"patch\": {\n          \"geometry\": { \"x\": 0, \"y\": 0, \"width\": 112, \"height\": 512 }\n        }\n      },\n      {\n        \"type\": \"updateSection\",\n        \"sectionId\": \"loop\",\n        \"patch\": {\n          \"geometry\": { \"x\": 208, \"y\": 0, \"width\": 480, \"height\": 320 }\n        }\n      },\n      {\n        \"type\": \"updateSection\",\n        \"sectionId\": \"board\",\n        \"patch\": {\n          \"geometry\": { \"x\": 208, \"y\": 416, \"width\": 480, \"height\": 160 }\n        }\n      }\n    ]\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"checkout\",\n        \"patch\": {\n          \"geometry\": { \"x\": 16, \"y\": 176, \"width\": 80, \"height\": 32 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"goals\",\n        \"patch\": {\n          \"geometry\": { \"x\": 16, \"y\": 272, \"width\": 80, \"height\": 32 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"secrets\",\n        \"patch\": {\n          \"geometry\": { \"x\": 16, \"y\": 368, \"width\": 80, \"height\": 32 }\n        }\n      }\n    ],\n    \"view\": \"config\"\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"cli\",\n        \"patch\": {\n          \"geometry\": { \"x\": 240, \"y\": 160, \"width\": 80, \"height\": 48 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"sched\",\n        \"patch\": {\n          \"geometry\": { \"x\": 352, \"y\": 160, \"width\": 80, \"height\": 48 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"workers\",\n        \"patch\": {\n          \"geometry\": { \"x\": 464, \"y\": 160, \"width\": 80, \"height\": 48 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"match\",\n        \"patch\": {\n          \"geometry\": { \"x\": 576, \"y\": 160, \"width\": 80, \"height\": 48 }\n        }\n      }\n    ],\n    \"view\": \"loop\"\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"epochs\",\n        \"patch\": {\n          \"geometry\": { \"x\": 224, \"y\": 464, \"width\": 112, \"height\": 96 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"artifacts\",\n        \"patch\": {\n          \"geometry\": { \"x\": 384, \"y\": 464, \"width\": 112, \"height\": 96 }\n        }\n      },\n      {\n        \"type\": \"updateObject\",\n        \"objectId\": \"saves\",\n        \"patch\": {\n          \"geometry\": { \"x\": 544, \"y\": 464, \"width\": 112, \"height\": 96 }\n        }\n      }\n    ],\n    \"view\": \"board\"\n  },\n  {\n    \"ops\": [\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"objdiff\",\n          \"type\": \"process\",\n          \"text\": \"objdiff\",\n          \"geometry\": { \"x\": 800, \"y\": 48, \"width\": 192, \"height\": 112 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"qa\",\n          \"type\": \"process\",\n          \"text\": \"qa\",\n          \"geometry\": { \"x\": 800, \"y\": 256, \"width\": 192, \"height\": 112 }\n        }\n      },\n      {\n        \"type\": \"addObject\",\n        \"object\": {\n          \"id\": \"regress\",\n          \"type\": \"decision\",\n          \"text\": \"regress\",\n          \"geometry\": { \"x\": 800, \"y\": 432, \"width\": 192, \"height\": 112 }\n        }\n      }\n    ],\n    \"view\": \"score\"\n  }\n]"
         }
-      ]
+      ],
+      "children": []
     },
     "b-step4-canvas-4": {
       "id": "b-step4-canvas-4",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/step-4.canvas.json",
         "title": "Step 4 — A score column"
-      }
+      },
+      "children": []
     }
   }
 }

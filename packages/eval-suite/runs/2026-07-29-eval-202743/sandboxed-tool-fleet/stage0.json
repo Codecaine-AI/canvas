@@ -1,0 +1,979 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-29-eval-202743.sandboxed-tool-fleet",
+  "title": "2026-07-29-eval-202743 · sandboxed-tool-fleet",
+  "description": "# Sandboxed tool-execution fleet\n\nA left-to-right operational map of disposable environments used by tool-calling agents. Requests pass through tenant concurrency and aggregate-runtime admission, then take either an immediate compatible warm-pool hit or a capacity-aware cold boot on a healthy host.\n\nThe center follows each environment through provisioning, ready, leased, idle, draining, and destroyed. Renewal heartbeats preserve a fixed-term lease; lease expiry or absolute maximum age invokes the reclaimer, which destroys the environment and never returns prior-tenant state to the pool. Image retirement drains old instances and waits for active work before destruction.\n\nWithin a lease, each tool call is governed by timeout, memory, CPU, and allowlisted proxy egress controls. Output is capped and streamed; durable session-keyed files go to the artifact store because local state is ephemeral. The pool supervisor adjusts pre-booted supply from capacity and demand, repeated boot failures quarantine hosts, and operations track boot latency, reclamations, timeouts, and escape-attempt signals.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1984,
+    "height": 1264
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-29-eval-202743 · sandboxed-tool-fleet",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3200,
+        "height": 2520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "placement",
+      "type": "section",
+      "text": "1 · Placement & fair admission",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 140,
+        "width": 1360,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "lifecycle",
+      "type": "section",
+      "text": "2 · Environment lifecycle",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 740,
+        "width": 2000,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "warm-pool",
+      "type": "section",
+      "text": "Warm pool & host health",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1640,
+        "y": 140,
+        "width": 1400,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "lease-enforcement",
+      "type": "section",
+      "text": "3 · Lease enforcement",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2280,
+        "y": 740,
+        "width": 880,
+        "height": 440
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "runtime-controls",
+      "type": "section",
+      "text": "4 · Tool-call controls",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 1340,
+        "width": 1360,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "io-persistence",
+      "type": "section",
+      "text": "5 · Output & durable artifacts",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1660,
+        "y": 1440,
+        "width": 880,
+        "height": 240
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "agent",
+      "type": "icon",
+      "text": "Tool-using agent",
+      "color": "teal",
+      "parentId": "placement",
+      "geometry": {
+        "x": 180,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "placement-svc",
+      "type": "icon",
+      "text": "Placement service",
+      "color": "teal",
+      "parentId": "placement",
+      "geometry": {
+        "x": 600,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "quota-gate",
+      "type": "icon",
+      "text": "Tenant concurrency + runtime quotas",
+      "color": "red",
+      "parentId": "placement",
+      "geometry": {
+        "x": 1140,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "provisioning",
+      "type": "process",
+      "text": "Provisioning",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 180,
+        "y": 900,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "ready",
+      "type": "process",
+      "text": "Ready",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 580,
+        "y": 900,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "leased",
+      "type": "process",
+      "text": "Leased",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 940,
+        "y": 900,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "idle",
+      "type": "process",
+      "text": "Idle",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 1440,
+        "y": 900,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "draining",
+      "type": "process",
+      "text": "Draining",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 1840,
+        "y": 900,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "destroyed",
+      "type": "process",
+      "text": "Destroyed",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 1700,
+        "y": 1080,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "pool-supervisor",
+      "type": "icon",
+      "text": "Pool supervisor",
+      "color": "teal",
+      "parentId": "warm-pool",
+      "geometry": {
+        "x": 1700,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "warm-pool-q",
+      "type": "icon",
+      "text": "Pre-booted supply",
+      "color": "green",
+      "parentId": "warm-pool",
+      "geometry": {
+        "x": 2020,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "queue"
+    },
+    {
+      "id": "healthy-hosts",
+      "type": "icon",
+      "text": "Healthy hosts",
+      "color": "gray",
+      "parentId": "warm-pool",
+      "geometry": {
+        "x": 2340,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "host-quarantine",
+      "type": "icon",
+      "text": "Host quarantine",
+      "color": "red",
+      "parentId": "warm-pool",
+      "geometry": {
+        "x": 2740,
+        "y": 300,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "renewal-heartbeat",
+      "type": "icon",
+      "text": "Renewal heartbeat",
+      "color": "yellow",
+      "parentId": "lease-enforcement",
+      "geometry": {
+        "x": 2340,
+        "y": 900,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "lease-clock",
+      "type": "icon",
+      "text": "Lease term + max age",
+      "color": "gray",
+      "parentId": "lease-enforcement",
+      "geometry": {
+        "x": 2580,
+        "y": 900,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "wait"
+    },
+    {
+      "id": "reclaimer",
+      "type": "predefined-process",
+      "text": "Reclaimer",
+      "color": "gray",
+      "parentId": "lease-enforcement",
+      "geometry": {
+        "x": 2900,
+        "y": 900,
+        "width": 260,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "tool-call",
+      "type": "icon",
+      "text": "Tool call",
+      "color": "gray",
+      "parentId": "runtime-controls",
+      "geometry": {
+        "x": 180,
+        "y": 1520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "tool"
+    },
+    {
+      "id": "resource-limits",
+      "type": "icon",
+      "text": "Timeout · memory · CPU",
+      "color": "gray",
+      "parentId": "runtime-controls",
+      "geometry": {
+        "x": 540,
+        "y": 1520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "egress-proxy",
+      "type": "icon",
+      "text": "Allowlist egress proxy",
+      "color": "red",
+      "parentId": "runtime-controls",
+      "geometry": {
+        "x": 860,
+        "y": 1520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "capped-output",
+      "type": "icon",
+      "text": "Capped output stream",
+      "color": "green",
+      "parentId": "io-persistence",
+      "geometry": {
+        "x": 1700,
+        "y": 1520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "send"
+    },
+    {
+      "id": "artifact-store",
+      "type": "icon",
+      "text": "Session artifact store",
+      "color": "gray",
+      "parentId": "io-persistence",
+      "geometry": {
+        "x": 2040,
+        "y": 1520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "ephemeral-local",
+      "type": "icon",
+      "text": "Ephemeral local state",
+      "color": "gray",
+      "parentId": "io-persistence",
+      "geometry": {
+        "x": 2380,
+        "y": 1520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "operations",
+      "type": "section",
+      "text": "6 · Operations monitoring",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 1980,
+        "width": 2920,
+        "height": 340
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "boot-metric",
+      "type": "icon",
+      "text": "Boot latency",
+      "color": "gray",
+      "parentId": "operations",
+      "geometry": {
+        "x": 300,
+        "y": 2100,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "reclaim-metric",
+      "type": "icon",
+      "text": "Lease reclamations",
+      "color": "gray",
+      "parentId": "operations",
+      "geometry": {
+        "x": 940,
+        "y": 2100,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "timeout-metric",
+      "type": "icon",
+      "text": "Tool timeouts",
+      "color": "gray",
+      "parentId": "operations",
+      "geometry": {
+        "x": 1580,
+        "y": 2100,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "escape-metric",
+      "type": "icon",
+      "text": "Escape-attempt signals",
+      "color": "gray",
+      "parentId": "operations",
+      "geometry": {
+        "x": 2220,
+        "y": 2100,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "timeout-note",
+      "type": "sticky",
+      "text": "**Timeout semantics**\n- Kill an overlong call\n- Report timeout, not tool error",
+      "color": "yellow",
+      "parentId": "runtime-controls",
+      "geometry": {
+        "x": 1100,
+        "y": 1640,
+        "width": 300,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-agent-placement",
+      "from": {
+        "objectId": "agent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "placement-svc",
+        "anchor": "left"
+      },
+      "label": "image + resource class",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-placement-quota",
+      "from": {
+        "objectId": "placement-svc",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "quota-gate",
+        "anchor": "left"
+      },
+      "label": "check limits · fair wait if exceeded",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-quota-pool",
+      "from": {
+        "objectId": "quota-gate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "warm-pool-q",
+        "anchor": "left"
+      },
+      "label": "admitted · claim compatible",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "waypoints": [
+        [
+          1260,
+          220
+        ],
+        [
+          2020,
+          220
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.45,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-supervisor-pool",
+      "from": {
+        "objectId": "pool-supervisor",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "warm-pool-q",
+        "anchor": "left"
+      },
+      "label": "adjust depth",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-pool-ready",
+      "from": {
+        "objectId": "warm-pool-q",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "ready",
+        "anchor": "top"
+      },
+      "label": "warm hit · return now",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-quota-hosts",
+      "from": {
+        "objectId": "quota-gate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "healthy-hosts",
+        "anchor": "left"
+      },
+      "label": "miss · select capacity",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray",
+      "waypoints": [
+        [
+          1260,
+          500
+        ],
+        [
+          2340,
+          500
+        ]
+      ]
+    },
+    {
+      "id": "e-host-provision",
+      "from": {
+        "objectId": "healthy-hosts",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "provisioning",
+        "anchor": "top"
+      },
+      "label": "cold miss · boot and wait",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray",
+      "waypoints": [
+        [
+          2400,
+          640
+        ],
+        [
+          320,
+          640
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.4,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-provision-ready",
+      "from": {
+        "objectId": "provisioning",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ready",
+        "anchor": "left"
+      },
+      "label": "ready",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-ready-leased",
+      "from": {
+        "objectId": "ready",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "leased",
+        "anchor": "left"
+      },
+      "label": "",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-leased-idle",
+      "from": {
+        "objectId": "leased",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "idle",
+        "anchor": "left"
+      },
+      "label": "lease ends",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-idle-draining",
+      "from": {
+        "objectId": "idle",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "draining",
+        "anchor": "left"
+      },
+      "label": "retire",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-draining-destroyed",
+      "from": {
+        "objectId": "draining",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "destroyed",
+        "anchor": "top"
+      },
+      "label": "after active lease",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-heartbeat-leased",
+      "from": {
+        "objectId": "renewal-heartbeat",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "leased",
+        "anchor": "top"
+      },
+      "label": "renew · keep valid",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "yellow",
+      "waypoints": [
+        [
+          2340,
+          800
+        ],
+        [
+          1080,
+          800
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.2,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-host-quarantine",
+      "from": {
+        "objectId": "healthy-hosts",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "host-quarantine",
+        "anchor": "left"
+      },
+      "label": "repeated boot failures",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-clock-reclaimer",
+      "from": {
+        "objectId": "lease-clock",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "reclaimer",
+        "anchor": "left"
+      },
+      "label": "lease expired",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-reclaimer-destroyed",
+      "from": {
+        "objectId": "reclaimer",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "destroyed",
+        "anchor": "right"
+      },
+      "label": "destroy · never repool",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-leased-tool",
+      "from": {
+        "objectId": "leased",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "tool-call",
+        "anchor": "top"
+      },
+      "label": "invoke in lease",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-tool-limits",
+      "from": {
+        "objectId": "tool-call",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "resource-limits",
+        "anchor": "left"
+      },
+      "label": "enforce per call",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-limits-egress",
+      "from": {
+        "objectId": "resource-limits",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "egress-proxy",
+        "anchor": "left"
+      },
+      "label": "network policy",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-egress-output",
+      "from": {
+        "objectId": "egress-proxy",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "capped-output",
+        "anchor": "left"
+      },
+      "label": "stream capped output",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.7,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-tool-artifacts",
+      "from": {
+        "objectId": "tool-call",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "artifact-store",
+        "anchor": "bottom"
+      },
+      "label": "durable files · session key",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    }
+  ],
+  "annotations": []
+}

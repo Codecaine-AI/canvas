@@ -49,9 +49,9 @@ function styleVariantsFor(type: InteractiveCanvasObjectType): StyleVariant[] {
     { name: "no-style", style: undefined },
   ];
   if (type === "process") {
-    // Locks the secondary style-shape dispatch quirk: only pill/diamond/
-    // ellipse are consulted via style.shape; process+triangle stays BBOX.
-    for (const shape of ["triangle", "diamond", "pill", "ellipse"] as const) {
+    // Locks the secondary style-shape dispatch quirk: only diamond/ellipse
+    // are consulted via style.shape; process+triangle stays BBOX.
+    for (const shape of ["triangle", "diamond", "ellipse"] as const) {
       variants.push({ name: `mismatch-shape=${shape}`, style: { shape } });
     }
   }
@@ -62,7 +62,7 @@ function directionVariantsFor(
   type: InteractiveCanvasObjectType,
 ): ReadonlyArray<InteractiveCanvasObject["direction"] | undefined> {
   if (type === "triangle") return ["up", "down", undefined];
-  if (type === "arrow-shape" || type === "chevron" || type === "parallelogram") {
+  if (type === "arrow-shape") {
     return ["left", "right", undefined];
   }
   return [undefined];

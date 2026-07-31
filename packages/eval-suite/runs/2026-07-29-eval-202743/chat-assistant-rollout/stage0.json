@@ -1,0 +1,344 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-29-eval-202743.chat-assistant-rollout",
+  "title": "Support Assistant Memory & Staged Rollout",
+  "description": "# Support assistant with long-term memory and staged rollout\n\nA left-to-right system diagram with three flows: **live support turns** gather profile, transcript, and retrieved help content before guarded generation and credentialed actions; **conversation lifecycle** distills durable, traceable profile facts and archives expired raw transcripts; **staged rollout** samples versioned challengers against the champion, evaluates completed conversations, requires product-owner approval for promotion, and independently pulls regressions from traffic. The displaced champion remains available for one-step rollback.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-29-eval-202743 · chat-assistant-rollout",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2240,
+        "height": 1400
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "live.entry",
+      "type": "section",
+      "text": "1 · Channels & input safety",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 80,
+        "y": 100,
+        "width": 480,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "live.context",
+      "type": "section",
+      "text": "2 · Turn context assembly",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 620,
+        "y": 100,
+        "width": 620,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "live.reply",
+      "type": "section",
+      "text": "3 · Guarded reply & actions",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1300,
+        "y": 100,
+        "width": 820,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "life.extract",
+      "type": "section",
+      "text": "4 · Conversation distillation",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 80,
+        "y": 560,
+        "width": 620,
+        "height": 300
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "life.retention",
+      "type": "section",
+      "text": "5 · Retention & compliance",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 760,
+        "y": 560,
+        "width": 480,
+        "height": 300
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "roll.config",
+      "type": "section",
+      "text": "6 · Champion & challengers",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1300,
+        "y": 560,
+        "width": 820,
+        "height": 300
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "roll.eval",
+      "type": "section",
+      "text": "7 · Evaluation & approval",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 80,
+        "y": 1020,
+        "width": 760,
+        "height": 300
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "roll.monitor",
+      "type": "section",
+      "text": "8 · Live monitoring & rollback",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 980,
+        "y": 1020,
+        "width": 1140,
+        "height": 300
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "live.customer",
+      "type": "icon",
+      "text": "Customer",
+      "color": "yellow",
+      "parentId": "live.entry",
+      "geometry": {
+        "x": 120,
+        "y": 180,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "live.channels",
+      "type": "icon",
+      "text": "Web + mobile chat",
+      "color": "yellow",
+      "parentId": "live.entry",
+      "geometry": {
+        "x": 320,
+        "y": 180,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "message"
+    },
+    {
+      "id": "live.input_guard",
+      "type": "icon",
+      "text": "Input safety",
+      "color": "red",
+      "parentId": "live.entry",
+      "geometry": {
+        "x": 220,
+        "y": 360,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "live.profile",
+      "type": "icon",
+      "text": "",
+      "color": "blue",
+      "parentId": "live.context",
+      "geometry": {
+        "x": 680,
+        "y": 160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "live.context.note",
+      "type": "sticky",
+      "text": "Profile + transcript + searched help articles → model context",
+      "color": "yellow",
+      "parentId": "live.context",
+      "geometry": {
+        "x": 840,
+        "y": 160,
+        "width": 180,
+        "height": 320
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "live.reply.note",
+      "type": "sticky",
+      "text": "Guarded model reply • safe fallback • credentialed billing/account actions • human handoff",
+      "color": "yellow",
+      "parentId": "live.reply",
+      "geometry": {
+        "x": 1380,
+        "y": 160,
+        "width": 400,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "life.extract.note",
+      "type": "sticky",
+      "text": "Transcript → distilled, sourced profile facts",
+      "color": "yellow",
+      "parentId": "life.extract",
+      "geometry": {
+        "x": 160,
+        "y": 660,
+        "width": 400,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "life.retention.note",
+      "type": "sticky",
+      "text": "Expired transcripts → cold archive",
+      "color": "yellow",
+      "parentId": "life.retention",
+      "geometry": {
+        "x": 840,
+        "y": 660,
+        "width": 320,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "roll.config.note",
+      "type": "sticky",
+      "text": "Versioned config: champion + challengers\nSampled traffic serves one variant\nPrompt • retrieval policy • model",
+      "color": "yellow",
+      "parentId": "roll.config",
+      "geometry": {
+        "x": 1380,
+        "y": 660,
+        "width": 600,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "roll.eval.note",
+      "type": "sticky",
+      "text": "Automated judges: resolution • grounding • tone\nExperiment report per challenger\nProduct owner approves or rejects promotion",
+      "color": "yellow",
+      "parentId": "roll.eval",
+      "geometry": {
+        "x": 160,
+        "y": 1100,
+        "width": 600,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "roll.monitor.note",
+      "type": "sticky",
+      "text": "Independent live metrics by variant: resolution • handoff • safety\nAny regression → pull challenger immediately\nApproved challenger becomes champion; prior champion enables one-step rollback",
+      "color": "yellow",
+      "parentId": "roll.monitor",
+      "geometry": {
+        "x": 1060,
+        "y": 1100,
+        "width": 900,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [],
+  "annotations": []
+}

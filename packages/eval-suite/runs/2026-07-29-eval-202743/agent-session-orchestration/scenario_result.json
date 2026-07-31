@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-29-eval-202743",
+  "tier": "system",
+  "scenario": "agent-session-orchestration",
+  "board_id": "eval.2026-07-29-eval-202743.agent-session-orchestration",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-30T01:27:45.355Z",
+      "finished_at": "2026-07-30T01:37:17.806Z",
+      "wall_ms": 572864,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "0bad2cca-73ef-42d1-8101-8c188857bbca"
+    ]
+  },
+  "finished_at": "2026-07-30T01:37:18.219Z",
+  "exit_code": 0
+}

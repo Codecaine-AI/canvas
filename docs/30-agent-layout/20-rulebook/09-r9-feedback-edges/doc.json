@@ -6,13 +6,7 @@
   "blocks": {
     "b-r9-root": {
       "id": "b-r9-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-r9-title-1",
-        "b-r9-card-2",
-        "b-r9-body-3",
-        "b-r9-evidence-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "Feedback edges use direct labels, flow-facing endpoint steering, and clear return corridors; the ROUTES block and edge-related diagnostics judge the production-routed result.",
         "format": "mdx",
@@ -25,12 +19,17 @@
           "ROUTES",
           "edge diagnostics"
         ]
-      }
+      },
+      "children": [
+        "b-r9-title-1",
+        "b-r9-card-2",
+        "b-r9-body-3",
+        "b-r9-evidence-4"
+      ]
     },
     "b-r9-title-1": {
       "id": "b-r9-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -38,12 +37,12 @@
         {
           "insert": "R9 — Feedback edges and detours"
         }
-      ]
+      ],
+      "children": []
     },
     "b-r9-card-2": {
       "id": "b-r9-card-2",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "Feedback uses a clear return corridor"
       },
@@ -51,12 +50,12 @@
         {
           "insert": "A feedback edge exits toward a clear return corridor, carries its meaning on the edge label, and routes without crossing boxes, merging with another run, or reading as a section border."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r9-body-3": {
       "id": "b-r9-body-3",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -125,18 +124,19 @@
         {
           "insert": " JSON."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r9-evidence-4": {
       "id": "b-r9-evidence-4",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Verification: add connections after section content is in place, then judge the returned ROUTES block and pushed render. A clean return has an empty through list, a readable direct label, and a path that owns its corridor."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

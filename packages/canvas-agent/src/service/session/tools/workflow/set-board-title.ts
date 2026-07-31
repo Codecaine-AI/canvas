@@ -38,7 +38,7 @@ export function toolSetBoardTitle(
   }
 
   const previous = session.draft.title;
-  const label = "updateTitle";
+  const label = "set_board_title";
   commitDraft(session, { ...session.draft, title: next }, label);
   const diagnostics = runDiagnostics(session.draft);
   emit(session, {

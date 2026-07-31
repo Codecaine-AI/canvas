@@ -6,14 +6,7 @@
   "blocks": {
     "b-r4-root": {
       "id": "b-r4-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-r4-title-1",
-        "b-r4-card-2",
-        "b-r4-detect-3",
-        "b-r4-expand-4",
-        "b-r4-evidence-5"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "A repeated-cell layout uses the aesthetic's peer signal: size cells to the largest member, copy that geometry exactly, repeat one group gap, and keep row and column centers aligned.",
         "format": "mdx",
@@ -26,12 +19,18 @@
           "digest geometry",
           "peer alignment"
         ]
-      }
+      },
+      "children": [
+        "b-r4-title-1",
+        "b-r4-card-2",
+        "b-r4-detect-3",
+        "b-r4-expand-4",
+        "b-r4-evidence-5"
+      ]
     },
     "b-r4-title-1": {
       "id": "b-r4-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -39,12 +38,12 @@
         {
           "insert": "R4 — grid: repeated-cell tables"
         }
-      ]
+      ],
+      "children": []
     },
     "b-r4-card-2": {
       "id": "b-r4-card-2",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "Peer cells form a lattice"
       },
@@ -52,12 +51,12 @@
         {
           "insert": "When items are peers, make their cell geometry match, repeat one exact gap on each group axis, and keep centers on shared row and column lines. The repetition communicates the table structure."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r4-detect-3": {
       "id": "b-r4-detect-3",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -82,12 +81,12 @@
         {
           "insert": " says same size plus same gap means peers. Size for content first, then match_size every peer to the largest member and read exact digest geometry for the rest instead of estimating a near match. The agent's 20 grid quantizes the resulting rectangles; it does not choose the gap."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r4-expand-4": {
       "id": "b-r4-expand-4",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -99,18 +98,19 @@
         {
           "insert": " the cells in their section's content batch, then judge the pushed render. Keep one reading order, leave air around labels and borders, and preserve the repeated pitch as later content is added. No diagnostic infers a table or normalizes its cells; exact peer sizing and alignment are render-based craft judgments. Crowding still warns when sibling corridors fall below the routing floor."
         }
-      ]
+      ],
+      "children": []
     },
     "b-r4-evidence-5": {
       "id": "b-r4-evidence-5",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Verification: an operation result carries digest rows for what it touched, and a look carries the whole board with exact cell rectangles. Compare widths, heights, and pitch there, then examine a look's render for the row and column signal before continuing."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

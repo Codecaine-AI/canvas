@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-29-cadence-153707",
+  "tier": "system",
+  "scenario": "rag-ingestion-retrieval",
+  "board_id": "eval.2026-07-29-cadence-153707.rag-ingestion-retrieval",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "invalid-infra"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-29T20:37:09.206Z",
+      "finished_at": "2026-07-29T20:52:14.370Z",
+      "wall_ms": 905165,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "de0d84e1-452e-4cf9-9b0b-a6002205d80f"
+    ]
+  },
+  "finished_at": "2026-07-29T20:52:14.371Z",
+  "exit_code": 2
+}

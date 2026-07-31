@@ -22,8 +22,8 @@ import {
 describe("resolveObjectRoleColors: shape role", () => {
   it("pick = fill + ink border", () => {
     expect(resolveObjectRoleColors({ color: "red" }, "shape")).toEqual({
-      fill: "#FFC7C2",
-      border: "#F24822",
+      fill: "#FFD2CC",
+      border: "#D5322F",
       text: OBJECT_TEXT_COLOR,
     });
   });
@@ -31,7 +31,7 @@ describe("resolveObjectRoleColors: shape role", () => {
   it("white keeps a visible ink border", () => {
     const white = resolveObjectRoleColors({ color: "white" }, "shape");
     expect(white.fill).toBe("#FFFFFF");
-    expect(white.border).toBe("#757575");
+    expect(white.border).toBe("#757980");
   });
 
   it("no pick falls back to the shape first-use default (gray)", () => {

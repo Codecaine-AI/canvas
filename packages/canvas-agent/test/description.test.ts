@@ -23,7 +23,7 @@ describe("update_description", () => {
 
     expect(result).toEqual({
       text: [
-        "APPLIED · updateDescription",
+        "APPLIED · update_description",
         `DELTA · description none → ${description.length} chars`,
       ].join("\n"),
       details: { operation: "update_description" },
@@ -39,7 +39,7 @@ describe("update_description", () => {
       type: "delta",
       sessionId: session.id,
       n: 4,
-      delta: "updateDescription",
+      delta: "update_description",
     });
   });
 

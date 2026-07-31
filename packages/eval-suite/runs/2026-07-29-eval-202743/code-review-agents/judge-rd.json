@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "code-review-agents",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at 6.5 because its spacious, clearly sectioned layout is readable, but several very long feedback routes—including a perimeter-scale dashed loop—require effort to trace.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 8,
+        "note": "Labels and yellow content cards have generous surrounding space, with only the cluster of horizontal feedback lines between the two rows creating localized traffic."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Eight numbered, lightly tinted regions make membership immediately clear, and each region consistently reads as a procedural stage."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5,
+        "note": "Failure: the purple dashed route runs around nearly the entire board perimeter, while the red, green, and orange feedback lines span multiple regions and force substantial eye travel despite having labels and arrowheads."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 8,
+        "note": "The board leaves air as the clear majority and generally contains one main content card per section, though several cards carry long, dense bullet lists."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7436,
+    "output_tokens": 460
+  },
+  "flags": []
+}

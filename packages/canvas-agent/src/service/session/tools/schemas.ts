@@ -320,8 +320,8 @@ export type PlaceStickyParams = Static<typeof PlaceStickyParams>;
  * `place_shape` — the pick and the click, nothing else. No text, no color, no
  * direction: those are `update_text` / `change_color` / `change_shape`
  * afterward. `type` is the FOLDED vocabulary — shape types with the icon
- * glyphs folded in as types of their own — so placing "database" and placing
- * "cloud" are the same gesture with a different pick (see ./placeable-types).
+ * glyphs folded in as types of their own — so placing "decision" and placing
+ * "memory" are the same gesture with a different pick (see ./placeable-types).
  */
 export const PlaceShapeParams = Type.Object(
   {

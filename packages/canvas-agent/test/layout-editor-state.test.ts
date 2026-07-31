@@ -80,7 +80,7 @@ function spawnContext(overrides: Record<string, unknown> = {}): SpawnContext {
         boundaryArrowCount: 1,
         viewport: { rect: { x: -20, y: -20, width: 900, height: 600 }, zoom: 0.8 },
       },
-      userRequests: "annotation threads on this board\n  R1 open  object:alpha  human — \"widen it\"",
+      userRequests: "R1 open  object:alpha  human — \"widen it\"",
       boardState: "DESCRIPTION · none\n\nBOARD · spawn snapshot\n  alpha rectangle \"Alpha\" 0,0 160×96",
       boardLints: { errors: 1, warnings: 2 },
       bootImages: { exemplar: "RVg=" },
@@ -376,7 +376,7 @@ describe("update", () => {
       toolCall("c1", "resolve_request", { id: "R1", status: "done", note: "widened it" }),
       toolResult("c1", "resolve_request", "REQUESTS · 1/1 disposed"),
       toolCall("c2", "update_description", { description: "# Payments\n\nA long account…" }),
-      toolResult("c2", "update_description", "APPLIED · updateDescription"),
+      toolResult("c2", "update_description", "APPLIED · update_description"),
       toolCall("c3", "finalize", { outcome: "committed", message: "Lined the steps up." }),
       toolResult("c3", "finalize", "Committed: Lined the steps up. (4 patch operations)."),
     ]);
@@ -843,8 +843,7 @@ describe("render", () => {
     expect(textOf(tail[0]!)).toBe("turn 3");
     expect(textOf(tail[7]!)).toBe("reply 6");
     const block = textOf(normalized.messages[0]!);
-    expect(block).toContain('<recent_conversation showing="8" total="14">');
-    expect(block).toContain("messages in the Messages tab");
+    expect(block).toContain('<recent_conversation showing="8" total="14" />');
     expect(block).not.toContain("older messages are cut");
   });
 
@@ -870,7 +869,7 @@ describe("render", () => {
     expect(textOf(tail[0]!)).toBe("call 4");
     expect(textOf(tail[10]!)).toBe("wrapping up");
     const block = textOf(normalized.messages[0]!);
-    expect(block).toContain('<recent_conversation showing="11" total="20">');
+    expect(block).toContain('<recent_conversation showing="11" total="20" />');
   });
 
   test("the module the kernel imports is the same three functions", () => {

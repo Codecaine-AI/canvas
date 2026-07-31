@@ -380,7 +380,7 @@ describe("CanvasStage: connection color (P1 palette picks)", () => {
       <CanvasStage document={documentWithColor} viewport={viewport} selectedConnectionId="connection-a" />,
     );
     const group = container.querySelector('[data-canvas-connection-group="connection-a"]');
-    expect(group!.querySelectorAll("path")[1]!.getAttribute("stroke")).toBe("#14AE5C");
+    expect(group!.querySelectorAll("path")[1]!.getAttribute("stroke")).toBe("#019142");
   });
 
   it("arrowhead markers inherit the connector stroke via context-stroke fill", () => {

@@ -16,37 +16,41 @@ afterEach(() => {
 });
 
 const EXPECTED_IDS: IconGlyphId[] = [
+  "agent",
+  "model",
+  "human",
+  "orchestrator",
+  "memory",
+  "knowledge",
+  "queue",
+  "server",
+  "terminal",
+  "config",
+  "api",
+  "message",
+  "send",
+  "event",
+  "guardrail",
+  "monitor",
+  "judge",
+  "document",
+  "documents",
   "activity",
   "archive",
   "key",
-  "chat",
-  "cloud",
-  "cpu",
-  "database",
-  "display",
-  "mail",
-  "file",
-  "code",
-  "bolt",
-  "pin",
-  "phone",
-  "package",
   "coin",
-  "shield",
-  "send",
-  "server",
-  "cube",
-  "gear",
-  "drive",
-  "terminal",
-  "person",
-  "wallet",
-  "globe",
+  "package",
+  "voice",
+  "search",
+  "tool",
+  "wait",
+  "lock",
+  "eval",
 ];
 
 describe("ICON_GLYPH_IDS", () => {
-  it("has exactly 26 entries matching the parity brief's ids", () => {
-    expect(ICON_GLYPH_IDS.length).toBe(26);
+  it("has exactly 30 entries matching the operational-map roster", () => {
+    expect(ICON_GLYPH_IDS.length).toBe(30);
     expect([...ICON_GLYPH_IDS].sort()).toEqual([...EXPECTED_IDS].sort());
   });
 });
@@ -54,7 +58,7 @@ describe("ICON_GLYPH_IDS", () => {
 describe("ICON_GLYPHS registry", () => {
   it("has exactly one definition per glyph id, keyed consistently", () => {
     const keys = Object.keys(ICON_GLYPHS);
-    expect(keys.length).toBe(26);
+    expect(keys.length).toBe(30);
     for (const id of EXPECTED_IDS) {
       expect(ICON_GLYPHS[id]).toBeDefined();
       expect(ICON_GLYPHS[id].id).toBe(id);

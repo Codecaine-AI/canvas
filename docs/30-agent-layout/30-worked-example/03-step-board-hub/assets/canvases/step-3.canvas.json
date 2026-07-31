@@ -24,7 +24,7 @@
     },
     {
       "id": "checkout",
-      "type": "pill",
+      "type": "rectangle",
       "text": "checkout",
       "label": "checkout",
       "geometry": {
@@ -32,11 +32,14 @@
         "y": 167,
         "width": 118,
         "height": 38
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "goals",
-      "type": "pill",
+      "type": "rectangle",
       "text": "goals",
       "label": "goals",
       "geometry": {
@@ -44,11 +47,14 @@
         "y": 269,
         "width": 118,
         "height": 38
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "secrets",
-      "type": "pill",
+      "type": "rectangle",
       "text": "secrets",
       "label": "secrets",
       "geometry": {
@@ -56,6 +62,9 @@
         "y": 372,
         "width": 118,
         "height": 38
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
@@ -136,7 +145,7 @@
     },
     {
       "id": "epochs",
-      "type": "database",
+      "type": "icon",
       "text": "epochs",
       "label": "epochs",
       "geometry": {
@@ -144,11 +153,15 @@
         "y": 461,
         "width": 112,
         "height": 96
-      }
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "artifacts",
-      "type": "database",
+      "type": "icon",
       "text": "artifacts",
       "label": "artifacts",
       "geometry": {
@@ -156,11 +169,15 @@
         "y": 461,
         "width": 112,
         "height": 96
-      }
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "saves",
-      "type": "database",
+      "type": "icon",
       "text": "saves",
       "label": "saves",
       "geometry": {
@@ -168,7 +185,11 @@
         "y": 461,
         "width": 112,
         "height": 96
-      }
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
     }
   ],
   "connections": []

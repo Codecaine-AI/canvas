@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./protocol": "./src/protocol.ts"
+    "./protocol": "./src/protocol.ts",
+    "./viewer-extension": "./src/viewer-extension/index.ts"
   },
   "scripts": {
     "harness": "bun src/service/server.ts",
@@ -13,14 +14,14 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@agent-kernel/db": "link:@agent-kernel/db",
-    "@agent-kernel/kernel": "link:@agent-kernel/kernel",
-    "@agent-kernel/protocol": "link:@agent-kernel/protocol",
-    "@agent-kernel/viewer-core": "link:@agent-kernel/viewer-core",
-    "@agent-kernel/viewer-shell": "link:@agent-kernel/viewer-shell",
-    "@agent-kernel/viewer-ui": "link:@agent-kernel/viewer-ui",
+    "@agent-kernel/db": "workspace:*",
+    "@agent-kernel/kernel": "workspace:*",
+    "@agent-kernel/protocol": "workspace:*",
+    "@agent-kernel/viewer-core": "workspace:*",
+    "@agent-kernel/viewer-shell": "workspace:*",
+    "@agent-kernel/viewer-ui": "workspace:*",
     "@codecaine-ai/canvas": "workspace:*",
-    "@codecaine-ai/prompt-kit": "link:@codecaine-ai/prompt-kit",
+    "@codecaine-ai/prompt-kit": "workspace:*",
     "@mariozechner/pi-ai": "^0.70.6",
     "@resvg/resvg-js": "^2.6.2",
     "elysia": "^1.2.0",

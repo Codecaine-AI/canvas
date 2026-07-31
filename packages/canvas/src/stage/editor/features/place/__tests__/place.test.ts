@@ -214,9 +214,9 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     expect(again.state.kind).toBe("place");
   });
 
-  it("W5 shape tools (ellipse/triangle/star/…) start a place gesture — the panel's full vocabulary is placeable", () => {
+  it("shape tools (ellipse/triangle/octagon/…) start a place gesture — the panel's full vocabulary is placeable", () => {
     const document = makeDocument([]);
-    for (const tool of ["ellipse", "triangle", "pentagon", "star", "chevron", "icon"] as const) {
+    for (const tool of ["ellipse", "triangle", "octagon", "predefined-process", "arrow-shape", "icon"] as const) {
       const ctx = makeContext(document, { tool });
       const result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 100, y: 100 }, { kind: "canvas" }), ctx);
       expect(result.state.kind).toBe("place");
@@ -227,7 +227,7 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     const document = makeDocument([]);
     const ctx = makeContext(document, {
       tool: "icon",
-      armedShape: { icon: "database", text: "Database" },
+      armedShape: { icon: "memory", text: "Memory" },
     });
 
     let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 300, y: 300 }, { kind: "canvas" }), ctx);
@@ -235,13 +235,13 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
     // so the stage can render the real shape instead of a dashed box.
     expect(result.overlay.placePreviewObject).toMatchObject({
       type: "icon",
-      icon: "database",
-      text: "Database",
+      icon: "memory",
+      text: "Memory",
     });
 
     result = stepInteraction(result.state, up({ x: 300, y: 300 }), ctx);
     const addAction = result.dispatch.find((action) => action.type === "canvas.addObject");
-    expect(addAction).toMatchObject({ objectType: "icon", icon: "database", text: "Database" });
+    expect(addAction).toMatchObject({ objectType: "icon", icon: "memory", text: "Memory" });
   });
 
   it("a direction variant (triangle down) rides through the same path", () => {

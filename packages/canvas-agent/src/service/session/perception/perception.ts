@@ -87,7 +87,6 @@ const CONNECTION_CHANNEL_FIELDS: readonly ChannelField[] = [
   { field: "style", fallback: "solid" },
   { field: "color", fallback: "gray" },
   { field: "arrow", fallback: "forward" },
-  { field: "role" },
   { field: "labelPosition" },
 ];
 
@@ -190,7 +189,7 @@ export function documentDelta(
     }
     // `type` and `icon` are ONE channel to the model (./placeable-types.ts), so
     // a swap reports one folded name on both sides — a rectangle becoming a
-    // glyph reads `rectangle → cloud`, never `icon` with a glyph beside it.
+    // glyph reads `rectangle → memory`, never `icon` with a glyph beside it.
     const previousType = fromDocumentFields(previous);
     const nextType = fromDocumentFields(object);
     if (previousType !== nextType) {

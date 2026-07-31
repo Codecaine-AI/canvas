@@ -6,7 +6,7 @@
   "blocks": {
     "b-render-root": {
       "id": "b-render-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "covers": "The display domain at packages/canvas/src/stage/: CanvasStage draws the DOCUMENT — grid surface, world transform, the z-tiered object/connector/section layers — and exposes two overlay slots for everything ephemeral; ObjectShape, grid.ts, and viewport.ts are its core; the read-only viewer face proves the core by construction.",
         "format": "mdx",
@@ -53,7 +53,7 @@
     },
     "b-render-title-1": {
       "id": "b-render-title-1",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -66,7 +66,7 @@
     },
     "b-render-intro-2": {
       "id": "b-render-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -91,7 +91,7 @@
     },
     "b-render-heading-canvasstage-3": {
       "id": "b-render-heading-canvasstage-3",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -104,7 +104,7 @@
     },
     "b-render-canvasstage-body-4": {
       "id": "b-render-canvasstage-body-4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -190,7 +190,7 @@
     },
     "b-render-canvasstage-helpers-5": {
       "id": "b-render-canvasstage-helpers-5",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -349,7 +349,7 @@
     },
     "b-render-canvasstage-imports-6": {
       "id": "b-render-canvasstage-imports-6",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -432,7 +432,7 @@
     },
     "b-render-heading-grid-7": {
       "id": "b-render-heading-grid-7",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -445,7 +445,7 @@
     },
     "b-render-grid-mechanism-8": {
       "id": "b-render-grid-mechanism-8",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -573,7 +573,7 @@
     },
     "b-render-grid-band-9": {
       "id": "b-render-grid-band-9",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -626,7 +626,7 @@
     },
     "b-render-grid-decision-10": {
       "id": "b-render-grid-decision-10",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Keep the grid legible via a screen-pixel step band, not a fixed world step"
@@ -677,7 +677,7 @@
     },
     "b-render-heading-theme-11": {
       "id": "b-render-heading-theme-11",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -690,7 +690,7 @@
     },
     "b-render-theme-body-12": {
       "id": "b-render-theme-body-12",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -853,7 +853,7 @@
     },
     "b-render-figjam-tokens-body-13": {
       "id": "b-render-figjam-tokens-body-13",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -956,7 +956,7 @@
     },
     "b-render-figjam-tokens-provenance-14": {
       "id": "b-render-figjam-tokens-provenance-14",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -985,7 +985,7 @@
     },
     "b-render-testing-17": {
       "id": "b-render-testing-17",
-      "flavour": "testing",
+      "type": "testing",
       "props": {
         "title": "Render-layer coverage"
       },
@@ -1034,7 +1034,7 @@
     },
     "b-render-closing-18": {
       "id": "b-render-closing-18",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1087,7 +1087,7 @@
     },
     "b-render-canvasstage-user-select-decision": {
       "id": "b-render-canvasstage-user-select-decision",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Board text is trim: user-select is off at the stage root, re-enabled only inside active text editors"
@@ -1197,7 +1197,7 @@
     },
     "b-stage-connectors-pointer": {
       "id": "b-stage-connectors-pointer",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1315,7 +1315,7 @@
     },
     "b-stage-heading-viewport": {
       "id": "b-stage-heading-viewport",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1328,7 +1328,7 @@
     },
     "b-stage-viewport-body-1": {
       "id": "b-stage-viewport-body-1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1497,7 +1497,7 @@
     },
     "b-stage-viewport-body-2": {
       "id": "b-stage-viewport-body-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1607,7 +1607,7 @@
     },
     "b-stage-heading-viewer": {
       "id": "b-stage-heading-viewer",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1620,7 +1620,7 @@
     },
     "b-stage-viewer-props": {
       "id": "b-stage-viewer-props",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1723,7 +1723,7 @@
     },
     "b-stage-viewer-fit": {
       "id": "b-stage-viewer-fit",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1812,7 +1812,7 @@
     },
     "b-stage-viewer-feedback": {
       "id": "b-stage-viewer-feedback",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1964,7 +1964,7 @@
     },
     "b-stage-viewer-trim": {
       "id": "b-stage-viewer-trim",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -2011,7 +2011,7 @@
     },
     "b-stage-heading-embedding": {
       "id": "b-stage-heading-embedding",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -2024,7 +2024,7 @@
     },
     "b-stage-embedding-contract": {
       "id": "b-stage-embedding-contract",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {

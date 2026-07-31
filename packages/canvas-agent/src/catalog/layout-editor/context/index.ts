@@ -9,6 +9,10 @@
  *                    rosters (generated from the validator's schema tables)
  *                    plus hand-written kind semantics; served by the
  *                    `capabilities` loader
+ *   <state_grammar>  ./state-grammar/   the reading key for the bare-value
+ *                    state blocks and tool results, quoting its line grammars
+ *                    from board/digest.ts and the lint registry; served by
+ *                    the `state-grammar` loader
  *   <style_guide>    ./style-guide/     the authored craft topics and craft
  *                    targets; served by the static `style-guide` loader
  *   image 1          ./exemplar.ts      the house-style exemplar board
@@ -64,6 +68,7 @@ export interface BootImageDeclaration {
  */
 const TEXT_BLOCKS: ReadonlyArray<{ kind: string; tag: string }> = [
   { kind: "capabilities", tag: "capabilities" },
+  { kind: "state-grammar", tag: "state_grammar" },
   { kind: "style-guide", tag: "style_guide" },
 ];
 

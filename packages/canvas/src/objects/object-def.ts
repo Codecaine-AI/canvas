@@ -14,33 +14,14 @@ import { connectorDef } from "../connectors/def";
 import { sectionDef } from "./section/def";
 import { stickyDef } from "./sticky/def";
 import { arrowShapeDef } from "./shapes/basic/arrow-shape";
-import { chevronDef } from "./shapes/basic/chevron";
 import { decisionDef } from "./shapes/basic/decision";
 import { ellipseDef } from "./shapes/basic/ellipse";
 import { octagonDef } from "./shapes/basic/octagon";
-import { pentagonDef } from "./shapes/basic/pentagon";
-import { plusDef } from "./shapes/basic/plus";
 import { processDef } from "./shapes/basic/process";
 import { rectangleDef } from "./shapes/basic/rectangle";
-import { starDef } from "./shapes/basic/star";
 import { triangleDef } from "./shapes/basic/triangle";
-import { cylinderHorizontalDef } from "./shapes/flowchart/cylinder-horizontal";
-import { databaseDef } from "./shapes/flowchart/database";
-import { documentDef } from "./shapes/flowchart/document";
-import { documentStackDef } from "./shapes/flowchart/document-stack";
-import { folderDef } from "./shapes/flowchart/folder";
-import { hexagonDef } from "./shapes/flowchart/hexagon";
-import { internalStorageDef } from "./shapes/flowchart/internal-storage";
-import { manualInputDef } from "./shapes/flowchart/manual-input";
-import { offPageConnectorDef } from "./shapes/flowchart/off-page-connector";
-import { orJunctionDef } from "./shapes/flowchart/or-junction";
-import { pageCornerDef } from "./shapes/flowchart/page-corner";
-import { parallelogramDef } from "./shapes/flowchart/parallelogram";
 import { predefinedProcessDef } from "./shapes/flowchart/predefined-process";
-import { summingJunctionDef } from "./shapes/flowchart/summing-junction";
-import { trapezoidDef } from "./shapes/flowchart/trapezoid";
 import { iconDef } from "./shapes/icon/def";
-import { pillDef } from "./shapes/misc/pill";
 
 /**
  * Tier 1 of the two-tier object/shape registry (RESTRUCTURE.md, "The two-tier
@@ -195,7 +176,7 @@ export interface ObjectDef {
   /**
    * Where and how this kind's `object.text` renders AND is edited (D3/D6/D14
    * — objects/text-slots.ts preset library). Absent = the kind renders no
-   * object text at all (plus / or-junction / summing-junction glyphs).
+   * object text at all.
    */
   textSlot?: TextSlot;
   textEditing: TextEditingSpec;
@@ -263,29 +244,10 @@ const DEFS_BY_RENDER_SHAPE: Partial<Record<RenderObjectShape, ObjectDef>> = {
   "rounded-rect": processDef,
   ellipse: ellipseDef,
   diamond: decisionDef,
-  document: documentDef,
-  database: databaseDef,
-  pill: pillDef,
   "arrow-shape": arrowShapeDef,
   "predefined-process": predefinedProcessDef,
   triangle: triangleDef,
-  parallelogram: parallelogramDef,
-  pentagon: pentagonDef,
   octagon: octagonDef,
-  hexagon: hexagonDef,
-  star: starDef,
-  plus: plusDef,
-  chevron: chevronDef,
-  trapezoid: trapezoidDef,
-  "off-page-connector": offPageConnectorDef,
-  "manual-input": manualInputDef,
-  "internal-storage": internalStorageDef,
-  "or-junction": orJunctionDef,
-  "summing-junction": summingJunctionDef,
-  "page-corner": pageCornerDef,
-  folder: folderDef,
-  "document-stack": documentStackDef,
-  "cylinder-horizontal": cylinderHorizontalDef,
   icon: iconDef,
 };
 
@@ -297,29 +259,10 @@ export const OBJECT_DEFS: readonly ObjectDef[] = [
   ellipseDef,
   rectangleDef,
   decisionDef,
-  documentDef,
-  databaseDef,
-  pillDef,
   arrowShapeDef,
   predefinedProcessDef,
   triangleDef,
-  parallelogramDef,
-  pentagonDef,
   octagonDef,
-  hexagonDef,
-  starDef,
-  plusDef,
-  chevronDef,
-  trapezoidDef,
-  offPageConnectorDef,
-  manualInputDef,
-  internalStorageDef,
-  orJunctionDef,
-  summingJunctionDef,
-  pageCornerDef,
-  folderDef,
-  documentStackDef,
-  cylinderHorizontalDef,
   iconDef,
 ];
 

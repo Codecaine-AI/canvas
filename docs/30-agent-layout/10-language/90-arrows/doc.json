@@ -6,14 +6,7 @@
   "blocks": {
     "b-arrows-root": {
       "id": "b-arrows-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-arrows-title-1",
-        "b-arrows-body-2",
-        "b-arrows-constraint-3",
-        "b-arrows-code-4",
-        "b-arrows-canvas-5"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "The arrows block is compact descriptive notation: one from > to line per connection, by reference number, conventionally placed last. It names connection intent; the production router chooses the route, steered when needed with anchors, endpoint positions, and waypoints.",
         "format": "mdx",
@@ -24,12 +17,18 @@
           "routing",
           "feedback loops"
         ]
-      }
+      },
+      "children": [
+        "b-arrows-title-1",
+        "b-arrows-body-2",
+        "b-arrows-constraint-3",
+        "b-arrows-code-4",
+        "b-arrows-canvas-5"
+      ]
     },
     "b-arrows-title-1": {
       "id": "b-arrows-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -37,12 +36,12 @@
         {
           "insert": "arrows — the connection block"
         }
-      ]
+      ],
+      "children": []
     },
     "b-arrows-body-2": {
       "id": "b-arrows-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -75,12 +74,12 @@
         {
           "insert": " header. By convention, this descriptive block appears last."
         }
-      ]
+      ],
+      "children": []
     },
     "b-arrows-constraint-3": {
       "id": "b-arrows-constraint-3",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "severity": "hard",
         "title": "Arrow notation declares connection intent"
@@ -89,12 +88,12 @@
         {
           "insert": "The from > to lines do not encode bends. On the live board, the production router computes the path. Steer minimally and in order: try an endpoint anchor, then an endpoint position, then waypoints when the corridor demands them. For each connection a batch touches, the ROUTES block reports the true polyline and names every box it crosses in through. Label the edge directly, enter and exit on faces that follow the flow, and keep separate runs from sharing a line. When a route detours or hugs a frame, open the corridor before adding steering."
         }
-      ]
+      ],
+      "children": []
     },
     "b-arrows-code-4": {
       "id": "b-arrows-code-4",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -102,16 +101,17 @@
         {
           "insert": "col 1|1|1\n  section 1 text=s1 label=\"A\"\n    item 2 text=a type=process size=M at=C\n  section 3 text=s2 label=\"B\"\n    item 4 text=b type=process size=M at=C\n  section 5 text=s3 label=\"C\"\n    item 6 text=c type=process size=M at=C\n\narrows\n  2 > 4\n  4 > 6\n  6 > 2"
         }
-      ]
+      ],
+      "children": []
     },
     "b-arrows-canvas-5": {
       "id": "b-arrows-canvas-5",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/example-arrows.canvas.json",
         "title": "Three arrows, including a routed feedback loop"
-      }
+      },
+      "children": []
     }
   }
 }

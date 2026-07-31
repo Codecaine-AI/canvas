@@ -31,8 +31,8 @@ function placementFixture() {
       at: [400, 0],
     }),
     runOp(session, "place_shape", {
-      id: "cloud",
-      type: "cloud",
+      id: "memory",
+      type: "memory",
       at: [800, 0],
     }),
     runOp(session, "place_section", {
@@ -67,10 +67,10 @@ function placementFixture() {
       "icon",
       { x: 800, y: 0, width: 120, height: 120 },
       {
-        id: "cloud",
+        id: "memory",
         text: "",
-        color: creationDefaultFor("cloud").color,
-        icon: "cloud",
+        color: creationDefaultFor("memory").color,
+        icon: "memory",
       },
     ),
     draftPlacedObject(

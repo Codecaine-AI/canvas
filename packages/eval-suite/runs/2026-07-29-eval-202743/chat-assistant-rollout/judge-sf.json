@@ -1,0 +1,614 @@
+{
+  "axis": "sf",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 6,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "A customer turn flows from web or mobile chat through input safety, context gathering, model generation, output safety, and then to either a reply, a credentialed action, a safe fallback, or human handoff.",
+        "brief_evidence": "“A customer converses with the assistant through our web and mobile chat surfaces. On every turn, the assistant gathers what it needs before answering…”; “A model call produces the reply…”; “A safety layer screens both the customer's input and the assistant's outgoing reply.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "Regions 1–3 are numbered “Channels & input safety,” “Turn context assembly,” and “Guarded reply & actions.” The reconstruction recovers web/mobile chat, input safety, context assembly, guarded reply, safe fallback, actions, and handoff, but explicitly says there are no connecting edges and that region 3's ordering and triggers are not shown.",
+        "note": "The major stages and outcomes are recognizable, but the board does not communicate a dependable directed turn flow or the internal branch conditions."
+      },
+      {
+        "brief_element": "The system is a customer support assistant.",
+        "brief_evidence": "“We need a diagram of how our customer support assistant works…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “A numbered operational map for a chat-assistant rollout” and components including Customer, chat channels, model context, support actions, and human handoff.",
+        "note": "The support-assistant domain and purpose are clear."
+      },
+      {
+        "brief_element": "New assistant versions reach production through a staged champion/challenger rollout process.",
+        "brief_evidence": "“…and how new versions of it reach production”; the brief later defines challenger sampling, evaluation, approval, promotion, monitoring, and rollback.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Regions 6–8 recover champion and challengers, sampled serving, automated evaluation, product-owner approval, promotion, live monitoring, immediate pulling, and rollback.",
+        "note": "The overall staged-rollout architecture is transmitted well."
+      },
+      {
+        "brief_element": "The customer uses both web and mobile chat surfaces.",
+        "brief_evidence": "“A customer converses with the assistant through our web and mobile chat surfaces.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 1 contains components labeled “Customer” and “Web + mobile chat.”",
+        "note": "Both channel types and the customer actor are explicit."
+      },
+      {
+        "brief_element": "The assistant gathers required context on every turn before answering.",
+        "brief_evidence": "“On every turn, the assistant gathers what it needs before answering…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 2 is “Turn context assembly” and says “Profile + transcript + searched help articles → model context,” while region 3 lists the reply. However, the reconstruction notes that no visible connecting edges establish a then-flow between regions.",
+        "note": "Turn-level context assembly is clear, but the universal ‘every turn’ requirement and guaranteed ordering before generation are not fully explicit."
+      },
+      {
+        "brief_element": "The assistant retrieves the customer's long-term profile.",
+        "brief_evidence": "“…the customer's long-term profile…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 2 explicitly includes “Profile” as an input to model context, and region 4 writes profile facts. The reconstruction does not identify the profile as specifically long-term.",
+        "note": "Profile use is recovered, but its long-term scope is softened."
+      },
+      {
+        "brief_element": "The long-term profile contains preferences, past issues, and prior resolutions accumulated across earlier conversations.",
+        "brief_evidence": "“preferences, past issues, prior resolutions accumulated across earlier conversations”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies these profile contents or states that they accumulate across earlier conversations.",
+        "note": "The profile's concrete semantic contents are absent."
+      },
+      {
+        "brief_element": "The assistant includes the current conversation so far in turn context.",
+        "brief_evidence": "“…the current conversation so far…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 2 includes “Transcript” as an input to model context.",
+        "note": "A transcript is recovered, but the board does not distinguish the current conversation-so-far from a completed or historical transcript."
+      },
+      {
+        "brief_element": "The assistant searches the support corpus for the most relevant help-center articles.",
+        "brief_evidence": "“…the most relevant help-center articles found by searching the support corpus.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 2 says “searched help articles” feed model context, and region 6 names retrieval policy as a variant dimension.",
+        "note": "Search and article use are visible, but the support corpus and relevance-selection requirement are not explicit."
+      },
+      {
+        "brief_element": "Profile, current conversation, and retrieved articles are assembled into model context.",
+        "brief_evidence": "The assistant gathers those three sources; “A model call produces the reply from that assembled context.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 2 explicitly reads “Profile + transcript + searched help articles → model context.”",
+        "note": "This is the strongest and clearest live-turn data relationship."
+      },
+      {
+        "brief_element": "A model call produces the reply from the assembled context.",
+        "brief_evidence": "“A model call produces the reply from that assembled context.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 2 ends at “model context,” and region 3 lists “Guarded model reply,” but the reconstruction reports no visible edge connecting context to model generation.",
+        "note": "The endpoints are present, but the defining generation relationship requires inference."
+      },
+      {
+        "brief_element": "When a reply requires an action, the assistant invokes an integration.",
+        "brief_evidence": "“When the reply requires an action… the assistant invokes integrations…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 3 lists “credentialed billing/account actions,” but the reconstruction says the items have no arrows or branch labels and their triggering conditions are not shown.",
+        "note": "Action capability is visible; the conditional branch from the reply to invocation is not."
+      },
+      {
+        "brief_element": "Supported action examples include issuing a refund and changing a subscription.",
+        "brief_evidence": "“…such as issuing a refund or changing a subscription…”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 3 identifies billing/account actions but does not name refunds or subscription changes.",
+        "note": "The action domains survive, while the concrete examples do not."
+      },
+      {
+        "brief_element": "Actions invoke integrations with the billing and account systems.",
+        "brief_evidence": "“…invokes integrations with the billing and account systems…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 3 explicitly lists “credentialed billing/account actions.”",
+        "note": "Billing and account targets are visible, but distinct integrations and invocation direction are not shown."
+      },
+      {
+        "brief_element": "Billing and account integration credentials live in a managed secrets vault.",
+        "brief_evidence": "“the credentials for those integrations live in a managed secrets vault”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies a managed secrets vault or any credential store.",
+        "note": "A key security ownership boundary is missing."
+      },
+      {
+        "brief_element": "Integration credentials are fetched per invocation.",
+        "brief_evidence": "“…and are fetched per invocation…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "The reconstruction only reports “credentialed billing/account actions”; no matching entry shows per-invocation credential retrieval.",
+        "note": "The credential access lifecycle is not recoverable."
+      },
+      {
+        "brief_element": "Integration credentials are never stored with the assistant.",
+        "brief_evidence": "“…never stored with the assistant itself.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states this prohibition or separates assistant storage from secrets ownership.",
+        "note": "The explicit security boundary is absent."
+      },
+      {
+        "brief_element": "A safety layer screens customer input.",
+        "brief_evidence": "“A safety layer screens both the customer's input…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 1 is titled “Channels & input safety” and contains an “Input safety” guardrail component.",
+        "note": "Input screening is clear, although its exact edge from chat is not drawn."
+      },
+      {
+        "brief_element": "A safety layer screens the assistant's outgoing reply.",
+        "brief_evidence": "“…and the assistant's outgoing reply.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 3 lists “Guarded model reply” and “safe fallback,” but no separate output-safety component or directed screening step is recovered.",
+        "note": "Output guarding is suggested, not operationally specified."
+      },
+      {
+        "brief_element": "A screened-out outgoing reply is replaced with a safe fallback.",
+        "brief_evidence": "“A screened-out reply is replaced with a safe fallback…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 3 explicitly lists “safe fallback,” but the reconstruction says no trigger or branch condition is shown for it.",
+        "note": "The fallback outcome exists, but its triggering safety branch and replacement semantics are missing."
+      },
+      {
+        "brief_element": "Repeated safety triggers cause human handoff.",
+        "brief_evidence": "“…repeated safety triggers… hand the conversation to a human support agent…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "Region 3 lists “human handoff,” but the reconstruction explicitly states that no trigger is shown; no matching entry identifies repeated safety triggers.",
+        "note": "The escalation threshold is absent."
+      },
+      {
+        "brief_element": "An explicit customer request causes human handoff.",
+        "brief_evidence": "“…or an explicit customer request hand the conversation to a human support agent…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry connects a customer request to human handoff.",
+        "note": "The customer-controlled escalation branch is missing."
+      },
+      {
+        "brief_element": "Handoff is to a human support agent.",
+        "brief_evidence": "“…hand the conversation to a human support agent…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 3 explicitly lists “human handoff,” and the reconstruction assigns it responsibility for transferring handling to a human.",
+        "note": "The destination is clear at a high level."
+      },
+      {
+        "brief_element": "Human handoff includes the conversation transcript.",
+        "brief_evidence": "“…together with the transcript…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry shows transcript data flowing to human handoff.",
+        "note": "The handoff payload is incomplete."
+      },
+      {
+        "brief_element": "Human handoff includes profile context.",
+        "brief_evidence": "“…the profile context…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry shows profile context flowing to human handoff.",
+        "note": "The handoff payload is incomplete."
+      },
+      {
+        "brief_element": "Human handoff includes what has already been attempted.",
+        "brief_evidence": "“…and what has already been attempted.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies attempted actions or transfers them to the human agent.",
+        "note": "The handoff's operational continuity data is missing."
+      },
+      {
+        "brief_element": "After a conversation ends, an extraction pass reviews the transcript.",
+        "brief_evidence": "“After a conversation ends, an extraction pass reviews the transcript…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 4 is “Conversation distillation” and reads “Transcript → distilled, sourced profile facts.”",
+        "note": "Transcript processing is recovered, but the explicit end-of-conversation trigger and extraction-pass step are not shown."
+      },
+      {
+        "brief_element": "The extraction pass writes durable facts into the customer's profile.",
+        "brief_evidence": "“…writes durable facts into the customer's profile…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 4 shows “Transcript → distilled, sourced profile facts.”",
+        "note": "Profile facts are produced, but the write into a durable customer-profile store is not explicitly directed."
+      },
+      {
+        "brief_element": "Conversation extraction is a distillation, not a raw transcript log.",
+        "brief_evidence": "“…a distillation, not a raw log.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 4 explicitly says “distilled… profile facts,” but no matching reconstruction entry states the negative constraint that raw logs are not written to the profile.",
+        "note": "Distillation is clear; exclusion of raw-log storage is only implied."
+      },
+      {
+        "brief_element": "A new profile fact that contradicts an older fact supersedes the older fact.",
+        "brief_evidence": "“A new fact that contradicts an older one supersedes it…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry describes contradiction detection, precedence, or supersession.",
+        "note": "Profile conflict-resolution semantics are absent."
+      },
+      {
+        "brief_element": "Each profile fact records its source conversation.",
+        "brief_evidence": "“…with the source conversation recorded…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 4 calls the output “sourced profile facts,” but does not explicitly identify the source as the originating conversation.",
+        "note": "Provenance is signaled, but its exact source field is not fully specified."
+      },
+      {
+        "brief_element": "Any profile fact can be traced to where it was learned.",
+        "brief_evidence": "“…so any fact can be traced to where it was learned.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The phrase “sourced profile facts” implies provenance, but no explicit traceability operation or guarantee appears.",
+        "note": "Traceability is suggested rather than fully communicated."
+      },
+      {
+        "brief_element": "Raw conversations older than the retention window leave the live store.",
+        "brief_evidence": "“Raw conversations older than the retention window leave the live store…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 5 reads “Expired transcripts → cold archive.”",
+        "note": "Expiration and movement are visible, but the retention window, raw-conversation status, and departure from a live store are not explicit."
+      },
+      {
+        "brief_element": "Expired raw conversations move to cold storage.",
+        "brief_evidence": "“…for cold storage…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 5 explicitly shows “Expired transcripts → cold archive.”",
+        "note": "The archival destination and direction are clear."
+      },
+      {
+        "brief_element": "Cold-stored conversations remain recoverable for compliance review.",
+        "brief_evidence": "“…where they remain recoverable for compliance review…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "Region 5 is titled “Retention & compliance,” but no matching reconstruction entry states recoverability or a compliance-review retrieval path.",
+        "note": "The archive exists, but its recovery behavior is not communicated."
+      },
+      {
+        "brief_element": "Cold-stored conversations are never pulled into a live turn.",
+        "brief_evidence": "“…but are never pulled into a live turn.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states this isolation boundary or prohibits cold archive data from entering model context.",
+        "note": "A critical privacy and data-boundary constraint is absent."
+      },
+      {
+        "brief_element": "The team proposes challenger variants to improve the assistant.",
+        "brief_evidence": "“The team improves the assistant by proposing challenger variants…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 6 explicitly identifies “champion + challengers.”",
+        "note": "The challenger concept is clear."
+      },
+      {
+        "brief_element": "A challenger may change the prompt.",
+        "brief_evidence": "“…a different prompt…”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 6 lists “Prompt” as a variant dimension.",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "A challenger may change the retrieval policy.",
+        "brief_evidence": "“…retrieval policy…”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 6 lists “retrieval policy” as a variant dimension.",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "A challenger may change the model choice.",
+        "brief_evidence": "“…or model choice…”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 6 lists “model” as a variant dimension.",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "Challengers run alongside the production champion.",
+        "brief_evidence": "“…that run alongside the production champion.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 6 contains versioned configuration with “champion + challengers” and says sampled traffic serves one variant.",
+        "note": "Concurrent champion/challenger operation is recoverable."
+      },
+      {
+        "brief_element": "Variant definitions are versioned configuration.",
+        "brief_evidence": "“Variant definitions are versioned configuration…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 6 explicitly states “Versioned config: champion + challengers.”",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "A rollout changes configuration rather than redeploying the service.",
+        "brief_evidence": "“…so a rollout changes configuration rather than redeploying the service.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Versioned configuration is explicit in region 6, but no matching reconstruction entry states that service redeployment is unnecessary or prohibited.",
+        "note": "Configuration-driven rollout is visible, but the no-redeploy operational constraint is omitted."
+      },
+      {
+        "brief_element": "A small sampled share of live conversations is assigned to a challenger instead of the champion.",
+        "brief_evidence": "“A small sampled share of live conversations is served by a challenger instead of the champion.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 6 says “Sampled traffic serves one variant.”",
+        "note": "Sampling and mutually exclusive variant serving are clear, but the small share, live-conversation unit, and challenger-versus-champion allocation are not all explicit."
+      },
+      {
+        "brief_element": "A panel of automated judges evaluates completed champion and challenger conversations.",
+        "brief_evidence": "“A panel of automated judges scores completed champion and challenger conversations…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 7 lists “Automated judges” and their dimensions, but does not explicitly say panel, completed conversations, or that both champion and challenger conversations are scored.",
+        "note": "Automated evaluation is clear; its input population and completion timing are softened."
+      },
+      {
+        "brief_element": "Automated judges score conversation resolution.",
+        "brief_evidence": "“…on resolution…”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 7 says “Automated judges: resolution…”",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "Automated judges score factual grounding against the profile.",
+        "brief_evidence": "“…factual grounding against the profile…”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 7 lists “grounding,” but does not specify grounding against the profile.",
+        "note": "The criterion survives, but its evidence source is missing."
+      },
+      {
+        "brief_element": "Automated judges score factual grounding against cited help-center articles.",
+        "brief_evidence": "“…and the cited articles…”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 7 lists “grounding,” while region 2 lists searched help articles; no reconstruction entry says grounding is checked against cited articles.",
+        "note": "Article-grounding ownership and citation requirement are not explicit."
+      },
+      {
+        "brief_element": "Automated judges score tone.",
+        "brief_evidence": "“…and tone…”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 7 says “Automated judges: … tone.”",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "Judge verdicts accumulate into one experiment report per challenger.",
+        "brief_evidence": "“…their verdicts accumulate into an experiment report per challenger.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed evaluation flow orders automated judging before “Experiment report per challenger.”",
+        "note": "The per-challenger reporting relationship is clearly recoverable."
+      },
+      {
+        "brief_element": "A challenger must clear an evaluation bar before human promotion review.",
+        "brief_evidence": "“when a challenger clears the bar, a product owner reviews the report…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 7 shows judges, a report, and product-owner approval or rejection, but the reconstruction explicitly notes that criteria and thresholds are not shown.",
+        "note": "The review process is present, but the gate condition is absent."
+      },
+      {
+        "brief_element": "A product owner reviews the challenger experiment report.",
+        "brief_evidence": "“…a product owner reviews the report…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 7 includes an experiment report and says “Product owner approves or rejects promotion,” but does not explicitly connect the report as the reviewed input.",
+        "note": "The intended relationship is strongly implied but not directly shown."
+      },
+      {
+        "brief_element": "The product owner approves or rejects promotion.",
+        "brief_evidence": "“…and approves or rejects promotion.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 7 explicitly states “Product owner approves or rejects promotion.”",
+        "note": "The human decision boundary is clear."
+      },
+      {
+        "brief_element": "Promotion is gated on people, not automated scores alone.",
+        "brief_evidence": "“Promotion is gated on people, not just scores…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The evaluation flow ends with product-owner approval or rejection after automated judges and an experiment report.",
+        "note": "Human approval as a mandatory promotion gate is recoverable."
+      },
+      {
+        "brief_element": "Approval makes the challenger the new champion.",
+        "brief_evidence": "“Approval makes the challenger the new champion…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 explicitly states “Approved challenger becomes champion.”",
+        "note": "Recovered exactly."
+      },
+      {
+        "brief_element": "The displaced champion is retained.",
+        "brief_evidence": "“…while the displaced champion is retained…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 states “prior champion enables one-step rollback,” and the reconstruction identifies the prior champion as remaining available.",
+        "note": "Retention is clearly implied by rollback availability."
+      },
+      {
+        "brief_element": "A single rollback step can restore the displaced champion.",
+        "brief_evidence": "“…so a single rollback step can restore it.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 8 explicitly says “prior champion enables one-step rollback,” but the reconstruction notes that the rollback trigger and exact routing are not drawn.",
+        "note": "The capability and one-step constraint are clear; restoration behavior is not operationally connected."
+      },
+      {
+        "brief_element": "Live quality monitoring operates independently of the experiment.",
+        "brief_evidence": "“Live quality monitoring runs independently of the experiment…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 8 says “Independent live metrics by variant,” but does not explicitly state independence from region 7's experiment process.",
+        "note": "Independent metrics are visible, while process independence from experimentation is only suggested."
+      },
+      {
+        "brief_element": "Live monitoring tracks resolution rate per variant.",
+        "brief_evidence": "“…it tracks resolution rate… per variant…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 says “Independent live metrics by variant: resolution…”",
+        "note": "Recovered, with ‘resolution’ standing for the rate metric."
+      },
+      {
+        "brief_element": "Live monitoring tracks human-handoff rate per variant.",
+        "brief_evidence": "“…human-handoff rate… per variant…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 says “Independent live metrics by variant: … handoff…”",
+        "note": "Recovered, with ‘handoff’ standing for the rate metric."
+      },
+      {
+        "brief_element": "Live monitoring tracks safety triggers per variant.",
+        "brief_evidence": "“…and safety triggers per variant…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Region 8 says “Independent live metrics by variant: … safety.”",
+        "note": "Per-variant safety monitoring is clear, but the monitored quantity is not explicitly identified as trigger count or rate."
+      },
+      {
+        "brief_element": "A challenger that regresses on any monitored quality metric is pulled from traffic immediately.",
+        "brief_evidence": "“…a challenger that regresses on any of these is pulled from traffic immediately…”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Region 8 explicitly states “Any regression → pull challenger immediately,” following the list of per-variant resolution, handoff, and safety metrics.",
+        "note": "The principal live failure-response path is strongly transmitted."
+      },
+      {
+        "brief_element": "Regression removal does not wait for the experiment to conclude.",
+        "brief_evidence": "“…rather than waiting for its experiment to conclude.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Immediate pulling is explicit, but no matching reconstruction entry directly compares that action with experiment completion.",
+        "note": "Immediacy is recovered; independence from experiment completion is not explicit."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "The board or system is named “2026-07-29-eval-202743 · chat-assistant-rollout.”",
+        "reconstruction_evidence": "The reconstruction lists this timestamped title as a component and says it names the rollout/evaluation board.",
+        "why_unsupported": "The brief supplies no timestamp, evaluation identifier, or exact board name."
+      },
+      {
+        "claim": "There is a component specifically named “Turn-context store.”",
+        "reconstruction_evidence": "The reconstruction names a blue memory/store icon in region 2 “Turn-context store,” while also acknowledging that the icon is unlabeled and has no visible edge.",
+        "why_unsupported": "The brief specifies profile, conversation, and corpus data sources but does not define a separate turn-context store. The reconstruction's specific component name goes beyond the brief and beyond the readable label evidence."
+      },
+      {
+        "claim": "The eight numbered regions form an ordered control flow from input safety through retention, experimentation, evaluation, and monitoring.",
+        "reconstruction_evidence": "The reconstruction includes a control flow named “Numbered board ordering” with steps 1 through 8, although its uncertainty list says no visible connecting edges prove direct then-edges.",
+        "why_unsupported": "The brief describes several related but partly independent operational lifecycles. It does not require retention to precede experimentation or experimentation to precede live monitoring as one linear procedure."
+      },
+      {
+        "claim": "Any regression, without qualification, requires immediate challenger removal.",
+        "reconstruction_evidence": "The reconstruction records the constraint “Any regression requires immediate challenger removal.”",
+        "why_unsupported": "The brief limits this rule to regression on the monitored live quality measures: resolution rate, human-handoff rate, or safety triggers. The reconstruction's unqualified wording is broader."
+      }
+    ],
+    "strongest_transmitted_behavior": "The champion/challenger rollout story is transmitted most strongly: versioned prompt/retrieval/model variants receive sampled traffic, automated judges produce per-challenger reports, a product owner gates promotion, approved challengers become champion, live metric regressions trigger immediate removal, and the prior champion supports one-step rollback.",
+    "most_consequential_loss": "The live customer-turn procedure lacks explicit directed and branched flow, especially output screening, safe-fallback and handoff triggers, handoff payloads, and per-invocation secret retrieval from a vault. As a result, engineers can identify the major capabilities but cannot implement the guarded action and escalation path without clarification.",
+    "overall_summary": "The reconstruction clearly communicates the system's domain, principal components, context inputs, conversation distillation, cold archival destination, and staged rollout architecture. The rollout and regression-removal behavior are substantially actionable. Fidelity drops because the board compresses the core live-turn behavior into numbered regions and bullet lists without edges or branch labels, leaving generation ordering, output safety, action invocation, and escalation semantics inferential. It also omits important security, provenance, retention-boundary, and recovery details, including the secrets vault, per-call credential fetching, profile supersession, compliance retrieval, and exclusion of cold history from live turns. This supports a solid design conversation but not an implementation plan.",
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 12823,
+    "output_tokens": 11799
+  },
+  "flags": []
+}

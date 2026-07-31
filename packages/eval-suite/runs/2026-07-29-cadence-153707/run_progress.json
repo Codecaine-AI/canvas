@@ -1,0 +1,21 @@
+{
+  "run_id": "2026-07-29-cadence-153707",
+  "tier": "system",
+  "sut_thinking": "low",
+  "tool_call_cap": 3,
+  "tool_call_cap_source": "agent default",
+  "status": "completed",
+  "started_at": "2026-07-29T20:37:09.160Z",
+  "finished_at": "2026-07-29T20:52:14.392Z",
+  "scenarios": {
+    "rag-ingestion-retrieval": {
+      "status": "invalid_infra",
+      "stages_done": [],
+      "pid": 94006,
+      "finished_at": "2026-07-29T20:52:14.383Z",
+      "outcomes": {
+        "stage0": "invalid-infra"
+      }
+    }
+  }
+}

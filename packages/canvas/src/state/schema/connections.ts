@@ -32,7 +32,6 @@ export type InteractiveCanvasConnection = {
   label?: string;
   style?: CanvasConnectionStyle;
   arrow?: CanvasArrowDirection;
-  role?: string;
    /**
    * Stroke color pick for this connector (P1, OBJECT-DEF-OVERHAUL.md D1/D12)
    * — a swatch id from the closed 10-id roster, resolved to a stroke hex via

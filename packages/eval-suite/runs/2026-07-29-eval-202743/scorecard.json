@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-07-29-eval-202743",
+  "status": "running",
+  "fingerprint": {
+    "repo": "49d293dc+dirty",
+    "model": "codex-lb/gpt-5.6-sol @ low",
+    "prompt": "3acbe92e",
+    "lints": "bdea0700",
+    "styles": "3446d051",
+    "surface": "2ab275de",
+    "tool_call_cap": 3,
+    "tool_call_cap_source": "agent default"
+  },
+  "previous_run": {
+    "run_id": "2026-07-29-cadence-153707",
+    "available": true,
+    "comparable": true,
+    "axis_set_changed": false,
+    "axes": [
+      "SF",
+      "RC",
+      "RD",
+      "CF",
+      "SD",
+      "PH"
+    ]
+  },
+  "sessions": {
+    "ok": 8,
+    "rejected": 0,
+    "abandoned": 0,
+    "invalidInfra": 0
+  },
+  "axes": [
+    {
+      "code": "SF",
+      "order": 1
+    },
+    {
+      "code": "RC",
+      "order": 2
+    },
+    {
+      "code": "RD",
+      "order": 3
+    },
+    {
+      "code": "CF",
+      "order": 4
+    },
+    {
+      "code": "SD",
+      "order": 5
+    },
+    {
+      "code": "PH",
+      "order": 6
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "agent-session-orchestration",
+      "label": "agent-session-orchestration",
+      "status": "graded",
+      "scores": {
+        "SF": 4,
+        "RC": 4,
+        "RD": 7,
+        "CF": 7,
+        "SD": null,
+        "PH": 8.5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "chat-assistant-rollout",
+      "label": "chat-assistant-rollout",
+      "status": "graded",
+      "scores": {
+        "SF": 6,
+        "RC": 4,
+        "RD": 6.5,
+        "CF": 4.5,
+        "SD": null,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "code-review-agents",
+      "label": "code-review-agents",
+      "status": "graded",
+      "scores": {
+        "SF": 7,
+        "RC": 6,
+        "RD": 6.5,
+        "CF": 5,
+        "SD": null,
+        "PH": 8.5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "eval-harness-orchestration",
+      "label": "eval-harness-orchestration",
+      "status": "graded",
+      "scores": {
+        "SF": 5,
+        "RC": 7,
+        "RD": 6.5,
+        "CF": 7,
+        "SD": null,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "ivr-agent-handoff",
+      "label": "ivr-agent-handoff",
+      "status": "graded",
+      "scores": {
+        "SF": 7,
+        "RC": 6,
+        "RD": 6.5,
+        "CF": 6.5,
+        "SD": null,
+        "PH": 5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "llm-inference-gateway",
+      "label": "llm-inference-gateway",
+      "status": "graded",
+      "scores": {
+        "SF": 6,
+        "RC": 6,
+        "RD": 6.5,
+        "CF": 7,
+        "SD": null,
+        "PH": 5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "rag-ingestion-retrieval",
+      "label": "rag-ingestion-retrieval",
+      "status": "graded",
+      "scores": {
+        "SF": 6,
+        "RC": 5,
+        "RD": 6.5,
+        "CF": 7,
+        "SD": null,
+        "PH": 7.5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "sandboxed-tool-fleet",
+      "label": "sandboxed-tool-fleet",
+      "status": "graded",
+      "scores": {
+        "SF": 5,
+        "RC": 6,
+        "RD": 6.5,
+        "CF": 6.5,
+        "SD": null,
+        "PH": 8.5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    }
+  ],
+  "means": {
+    "scores": {
+      "SF": 5.75,
+      "RC": 5.5,
+      "RD": 6.56,
+      "CF": 6.31,
+      "SD": null,
+      "PH": 7.38
+    },
+    "deltas": {
+      "SF": null,
+      "RC": null,
+      "RD": null,
+      "CF": null,
+      "SD": null,
+      "PH": null
+    },
+    "flags": []
+  },
+  "movements": [],
+  "axis_correlation": {
+    "threshold": 6,
+    "denominator": 8,
+    "lockstep_pairs": []
+  }
+}

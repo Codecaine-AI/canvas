@@ -43,7 +43,7 @@ describe("geometry-def-agreement", () => {
     const entries = Object.entries(OUTLINES_BY_TYPE) as Array<
       [InteractiveCanvasObjectType, (typeof OUTLINES_BY_TYPE)[InteractiveCanvasObjectType]]
     >;
-    expect(entries.length).toBe(16);
+    expect(entries.length).toBe(4);
     for (const [type, spec] of entries) {
       const def = objectDefForType(type);
       expect(def, `OUTLINES_BY_TYPE key "${type}" has no registered def`).toBeDefined();

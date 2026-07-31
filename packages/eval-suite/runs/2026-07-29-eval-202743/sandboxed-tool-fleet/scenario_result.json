@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-29-eval-202743",
+  "tier": "system",
+  "scenario": "sandboxed-tool-fleet",
+  "board_id": "eval.2026-07-29-eval-202743.sandboxed-tool-fleet",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-30T01:27:45.355Z",
+      "finished_at": "2026-07-30T01:43:21.547Z",
+      "wall_ms": 936655,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "9fc96914-c944-4863-80b7-a85197a3d647"
+    ]
+  },
+  "finished_at": "2026-07-30T01:43:22.010Z",
+  "exit_code": 0
+}

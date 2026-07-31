@@ -6,7 +6,7 @@
   "blocks": {
     "b-shape-ref-root": {
       "id": "b-shape-ref-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "covers": "Per-shape visual and connection reference: every canvas object type at its default creation geometry, with computed connection-anchor positions and text-slot behavior, each illustrated by a live canvas embed.",
         "format": "mdx",
@@ -24,7 +24,6 @@
         "b-shape-ref-intro-1",
         "b-shape-ref-intro-2",
         "b-shape-ref-intro-3",
-        "b-shape-ref-stale",
         "b-shape-ref-type-container",
         "b-shape-ref-type-container-p1",
         "b-shape-ref-type-container-p2",
@@ -42,23 +41,10 @@
         "b-shape-ref-type-sticky-p1",
         "b-shape-ref-type-sticky-p2",
         "b-shape-ref-type-sticky-canvas",
-        "b-shape-ref-type-document",
-        "b-shape-ref-type-document-p1",
-        "b-shape-ref-type-document-p2",
-        "b-shape-ref-type-document-canvas",
-        "b-shape-ref-type-database",
-        "b-shape-ref-type-database-p1",
-        "b-shape-ref-type-database-p2",
-        "b-shape-ref-type-database-canvas",
         "b-shape-ref-type-section",
         "b-shape-ref-type-section-p1",
         "b-shape-ref-type-section-p2",
         "b-shape-ref-type-section-canvas",
-        "b-shape-ref-type-pill",
-        "b-shape-ref-type-pill-p1",
-        "b-shape-ref-type-pill-p2",
-        "b-shape-ref-type-pill-p3",
-        "b-shape-ref-type-pill-canvas",
         "b-shape-ref-type-arrow-shape",
         "b-shape-ref-type-arrow-shape-p1",
         "b-shape-ref-type-arrow-shape-p2",
@@ -76,74 +62,10 @@
         "b-shape-ref-type-triangle-p1",
         "b-shape-ref-type-triangle-p2",
         "b-shape-ref-type-triangle-canvas",
-        "b-shape-ref-type-parallelogram",
-        "b-shape-ref-type-parallelogram-p1",
-        "b-shape-ref-type-parallelogram-p2",
-        "b-shape-ref-type-parallelogram-canvas",
-        "b-shape-ref-type-pentagon",
-        "b-shape-ref-type-pentagon-p1",
-        "b-shape-ref-type-pentagon-p2",
-        "b-shape-ref-type-pentagon-canvas",
         "b-shape-ref-type-octagon",
         "b-shape-ref-type-octagon-p1",
         "b-shape-ref-type-octagon-p2",
         "b-shape-ref-type-octagon-canvas",
-        "b-shape-ref-type-star",
-        "b-shape-ref-type-star-p1",
-        "b-shape-ref-type-star-p2",
-        "b-shape-ref-type-star-canvas",
-        "b-shape-ref-type-plus",
-        "b-shape-ref-type-plus-p1",
-        "b-shape-ref-type-plus-p2",
-        "b-shape-ref-type-plus-canvas",
-        "b-shape-ref-type-chevron",
-        "b-shape-ref-type-chevron-p1",
-        "b-shape-ref-type-chevron-p2",
-        "b-shape-ref-type-chevron-canvas",
-        "b-shape-ref-type-folder",
-        "b-shape-ref-type-folder-p1",
-        "b-shape-ref-type-folder-p2",
-        "b-shape-ref-type-folder-canvas",
-        "b-shape-ref-type-document-stack",
-        "b-shape-ref-type-document-stack-p1",
-        "b-shape-ref-type-document-stack-p2",
-        "b-shape-ref-type-document-stack-canvas",
-        "b-shape-ref-type-off-page-connector",
-        "b-shape-ref-type-off-page-connector-p1",
-        "b-shape-ref-type-off-page-connector-p2",
-        "b-shape-ref-type-off-page-connector-canvas",
-        "b-shape-ref-type-trapezoid",
-        "b-shape-ref-type-trapezoid-p1",
-        "b-shape-ref-type-trapezoid-p2",
-        "b-shape-ref-type-trapezoid-canvas",
-        "b-shape-ref-type-manual-input",
-        "b-shape-ref-type-manual-input-p1",
-        "b-shape-ref-type-manual-input-p2",
-        "b-shape-ref-type-manual-input-canvas",
-        "b-shape-ref-type-hexagon",
-        "b-shape-ref-type-hexagon-p1",
-        "b-shape-ref-type-hexagon-p2",
-        "b-shape-ref-type-hexagon-canvas",
-        "b-shape-ref-type-internal-storage",
-        "b-shape-ref-type-internal-storage-p1",
-        "b-shape-ref-type-internal-storage-p2",
-        "b-shape-ref-type-internal-storage-canvas",
-        "b-shape-ref-type-or-junction",
-        "b-shape-ref-type-or-junction-p1",
-        "b-shape-ref-type-or-junction-p2",
-        "b-shape-ref-type-or-junction-canvas",
-        "b-shape-ref-type-summing-junction",
-        "b-shape-ref-type-summing-junction-p1",
-        "b-shape-ref-type-summing-junction-p2",
-        "b-shape-ref-type-summing-junction-canvas",
-        "b-shape-ref-type-cylinder-horizontal",
-        "b-shape-ref-type-cylinder-horizontal-p1",
-        "b-shape-ref-type-cylinder-horizontal-p2",
-        "b-shape-ref-type-cylinder-horizontal-canvas",
-        "b-shape-ref-type-page-corner",
-        "b-shape-ref-type-page-corner-p1",
-        "b-shape-ref-type-page-corner-p2",
-        "b-shape-ref-type-page-corner-canvas",
         "b-shape-ref-type-icon",
         "b-shape-ref-type-icon-p1",
         "b-shape-ref-type-icon-p2",
@@ -152,173 +74,43 @@
     },
     "b-shape-ref-heading-title": {
       "id": "b-shape-ref-heading-title",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
-      "children": [],
       "text": [
         {
           "insert": "Canvas Engine — Shape Reference"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-intro-1": {
       "id": "b-shape-ref-intro-1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
-          "insert": "A per-shape visual and connection reference: every one of the 31 "
-        },
-        {
-          "insert": "InteractiveCanvasObjectType",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": " values at its default creation geometry, with its real computed connection-anchor positions and its text-slot behavior, each illustrated by a live canvas embed. This bundle builds on the model layer's field-by-field object type reference in "
-        },
-        {
-          "insert": "canvas-10-model",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "20-implementation/10-model",
-              "label": "canvas-10-model"
-            }
-          }
-        },
-        {
-          "insert": " — schema fields and validation rules are documented there, not repeated here — and on the shape API design doc "
-        },
-        {
-          "insert": "canvas-10-system-design-10-shape-api",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "10-system-design/10-shape-api",
-              "label": "canvas-10-system-design-10-shape-api"
-            }
-          }
-        },
-        {
-          "insert": ". What this reference adds is the connection-facing view: where connectors actually attach on each shape, and where each shape puts its text."
+          "insert": "A per-shape visual and connection reference: every one of the 11 InteractiveCanvasObjectType values at its default creation geometry, with its real computed connection-anchor positions and its text-slot behavior, each illustrated by a live canvas embed. This bundle builds on the model layer's field-by-field object type reference in canvas-10-model — schema fields and validation rules are documented there, not repeated here — and on the shape API design doc canvas-10-system-design-10-shape-api. What this reference adds is the connection-facing view: where connectors actually attach on each shape, and where each shape puts its text."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-intro-2": {
       "id": "b-shape-ref-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
-          "insert": "Anchor resolution in one breath: "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " (in "
-        },
-        {
-          "insert": "objects/geometry.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " since the P3 geometry move) builds four cardinal candidates offset "
-        },
-        {
-          "insert": "ANCHOR_OFFSET_PX",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (10 world px) outside the object's bound, then projects each along the ray from the object's center onto the shape's real outline via "
-        },
-        {
-          "insert": "outlinePolygon",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "outlinePolygon"
-            }
-          }
-        },
-        {
-          "insert": ". Outlines are def-declared "
-        },
-        {
-          "insert": "OutlineSpec",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "s now: true outlines cover pill, diamond, arrow-shape, ellipse, and the W5 polygon set (triangle, parallelogram, pentagon, octagon, star, plus, chevron, off-page-connector, trapezoid, manual-input, hexagon, or/summing junctions); every other type falls back to its axis-aligned bounding rect. During an interactive connect, "
-        },
-        {
-          "insert": "resolveConnectionCascade",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
-              "symbol": "resolveConnectionCascade"
-            }
-          }
-        },
-        {
-          "insert": " snaps the pointer to the nearest cardinal anchor within "
-        },
-        {
-          "insert": "ANCHOR_SNAP_VIEW_PX",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (8 view px, divided by zoom), else to the nearest outline point within "
-        },
-        {
-          "insert": "OUTLINE_SNAP_WORLD_PX",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (8 world px), else connects to the shape's center when the pointer is inside it, else falls through to a free point."
+          "insert": "Anchor resolution in one breath: getConnectionAnchors (in objects/geometry.ts since the P3 geometry move) builds four cardinal candidates offset ANCHOR_OFFSET_PX (10 world px) outside the object's bound, then projects each along the ray from the object's center onto the shape's real outline via outlinePolygon. Outlines are def-declared OutlineSpecs now: true outlines cover pill, diamond, arrow-shape, ellipse, and the polygon set (triangle, octagon); every other type falls back to its axis-aligned bounding rect. During an interactive connect, resolveConnectionCascade snaps the pointer to the nearest cardinal anchor within ANCHOR_SNAP_VIEW_PX (8 view px, divided by zoom), else to the nearest outline point within OUTLINE_SNAP_WORLD_PX (8 world px), else connects to the shape's center when the pointer is inside it, else falls through to a free point."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-intro-3": {
       "id": "b-shape-ref-intro-3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "Every embed below follows the same recipe: the subject shape sits at its "
@@ -387,26 +179,26 @@
         {
           "insert": " the top/bottom anchors sit visibly inside the bounding box, on the chevron body's edges. A fifth free-floating caption under each shape states the text-slot rule (centered vs. top-left vs. below-icon vs. body-only)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-container": {
       "id": "b-shape-ref-type-container",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "rectangle"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-container-p1": {
       "id": "b-shape-ref-type-container-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "A plain rounded-rect shape — the W6 successor to the removed container type, with no containment role ("
@@ -456,13 +248,13 @@
         {
           "insert": "), with body text below it."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-container-p2": {
       "id": "b-shape-ref-type-container-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "Anchors treat this type as a plain rect outline ("
@@ -510,11 +302,12 @@
         {
           "insert": "top (260, 80) = [0.5, 0]; right (440, 200) = [1, 0.5]; bottom (260, 320) = [0.5, 1]; left (80, 200) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-container-canvas": {
       "id": "b-shape-ref-type-container-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Rectangle — anchors & text slot",
         "canvasId": "shape-ref-container"
@@ -523,22 +316,21 @@
     },
     "b-shape-ref-type-process": {
       "id": "b-shape-ref-type-process",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "process"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-process-p1": {
       "id": "b-shape-ref-type-process-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "The generic rounded-rect flow step and the engine's fallback type ("
@@ -608,13 +400,13 @@
         {
           "insert": "), body below it."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-process-p2": {
       "id": "b-shape-ref-type-process-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "Anchors treat this type as a plain rect outline ("
@@ -662,11 +454,12 @@
         {
           "insert": "top (252, 160) = [0.5, 0]; right (344, 208) = [1, 0.5]; bottom (252, 256) = [0.5, 1]; left (160, 208) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-process-canvas": {
       "id": "b-shape-ref-type-process-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Process — anchors & text slot",
         "canvasId": "shape-ref-process"
@@ -675,22 +468,21 @@
     },
     "b-shape-ref-type-decision": {
       "id": "b-shape-ref-type-decision",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "decision"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-decision-p1": {
       "id": "b-shape-ref-type-decision-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "The diamond branch point. Default geometry is "
@@ -740,13 +532,13 @@
         {
           "insert": " polygon over the full bounding box. Label and body render centered, with extra padding since a diamond's usable interior is smaller than its box."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-decision-p2": {
       "id": "b-shape-ref-type-decision-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "This is one of the true-outline shapes: anchors project onto the real diamond polygon ("
@@ -793,13 +585,13 @@
         {
           "insert": "top (240, 160) = [0.5, 0]; right (320, 216) = [1, 0.5]; bottom (240, 272) = [0.5, 1]; left (160, 216) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-decision-p3": {
       "id": "b-shape-ref-type-decision-p3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "Note the four cardinal anchors still coincide with the bounds-edge midpoints — a diamond's north/south/east/west vertices sit exactly on its bounding box. The true outline only diverges from the box off-axis, which is what the outline-snap stage of "
@@ -818,11 +610,12 @@
         {
           "insert": " sees when a pointer approaches a diamond edge diagonally."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-decision-canvas": {
       "id": "b-shape-ref-type-decision-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Decision — anchors & text slot",
         "canvasId": "shape-ref-decision"
@@ -831,22 +624,21 @@
     },
     "b-shape-ref-type-sticky": {
       "id": "b-shape-ref-type-sticky",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "sticky"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-sticky-p1": {
       "id": "b-shape-ref-type-sticky-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "The FigJam note card. Default creation geometry is "
@@ -910,13 +702,13 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-sticky-p2": {
       "id": "b-shape-ref-type-sticky-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "Anchors treat this type as a plain rect outline ("
@@ -964,225 +756,35 @@
         {
           "insert": "top (268, 180) = [0.5, 0]; right (356, 244) = [1, 0.5]; bottom (268, 308) = [0.5, 1]; left (180, 244) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-sticky-canvas": {
       "id": "b-shape-ref-type-sticky-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Sticky — anchors & text slot",
         "canvasId": "shape-ref-sticky"
       },
       "children": []
     },
-    "b-shape-ref-type-document": {
-      "id": "b-shape-ref-type-document",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "document"
-        }
-      ]
-    },
-    "b-shape-ref-type-document-p1": {
-      "id": "b-shape-ref-type-document-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A file/document node (D16 vocabulary). Default geometry "
-        },
-        {
-          "insert": "{ width: 160, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", drawn as a wavy-bottom-edge silhouette in W5 (replacing the earlier dog-eared page) via "
-        },
-        {
-          "insert": "documentWavyPath",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/flowchart/document.tsx",
-              "symbol": "documentWavyPath"
-            }
-          }
-        },
-        {
-          "insert": ", proportioned by "
-        },
-        {
-          "insert": "DOCUMENT_GEOMETRY",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/flowchart/document.tsx",
-              "symbol": "DOCUMENT_GEOMETRY"
-            }
-          }
-        },
-        {
-          "insert": "'s waveShoulderYRatio (0.82) and waveCrestYRatio (0.96); label renders top-left, body below, in the shared base trim. The old dog-eared notch moved verbatim to the new "
-        },
-        {
-          "insert": "page-corner",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": " type."
-        }
-      ]
-    },
-    "b-shape-ref-type-document-p2": {
-      "id": "b-shape-ref-type-document-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "The drawn silhouette is not modeled as a true outline — anchors fall back to the axis-aligned bounds rect (the same conservative fallback the upstream BlockSuite port uses for icon-like shapes), so the wavy bottom edge is inside the anchor rect — a connector aimed at the bottom lands on the box, not the curve. "
-        },
-        {
-          "insert": "At the default 160×120 geometry, getConnectionAnchors resolves the four cardinal anchors to top (240, 160) = [0.5, 0]; right (320, 220) = [1, 0.5]; bottom (240, 280) = [0.5, 1]; left (160, 220) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-document-canvas": {
-      "id": "b-shape-ref-type-document-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Document — anchors & text slot",
-        "canvasId": "shape-ref-document"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-database": {
-      "id": "b-shape-ref-type-database",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "database"
-        }
-      ]
-    },
-    "b-shape-ref-type-database-p1": {
-      "id": "b-shape-ref-type-database-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A data store (D16). Default geometry "
-        },
-        {
-          "insert": "{ width: 140, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", drawn as an SVG cylinder silhouette. Unlike the icon glyph family, its colors resolve through the shape pick's role cells (resolveShapeColors over CANVAS_PALETTE) and its label renders centered over the silhouette rather than below it."
-        }
-      ]
-    },
-    "b-shape-ref-type-database-p2": {
-      "id": "b-shape-ref-type-database-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "The drawn silhouette is not modeled as a true outline — anchors fall back to the axis-aligned bounds rect (the same conservative fallback the upstream BlockSuite port uses for icon-like shapes), so anchors land on the box, not the curved cylinder caps. "
-        },
-        {
-          "insert": "At the default "
-        },
-        {
-          "insert": "140×120",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " geometry, "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " resolves the four cardinal anchors to "
-        },
-        {
-          "insert": "top (230, 160) = [0.5, 0]; right (300, 220) = [1, 0.5]; bottom (230, 280) = [0.5, 1]; left (160, 220) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-database-canvas": {
-      "id": "b-shape-ref-type-database-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Database — anchors & text slot",
-        "canvasId": "shape-ref-database"
-      },
-      "children": []
-    },
     "b-shape-ref-type-section": {
       "id": "b-shape-ref-type-section",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "section"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-section-p1": {
       "id": "b-shape-ref-type-section-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "The FigJam section (W2) — the one type with corner-only handles and descendant drag capture. Default geometry is deliberately large, "
@@ -1251,13 +853,13 @@
         {
           "insert": ", capped at 6×) and truncates to its section's inner width with an ellipsis, so section names stay readable from afar without dwarfing the board."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-section-p2": {
       "id": "b-shape-ref-type-section-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "Anchors treat this type as a plain rect outline ("
@@ -1305,168 +907,35 @@
         {
           "insert": "top (320, 80) = [0.5, 0]; right (560, 260) = [1, 0.5]; bottom (320, 440) = [0.5, 1]; left (80, 260) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-section-canvas": {
       "id": "b-shape-ref-type-section-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Section — anchors & text slot",
         "canvasId": "shape-ref-section"
       },
       "children": []
     },
-    "b-shape-ref-type-pill": {
-      "id": "b-shape-ref-type-pill",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "pill"
-        }
-      ]
-    },
-    "b-shape-ref-type-pill-p1": {
-      "id": "b-shape-ref-type-pill-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A true stadium shape (W2). Default geometry "
-        },
-        {
-          "insert": "{ width: 200, height: 64 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", rendered with "
-        },
-        {
-          "insert": "border-radius: 999px",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/CanvasStage.tsx"
-            }
-          }
-        },
-        {
-          "insert": " (real radius = height/2 per "
-        },
-        {
-          "insert": "SHAPE_CORNER_RADII_PX",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "). Label and body render centered."
-        }
-      ]
-    },
-    "b-shape-ref-type-pill-p2": {
-      "id": "b-shape-ref-type-pill-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "This is a true-outline shape: anchors project onto a polygonized stadium ("
-        },
-        {
-          "insert": "pillPoints",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts"
-            }
-          }
-        },
-        {
-          "insert": ", two 8-segment half-circle fans joined by the straight sides). "
-        },
-        {
-          "insert": "At the default "
-        },
-        {
-          "insert": "200×64",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " geometry, "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " resolves the four cardinal anchors to "
-        },
-        {
-          "insert": "top (260, 160) = [0.5, 0]; right (360, 192) = [1, 0.5]; bottom (260, 224) = [0.5, 1]; left (160, 192) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-pill-p3": {
-      "id": "b-shape-ref-type-pill-p3",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "As with the diamond, the four cardinal anchors coincide with the bounds-edge midpoints — a stadium's extremes sit on its bounding box — so the true outline only matters off-axis, where outline snapping follows the end-cap curves instead of the box corners."
-        }
-      ]
-    },
-    "b-shape-ref-type-pill-canvas": {
-      "id": "b-shape-ref-type-pill-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Pill — anchors & text slot",
-        "canvasId": "shape-ref-pill"
-      },
-      "children": []
-    },
     "b-shape-ref-type-arrow-shape": {
       "id": "b-shape-ref-type-arrow-shape",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "arrow-shape"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-arrow-shape-p1": {
       "id": "b-shape-ref-type-arrow-shape-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "The fat chevron (W2), pointing left or right via the type-only "
@@ -1536,13 +1005,13 @@
         {
           "insert": " (head 38% of width, body 60% of height, raised from 53% in W5 so the rendered body reads blockier; approximate, pending a live FigJam pixel sample). The label centers within the chevron BODY only — an offset margin equal to the head width keeps text off the pointed side."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-arrow-shape-p2": {
       "id": "b-shape-ref-type-arrow-shape-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "The showcase true-outline case: anchors project onto the actual chevron polygon, and the connector attachment outline is the very same "
@@ -1564,22 +1033,23 @@
         {
           "insert": "At the default 361×100 geometry, getConnectionAnchors resolves the four cardinal anchors to top (340.5, 180) = [0.5, 0.2]; right (521, 210) = [1, 0.5]; bottom (340.5, 240) = [0.5, 0.8]; left (160, 210) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-arrow-shape-p3": {
       "id": "b-shape-ref-type-arrow-shape-p3",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "The top and bottom anchors land on the chevron body's horizontal edges at ry = 0.20 and ry = 0.80 — visibly inset from the bounding box (the body is 60% of total height, vertically centered, so each inset is (1 − 0.60) / 2 = 0.20; W5 raised the body-height ratio from 0.53, which had produced insets of 0.235). Left lands on the body tail, right on the chevron tip. This embed is the clearest demonstration that connectors attach to the true outline, not the bbox."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-arrow-shape-canvas": {
       "id": "b-shape-ref-type-arrow-shape-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Arrow Shape — anchors & text slot",
         "canvasId": "shape-ref-arrow-shape"
@@ -1588,22 +1058,21 @@
     },
     "b-shape-ref-type-predefined-process": {
       "id": "b-shape-ref-type-predefined-process",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "predefined-process"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-predefined-process-p1": {
       "id": "b-shape-ref-type-predefined-process-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "The flowchart \"predefined process\" rect (W2): a rounded rect with two inner vertical bars near each end, signaling a called subroutine. Default geometry "
@@ -1636,13 +1105,13 @@
         {
           "insert": ". Label and body render centered."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-predefined-process-p2": {
       "id": "b-shape-ref-type-predefined-process-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "Anchors treat this type as a plain rect outline ("
@@ -1690,11 +1159,12 @@
         {
           "insert": "top (260, 160) = [0.5, 0]; right (360, 210) = [1, 0.5]; bottom (260, 260) = [0.5, 1]; left (160, 210) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-predefined-process-canvas": {
       "id": "b-shape-ref-type-predefined-process-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Predefined Process — anchors & text slot",
         "canvasId": "shape-ref-predefined-process"
@@ -1703,22 +1173,21 @@
     },
     "b-shape-ref-type-ellipse": {
       "id": "b-shape-ref-type-ellipse",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "ellipse"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-ellipse-p1": {
       "id": "b-shape-ref-type-ellipse-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "A true ellipse inscribed in the object's bounding box. Default geometry "
@@ -1737,22 +1206,23 @@
         {
           "insert": ", style.shape \"ellipse\"; label renders centered."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-ellipse-p2": {
       "id": "b-shape-ref-type-ellipse-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "True-outline type via ellipsePoints — anchors project onto the actual ellipse curve. At the default 160×120 geometry, getConnectionAnchors resolves the four cardinal anchors to top (240, 160) = [0.5, 0]; right (320, 220) = [1, 0.5]; bottom (240, 280) = [0.5, 1]; left (160, 220) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-ellipse-canvas": {
       "id": "b-shape-ref-type-ellipse-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Ellipse — anchors & text slot",
         "canvasId": "shape-ref-ellipse"
@@ -1761,22 +1231,21 @@
     },
     "b-shape-ref-type-triangle": {
       "id": "b-shape-ref-type-triangle",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "triangle"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-triangle-p1": {
       "id": "b-shape-ref-type-triangle-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "An isosceles triangle, pointing up or down via the type-only "
@@ -1809,176 +1278,46 @@
         {
           "insert": ", style.shape \"triangle\"; label renders centered in the lower two-thirds (the apex carries no text)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-triangle-p2": {
       "id": "b-shape-ref-type-triangle-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "True-outline type via trianglePoints — note the left/right anchors land inset from the bbox edges, on the triangle's slanted sides, not the corners. At the default 140×120 geometry, getConnectionAnchors resolves the four cardinal anchors to top (230, 160) = [0.5, 0]; right (265, 220) = [0.75, 0.5]; bottom (230, 280) = [0.5, 1]; left (195, 220) = [0.25, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-triangle-canvas": {
       "id": "b-shape-ref-type-triangle-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Triangle — anchors & text slot",
         "canvasId": "shape-ref-triangle"
       },
       "children": []
     },
-    "b-shape-ref-type-parallelogram": {
-      "id": "b-shape-ref-type-parallelogram",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "parallelogram"
-        }
-      ]
-    },
-    "b-shape-ref-type-parallelogram-p1": {
-      "id": "b-shape-ref-type-parallelogram-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A skewed quadrilateral, skewed right or left via the type-only "
-        },
-        {
-          "insert": "direction",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasShapeDirection"
-            }
-          }
-        },
-        {
-          "insert": " field (soft-defaults to \"right\"). Default geometry "
-        },
-        {
-          "insert": "{ width: 160, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"parallelogram\"; label renders centered. Skew is a fixed fraction of width — approximate, pending a pixel-reference check against FigJam."
-        }
-      ]
-    },
-    "b-shape-ref-type-parallelogram-p2": {
-      "id": "b-shape-ref-type-parallelogram-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "True-outline type via parallelogramPoints. At the default 160×100 geometry, getConnectionAnchors resolves the four cardinal anchors to top (240, 160) = [0.5, 0]; right (305.6, 210) = [0.91, 0.5]; bottom (240, 260) = [0.5, 1]; left (174.4, 210) = [0.09, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-parallelogram-canvas": {
-      "id": "b-shape-ref-type-parallelogram-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Parallelogram — anchors & text slot",
-        "canvasId": "shape-ref-parallelogram"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-pentagon": {
-      "id": "b-shape-ref-type-pentagon",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "pentagon"
-        }
-      ]
-    },
-    "b-shape-ref-type-pentagon-p1": {
-      "id": "b-shape-ref-type-pentagon-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A 5-point regular polygon (one point up). Default geometry "
-        },
-        {
-          "insert": "{ width: 140, height: 140 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"pentagon\"; label renders centered."
-        }
-      ]
-    },
-    "b-shape-ref-type-pentagon-p2": {
-      "id": "b-shape-ref-type-pentagon-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "True-outline type via pentagonPoints. At the default 140×140 geometry, getConnectionAnchors resolves the four cardinal anchors to top (230, 160) = [0.5, 0]; right (289.546, 230) = [0.925, 0.5]; bottom (230, 286.631) = [0.5, 0.905]; left (170.454, 230) = [0.075, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-pentagon-canvas": {
-      "id": "b-shape-ref-type-pentagon-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Pentagon — anchors & text slot",
-        "canvasId": "shape-ref-pentagon"
-      },
-      "children": []
-    },
     "b-shape-ref-type-octagon": {
       "id": "b-shape-ref-type-octagon",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "octagon"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-octagon-p1": {
       "id": "b-shape-ref-type-octagon-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "An 8-point regular polygon. Default geometry "
@@ -1997,872 +1336,46 @@
         {
           "insert": ", style.shape \"octagon\"; label renders centered."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-octagon-p2": {
       "id": "b-shape-ref-type-octagon-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "True-outline type via octagonPoints. At the default 140×140 geometry, getConnectionAnchors resolves the four cardinal anchors to top (230, 165.328) = [0.5, 0.038]; right (294.672, 230) = [0.962, 0.5]; bottom (230, 294.672) = [0.5, 0.962]; left (165.328, 230) = [0.038, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-octagon-canvas": {
       "id": "b-shape-ref-type-octagon-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Octagon — anchors & text slot",
         "canvasId": "shape-ref-octagon"
       },
       "children": []
     },
-    "b-shape-ref-type-star": {
-      "id": "b-shape-ref-type-star",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "star"
-        }
-      ]
-    },
-    "b-shape-ref-type-star-p1": {
-      "id": "b-shape-ref-type-star-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A 5-point star polygon (10 alternating outer/inner vertices). Default geometry "
-        },
-        {
-          "insert": "{ width: 140, height: 140 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"star\"; label renders small and centered. Inner radius is a fixed fraction of outer — approximate, pending a pixel-reference check."
-        }
-      ]
-    },
-    "b-shape-ref-type-star-p2": {
-      "id": "b-shape-ref-type-star-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "True-outline type via starPoints. At the default 140×140 geometry, getConnectionAnchors resolves the four cardinal anchors to top (230, 160) = [0.5, 0]; right (268.042, 230) = [0.772, 0.5]; bottom (230, 258) = [0.5, 0.7]; left (191.958, 230) = [0.228, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-star-canvas": {
-      "id": "b-shape-ref-type-star-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Star — anchors & text slot",
-        "canvasId": "shape-ref-star"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-plus": {
-      "id": "b-shape-ref-type-plus",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "plus"
-        }
-      ]
-    },
-    "b-shape-ref-type-plus-p1": {
-      "id": "b-shape-ref-type-plus-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A 12-point cross/plus polygon (equal-width horizontal and vertical bars). Default geometry "
-        },
-        {
-          "insert": "{ width: 120, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"plus\"; renders no visible label text (accessibility-only — hidesVisibleText — the cross's usable text area is too small)."
-        }
-      ]
-    },
-    "b-shape-ref-type-plus-p2": {
-      "id": "b-shape-ref-type-plus-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "True-outline type via plusPoints. At the default 120×120 geometry, getConnectionAnchors resolves the four cardinal anchors to top (220, 160) = [0.5, 0]; right (280, 220) = [1, 0.5]; bottom (220, 280) = [0.5, 1]; left (160, 220) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-plus-canvas": {
-      "id": "b-shape-ref-type-plus-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Plus — anchors & text slot",
-        "canvasId": "shape-ref-plus"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-chevron": {
-      "id": "b-shape-ref-type-chevron",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "chevron"
-        }
-      ]
-    },
-    "b-shape-ref-type-chevron-p1": {
-      "id": "b-shape-ref-type-chevron-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "FigJam's \"fat chevron arrow\", pointing left or right via the type-only "
-        },
-        {
-          "insert": "direction",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "CanvasShapeDirection"
-            }
-          }
-        },
-        {
-          "insert": " field (soft-defaults to \"right\") — distinct from arrow-shape (the two silhouettes diverged enough in FigJam's own picker to justify separate types). Default geometry "
-        },
-        {
-          "insert": "{ width: 160, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"chevron\"; label renders centered, offset away from the notch."
-        }
-      ]
-    },
-    "b-shape-ref-type-chevron-p2": {
-      "id": "b-shape-ref-type-chevron-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "True-outline type via chevronPoints, proportioned by CHEVRON_GEOMETRY's notchWidthRatio (0.25). At the default 160×120 geometry, getConnectionAnchors resolves the four cardinal anchors to top (240, 160) = [0.5, 0]; right (320, 220) = [1, 0.5]; bottom (240, 280) = [0.5, 1]; left (200, 220) = [0.25, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-chevron-canvas": {
-      "id": "b-shape-ref-type-chevron-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Chevron — anchors & text slot",
-        "canvasId": "shape-ref-chevron"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-folder": {
-      "id": "b-shape-ref-type-folder",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "folder"
-        }
-      ]
-    },
-    "b-shape-ref-type-folder-p1": {
-      "id": "b-shape-ref-type-folder-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A manila-folder silhouette: a rectangle with a small tab notch on the top edge. Default geometry "
-        },
-        {
-          "insert": "{ width: 140, height: 110 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"folder\", tab width proportioned by FOLDER_GEOMETRY's tabWidthRatio (0.38); label renders centered in the main body, below the tab."
-        }
-      ]
-    },
-    "b-shape-ref-type-folder-p2": {
-      "id": "b-shape-ref-type-folder-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "Bbox-fallback outline (the tab notch doesn't perturb anchors). At the default 140×110 geometry, getConnectionAnchors resolves the four cardinal anchors to top (230, 160) = [0.5, 0]; right (300, 215) = [1, 0.5]; bottom (230, 270) = [0.5, 1]; left (160, 215) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-folder-canvas": {
-      "id": "b-shape-ref-type-folder-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Folder — anchors & text slot",
-        "canvasId": "shape-ref-folder"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-document-stack": {
-      "id": "b-shape-ref-type-document-stack",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "document-stack"
-        }
-      ]
-    },
-    "b-shape-ref-type-document-stack-p1": {
-      "id": "b-shape-ref-type-document-stack-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "FigJam's \"multiple documents (stacked)\" symbol: offset duplicate wavy-document outlines behind the primary. Default geometry "
-        },
-        {
-          "insert": "{ width: 160, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"document-stack\", offset proportioned by DOCUMENT_STACK_GEOMETRY's offsetPx (6); label renders centered on the front-most silhouette."
-        }
-      ]
-    },
-    "b-shape-ref-type-document-stack-p2": {
-      "id": "b-shape-ref-type-document-stack-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "Bbox-fallback outline. At the default 160×120 geometry, getConnectionAnchors resolves the four cardinal anchors to top (240, 160) = [0.5, 0]; right (320, 220) = [1, 0.5]; bottom (240, 280) = [0.5, 1]; left (160, 220) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-document-stack-canvas": {
-      "id": "b-shape-ref-type-document-stack-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Document Stack — anchors & text slot",
-        "canvasId": "shape-ref-document-stack"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-off-page-connector": {
-      "id": "b-shape-ref-type-off-page-connector",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "off-page-connector"
-        }
-      ]
-    },
-    "b-shape-ref-type-off-page-connector-p1": {
-      "id": "b-shape-ref-type-off-page-connector-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A downward-pointing pentagon (FigJam's SHIELD shapeType). Default geometry "
-        },
-        {
-          "insert": "{ width: 120, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"off-page-connector\", point proportioned by OFF_PAGE_CONNECTOR_GEOMETRY's shoulderRatio (0.6); label renders centered in the upper rectangular band, above the point."
-        }
-      ]
-    },
-    "b-shape-ref-type-off-page-connector-p2": {
-      "id": "b-shape-ref-type-off-page-connector-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "True-outline type via offPageConnectorPoints. At the default 120×100 geometry, getConnectionAnchors resolves the four cardinal anchors to top (220, 160) = [0.5, 0]; right (280, 210) = [1, 0.5]; bottom (220, 260) = [0.5, 1]; left (160, 210) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-off-page-connector-canvas": {
-      "id": "b-shape-ref-type-off-page-connector-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Off-Page Connector — anchors & text slot",
-        "canvasId": "shape-ref-off-page-connector"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-trapezoid": {
-      "id": "b-shape-ref-type-trapezoid",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "trapezoid"
-        }
-      ]
-    },
-    "b-shape-ref-type-trapezoid-p1": {
-      "id": "b-shape-ref-type-trapezoid-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A 4-point trapezoid (FigJam's \"manual operation\" symbol): wider bottom edge, narrower symmetric top edge. Default geometry "
-        },
-        {
-          "insert": "{ width: 150, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"trapezoid\"; label renders centered."
-        }
-      ]
-    },
-    "b-shape-ref-type-trapezoid-p2": {
-      "id": "b-shape-ref-type-trapezoid-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "True-outline type via trapezoidPoints. At the default 150×100 geometry, getConnectionAnchors resolves the four cardinal anchors to top (235, 160) = [0.5, 0]; right (295, 210) = [0.9, 0.5]; bottom (235, 260) = [0.5, 1]; left (175, 210) = [0.1, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-trapezoid-canvas": {
-      "id": "b-shape-ref-type-trapezoid-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Trapezoid — anchors & text slot",
-        "canvasId": "shape-ref-trapezoid"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-manual-input": {
-      "id": "b-shape-ref-type-manual-input",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "manual-input"
-        }
-      ]
-    },
-    "b-shape-ref-type-manual-input-p1": {
-      "id": "b-shape-ref-type-manual-input-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A rectangle with a slanted top edge (top-left corner dropped). Default geometry "
-        },
-        {
-          "insert": "{ width: 150, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"manual-input\", drop proportioned by MANUAL_INPUT_GEOMETRY's dropRatio (0.25); label renders centered in the lower rectangular band, below the slanted edge."
-        }
-      ]
-    },
-    "b-shape-ref-type-manual-input-p2": {
-      "id": "b-shape-ref-type-manual-input-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "True-outline type via manualInputPoints. At the default 150×100 geometry, getConnectionAnchors resolves the four cardinal anchors to top (235, 172.5) = [0.5, 0.125]; right (310, 210) = [1, 0.5]; bottom (235, 260) = [0.5, 1]; left (160, 210) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-manual-input-canvas": {
-      "id": "b-shape-ref-type-manual-input-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Manual Input — anchors & text slot",
-        "canvasId": "shape-ref-manual-input"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-hexagon": {
-      "id": "b-shape-ref-type-hexagon",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "hexagon"
-        }
-      ]
-    },
-    "b-shape-ref-type-hexagon-p1": {
-      "id": "b-shape-ref-type-hexagon-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A 6-point regular hexagon, flat-top orientation (FigJam's \"preparation\" symbol). Default geometry "
-        },
-        {
-          "insert": "{ width: 150, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"hexagon\"; label renders centered."
-        }
-      ]
-    },
-    "b-shape-ref-type-hexagon-p2": {
-      "id": "b-shape-ref-type-hexagon-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "True-outline type via hexagonPoints. At the default 150×100 geometry, getConnectionAnchors resolves the four cardinal anchors to top (235, 166.699) = [0.5, 0.067]; right (310, 210) = [1, 0.5]; bottom (235, 253.301) = [0.5, 0.933]; left (160, 210) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-hexagon-canvas": {
-      "id": "b-shape-ref-type-hexagon-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Hexagon — anchors & text slot",
-        "canvasId": "shape-ref-hexagon"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-internal-storage": {
-      "id": "b-shape-ref-type-internal-storage",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "internal-storage"
-        }
-      ]
-    },
-    "b-shape-ref-type-internal-storage-p1": {
-      "id": "b-shape-ref-type-internal-storage-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A rectangle with two additional straight rule lines drawn inside near the top and left edges (FigJam's \"internal storage\" symbol). Default geometry "
-        },
-        {
-          "insert": "{ width: 150, height: 110 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"internal-storage\"; label renders in the main cell, right of the left rule and below the top rule."
-        }
-      ]
-    },
-    "b-shape-ref-type-internal-storage-p2": {
-      "id": "b-shape-ref-type-internal-storage-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "Outline is a plain rect — the interior rule lines are decoration only and don't perturb where a connector crosses the border. At the default 150×110 geometry, getConnectionAnchors resolves the four cardinal anchors to top (235, 160) = [0.5, 0]; right (310, 215) = [1, 0.5]; bottom (235, 270) = [0.5, 1]; left (160, 215) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-internal-storage-canvas": {
-      "id": "b-shape-ref-type-internal-storage-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Internal Storage — anchors & text slot",
-        "canvasId": "shape-ref-internal-storage"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-or-junction": {
-      "id": "b-shape-ref-type-or-junction",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "or-junction"
-        }
-      ]
-    },
-    "b-shape-ref-type-or-junction-p1": {
-      "id": "b-shape-ref-type-or-junction-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A circle with an inscribed \"+\" (FigJam's OR flowchart junction). Default geometry "
-        },
-        {
-          "insert": "{ width: 100, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"or-junction\"; renders no visible label text (accessibility-only)."
-        }
-      ]
-    },
-    "b-shape-ref-type-or-junction-p2": {
-      "id": "b-shape-ref-type-or-junction-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "Ellipse-silhouette true-outline type (shares the \"junction\" outline tier with summing-junction, both via ellipsePoints); the inscribed \"+\" is drawn from cardinal lines at 50%/50%, distinguishing it from summing-junction's \"x\". At the default 100×100 geometry, getConnectionAnchors resolves the four cardinal anchors to top (210, 160) = [0.5, 0]; right (260, 210) = [1, 0.5]; bottom (210, 260) = [0.5, 1]; left (160, 210) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-or-junction-canvas": {
-      "id": "b-shape-ref-type-or-junction-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Or Junction — anchors & text slot",
-        "canvasId": "shape-ref-or-junction"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-summing-junction": {
-      "id": "b-shape-ref-type-summing-junction",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "summing-junction"
-        }
-      ]
-    },
-    "b-shape-ref-type-summing-junction-p1": {
-      "id": "b-shape-ref-type-summing-junction-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A circle with an inscribed \"x\" (FigJam's summing-junction flowchart symbol). Default geometry "
-        },
-        {
-          "insert": "{ width: 100, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"summing-junction\"; renders no visible label text (accessibility-only)."
-        }
-      ]
-    },
-    "b-shape-ref-type-summing-junction-p2": {
-      "id": "b-shape-ref-type-summing-junction-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "Ellipse-silhouette true-outline type, same tier as or-junction; the inscribed \"x\" is drawn from diagonal lines at roughly 14.64%/85.36% (cos 45° scaled), distinguishing it from or-junction's \"+\". At the default 100×100 geometry, getConnectionAnchors resolves the four cardinal anchors to top (210, 160) = [0.5, 0]; right (260, 210) = [1, 0.5]; bottom (210, 260) = [0.5, 1]; left (160, 210) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-summing-junction-canvas": {
-      "id": "b-shape-ref-type-summing-junction-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Summing Junction — anchors & text slot",
-        "canvasId": "shape-ref-summing-junction"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-cylinder-horizontal": {
-      "id": "b-shape-ref-type-cylinder-horizontal",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "cylinder-horizontal"
-        }
-      ]
-    },
-    "b-shape-ref-type-cylinder-horizontal-p1": {
-      "id": "b-shape-ref-type-cylinder-horizontal-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "A horizontal-orientation cylinder (FigJam's ENG_QUEUE shapeType), distinct from database's vertical cylinder. Default geometry "
-        },
-        {
-          "insert": "{ width: 150, height: 100 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"cylinder-horizontal\"; label renders centered on the silhouette."
-        }
-      ]
-    },
-    "b-shape-ref-type-cylinder-horizontal-p2": {
-      "id": "b-shape-ref-type-cylinder-horizontal-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "Bbox-fallback outline (like database). At the default 150×100 geometry, getConnectionAnchors resolves the four cardinal anchors to top (235, 160) = [0.5, 0]; right (310, 210) = [1, 0.5]; bottom (235, 260) = [0.5, 1]; left (160, 210) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-cylinder-horizontal-canvas": {
-      "id": "b-shape-ref-type-cylinder-horizontal-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Cylinder (Horizontal) — anchors & text slot",
-        "canvasId": "shape-ref-cylinder-horizontal"
-      },
-      "children": []
-    },
-    "b-shape-ref-type-page-corner": {
-      "id": "b-shape-ref-type-page-corner",
-      "flavour": "heading",
-      "props": {
-        "level": 2
-      },
-      "children": [],
-      "text": [
-        {
-          "insert": "page-corner"
-        }
-      ]
-    },
-    "b-shape-ref-type-page-corner-p1": {
-      "id": "b-shape-ref-type-page-corner-p1",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "The dog-eared/folded-corner page silhouette document used before W5 (FigJam's ENG_FILE shapeType), split into its own type once document moved to a wavy-bottom silhouette. Default geometry "
-        },
-        {
-          "insert": "{ width: 160, height: 120 }",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "defaultGeometryFor"
-            }
-          }
-        },
-        {
-          "insert": ", style.shape \"page-corner\"; rendered with the same CSS clip-path notch document used to carry (polygon(0 0, 76% 0, 100% 24%, 100% 100%, 0 100%), asymmetric border radius 2px 8px 8px 8px); label renders centered on the silhouette."
-        }
-      ]
-    },
-    "b-shape-ref-type-page-corner-p2": {
-      "id": "b-shape-ref-type-page-corner-p2",
-      "flavour": "paragraph",
-      "props": {},
-      "children": [],
-      "text": [
-        {
-          "insert": "Bbox-fallback outline. At the default 160×120 geometry, getConnectionAnchors resolves the four cardinal anchors to top (240, 160) = [0.5, 0]; right (320, 220) = [1, 0.5]; bottom (240, 280) = [0.5, 1]; left (160, 220) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
-        }
-      ]
-    },
-    "b-shape-ref-type-page-corner-canvas": {
-      "id": "b-shape-ref-type-page-corner-canvas",
-      "flavour": "canvas",
-      "props": {
-        "title": "Page Corner — anchors & text slot",
-        "canvasId": "shape-ref-page-corner"
-      },
-      "children": []
-    },
     "b-shape-ref-type-icon": {
       "id": "b-shape-ref-type-icon",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
-      "children": [],
       "text": [
         {
           "insert": "icon"
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-icon-p1": {
       "id": "b-shape-ref-type-icon-p1",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "A single icon-glyph family covering FigJam's 26-item Advanced picker tier, parameterized by a required "
@@ -2895,71 +1408,27 @@
         {
           "insert": ", style.shape \"icon\"; rendered via IconShapeBody with the label-below-glyph layout used by every icon glyph. This embed uses glyph \"cpu\"; the same icon type also covers the retired Person and Chat catalog entries through glyphs \"person\" and \"chat\" — 26 glyphs exist in total (activity, archive, key, chat, cloud, cpu, database, display, mail, file, code, bolt, pin, phone, package, coin, shield, send, server, cube, gear, drive, terminal, person, wallet, globe)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-icon-p2": {
       "id": "b-shape-ref-type-icon-p2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
-      "children": [],
       "text": [
         {
           "insert": "Bbox-fallback outline. At the default 120×120 geometry, getConnectionAnchors resolves the four cardinal anchors to top (220, 160) = [0.5, 0]; right (280, 220) = [1, 0.5]; bottom (220, 280) = [0.5, 1]; left (160, 220) = [0, 0.5] (world point = relative [rx, ry] on the bounds)."
         }
-      ]
+      ],
+      "children": []
     },
     "b-shape-ref-type-icon-canvas": {
       "id": "b-shape-ref-type-icon-canvas",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "title": "Icon (CPU glyph) — anchors & text slot",
         "canvasId": "shape-ref-icon"
       },
-      "children": []
-    },
-    "b-shape-ref-stale": {
-      "id": "b-shape-ref-stale",
-      "flavour": "observation",
-      "props": {
-        "title": "STALE NOTICE — pre-overhaul content below"
-      },
-      "text": [
-        {
-          "insert": "The per-type prose below predates the object-definition overhaul in places: mentions of label/body fields, labelEditing targets, and section title/tint families are historical (the anchor positions and outline tiers remain accurate). For the shipped contract — the single "
-        },
-        {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " field, the "
-        },
-        {
-          "insert": "color?: CanvasColor",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " 10-pick color model and per-kind role tables, def-declared text slots, and def-declared outlines — see "
-        },
-        {
-          "insert": "canvas-10-system-design-10-shape-api",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "10-system-design/10-shape-api",
-              "label": "canvas-10-system-design-10-shape-api"
-            }
-          }
-        },
-        {
-          "insert": "; where this section and that doc disagree, that doc (and the code it cites) wins."
-        }
-      ],
       "children": []
     }
   }

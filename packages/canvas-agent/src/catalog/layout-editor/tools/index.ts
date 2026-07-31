@@ -16,6 +16,7 @@
  */
 import { defineTools } from "@agent-kernel/kernel/agent-definition";
 
+import { TOOL_CALL_CAP_OVERRIDE } from "../../../service/kernel";
 import { operationTools } from "../../../service/session/tools/operations";
 import { workflowTools } from "../../../service/session/tools/workflow";
 import {
@@ -50,6 +51,21 @@ export const tools = defineTools<LayoutToolRuntime>((pi, runtime) => {
    * executed tool result unchanged.
    */
   pi.on("tool_result", (event) => layoutToolErrorOverride(event));
+
+  /*
+   * The prompt's one-call cadence is enforced at the wire, not just asked
+   * for: while the cap sits at its one-call default, every provider request
+   * carries parallel_tool_calls=false, so the model cannot emit a second
+   * tool call in the same assistant message. A raised cap
+   * (CANVAS_AGENT_TOOL_CALL_CAP=2|3) keeps the provider default and leaves
+   * batching judgment to the prompt.
+   */
+  if ((TOOL_CALL_CAP_OVERRIDE ?? 1) === 1) {
+    pi.on("before_provider_request", (event) => ({
+      ...(event.payload as Record<string, unknown>),
+      parallel_tool_calls: false,
+    }));
+  }
 
   for (const tool of operationTools) {
     pi.registerTool({

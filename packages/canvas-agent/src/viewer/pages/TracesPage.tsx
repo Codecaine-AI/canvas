@@ -9,6 +9,7 @@ import {
   KernelTraceWorkspace,
   type TraceWorkspaceRow,
 } from "@agent-kernel/viewer-shell";
+import { createDetailBlockProvider } from "@codecaine-ai/canvas-agent/viewer-extension";
 import { AgentSurface } from "../components/AgentSurface";
 import { useCanvasTraceExtensions } from "../components/TraceDetailView";
 import { useViewerStyleSettings } from "../App";
@@ -60,7 +61,11 @@ export function TracesPage() {
     [detail],
   );
 
-  const extensions = useCanvasTraceExtensions(detail);
+  const extensions = useCanvasTraceExtensions(
+    detail,
+    AGENT_API_BASE,
+    createDetailBlockProvider,
+  );
 
   const rows = useMemo<TraceWorkspaceRow[]>(
     () =>

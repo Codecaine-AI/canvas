@@ -154,21 +154,21 @@ describe("change_shape", () => {
   test("shape → icon lowers the glyph onto the carrier type and sets `icon`", () => {
     const session = makeTestSession(contentBoard(), ["frame"]);
 
-    const result = runOp(session, "change_shape", { id: "step", patch: { type: "cloud" } });
+    const result = runOp(session, "change_shape", { id: "step", patch: { type: "memory" } });
 
     expect(result.isError).toBeUndefined();
     const swapped = objectOf(session, "step");
     // The document's {type: "icon", icon} split never reached the tool surface.
     expect(swapped.type).toBe("icon");
-    expect(swapped.icon).toBe("cloud");
+    expect(swapped.icon).toBe("memory");
   });
 
   test("icon → shape clears the glyph, so no icon ghost survives the swap", () => {
     const document = contentBoard();
     document.objects.push({
       ...box("glyph", 300, 300, 120, 120, "icon"),
-      text: "Cloudy",
-      icon: "cloud",
+      text: "Store",
+      icon: "memory",
     } as InteractiveCanvasObject);
     const session = makeTestSession(document, ["frame"]);
 
@@ -184,8 +184,8 @@ describe("change_shape", () => {
     const document = contentBoard();
     document.objects.push({
       ...box("glyph", 300, 300, 120, 120, "icon"),
-      text: "Cloudy",
-      icon: "cloud",
+      text: "Store",
+      icon: "memory",
     } as InteractiveCanvasObject);
     const session = makeTestSession(document, ["frame"]);
 
@@ -209,12 +209,12 @@ describe("change_shape", () => {
 
   test("direction alone re-points a facing shape", () => {
     const session = makeTestSession(contentBoard(), ["frame"]);
-    runOp(session, "change_shape", { id: "step", patch: { type: "chevron" } });
+    runOp(session, "change_shape", { id: "step", patch: { type: "arrow-shape" } });
 
     const result = runOp(session, "change_shape", { id: "step", patch: { direction: "left" } });
 
     expect(result.isError).toBeUndefined();
-    expect(objectOf(session, "step").type).toBe("chevron");
+    expect(objectOf(session, "step").type).toBe("arrow-shape");
     expect(objectOf(session, "step").direction).toBe("left");
   });
 

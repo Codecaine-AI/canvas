@@ -60,39 +60,20 @@ function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectTyp
     value === "process" ||
     value === "decision" ||
     value === "sticky" ||
-    value === "document" ||
-    value === "database" ||
     value === "section" ||
-    value === "pill" ||
     value === "arrow-shape" ||
     value === "predefined-process" ||
-    // W5 — FigJam parity shape set (Wave A):
+    // The universal shape core (operational-maps surface trim):
     value === "ellipse" ||
     value === "triangle" ||
-    value === "parallelogram" ||
-    value === "pentagon" ||
     value === "octagon" ||
-    value === "star" ||
-    value === "plus" ||
-    value === "chevron" ||
-    value === "folder" ||
-    value === "document-stack" ||
-    value === "off-page-connector" ||
-    value === "trapezoid" ||
-    value === "manual-input" ||
-    value === "hexagon" ||
-    value === "internal-storage" ||
-    value === "or-junction" ||
-    value === "summing-junction" ||
-    value === "cylinder-horizontal" ||
-    value === "page-corner" ||
     value === "icon"
   );
 }
 
 /**
- * `direction: "left" | "right"` acceptance (W2, reused W5) for the 3 shapes
- * that point/skew horizontally: arrow-shape, chevron, parallelogram.
+ * `direction: "left" | "right"` acceptance (W2, reused W5) for the one shape
+ * that points horizontally: arrow-shape.
  */
 function isArrowShapeDirection(value: unknown): value is "left" | "right" {
   return value === "left" || value === "right";
@@ -105,32 +86,36 @@ function isTriangleDirection(value: unknown): value is "up" | "down" {
 
 function isCanvasIconGlyph(value: unknown): value is CanvasIconGlyph {
   return (
+    value === "agent" ||
+    value === "model" ||
+    value === "human" ||
+    value === "orchestrator" ||
+    value === "memory" ||
+    value === "knowledge" ||
+    value === "queue" ||
+    value === "server" ||
+    value === "terminal" ||
+    value === "config" ||
+    value === "api" ||
+    value === "message" ||
+    value === "send" ||
+    value === "event" ||
+    value === "guardrail" ||
+    value === "monitor" ||
+    value === "judge" ||
+    value === "document" ||
+    value === "documents" ||
     value === "activity" ||
     value === "archive" ||
     value === "key" ||
-    value === "chat" ||
-    value === "cloud" ||
-    value === "cpu" ||
-    value === "database" ||
-    value === "display" ||
-    value === "mail" ||
-    value === "file" ||
-    value === "code" ||
-    value === "bolt" ||
-    value === "pin" ||
-    value === "phone" ||
-    value === "package" ||
     value === "coin" ||
-    value === "shield" ||
-    value === "send" ||
-    value === "server" ||
-    value === "cube" ||
-    value === "gear" ||
-    value === "drive" ||
-    value === "terminal" ||
-    value === "person" ||
-    value === "wallet" ||
-    value === "globe"
+    value === "package" ||
+    value === "voice" ||
+    value === "search" ||
+    value === "tool" ||
+    value === "wait" ||
+    value === "lock" ||
+    value === "eval"
   );
 }
 
@@ -403,17 +388,12 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
     // kind, falling back to the neutral "gray" family.)
 
     // W2 — arrow-shape direction defaults to "right" when omitted/invalid
-    // (non-fatal: a chevron pointing right is a reasonable default, not worth
-    // rejecting the whole document over). W5 generalizes the same soft-default
-    // pattern to parallelogram/chevron (left|right, default "right") and
-    // triangle (up|down, default "up") — each type only accepts its own
+    // (non-fatal: an arrow pointing right is a reasonable default, not worth
+    // rejecting the whole document over). Triangle takes the same soft-default
+    // pattern with up|down (default "up") — each type only accepts its own
     // 2-value subset of CanvasShapeDirection.
     let direction: CanvasShapeDirection | undefined;
-    if (
-      rawObject.type === "arrow-shape" ||
-      rawObject.type === "parallelogram" ||
-      rawObject.type === "chevron"
-    ) {
+    if (rawObject.type === "arrow-shape") {
       direction = isArrowShapeDirection(rawObject.direction) ? rawObject.direction : "right";
     } else if (rawObject.type === "triangle") {
       direction = isTriangleDirection(rawObject.direction) ? rawObject.direction : "up";
@@ -569,7 +549,6 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
       label: typeof rawConnection.label === "string" ? rawConnection.label : undefined,
       style: normalizeConnectionStyle(rawConnection.style),
       arrow: isArrow(rawConnection.arrow) ? rawConnection.arrow : "forward",
-      role: typeof rawConnection.role === "string" ? rawConnection.role : undefined,
       color: connectionColor,
       waypoints,
       // NOTE: this object literal is a whitelist — a field missing here is

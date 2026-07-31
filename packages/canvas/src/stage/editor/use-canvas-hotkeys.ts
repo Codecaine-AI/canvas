@@ -72,10 +72,6 @@ const DIRECT_DOCK_TOOL_FALLBACK_MAP: Partial<Record<HotkeyDockTool, CanvasTool>>
 const TOOL_KEY_MAP: Partial<Record<string, CanvasTool>> = {
   c: "rectangle",
   p: "process",
-  // Checkpoint 5 (D16 expanded vocabulary) — chosen to avoid colliding with
-  // the letters above: O(dOcument), B(dataBase).
-  o: "document",
-  b: "database",
 };
 
 export type UseCanvasHotkeysArgs = {

@@ -33,7 +33,7 @@
     {
       "id": "sticky-purpose",
       "type": "sticky",
-      "text": "Bun/TS control plane for high-parallelism GameCube decompilation (Melee). Deterministic runner owns state/scheduling/validation; many Pi agents research, edit, validate in parallel \u2014 coordinating only through a shared SQLite board, never agent-to-agent chat.",
+      "text": "Bun/TS control plane for high-parallelism GameCube decompilation (Melee). Deterministic runner owns state/scheduling/validation; many Pi agents research, edit, validate in parallel — coordinating only through a shared SQLite board, never agent-to-agent chat.",
       "color": "yellow",
       "parentId": "page-frame",
       "geometry": {
@@ -50,7 +50,7 @@
     {
       "id": "sticky-coordination",
       "type": "sticky",
-      "text": "Coordination via board + file locks + artifacts \u2014 no agent chat",
+      "text": "Coordination via board + file locks + artifacts — no agent chat",
       "color": "yellow",
       "parentId": "page-frame",
       "geometry": {
@@ -99,7 +99,7 @@
     },
     {
       "id": "pill-melee-checkout",
-      "type": "pill",
+      "type": "rectangle",
       "text": "Melee checkout (doldecomp)",
       "color": "white",
       "parentId": "section-config",
@@ -110,12 +110,12 @@
         "height": 64
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "pill-project-json",
-      "type": "pill",
+      "type": "rectangle",
       "text": "project.json descriptor",
       "color": "white",
       "parentId": "section-config",
@@ -126,12 +126,12 @@
         "height": 64
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "pill-run-goals",
-      "type": "pill",
+      "type": "rectangle",
       "text": "Run goals (match % target)",
       "color": "white",
       "parentId": "section-config",
@@ -142,40 +142,42 @@
         "height": 64
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "pill-pi-provider",
-      "type": "pill",
+      "type": "icon",
       "text": "Pi provider config",
       "color": "white",
       "parentId": "section-config",
       "geometry": {
         "x": 560,
-        "y": 576,
+        "y": 560,
         "width": 288,
-        "height": 64
+        "height": 96
       },
       "style": {
-        "shape": "pill"
-      }
+        "shape": "icon"
+      },
+      "icon": "config"
     },
     {
       "id": "pill-secrets",
-      "type": "pill",
+      "type": "icon",
       "text": "Secrets (local.env)",
       "color": "white",
       "parentId": "section-config",
       "geometry": {
         "x": 560,
-        "y": 672,
+        "y": 656,
         "width": 288,
-        "height": 64
+        "height": 96
       },
       "style": {
-        "shape": "pill"
-      }
+        "shape": "icon"
+      },
+      "icon": "key"
     },
     {
       "id": "icon-operator",
@@ -192,7 +194,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "person"
+      "icon": "human"
     },
     {
       "id": "section-hero",
@@ -261,7 +263,7 @@
     {
       "id": "node-toolpack",
       "type": "predefined-process",
-      "text": "Toolpack calls (ghidra \u00b7 opseq \u00b7 m2c \u00b7 permuter)",
+      "text": "Toolpack calls (ghidra · opseq · m2c · permuter)",
       "color": "violet",
       "parentId": "section-hero",
       "geometry": {
@@ -357,7 +359,7 @@
     {
       "id": "section-board",
       "type": "section",
-      "text": "State substrate \u2014 SQLite board",
+      "text": "State substrate — SQLite board",
       "color": "teal",
       "parentId": "page-frame",
       "geometry": {
@@ -372,7 +374,7 @@
     },
     {
       "id": "db-epochs",
-      "type": "database",
+      "type": "icon",
       "text": "Epochs / claims / events",
       "color": "teal",
       "parentId": "section-board",
@@ -383,12 +385,13 @@
         "height": 112
       },
       "style": {
-        "shape": "database"
-      }
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "db-artifacts",
-      "type": "database",
+      "type": "icon",
       "text": "Artifacts + prompts (audit)",
       "color": "teal",
       "parentId": "section-board",
@@ -399,12 +402,13 @@
         "height": 112
       },
       "style": {
-        "shape": "database"
-      }
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "db-savepoints",
-      "type": "database",
+      "type": "icon",
       "text": "Save points",
       "color": "teal",
       "parentId": "section-board",
@@ -415,8 +419,9 @@
         "height": 112
       },
       "style": {
-        "shape": "database"
-      }
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "section-score-gate",
@@ -580,7 +585,7 @@
     },
     {
       "id": "node-github-prs",
-      "type": "pill",
+      "type": "rectangle",
       "text": "GitHub PRs",
       "color": "green",
       "parentId": "page-frame",
@@ -591,7 +596,7 @@
         "height": 64
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
@@ -644,7 +649,7 @@
     },
     {
       "id": "db-knowledge-graph",
-      "type": "database",
+      "type": "icon",
       "text": "Knowledge graph (graph.sqlite)",
       "color": "pink",
       "parentId": "section-knowledge",
@@ -655,8 +660,9 @@
         "height": 112
       },
       "style": {
-        "shape": "database"
-      }
+        "shape": "icon"
+      },
+      "icon": "knowledge"
     },
     {
       "id": "section-health",
@@ -689,7 +695,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "shield"
+      "icon": "guardrail"
     },
     {
       "id": "section-surfaces",
@@ -754,7 +760,6 @@
       "label": "run goals",
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green"
     },
     {
@@ -774,7 +779,6 @@
       "label": "load config",
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green"
     },
     {
@@ -790,7 +794,6 @@
       "label": "start epoch",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -806,7 +809,6 @@
       "label": "assign claims",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -822,7 +824,6 @@
       "label": "research / edit",
       "style": "solid",
       "arrow": "both",
-      "role": "flow",
       "color": "violet"
     },
     {
@@ -838,7 +839,6 @@
       "label": "candidate build",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -854,7 +854,6 @@
       "label": "score",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -867,10 +866,9 @@
         "objectId": "node-checkpoint",
         "anchor": "top"
       },
-      "label": "yes \u00b7 match",
+      "label": "yes · match",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "green"
     },
     {
@@ -887,10 +885,9 @@
           0
         ]
       },
-      "label": "no \u00b7 retry",
+      "label": "no · retry",
       "style": "dashed",
       "arrow": "forward",
-      "role": "feedback",
       "color": "red",
       "waypoints": [
         [
@@ -920,7 +917,6 @@
       "label": "commit",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "teal",
       "waypoints": [
         [
@@ -954,7 +950,6 @@
       "label": "read board",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "teal"
     },
     {
@@ -978,7 +973,6 @@
       "label": "wake + snapshot",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "teal",
       "waypoints": [
         [
@@ -1008,7 +1002,6 @@
       "label": "conflicts",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "orange",
       "waypoints": [
         [
@@ -1042,7 +1035,6 @@
       "label": "resolved facts",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "teal"
     },
     {
@@ -1066,7 +1058,6 @@
       "label": "candidates",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "violet",
       "waypoints": [
         [
@@ -1088,7 +1079,6 @@
       "label": "score OK",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -1104,7 +1094,6 @@
       "label": "lint OK",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -1120,7 +1109,6 @@
       "label": "verdict",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -1133,10 +1121,9 @@
         "objectId": "node-reject",
         "anchor": "top"
       },
-      "label": "yes \u00b7 reject",
+      "label": "yes · reject",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red"
     },
     {
@@ -1153,10 +1140,9 @@
           0
         ]
       },
-      "label": "no \u00b7 new baseline",
+      "label": "no · new baseline",
       "style": "dashed",
       "arrow": "forward",
-      "role": "feedback",
       "color": "green",
       "waypoints": [
         [
@@ -1186,7 +1172,6 @@
       "label": "matched slices",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "orange",
       "waypoints": [
         [
@@ -1212,7 +1197,6 @@
       "label": "split PRs",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "orange"
     },
     {
@@ -1228,7 +1212,6 @@
       "label": "findings",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "orange"
     },
     {
@@ -1244,7 +1227,6 @@
       "label": "open PRs",
       "style": "solid",
       "arrow": "forward",
-      "role": "output",
       "color": "green"
     },
     {
@@ -1264,7 +1246,6 @@
       "label": "distill lessons",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "pink",
       "waypoints": [
         [
@@ -1290,7 +1271,6 @@
       "label": "merged evidence",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "pink",
       "waypoints": [
         [
@@ -1324,7 +1304,6 @@
       "label": "context packs",
       "style": "dashed",
       "arrow": "forward",
-      "role": "feedback",
       "color": "pink",
       "waypoints": [
         [
@@ -1350,7 +1329,6 @@
       "label": "write facts",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "pink"
     },
     {
@@ -1370,7 +1348,6 @@
       "label": "index PRs",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "pink"
     },
     {
@@ -1390,7 +1367,6 @@
       "label": "recover / restart",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "red"
     },
     {
@@ -1406,7 +1382,6 @@
       "label": "live state",
       "style": "solid",
       "arrow": "both",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -1426,7 +1401,6 @@
       "label": "controls / status",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "teal"
     }
   ],

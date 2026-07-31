@@ -42,11 +42,11 @@ export function windowedTail(ctx: RenderContext): WindowedTail {
   return { messages, shown: messages.length, total: ctx.messages.length };
 }
 
-/** The counts ride the attrs; the body says where the messages render. */
+/** The counts ride the attrs; the messages themselves follow the state block. */
 export function recentConversationBlock(tail: WindowedTail): string[] {
   return block(
     "recent_conversation",
     `showing="${tail.shown}" total="${tail.total}"`,
-    tail.shown > 0 ? "messages in the Messages tab" : "",
+    "",
   );
 }

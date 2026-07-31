@@ -1,0 +1,673 @@
+{
+  "axis": "sf",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 6,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The platform provides an LLM inference gateway.",
+        "brief_evidence": "“how our platform's inference gateway works”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed purpose explicitly identifies “An LLM inference gateway,” and the component list includes “Gateway endpoint.”",
+        "note": "The domain and gateway role are clear."
+      },
+      {
+        "brief_element": "The gateway exposes one endpoint to client applications.",
+        "brief_evidence": "“it exposes one endpoint to client applications”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Client app” sending a request to the singular “Gateway endpoint” and records the flow from client to gateway.",
+        "note": "This is the entry point for the main end-to-end request flow."
+      },
+      {
+        "brief_element": "Clients request a capability tier rather than selecting a particular backend.",
+        "brief_evidence": "“which request a capability tier instead of a particular backend”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The client flow is labeled “tier request,” and the reconstruction identifies a “Capability-tier router.” No client-to-backend selection is reconstructed.",
+        "note": "Tier-based abstraction is communicated clearly."
+      },
+      {
+        "brief_element": "The edge service authenticates the caller.",
+        "brief_evidence": "“The edge service authenticates the caller”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The gateway sends an edge labeled “authenticate” to “Authenticate · tenant · quota · request ID.”",
+        "note": "Authentication is explicitly placed immediately after ingress."
+      },
+      {
+        "brief_element": "The edge service resolves tenant identity.",
+        "brief_evidence": "“resolves tenant identity”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The authentication process includes “tenant,” and its outgoing edge to admission is also labeled “tenant.”",
+        "note": "Tenant handling is visible, though the exact word “resolve” is compressed into the process label."
+      },
+      {
+        "brief_element": "The edge service resolves tenant quota.",
+        "brief_evidence": "“resolves tenant identity and quota”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The process is labeled “Authenticate · tenant · quota · request ID.”",
+        "note": "Quota handling is explicit."
+      },
+      {
+        "brief_element": "The edge service stamps a request ID.",
+        "brief_evidence": "“stamps a request id”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The process label includes “request ID,” but the reconstruction can only say it “establishes or checks” request-ID information.",
+        "note": "The board communicates request-ID handling but not unambiguously that this step creates or stamps the ID."
+      },
+      {
+        "brief_element": "The request ID follows every backend attempt.",
+        "brief_evidence": "“a request id that follows every attempt”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states that the request ID accompanies every attempt. The retry step preserves a “same key,” which is identified as a key rather than the request ID.",
+        "note": "Attempt-wide request-ID propagation is not recoverable."
+      },
+      {
+        "brief_element": "An admission controller enforces per-tenant concurrency limits.",
+        "brief_evidence": "“An admission controller enforces per-tenant concurrency”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies the “Concurrency + token limits” guardrail, reached over an edge labeled “tenant,” and describes it as an admission guardrail.",
+        "note": "Per-tenant concurrency control is clear."
+      },
+      {
+        "brief_element": "The admission controller enforces per-tenant token-rate limits.",
+        "brief_evidence": "“and token-rate limits”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The guardrail is labeled “Concurrency + token limits,” and the incoming edge says “tenant.”",
+        "note": "Token limiting is recovered, but the rate-based character of the limit is not explicit."
+      },
+      {
+        "brief_element": "Work exceeding immediate admission capacity waits in a queue.",
+        "brief_evidence": "“Excess work waits in a deadline-aware queue”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction includes “Deadline-aware wait” after the concurrency/token guardrail.",
+        "note": "Waiting is shown, but neither a queue component nor the trigger that only excess work enters it is explicit."
+      },
+      {
+        "brief_element": "The admission queue is deadline-aware.",
+        "brief_evidence": "“a deadline-aware queue”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "A wait component is explicitly labeled “Deadline-aware wait,” with a continuation labeled “before deadline.”",
+        "note": "Deadline awareness is directly communicated."
+      },
+      {
+        "brief_element": "If queued work's deadline passes, the controller explicitly rejects it.",
+        "brief_evidence": "“if its deadline passes, the controller rejects it explicitly”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction finds a nearby label “expired · reject · retry” and a dashed red route, but states that the route does not terminate at a specific component and its attachment is ambiguous.",
+        "note": "Expiry and rejection vocabulary survive, but controller ownership and the exact terminal route do not."
+      },
+      {
+        "brief_element": "A deadline-expired request tells the caller to retry.",
+        "brief_evidence": "“and tells the caller to retry instead of serving it late”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The ambiguous label includes “retry,” but the reconstructed failure path has no visible endpoint at the client or gateway response.",
+        "note": "Retry is named, but caller notification is not recoverable."
+      },
+      {
+        "brief_element": "Deadline-expired work is not served late.",
+        "brief_evidence": "“instead of serving it late”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The route out of “Deadline-aware wait” is labeled “before deadline,” and an expiry/reject label is present.",
+        "note": "The intended boundary is suggested, but the ambiguous expiry route prevents a fully explicit guarantee."
+      },
+      {
+        "brief_element": "The router selects a backend within the requested capability tier.",
+        "brief_evidence": "“The router selects a backend within the requested tier”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies a “Capability-tier router,” a cache-miss path into it, and eligible hosted and self-hosted capacity routes. It also reports that the exact upstream owner of those routes is unclear.",
+        "note": "Tier routing and capacity choices are recognizable, but the dispatch relationship from router to backend is not cleanly reconstructable."
+      },
+      {
+        "brief_element": "Backend selection considers live health.",
+        "brief_evidence": "“from live health”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction sees a detached label “health + probes” and a circuit-breaker component, but explicitly says no unambiguous edge identifies the sender or receiver.",
+        "note": "Health exists as vocabulary, but its use as a router input is not established."
+      },
+      {
+        "brief_element": "Backend selection considers measured latency.",
+        "brief_evidence": "“measured latency”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry uses measured latency as a routing criterion. Latency appears only in the billing-stream label.",
+        "note": "Accounting for latency does not communicate latency-based routing."
+      },
+      {
+        "brief_element": "Backend selection considers queue depth.",
+        "brief_evidence": "“queue depth”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies queue depth or connects it to the router.",
+        "note": "This routing signal is absent."
+      },
+      {
+        "brief_element": "Backend selection considers price.",
+        "brief_evidence": "“price”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Spend ceiling · cheapest then reject” and cost metering, but no edge or router responsibility establishes price as a normal backend-selection input.",
+        "note": "Cost-aware degradation is visible, but general price-aware routing is not."
+      },
+      {
+        "brief_element": "Backend selection enforces the tenant's data-residency requirements.",
+        "brief_evidence": "“the tenant's data-residency requirements”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry mentions data residency or a geographic/compliance eligibility constraint.",
+        "note": "A major routing eligibility boundary is lost."
+      },
+      {
+        "brief_element": "Eligible capacity includes hosted provider endpoints.",
+        "brief_evidence": "“Eligible capacity includes hosted provider endpoints”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Hosted providers · independent accounts” receiving a route labeled “eligible hosted.”",
+        "note": "Hosted capacity is clearly present."
+      },
+      {
+        "brief_element": "Hosted provider endpoints are spread across independent accounts.",
+        "brief_evidence": "“spread across independent accounts”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The hosted component is explicitly labeled “Hosted providers · independent accounts.”",
+        "note": "The account-isolation detail is exact."
+      },
+      {
+        "brief_element": "Eligible capacity also includes a self-hosted pool.",
+        "brief_evidence": "“and a self-hosted pool”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction identifies “Self-hosted pool + scheduler” on a route labeled “eligible pool.”",
+        "note": "The second capacity class is clear."
+      },
+      {
+        "brief_element": "The self-hosted pool is managed by its own scheduler.",
+        "brief_evidence": "“managed by its own scheduler”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The component label explicitly includes “Self-hosted pool + scheduler.”",
+        "note": "Scheduler ownership is transmitted."
+      },
+      {
+        "brief_element": "Before dispatch, a prompt assembler applies tenant system context.",
+        "brief_evidence": "“Before dispatch, a prompt assembler applies tenant system context”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "A process labeled “Tenant context + safety policy” precedes cache and routing.",
+        "note": "The transformation and ordering are visible, but the responsible component is not identified as a prompt assembler and the context is not specifically called system context."
+      },
+      {
+        "brief_element": "Before dispatch, the prompt assembler applies safety policy.",
+        "brief_evidence": "“and safety policy”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The process “Tenant context + safety policy” appears before the cache-miss route reaches the tier router.",
+        "note": "Safety policy application and pre-routing order are clear."
+      },
+      {
+        "brief_element": "The response cache can return exact matches.",
+        "brief_evidence": "“A response cache returns exact matches”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "A memory/store component is labeled “Exact + semantic cache” and has a hit route directly to streaming.",
+        "note": "Exact caching is clear."
+      },
+      {
+        "brief_element": "The response cache can return semantically near-duplicate deterministic results.",
+        "brief_evidence": "“and semantically near-duplicate deterministic results”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The cache is labeled “Exact + semantic cache,” and its hit edge is labeled “hit · deterministic.”",
+        "note": "Semantic and deterministic cache behavior is communicated, though “near-duplicate” is abbreviated to semantic."
+      },
+      {
+        "brief_element": "Cache keys include the prompt.",
+        "brief_evidence": "“keyed by prompt”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry states that prompt content is part of the cache key.",
+        "note": "The cache exists, but this key dimension is absent."
+      },
+      {
+        "brief_element": "Cache keys include generation parameters.",
+        "brief_evidence": "“parameters”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry mentions parameters as part of cache identity.",
+        "note": "This correctness constraint is absent."
+      },
+      {
+        "brief_element": "Cache keys include policy version.",
+        "brief_evidence": "“and policy version”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The edge from tenant context and safety policy into the cache is explicitly labeled “policy version.”",
+        "note": "Policy-version participation in cache access is visible."
+      },
+      {
+        "brief_element": "The gateway streams tokens to the caller as they arrive.",
+        "brief_evidence": "“The gateway streams tokens to the caller as they arrive.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Stream tokens,” a “first token” route, and completion/failure outcomes. It does not recover a visible stream edge back to the client.",
+        "note": "Incremental streaming is clear, but caller delivery and the explicit as-they-arrive relationship are not fully shown."
+      },
+      {
+        "brief_element": "Before any token is emitted, failures are classified.",
+        "brief_evidence": "“Before any token is emitted, failures are classified as...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A decision labeled “Failure before first token?” distinguishes “retryable · pre-stream” from “no retry.”",
+        "note": "Pre-stream retryability classification is visible, but the required failure taxonomy is not."
+      },
+      {
+        "brief_element": "Timeout is a pre-token failure class.",
+        "brief_evidence": "“timeout”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry names timeout as a failure class. Timeout is only indirectly suggested in the brief-equivalent circuit-breaker concept, not recovered from the board.",
+        "note": "The specific classification is absent."
+      },
+      {
+        "brief_element": "Rate-limit rejection is a pre-token failure class.",
+        "brief_evidence": "“rate-limit rejection”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies backend rate-limit rejection as a classified pre-token failure.",
+        "note": "Admission token limits do not substitute for this backend failure category."
+      },
+      {
+        "brief_element": "Content-policy refusal is a pre-token failure class.",
+        "brief_evidence": "“content-policy refusal”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry names content-policy refusal as a failure outcome.",
+        "note": "Safety policy is shown, but its refusal failure class is not."
+      },
+      {
+        "brief_element": "Backend overload is a pre-token failure class.",
+        "brief_evidence": "“backend overload”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry explicitly classifies backend overload. Protected capacity and circuit breakers do not establish this failure category.",
+        "note": "The overload classification is absent."
+      },
+      {
+        "brief_element": "Malformed response is a pre-token failure class.",
+        "brief_evidence": "“malformed response”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry mentions malformed responses.",
+        "note": "The failure taxonomy is materially incomplete."
+      },
+      {
+        "brief_element": "Retryable pre-stream failures move to the next backend.",
+        "brief_evidence": "“Retryable failures move to the next backend”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “retryable · pre-stream” branch reaches “Retry next backend · same key · fresh deadline,” followed by a dashed route labeled “next fallback” toward the router.",
+        "note": "The core fallback behavior is one of the clearest transmitted paths."
+      },
+      {
+        "brief_element": "Retries remain within the tier's configured fallback order.",
+        "brief_evidence": "“in the tier's fallback order”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The retry process says “next backend,” and a nearby dashed route is labeled “next fallback,” but the reconstruction reports that the exact attachment and full loop ordering are partly obscured.",
+        "note": "Sequential fallback is suggested, but tier ownership and an explicit configured order are not fully recoverable."
+      },
+      {
+        "brief_element": "Each retry receives a fresh deadline.",
+        "brief_evidence": "“with a fresh deadline”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The retry step explicitly reads “Retry next backend · same key · fresh deadline.”",
+        "note": "This retry constraint is exact."
+      },
+      {
+        "brief_element": "Retries preserve the same idempotency key.",
+        "brief_evidence": "“and the same idempotency key”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The retry step explicitly says “same key,” but does not name it as an idempotency key.",
+        "note": "Key preservation is clear; key semantics require inference."
+      },
+      {
+        "brief_element": "Non-retryable pre-stream failures return immediately.",
+        "brief_evidence": "“non-retryable failures return immediately”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The “no retry” path terminates at “Return failure · no retry.”",
+        "note": "Return without retry is explicit, but immediacy is not stated."
+      },
+      {
+        "brief_element": "After streaming begins, a backend failure cannot be silently retried elsewhere.",
+        "brief_evidence": "“After streaming begins, a backend failure cannot be silently retried elsewhere”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The post-emission red route goes from streaming directly to “Visible stream failure · preserve partial output,” while retry is reachable only on the “retryable · pre-stream” branch.",
+        "note": "The pre-stream/post-stream retry boundary is clear."
+      },
+      {
+        "brief_element": "Once streaming begins, the gateway may complete the stream normally.",
+        "brief_evidence": "“the gateway either completes the stream”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "A green arrow connects “Stream tokens” to “Complete stream.”",
+        "note": "The successful terminal outcome is explicit."
+      },
+      {
+        "brief_element": "A post-emission backend failure visibly fails the stream.",
+        "brief_evidence": "“or visibly fails it”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red edge labeled “backend fails after emission” terminates at “Visible stream failure · preserve partial output.”",
+        "note": "The failure trigger and visible outcome are explicit."
+      },
+      {
+        "brief_element": "A post-emission stream failure preserves tokens already received by the caller.",
+        "brief_evidence": "“while preserving what the caller already received”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The stop node explicitly says “Visible stream failure · preserve partial output.”",
+        "note": "Partial-output preservation is clearly transmitted."
+      },
+      {
+        "brief_element": "Circuit breakers open after sustained backend errors.",
+        "brief_evidence": "“Circuit breakers open after sustained backend errors”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A guardrail is labeled “Circuit breaker + shadow probes,” but no reconstructed line or state transition communicates sustained errors as the opening trigger.",
+        "note": "The component exists, but its error threshold behavior is missing."
+      },
+      {
+        "brief_element": "Circuit breakers open after sustained backend timeouts.",
+        "brief_evidence": "“or timeouts”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry connects timeouts to circuit-breaker opening.",
+        "note": "The timeout trigger is absent."
+      },
+      {
+        "brief_element": "Open circuit breakers drain new traffic toward healthy capacity.",
+        "brief_evidence": "“and drain new traffic toward healthy capacity”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A dashed route runs from the circuit-breaker/protected-capacity area toward the router, and a detached “health + probes” label exists, but the reconstruction explicitly reports uncertain source, direction, and semantics.",
+        "note": "Traffic diversion is suggested visually but cannot be reconstructed reliably."
+      },
+      {
+        "brief_element": "An open circuit breaker admits a trickle of shadow probes.",
+        "brief_evidence": "“They admit a trickle of shadow probes”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The circuit-breaker component is labeled “Circuit breaker + shadow probes.”",
+        "note": "Probe association is explicit, but trickle admission and the open-state condition are not."
+      },
+      {
+        "brief_element": "The circuit breaker closes again after successful probing or recovery.",
+        "brief_evidence": "“before closing again”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry shows a closing transition or recovery condition.",
+        "note": "Circuit-breaker recovery behavior is not recoverable."
+      },
+      {
+        "brief_element": "Metering records token usage.",
+        "brief_evidence": "“Metering records tokens”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A component is labeled “Billing stream · tokens · latency · backend · cache · cost.”",
+        "note": "The field is explicit, though the writer edge is absent."
+      },
+      {
+        "brief_element": "Metering records latency.",
+        "brief_evidence": "“latency”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The billing-stream label explicitly includes “latency.”",
+        "note": "The field is present."
+      },
+      {
+        "brief_element": "Metering records the selected backend.",
+        "brief_evidence": "“selected backend”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The billing-stream label includes “backend.”",
+        "note": "The selected-backend meaning is a reasonable paraphrase, although selection provenance is not connected."
+      },
+      {
+        "brief_element": "Metering records cache outcome.",
+        "brief_evidence": "“cache outcome”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The billing-stream label includes “cache.”",
+        "note": "The cache dimension is present, though hit/miss wording is compressed."
+      },
+      {
+        "brief_element": "Metering records cost.",
+        "brief_evidence": "“and cost”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The billing-stream label explicitly includes “cost.”",
+        "note": "The field is exact."
+      },
+      {
+        "brief_element": "Metering records are written into a billing stream.",
+        "brief_evidence": "“into a billing stream”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A billing-stream component is present, but the reconstruction states that region 8 has no visible connecting edges and does not identify which runtime component writes to it.",
+        "note": "The destination exists, but the accounting flow and ownership are not shown."
+      },
+      {
+        "brief_element": "Prompts are redacted before entering the audit store.",
+        "brief_evidence": "“redacted prompts ... enter an audit store”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A store-like component is labeled “Redacted prompt + response audit,” but there is no visible input edge or ordering.",
+        "note": "Redacted prompt auditing is named, but the write path is absent."
+      },
+      {
+        "brief_element": "Responses are redacted before entering the audit store.",
+        "brief_evidence": "“and responses enter an audit store”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The audit component label includes “Redacted ... response audit,” but no runtime writer or ordering is shown.",
+        "note": "The data category and redaction are visible; the operational flow is not."
+      },
+      {
+        "brief_element": "When a tenant reaches its spend ceiling, service first degrades to the cheapest capable backend.",
+        "brief_evidence": "“A tenant that reaches its spend ceiling first degrades to the cheapest capable backend”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A guardrail reads “Spend ceiling · cheapest then reject.”",
+        "note": "The order is communicated, but tenant scope, degradation mechanics, and the requirement that the backend remain capable are omitted."
+      },
+      {
+        "brief_element": "After cheapest-capable degradation, new work is rejected.",
+        "brief_evidence": "“and then has new work rejected”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The spend guardrail says “cheapest then reject,” but region 8 has no visible connections to admission or a terminal rejection outcome.",
+        "note": "The policy order is named, but its application specifically to new work is not recoverable."
+      },
+      {
+        "brief_element": "Only a small sample of traffic is selected for structured evaluation.",
+        "brief_evidence": "“A small sample of structured evaluation traffic”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "An evaluation component is labeled “Sampled eval · shadow only.”",
+        "note": "Sampling and evaluation are explicit, but small sampling rate and structured-traffic semantics are not."
+      },
+      {
+        "brief_element": "Sampled evaluation traffic is mirrored to a shadow backend.",
+        "brief_evidence": "“is mirrored to a shadow backend”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “Sampled eval · shadow only,” but region 8 has no visible connecting edges and no separate shadow-backend component or mirror route.",
+        "note": "Shadow evaluation is recognizable, but mirroring and its destination are not operationally recoverable."
+      },
+      {
+        "brief_element": "The shadow backend's result never changes the client response.",
+        "brief_evidence": "“whose result never changes the client response”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The label “shadow only” suggests non-production evaluation, but no flow establishes that the result cannot affect the client response.",
+        "note": "The isolation guarantee is implied rather than explicitly communicated."
+      },
+      {
+        "brief_element": "The architecture makes admission, routing, caching, fallback, streaming, capacity protection, and accounting interact as one operational system.",
+        "brief_evidence": "“The diagram should make clear how admission, routing, caching, fallback, streaming, capacity protection, and accounting interact”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction recovers a connected request path through admission, cache, routing, fallback, and streaming, plus protected-capacity and accounting components. However, router-to-capacity lines are ambiguous and region 8 accounting components have no visible connecting edges.",
+        "note": "The runtime core interacts coherently enough for design discussion, but capacity ownership and accounting integration are not implementation-ready."
+      },
+      {
+        "brief_element": "The architecture explicitly explains request behavior under overload.",
+        "brief_evidence": "“especially how requests behave under overload”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "Concurrency/token guardrails, deadline-aware waiting, ambiguous expiry rejection, circuit breakers, and spend rejection are present, but backend-overload classification and definitive overload routes are missing.",
+        "note": "Several overload controls survive, but the complete overload operational story does not."
+      },
+      {
+        "brief_element": "The architecture explicitly explains request behavior under provider failure.",
+        "brief_evidence": "“and provider failure”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction clearly distinguishes retryable pre-stream fallback, non-retryable return, successful streaming, and visible post-emission failure preserving partial output.",
+        "note": "Provider-failure handling across the streaming boundary is the strongest end-to-end behavior."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "The board header is a system component or responsibility-bearing element named “2026-07-29-eval-202743 · llm-inference-gateway.”",
+        "reconstruction_evidence": "The component list includes “Board: 2026-07-29-eval-202743 · llm-inference-gateway” and assigns it the responsibility of naming the depicted system/evaluation.",
+        "why_unsupported": "The brief supports the inference-gateway subject but does not define an evaluation board, timestamped component, or runtime responsibility corresponding to this header."
+      },
+      {
+        "claim": "The client is specifically a human-side requester.",
+        "reconstruction_evidence": "The “Client app” responsibility says “Human-side requester.”",
+        "why_unsupported": "The brief says client applications, not necessarily human-operated clients. The added human-side characterization is not architecturally supported."
+      },
+      {
+        "claim": "The gateway endpoint itself visibly connects directly to protected-capacity routing.",
+        "reconstruction_evidence": "The gateway component responsibility says it “also visibly connects to protected-capacity routing,” and the hosted-capacity flow begins with a route descending from the gateway area.",
+        "why_unsupported": "The brief assigns backend selection to the router, not directly to the edge endpoint. The reconstruction also marks the capacity-line ownership as uncertain, so assigning this direct relationship to the gateway is unsupported specificity."
+      },
+      {
+        "claim": "Prompt/context processing must itself occur before the admission deadline.",
+        "reconstruction_evidence": "A reconstructed constraint says “Prompt/context processing must proceed before the deadline.”",
+        "why_unsupported": "The brief explicitly applies deadline behavior to excess work in the admission queue. It does not state that prompt assembly is governed by that same admission deadline, even if the board's route visually suggests such ordering."
+      },
+      {
+        "claim": "Spend-ceiling rejection occurs when the cheapest option still cannot satisfy the ceiling.",
+        "reconstruction_evidence": "The reconstructed spend failure outcome says “Reject if the ceiling still cannot be satisfied.”",
+        "why_unsupported": "The brief states an ordered policy—degrade to the cheapest capable backend and then reject new work—but does not specify the exact predicate “if the ceiling still cannot be satisfied.”"
+      }
+    ],
+    "strongest_transmitted_behavior": "The pre-stream versus post-emission failure contract is transmitted particularly well: retryable failures before the first token go to the next fallback with the same key and a fresh deadline, non-retryable failures return without retry, and failures after emission visibly fail the stream while preserving partial output.",
+    "most_consequential_loss": "The backend-selection and capacity-protection control plane is not implementation-ready: live health is only ambiguously attached, latency, queue depth, and data residency are absent as routing inputs, router-to-capacity ownership is unclear, and circuit-breaker opening, draining, probing, and closing behavior is mostly reduced to a component label.",
+    "overall_summary": "The reconstruction reliably communicates the gateway's purpose, tier-based client abstraction, authentication and admission sequence, cache hit/miss split, hosted and self-hosted capacity classes, fallback loop, streaming outcomes, and high-level accounting destinations. The principal happy path and provider-failure story are recoverable, so the board supports a substantive design conversation. Fidelity falls short of an implementation plan because deadline-expiry handling is ambiguous, request-ID propagation and cache-key dimensions are incomplete, the required failure taxonomy is missing, router selection criteria and data-residency enforcement are largely absent, circuit-breaker recovery semantics are not shown, and metering, audit, spend control, and shadow evaluation are disconnected from runtime ownership. There are no clear system-defining contradictions, but multiple defining relationships require inference.",
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 13906,
+    "output_tokens": 13799
+  },
+  "flags": []
+}

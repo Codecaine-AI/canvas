@@ -15,6 +15,7 @@ import type {
 import type { CanvasConnectionEndpoint } from "../../canvas/src/state/schema/connections";
 
 import { DIGEST_DEFAULTS_LEGEND, formatBoardDigest } from "../src/board/digest";
+import { formatStateGrammar } from "../src/catalog/layout-editor/context/state-grammar";
 import { box, connect, makeDocument } from "./synthetic";
 
 type Coverage = "rendered" | "legend" | "structural";
@@ -32,7 +33,7 @@ const OBJECT_FIELD_COVERAGE: Record<keyof InteractiveCanvasObject, Coverage> = {
   locked: "rendered",
   direction: "rendered",
   author: "rendered",
-  icon: "rendered", // folded INTO the type column — `cloud`, not `icon icon=cloud`
+  icon: "rendered", // folded INTO the type column — `memory`, not `icon icon=memory`
 };
 
 /** Compile-time exhaustive over the connection schema. */
@@ -43,7 +44,6 @@ const CONNECTION_FIELD_COVERAGE: Record<keyof InteractiveCanvasConnection, Cover
   label: "rendered",
   style: "legend",
   arrow: "legend",
-  role: "rendered",
   color: "legend",
   waypoints: "rendered",
   labelPosition: "rendered", // lp=<along>[@<offset>]; absent = routed midpoint
@@ -67,13 +67,16 @@ describe("digest completeness invariant", () => {
       value === "rendered" || value === "legend" || value === "structural")).toBe(true);
   });
 
-  test("the header legend declares every legend-covered default", () => {
+  test("the declared legend covers every legend-covered default and ships in the state grammar", () => {
     expect(DIGEST_DEFAULTS_LEGEND).toContain("color gray");
     expect(DIGEST_DEFAULTS_LEGEND).toContain("sticky yellow");
     expect(DIGEST_DEFAULTS_LEGEND).toContain("edge solid gray arrow=forward");
     expect(DIGEST_DEFAULTS_LEGEND).toContain("shape per type");
+    // The digest itself carries bare values; the legend's one home is the
+    // <state_grammar> context block, which quotes the constant verbatim.
     const digest = formatBoardDigest(makeDocument([box("solo", 0, 0)]));
-    expect(digest).toContain(DIGEST_DEFAULTS_LEGEND);
+    expect(digest).not.toContain(DIGEST_DEFAULTS_LEGEND);
+    expect(formatStateGrammar()).toContain(DIGEST_DEFAULTS_LEGEND);
   });
 
   test("every rendered object field appears in the digest when set non-default", () => {
@@ -88,12 +91,12 @@ describe("digest completeness invariant", () => {
       parentId: "home",
       color: "violet" as const,
       direction: "left" as const,
-      style: { shape: "chevron" as const },
+      style: { shape: "diamond" as const },
     };
     const chip = {
       ...box("brain", 240, 64, 96, 96, "icon"),
       parentId: "home",
-      icon: "cpu" as const,
+      icon: "model" as const,
     };
     const sticky = {
       ...box("memo", 400, 64, 176, 128, "sticky"),
@@ -113,10 +116,10 @@ describe("digest completeness invariant", () => {
     // color (non-default), direction, non-default style.shape.
     expect(digest).toContain("violet");
     expect(digest).toContain("dir=left");
-    expect(digest).toContain("shape=chevron");
+    expect(digest).toContain("shape=diamond");
     // The glyph IS the type column, so the split never shows: no bare `icon`
     // type and no `icon=` extra beside it. Sticky non-default color + author.
-    expect(digest).toContain('brain cpu "brain" 240,64 96×96');
+    expect(digest).toContain('brain model "brain" 240,64 96×96');
     expect(digest).not.toContain("icon=");
     expect(digest).not.toContain(" icon ");
     expect(digest).toContain("pink");
@@ -135,7 +138,6 @@ describe("digest completeness invariant", () => {
       label: "handoff",
       style: "dashed" as const,
       arrow: "both" as const,
-      role: "escalation",
       color: "orange" as const,
       waypoints: [[100, 48], [220, 48]] as Array<[number, number]>,
       labelPosition: { along: 0.25, offset: -12 },
@@ -145,7 +147,7 @@ describe("digest completeness invariant", () => {
     );
 
     expect(digest).toContain(
-      '  flow a→b "handoff" dashed orange arrow=both role="escalation" anchors=right→top pos=auto→0.25,0 wp=100,48→220,48 lp=0.25@-12',
+      '  flow a→b "handoff" dashed orange arrow=both anchors=right→top pos=auto→0.25,0 wp=100,48→220,48 lp=0.25@-12',
     );
   });
 
@@ -163,19 +165,17 @@ describe("digest completeness invariant", () => {
   test("text fields render in full — nothing is truncated", () => {
     const longText = `alpha ${"x".repeat(300)} omega`;
     const longLabel = `route ${"y".repeat(200)} end`;
-    const longRole = `role-${"z".repeat(120)}`;
     const digest = formatBoardDigest(makeDocument(
       [
         { ...box("wordy", 0, 0), text: `multi\n${longText}` },
         { ...box("scribe", 320, 0, 176, 128, "sticky"), author: `Ford ${"a".repeat(80)}` },
       ],
-      [{ ...connect("edge", "wordy", "scribe"), label: longLabel, role: longRole }],
+      [{ ...connect("edge", "wordy", "scribe"), label: longLabel }],
     ));
 
     // Whitespace collapses to one line, but every character survives.
     expect(digest).toContain(`multi ${longText}`);
     expect(digest).toContain(longLabel);
-    expect(digest).toContain(longRole);
     expect(digest).toContain(`Ford ${"a".repeat(80)}`);
     expect(digest).not.toMatch(/…\(\+\d+ch\)/);
   });

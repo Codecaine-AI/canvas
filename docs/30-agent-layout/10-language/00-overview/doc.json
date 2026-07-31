@@ -6,7 +6,20 @@
   "blocks": {
     "b-language-root": {
       "id": "b-language-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
+      "props": {
+        "covers": "Overview of the board layout vocabulary: a compact descriptive notation for composition patterns, its three-part shape (tree, alignment facts, arrows), reference numbers, statement anatomy, and the nine-construct index.",
+        "format": "mdx",
+        "type": "reference",
+        "concepts": [
+          "layout vocabulary",
+          "description shape",
+          "reference numbers",
+          "statement anatomy",
+          "nesting",
+          "notation conventions"
+        ]
+      },
       "children": [
         "b-language-title-1",
         "b-language-intro-2",
@@ -37,25 +50,11 @@
         "b-language-deferred-body-27",
         "b-language-deferred-sparse-28",
         "b-language-lab-pointer-29"
-      ],
-      "props": {
-        "covers": "Overview of the board layout vocabulary: a compact descriptive notation for composition patterns, its three-part shape (tree, alignment facts, arrows), reference numbers, statement anatomy, and the nine-construct index.",
-        "format": "mdx",
-        "type": "reference",
-        "concepts": [
-          "layout vocabulary",
-          "description shape",
-          "reference numbers",
-          "statement anatomy",
-          "nesting",
-          "notation conventions"
-        ]
-      }
+      ]
     },
     "b-language-title-1": {
       "id": "b-language-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -63,12 +62,12 @@
         {
           "insert": "The board layout vocabulary"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-intro-2": {
       "id": "b-language-intro-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -92,12 +91,12 @@
         {
           "insert": " context renders one nested aesthetic topic: calm and uniform, with content-first sizing, one repeated gap per group, peer geometry copied from the digest, air around content and labels, sections as homes and addressable units, restrained semantic color, and direct edge labels. Read a description in three passes: the indented tree first, then the alignment facts, then the arrows."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-clarity-decision-3": {
       "id": "b-language-clarity-decision-3",
-      "flavour": "decision",
-      "children": [],
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Vocabulary in practice"
@@ -106,12 +105,12 @@
         {
           "insert": "The canvas document backs the draft. An operation result is sized to that operation — its change, its lint delta, and the routed truth for any edge it touched — while a look returns the whole board, its digest, and a measured close-up of any region it is asked to frame; a refused call changes nothing and returns only its error lines. Sections keep exactly the geometry they are given, and fit_section closes one around the children already inside it when asked. Section membership is reconciled from geometry rather than trusted from parentId. Six diagnostics judge document and routed geometry on every edit — covered-content, containment, broken-edges, unreadable-labels, crowding, and clipped-text — and a committed finalize adds frame-slack."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-shape-heading-4": {
       "id": "b-language-shape-heading-4",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -119,23 +118,23 @@
         {
           "insert": "Description shape"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-shape-body-5": {
       "id": "b-language-shape-body-5",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The descriptive notation has three parts, in this order:"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-shape-tree-6": {
       "id": "b-language-shape-tree-6",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -149,12 +148,12 @@
         {
           "insert": " — objects and how space is divided. Nested by indentation."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-shape-align-7": {
       "id": "b-language-shape-align-7",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -196,12 +195,12 @@
         {
           "insert": " lines at the left margin. Cross-branch spatial claims; they reference objects by number."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-shape-arrows-8": {
       "id": "b-language-shape-arrows-8",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -229,23 +228,23 @@
         {
           "insert": " block, always last. The connections that exist in the document."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-shape-parsing-9": {
       "id": "b-language-shape-parsing-9",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Examples separate the parts with one blank line and use exactly 2 spaces per indentation level. This is a reading convention for the pages, not input grammar."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-alignfacts-body-10": {
       "id": "b-language-alignfacts-body-10",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -279,12 +278,12 @@
         {
           "insert": " lines. Alignment facts are cross-branch spatial claims: they reference objects by number, from anywhere in the tree."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-refs-heading-11": {
       "id": "b-language-refs-heading-11",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -292,12 +291,12 @@
         {
           "insert": "Reference numbers"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-refs-body-12": {
       "id": "b-language-refs-body-12",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -400,12 +399,12 @@
         {
           "insert": ") for objects that do not appear in the tree. When display text repeats, reference numbers keep the description unambiguous."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-anatomy-heading-13": {
       "id": "b-language-anatomy-heading-13",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -413,12 +412,12 @@
         {
           "insert": "How to read a statement"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-anatomy-body-14": {
       "id": "b-language-anatomy-body-14",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -438,25 +437,25 @@
         {
           "insert": " line, taken apart:"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-anatomy-code-15": {
       "id": "b-language-anatomy-code-15",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
       "text": [
         {
-          "insert": "item 2 text=checkout type=pill size=M at=C"
+          "insert": "item 2 text=checkout type=rectangle size=M at=C"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-anatomy-table-16": {
       "id": "b-language-anatomy-table-16",
-      "flavour": "structured-table",
-      "children": [],
+      "type": "structured-table",
       "props": {
         "title": "Anatomy of an item line",
         "columns": [
@@ -489,23 +488,23 @@
             "compass position — where in the region"
           ]
         ]
-      }
+      },
+      "children": []
     },
     "b-language-statements-body-17": {
       "id": "b-language-statements-body-17",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "The notation is small on purpose. These are all the statements used on these pages:"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-statements-table-18": {
       "id": "b-language-statements-table-18",
-      "flavour": "structured-table",
-      "children": [],
+      "type": "structured-table",
       "props": {
         "title": "The nine statements",
         "columns": [
@@ -550,12 +549,12 @@
             "the block of connections — always last, even when empty"
           ]
         ]
-      }
+      },
+      "children": []
     },
     "b-language-statements-index-19": {
       "id": "b-language-statements-index-19",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -699,12 +698,12 @@
         {
           "insert": " puts them all in one description."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-nesting-heading-20": {
       "id": "b-language-nesting-heading-20",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -712,12 +711,12 @@
         {
           "insert": "How a description nests"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-nesting-body-21": {
       "id": "b-language-nesting-body-21",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -793,12 +792,12 @@
         {
           "insert": "'s indented lines are always items."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-nesting-code-22": {
       "id": "b-language-nesting-code-22",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -806,21 +805,21 @@
         {
           "insert": "col 2|1\n  section 1 text=top label=\"Top\"\n    grid 1x3 gap=32\n      item 2 text=a type=process size=M\n      item 3 text=b type=process size=M\n      item 4 text=c type=process size=M\n  section 5 text=bottom label=\"Bottom\"\n    group\n      item 6 text=note type=sticky size=S at=W\n      item 7 text=core type=process size=L at=C\n\nalign y: 2 7\n\narrows\n  2 > 3\n  3 > 4\n  4 > 7"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-nesting-canvas-23": {
       "id": "b-language-nesting-canvas-23",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/example-nesting.canvas.json",
         "title": "The nesting example"
-      }
+      },
+      "children": []
     },
     "b-language-canonical-heading-24": {
       "id": "b-language-canonical-heading-24",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -828,12 +827,12 @@
         {
           "insert": "Notation conventions"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-canonical-body-25": {
       "id": "b-language-canonical-body-25",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -894,12 +893,12 @@
         {
           "insert": ". These conventions make examples comparable; they do not define a serialized board format."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-deferred-heading-26": {
       "id": "b-language-deferred-heading-26",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -907,12 +906,12 @@
         {
           "insert": "Deliberately deferred"
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-deferred-body-27": {
       "id": "b-language-deferred-body-27",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -935,12 +934,12 @@
         {
           "insert": " is the object's short name, not the real sticky body text, which is sentences long and would destroy line readability. Body text stays off the line until a preview form is designed."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-deferred-sparse-28": {
       "id": "b-language-deferred-sparse-28",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -954,12 +953,12 @@
         {
           "insert": " — these pages favor explicit facts so a reader does not have to infer omitted layout decisions."
         }
-      ]
+      ],
+      "children": []
     },
     "b-language-lab-pointer-29": {
       "id": "b-language-lab-pointer-29",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -974,7 +973,8 @@
         {
           "insert": "; the notation itself is never submitted as an edit."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

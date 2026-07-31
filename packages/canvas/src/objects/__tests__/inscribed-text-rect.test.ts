@@ -16,10 +16,6 @@ const SIZE_CASES = [
 ] as const;
 
 const SKIPPED_TEXT_SILHOUETTE_TYPES = new Set<string>([
-  // Pure glyphs: no rendered object text.
-  "plus",
-  "or-junction",
-  "summing-junction",
   // Below-slot text sits outside the glyph silhouette by design.
   "icon",
   // Non-shape text placements.
@@ -32,8 +28,6 @@ const DIRECTION_CASES: Partial<
 > = {
   triangle: ["up", "down"],
   "arrow-shape": ["left", "right"],
-  chevron: ["left", "right"],
-  parallelogram: ["left", "right"],
 };
 
 type RectCorner = {

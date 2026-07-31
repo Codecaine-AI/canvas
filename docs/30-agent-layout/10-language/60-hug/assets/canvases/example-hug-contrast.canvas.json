@@ -24,7 +24,7 @@
     },
     {
       "id": "one",
-      "type": "pill",
+      "type": "rectangle",
       "text": "one",
       "label": "one",
       "geometry": {
@@ -32,11 +32,14 @@
         "y": 113,
         "width": 75,
         "height": 24
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "two",
-      "type": "pill",
+      "type": "rectangle",
       "text": "two",
       "label": "two",
       "geometry": {
@@ -44,11 +47,14 @@
         "y": 183,
         "width": 75,
         "height": 24
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "three",
-      "type": "pill",
+      "type": "rectangle",
       "text": "three",
       "label": "three",
       "geometry": {
@@ -56,6 +62,9 @@
         "y": 252,
         "width": 75,
         "height": 24
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {

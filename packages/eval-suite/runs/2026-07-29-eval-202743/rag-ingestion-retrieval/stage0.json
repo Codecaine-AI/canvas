@@ -1,0 +1,1017 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-29-eval-202743.rag-ingestion-retrieval",
+  "title": "RAG ingestion, retrieval, and index rebuild",
+  "description": "# Retrieval-augmented generation: ingestion to grounded answers\n\nThis diagram follows knowledge left-to-right from scheduled or change-triggered source arrivals through normalization, version classification, chunking, embedding, and version-consistent publication to vector, document, and keyword stores. Unparseable content is quarantined; transient embedding failures retry and persistent failures enter a dead-letter store.\n\nThe serving path rewrites a user question, performs hybrid retrieval, fuses and reranks results, applies access controls, and either produces an evidence-grounded answer with citations or says it does not know when evidence is insufficient. Feedback identifies coverage gaps and feeds ingestion priorities.\n\nThe bottom lane shows embedding-model replacement: a coordinator re-embeds the corpus into a new index generation while live queries remain on the current generation, then promotes the complete generation atomically while retaining the prior generation for rollback.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-29-eval-202743 · rag-ingestion-retrieval",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3600,
+        "height": 2400
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-sources",
+      "type": "section",
+      "text": "1 · Sources & arrivals",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 140,
+        "width": 600,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-process",
+      "type": "section",
+      "text": "2 · Normalize & version",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 840,
+        "y": 140,
+        "width": 600,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-enrich",
+      "type": "section",
+      "text": "3 · Chunk & embed",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1560,
+        "y": 140,
+        "width": 600,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-publish",
+      "type": "section",
+      "text": "4 · Version-consistent publish",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2280,
+        "y": 140,
+        "width": 600,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-query",
+      "type": "section",
+      "text": "5 · Permission-aware retrieval",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 760,
+        "width": 920,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-answer",
+      "type": "section",
+      "text": "6 · Grounded answer",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1180,
+        "y": 760,
+        "width": 620,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-failures",
+      "type": "section",
+      "text": "7 · Failure handling",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1940,
+        "y": 760,
+        "width": 620,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-feedback",
+      "type": "section",
+      "text": "8 · Feedback & coverage",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2700,
+        "y": 760,
+        "width": 620,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "src-adapters",
+      "type": "icon",
+      "text": "Source adapters",
+      "color": "gray",
+      "parentId": "sec-sources",
+      "geometry": {
+        "x": 180,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "src-arrivals",
+      "type": "icon",
+      "text": "Scheduled + changed arrivals",
+      "color": "green",
+      "parentId": "sec-sources",
+      "geometry": {
+        "x": 420,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "queue"
+    },
+    {
+      "id": "src-note",
+      "type": "sticky",
+      "text": "Docs · wikis · tickets · code + ACLs",
+      "color": "yellow",
+      "parentId": "sec-sources",
+      "geometry": {
+        "x": 180,
+        "y": 340,
+        "width": 180,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "proc-extract",
+      "type": "process",
+      "text": "Extract + normalize",
+      "color": "gray",
+      "parentId": "sec-process",
+      "geometry": {
+        "x": 900,
+        "y": 220,
+        "width": 220,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "proc-hash",
+      "type": "decision",
+      "text": "Content changed?",
+      "color": "gray",
+      "parentId": "sec-process",
+      "geometry": {
+        "x": 1220,
+        "y": 220,
+        "width": 220,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "enrich-chunk",
+      "type": "process",
+      "text": "Chunk + preserve metadata",
+      "color": "gray",
+      "parentId": "sec-enrich",
+      "geometry": {
+        "x": 1620,
+        "y": 220,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "enrich-embed",
+      "type": "icon",
+      "text": "Rate-limited embedding",
+      "color": "pink",
+      "parentId": "sec-enrich",
+      "geometry": {
+        "x": 2040,
+        "y": 220,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "pub-vector",
+      "type": "icon",
+      "text": "Vector index",
+      "color": "blue",
+      "parentId": "sec-publish",
+      "geometry": {
+        "x": 2320,
+        "y": 220,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "pub-doc",
+      "type": "icon",
+      "text": "Fragments + metadata",
+      "color": "white",
+      "parentId": "sec-publish",
+      "geometry": {
+        "x": 2520,
+        "y": 220,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "pub-keyword",
+      "type": "icon",
+      "text": "Keyword index",
+      "color": "gray",
+      "parentId": "sec-publish",
+      "geometry": {
+        "x": 2720,
+        "y": 220,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "qry-question",
+      "type": "icon",
+      "text": "User question",
+      "color": "yellow",
+      "parentId": "sec-query",
+      "geometry": {
+        "x": 180,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "message"
+    },
+    {
+      "id": "qry-rewrite",
+      "type": "icon",
+      "text": "Rewrite searches",
+      "color": "gray",
+      "parentId": "sec-query",
+      "geometry": {
+        "x": 400,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "qry-fuse",
+      "type": "process",
+      "text": "Hybrid lookup · fuse · rerank · ACL",
+      "color": "gray",
+      "parentId": "sec-query",
+      "geometry": {
+        "x": 740,
+        "y": 860,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "ans-confidence",
+      "type": "decision",
+      "text": "Enough grounded evidence?",
+      "color": "gray",
+      "parentId": "sec-answer",
+      "geometry": {
+        "x": 1240,
+        "y": 860,
+        "width": 280,
+        "height": 140
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "ans-grounded",
+      "type": "icon",
+      "text": "Grounded answer + citations",
+      "color": "pink",
+      "parentId": "sec-answer",
+      "geometry": {
+        "x": 1240,
+        "y": 1080,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "ans-idk",
+      "type": "octagon",
+      "text": "Say “I don’t know”",
+      "color": "gray",
+      "parentId": "sec-answer",
+      "geometry": {
+        "x": 1480,
+        "y": 1080,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    },
+    {
+      "id": "fail-quarantine",
+      "type": "icon",
+      "text": "Parse quarantine",
+      "color": "gray",
+      "parentId": "sec-failures",
+      "geometry": {
+        "x": 2000,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "fail-retry",
+      "type": "process",
+      "text": "Retry transient failures",
+      "color": "gray",
+      "parentId": "sec-failures",
+      "geometry": {
+        "x": 2200,
+        "y": 860,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fail-dlq",
+      "type": "icon",
+      "text": "Dead-letter batches",
+      "color": "gray",
+      "parentId": "sec-failures",
+      "geometry": {
+        "x": 2200,
+        "y": 1060,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "fb-signals",
+      "type": "icon",
+      "text": "Thumbs + citation utility",
+      "color": "gray",
+      "parentId": "sec-feedback",
+      "geometry": {
+        "x": 2760,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "activity"
+    },
+    {
+      "id": "fb-gaps",
+      "type": "icon",
+      "text": "Coverage gaps",
+      "color": "gray",
+      "parentId": "sec-feedback",
+      "geometry": {
+        "x": 2960,
+        "y": 860,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "sec-rebuild",
+      "type": "section",
+      "text": "9 · Embedding-model rebuild",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 1480,
+        "width": 1460,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "sec-generations",
+      "type": "section",
+      "text": "10 · Atomic generation switchover",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1800,
+        "y": 1540,
+        "width": 1000,
+        "height": 240
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "reb-model-change",
+      "type": "icon",
+      "text": "Embedding model change",
+      "color": "yellow",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 200,
+        "y": 1620,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "reb-coordinator",
+      "type": "icon",
+      "text": "Rebuild coordinator",
+      "color": "teal",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 520,
+        "y": 1620,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "reb-corpus",
+      "type": "icon",
+      "text": "Re-embed full corpus",
+      "color": "white",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 840,
+        "y": 1620,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "reb-new-gen",
+      "type": "icon",
+      "text": "New index generation",
+      "color": "blue",
+      "parentId": "sec-rebuild",
+      "geometry": {
+        "x": 1160,
+        "y": 1620,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "gen-current",
+      "type": "icon",
+      "text": "Current generation",
+      "color": "blue",
+      "parentId": "sec-generations",
+      "geometry": {
+        "x": 1840,
+        "y": 1620,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "gen-promote",
+      "type": "process",
+      "text": "Atomic promote",
+      "color": "gray",
+      "parentId": "sec-generations",
+      "geometry": {
+        "x": 2200,
+        "y": 1620,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "gen-prior",
+      "type": "icon",
+      "text": "Prior generation · rollback",
+      "color": "gray",
+      "parentId": "sec-generations",
+      "geometry": {
+        "x": 2640,
+        "y": 1620,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-src-arrive",
+      "from": {
+        "objectId": "src-adapters",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "src-arrivals",
+        "anchor": "left"
+      },
+      "label": "sync",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-arrive-extract",
+      "from": {
+        "objectId": "src-arrivals",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "proc-extract",
+        "anchor": "left"
+      },
+      "label": "content + ACLs",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-extract-hash",
+      "from": {
+        "objectId": "proc-extract",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "proc-hash",
+        "anchor": "left"
+      },
+      "label": "text",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-hash-chunk",
+      "from": {
+        "objectId": "proc-hash",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "enrich-chunk",
+        "anchor": "left"
+      },
+      "label": "process",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-chunk-embed",
+      "from": {
+        "objectId": "enrich-chunk",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "enrich-embed",
+        "anchor": "left"
+      },
+      "label": "batches",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-embed-vector",
+      "from": {
+        "objectId": "enrich-embed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "pub-vector",
+        "anchor": "left"
+      },
+      "label": "vectors",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-publish-query",
+      "from": {
+        "objectId": "sec-publish",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "qry-fuse",
+        "anchor": "top"
+      },
+      "label": "consistent version only",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.94,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-question-rewrite",
+      "from": {
+        "objectId": "qry-question",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "qry-rewrite",
+        "anchor": "left"
+      },
+      "label": "ask",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-rewrite-fuse",
+      "from": {
+        "objectId": "qry-rewrite",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "qry-fuse",
+        "anchor": "left"
+      },
+      "label": "parallel searches",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-fuse-confidence",
+      "from": {
+        "objectId": "qry-fuse",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "ans-confidence",
+        "anchor": "left"
+      },
+      "label": "ranked evidence",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-confidence-answer",
+      "from": {
+        "objectId": "ans-confidence",
+        "anchor": "bottom",
+        "position": [
+          0.3,
+          1
+        ]
+      },
+      "to": {
+        "objectId": "ans-grounded",
+        "anchor": "top"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-confidence-idk",
+      "from": {
+        "objectId": "ans-confidence",
+        "anchor": "bottom",
+        "position": [
+          0.7,
+          1
+        ]
+      },
+      "to": {
+        "objectId": "ans-idk",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.75,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-extract-quarantine",
+      "from": {
+        "objectId": "proc-extract",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fail-quarantine",
+        "anchor": "top"
+      },
+      "label": "unparseable + context",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-embed-retry",
+      "from": {
+        "objectId": "enrich-embed",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fail-retry",
+        "anchor": "top"
+      },
+      "label": "transient failure",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-retry-dlq",
+      "from": {
+        "objectId": "fail-retry",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fail-dlq",
+        "anchor": "top"
+      },
+      "label": "persistent · inputs + attempts",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-answer-feedback",
+      "from": {
+        "objectId": "ans-grounded",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fb-signals",
+        "anchor": "left"
+      },
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.92,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-feedback-gaps",
+      "from": {
+        "objectId": "fb-signals",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fb-gaps",
+        "anchor": "left"
+      },
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-gaps-priority",
+      "from": {
+        "objectId": "fb-gaps",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "sec-sources",
+        "anchor": "bottom"
+      },
+      "label": "prioritize ingestion",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          3020,
+          680
+        ],
+        [
+          420,
+          680
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.5,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-rebuild-start",
+      "from": {
+        "objectId": "reb-model-change",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "reb-coordinator",
+        "anchor": "left"
+      },
+      "label": "trigger",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "yellow"
+    },
+    {
+      "id": "e-rebuild-corpus",
+      "from": {
+        "objectId": "reb-coordinator",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "reb-corpus",
+        "anchor": "left"
+      },
+      "label": "re-embed",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-rebuild-new",
+      "from": {
+        "objectId": "reb-corpus",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "reb-new-gen",
+        "anchor": "left"
+      },
+      "label": "vectors",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-new-promote",
+      "from": {
+        "objectId": "reb-new-gen",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "gen-promote",
+        "anchor": "left"
+      },
+      "label": "complete + consistent",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "labelPosition": {
+        "along": 0.25,
+        "offset": -40
+      }
+    }
+  ],
+  "annotations": []
+}

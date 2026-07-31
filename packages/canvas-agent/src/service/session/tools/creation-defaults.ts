@@ -25,12 +25,16 @@
  * enforcement, and whether the UI ever adopts these numbers is a separate
  * product call.
  *
- * Colors are the canvas package's per-kind first-use fallbacks
- * (`FIRST_USE_COLORS`) — an agent-placed object and a UI-placed one look the
- * same on a fresh board, and recoloring is its own gesture (`change_color`).
+ * Colors: a registry-named object (any shape or glyph in the object-preference
+ * registry) lands wearing its PREFERRED color — a placed "memory" is blue with
+ * no caller involvement. Sections and stickies sit outside the registry and
+ * keep the canvas package's per-kind first-use fallbacks (`FIRST_USE_COLORS`).
+ * Recoloring afterward is its own gesture (`change_color`).
  */
 import { FIRST_USE_COLORS } from "@codecaine-ai/canvas/actions";
 import type { CanvasColor } from "@codecaine-ai/canvas/schema";
+
+import { preferredObjectColor } from "../../../../../canvas/src/objects/registry";
 
 import { OBJECT_TYPE_DEFAULTS } from "../../../../../canvas/src/state/schema/object-defaults";
 import { AGENT_GRID } from "./grid";
@@ -128,9 +132,17 @@ export function creationKindFor(kindOrType: CreationKind | FoldedTypeName | stri
   return glyphForPlaceableType(kindOrType) === undefined ? "shape" : "icon";
 }
 
-/** The default size and color a placed object of this kind (or type) gets. */
+/**
+ * The default size and color a placed object of this kind (or type) gets.
+ * Size always comes off the kind row; color resolves through the
+ * object-preference registry first — the preferred color IS the creation
+ * default for every registry name — and falls back to the kind row for the
+ * names outside it (section, sticky, and the bare kind words).
+ */
 export function creationDefaultFor(
   kindOrType: CreationKind | FoldedTypeName | string,
 ): CreationDefault {
-  return CREATION_DEFAULTS[creationKindFor(kindOrType)];
+  const byKind = CREATION_DEFAULTS[creationKindFor(kindOrType)];
+  const preferred = preferredObjectColor(kindOrType);
+  return preferred === undefined ? byKind : { size: byKind.size, color: preferred };
 }

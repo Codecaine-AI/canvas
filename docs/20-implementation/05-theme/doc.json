@@ -6,7 +6,7 @@
   "blocks": {
     "b-theme-root": {
       "id": "b-theme-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "covers": "The theme domain: packages/canvas/src/theme/ — palette.ts (the closed 10-pick ink/fill/wash color table and per-role resolvers) and tokens.ts (canvas surface variables, the universal shape stroke, the text size hierarchy) — plus the dispersal story that put every other FigJam constant beside its consumer.",
         "format": "mdx",
@@ -37,7 +37,7 @@
     },
     "b-theme-title-1": {
       "id": "b-theme-title-1",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -50,7 +50,7 @@
     },
     "b-theme-intro-2": {
       "id": "b-theme-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -129,7 +129,7 @@
     },
     "b-theme-palette-heading-3": {
       "id": "b-theme-palette-heading-3",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -142,7 +142,7 @@
     },
     "b-theme-palette-table-4": {
       "id": "b-theme-palette-table-4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -192,7 +192,7 @@
     },
     "b-theme-palette-roles-5": {
       "id": "b-theme-palette-roles-5",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -230,7 +230,7 @@
     },
     "b-theme-palette-resolvers-6": {
       "id": "b-theme-palette-resolvers-6",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -324,7 +324,7 @@
     },
     "b-theme-palette-decision-7": {
       "id": "b-theme-palette-decision-7",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Every hex is provenance-annotated, sampled or derived"
@@ -338,7 +338,7 @@
     },
     "b-theme-tokens-heading-8": {
       "id": "b-theme-tokens-heading-8",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -351,7 +351,7 @@
     },
     "b-theme-tokens-body-9": {
       "id": "b-theme-tokens-body-9",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -491,7 +491,7 @@
     },
     "b-theme-dispersal-heading-10": {
       "id": "b-theme-dispersal-heading-10",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -504,7 +504,7 @@
     },
     "b-theme-dispersal-body-11": {
       "id": "b-theme-dispersal-body-11",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -559,7 +559,7 @@
     },
     "b-theme-layering-heading-12": {
       "id": "b-theme-layering-heading-12",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -572,7 +572,7 @@
     },
     "b-theme-layering-body-13": {
       "id": "b-theme-layering-body-13",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -710,7 +710,7 @@
     },
     "b-theme-closing-14": {
       "id": "b-theme-closing-14",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {

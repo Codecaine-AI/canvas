@@ -6,16 +6,7 @@
   "blocks": {
     "b-item-root": {
       "id": "b-item-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-item-title-1",
-        "b-item-body-2",
-        "b-item-table-3",
-        "b-item-at-4",
-        "b-item-compass-observation-5",
-        "b-item-code-6",
-        "b-item-canvas-7"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "The item notation: one real object per line with every field labeled — number, text=, type=, size=, at=, hug= — plus the compass placement rules for when at= is required or forbidden.",
         "format": "mdx",
@@ -27,12 +18,20 @@
           "content-first sizing",
           "reference numbers"
         ]
-      }
+      },
+      "children": [
+        "b-item-title-1",
+        "b-item-body-2",
+        "b-item-table-3",
+        "b-item-at-4",
+        "b-item-compass-observation-5",
+        "b-item-code-6",
+        "b-item-canvas-7"
+      ]
     },
     "b-item-title-1": {
       "id": "b-item-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -40,23 +39,23 @@
         {
           "insert": "item — a real object"
         }
-      ]
+      ],
+      "children": []
     },
     "b-item-body-2": {
       "id": "b-item-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "A real object on the board — one per line, every field labeled. In this descriptive notation, an item says what it is and where it sits by compass rather than by pixel coordinates. The size label is human shorthand: live add geometry and geometry patches carry a complete finite {x, y, width, height}. The agent chooses dimensions from content and role, then matches peers by copying exact digest geometry; the 16px grid quantizes geometry rather than prescribing a size or spacing amount. Fields, in fixed order:"
         }
-      ]
+      ],
+      "children": []
     },
     "b-item-table-3": {
       "id": "b-item-table-3",
-      "flavour": "structured-table",
-      "children": [],
+      "type": "structured-table",
       "props": {
         "title": "item fields",
         "columns": [
@@ -96,12 +95,12 @@
             "compass corner; only on direct children of a split"
           ]
         ]
-      }
+      },
+      "children": []
     },
     "b-item-at-4": {
       "id": "b-item-at-4",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -177,12 +176,12 @@
         {
           "insert": " line directly under a split occupies one weight slot by itself."
         }
-      ]
+      ],
+      "children": []
     },
     "b-item-compass-observation-5": {
       "id": "b-item-compass-observation-5",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "Nine compass values, three jobs"
       },
@@ -217,29 +216,30 @@
         {
           "insert": " takes the four cardinal values for a fan."
         }
-      ]
+      ],
+      "children": []
     },
     "b-item-code-6": {
       "id": "b-item-code-6",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
       "text": [
         {
-          "insert": "section 1 text=panel label=\"Item placement\"\n  group\n    item 2 text=note type=sticky size=M at=NW\n    item 3 text=step type=process size=M at=C\n    item 4 text=tag type=pill size=S at=SE\n\narrows"
+          "insert": "section 1 text=panel label=\"Item placement\"\n  group\n    item 2 text=note type=sticky size=M at=NW\n    item 3 text=step type=process size=M at=C\n    item 4 text=tag type=rectangle size=S at=SE\n\narrows"
         }
-      ]
+      ],
+      "children": []
     },
     "b-item-canvas-7": {
       "id": "b-item-canvas-7",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/example-item.canvas.json",
         "title": "Three items placed by compass"
-      }
+      },
+      "children": []
     }
   }
 }

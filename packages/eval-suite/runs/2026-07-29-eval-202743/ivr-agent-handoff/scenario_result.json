@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-07-29-eval-202743",
+  "tier": "system",
+  "scenario": "ivr-agent-handoff",
+  "board_id": "eval.2026-07-29-eval-202743.ivr-agent-handoff",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-30T01:27:45.355Z",
+      "finished_at": "2026-07-30T01:52:22.211Z",
+      "wall_ms": 1477310,
+      "retries": 1
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "6e8369b4-7954-4fdf-8f7b-c17a37b0365e",
+      "ee90149d-5261-47f5-aa75-73efec8ae617"
+    ]
+  },
+  "finished_at": "2026-07-30T01:52:22.665Z",
+  "exit_code": 0
+}

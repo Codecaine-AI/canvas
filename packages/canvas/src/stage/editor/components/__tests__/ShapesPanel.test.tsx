@@ -45,8 +45,9 @@ describe("ShapesPanel geometry", () => {
   });
 
   it("renders the Shapes header and a close button", () => {
-    const { getByText, getByLabelText } = render(<ShapesPanel />);
-    expect(getByText("Shapes")).toBeTruthy();
+    const { getAllByText, getByLabelText } = render(<ShapesPanel />);
+    // "Shapes" appears twice: the panel header and the shape section label.
+    expect(getAllByText("Shapes").length).toBeGreaterThanOrEqual(1);
     expect(getByLabelText("Close shapes panel")).toBeTruthy();
   });
 
@@ -62,14 +63,13 @@ describe("ShapesPanel geometry", () => {
 });
 
 describe("ShapesPanel sections", () => {
-  it("renders exactly the 3 catalog category sections, in order: Basic, Flowchart, Advanced", () => {
+  it("renders exactly the 2 catalog category sections, in order: Icons, Shapes", () => {
     const { container } = render(<ShapesPanel />);
     const categories = container.querySelectorAll("[data-shape-category]");
-    expect(categories.length).toBe(3);
+    expect(categories.length).toBe(2);
     expect(Array.from(categories).map((c) => c.getAttribute("data-shape-category"))).toEqual([
-      "basic",
-      "flowchart",
-      "advanced",
+      "icons",
+      "shapes",
     ]);
   });
 
@@ -82,15 +82,15 @@ describe("ShapesPanel sections", () => {
 
   it("collapses and expands a section's grid when its header is clicked", () => {
     const { container } = render(<ShapesPanel />);
-    const header = container.querySelector('[data-section-header="Basic"]') as HTMLElement;
-    expect(container.querySelector('[data-shape-grid="basic"]')).toBeTruthy();
+    const header = container.querySelector('[data-section-header="Icons"]') as HTMLElement;
+    expect(container.querySelector('[data-shape-grid="icons"]')).toBeTruthy();
     fireEvent.click(header);
-    expect(container.querySelector('[data-shape-grid="basic"]')).toBeNull();
+    expect(container.querySelector('[data-shape-grid="icons"]')).toBeNull();
     fireEvent.click(header);
-    expect(container.querySelector('[data-shape-grid="basic"]')).toBeTruthy();
+    expect(container.querySelector('[data-shape-grid="icons"]')).toBeTruthy();
   });
 
-  it("renders the correct entry count for each section (Basic=13, Flowchart=16, Advanced=26)", () => {
+  it("renders the correct entry count for each section (Icons=30, Shapes=10)", () => {
     const { container } = render(<ShapesPanel />);
     for (const category of SHAPE_CATALOG) {
       const grid = container.querySelector(`[data-shape-grid="${category.id}"]`) as HTMLElement;
@@ -99,23 +99,21 @@ describe("ShapesPanel sections", () => {
       expect(grid.style.rowGap).toBe("6px");
       expect(grid.querySelectorAll("[data-shape-entry]").length).toBe(category.entries.length);
     }
-    const basic = SHAPE_CATALOG.find((c) => c.id === "basic")!;
-    const flowchart = SHAPE_CATALOG.find((c) => c.id === "flowchart")!;
-    const advanced = SHAPE_CATALOG.find((c) => c.id === "advanced")!;
-    expect(basic.entries.length).toBe(13);
-    expect(flowchart.entries.length).toBe(16);
-    expect(advanced.entries.length).toBe(26);
+    const icons = SHAPE_CATALOG.find((c) => c.id === "icons")!;
+    const shapes = SHAPE_CATALOG.find((c) => c.id === "shapes")!;
+    expect(icons.entries.length).toBe(30);
+    expect(shapes.entries.length).toBe(10);
   });
 });
 
 describe("ShapesPanel search", () => {
   it("filters categories/entries by query and hides empty categories", () => {
     const { getByLabelText, container } = render(<ShapesPanel />);
-    fireEvent.change(getByLabelText("Search shapes"), { target: { value: "hexagon" } });
+    fireEvent.change(getByLabelText("Search shapes"), { target: { value: "octagon" } });
     const categories = container.querySelectorAll("[data-shape-category]");
-    // "Hexagon" only appears in Flowchart per the catalog data.
+    // "Octagon" only appears in Shapes per the catalog data.
     expect(categories.length).toBe(1);
-    expect(categories[0].getAttribute("data-shape-category")).toBe("flowchart");
+    expect(categories[0].getAttribute("data-shape-category")).toBe("shapes");
   });
 });
 
@@ -140,9 +138,9 @@ describe("ShapesPanel interaction", () => {
 
   it("shows shape tooltips below icons and aligns edge-column labels inside the panel", () => {
     const { container } = render(<ShapesPanel />);
-    const basicEntries = SHAPE_CATALOG.find((c) => c.id === "basic")!.entries;
-    const firstColumnButton = container.querySelector(`[data-shape-entry="${basicEntries[0].id}"]`) as HTMLElement;
-    const lastColumnButton = container.querySelector(`[data-shape-entry="${basicEntries[3].id}"]`) as HTMLElement;
+    const iconEntries = SHAPE_CATALOG.find((c) => c.id === "icons")!.entries;
+    const firstColumnButton = container.querySelector(`[data-shape-entry="${iconEntries[0].id}"]`) as HTMLElement;
+    const lastColumnButton = container.querySelector(`[data-shape-entry="${iconEntries[3].id}"]`) as HTMLElement;
 
     fireEvent.pointerEnter(firstColumnButton);
 
@@ -177,22 +175,22 @@ describe("ShapesPanel interaction", () => {
     expect(onPick).toHaveBeenCalledWith(anyEntry.objectType);
   });
 
-  it("clicking an Advanced entry dispatches an insert with type 'icon' and the correct glyph (via onPickEntry)", () => {
+  it("clicking an icon entry dispatches an insert with type 'icon' and the correct glyph (via onPickEntry)", () => {
     const onPickEntry = mock((_entry: ShapeCatalogEntry) => {});
     const { container } = render(<ShapesPanel onPickEntry={onPickEntry} />);
-    const advanced = SHAPE_CATALOG.find((c) => c.id === "advanced")!;
-    const cpuEntry = advanced.entries.find((e) => e.icon === "cpu")!;
-    expect(cpuEntry).toBeTruthy();
-    fireEvent.click(container.querySelector(`[data-shape-entry="${cpuEntry.id}"]`)!);
+    const icons = SHAPE_CATALOG.find((c) => c.id === "icons")!;
+    const modelEntry = icons.entries.find((e) => e.icon === "model")!;
+    expect(modelEntry).toBeTruthy();
+    fireEvent.click(container.querySelector(`[data-shape-entry="${modelEntry.id}"]`)!);
     expect(onPickEntry).toHaveBeenCalledWith(
-      expect.objectContaining({ objectType: "icon", icon: "cpu" }),
+      expect.objectContaining({ objectType: "icon", icon: "model" }),
     );
   });
 
   it("clicking the triangle-down entry dispatches an insert with direction 'down' (via onPickEntry)", () => {
     const onPickEntry = mock((_entry: ShapeCatalogEntry) => {});
     const { container } = render(<ShapesPanel onPickEntry={onPickEntry} />);
-    fireEvent.click(container.querySelector('[data-shape-entry="basic-triangle-down"]')!);
+    fireEvent.click(container.querySelector('[data-shape-entry="shape-triangle-down"]')!);
     expect(onPickEntry).toHaveBeenCalledWith(
       expect.objectContaining({ objectType: "triangle", direction: "down" }),
     );
@@ -202,7 +200,7 @@ describe("ShapesPanel interaction", () => {
     const onPick = mock((_type: string) => {});
     const onPickEntry = mock((_entry: ShapeCatalogEntry) => {});
     const { container } = render(<ShapesPanel onPick={onPick} onPickEntry={onPickEntry} />);
-    fireEvent.click(container.querySelector('[data-shape-entry="basic-square"]')!);
+    fireEvent.click(container.querySelector('[data-shape-entry="shape-square"]')!);
     expect(onPick).toHaveBeenCalledWith("rectangle");
     expect(onPickEntry).toHaveBeenCalledTimes(1);
   });
@@ -218,7 +216,7 @@ describe("ShapesPanel interaction", () => {
     const onClose = mock(() => {});
     const onPick = mock((_type: string) => {});
     const { container } = render(<ShapesPanel onPick={onPick} onClose={onClose} />);
-    fireEvent.click(container.querySelector('[data-shape-entry="basic-square"]')!);
+    fireEvent.click(container.querySelector('[data-shape-entry="shape-square"]')!);
     expect(onPick).toHaveBeenCalledTimes(1);
     expect(onClose).not.toHaveBeenCalled();
   });
@@ -226,9 +224,9 @@ describe("ShapesPanel interaction", () => {
 
 describe("ShapesPanel selected-entry highlight", () => {
   it("renders the violet selected state on the entry matching selectedEntryId only", () => {
-    const { container } = render(<ShapesPanel selectedEntryId="basic-square" />);
-    const selected = container.querySelector('[data-shape-entry="basic-square"]') as HTMLElement;
-    const other = container.querySelector('[data-shape-entry="basic-ellipse"]') as HTMLElement;
+    const { container } = render(<ShapesPanel selectedEntryId="shape-square" />);
+    const selected = container.querySelector('[data-shape-entry="shape-square"]') as HTMLElement;
+    const other = container.querySelector('[data-shape-entry="shape-ellipse"]') as HTMLElement;
 
     expect(selected.getAttribute("data-selected")).toBe("true");
     expect(selected.getAttribute("aria-pressed")).toBe("true");
@@ -240,8 +238,8 @@ describe("ShapesPanel selected-entry highlight", () => {
   });
 
   it("selected state beats the hover wash so the armed shape stays visibly violet", () => {
-    const { container } = render(<ShapesPanel selectedEntryId="basic-square" />);
-    const selected = container.querySelector('[data-shape-entry="basic-square"]') as HTMLElement;
+    const { container } = render(<ShapesPanel selectedEntryId="shape-square" />);
+    const selected = container.querySelector('[data-shape-entry="shape-square"]') as HTMLElement;
     fireEvent.pointerEnter(selected);
     expect(selected.style.background).toBe("rgba(140, 46, 242, 0.12)");
   });

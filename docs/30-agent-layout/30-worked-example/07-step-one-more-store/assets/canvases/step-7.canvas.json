@@ -24,7 +24,7 @@
     },
     {
       "id": "checkout",
-      "type": "pill",
+      "type": "rectangle",
       "text": "checkout",
       "label": "checkout",
       "geometry": {
@@ -32,11 +32,14 @@
         "y": 184,
         "width": 75,
         "height": 24
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "goals",
-      "type": "pill",
+      "type": "rectangle",
       "text": "goals",
       "label": "goals",
       "geometry": {
@@ -44,11 +47,14 @@
         "y": 276,
         "width": 75,
         "height": 24
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "secrets",
-      "type": "pill",
+      "type": "rectangle",
       "text": "secrets",
       "label": "secrets",
       "geometry": {
@@ -56,6 +62,9 @@
         "y": 368,
         "width": 75,
         "height": 24
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
@@ -136,51 +145,67 @@
     },
     {
       "id": "epochs",
-      "type": "database",
+      "type": "icon",
       "text": "epochs",
       "label": "epochs",
       "geometry": {
-        "x": 394,
-        "y": 461,
-        "width": 44,
-        "height": 38
-      }
+        "x": 368,
+        "y": 432,
+        "width": 96,
+        "height": 96
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "artifacts",
-      "type": "database",
+      "type": "icon",
       "text": "artifacts",
       "label": "artifacts",
       "geometry": {
-        "x": 458,
-        "y": 461,
-        "width": 44,
-        "height": 38
-      }
+        "x": 432,
+        "y": 432,
+        "width": 96,
+        "height": 96
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "saves",
-      "type": "database",
+      "type": "icon",
       "text": "saves",
       "label": "saves",
       "geometry": {
-        "x": 394,
-        "y": 519,
-        "width": 44,
-        "height": 38
-      }
+        "x": 368,
+        "y": 490,
+        "width": 96,
+        "height": 96
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "cache",
-      "type": "database",
+      "type": "icon",
       "text": "cache",
       "label": "cache",
       "geometry": {
-        "x": 458,
-        "y": 519,
-        "width": 44,
-        "height": 38
-      }
+        "x": 432,
+        "y": 490,
+        "width": 96,
+        "height": 96
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
     },
     {
       "id": "score",
@@ -234,7 +259,7 @@
     },
     {
       "id": "absorb",
-      "type": "pill",
+      "type": "rectangle",
       "text": "absorb",
       "label": "absorb",
       "geometry": {
@@ -242,11 +267,14 @@
         "y": 477,
         "width": 68,
         "height": 22
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "reject",
-      "type": "pill",
+      "type": "rectangle",
       "text": "reject",
       "label": "reject",
       "geometry": {
@@ -254,6 +282,9 @@
         "y": 477,
         "width": 68,
         "height": 22
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     }
   ],

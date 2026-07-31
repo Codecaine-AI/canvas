@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { transcriptPath } from "../lib/kernel-api";
+import { transcriptUrl } from "../../viewer-extension/paths";
 import { isRecord, useAgentJson } from "./use-agent-json";
 
 /**
@@ -63,8 +63,11 @@ export type SessionTranscriptState =
 
 export function useSessionTranscript(
   containerId: string | null,
+  apiBase: string,
 ): SessionTranscriptState {
-  const state = useAgentJson(containerId ? transcriptPath(containerId) : null);
+  const state = useAgentJson(
+    containerId ? transcriptUrl(apiBase, containerId) : null,
+  );
   return useMemo<SessionTranscriptState>(() => {
     if (state.status === "loading") return { status: "loading" };
     // 404 (route not built yet), 502 (harness down), or a wrong shape all

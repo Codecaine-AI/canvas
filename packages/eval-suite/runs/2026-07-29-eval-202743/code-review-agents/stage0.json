@@ -1,0 +1,454 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-29-eval-202743.code-review-agents",
+  "title": "Multi-agent automated code review",
+  "description": "## Multi-agent automated code review\n\nA left-to-right lifecycle across the top row: pull-request intake resolves and gates the change, context assembly ranks source material, specialist reviewers run in parallel, and aggregation validates findings before publication. The bottom row shows publication policy, human feedback and threshold calibration, head-change cancellation/restart, and telemetry-driven budget degradation.\n\nSolid teal/green/orange edges carry the primary review and feedback flow. Dashed edges show lifecycle controls: calibrated thresholds feed future validation, head changes cancel and restart intake, and exhausted daily budgets restrict later runs to correctness and security reviewers.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2624,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-29-eval-202743 · code-review-agents",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2560,
+        "height": 1600
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "intake",
+      "type": "section",
+      "text": "1 · Intake & eligibility",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 100,
+        "width": 500,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "context",
+      "type": "section",
+      "text": "2 · Context assembly",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 720,
+        "y": 100,
+        "width": 500,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "plan-review",
+      "type": "section",
+      "text": "3 · Plan & parallel review",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1340,
+        "y": 100,
+        "width": 500,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "aggregate",
+      "type": "section",
+      "text": "4 · Aggregate & validate",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1960,
+        "y": 100,
+        "width": 500,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "publish",
+      "type": "section",
+      "text": "5 · Publish & policy verdict",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 820,
+        "width": 500,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "feedback",
+      "type": "section",
+      "text": "6 · Feedback & calibration",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 720,
+        "y": 820,
+        "width": 500,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "head-change",
+      "type": "section",
+      "text": "7 · Head changes & restart",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1340,
+        "y": 820,
+        "width": 500,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "telemetry",
+      "type": "section",
+      "text": "8 · Telemetry & budget",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1960,
+        "y": 820,
+        "width": 500,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "pr-event",
+      "type": "icon",
+      "text": "Pull request event",
+      "color": "yellow",
+      "parentId": "intake",
+      "geometry": {
+        "x": 200,
+        "y": 180,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "intake-note",
+      "type": "sticky",
+      "text": "**Resolve & gate**\n- Diff, files, policy, build\n- Reject drafts\n- Skip vendored/generated",
+      "color": "yellow",
+      "parentId": "intake",
+      "geometry": {
+        "x": 180,
+        "y": 360,
+        "width": 320,
+        "height": 240
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "context-note",
+      "type": "sticky",
+      "text": "**Rank context**\n- Diff + surrounding source\n- Tests + ownership\n- Prior review history\n- Truncate low-value items\n- Log every drop",
+      "color": "yellow",
+      "parentId": "context",
+      "geometry": {
+        "x": 800,
+        "y": 180,
+        "width": 320,
+        "height": 360
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "plan-note",
+      "type": "sticky",
+      "text": "**Plan + fan out**\n- Partition review units\n- 5 specialist reviewers in parallel\n- Shared context + read-only tools\n- Findings: location, severity, rationale, confidence\n- Tool cap → return partial results",
+      "color": "yellow",
+      "parentId": "plan-review",
+      "geometry": {
+        "x": 1420,
+        "y": 180,
+        "width": 320,
+        "height": 460
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "aggregate-note",
+      "type": "sticky",
+      "text": "**Merge + verify**\n- Dedupe overlaps; reconcile severity\n- Withhold low confidence\n- Drop stale locations at current head\n- Recheck every high-severity finding\n- Unverified → demote, never post",
+      "color": "yellow",
+      "parentId": "aggregate",
+      "geometry": {
+        "x": 2040,
+        "y": 180,
+        "width": 320,
+        "height": 460
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "publish-note",
+      "type": "sticky",
+      "text": "**Publish outcome**\n- Inline comments + summary verdict\n- Policy: request changes, approve, or advisory\n- Only surviving findings are posted",
+      "color": "yellow",
+      "parentId": "publish",
+      "geometry": {
+        "x": 180,
+        "y": 900,
+        "width": 320,
+        "height": 340
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "feedback-note",
+      "type": "sticky",
+      "text": "**Feedback loop**\n- Author replies + reviewer disagreements\n- Wrong findings are recorded\n- Calibrate by finding class\n- Adjust future confidence thresholds",
+      "color": "yellow",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 800,
+        "y": 900,
+        "width": 320,
+        "height": 420
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "head-note",
+      "type": "sticky",
+      "text": "**Cancel + restart**\n- Watch branch head\n- New commit or force-push cancels in-flight work\n- Discard partial results\n- Restart against the new head\n- Never publish against an obsolete diff",
+      "color": "yellow",
+      "parentId": "head-change",
+      "geometry": {
+        "x": 1420,
+        "y": 900,
+        "width": 320,
+        "height": 460
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "telemetry-note",
+      "type": "sticky",
+      "text": "**Observe + degrade**\n- Cost, latency, tokens by reviewer\n- Cancellation rate\n- Accepted vs dismissed findings\n- Daily repository budget\n- Over budget → correctness + security only",
+      "color": "yellow",
+      "parentId": "telemetry",
+      "geometry": {
+        "x": 2040,
+        "y": 900,
+        "width": 320,
+        "height": 460
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-intake-context",
+      "from": {
+        "objectId": "intake",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "context",
+        "anchor": "left"
+      },
+      "label": "eligible change",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-context-plan",
+      "from": {
+        "objectId": "context",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "plan-review",
+        "anchor": "left"
+      },
+      "label": "ranked context",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-plan-aggregate",
+      "from": {
+        "objectId": "plan-review",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "aggregate",
+        "anchor": "left"
+      },
+      "label": "parallel findings",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-aggregate-publish",
+      "from": {
+        "objectId": "aggregate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "publish",
+        "anchor": "top"
+      },
+      "label": "verified findings",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-publish-feedback",
+      "from": {
+        "objectId": "publish",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "feedback",
+        "anchor": "left"
+      },
+      "label": "replies & disputes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "e-feedback-thresholds",
+      "from": {
+        "objectId": "feedback",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "aggregate",
+        "anchor": "bottom"
+      },
+      "label": "calibrated thresholds",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange",
+      "waypoints": [
+        [
+          980,
+          780
+        ],
+        [
+          2220,
+          780
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.72,
+        "offset": 0
+      }
+    },
+    {
+      "id": "e-head-restart",
+      "from": {
+        "objectId": "head-change",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "intake",
+        "anchor": "bottom"
+      },
+      "label": "cancel + restart at new head",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1600,
+          700
+        ],
+        [
+          360,
+          700
+        ]
+      ]
+    },
+    {
+      "id": "e-budget-degrade",
+      "from": {
+        "objectId": "telemetry",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "intake",
+        "anchor": "left"
+      },
+      "label": "over budget: correctness + security only",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet"
+    }
+  ],
+  "annotations": []
+}

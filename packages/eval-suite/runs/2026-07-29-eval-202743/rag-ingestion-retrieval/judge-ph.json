@@ -1,0 +1,211 @@
+{
+  "axis": "ph",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 7.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "One of 130 tool calls failed, for a failure rate of approximately 0.77%. It was a blocked finalize rather than a malformed edit, and the agent corrected the named frame-slack issue on the immediately following call. The longest failure run was 1, there were no repeated failed-call error classes, and session metadata records no harness retry.",
+      "failed_call_count": 1,
+      "rejected_call_count": 1,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 126,
+          "transcript_excerpt": "Finalize blocked; the run continues:\n- W1 frame-slack: sec-generations is 1580×520 around children needing 968×200 — 76% of the frame is unused",
+          "finding": "This blocked finalize is the sole failed call. It produced a failure run of one."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 127,
+          "transcript_excerpt": "APPLIED · fit_section sec-generations\nDELTA\n  sec-generations  1740,1480 1580×520 → 1800,1540 1000×240\nLINTS · clean",
+          "finding": "The sole failure was corrected on the next call using the strategy explicitly suggested by the blocker."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "transcript_excerpt": "Committed: Built a clean end-to-end RAG diagram covering versioned ingestion, permission-aware grounded retrieval, failure and low-confidence paths, feedback-driven priorities, and atomic embedding-index rebuilds with rollback.",
+          "finding": "The agent reached a successful finalize without further failed calls."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "The session used three framed looks, all late in the build or during QA. There were two clear look-to-adjustment rounds and two render→adjust→render sequences: the first dense-region inspection exposed one warning that was fixed before the whole-page QA render, and the whole-page render was followed by the blocked-finalize correction and a focused rebuild-region render. This is real iteration, but close-ups were not interleaved throughout the earlier dense connector construction; most detail work relied only on standing renders and lint output.",
+      "render_count": 3,
+      "adjustment_round_count": 2,
+      "render_adjust_render_loop_count": 2,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 122,
+          "transcript_excerpt": "LOOK · 1 render · framed 6 ids\n...\nDIAGNOSTICS · 0 errors · 1 warning\n  W1 covered-content: label \"prioritize ingestion\" chip on e-gaps-priority sits within 16px of e-publish-query's path",
+          "finding": "The first framed look targeted the dense answer/failure/feedback routing region and identified a specific remaining warning."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 123,
+          "transcript_excerpt": "APPLIED · move_label e-gaps-priority → along 0.5, offset -40\nLINTS · +0 −1\n  − W1 covered-content  (resolved)",
+          "finding": "The agent adjusted exactly what the preceding framed render showed."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 126,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame\n...\nDIAGNOSTICS · clean",
+          "finding": "A whole-page framed QA render confirmed clean diagnostics before the first finalize attempt."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "LOOK · 1 render · framed sec-rebuild+sec-generations+e-new-promote\n...\nDIAGNOSTICS · clean",
+          "finding": "After fitting sec-generations, the agent inspected the modified rebuild/switchover region before committing, completing the second render→adjust→render loop."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "All lint errors and warnings were ultimately resolved; the final QA renders reported clean diagnostics. There was no warning override, silent or reasoned. The session did spend several consecutive turns tweaking and then deleting the low-confidence edge label, but the tactics changed from label positioning to shortening and finally removal, so it does not meet the rubric's strict definition of the same lint re-fired for more than three consecutive turns without a strategy change.",
+      "lint_error_count": 7,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 20,
+          "transcript_excerpt": "LINTS · +2 −0\n  + E1 containment: proc-hash extends 40px outside its section sec-process\n  + W1 crowding: proc-extract and proc-hash sit 20px apart",
+          "finding": "An early containment error and crowding warning were handled through resizing on the next two calls rather than ignored."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 22,
+          "transcript_excerpt": "APPLIED · resize proc-hash → 220×100\nLINTS · +0 −1\n  − E1 containment  (resolved)",
+          "finding": "The containment error was directly resolved."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 97,
+          "transcript_excerpt": "LINTS · +4 −0\n  + E1 covered-content: label \"thumbs + citation utility\" chip on e-answer-feedback lies on e-extract-quarantine's path for 30px",
+          "finding": "A dense routing edit introduced one error and three warnings; subsequent label movement, shortening, removal, rerouting, and endpoint changes cleared them."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 102,
+          "transcript_excerpt": "APPLIED · move_label e-confidence-idk → along 0.55, offset 60\nLINTS · +1 −1\n  + W1 unreadable-labels: label \"no · thin / low score\" chip on e-confidence-idk ...\n  − W1 covered-content  (resolved)",
+          "finding": "This began a short multi-turn skirmish over the low-confidence edge label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 106,
+          "transcript_excerpt": "APPLIED · update_text e-confidence-idk\nDELTA\n  e-confidence-idk  label no → —\nLINTS · +0 −2\n  − W1 covered-content, − W2 unreadable-labels  (resolved)",
+          "finding": "The agent ended the recurring warning sequence by changing strategy and removing the troublesome label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 126,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Whole-page QA showed no remaining lint before finalize."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Focused post-fix QA also showed no remaining lint; therefore no warning was overridden."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary broadly matches the stage diff: the board contains ingestion and versioning sections, permission-aware retrieval, a grounded-answer/IDK branch, quarantine and DLQ handling, feedback-to-ingestion routing, and rebuild/promotion/rollback components. The word \"clean\" is supported mechanically by clean final diagnostics. The phrase \"end-to-end\" and the rebuild-with-rollback claim are mildly inflated because the diff leaves gen-current and gen-prior disconnected and connects only the vector store directly within the three-store publication area, but this is not a claim that a known destroyed or lint-failing state was fixed.",
+      "commit_count": 1,
+      "honest_summary_count": 0,
+      "inflated_claim_count": 1,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "line": "Built a clean end-to-end RAG diagram covering versioned ingestion, permission-aware grounded retrieval, failure and low-confidence paths, feedback-driven priorities, and atomic embedding-index rebuilds with rollback.",
+          "assessment": "Mostly grounded in the diff and clean final diagnostics, but mildly inflated by \"end-to-end\" and \"with rollback\": gen-current and gen-prior are present as labeled components but have no connecting edges to the promotion flow."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 126,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The final whole-page QA supports the summary's mechanical use of \"clean.\""
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "gen-current memory \"Current generation\" ...\ngen-promote process \"Atomic promote\" ...\ngen-prior archive \"Prior generation · rollback\" ...\n...\ne-new-promote reb-new-gen→gen-promote \"complete + consistent\"",
+          "finding": "The focused QA shows the relevant rebuild and rollback components, but only reb-new-gen is connected to gen-promote; no edge connects current generation or promotion to the prior-generation rollback component."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "transcript_excerpt": "Committed: Built a clean end-to-end RAG diagram covering versioned ingestion, permission-aware grounded retrieval, failure and low-confidence paths, feedback-driven priorities, and atomic embedding-index rebuilds with rollback.",
+          "finding": "The final summary does not declare the disconnected generation components, making the broad completeness language mildly inflated rather than exact."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The committed diff contains 63 patch operations, while the transcript contains 130 tool calls including QA and finalize. The 14.08-minute wall time stayed within the 15-minute session budget, and the 300-turn budget was not approached. The operation volume is plausible for a large multi-lane architecture map, though the repeated label-position/shorten/delete sequence on e-confidence-idk was locally inefficient. No object build-delete-rebuild cycle or repeated NO-OP occurred.",
+      "operation_count": 63,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 14.08,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 102,
+          "transcript_excerpt": "APPLIED · move_label e-confidence-idk → along 0.55, offset 60",
+          "finding": "This was part of a locally inefficient sequence of repeated adjustments to one edge label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 103,
+          "transcript_excerpt": "e-confidence-idk  label \"no · thin / low score\" → \"no · low confidence\"",
+          "finding": "The agent shortened the label after positioning failed to clear lint."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 106,
+          "transcript_excerpt": "e-confidence-idk  label no → —",
+          "finding": "The sequence ended in label removal, but it was lint-driven adjustment rather than an add-delete-rebuild object cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "transcript_excerpt": "Committed: ... (63 patch operations).",
+          "finding": "The agent finalized successfully within the recorded 844.8-second wall time and well below the turn limit."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The sole session completed normally, had zero metadata retries, and reached a successful commit, so nothing is excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "transcript_excerpt": "The proposal is now awaiting operator review.",
+          "finding": "The session ended normally after successful finalize; there was no harness death, proxy failure, container collision, or stuck ACTIVE session."
+        }
+      ]
+    },
+    "score": 7.5
+  },
+  "usage": {
+    "input_tokens": 58424,
+    "output_tokens": 3655
+  },
+  "flags": []
+}

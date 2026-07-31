@@ -1,0 +1,2355 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-40-operational-maps",
+  "title": "Operational maps — the diagram language",
+  "root": "b-om-root",
+  "blocks": {
+    "b-om-root": {
+      "id": "b-om-root",
+      "type": "paragraph",
+      "props": {},
+      "text": [],
+      "children": [
+        "b7-opener",
+        "b2-vision-h",
+        "b2-vision-1",
+        "pm-ms6jdegc-142-bnn22y",
+        "pm-ms6jdegc-143-y47ffd",
+        "pm-ms6jdegc-144-h4tw4y",
+        "pm-ms6jdegc-145-znvemm",
+        "b2-vision-2",
+        "pm-ms6jdegc-146-2chx8o",
+        "pm-ms6jdegc-147-bk204o",
+        "pm-ms6jdegc-148-m20qjr",
+        "pm-ms6jdegc-149-7wwm20",
+        "b2-vision-3",
+        "pm-ms6jdegc-150-4xzv84",
+        "pm-ms6jdegc-151-wa0l60",
+        "pm-ms6jdegc-152-z8wzrd",
+        "b2-vision-4",
+        "pm-ms6jdegc-153-z6deel",
+        "pm-ms6jdegc-154-95ekf0",
+        "pm-ms6jdegc-155-pde1m8",
+        "b-om-genres-heading-10",
+        "b3-genres-intro",
+        "b3-genres-split",
+        "b3-map-h",
+        "b3-map-nodes",
+        "b3-map-edges",
+        "b3-map-time",
+        "b3-map-answers",
+        "b3-map-exemplars",
+        "b3-proc-h",
+        "b3-proc-nodes",
+        "b3-proc-edges",
+        "b3-proc-time",
+        "b3-proc-answers",
+        "b3-proc-exemplars",
+        "b3-compose-h",
+        "b3-compose-regional",
+        "b3-compose-crossover",
+        "b3-compose-build",
+        "b2-surface-h",
+        "b2-surface-lead",
+        "b2-shapes-h",
+        "b2-shapes-intro",
+        "b2-shape-rect",
+        "b2-shape-rounded",
+        "b2-shape-predef",
+        "b2-shape-decision",
+        "b2-shape-triangle",
+        "b2-shape-circle",
+        "b2-shape-arrow",
+        "b2-shape-octagon",
+        "b2-shapes-cut",
+        "pm-ms6jdegc-156-c1gm15",
+        "b2-glyphs-h",
+        "b-om-surface-glyphs-27",
+        "b-om-glyph-inv-intro",
+        "b-om-glyph-inv-activity",
+        "b-om-glyph-inv-archive",
+        "b-om-glyph-inv-key",
+        "b-om-glyph-inv-chat",
+        "b-om-glyph-inv-cloud",
+        "b-om-glyph-inv-cpu",
+        "b-om-glyph-inv-database",
+        "b-om-glyph-inv-display",
+        "b-om-glyph-inv-mail",
+        "b-om-glyph-inv-file",
+        "b-om-glyph-inv-code",
+        "b-om-glyph-inv-bolt",
+        "b-om-glyph-inv-pin",
+        "b-om-glyph-inv-phone",
+        "b-om-glyph-inv-package",
+        "b-om-glyph-inv-coin",
+        "b-om-glyph-inv-shield",
+        "b-om-glyph-inv-send",
+        "b-om-glyph-inv-server",
+        "b-om-glyph-inv-cube",
+        "b-om-glyph-inv-gear",
+        "b-om-glyph-inv-drive",
+        "b-om-glyph-inv-terminal",
+        "b-om-glyph-inv-person",
+        "b-om-glyph-inv-wallet",
+        "b-om-glyph-inv-globe",
+        "b2-glyphs-sharp",
+        "b2-roster-h",
+        "b2-roster-intro",
+        "b2-roster-sheet-1",
+        "b2-roster-agent",
+        "b2-roster-model",
+        "b2-roster-human",
+        "b2-roster-orchestrator",
+        "b2-roster-memory",
+        "b2-roster-knowledge",
+        "b2-roster-queue",
+        "b2-roster-server",
+        "b2-roster-terminal",
+        "b2-roster-config",
+        "b2-roster-api",
+        "b2-roster-message",
+        "b2-roster-send",
+        "b2-roster-event",
+        "b2-roster-guardrail",
+        "b2-roster-monitor",
+        "b2-roster-judge",
+        "b2-roster-document",
+        "b2-roster-documents",
+        "b2-roster-search",
+        "b2-roster-tool",
+        "b2-roster-wait",
+        "b2-roster-lock",
+        "b2-roster-eval",
+        "b2-roster-x-activity",
+        "b2-roster-x-archive",
+        "b2-roster-x-key",
+        "b2-roster-x-coin",
+        "b2-roster-x-package",
+        "b2-roster-x-phone",
+        "b2-roster-notes",
+        "b2-registry-h",
+        "b2-registry-lead",
+        "b-om-s2-registry-code",
+        "b6-context-render-intro",
+        "b6-context-render-code",
+        "b6-registry-storage",
+        "b6-registry-placement",
+        "b2-decisions-h",
+        "b2-dec-purpose",
+        "b2-dec-composition",
+        "b2-dec-iconfirst",
+        "b2-dec-name",
+        "b2-dec-registry",
+        "b2-dec-softedges",
+        "b2-dec-role",
+        "b2-dec-color-guidance",
+        "b2-dec-no-idioms",
+        "b2-dec-no-plurals",
+        "b2-dec-name-genre",
+        "b2-dec-ports-open"
+      ]
+    },
+    "b2-vision-h": {
+      "id": "b2-vision-h",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The Vision"
+        }
+      ],
+      "children": []
+    },
+    "b2-vision-1": {
+      "id": "b2-vision-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The canvas is the map layer of Codecaine Core, purpose-built for agentic diagramming. "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-142-bnn22y": {
+      "id": "pm-ms6jdegc-142-bnn22y",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A board shows an agentic system whole: "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-143-y47ffd": {
+      "id": "pm-ms6jdegc-143-y47ffd",
+      "type": "list-item",
+      "props": {},
+      "text": [
+        {
+          "insert": "the agents, models, memories, tools, queues, and people it is made of, and the flows that join them"
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-144-h4tw4y": {
+      "id": "pm-ms6jdegc-144-h4tw4y",
+      "type": "list-item",
+      "props": {},
+      "text": [
+        {
+          "insert": "This agent feeds that knowledge base, which that tool reads. "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-145-znvemm": {
+      "id": "pm-ms6jdegc-145-znvemm",
+      "type": "list-item",
+      "props": {},
+      "text": [
+        {
+          "insert": "Other diagram forms are possible on it, but every design decision favors this one."
+        }
+      ],
+      "children": []
+    },
+    "b2-vision-2": {
+      "id": "b2-vision-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Composition is Factorio-style. "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-146-2chx8o": {
+      "id": "pm-ms6jdegc-146-2chx8o",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Nothing prescribes a layout: "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-147-bk204o": {
+      "id": "pm-ms6jdegc-147-bk204o",
+      "type": "list-item",
+      "props": {},
+      "text": [
+        {
+          "insert": "objects are not required to live inside sections (other than the based board section) and there is no template a board must follow"
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-148-m20qjr": {
+      "id": "pm-ms6jdegc-148-m20qjr",
+      "type": "list-item",
+      "props": {},
+      "text": [
+        {
+          "insert": "Order emerges from what the pieces are and how they connect — unmistakable component identity, typed edges — the way a factory floor reads without anyone enforcing its shape. "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-149-7wwm20": {
+      "id": "pm-ms6jdegc-149-7wwm20",
+      "type": "list-item",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sections group a subsystem when grouping earns its keep; structure and behavior mix freely on one open surface, and the most agentic content on a board is exactly where they touch: a procedure step writing to a shared memory."
+        }
+      ],
+      "children": []
+    },
+    "b2-vision-3": {
+      "id": "b2-vision-3",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The board stays at the operational level, and depth lives in the docs. "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-150-4xzv84": {
+      "id": "pm-ms6jdegc-150-4xzv84",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A doc section embeds a reference view of the board region (based on section id) it discusses, and the detailed diagrams specific to that subsystem"
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-151-wa0l60": {
+      "id": "pm-ms6jdegc-151-wa0l60",
+      "type": "list-item",
+      "props": {},
+      "text": [
+        {
+          "insert": "a sequence diagram, a fine-grained process flow — sit in the doc beside that reference"
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-152-z8wzrd": {
+      "id": "pm-ms6jdegc-152-z8wzrd",
+      "type": "list-item",
+      "props": {},
+      "text": [
+        {
+          "insert": "One board, many documentation lenses; the map never bloats to carry the detail."
+        }
+      ],
+      "children": []
+    },
+    "b2-vision-4": {
+      "id": "b2-vision-4",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Consistency comes from vocabulary, not layout rules. "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-153-z6deel": {
+      "id": "pm-ms6jdegc-153-z6deel",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every semantic object has one recognizable look supplied by the preference registry; edges carry their meaning on the line; and how boards get laid out is general prompting — the build grammar above plus layout guidance in the agent context, not a catalog of named patterns. "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-154-95ekf0": {
+      "id": "pm-ms6jdegc-154-95ekf0",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Most boards will simply use the shipped base corpus, which is why the shipped defaults are the real product. "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-155-pde1m8": {
+      "id": "pm-ms6jdegc-155-pde1m8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The genre is named the operational map."
+        }
+      ],
+      "children": []
+    },
+    "b-om-genres-heading-10": {
+      "id": "b-om-genres-heading-10",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The Two Genres"
+        }
+      ],
+      "children": []
+    },
+    "b2-surface-h": {
+      "id": "b2-surface-h",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The Object Surface"
+        }
+      ],
+      "children": []
+    },
+    "b2-surface-lead": {
+      "id": "b2-surface-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Icons carry the semantic vocabulary; shapes are a small universal core. Icons win because they have better detail, are drawn from the Nucleo library through the existing vendoring pipeline (expanding the set is selection, not authoring), need no bespoke geometry maintenance, and are user-swappable — customizing your diagram style means picking a different glyph. A shape earns its place only by being universally readable without a legend while holding sentence-length text inside a resizable outline. Section, sticky, and connector are permanent fixtures outside this audit; the pill look belongs solely to the connector's label chip and is not a placeable object."
+        }
+      ],
+      "children": []
+    },
+    "b2-shapes-h": {
+      "id": "b2-shapes-h",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Shapes"
+        }
+      ],
+      "children": []
+    },
+    "b2-shapes-intro": {
+      "id": "b2-shapes-intro",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The full placeable shape roster — eight universal marks. Arrow and triangle keep the schema's direction field (arrow: left or right; triangle: up or down), placed as directional variants the way the picker already offers them:"
+        }
+      ],
+      "children": []
+    },
+    "b2-shape-rect": {
+      "id": "b2-shape-rect",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "rectangle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — plain box; message or payload container"
+        }
+      ],
+      "children": []
+    },
+    "b2-shape-rounded": {
+      "id": "b2-shape-rounded",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "rounded rectangle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a step"
+        }
+      ],
+      "children": []
+    },
+    "b2-shape-predef": {
+      "id": "b2-shape-predef",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "predefined process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a delegated step: spawned sub-agent, subroutine, enqueued task"
+        }
+      ],
+      "children": []
+    },
+    "b2-shape-decision": {
+      "id": "b2-shape-decision",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "decision diamond",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a branch"
+        }
+      ],
+      "children": []
+    },
+    "b2-shape-triangle": {
+      "id": "b2-shape-triangle",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "triangle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — directional marker; direction up or down"
+        }
+      ],
+      "children": []
+    },
+    "b2-shape-arrow": {
+      "id": "b2-shape-arrow",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "arrow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — routing outcome; direction left or right"
+        }
+      ],
+      "children": []
+    },
+    "b2-shape-octagon": {
+      "id": "b2-shape-octagon",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "octagon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — stop"
+        }
+      ],
+      "children": []
+    },
+    "b2-shapes-cut": {
+      "id": "b2-shapes-cut",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Everything else in the basic and flowchart categories is cut. "
+        }
+      ],
+      "children": []
+    },
+    "pm-ms6jdegc-156-c1gm15": {
+      "id": "pm-ms6jdegc-156-c1gm15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The document / file / page-corner family collapses into one well-chosen document glyph; storage cylinders yield to the database glyph; the picker's default face is icons, with this shape core as a small utility row."
+        }
+      ],
+      "children": []
+    },
+    "b2-glyphs-h": {
+      "id": "b2-glyphs-h",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Glyphs"
+        }
+      ],
+      "children": []
+    },
+    "b-om-surface-glyphs-27": {
+      "id": "b-om-surface-glyphs-27",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The direction succeeds or fails on the glyph set. The current 26 glyphs are generic-tech clip art, which is why only five see use. The real investment is an agentic vocabulary — candidates: agent, sub-agent, model/LLM, tool, knowledge base, memory, queue/stream, human, guardrail, prompt, artifact/report, eval/judge, orchestrator. With that set plus connector roles, a board can say \"this agent writes to this memory, which this tool reads\" with almost no shape semantics at all."
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-intro": {
+      "id": "b-om-glyph-inv-intro",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The current glyph inventory — 26 ids in registry order ("
+        },
+        {
+          "insert": "ICON_GLYPH_IDS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in packages/canvas/src/objects/shapes/icon/icon-glyphs.ts). Five are in use on the boards; the rest are the generic-tech set the agentic vocabulary would replace:"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-activity": {
+      "id": "b-om-glyph-inv-activity",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "activity",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Activity"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-archive": {
+      "id": "b-om-glyph-inv-archive",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "archive",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Archive"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-key": {
+      "id": "b-om-glyph-inv-key",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "key",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Key"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-chat": {
+      "id": "b-om-glyph-inv-chat",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "chat",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Chat · in use (3) — conversation history, chat surfaces"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-cloud": {
+      "id": "b-om-glyph-inv-cloud",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "cloud",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Cloud"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-cpu": {
+      "id": "b-om-glyph-inv-cpu",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "cpu",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — CPU · in use (5) — AI / model steps"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-database": {
+      "id": "b-om-glyph-inv-database",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "database",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Database · collides with the flowchart database shape; glyph wins on the agent surface"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-display": {
+      "id": "b-om-glyph-inv-display",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "display",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Display"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-mail": {
+      "id": "b-om-glyph-inv-mail",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "mail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Mail"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-file": {
+      "id": "b-om-glyph-inv-file",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "file",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — File"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-code": {
+      "id": "b-om-glyph-inv-code",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "code",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Code"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-bolt": {
+      "id": "b-om-glyph-inv-bolt",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "bolt",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Bolt"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-pin": {
+      "id": "b-om-glyph-inv-pin",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "pin",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Pin"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-phone": {
+      "id": "b-om-glyph-inv-phone",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "phone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Phone"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-package": {
+      "id": "b-om-glyph-inv-package",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "package",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Package"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-coin": {
+      "id": "b-om-glyph-inv-coin",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "coin",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Coin"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-shield": {
+      "id": "b-om-glyph-inv-shield",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "shield",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Shield · in use (1) — guardian / babysit role"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-send": {
+      "id": "b-om-glyph-inv-send",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "send",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Send"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-server": {
+      "id": "b-om-glyph-inv-server",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "server",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Server"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-cube": {
+      "id": "b-om-glyph-inv-cube",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "cube",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Cube"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-gear": {
+      "id": "b-om-glyph-inv-gear",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "gear",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Gear"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-drive": {
+      "id": "b-om-glyph-inv-drive",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "drive",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Drive"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-terminal": {
+      "id": "b-om-glyph-inv-terminal",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "terminal",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Terminal · in use (2) — CLI / runner components"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-person": {
+      "id": "b-om-glyph-inv-person",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "person",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Person · in use (6) — actors: user, client, operator"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-wallet": {
+      "id": "b-om-glyph-inv-wallet",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "wallet",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Wallet"
+        }
+      ],
+      "children": []
+    },
+    "b-om-glyph-inv-globe": {
+      "id": "b-om-glyph-inv-globe",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "globe",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — Globe"
+        }
+      ],
+      "children": []
+    },
+    "b2-glyphs-sharp": {
+      "id": "b2-glyphs-sharp",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The replacement roster is drawn from the Nucleo Sharp set — the current 26 come from nucleo_ui/outline, and sharper edges have three independent levers: the source set (nucleo_sharp sits unused in the library at Dropbox/UI Components/Icons/nucleo), the renderer's hardcoded round caps and joins, and stroke weight (the canvas draws at 0.65/18 viewBox units against the art's native 1.5/18). Regeneration is manifest-driven: edit packages/canvas/src/ui/icons/manifest.json, run bun tools/nucleo-icons/generate.ts."
+        }
+      ],
+      "children": []
+    },
+    "b2-registry-h": {
+      "id": "b2-registry-h",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The Preference Registry"
+        }
+      ],
+      "children": []
+    },
+    "b2-registry-lead": {
+      "id": "b2-registry-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every semantic object gets a registry entry: its name, what it means, the scenarios where it is used, and its default color. The name is the stored glyph or shape id itself — one string across registry, picker, agent vocabulary, and lints; there is no separate render pointer. Consistency comes from defaults: the default color and the shared meaning cover the vast majority of placements. Color is the one per-placement override — legibility against a section's fill or a board's palette is a legitimate reason — while meaning and scenarios are the shared language and do not vary. Their main consumer is the agent's context: the vocabulary listing that walks every shape and glyph — here is the name, here is what it is, here is when to use it — plus picker tooltips and lint wording."
+        }
+      ],
+      "children": []
+    },
+    "b-om-s2-registry-code": {
+      "id": "b-om-s2-registry-code",
+      "type": "code",
+      "props": {
+        "language": "ts"
+      },
+      "text": [
+        {
+          "insert": "// Object-preference registry — entry shape (sketch, not yet built)\n// `name` IS the stored glyph or shape id — no aliasing, no render pointer.\n// One string names the object in the registry, the picker, the agent's\n// vocabulary, and the lints.\ntype ObjectPreference = {\n  name: string; // \"memory\", \"agent\", \"decision\", …\n  meaning: string; // one line: what this object represents\n  scenarios: string[]; // \"use when …\" — the boards' shared language\n  color: CanvasColor; // default swatch — used almost always; per-placement override allowed\n};\n\n// Example shipped defaults\nconst DEFAULTS: ObjectPreference[] = [\n  {\n    name: \"memory\",\n    meaning: \"A store an agent reads from or writes to across turns\",\n    scenarios: [\n      \"long/short-term memory, knowledge bases, vector stores\",\n      \"the target of state-read / state-write edges\",\n    ],\n    color: \"blue\",\n  },\n  {\n    name: \"agent\",\n    meaning: \"An autonomous agent — plans and acts on its own\",\n    scenarios: [\"main agents, sub-agents, workers in a pool\"],\n    color: \"teal\",\n  },\n];"
+        }
+      ],
+      "children": []
+    },
+    "b2-decisions-h": {
+      "id": "b2-decisions-h",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decision Record"
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-purpose": {
+      "id": "b2-dec-purpose",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "Purpose-built for agentic diagramming"
+      },
+      "text": [
+        {
+          "insert": "The canvas is Core's map layer, designed for agentic systems; other diagram forms are incidental. When design choices pull apart, the agentic use case wins."
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-composition": {
+      "id": "b2-dec-composition",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "Free composition; depth lives in the docs"
+      },
+      "text": [
+        {
+          "insert": "No enforced containment or layout templates — sections are available structure, not mandatory. Boards stay operational; detailed diagrams (sequence, fine-grained flow) live in doc sections beside an embedded reference view of the board region."
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-iconfirst": {
+      "id": "b2-dec-iconfirst",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "Icon-first with an eight-shape universal core"
+      },
+      "text": [
+        {
+          "insert": "Icons carry semantics; the placeable shapes are exactly the eight listed above, with arrow (left/right) and triangle (up/down) as directional variants. Predefined process stays a shape (needs inline text, reads universally). Pill is connector furniture only. The document family collapses into a single glyph."
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-name": {
+      "id": "b2-dec-name",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "One canonical name per object, everywhere"
+      },
+      "text": [
+        {
+          "insert": "The registry's key field is name, and that string is the single canonical id across the whole system: registry key, picker label, the string the agent types to place the object, and the string lints cite. There is no renders field — the name IS the stored glyph or shape id, so an entry cannot drift from the art it names. Changing the art behind a name is a manifest change and a regeneration, not a registry alias."
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-registry": {
+      "id": "b2-dec-registry",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "Shipped defaults are the product"
+      },
+      "text": [
+        {
+          "insert": "The registry ships a default base corpus — meanings, scenarios, colors — and the defaults cover the vast majority of placements; most boards use them unmodified. Color is the single per-placement override, warranted by section fills and palette collisions. Meaning and scenarios are shared language, fixed across users and boards, and their primary consumer is the agent's context: the vocabulary listing that teaches the system what each object is and when to use it. Overrides ripple to the picker and the agent via the registry.changed event."
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-h": {
+      "id": "b2-roster-h",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Proposed Starter Roster"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-intro": {
+      "id": "b2-roster-intro",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The shipped base corpus — 30 glyphs from nucleo_ui/outline at 18px: 24 semantic picks plus six retained glyphs carrying agentic designations. Half reuse art the canvas already vendors, so existing boards keep their look. Each entry: name, source icon, default color, scenario."
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-agent": {
+      "id": "b2-roster-agent",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "agent",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — robot-2 · teal — an autonomous agent (alternates: robot, chat-bot, face-robot)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-model": {
+      "id": "b2-roster-model",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "model",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — microchip · pink — an LLM / model call — the existing cpu glyph's art (alternates: brain-sparkle, brain-nodes)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-human": {
+      "id": "b2-roster-human",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "human",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — user · yellow — a person in the loop — the existing person glyph's art (alternates: people, users)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-orchestrator": {
+      "id": "b2-roster-orchestrator",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "orchestrator",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — sitemap · teal — coordination and spawn hierarchy (squares-connected also approved; workflow, gear-nodes alternates)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-memory": {
+      "id": "b2-roster-memory",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "memory",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — database · blue — a store read/written across turns — the existing database glyph (family: database-check, -key, -lock, -plus)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-knowledge": {
+      "id": "b2-roster-knowledge",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "knowledge",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — book-2 · blue — reference corpus, knowledge base — a singular book (alternates: book-open, books)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-queue": {
+      "id": "b2-roster-queue",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "queue",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — queue · green — a queue or stream of work items (alternates: stack, app-stack)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-server": {
+      "id": "b2-roster-server",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "server",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — server · gray — infrastructure and services — the existing server glyph (alternate: cloud)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-terminal": {
+      "id": "b2-roster-terminal",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "terminal",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — square-terminal · gray — CLI, runner, exec surface — bordered (console also approved; replaces the borderless terminal art)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-config": {
+      "id": "b2-roster-config",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "config",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — gear · gray — configuration and settings — the existing gear glyph"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-api": {
+      "id": "b2-roster-api",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "api",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — plug · gray — external API or connection point (alternates: plug-2, connections)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-message": {
+      "id": "b2-roster-message",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "message",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — chat-bubble · yellow — a conversation or message surface — the existing chat glyph"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-send": {
+      "id": "b2-roster-send",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "send",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — paper-plane · green — emit or dispatch — the existing send glyph"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-event": {
+      "id": "b2-roster-event",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "event",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — bolt · yellow — a trigger or event — the existing bolt glyph"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-guardrail": {
+      "id": "b2-roster-guardrail",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "guardrail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — shield · red — safety gate — plain shield (the current shield glyph uses shield-check art; alternates: shield-check, shield-lock)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-monitor": {
+      "id": "b2-roster-monitor",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "monitor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — eye · gray — observation and tracing (alternates: gauge, radar)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-judge": {
+      "id": "b2-roster-judge",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "judge",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — scale · pink — an eval or verdict step (alternates: gavel, badge-check)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-document": {
+      "id": "b2-roster-document",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "document",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — file · white — a produced artifact — the existing file glyph (alternates: report-file, page)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-notes": {
+      "id": "b2-roster-notes",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Adoption is same-set and mechanical: manifest entries for the new sources, glyph ids renamed to the registry names above (canonical-name rule: cpu becomes model, person becomes human, chat becomes message, and so on), then one run of bun tools/nucleo-icons/generate.ts. No renderer changes. Considered and declined: branch, target, and tag — no clear job on the audited boards; any library icon can still be brought in ad hoc."
+        }
+      ],
+      "children": []
+    },
+    "b3-genres-intro": {
+      "id": "b3-genres-intro",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Two genres, applied per region — not per board. Any region of a board is either mapping structure or walking a procedure, and the region's genre fixes its vocabulary, what its edges mean, and its reading direction. This section is the build grammar: the description the system uses to decide what it is drawing, and the reason two boards of the same system come out looking alike."
+        }
+      ],
+      "children": []
+    },
+    "b3-genres-split": {
+      "id": "b3-genres-split",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The corpus splits cleanly",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — about two-thirds of all edges are temporal (next step, branch, ordering) and one-third are data relationships (reads, writes, feeds, informs). The split is the genre boundary made visible."
+        }
+      ],
+      "children": []
+    },
+    "b3-map-h": {
+      "id": "b3-map-h",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "System Maps — What Exists and What Touches What"
+        }
+      ],
+      "children": []
+    },
+    "b3-map-nodes": {
+      "id": "b3-map-nodes",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Nodes are components",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — agents, models, memories, tools, queues, humans — icons and stores, not steps."
+        }
+      ],
+      "children": []
+    },
+    "b3-map-edges": {
+      "id": "b3-map-edges",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Edges are standing relationships",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — reads, writes, feeds, informs. This agent reads that memory; this tool feeds that store. The label names the relationship when it is not obvious."
+        }
+      ],
+      "children": []
+    },
+    "b3-map-time": {
+      "id": "b3-map-time",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Time is not an axis",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — the same edge fires a thousand times in production."
+        }
+      ],
+      "children": []
+    },
+    "b3-map-answers": {
+      "id": "b3-map-answers",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The region answers",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — where state lives, who writes it, who reads it, what depends on what."
+        }
+      ],
+      "children": []
+    },
+    "b3-map-exemplars": {
+      "id": "b3-map-exemplars",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Exemplars",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — v2-flow, bubba-voice, agent-flows-2, most of gc-decomp-harness."
+        }
+      ],
+      "children": []
+    },
+    "b3-proc-h": {
+      "id": "b3-proc-h",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Procedures — What Happens Next"
+        }
+      ],
+      "children": []
+    },
+    "b3-proc-nodes": {
+      "id": "b3-proc-nodes",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Nodes are steps",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — process and predefined-process chains; decision diamonds branch; terminators open and close."
+        }
+      ],
+      "children": []
+    },
+    "b3-proc-edges": {
+      "id": "b3-proc-edges",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Edges mean then",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — next step, branch outcomes carried as on-line text (yes / no), and back-edges for loops like \"Restart Execution Loop\"."
+        }
+      ],
+      "children": []
+    },
+    "b3-proc-time": {
+      "id": "b3-proc-time",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Time is the axis",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — a start, branches, an end — and a stop octagon where the run halts."
+        }
+      ],
+      "children": []
+    },
+    "b3-proc-answers": {
+      "id": "b3-proc-answers",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The region answers",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — under what condition does what happen, and when does it stop."
+        }
+      ],
+      "children": []
+    },
+    "b3-proc-exemplars": {
+      "id": "b3-proc-exemplars",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Exemplars",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — intent-classification-1 and -2, ink-diagrams, the orchestration loop inside claude-code-researcher."
+        }
+      ],
+      "children": []
+    },
+    "b3-compose-h": {
+      "id": "b3-compose-h",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "How the Genres Compose"
+        }
+      ],
+      "children": []
+    },
+    "b3-compose-regional": {
+      "id": "b3-compose-regional",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Genre is regional and fluid",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — a system map's section can itself be a procedure — the map shows the factory, one section walks a single machine's loop. Procedures sit inside mapped components; maps form context around a central procedure. Neither frames the other by rule."
+        }
+      ],
+      "children": []
+    },
+    "b3-compose-crossover": {
+      "id": "b3-compose-crossover",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Crossover edges join them",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — an edge from a procedure step writing into a memory node is a procedure node touching a map node. Control flow that periodically touches shared state is the signature of an agentic-system board — the most agentic content on it."
+        }
+      ],
+      "children": []
+    },
+    "b3-compose-build": {
+      "id": "b3-compose-build",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The build rule",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — to draw a region: decide its genre first; the genre then fixes the vocabulary (components and stores versus steps and branches), what the edges mean, and the reading direction. Applying the same decision procedure every time is what makes boards consistent."
+        }
+      ],
+      "children": []
+    },
+    "b2-shape-circle": {
+      "id": "b2-shape-circle",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "circle / ellipse",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — start and end terminators; kept for universality more than corpus usage"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-sheet-1": {
+      "id": "b2-roster-sheet-1",
+      "type": "image",
+      "props": {
+        "src": "./assets/images/roster-final-c.svg",
+        "alt": "The final glyph roster: 30 icons in the soft outline style, registry name above each icon and nucleo_ui icon name below. Rows run agent through documents, then search, tool, wait, lock, eval, then the retained extras: activity, archive, key, coin, package, and voice as the bare telephone handset.",
+        "caption": "The shipped base corpus — 24 semantic picks and 6 retained glyphs."
+      },
+      "text": [],
+      "children": []
+    },
+    "b2-dec-softedges": {
+      "id": "b2-dec-softedges",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "Edge style stays soft — nucleo_ui/outline is the source set"
+      },
+      "text": [
+        {
+          "insert": "The nucleo_sharp set (24px, square caps, miter corners) was evaluated via rendered contact sheets and rejected: the current softer nucleo_ui/outline style reads better. All glyphs draw from nucleo_ui/outline at 18px, which also keeps the pipeline and renderers unchanged."
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-documents": {
+      "id": "b2-roster-documents",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "documents",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — files · white — multiple documents — reports, corpora, batches (alternates: files-2, copies-2)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-x-activity": {
+      "id": "b2-roster-x-activity",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "activity",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — square-activity-chart · gray — traces, telemetry, run activity — retained existing glyph"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-x-archive": {
+      "id": "b2-roster-x-archive",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "archive",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — box-archive · gray — cold storage, retired state — retained existing glyph"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-x-key": {
+      "id": "b2-roster-x-key",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "key",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — key · yellow — secrets, credentials, auth — retained existing glyph"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-x-coin": {
+      "id": "b2-roster-x-coin",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "coin",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — coin · yellow — cost, billing, budgets — retained existing glyph"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-x-package": {
+      "id": "b2-roster-x-package",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "package",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — box-3 · gray — build artifact, bundle, deployment — retained existing glyph"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-x-phone": {
+      "id": "b2-roster-x-phone",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "voice",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — phone · gray — a voice channel: the audio boundary where a human talks to the system (voice sessions, speech-to-text / text-to-speech seams, call surfaces; not telephony plumbing)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-search": {
+      "id": "b2-roster-search",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "search",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — magnifier · gray — retrieval, lookup, similarity search (alternates: magnifier-2, magnifier-check)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-tool": {
+      "id": "b2-roster-tool",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "tool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — wrench · gray — a capability an agent can invoke — distinct from api and config (alternates: wrench-screwdriver, hammer)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-wait": {
+      "id": "b2-roster-wait",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "wait",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — hourglass · gray — blocking waits, join barriers, timeouts (alternates: clock, stopwatch)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-lock": {
+      "id": "b2-roster-lock",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "lock",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — lock · gray — leases, claims, mutual exclusion — key stays secrets (alternates: square-lock, circle-lock)"
+        }
+      ],
+      "children": []
+    },
+    "b2-roster-eval": {
+      "id": "b2-roster-eval",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "eval",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — flask · green — experiments, eval sets, test harnesses (alternates: task-debug, clipboard-check)"
+        }
+      ],
+      "children": []
+    },
+    "b6-context-render-intro": {
+      "id": "b6-context-render-intro",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The context renderer. registry.context renders the vocabulary the agent reads: one element per object, walked in roster order — shapes first, then glyphs. Each element carries the name, the default color, the meaning, and one line per scenario. XML keeps each object a visually distinct block in the prompt; the format is otherwise unimportant. This listing replaces the hand-maintained capabilities vocabulary — the registry becomes its single source."
+        }
+      ],
+      "children": []
+    },
+    "b6-context-render-code": {
+      "id": "b6-context-render-code",
+      "type": "code",
+      "props": {
+        "language": "xml"
+      },
+      "text": [
+        {
+          "insert": "<vocabulary>\n  <object name=\"decision\" preferred_color=\"gray\">\n    <meaning>A branch — the flow forks on a condition</meaning>\n    <use_when>\n      - yes/no gates\n      - routing on the outcome of a check\n    </use_when>\n  </object>\n  <object name=\"memory\" preferred_color=\"blue\">\n    <meaning>A store an agent reads from or writes to across turns</meaning>\n    <use_when>\n      - long/short-term memory, knowledge bases, vector stores\n      - the target of state-read / state-write edges\n    </use_when>\n  </object>\n  <object name=\"agent\" preferred_color=\"teal\">\n    <meaning>An autonomous agent — plans and acts on its own</meaning>\n    <use_when>\n      - main agents, sub-agents, workers in a pool\n    </use_when>\n  </object>\n  <!-- … one element per shape and glyph, roster order … -->\n</vocabulary>"
+        }
+      ],
+      "children": []
+    },
+    "b6-registry-storage": {
+      "id": "b6-registry-storage",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Storage and editing. The registry is not a service — it is a JSON file in the repo, the shipped base corpus, and the single source every consumer reads. Two things read it: the context renderer above and the picker (labels, tooltips, creation colors); the lints quote it for wording. One thing writes it: a registry editor in the studio config surface, where meanings, use-when lists, and preferred colors are adjusted per entry. Edits change the shared defaults themselves — the whole system's language moves together — and a change regenerates the picker's catalog and the agent's context listing. Per-placement color changes are not registry writes; they live on the board object, one at a time."
+        }
+      ],
+      "children": []
+    },
+    "b6-registry-placement": {
+      "id": "b6-registry-placement",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Placement and color. Creation does not accept a color, and that is a feature, not a gap: placing an object stamps the registry's preferred color, and recoloring is its own later gesture (change_color). The two-step forces the right thinking — place it, then look at the board and ask whether this spot warrants a different color at all. The agent's loop already supports this literally: every placement attaches a fresh draft render to the pushed state, so the agent sees the default-colored object in situ before any recolor decision. Most of the time the answer is the default, which is the consistency working."
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-role": {
+      "id": "b2-dec-role",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "The connection role field is deleted"
+      },
+      "text": [
+        {
+          "insert": "Connections carry exactly what a reader can see: the on-line text (label), arrowhead, line style, and color. The invisible role string — schema-allowed, never rendered, never settable in the UI, written only by the layout agent and read back only by its own digest — is removed from the schema, the agent surface, and the digest, with existing boards stripped by migration. Edge meaning lives on the line: the label carries it for a reader, and conventional looks for recurring edge kinds are general prompting guidance. This closes the edge-encoding question."
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-color-guidance": {
+      "id": "b2-dec-color-guidance",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "Color overrides: one guidance sentence, one lint"
+      },
+      "text": [
+        {
+          "insert": "Two mechanisms, both small. The agent context carries one sentence of guidance: keep preferred colors, and depart only when the object would sit illegibly in its container. And a new report-only lint warns when a direct child of a container shares the container's color — a red section must not hold red objects. Nothing blocks, nothing nags the human side; the registry default plus these two keep color drift in check."
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-no-idioms": {
+      "id": "b2-dec-no-idioms",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "No idiom library — layout knowledge is general prompting"
+      },
+      "text": [
+        {
+          "insert": "There is no catalog of named patterns. Recurring structures — a loop drawn as a section with a back-arrow, a delegated step fanning to workers and joining back — should fall out of good general prompting about how to lay boards out: the two-genre build grammar, the vocabulary listing, and plain layout guidance in the agent context. Codifying them as idioms with exemplars was considered and rejected as heavy-handed."
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-no-plurals": {
+      "id": "b2-dec-no-plurals",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "No plural glyphs"
+      },
+      "text": [
+        {
+          "insert": "documents stays a stack because a pile of files is how that thing actually looks; nothing else gets plural art. Many agents are drawn as structure — a fan-out from the delegating step to its workers — not as a dedicated icon, and counts live in text when they matter. No custom stacked art is composed."
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-name-genre": {
+      "id": "b2-dec-name-genre",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "The genre is named the operational map"
+      },
+      "text": [
+        {
+          "insert": "Boards of this kind are operational maps — in the docs, in the agent prompting, and in UI copy. Short form: op map. Runners-up (living blueprint, system board, leveled system map) are retired."
+        }
+      ],
+      "children": []
+    },
+    "b7-opener": {
+      "id": "b7-opener",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "What an operational map is, the two genres every board mixes, the object surface — eight universal shapes plus a 30-glyph icon vocabulary — and the preference registry that keeps boards consistent. The decisions that shaped the language close the doc."
+        }
+      ],
+      "children": []
+    },
+    "b2-dec-ports-open": {
+      "id": "b2-dec-ports-open",
+      "type": "callout",
+      "props": {
+        "kind": "open-call",
+        "title": "Section boundary ports — parked"
+      },
+      "text": [
+        {
+          "insert": "Sections have no ports. Cross-section edges attach to the section itself and mean all-of-this. Revisit only if free composition proves to need boundary termination."
+        }
+      ],
+      "children": []
+    }
+  }
+}

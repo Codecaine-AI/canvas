@@ -48,7 +48,7 @@
     },
     {
       "id": "node-fetch-relevant-data",
-      "type": "trapezoid",
+      "type": "process",
       "text": "Fetch Relavant Data",
       "color": "red",
       "parentId": "page-frame",
@@ -59,12 +59,12 @@
         "height": 128
       },
       "style": {
-        "shape": "trapezoid"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "doc-past-messages",
-      "type": "page-corner",
+      "type": "icon",
       "text": "Past Messages in Chain (And Message Classifications)",
       "color": "yellow",
       "parentId": "page-frame",
@@ -75,12 +75,13 @@
         "height": 160
       },
       "style": {
-        "shape": "page-corner"
-      }
+        "shape": "icon"
+      },
+      "icon": "document"
     },
     {
       "id": "doc-similar-past-tickets",
-      "type": "page-corner",
+      "type": "icon",
       "text": "Similar Past Tickets",
       "color": "yellow",
       "parentId": "page-frame",
@@ -91,12 +92,13 @@
         "height": 128
       },
       "style": {
-        "shape": "page-corner"
-      }
+        "shape": "icon"
+      },
+      "icon": "document"
     },
     {
       "id": "doc-other-context",
-      "type": "page-corner",
+      "type": "icon",
       "text": "Other Context",
       "color": "yellow",
       "parentId": "page-frame",
@@ -107,8 +109,9 @@
         "height": 128
       },
       "style": {
-        "shape": "page-corner"
-      }
+        "shape": "icon"
+      },
+      "icon": "document"
     },
     {
       "id": "section-direct",
@@ -145,7 +148,7 @@
     },
     {
       "id": "node-classify-intent-direct",
-      "type": "pentagon",
+      "type": "process",
       "text": "Classify Intent",
       "color": "blue",
       "parentId": "section-direct",
@@ -156,12 +159,12 @@
         "height": 144
       },
       "style": {
-        "shape": "pentagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "doc-intent-defs-direct",
-      "type": "page-corner",
+      "type": "icon",
       "text": "Intent Definitions and Examples",
       "color": "yellow",
       "parentId": "section-direct",
@@ -172,8 +175,9 @@
         "height": 144
       },
       "style": {
-        "shape": "page-corner"
-      }
+        "shape": "icon"
+      },
+      "icon": "document"
     },
     {
       "id": "intent-refund-request",
@@ -310,7 +314,7 @@
     },
     {
       "id": "node-classify-intent-layered",
-      "type": "pentagon",
+      "type": "process",
       "text": "Classify Intent",
       "color": "blue",
       "parentId": "section-layered",
@@ -321,12 +325,12 @@
         "height": 144
       },
       "style": {
-        "shape": "pentagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "doc-intent-defs-layered",
-      "type": "page-corner",
+      "type": "icon",
       "text": "Intent Definitions and Examples",
       "color": "yellow",
       "parentId": "section-layered",
@@ -337,12 +341,13 @@
         "height": 144
       },
       "style": {
-        "shape": "page-corner"
-      }
+        "shape": "icon"
+      },
+      "icon": "document"
     },
     {
       "id": "layer1-refunds",
-      "type": "pentagon",
+      "type": "process",
       "text": "Refunds",
       "color": "blue",
       "parentId": "section-layered",
@@ -353,12 +358,12 @@
         "height": 112
       },
       "style": {
-        "shape": "pentagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "layer1-orders",
-      "type": "pentagon",
+      "type": "process",
       "text": "Orders",
       "color": "blue",
       "parentId": "section-layered",
@@ -369,12 +374,12 @@
         "height": 112
       },
       "style": {
-        "shape": "pentagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "layer1-subscriptions",
-      "type": "pentagon",
+      "type": "process",
       "text": "Subscriptions",
       "color": "blue",
       "parentId": "section-layered",
@@ -385,12 +390,12 @@
         "height": 112
       },
       "style": {
-        "shape": "pentagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "layer1-intent-n",
-      "type": "pentagon",
+      "type": "process",
       "text": "Intent N",
       "color": "blue",
       "parentId": "section-layered",
@@ -401,12 +406,12 @@
         "height": 112
       },
       "style": {
-        "shape": "pentagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "layer2-new-orders",
-      "type": "pentagon",
+      "type": "process",
       "text": "New Orders",
       "color": "blue",
       "parentId": "section-layered",
@@ -417,12 +422,12 @@
         "height": 112
       },
       "style": {
-        "shape": "pentagon"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "layer2-existing-orders",
-      "type": "pentagon",
+      "type": "process",
       "text": "Existing Orders",
       "color": "blue",
       "parentId": "section-layered",
@@ -433,7 +438,7 @@
         "height": 112
       },
       "style": {
-        "shape": "pentagon"
+        "shape": "rounded-rect"
       }
     },
     {
@@ -620,7 +625,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -635,7 +639,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green",
       "waypoints": [
         [
@@ -660,7 +663,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green"
     },
     {
@@ -675,7 +677,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green",
       "waypoints": [
         [
@@ -700,7 +701,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "red",
       "waypoints": [
         [
@@ -725,7 +725,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "red",
       "waypoints": [
         [
@@ -750,7 +749,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green"
     },
     {
@@ -765,7 +763,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -790,7 +787,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -815,7 +811,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue"
     },
     {
@@ -830,7 +825,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -855,7 +849,6 @@
       },
       "style": "dashed",
       "arrow": "none",
-      "role": "ellipsis",
       "color": "gray"
     },
     {
@@ -870,7 +863,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "violet"
     },
     {
@@ -885,7 +877,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "violet"
     },
     {
@@ -900,7 +891,6 @@
       },
       "style": "dashed",
       "arrow": "none",
-      "role": "ellipsis",
       "color": "teal"
     },
     {
@@ -915,7 +905,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green"
     },
     {
@@ -930,7 +919,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -955,7 +943,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -980,7 +967,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1005,7 +991,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1030,7 +1015,6 @@
       },
       "style": "dashed",
       "arrow": "none",
-      "role": "ellipsis",
       "color": "gray"
     },
     {
@@ -1045,7 +1029,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1070,7 +1053,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1095,7 +1077,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1120,7 +1101,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1145,7 +1125,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1170,7 +1149,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1195,7 +1173,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1220,7 +1197,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1245,7 +1221,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1270,7 +1245,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1295,7 +1269,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [
@@ -1320,7 +1293,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "blue",
       "waypoints": [
         [

@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-29-eval-202743",
+  "tier": "system",
+  "scenario": "eval-harness-orchestration",
+  "board_id": "eval.2026-07-29-eval-202743.eval-harness-orchestration",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-30T01:27:45.354Z",
+      "finished_at": "2026-07-30T01:40:50.168Z",
+      "wall_ms": 785215,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "ebc9781d-78d1-4c78-933c-76c3ac3bcc4b"
+    ]
+  },
+  "finished_at": "2026-07-30T01:40:50.569Z",
+  "exit_code": 0
+}

@@ -98,7 +98,7 @@
     },
     {
       "id": "pill-overall-context",
-      "type": "pill",
+      "type": "rectangle",
       "text": "Overall Context / Interview Purpose",
       "color": "white",
       "parentId": "card-general",
@@ -109,7 +109,7 @@
         "height": 57
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
@@ -146,7 +146,7 @@
     },
     {
       "id": "pill-q1-base-question-text",
-      "type": "pill",
+      "type": "rectangle",
       "text": "Base Question Text",
       "color": "white",
       "parentId": "card-question-1",
@@ -157,12 +157,12 @@
         "height": 40
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "pill-q1-research-objective",
-      "type": "pill",
+      "type": "rectangle",
       "text": "Research Objective",
       "color": "white",
       "parentId": "card-question-1",
@@ -173,7 +173,7 @@
         "height": 60
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
@@ -194,7 +194,7 @@
     },
     {
       "id": "pill-q2-base-question-text",
-      "type": "pill",
+      "type": "rectangle",
       "text": "Base Question Text",
       "color": "white",
       "parentId": "card-question-2",
@@ -205,12 +205,12 @@
         "height": 60
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "pill-q2-research-objective",
-      "type": "pill",
+      "type": "rectangle",
       "text": "Research Objective",
       "color": "white",
       "parentId": "card-question-2",
@@ -221,7 +221,7 @@
         "height": 60
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
@@ -242,7 +242,7 @@
     },
     {
       "id": "pill-qn-base-question-text",
-      "type": "pill",
+      "type": "rectangle",
       "text": "Base Question Text",
       "color": "white",
       "parentId": "card-question-n",
@@ -253,12 +253,12 @@
         "height": 46.5
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
       "id": "pill-qn-research-objective",
-      "type": "pill",
+      "type": "rectangle",
       "text": "Research Objective",
       "color": "white",
       "parentId": "card-question-n",
@@ -269,7 +269,7 @@
         "height": 60
       },
       "style": {
-        "shape": "pill"
+        "shape": "rounded-rect"
       }
     },
     {
@@ -287,7 +287,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "cpu"
+      "icon": "model"
     },
     {
       "id": "chip-adapt-question",
@@ -304,7 +304,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "cpu"
+      "icon": "model"
     },
     {
       "id": "chat-ai-asks-question",
@@ -321,7 +321,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "chat"
+      "icon": "message"
     },
     {
       "id": "person-interviewee-response",
@@ -338,7 +338,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "person"
+      "icon": "human"
     },
     {
       "id": "chip-generate-probing-question",
@@ -355,7 +355,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "cpu"
+      "icon": "model"
     },
     {
       "id": "section-memory-bank",
@@ -668,7 +668,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "yellow"
     },
     {
@@ -683,7 +682,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "yellow"
     },
     {
@@ -698,7 +696,6 @@
       },
       "style": "solid",
       "arrow": "none",
-      "role": "sequence",
       "color": "gray"
     },
     {
@@ -713,7 +710,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "violet"
     },
     {
@@ -728,7 +724,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -743,7 +738,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -758,7 +752,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "orange"
     },
     {
@@ -773,7 +766,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "orange"
     },
     {
@@ -788,7 +780,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "green"
     },
     {
@@ -804,7 +795,6 @@
       "label": "Test",
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "green"
     },
     {
@@ -819,7 +809,6 @@
       },
       "style": "solid",
       "arrow": "back",
-      "role": "flow",
       "color": "gray",
       "waypoints": [
         [
@@ -844,7 +833,6 @@
       },
       "style": "solid",
       "arrow": "back",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -859,7 +847,6 @@
       },
       "style": "solid",
       "arrow": "back",
-      "role": "flow",
       "color": "gray"
     },
     {
@@ -874,7 +861,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red"
     },
     {
@@ -897,7 +883,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red"
     },
     {
@@ -912,7 +897,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red"
     },
     {
@@ -927,7 +911,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red"
     },
     {
@@ -942,7 +925,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red"
     },
     {
@@ -957,7 +939,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red"
     },
     {
@@ -972,7 +953,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray",
       "waypoints": [
         [
@@ -997,7 +977,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray",
       "waypoints": [
         [
@@ -1022,7 +1001,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray",
       "waypoints": [
         [
@@ -1047,7 +1025,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "gray"
     },
     {

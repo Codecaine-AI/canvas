@@ -113,7 +113,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "person"
+      "icon": "human"
     },
     {
       "id": "decision-have-data",
@@ -165,7 +165,7 @@
     },
     {
       "id": "docs-data-labels",
-      "type": "document-stack",
+      "type": "icon",
       "text": "Data Labels",
       "color": "teal",
       "parentId": "page-frame",
@@ -176,8 +176,9 @@
         "height": 160
       },
       "style": {
-        "shape": "document-stack"
-      }
+        "shape": "icon"
+      },
+      "icon": "documents"
     },
     {
       "id": "process-determine-labels",
@@ -306,7 +307,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "person"
+      "icon": "human"
     },
     {
       "id": "section-case-labeled",
@@ -419,7 +420,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green"
     },
     {
@@ -435,10 +435,12 @@
       "label": "No",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red",
       "waypoints": [
-        [960, 352]
+        [
+          960,
+          352
+        ]
       ]
     },
     {
@@ -454,10 +456,12 @@
       "label": "Yes",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red",
       "waypoints": [
-        [1824, 352]
+        [
+          1824,
+          352
+        ]
       ]
     },
     {
@@ -473,10 +477,12 @@
       "label": "No Labels",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red",
       "waypoints": [
-        [1408, 704]
+        [
+          1408,
+          704
+        ]
       ]
     },
     {
@@ -492,10 +498,12 @@
       "label": "Yes",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red",
       "waypoints": [
-        [2272, 704]
+        [
+          2272,
+          704
+        ]
       ]
     },
     {
@@ -510,7 +518,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "output",
       "color": "red"
     },
     {
@@ -525,10 +532,12 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue",
       "waypoints": [
-        [960, 1056]
+        [
+          960,
+          1056
+        ]
       ]
     },
     {
@@ -543,7 +552,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -558,7 +566,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -573,7 +580,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -581,7 +587,10 @@
       "from": {
         "objectId": "process-generate-classifications",
         "anchor": "bottom",
-        "position": [0.25, 1]
+        "position": [
+          0.25,
+          1
+        ]
       },
       "to": {
         "objectId": "process-labeling-app",
@@ -589,10 +598,12 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue",
       "waypoints": [
-        [2192, 1856]
+        [
+          2192,
+          1856
+        ]
       ]
     },
     {
@@ -600,7 +611,10 @@
       "from": {
         "objectId": "process-generate-classifications",
         "anchor": "bottom",
-        "position": [0.75, 1]
+        "position": [
+          0.75,
+          1
+        ]
       },
       "to": {
         "objectId": "process-compare-intents",
@@ -608,10 +622,12 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue",
       "waypoints": [
-        [2352, 1856]
+        [
+          2352,
+          1856
+        ]
       ]
     },
     {
@@ -626,7 +642,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -641,7 +656,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green"
     },
     {
@@ -656,11 +670,16 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "blue",
       "waypoints": [
-        [1008, 2048],
-        [1008, 1472]
+        [
+          1008,
+          2048
+        ],
+        [
+          1008,
+          1472
+        ]
       ]
     },
     {
@@ -675,11 +694,16 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "teal",
       "waypoints": [
-        [3136, 1616],
-        [2704, 1616]
+        [
+          3136,
+          1616
+        ],
+        [
+          2704,
+          1616
+        ]
       ]
     },
     {
@@ -694,7 +718,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -710,10 +733,12 @@
       "label": "Yes",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red",
       "waypoints": [
-        [2528, 2064]
+        [
+          2528,
+          2064
+        ]
       ]
     },
     {
@@ -729,10 +754,12 @@
       "label": "No",
       "style": "solid",
       "arrow": "forward",
-      "role": "decision",
       "color": "red",
       "waypoints": [
-        [2880, 2064]
+        [
+          2880,
+          2064
+        ]
       ]
     },
     {
@@ -747,11 +774,16 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "feedback",
       "color": "blue",
       "waypoints": [
-        [3440, 2320],
-        [3440, 1472]
+        [
+          3440,
+          2320
+        ],
+        [
+          3440,
+          1472
+        ]
       ]
     }
   ],

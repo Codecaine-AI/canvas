@@ -6,13 +6,7 @@
   "blocks": {
     "b-group-root": {
       "id": "b-group-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-group-title-1",
-        "b-group-body-2",
-        "b-group-code-3",
-        "b-group-canvas-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "The group notation: wraps two or more loose items that share one slot, each placed by its own at= compass; also the spelling of an empty region. A single item never needs a wrapper.",
         "format": "mdx",
@@ -23,12 +17,17 @@
           "shared slot",
           "empty region"
         ]
-      }
+      },
+      "children": [
+        "b-group-title-1",
+        "b-group-body-2",
+        "b-group-code-3",
+        "b-group-canvas-4"
+      ]
     },
     "b-group-title-1": {
       "id": "b-group-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -36,12 +35,12 @@
         {
           "insert": "group — a loose cluster"
         }
-      ]
+      ],
+      "children": []
     },
     "b-group-body-2": {
       "id": "b-group-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -65,12 +64,12 @@
         {
           "insert": " with no children). A single item never needs a wrapper."
         }
-      ]
+      ],
+      "children": []
     },
     "b-group-code-3": {
       "id": "b-group-code-3",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -78,16 +77,17 @@
         {
           "insert": "section 1 text=cluster label=\"A loose cluster\"\n  group\n    item 2 text=note-a type=sticky size=S at=NW\n    item 3 text=note-b type=sticky size=M at=C\n    item 4 text=note-c type=sticky size=M at=SE\n\narrows"
         }
-      ]
+      ],
+      "children": []
     },
     "b-group-canvas-4": {
       "id": "b-group-canvas-4",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/example-group.canvas.json",
         "title": "A loose cluster sharing one slot"
-      }
+      },
+      "children": []
     }
   }
 }

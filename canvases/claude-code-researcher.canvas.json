@@ -45,7 +45,7 @@
       "style": {
         "shape": "icon"
       },
-      "icon": "person"
+      "icon": "human"
     },
     {
       "id": "section-slash-command",
@@ -241,7 +241,7 @@
     },
     {
       "id": "doc-final-report",
-      "type": "document",
+      "type": "icon",
       "text": "Final Report",
       "color": "green",
       "parentId": "page-frame",
@@ -252,8 +252,9 @@
         "height": 160
       },
       "style": {
-        "shape": "document"
-      }
+        "shape": "icon"
+      },
+      "icon": "document"
     },
     {
       "id": "section-agent-state",
@@ -289,7 +290,7 @@
     },
     {
       "id": "doc-main-agent-state",
-      "type": "document",
+      "type": "icon",
       "text": "Main Agent State",
       "color": "orange",
       "parentId": "section-agent-state",
@@ -300,12 +301,13 @@
         "height": 192
       },
       "style": {
-        "shape": "document"
-      }
+        "shape": "icon"
+      },
+      "icon": "document"
     },
     {
       "id": "doc-sub-agent-states",
-      "type": "document-stack",
+      "type": "icon",
       "text": "Sub Agent States",
       "color": "orange",
       "parentId": "section-agent-state",
@@ -316,8 +318,9 @@
         "height": 192
       },
       "style": {
-        "shape": "document-stack"
-      }
+        "shape": "icon"
+      },
+      "icon": "documents"
     },
     {
       "id": "section-sub-agents",
@@ -397,7 +400,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "input",
       "color": "green"
     },
     {
@@ -412,7 +414,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -427,7 +428,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "state-write",
       "color": "blue",
       "waypoints": [
         [
@@ -448,7 +448,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -463,7 +462,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -478,7 +476,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -493,7 +490,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -508,7 +504,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -523,7 +518,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -538,7 +532,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "red"
     },
     {
@@ -553,7 +546,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -568,7 +560,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "output",
       "color": "blue"
     },
     {
@@ -583,7 +574,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "state-write",
       "color": "blue",
       "waypoints": [
         [
@@ -608,7 +598,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "state-write",
       "color": "blue",
       "waypoints": [
         [
@@ -633,7 +622,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "state-write",
       "color": "blue",
       "waypoints": [
         [
@@ -658,7 +646,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "state-write",
       "color": "blue",
       "waypoints": [
         [
@@ -683,7 +670,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "state-write",
       "color": "orange",
       "waypoints": [
         [
@@ -708,7 +694,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "state-write",
       "color": "orange",
       "waypoints": [
         [
@@ -733,7 +718,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "state-read",
       "color": "orange",
       "waypoints": [
         [
@@ -762,7 +746,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "state-write",
       "color": "blue"
     },
     {
@@ -777,7 +760,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "state-write",
       "color": "blue",
       "waypoints": [
         [
@@ -802,7 +784,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     },
     {
@@ -817,7 +798,6 @@
       },
       "style": "solid",
       "arrow": "forward",
-      "role": "flow",
       "color": "blue"
     }
   ],

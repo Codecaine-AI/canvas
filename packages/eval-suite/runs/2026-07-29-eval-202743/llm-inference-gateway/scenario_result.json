@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-07-29-eval-202743",
+  "tier": "system",
+  "scenario": "llm-inference-gateway",
+  "board_id": "eval.2026-07-29-eval-202743.llm-inference-gateway",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-07-30T01:27:45.355Z",
+      "finished_at": "2026-07-30T01:50:32.185Z",
+      "wall_ms": 1367270,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "d5704135-4b08-4ab6-94b4-c57942fac455"
+    ]
+  },
+  "finished_at": "2026-07-30T01:50:32.626Z",
+  "exit_code": 0
+}

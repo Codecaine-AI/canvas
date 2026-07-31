@@ -1,0 +1,929 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-07-29-eval-202743.eval-harness-orchestration",
+  "title": "2026-07-29-eval-202743 · eval-harness-orchestration",
+  "description": "# Offline evaluation harness orchestration\n\nShows a pinned, fingerprinted evaluation run moving left-to-right through immutable scenario inputs, bounded execution against an isolated system under test, evidence-backed grading, scorecard assembly, compatible baseline comparison, and retention/promotion.\n\n- **Execution:** the scheduler fans scenarios to a bounded worker pool. Workers run ordered steps, capture the full transcript and final artifact, retry infrastructure faults, and separately record product regressions.\n- **Grading:** globally bounded graders score criteria concurrently; the artifact-only grader is blind to the original request. Evidence is mandatory, with invalid verdicts retried and repeated failures flagged.\n- **Comparison:** valid verdicts become a scorecard. Threshold movements are narrated only when the chosen baseline has the same run fingerprint.\n- **Retention:** artifacts, transcripts, and verdicts remain available for review; a promoted compatible run becomes a future baseline.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1984,
+    "height": 1264
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-07-29-eval-202743 · eval-harness-orchestration",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3200,
+        "height": 1800
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "inputs",
+      "type": "section",
+      "text": "1 · Pinned run",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 160,
+        "width": 760,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "execution",
+      "type": "section",
+      "text": "2 · Bounded execution",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1020,
+        "y": 160,
+        "width": 980,
+        "height": 700
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "grading",
+      "type": "section",
+      "text": "3 · Evidence-backed grading",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2140,
+        "y": 160,
+        "width": 900,
+        "height": 700
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "assembly",
+      "type": "section",
+      "text": "4 · Assemble scorecard",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 120,
+        "y": 1040,
+        "width": 760,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "comparison",
+      "type": "section",
+      "text": "5 · Compatible comparison",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1020,
+        "y": 1040,
+        "width": 980,
+        "height": 320
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "retention",
+      "type": "section",
+      "text": "6 · Retention & promotion",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2140,
+        "y": 1040,
+        "width": 900,
+        "height": 320
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "suite",
+      "type": "icon",
+      "text": "Pinned suite",
+      "color": "green",
+      "parentId": "inputs",
+      "geometry": {
+        "x": 200,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "eval"
+    },
+    {
+      "id": "scenarios",
+      "type": "icon",
+      "text": "Immutable scenario versions",
+      "color": "white",
+      "parentId": "inputs",
+      "geometry": {
+        "x": 480,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "fingerprint",
+      "type": "icon",
+      "text": "Run fingerprint",
+      "color": "gray",
+      "parentId": "inputs",
+      "geometry": {
+        "x": 680,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "scheduler",
+      "type": "icon",
+      "text": "Bounded scheduler",
+      "color": "teal",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1120,
+        "y": 280,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "workers",
+      "type": "icon",
+      "text": "Worker pool",
+      "color": "teal",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1460,
+        "y": 280,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "sut",
+      "type": "icon",
+      "text": "Isolated SUT",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1800,
+        "y": 280,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "capture",
+      "type": "icon",
+      "text": "Transcript + artifact",
+      "color": "white",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1080,
+        "y": 560,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "documents"
+    },
+    {
+      "id": "infra-fault",
+      "type": "icon",
+      "text": "Infrastructure fault",
+      "color": "yellow",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1480,
+        "y": 560,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "graders",
+      "type": "icon",
+      "text": "Globally bounded graders",
+      "color": "teal",
+      "parentId": "grading",
+      "geometry": {
+        "x": 2240,
+        "y": 280,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "artifact-grader",
+      "type": "icon",
+      "text": "Artifact-only grader",
+      "color": "pink",
+      "parentId": "grading",
+      "geometry": {
+        "x": 2500,
+        "y": 280,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "verdicts",
+      "type": "icon",
+      "text": "Evidence-backed verdicts",
+      "color": "white",
+      "parentId": "grading",
+      "geometry": {
+        "x": 2800,
+        "y": 280,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "evidence-gate",
+      "type": "icon",
+      "text": "Evidence required",
+      "color": "red",
+      "parentId": "grading",
+      "geometry": {
+        "x": 2520,
+        "y": 560,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "assembler",
+      "type": "predefined-process",
+      "text": "Merge valid verdicts",
+      "color": "gray",
+      "parentId": "assembly",
+      "geometry": {
+        "x": 200,
+        "y": 1160,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "scorecard",
+      "type": "icon",
+      "text": "Run scorecard",
+      "color": "white",
+      "parentId": "assembly",
+      "geometry": {
+        "x": 600,
+        "y": 1160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "threshold",
+      "type": "icon",
+      "text": "Movement threshold",
+      "color": "gray",
+      "parentId": "assembly",
+      "geometry": {
+        "x": 400,
+        "y": 1380,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "baseline",
+      "type": "icon",
+      "text": "Chosen baseline",
+      "color": "white",
+      "parentId": "comparison",
+      "geometry": {
+        "x": 1120,
+        "y": 1160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "compatibility",
+      "type": "decision",
+      "text": "Fingerprints match?",
+      "color": "gray",
+      "parentId": "comparison",
+      "geometry": {
+        "x": 1400,
+        "y": 1160,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "movement",
+      "type": "icon",
+      "text": "Threshold movements",
+      "color": "white",
+      "parentId": "comparison",
+      "geometry": {
+        "x": 1800,
+        "y": 1160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "archive",
+      "type": "icon",
+      "text": "Artifacts, transcripts & verdicts",
+      "color": "gray",
+      "parentId": "retention",
+      "geometry": {
+        "x": 2240,
+        "y": 1160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "promote",
+      "type": "icon",
+      "text": "Promote run",
+      "color": "yellow",
+      "parentId": "retention",
+      "geometry": {
+        "x": 2520,
+        "y": 1160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "future-baseline",
+      "type": "icon",
+      "text": "Future baseline",
+      "color": "white",
+      "parentId": "retention",
+      "geometry": {
+        "x": 2800,
+        "y": 1160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "product-regression",
+      "type": "icon",
+      "text": "Product regression",
+      "color": "red",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1680,
+        "y": 560,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    },
+    {
+      "id": "grading-flag",
+      "type": "icon",
+      "text": "Flag after retry",
+      "color": "yellow",
+      "parentId": "grading",
+      "geometry": {
+        "x": 2800,
+        "y": 700,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "event"
+    }
+  ],
+  "connections": [
+    {
+      "id": "e-suite-scenarios",
+      "from": {
+        "objectId": "suite",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "scenarios",
+        "anchor": "left"
+      },
+      "label": "pins",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-scenarios-fingerprint",
+      "from": {
+        "objectId": "scenarios",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fingerprint",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "e-fingerprint-scheduler",
+      "from": {
+        "objectId": "fingerprint",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "scheduler",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-scheduler-workers",
+      "from": {
+        "objectId": "scheduler",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "workers",
+        "anchor": "left"
+      },
+      "label": "bounded fan-out",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-workers-sut",
+      "from": {
+        "objectId": "workers",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "sut",
+        "anchor": "left"
+      },
+      "label": "scenario steps",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "e-workers-capture",
+      "from": {
+        "objectId": "workers",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "capture",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "waypoints": [
+        [
+          1520,
+          440
+        ],
+        [
+          1240,
+          440
+        ],
+        [
+          1240,
+          520
+        ],
+        [
+          1140,
+          520
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.8,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-workers-infra",
+      "from": {
+        "objectId": "workers",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "infra-fault",
+        "anchor": "top"
+      },
+      "label": "retry",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange",
+      "labelPosition": {
+        "along": 0.35,
+        "offset": -120
+      }
+    },
+    {
+      "id": "e-workers-product",
+      "from": {
+        "objectId": "workers",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "product-regression",
+        "anchor": "top"
+      },
+      "label": "behavior failure",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "labelPosition": {
+        "along": 0.8,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-capture-graders",
+      "from": {
+        "objectId": "capture",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "graders",
+        "anchor": "left"
+      },
+      "label": "completed scenario",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "waypoints": [
+        [
+          1280,
+          620
+        ],
+        [
+          1280,
+          820
+        ],
+        [
+          2080,
+          820
+        ],
+        [
+          2080,
+          340
+        ]
+      ]
+    },
+    {
+      "id": "e-graders-verdicts",
+      "from": {
+        "objectId": "graders",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "verdicts",
+        "anchor": "left"
+      },
+      "label": "criterion verdicts",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 80
+      }
+    },
+    {
+      "id": "e-artifact-verdicts",
+      "from": {
+        "objectId": "artifact-grader",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "verdicts",
+        "anchor": "left"
+      },
+      "label": "blind score",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "pink",
+      "labelPosition": {
+        "along": 0.4,
+        "offset": -40
+      }
+    },
+    {
+      "id": "e-verdicts-evidence",
+      "from": {
+        "objectId": "verdicts",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "evidence-gate",
+        "anchor": "right"
+      },
+      "label": "validate evidence",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-evidence-retry",
+      "from": {
+        "objectId": "evidence-gate",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "graders",
+        "anchor": "bottom"
+      },
+      "label": "invalid → retry",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-evidence-flag",
+      "from": {
+        "objectId": "evidence-gate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "grading-flag",
+        "anchor": "left"
+      },
+      "label": "retry fails",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e-evidence-assembler",
+      "from": {
+        "objectId": "evidence-gate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "assembler",
+        "anchor": "top"
+      },
+      "label": "valid verdicts",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-assembler-scorecard",
+      "from": {
+        "objectId": "assembler",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "scorecard",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "e-scorecard-compatibility",
+      "from": {
+        "objectId": "scorecard",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "compatibility",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "labelPosition": {
+        "along": 0.95,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e-baseline-compatibility",
+      "from": {
+        "objectId": "baseline",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "compatibility",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-compatibility-movement",
+      "from": {
+        "objectId": "compatibility",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "movement",
+        "anchor": "left"
+      },
+      "label": "match",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-threshold-movement",
+      "from": {
+        "objectId": "threshold",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "movement",
+        "anchor": "bottom"
+      },
+      "label": "narrate crossings",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "e-movement-archive",
+      "from": {
+        "objectId": "movement",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "archive",
+        "anchor": "left"
+      },
+      "label": "retain run",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "gray"
+    },
+    {
+      "id": "e-archive-promote",
+      "from": {
+        "objectId": "archive",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "promote",
+        "anchor": "left"
+      },
+      "label": "review",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "yellow"
+    },
+    {
+      "id": "e-promote-future",
+      "from": {
+        "objectId": "promote",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "future-baseline",
+        "anchor": "left"
+      },
+      "label": "promote",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "yellow"
+    }
+  ],
+  "annotations": []
+}

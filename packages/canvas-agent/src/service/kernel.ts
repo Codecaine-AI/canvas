@@ -21,6 +21,7 @@ import {
 import { createKernel, type KernelInstance } from "@agent-kernel/kernel";
 
 import { capabilitiesLoader } from "./loaders/capabilities";
+import { stateGrammarLoader } from "./loaders/state-grammar";
 import { styleGuideLoader } from "./loaders/style-guide";
 import type { LayoutToolRuntime } from "./session/tools";
 
@@ -97,10 +98,15 @@ export async function bootKernelDatabase(): Promise<KernelDatabaseBoot> {
   const handle = openKernelDatabase({ path: dbPath });
   await ensureKernelObservabilitySchema(handle.db);
   await writeKernelManifest(REPO_ROOT, {
+    manifestVersion: 2,
     kernelId: KERNEL_ID,
     displayName: "Canvas Agent",
+    kernelRoot: AGENT_KERNEL_DIR,
+    dbPath,
+    catalogRoots: [AGENT_CATALOG_DIR],
     piSessionsDir: PI_SESSIONS_DIR,
-    viewerBaseUrl: "http://127.0.0.1:3999",
+    readApiBaseUrl: `http://127.0.0.1:${Bun.env.CANVAS_AGENT_PORT ?? 4820}`,
+    viewerBaseUrl: "http://127.0.0.1:4830",
   });
   return { db: handle.db, dbPath, close: () => handle.close() };
 }
@@ -121,7 +127,7 @@ export function createLayoutKernel(
     // Section ② only. The board / editor / user-request loaders retired when
     // the layout-editor's state/ sidecar took over the working picture (③);
     // their snapshots still travel on sessionData, read by seed() instead.
-    loaders: [capabilitiesLoader, styleGuideLoader],
+    loaders: [capabilitiesLoader, stateGrammarLoader, styleGuideLoader],
     toolRuntime,
     piSessionsDir: PI_SESSIONS_DIR,
     piAgentDir: PI_AGENT_DIR,

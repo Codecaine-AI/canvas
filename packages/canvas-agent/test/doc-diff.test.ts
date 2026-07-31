@@ -334,12 +334,12 @@ describe("diffDocuments", () => {
     expect(diffDocuments(baseline, draft)).toEqual([]);
   });
 
-  test("emits an object type change (pill terminals must survive accept)", () => {
+  test("emits an object type change (terminators must survive accept)", () => {
     const baseline = makeDocument([box("a", 0, 0)]);
-    const draft = makeDocument([{ ...box("a", 0, 0), type: "pill" as const }]);
+    const draft = makeDocument([{ ...box("a", 0, 0), type: "ellipse" as const }]);
 
     expect(diffDocuments(baseline, draft)).toEqual([
-      { type: "updateObject", objectId: "a", patch: { type: "pill" } },
+      { type: "updateObject", objectId: "a", patch: { type: "ellipse" } },
     ]);
   });
 

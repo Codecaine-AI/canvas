@@ -102,6 +102,15 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
         style: { shape: "note" },
       }]),
     },
+    {
+      // section-child-color: a red section directly holding a red child.
+      name: "section-child-color",
+      document: makeDocument([
+        box("page", 0, 0, 1200, 800, "section"),
+        { ...box("hot", 40, 40, 480, 320, "section"), color: "red", parentId: "page" },
+        { ...box("ember", 80, 120, 184, 96, "process"), color: "red", parentId: "hot" },
+      ]),
+    },
   ];
 }
 

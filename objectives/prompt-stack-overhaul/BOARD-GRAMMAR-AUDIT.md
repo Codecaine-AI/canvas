@@ -1,6 +1,15 @@
 # Board-grammar audit — prompt stack ① / ② / ③
 
-2026-07-28. Analysis only; no prompt or context edits. Scope: how the board
+**STATUS 2026-07-29: EXECUTED.** The §4 proposal is built (suite 613/0):
+① rewritten to purpose + state skeleton + workflow (system.md 221 lines,
+hash pk1-7f1bc2eb…), ② gained `<state_grammar>` (context/state-grammar/ +
+loader + parity pins in context-loaders.test.ts), ③ stripped to bare values
+(digest legends, flat-BOARD legend, requests legend, tail explainer removed),
+workflow APPLIED summaries snake_cased, finalize uses `diagnosticLines`,
+prompt-assembly.test.ts pins the new shape. Remaining: a traced confirmation
+run (step 5 of the order of work).
+
+2026-07-28. Analysis only at time of writing; execution followed on review. Scope: how the board
 grammar is taught, where, and where each fact should live. Out of scope: the
 `<diff>` block redesign (parked) and the multi-tool-call cap investigation.
 
@@ -155,7 +164,7 @@ the APPLIED block.
 | Fact | ① | ② | ③/runtime | Verdict |
 |---|---|---|---|---|
 | 20-grid snap + read-back + exempt fractions | board_model (5 bullets) + APPLIED block echo | header ¶2, full restatement | resize/update_text warnings at point of use | **contradiction-free triple**; pick one home |
-| Object/edge line grammar | BOARD digest block | — | `#` legends, live on every request | artifact wins; ① copy is where S1/S2 rotted |
+| Object/edge line grammar | BOARD digest block | — | `#` legends, live on every request | ② state-reference explains it, `#` legends reinforce at point of use; ① copy (where S1/S2 rotted) deletes |
 | Route notation `─(sN…)→` | ROUTES block (12 lines) | connections spec + edges blurb + shift_segment entry | edges legend, ROUTES rows, shift_segment errors/schema | four homes; ① is the most redundant |
 | sN-freshness rule (chain off newest result) | ROUTES block | edges blurb + shift_segment consequence | shift_segment tool description | behavioral — belongs in ① or ②, once |
 | Rn request grammar | REQUESTS block (stale, S3) | — | `<requests>` legend (correct) | artifact wins; ① copy deletes |
@@ -164,8 +173,9 @@ the APPLIED block.
 | Lint line form `E1 rule: message (suggestion)` | LINTS block (implied) | — | lint lines are prose; `lints/run.ts` single source | self-describing; nothing needed |
 | Digest indent = containment | BOARD digest block | sections spec (`sections.ts:24`) | `#` legend first clause | legend + ② semantics suffice |
 | Closed rosters / glyphs-are-types | board_model pointer + workflow constraint | vocabulary (authoritative) + contact sheet | change_shape notes, refusals | correct as-is: ① points, ② holds |
-| `look` contract (one region, composition, board-never-from-look) | state_structure closing bullets (~14 lines) | absent from `<gestures>` | look result self-describes headers; refusal teaches call shape | see P6 — the one genuinely open placement |
-| MEASURES semantics (gaps/pitch/free/ink) | MEASURES block | — | rows are labeled but terse | reference → ② (new perception topic) or stays ① with `look` |
+| `look` contract (one region, composition, board-never-from-look) | state_structure closing bullets (~14 lines) | absent from `<gestures>` | look result self-describes headers; refusal teaches call shape | reference → ② state-reference block; ① keeps the operational when/cadence lines |
+| MEASURES semantics (gaps/pitch/free/ink) | MEASURES block | — | rows are labeled but terse | reference → ② (state-reference block, with `look`) |
+| Taxonomy & material behavior (only-containers, base section, last-section refusal, chips-not-objects) | board_model (~25 lines) | kind specs + delete consequences already state nearly all of it | — | ② already holds it; board_model dissolves into ② (see P2) |
 | Current-board-first image contract + degradation | VIEWS block + closing bullets | — | `<views>` captions + inline failure notes | behavioral core stays ①, compressed |
 | Conversation tail is capped; state is current | opener + closing | — | cut-notice line says it verbatim | artifact says it; ① one clause |
 | Duplication between look result and ③ is deliberate | implied ("the standing picture is not restated *there*") | — | `perception.ts` docblock | fine |
@@ -179,105 +189,152 @@ which is the argument for the principle in one sentence.
 
 ## 4. Proposal
 
-Placement principle (agreed in the state round): grammar lives in the
-artifacts, reference lives in ②, behavior lives in ①.
+Placement principle, final form (review 2026-07-29):
 
-### P1. `state_structure` sheds the ten state_blocks (~93 lines → ~10)
+- **① system prompt** = the purpose (including the purpose of the state
+  structure: re-derived every request, never stale, results sized to the
+  operation), the **actual state structure** (the skeleton, so "look at the
+  board" resolves against a named part right there), and the **workflow**.
+  Nothing else — no board model section, no grammar teaching.
+- **② context** = the information: capabilities, gestures, style — plus a
+  **concise grammar key for reading each state thing**: the minimum needed,
+  not an explainer. Semi-static; can be added to.
+- **③ state** = **just the values.** No descriptions of what is there — no
+  `#` legend lines, no inline explainer prose. Attrs stay (counts are
+  values); runtime condition notes stay (a render failure or stale snapshot
+  is changing state, not grammar); minimal empty markers (`(empty)`,
+  `(none)`) stay as values.
 
-Replace the block-by-block grammar school with a compact contract:
+> ⚠ The ③ leg reverses the state-round decision that artifacts self-describe
+> via legends. Confirmed direction from review, flagged here explicitly since
+> it un-builds part of the 2026-07-28 state overhaul (the legend lines) and
+> extends to the flat `BOARD` legend in `look` results and the `<requests>`
+> body legend.
 
-- Keep: the re-derived-per-request opener; the one-sentence naming of the
-  eight children; **a new one-sentence policy that every block carries its
-  own grammar** — `#` legends declare line grammar and elided defaults, attrs
-  carry the counts, and the result headers (`APPLIED`, `DELTA`, `LINTS`,
-  `ROUTES`, `REQUESTS`, `MEASURES`, `DIAGNOSTICS`, `NO-OP`, `ERROR`) say what
-  they are — read them literally.
-- Keep, as behavior: results report post-snap numbers — compute the next
-  gesture from them; notes under APPLIED are report-only; `BOARD DIFF` equals
-  what committing ships; NO-OP vs ERROR ("fix the call, send it again");
-  result-sizing principle; the cadence bullets (`{{toolCallCap}}`, unchanged
-  this round).
-- Delete: APPLIED verb-roster flavor, both digest line grammars (S1/S2 die
-  with them), DELTA's seven line forms, LINTS' three headline forms, the
-  ROUTES notation lines, the MEASURES row glossary (see P6), the REQUESTS
-  grammar (S3 dies), VIEWS' caption enumeration (keep the degradation +
-  current-board-first sentences).
+### P1. ① `state_structure` becomes purpose + skeleton
 
-### P2. `board_model` stays the behavioral home, minus echoes
+Replace the ~93 lines of state_blocks with:
 
-Keep taxonomy, containment, grid (the canonical statement — see P4),
-description contract, diagnostics gate (the one full statement; finalize's
-checklist restate may stay). Drop the APPLIED-block grid echo and one of the
-two gate sentences when the state_blocks go.
+- a short purpose paragraph — why state is shaped this way (re-derived each
+  request, the standing picture is never restated in results), carrying the
+  operational habits that hang off it: post-snap numbers are the ones you
+  plan from; NO-OP/ERROR → fix the call, send it again; the
+  `{{toolCallCap}}` cadence bullets; `look`/`finalize` ride alone;
+- the annotated skeleton (~15 lines): the `<state>` children in order, one
+  clause each, shaped like the artifact. No line grammar, no headline
+  formats (S1/S2/S3 die unreplaced in ①).
 
-### P3. Grammar deltas already owed to ③ regardless of the rewrite
+Placement of the cadence/habit bullets — with the skeleton (recommended, they
+are state mechanics) vs folded into workflow constraints — is Q2.
 
-Code follow-ups, separate from prompt edits: snake_case gesture summaries for
-the three workflow APPLIED lines (S6); `finalize.ts` calls `diagnosticLines`
-instead of its inline copy; decide whether `<recent_ops>` gets a `#` legend
-(S9) — recommended, it's the only legend-less child; optionally a DELTA
-micro-legend. Each is a small change in a single-source file.
+### P2. `board_model` dissolves (confirmed in review)
 
-### P4. The grid rule gets one home: ① `board_model`
+② kind specs already state the taxonomy (only-containers,
+base-section-is-the-page, last-section refusal, chips-not-objects) and the
+capabilities header already carries the grid rule. `board_model`'s
+operational lines are already in ① elsewhere (draft framing in `purpose`,
+the E*/W* gate in finalize constraints). The residue with no ② home yet —
+description contract, annotation/request model, diagnostics roster — moves
+into the ② grammar key (P3). ① no longer contains a `board_model` section.
 
-It is world behavior, its best prose already lives there, and the
-prompt-assembly tests pin it there. Delete ② capabilities header ¶2 (the full
-restatement). The point-of-use warnings in results stay — they're enforcement,
-not teaching.
+### P3. New ② block: the concise state-grammar key (name TBD)
 
-### P5. ② absorbs the reference residue of the deleted blocks
+A hand-written peer of `<capabilities>`: one compact entry per state child
+and per result header — closer to a legend table than prose. Roughly what
+the `#` legends say today, moved up a level and completed, written fresh
+against the renderers (S1–S5 fixed by construction):
 
-- Route notation: already in the edges legend + ② connections; add the
-  "indices are never renumbered" clause to the connections steering topic when
-  the ROUTES block dies (it's the one fact currently only in ①).
-- Nothing else from the state_blocks needs a ② home — S3's grammar is in the
-  requests legend, digest grammar is in the `#` legends.
+- `<board>`: object line `id type "text" [color] x,y w×h [k=v…]`, indent =
+  containment, elided defaults, edge line + extras (incl. `lp=`), text never
+  truncated;
+- `<recent_ops>` line form; `<diff>`/BOARD DIFF verbs (equals what committing
+  ships); `<lints>` line form + the seven-diagnostic roster, one clause each;
+  `<requests>` thread grammar (`Rn open target author — "body"`, `↳` replies)
+  + dispose-with-resolve_request; `<views>` ordering + degradation forms;
+  the conversation-tail cap;
+- result headers: APPLIED (report-only notes), DELTA forms, LINTS delta,
+  ROUTES + sN notation (indices never renumbered; chain off the newest
+  printing), DIAGNOSTICS, the flat `BOARD` form, REQUESTS, NO-OP/ERROR;
+- `look`: the framing knob, smallest-set guidance, result composition,
+  MEASURES rows (gaps/pitch/free/ink) — one line each;
+- the description/title contract (what they are for; workflow keeps the
+  steps that maintain them).
 
-### P6. Open question — where `look` is taught (recommend: ②)
+Same assembly pattern as capabilities (one more TEXT_BLOCK + folder), and
+the same discipline: parity pins against `digest.ts` constants,
+`LAYOUT_RULES` ids, and `edge-route.ts` notation, so the key cannot rot the
+way ①'s hand-copied grammar did.
 
-`look` is the only tool taught exclusively in ① (~14 lines of closing
-bullets + the MEASURES block), because ②'s `<gestures>` is generated from the
-operations roster and workflow tools have no home there. Recommend a
-hand-written `<perceiving>` block in ② (peer of `<gestures>`): what `look`
-frames, what comes back, MEASURES row semantics, smallest-set framing
-guidance. ① keeps only the behavioral cadence lines ("look/finalize ride
-alone", "use look when judgment needs a close-up", edit-from-results). This is
-the largest judgment call in the proposal; the alternative (leave `look` in ①,
-move only MEASURES glossary to ②) is defensible if ① should keep everything
-cadence-adjacent.
+### P3a. ③ strips to values (code round, after ② lands)
 
-### P7. Net effect on ①
+Remove: both `#` legend lines from the `<board>` children, the combined
+legend in `look`'s flat `BOARD` header, the `<requests>` body legend, the
+`<recent_conversation>` cut-notice explainer (its fact — "the state block is
+the current picture" — moves to ①'s purpose paragraph / ②'s key). Keep:
+attrs, empty markers, runtime degradation notes, and the lint suggestion
+prose (a suggestion is a finding's content, not grammar). The S9
+recommendation (add a `<recent_ops>` legend) is withdrawn — no legends
+anywhere.
 
-state_structure ~120 → ~40 lines (opener + self-description policy +
-behavioral results paragraph + cadence/look bullets); prompt total ~360 →
-~270–280. `test/prompt-assembly.test.ts` rewrites alongside: the
-"specifies the state-text grammar" test dissolves into a much smaller
-"states the self-description policy" pin; "gives every state block its own
-delimited subsection" is deleted; the perception-delivery, grid, taxonomy,
-description, diagnostics, and workflow pins survive nearly untouched. The
-docblock at the top of the test (which promises "the canonical state-text
-grammar" lives in the prompt) is rewritten to promise the policy instead.
+### P4. The grid rule's canonical home is ② (reversing the pre-review draft)
+
+The material behaves this way, so it is reference: keep the capabilities
+header's full statement (already written), and let the new state-reference
+block's APPLIED entry carry the read-back consequence. ① retains only the
+operational habit, folded into P1's results paragraph ("the numbers that
+landed are the ones you plan from"). board_model's five grid bullets go with
+board_model. Point-of-use warnings in results stay — enforcement, not
+teaching.
+
+### P5. Code follow-ups independent of the grammar move (land first)
+
+snake_case gesture summaries for the three workflow APPLIED lines (S6);
+`finalize.ts` calls `diagnosticLines` instead of its inline copy.
+
+### P6. Net effect
+
+① = `purpose` (incl. state purpose) + skeleton (~30 lines together) +
+`workflow` (~175) ≈ **~210 lines** (from 361), every sentence either "what we
+are doing" or "how to go". ③ sheds its legend/explainer lines from every
+request. ② grows ~40 concise lines plus parity pins.
+`test/prompt-assembly.test.ts` rewrites alongside: the state-text-grammar and
+state-block-subsection tests are deleted; taxonomy/description/diagnostics/
+grid pins move into new ② assembly pins (a `context-assembly` test that
+snapshots `formatCapabilities()` + the grammar key — ② currently has
+import-time roster guards but no sentence-level pins at all); the
+perception-delivery pins split between the ① skeleton and the ② key. The
+test docblock's promise changes from "the canonical state-text grammar" to
+"the purpose, the state skeleton, and the workflow."
 
 ### Order of work (after review)
 
-1. P3 code follow-ups land first (so ① never describes the camelCase forms).
-2. ② edits: header ¶2 deletion, connections addition, `<perceiving>` block
-   (pending P6 decision).
-3. ① rewrite + test rewrite in the same change (raw string replacement in
-   prompt.json, then regenerate system.md via the kernel render CLI).
-4. One traced run to confirm the model still reads legends correctly with the
-   SP grammar gone.
+1. P5 code follow-ups (so ② never documents the camelCase forms).
+2. ② first: the grammar key + parity pins + context tests — ② must hold the
+   grammar before ① and ③ stop holding it.
+3. ① rewrite + prompt-assembly test rewrite in one change (raw string
+   replacement in prompt.json; regenerate system.md via the kernel render
+   CLI).
+4. ③ strip (P3a) — legends and explainer lines out of the renderers, their
+   tests updated.
+5. One traced run to confirm the model reads the board from ② alone — watch
+   digest reading, `look` usage, and REQUESTS handling specifically, since
+   their teaching moved furthest and ③ no longer reminds.
 
 ---
 
 ## Open questions for review
 
-1. P6: `look` reference to ② as `<perceiving>`, or stay in ①?
-2. P4: agree grid's single home is ① (deleting ② header ¶2)?
-3. S9: add the `<recent_ops>` legend, or accept one legend-less child?
-4. Does the finalize-constraints restatement of the E*/W* gate survive the
-   dedup (recommended: yes — a checklist restate at the point of commitment
-   is the one defensible duplicate)?
-5. `author=` extra: operator-attributed objects render it, and no prompt or ②
-   text mentions the field at all. Fine to leave to the legend's generic
-   `[k=v…]`, or does ② stickies/objects want one line?
+1. P3a scope check: the values-only state reverses the state-round
+   self-describing-legend decision — confirmed for the two `<board>` legends;
+   does it also cover the `look` flat-`BOARD` legend, the `<requests>` body
+   legend, and the tail cut-notice as proposed?
+2. ① shape: cadence/habit bullets with the skeleton (recommended) or inside
+   workflow constraints? And skeleton form: literal mini-`<state>` example vs
+   annotated list?
+3. Name of the ② grammar key block (e.g. `<state_grammar>` /
+   `<reading_the_board>`; never `inspect`).
+4. Does the finalize-constraints restatement of the E*/W* gate stay
+   (recommended: yes — the checklist restate at the point of commitment is
+   the one defensible duplicate, and with board_model gone it is ①'s only
+   full statement of the gate)?
+5. `author=` extra: one line in the ② key, or leave undocumented?

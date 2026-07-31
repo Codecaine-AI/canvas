@@ -130,38 +130,16 @@ export function objectTypeForTool(tool: CanvasTool): InteractiveCanvasObjectType
     case "process":
     case "decision":
     case "sticky":
-    // D16 — these were previously missing from this switch, meaning an
-    // armed document/database tool silently failed to start a PlaceGesture.
-    case "document":
-    case "database":
     // W2 — FigJam sections + V2 Flow shape vocabulary:
     case "section":
-    case "pill":
     case "arrow-shape":
     case "predefined-process":
-    // W5 — FigJam parity shape set (Wave A added the tools; the Shapes-panel
-    // creation-flow work wires them here). Same 1:1 tool<->type pattern as
-    // every case above; without these an armed ellipse/triangle/… tool
-    // silently failed to start a PlaceGesture.
+    // The universal shape core — same 1:1 tool<->type pattern as every case
+    // above; without these an armed ellipse/triangle/… tool silently failed
+    // to start a PlaceGesture.
     case "ellipse":
     case "triangle":
-    case "parallelogram":
-    case "pentagon":
     case "octagon":
-    case "star":
-    case "plus":
-    case "chevron":
-    case "folder":
-    case "document-stack":
-    case "off-page-connector":
-    case "trapezoid":
-    case "manual-input":
-    case "hexagon":
-    case "internal-storage":
-    case "or-junction":
-    case "summing-junction":
-    case "cylinder-horizontal":
-    case "page-corner":
     case "icon":
       return tool;
     default:

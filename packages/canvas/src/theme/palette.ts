@@ -23,12 +23,15 @@
  *     stickies may use a stickier hue-specific fill from the same family.
  *   - wash: lightest section background tint, kept lighter than objects.
  *
- * Provenance notes: red/green/blue/violet/pink inks carry over from the
- * sampled saturated palette and connector strokes. Yellow/orange/gray inks
- * reuse sampled FigJam connector strokes (#E8A302 mustard, #EB7500 orange,
- * #757575 gray) so 2px lines read on the #F5F5F5 board. Teal's fill is
- * lightened from the old sampled #5AD8CC to #C6FAF6 so it sits in the same
- * pastel band as its siblings; teal wash #EAFDFB is derived.
+ * Provenance notes: yellow/orange/gray inks reuse sampled FigJam connector
+ * strokes (#E8A302 mustard, #EB7500 orange, #757575 gray) so 2px lines read
+ * on the #F5F5F5 board; violet ink carries the sampled saturated stroke.
+ * Red/green/blue/pink inks are OKLCH picks tuned line-safe against the board
+ * — racing red #D5322F, kelly #019142, cobalt #1A5CDF, flamingo #B74D85 —
+ * from reference/board-design-reference/analysis/mw2-palette-proposal.html.
+ * Teal fill is lightened from the sampled #5AD8CC to #C6FAF6 so it sits in
+ * the same pastel band as its siblings; teal wash #EAFDFB is derived. White
+ * strokes use the near-neutral stone #757980 with #DBDEE3/#C1C4CB chips.
  */
 
 import type { CanvasColor, CanvasHue } from "../state/schema/colors";
@@ -70,11 +73,11 @@ export const CANVAS_PALETTE: Record<CanvasColor, Swatch> = {
     connector: "#757575",
   },
   red: {
-    swatch: "#F24822",
-    shape: { fill: "#FFC7C2", border: "#F24822" },
-    section: { tint: "#FFF5F5", chip: { fill: "#FFC7C2", border: "#F24822" } },
-    sticky: "#FFAFA3",
-    connector: "#F24822",
+    swatch: "#D5322F",
+    shape: { fill: "#FFD2CC", border: "#D5322F" },
+    section: { tint: "#FEF3F1", chip: { fill: "#FFD2CC", border: "#D5322F" } },
+    sticky: "#FFBFB7",
+    connector: "#D5322F",
   },
   orange: {
     swatch: "#EB7500",
@@ -91,11 +94,11 @@ export const CANVAS_PALETTE: Record<CanvasColor, Swatch> = {
     connector: "#E8A302",
   },
   green: {
-    swatch: "#14AE5C",
-    shape: { fill: "#DDF8E2", border: "#14AE5C" },
-    section: { tint: "#EBFFEE", chip: { fill: "#DDF8E2", border: "#14AE5C" } },
-    sticky: "#DDF8E2",
-    connector: "#14AE5C",
+    swatch: "#019142",
+    shape: { fill: "#C5E9CB", border: "#019142" },
+    section: { tint: "#F0F8F2", chip: { fill: "#C5E9CB", border: "#019142" } },
+    sticky: "#C5E9CB",
+    connector: "#019142",
   },
   teal: {
     swatch: "#369E94",
@@ -105,11 +108,11 @@ export const CANVAS_PALETTE: Record<CanvasColor, Swatch> = {
     connector: "#369E94",
   },
   blue: {
-    swatch: "#0D99FF",
-    shape: { fill: "#C2E5FF", border: "#0D99FF" },
-    section: { tint: "#F5FBFF", chip: { fill: "#C2E5FF", border: "#0D99FF" } },
-    sticky: "#A8DAFF",
-    connector: "#0D99FF",
+    swatch: "#1A5CDF",
+    shape: { fill: "#CDDFFF", border: "#1A5CDF" },
+    section: { tint: "#F1F6FE", chip: { fill: "#CDDFFF", border: "#1A5CDF" } },
+    sticky: "#B9D2FF",
+    connector: "#1A5CDF",
   },
   violet: {
     swatch: "#9747FF",
@@ -119,18 +122,18 @@ export const CANVAS_PALETTE: Record<CanvasColor, Swatch> = {
     connector: "#9747FF",
   },
   pink: {
-    swatch: "#F849C1",
-    shape: { fill: "#FFC2EC", border: "#F849C1" },
-    section: { tint: "#FFF0FA", chip: { fill: "#FFC2EC", border: "#F849C1" } },
-    sticky: "#FFC2EC",
-    connector: "#F849C1",
+    swatch: "#B74D85",
+    shape: { fill: "#F9D1E3", border: "#B74D85" },
+    section: { tint: "#FDF3F7", chip: { fill: "#F9D1E3", border: "#B74D85" } },
+    sticky: "#F9D1E3",
+    connector: "#B74D85",
   },
   white: {
     swatch: "#FFFFFF",
-    shape: { fill: "#FFFFFF", border: "#757575" },
-    section: { tint: "#FFFFFF", chip: { fill: "#E6E6E6", border: "#C4C4C4" } },
+    shape: { fill: "#FFFFFF", border: "#757980" },
+    section: { tint: "#FFFFFF", chip: { fill: "#DBDEE3", border: "#C1C4CB" } },
     sticky: "#FFFFFF",
-    connector: "#757575",
+    connector: "#757980",
   },
 };
 

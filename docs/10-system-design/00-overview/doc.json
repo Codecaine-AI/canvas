@@ -6,7 +6,7 @@
   "blocks": {
     "b-overview-root": {
       "id": "b-overview-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "concepts": [
           "typed-action reducer",
@@ -57,7 +57,7 @@
     },
     "b-overview-title-1": {
       "id": "b-overview-title-1",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -70,7 +70,7 @@
     },
     "b-overview-intro-2": {
       "id": "b-overview-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -96,7 +96,7 @@
     },
     "b-overview-what-heading-3": {
       "id": "b-overview-what-heading-3",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -109,7 +109,7 @@
     },
     "b-overview-what-body-4": {
       "id": "b-overview-what-body-4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -133,7 +133,7 @@
     },
     "b-overview-layer-heading-5": {
       "id": "b-overview-layer-heading-5",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -146,7 +146,7 @@
     },
     "b-overview-layer-tree-6": {
       "id": "b-overview-layer-tree-6",
-      "flavour": "file-tree",
+      "type": "file-tree",
       "props": {
         "entries": [
           {
@@ -204,7 +204,7 @@
     },
     "b-overview-dataflow-heading-7": {
       "id": "b-overview-dataflow-heading-7",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -217,7 +217,7 @@
     },
     "b-overview-dataflow-model-8": {
       "id": "b-overview-dataflow-model-8",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -303,7 +303,7 @@
     },
     "b-overview-dataflow-interaction-9": {
       "id": "b-overview-dataflow-interaction-9",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -448,7 +448,7 @@
     },
     "b-overview-dataflow-trim-10": {
       "id": "b-overview-dataflow-trim-10",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -469,7 +469,7 @@
     },
     "b-overview-dataflow-decision-11": {
       "id": "b-overview-dataflow-decision-11",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "One reducer is the single mutation authority"
@@ -506,7 +506,7 @@
     },
     "b-overview-selfcontained-heading-12": {
       "id": "b-overview-selfcontained-heading-12",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -519,7 +519,7 @@
     },
     "b-overview-selfcontained-body-13": {
       "id": "b-overview-selfcontained-body-13",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -584,7 +584,7 @@
     },
     "b-overview-surfaces-heading-14": {
       "id": "b-overview-surfaces-heading-14",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -597,7 +597,7 @@
     },
     "b-overview-surfaces-intro-15": {
       "id": "b-overview-surfaces-intro-15",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -617,7 +617,7 @@
     },
     "b-overview-surfaces-list-editor-16": {
       "id": "b-overview-surfaces-list-editor-16",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -640,7 +640,7 @@
     },
     "b-overview-surfaces-list-viewer-17": {
       "id": "b-overview-surfaces-list-viewer-17",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -663,7 +663,7 @@
     },
     "b-overview-surfaces-list-canvases-18": {
       "id": "b-overview-surfaces-list-canvases-18",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -686,7 +686,7 @@
     },
     "b-overview-surfaces-exports-body-19": {
       "id": "b-overview-surfaces-exports-body-19",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -786,7 +786,7 @@
     },
     "b-overview-lightboard-decision-20": {
       "id": "b-overview-lightboard-decision-20",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Fixed light board background, independent of host app theme"
@@ -814,7 +814,7 @@
     },
     "b-overview-sample-heading-21": {
       "id": "b-overview-sample-heading-21",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -827,7 +827,7 @@
     },
     "b-overview-sample-intro-22": {
       "id": "b-overview-sample-intro-22",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -851,7 +851,7 @@
     },
     "b-overview-sample-canvas-23": {
       "id": "b-overview-sample-canvas-23",
-      "flavour": "canvas",
+      "type": "canvas",
       "props": {
         "canvasId": "v2-flow",
         "title": "V2 Flow (FigJam parity) — bundled sample"
@@ -860,7 +860,7 @@
     },
     "b-overview-nextsteps-heading-24": {
       "id": "b-overview-nextsteps-heading-24",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -873,7 +873,7 @@
     },
     "b-overview-nextsteps-model-25": {
       "id": "b-overview-nextsteps-model-25",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -896,7 +896,7 @@
     },
     "b-overview-nextsteps-interaction-26": {
       "id": "b-overview-nextsteps-interaction-26",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -919,7 +919,7 @@
     },
     "b-overview-nextsteps-routing-27": {
       "id": "b-overview-nextsteps-routing-27",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -942,7 +942,7 @@
     },
     "b-overview-nextsteps-render-28": {
       "id": "b-overview-nextsteps-render-28",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -965,7 +965,7 @@
     },
     "b-overview-nextsteps-editor-29": {
       "id": "b-overview-nextsteps-editor-29",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -988,7 +988,7 @@
     },
     "b-overview-nextsteps-trim-30": {
       "id": "b-overview-nextsteps-trim-30",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1011,7 +1011,7 @@
     },
     "b-overview-nextsteps-studio-31": {
       "id": "b-overview-nextsteps-studio-31",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1043,7 +1043,7 @@
     },
     "b-overview-nextsteps-appendix-32": {
       "id": "b-overview-nextsteps-appendix-32",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1066,7 +1066,7 @@
     },
     "b-overview-nextsteps-provenance-33": {
       "id": "b-overview-nextsteps-provenance-33",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },

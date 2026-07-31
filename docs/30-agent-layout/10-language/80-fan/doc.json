@@ -6,13 +6,7 @@
   "blocks": {
     "b-fan-root": {
       "id": "b-fan-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-fan-title-1",
-        "b-fan-body-2",
-        "b-fan-code-3",
-        "b-fan-canvas-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "The fan pattern: a hub centered over children that share one line and one repeated gap; dir= describes their side, and declaration order describes their order along that line.",
         "format": "mdx",
@@ -23,12 +17,17 @@
           "dir=",
           "alignment facts"
         ]
-      }
+      },
+      "children": [
+        "b-fan-title-1",
+        "b-fan-body-2",
+        "b-fan-code-3",
+        "b-fan-canvas-4"
+      ]
     },
     "b-fan-title-1": {
       "id": "b-fan-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -36,12 +35,12 @@
         {
           "insert": "fan — hub over children"
         }
-      ]
+      ],
+      "children": []
     },
     "b-fan-body-2": {
       "id": "b-fan-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -101,12 +100,12 @@
         {
           "insert": ", two or more child references. The children land on one shared line with one gap repeated exactly, and the hub centers over their midpoint. Choose enough clearance for each wire and direct edge label to pass cleanly. Equal child size plus equal gap marks them as peers; the centered hub reads as their parent. The children's declaration order becomes their order along the shared line."
         }
-      ]
+      ],
+      "children": []
     },
     "b-fan-code-3": {
       "id": "b-fan-code-3",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -114,16 +113,17 @@
         {
           "insert": "section 1 text=tree label=\"fan dir=S\"\n  group\n    item 2 text=hub type=decision size=M at=N\n    item 3 text=a type=process size=M at=SW\n    item 4 text=b type=process size=M at=S\n    item 5 text=c type=process size=M at=SE\n\nfan 2 dir=S: 3 4 5\n\narrows\n  2 > 3\n  2 > 4\n  2 > 5"
         }
-      ]
+      ],
+      "children": []
     },
     "b-fan-canvas-4": {
       "id": "b-fan-canvas-4",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/example-fan.canvas.json",
         "title": "fan 2 dir=S — the hub centers over its children"
-      }
+      },
+      "children": []
     }
   }
 }

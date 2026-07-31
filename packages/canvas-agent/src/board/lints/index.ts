@@ -21,6 +21,7 @@ import { rule as brokenEdges } from "./rules/broken-edges";
 import { rule as unreadableLabels } from "./rules/unreadable-labels";
 import { rule as crowding } from "./rules/crowding";
 import { rule as clippedText } from "./rules/clipped-text";
+import { rule as sectionChildColor } from "./rules/section-child-color";
 import { rule as frameSlack } from "./rules/frame-slack";
 
 export const LAYOUT_RULES: readonly LayoutRule[] = [
@@ -30,6 +31,7 @@ export const LAYOUT_RULES: readonly LayoutRule[] = [
   unreadableLabels,
   crowding,
   clippedText,
+  sectionChildColor,
 ];
 
 export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES, frameSlack];

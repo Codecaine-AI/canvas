@@ -6,14 +6,7 @@
   "blocks": {
     "b-section-root": {
       "id": "b-section-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-section-title-1",
-        "b-section-body-2",
-        "b-section-frame-3",
-        "b-section-code-4",
-        "b-section-canvas-5"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "The section notation: a real container object with a title and one nested composition; the frame is closed around its children with fit_section, and sections give every idea a home while serving as addressable, linkable units.",
         "format": "mdx",
@@ -25,12 +18,18 @@
           "automatic frame",
           "shrink to fit"
         ]
-      }
+      },
+      "children": [
+        "b-section-title-1",
+        "b-section-body-2",
+        "b-section-frame-3",
+        "b-section-code-4",
+        "b-section-canvas-5"
+      ]
     },
     "b-section-title-1": {
       "id": "b-section-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -38,12 +37,12 @@
         {
           "insert": "section — a real container object"
         }
-      ]
+      ],
+      "children": []
     },
     "b-section-body-2": {
       "id": "b-section-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -117,23 +116,23 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-section-frame-3": {
       "id": "b-section-frame-3",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "On the live board, the section's text renders as its title chip; the chip is not a separate object. Give the title and content clear air, and repeat one deliberate gap through each group. A section keeps exactly the geometry it is given; fit_section closes one around the children already inside it, and only that section, when the region is finished. Sections do the grouping: every idea has a home, and each section is an addressable, linkable unit. Nest sections for hierarchy."
         }
-      ]
+      ],
+      "children": []
     },
     "b-section-code-4": {
       "id": "b-section-code-4",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -141,16 +140,17 @@
         {
           "insert": "section 1 text=outer label=\"Automatic padding\"\n  section 2 text=inner label=\"Nested\"\n    item 3 text=content type=process size=M at=C\n\narrows"
         }
-      ]
+      ],
+      "children": []
     },
     "b-section-canvas-5": {
       "id": "b-section-canvas-5",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/example-section.canvas.json",
         "title": "Nested sections with automatic frames"
-      }
+      },
+      "children": []
     }
   }
 }

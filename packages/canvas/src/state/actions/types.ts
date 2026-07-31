@@ -28,44 +28,19 @@ export type CanvasTool =
   | "decision"
   | "sticky"
   | "annotation"
-  // D16 — expanded vocabulary (checkpoint 5):
-  | "document"
-  | "database"
   // W2 — FigJam sections + V2 Flow shape vocabulary:
   | "section"
-  | "pill"
   | "arrow-shape"
   | "predefined-process"
   // Connector Mode — wiring-mode tool, not a placeable object type, so the
   // 1:1 tool<->type pattern documented below does not apply to it.
   | "connector"
-  // W5 — FigJam parity shape set (Wave A): one tool per new placeable object
-  // type, mirroring the 1:1 tool<->type pattern every prior wave established
-  // above (ShapesPanel/dock wiring for these is Wave C's concern, not this
-  // wave's — see the implementation brief's file-ownership table — but the
-  // CanvasTool union itself lives here, and objectTypeForTool's switch in
-  // interaction.ts already has a safe `default: return null` for any tool
-  // it doesn't recognize, so adding these entries here doesn't obligate a
-  // change there).
+  // The universal shape core (operational-maps surface trim): one tool per
+  // placeable object type, mirroring the 1:1 tool<->type pattern every prior
+  // wave established above.
   | "ellipse"
   | "triangle"
-  | "parallelogram"
-  | "pentagon"
   | "octagon"
-  | "star"
-  | "plus"
-  | "chevron"
-  | "folder"
-  | "document-stack"
-  | "off-page-connector"
-  | "trapezoid"
-  | "manual-input"
-  | "hexagon"
-  | "internal-storage"
-  | "or-junction"
-  | "summing-junction"
-  | "cylinder-horizontal"
-  | "page-corner"
   | "icon";
 
 export type CanvasSelection =

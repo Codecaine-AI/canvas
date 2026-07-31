@@ -6,22 +6,7 @@
   "blocks": {
     "b-worked-root": {
       "id": "b-worked-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-worked-title-1",
-        "b-worked-stale-marker",
-        "b-worked-lede-2",
-        "b-worked-steps-heading-3",
-        "b-worked-steps-item1-4",
-        "b-worked-steps-item2-5",
-        "b-worked-steps-item3-6",
-        "b-worked-steps-item4-7",
-        "b-worked-steps-item5-8",
-        "b-worked-steps-item6-9",
-        "b-worked-steps-item7-10",
-        "b-worked-stepper-heading-11",
-        "b-worked-stepper-body-12"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "Overview and index of the seven-stage worked example: one board built through section-skeleton, per-section content, connection, and review batches, with fresh board digests, local deltas, cumulative board diffs, lint changes, routed truth, request status, and painted-extent renders.",
         "format": "mdx",
@@ -36,12 +21,26 @@
           "production routes",
           "cumulative board diff"
         ]
-      }
+      },
+      "children": [
+        "b-worked-title-1",
+        "b-worked-stale-marker",
+        "b-worked-lede-2",
+        "b-worked-steps-heading-3",
+        "b-worked-steps-item1-4",
+        "b-worked-steps-item2-5",
+        "b-worked-steps-item3-6",
+        "b-worked-steps-item4-7",
+        "b-worked-steps-item5-8",
+        "b-worked-steps-item6-9",
+        "b-worked-steps-item7-10",
+        "b-worked-stepper-heading-11",
+        "b-worked-stepper-body-12"
+      ]
     },
     "b-worked-title-1": {
       "id": "b-worked-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -49,12 +48,12 @@
         {
           "insert": "A board in seven edits"
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-lede-2": {
       "id": "b-worked-lede-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -82,12 +81,12 @@
         {
           "insert": " documents how the named R1-R10 concerns are owned by the aesthetic, operation mechanics, and diagnostics."
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-steps-heading-3": {
       "id": "b-worked-steps-heading-3",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -95,35 +94,25 @@
         {
           "insert": "The seven steps"
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-steps-item1-4": {
       "id": "b-worked-steps-item1-4",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": true
       },
       "text": [
         {
-          "insert": "Step 1 — A lane and a stage",
-          "attributes": {
-            "reference": {
-              "kind": "doc",
-              "path": "30-agent-layout/30-worked-example/01-step-lane-and-stage",
-              "label": "Step 1 — A lane and a stage"
-            }
-          }
-        },
-        {
-          "insert": " — establish the Config and Stage sections first, then add three stacked pills and a placeholder sticky."
+          "insert": "Step 1 — A lane and a stage — establish the Config and Stage sections first, then add three stacked rectangles and a placeholder sticky."
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-steps-item2-5": {
       "id": "b-worked-steps-item2-5",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -141,12 +130,12 @@
         {
           "insert": " — replace the placeholder stage with four evenly spaced runner nodes ending in a decision."
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-steps-item3-6": {
       "id": "b-worked-steps-item3-6",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -164,12 +153,12 @@
         {
           "insert": " — trim and move the runner row upward, then add a Board — hub section with three database stores."
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-steps-item4-7": {
       "id": "b-worked-steps-item4-7",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -187,12 +176,12 @@
         {
           "insert": " — add the Score gate section, reflow the existing bands, and build its three-node vertical chain."
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-steps-item5-8": {
       "id": "b-worked-steps-item5-8",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -210,35 +199,25 @@
         {
           "insert": " — use an empty batch with view to examine the Score gate without mutating the board, and judge whether the intended shared centerline reads clearly."
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-steps-item6-9": {
       "id": "b-worked-steps-item6-9",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": true
       },
       "text": [
         {
-          "insert": "Step 6 — Fan out, wire the arrows",
-          "attributes": {
-            "reference": {
-              "kind": "doc",
-              "path": "30-agent-layout/30-worked-example/06-step-fan-and-arrows",
-              "label": "Step 6 — Fan out, wire the arrows"
-            }
-          }
-        },
-        {
-          "insert": " — compact the score chain and add two outcome pills, judge that render, then add ten routed connections after all endpoints exist."
+          "insert": "Step 6 — Fan out, wire the arrows — compact the score chain and add two outcome rectangles, judge that render, then add ten routed connections after all endpoints exist."
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-steps-item7-10": {
       "id": "b-worked-steps-item7-10",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": true
       },
@@ -256,12 +235,12 @@
         {
           "insert": " — explicitly reposition the three stores into a 2x2 arrangement, add cache, review the routed consequence, and finalize the cumulative proposal."
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-stepper-heading-11": {
       "id": "b-worked-stepper-heading-11",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -269,12 +248,12 @@
         {
           "insert": "How pushed results show locality"
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-stepper-body-12": {
       "id": "b-worked-stepper-body-12",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -319,12 +298,12 @@
         {
           "insert": " changes only the hub stores and the route affected by the moved saves endpoint, while the cumulative BOARD DIFF still carries the entire seven-step proposal."
         }
-      ]
+      ],
+      "children": []
     },
     "b-worked-stale-marker": {
       "id": "b-worked-stale-marker",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "Stale — this worked example is a full generation behind"
       },
@@ -345,7 +324,8 @@
         {
           "insert": "): one gesture per call, bare place_* payloads, geometry on a 20 grid, and measured looks. The call payloads and the narrative below are kept only as a record of the earlier surface; re-recording the example against the gesture surface is its own follow-up."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

@@ -27,7 +27,11 @@ other axes' output, or any pre-derived checklist.
 3. Inspect the PNG and JSON together. A requirement may be represented by any clear
    visual form: a labeled component, connection, region, note, legend, sequence,
    repeated topology, or another unambiguous encoding. Do not require a particular
-   shape, color, position, or diagram genre.
+   shape, color, position, or diagram genre. Representation must be visible in the
+   render: an edge's meaning lives on the line (its label, arrowhead, and style),
+   and a fact carried only in unrendered JSON metadata — a field no reader can
+   see — represents nothing. The JSON disambiguates what the PNG shows; it never
+   substitutes for it.
 4. Assign one status per requirement:
    - **represented** — the full stated meaning is present and unambiguous;
    - **partial** — a recognizable portion is present, but a stated qualifier,

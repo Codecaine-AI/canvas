@@ -6,13 +6,7 @@
   "blocks": {
     "b-rowcol-root": {
       "id": "b-rowcol-root",
-      "flavour": "paragraph",
-      "children": [
-        "b-rowcol-title-1",
-        "b-rowcol-body-2",
-        "b-rowcol-code-3",
-        "b-rowcol-canvas-4"
-      ],
+      "type": "paragraph",
       "props": {
         "covers": "The row and col notation: |-separated weights describe proportional bands along the axis, exactly one child per weight, with clear corridors between neighboring bands.",
         "format": "mdx",
@@ -24,12 +18,17 @@
           "weights",
           "corridors"
         ]
-      }
+      },
+      "children": [
+        "b-rowcol-title-1",
+        "b-rowcol-body-2",
+        "b-rowcol-code-3",
+        "b-rowcol-canvas-4"
+      ]
     },
     "b-rowcol-title-1": {
       "id": "b-rowcol-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -37,12 +36,12 @@
         {
           "insert": "row and col — weighted splits"
         }
-      ]
+      ],
+      "children": []
     },
     "b-rowcol-body-2": {
       "id": "b-rowcol-body-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -102,12 +101,12 @@
         {
           "insert": " with no weights has no children. Keep an empty corridor between neighboring bands so connector lines have room to run."
         }
-      ]
+      ],
+      "children": []
     },
     "b-rowcol-code-3": {
       "id": "b-rowcol-code-3",
-      "flavour": "code",
-      "children": [],
+      "type": "code",
       "props": {
         "language": "text"
       },
@@ -115,16 +114,17 @@
         {
           "insert": "col 1|2\n  section 1 text=side label=\"weight 1\"\n    item 2 text=a type=process size=M at=C\n  section 3 text=main label=\"weight 2\"\n    item 4 text=b type=process size=L at=C\n\narrows"
         }
-      ]
+      ],
+      "children": []
     },
     "b-rowcol-canvas-4": {
       "id": "b-rowcol-canvas-4",
-      "flavour": "canvas",
-      "children": [],
+      "type": "canvas",
       "props": {
         "src": "./assets/canvases/example-row-col.canvas.json",
         "title": "col 1|2 — two stacked bands, heights 1:2"
-      }
+      },
+      "children": []
     }
   }
 }

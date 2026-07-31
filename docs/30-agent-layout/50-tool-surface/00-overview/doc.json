@@ -6,7 +6,19 @@
   "blocks": {
     "b-ts-ov-root": {
       "id": "b-ts-ov-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
+      "props": {
+        "covers": "Why the layout agent's tools are factored by editing gesture rather than by CRUD per kind, the full thirty-two-tool roster in its registration order, the calls the surface absorbs rather than adds, the scope it deliberately excludes, and a map of the rest of this tier.",
+        "format": "mdx",
+        "type": "overview",
+        "concepts": [
+          "gesture factoring",
+          "tool roster",
+          "capability matrix",
+          "structural parameters",
+          "surface scope"
+        ]
+      },
       "children": [
         "b-ts-ov-title-1",
         "b-ts-ov-lede-2",
@@ -33,24 +45,11 @@
         "b-ts-ov-tier-grid-23",
         "b-ts-ov-tier-pipeline-24",
         "b-ts-ov-tier-registration-25"
-      ],
-      "props": {
-        "covers": "Why the layout agent's tools are factored by editing gesture rather than by CRUD per kind, the full thirty-two-tool roster in its registration order, the calls the surface absorbs rather than adds, the scope it deliberately excludes, and a map of the rest of this tier.",
-        "format": "mdx",
-        "type": "overview",
-        "concepts": [
-          "gesture factoring",
-          "tool roster",
-          "capability matrix",
-          "structural parameters",
-          "surface scope"
-        ]
-      }
+      ]
     },
     "b-ts-ov-title-1": {
       "id": "b-ts-ov-title-1",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -58,12 +57,12 @@
         {
           "insert": "The gesture tool surface"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-lede-2": {
       "id": "b-ts-ov-lede-2",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -78,12 +77,12 @@
         {
           "insert": " rather than by CRUD per kind. Each tool is one thing a person does in one motion on the real canvas: place a thing, move it, resize it, retitle it, slide a connector segment out of the way. Two consequences fall out of that framing."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-consequence-matrix-3": {
       "id": "b-ts-ov-consequence-matrix-3",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -106,12 +105,12 @@
         {
           "insert": " existing and its schema naming its target kind — not by prose inside a catch-all patch."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-consequence-structural-4": {
       "id": "b-ts-ov-consequence-structural-4",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -125,12 +124,12 @@
         {
           "insert": " Every verb's schema states exactly what that gesture needs. There are no everything-optional patches."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-trace-5": {
       "id": "b-ts-ov-trace-5",
-      "flavour": "observation",
-      "children": [],
+      "type": "observation",
       "props": {
         "title": "A trace reads like an editing session"
       },
@@ -147,12 +146,12 @@
         {
           "insert": " — the sequence a person would perform, in the order they would perform it. That is what the playback rail animates and what the eval judges read."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-roster-heading-6": {
       "id": "b-ts-ov-roster-heading-6",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -160,12 +159,12 @@
         {
           "insert": "The roster"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-roster-source-7": {
       "id": "b-ts-ov-roster-source-7",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -221,12 +220,12 @@
         {
           "insert": " pins the roster and the structural invariants every schema satisfies."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-roster-table-8": {
       "id": "b-ts-ov-roster-table-8",
-      "flavour": "structured-table",
-      "children": [],
+      "type": "structured-table",
       "props": {
         "title": "Thirty-two tools, in registration order",
         "columns": [
@@ -396,12 +395,12 @@
             "end the run, with a proposal or without one"
           ]
         ]
-      }
+      },
+      "children": []
     },
     "b-ts-ov-absorbed-heading-9": {
       "id": "b-ts-ov-absorbed-heading-9",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -409,12 +408,12 @@
         {
           "insert": "Absorbed, not added"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-absorbed-lede-10": {
       "id": "b-ts-ov-absorbed-lede-10",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -429,12 +428,12 @@
         {
           "insert": " is the counterexample and is a real gesture on the roster: peer sizing is its own motion, and it earns its own verb."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-absorbed-measure-11": {
       "id": "b-ts-ov-absorbed-measure-11",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -466,12 +465,12 @@
         {
           "insert": " measured — per-pair gaps on each axis, row and column pitch, the section's free margins, ink share — so conformance is read rather than computed in context."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-absorbed-distribute-12": {
       "id": "b-ts-ov-absorbed-distribute-12",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -494,12 +493,12 @@
         {
           "insert": ". Equalizing inside a fixed span can never open a gap, and the agent always knows its target gap from the craft targets, so the gesture that sets the pitch covers both jobs."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-absorbed-route-13": {
       "id": "b-ts-ov-absorbed-route-13",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -531,12 +530,12 @@
         {
           "insert": " for the whole path — not a hint handed to a solver."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-scope-heading-14": {
       "id": "b-ts-ov-scope-heading-14",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -544,23 +543,23 @@
         {
           "insert": "What the surface excludes"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-scope-lede-15": {
       "id": "b-ts-ov-scope-lede-15",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "Three capabilities sit outside the surface's scope. Each is buildable from what is on the roster, and each has a condition under which it is worth revisiting."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-scope-multi-16": {
       "id": "b-ts-ov-scope-multi-16",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -628,12 +627,12 @@
         {
           "insert": ", take a list because the arrangement itself is the gesture. Revisit once single-id traces show where batching earns its keep."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-scope-extend-17": {
       "id": "b-ts-ov-scope-extend-17",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -674,12 +673,12 @@
         {
           "insert": "."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-scope-annotation-18": {
       "id": "b-ts-ov-scope-annotation-18",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -720,12 +719,12 @@
         {
           "insert": ", not removed."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-scope-close-19": {
       "id": "b-ts-ov-scope-close-19",
-      "flavour": "constraint",
-      "children": [],
+      "type": "constraint",
       "props": {
         "title": "The roster is the boundary"
       },
@@ -733,12 +732,12 @@
         {
           "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty-five gestures are the only way the draft changes."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-tier-heading-20": {
       "id": "b-ts-ov-tier-heading-20",
-      "flavour": "heading",
-      "children": [],
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -746,23 +745,23 @@
         {
           "insert": "The rest of this tier"
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-tier-lede-21": {
       "id": "b-ts-ov-tier-lede-21",
-      "flavour": "paragraph",
-      "children": [],
+      "type": "paragraph",
       "props": {},
       "text": [
         {
           "insert": "This page is the shape of the surface. Four sibling pages carry the contracts."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-tier-gestures-22": {
       "id": "b-ts-ov-tier-gestures-22",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -780,12 +779,12 @@
         {
           "insert": " — the per-group contracts: every signature, what each gesture refuses, and the lock matrix."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-tier-grid-23": {
       "id": "b-ts-ov-tier-grid-23",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -803,12 +802,12 @@
         {
           "insert": " — which numbers quantize, which are exempt, and what a bare placement lands as."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-tier-pipeline-24": {
       "id": "b-ts-ov-tier-pipeline-24",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -826,12 +825,12 @@
         {
           "insert": " — the stages every gesture runs through, and the three result classes they return."
         }
-      ]
+      ],
+      "children": []
     },
     "b-ts-ov-tier-registration-25": {
       "id": "b-ts-ov-tier-registration-25",
-      "flavour": "list-item",
-      "children": [],
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -849,7 +848,8 @@
         {
           "insert": " — how the roster reaches the model, and where the gesture vocabulary gives way to the neutral delta vocabulary a document diff speaks."
         }
-      ]
+      ],
+      "children": []
     }
   }
 }

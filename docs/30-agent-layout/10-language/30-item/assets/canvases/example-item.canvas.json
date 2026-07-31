@@ -48,7 +48,7 @@
     },
     {
       "id": "tag",
-      "type": "pill",
+      "type": "rectangle",
       "text": "tag",
       "label": "tag",
       "geometry": {
@@ -56,6 +56,9 @@
         "y": 269,
         "width": 46,
         "height": 15
+      },
+      "style": {
+        "shape": "rounded-rect"
       }
     }
   ],

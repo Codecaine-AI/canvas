@@ -1,0 +1,813 @@
+{
+  "axis": "rc",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-07-29-eval-202743",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The inference gateway exposes one endpoint to client applications.",
+        "brief_evidence": "“it exposes one endpoint to client applications”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1 · Client & Edge",
+            "observation": "A single “Gateway endpoint” is shown beneath “Client app.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=edge], connection[id=e_client_edge]",
+            "observation": "The sole edge object is labeled “Gateway endpoint” and receives the client request."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "Clients request a capability tier instead of selecting a particular backend.",
+        "brief_evidence": "“which request a capability tier instead of a particular backend”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Client-to-gateway path and Section 4",
+            "observation": "The client edge is labeled “tier request,” and backend selection is delegated to the “Capability-tier router.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e_client_edge], objects[id=router]",
+            "observation": "The request line is labeled “tier request”; the router is labeled “Capability-tier router.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The edge service authenticates the caller.",
+        "brief_evidence": "“The edge service authenticates the caller”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 1–2, gateway-to-identity path",
+            "observation": "The gateway connects to “Authenticate · tenant · quota · request ID” on an arrow labeled “authenticate.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=identity], connections[id=e_edge_identity]",
+            "observation": "Authentication is visible in both the process label and directed connection."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "The edge service resolves tenant identity and quota.",
+        "brief_evidence": "“resolves tenant identity and quota”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 · Admission & Deadlines",
+            "observation": "The identity process explicitly reads “Authenticate · tenant · quota · request ID.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=identity].text",
+            "observation": "Both tenant and quota are explicitly named."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "The edge stamps a request ID that follows every backend attempt.",
+        "brief_evidence": "“stamps a request id that follows every attempt”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Identity process and Failure & Fallback section",
+            "observation": "The identity process names “request ID,” but the retry process says only “same key,” not that the request ID follows every attempt."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=identity], objects[id=retry], connections involving retry",
+            "observation": "Request ID stamping is represented at identity; no visible retry edge or node explicitly carries that request ID through every attempt."
+          }
+        ],
+        "note": "Request ID creation is shown, but its propagation across all attempts is not explicit."
+      },
+      {
+        "id": "R6",
+        "requirement": "An admission controller enforces per-tenant concurrency limits.",
+        "brief_evidence": "“An admission controller enforces per-tenant concurrency”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 · Admission & Deadlines",
+            "observation": "A guardrail labeled “Concurrency + token limits” receives a directed input labeled “tenant.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=admit], connections[id=e_identity_admit]",
+            "observation": "The admission guardrail names concurrency limits and is fed tenant context."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "The admission controller enforces per-tenant token-rate limits.",
+        "brief_evidence": "“and token-rate limits”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 · Admission & Deadlines",
+            "observation": "The tenant-fed admission guardrail is labeled “Concurrency + token limits.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=admit], connections[id=e_identity_admit]",
+            "observation": "Token limits are explicitly associated with tenant admission."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Excess work waits in a deadline-aware queue.",
+        "brief_evidence": "“Excess work waits in a deadline-aware queue”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, admission-to-queue path",
+            "observation": "The admission guardrail points to a queue icon labeled “Deadline-aware wait.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=deadlineq], connections[id=e_admit_queue]",
+            "observation": "A directed edge connects admission to the deadline-aware queue."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "If queued work passes its deadline, the controller explicitly rejects it and tells the caller to retry rather than serving it late.",
+        "brief_evidence": "“if its deadline passes, the controller rejects it explicitly and tells the caller to retry instead of serving it late”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed red path from Deadline-aware wait back to Gateway endpoint",
+            "observation": "The return path is labeled “expired · reject · retry,” while the forward path is limited by “before deadline.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e_queue_reject], connections[id=e_queue_assembler]",
+            "observation": "Expired work returns to the edge as reject/retry; only work before deadline advances."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "The router selects a backend within the requested capability tier.",
+        "brief_evidence": "“The router selects a backend within the requested tier”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4 and routes to Section 5",
+            "observation": "The “Capability-tier router” directs work to eligible hosted and self-hosted capacity."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=router], connections[id=e_router_hosted], connections[id=e_router_selfhost]",
+            "observation": "The router has directed selection paths labeled “eligible hosted” and “eligible pool.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "Backend selection uses live health, measured latency, queue depth, price, and tenant data-residency requirements.",
+        "brief_evidence": "“from live health, measured latency, queue depth, price, and the tenant's data-residency requirements”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Router and circuit-breaker feedback path",
+            "observation": "The router receives “health + probes,” but no visible routing criteria mention measured latency, queue depth, price, or data residency."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=router] and all connections incident to router",
+            "observation": "Searched router labels and incident edge labels; only tier eligibility, fallback, and health/probes are represented."
+          }
+        ],
+        "note": "Live health is present; four other stated selection inputs are absent."
+      },
+      {
+        "id": "R12",
+        "requirement": "Eligible capacity includes hosted provider endpoints spread across independent accounts.",
+        "brief_evidence": "“Eligible capacity includes hosted provider endpoints spread across independent accounts”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5 · Protected Capacity",
+            "observation": "A capacity component is labeled “Hosted providers · independent accounts” and receives “eligible hosted.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=hosted], connections[id=e_router_hosted]",
+            "observation": "Hosted providers and independent accounts are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "Eligible capacity includes a self-hosted pool managed by its own scheduler.",
+        "brief_evidence": "“and a self-hosted pool managed by its own scheduler”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5 · Protected Capacity",
+            "observation": "A component is labeled “Self-hosted pool + scheduler” and receives “eligible pool.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=selfhost], connections[id=e_router_selfhost]",
+            "observation": "The self-hosted pool and scheduler are explicitly named."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Before dispatch, a prompt assembler applies tenant system context.",
+        "brief_evidence": "“Before dispatch, a prompt assembler applies tenant system context”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 · Prompt & Cache, before router",
+            "observation": "The pre-routing process is labeled “Tenant context + safety policy.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=assembler], path deadlineq → assembler → cache → router",
+            "observation": "Tenant context is applied on the visible path before routing and dispatch."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "Before dispatch, the prompt assembler applies safety policy.",
+        "brief_evidence": "“and safety policy”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 · Prompt & Cache",
+            "observation": "The assembler process explicitly includes “safety policy.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=assembler].text",
+            "observation": "Safety policy is visible before the cache and router."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "The response cache returns exact matches.",
+        "brief_evidence": "“A response cache returns exact matches”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 cache and blue hit path",
+            "observation": "The cache is labeled “Exact + semantic cache,” with a hit path directly to streaming."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=cache], connections[id=e_cache_hit_stream]",
+            "observation": "Exact caching and a cache-hit response path are represented."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "The response cache returns semantically near-duplicate deterministic results.",
+        "brief_evidence": "“and semantically near-duplicate deterministic results”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 cache and cache-to-stream edge",
+            "observation": "The component says “Exact + semantic cache,” and its hit edge says “hit · deterministic.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=cache], connections[id=e_cache_hit_stream]",
+            "observation": "Semantic caching and deterministic hit behavior are both visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "The cache key includes prompt, parameters, and policy version.",
+        "brief_evidence": "“keyed by prompt, parameters, and policy version”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Assembler-to-cache edge",
+            "observation": "The edge is labeled “policy version,” but prompt and parameters are not identified as cache-key fields."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=cache] and all connections incident to cache",
+            "observation": "Searched cache text and edge labels; only policy version is explicit among the three required key fields."
+          }
+        ],
+        "note": "Policy version is shown, but prompt and parameters are not explicitly represented as cache-key inputs."
+      },
+      {
+        "id": "R19",
+        "requirement": "The gateway streams tokens to the caller as they arrive.",
+        "brief_evidence": "“The gateway streams tokens to the caller as they arrive”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 · Streaming Contract",
+            "observation": "A prominent component labeled “Stream tokens” begins on the “first token” path."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=stream], connections[id=e_classify_stream]",
+            "observation": "The directed first-token path enters token streaming."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Before any token is emitted, failures are classified as timeout, rate-limit rejection, content-policy refusal, backend overload, or malformed response.",
+        "brief_evidence": "“Before any token is emitted, failures are classified as timeout, rate-limit rejection, content-policy refusal, backend overload, or malformed response.”",
+        "importance": "system_defining",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 · Failure & Fallback",
+            "observation": "The board asks only “Failure before first token?” and branches by retryability; none of the five required failure classes is visible."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=classify], objects[id=retry], objects[id=failfast], and all failure-section connections",
+            "observation": "Searched all failure-node text and edge labels; timeout, rate-limit rejection, content-policy refusal, backend overload, and malformed response do not appear."
+          }
+        ],
+        "note": "The pre-stream boundary is represented, but the explicitly required failure taxonomy is wholly missing."
+      },
+      {
+        "id": "R21",
+        "requirement": "Retryable pre-stream failures move to the next backend in the tier's fallback order.",
+        "brief_evidence": "“Retryable failures move to the next backend in the tier's fallback order”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 6 and dashed orange return to router",
+            "observation": "The retryable pre-stream branch reaches “Retry next backend,” then returns to the capability-tier router on “next fallback.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e_classify_retry], objects[id=retry], connections[id=e_retry_router]",
+            "observation": "The directed retry path explicitly selects the next fallback through the tier router."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "Each retry uses a fresh deadline and the same idempotency key.",
+        "brief_evidence": "“with a fresh deadline and the same idempotency key”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Retry process in Section 6",
+            "observation": "The process reads “Retry next backend · same key · fresh deadline.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=retry].text",
+            "observation": "Both same-key and fresh-deadline retry semantics are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "Non-retryable pre-stream failures return immediately.",
+        "brief_evidence": "“non-retryable failures return immediately”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Failure classifier to failure terminal",
+            "observation": "The “no retry” branch reaches “Return failure · no retry.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e_classify_failfast], objects[id=failfast]",
+            "observation": "A direct no-retry branch visibly terminates in returned failure."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "After streaming begins, backend failure cannot be silently retried on another backend.",
+        "brief_evidence": "“After streaming begins, a backend failure cannot be silently retried elsewhere”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7, red post-emission failure branch",
+            "observation": "“backend fails after emission” leads only to a visible stream-failure terminal, not to the retry loop."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e_stream_fail], objects[id=streamfail], retry-related connections",
+            "observation": "The post-emission failure path is separate from and has no connection to retry."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "Once streaming starts, the gateway either completes the stream or visibly fails it while preserving already received output.",
+        "brief_evidence": "“the gateway either completes the stream or visibly fails it while preserving what the caller already received”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 7 · Streaming Contract",
+            "observation": "Streaming branches to “Complete stream” or “Visible stream failure · preserve partial output.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e_stream_complete], connections[id=e_stream_fail], objects[id=complete], objects[id=streamfail]",
+            "observation": "Both required post-stream outcomes and preservation of partial output are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "Circuit breakers open after sustained backend errors or timeouts.",
+        "brief_evidence": "“Circuit breakers open after sustained backend errors or timeouts”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5 circuit-breaker component",
+            "observation": "A “Circuit breaker + shadow probes” component is visible, but no label states the sustained-error/timeout opening trigger."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=breaker], connections[id=e_breaker_router]",
+            "observation": "Searched breaker text and its only connection; neither sustained errors nor timeouts nor opening threshold is stated."
+          }
+        ],
+        "note": "The circuit-breaker component exists, but its required opening condition is missing."
+      },
+      {
+        "id": "R27",
+        "requirement": "Open circuit breakers drain new traffic toward healthy capacity.",
+        "brief_evidence": "“and drain new traffic toward healthy capacity”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed red breaker-to-router feedback",
+            "observation": "The breaker sends “health + probes” to the router, suggesting health-aware diversion, but no line explicitly states that new traffic is drained to healthy capacity."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e_breaker_router] and router-to-capacity connections",
+            "observation": "Health feedback and eligible-capacity routes are visible, but the open-state traffic-draining behavior is not explicit."
+          }
+        ],
+        "note": "Healthy rerouting is inferable but the stated open-breaker drain behavior is not fully encoded."
+      },
+      {
+        "id": "R28",
+        "requirement": "Circuit breakers admit a trickle of shadow probes before closing again.",
+        "brief_evidence": "“They admit a trickle of shadow probes before closing again.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Circuit-breaker component and feedback edge",
+            "observation": "“shadow probes” and “health + probes” are visible, but neither a trickle nor probe-gated closing is stated."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=breaker], connections[id=e_breaker_router]",
+            "observation": "Probe behavior is named; searched labels contain no closing transition or trickle qualifier."
+          }
+        ],
+        "note": "Shadow probes are represented, but their limited rate and role before closure are missing."
+      },
+      {
+        "id": "R29",
+        "requirement": "Metering records tokens, latency, selected backend, cache outcome, and cost.",
+        "brief_evidence": "“Metering records tokens, latency, selected backend, cache outcome, and cost”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 billing component",
+            "observation": "The label lists “tokens · latency · backend · cache · cost.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=billing].text",
+            "observation": "All five required metering fields are explicitly visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R30",
+        "requirement": "Metering records are written into a billing stream.",
+        "brief_evidence": "“into a billing stream”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 · Metering, Audit & Shadow Eval",
+            "observation": "The metering component is explicitly labeled “Billing stream.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=billing]",
+            "observation": "A visible queue icon names the billing-stream destination."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "Redacted prompts and responses enter an audit store.",
+        "brief_evidence": "“while redacted prompts and responses enter an audit store”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 audit component",
+            "observation": "An archive icon is labeled “Redacted prompt + response audit.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=audit]",
+            "observation": "The archive component visibly combines redaction, prompt/response data, and audit storage."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "At the spend ceiling, a tenant first degrades to the cheapest capable backend.",
+        "brief_evidence": "“A tenant that reaches its spend ceiling first degrades to the cheapest capable backend”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 spend guardrail",
+            "observation": "The label reads “Spend ceiling · cheapest then reject,” but does not say the cheapest backend must remain capable."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=spend].text",
+            "observation": "Spend ceiling and cheapest-first degradation are explicit; the capable-backend qualifier is absent."
+          }
+        ],
+        "note": "The degradation order is shown, but capability preservation is not."
+      },
+      {
+        "id": "R33",
+        "requirement": "After spend-ceiling degradation, new work is rejected.",
+        "brief_evidence": "“and then has new work rejected”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 spend guardrail",
+            "observation": "The ordered label “Spend ceiling · cheapest then reject” explicitly shows rejection after degradation."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=spend].text",
+            "observation": "The required cheapest-then-reject sequence is visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "A small sample of structured evaluation traffic is used for shadow evaluation.",
+        "brief_evidence": "“A small sample of structured evaluation traffic”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 shadow-evaluation component",
+            "observation": "The component says “Sampled eval · shadow only,” representing sampling and evaluation, but not that the traffic is structured."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=shadoweval].text",
+            "observation": "Sampled evaluation is explicit; no object or connection identifies structured evaluation traffic."
+          }
+        ],
+        "note": "Sampling is present, but the structured-traffic qualifier is absent."
+      },
+      {
+        "id": "R35",
+        "requirement": "The sampled evaluation traffic is mirrored to a shadow backend.",
+        "brief_evidence": "“is mirrored to a shadow backend”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 shadow-evaluation component and surrounding board",
+            "observation": "“Sampled eval · shadow only” is shown, but there is no visible mirroring edge or distinct shadow-backend component."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=shadoweval] and all connections",
+            "observation": "The shadow-evaluation object has no incident connection, and no object is labeled as a shadow backend."
+          }
+        ],
+        "note": "Shadow evaluation is named, but the mirroring relationship and destination backend are not fully represented."
+      },
+      {
+        "id": "R36",
+        "requirement": "The shadow backend result never changes the client response.",
+        "brief_evidence": "“whose result never changes the client response”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 shadow-evaluation component",
+            "observation": "The component is labeled “Sampled eval · shadow only” and is isolated from the client-response and streaming paths."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=shadoweval], connections array",
+            "observation": "The visible “shadow only” qualifier is reinforced by the absence of any connection from shadow evaluation into the response path."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R37",
+        "requirement": "The diagram makes clear how admission, routing, caching, fallback, streaming, and capacity protection interact.",
+        "brief_evidence": "“The diagram should make clear how admission, routing, caching, fallback, streaming, capacity protection, and accounting interact”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sections 2–7 and cross-section request/fallback/health paths",
+            "observation": "Admission, queueing, prompt/cache, routing, capacity, failure/fallback, and streaming are connected by directed paths; circuit-breaker feedback reaches the router."
+          },
+          {
+            "source": "json",
+            "locator": "connections from e_identity_admit through e_stream_fail, plus e_retry_router and e_breaker_router",
+            "observation": "The main operational chain and fallback/protection loops are encoded, but several protection semantics and some component interactions remain only implicit."
+          }
+        ],
+        "note": "The principal operational chain is clear, but missing failure classes and incomplete breaker semantics prevent full interaction coverage."
+      },
+      {
+        "id": "R38",
+        "requirement": "The diagram makes clear how accounting interacts with the gateway flow.",
+        "brief_evidence": "“and accounting interact”",
+        "importance": "supporting",
+        "status": "absent",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 8 relative to Sections 1–7",
+            "observation": "Billing, audit, shadow evaluation, and spend components are displayed as isolated icons with no lines connecting them to request, backend, cache, stream, or admission paths."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=billing], objects[id=audit], objects[id=shadoweval], objects[id=spend], entire connections array",
+            "observation": "None of the four accounting-section objects is an endpoint of any connection."
+          }
+        ],
+        "note": "Accounting components are named, but their interaction with the gateway is not represented."
+      },
+      {
+        "id": "R39",
+        "requirement": "The diagram especially clarifies request behavior under overload and provider failure.",
+        "brief_evidence": "“especially how requests behave under overload and provider failure”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Admission deadline rejection, Failure & Fallback, Streaming Contract, and circuit-breaker paths",
+            "observation": "Overload is handled through admission limits, deadline-aware waiting, and explicit expiry rejection; provider failures branch into pre-stream retry/no-retry and post-stream visible failure behavior."
+          },
+          {
+            "source": "json",
+            "locator": "e_admit_queue, e_queue_reject, e_classify_retry, e_classify_failfast, e_stream_fail, e_breaker_router",
+            "observation": "Directed paths encode overload rejection, fallback, fail-fast handling, visible post-stream failure, and health feedback."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.8288,
+    "caps_applied": [
+      {
+        "cap": 6,
+        "requirement_id": "R20",
+        "reason": "system-defining requirement is absent"
+      }
+    ],
+    "strongest_covered_cluster": "The end-to-end admission, deadline queue, prompt/cache, tier routing, fallback, and streaming contract is strongly represented, including explicit expiry rejection and distinct pre-stream versus post-stream failure behavior.",
+    "most_consequential_gap": "The required pre-token failure taxonomy—timeout, rate-limit rejection, content-policy refusal, backend overload, and malformed response—is entirely absent; routing criteria and circuit-breaker state semantics are also incomplete.",
+    "coverage_summary": "Weighted coverage is 60.5 of 73 (P = 0.8288), which reaches the rubric's 7-level coverage anchor before caps. The main request and fallback architecture is substantially covered, but absent system-defining R20 caps the final result at 6. Accounting destinations are present but disconnected from the operational flow.",
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 13141,
+    "output_tokens": 8403
+  },
+  "flags": []
+}

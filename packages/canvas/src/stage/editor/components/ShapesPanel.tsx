@@ -11,14 +11,11 @@ import type { InteractiveCanvasObjectType } from "../../../state/schema";
  * the dock's shape-tool button (bottom-dock-spec: "Clicking button 5-> full-
  * height LEFT-docked white panel").
  *
- * Wave C rewrite: restructured to exactly 3 sections — Basic / Flowchart /
- * Advanced — mirroring FigJam's actual picker model (parity doc:
- * docs/10-system-design/20-figjam-parity/doc.json). Dropped the earlier
- * Recents/Connections sections and the "Other libraries" (AWS/Azure/Cisco)
- * footer: those were placeholder scaffolding from before the real W5 shape
- * vocabulary landed, and FigJam's own picker has no such concepts (connectors
- * are the dock's separate "connector" tool, not a Shapes-panel entry — see
- * CanvasDock.tsx's ToolId union).
+ * Two sections mirroring the catalog's arrangement: Icons (the default face
+ * — the 30-glyph semantic vocabulary in registry order) and Shapes (the
+ * eight universal marks as a compact utility group). Connectors are the
+ * dock's separate "connector" tool, not a Shapes-panel entry — see
+ * CanvasDock.tsx's ToolId union.
  *
  * Origin reference (fj-053-072): full-height left panel, white bg, "Shapes"
  * header + close (x), "Search shapes" input with purple focus ring,
@@ -31,8 +28,8 @@ import type { InteractiveCanvasObjectType } from "../../../state/schema";
  * InteractiveCanvasEditor.tsx's `handleShapePick`, which arms
  * `canvas.setTool`). `onPickEntry` is a new, additive, richer callback that
  * carries the FULL catalog entry — including `direction` (triangle up/down,
- * parallelogram/chevron/arrow-shape left/right) and `icon` (the Advanced
- * tier's glyph selector) — for any consumer that wants to insert a
+ * arrow-shape left/right) and `icon` (the glyph selector) — for any
+ * consumer that wants to insert a
  * fully-formed object directly (e.g. via the `canvas.addObjects` action,
  * which accepts complete InteractiveCanvasObject values including these
  * fields) rather than going through the tool-arm-and-click pipeline. Both

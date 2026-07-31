@@ -216,7 +216,7 @@ export function parseSystemScenario(
     complexity: config.complexity,
     tags: config.tags,
     board: config.page,
-    pollCapMinutes: 15,
+    pollCapMinutes: 30,
     declaredEditCount: edits.length,
     sourcePath: resolve(sourcePath, "brief.md"),
     stages: [

@@ -6,7 +6,7 @@
   "blocks": {
     "b-studio-root": {
       "id": "b-studio-root",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {
         "covers": "The Studio app (packages/studio): a Vite web app and Electron shell whose shared /api/canvases file API persists boards as canvases/*.canvas.json, renders cacheable SVG previews, and serves editor, view-only, and iframe embed routes over the same canonical documents.",
         "format": "mdx",
@@ -55,7 +55,7 @@
     },
     "b-studio-title-1": {
       "id": "b-studio-title-1",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 1
       },
@@ -68,7 +68,7 @@
     },
     "b-studio-intro-2": {
       "id": "b-studio-intro-2",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -101,7 +101,7 @@
     },
     "b-studio-heading-app-3": {
       "id": "b-studio-heading-app-3",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -114,7 +114,7 @@
     },
     "b-studio-app-para-4": {
       "id": "b-studio-app-para-4",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -293,7 +293,7 @@
     },
     "b-studio-app-para-5": {
       "id": "b-studio-app-para-5",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -527,7 +527,7 @@
     },
     "b-studio-app-para-6": {
       "id": "b-studio-app-para-6",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -540,7 +540,7 @@
     },
     "b-studio-app-para-7": {
       "id": "b-studio-app-para-7",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -754,7 +754,7 @@
     },
     "b-studio-heading-embed": {
       "id": "b-studio-heading-embed",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -767,7 +767,7 @@
     },
     "b-studio-embed-preview": {
       "id": "b-studio-embed-preview",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -834,7 +834,7 @@
     },
     "b-studio-embed-routes": {
       "id": "b-studio-embed-routes",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -897,7 +897,7 @@
     },
     "b-studio-embed-ux": {
       "id": "b-studio-embed-ux",
-      "flavour": "decision",
+      "type": "decision",
       "props": {
         "status": "accepted",
         "title": "Keep inline previews static; expand to navigate; edit separately"
@@ -911,7 +911,7 @@
     },
     "b-studio-sample-item-synthetic-10": {
       "id": "b-studio-sample-item-synthetic-10",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -934,7 +934,7 @@
     },
     "b-studio-sample-item-v2-flow-11": {
       "id": "b-studio-sample-item-v2-flow-11",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -957,7 +957,7 @@
     },
     "b-studio-sample-item-v2-flow-elements-12": {
       "id": "b-studio-sample-item-v2-flow-elements-12",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -980,42 +980,20 @@
     },
     "b-studio-sample-item-v2-flow-figjam-13": {
       "id": "b-studio-sample-item-v2-flow-figjam-13",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
       "text": [
         {
-          "insert": "v2-flow.canvas.json",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/v2-flow.canvas.json"
-            }
-          }
-        },
-        {
-          "insert": " — \"V2 Flow (FigJam parity)\": 39 objects and 24 connections, with 12 sections, 3 stickies, 7 pills, 5 icons (cpu 3, chat 1, person 1), 5 predefined-process objects, 6 arrow-shapes, and 1 rectangle; it is the live sample embedded in "
-        },
-        {
-          "insert": "canvas-00-overview",
-          "attributes": {
-            "reference": {
-              "kind": "doc",
-              "path": "10-system-design/00-overview"
-            }
-          }
-        },
-        {
-          "insert": "."
+          "insert": "v2-flow.canvas.json — \"V2 Flow (FigJam parity)\": 39 objects and 24 connections, with 12 sections, 3 stickies, 7 chip rectangles, 5 icons (model 3, message 1, human 1), 5 predefined-process objects, 6 arrow-shapes, and 1 rectangle; it is the live sample embedded in canvas-00-overview."
         }
       ],
       "children": []
     },
     "b-studio-heading-double-duty-14": {
       "id": "b-studio-heading-double-duty-14",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1028,7 +1006,7 @@
     },
     "b-studio-double-duty-observation-15": {
       "id": "b-studio-double-duty-observation-15",
-      "flavour": "observation",
+      "type": "observation",
       "props": {
         "title": "One sample, two consumers, recorded drift"
       },
@@ -1064,7 +1042,7 @@
     },
     "b-studio-heading-design-ref-16": {
       "id": "b-studio-heading-design-ref-16",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1077,7 +1055,7 @@
     },
     "b-studio-design-ref-para-17": {
       "id": "b-studio-design-ref-para-17",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1124,55 +1102,20 @@
     },
     "b-studio-testing-block-18": {
       "id": "b-studio-testing-block-18",
-      "flavour": "testing",
+      "type": "testing",
       "props": {
         "title": "Frozen red baseline for v2-flow drift"
       },
       "text": [
         {
-          "insert": "v2-flow-figjam-canvas.test.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/__tests__/v2-flow-figjam-canvas.test.ts"
-            }
-          }
-        },
-        {
-          "insert": " still asserts scene composition for "
-        },
-        {
-          "insert": "v2-flow.canvas.json",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "canvases/v2-flow.canvas.json"
-            }
-          }
-        },
-        {
-          "insert": ", but the verified fixture now has 39 objects and 24 connections: 12 sections, 3 stickies, 7 pills, 5 icons (cpu 3, chat 1, person 1), 5 predefined-process objects, 6 arrow-shapes, and 1 rectangle. The mismatch is intentional baseline bookkeeping, not a green guardrail: the test's older expectations record the drift until a code session updates the assertions to the current scene. Keep this aligned with the testing policy in "
-        },
-        {
-          "insert": "99-appendix",
-          "attributes": {
-            "reference": {
-              "kind": "doc",
-              "path": "99-appendix"
-            }
-          }
-        },
-        {
-          "insert": "."
+          "insert": "v2-flow-figjam-canvas.test.ts still asserts scene composition for v2-flow.canvas.json, but the verified fixture now has 39 objects and 24 connections: 12 sections, 3 stickies, 7 chip rectangles, 5 icons (model 3, message 1, human 1), 5 predefined-process objects, 6 arrow-shapes, and 1 rectangle. The mismatch is intentional baseline bookkeeping, not a green guardrail: the test's older expectations record the drift until a code session updates the assertions to the current scene. Keep this aligned with the testing policy in 99-appendix."
         }
       ],
       "children": []
     },
     "b-studio-closing-para-19": {
       "id": "b-studio-closing-para-19",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1208,7 +1151,7 @@
     },
     "b-studio-heading-canvases-8": {
       "id": "b-studio-heading-canvases-8",
-      "flavour": "heading",
+      "type": "heading",
       "props": {
         "level": 2
       },
@@ -1221,7 +1164,7 @@
     },
     "b-studio-canvases-intro-9": {
       "id": "b-studio-canvases-intro-9",
-      "flavour": "paragraph",
+      "type": "paragraph",
       "props": {},
       "text": [
         {
@@ -1359,7 +1302,7 @@
     },
     "b-studio-sample-item-board-1": {
       "id": "b-studio-sample-item-board-1",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1382,7 +1325,7 @@
     },
     "b-studio-sample-item-board-2": {
       "id": "b-studio-sample-item-board-2",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1405,7 +1348,7 @@
     },
     "b-studio-sample-item-board-3": {
       "id": "b-studio-sample-item-board-3",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
@@ -1428,7 +1371,7 @@
     },
     "b-studio-sample-item-layer-cake": {
       "id": "b-studio-sample-item-layer-cake",
-      "flavour": "list-item",
+      "type": "list-item",
       "props": {
         "ordered": false
       },
