@@ -1,0 +1,32 @@
+{
+	"label": "Committed — draft finalized",
+	"state": {
+		"kind": "board-v1",
+		"boardId": "board-pipeline-demo",
+		"containerId": "container-7f3a",
+		"sessionId": "sess-01k1v8",
+		"instructions": [
+			"Align the ingest → transform → publish pipeline horizontally and make the retry loop read as a loop."
+		],
+		"seeded": {
+			"board": "<description>\nA three-stage data pipeline aligned on one row; the retry loop sits under transform and reads as a cycle.\n</description>\n<objects>\nbox b1 \"Ingest\" @ (120, 240) 180x90\nbox b2 \"Transform\" @ (430, 240) 180x90\nbox b3 \"Publish\" @ (760, 240) 180x90\nbox b4 \"Retry queue\" @ (430, 430) 200x70\nsticky s1 \"drops malformed rows silently?\" @ (430, 530)\n</objects>\n<edges>\nedge e1 b1 -> b2\nedge e2 b2 -> b3\nedge e3 b2 -> b4\nedge e4 b4 -> b2\n</edges>\n<lints>\n</lints>",
+			"requests": "(none — no user comments or requests on this board)",
+			"lints": { "errors": 0, "warnings": 0 }
+		},
+		"ops": [
+			{ "turn": 5, "tool": "move_object", "target": "s1", "status": "applied", "summary": "s1 → under b4, beside the loop it questions" },
+			{ "turn": 6, "tool": "update_description", "target": null, "status": "applied", "summary": "description matches the aligned row + loop" },
+			{ "turn": 7, "tool": "commit", "target": null, "status": "applied", "summary": "aligned pipeline row, loop under transform" }
+		],
+		"views": [
+			{ "turn": 6, "kind": "section", "sectionId": "sec-main" }
+		],
+		"pending": {},
+		"turns": 7,
+		"toolCalls": 9,
+		"toolErrors": 1,
+		"userMessages": 1,
+		"outcome": { "outcome": "committed", "message": "Aligned the pipeline row; retry loop now reads as a cycle under transform." },
+		"lastEventSeq": 78
+	}
+}

@@ -1,0 +1,26 @@
+{
+	"label": "Fresh spawn — align pipeline",
+	"state": {
+		"kind": "board-v1",
+		"boardId": "board-pipeline-demo",
+		"containerId": null,
+		"sessionId": null,
+		"instructions": [
+			"Align the ingest → transform → publish pipeline horizontally and make the retry loop read as a loop."
+		],
+		"seeded": {
+			"board": "<description>\nA three-stage data pipeline: ingest pulls from the source bucket, transform normalizes records, publish writes to the serving store. A retry loop hangs off transform.\n</description>\n<objects>\nbox b1 \"Ingest\" @ (120, 240) 180x90\nbox b2 \"Transform\" @ (430, 310) 180x90\nbox b3 \"Publish\" @ (760, 180) 180x90\nbox b4 \"Retry queue\" @ (410, 520) 200x70\nsticky s1 \"drops malformed rows silently?\" @ (640, 470)\n</objects>\n<edges>\nedge e1 b1 -> b2\nedge e2 b2 -> b3\nedge e3 b2 -> b4\nedge e4 b4 -> b2\n</edges>\n<lints>\n<warnings>\nW1 b2 overlaps e4 label\nW2 b3 vertically misaligned with b1/b2 row\n</warnings>\n</lints>",
+			"requests": "(none — no user comments or requests on this board)",
+			"lints": { "errors": 0, "warnings": 2 }
+		},
+		"ops": [],
+		"views": [],
+		"pending": {},
+		"turns": 0,
+		"toolCalls": 0,
+		"toolErrors": 0,
+		"userMessages": 0,
+		"outcome": null,
+		"lastEventSeq": -1
+	}
+}

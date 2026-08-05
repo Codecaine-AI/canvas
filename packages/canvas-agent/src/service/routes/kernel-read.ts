@@ -38,7 +38,10 @@ export function createKernelReadRoutes(
 ) {
   const readService = kernel.readApiService;
 
-  /** trace-sessions over kind "layout-session" — read-service list shape. */
+  /** trace-sessions over kind "layout-session" — read-service list shape.
+   * Prompt-edit runs are absent by design: those traces are owned by the
+   * prompt-kit kernel and record into its db (see service/kernel.ts,
+   * bootPromptEditTraceKernel). */
   const listLayoutSessions = async (query: KernelTraceReadQuery = {}) => {
     await kernel.traceWriter.flush();
     const rows = await listSessionContainersWithStats(db, {

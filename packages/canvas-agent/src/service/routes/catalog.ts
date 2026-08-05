@@ -17,17 +17,25 @@
  */
 import { Elysia } from "elysia";
 
-import type { KernelInstance } from "@agent-kernel/kernel";
+import type {
+  KernelInstance,
+  PromptEditSessionService,
+} from "@agent-kernel/kernel";
 import { createKernelCatalogApi } from "@agent-kernel/kernel/catalog-api";
 
-export function createCatalogRoutes(kernel: KernelInstance<unknown>) {
+export function createCatalogRoutes(
+  kernel: KernelInstance<unknown>,
+  promptEditSessions?: PromptEditSessionService,
+) {
   const service = kernel.catalogApiService({ allowWrites: true });
 
   // Same elysia-copy cast as kernel-read.ts: the kernel package resolves its
-  // own structurally-identical Elysia.
+  // own structurally-identical Elysia. Passing promptEditSessions mounts the
+  // prompt-edit session routes under the same prefix.
   const standardCatalogApi = createKernelCatalogApi(service, {
     prefix: "/api/agent/kernel",
     allowWrites: true,
+    promptEditSessions,
   }) as unknown as Elysia;
 
   return new Elysia()

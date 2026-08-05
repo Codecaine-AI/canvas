@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 1,
+  "annotations": [
+    {
+      "id": "d119850a-7cfe-4d7c-b592-b16da5e1edad",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-purpose-identity-instruction",
+        "fingerprint": "982e3adf"
+      },
+      "body": "Tighten this line: \"full board editor\" vs \"scoped part\" reads contradictory on first read.",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-03T23:35:59.754Z",
+      "agentRun": {
+        "sessionId": "pes-2-msdwygoq",
+        "patchId": "pes-txn-1-msdwyoxr",
+        "summary": "Clarifies that the editor works within the operator-selected board scope, removing the full-board/scoped-part contradiction.",
+        "changedIds": [
+          "node-purpose-identity"
+        ]
+      },
+      "resolution": "Clarifies that the editor works within the operator-selected board scope, removing the full-board/scoped-part contradiction."
+    },
+    {
+      "id": "d1d5af97-a216-40be-89c7-8d34587f200a",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "layoutEditorPrompt"
+      },
+      "body": "Whole document: \"operator\" and \"user\" both name the same person — pick one term everywhere.",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-03T23:48:50.498Z",
+      "agentRun": {
+        "sessionId": "pes-2-msdwygoq",
+        "patchId": "pes-txn-2-msdwz9ew",
+        "summary": "Standardizes the sole conflicting reference from “user” to the established term “operator.”",
+        "changedIds": [
+          "node-phase-orientate-constraints-list"
+        ]
+      },
+      "resolution": "Standardizes the sole conflicting reference from “user” to the established term “operator.”"
+    },
+    {
+      "id": "aa8ffaf6-94c7-4091-b262-c3258f1f7787",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-state-purpose",
+        "fingerprint": "a7fbe728"
+      },
+      "body": "Split this opening sentence: plain-text state and attached image renders are two different channels and should be two sentences.",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-04T00:15:18.082Z",
+      "agentRun": {
+        "sessionId": "pes-1-msdwplx6",
+        "patchId": "pes-txn-2-msdwqwjm",
+        "summary": "Separates the plain-text state, attached-render channel, and current-board image statement while removing “separately” as requested.",
+        "changedIds": [
+          "node-state-purpose"
+        ]
+      },
+      "resolution": "Separates the plain-text state, attached-render channel, and current-board image statement while removing “separately” as requested."
+    },
+    {
+      "id": "7c05ef09-7fee-49f7-a720-3d3895c4ba0e",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-phase-orientate",
+        "fingerprint": "0c92a49e"
+      },
+      "body": "I would like to make this a lot more concise, this would largely just be re orienting, i dont think it needs so many constraints",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-04T15:07:49.726Z",
+      "agentRun": {
+        "sessionId": "pes-3-mseslem1",
+        "patchId": "pes-txn-1-mseslxum",
+        "summary": "Reduce orientate to a short reorientation pass and remove its phase-specific constraint block.",
+        "changedIds": [
+          "node-phase-orientate-objective-text",
+          "node-phase-orientate-steps-list",
+          "node-phase-orientate-constraints"
+        ]
+      },
+      "resolution": "Reduce orientate to a short reorientation pass and remove its phase-specific constraint block."
+    },
+    {
+      "id": "b1858ad3-0298-430b-b87c-8cd02e68a2c2",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-state-purpose"
+      },
+      "body": "Ownership smoke test: propose a trivial one-word tightening here. Proposal will be discarded.",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-04T16:12:15.238Z",
+      "resolution": "Ownership smoke test — discarded by design."
+    },
+    {
+      "id": "6485e951-d6c3-4cf5-98b1-061f360bd851",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-state-purpose",
+        "fingerprint": "c0b01eee"
+      },
+      "body": "The phrase \"never a snapshot, and never stale under you\" is doing double duty — cut one of the two negations.",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-04T16:42:57.777Z",
+      "agentRun": {
+        "sessionId": "pes-1-msevzr1t",
+        "patchId": "pes-txn-1-msevzwqa",
+        "summary": "Remove the redundant snapshot negation while preserving the live-state guarantee.",
+        "changedIds": [
+          "node-state-fresh"
+        ]
+      },
+      "resolution": "Remove the redundant snapshot negation while preserving the live-state guarantee."
+    },
+    {
+      "id": "448541df-5b7a-4ad1-a2f3-dd8b088b8cd6",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-section-state-structure",
+        "fingerprint": "94378768"
+      },
+      "body": "We don't need this prompt to have things talking about the rules and stuff within the tools. We could add a rules section at the bottom if necessary.",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-04T18:41:50.471Z",
+      "agentRun": {
+        "sessionId": "pes-2-msf08qgb",
+        "patchId": "pes-txn-1-msf098mr",
+        "summary": "Moves operational tool-use requirements out of state_structure into a final rules section, leaving state_structure to describe live state and results.",
+        "changedIds": [
+          "node-state-operational",
+          "node-section-rules"
+        ]
+      },
+      "resolution": "Moves operational tool-use requirements out of state_structure into a final rules section, leaving state_structure to describe live state and results."
+    },
+    {
+      "id": "72d53c8c-5a00-4348-9126-b54d35180713",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-section-state-structure",
+        "fingerprint": "8093786b"
+      },
+      "body": "can we update the style here to match out style guide, content is fine",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-04T19:54:37.410Z",
+      "agentRun": {
+        "sessionId": "pes-3-msf2u82q",
+        "patchId": "pes-txn-1-msf2uvtz",
+        "summary": "Restyles the state description as direct field declarations with scannable labels while preserving its operational content.",
+        "changedIds": [
+          "node-state-purpose",
+          "node-state-fresh",
+          "node-state-skeleton-intro",
+          "node-state-skeleton",
+          "node-state-grammar-pointer",
+          "node-state-results"
+        ]
+      },
+      "resolution": "Restyles the state description as direct field declarations with scannable labels while preserving its operational content."
+    },
+    {
+      "id": "2923cd4e-e47b-4201-bac3-2541b9571f87",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-section-state-structure",
+        "fingerprint": "c38d1662"
+      },
+      "body": "test",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-04T20:00:36.372Z",
+      "resolution": "dismissed"
+    },
+    {
+      "id": "d1351e91-e59f-4e83-94fc-d14795393a11",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-workflow-intro",
+        "fingerprint": "fb7944e4"
+      },
+      "body": "Marker test: this intro paragraph could name the loop invariant explicitly.",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-04T20:21:52.889Z",
+      "resolution": "dismissed"
+    },
+    {
+      "id": "a336a4db-c7ea-488e-921d-648ced36c7d8",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-workflow-intro",
+        "fingerprint": "fb7944e4"
+      },
+      "body": "Bubble test: consider naming the loop invariant.",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-05T02:06:24.670Z",
+      "resolution": "dismissed"
+    },
+    {
+      "id": "5392f94f-2714-4865-8305-4ae1231672a0",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-section-purpose",
+        "fingerprint": "48e105b8"
+      },
+      "body": "test",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "open",
+      "createdAt": "2026-08-05T15:26:17.400Z"
+    },
+    {
+      "id": "9683a761-3960-4c8f-afff-41aa0302f985",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-state-field-board",
+        "fingerprint": "bc8ddda7"
+      },
+      "body": "test 2",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "open",
+      "createdAt": "2026-08-05T15:26:28.829Z"
+    },
+    {
+      "id": "b1350345-ee4c-4248-bf4d-e7d9127c6833",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "layoutEditorPrompt"
+      },
+      "body": "test",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "open",
+      "createdAt": "2026-08-05T15:26:47.036Z"
+    }
+  ]
+}

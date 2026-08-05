@@ -15,17 +15,13 @@ const VIEWER_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(VIEWER_DIR, "../../../..");
 
 /**
- * The sibling checkouts: the viewer packages
- * (@agent-kernel/viewer-{core,ui,shell}) and the prompt-authoring UI
- * (@codecaine-ai/prompt-kit, which lives in its own repo alongside
- * agent-kernel) are machine-local `link:` deps whose exports point at TS
- * *source*, so Vite compiles them through the node_modules symlinks. That
- * needs (a) fs.allow for *both* sibling repos — prompt-kit is not under
- * agent-kernel, so it needs its own entry or Vite refuses to serve the
- * editor sources, (b) react/react-dom dedupe (the linked packages carry
- * their own react — resolving two Reacts crashes hooks), and (c)
- * optimizeDeps.exclude so esbuild never pre-bundles the symlinked source
- * with its own React copy baked in.
+ * The viewer packages (@agent-kernel/viewer-{core,ui,shell}) are machine-local
+ * `link:` deps. The prompt-authoring UI (@codecaine-ai/prompt-kit) is a
+ * `workspace:*` dependency resolved through the Core meta-workspace. Their
+ * exports point at TS source, so Vite compiles them through node_modules. That
+ * needs (a) fs.allow for both sibling repos, (b) react/react-dom dedupe, and
+ * (c) optimizeDeps.exclude so esbuild never pre-bundles the source with its
+ * own React copy baked in.
  */
 const AGENT_KERNEL_DIR = resolve(REPO_ROOT, "../agent-kernel");
 const PROMPT_KIT_DIR = resolve(REPO_ROOT, "../prompt-kit");

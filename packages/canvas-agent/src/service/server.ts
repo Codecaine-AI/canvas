@@ -14,8 +14,9 @@
  */
 import { Elysia } from "elysia";
 
-import { bootKernelDatabase } from "./kernel";
+import { bootKernelDatabase, bootPromptEditTraceKernel } from "./kernel";
 import { LayoutSessionStore } from "./session";
+import { createCanvasPromptEditSessions } from "./prompt-edit";
 import { createCatalogRoutes } from "./routes/catalog";
 import { createKernelReadRoutes } from "./routes/kernel-read";
 import { createSessionRoutes } from "./routes/sessions";
@@ -26,17 +27,26 @@ const port = Number(Bun.env.CANVAS_AGENT_PORT ?? Bun.env.PORT ?? 4820);
 const boot = await bootKernelDatabase();
 const store = new LayoutSessionStore(boot.db);
 const kernel = store.kernel;
+// Prompt-editor runs record under the prompt-kit kernel when its repo is
+// present — prompt-edit traces are owned by that kernel, not this one.
+const promptEditTraceKernel = await bootPromptEditTraceKernel();
+const promptEditSessions = createCanvasPromptEditSessions(
+  kernel,
+  promptEditTraceKernel?.kernel,
+);
 
 const app = new Elysia()
   .use(createSessionRoutes(store))
   .use(createKernelReadRoutes(kernel, boot.db))
   .use(createTranscriptRoutes())
-  .use(createCatalogRoutes(kernel))
+  .use(createCatalogRoutes(kernel, promptEditSessions))
   .get("/api/agent/doctor", () => kernel.doctor())
   .get("/health", () => ({ status: "ok", kernel: kernel.id }))
   .listen({ hostname: "127.0.0.1", port });
 
 function shutdown(): void {
+  promptEditSessions.disposeAll();
+  promptEditTraceKernel?.close();
   kernel.dispose();
   boot.close();
 }

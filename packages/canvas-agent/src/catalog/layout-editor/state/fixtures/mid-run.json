@@ -1,0 +1,39 @@
+{
+	"label": "Mid-run — reflow after look",
+	"variables": {
+		"toolCallCap": 2
+	},
+	"state": {
+		"kind": "board-v1",
+		"boardId": "board-pipeline-demo",
+		"containerId": "container-7f3a",
+		"sessionId": "sess-01k1v8",
+		"instructions": [
+			"Align the ingest → transform → publish pipeline horizontally and make the retry loop read as a loop.",
+			"Keep the sticky next to whatever it is complaining about."
+		],
+		"seeded": {
+			"board": "<description>\nA three-stage data pipeline: ingest pulls from the source bucket, transform normalizes records, publish writes to the serving store. A retry loop hangs off transform.\n</description>\n<objects>\nbox b1 \"Ingest\" @ (120, 240) 180x90\nbox b2 \"Transform\" @ (430, 310) 180x90\nbox b3 \"Publish\" @ (760, 180) 180x90\nbox b4 \"Retry queue\" @ (410, 520) 200x70\nsticky s1 \"drops malformed rows silently?\" @ (640, 470)\n</objects>\n<edges>\nedge e1 b1 -> b2\nedge e2 b2 -> b3\nedge e3 b2 -> b4\nedge e4 b4 -> b2\n</edges>\n<lints>\n<warnings>\nW1 b2 overlaps e4 label\nW2 b3 vertically misaligned with b1/b2 row\n</warnings>\n</lints>",
+			"requests": "(none — no user comments or requests on this board)",
+			"lints": { "errors": 0, "warnings": 2 }
+		},
+		"ops": [
+			{ "turn": 1, "tool": "move_object", "target": "b2", "status": "applied", "summary": "b2 → (430, 240): onto the b1 row" },
+			{ "turn": 1, "tool": "move_object", "target": "b3", "status": "applied", "summary": "b3 → (760, 240): onto the b1 row" },
+			{ "turn": 2, "tool": "look", "target": null, "status": "note", "summary": "framed b2..b4 — retry loop still reads as a fork" },
+			{ "turn": 3, "tool": "move_object", "target": "b4", "status": "applied", "summary": "b4 → (430, 430): directly under b2" },
+			{ "turn": 3, "tool": "reroute_edge", "target": "e4", "status": "error", "summary": "waypoint outside board bounds" }
+		],
+		"views": [
+			{ "turn": 2, "kind": "crop", "sectionId": null, "region": "ids b2+b4" },
+			{ "turn": 3, "kind": "section", "sectionId": "sec-main" }
+		],
+		"pending": {},
+		"turns": 4,
+		"toolCalls": 5,
+		"toolErrors": 1,
+		"userMessages": 2,
+		"outcome": null,
+		"lastEventSeq": 41
+	}
+}

@@ -13,7 +13,8 @@
  */
 @source "../../../../../agent-kernel/packages/viewer-shell/src";
 @source "../../../../../agent-kernel/packages/viewer-ui/src";
-@source "../../../../../prompt-kit/src";
+@source "../../../../../prompt-kit/packages/prompt-kit/src";
+@source "../../../../../annotations/src";
 
 /*
  * Shared-name token → Tailwind color mapping (the same mapping studio's
