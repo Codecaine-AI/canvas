@@ -239,8 +239,9 @@
       "body": "test",
       "intent": "agent-request",
       "author": "human",
-      "status": "open",
-      "createdAt": "2026-08-05T15:26:17.400Z"
+      "status": "resolved",
+      "createdAt": "2026-08-05T15:26:17.400Z",
+      "resolution": "dismissed"
     },
     {
       "id": "9683a761-3960-4c8f-afff-41aa0302f985",
@@ -253,8 +254,9 @@
       "body": "test 2",
       "intent": "agent-request",
       "author": "human",
-      "status": "open",
-      "createdAt": "2026-08-05T15:26:28.829Z"
+      "status": "resolved",
+      "createdAt": "2026-08-05T15:26:28.829Z",
+      "resolution": "dismissed"
     },
     {
       "id": "b1350345-ee4c-4248-bf4d-e7d9127c6833",
@@ -266,8 +268,59 @@
       "body": "test",
       "intent": "agent-request",
       "author": "human",
-      "status": "open",
-      "createdAt": "2026-08-05T15:26:47.036Z"
+      "status": "resolved",
+      "createdAt": "2026-08-05T15:26:47.036Z",
+      "resolution": "dismissed"
+    },
+    {
+      "id": "db389130-3915-4a6c-b885-999d80d0b3c2",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-section-purpose",
+        "fingerprint": "48e105b8"
+      },
+      "body": "I would like the purpose here to be more about you being an editor in a fig jam-style canvas. The purpose should not include things about open entries or requests, or things like that.",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-05T19:51:49.074Z",
+      "agentRun": {
+        "sessionId": "pes-4-msgi77ts",
+        "patchId": "pes-txn-1-msgi7moo",
+        "summary": "Refocuses the purpose on editing a FigJam-style shared canvas and removes request/state mechanics.",
+        "changedIds": [
+          "node-purpose-identity",
+          "node-purpose-identity-detail"
+        ]
+      },
+      "resolution": "Refocuses the purpose on editing a FigJam-style shared canvas and removes request/state mechanics."
+    },
+    {
+      "id": "a8c78df9-898b-425c-b5fc-11aa40b549e5",
+      "target": {
+        "kind": "prompt-node",
+        "docId": "layoutEditorPrompt",
+        "nodeId": "node-section-workflow",
+        "fingerprint": "907b1b37"
+      },
+      "body": "Generally, the workflow is pretty good, but I feel like we have way too many constraints in here. A lot of these are global constraints, but I feel like this is a little too hefty for what is actually needed.",
+      "intent": "agent-request",
+      "author": "human",
+      "status": "resolved",
+      "createdAt": "2026-08-05T19:52:22.218Z",
+      "agentRun": {
+        "sessionId": "pes-4-msgi77ts",
+        "patchId": "pes-txn-2-msgi845x",
+        "summary": "Condenses phase constraints to the few local guardrails and completion checks that materially change behavior.",
+        "changedIds": [
+          "node-phase-plan-constraints-list",
+          "node-phase-build-constraints-list",
+          "node-phase-qa-constraints-list",
+          "node-phase-finalize-constraints-list"
+        ]
+      },
+      "resolution": "Condenses phase constraints to the few local guardrails and completion checks that materially change behavior."
     }
   ]
 }

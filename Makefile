@@ -81,13 +81,30 @@ traces:
 # Single-port mode: API + viewer SPA together; doc.json edits are picked up
 # live via fs-watch (--dev is only for hacking on the viewer SPA itself,
 # and spawns vite on an uncontrolled second port).
+# Also boots the docs kernel on :4840 by default (override with DOCS_KERNEL_PORT),
+# pointing it at this repo's docs/ so annotate/AI editing works; opens the browser on macOS.
 DOCS_SYSTEM ?= ../docs-system
 docs:
 	@if [ -f "$(DOCS_SYSTEM)/packages/docs-cli/src/index.ts" ]; then \
 		echo "docs: serving with live checkout $(DOCS_SYSTEM)"; \
+		if [ "$$(uname)" = "Darwin" ]; then \
+			( for i in $$(seq 1 60); do \
+				curl -sf http://localhost:4810/ >/dev/null 2>&1 && { open http://localhost:4810; exit 0; }; \
+				sleep 0.5; \
+			done ) & \
+		fi; \
+		KERNEL_PORT="$${DOCS_KERNEL_PORT:-4840}"; \
+		if curl -sf http://127.0.0.1:$$KERNEL_PORT/health >/dev/null 2>&1; then \
+			echo "docs kernel: already running on :$$KERNEL_PORT — leaving it"; \
+		else \
+			echo "docs kernel: starting on :$$KERNEL_PORT"; \
+			DOCS_KERNEL_DOCS_ROOT="$(CURDIR)/docs" DOCS_KERNEL_PORT=$$KERNEL_PORT bun run --cwd "$(DOCS_SYSTEM)/packages/docs-kernel" start & KERNEL_PID=$$!; \
+			trap 'kill $$KERNEL_PID 2>/dev/null' EXIT INT TERM; \
+		fi; \
 		bun "$(DOCS_SYSTEM)/packages/docs-cli/src/index.ts" serve --root docs --port 4810 --theme-locked; \
 	else \
 		echo "docs: live checkout not found, using vendored tools/docs-framework"; \
+		echo "docs kernel: not started in vendored mode (annotate/AI editing needs the live ../docs-system checkout)"; \
 		bun tools/docs-framework/packages/docs-cli/src/index.ts serve --root docs --port 4810 --theme-locked; \
 	fi
 
