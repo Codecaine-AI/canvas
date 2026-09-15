@@ -1,7 +1,7 @@
 /**
  * The Edges group — `style_edge`, `change_connection`, `reroute`,
  * `shift_segment`, `reset_route`, `move_label`
- * (docs/30-agent-layout/50-tool-surface/10-gestures §Edges).
+ * (docs/20-agent-layout/50-tool-surface/10-gestures §Edges).
  *
  * THREE DIFFERENT GESTURES, THREE DIFFERENT TOOLS. Restyling a wire,
  * repointing it, and cleaning up its route are separate motions on the real

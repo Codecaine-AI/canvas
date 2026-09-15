@@ -132,7 +132,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/30-connectors",
+              "path": "30-implementation/30-connectors",
               "label": "canvas-30-connectors"
             }
           }
@@ -481,8 +481,9 @@
     },
     "b-appendix-vendor-constraint-7": {
       "id": "b-appendix-vendor-constraint-7",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "severity": "hard",
         "title": "MPL-2.0 file-level boundary"
       },
@@ -945,9 +946,10 @@
     },
     "b-appendix-bdr-assumption-14": {
       "id": "b-appendix-bdr-assumption-14",
-      "type": "assumption",
+      "type": "callout",
       "props": {
         "confidence": "medium",
+        "kind": "assumption",
         "title": "Some constants are flagged extrapolations"
       },
       "text": [
@@ -969,7 +971,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/60-trim",
+              "path": "30-implementation/60-trim",
               "label": "canvas-60-trim"
             }
           }
@@ -1171,8 +1173,9 @@
     },
     "b-appendix-testing-block-17": {
       "id": "b-appendix-testing-block-17",
-      "type": "testing",
+      "type": "callout",
       "props": {
+        "kind": "testing",
         "title": "Unit tests for logic, DOM/geometry assertions for rendering — never screenshots"
       },
       "text": [
@@ -1239,7 +1242,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/60-trim",
+              "path": "30-implementation/60-trim",
               "label": "canvas-60-trim"
             }
           }

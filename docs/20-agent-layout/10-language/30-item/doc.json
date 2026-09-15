@@ -1,0 +1,246 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-30-item",
+  "title": "item — a real object",
+  "root": "b-item-root",
+  "blocks": {
+    "b-item-root": {
+      "id": "b-item-root",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "item",
+          "compass placement",
+          "at=",
+          "content-first sizing",
+          "reference numbers"
+        ],
+        "covers": "The item notation: one real object per line with every field labeled — number, text=, type=, size=, at=, hug= — plus the compass placement rules for when at= is required or forbidden.",
+        "format": "mdx",
+        "type": "reference"
+      },
+      "children": [
+        "b-item-title-1",
+        "b-item-body-2",
+        "b-item-table-3",
+        "b-item-at-4",
+        "b-item-compass-observation-5",
+        "b-item-code-6",
+        "b-item-canvas-7"
+      ]
+    },
+    "b-item-title-1": {
+      "id": "b-item-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "item — a real object"
+        }
+      ],
+      "children": []
+    },
+    "b-item-body-2": {
+      "id": "b-item-body-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A real object on the board — one per line, every field labeled. In this descriptive notation, an item says what it is and where it sits by compass rather than by pixel coordinates. The size label is human shorthand: live add geometry and geometry patches carry a complete finite {x, y, width, height}. The agent chooses dimensions from content and role, then matches peers by copying exact digest geometry; the 16px grid quantizes geometry rather than prescribing a size or spacing amount. Fields, in fixed order:"
+        }
+      ],
+      "children": []
+    },
+    "b-item-table-3": {
+      "id": "b-item-table-3",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "field",
+          "required",
+          "values"
+        ],
+        "rows": [
+          [
+            "number",
+            "yes",
+            "positive integer, unique — declared once, reused by align, fan, and arrows"
+          ],
+          [
+            "text=",
+            "yes",
+            "the object's name; duplicates legal; JSON-quoted when not [A-Za-z0-9][A-Za-z0-9_.:-]*"
+          ],
+          [
+            "type=",
+            "yes",
+            "a type from the closed canvas roster (process, decision, database, pill, ...); sticky denotes the note kind, and icon requires a roster glyph"
+          ],
+          [
+            "size=",
+            "yes",
+            "S, M, L as qualitative role sizes in this notation; live types carry no default-size guidance"
+          ],
+          [
+            "at=",
+            "see below",
+            "compass: N NE E SE S SW W NW C"
+          ],
+          [
+            "hug=",
+            "optional",
+            "compass corner; only on direct children of a split"
+          ]
+        ],
+        "title": "item fields"
+      },
+      "children": []
+    },
+    "b-item-at-4": {
+      "id": "b-item-at-4",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "at=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is "
+        },
+        {
+          "insert": "required",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " on items inside a "
+        },
+        {
+          "insert": "group",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/40-group",
+              "label": "group — a loose cluster"
+            }
+          }
+        },
+        {
+          "insert": " or standing alone as a split child or root (their position within their band matters). "
+        },
+        {
+          "insert": "at=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is "
+        },
+        {
+          "insert": "forbidden",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " on items inside a "
+        },
+        {
+          "insert": "grid",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/50-grid",
+              "label": "grid — a repeated-cell lattice"
+            }
+          }
+        },
+        {
+          "insert": " (the lattice places them). An "
+        },
+        {
+          "insert": "item",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " line directly under a split occupies one weight slot by itself."
+        }
+      ],
+      "children": []
+    },
+    "b-item-compass-observation-5": {
+      "id": "b-item-compass-observation-5",
+      "type": "callout",
+      "props": {
+        "kind": "observation",
+        "title": "Nine compass values, three jobs"
+      },
+      "text": [
+        {
+          "insert": "The compass set is NW N NE W C E SW S SE. "
+        },
+        {
+          "insert": "at=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " places an item inside its region, "
+        },
+        {
+          "insert": "hug=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pins a split child to a corner, and "
+        },
+        {
+          "insert": "dir=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " takes the four cardinal values for a fan."
+        }
+      ],
+      "children": []
+    },
+    "b-item-code-6": {
+      "id": "b-item-code-6",
+      "type": "code",
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "section 1 text=panel label=\"Item placement\"\n  group\n    item 2 text=note type=sticky size=M at=NW\n    item 3 text=step type=process size=M at=C\n    item 4 text=tag type=rectangle size=S at=SE\n\narrows"
+        }
+      ],
+      "children": []
+    },
+    "b-item-canvas-7": {
+      "id": "b-item-canvas-7",
+      "type": "canvas",
+      "props": {
+        "src": "./assets/canvases/example-item.canvas.json",
+        "title": "Three items placed by compass"
+      },
+      "children": []
+    }
+  }
+}

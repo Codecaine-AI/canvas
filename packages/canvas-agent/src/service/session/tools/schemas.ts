@@ -391,7 +391,7 @@ export type ConnectParams = Static<typeof ConnectParams>;
  * `style.strokeStyle` (packages/canvas/src/state/schema/style.ts), so
  * `change_section_border` is plumbing rather than a schema change. The UI
  * flyout offers only solid/dashed; the model and the handler both accept
- * "none", per docs/30-agent-layout/50-tool-surface/10-gestures §Sections.
+ * "none", per docs/20-agent-layout/50-tool-surface/10-gestures §Sections.
  */
 export const SectionBorder = StringEnum(["solid", "dashed", "none"], {
   description: "How the frame's border is stroked.",
@@ -480,7 +480,7 @@ export type ShapeSwapPatch = Static<typeof ShapeSwapPatch>;
 //
 // Restyling, repointing, and routing are three different gestures, and the
 // schemas are what keep them from bleeding into one another
-// (docs/30-agent-layout/50-tool-surface/10-gestures §Edges):
+// (docs/20-agent-layout/50-tool-surface/10-gestures §Edges):
 //
 //  - `EdgeStylePatch` carries the LINE and the ARROWHEADS and nothing else.
 //    An edge's color is `change_color` and an edge's label is `update_text` —

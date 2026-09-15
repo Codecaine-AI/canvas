@@ -1,0 +1,1325 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-interaction",
+  "title": "Canvas Engine — Interaction Kernel",
+  "root": "b-interaction-root",
+  "blocks": {
+    "b-interaction-root": {
+      "id": "b-interaction-root",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "pointer vocabulary",
+          "hit-testing",
+          "frame coalescer",
+          "edge pan",
+          "clipboard",
+          "kernel vs pipeline split"
+        ],
+        "covers": "The pointer kernel at packages/canvas/src/interaction/: normalized pointer events, the hit vocabulary and shared thresholds, pure DOM-free hit-testing, the frame coalescer, edge-pan math, and the in-memory clipboard. The gesture machine itself assembles above the stage in the editor pipeline; feature slices own gesture logic.",
+        "format": "mdx",
+        "type": "overview"
+      },
+      "children": [
+        "b-interaction-title-1",
+        "b-interaction-intro-2",
+        "b-interaction-heading-vocabulary-25",
+        "b-interaction-vocabulary-body-26",
+        "b-interaction-vocabulary-thresholds-27",
+        "b-interaction-heading-hit-testing-28",
+        "b-interaction-hit-testing-body-29",
+        "b-interaction-hit-testing-outline-30",
+        "b-interaction-heading-frame-coalescer-31",
+        "b-interaction-frame-coalescer-body-32",
+        "b-interaction-heading-clipboard-19",
+        "b-interaction-clipboard-body-20",
+        "b-interaction-heading-edge-pan-21",
+        "b-interaction-edge-pan-body-22",
+        "b-interaction-testing-23",
+        "b-interaction-closing-24"
+      ]
+    },
+    "b-interaction-title-1": {
+      "id": "b-interaction-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Interaction Kernel"
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-intro-2": {
+      "id": "b-interaction-intro-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "interaction/ is the pure-TS floor under every gesture: it defines what a pointer event IS, what a hit IS, and the shared thresholds that decide when a press becomes a drag — and it implements the DOM-free utilities (hit-testing, frame coalescing, edge-pan velocity, the clipboard) that everything above consumes. What it deliberately does NOT contain is the machine: the gesture-state union and the dispatcher assemble in "
+        },
+        {
+          "insert": "core.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
+              "symbol": "stepInteraction",
+              "label": "core.ts"
+            }
+          }
+        },
+        {
+          "insert": " (see "
+        },
+        {
+          "insert": "30-implementation/50-editor",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/50-editor",
+              "label": "30-implementation/50-editor"
+            }
+          }
+        },
+        {
+          "insert": "), each editor feature slice owns its own gesture logic, and connector gestures live in the connector slice (see "
+        },
+        {
+          "insert": "30-implementation/30-connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/30-connectors",
+              "label": "30-implementation/30-connectors"
+            }
+          }
+        },
+        {
+          "insert": "). The barrel "
+        },
+        {
+          "insert": "interaction.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/interaction.ts",
+              "label": "interaction.ts"
+            }
+          }
+        },
+        {
+          "insert": " says exactly this in its header — it re-exports kernel vocabulary and nothing else."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-heading-vocabulary-25": {
+      "id": "b-interaction-heading-vocabulary-25",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The vocabulary: types.ts"
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-vocabulary-body-26": {
+      "id": "b-interaction-vocabulary-body-26",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasPointerEvent",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "CanvasPointerEvent",
+              "label": "CanvasPointerEvent"
+            }
+          }
+        },
+        {
+          "insert": " / "
+        },
+        {
+          "insert": "CanvasPointerEventType",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "CanvasPointerEventType",
+              "label": "CanvasPointerEventType"
+            }
+          }
+        },
+        {
+          "insert": " is the normalized event shape: "
+        },
+        {
+          "insert": "down",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "move",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "up",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "cancel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or "
+        },
+        {
+          "insert": "double",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", carrying "
+        },
+        {
+          "insert": "world",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "screen",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " coordinates, mouse button/modifier state, and a "
+        },
+        {
+          "insert": "CanvasHit",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "CanvasHit",
+              "label": "CanvasHit"
+            }
+          }
+        },
+        {
+          "insert": " so the dispatcher and feature slices consume normalized data instead of raw DOM events. The "
+        },
+        {
+          "insert": "CanvasHit",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "CanvasHit",
+              "label": "CanvasHit"
+            }
+          }
+        },
+        {
+          "insert": " union currently has seven kinds: "
+        },
+        {
+          "insert": "canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " when no target wins; "
+        },
+        {
+          "insert": "object",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " when an object body or section title chip wins; "
+        },
+        {
+          "insert": "handle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for resize handles; "
+        },
+        {
+          "insert": "connection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for connector paths; "
+        },
+        {
+          "insert": "endpoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for connector endpoint handles; "
+        },
+        {
+          "insert": "bend-segment",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for selected connector bend pills; and "
+        },
+        {
+          "insert": "port",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for anchor-dot or port-proximity hits."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-vocabulary-thresholds-27": {
+      "id": "b-interaction-vocabulary-thresholds-27",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The shared thresholds are "
+        },
+        {
+          "insert": "DRAG_THRESHOLD",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "DRAG_THRESHOLD",
+              "label": "DRAG_THRESHOLD"
+            }
+          }
+        },
+        {
+          "insert": " = 3 world units before a press promotes into a drag gesture, and "
+        },
+        {
+          "insert": "SNAP_THRESHOLD_SCREEN_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "SNAP_THRESHOLD_SCREEN_PX",
+              "label": "SNAP_THRESHOLD_SCREEN_PX"
+            }
+          }
+        },
+        {
+          "insert": " = 6 screen px for zoom-normalized snapping. "
+        },
+        {
+          "insert": "ResizeHandle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "ResizeHandle",
+              "label": "ResizeHandle"
+            }
+          }
+        },
+        {
+          "insert": " names the eight cardinal/intercardinal handles, "
+        },
+        {
+          "insert": "RESIZE_HANDLES",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "RESIZE_HANDLES",
+              "label": "RESIZE_HANDLES"
+            }
+          }
+        },
+        {
+          "insert": " stores them in "
+        },
+        {
+          "insert": "n",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ne",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "e",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "se",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "s",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "sw",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "w",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "nw",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " order, and the small pure helpers "
+        },
+        {
+          "insert": "selectedObjectIds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "selectedObjectIds",
+              "label": "selectedObjectIds"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "worldDistance",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "worldDistance",
+              "label": "worldDistance"
+            }
+          }
+        },
+        {
+          "insert": " keep selection extraction and pointer-distance math out of DOM code."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-heading-hit-testing-28": {
+      "id": "b-interaction-heading-hit-testing-28",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Hit-testing"
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-hit-testing-body-29": {
+      "id": "b-interaction-hit-testing-body-29",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "hit-testing.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "label": "hit-testing.ts"
+            }
+          }
+        },
+        {
+          "insert": " is pure, DOM-free hit-testing and geometry gathering. "
+        },
+        {
+          "insert": "hitTestObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "symbol": "hitTestObjects",
+              "label": "hitTestObjects"
+            }
+          }
+        },
+        {
+          "insert": " walks the stage paint order from topmost to bottommost, with section title chips checked before ordinary object outlines. "
+        },
+        {
+          "insert": "selectionBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "symbol": "selectionBounds",
+              "label": "selectionBounds"
+            }
+          }
+        },
+        {
+          "insert": " computes selected-object union bounds, "
+        },
+        {
+          "insert": "gatherSnapCandidates",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "symbol": "gatherSnapCandidates",
+              "label": "gatherSnapCandidates"
+            }
+          }
+        },
+        {
+          "insert": " gathers sibling and section bounds for snapping, "
+        },
+        {
+          "insert": "objectsIntersectingBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "symbol": "objectsIntersectingBounds",
+              "label": "objectsIntersectingBounds"
+            }
+          }
+        },
+        {
+          "insert": " answers drag-select membership by stored-geometry intersection, "
+        },
+        {
+          "insert": "descendantIds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "symbol": "descendantIds",
+              "label": "descendantIds"
+            }
+          }
+        },
+        {
+          "insert": " returns transitive descendants, and "
+        },
+        {
+          "insert": "objectGeometryMap",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "symbol": "objectGeometryMap",
+              "label": "objectGeometryMap"
+            }
+          }
+        },
+        {
+          "insert": " projects object ids to geometries. The editor pipeline falls back to these helpers during hit resolution, and feature slices reuse the same geometry vocabulary for selection, move, and snapping workflows."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-hit-testing-outline-30": {
+      "id": "b-interaction-hit-testing-outline-30",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "outline-hit-testing.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/outline-hit-testing.test.ts",
+              "label": "outline-hit-testing.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " verifies the outline behavior: true-outline shapes such as diamonds reject empty bbox corners and fall through to the object behind or canvas, bbox-outline objects keep full-box hits, below-slot text stays clickable, and zoom-scaled section title chips win before overlapping objects."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-heading-frame-coalescer-31": {
+      "id": "b-interaction-heading-frame-coalescer-31",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The frame coalescer"
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-frame-coalescer-body-32": {
+      "id": "b-interaction-frame-coalescer-body-32",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "createFrameCoalescer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/frame-coalescer.ts",
+              "symbol": "createFrameCoalescer",
+              "label": "createFrameCoalescer"
+            }
+          }
+        },
+        {
+          "insert": " is the kernel rAF coalescer: callers provide a commit function and may inject the tiny request/cancel scheduler shape, so tests can drive frames deterministically with a fake scheduler. Its contract is "
+        },
+        {
+          "insert": "push",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (record latest value and schedule one frame if needed), "
+        },
+        {
+          "insert": "flush",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (cancel the pending frame and synchronously commit the queued value), "
+        },
+        {
+          "insert": "cancel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (drop the pending value without committing), and "
+        },
+        {
+          "insert": "isPending",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (whether a frame is scheduled). The editor pipeline batches pointer-move work through it; see "
+        },
+        {
+          "insert": "30-implementation/50-editor",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/50-editor",
+              "label": "30-implementation/50-editor"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-heading-clipboard-19": {
+      "id": "b-interaction-heading-clipboard-19",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Clipboard"
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-clipboard-body-20": {
+      "id": "b-interaction-clipboard-body-20",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "clipboard.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/clipboard.ts",
+              "label": "clipboard.ts"
+            }
+          }
+        },
+        {
+          "insert": " implements an in-memory clipboard — a module-level "
+        },
+        {
+          "insert": "clipboardMemory",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " variable, not the OS clipboard. "
+        },
+        {
+          "insert": "copySelection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/clipboard.ts",
+              "symbol": "copySelection",
+              "label": "copySelection"
+            }
+          }
+        },
+        {
+          "insert": " captures the current object selection plus every descendant (via "
+        },
+        {
+          "insert": "collectDescendantIds",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so copying a section brings its children along), plus every connection whose both endpoints land inside the captured set, deep-cloned via "
+        },
+        {
+          "insert": "structuredClone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and records a "
+        },
+        {
+          "insert": "sourcePoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the copied selection's bounds center) used later to compute the paste offset. The editor's hotkey handler ("
+        },
+        {
+          "insert": "use-canvas-hotkeys.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts",
+              "label": "use-canvas-hotkeys.ts"
+            }
+          }
+        },
+        {
+          "insert": ") stores the result in the module singleton via "
+        },
+        {
+          "insert": "setClipboardMemory",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/clipboard.ts",
+              "symbol": "setClipboardMemory",
+              "label": "setClipboardMemory"
+            }
+          }
+        },
+        {
+          "insert": " on Cmd/Ctrl-C. On paste, it reads the payload back with "
+        },
+        {
+          "insert": "getClipboardMemory",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/clipboard.ts",
+              "symbol": "getClipboardMemory",
+              "label": "getClipboardMemory"
+            }
+          }
+        },
+        {
+          "insert": " and calls "
+        },
+        {
+          "insert": "buildPastePayload",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/clipboard.ts",
+              "symbol": "buildPastePayload",
+              "label": "buildPastePayload"
+            }
+          }
+        },
+        {
+          "insert": ", which re-clones the objects and connections and translates every geometry — and every explicit connection waypoint, because waypoints are stored as absolute world coordinates, so paste offsets translate them explicitly — by the delta between a target drop point (or a default 24-unit offset when pasting without one) and the recorded "
+        },
+        {
+          "insert": "sourcePoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so a fan of connectors pastes intact rather than re-routing from scratch. The resulting objects and connections are dispatched in a single "
+        },
+        {
+          "insert": "canvas.addObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/objects.ts",
+              "symbol": "canvas.addObjects",
+              "label": "canvas.addObjects"
+            }
+          }
+        },
+        {
+          "insert": " action, so the whole paste — however many objects and connections it contains — lands as one reducer call and one undo step."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-heading-edge-pan-21": {
+      "id": "b-interaction-heading-edge-pan-21",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Edge panning"
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-edge-pan-body-22": {
+      "id": "b-interaction-edge-pan-body-22",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "edge-pan.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/edge-pan.ts",
+              "label": "edge-pan.ts"
+            }
+          }
+        },
+        {
+          "insert": " auto-pans the viewport while any "
+        },
+        {
+          "insert": "EDGE_PAN_DRAG_KINDS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
+              "symbol": "EDGE_PAN_DRAG_KINDS",
+              "label": "EDGE_PAN_DRAG_KINDS"
+            }
+          }
+        },
+        {
+          "insert": " gesture is in progress ("
+        },
+        {
+          "insert": "move",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "drag-select",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "place",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connector-endpoint-drag",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connector-create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or "
+        },
+        {
+          "insert": "connector-bend-drag",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") and the pointer sits inside a "
+        },
+        {
+          "insert": "band",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "-px region near a stage edge, so the user can drag past the visible viewport bounds without releasing the pointer. Its sole export, "
+        },
+        {
+          "insert": "computeEdgePan",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/edge-pan.ts",
+              "symbol": "computeEdgePan",
+              "label": "computeEdgePan"
+            }
+          }
+        },
+        {
+          "insert": ", takes the pointer's stage-relative position, the stage's screen-space size, the edge band width, and a max speed, and returns a "
+        },
+        {
+          "insert": "{ dx, dy }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " delta to add to the viewport's pan each animation frame (matching "
+        },
+        {
+          "insert": "panBy",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "panBy",
+              "label": "panBy"
+            }
+          }
+        },
+        {
+          "insert": "'s screen-delta sign convention in "
+        },
+        {
+          "insert": "viewport.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "label": "viewport.ts"
+            }
+          }
+        },
+        {
+          "insert": "). Each axis is computed independently, so a pointer parked in a corner yields nonzero "
+        },
+        {
+          "insert": "dx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "dy",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " simultaneously. Velocity ramps linearly from 0 at "
+        },
+        {
+          "insert": "band",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " px away from the edge up to "
+        },
+        {
+          "insert": "maxSpeed",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " right at the edge (or beyond, if the pointer has left the stage bounds entirely); a pointer more than "
+        },
+        {
+          "insert": "band",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " px from every edge — the \"safe\" interior — or a non-positive "
+        },
+        {
+          "insert": "band",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "maxSpeed",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", yields "
+        },
+        {
+          "insert": "{ dx: 0, dy: 0 }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-testing-23": {
+      "id": "b-interaction-testing-23",
+      "type": "callout",
+      "props": {
+        "kind": "testing",
+        "title": "Interaction test suite"
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/interaction/__tests__/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__",
+              "label": "interaction/__tests__/"
+            }
+          }
+        },
+        {
+          "insert": " contains the local interaction coverage: "
+        },
+        {
+          "insert": "interaction.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/interaction.test.ts",
+              "label": "interaction.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "interaction.connection-cascade.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/interaction.connection-cascade.test.ts",
+              "label": "interaction.connection-cascade.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "interaction.connector-mode.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/interaction.connector-mode.test.ts",
+              "label": "interaction.connector-mode.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "interaction.frame-coalescer.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/interaction.frame-coalescer.test.ts",
+              "label": "interaction.frame-coalescer.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "edge-pan.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/edge-pan.test.ts",
+              "label": "edge-pan.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "outline-hit-testing.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/__tests__/outline-hit-testing.test.ts",
+              "label": "outline-hit-testing.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ". The frame coalescer suite drives "
+        },
+        {
+          "insert": "createFrameCoalescer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/frame-coalescer.ts",
+              "symbol": "createFrameCoalescer",
+              "label": "createFrameCoalescer"
+            }
+          }
+        },
+        {
+          "insert": " with a fake scheduler; the edge-pan and outline suites cover the kernel utilities directly, while the remaining suites keep interaction-level regressions visible from this package root. The snapping suite lives with its slice at "
+        },
+        {
+          "insert": "packages/canvas/src/stage/editor/features/snapping/__tests__/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/__tests__",
+              "label": "snapping/__tests__/"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-interaction-closing-24": {
+      "id": "b-interaction-closing-24",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "What used to be narrated here as one interaction layer now reads in three places: the gesture-state union, dispatcher, and the selection/move/place/snapping slices in "
+        },
+        {
+          "insert": "30-implementation/50-editor",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/50-editor",
+              "label": "30-implementation/50-editor"
+            }
+          }
+        },
+        {
+          "insert": "; connector gestures, Connector Mode, and the connection cascade in "
+        },
+        {
+          "insert": "30-implementation/30-connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/30-connectors",
+              "label": "30-implementation/30-connectors"
+            }
+          }
+        },
+        {
+          "insert": "; and this kernel underneath both."
+        }
+      ],
+      "children": []
+    }
+  }
+}

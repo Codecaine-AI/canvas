@@ -1,0 +1,981 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-30-agent-layout-10-language-00-overview",
+  "title": "The board layout vocabulary",
+  "root": "b-language-root",
+  "blocks": {
+    "b-language-root": {
+      "id": "b-language-root",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "layout vocabulary",
+          "description shape",
+          "reference numbers",
+          "statement anatomy",
+          "nesting",
+          "notation conventions"
+        ],
+        "covers": "Overview of the board layout vocabulary: a compact descriptive notation for composition patterns, its three-part shape (tree, alignment facts, arrows), reference numbers, statement anatomy, and the nine-construct index.",
+        "format": "mdx",
+        "type": "reference"
+      },
+      "children": [
+        "b-language-title-1",
+        "b-language-intro-2",
+        "b-language-clarity-decision-3",
+        "b-language-shape-heading-4",
+        "b-language-shape-body-5",
+        "b-language-shape-tree-6",
+        "b-language-shape-align-7",
+        "b-language-shape-arrows-8",
+        "b-language-shape-parsing-9",
+        "b-language-alignfacts-body-10",
+        "b-language-refs-heading-11",
+        "b-language-refs-body-12",
+        "b-language-anatomy-heading-13",
+        "b-language-anatomy-body-14",
+        "b-language-anatomy-code-15",
+        "b-language-anatomy-table-16",
+        "b-language-statements-body-17",
+        "b-language-statements-table-18",
+        "b-language-statements-index-19",
+        "b-language-nesting-heading-20",
+        "b-language-nesting-body-21",
+        "b-language-nesting-code-22",
+        "b-language-nesting-canvas-23",
+        "b-language-canonical-heading-24",
+        "b-language-canonical-body-25",
+        "b-language-deferred-heading-26",
+        "b-language-deferred-body-27",
+        "b-language-deferred-sparse-28",
+        "b-language-lab-pointer-29"
+      ]
+    },
+    "b-language-title-1": {
+      "id": "b-language-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "The board layout vocabulary"
+        }
+      ],
+      "children": []
+    },
+    "b-language-intro-2": {
+      "id": "b-language-intro-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "These pages document the board's layout vocabulary and composition patterns. Their compact notation describes arrangements for people; it is not a machine interface, and the agent neither reads nor writes it. The agent edits sections, stickies, objects, and connections directly through the twenty-five editing gestures exposed as "
+        },
+        {
+          "insert": "the operation surface",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The "
+        },
+        {
+          "insert": "style_guide",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " context renders one nested aesthetic topic: calm and uniform, with content-first sizing, one repeated gap per group, peer geometry copied from the digest, air around content and labels, sections as homes and addressable units, restrained semantic color, and direct edge labels. Read a description in three passes: the indented tree first, then the alignment facts, then the arrows."
+        }
+      ],
+      "children": []
+    },
+    "b-language-clarity-decision-3": {
+      "id": "b-language-clarity-decision-3",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "status": "accepted",
+        "title": "Vocabulary in practice"
+      },
+      "text": [
+        {
+          "insert": "The canvas document backs the draft. An operation result is sized to that operation — its change, its lint delta, and the routed truth for any edge it touched — while a look returns the whole board, its digest, and a measured close-up of any region it is asked to frame; a refused call changes nothing and returns only its error lines. Sections keep exactly the geometry they are given, and fit_section closes one around the children already inside it when asked. Section membership is reconciled from geometry rather than trusted from parentId. Six diagnostics judge document and routed geometry on every edit — covered-content, containment, broken-edges, unreadable-labels, crowding, and clipped-text — and a committed finalize adds frame-slack."
+        }
+      ],
+      "children": []
+    },
+    "b-language-shape-heading-4": {
+      "id": "b-language-shape-heading-4",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Description shape"
+        }
+      ],
+      "children": []
+    },
+    "b-language-shape-body-5": {
+      "id": "b-language-shape-body-5",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The descriptive notation has three parts, in this order:"
+        }
+      ],
+      "children": []
+    },
+    "b-language-shape-tree-6": {
+      "id": "b-language-shape-tree-6",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The tree",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — objects and how space is divided. Nested by indentation."
+        }
+      ],
+      "children": []
+    },
+    "b-language-shape-align-7": {
+      "id": "b-language-shape-align-7",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Alignment facts",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/70-align",
+              "label": "align — a shared centerline"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "fan",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/80-fan",
+              "label": "fan — hub over children"
+            }
+          }
+        },
+        {
+          "insert": " lines at the left margin. Cross-branch spatial claims; they reference objects by number."
+        }
+      ],
+      "children": []
+    },
+    "b-language-shape-arrows-8": {
+      "id": "b-language-shape-arrows-8",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Arrows",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — the "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/90-arrows",
+              "label": "arrows — the connection block"
+            }
+          }
+        },
+        {
+          "insert": " block, always last. The connections that exist in the document."
+        }
+      ],
+      "children": []
+    },
+    "b-language-shape-parsing-9": {
+      "id": "b-language-shape-parsing-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Examples separate the parts with one blank line and use exactly 2 spaces per indentation level. This is a reading convention for the pages, not input grammar."
+        }
+      ],
+      "children": []
+    },
+    "b-language-alignfacts-body-10": {
+      "id": "b-language-alignfacts-body-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "After the tree, at the left margin, in this order: all "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/70-align",
+              "label": "align — a shared centerline"
+            }
+          }
+        },
+        {
+          "insert": " lines, then all "
+        },
+        {
+          "insert": "fan",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/80-fan",
+              "label": "fan — hub over children"
+            }
+          }
+        },
+        {
+          "insert": " lines. Alignment facts are cross-branch spatial claims: they reference objects by number, from anywhere in the tree."
+        }
+      ],
+      "children": []
+    },
+    "b-language-refs-heading-11": {
+      "id": "b-language-refs-heading-11",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Reference numbers"
+        }
+      ],
+      "children": []
+    },
+    "b-language-refs-body-12": {
+      "id": "b-language-refs-body-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every object line ("
+        },
+        {
+          "insert": "item",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/30-item",
+              "label": "item — a real object"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/20-section",
+              "label": "section — a real container object"
+            }
+          }
+        },
+        {
+          "insert": ") declares a positive integer, assigned in declaration order starting at 1. All later references — "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/70-align",
+              "label": "align — a shared centerline"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "fan",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/80-fan",
+              "label": "fan — hub over children"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/90-arrows",
+              "label": "arrows — the connection block"
+            }
+          }
+        },
+        {
+          "insert": " — use these numbers. The number "
+        },
+        {
+          "insert": "is",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " the object's identity within the description; "
+        },
+        {
+          "insert": "text=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is only its short display name. Several objects may share the same text — references always go through numbers, so nothing is ambiguous. Declaring the same number twice is an error. A reference may instead be a JSON-quoted raw id ("
+        },
+        {
+          "insert": "\"some-id\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") for objects that do not appear in the tree. When display text repeats, reference numbers keep the description unambiguous."
+        }
+      ],
+      "children": []
+    },
+    "b-language-anatomy-heading-13": {
+      "id": "b-language-anatomy-heading-13",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "How to read a statement"
+        }
+      ],
+      "children": []
+    },
+    "b-language-anatomy-body-14": {
+      "id": "b-language-anatomy-body-14",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every value is labeled, so each field answers one specific layout question. One "
+        },
+        {
+          "insert": "item",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/30-item",
+              "label": "item — a real object"
+            }
+          }
+        },
+        {
+          "insert": " line, taken apart:"
+        }
+      ],
+      "children": []
+    },
+    "b-language-anatomy-code-15": {
+      "id": "b-language-anatomy-code-15",
+      "type": "code",
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "item 2 text=checkout type=rectangle size=M at=C"
+        }
+      ],
+      "children": []
+    },
+    "b-language-anatomy-table-16": {
+      "id": "b-language-anatomy-table-16",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "token",
+          "meaning"
+        ],
+        "rows": [
+          [
+            "item",
+            "keyword — what this line declares"
+          ],
+          [
+            "2",
+            "reference number — declared once, reused later"
+          ],
+          [
+            "text=checkout",
+            "the object's name — several objects can share it; the number is the identity"
+          ],
+          [
+            "type=pill",
+            "shape type"
+          ],
+          [
+            "size=M",
+            "qualitative role size — S, M, or L; live geometry is chosen content-first, with peers matched exactly"
+          ],
+          [
+            "at=C",
+            "compass position — where in the region"
+          ]
+        ],
+        "title": "Anatomy of an item line"
+      },
+      "children": []
+    },
+    "b-language-statements-body-17": {
+      "id": "b-language-statements-body-17",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The notation is small on purpose. These are all the statements used on these pages:"
+        }
+      ],
+      "children": []
+    },
+    "b-language-statements-table-18": {
+      "id": "b-language-statements-table-18",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "statement",
+          "meaning"
+        ],
+        "rows": [
+          [
+            "item",
+            "a real object — one per line, every field labeled"
+          ],
+          [
+            "section",
+            "a real container with a label — exactly one child"
+          ],
+          [
+            "group",
+            "wraps two or more loose items that share one slot"
+          ],
+          [
+            "row",
+            "split a region into side-by-side bands, one child per weight"
+          ],
+          [
+            "col",
+            "split a region into stacked bands, one child per weight"
+          ],
+          [
+            "grid",
+            "rows × columns of identical cells, one item line per cell"
+          ],
+          [
+            "align",
+            "put objects on one shared centerline — written after the tree"
+          ],
+          [
+            "fan",
+            "a hub with children spread out beside it — written after the tree"
+          ],
+          [
+            "arrows",
+            "the block of connections — always last, even when empty"
+          ]
+        ],
+        "title": "The nine statements"
+      },
+      "children": []
+    },
+    "b-language-statements-index-19": {
+      "id": "b-language-statements-index-19",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Each construct has its own page: "
+        },
+        {
+          "insert": "row and col",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/10-row-and-col",
+              "label": "row and col — weighted splits"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/20-section",
+              "label": "section — a real container object"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "item",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/30-item",
+              "label": "item — a real object"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "group",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/40-group",
+              "label": "group — a loose cluster"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "grid",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/50-grid",
+              "label": "grid — a repeated-cell lattice"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "hug=",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/60-hug",
+              "label": "hug= — pinned lanes"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "align",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/70-align",
+              "label": "align — a shared centerline"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "fan",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/80-fan",
+              "label": "fan — hub over children"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/90-arrows",
+              "label": "arrows — the connection block"
+            }
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "The full example",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/95-full-example",
+              "label": "The full example"
+            }
+          }
+        },
+        {
+          "insert": " puts them all in one description."
+        }
+      ],
+      "children": []
+    },
+    "b-language-nesting-heading-20": {
+      "id": "b-language-nesting-heading-20",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "How a description nests"
+        }
+      ],
+      "children": []
+    },
+    "b-language-nesting-body-21": {
+      "id": "b-language-nesting-body-21",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Indentation is the grammar, exactly like YAML: the lines indented under a container are its children, in order. Nothing else marks nesting. A "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/20-section",
+              "label": "section — a real container object"
+            }
+          }
+        },
+        {
+          "insert": " has exactly one child; a "
+        },
+        {
+          "insert": "row",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/10-row-and-col",
+              "label": "row and col — weighted splits"
+            }
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "col",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/10-row-and-col",
+              "label": "row and col — weighted splits"
+            }
+          }
+        },
+        {
+          "insert": " has one child per weight; a "
+        },
+        {
+          "insert": "grid",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/50-grid",
+              "label": "grid — a repeated-cell lattice"
+            }
+          }
+        },
+        {
+          "insert": "'s items fill the lattice row by row; a "
+        },
+        {
+          "insert": "group",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/40-group",
+              "label": "group — a loose cluster"
+            }
+          }
+        },
+        {
+          "insert": "'s indented lines are always items."
+        }
+      ],
+      "children": []
+    },
+    "b-language-nesting-code-22": {
+      "id": "b-language-nesting-code-22",
+      "type": "code",
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "col 2|1\n  section 1 text=top label=\"Top\"\n    grid 1x3 gap=32\n      item 2 text=a type=process size=M\n      item 3 text=b type=process size=M\n      item 4 text=c type=process size=M\n  section 5 text=bottom label=\"Bottom\"\n    group\n      item 6 text=note type=sticky size=S at=W\n      item 7 text=core type=process size=L at=C\n\nalign y: 2 7\n\narrows\n  2 > 3\n  3 > 4\n  4 > 7"
+        }
+      ],
+      "children": []
+    },
+    "b-language-nesting-canvas-23": {
+      "id": "b-language-nesting-canvas-23",
+      "type": "canvas",
+      "props": {
+        "src": "./assets/canvases/example-nesting.canvas.json",
+        "title": "The nesting example"
+      },
+      "children": []
+    },
+    "b-language-canonical-heading-24": {
+      "id": "b-language-canonical-heading-24",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Notation conventions"
+        }
+      ],
+      "children": []
+    },
+    "b-language-canonical-body-25": {
+      "id": "b-language-canonical-body-25",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "For consistent examples, use 2-space indentation, assign reference numbers in declaration order from 1, write every required field, and include "
+        },
+        {
+          "insert": "at=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " according to the construct rules, including "
+        },
+        {
+          "insert": "at=C",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Include "
+        },
+        {
+          "insert": "label=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "hug=",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/60-hug",
+              "label": "hug= — pinned lanes"
+            }
+          }
+        },
+        {
+          "insert": " only when they describe the arrangement. Put one blank line before alignment facts, when present, and one before "
+        },
+        {
+          "insert": "arrows",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "doc",
+              "path": "20-agent-layout/10-language/90-arrows",
+              "label": "arrows — the connection block"
+            }
+          }
+        },
+        {
+          "insert": ". These conventions make examples comparable; they do not define a serialized board format."
+        }
+      ],
+      "children": []
+    },
+    "b-language-deferred-heading-26": {
+      "id": "b-language-deferred-heading-26",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Deliberately deferred"
+        }
+      ],
+      "children": []
+    },
+    "b-language-deferred-body-27": {
+      "id": "b-language-deferred-body-27",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Body text on items",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — "
+        },
+        {
+          "insert": "text=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the object's short name, not the real sticky body text, which is sentences long and would destroy line readability. Body text stays off the line until a preview form is designed."
+        }
+      ],
+      "children": []
+    },
+    "b-language-deferred-sparse-28": {
+      "id": "b-language-deferred-sparse-28",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Sparse descriptions",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — these pages favor explicit facts so a reader does not have to infer omitted layout decisions."
+        }
+      ],
+      "children": []
+    },
+    "b-language-lab-pointer-29": {
+      "id": "b-language-lab-pointer-29",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Use this notation to discuss composition, review examples, and name design intent. To change a board, the agent uses "
+        },
+        {
+          "insert": "the operation surface",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; the notation itself is never submitted as an edit."
+        }
+      ],
+      "children": []
+    }
+  }
+}

@@ -1,6 +1,6 @@
 /**
  * The Sections group — `fit_section`, `change_section_border`, `lock`,
- * `unlock` (docs/30-agent-layout/50-tool-surface/10-gestures §Sections).
+ * `unlock` (docs/20-agent-layout/50-tool-surface/10-gestures §Sections).
  *
  * Four gestures that act on a frame AS a frame: close it around what it holds,
  * restroke its border, and protect or release its region. Everything a section

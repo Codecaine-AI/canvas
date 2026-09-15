@@ -8,5 +8,6 @@ dist-electron/
 .agent-kernel/
 .pi-agent/
 canvases/evals/
+.changesets/
 
 .DS_Store

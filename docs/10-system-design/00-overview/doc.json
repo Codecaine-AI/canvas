@@ -469,8 +469,9 @@
     },
     "b-overview-dataflow-decision-11": {
       "id": "b-overview-dataflow-decision-11",
-      "type": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "One reducer is the single mutation authority"
       },
@@ -786,8 +787,9 @@
     },
     "b-overview-lightboard-decision-20": {
       "id": "b-overview-lightboard-decision-20",
-      "type": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "Fixed light board background, independent of host app theme"
       },
@@ -883,7 +885,7 @@
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/10-model",
+              "path": "30-implementation/10-model",
               "label": "canvas-10-model"
             }
           }
@@ -906,7 +908,7 @@
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/20-interaction",
+              "path": "30-implementation/20-interaction",
               "label": "canvas-20-interaction"
             }
           }
@@ -929,7 +931,7 @@
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/30-connectors",
+              "path": "30-implementation/30-connectors",
               "label": "canvas-30-connectors"
             }
           }
@@ -952,7 +954,7 @@
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/40-stage",
+              "path": "30-implementation/40-stage",
               "label": "canvas-40-stage"
             }
           }
@@ -975,7 +977,7 @@
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/50-editor",
+              "path": "30-implementation/50-editor",
               "label": "canvas-50-editor"
             }
           }
@@ -998,7 +1000,7 @@
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/60-trim",
+              "path": "30-implementation/60-trim",
               "label": "canvas-60-trim"
             }
           }
@@ -1021,7 +1023,7 @@
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/70-studio-and-canvases",
+              "path": "30-implementation/70-studio-and-canvases",
               "label": "canvas-70-studio-and-canvas JSON files"
             }
           }

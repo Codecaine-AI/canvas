@@ -1,6 +1,6 @@
 /**
  * The lock gate across the whole gesture roster
- * (docs/30-agent-layout/50-tool-surface/10-gestures §Sections: "A lock gates
+ * (docs/20-agent-layout/50-tool-surface/10-gestures §Sections: "A lock gates
  * what every other tool may do to the frame and its descendants").
  *
  * A lock is stored as one field on a section, but it is enforced everywhere:

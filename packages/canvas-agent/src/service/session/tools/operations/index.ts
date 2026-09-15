@@ -1,6 +1,6 @@
 /**
  * Registration surface for the layout editor's mutation tools — the gesture
- * roster (docs/30-agent-layout/50-tool-surface/00-overview), in six groups:
+ * roster (docs/20-agent-layout/50-tool-surface/00-overview), in six groups:
  *
  *   Place     place_section, place_sticky, place_shape, clone, connect
  *   Arrange   move_to, move_by, resize, match_size, align, space_out

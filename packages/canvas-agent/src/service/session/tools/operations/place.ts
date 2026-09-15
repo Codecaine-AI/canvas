@@ -1,5 +1,5 @@
 /**
- * The Place group (docs/30-agent-layout/50-tool-surface/10-gestures §Place) —
+ * The Place group (docs/20-agent-layout/50-tool-surface/10-gestures §Place) —
  * the five gestures that
  * put something new on the board: `place_section`, `place_sticky`,
  * `place_shape`, `clone`, and `connect`.

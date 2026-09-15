@@ -157,7 +157,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/10-model",
+              "path": "30-implementation/10-model",
               "label": "canvas-10-model"
             }
           }
@@ -1218,7 +1218,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/30-connectors",
+              "path": "30-implementation/30-connectors",
               "label": "canvas-30-connectors"
             }
           }
@@ -1426,8 +1426,9 @@
     },
     "b-sapi-decision-outline-hit": {
       "id": "b-sapi-decision-outline-hit",
-      "type": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "Clicks respect the declared outline; drag-select, drop targets, and snapping deliberately stay bbox"
       },
@@ -1935,8 +1936,9 @@
     },
     "b-sapi-constraint-closed-roster": {
       "id": "b-sapi-constraint-closed-roster",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "severity": "hard",
         "title": "The color roster is closed: 10 picks, no custom colors, ever"
       },
@@ -2216,8 +2218,9 @@
     },
     "b-sapi-constraint-closed-vocab": {
       "id": "b-sapi-constraint-closed-vocab",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "severity": "hard",
         "title": "Shape vocabulary is closed and typed, not freeform SVG"
       },
@@ -2270,7 +2273,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/10-model",
+              "path": "30-implementation/10-model",
               "label": "canvas-10-model"
             }
           }
@@ -2284,7 +2287,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/30-connectors",
+              "path": "30-implementation/30-connectors",
               "label": "canvas-30-connectors"
             }
           }
@@ -2298,7 +2301,7 @@
             "code": true,
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/80-shape-reference",
+              "path": "30-implementation/80-shape-reference",
               "label": "canvas-20-implementation-80-shape-reference"
             }
           }

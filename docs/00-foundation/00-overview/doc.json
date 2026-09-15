@@ -409,12 +409,12 @@
           "insert": ". For the model layer itself — schema, actions, reducer, geometry — see "
         },
         {
-          "insert": "20-implementation/10-model",
+          "insert": "30-implementation/10-model",
           "attributes": {
             "reference": {
               "kind": "doc",
-              "path": "20-implementation/10-model",
-              "label": "20-implementation/10-model"
+              "path": "30-implementation/10-model",
+              "label": "30-implementation/10-model"
             }
           }
         },

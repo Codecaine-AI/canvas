@@ -109,7 +109,7 @@ export interface OpContext {
    * Require that this box is not under a lock — the gate EVERY mutating
    * gesture that writes an existing object runs, because a lock gates what
    * every other tool may do to the frame and its descendants
-   * (docs/30-agent-layout/50-tool-surface/10-gestures §Sections, lock matrix).
+   * (docs/20-agent-layout/50-tool-surface/10-gestures §Sections, lock matrix).
    *
    * The rule mirrors the UI's own `isLockedForManipulation`
    * (packages/canvas/src/stage/editor/pipeline/core.ts), so a gesture the
