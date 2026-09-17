@@ -32,7 +32,6 @@ export type CanvasTool =
   | "text"
   | "sticky"
   | "source-node"
-  | "annotation-marker"
   | "annotation"
   // D16 — expanded vocabulary (checkpoint 5):
   | "document"
@@ -212,7 +211,6 @@ export function defaultGeometryFor(type: InteractiveCanvasObjectType): CanvasGeo
   if (type === "container") return { x: 80, y: 80, width: 360, height: 240 };
   if (type === "decision") return { x: 160, y: 160, width: 160, height: 112 };
   if (type === "sticky") return { x: 180, y: 180, width: 176, height: 128 };
-  if (type === "annotation-marker") return { x: 220, y: 220, width: 40, height: 40 };
   if (type === "document") return { x: 160, y: 160, width: 160, height: 120 };
   if (type === "person") return { x: 160, y: 160, width: 120, height: 140 };
   if (type === "database") return { x: 160, y: 160, width: 140, height: 120 };
@@ -255,7 +253,6 @@ function toneForType(type: InteractiveCanvasObjectType): InteractiveCanvasTone {
   if (type === "decision") return "decision";
   if (type === "sticky") return "warning";
   if (type === "source-node") return "agent";
-  if (type === "annotation-marker") return "annotation";
   if (type === "document") return "memory";
   if (type === "person") return "input";
   if (type === "database") return "memory";
@@ -276,7 +273,6 @@ function toneForType(type: InteractiveCanvasObjectType): InteractiveCanvasTone {
 function shapeForType(type: InteractiveCanvasObjectType): CanvasObjectStyle["shape"] {
   if (type === "decision") return "diamond";
   if (type === "sticky") return "note";
-  if (type === "annotation-marker") return "marker";
   if (type === "document") return "document";
   if (type === "person") return "person";
   if (type === "database") return "database";
@@ -1271,4 +1267,3 @@ export function buildSelectionContext(
       }) ?? [],
   };
 }
-

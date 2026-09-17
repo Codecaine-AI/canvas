@@ -79,14 +79,6 @@ export const syntheticInteractiveCanvas: InteractiveCanvasDocument = {
       geometry: { x: 680, y: 376, width: 216, height: 128 },
       style: { tone: "warning", shape: "note" },
     },
-    {
-      id: "annotation-review",
-      type: "annotation-marker",
-      label: "Review",
-      parentId: "interview-flow",
-      geometry: { x: 616, y: 144, width: 40, height: 40 },
-      style: { tone: "annotation", shape: "marker" },
-    },
     // D16 expanded vocabulary (checkpoint 5) — minimal coverage so tests
     // exercising this shared fixture also see the new shapes/palette tokens.
     {

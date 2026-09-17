@@ -190,7 +190,7 @@ type MarqueeGesture = {
 
 /**
  * Armed-tool object creation (4.2.2): pointer-down with a creatable tool armed
- * (container/process/decision/text/sticky/source-node/annotation-marker)
+ * (container/process/decision/text/sticky/source-node)
  * starts this gesture over empty canvas. A sub-threshold release creates a
  * default-size object centered at the point; a drag creates an object sized
  * to the normalized, min-size-clamped dragged rect. Either way, on completion
@@ -495,7 +495,6 @@ function objectTypeForTool(tool: CanvasTool): InteractiveCanvasObjectType | null
     case "text":
     case "sticky":
     case "source-node":
-    case "annotation-marker":
     // D16 — these were previously missing from this switch, meaning an
     // armed document/person/database/chat tool silently failed to start a
     // PlaceGesture; fixed here alongside the W2 additions below since it's
