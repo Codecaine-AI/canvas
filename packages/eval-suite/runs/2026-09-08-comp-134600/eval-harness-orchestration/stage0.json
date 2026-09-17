@@ -1,0 +1,808 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-comp-134600.eval-harness-orchestration",
+  "title": "2026-09-08-comp-134600 · eval-harness-orchestration",
+  "description": "# Offline evaluation harness orchestration\nRead left to right: an immutable pinned suite and run fingerprint feed a scheduler and bounded worker pool against an isolated SUT, never production. Workers execute ordered steps and capture full transcripts, final artifacts and typed failure records. Infrastructure faults are recorded and retried; behavior failures are recorded before continuing.\n\nEach completed scenario immediately enters globally bounded concurrent grading. Independent criterion graders and an artifact-only grader (without the original request) produce verdicts requiring evidence. Missing evidence invalidates a verdict; retry once, flag repeated failure, and assemble only valid verdicts.\n\nThe assembler builds a scorecard. Comparison with the chosen baseline requires identical fingerprints; compatible movements crossing the threshold are narrated, while incompatible comparisons are blocked. Promotion sets the baseline for future compatible runs. The audit archive retains every artifact, transcript and verdict, including invalid attempts and typed faults, for review. Scenario wording changes create new versions rather than altering frozen definitions.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1984,
+    "height": 1264
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-09-08-comp-134600 · eval-harness-orchestration",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3800,
+        "height": 2000
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "pin",
+      "type": "section",
+      "text": "1 · Immutable run contract",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 160,
+        "width": 420,
+        "height": 740
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "exec",
+      "type": "section",
+      "text": "2 · Bounded execution · isolated SUT",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 660,
+        "y": 160,
+        "width": 820,
+        "height": 1280
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "grade",
+      "type": "section",
+      "text": "3 · Concurrent grading · global limit G",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1620,
+        "y": 160,
+        "width": 920,
+        "height": 1280
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "compare",
+      "type": "section",
+      "text": "4 · Compatible comparison",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2760,
+        "y": 160,
+        "width": 800,
+        "height": 1280
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "suite",
+      "type": "icon",
+      "text": "Pinned suite",
+      "color": "white",
+      "parentId": "pin",
+      "geometry": {
+        "x": 160,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "contract",
+      "type": "sticky",
+      "text": "**Frozen contract**\nWording changes → new scenario versions; never edit in place.\n\nFingerprint: revision, configuration, prompt versions, rubric versions.",
+      "color": "yellow",
+      "parentId": "pin",
+      "geometry": {
+        "x": 160,
+        "y": 480,
+        "width": 300,
+        "height": 420
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "scheduler",
+      "type": "icon",
+      "text": "Scheduler",
+      "color": "teal",
+      "parentId": "exec",
+      "geometry": {
+        "x": 740,
+        "y": 260,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "workers",
+      "type": "predefined-process",
+      "text": "Worker pool ≤ N\nOrdered scenario steps",
+      "color": "gray",
+      "parentId": "exec",
+      "geometry": {
+        "x": 1000,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "sut",
+      "type": "icon",
+      "text": "Isolated SUT\nNever production",
+      "color": "gray",
+      "parentId": "exec",
+      "geometry": {
+        "x": 1080,
+        "y": 480,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "results",
+      "type": "predefined-process",
+      "text": "Completed scenario\nTranscript + final artifact\nTyped failure records",
+      "color": "gray",
+      "parentId": "exec",
+      "geometry": {
+        "x": 1000,
+        "y": 760,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "fault",
+      "type": "predefined-process",
+      "text": "Infrastructure fault\nRecord separately + retry",
+      "color": "gray",
+      "parentId": "exec",
+      "geometry": {
+        "x": 740,
+        "y": 1020,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "behavior",
+      "type": "predefined-process",
+      "text": "Behavior failure\nRecord, then continue steps",
+      "color": "gray",
+      "parentId": "exec",
+      "geometry": {
+        "x": 1100,
+        "y": 1240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "dispatch",
+      "type": "icon",
+      "text": "Grade immediately\nGlobal limit G",
+      "color": "green",
+      "parentId": "grade",
+      "geometry": {
+        "x": 1700,
+        "y": 760,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "queue"
+    },
+    {
+      "id": "criteria",
+      "type": "icon",
+      "text": "Criterion A\nIndependent grader",
+      "color": "pink",
+      "parentId": "grade",
+      "geometry": {
+        "x": 1960,
+        "y": 360,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "criteria-b",
+      "type": "icon",
+      "text": "Criterion B\nIndependent grader",
+      "color": "pink",
+      "parentId": "grade",
+      "geometry": {
+        "x": 1960,
+        "y": 760,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "artifact-grade",
+      "type": "icon",
+      "text": "Artifact-only grader\nNo original request",
+      "color": "pink",
+      "parentId": "grade",
+      "geometry": {
+        "x": 1960,
+        "y": 1160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "evidence",
+      "type": "decision",
+      "text": "Evidence?",
+      "color": "gray",
+      "parentId": "grade",
+      "geometry": {
+        "x": 2200,
+        "y": 760,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "assemble",
+      "type": "predefined-process",
+      "text": "Assemble valid verdicts\nScorecard",
+      "color": "gray",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2820,
+        "y": 760,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "retrygrade",
+      "type": "predefined-process",
+      "text": "Invalid → retry grader once\nStill no evidence → flag",
+      "color": "gray",
+      "parentId": "grade",
+      "geometry": {
+        "x": 2200,
+        "y": 520,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "compatible",
+      "type": "decision",
+      "text": "Same fingerprint?",
+      "color": "gray",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2820,
+        "y": 1000,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "narrate",
+      "type": "predefined-process",
+      "text": "Compare with baseline\nNarrate |Δ| ≥ threshold",
+      "color": "gray",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2820,
+        "y": 1240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "blocked",
+      "type": "predefined-process",
+      "text": "Incompatible\nDo not compare",
+      "color": "gray",
+      "parentId": "compare",
+      "geometry": {
+        "x": 3200,
+        "y": 1000,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "baseline",
+      "type": "icon",
+      "text": "Chosen baseline",
+      "color": "blue",
+      "parentId": "compare",
+      "geometry": {
+        "x": 3260,
+        "y": 480,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "retention",
+      "type": "section",
+      "text": "5 · Retained audit trail",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1620,
+        "y": 1600,
+        "width": 920,
+        "height": 320
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "audit",
+      "type": "icon",
+      "text": "Run archive",
+      "color": "blue",
+      "parentId": "retention",
+      "geometry": {
+        "x": 1740,
+        "y": 1700,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "audit-note",
+      "type": "sticky",
+      "text": "Retain every artifact, transcript and verdict, including invalid attempts and typed faults, for disputed-score review.",
+      "color": "yellow",
+      "parentId": "retention",
+      "geometry": {
+        "x": 2020,
+        "y": 1680,
+        "width": 460,
+        "height": 240
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e1",
+      "from": {
+        "objectId": "suite"
+      },
+      "to": {
+        "objectId": "scheduler"
+      },
+      "label": "pinned run",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e2",
+      "from": {
+        "objectId": "scheduler"
+      },
+      "to": {
+        "objectId": "workers"
+      },
+      "label": "fan out",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e3",
+      "from": {
+        "objectId": "workers",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "sut",
+        "anchor": "top"
+      },
+      "label": "execute steps",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "capture",
+      "from": {
+        "objectId": "sut",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "results",
+        "anchor": "top"
+      },
+      "label": "capture full run",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "infra",
+      "from": {
+        "objectId": "sut",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "fault",
+        "anchor": "top"
+      },
+      "label": "infrastructure failure",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "retryexec",
+      "from": {
+        "objectId": "fault",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "workers",
+        "anchor": "top"
+      },
+      "label": "retry infrastructure only",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "behfail",
+      "from": {
+        "objectId": "sut",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "behavior",
+        "anchor": "right"
+      },
+      "label": "behavior failure",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "ready",
+      "from": {
+        "objectId": "results",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "dispatch",
+        "anchor": "left"
+      },
+      "label": "each completion",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "ga",
+      "from": {
+        "objectId": "dispatch"
+      },
+      "to": {
+        "objectId": "criteria"
+      },
+      "label": "criterion A",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "gb",
+      "from": {
+        "objectId": "dispatch",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "criteria-b",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "gc",
+      "from": {
+        "objectId": "dispatch",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "artifact-grade",
+        "anchor": "left"
+      },
+      "label": "artifact only",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "va",
+      "from": {
+        "objectId": "criteria",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "evidence",
+        "anchor": "top"
+      },
+      "label": "verdict + evidence",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.15,
+        "offset": 20
+      }
+    },
+    {
+      "id": "vb",
+      "from": {
+        "objectId": "criteria-b",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "evidence",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "vc",
+      "from": {
+        "objectId": "artifact-grade",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "evidence",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "valid",
+      "from": {
+        "objectId": "evidence",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "assemble",
+        "anchor": "left"
+      },
+      "label": "yes · valid",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "invalid",
+      "from": {
+        "objectId": "evidence",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "retrygrade",
+        "anchor": "bottom"
+      },
+      "label": "no",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "score-check",
+      "from": {
+        "objectId": "assemble",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "compatible",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "compatible-yes",
+      "from": {
+        "objectId": "compatible",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "narrate",
+        "anchor": "top"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "no-compare",
+      "from": {
+        "objectId": "compatible",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "blocked",
+        "anchor": "left"
+      },
+      "label": "no",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "baseline-check",
+      "from": {
+        "objectId": "baseline",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "compatible",
+        "anchor": "left"
+      },
+      "label": "baseline fingerprint",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "promote",
+      "from": {
+        "objectId": "assemble",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "baseline",
+        "anchor": "bottom"
+      },
+      "label": "promote run → future baseline",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "retain-exec",
+      "from": {
+        "objectId": "exec",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "audit",
+        "anchor": "left"
+      },
+      "label": "transcripts · artifacts · typed faults",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "retain-grade",
+      "from": {
+        "objectId": "grade",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "audit",
+        "anchor": "top"
+      },
+      "label": "every verdict",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "retry-valid",
+      "from": {
+        "objectId": "retrygrade",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "assemble",
+        "anchor": "top"
+      },
+      "label": "retry has evidence",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.2,
+        "offset": 20
+      }
+    }
+  ],
+  "annotations": []
+}

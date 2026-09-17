@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas";
+import { validateInteractiveCanvasDocument, type InteractiveCanvasDocument } from "@codecaine-ai/canvas";
 
 import { ROOT_PAGE_FRAME_ID } from "../../new-document";
 import { adaptProjectCanvasToStudio, adaptStudioDocumentToProject } from "../docs-board-adapter";
@@ -36,11 +36,9 @@ describe("adaptStudioDocumentToProject", () => {
     expect(objects[0]).toMatchObject({
       id: ROOT_PAGE_FRAME_ID,
       type: "section",
-      label: "Project Board",
-      title: "Project Board",
-      tint: "white",
+      text: "Project Board",
+      color: "white",
       parentId: null,
-      locked: "background",
       geometry: { x: 32, y: 32, width: 896, height: 496 },
       style: { shape: "section" },
     });
@@ -49,6 +47,9 @@ describe("adaptStudioDocumentToProject", () => {
       parentId: ROOT_PAGE_FRAME_ID,
       custom: true,
     });
+    expect(validateInteractiveCanvasDocument(wire).ok).toBe(true);
+    expect(objects.every((object) => typeof object.text === "string")).toBe(true);
+    expect(objects.every((object) => !("label" in object) && !("tint" in object))).toBe(true);
   });
 
   /**
@@ -92,6 +93,8 @@ describe("adaptStudioDocumentToProject", () => {
     };
 
     const wire = adaptStudioDocumentToProject(document, {});
+    // The docs viewer reads the saved wire directly, without Studio's adapter.
+    expect(validateInteractiveCanvasDocument(wire).ok).toBe(true);
     const savedConnections = wire.connections as Record<string, unknown>[];
     expect(savedConnections[0]?.labelPosition).toEqual({ along: 0.3, offset: -16 });
 
@@ -99,5 +102,35 @@ describe("adaptStudioDocumentToProject", () => {
     expect(reloaded.ok).toBe(true);
     if (!reloaded.ok) return;
     expect(reloaded.document.connections[0]?.labelPosition).toEqual({ along: 0.3, offset: -16 });
+  });
+
+  it("saves edits to legacy boards in the viewer schema without reverting geometry or empty text", () => {
+    const raw = {
+      schemaVersion: 1, id: "legacy", title: "Legacy", mode: "diagram",
+      size: { width: 960, height: 560 }, viewport: { x: 0, y: 0, zoom: 1 },
+      objects: [
+        { id: "frame", type: "section", label: "Background", title: "Background", tint: "purple", geometry: { x: 0, y: 0, width: 960, height: 560 } },
+        { id: "card", type: "container", label: "Old label", parentId: "frame", geometry: { x: 100, y: 120, width: 160, height: 80 }, custom: "keep" },
+      ],
+      connections: [], annotations: [],
+    };
+    const loaded = adaptProjectCanvasToStudio(raw);
+    expect(loaded.ok).toBe(true);
+    if (!loaded.ok) return;
+    const card = loaded.document.objects.find((object) => object.id === "card")!;
+    card.text = "";
+    card.color = "green";
+    card.geometry.x = 210;
+    const wire = adaptStudioDocumentToProject(loaded.document, raw);
+    expect(validateInteractiveCanvasDocument(wire).ok).toBe(true);
+    const objects = wire.objects as Record<string, unknown>[];
+    expect(objects.find((object) => object.id === "card")).toMatchObject({
+      type: "rectangle", text: "", color: "green", custom: "keep",
+      geometry: { x: 210, y: 120, width: 160, height: 80 },
+    });
+    expect(objects.find((object) => object.id === "frame")).toMatchObject({ text: "Background", color: "violet" });
+    const reloaded = adaptProjectCanvasToStudio(wire);
+    expect(reloaded.ok).toBe(true);
+    if (reloaded.ok) expect(adaptStudioDocumentToProject(reloaded.document, wire)).toEqual(wire);
   });
 });

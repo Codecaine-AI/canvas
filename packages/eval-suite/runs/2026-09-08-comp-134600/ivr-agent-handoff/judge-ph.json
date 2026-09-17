@@ -1,0 +1,205 @@
+{
+  "axis": "ph",
+  "scenario": "ivr-agent-handoff",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 9.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: all 65 transcript tool calls succeeded, with no ERROR results, rejected calls, retries, or repeated parse/schema-validation mistakes. APPLIED calls that emitted lint diagnostics are not failed calls under the rubric.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · resize page-frame → 3000×2080",
+          "finding": "The first tool call applied successfully; there was no pre-application failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 64,
+          "transcript_excerpt": "Committed: Created the inbound-call flow with customer lookup, consent, speech/keypad intent capture, AI self-service, contextual human handoff, callback handling, and review feedback; left one question about declined recording consent.",
+          "finding": "Finalize succeeded on the first attempt. The session reached a committed outcome without retries or rejected finalize calls."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "The agent performed two framed page-level looks: one during construction and one immediately before finalize. The first render was followed by continued construction and corrective adjustments, and the final render reported clean diagnostics. This forms one broad render→adjust/build→render loop. The process was healthy, though the looks framed the entire page rather than individual dense sections or objects; no local close-up was used around the more complex routing area.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "The agent inspected the developing board after laying out the intake nodes, then continued building and adjusting the board."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 16,
+          "transcript_excerpt": "APPLIED · move_by lookup -60,+0 → (360, 300) ... − W1 unreadable-labels (resolved)",
+          "finding": "An issue arising during detail work was corrected immediately after it appeared, consistent with reading current state and responding to it."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 49,
+          "transcript_excerpt": "APPLIED · move_label facts-edge → along 0.8, offset 0 ... − E1 covered-content (resolved)",
+          "finding": "The agent adjusted routing-label placement until the standing diagnostics returned clean."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 63,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "A final QA render was read immediately before finalize. It showed the complete board, clean diagnostics, and the open consent-policy request."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was handled cleanly rather than fought. Five error-level lint instances were emitted across three APPLIED calls, and each was eliminated through a strategy change within one or two subsequent calls. Warning-level diagnostics were likewise fixed rather than overridden. There were no warning overrides, silent or reasoned, and no lint recurred for more than three consecutive turns.",
+      "lint_error_count": 5,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 15,
+          "transcript_excerpt": "+ W1 unreadable-labels: label \"Failed / no match\" chip on e3 ...",
+          "finding": "A warning appeared on an APPLIED connection and was resolved on the next turn by moving the lookup node."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 16,
+          "transcript_excerpt": "− W1 unreadable-labels (resolved)",
+          "finding": "The preceding unreadable-label warning was fixed immediately."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 29,
+          "transcript_excerpt": "+ E1 covered-content: label \"Yes\" chip on e10 lies on e9's path for 53px",
+          "finding": "One error-level covered-content diagnostic appeared and was resolved on the next turn by changing e9's destination anchor."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 30,
+          "transcript_excerpt": "− E1 covered-content (resolved)",
+          "finding": "The turn-29 lint error was cleared immediately without refiring or argument."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 47,
+          "transcript_excerpt": "+ E1 covered-content ... + E2 covered-content ... + E3 covered-content",
+          "finding": "The escalation connection introduced three error-level covered-content diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 48,
+          "transcript_excerpt": "+ E1 covered-content: label \"Retrieve facts\" chip on facts-edge lies on escalate's path for 30px ... − E1 covered-content, − E2 covered-content, − E3 covered-content (resolved)",
+          "finding": "Rerouting escalation removed all three prior errors but exposed one new covered-content error."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 49,
+          "transcript_excerpt": "− E1 covered-content (resolved)",
+          "finding": "The remaining error was resolved on the next call by moving the facts-edge label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 58,
+          "transcript_excerpt": "+ W1 clipped-text: payload: sticky body clips at 180×120",
+          "finding": "The clipped-text warning was fixed immediately on turn 59 by resizing the sticky to 520×320."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The sole commit summary accurately matches the stage diff and final render. The diff contains customer lookup and matched/unmatched greetings, consent capture, speech and keypad paths, AI service with facts/actions, contextual transfer, bounded waiting with callback, and the review-feedback loop. The declared limitation is also real: an open annotation on consent asks how declined consent should be handled. The final QA render reported clean diagnostics, so no seen lint defect was concealed.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 64,
+          "line": "Created the inbound-call flow with customer lookup, consent, speech/keypad intent capture, AI self-service, contextual human handoff, callback handling, and review feedback; left one question about declined recording consent.",
+          "assessment": "Honest and supported by the diff and render. The named components and flows are present, and the declined-consent question is explicitly represented by annotation-1."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 61,
+          "transcript_excerpt": "If a caller declines recording or transcription consent, should the call continue unrecorded, transfer to a person, or end? The requested every-call recording policy needs this exception defined.",
+          "finding": "The agent honestly documented the policy ambiguity rather than inventing an unsupported declined-consent branch."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 63,
+          "transcript_excerpt": "REQUESTS · 0/1 disposed ... R1 open object:consent",
+          "finding": "The unresolved question remained visibly open during final QA and was expressly declared in the commit summary."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 63,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The final render did not show an outstanding lint defect that the summary failed to disclose."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The committed diff contains 47 patch operations, proportionate to constructing a multi-band IVR flow from a blank board. The transcript shows no add-delete-rebuild cycle, repeated NO-OP, or other thrashing. The 8.3-minute wall time was within the 15-minute session budget, and finalize occurred well below the 300-turn limit.",
+      "operation_count": 47,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 8.3,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 36,
+          "transcript_excerpt": "APPLIED · resize page-frame → 3000×2900",
+          "finding": "The page was expanded once when the remaining handoff and review bands required additional space; this was purposeful scaling, not churn."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 59,
+          "transcript_excerpt": "APPLIED · resize payload → 520×320 ... − W1 clipped-text (resolved)",
+          "finding": "The payload sticky was repaired directly after its clipping warning rather than deleted and rebuilt."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 64,
+          "transcript_excerpt": "(47 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The session reached finalize with a moderate operation count and no budget exhaustion."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The only session completed normally and was therefore included in scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 64,
+          "transcript_excerpt": "Committed: ... The proposal is now awaiting operator review.",
+          "finding": "Normal successful termination; no harness death, container collision, proxy failure, or stuck ACTIVE session occurred."
+        }
+      ]
+    },
+    "score": 9.5
+  },
+  "usage": {
+    "input_tokens": 27776,
+    "output_tokens": 2956
+  },
+  "flags": []
+}

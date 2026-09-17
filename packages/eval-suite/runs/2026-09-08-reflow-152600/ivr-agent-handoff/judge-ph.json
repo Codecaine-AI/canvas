@@ -1,0 +1,204 @@
+{
+  "axis": "ph",
+  "scenario": "ivr-agent-handoff",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "One of 86 tool calls failed, for a failure rate of approximately 1.16%. The failed reroute was followed immediately by a strategy change, then succeeded on the subsequent reroute; the error class did not recur. There were no rejected resolve_request/finalize calls, retries, or parse/schema-validation fights.",
+      "failed_call_count": 1,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 60,
+          "transcript_excerpt": "ERROR · reroute — these corners cannot be joined to the edge's ends without a diagonal leg: the router attaches review at 1580,640 and route at 600,1410, so the first corner must share an x or a y with 1580,640 and the last with 600,1410.",
+          "finding": "The session's only failed call was a waypoint-geometry validation error."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 61,
+          "transcript_excerpt": "APPLIED · change_connection feedback",
+          "finding": "The very next call changed the endpoint position rather than repeating the rejected waypoint geometry."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 62,
+          "transcript_excerpt": "APPLIED · reroute feedback",
+          "finding": "The revised reroute applied successfully, with no repeated error class or consecutive failure run beyond one."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "transcript_excerpt": "Committed: Created the inbound-call flow with lookup, consent, speech/keypad intent capture, AI self-service, contextual human handoff, callback handling, and quality feedback; left one policy question about declined consent.",
+          "finding": "Finalize succeeded on the first attempt."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "The session used two explicit framed renders of the page frame. The first was during the intake build, followed by extensive construction and adjustment, and the second was a final QA render before finalize. This forms one broad render→adjust→render loop. However, both looks framed the entire page-frame rather than individual dense regions, so close-up inspection was not interleaved with the later dense routing and label work.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame",
+          "finding": "A legal framed render was taken after the initial intake objects were placed."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 15,
+          "transcript_excerpt": "APPLIED · move_to lookup → (480, 200) ... − W1 unreadable-labels (resolved)",
+          "finding": "Post-render work included concrete layout adjustment and lint resolution."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 41,
+          "transcript_excerpt": "APPLIED · reroute transfer ... − E1 covered-content, − E2 covered-content, − E3 covered-content, − W1 unreadable-labels (resolved)",
+          "finding": "Dense routing was adjusted using diagnostics, but without a close-up look at the AI/handoff region."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 84,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "A final whole-board QA render was read immediately before finalize; no defect was reported by diagnostics."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Thirteen error-severity lint occurrences were emitted across construction, along with warnings. The agent addressed all of them and reached clean diagnostics. No identical lint re-fired for more than three consecutive turns without a strategy change, so there was no lint fight. No warnings were overridden or silently committed.",
+      "lint_error_count": 13,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 17,
+          "transcript_excerpt": "+ E1 covered-content: label \"No match / error\" chip on c3 lies on c2's path for 104px",
+          "finding": "The label/path collision was addressed through label movement and was resolved by turn 19."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 36,
+          "transcript_excerpt": "+ E1 covered-content: label \"Query / account facts\" chip on facts-link overlaps label \"Execute / result\" chip on action-link ... + E2 covered-content",
+          "finding": "Both errors were cleared on the next turn by changing the action-link anchor."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 40,
+          "transcript_excerpt": "LINTS · +4 −0 ... + E1 covered-content ... + E2 covered-content ... + E3 covered-content ... + W1 unreadable-labels",
+          "finding": "The transfer edge introduced several collisions, all cleared on turn 41 by rerouting."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 53,
+          "transcript_excerpt": "+ E1 containment: evidence extends 20px outside its section quality",
+          "finding": "The containment error was fixed immediately on turn 54 by moving the object inside its section."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 59,
+          "transcript_excerpt": "+ E1 covered-content: label \"Call-wide capture\" chip on record lies on feedback's path for 30px",
+          "finding": "The feedback route was revised; after one failed geometry call, the conflicting errors were resolved by turn 62."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 70,
+          "transcript_excerpt": "LINTS · +4 −0 ... + E1 covered-content ... + E2 covered-content ... + E3 covered-content ... + W1 covered-content",
+          "finding": "The success-edge collision cluster was handled through targeted label adjustments, reaching clean lint by turn 76."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 84,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA showed no open lint errors or warnings, so no override reason was required."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary matches the stage diff and final render. The board contains the claimed lookup, consent, speech/keypad intent capture, AI self-service, handoff packet, callback branch, and quality-feedback loop. The limitation concerning declined consent was honestly declared and is represented by an open annotation. No inflated claim or undeclared seen defect is evident.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "line": "Created the inbound-call flow with lookup, consent, speech/keypad intent capture, AI self-service, contextual human handoff, callback handling, and quality feedback; left one policy question about declined consent.",
+          "assessment": "Honest and supported by the 48-operation diff and clean final render; the consent limitation is explicitly declared rather than concealed."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 64,
+          "transcript_excerpt": "**Handoff packet**\nTranscript · account context · detected intent · work completed.\nTravels with the call so the caller need not repeat details.",
+          "finding": "The contextual handoff claim is substantiated by a dedicated handoff note, later shortened to fit."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 82,
+          "transcript_excerpt": "If a caller declines recording or transcription consent, should the call continue unrecorded, transfer to a person, or end?",
+          "finding": "The declared consent-policy limitation is concretely recorded as an open annotation on the consent step."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 84,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 48 ops",
+          "finding": "The final board listing and diff substantiate the summary's component claims and report clean diagnostics."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session completed a substantial end-to-end flow in 48 committed patch operations over approximately 10.65 minutes, within the 15-minute and 300-turn budgets. There were several targeted label and routing adjustments, but no add-delete-rebuild cycle, repeated NO-OP, or abandonment. The operations were proportionate to the diagram's breadth.",
+      "operation_count": 48,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 10.65,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 41,
+          "transcript_excerpt": "APPLIED · reroute transfer ... − E1 covered-content, − E2 covered-content, − E3 covered-content, − W1 unreadable-labels (resolved)",
+          "finding": "One targeted reroute resolved four lint findings at once, demonstrating economical correction."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 67,
+          "transcript_excerpt": "APPLIED · fit_section quality",
+          "finding": "Section fitting was used instead of manual multi-step geometry cleanup."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "transcript_excerpt": "(48 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The session reached finalize well inside both the wall-time and turn limits."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck session, container collision, proxy failure, or other declared infrastructure failure appears in the payload. No session was excluded.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 35436,
+    "output_tokens": 2837
+  },
+  "flags": []
+}

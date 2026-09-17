@@ -1,0 +1,465 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation-10-state",
+  "title": "State",
+  "root": "b-state-root-0",
+  "blocks": {
+    "b-state-root-0": {
+      "id": "b-state-root-0",
+      "type": "paragraph",
+      "props": {
+        "covers": "Where state code lives: the schema/actions/reducer/geometry split under packages/canvas/src/state/, the per-domain action layout, and the single mutation path.",
+        "type": "implementation",
+        "concepts": [
+          "state",
+          "schema",
+          "actions",
+          "reducer",
+          "geometry",
+          "mutation-authority",
+          "creation-defaults"
+        ]
+      },
+      "children": [
+        "b-state-role-1",
+        "b-state-sources-2",
+        "b-state-gov-3",
+        "b-state-gov-model-4",
+        "b-state-gov-layering-5",
+        "b-state-decisions-6",
+        "b-state-actions-split-decision-7",
+        "b-state-actions-split-why-8",
+        "b-state-actions-split-applies-9",
+        "b-state-one-path-decision-10",
+        "b-state-one-path-why-11",
+        "b-state-one-path-applies-12",
+        "b-state-defaults-decision-13",
+        "b-state-defaults-why-14",
+        "b-state-defaults-applies-15"
+      ]
+    },
+    "b-state-role-1": {
+      "id": "b-state-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "State code for the canvas engine: the document schema, the closed action vocabulary, the single reducer, and the pure geometry helpers. The document model — schema semantics, actions, validation, history — is owned by design; this area records only where state code lives and how it is split."
+        }
+      ],
+      "children": []
+    },
+    "b-state-sources-2": {
+      "id": "b-state-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "packages/canvas/src/state",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state",
+              "label": "packages/canvas/src/state"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-state-gov-3": {
+      "id": "b-state-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-state-gov-model-4": {
+      "id": "b-state-gov-model-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Document model",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/10-document-model",
+              "label": "Document model"
+            }
+          }
+        },
+        {
+          "insert": " — owns the document model: schema, the action vocabulary's semantics, the reducer contract, validation, and history."
+        }
+      ],
+      "children": []
+    },
+    "b-state-gov-layering-5": {
+      "id": "b-state-gov-layering-5",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The layer cake",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "The layer cake"
+            }
+          }
+        },
+        {
+          "insert": " — owns section membership and paint-order behavior."
+        }
+      ],
+      "children": []
+    },
+    "b-state-decisions-6": {
+      "id": "b-state-decisions-6",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-state-actions-split-decision-7": {
+      "id": "b-state-actions-split-decision-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the action layer is split by domain under "
+        },
+        {
+          "insert": "state/actions/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions",
+              "label": "state/actions/"
+            }
+          }
+        },
+        {
+          "insert": " — objects, connections, annotations, geometry-ops, history, waypoints, plus shared helpers and types — with "
+        },
+        {
+          "insert": "state/actions.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as the public re-export and "
+        },
+        {
+          "insert": "reducer.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
+              "label": "reducer.ts"
+            }
+          }
+        },
+        {
+          "insert": " as the single reducer entry point."
+        }
+      ],
+      "children": []
+    },
+    "b-state-actions-split-why-8": {
+      "id": "b-state-actions-split-why-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was one monolithic actions file, which the vocabulary had outgrown; the per-domain split keeps each handler family reviewable and keeps the reducer a thin dispatch."
+        }
+      ],
+      "children": []
+    },
+    "b-state-actions-split-applies-9": {
+      "id": "b-state-actions-split-applies-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas/src/state/actions",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions",
+              "label": "packages/canvas/src/state/actions"
+            }
+          }
+        },
+        {
+          "insert": " — including every future action, which joins its domain file (or adds one) and dispatches through "
+        },
+        {
+          "insert": "reducer.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-state-one-path-decision-10": {
+      "id": "b-state-one-path-decision-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "every document mutation is a "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " handled inside "
+        },
+        {
+          "insert": "state/actions/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; new capabilities add action handlers there, and no code outside the reducer path may write to a document."
+        }
+      ],
+      "children": []
+    },
+    "b-state-one-path-why-11": {
+      "id": "b-state-one-path-why-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was letting gesture or trim code mutate documents directly, which forks mutation authority and silently bypasses history, validation, and the reducer's waypoint-reconciliation choke point."
+        }
+      ],
+      "children": []
+    },
+    "b-state-one-path-applies-12": {
+      "id": "b-state-one-path-applies-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "reducer.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
+              "label": "reducer.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future mutation source (gesture, trim, agent), which dispatches the same actions."
+        }
+      ],
+      "children": []
+    },
+    "b-state-defaults-decision-13": {
+      "id": "b-state-defaults-decision-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "creation defaults live in "
+        },
+        {
+          "insert": "state/schema/object-defaults.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "label": "state/schema/object-defaults.ts"
+            }
+          }
+        },
+        {
+          "insert": " — a reducer-readable table — not on the object defs, because "
+        },
+        {
+          "insert": "state/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " must not import "
+        },
+        {
+          "insert": "objects/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and the actions surface is a standalone public API; the identity lock between def-stamped and reducer defaults is "
+        },
+        {
+          "insert": "type-defaults.test.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/__tests__/type-defaults.test.ts",
+              "label": "type-defaults.test.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-state-defaults-why-14": {
+      "id": "b-state-defaults-why-14",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was reading defaults off the defs at reduce time, which inverts the layer order and drags React-adjacent code under the reducer."
+        }
+      ],
+      "children": []
+    },
+    "b-state-defaults-applies-15": {
+      "id": "b-state-defaults-applies-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "object-defaults.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "label": "object-defaults.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future object type, which adds its row here first."
+        }
+      ],
+      "children": []
+    }
+  }
+}

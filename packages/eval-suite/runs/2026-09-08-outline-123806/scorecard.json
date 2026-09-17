@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-09-08-outline-123806",
+  "status": "running",
+  "fingerprint": {
+    "repo": "f3e3fa00+dirty",
+    "model": "codex-lb/gpt-6-astra @ low",
+    "prompt": "347d5556",
+    "lints": "20ebe21e",
+    "styles": "64d76f6b",
+    "surface": "971c0509",
+    "tool_call_cap": 3,
+    "tool_call_cap_source": "agent default"
+  },
+  "previous_run": {
+    "run_id": "2026-09-08-eval-092548",
+    "available": true,
+    "comparable": true,
+    "axis_set_changed": false,
+    "axes": [
+      "SF",
+      "RC",
+      "RD",
+      "CF",
+      "SD",
+      "PH"
+    ]
+  },
+  "sessions": {
+    "ok": 1,
+    "rejected": 0,
+    "abandoned": 0,
+    "invalidInfra": 0
+  },
+  "axes": [
+    {
+      "code": "SF",
+      "order": 1
+    },
+    {
+      "code": "RC",
+      "order": 2
+    },
+    {
+      "code": "RD",
+      "order": 3
+    },
+    {
+      "code": "CF",
+      "order": 4
+    },
+    {
+      "code": "SD",
+      "order": 5
+    },
+    {
+      "code": "PH",
+      "order": 6
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "code-review-agents",
+      "label": "code-review-agents",
+      "status": "graded",
+      "scores": {
+        "SF": 9,
+        "RC": 9,
+        "RD": 6.5,
+        "CF": 6,
+        "SD": null,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": 0,
+        "RC": -1,
+        "RD": -1,
+        "CF": 1,
+        "SD": null,
+        "PH": -1.5
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    }
+  ],
+  "means": {
+    "scores": {
+      "SF": 9,
+      "RC": 9,
+      "RD": 6.5,
+      "CF": 6,
+      "SD": null,
+      "PH": 8
+    },
+    "deltas": {
+      "SF": 0,
+      "RC": -1,
+      "RD": -1,
+      "CF": 1,
+      "SD": null,
+      "PH": -1.5
+    },
+    "flags": []
+  },
+  "movements": [
+    {
+      "scenario": "code-review-agents",
+      "axis": "RC",
+      "previous": 10,
+      "current": 9,
+      "delta": -1,
+      "evidence": "The board represents virtually the entire stated pipeline, including intake eligibility controls, budgeted context construction, five concurrent reviewers, bounded read-only tooling, aggregation and verification safeguards, policy-driven publication, calibration feedback, head-change recovery, telemetry, and daily-budget degradation. The sole gap is a supporting rationale/priority qualifier rather than missing architecture or failure behavior."
+    },
+    {
+      "scenario": "code-review-agents",
+      "axis": "RD",
+      "previous": 7.5,
+      "current": 6.5,
+      "delta": -1,
+      "evidence": "The board is readable with effort, matching the 6–6.5 anchor because its stage grouping and primary left-to-right flow are clear, but small labels and several long dashed feedback routes require close tracing."
+    },
+    {
+      "scenario": "code-review-agents",
+      "axis": "CF",
+      "previous": 5,
+      "current": 6,
+      "delta": 1,
+      "evidence": "The board breathes and its staged flow is readable, but large dead frame areas, note-heavy regions, and several plain-box vocabulary substitutions leave it at the rubric’s “doesn’t finish” anchor."
+    },
+    {
+      "scenario": "code-review-agents",
+      "axis": "PH",
+      "previous": 9.5,
+      "current": 8,
+      "delta": -1.5,
+      "evidence": "Mechanically clean: 0 failed calls across 63 tool calls, no rejected calls, no retries, no consecutive failure runs, and no repeated parse/schema/validation error class. The single NO-OP at turn 7 was legal and was not repeated."
+    }
+  ],
+  "axis_correlation": {
+    "threshold": 6,
+    "denominator": 8,
+    "lockstep_pairs": []
+  }
+}

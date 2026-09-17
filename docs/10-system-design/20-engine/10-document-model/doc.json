@@ -1,0 +1,1440 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-20-engine-10-document-model",
+  "title": "Document model",
+  "root": "b-engine-model-root",
+  "blocks": {
+    "b-engine-model-title-1": {
+      "id": "b-engine-model-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Document model"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-intro-2": {
+      "id": "b-engine-model-intro-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The model layer defines what a canvas document is (schema), the closed vocabulary of ways it can change (actions), the single function that performs every change (the reducer), and a small set of pure geometry helpers those changes lean on. Everything above this layer — pointer interaction, connector routing, rendering, the editor shell — reads and writes through these types and functions rather than inventing its own notion of canvas state."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-schema-heading-3": {
+      "id": "b-engine-model-schema-heading-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Document schema"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-schema-doc-4": {
+      "id": "b-engine-model-schema-doc-4",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/document.ts",
+              "symbol": "InteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": " is the serializable, versioned shape of a canvas: "
+        },
+        {
+          "insert": "schemaVersion",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (always "
+        },
+        {
+          "insert": "1",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), an "
+        },
+        {
+          "insert": "id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", an optional "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a "
+        },
+        {
+          "insert": "mode",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (only "
+        },
+        {
+          "insert": "\"diagram\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " exists), an optional viewport (pan/zoom) and canvas size, and the validated collections: "
+        },
+        {
+          "insert": "objects",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connections",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and optional "
+        },
+        {
+          "insert": "annotations",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-schema-objects-5": {
+      "id": "b-engine-model-schema-objects-5",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Each "
+        },
+        {
+          "insert": "InteractiveCanvasObject",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/objects.ts",
+              "symbol": "InteractiveCanvasObject"
+            }
+          }
+        },
+        {
+          "insert": " carries an id, a "
+        },
+        {
+          "insert": "type",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from the closed object-type vocabulary, a single required "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field (the kind decides where and how it renders), an optional "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pick from the closed 10-swatch roster, an optional "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " recording section membership, required world-space "
+        },
+        {
+          "insert": "geometry",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (x/y/width/height), and optional style/layout/per-type fields ("
+        },
+        {
+          "insert": "direction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "author",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-schema-connections-6": {
+      "id": "b-engine-model-schema-connections-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Each "
+        },
+        {
+          "insert": "InteractiveCanvasConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/connections.ts",
+              "symbol": "InteractiveCanvasConnection"
+            }
+          }
+        },
+        {
+          "insert": " links two object endpoints — each with an optional side "
+        },
+        {
+          "insert": "anchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and an optional precise "
+        },
+        {
+          "insert": "[0..1, 0..1]",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " relative "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — and carries line style and arrow direction, its own separate "
+        },
+        {
+          "insert": "label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", an optional "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pick, and optional "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": a world-space polyline override that wins over auto-routing when present. "
+        },
+        {
+          "insert": "annotations",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " attach a note or an agent-request to an object, connection, or arbitrary region, with an "
+        },
+        {
+          "insert": "intent",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "status",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lifecycle of their own."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-schema-style-7": {
+      "id": "b-engine-model-schema-style-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasConnectionStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/connections.ts",
+              "symbol": "CanvasConnectionStyle"
+            }
+          }
+        },
+        {
+          "insert": " is line style only: "
+        },
+        {
+          "insert": "\"solid\" | \"dashed\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Routing is always elbow/orthogonal through the routing layer; the style field never selects a path algorithm. "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are the user-bend mechanism: when present, routing honors the stored polyline instead of recomputing around obstacles, and the reducer keeps them coherent — translating them during rigid moves, dropping them after asymmetric moves or resizes, and clearing them when an endpoint object, anchor, or precise position changes, so a reconnected connector returns to auto-routing."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-types-heading-8": {
+      "id": "b-engine-model-types-heading-8",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Object types and color"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-types-body-9": {
+      "id": "b-engine-model-types-body-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The object-type vocabulary is closed: eleven kinds — "
+        },
+        {
+          "insert": "rectangle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "decision",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "sticky",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "arrow-shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "predefined-process",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ellipse",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "triangle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "octagon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — each with a defaults row in "
+        },
+        {
+          "insert": "OBJECT_TYPE_DEFAULTS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "OBJECT_TYPE_DEFAULTS"
+            }
+          }
+        },
+        {
+          "insert": " and a registered def that owns its rendering and outline. "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the only grouping kind: membership is a persisted, auto-managed "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", never containment by any other type. The full roster, per-kind trim, and text-slot model are specified in "
+        },
+        {
+          "insert": "the shape API",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "The shape API"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-color-body-10": {
+      "id": "b-engine-model-color-body-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Color is a single stored field per object and connection: "
+        },
+        {
+          "insert": "color?: CanvasColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — a swatch id from the closed 10-pick roster in "
+        },
+        {
+          "insert": "state/schema/colors.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/colors.ts",
+              "symbol": "CanvasColor"
+            }
+          }
+        },
+        {
+          "insert": ". The id carries no hex; what a pick looks like per kind resolves through the role tables in "
+        },
+        {
+          "insert": "theme/palette.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "symbol": "CANVAS_PALETTE"
+            }
+          }
+        },
+        {
+          "insert": ". An absent pick renders as the kind's first-use default ("
+        },
+        {
+          "insert": "FIRST_USE_COLORS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "symbol": "FIRST_USE_COLORS"
+            }
+          }
+        },
+        {
+          "insert": ": sticky "
+        },
+        {
+          "insert": "\"yellow\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", everything else "
+        },
+        {
+          "insert": "\"gray\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). New objects take the per-kind last-picked color; connectors are the exception — every connector creation path stamps "
+        },
+        {
+          "insert": "FIRST_USE_COLORS.connector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and a picked connector color is not remembered for future connectors. All object text is one fixed dark color."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-validate-heading-11": {
+      "id": "b-engine-model-validate-heading-11",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Validation without throwing"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-validate-body-12": {
+      "id": "b-engine-model-validate-body-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "validateInteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/validate.ts",
+              "symbol": "validateInteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": " is a hand-written validator over an "
+        },
+        {
+          "insert": "unknown",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " input. It returns a discriminated "
+        },
+        {
+          "insert": "CanvasValidationResult",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rather than throwing: on success "
+        },
+        {
+          "insert": "{ ok: true, document, warnings? }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", on failure "
+        },
+        {
+          "insert": "{ ok: false, issues }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The key distinction is soft versus hard: an unknown "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is dropped with a warning and normalization continues, while invalid geometry, missing required text, duplicate ids, unknown object types, invalid section parenting, invalid connection endpoints or positions, or malformed "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fail validation. "
+        },
+        {
+          "insert": "assertInteractiveCanvasDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the one place a failed validation becomes a thrown error."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-validate-migration-13": {
+      "id": "b-engine-model-validate-migration-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Validation is migration-aware so old documents keep loading: legacy connector styles map forward ("
+        },
+        {
+          "insert": "\"dotted\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to "
+        },
+        {
+          "insert": "\"dashed\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; "
+        },
+        {
+          "insert": "\"elbow\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "\"smooth\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to "
+        },
+        {
+          "insert": "\"solid\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), the legacy boolean section lock maps to "
+        },
+        {
+          "insert": "\"background\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and unknown leftover keys from retired schema fields are ignored rather than rejected."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-actions-heading-14": {
+      "id": "b-engine-model-actions-heading-14",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Action vocabulary"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-actions-body-15": {
+      "id": "b-engine-model-actions-body-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/types.ts",
+              "symbol": "CanvasAction"
+            }
+          }
+        },
+        {
+          "insert": " is a single discriminated union — every variant prefixed "
+        },
+        {
+          "insert": "canvas.",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — and this closed vocabulary is the entire surface through which a document can change. It covers:"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-actions-selection-16": {
+      "id": "b-engine-model-actions-selection-16",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "selection and tools — "
+        },
+        {
+          "insert": "canvas.select",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "canvas.setTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "canvas.updateDocumentTitle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ";"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-actions-objects-17": {
+      "id": "b-engine-model-actions-objects-17",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "object CRUD and geometry — add, bulk-add (paste), update, bulk geometry patch (with a history opt-out for live-preview frames), resize, nudge, duplicate, delete, and "
+        },
+        {
+          "insert": "canvas.setObjectType",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " shape-swaps in place while preserving geometry, text, color, and parent;"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-actions-connections-18": {
+      "id": "b-engine-model-actions-connections-18",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "connection CRUD — add, update (endpoint changes clear waypoints), delete, and "
+        },
+        {
+          "insert": "canvas.quickConnect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", which connects to an existing object under the drop point or duplicates the source object with empty text and connects to it, in one history entry;"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-actions-sections-19": {
+      "id": "b-engine-model-actions-sections-19",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "section and layout operations — "
+        },
+        {
+          "insert": "canvas.setParent",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "canvas.reconcileSectionMembership",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (see "
+        },
+        {
+          "insert": "The layer cake",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "The layer cake"
+            }
+          }
+        },
+        {
+          "insert": "), "
+        },
+        {
+          "insert": "canvas.captureSectionContents",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "canvas.fitSectionToChildren",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "canvas.alignSelection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "canvas.distributeSelection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ";"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-actions-history-20": {
+      "id": "b-engine-model-actions-history-20",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "history — "
+        },
+        {
+          "insert": "canvas.undo",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "canvas.redo",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "canvas.reset",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", which restore stored documents verbatim."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-actions-summary-21": {
+      "id": "b-engine-model-actions-summary-21",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Mutating actions record a history entry through "
+        },
+        {
+          "insert": "withHistory",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/history.ts",
+              "symbol": "withHistory"
+            }
+          }
+        },
+        {
+          "insert": " with a "
+        },
+        {
+          "insert": "CanvasChangeSummary",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — source, human-readable summary, and the ids touched — which backs both the undo ledger and any \"what just changed\" highlight in a consuming UI."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-reducer-decision-22": {
+      "id": "b-engine-model-reducer-decision-22",
+      "type": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Single reducer as mutation authority"
+      },
+      "text": [
+        {
+          "insert": "reduceInteractiveCanvasState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
+              "symbol": "reduceInteractiveCanvasState"
+            }
+          }
+        },
+        {
+          "insert": " is the one function that turns "
+        },
+        {
+          "insert": "(InteractiveCanvasState, CanvasAction)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " into a new state, and it is the only place a document is ever mutated. Interactive UI gestures dispatch the exact same "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " values an external agent or automation script would dispatch to make the identical change; neither path has a shortcut around the other. This choke point guarantees two properties regardless of an action's origin: consistent undo (every mutation goes through the same history bookkeeping, so a human edit and an agent edit undo identically) and waypoint coherence (every action that can move or resize an object flows through the same reconciliation pass). Splitting the reducer, or giving any caller a way to patch the document directly, would let those guarantees diverge quietly."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-waypoint-choke-23": {
+      "id": "b-engine-model-waypoint-choke-23",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The reducer wraps the action switch with a stale-waypoint choke point: after any document-changing action (excluding undo/redo/reset), "
+        },
+        {
+          "insert": "reconcileConnectionWaypoints",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/waypoints.ts",
+              "symbol": "reconcileConnectionWaypoints"
+            }
+          }
+        },
+        {
+          "insert": " compares each waypointed connection's two endpoint owners before and after. If both owners translated by the same delta with no resize — a multi-select drag, a nudge, a section carrying its members — every waypoint shifts by that delta, preserving trunk-and-branch fan shapes. If the owners moved asymmetrically or either resized, the waypoints are dropped so the connector falls back to obstacle-avoiding auto-routing. Because this runs inside the reducer, the waypoint change shares the triggering action's history entry: one undo restores geometry and waypoints together."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-geometry-heading-24": {
+      "id": "b-engine-model-geometry-heading-24",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Geometry helpers"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-geometry-body-25": {
+      "id": "b-engine-model-geometry-body-25",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "state/geometry.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "snapGeometry"
+            }
+          }
+        },
+        {
+          "insert": " is a set of pure, DOM-free functions over plain numbers and "
+        },
+        {
+          "insert": "CanvasGeometry",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " records: grid snapping ("
+        },
+        {
+          "insert": "CANVAS_GRID_SIZE",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "CANVAS_GRID_SIZE"
+            }
+          }
+        },
+        {
+          "insert": " = 16 px, round-to-nearest with width/height floored at one cell), anchor-point resolution, bounding-box math ("
+        },
+        {
+          "insert": "boundsForGeometries",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "boundsForGeometries"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "documentBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "documentBounds"
+            }
+          }
+        },
+        {
+          "insert": "), rectangle overlap, "
+        },
+        {
+          "insert": "alignObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "alignObjects"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "distributeObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "distributeObjects"
+            }
+          }
+        },
+        {
+          "insert": " (three or more objects, equal gaps along an axis), "
+        },
+        {
+          "insert": "fitSectionToChildren",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "fitSectionToChildren"
+            }
+          }
+        },
+        {
+          "insert": " (section-only, padded 32 px), transitive membership walking ("
+        },
+        {
+          "insert": "sectionDescendantIds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "sectionDescendantIds"
+            }
+          }
+        },
+        {
+          "insert": "), and stable id generation. All are pure document-in/document-out; the corresponding actions are thin reducer cases that call them and run the result through history."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-geometry-coords-26": {
+      "id": "b-engine-model-geometry-coords-26",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every geometry and waypoint is a plain number pair in one flat world-space coordinate system — logical px, no separate world/screen unit split in the schema. The origin is not pinned to anything; objects may have negative coordinates or extend past the document's nominal "
+        },
+        {
+          "insert": "size",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "documentBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/geometry.ts",
+              "symbol": "documentBounds"
+            }
+          }
+        },
+        {
+          "insert": " always recomputes the real bounding box from actual object geometry rather than trusting "
+        },
+        {
+          "insert": "size",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as authoritative. The 16 px placement-snap grid is a model-layer concern, unrelated to the render layer's adaptive dot grid ("
+        },
+        {
+          "insert": "Stage and viewport",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/40-stage-and-viewport",
+              "label": "Stage and viewport"
+            }
+          }
+        },
+        {
+          "insert": "): one is placement snapping, the other visual density."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-closing-27": {
+      "id": "b-engine-model-closing-27",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every change to a document — pointer interaction, keyboard shortcut, toolbar edit, or external agent — must be expressed as a "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " dispatched through "
+        },
+        {
+          "insert": "reduceInteractiveCanvasState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
+              "symbol": "reduceInteractiveCanvasState"
+            }
+          }
+        },
+        {
+          "insert": ". Ad hoc mutation anywhere else silently breaks undo history and skips waypoint reconciliation, producing state that looks fine until the next drag or undo exposes the drift."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-root": {
+      "id": "b-engine-model-root",
+      "type": "paragraph",
+      "props": {
+        "covers": "The data core of the canvas engine: the document schema, the closed typed-action vocabulary, the single reducer that performs every mutation, validation without throwing, and the pure geometry helpers.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "InteractiveCanvasDocument",
+          "CanvasAction",
+          "reduceInteractiveCanvasState",
+          "validation",
+          "waypoints",
+          "color roster",
+          "geometry helpers"
+        ]
+      },
+      "children": [
+        "b-engine-model-title-1",
+        "b-engine-model-intro-2",
+        "b-engine-model-schema-heading-3",
+        "b-engine-model-schema-doc-4",
+        "b-engine-model-schema-objects-5",
+        "b-engine-model-schema-connections-6",
+        "b-engine-model-schema-style-7",
+        "b-engine-model-types-heading-8",
+        "b-engine-model-types-body-9",
+        "b-engine-model-color-body-10",
+        "b-engine-model-validate-heading-11",
+        "b-engine-model-validate-body-12",
+        "b-engine-model-validate-migration-13",
+        "b-engine-model-actions-heading-14",
+        "b-engine-model-actions-body-15",
+        "b-engine-model-actions-selection-16",
+        "b-engine-model-actions-objects-17",
+        "b-engine-model-actions-connections-18",
+        "b-engine-model-actions-sections-19",
+        "b-engine-model-actions-history-20",
+        "b-engine-model-actions-summary-21",
+        "b-engine-model-reducer-decision-22",
+        "b-engine-model-waypoint-choke-23",
+        "b-engine-model-geometry-heading-24",
+        "b-engine-model-geometry-body-25",
+        "b-engine-model-geometry-coords-26",
+        "b-engine-model-closing-27"
+      ]
+    }
+  }
+}

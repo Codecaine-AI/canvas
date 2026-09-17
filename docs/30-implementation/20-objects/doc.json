@@ -1,0 +1,750 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation-20-objects",
+  "title": "Objects",
+  "root": "b-obj-root-0",
+  "blocks": {
+    "b-obj-root-0": {
+      "id": "b-obj-root-0",
+      "type": "paragraph",
+      "props": {
+        "covers": "The layout of the object system under packages/canvas/src/objects/, the closed seven-file recipe for adding a shape, the shared outline constants, and the two-tier object-preference registry.",
+        "type": "implementation",
+        "concepts": [
+          "objects",
+          "shape-def",
+          "object-def-registry",
+          "add-a-shape-recipe",
+          "outline-specs",
+          "object-preferences"
+        ]
+      },
+      "children": [
+        "b-obj-role-1",
+        "b-obj-sources-2",
+        "b-obj-gov-3",
+        "b-obj-gov-shape-4",
+        "b-obj-gov-opmaps-5",
+        "b-obj-decisions-6",
+        "b-obj-recipe-decision-7",
+        "b-obj-recipe-why-8",
+        "b-obj-recipe-applies-9",
+        "b-obj-outlines-decision-10",
+        "b-obj-outlines-why-11",
+        "b-obj-outlines-applies-12",
+        "b-obj-registry-decision-13",
+        "b-obj-registry-why-14",
+        "b-obj-registry-applies-15",
+        "b-obj-roster-16"
+      ]
+    },
+    "b-obj-role-1": {
+      "id": "b-obj-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The object system: the ObjectDef/ShapeDef registry, per-kind defs, text slots, outline geometry, and the object-preference registry. The shape contract — what a def is, text slots, outlines and anchors, color roles — is owned by design; this area records the layout of "
+        },
+        {
+          "insert": "objects/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and the closed recipe for extending it."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-sources-2": {
+      "id": "b-obj-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "packages/canvas/src/objects",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects",
+              "label": "packages/canvas/src/objects"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-gov-3": {
+      "id": "b-obj-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-obj-gov-shape-4": {
+      "id": "b-obj-gov-shape-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The shape contract",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "The shape contract"
+            }
+          }
+        },
+        {
+          "insert": " — owns the shape contract: ObjectDef v2, ShapeDef, text slots, outlines and anchors, color roles."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-gov-opmaps-5": {
+      "id": "b-obj-gov-opmaps-5",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Operational maps",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/40-operational-maps",
+              "label": "Operational maps"
+            }
+          }
+        },
+        {
+          "insert": " — owns the registry model: the entry shape, the one-canonical-name rule, and defaults as product."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-decisions-6": {
+      "id": "b-obj-decisions-6",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-obj-recipe-decision-7": {
+      "id": "b-obj-recipe-decision-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "a new shape is one new ShapeDef file under "
+        },
+        {
+          "insert": "objects/shapes/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/shapes",
+              "label": "objects/shapes/"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "basic/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "flowchart/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or "
+        },
+        {
+          "insert": "icon/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") — silhouette, css, catalog metadata, everything, in that file, with "
+        },
+        {
+          "insert": "shapeObjectDef",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " stamping the rest — plus exactly seven one-line registrations: the type union in "
+        },
+        {
+          "insert": "object-types.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "label": "object-types.ts"
+            }
+          }
+        },
+        {
+          "insert": ", the render-shape variant in "
+        },
+        {
+          "insert": "style.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/style.ts",
+              "label": "style.ts"
+            }
+          }
+        },
+        {
+          "insert": ", the guard branch in "
+        },
+        {
+          "insert": "validate.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/validate.ts",
+              "label": "validate.ts"
+            }
+          }
+        },
+        {
+          "insert": ", the defaults row in "
+        },
+        {
+          "insert": "object-defaults.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-defaults.ts",
+              "label": "object-defaults.ts"
+            }
+          }
+        },
+        {
+          "insert": ", the registry entry in "
+        },
+        {
+          "insert": "object-def.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/object-def.ts",
+              "label": "object-def.ts"
+            }
+          }
+        },
+        {
+          "insert": ", the picker placement in "
+        },
+        {
+          "insert": "catalog.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/catalog.ts",
+              "label": "catalog.ts"
+            }
+          }
+        },
+        {
+          "insert": " (labels and keywords derive from the def; the catalog is arrangement only), and the preview glyph in "
+        },
+        {
+          "insert": "shape-previews.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/shape-previews.tsx",
+              "label": "shape-previews.tsx"
+            }
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "octagon.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/shapes/basic/octagon.tsx",
+              "label": "octagon.tsx"
+            }
+          }
+        },
+        {
+          "insert": " is the template. A true outline is the one optional extra: a points builder and exported spec const in "
+        },
+        {
+          "insert": "objects/geometry.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", listed in the dispatch table and referenced from the def; skipping it ships correct bbox anchors."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-recipe-why-8": {
+      "id": "b-obj-recipe-why-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was per-shape logic spread across editor, renderer, and schema — how shape zoos rot. The closed recipe means the compiler and two tests ("
+        },
+        {
+          "insert": "geometry-def-agreement.test.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/__tests__/geometry-def-agreement.test.ts",
+              "label": "geometry-def-agreement.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "type-defaults.test.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/__tests__/type-defaults.test.ts",
+              "label": "type-defaults.test.ts"
+            }
+          }
+        },
+        {
+          "insert": ") walk an author through anything missed."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-recipe-applies-9": {
+      "id": "b-obj-recipe-applies-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas/src/objects/shapes",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/shapes",
+              "label": "packages/canvas/src/objects/shapes"
+            }
+          }
+        },
+        {
+          "insert": " — including every future shape, which touches exactly these files and nothing else."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-outlines-decision-10": {
+      "id": "b-obj-outlines-decision-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "outline math is a pure, React-free concern of "
+        },
+        {
+          "insert": "objects/geometry.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "label": "objects/geometry.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and a true-outline def declares its "
+        },
+        {
+          "insert": "outline",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " by referencing the "
+        },
+        {
+          "insert": "same",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " exported spec const the dispatch tables use — identity, not duplication; "
+        },
+        {
+          "insert": "geometry-def-agreement.test.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " asserts it, and the import-boundaries test allows "
+        },
+        {
+          "insert": "connectors/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to import "
+        },
+        {
+          "insert": "objects/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for this math."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-outlines-why-11": {
+      "id": "b-obj-outlines-why-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was per-def outline copies, which drift from the hit-testing and anchor dispatch tables and let a connector land where the shape isn't drawn."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-outlines-applies-12": {
+      "id": "b-obj-outlines-applies-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "objects/geometry.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "label": "objects/geometry.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future true-outline shape."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-registry-decision-13": {
+      "id": "b-obj-registry-decision-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the object-preference registry is a repo file, not a service: "
+        },
+        {
+          "insert": "object-preferences.json",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/registry/object-preferences.json",
+              "label": "object-preferences.json"
+            }
+          }
+        },
+        {
+          "insert": " holds the entries in roster order — the order is load-bearing; the picker and the agent's vocabulary listing walk it as-is — and "
+        },
+        {
+          "insert": "registry/index.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/registry/index.ts",
+              "label": "registry/index.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the typed read surface every consumer shares, validating colors at load. There is no change event and no registry-editor surface; edits are edits to the JSON, picked up at the next load."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-registry-why-14": {
+      "id": "b-obj-registry-why-14",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was a registry service with change notifications, which buys live propagation nobody needs at the cost of a runtime dependency in every reader."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-registry-applies-15": {
+      "id": "b-obj-registry-applies-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas/src/objects/registry",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/registry",
+              "label": "packages/canvas/src/objects/registry"
+            }
+          }
+        },
+        {
+          "insert": " — including every future vocabulary entry, which joins the JSON in roster order and is read only through "
+        },
+        {
+          "insert": "index.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-roster-16": {
+      "id": "b-obj-roster-16",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Roster: "
+        },
+        {
+          "insert": "objects/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " holds "
+        },
+        {
+          "insert": "object-def.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the OBJECT_DEFS registry and dispatch), "
+        },
+        {
+          "insert": "shapes/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (ShapeDef, the "
+        },
+        {
+          "insert": "base.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " adapter, one-file defs), "
+        },
+        {
+          "insert": "section/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "sticky/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the two bespoke kinds), "
+        },
+        {
+          "insert": "text-slots.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with its constants, "
+        },
+        {
+          "insert": "geometry.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (outline math), "
+        },
+        {
+          "insert": "catalog.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (picker arrangement), and "
+        },
+        {
+          "insert": "registry/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (the preference corpus)."
+        }
+      ],
+      "children": []
+    }
+  }
+}

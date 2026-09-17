@@ -21,8 +21,4 @@ export const CRAFT_TARGETS: CraftTargets = {
   sectionGutterSideBySide: 144,
   sectionGutterStacked: 160,
   framePadding: 48,
-  boardAreaMultiple: 7,
-  inkShare: 0.15,
-  nodesPerSectionMin: 2,
-  nodesPerSectionMax: 3,
 };

@@ -1,0 +1,199 @@
+{
+  "axis": "ph",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: all 87 tool calls completed without an ERROR result. There were no rejected calls, retries, malformed requests, repeated error classes, or parse/schema-validation fights. Failure rate was 0%, and the longest failure run was 0.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · resize page-frame → 2800×2100",
+          "finding": "The first edit applied successfully; there was no failure before the first APPLIED result."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame",
+          "finding": "The QA look was accepted and returned a clean diagnostic render."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "transcript_excerpt": "Committed: Created the fleet diagram covering quota-gated placement, warm and cold allocation, lease retirement and destruction, isolated tool execution, and fleet supervision.",
+          "finding": "Finalize succeeded on the first attempt; no blocked or rejected finalize occurred."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "The session used one explicit framed render, at the end of construction, and read a clean whole-page result before finalizing. There were no close-ups interleaved with the detailed construction of the four dense regions and no edit after the QA render, so there was no render-adjust-render iteration. Standing-state and lint feedback did drive many local corrections, but the explicit perception loop was minimal.",
+      "render_count": 1,
+      "adjustment_round_count": 0,
+      "render_adjust_render_loop_count": 0,
+      "single_render_session_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame",
+          "finding": "The sole explicit look framed the entire page only after all substantive edits had been completed."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The final QA render reported a clean board, but the agent made no subsequent visual adjustment."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "transcript_excerpt": "Committed: Created the fleet diagram covering quota-gated placement, warm and cold allocation, lease retirement and destruction, isolated tool execution, and fleet supervision.",
+          "finding": "Finalize immediately followed the single QA look, confirming there was no render-adjust-render loop."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint handling was disciplined. One error-severity lint appeared and was addressed immediately; warnings were likewise fixed rather than overridden. No lint repeated for more than three consecutive turns, and the commit contained no silent warning override because final diagnostics were clean.",
+      "lint_error_count": 1,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "+ W1 unreadable-labels: label \"Image + class\" chip on a-q ... bleeds onto agent and quota",
+          "finding": "The warning was resolved on the next turn by moving the agent; it was not fought or ignored."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 35,
+          "transcript_excerpt": "+ W1 clipped-text: quota-note: sticky body clips at 180×120",
+          "finding": "The agent first resized the note and then shortened its text when the initial resize remained slightly insufficient; this was a clear strategy change rather than a lint fight."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 61,
+          "transcript_excerpt": "+ E1 covered-content: label \"All egress\" chip on egress lies on files's path for 75px",
+          "finding": "This was the session's only error-severity lint. Turn 62 moved the label and resolved E1, while turn 63 corrected the new warning caused by the first placement."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 81,
+          "transcript_excerpt": "+ W1 covered-content: label \"Image retired · finish active lease\" chip on live-retire sits within 16px of idle",
+          "finding": "The warning was fixed on the immediately following turn by moving the label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA showed no outstanding lint errors or warnings, so no override reason was required in the summary."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary accurately and conservatively describes the stage diff. The diff contains quota admission, warm-hit and cold-boot allocation, lifecycle retirement and destruction, isolated execution controls, and fleet supervision. The final render was diagnostically clean, and no defect known from the sole QA look was left undeclared.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "line": "Created the fleet diagram covering quota-gated placement, warm and cold allocation, lease retirement and destruction, isolated tool execution, and fleet supervision.",
+          "assessment": "Honest and supported by the diff: the added placement, lifecycle, execution, and fleet sections and their connections directly substantiate every listed area."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 59 ops",
+          "finding": "The reported diff includes four sections, the relevant process objects, and 24 connections matching the summary's scope."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The agent saw a clean final diagnostic state before committing, with no visible lint defect requiring disclosure."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "transcript_excerpt": "Created the fleet diagram covering quota-gated placement, warm and cold allocation, lease retirement and destruction, isolated tool execution, and fleet supervision.",
+          "finding": "The wording claims coverage rather than perfection or comprehensive rebalancing, and it matches the actual added content."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The work stayed within both budgets and reached finalize in 9.73 minutes with 59 committed patch operations. Most actions were direct and proportional for a large four-band diagram. There was one localized add-reroute-delete replacement cycle around the output edge, but it was resolved quickly by converting the existing call edge to a bidirectional edge rather than causing broad rebuild thrash.",
+      "operation_count": 59,
+      "thrash_cycle_count": 1,
+      "wall_time_minutes": 9.73,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 55,
+          "transcript_excerpt": "APPLIED · connect output runtime→caller",
+          "finding": "This began the sole localized add-then-delete cycle by introducing a separate anti-parallel output edge."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 56,
+          "transcript_excerpt": "APPLIED · reroute output",
+          "finding": "The first attempted correction did not clear the warning, leaving one lint open."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 57,
+          "transcript_excerpt": "APPLIED · delete output (connection)",
+          "finding": "The newly added output edge was deleted after the unsuccessful reroute."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 58,
+          "transcript_excerpt": "call  arrow forward → both",
+          "finding": "The agent completed the strategy change by reusing the existing call edge for bidirectional call/output flow."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "transcript_excerpt": "Committed: ... (59 patch operations).",
+          "finding": "The session finalized successfully well below the 15-minute and 300-turn limits."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or evidenced. The only session completed normally and is included in scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "transcript_excerpt": "The proposal is now awaiting operator review.",
+          "finding": "The session reached a successful committed terminal state; there was no stuck ACTIVE session, harness death, collision, or proxy failure."
+        }
+      ]
+    },
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 33656,
+    "output_tokens": 2574
+  },
+  "flags": []
+}

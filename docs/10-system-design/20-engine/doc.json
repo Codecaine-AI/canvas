@@ -1,0 +1,248 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-20-engine",
+  "title": "The canvas engine",
+  "root": "b-engine-root",
+  "blocks": {
+    "b-engine-title-1": {
+      "id": "b-engine-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "The canvas engine"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-intro-2": {
+      "id": "b-engine-intro-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The canvas engine is a FigJam-parity, typed-action, world-space diagram engine. Its behavioral spine is short: a validated "
+        },
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/document.ts",
+              "symbol": "InteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": " is the only state, a closed "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/types.ts",
+              "symbol": "CanvasAction"
+            }
+          }
+        },
+        {
+          "insert": " vocabulary is the only way it changes, one reducer performs every change, and everything on screen — paint order, connector paths, overlays — is derived from that state rather than stored beside it. This page tree specifies that behavior in five areas."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-map-model-3": {
+      "id": "b-engine-map-model-3",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Document model",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/10-document-model",
+              "label": "Document model"
+            }
+          }
+        },
+        {
+          "insert": " — the schema, the action vocabulary, the single-reducer discipline, validation, and the geometry helpers."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-map-interaction-4": {
+      "id": "b-engine-map-interaction-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Interaction",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/20-interaction",
+              "label": "Interaction"
+            }
+          }
+        },
+        {
+          "insert": " — the pipeline from DOM pointer event to document mutation: normalization, hit resolution, the nine-state gesture machine, feedback, and the clipboard."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-map-connectors-5": {
+      "id": "b-engine-map-connectors-5",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/30-connectors",
+              "label": "Connectors"
+            }
+          }
+        },
+        {
+          "insert": " — routing, anchor resolution, waypoints and bends, the connection cascade, and the connector gestures."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-map-stage-6": {
+      "id": "b-engine-map-stage-6",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Stage and viewport",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/40-stage-and-viewport",
+              "label": "Stage and viewport"
+            }
+          }
+        },
+        {
+          "insert": " — the z-tiered draw model, the adaptive grid, world/screen transform math, and the read-only viewer face."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-map-persist-7": {
+      "id": "b-engine-map-persist-7",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Persistence and embedding",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/50-persistence-and-embedding",
+              "label": "Persistence and embedding"
+            }
+          }
+        },
+        {
+          "insert": " — the file API contract, the on-disk canvas format, previews, and the editor/view/embed surfaces."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-layering-pointer-8": {
+      "id": "b-engine-layering-pointer-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Section layering — how "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is reconciled from geometry and how the section stack is derived from it — is engine behavior too, but it has its own sibling page: "
+        },
+        {
+          "insert": "The layer cake",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "The layer cake"
+            }
+          }
+        },
+        {
+          "insert": ". The object and color vocabulary the engine renders is specified in "
+        },
+        {
+          "insert": "the shape API",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "The shape API"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-root": {
+      "id": "b-engine-root",
+      "type": "paragraph",
+      "props": {
+        "covers": "The behavioral model of the canvas engine in five areas: the document model and its single reducer, the interaction pipeline from pointer event to action, connector routing and gestures, the stage and viewport, and persistence and embedding.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "document model",
+          "interaction pipeline",
+          "connectors",
+          "stage and viewport",
+          "persistence",
+          "section layering"
+        ]
+      },
+      "children": [
+        "b-engine-title-1",
+        "b-engine-intro-2",
+        "b-engine-map-model-3",
+        "b-engine-map-interaction-4",
+        "b-engine-map-connectors-5",
+        "b-engine-map-stage-6",
+        "b-engine-map-persist-7",
+        "b-engine-layering-pointer-8"
+      ]
+    }
+  }
+}

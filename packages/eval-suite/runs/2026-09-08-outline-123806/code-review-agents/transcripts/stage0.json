@@ -1,0 +1,1508 @@
+{
+  "container_id": "618dae0d-a097-5e40-877b-57048b4e6c76",
+  "pi_sessions": [
+    {
+      "piSessionId": "01a08219-47a6-7764-9c73-1dc09f1bd5f0",
+      "file": "2026-09-08T17-38-09-958Z_01a08219-47a6-7764-9c73-1dc09f1bd5f0.jsonl",
+      "startedAt": "2026-09-08T17:38:09.958Z",
+      "userMessages": [
+        {
+          "text": "# Multi-agent automated code review\n\nWe need a diagram of how our automated code-review pipeline works, beginning when a pull request event reaches the intake service. Intake resolves the diff, changed files, repository review policy, and build status. It rejects draft pull requests and excludes vendored or generated paths before invoking any model work. For an eligible change, the context builder assembles diff hunks, surrounding source, related tests, ownership metadata, and prior review history for the touched files. Its budget forces it to rank the material, truncate lower-value context, and record everything it drops.\n\nThe planner partitions the change into review units and dispatches correctness, security, performance, test-coverage, and API-compatibility reviewers concurrently over the shared context. Each reviewer returns findings with a current-file location, severity, rationale, and confidence. Reviewers may call read-only repository search, symbol lookup, and test-history tools within a per-review call budget. A reviewer that exhausts this allowance returns its available findings rather than delaying the run.\n\nThe aggregator merges the parallel results, deduplicates overlapping findings, reconciles conflicting severities, and withholds low-confidence findings. It checks the current branch head and drops any finding whose location no longer exists. Before publication, the verifier rechecks every high-severity finding against the actual source. An unverified finding is demoted instead of posted, because false positives on a pull request are the failure the team most wants to avoid.\n\nSurviving findings become inline comments and a summary verdict. Depending on repository policy, the pipeline can request changes, approve, or remain advisory. Author replies and human reviewer disagreements return to the calibration process. A finding resolved as wrong is recorded, and the calibration store adjusts the confidence threshold for that finding class in later reviews.\n\nA head-change monitor cancels an in-flight review when a force-push or new commit arrives, starts a fresh review against the new head, and discards partial work rather than publishing it against the wrong diff. The telemetry service tracks cost, latency, token usage by reviewer, cancellation rate, and the accepted-versus-dismissed rate of published findings. When a repository exceeds its daily review budget, intake degrades subsequent runs to correctness and security review only. The diagram should make clear how failures and feedback affect the review lifecycle.\n",
+          "timestamp": "2026-09-08T17:38:09.991Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-09-08T17:38:16.089Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_roTQfd106p50jKYTsdaPGjdr|fc_05d56ad8760c8fb9016aa048074b6487d18bff0f22ea06e2d9",
+              "toolName": "resize",
+              "params": {
+                "id": "page-frame",
+                "width": 3400,
+                "height": 2200
+              },
+              "resultText": "APPLIED · resize page-frame → 3400×2200\nDELTA\n  page-frame  32,32 2560×1600 → 32,32 3400×2200\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-09-08T17:38:23.061Z",
+          "thinking": "**Laying out horizontal stages**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_gvFX1UZEyklS8QTtiN01DXdb|fc_05d56ad8760c8fb9016aa0480eccd487d1970b4cb43c627581",
+              "toolName": "update_text",
+              "params": {
+                "id": "page-frame",
+                "text": "Multi-agent automated code review"
+              },
+              "resultText": "APPLIED · update_text page-frame\nDELTA\n  page-frame  text \"2026-09-08-outline-123806 · code-review-agents\" → \"Multi-agent automated code review\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-09-08T17:38:27.774Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_zYHpt66ySfWCNfQvUz41dOUJ|fc_05d56ad8760c8fb9016aa048126a9087d1a31efe5644d334df",
+              "toolName": "place_section",
+              "params": {
+                "id": "intake-zone",
+                "text": "1 · Intake / no model work",
+                "at": [
+                  100,
+                  200
+                ],
+                "size": {
+                  "width": 440,
+                  "height": 900
+                }
+              },
+              "resultText": "APPLIED · place_section intake-zone 100,200 440×900\nDELTA\n  + intake-zone  section 100,200 440×900 \"1 · Intake / no model work\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-09-08T17:38:33.553Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Ec8lcJDhLtVC72empHsOj0SM|fc_05d56ad8760c8fb9016aa048185a4087d1a67738fb0ed2793f",
+              "toolName": "place_section",
+              "params": {
+                "id": "context-zone",
+                "text": "2 · Context & plan",
+                "at": [
+                  660,
+                  200
+                ],
+                "size": {
+                  "width": 440,
+                  "height": 900
+                }
+              },
+              "resultText": "APPLIED · place_section context-zone 660,200 440×900\nDELTA\n  + context-zone  section 660,200 440×900 \"2 · Context & plan\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-09-08T17:38:39.052Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_LDhTddJmJvtc1Wv8p5cQZZar|fc_05d56ad8760c8fb9016aa0481dccf887d1ace18e08c7f03155",
+              "toolName": "place_section",
+              "params": {
+                "id": "review-zone",
+                "text": "3 · Concurrent reviewers · shared context",
+                "at": [
+                  1220,
+                  200
+                ],
+                "size": {
+                  "width": 440,
+                  "height": 1260
+                }
+              },
+              "resultText": "APPLIED · place_section review-zone 1220,200 440×1260\nDELTA\n  + review-zone  section 1220,200 440×1260 \"3 · Concurrent reviewers · shared context\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "timestamp": "2026-09-08T17:38:47.729Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_VWxdRpy1F8rW1K1yrma9IRM6|fc_05d56ad8760c8fb9016aa04826553c87d19d2ff3d581fc9b4d",
+              "toolName": "place_section",
+              "params": {
+                "id": "quality-zone",
+                "text": "4 · Merge & verify",
+                "at": [
+                  1820,
+                  200
+                ],
+                "size": {
+                  "width": 660,
+                  "height": 1260
+                }
+              },
+              "resultText": "APPLIED · place_section quality-zone 1820,200 660×1260\nDELTA\n  + quality-zone  section 1820,200 660×1260 \"4 · Merge & verify\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "timestamp": "2026-09-08T17:38:54.060Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_jpJ5RpMUDQdzkECqXQGG8mOu|fc_05d56ad8760c8fb9016aa0482cb9d487d1bbcd56b50ef3c1c7",
+              "toolName": "place_section",
+              "params": {
+                "id": "publish-zone",
+                "text": "5 · Publish & calibrate",
+                "at": [
+                  2640,
+                  200
+                ],
+                "size": {
+                  "width": 640,
+                  "height": 1260
+                }
+              },
+              "resultText": "APPLIED · place_section publish-zone 2640,200 640×1260\nDELTA\n  + publish-zone  section 2640,200 640×1260 \"5 · Publish & calibrate\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "timestamp": "2026-09-08T17:39:00.110Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_1M30o6zzLzVF9rLaaKU9SFuy|fc_05d56ad8760c8fb9016aa048335c3887d1a7bd4211b79ec34e",
+              "toolName": "resize",
+              "params": {
+                "id": "page-frame",
+                "width": 3400,
+                "height": 2200
+              },
+              "resultText": "NO-OP · resize page-frame — the board already matches this, so nothing changed.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "timestamp": "2026-09-08T17:39:04.681Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_nhyY98SYSLEwkelXRR43hJWd|fc_05d56ad8760c8fb9016aa048378da487d1bc15210a1f9a7bb0",
+              "toolName": "place_shape",
+              "params": {
+                "id": "intake",
+                "type": "process",
+                "at": [
+                  160,
+                  300
+                ]
+              },
+              "resultText": "APPLIED · place_shape intake process 160,300 280×100\nDELTA\n  + intake  process 160,300 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "timestamp": "2026-09-08T17:39:08.590Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Ss41SbJXqerQHjmpTSEnx3QI|fc_05d56ad8760c8fb9016aa0483bee1c87d1a40b1bce5f852cdf",
+              "toolName": "update_text",
+              "params": {
+                "id": "intake",
+                "text": "PR event → Intake"
+              },
+              "resultText": "APPLIED · update_text intake\nDELTA\n  intake  text \"\" → \"PR event → Intake\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "timestamp": "2026-09-08T17:39:13.131Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_62yhGeplebYiTQybunEWRwTp|fc_05d56ad8760c8fb9016aa0484015b487d19ecd10646fdc6ae0",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "intake",
+                "id": "eligible",
+                "at": [
+                  160,
+                  540
+                ],
+                "text": "Reject drafts; filter paths"
+              },
+              "resultText": "APPLIED · clone eligible from intake 160,540 280×100\nDELTA\n  + eligible  process 160,540 280×100 \"Reject drafts; filter paths\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "timestamp": "2026-09-08T17:39:17.557Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_4AdEaP14VYFmnTApuEje5p1x|fc_05d56ad8760c8fb9016aa04844a33c87d1aaeed220de9dd90d",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "intake",
+                "id": "context",
+                "at": [
+                  720,
+                  540
+                ],
+                "text": "Build ranked context"
+              },
+              "resultText": "APPLIED · clone context from intake 720,540 280×100\nDELTA\n  + context  process 720,540 280×100 \"Build ranked context\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "timestamp": "2026-09-08T17:39:23.433Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_iSeS2SmaPyOmZFf9iceXgRmu|fc_05d56ad8760c8fb9016aa0484a372487d185932a79a2e29f49",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "intake",
+                "id": "planner",
+                "at": [
+                  720,
+                  820
+                ],
+                "text": "Partition & dispatch units"
+              },
+              "resultText": "APPLIED · clone planner from intake 720,820 280×100\nDELTA\n  + planner  process 720,820 280×100 \"Partition & dispatch units\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "timestamp": "2026-09-08T17:39:28.434Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ieax0R2QlCg3ySj28eLXkv0r|fc_05d56ad8760c8fb9016aa0484fa2c087d190ac5110e3a08479",
+              "toolName": "look",
+              "params": {
+                "view": "page-frame"
+              },
+              "resultText": "LOOK · 1 render · close-up page-frame\nBOARD\n  page-frame section \"Multi-agent automated code review\" white 32,32 3400×2200\n    intake-zone section \"1 · Intake / no model work\" 100,200 440×900\n      intake process \"PR event → Intake\" 160,300 280×100\n      eligible process \"Reject drafts; filter paths\" 160,540 280×100\n    context-zone section \"2 · Context & plan\" 660,200 440×900\n      context process \"Build ranked context\" 720,540 280×100\n      planner process \"Partition & dispatch units\" 720,820 280×100\n    review-zone section \"3 · Concurrent reviewers · shared context\" 1220,200 440×1260\n      (empty)\n    quality-zone section \"4 · Merge & verify\" 1820,200 660×1260\n      (empty)\n    publish-zone section \"5 · Publish & calibrate\" 2640,200 640×1260\n      (empty)\nEDGES\n  (none)\nBOARD DIFF · base → draft · 10 ops\n  addSection intake-zone\n  addSection context-zone\n  addSection review-zone\n  addSection quality-zone\n  addSection publish-zone\n  addObject intake\n  addObject eligible\n  addObject context\n  addObject planner\n  updateSection page-frame  resized · retexted\nDIAGNOSTICS · clean\nREQUESTS · none\nMEASURES · section page-frame 32,32 3400×2200\n  gaps x  intake-zone↔context-zone 120 · context-zone↔review-zone 120 · review-zone↔quality-zone 160 · quality-zone↔publish-zone 160\n  pitch x 60 · 500 · 60 · 500 · 600 · 820\n  pitch y 100 · 240 · 280\n  free    left 44 · right 128 · top 116 · bottom 744\n  ink     1%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T17-38-09-958Z_01a08219-47a6-7764-9c73-1dc09f1bd5f0.60.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "timestamp": "2026-09-08T17:39:35.137Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_vv0XJRFiIBEvYq9TWbI8RALt|fc_05d56ad8760c8fb9016aa0485679d887d1aa164fcfb45c6308",
+              "toolName": "place_shape",
+              "params": {
+                "id": "correct",
+                "type": "agent",
+                "at": [
+                  1300,
+                  320
+                ]
+              },
+              "resultText": "APPLIED · place_shape correct agent 1300,320 120×120\nDELTA\n  + correct  agent 1300,320 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 15,
+          "timestamp": "2026-09-08T17:39:40.072Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_TH8cyZwtzN1cU2mjUUSLUedQ|fc_05d56ad8760c8fb9016aa0485b418487d1a1a3bf2aed32641b",
+              "toolName": "resize",
+              "params": {
+                "id": "correct",
+                "width": 280,
+                "height": 140
+              },
+              "resultText": "APPLIED · resize correct → 280×140\nDELTA\n  correct  1300,320 120×120 → 1300,320 280×140\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 16,
+          "timestamp": "2026-09-08T17:39:45.280Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_fMnLSUKiycjwUECXtylFIT3v|fc_05d56ad8760c8fb9016aa04860cb5887d1a3bc1a307fd02a6f",
+              "toolName": "update_text",
+              "params": {
+                "id": "correct",
+                "text": "Correctness"
+              },
+              "resultText": "APPLIED · update_text correct\nDELTA\n  correct  text \"\" → Correctness\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 17,
+          "timestamp": "2026-09-08T17:39:49.763Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_QVcnT2j7bhpBOLN5UIa3RoKz|fc_05d56ad8760c8fb9016aa04864c6b487d18d8f1076c55f5132",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "correct",
+                "id": "security",
+                "at": [
+                  1300,
+                  540
+                ],
+                "text": "Security"
+              },
+              "resultText": "APPLIED · clone security from correct 1300,540 280×140\nDELTA\n  + security  agent 1300,540 280×140 \"Security\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 18,
+          "timestamp": "2026-09-08T17:39:53.716Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_oYqbO2UEIVZbDkWWjKP3xfnF|fc_05d56ad8760c8fb9016aa04868d43487d19df2406ac1a75575",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "correct",
+                "id": "performance",
+                "at": [
+                  1300,
+                  760
+                ],
+                "text": "Performance"
+              },
+              "resultText": "APPLIED · clone performance from correct 1300,760 280×140\nDELTA\n  + performance  agent 1300,760 280×140 \"Performance\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 19,
+          "timestamp": "2026-09-08T17:39:59.032Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_LlDqZTwK1LvMB4pfQGrAUYfD|fc_05d56ad8760c8fb9016aa0486e0aa487d181b581e6a07f52d8",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "correct",
+                "id": "tests",
+                "at": [
+                  1300,
+                  980
+                ],
+                "text": "Test coverage"
+              },
+              "resultText": "APPLIED · clone tests from correct 1300,980 280×140\nDELTA\n  + tests  agent 1300,980 280×140 \"Test coverage\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 20,
+          "timestamp": "2026-09-08T17:40:06.560Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_OCX7mamOKXUPtfckC0ArhDDO|fc_05d56ad8760c8fb9016aa04875641887d198f33b2a1bbd0d78",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "correct",
+                "id": "compat",
+                "at": [
+                  1300,
+                  1200
+                ],
+                "text": "API compatibility"
+              },
+              "resultText": "APPLIED · clone compat from correct 1300,1200 280×140\nDELTA\n  + compat  agent 1300,1200 280×140 \"API compatibility\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 21,
+          "timestamp": "2026-09-08T17:40:12.868Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_4Yzi3i1NT4bil2zipQa7gCVb|fc_05d56ad8760c8fb9016aa0487bcef487d1945bfbeb3a04c9bb",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "intake",
+                "id": "merge",
+                "at": [
+                  1880,
+                  760
+                ],
+                "text": "Merge & deduplicate"
+              },
+              "resultText": "APPLIED · clone merge from intake 1880,760 280×100\nDELTA\n  + merge  process 1880,760 280×100 \"Merge & deduplicate\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 22,
+          "timestamp": "2026-09-08T17:40:19.841Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_wEJJdWm37tU8o0tjzHy7AFl1|fc_05d56ad8760c8fb9016aa04882092c87d1a71614c3ecc1a53e",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "intake",
+                "id": "verify",
+                "at": [
+                  1880,
+                  1040
+                ],
+                "text": "Verify high severity in source"
+              },
+              "resultText": "APPLIED · clone verify from intake 1880,1040 280×100\nDELTA\n  + verify  process 1880,1040 280×100 \"Verify high severity in source\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 23,
+          "timestamp": "2026-09-08T17:40:27.035Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_JihrRdb96R2RY65Z3awL0CWK|fc_05d56ad8760c8fb9016aa04889f1c087d1a20c4b48193d6aa6",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "intake",
+                "id": "publish",
+                "at": [
+                  2720,
+                  1040
+                ],
+                "text": "Inline comments + verdict"
+              },
+              "resultText": "APPLIED · clone publish from intake 2720,1040 280×100\nDELTA\n  + publish  process 2720,1040 280×100 \"Inline comments + verdict\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 24,
+          "timestamp": "2026-09-08T17:40:32.755Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_rXkvoRaD551IExsK9iHF3RYJ|fc_05d56ad8760c8fb9016aa0488f8f7087d1b3b693b4751393ad",
+              "toolName": "connect",
+              "params": {
+                "id": "e1",
+                "from": {
+                  "objectId": "intake",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "eligible",
+                  "anchor": "top"
+                }
+              },
+              "resultText": "APPLIED · connect e1 intake→eligible\nDELTA\n  + e1  intake → eligible\nLINTS · clean\nROUTES\n  e1  anchors bottom→top  path intake (s0 v x=300) eligible  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 25,
+          "timestamp": "2026-09-08T17:40:38.029Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_EuYmzPMeUMI36Ep1KcSCR13W|fc_05d56ad8760c8fb9016aa04894cda887d1be5bf2b3343f6824",
+              "toolName": "connect",
+              "params": {
+                "id": "e2",
+                "from": {
+                  "objectId": "eligible",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "context",
+                  "anchor": "left"
+                },
+                "label": "eligible"
+              },
+              "resultText": "APPLIED · connect e2 eligible→context\nDELTA\n  + e2  eligible → context\nLINTS · clean\nROUTES\n  e2  anchors right→left  path eligible ─(s0 h y=590)→ context  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 26,
+          "timestamp": "2026-09-08T17:40:42.726Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_3WYuMDXHP9VvUxBawhWjtL58|fc_05d56ad8760c8fb9016aa048998fa487d1865b4aaff9b3cb5a",
+              "toolName": "connect",
+              "params": {
+                "id": "e3",
+                "from": {
+                  "objectId": "context",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "planner",
+                  "anchor": "top"
+                }
+              },
+              "resultText": "APPLIED · connect e3 context→planner\nDELTA\n  + e3  context → planner\nLINTS · clean\nROUTES\n  e3  anchors bottom→top  path context (s0 v x=860) planner  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 27,
+          "timestamp": "2026-09-08T17:40:50.683Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ezTQPnxKtwUQXhIwA7gyeXmh|fc_05d56ad8760c8fb9016aa048a18aa887d1acaf0e814f64446d",
+              "toolName": "connect",
+              "params": {
+                "id": "dispatch",
+                "from": {
+                  "objectId": "planner"
+                },
+                "to": {
+                  "objectId": "review-zone"
+                },
+                "label": "parallel units + context"
+              },
+              "resultText": "APPLIED · connect dispatch planner→review-zone\nDELTA\n  + dispatch  planner → review-zone\nLINTS · +1 −0\n  + W1 unreadable-labels: label \"parallel units + context\" chip on dispatch (254×30px) bleeds onto planner: 220px of corridor where the chip needs 287px (open the planner↔review-zone corridor to ≥287px so the chip and its 16px margins fit)\nROUTES\n  dispatch  anchors right→left  path planner ─(s0 h y=870)→ ─(s1 h y=870)→ (s2 v x=1110) ─(s3 h y=830)→ ─(s4 h y=830)→ review-zone  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 28,
+          "timestamp": "2026-09-08T17:40:54.810Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ohDabgHNw1TzSRYN2NsFmzBU|fc_05d56ad8760c8fb9016aa048a6227087d193b9388591b622cf",
+              "toolName": "update_text",
+              "params": {
+                "id": "dispatch",
+                "text": "dispatch"
+              },
+              "resultText": "APPLIED · update_text dispatch\nDELTA\n  dispatch  label \"parallel units + context\" → dispatch\nLINTS · +0 −1\n  − W1 unreadable-labels  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 29,
+          "timestamp": "2026-09-08T17:41:03.243Z",
+          "thinking": "**Optimizing remaining calls**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_qT6cY2abvnHiFxjZ9TVvgRth|fc_05d56ad8760c8fb9016aa048ae281c87d187b3ce72002bd678",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "intake-detail",
+                "at": [
+                  160,
+                  760
+                ],
+                "text": "Resolve diff, changed files, repository policy and build status.\nExclude vendored / generated paths before model work."
+              },
+              "resultText": "APPLIED · place_sticky intake-detail 160,760 180×120\nDELTA\n  + intake-detail  sticky 160,760 180×120 \"Resolve diff, changed files, repository policy and build status.\\nExclude vendored / generated paths before model work.\"\nLINTS · +1 −0\n  + W1 clipped-text: intake-detail: sticky body clips at 180×120: 15 row(s), the note holds 1 — needs 180×589 (grow intake-detail to ≥180×589 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 30,
+          "timestamp": "2026-09-08T17:41:07.361Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_fSEG0ePtwhbKTOu64sQOFkx0|fc_05d56ad8760c8fb9016aa048b2a02c87d189e0aa22d5458248",
+              "toolName": "resize",
+              "params": {
+                "id": "intake-detail",
+                "width": 320,
+                "height": 360
+              },
+              "resultText": "APPLIED · resize intake-detail → 320×360\nDELTA\n  intake-detail  160,760 180×120 → 160,760 320×360\nLINTS · +1 −1\n  + E1 containment: intake-detail extends 20px outside its section intake-zone (move_to intake-detail back inside intake-zone, or resize intake-zone to hold it — fit_section intake-zone closes the frame around what is already inside)\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 31,
+          "timestamp": "2026-09-08T17:41:11.532Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_SMYdLVHVLG2TWrY97RAwD82M|fc_05d56ad8760c8fb9016aa048b6a9ac87d19bec078668c7d13b",
+              "toolName": "fit_section",
+              "params": {
+                "id": "intake-zone"
+              },
+              "resultText": "APPLIED · fit_section intake-zone\nDELTA\n  intake-zone  100,200 440×900 → 120,220 400×940\nLINTS · +0 −1\n  − E1 containment  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 32,
+          "timestamp": "2026-09-08T17:41:18.970Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_1iG1pQ6e1JffsT4SaOK1DJCu|fc_05d56ad8760c8fb9016aa048bd289487d1bbe8d1d31cb955d5",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "intake-detail",
+                "id": "context-detail",
+                "at": [
+                  720,
+                  960
+                ],
+                "text": "Shared context: hunks, source, related tests, ownership and prior reviews.\nRank by value; truncate to budget and log every dropped item."
+              },
+              "resultText": "APPLIED · clone context-detail from intake-detail 720,960 320×360\nDELTA\n  + context-detail  sticky 720,960 320×360 \"Shared context: hunks, source, related tests, ownership and prior reviews.\\nRank by value; truncate to budget and log every dropped item.\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 33,
+          "timestamp": "2026-09-08T17:41:23.434Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_MfMzWbBjA8CzT9gvZnhjlccS|fc_05d56ad8760c8fb9016aa048c2a7dc87d19876cfa869a30d7d",
+              "toolName": "resize",
+              "params": {
+                "id": "context-zone",
+                "width": 440,
+                "height": 1160
+              },
+              "resultText": "APPLIED · resize context-zone → 440×1160\nDELTA\n  context-zone  660,200 440×900 → 660,200 440×1160\n  context-detail  parentId page-frame → context-zone\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 34,
+          "timestamp": "2026-09-08T17:41:28.348Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_VabQznQ1mUFz1BUbK9M2aZzC|fc_05d56ad8760c8fb9016aa048c70fec87d19477a76aad5b1ed1",
+              "toolName": "connect",
+              "params": {
+                "id": "results",
+                "from": {
+                  "objectId": "review-zone",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "merge",
+                  "anchor": "left"
+                },
+                "label": "findings"
+              },
+              "resultText": "APPLIED · connect results review-zone→merge\nDELTA\n  + results  review-zone → merge\nLINTS · clean\nROUTES\n  results  anchors right→left  path review-zone ─(s0 h y=830)→ ─(s1 h y=830)→ (s2 v x=1770) ─(s3 h y=810)→ ─(s4 h y=810)→ merge  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 35,
+          "timestamp": "2026-09-08T17:41:33.805Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_wvpju9Aw0oauNZQTRFhNFSsC|fc_05d56ad8760c8fb9016aa048cbb80c87d1b672ebd7aa37daf0",
+              "toolName": "connect",
+              "params": {
+                "id": "merge-verify",
+                "from": {
+                  "objectId": "merge",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "verify",
+                  "anchor": "top"
+                }
+              },
+              "resultText": "APPLIED · connect merge-verify merge→verify\nDELTA\n  + merge-verify  merge → verify\nLINTS · clean\nROUTES\n  merge-verify  anchors bottom→top  path merge (s0 v x=2020) verify  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 36,
+          "timestamp": "2026-09-08T17:41:38.708Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_RbCV3tzRCrYH1VwwGwDVGLYP|fc_05d56ad8760c8fb9016aa048d12d7087d198cb43ba2ce883ab",
+              "toolName": "connect",
+              "params": {
+                "id": "verified-publish",
+                "from": {
+                  "objectId": "verify",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "publish",
+                  "anchor": "left"
+                },
+                "label": "surviving findings"
+              },
+              "resultText": "APPLIED · connect verified-publish verify→publish\nDELTA\n  + verified-publish  verify → publish\nLINTS · clean\nROUTES\n  verified-publish  anchors right→left  path verify ─(s0 h y=1090)→ publish  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 37,
+          "timestamp": "2026-09-08T17:41:45.572Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_XX5pVj6R1VzQxP92lZzbZTLf|fc_05d56ad8760c8fb9016aa048d782d087d1ad759b913dea33cc",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "intake-detail",
+                "id": "quality-detail",
+                "at": [
+                  1880,
+                  300
+                ],
+                "text": "Reconcile severities; withhold low confidence.\nCheck current head; drop locations that no longer exist.\nUnverified high-severity findings are demoted, not posted."
+              },
+              "resultText": "APPLIED · clone quality-detail from intake-detail 1880,300 320×360\nDELTA\n  + quality-detail  sticky 1880,300 320×360 \"Reconcile severities; withhold low confidence.\\nCheck current head; drop locations that no longer exist.\\nUnverified high-severity findings are demoted, not posted.\"\nLINTS · +1 −0\n  + W1 clipped-text: quality-detail: sticky body clips at 320×360: 9 row(s), the note holds 8 — needs 320×373 (grow quality-detail to ≥320×373 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 38,
+          "timestamp": "2026-09-08T17:41:51.327Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_F6NTh5bjovsySoGkbUAjbJ2b|fc_05d56ad8760c8fb9016aa048de5ba887d18cb472145e9da6db",
+              "toolName": "resize",
+              "params": {
+                "id": "quality-detail",
+                "width": 480,
+                "height": 360
+              },
+              "resultText": "APPLIED · resize quality-detail → 480×360\nDELTA\n  quality-detail  1880,300 320×360 → 1880,300 480×360\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 39,
+          "timestamp": "2026-09-08T17:41:58.378Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_NJxstSw3P9T25WweHeOX4ZHp|fc_05d56ad8760c8fb9016aa048e468d887d18c703db7cbf0e189",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "quality-detail",
+                "id": "publication-policy",
+                "at": [
+                  2720,
+                  300
+                ],
+                "text": "Repository policy selects: request changes, approve, or advisory.\nAuthor replies and human disagreements feed calibration. Record findings resolved as wrong; adjust later confidence thresholds by finding class."
+              },
+              "resultText": "APPLIED · clone publication-policy from quality-detail 2720,300 480×360\nDELTA\n  + publication-policy  sticky 2720,300 480×360 \"Repository policy selects: request changes, approve, or advisory.\\nAuthor replies and human disagreements feed calibration. Record findings resolved as wrong; adjust later confidence thresholds by finding class.\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 40,
+          "timestamp": "2026-09-08T17:42:04.117Z",
+          "thinking": "**Finishing missing pieces**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_gTqOiL8FXtjOHf3R6QMxkSJE|fc_05d56ad8760c8fb9016aa048ebab9487d1aaf47192ced6599d",
+              "toolName": "place_section",
+              "params": {
+                "id": "controls",
+                "text": "Lifecycle controls · cancellation, budgets & tools",
+                "at": [
+                  120,
+                  1620
+                ],
+                "size": {
+                  "width": 2360,
+                  "height": 540
+                }
+              },
+              "resultText": "APPLIED · place_section controls 120,1620 2360×540\nDELTA\n  + controls  section 120,1620 2360×540 \"Lifecycle controls · cancellation, budgets & tools\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 41,
+          "timestamp": "2026-09-08T17:42:10.643Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_zj7DCWm0GkJ2AMx6lxwTkXGB|fc_05d56ad8760c8fb9016aa048f09c9887d19eee6d8e3d18097f",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "quality-detail",
+                "id": "cancel-note",
+                "at": [
+                  180,
+                  1800
+                ],
+                "text": "Force-push / new commit:\ncancel in-flight review, discard partial work; never publish against the old diff. Restart intake on the new head."
+              },
+              "resultText": "APPLIED · clone cancel-note from quality-detail 180,1800 480×360\nDELTA\n  + cancel-note  sticky 180,1800 480×360 \"Force-push / new commit:\\ncancel in-flight review, discard partial work; never publish against the old diff. Restart intake on the new head.\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 42,
+          "timestamp": "2026-09-08T17:42:18.022Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_2oCqISEJKax79SqE6u0qzhfJ|fc_05d56ad8760c8fb9016aa048f7c49c87d1b218a91ebb1864df",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "quality-detail",
+                "id": "tools-note",
+                "at": [
+                  820,
+                  1800
+                ],
+                "text": "Read-only tools: repository search, symbol lookup, test history.\nPer-review call budget: on exhaustion, return available findings immediately.\nEach finding: current-file location, severity, rationale, confidence."
+              },
+              "resultText": "APPLIED · clone tools-note from quality-detail 820,1800 480×360\nDELTA\n  + tools-note  sticky 820,1800 480×360 \"Read-only tools: repository search, symbol lookup, test history.\\nPer-review call budget: on exhaustion, return available findings immediately.\\nEach finding: current-file location, severity, rationale, confidence.\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 43,
+          "timestamp": "2026-09-08T17:42:24.445Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_3jPeBese0QCY6T4NRNUobqkI|fc_05d56ad8760c8fb9016aa048fe25a487d188dd3bac86d5febe",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "quality-detail",
+                "id": "telemetry-note",
+                "at": [
+                  1460,
+                  1800
+                ],
+                "text": "Telemetry: cost, latency, token usage by reviewer, cancellation rate, and accepted versus dismissed findings.\nDaily repository budget exceeded: intake limits subsequent runs to correctness + security only."
+              },
+              "resultText": "APPLIED · clone telemetry-note from quality-detail 1460,1800 480×360\nDELTA\n  + telemetry-note  sticky 1460,1800 480×360 \"Telemetry: cost, latency, token usage by reviewer, cancellation rate, and accepted versus dismissed findings.\\nDaily repository budget exceeded: intake limits subsequent runs to correctness + security only.\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 44,
+          "timestamp": "2026-09-08T17:42:28.928Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_T5jblosJya5sh1kFN6C8L2Fh|fc_05d56ad8760c8fb9016aa049041b0087d1a16447f83358045c",
+              "toolName": "place_shape",
+              "params": {
+                "id": "calibration",
+                "type": "memory",
+                "at": [
+                  2720,
+                  1280
+                ]
+              },
+              "resultText": "APPLIED · place_shape calibration memory 2720,1280 120×120\nDELTA\n  + calibration  memory 2720,1280 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 45,
+          "timestamp": "2026-09-08T17:42:33.555Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_TC4BcbmnJsoGG2j9FZqziZYc|fc_05d56ad8760c8fb9016aa04908dbe487d1bef99d5a0e5f1f1b",
+              "toolName": "resize",
+              "params": {
+                "id": "calibration",
+                "width": 280,
+                "height": 140
+              },
+              "resultText": "APPLIED · resize calibration → 280×140\nDELTA\n  calibration  2720,1280 120×120 → 2720,1280 280×140\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 46,
+          "timestamp": "2026-09-08T17:42:41.282Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_rG2Sp1wBCNWZo1f3dyWRZDk3|fc_05d56ad8760c8fb9016aa04910b06087d1b7fc9023debe77fe",
+              "toolName": "update_text",
+              "params": {
+                "id": "calibration",
+                "text": "Calibration thresholds"
+              },
+              "resultText": "APPLIED · update_text calibration\nDELTA\n  calibration  text \"\" → \"Calibration thresholds\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 47,
+          "timestamp": "2026-09-08T17:42:48.938Z",
+          "thinking": "**Adding upper control nodes**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_q2S3vlGEEunNISa5xaBwA3RP|fc_05d56ad8760c8fb9016aa0491873a087d1923f84bfa3f80c7a",
+              "toolName": "connect",
+              "params": {
+                "id": "feedback",
+                "from": {
+                  "objectId": "publish",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "calibration",
+                  "anchor": "top"
+                },
+                "label": "Replies / disagreements",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect feedback publish→calibration\nDELTA\n  + feedback  publish → calibration\nLINTS · clean\nROUTES\n  feedback  anchors bottom→top  path publish (s0 v x=2860) calibration  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 48,
+          "timestamp": "2026-09-08T17:42:55.083Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_b6wXVNbFrUICg8QDif1YKPKY|fc_05d56ad8760c8fb9016aa0491de49487d1b2a59bd760dd5dc0",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "intake",
+                "id": "head-monitor",
+                "at": [
+                  180,
+                  1660
+                ],
+                "text": "Head monitor: cancel / restart"
+              },
+              "resultText": "APPLIED · clone head-monitor from intake 180,1660 280×100\nDELTA\n  + head-monitor  process 180,1660 280×100 \"Head monitor: cancel / restart\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 49,
+          "timestamp": "2026-09-08T17:43:03.279Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_OboPwRsMcle5KVQZD0Sh4MhF|fc_05d56ad8760c8fb9016aa04925cc1487d196c6593a85a94d93",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "head-monitor",
+                "id": "repo-tools",
+                "at": [
+                  820,
+                  1660
+                ],
+                "text": "Read-only tools · call budget"
+              },
+              "resultText": "APPLIED · clone repo-tools from head-monitor 820,1660 280×100\nDELTA\n  + repo-tools  process 820,1660 280×100 \"Read-only tools · call budget\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 50,
+          "timestamp": "2026-09-08T17:43:17.432Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_UBLiPb5SarjX8UTHgj409oqw|fc_05d56ad8760c8fb9016aa04932bdcc87d1a4dd7807b0a3dc25",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "head-monitor",
+                "id": "telemetry",
+                "at": [
+                  1460,
+                  1660
+                ],
+                "text": "Telemetry / daily budget"
+              },
+              "resultText": "APPLIED · clone telemetry from head-monitor 1460,1660 280×100\nDELTA\n  + telemetry  process 1460,1660 280×100 \"Telemetry / daily budget\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 51,
+          "timestamp": "2026-09-08T17:43:22.648Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_8fjHg7W3vLvyjcABkWdB93R3|fc_05d56ad8760c8fb9016aa04938faa087d1b634f7ed5f70c71b",
+              "toolName": "connect",
+              "params": {
+                "id": "calibrate-next",
+                "from": {
+                  "objectId": "calibration",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "merge",
+                  "anchor": "right"
+                },
+                "label": "Later confidence thresholds",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect calibrate-next calibration→merge\nDELTA\n  + calibrate-next  calibration → merge\nLINTS · +3 −0\n  + E1 covered-content: label \"surviving findings\" chip on verified-publish overlaps label \"Later confidence thresholds\" chip on calibrate-next (separate the two edges (spacing or waypoints) so both labels read)\n  + E2 covered-content: label \"surviving findings\" chip on verified-publish lies on calibrate-next's path for 30px (move the label with a waypoint or reroute calibrate-next so the chip owns its wire)\n  + E3 covered-content: label \"Later confidence thresholds\" chip on calibrate-next lies on verified-publish's path for 283px (move the label with a waypoint or reroute verified-publish so the chip owns its wire)\nROUTES\n  calibrate-next  anchors left→right  path calibration ─(s0 h y=1350)→ ─(s1 h y=1350)→ (s2 v x=2440) ─(s3 h y=810)→ ─(s4 h y=810)→ merge  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 52,
+          "timestamp": "2026-09-08T17:43:29.343Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_kuEsZPYdTtGBmFE2SSoxD98I|fc_05d56ad8760c8fb9016aa0493f5ad087d19a3ad07cde492812",
+              "toolName": "move_label",
+              "params": {
+                "id": "calibrate-next",
+                "along": 0.18,
+                "offset": 20
+              },
+              "resultText": "APPLIED · move_label calibrate-next → along 0.18, offset 20\nDELTA\n  calibrate-next  labelPosition — → {\"along\":0.18,\"offset\":20}\nLINTS · +0 −2\n  − E1 covered-content, − E3 covered-content  (resolved)\nROUTES\n  calibrate-next  anchors left→right  path calibration ─(s0 h y=1350)→ ─(s1 h y=1350)→ (s2 v x=2440) ─(s3 h y=810)→ ─(s4 h y=810)→ merge  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 53,
+          "timestamp": "2026-09-08T17:43:33.577Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_6ucFzBheTU1qZbNb4QPrx8XC|fc_05d56ad8760c8fb9016aa04944bdd887d18a121ef3020a9d43",
+              "toolName": "move_label",
+              "params": {
+                "id": "verified-publish",
+                "along": 0.75,
+                "offset": 0
+              },
+              "resultText": "APPLIED · move_label verified-publish → along 0.75, offset 0\nDELTA\n  verified-publish  labelPosition — → {\"along\":0.75,\"offset\":0}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  verified-publish  anchors right→left  path verify ─(s0 h y=1090)→ publish  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 54,
+          "timestamp": "2026-09-08T17:43:39.421Z",
+          "thinking": "**Finishing control wire endpoints**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_UlBYdJV0HduNSGcl7SJ8DP9u|fc_05d56ad8760c8fb9016aa0494adda087d19081f437613e899a",
+              "toolName": "connect",
+              "params": {
+                "id": "restart",
+                "from": {
+                  "objectId": "head-monitor",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "intake-zone",
+                  "anchor": "bottom"
+                },
+                "label": "Cancel; restart new head",
+                "color": "red",
+                "style": "dashed"
+              },
+              "resultText": "APPLIED · connect restart head-monitor→intake-zone\nDELTA\n  + restart  head-monitor → intake-zone\nLINTS · clean\nROUTES\n  restart  anchors top→bottom  path head-monitor (s0 v x=320) intake-zone  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 55,
+          "timestamp": "2026-09-08T17:43:49.083Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_kOxbtKJTQNz373Qwem4hCLaU|fc_05d56ad8760c8fb9016aa049520e0087d191899163e6628c03",
+              "toolName": "connect",
+              "params": {
+                "id": "tool-access",
+                "from": {
+                  "objectId": "review-zone",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "repo-tools",
+                  "anchor": "top"
+                },
+                "label": "Bounded read-only calls",
+                "arrow": "both",
+                "style": "dashed"
+              },
+              "resultText": "APPLIED · connect tool-access review-zone→repo-tools\nDELTA\n  + tool-access  review-zone → repo-tools\nLINTS · clean\nROUTES\n  tool-access  anchors bottom→top  path review-zone (s0 v x=1440) (s1 v x=1440) ─(s2 h y=1560)→ (s3 v x=960) (s4 v x=960) repo-tools  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 56,
+          "timestamp": "2026-09-08T17:43:56.893Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_tXB08NTlDUzBF2gfKNphnB4I|fc_05d56ad8760c8fb9016aa0495ae5b887d1938acc851695aca4",
+              "toolName": "connect",
+              "params": {
+                "id": "budget-mode",
+                "from": {
+                  "objectId": "telemetry",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "planner",
+                  "anchor": "right"
+                },
+                "label": "Over daily budget: 2 reviewers",
+                "style": "dashed",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · connect budget-mode telemetry→planner\nDELTA\n  + budget-mode  telemetry → planner\nLINTS · +2 −0\n  + E1 covered-content: label \"dispatch\" chip on dispatch lies on budget-mode's path for 30px (move the label with a waypoint or reroute budget-mode so the chip owns its wire)\n  + E2 covered-content: label \"Bounded read-only calls\" chip on tool-access lies on budget-mode's path for 30px (move the label with a waypoint or reroute budget-mode so the chip owns its wire)\nROUTES\n  budget-mode  anchors top→right  path telemetry (s0 v x=1600) ─(s1 h y=1640)→ (s2 v x=1120) ─(s3 h y=800)→ (s4 v x=1020) ─(s5 h y=870)→ planner  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 57,
+          "timestamp": "2026-09-08T17:44:03.984Z",
+          "thinking": "**Fixing intake budget**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_kcZIdPsf11tqPS2hCVIc1Nlb|fc_05d56ad8760c8fb9016aa049639dec87d19864c786bfed6e09",
+              "toolName": "change_connection",
+              "params": {
+                "id": "budget-mode",
+                "patch": {
+                  "to": {
+                    "objectId": "intake-zone",
+                    "anchor": "right"
+                  }
+                }
+              },
+              "resultText": "APPLIED · change_connection budget-mode\nDELTA\n  budget-mode  route telemetry→planner → telemetry→intake-zone\nLINTS · +1 −2\n  + W1 covered-content: label \"Over daily budget: 2 reviewers\" chip on budget-mode sits within 16px of head-monitor (give the chip clear air — nudge head-monitor or reroute budget-mode)\n  − E1 covered-content, − E2 covered-content  (resolved)\nROUTES\n  budget-mode  anchors top→right  path telemetry (s0 v x=1600) ─(s1 h y=1640)→ (s2 v x=800) ─(s3 h y=1780)→ (s4 v x=540) ─(s5 h y=690)→ intake-zone  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 58,
+          "timestamp": "2026-09-08T17:44:12.821Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_LjubEli1jwYkBvunBCq9oq58|fc_05d56ad8760c8fb9016aa0496b487887d1b635374778603a86",
+              "toolName": "reroute",
+              "params": {
+                "id": "budget-mode",
+                "points": [
+                  [
+                    1600,
+                    1500
+                  ],
+                  [
+                    580,
+                    1500
+                  ],
+                  [
+                    580,
+                    690
+                  ]
+                ]
+              },
+              "resultText": "APPLIED · reroute budget-mode\nDELTA\n  budget-mode  wp none → 1600,1500→580,1500→580,700\nLINTS · +0 −1\n  − W1 covered-content  (resolved)\nROUTES\n  budget-mode  anchors top→right  path telemetry (s0 v x=1600) ─(s1 h y=1500)→ (s2 v x=580) ─(s3 h y=700)→ intake-zone  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 59,
+          "timestamp": "2026-09-08T17:44:34.229Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_l13IudmW6p2n6JnZE76r5Vcp|fc_05d56ad8760c8fb9016aa0497ede4887d1937cc2e74473cf01",
+              "toolName": "fit_section",
+              "params": {
+                "id": "controls"
+              },
+              "resultText": "APPLIED · fit_section controls\nDELTA\n  controls  120,1620 2360×540 → 140,1580 1840×620\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 60,
+          "timestamp": "2026-09-08T17:44:48.202Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_RAFiz5Grmf6uRx4v3LGtD6b3|fc_05d56ad8760c8fb9016aa04986fd8c87d19d1c64b936dd6890",
+              "toolName": "update_description",
+              "params": {
+                "description": "# Multi-agent automated code review\n\nRead left to right through five stages: intake, context and planning, concurrent reviewers, merge and verification, then publication and calibration.\n\n- Intake resolves the diff, files, review policy and build status; rejects drafts and excludes generated or vendored paths before model work.\n- Context is ranked and truncated to budget, with dropped material logged. The planner partitions review units over shared context for correctness, security, performance, test-coverage and API-compatibility agents.\n- Reviewers use bounded read-only tools and return available findings on budget exhaustion. Findings carry a current-file location, severity, rationale and confidence.\n- Aggregation deduplicates, reconciles severity, withholds low confidence and removes stale locations. High-severity findings are rechecked against source; unverified findings are demoted, not posted.\n- Surviving findings become inline comments and a policy-driven verdict. Author replies and human disagreements calibrate later per-class confidence thresholds, recording findings resolved as wrong.\n\nThe lower lifecycle-control region documents cancellation and restart on head changes, discarding partial work; repository tools and call budgets; and telemetry for cost, latency, reviewer tokens, cancellations and accepted versus dismissed findings. Dashed red is cancellation/restart, orange is daily-budget degradation to correctness and security only, and blue is calibration feedback. Section-level dispatch and results edges represent the concurrent reviewer group, not a sequential chain."
+              },
+              "resultText": "APPLIED · update_description\nDELTA · description none → 1609 chars",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 61,
+          "timestamp": "2026-09-08T17:44:54.856Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_3TciqK2Hn4j32XegLIoYcfVx|fc_05d56ad8760c8fb9016aa0499638d887d1a53f5ba7a673fce5",
+              "toolName": "look",
+              "params": {
+                "view": "page-frame"
+              },
+              "resultText": "LOOK · 1 render · close-up page-frame\nBOARD\n  page-frame section \"Multi-agent automated code review\" white 32,32 3400×2200\n    intake-zone section \"1 · Intake / no model work\" 120,220 400×940\n      intake process \"PR event → Intake\" 160,300 280×100\n      eligible process \"Reject drafts; filter paths\" 160,540 280×100\n      intake-detail sticky \"Resolve diff, changed files, repository policy and build status. Exclude vendored / generated paths before model work.\" 160,760 320×360\n    context-zone section \"2 · Context & plan\" 660,200 440×1160\n      context process \"Build ranked context\" 720,540 280×100\n      planner process \"Partition & dispatch units\" 720,820 280×100\n      context-detail sticky \"Shared context: hunks, source, related tests, ownership and prior reviews. Rank by value; truncate to budget and log every dropped item.\" 720,960 320×360\n    review-zone section \"3 · Concurrent reviewers · shared context\" 1220,200 440×1260\n      correct agent \"Correctness\" teal 1300,320 280×140\n      security agent \"Security\" teal 1300,540 280×140\n      performance agent \"Performance\" teal 1300,760 280×140\n      tests agent \"Test coverage\" teal 1300,980 280×140\n      compat agent \"API compatibility\" teal 1300,1200 280×140\n    quality-zone section \"4 · Merge & verify\" 1820,200 660×1260\n      merge process \"Merge & deduplicate\" 1880,760 280×100\n      verify process \"Verify high severity in source\" 1880,1040 280×100\n      quality-detail sticky \"Reconcile severities; withhold low confidence. Check current head; drop locations that no longer exist. Unverified high-severity findings are demoted, not posted.\" 1880,300 480×360\n    publish-zone section \"5 · Publish & calibrate\" 2640,200 640×1260\n      publish process \"Inline comments + verdict\" 2720,1040 280×100\n      publication-policy sticky \"Repository policy selects: request changes, approve, or advisory. Author replies and human disagreements feed calibration. Record findings resolved as wrong; adjust later confidence thresholds by finding class.\" 2720,300 480×360\n      calibration memory \"Calibration thresholds\" blue 2720,1280 280×140\n    controls section \"Lifecycle controls · cancellation, budgets & tools\" 140,1580 1840×620\n      cancel-note sticky \"Force-push / new commit: cancel in-flight review, discard partial work; never publish against the old diff. Restart intake on the new head.\" 180,1800 480×360\n      tools-note sticky \"Read-only tools: repository search, symbol lookup, test history. Per-review call budget: on exhaustion, return available findings immediately. Each finding: current-file location, severity, rationale, confidence.\" 820,1800 480×360\n      telemetry-note sticky \"Telemetry: cost, latency, token usage by reviewer, cancellation rate, and accepted versus dismissed findings. Daily repository budget exceeded: intake limits subsequent runs to correctness + security only.\" 1460,1800 480×360\n      head-monitor process \"Head monitor: cancel / restart\" 180,1660 280×100\n      repo-tools process \"Read-only tools · call budget\" 820,1660 280×100\n      telemetry process \"Telemetry / daily budget\" 1460,1660 280×100\nEDGES\n  e1 intake→eligible — anchors=bottom→top · intake (s0 v x=300) eligible\n  e2 eligible→context \"eligible\" anchors=right→left · eligible ─(s0 h y=590)→ context\n  e3 context→planner — anchors=bottom→top · context (s0 v x=860) planner\n  dispatch planner→review-zone \"dispatch\" · planner ─(s0 h y=870)→ ─(s1 h y=870)→ (s2 v x=1110) ─(s3 h y=830)→ ─(s4 h y=830)→ review-zone\n  results review-zone→merge \"findings\" anchors=right→left · review-zone ─(s0 h y=830)→ ─(s1 h y=830)→ (s2 v x=1770) ─(s3 h y=810)→ ─(s4 h y=810)→ merge\n  merge-verify merge→verify — anchors=bottom→top · merge (s0 v x=2020) verify\n  verified-publish verify→publish \"surviving findings\" anchors=right→left lp=0.75 · verify ─(s0 h y=1090)→ publish\n  feedback publish→calibration \"Replies / disagreements\" dashed blue anchors=bottom→top · publish (s0 v x=2860) calibration\n  calibrate-next calibration→merge \"Later confidence thresholds\" dashed blue anchors=left→right lp=0.18@20 · calibration ─(s0 h y=1350)→ ─(s1 h y=1350)→ (s2 v x=2440) ─(s3 h y=810)→ ─(s4 h y=810)→ merge\n  restart head-monitor→intake-zone \"Cancel; restart new head\" dashed red anchors=top→bottom · head-monitor (s0 v x=320) intake-zone\n  tool-access review-zone→repo-tools \"Bounded read-only calls\" dashed arrow=both anchors=bottom→top · review-zone (s0 v x=1440) (s1 v x=1440) ─(s2 h y=1560)→ (s3 v x=960) (s4 v x=960) repo-tools\n  budget-mode telemetry→intake-zone \"Over daily budget: 2 reviewers\" dashed orange anchors=top→right wp=1600,1500→580,1500→580,700 · telemetry (s0 v x=1600) ─(s1 h y=1500)→ (s2 v x=580) ─(s3 h y=700)→ intake-zone\nBOARD DIFF · base → draft · 43 ops\n  updateDescription  1609 chars\n  addSection intake-zone\n  addSection context-zone\n  addSection review-zone\n  addSection quality-zone\n  addSection publish-zone\n  addObject intake\n  addObject eligible\n  addObject context\n  addObject planner\n  addObject correct\n  addObject security\n  addObject performance\n  addObject tests\n  addObject compat\n  addObject merge\n  addObject verify\n  addObject publish\n  addSticky intake-detail\n  addSticky context-detail\n  addSticky quality-detail\n  addSticky publication-policy\n  addSection controls\n  addSticky cancel-note\n  addSticky tools-note\n  addSticky telemetry-note\n  addObject calibration\n  addObject head-monitor\n  addObject repo-tools\n  addObject telemetry\n  updateSection page-frame  resized · retexted\n  addConnection e1\n  addConnection e2\n  addConnection e3\n  addConnection dispatch\n  addConnection results\n  addConnection merge-verify\n  addConnection verified-publish\n  addConnection feedback\n  addConnection calibrate-next\n  addConnection restart\n  addConnection tool-access\n  addConnection budget-mode\nDIAGNOSTICS · clean\nROUTES\n  e1  anchors bottom→top  path intake (s0 v x=300) eligible  through none\n  e2  anchors right→left  path eligible ─(s0 h y=590)→ context  through none\n  e3  anchors bottom→top  path context (s0 v x=860) planner  through none\n  dispatch  anchors right→left  path planner ─(s0 h y=870)→ ─(s1 h y=870)→ (s2 v x=1110) ─(s3 h y=830)→ ─(s4 h y=830)→ review-zone  through none\n  results  anchors right→left  path review-zone ─(s0 h y=830)→ ─(s1 h y=830)→ (s2 v x=1770) ─(s3 h y=810)→ ─(s4 h y=810)→ merge  through none\n  merge-verify  anchors bottom→top  path merge (s0 v x=2020) verify  through none\n  verified-publish  anchors right→left  path verify ─(s0 h y=1090)→ publish  through none\n  feedback  anchors bottom→top  path publish (s0 v x=2860) calibration  through none\n  calibrate-next  anchors left→right  path calibration ─(s0 h y=1350)→ ─(s1 h y=1350)→ (s2 v x=2440) ─(s3 h y=810)→ ─(s4 h y=810)→ merge  through none\n  restart  anchors top→bottom  path head-monitor (s0 v x=320) intake-zone  through none\n  tool-access  anchors bottom→top  path review-zone (s0 v x=1440) (s1 v x=1440) ─(s2 h y=1560)→ (s3 v x=960) (s4 v x=960) repo-tools  through none\n  budget-mode  anchors top→right  path telemetry (s0 v x=1600) ─(s1 h y=1500)→ (s2 v x=580) ─(s3 h y=700)→ intake-zone  through none\nREQUESTS · none\nMEASURES · section page-frame 32,32 3400×2200\n  gaps x  intake-zone↔context-zone 140 · context-zone↔review-zone 120 · review-zone↔quality-zone 160 · quality-zone↔publish-zone 160\n  gaps y  context-zone↔controls 220 · quality-zone↔controls 120 · review-zone↔controls 120 · intake-zone↔controls 420\n  pitch x 20 · 20 · 20 · 480 · 60 · 100 · 400 · 80 · +5 more\n  pitch y 20 · 80 · 20 · 220 · 220 · 60 · 140 · 20 · +6 more\n  free    left 64 · right 128 · top 116 · bottom 4\n  ink     22%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T17-38-09-958Z_01a08219-47a6-7764-9c73-1dc09f1bd5f0.252.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 62,
+          "timestamp": "2026-09-08T17:45:01.012Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_DBMEyNdGOTtsWPLsIFY85DOf|fc_05d56ad8760c8fb9016aa0499babdc87d19e8fa1c8c81ad186",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Created the five-stage review pipeline with concurrent specialists, verification safeguards, calibration feedback, head-change recovery, and budget controls."
+              },
+              "resultText": "Committed: Created the five-stage review pipeline with concurrent specialists, verification safeguards, calibration feedback, head-change recovery, and budget controls. (43 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

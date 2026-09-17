@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-08-reflow-152600",
+  "tier": "system",
+  "scenario": "llm-inference-gateway",
+  "board_id": "eval.2026-09-08-reflow-152600.llm-inference-gateway",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-09-08T20:26:01.848Z",
+      "finished_at": "2026-09-08T20:36:21.015Z",
+      "wall_ms": 620302,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "ef1b7388-92bf-45a2-b079-24b16d5510aa"
+    ]
+  },
+  "finished_at": "2026-09-08T20:36:22.151Z",
+  "exit_code": 0
+}

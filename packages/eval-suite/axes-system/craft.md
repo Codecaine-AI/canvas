@@ -21,24 +21,27 @@ Judge holistically, consulting these four sub-checks (they guide; they are not
 separately scored):
 
 1. **Frame use** — is the content composed within the frame, or is a large fraction
-   dead space with mass packed to one side? A board committed with the bottom ~40%
-   of the locked frame empty fails this check.
-2. **Color** — registry discipline, not decoration. Objects wear their registry
-   preferred colors: teal for agent and orchestrator; pink for model and judge;
+   dead space with mass packed to one side? Purposeful whitespace separates regions and exposes the flow; unexplained empty bands do not.
+2. **Color** — consistent meaning and legibility. Registry colors are starting
+   defaults: teal for agent and orchestrator; pink for model and judge;
    blue for memory and knowledge; green for queue, send, and eval; yellow for
    human, message, event, key, and coin; red for guardrail; white for document and
    documents; gray for the infrastructure set (server, terminal, config, api,
    monitor, search, tool, wait, lock, activity, archive, package, voice) and the
-   shape core. Consistency comes from the defaults; a departure reads deliberate
-   only when it buys container legibility — and a direct child sharing its
-   container's fill color is a flaw, never a justified departure. Decorative
+   shape core. Gray is not mandatory: process and decision tints can express
+   consistent roles or functions. Judge whether color communicates that meaning
+   and preserves legibility. A child may share
+   its container's hue if its text, border, and fill remain visually distinct. Decorative
    recoloring and monotone-by-neglect both fail; a registry-true restrained
    palette is NOT monotony.
 3. **Machinery leakage** — junction crosshair marks, arrowheads terminating into
    waypoints, orphaned/floating badges, wires merging ambiguously. A finished board
    shows zero routing machinery.
-4. **Alignment & rhythm** — registers hold across the board; density variation reads
-   deliberate (hero row vs detail cluster) not accidental.
+4. **Alignment & rhythm** — real peers share local registers, sizes, and gaps;
+   unrelated regions have proportions suited to their role. Grouping and hierarchy
+   make the main flow visible. Repeated identical panels with one icon and a long
+   note each are weak composition when their text describes a richer structure.
+   Notes can retain depth without substituting for drawable relationships.
 
 Vocabulary is part of craft, weighed through the anchors: a finished board speaks
 the operational-map language — icons carry the nouns (agent, model, memory, tool,
@@ -55,9 +58,9 @@ other board.
 | score | anchor |
 |---|---|
 | 10 | Beyond critique on every sub-check. Unclaimed; exists so 8–9 mean something. |
-| 9 | Exhibition grade: composed frame, registry-true color and vocabulary throughout, deliberate density variation, registers hold everywhere, zero machinery — nothing a reviewer would change. |
+| 9 | Exhibition grade: composed frame, semantically consistent color and vocabulary throughout, deliberate density variation, registers hold everywhere, zero machinery — nothing a reviewer would change. |
 | 8 | Finished composition with one visible flaw a reviewer would mention but not fix. |
-| 7 | Composed: the frame is filled with intent, objects wear their registry colors with only justified departures, registers mostly hold, no machinery; slight imbalance (one large empty band) or a couple of vocabulary misses keeps it under 8. |
+| 7 | Composed: the frame is filled with intent, objects use color consistently for meaning and legibility, registers mostly hold, no machinery; slight imbalance (one large empty band) or a couple of vocabulary misses keeps it under 8. |
 | 6–6.5 | Breathes but doesn't finish: machinery leaks (crosshair junctions, a floating unanchored badge) or a dead band of frame, against otherwise deliberate composition. |
 | 5 | Flat: clean topology but the vocabulary is ignored — plain boxes where the registry has objects for the job, monotone-by-neglect or decorative off-registry color, uniform density — nothing composed. You can read it; you wouldn't pin it up. |
 | 4 | Composition fails: stretched empty section towers, mass packed to one side with large dead frame, off-register rows dominate. |

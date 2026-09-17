@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board is readable with effort at the 6–6.5 anchor: its four regions and core flows are recoverable, but small type, crowded inter-region routing, and several long blue and gray detours prevent fluent arm's-length reading.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 6.5,
+        "note": "Most boxes and chips have clear local spacing, but many labels and node captions are very small, while the publication/retrieval boundary concentrates several routes and chips into a tight horizontal band."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "The four numbered, framed regions make ingestion, publication, retrieval, and rebuilding easy to distinguish, though publication and retrieval are visually entangled by multiple cross-region blue routes."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Arrowheads, colors, and labels usually communicate direction, but long blue perimeter-like runs, closely parallel vertical routes near the stores, and extended gray inter-region paths require careful tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 7,
+        "note": "Branches for changed versus unchanged content, retry/dead-letter handling, parallel retrieval, version validation, and rollback are visibly decomposed, but the large canvas and fine text make the overall topology harder to absorb at a glance."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8050,
+    "output_tokens": 419
+  },
+  "flags": []
+}

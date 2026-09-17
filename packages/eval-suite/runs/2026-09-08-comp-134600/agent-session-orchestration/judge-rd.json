@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "agent-session-orchestration",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 7,
+  "verdict": {
+    "score": 7,
+    "score_rationale": "The board is comfortably readable at the 7 anchor, with spacious, instantly distinguishable regions and mostly clean flows, though several long cross-region routes and small text require extra eye travel.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 8,
+        "note": "Labels and nodes generally have ample clearance, but the small type inside nodes and chips is less comfortable at arm's length."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Tinted, titled regions clearly separate admission, execution, concurrency, durability, lifecycle, and snapshot reachability."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6.5,
+        "note": "Arrowheads, colors, styles, and labels are mostly clear, but the long blue reattach route, dashed subtask route, and lifecycle paths spanning region boundaries demand tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 7,
+        "note": "The central turn loop and supporting subsystems are well decomposed, though large explanatory notes and the detached bottom snapshot example make the overall reading sequence less immediate."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7839,
+    "output_tokens": 413
+  },
+  "flags": []
+}

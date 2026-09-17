@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board is readable with effort, matching the 6–6.5 anchor because its spacious, clearly grouped stages are undermined by very small text, several indirect routes, and branching that requires close tracing.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "The major regions and most label chips have generous clearance, but the tiny chip and node text remains difficult to read at arm's length despite the available space."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Five numbered, color-tinted regions make ownership and the left-to-right lifecycle immediately apparent, with the audit trail clearly separated below."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6,
+        "note": "Arrow colors, styles, and labels usually clarify meaning, but the long dashed archive and baseline routes, the large grading feedback loop, and a few detached-looking line segments require deliberate tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 6.5,
+        "note": "The central execution, grading, evidence, comparison, retry, and retention structures are all discernible, though sparse oversized panels paired with small typography and multiple secondary paths weaken fluent scanning."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 6466,
+    "output_tokens": 401
+  },
+  "flags": []
+}

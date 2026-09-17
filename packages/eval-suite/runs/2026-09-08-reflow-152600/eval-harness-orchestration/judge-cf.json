@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at 6.5 because its deliberate three-stage composition, readable semantic palette, and mostly clean routing are undermined by a very large dead lower band and a few unresolved alignment and vocabulary details.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5.5,
+        "note": "Failure: the three main regions occupy the upper portion well, but the low Run archive placement creates an exceptionally large, mostly empty lower band and stretches two blue routes across the frame."
+      },
+      {
+        "name": "color",
+        "score": 8,
+        "note": "Teal execution, pink grading, green valid paths, red invalid/retry paths, and blue storage/comparison paths communicate roles consistently with good contrast."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 7.5,
+        "note": "No crosshair junctions or orphaned badges are visible, though several long perimeter routes and tightly placed arrowheads near decision edges retain a slightly diagram-editor-like feel."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6,
+        "note": "Failure: local registers within each stage are generally orderly, but the stage containers vary awkwardly in height and density, the comparison area is sparse, and the isolated bottom archive breaks the overall rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7379,
+    "output_tokens": 525
+  },
+  "flags": []
+}

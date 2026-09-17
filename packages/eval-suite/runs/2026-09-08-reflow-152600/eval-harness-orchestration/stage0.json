@@ -1,0 +1,778 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-reflow-152600.eval-harness-orchestration",
+  "title": "2026-09-08-reflow-152600 · eval-harness-orchestration",
+  "description": "# Offline evaluation harness orchestration\nRead down the execution region, up through grading, then down through comparison. Blue paths retain run material and maintain the baseline.\n\n- A pinned suite freezes scenario definitions and the tested revision, configuration, prompt versions and rubric versions. Wording changes create new scenario versions rather than overwriting history.\n- The scheduler fans out to a bounded worker pool running ordered steps against an isolated SUT, never production. Infrastructure faults are logged and retried; success and product-behavior failures are recorded before continuation. Transcripts, final artifacts and fault types are retained distinctly.\n- Each completed scenario immediately enters globally limited concurrent grading. Independent criteria graders and an artifact-only grader produce verdicts with evidence; the artifact-only grader receives no original request. Missing evidence invalidates a verdict, triggers one retry, and is flagged and excluded if still invalid. Every verdict is archived, including invalid ones.\n- The assembler merges valid verdicts into a scorecard. Comparison with the chosen baseline requires identical fingerprints; incompatible runs are not compared. Compatible score movements at or above the defined threshold are narrated. Promotion sets the future baseline for compatible runs.\n- The run archive retains transcripts, artifacts and verdicts for re-examining disputed scores.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1984,
+    "height": 1264
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Offline evaluation harness • pinned runs → defensible comparisons",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 20,
+        "y": 60,
+        "width": 3120,
+        "height": 1900
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "exec",
+      "type": "section",
+      "text": "1 · Pinned input & bounded execution",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 60,
+        "y": 140,
+        "width": 900,
+        "height": 1320
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "grade",
+      "type": "section",
+      "text": "2 · Immediate, concurrent grading",
+      "color": "pink",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1180,
+        "y": 180,
+        "width": 800,
+        "height": 1300
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "compare",
+      "type": "section",
+      "text": "3 · Compatible comparison",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2280,
+        "y": 620,
+        "width": 820,
+        "height": 840
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "pin",
+      "type": "icon",
+      "text": "Pinned suite",
+      "color": "gray",
+      "parentId": "exec",
+      "geometry": {
+        "x": 180,
+        "y": 220,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "pin-note",
+      "type": "sticky",
+      "text": "Frozen scenarios: new wording → new version, never edit in place.\nFingerprint: tested revision, config, prompt versions, rubric versions.",
+      "color": "yellow",
+      "parentId": "exec",
+      "geometry": {
+        "x": 420,
+        "y": 220,
+        "width": 500,
+        "height": 280
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "scheduler",
+      "type": "icon",
+      "text": "Scheduler",
+      "color": "teal",
+      "parentId": "exec",
+      "geometry": {
+        "x": 100,
+        "y": 540,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "workers",
+      "type": "predefined-process",
+      "text": "Bounded worker pool\nOrdered scenario steps",
+      "color": "gray",
+      "parentId": "exec",
+      "geometry": {
+        "x": 460,
+        "y": 560,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "predefined-process"
+      }
+    },
+    {
+      "id": "sut",
+      "type": "icon",
+      "text": "Isolated SUT\nNever production",
+      "color": "gray",
+      "parentId": "exec",
+      "geometry": {
+        "x": 540,
+        "y": 780,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "server"
+    },
+    {
+      "id": "outcome",
+      "type": "decision",
+      "text": "Step outcome?",
+      "color": "gray",
+      "parentId": "exec",
+      "geometry": {
+        "x": 460,
+        "y": 1040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "record",
+      "type": "process",
+      "text": "Record behavior / success\nFull transcript + artifact",
+      "color": "gray",
+      "parentId": "exec",
+      "geometry": {
+        "x": 460,
+        "y": 1320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "dispatch",
+      "type": "icon",
+      "text": "Global grading limit",
+      "color": "teal",
+      "parentId": "grade",
+      "geometry": {
+        "x": 1260,
+        "y": 1320,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "criteria",
+      "type": "icon",
+      "text": "Independent criteria graders",
+      "color": "pink",
+      "parentId": "grade",
+      "geometry": {
+        "x": 1500,
+        "y": 1000,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "blind",
+      "type": "icon",
+      "text": "Artifact-only grader\nNo original request",
+      "color": "pink",
+      "parentId": "grade",
+      "geometry": {
+        "x": 1800,
+        "y": 1000,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "evidence",
+      "type": "decision",
+      "text": "Evidence present?",
+      "color": "gray",
+      "parentId": "grade",
+      "geometry": {
+        "x": 1560,
+        "y": 700,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "retried",
+      "type": "decision",
+      "text": "Already retried?",
+      "color": "gray",
+      "parentId": "grade",
+      "geometry": {
+        "x": 1220,
+        "y": 420,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "flag",
+      "type": "process",
+      "text": "Flag invalid verdict\nExclude from scorecard",
+      "color": "gray",
+      "parentId": "grade",
+      "geometry": {
+        "x": 1660,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "assemble",
+      "type": "process",
+      "text": "Assembler\nMerge valid verdicts → scorecard",
+      "color": "gray",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2320,
+        "y": 700,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "compatible",
+      "type": "decision",
+      "text": "Same fingerprint?",
+      "color": "gray",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2320,
+        "y": 980,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "narrate",
+      "type": "process",
+      "text": "Compare scores\nNarrate |Δ| ≥ threshold",
+      "color": "gray",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2320,
+        "y": 1320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "skip",
+      "type": "process",
+      "text": "No comparison\nIncompatible runs",
+      "color": "gray",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2780,
+        "y": 980,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "baseline",
+      "type": "icon",
+      "text": "Chosen baseline",
+      "color": "blue",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2840,
+        "y": 700,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "retained",
+      "type": "icon",
+      "text": "Run archive\nRe-examine scores",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1540,
+        "y": 1800,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "promote",
+      "type": "process",
+      "text": "Promote run\nFuture compatible baseline",
+      "color": "gray",
+      "parentId": "compare",
+      "geometry": {
+        "x": 2780,
+        "y": 1320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "p-s",
+      "from": {
+        "objectId": "pin"
+      },
+      "to": {
+        "objectId": "scheduler"
+      },
+      "label": "start pinned run",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "sw",
+      "from": {
+        "objectId": "scheduler"
+      },
+      "to": {
+        "objectId": "workers"
+      },
+      "label": "fan out",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.3,
+        "offset": 40
+      }
+    },
+    {
+      "id": "ws",
+      "from": {
+        "objectId": "workers"
+      },
+      "to": {
+        "objectId": "sut"
+      },
+      "label": "execute steps",
+      "style": "solid",
+      "arrow": "both"
+    },
+    {
+      "id": "so",
+      "from": {
+        "objectId": "sut"
+      },
+      "to": {
+        "objectId": "outcome"
+      },
+      "label": "observed result",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "or",
+      "from": {
+        "objectId": "outcome"
+      },
+      "to": {
+        "objectId": "record"
+      },
+      "label": "success / product failure",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "retry-infra",
+      "from": {
+        "objectId": "outcome",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "workers",
+        "anchor": "top"
+      },
+      "label": "log infra fault • retry",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          360,
+          1090
+        ],
+        [
+          360,
+          540
+        ],
+        [
+          600,
+          540
+        ]
+      ]
+    },
+    {
+      "id": "rd",
+      "from": {
+        "objectId": "record"
+      },
+      "to": {
+        "objectId": "dispatch"
+      },
+      "label": "scenario complete → grade now",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "dc",
+      "from": {
+        "objectId": "dispatch",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "criteria",
+        "anchor": "bottom"
+      },
+      "label": "parallel criteria",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "db",
+      "from": {
+        "objectId": "dispatch",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "blind",
+        "anchor": "bottom"
+      },
+      "label": "artifact only",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "ce",
+      "from": {
+        "objectId": "criteria",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "evidence",
+        "anchor": "bottom"
+      },
+      "label": "verdict + evidence",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "be",
+      "from": {
+        "objectId": "blind",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "evidence",
+        "anchor": "right"
+      },
+      "label": "verdict + evidence",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "invalid",
+      "from": {
+        "objectId": "evidence",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "retried",
+        "anchor": "bottom"
+      },
+      "label": "no • invalid",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "rf",
+      "from": {
+        "objectId": "retried",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "flag",
+        "anchor": "left"
+      },
+      "label": "yes • flag",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "retry-grade",
+      "from": {
+        "objectId": "retried",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "dispatch",
+        "anchor": "left"
+      },
+      "label": "no • retry grader",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "ea",
+      "from": {
+        "objectId": "evidence",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "assemble",
+        "anchor": "top"
+      },
+      "label": "yes • valid verdicts",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "ac",
+      "from": {
+        "objectId": "assemble"
+      },
+      "to": {
+        "objectId": "compatible"
+      },
+      "label": "run scorecard",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "cn",
+      "from": {
+        "objectId": "compatible"
+      },
+      "to": {
+        "objectId": "narrate"
+      },
+      "label": "yes • compatible",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "cs",
+      "from": {
+        "objectId": "compatible"
+      },
+      "to": {
+        "objectId": "skip"
+      },
+      "label": "no",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "bc",
+      "from": {
+        "objectId": "baseline",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "compatible",
+        "anchor": "top"
+      },
+      "label": "baseline fingerprint + scores",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "continue",
+      "from": {
+        "objectId": "record",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "workers",
+        "anchor": "right"
+      },
+      "label": "more steps • continue",
+      "style": "dashed",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.7,
+        "offset": -100
+      }
+    },
+    {
+      "id": "archive-results",
+      "from": {
+        "objectId": "record",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "retained",
+        "anchor": "left"
+      },
+      "label": "transcripts + artifacts + fault types",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "archive-verdicts",
+      "from": {
+        "objectId": "evidence",
+        "anchor": "right",
+        "position": [
+          1,
+          0.6
+        ]
+      },
+      "to": {
+        "objectId": "retained",
+        "anchor": "right"
+      },
+      "label": "retain every verdict",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          2020,
+          760
+        ],
+        [
+          2020,
+          1860
+        ]
+      ]
+    },
+    {
+      "id": "np",
+      "from": {
+        "objectId": "narrate",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "promote",
+        "anchor": "left"
+      },
+      "label": "on promotion",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "pb",
+      "from": {
+        "objectId": "promote",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "baseline",
+        "anchor": "right"
+      },
+      "label": "set future baseline",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    }
+  ],
+  "annotations": []
+}

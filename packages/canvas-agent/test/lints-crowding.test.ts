@@ -10,10 +10,10 @@ describe("crowding lint", () => {
     expect(crowding.guidance).toContain("corridor");
   });
 
-  test("side-by-side siblings 44px apart produce one warning", () => {
+  test("side-by-side siblings 8px apart produce one warning", () => {
     const findings = crowding.check(makeDocument([
       box("a", 0, 0),
-      box("b", 204, 0),
+      box("b", 168, 0),
     ]));
 
     expect(findings).toHaveLength(1);
@@ -21,10 +21,19 @@ describe("crowding lint", () => {
       rule: "crowding",
       severity: "warning",
       at: ["a", "b"],
-      where: { x: 0, y: 0, width: 364, height: 96 },
+      where: { x: 0, y: 0, width: 328, height: 96 },
     });
-    expect(findings[0]!.message).toContain("44px");
-    expect(findings[0]!.message).toContain("≥80px");
+    expect(findings[0]!.message).toContain("8px");
+    expect(findings[0]!.message).toContain("≥16px");
+  });
+
+  test("unused 20px gaps do not require speculative routing corridors", () => {
+    expect(crowding.check(makeDocument([box("a", 0, 0), box("b", 180, 0)]))).toHaveLength(0);
+    expect(crowding.check(makeDocument([box("a", 0, 0), box("b", 0, 116)]))).toHaveLength(0);
+  });
+
+  test("touching siblings remain a finding", () => {
+    expect(crowding.check(makeDocument([box("a", 0, 0), box("b", 160, 0)]))).toHaveLength(1);
   });
 
   test("side-by-side siblings with an ample gap are clean", () => {
@@ -36,10 +45,10 @@ describe("crowding lint", () => {
     expect(findings).toHaveLength(0);
   });
 
-  test("stacked siblings 32px apart produce one warning", () => {
+  test("stacked siblings 8px apart produce one warning", () => {
     const findings = crowding.check(makeDocument([
       box("a", 0, 0),
-      box("b", 0, 128),
+      box("b", 0, 104),
     ]));
 
     expect(findings).toHaveLength(1);
@@ -47,10 +56,10 @@ describe("crowding lint", () => {
       rule: "crowding",
       severity: "warning",
       at: ["a", "b"],
-      where: { x: 0, y: 0, width: 160, height: 224 },
+      where: { x: 0, y: 0, width: 160, height: 200 },
     });
-    expect(findings[0]!.message).toContain("32px");
-    expect(findings[0]!.message).toContain("≥48px");
+    expect(findings[0]!.message).toContain("8px");
+    expect(findings[0]!.message).toContain("≥16px");
   });
 
   test("stacked siblings with an ample gap are clean", () => {

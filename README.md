@@ -26,12 +26,37 @@ board-design-reference/
 
 ## Getting started
 
+Submodule setup is one level at a time — never `--recursive` (the
+docs-framework/canvas embedding is circular, so a recursive init loops):
+
 ```bash
+git submodule update --init tools/docs-framework
+git -C tools/docs-framework submodule update --init packages/canvas
 bun install
 bun test packages/canvas/src   # engine test suite
 bun run dev:studio             # standalone board editor, http://localhost:3999
 make studio                    # build and open the Mac Electron app
 ```
+
+## Running the layout agent
+
+The canvas-agent harness is a sibling Bun service on `127.0.0.1:4820`; the
+operator viewer (traces + prompt config) runs on `:4830`. Kernel runtime
+state lives in the gitignored `.agent-kernel/` directory.
+
+```bash
+make harness                   # agent service alone, foreground (:4820)
+make traces                    # harness (if needed) + operator viewer (:4830)
+bun run dev:harness            # the script under make harness
+bun run dev:agent-viewer       # the viewer alone
+
+# headless session against a saved board, no studio needed
+bun run --cwd packages/canvas-agent cli --list-scopes <canvas-id>
+bun run --cwd packages/canvas-agent cli --canvas <id> --scope <id,id,…> \
+  --instruction "…" [--out-dir <dir>]
+```
+
+`make studio` starts the harness alongside the Mac app automatically.
 
 See `PROVENANCE.md` for what was extracted from Spectre and the BlockSuite
 (MPL-2.0) vendoring/licensing notes.

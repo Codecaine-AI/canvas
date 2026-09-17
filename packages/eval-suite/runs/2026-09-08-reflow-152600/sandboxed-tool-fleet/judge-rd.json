@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 7,
+  "verdict": {
+    "score": 7,
+    "score_rationale": "The board is comfortably readable with distinct functional regions and mostly clean flows, but small type, several long dashed detours, and a few loosely positioned edge labels create the tight or awkward spots characteristic of the 7 anchor.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Nodes and label chips generally have ample clearance, though much of the operational text is small at full-board viewing distance and a few chips sit close to region boundaries or vertical routes."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Colored and titled regions make admission, fleet health, lease lifecycle, controlled execution, and telemetry ownership immediately distinguishable."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6.5,
+        "note": "Most arrows are labeled and traceable, but the long dashed Ready-to-Reclaimer route, the bottom Adjust supply run, and labels such as Max age and Image retired require extra tracing to associate confidently."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 7.5,
+        "note": "The board decomposes primary flow, cold-start handling, retirement, timeout, storage, and monitoring clearly, although sparse lower regions and detached notes weaken the overall visual hierarchy."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8367,
+    "output_tokens": 481
+  },
+  "flags": []
+}

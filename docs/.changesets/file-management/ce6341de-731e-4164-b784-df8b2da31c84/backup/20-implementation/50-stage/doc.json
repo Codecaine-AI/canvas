@@ -1,0 +1,645 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation-50-stage",
+  "title": "Stage",
+  "root": "b-stage-root-0",
+  "blocks": {
+    "b-stage-root-0": {
+      "id": "b-stage-root-0",
+      "type": "paragraph",
+      "props": {
+        "covers": "How the presentation layer is assembled: editor/ and viewer/ as faces under stage/, the single composition root and feature-slice rule, the hotkey table's one home, and the overlay-slot rule.",
+        "type": "implementation",
+        "concepts": [
+          "stage",
+          "editor-face",
+          "viewer-face",
+          "composition-root",
+          "feature-slices",
+          "hotkeys",
+          "overlay-slots"
+        ]
+      },
+      "children": [
+        "b-stage-role-1",
+        "b-stage-sources-2",
+        "b-stage-gov-3",
+        "b-stage-gov-stage-4",
+        "b-stage-gov-ixn-5",
+        "b-stage-decisions-6",
+        "b-stage-faces-decision-7",
+        "b-stage-faces-why-8",
+        "b-stage-faces-applies-9",
+        "b-stage-root-decision-10",
+        "b-stage-root-why-11",
+        "b-stage-root-applies-12",
+        "b-stage-hotkeys-decision-13",
+        "b-stage-hotkeys-why-14",
+        "b-stage-hotkeys-applies-15",
+        "b-stage-overlays-decision-16",
+        "b-stage-overlays-why-17",
+        "b-stage-overlays-applies-18"
+      ]
+    },
+    "b-stage-role-1": {
+      "id": "b-stage-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The presentation layer and its two faces: "
+        },
+        {
+          "insert": "stage/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " owns the document renderer — "
+        },
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ObjectShape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the grid, the viewport math — with "
+        },
+        {
+          "insert": "editor/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "viewer/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as subdivisions underneath it. Rendering and interaction behavior are owned by design; this area records how the layer is assembled."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-sources-2": {
+      "id": "b-stage-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "packages/canvas/src/stage",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage",
+              "label": "packages/canvas/src/stage"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-gov-3": {
+      "id": "b-stage-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-stage-gov-stage-4": {
+      "id": "b-stage-gov-stage-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Stage and viewport",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/40-stage-and-viewport",
+              "label": "Stage and viewport"
+            }
+          }
+        },
+        {
+          "insert": " — owns stage behavior: document rendering, the adaptive grid, viewport math, and the viewer face's contract."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-gov-ixn-5": {
+      "id": "b-stage-gov-ixn-5",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Interaction",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/20-interaction",
+              "label": "Interaction"
+            }
+          }
+        },
+        {
+          "insert": " — owns the gesture behavior the editor face wires up."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-decisions-6": {
+      "id": "b-stage-decisions-6",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-stage-faces-decision-7": {
+      "id": "b-stage-faces-decision-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "editor/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor",
+              "label": "editor/"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "viewer/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewer",
+              "label": "viewer/"
+            }
+          }
+        },
+        {
+          "insert": " live under "
+        },
+        {
+          "insert": "stage/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", not beside it — they are faces of the stage, thin compositions over the same core renderer and viewport math, and the shared pieces ("
+        },
+        {
+          "insert": "CanvasStage.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ObjectShape.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "grid.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "viewport.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") sit directly in "
+        },
+        {
+          "insert": "stage/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-faces-why-8": {
+      "id": "b-stage-faces-why-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was top-level "
+        },
+        {
+          "insert": "editor/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "viewer/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " peers of "
+        },
+        {
+          "insert": "stage/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", which reads as three renderers and invites the faces to fork the core instead of composing it."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-faces-applies-9": {
+      "id": "b-stage-faces-applies-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas/src/stage",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage",
+              "label": "packages/canvas/src/stage"
+            }
+          }
+        },
+        {
+          "insert": " — including every future face (a print face, a thumbnail face), which is a subdivision under "
+        },
+        {
+          "insert": "stage/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " composing the same core."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-root-decision-10": {
+      "id": "b-stage-root-decision-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "InteractiveCanvasEditor.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/InteractiveCanvasEditor.tsx",
+              "label": "InteractiveCanvasEditor.tsx"
+            }
+          }
+        },
+        {
+          "insert": " is the one composition root: it owns the reducer instance and wires viewport, hotkeys, the interaction pipeline, text editing, context menu, toolbar, and trim around one stage instance. Feature slices under "
+        },
+        {
+          "insert": "stage/editor/features/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features",
+              "label": "stage/editor/features/"
+            }
+          }
+        },
+        {
+          "insert": " own their gesture logic end to end and never import each other sideways — "
+        },
+        {
+          "insert": "snapping/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the one declared service-slice exception."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-root-why-11": {
+      "id": "b-stage-root-why-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was wiring spread across components with cross-importing slices, which hides the editor's actual shape and turns feature boundaries into suggestion."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-root-applies-12": {
+      "id": "b-stage-root-applies-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "stage/editor/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor",
+              "label": "stage/editor/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future editor feature, which lands as a slice and is wired at the root."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-hotkeys-decision-13": {
+      "id": "b-stage-hotkeys-decision-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "use-canvas-hotkeys.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts",
+              "label": "use-canvas-hotkeys.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the single home of the editor's keyboard vocabulary — one window-level listener, one binding table, kept in sync with UI hint text; new bindings join it. The one carve-out is panning (space-drag, middle-drag, wheel), owned by the viewport hook."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-hotkeys-why-14": {
+      "id": "b-stage-hotkeys-why-14",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was per-component key listeners, which collide, double-fire, and make the vocabulary undiscoverable."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-hotkeys-applies-15": {
+      "id": "b-stage-hotkeys-applies-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "use-canvas-hotkeys.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/use-canvas-hotkeys.ts",
+              "label": "use-canvas-hotkeys.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future binding."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-overlays-decision-16": {
+      "id": "b-stage-overlays-decision-16",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "everything ephemeral the editor draws — selection boxes, drag rectangles, snap guides, placement ghosts, connector previews — enters the stage through its two overlay slots (screen-space and transformed-world); "
+        },
+        {
+          "insert": "CanvasStage.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "label": "CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " itself renders only the persisted document."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-overlays-why-17": {
+      "id": "b-stage-overlays-why-17",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was painting editor feedback inside the stage core, which couples the shared renderer to editing state the viewer face must not know about."
+        }
+      ],
+      "children": []
+    },
+    "b-stage-overlays-applies-18": {
+      "id": "b-stage-overlays-applies-18",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "CanvasStage.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "label": "CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": " — including every future feedback visual, which renders through a slot."
+        }
+      ],
+      "children": []
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "code-review-agents",
+  "run_id": "2026-09-08-outline-123806",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "score": 6,
+    "score_rationale": "The board breathes and its staged flow is readable, but large dead frame areas, note-heavy regions, and several plain-box vocabulary substitutions leave it at the rubric’s “doesn’t finish” anchor.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5.5,
+        "note": "The five-stage sequence uses the upper middle coherently, but a vast empty top band and an especially large unused lower-right area make the content feel packed toward the left and center."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Teal reviewers, blue calibration memory, gray process/infrastructure elements, and yellow message-like notes are restrained and largely registry-consistent, though the repeated yellow prose cards visually outweigh the operational objects."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 7,
+        "note": "No crosshair junctions or orphaned badges are visible, but the very long dashed orange, red, blue, and gray return routes skim containers and frame space in a routing-mechanical rather than fully polished manner."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6,
+        "note": "The five reviewer agents form a strong regular register and the main stages align, but inconsistent panel densities, oversized prose notes, and generic boxes for event, monitoring, tools, and telemetry weaken hierarchy and operational-map vocabulary."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7582,
+    "output_tokens": 466
+  },
+  "flags": []
+}

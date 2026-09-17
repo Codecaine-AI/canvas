@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "ivr-agent-handoff",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board is readable with effort, matching the 6–6.5 anchor because its spacious, clearly grouped regions are offset by small text, changing flow directions, and several long routes that require close tracing.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Nodes and label chips generally have generous clearance, but the very large canvas makes their text relatively small at arm's length."
+      },
+      {
+        "name": "grouping",
+        "score": 8.5,
+        "note": "Four color-coded, numbered horizontal regions establish the operational stages and ownership immediately."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Most local arrows are clean and labeled, but the orange handoff route and especially the dashed purple feedback loop make long perimeter detours, while alternating leftward, rightward, and vertical flows slow tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 7,
+        "note": "The board clearly decomposes intake, self-service, handoff, and improvement, though the main path and recovery branches must be reconstructed across wide gaps and direction changes."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 10374,
+    "output_tokens": 462
+  },
+  "flags": []
+}

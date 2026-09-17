@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation-40-connectors",
+  "title": "Connectors",
+  "root": "b-conn-root-0",
+  "blocks": {
+    "b-conn-root-0": {
+      "id": "b-conn-root-0",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "connectors",
+          "pathfinding",
+          "vendored-core",
+          "connector-def",
+          "slice-vocabulary"
+        ],
+        "covers": "The connector slice's internal boundaries: the quarantined pathfinding/ core and the def.ts/types.ts placement that keeps connectors out of the object registry.",
+        "type": "implementation"
+      },
+      "children": [
+        "b-conn-role-1",
+        "b-conn-sources-2",
+        "b-conn-gov-3",
+        "b-conn-gov-conn-4",
+        "b-conn-decisions-5",
+        "b-conn-quarantine-decision-6",
+        "b-conn-quarantine-why-7",
+        "b-conn-quarantine-applies-8",
+        "b-conn-def-types-decision-9",
+        "b-conn-def-types-why-10",
+        "b-conn-def-types-applies-11"
+      ]
+    },
+    "b-conn-role-1": {
+      "id": "b-conn-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The connector slice: def, routing, cascade, gestures, overlays, and render components in one folder. Routing and gesture behavior are owned by design; this area records the slice's internal boundaries."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-sources-2": {
+      "id": "b-conn-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "packages/canvas/src/connectors",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors",
+              "label": "packages/canvas/src/connectors"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-gov-3": {
+      "id": "b-conn-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-conn-gov-conn-4": {
+      "id": "b-conn-gov-conn-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/30-connectors",
+              "label": "Connectors"
+            }
+          }
+        },
+        {
+          "insert": " — owns connector behavior: routing, anchor resolution, waypoints, bend editing, the connection cascade, and Connector Mode."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-decisions-5": {
+      "id": "b-conn-decisions-5",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-conn-quarantine-decision-6": {
+      "id": "b-conn-quarantine-decision-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "connectors/pathfinding/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/pathfinding",
+              "label": "connectors/pathfinding/"
+            }
+          }
+        },
+        {
+          "insert": " is the quarantined vendored core — the BlockSuite-derived A* files and nothing else. Local routing logic ("
+        },
+        {
+          "insert": "routing.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "bend-editing.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connection-cascade.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") stays outside the folder and consumes it through imports. The license boundary itself — the exact file set, header rules, and the clean-room-or-listed-file rule — is the repo-wide provenance decision on "
+        },
+        {
+          "insert": "Implementation Overview",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation",
+              "label": "Implementation Overview"
+            }
+          }
+        },
+        {
+          "insert": "; this entry does not restate it."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-quarantine-why-7": {
+      "id": "b-conn-quarantine-why-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was mixing vendored and local routing code in one folder, which makes the MPL file set impossible to police and invites edits that blend obligations into clean files."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-quarantine-applies-8": {
+      "id": "b-conn-quarantine-applies-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "pathfinding/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/pathfinding",
+              "label": "pathfinding/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future routing algorithm, which is either clean-room outside the folder or a tracked derived file inside it."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-def-types-decision-9": {
+      "id": "b-conn-def-types-decision-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the connector def lives in "
+        },
+        {
+          "insert": "connectors/def.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/def.ts",
+              "label": "connectors/def.ts"
+            }
+          }
+        },
+        {
+          "insert": " as a "
+        },
+        {
+          "insert": "ConnectorDef",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", deliberately absent from "
+        },
+        {
+          "insert": "OBJECT_DEFS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — connections are their own document collection, not an object kind — and "
+        },
+        {
+          "insert": "connectors/types.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/types.ts",
+              "label": "connectors/types.ts"
+            }
+          }
+        },
+        {
+          "insert": " owns the slice's gesture and overlay vocabulary, with the slice's gesture steppers in "
+        },
+        {
+          "insert": "gestures.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " assembled into the editor's state union by the pipeline."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-def-types-why-10": {
+      "id": "b-conn-def-types-why-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was registering connectors as an ObjectDef, which forces object semantics — geometry, containment, object tools — onto what is a routed relation between objects."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-def-types-applies-11": {
+      "id": "b-conn-def-types-applies-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "def.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/def.ts",
+              "label": "def.ts"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "types.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/types.ts",
+              "label": "types.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future connector capability, whose vocabulary joins "
+        },
+        {
+          "insert": "types.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and whose gestures join the slice."
+        }
+      ],
+      "children": []
+    }
+  }
+}

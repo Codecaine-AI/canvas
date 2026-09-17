@@ -1,0 +1,2347 @@
+{
+  "container_id": "befc6516-4a7a-5129-b480-4bc8f3d59ad8",
+  "pi_sessions": [
+    {
+      "piSessionId": "01a08255-7536-7620-a769-8d9a2d61d4be",
+      "file": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-8d9a2d61d4be.jsonl",
+      "startedAt": "2026-09-08T18:43:53.782Z",
+      "userMessages": [
+        {
+          "text": "# Retrieval-augmented generation ingestion and query\n\nWe need a diagram of how our retrieval-augmented generation system carries knowledge from ingestion through grounded answers. Source adapters pull from document stores, wikis, ticket systems, and code repositories on schedules and change notifications. An arrival may be a first import or an update, and each source's access rules travel with it. Extraction normalizes formats and removes boilerplate. Unparseable documents enter quarantine with failure context while the rest of the batch continues.\n\nA content hash classifies each document as new, changed, or unchanged. Unchanged content bypasses expensive processing. A changed document supersedes its previous version, whose stale derived records are deleted. The chunker splits normalized content with overlap and preserves headings, source identity, permissions, and a version stamp on every fragment. The embedding service accepts rate-limited batches. Workers retry transient failures, then send persistently failing batches to a dead-letter store with inputs and attempt history for reprocessing.\n\nEach completed version writes vectors to a vector index, fragment text and metadata to a document store, and terms to a keyword index. Publication succeeds only when all three reflect the same version; partial writes remain unavailable and are repaired or rolled back before serving.\n\nWhen a user asks a question, the retrieval service rewrites it into one or more searches, runs vector and keyword lookups in parallel, fuses and reranks candidates, and applies the asking user's permissions before context reaches the generation service. Generation answers only from retrieved evidence and returns citations. If context is thin or every reranker score is low, it says it does not know. Feedback records thumb signals, the usefulness of cited fragments, and unanswered questions; the resulting coverage gaps return to ingestion priorities.\n\nWhen the embedding model changes, a rebuild coordinator re-embeds the corpus in the background into a new index generation. Live queries remain on the current generation until the rebuild is complete and consistent. Switchover atomically promotes the new generation, while the prior generation remains available for rollback.\n\nThe diagram should make clear how version-consistent content moves from ingestion through permission-aware retrieval to grounded answers, and how failed processing, index rebuilds, and low-confidence queries are handled.\n",
+          "timestamp": "2026-09-08T18:43:53.950Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-09-08T18:44:01.121Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_lwt4G3fhoUF8ep3gZdcBEva8|fc_00579ef4cc8ee763016aa0576eb43487d1be0ab0591129e1cb",
+              "toolName": "resize",
+              "params": {
+                "id": "page-frame",
+                "width": 3600,
+                "height": 2600
+              },
+              "resultText": "APPLIED · resize page-frame → 3600×2600\nDELTA\n  page-frame  32,32 2240×1400 → 32,32 3600×2600\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-09-08T18:44:06.040Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_OlcnDPrdnvFDtmyC18TJeeb7|fc_00579ef4cc8ee763016aa05774d67887d18c30530504daad85",
+              "toolName": "place_section",
+              "params": {
+                "id": "ingest",
+                "text": "1 · Ingestion & failure isolation",
+                "at": [
+                  100,
+                  140
+                ],
+                "size": {
+                  "width": 2220,
+                  "height": 760
+                }
+              },
+              "resultText": "APPLIED · place_section ingest 100,140 2220×760\nDELTA\n  + ingest  section 100,140 2220×760 \"1 · Ingestion & failure isolation\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-09-08T18:44:13.975Z",
+          "thinking": "**Building default nodes**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Xi6HohnmsWFsuE0VgIm8Ivyo|fc_00579ef4cc8ee763016aa0577d1e8087d18b43ed1ab9fb2afe",
+              "toolName": "change_color",
+              "params": {
+                "id": "ingest",
+                "color": "teal"
+              },
+              "resultText": "APPLIED · change_color ingest\nDELTA\n  ingest  color gray → teal\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-09-08T18:44:24.950Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_KhpmEurTQzEWoycF74tMEBaS|fc_00579ef4cc8ee763016aa057880d5c87d1a4f9e08fec37a353",
+              "toolName": "place_shape",
+              "params": {
+                "id": "adapters",
+                "type": "process",
+                "at": [
+                  160,
+                  260
+                ]
+              },
+              "resultText": "APPLIED · place_shape adapters process 160,260 280×100\nDELTA\n  + adapters  process 160,260 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-09-08T18:44:28.891Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5FzZoHRIzq4WlDpYqnhoQpAh|fc_00579ef4cc8ee763016aa0578c418087d1b4f4bb3d256c7742",
+              "toolName": "update_text",
+              "params": {
+                "id": "adapters",
+                "text": "Source adapters"
+              },
+              "resultText": "APPLIED · update_text adapters\nDELTA\n  adapters  text \"\" → \"Source adapters\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "timestamp": "2026-09-08T18:44:36.098Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_hjd0C8TYkjbCuZFgNm4uNcNJ|fc_00579ef4cc8ee763016aa05792dd0887d1a12d04e1e819562e",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "adapters",
+                "id": "extract",
+                "at": [
+                  600,
+                  260
+                ],
+                "text": "Extract & normalize"
+              },
+              "resultText": "APPLIED · clone extract from adapters 600,260 280×100\nDELTA\n  + extract  process 600,260 280×100 \"Extract & normalize\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "timestamp": "2026-09-08T18:44:41.280Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_8jYEyeeoWSZpvaSgWYpwIyGo|fc_00579ef4cc8ee763016aa0579818a087d1a64b1a9c0eac8395",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "adapters",
+                "id": "hash",
+                "at": [
+                  1040,
+                  260
+                ],
+                "text": "Content hash classification"
+              },
+              "resultText": "APPLIED · clone hash from adapters 1040,260 280×100\nDELTA\n  + hash  process 1040,260 280×100 \"Content hash classification\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "timestamp": "2026-09-08T18:44:47.893Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_RHWBxU9HBKNtZMyLGBtTaRee|fc_00579ef4cc8ee763016aa0579d2ae887d1b21178a062fdb0f2",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "hash",
+                "id": "chunk",
+                "at": [
+                  1480,
+                  260
+                ],
+                "text": "Chunk with overlap"
+              },
+              "resultText": "APPLIED · clone chunk from hash 1480,260 280×100\nDELTA\n  + chunk  process 1480,260 280×100 \"Chunk with overlap\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "timestamp": "2026-09-08T18:44:55.012Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_4G1Hd1cSM0dNVPwlXlNCyA7S|fc_00579ef4cc8ee763016aa057a5ff4887d19f4d2331944d4a92",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "chunk",
+                "id": "embed",
+                "at": [
+                  1920,
+                  260
+                ],
+                "text": "Rate-limited embedding batches"
+              },
+              "resultText": "APPLIED · clone embed from chunk 1920,260 280×100\nDELTA\n  + embed  process 1920,260 280×100 \"Rate-limited embedding batches\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "timestamp": "2026-09-08T18:44:59.450Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_wGoJWInLP3dip7WH6xvtf7A6|fc_00579ef4cc8ee763016aa057aaa24087d1a662bc2917047b08",
+              "toolName": "look",
+              "params": {
+                "view": "page-frame"
+              },
+              "resultText": "LOOK · 1 render · close-up page-frame\nBOARD\n  page-frame section \"2026-09-08-comp-134600 · rag-ingestion-retrieval\" white 32,32 3600×2600\n    ingest section \"1 · Ingestion & failure isolation\" teal 100,140 2220×760\n      adapters process \"Source adapters\" 160,260 280×100\n      extract process \"Extract & normalize\" 600,260 280×100\n      hash process \"Content hash classification\" 1040,260 280×100\n      chunk process \"Chunk with overlap\" 1480,260 280×100\n      embed process \"Rate-limited embedding batches\" 1920,260 280×100\nEDGES\n  (none)\nBOARD DIFF · base → draft · 7 ops\n  addSection ingest\n  addObject adapters\n  addObject extract\n  addObject hash\n  addObject chunk\n  addObject embed\n  updateSection page-frame  resized\nDIAGNOSTICS · clean\nREQUESTS · none\nMEASURES · section page-frame 32,32 3600×2600\n  pitch x 60 · 440 · 440 · 440 · 440\n  pitch y 120\n  free    left 44 · right 1288 · top 56 · bottom 1704\n  ink     1%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-8d9a2d61d4be.44.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "timestamp": "2026-09-08T18:45:03.712Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_mt3WSFzBZmZPadTeuZG6T83c|fc_00579ef4cc8ee763016aa057ae84d487d18c4bea380c088982",
+              "toolName": "connect",
+              "params": {
+                "id": "a-e",
+                "from": {
+                  "objectId": "adapters"
+                },
+                "to": {
+                  "objectId": "extract"
+                },
+                "label": "imports / updates + ACL"
+              },
+              "resultText": "APPLIED · connect a-e adapters→extract\nDELTA\n  + a-e  adapters → extract\nLINTS · +1 −0\n  + W1 unreadable-labels: label \"imports / updates + ACL\" chip on a-e (245×30px) bleeds onto adapters and extract: 160px of corridor where the chip needs 277px (open the adapters↔extract corridor to ≥277px so the chip and its 16px margins fit)\nROUTES\n  a-e  anchors right→left  path adapters ─(s0 h y=310)→ extract  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "timestamp": "2026-09-08T18:45:09.100Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_aD705NGxKyYRjhkdzZeBbjHJ|fc_00579ef4cc8ee763016aa057b4635887d19cb00ecc122b9551",
+              "toolName": "update_text",
+              "params": {
+                "id": "a-e",
+                "text": "+ ACL"
+              },
+              "resultText": "APPLIED · update_text a-e\nDELTA\n  a-e  label \"imports / updates + ACL\" → \"+ ACL\"\nLINTS · +0 −1\n  − W1 unreadable-labels  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "timestamp": "2026-09-08T18:45:13.775Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_rODmQ2jfetKWV4IAcQP3j7C9|fc_00579ef4cc8ee763016aa057b8868487d1bf8c57ecae698d34",
+              "toolName": "connect",
+              "params": {
+                "id": "eh",
+                "from": {
+                  "objectId": "extract"
+                },
+                "to": {
+                  "objectId": "hash"
+                }
+              },
+              "resultText": "APPLIED · connect eh extract→hash\nDELTA\n  + eh  extract → hash\nLINTS · clean\nROUTES\n  eh  anchors right→left  path extract ─(s0 h y=310)→ hash  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "timestamp": "2026-09-08T18:45:20.980Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_feh2exr9WvLHTsOqnS4lYrpM|fc_00579ef4cc8ee763016aa057bf965887d1aff75c5efa67ae1b",
+              "toolName": "connect",
+              "params": {
+                "id": "hc",
+                "from": {
+                  "objectId": "hash"
+                },
+                "to": {
+                  "objectId": "chunk"
+                },
+                "label": "new"
+              },
+              "resultText": "APPLIED · connect hc hash→chunk\nDELTA\n  + hc  hash → chunk\nLINTS · clean\nROUTES\n  hc  anchors right→left  path hash ─(s0 h y=310)→ chunk  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "timestamp": "2026-09-08T18:45:30.964Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_UtzguLkK6dydudfNuwy2fRq4|fc_00579ef4cc8ee763016aa057cab2e887d199b16ec2cbdd4393",
+              "toolName": "connect",
+              "params": {
+                "id": "ce",
+                "from": {
+                  "objectId": "chunk"
+                },
+                "to": {
+                  "objectId": "embed"
+                }
+              },
+              "resultText": "APPLIED · connect ce chunk→embed\nDELTA\n  + ce  chunk → embed\nLINTS · clean\nROUTES\n  ce  anchors right→left  path chunk ─(s0 h y=310)→ embed  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 15,
+          "timestamp": "2026-09-08T18:45:36.543Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_gJGw5iQNaHW9D9yA1YmYQB2Y|fc_00579ef4cc8ee763016aa057cec22487d1bc0243af674d9cbf",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "extract",
+                "id": "quarantine",
+                "at": [
+                  600,
+                  520
+                ],
+                "text": "Quarantine + failure context"
+              },
+              "resultText": "APPLIED · clone quarantine from extract 600,520 280×100\nDELTA\n  + quarantine  process 600,520 280×100 \"Quarantine + failure context\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 16,
+          "timestamp": "2026-09-08T18:45:44.127Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_tzbsozQ7zSQuNGgZWC1BhEl3|fc_00579ef4cc8ee763016aa057d4b19c87d1ac9e974edd7a11eb",
+              "toolName": "connect",
+              "params": {
+                "id": "eq",
+                "from": {
+                  "objectId": "extract"
+                },
+                "to": {
+                  "objectId": "quarantine"
+                },
+                "label": "unparseable",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect eq extract→quarantine\nDELTA\n  + eq  extract → quarantine\nLINTS · clean\nROUTES\n  eq  anchors bottom→top  path extract (s0 v x=740) quarantine  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 17,
+          "timestamp": "2026-09-08T18:45:50.461Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_BvpUL0qIYO5fZrBxyCYLSQug|fc_00579ef4cc8ee763016aa057dcfeec87d1a3c97a7ce60d565f",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "hash",
+                "id": "changed",
+                "at": [
+                  1040,
+                  520
+                ],
+                "text": "Supersede version; delete stale records"
+              },
+              "resultText": "APPLIED · clone changed from hash 1040,520 280×100\nDELTA\n  + changed  process 1040,520 280×100 \"Supersede version; delete stale records\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 18,
+          "timestamp": "2026-09-08T18:45:55.267Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_oWcLdiDGLhLE2vzcgPwXXlPZ|fc_00579ef4cc8ee763016aa057e245cc87d197a3f63cef3f79ac",
+              "toolName": "connect",
+              "params": {
+                "id": "hchanged",
+                "from": {
+                  "objectId": "hash"
+                },
+                "to": {
+                  "objectId": "changed"
+                },
+                "label": "changed"
+              },
+              "resultText": "APPLIED · connect hchanged hash→changed\nDELTA\n  + hchanged  hash → changed\nLINTS · clean\nROUTES\n  hchanged  anchors bottom→top  path hash (s0 v x=1180) changed  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 19,
+          "timestamp": "2026-09-08T18:46:01.617Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5Z7NF3ONXHq5Mncsfg3SHD5i|fc_00579ef4cc8ee763016aa057e7dd9c87d191c77094c4c53cfc",
+              "toolName": "connect",
+              "params": {
+                "id": "changedchunk",
+                "from": {
+                  "objectId": "changed",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "chunk",
+                  "anchor": "bottom"
+                }
+              },
+              "resultText": "APPLIED · connect changedchunk changed→chunk\nDELTA\n  + changedchunk  changed → chunk\nLINTS · clean\nROUTES\n  changedchunk  anchors right→bottom  path changed ─(s0 h y=570)→ ─(s1 h y=570)→ (s2 v x=1620) (s3 v x=1620) chunk  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 20,
+          "timestamp": "2026-09-08T18:46:06.565Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_FTyUUG8TZrxXiqAhhGDACtmL|fc_00579ef4cc8ee763016aa057ed5d6c87d1a1d26497572c5cd5",
+              "toolName": "place_section",
+              "params": {
+                "id": "publish",
+                "text": "2 · Version-consistent publication",
+                "at": [
+                  2460,
+                  140
+                ],
+                "size": {
+                  "width": 1080,
+                  "height": 760
+                }
+              },
+              "resultText": "APPLIED · place_section publish 2460,140 1080×760\nDELTA\n  + publish  section 2460,140 1080×760 \"2 · Version-consistent publication\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 21,
+          "timestamp": "2026-09-08T18:46:12.927Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_tJi2No1mR6cv2ic5vPOPX3os|fc_00579ef4cc8ee763016aa057f4020c87d198cd9c0305e84a90",
+              "toolName": "change_color",
+              "params": {
+                "id": "publish",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · change_color publish\nDELTA\n  publish  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 22,
+          "timestamp": "2026-09-08T18:46:17.277Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_tGCAEMvuHYSZgo4VsRbJqwq1|fc_00579ef4cc8ee763016aa057f847cc87d1b07681397b2196a7",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "embed",
+                "id": "write",
+                "at": [
+                  2520,
+                  260
+                ],
+                "text": "Stage version: vectors, fragments, terms"
+              },
+              "resultText": "APPLIED · clone write from embed 2520,260 280×100\nDELTA\n  + write  process 2520,260 280×100 \"Stage version: vectors, fragments, terms\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 23,
+          "timestamp": "2026-09-08T18:46:22.187Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_cCMxec5LqYAEnLdbIGomSjrN|fc_00579ef4cc8ee763016aa057fd2b8487d1be547d216d267bf2",
+              "toolName": "connect",
+              "params": {
+                "id": "ew",
+                "from": {
+                  "objectId": "embed"
+                },
+                "to": {
+                  "objectId": "write"
+                },
+                "label": "completed version"
+              },
+              "resultText": "APPLIED · connect ew embed→write\nDELTA\n  + ew  embed → write\nLINTS · clean\nROUTES\n  ew  anchors right→left  path embed ─(s0 h y=310)→ write  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 24,
+          "timestamp": "2026-09-08T18:46:28.841Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_rV6g7zbg7QX1ibw3Ms0LOFeV|fc_00579ef4cc8ee763016aa05803726087d190d772cc542997d0",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "write",
+                "id": "gate",
+                "at": [
+                  3180,
+                  260
+                ],
+                "text": "All 3 at same version?"
+              },
+              "resultText": "APPLIED · clone gate from write 3180,260 280×100\nDELTA\n  + gate  process 3180,260 280×100 \"All 3 at same version?\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 25,
+          "timestamp": "2026-09-08T18:46:33.571Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_9iZkRnu8ay74XLLRKD3GktAe|fc_00579ef4cc8ee763016aa05808891c87d1a14d6b1060c4e899",
+              "toolName": "connect",
+              "params": {
+                "id": "wg",
+                "from": {
+                  "objectId": "write"
+                },
+                "to": {
+                  "objectId": "gate"
+                },
+                "label": "verify"
+              },
+              "resultText": "APPLIED · connect wg write→gate\nDELTA\n  + wg  write → gate\nLINTS · clean\nROUTES\n  wg  anchors right→left  path write ─(s0 h y=310)→ gate  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 26,
+          "timestamp": "2026-09-08T18:46:38.711Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_FJFVpH1f9y6kgaLkplARBhJu|fc_00579ef4cc8ee763016aa0580d446487d19a100934fa41b07c",
+              "toolName": "change_shape",
+              "params": {
+                "id": "gate",
+                "patch": {
+                  "type": "decision"
+                }
+              },
+              "resultText": "APPLIED · change_shape gate\nDELTA\n  gate  type process → decision\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 27,
+          "timestamp": "2026-09-08T18:46:45.577Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Jc1MW4tCvHpieZAODHJ8V0TG|fc_00579ef4cc8ee763016aa058122db487d1bb6081cea0ec058a",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "write",
+                "id": "live",
+                "at": [
+                  3180,
+                  720
+                ],
+                "text": "Publish serving version"
+              },
+              "resultText": "APPLIED · clone live from write 3180,720 280×100\nDELTA\n  + live  process 3180,720 280×100 \"Publish serving version\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 28,
+          "timestamp": "2026-09-08T18:46:53.963Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5hXvJme5y5i170Fuq2rRad0g|fc_00579ef4cc8ee763016aa0581bb3d887d189be1a421e3f69bf",
+              "toolName": "connect",
+              "params": {
+                "id": "gl",
+                "from": {
+                  "objectId": "gate"
+                },
+                "to": {
+                  "objectId": "live"
+                },
+                "label": "yes",
+                "color": "green"
+              },
+              "resultText": "APPLIED · connect gl gate→live\nDELTA\n  + gl  gate → live\nLINTS · clean\nROUTES\n  gl  anchors bottom→top  path gate (s0 v x=3320) live  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 29,
+          "timestamp": "2026-09-08T18:47:00.508Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_4m5yYsiA6cyy0WWXt5Cwoers|fc_00579ef4cc8ee763016aa0582332e887d1bf717e88b440c858",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "write",
+                "id": "repair",
+                "at": [
+                  2740,
+                  520
+                ],
+                "text": "Unavailable: repair or roll back"
+              },
+              "resultText": "APPLIED · clone repair from write 2740,520 280×100\nDELTA\n  + repair  process 2740,520 280×100 \"Unavailable: repair or roll back\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 30,
+          "timestamp": "2026-09-08T18:47:07.312Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_1onkBwYE0T99CnP8UOSuWPHb|fc_00579ef4cc8ee763016aa05829847887d19065ed372004d3e5",
+              "toolName": "connect",
+              "params": {
+                "id": "gr",
+                "from": {
+                  "objectId": "gate",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "repair",
+                  "anchor": "top"
+                },
+                "label": "partial",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect gr gate→repair\nDELTA\n  + gr  gate → repair\nLINTS · +3 −0\n  + E1 covered-content: label \"verify\" chip on wg overlaps label \"partial\" chip on gr (separate the two edges (spacing or waypoints) so both labels read)\n  + E2 covered-content: label \"verify\" chip on wg lies on gr's path for 82px (move the label with a waypoint or reroute gr so the chip owns its wire)\n  + E3 covered-content: label \"partial\" chip on gr lies on wg's path for 91px (move the label with a waypoint or reroute wg so the chip owns its wire)\nROUTES\n  gr  anchors left→top  path gate ─(s0 h y=310)→ ─(s1 h y=310)→ (s2 v x=2880) (s3 v x=2880) repair  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 31,
+          "timestamp": "2026-09-08T18:47:13.141Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_OWgQXZ41dJ8NUhu7U8FxqsC7|fc_00579ef4cc8ee763016aa0582f3f5087d1a5f167979dc9d370",
+              "toolName": "change_connection",
+              "params": {
+                "id": "gr",
+                "patch": {
+                  "from": {
+                    "objectId": "gate",
+                    "anchor": "bottom"
+                  },
+                  "to": {
+                    "objectId": "repair",
+                    "anchor": "right"
+                  }
+                }
+              },
+              "resultText": "APPLIED · change_connection gr\nDELTA\n  gr  anchors left→top → bottom→right\nLINTS · +3 −3\n  + E1 covered-content: label \"yes\" chip on gl lies on gr's path for 30px (move the label with a waypoint or reroute gr so the chip owns its wire)\n  + E2 covered-content: label \"partial\" chip on gr lies on gl's path for 30px (move the label with a waypoint or reroute gl so the chip owns its wire)\n  + W1 covered-content: label \"yes\" chip on gl sits within 16px of label \"partial\" chip on gr (separate the two edges so the chips read as two labels)\n  − E1 covered-content, − E2 covered-content, − E3 covered-content  (resolved)\nROUTES\n  gr  anchors bottom→right  path gate (s0 v x=3320) (s1 v x=3320) ─(s2 h y=570)→ ─(s3 h y=570)→ repair  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 32,
+          "timestamp": "2026-09-08T18:47:17.264Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_PKOis5UGP8R3byCMWwyPUdvK|fc_00579ef4cc8ee763016aa05834974487d1b99e0620f2a93c5c",
+              "toolName": "move_label",
+              "params": {
+                "id": "gl",
+                "along": 0.85,
+                "offset": 0
+              },
+              "resultText": "APPLIED · move_label gl → along 0.85, offset 0\nDELTA\n  gl  labelPosition — → {\"along\":0.85,\"offset\":0}\nLINTS · +0 −2\n  − E1 covered-content, − W1 covered-content  (resolved)\nROUTES\n  gl  anchors bottom→top  path gate (s0 v x=3320) live  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 33,
+          "timestamp": "2026-09-08T18:47:25.632Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_tMThsnK9wa1f1l3PYgp206d3|fc_00579ef4cc8ee763016aa0583aea0887d185ecb86f3a10582c",
+              "toolName": "move_label",
+              "params": {
+                "id": "gr",
+                "along": 0.85,
+                "offset": 0
+              },
+              "resultText": "APPLIED · move_label gr → along 0.85, offset 0\nDELTA\n  gr  labelPosition — → {\"along\":0.85,\"offset\":0}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  gr  anchors bottom→right  path gate (s0 v x=3320) (s1 v x=3320) ─(s2 h y=570)→ ─(s3 h y=570)→ repair  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 34,
+          "timestamp": "2026-09-08T18:47:32.637Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_6baTSNhZNk2Gf1J3QBtyeBMb|fc_00579ef4cc8ee763016aa0584210c487d1a54da6b6900509bb",
+              "toolName": "place_section",
+              "params": {
+                "id": "query",
+                "text": "3 · Permission-aware retrieval & grounded answers",
+                "at": [
+                  100,
+                  1060
+                ],
+                "size": {
+                  "width": 3440,
+                  "height": 740
+                }
+              },
+              "resultText": "APPLIED · place_section query 100,1060 3440×740\nDELTA\n  + query  section 100,1060 3440×740 \"3 · Permission-aware retrieval & grounded answers\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 35,
+          "timestamp": "2026-09-08T18:47:37.082Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_isszQmVaDJl2iOsFbabQZuA6|fc_00579ef4cc8ee763016aa0584881c087d1b345081aaaf1f9d1",
+              "toolName": "change_color",
+              "params": {
+                "id": "query",
+                "color": "violet"
+              },
+              "resultText": "APPLIED · change_color query\nDELTA\n  query  color gray → violet\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 36,
+          "timestamp": "2026-09-08T18:47:43.416Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_2ZvCHwyGQymsdBjC05PDyTcJ|fc_00579ef4cc8ee763016aa0584ed6b087d1805529f09dc2c994",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "adapters",
+                "id": "rewrite",
+                "at": [
+                  160,
+                  1320
+                ],
+                "text": "User question → rewrite searches"
+              },
+              "resultText": "APPLIED · clone rewrite from adapters 160,1320 280×100\nDELTA\n  + rewrite  process 160,1320 280×100 \"User question → rewrite searches\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 37,
+          "timestamp": "2026-09-08T18:47:48.008Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_p05fPKVjg4SCwf94OaWCDVsv|fc_00579ef4cc8ee763016aa05852e4e887d1a0576acd85c471a0",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "adapters",
+                "id": "vector",
+                "at": [
+                  620,
+                  1180
+                ],
+                "text": "Vector lookup"
+              },
+              "resultText": "APPLIED · clone vector from adapters 620,1180 280×100\nDELTA\n  + vector  process 620,1180 280×100 \"Vector lookup\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 38,
+          "timestamp": "2026-09-08T18:47:55.443Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_9esUXKFcYa4Ni2fw8VXr3o1p|fc_00579ef4cc8ee763016aa0585aa0cc87d180182df990f4411d",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "vector",
+                "id": "keyword",
+                "at": [
+                  620,
+                  1500
+                ],
+                "text": "Keyword lookup"
+              },
+              "resultText": "APPLIED · clone keyword from vector 620,1500 280×100\nDELTA\n  + keyword  process 620,1500 280×100 \"Keyword lookup\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 39,
+          "timestamp": "2026-09-08T18:48:01.081Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_QhfBYU6yE47W7tuaeMUzZc3G|fc_00579ef4cc8ee763016aa0585ff79487d1afae6dffef11a4b4",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "vector",
+                "id": "fuse",
+                "at": [
+                  1080,
+                  1320
+                ],
+                "text": "Fuse & rerank candidates"
+              },
+              "resultText": "APPLIED · clone fuse from vector 1080,1320 280×100\nDELTA\n  + fuse  process 1080,1320 280×100 \"Fuse & rerank candidates\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 40,
+          "timestamp": "2026-09-08T18:48:07.127Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_rDwRXeTqLsbLJZPvjur55gFq|fc_00579ef4cc8ee763016aa05864cd4487d190310d6b7cae6ee7",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "fuse",
+                "id": "acl",
+                "at": [
+                  1520,
+                  1320
+                ],
+                "text": "Apply asking user's ACL"
+              },
+              "resultText": "APPLIED · clone acl from fuse 1520,1320 280×100\nDELTA\n  + acl  process 1520,1320 280×100 \"Apply asking user's ACL\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 41,
+          "timestamp": "2026-09-08T18:48:13.632Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_L3FZbaA7ftRZP64FDyb3N3vD|fc_00579ef4cc8ee763016aa0586ca11087d197340a3fbd3b887a",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "gate",
+                "id": "confidence",
+                "at": [
+                  1960,
+                  1320
+                ],
+                "text": "Enough strong evidence?"
+              },
+              "resultText": "APPLIED · clone confidence from gate 1960,1320 280×100\nDELTA\n  + confidence  decision 1960,1320 280×100 \"Enough strong evidence?\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 42,
+          "timestamp": "2026-09-08T18:48:19.431Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_rb2eakae09uiRgdaDmD48CO6|fc_00579ef4cc8ee763016aa05872165487d1ac05df3a289c4cc1",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "fuse",
+                "id": "generate",
+                "at": [
+                  2420,
+                  1320
+                ],
+                "text": "Generate from evidence + citations"
+              },
+              "resultText": "APPLIED · clone generate from fuse 2420,1320 280×100\nDELTA\n  + generate  process 2420,1320 280×100 \"Generate from evidence + citations\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 43,
+          "timestamp": "2026-09-08T18:48:25.822Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_d74D8X2Y8L8HAogdsVizl7fO|fc_00579ef4cc8ee763016aa05877c86487d1b8aac246f3c5d6ed",
+              "toolName": "connect",
+              "params": {
+                "id": "rv",
+                "from": {
+                  "objectId": "rewrite"
+                },
+                "to": {
+                  "objectId": "vector"
+                }
+              },
+              "resultText": "APPLIED · connect rv rewrite→vector\nDELTA\n  + rv  rewrite → vector\nLINTS · clean\nROUTES\n  rv  anchors right→left  path rewrite ─(s0 h y=1370)→ ─(s1 h y=1370)→ (s2 v x=530) ─(s3 h y=1230)→ ─(s4 h y=1230)→ vector  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 44,
+          "timestamp": "2026-09-08T18:48:30.905Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_XBeuiDeKbicPrkHH5cmOnPGa|fc_00579ef4cc8ee763016aa0587dff8087d1860e81712d09185c",
+              "toolName": "connect",
+              "params": {
+                "id": "rk",
+                "from": {
+                  "objectId": "rewrite"
+                },
+                "to": {
+                  "objectId": "keyword"
+                }
+              },
+              "resultText": "APPLIED · connect rk rewrite→keyword\nDELTA\n  + rk  rewrite → keyword\nLINTS · clean\nROUTES\n  rk  anchors right→left  path rewrite ─(s0 h y=1370)→ ─(s1 h y=1370)→ (s2 v x=530) ─(s3 h y=1550)→ ─(s4 h y=1550)→ keyword  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 45,
+          "timestamp": "2026-09-08T18:48:35.354Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_lU9jZwdGMAPRRlTbs0XFysKz|fc_00579ef4cc8ee763016aa05882848c87d183709251a6047893",
+              "toolName": "connect",
+              "params": {
+                "id": "vf",
+                "from": {
+                  "objectId": "vector"
+                },
+                "to": {
+                  "objectId": "fuse"
+                }
+              },
+              "resultText": "APPLIED · connect vf vector→fuse\nDELTA\n  + vf  vector → fuse\nLINTS · clean\nROUTES\n  vf  anchors right→left  path vector ─(s0 h y=1230)→ ─(s1 h y=1230)→ (s2 v x=990) ─(s3 h y=1370)→ ─(s4 h y=1370)→ fuse  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 46,
+          "timestamp": "2026-09-08T18:48:40.992Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_GVtogl5eI3vCEqqTBNzsUoB5|fc_00579ef4cc8ee763016aa05887933487d18d9029f19d2a185b",
+              "toolName": "connect",
+              "params": {
+                "id": "kf",
+                "from": {
+                  "objectId": "keyword"
+                },
+                "to": {
+                  "objectId": "fuse"
+                }
+              },
+              "resultText": "APPLIED · connect kf keyword→fuse\nDELTA\n  + kf  keyword → fuse\nLINTS · clean\nROUTES\n  kf  anchors right→left  path keyword ─(s0 h y=1550)→ ─(s1 h y=1550)→ (s2 v x=990) ─(s3 h y=1370)→ ─(s4 h y=1370)→ fuse  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 47,
+          "timestamp": "2026-09-08T18:48:45.430Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_vlAw3WaY2UQjqisHgWwd6bXu|fc_00579ef4cc8ee763016aa0588c7b5487d1881a81a77b2417d8",
+              "toolName": "connect",
+              "params": {
+                "id": "fa",
+                "from": {
+                  "objectId": "fuse"
+                },
+                "to": {
+                  "objectId": "acl"
+                }
+              },
+              "resultText": "APPLIED · connect fa fuse→acl\nDELTA\n  + fa  fuse → acl\nLINTS · clean\nROUTES\n  fa  anchors right→left  path fuse ─(s0 h y=1370)→ acl  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 48,
+          "timestamp": "2026-09-08T18:48:49.758Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_JdPSRCHQ6UhO1MP8uZNjPWik|fc_00579ef4cc8ee763016aa05890d13087d18cfbf1551175c9c2",
+              "toolName": "connect",
+              "params": {
+                "id": "ac",
+                "from": {
+                  "objectId": "acl"
+                },
+                "to": {
+                  "objectId": "confidence"
+                }
+              },
+              "resultText": "APPLIED · connect ac acl→confidence\nDELTA\n  + ac  acl → confidence\nLINTS · clean\nROUTES\n  ac  anchors right→left  path acl ─(s0 h y=1370)→ confidence  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 49,
+          "timestamp": "2026-09-08T18:48:55.549Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_CodamxEIr10zYTUfr90Rk9N4|fc_00579ef4cc8ee763016aa058966cf887d194f96c7455d48f23",
+              "toolName": "connect",
+              "params": {
+                "id": "cg",
+                "from": {
+                  "objectId": "confidence"
+                },
+                "to": {
+                  "objectId": "generate"
+                },
+                "label": "yes"
+              },
+              "resultText": "APPLIED · connect cg confidence→generate\nDELTA\n  + cg  confidence → generate\nLINTS · clean\nROUTES\n  cg  anchors right→left  path confidence ─(s0 h y=1370)→ generate  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 50,
+          "timestamp": "2026-09-08T18:48:59.981Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_fmksAp4pnL2OVoMKxEOlEtaa|fc_00579ef4cc8ee763016aa0589afbf487d1895a2f91c2a93085",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "generate",
+                "id": "unknown",
+                "at": [
+                  1960,
+                  1600
+                ],
+                "text": "I don't know"
+              },
+              "resultText": "APPLIED · clone unknown from generate 1960,1600 280×100\nDELTA\n  + unknown  process 1960,1600 280×100 \"I don't know\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 51,
+          "timestamp": "2026-09-08T18:49:06.216Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_j2jq4aXooImVWYOzSpHkiBH8|fc_00579ef4cc8ee763016aa058a0ea3087d1b600009e9f7fe6cc",
+              "toolName": "connect",
+              "params": {
+                "id": "cu",
+                "from": {
+                  "objectId": "confidence"
+                },
+                "to": {
+                  "objectId": "unknown"
+                },
+                "label": "thin context / all scores low",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · connect cu confidence→unknown\nDELTA\n  + cu  confidence → unknown\nLINTS · clean\nROUTES\n  cu  anchors bottom→top  path confidence (s0 v x=2100) unknown  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 52,
+          "timestamp": "2026-09-08T18:49:11.841Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_pj6MZTcW2Puyw9ff8YrqasRu|fc_00579ef4cc8ee763016aa058a5e33887d1ad89a0aabd24ce73",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "sources",
+                "at": [
+                  160,
+                  520
+                ],
+                "text": "**Source adapters**\nDocs, wikis, tickets, code\nSchedules + change events\nFirst import or update; ACL travels"
+              },
+              "resultText": "APPLIED · place_sticky sources 160,520 180×120\nDELTA\n  + sources  sticky 160,520 180×120 \"**Source adapters**\\nDocs, wikis, tickets, code\\nSchedules + change events\\nFirst import or update; ACL travels\"\nLINTS · +1 −0\n  + W1 clipped-text: sources: sticky body clips at 180×120: 11 row(s), the note holds 1 — needs 180×445 (grow sources to ≥180×445 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 53,
+          "timestamp": "2026-09-08T18:49:19.052Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_NPX8pcg0cQGk43dIOcWpVxrH|fc_00579ef4cc8ee763016aa058ad5ba487d1bebc9a5cc7db8484",
+              "toolName": "resize",
+              "params": {
+                "id": "sources",
+                "width": 360,
+                "height": 300
+              },
+              "resultText": "APPLIED · resize sources → 360×300\nDELTA\n  sources  160,520 180×120 → 160,520 360×300\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 54,
+          "timestamp": "2026-09-08T18:49:23.803Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_oDRXn7e2vnP1vazrJTUUywSS|fc_00579ef4cc8ee763016aa058b270a487d1b712c689cebf55dd",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "embed",
+                "id": "retry",
+                "at": [
+                  1920,
+                  520
+                ],
+                "text": "Workers retry transient failures"
+              },
+              "resultText": "APPLIED · clone retry from embed 1920,520 280×100\nDELTA\n  + retry  process 1920,520 280×100 \"Workers retry transient failures\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 55,
+          "timestamp": "2026-09-08T18:49:28.669Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_3F7yzPBlOjhpxRHIHmUdCfvL|fc_00579ef4cc8ee763016aa058b744d887d1a5091e1583677a50",
+              "toolName": "connect",
+              "params": {
+                "id": "er",
+                "from": {
+                  "objectId": "embed"
+                },
+                "to": {
+                  "objectId": "retry"
+                },
+                "label": "failure / retry",
+                "arrow": "both",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect er embed→retry\nDELTA\n  + er  embed → retry\nLINTS · clean\nROUTES\n  er  anchors bottom→top  path embed (s0 v x=2060) retry  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 56,
+          "timestamp": "2026-09-08T18:49:33.465Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5nqi9Gz1s4DskBpOwtWAUS8H|fc_00579ef4cc8ee763016aa058bc463c87d19eac934b2ae1a458",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "retry",
+                "id": "dead",
+                "at": [
+                  1920,
+                  740
+                ],
+                "text": "Dead-letter: inputs + attempt history"
+              },
+              "resultText": "APPLIED · clone dead from retry 1920,740 280×100\nDELTA\n  + dead  process 1920,740 280×100 \"Dead-letter: inputs + attempt history\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 57,
+          "timestamp": "2026-09-08T18:50:14.268Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ZIodUMRerpeVklNDlpKvwf3z|fc_00579ef4cc8ee763016aa058ddd01487d18a8532ac0d36c841",
+              "toolName": "connect",
+              "params": {
+                "id": "rd",
+                "from": {
+                  "objectId": "retry"
+                },
+                "to": {
+                  "objectId": "dead"
+                },
+                "label": "exhausted",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect rd retry→dead\nDELTA\n  + rd  retry → dead\nLINTS · clean\nROUTES\n  rd  anchors bottom→top  path retry (s0 v x=2060) dead  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 58,
+          "timestamp": "2026-09-08T18:50:24.192Z",
+          "thinking": "**Finishing efficiently**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_QDcbOcIfXmqe8RgBx5gAOVHO|fc_00579ef4cc8ee763016aa058ef2e7487d1a36ec1e9e809c025",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "chunk",
+                "id": "skip",
+                "at": [
+                  1040,
+                  740
+                ],
+                "text": "Unchanged: skip processing"
+              },
+              "resultText": "APPLIED · clone skip from chunk 1040,740 280×100\nDELTA\n  + skip  process 1040,740 280×100 \"Unchanged: skip processing\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 59,
+          "timestamp": "2026-09-08T18:50:29.315Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_I9fWwiQ6zZeU0uuF0JTRNAgP|fc_00579ef4cc8ee763016aa058f4152087d1adb014d61c05ee9a",
+              "toolName": "connect",
+              "params": {
+                "id": "hs",
+                "from": {
+                  "objectId": "hash",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "skip",
+                  "anchor": "left"
+                },
+                "label": "unchanged"
+              },
+              "resultText": "APPLIED · connect hs hash→skip\nDELTA\n  + hs  hash → skip\nLINTS · +1 −0\n  + E1 covered-content: label \"unchanged\" chip on hs covers changed (route hs around changed or move the label with a waypoint)\nROUTES\n  hs  anchors left→left  path hash ─(s0 h y=310)→ (s1 v x=1016) ─(s2 h y=790)→ skip  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 60,
+          "timestamp": "2026-09-08T18:50:35.592Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_tiqkwoHcVguMqtktIexsGWd5|fc_00579ef4cc8ee763016aa058f9639087d18d1db095829e58f7",
+              "toolName": "move_label",
+              "params": {
+                "id": "hs",
+                "along": 0.8,
+                "offset": 60
+              },
+              "resultText": "APPLIED · move_label hs → along 0.8, offset 60\nDELTA\n  hs  labelPosition — → {\"along\":0.8,\"offset\":60}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  hs  anchors left→left  path hash ─(s0 h y=310)→ (s1 v x=1016) ─(s2 h y=790)→ skip  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 61,
+          "timestamp": "2026-09-08T18:50:42.668Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_CbWKogOeYAjkHt4EcTagUdqm|fc_00579ef4cc8ee763016aa058ffd95087d193562aa067b942c3",
+              "toolName": "place_section",
+              "params": {
+                "id": "rebuild",
+                "text": "4 · Background model rebuild & atomic switchover",
+                "at": [
+                  100,
+                  1960
+                ],
+                "size": {
+                  "width": 3440,
+                  "height": 540
+                }
+              },
+              "resultText": "APPLIED · place_section rebuild 100,1960 3440×540\nDELTA\n  + rebuild  section 100,1960 3440×540 \"4 · Background model rebuild & atomic switchover\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 62,
+          "timestamp": "2026-09-08T18:50:48.118Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_6HDo5kfUKfBmPG1yYRef7AI5|fc_00579ef4cc8ee763016aa05907201087d19ab437676b056e29",
+              "toolName": "change_color",
+              "params": {
+                "id": "rebuild",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · change_color rebuild\nDELTA\n  rebuild  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 63,
+          "timestamp": "2026-09-08T18:50:54.110Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_HJkE4ILbhz903YmZVUOCdufq|fc_00579ef4cc8ee763016aa0590b550087d1a991b2b60b1d7454",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "adapters",
+                "id": "coordinator",
+                "at": [
+                  160,
+                  2100
+                ],
+                "text": "Model change → rebuild coordinator"
+              },
+              "resultText": "APPLIED · clone coordinator from adapters 160,2100 280×100\nDELTA\n  + coordinator  process 160,2100 280×100 \"Model change → rebuild coordinator\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 64,
+          "timestamp": "2026-09-08T18:50:59.235Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_gvh6O0WYfLxml2cknUSdynQm|fc_00579ef4cc8ee763016aa05912153887d1b523fa1fd83d4b73",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "chunk",
+                "id": "background",
+                "at": [
+                  680,
+                  2100
+                ],
+                "text": "Re-embed corpus → new generation"
+              },
+              "resultText": "APPLIED · clone background from chunk 680,2100 280×100\nDELTA\n  + background  process 680,2100 280×100 \"Re-embed corpus → new generation\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 65,
+          "timestamp": "2026-09-08T18:51:05.831Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_DSycsEwHmNXWyAVwWk4rhmi5|fc_00579ef4cc8ee763016aa05918baa087d1ae2c7f4bf9450751",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "gate",
+                "id": "ready",
+                "at": [
+                  1200,
+                  2100
+                ],
+                "text": "Complete & consistent?"
+              },
+              "resultText": "APPLIED · clone ready from gate 1200,2100 280×100\nDELTA\n  + ready  decision 1200,2100 280×100 \"Complete & consistent?\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 66,
+          "timestamp": "2026-09-08T18:51:12.200Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_CskwjHvEq3KhhIwyz17dhmOx|fc_00579ef4cc8ee763016aa0591f77a087d18a9da87eff0e2cfa",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "live",
+                "id": "promote",
+                "at": [
+                  1720,
+                  2100
+                ],
+                "text": "Atomically promote new generation"
+              },
+              "resultText": "APPLIED · clone promote from live 1720,2100 280×100\nDELTA\n  + promote  process 1720,2100 280×100 \"Atomically promote new generation\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 67,
+          "timestamp": "2026-09-08T18:51:17.842Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_HTk9AktaG0GutjJdybkydsvi|fc_00579ef4cc8ee763016aa0592502e487d19fb17665b5ce704e",
+              "toolName": "connect",
+              "params": {
+                "id": "cb",
+                "from": {
+                  "objectId": "coordinator"
+                },
+                "to": {
+                  "objectId": "background"
+                }
+              },
+              "resultText": "APPLIED · connect cb coordinator→background\nDELTA\n  + cb  coordinator → background\nLINTS · clean\nROUTES\n  cb  anchors right→left  path coordinator ─(s0 h y=2150)→ background  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 68,
+          "timestamp": "2026-09-08T18:51:26.088Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_MweRF8dil9WGctx7DybQ489a|fc_00579ef4cc8ee763016aa0592d4cb087d1a0040f953b4bfaa3",
+              "toolName": "connect",
+              "params": {
+                "id": "br",
+                "from": {
+                  "objectId": "background"
+                },
+                "to": {
+                  "objectId": "ready"
+                }
+              },
+              "resultText": "APPLIED · connect br background→ready\nDELTA\n  + br  background → ready\nLINTS · clean\nROUTES\n  br  anchors right→left  path background ─(s0 h y=2150)→ ready  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 69,
+          "timestamp": "2026-09-08T18:51:33.363Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_AnqgTqEgbkMgilSyfeaWkqNV|fc_00579ef4cc8ee763016aa059334dd487d19f62e14409e7f9f7",
+              "toolName": "connect",
+              "params": {
+                "id": "rp",
+                "from": {
+                  "objectId": "ready"
+                },
+                "to": {
+                  "objectId": "promote"
+                },
+                "label": "yes"
+              },
+              "resultText": "APPLIED · connect rp ready→promote\nDELTA\n  + rp  ready → promote\nLINTS · clean\nROUTES\n  rp  anchors right→left  path ready ─(s0 h y=2150)→ promote  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 70,
+          "timestamp": "2026-09-08T18:51:39.132Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_xSrV1H0JgCMROkSjeuCZ9OUa|fc_00579ef4cc8ee763016aa0593962e487d193332680ddca09d1",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "live",
+                "id": "current",
+                "at": [
+                  2240,
+                  2100
+                ],
+                "text": "Current generation / serving pointer"
+              },
+              "resultText": "APPLIED · clone current from live 2240,2100 280×100\nDELTA\n  + current  process 2240,2100 280×100 \"Current generation / serving pointer\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 71,
+          "timestamp": "2026-09-08T18:51:43.644Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_L0Sf5eGms5OXXKttmWPtQwnl|fc_00579ef4cc8ee763016aa0593ec42887d19d2333183d261b80",
+              "toolName": "connect",
+              "params": {
+                "id": "pc",
+                "from": {
+                  "objectId": "promote"
+                },
+                "to": {
+                  "objectId": "current"
+                }
+              },
+              "resultText": "APPLIED · connect pc promote→current\nDELTA\n  + pc  promote → current\nLINTS · clean\nROUTES\n  pc  anchors right→left  path promote ─(s0 h y=2150)→ current  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 72,
+          "timestamp": "2026-09-08T18:51:49.557Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_CLJj0B9VoEBIQPO3y9RdNneT|fc_00579ef4cc8ee763016aa0594515fc87d1851546a9aab167f2",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "current",
+                "id": "prior",
+                "at": [
+                  2820,
+                  2100
+                ],
+                "text": "Prior generation retained for rollback"
+              },
+              "resultText": "APPLIED · clone prior from current 2820,2100 280×100\nDELTA\n  + prior  process 2820,2100 280×100 \"Prior generation retained for rollback\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 73,
+          "timestamp": "2026-09-08T18:51:57.169Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_JyLxxeWGdBVyu7MPyhFcAlWb|fc_00579ef4cc8ee763016aa0594afe9887d1abeafaa3407faf36",
+              "toolName": "connect",
+              "params": {
+                "id": "rollback",
+                "from": {
+                  "objectId": "current"
+                },
+                "to": {
+                  "objectId": "prior"
+                },
+                "arrow": "both",
+                "label": "retain / rollback"
+              },
+              "resultText": "APPLIED · connect rollback current→prior\nDELTA\n  + rollback  current → prior\nLINTS · clean\nROUTES\n  rollback  anchors right→left  path current ─(s0 h y=2150)→ prior  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 74,
+          "timestamp": "2026-09-08T18:52:03.906Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_csXmX80bucBNYXSAGoavOZW2|fc_00579ef4cc8ee763016aa05952634887d1888619668a143dbf",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "fragment-rules",
+                "at": [
+                  1480,
+                  660
+                ],
+                "text": "Every fragment retains headings, source identity, ACL and version.\nExtraction removes boilerplate; quarantine isolates failures so the batch continues."
+              },
+              "resultText": "APPLIED · place_sticky fragment-rules 1480,660 180×120\nDELTA\n  + fragment-rules  sticky 1480,660 180×120 \"Every fragment retains headings, source identity, ACL and version.\\nExtraction removes boilerplate; quarantine isolates failures so the batch continues.\"\nLINTS · +1 −0\n  + W1 clipped-text: fragment-rules: sticky body clips at 180×120: 16 row(s), the note holds 1 — needs 180×625 (grow fragment-rules to ≥180×625 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 75,
+          "timestamp": "2026-09-08T18:52:11.957Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Zz3go9RLqa1HfMGtPp6fBEoj|fc_00579ef4cc8ee763016aa0595ab0c087d18594986c5ef198bb",
+              "toolName": "resize",
+              "params": {
+                "id": "fragment-rules",
+                "width": 380,
+                "height": 220
+              },
+              "resultText": "APPLIED · resize fragment-rules → 380×220\n  sticky body clips at 380×220: 7 row(s), the note holds 4 — needs 380×301\nDELTA\n  fragment-rules  1480,660 180×120 → 1480,660 380×220\nLINTS · +1 −1\n  + W1 clipped-text: fragment-rules: sticky body clips at 380×220: 7 row(s), the note holds 4 — needs 380×301 (grow fragment-rules to ≥380×301 or shorten the text)\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 76,
+          "timestamp": "2026-09-08T18:52:16.702Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ojD5LlsnXQQ23w2ysSwAbxsW|fc_00579ef4cc8ee763016aa0595f7bc087d1842189ecd9cb70a3",
+              "toolName": "update_text",
+              "params": {
+                "id": "fragment-rules",
+                "text": "Fragments retain headings, source ID, ACL and version. Quarantine lets the batch continue."
+              },
+              "resultText": "APPLIED · update_text fragment-rules\nDELTA\n  fragment-rules  text \"Every fragment retains headings, source identity, ACL and version.\\nExtraction removes boilerplate; quarantine isolates failures so the batch continues.\" → \"Fragments retain headings, source ID, ACL and version. Quarantine lets the batch continue.\"\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 77,
+          "timestamp": "2026-09-08T18:52:22.592Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_sY7ykSlSvOBHPWy8lzERvGej|fc_00579ef4cc8ee763016aa05964a05c87d18b533df2c88f7dfa",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "generate",
+                "id": "feedback",
+                "at": [
+                  2980,
+                  1320
+                ],
+                "text": "Feedback & coverage gaps"
+              },
+              "resultText": "APPLIED · clone feedback from generate 2980,1320 280×100\nDELTA\n  + feedback  process 2980,1320 280×100 \"Feedback & coverage gaps\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 78,
+          "timestamp": "2026-09-08T18:52:28.868Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_LWNRVYo8xK3Hzva7eAbLS1De|fc_00579ef4cc8ee763016aa0596b046c87d18ae9175864acf4cd",
+              "toolName": "connect",
+              "params": {
+                "id": "gf",
+                "from": {
+                  "objectId": "generate"
+                },
+                "to": {
+                  "objectId": "feedback"
+                },
+                "label": "thumbs + citation value"
+              },
+              "resultText": "APPLIED · connect gf generate→feedback\nDELTA\n  + gf  generate → feedback\nLINTS · clean\nROUTES\n  gf  anchors right→left  path generate ─(s0 h y=1370)→ feedback  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 79,
+          "timestamp": "2026-09-08T18:52:34.013Z",
+          "thinking": "**Finishing loops and links**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_b2lFodg3Vp94YuxebyLA8sXv|fc_00579ef4cc8ee763016aa05971b32487d1ae6c875e6054fbcb",
+              "toolName": "connect",
+              "params": {
+                "id": "uf",
+                "from": {
+                  "objectId": "unknown",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "feedback",
+                  "anchor": "bottom"
+                },
+                "label": "unanswered questions"
+              },
+              "resultText": "APPLIED · connect uf unknown→feedback\nDELTA\n  + uf  unknown → feedback\nLINTS · clean\nROUTES\n  uf  anchors right→bottom  path unknown ─(s0 h y=1650)→ ─(s1 h y=1650)→ (s2 v x=3120) (s3 v x=3120) feedback  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 80,
+          "timestamp": "2026-09-08T18:52:41.070Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_HSmgUHGZCuzdaYIKWgIXcz0N|fc_00579ef4cc8ee763016aa05976693c87d18987d9fd9ebf6649",
+              "toolName": "connect",
+              "params": {
+                "id": "feedback-ingest",
+                "from": {
+                  "objectId": "feedback",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "ingest",
+                  "anchor": "bottom"
+                },
+                "label": "coverage gaps → ingestion priorities",
+                "style": "dashed",
+                "color": "teal"
+              },
+              "resultText": "APPLIED · connect feedback-ingest feedback→ingest\nDELTA\n  + feedback-ingest  feedback → ingest\nLINTS · clean\nROUTES\n  feedback-ingest  anchors top→bottom  path feedback (s0 v x=3120) (s1 v x=3120) ─(s2 h y=1110)→ (s3 v x=1210) (s4 v x=1210) ingest  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 81,
+          "timestamp": "2026-09-08T18:52:48.352Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ZwkuPhrkdie6RFH9uYK2zsri|fc_00579ef4cc8ee763016aa0597dce0487d1bcfd293ffc8acbf2",
+              "toolName": "connect",
+              "params": {
+                "id": "live-query",
+                "from": {
+                  "objectId": "live",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "query",
+                  "anchor": "top"
+                },
+                "label": "Only published versions are searchable",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect live-query live→query\nDELTA\n  + live-query  live → query\nLINTS · clean\nROUTES\n  live-query  anchors bottom→top  path live (s0 v x=3320) (s1 v x=3320) ─(s2 h y=940)→ (s3 v x=1820) (s4 v x=1820) query  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 82,
+          "timestamp": "2026-09-08T18:52:54.897Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_N3xXKHTaCCYG73ebKsRSJurk|fc_00579ef4cc8ee763016aa059844fe487d1a92f005b3eba6353",
+              "toolName": "connect",
+              "params": {
+                "id": "serving-query",
+                "from": {
+                  "objectId": "current",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "query",
+                  "anchor": "bottom"
+                },
+                "label": "Live queries stay on current generation until promotion",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect serving-query current→query\nDELTA\n  + serving-query  current → query\nLINTS · +1 −0\n  + W1 broken-edges: connector serving-query hugs the top border of rebuild for 560px (route serving-query clear of rebuild's frame so it reads as a wire, not a border)\nROUTES\n  serving-query  anchors top→bottom  path current (s0 v x=2380) (s1 v x=2380) ─(s2 h y=1950)→ (s3 v x=1820) (s4 v x=1820) query  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 83,
+          "timestamp": "2026-09-08T18:52:59.393Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_dk4Ap91F7U6XNWa4RdoVnLEP|fc_00579ef4cc8ee763016aa0598a6a0087d1b7e50c80485cb7ad",
+              "toolName": "shift_segment",
+              "params": {
+                "id": "serving-query",
+                "segment": 2,
+                "to": 1880
+              },
+              "resultText": "APPLIED · shift_segment serving-query\nDELTA\n  serving-query  wp none → 2380,1880→1820,1880\nLINTS · +0 −1\n  − W1 broken-edges  (resolved)\nROUTES\n  serving-query  anchors top→bottom  path current (s0 v x=2380) ─(s1 h y=1880)→ (s2 v x=1820) query  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 84,
+          "timestamp": "2026-09-08T18:53:07.214Z",
+          "thinking": "**Finishing description and loops**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_2HzU6p50b8AZTKBYByQELLJk|fc_00579ef4cc8ee763016aa05992c29487d1af06a6230680657a",
+              "toolName": "update_text",
+              "params": {
+                "id": "extract",
+                "text": "Normalize formats; strip boilerplate"
+              },
+              "resultText": "APPLIED · update_text extract\nDELTA\n  extract  text \"Extract & normalize\" → \"Normalize formats; strip boilerplate\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 85,
+          "timestamp": "2026-09-08T18:53:13.018Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Myx0uVGyzBuYegQ36g97doyg|fc_00579ef4cc8ee763016aa0599847c887d1b42e23bfd71d3cfc",
+              "toolName": "update_text",
+              "params": {
+                "id": "write",
+                "text": "Stage vector index, document store & keyword index"
+              },
+              "resultText": "APPLIED · update_text write\nDELTA\n  write  text \"Stage version: vectors, fragments, terms\" → \"Stage vector index, document store & keyword index\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 86,
+          "timestamp": "2026-09-08T18:53:19.781Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_9MudggVxT3oav2dvl4TnfkGM|fc_00579ef4cc8ee763016aa0599e3d7487d198262d038447810a",
+              "toolName": "connect",
+              "params": {
+                "id": "reprocess",
+                "from": {
+                  "objectId": "dead",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "embed",
+                  "anchor": "right"
+                },
+                "label": "reprocess",
+                "style": "dashed",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect reprocess dead→embed\nDELTA\n  + reprocess  dead → embed\nLINTS · +1 −0\n  + E1 covered-content: label \"reprocess\" chip on reprocess covers retry (route reprocess around retry or move the label with a waypoint)\nROUTES\n  reprocess  anchors right→right  path dead ─(s0 h y=790)→ (s1 v x=2224) ─(s2 h y=310)→ embed  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 87,
+          "timestamp": "2026-09-08T18:53:25.124Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_e3u2XWFqO2ZHCLiqxieEOunV|fc_00579ef4cc8ee763016aa059a3e90087d1b1512dc92bdd3b4f",
+              "toolName": "move_label",
+              "params": {
+                "id": "reprocess",
+                "along": 0.25,
+                "offset": -60
+              },
+              "resultText": "APPLIED · move_label reprocess → along 0.25, offset -60\nDELTA\n  reprocess  labelPosition — → {\"along\":0.25,\"offset\":-60}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  reprocess  anchors right→right  path dead ─(s0 h y=790)→ (s1 v x=2224) ─(s2 h y=310)→ embed  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 88,
+          "timestamp": "2026-09-08T18:53:31.584Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_YqKp36NpdaaoJ45P2gaXZAWO|fc_00579ef4cc8ee763016aa059a9efdc87d1b4a2303a5717decd",
+              "toolName": "connect",
+              "params": {
+                "id": "repair-recheck",
+                "from": {
+                  "objectId": "repair",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "write",
+                  "anchor": "bottom"
+                },
+                "label": "repair & recheck",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect repair-recheck repair→write\nDELTA\n  + repair-recheck  repair → write\nLINTS · clean\nROUTES\n  repair-recheck  anchors top→bottom  path repair (s0 v x=2880) (s1 v x=2880) ─(s2 h y=440)→ (s3 v x=2660) (s4 v x=2660) write  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 89,
+          "timestamp": "2026-09-08T18:53:38.133Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_E7bmlinhfSrAkrTDRRCletl3|fc_00579ef4cc8ee763016aa059b049f487d18846a493d6ca659a",
+              "toolName": "connect",
+              "params": {
+                "id": "rebuild-wait",
+                "from": {
+                  "objectId": "ready",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "background",
+                  "anchor": "bottom"
+                },
+                "label": "no · continue rebuild / repair",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect rebuild-wait ready→background\nDELTA\n  + rebuild-wait  ready → background\nLINTS · +2 −0\n  + W1 broken-edges: br and rebuild-wait run anti-parallel between background and ready (use one edge with a both-ends arrow, or offset the two routes)\n  + W2 unreadable-labels: label \"no · continue rebuild / repair\" chip on rebuild-wait (312×30px) bleeds onto ready and background: 240px of corridor where the chip needs 344px (open the ready↔background corridor to ≥344px so the chip and its 16px margins fit)\nROUTES\n  rebuild-wait  anchors bottom→bottom  path ready (s0 v x=1340) ─(s1 h y=2224)→ (s2 v x=820) background  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 90,
+          "timestamp": "2026-09-08T18:53:43.009Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_K3ICEsA5FNf5br9HMgW8k0n3|fc_00579ef4cc8ee763016aa059b645cc87d1b64b03b716fa7b95",
+              "toolName": "shift_segment",
+              "params": {
+                "id": "rebuild-wait",
+                "segment": 1,
+                "to": 2340
+              },
+              "resultText": "APPLIED · shift_segment rebuild-wait\nDELTA\n  rebuild-wait  wp none → 1340,2340→820,2340\nLINTS · +0 −1\n  − W2 unreadable-labels  (resolved)\nROUTES\n  rebuild-wait  anchors bottom→bottom  path ready (s0 v x=1340) ─(s1 h y=2340)→ (s2 v x=820) background  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 91,
+          "timestamp": "2026-09-08T18:53:54.468Z",
+          "thinking": "**Adding separate wait branch**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_uZaFqTA53rFQyALve6g28IFq|fc_00579ef4cc8ee763016aa059c1ffcc87d1860e95a36bc3c67d",
+              "toolName": "place_shape",
+              "params": {
+                "id": "rebuild-repair",
+                "type": "process",
+                "at": [
+                  1200,
+                  2320
+                ]
+              },
+              "resultText": "APPLIED · place_shape rebuild-repair process 1200,2320 280×100\nDELTA\n  + rebuild-repair  process 1200,2320 280×100 \"\"\nLINTS · +2 −0\n  + E1 covered-content: label \"no · continue rebuild / repair\" chip on rebuild-wait covers rebuild-repair (route rebuild-wait around rebuild-repair or move the label with a waypoint)\n  + E2 broken-edges: connector rebuild-wait (ready→background) passes through a box (reroute with waypoints or move the boxes so the path is clear)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 92,
+          "timestamp": "2026-09-08T18:54:00.207Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_d0gMvlhngu6iDgQc63n3csc8|fc_00579ef4cc8ee763016aa059c6be9c87d186520306aa9e2db4",
+              "toolName": "change_connection",
+              "params": {
+                "id": "rebuild-wait",
+                "patch": {
+                  "to": {
+                    "objectId": "rebuild-repair",
+                    "anchor": "top"
+                  }
+                }
+              },
+              "resultText": "APPLIED · change_connection rebuild-wait\n  manual waypoints dropped — they described the old endpoints; the router owns this edge again\nDELTA\n  rebuild-wait  route ready→background → ready→rebuild-repair\n  rebuild-wait  anchors bottom→bottom → bottom→top\n  rebuild-wait  wp 1340,2340→820,2340 → none\nLINTS · +0 −3\n  − E1 covered-content, − E2 broken-edges, − W1 broken-edges  (resolved)\nROUTES\n  rebuild-wait  anchors bottom→top  path ready (s0 v x=1340) rebuild-repair  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 93,
+          "timestamp": "2026-09-08T18:54:06.505Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_mwpOvBDcuVP6boNeVo5SsAjP|fc_00579ef4cc8ee763016aa059cce3d487d1ac3608f326d8e39d",
+              "toolName": "update_text",
+              "params": {
+                "id": "rebuild-repair",
+                "text": "Continue rebuild / repair"
+              },
+              "resultText": "APPLIED · update_text rebuild-repair\nDELTA\n  rebuild-repair  text \"\" → \"Continue rebuild / repair\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 94,
+          "timestamp": "2026-09-08T18:54:15.716Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_EOl1S7Ybr3q5OFn1DZoB9jvI|fc_00579ef4cc8ee763016aa059d56f6487d18ec0190f647a3041",
+              "toolName": "connect",
+              "params": {
+                "id": "resume-rebuild",
+                "from": {
+                  "objectId": "rebuild-repair",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "background",
+                  "anchor": "bottom"
+                },
+                "label": "retry",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect resume-rebuild rebuild-repair→background\nDELTA\n  + resume-rebuild  rebuild-repair → background\nLINTS · clean\nROUTES\n  resume-rebuild  anchors left→bottom  path rebuild-repair ─(s0 h y=2370)→ ─(s1 h y=2370)→ (s2 v x=820) (s3 v x=820) background  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 95,
+          "timestamp": "2026-09-08T18:54:29.965Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_SDvXlRGLg1B2i8t4tBZuHkVO|fc_00579ef4cc8ee763016aa059dd427887d1b509391083590c7f",
+              "toolName": "update_description",
+              "params": {
+                "description": "# Retrieval-augmented generation\nRead left to right across ingestion and publication, then retrieval; the lower lane shows background index rebuilds.\n\n- Source adapters import documents, wikis, tickets and code on schedules or change events, carrying ACLs. Normalization isolates unparseable documents in quarantine. Hash classification skips unchanged content and supersedes changed versions, deleting stale derived records. Overlapping chunks retain headings, source identity, permissions and version stamps. Rate-limited embedding workers retry transient failures; exhausted batches retain inputs and attempt history in dead-letter storage for reprocessing.\n- Publication stages the vector index, document store and keyword index. Only a matching version across all three becomes searchable; partial writes stay unavailable for repair or rollback and recheck.\n- Rewritten questions fan out to vector and keyword search, then merge through fusion and reranking. User ACL filtering precedes evidence assessment and generation. Strong evidence yields grounded answers with citations; thin context or uniformly low scores yields “I don't know.” Feedback captures thumbs, citation usefulness and unanswered questions, returning coverage gaps to ingestion priorities.\n- Model changes trigger background corpus re-embedding into a new generation. Incomplete rebuilds continue or repair. Complete, consistent generations are promoted atomically; live queries remain on the current serving pointer until promotion, with the prior generation retained for rollback."
+              },
+              "resultText": "APPLIED · update_description\nDELTA · description none → 1557 chars",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 96,
+          "timestamp": "2026-09-08T18:54:36.202Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ICaYsxm59b9K79f4JmhNkduW|fc_00579ef4cc8ee763016aa059ebd4e087d1ac94d6d1761efeec",
+              "toolName": "look",
+              "params": {
+                "view": "page-frame"
+              },
+              "resultText": "LOOK · 1 render · close-up page-frame\nBOARD\n  page-frame section \"2026-09-08-comp-134600 · rag-ingestion-retrieval\" white 32,32 3600×2600\n    ingest section \"1 · Ingestion & failure isolation\" teal 100,140 2220×760\n      adapters process \"Source adapters\" 160,260 280×100\n      extract process \"Normalize formats; strip boilerplate\" 600,260 280×100\n      hash process \"Content hash classification\" 1040,260 280×100\n      chunk process \"Chunk with overlap\" 1480,260 280×100\n      embed process \"Rate-limited embedding batches\" 1920,260 280×100\n      quarantine process \"Quarantine + failure context\" 600,520 280×100\n      changed process \"Supersede version; delete stale records\" 1040,520 280×100\n      sources sticky \"**Source adapters** Docs, wikis, tickets, code Schedules + change events First import or update; ACL travels\" 160,520 360×300\n      retry process \"Workers retry transient failures\" 1920,520 280×100\n      dead process \"Dead-letter: inputs + attempt history\" 1920,740 280×100\n      skip process \"Unchanged: skip processing\" 1040,740 280×100\n      fragment-rules sticky \"Fragments retain headings, source ID, ACL and version. Quarantine lets the batch continue.\" 1480,660 380×220\n    publish section \"2 · Version-consistent publication\" blue 2460,140 1080×760\n      write process \"Stage vector index, document store & keyword index\" 2520,260 280×100\n      gate decision \"All 3 at same version?\" 3180,260 280×100 shape=rounded-rect\n      live process \"Publish serving version\" 3180,720 280×100\n      repair process \"Unavailable: repair or roll back\" 2740,520 280×100\n    query section \"3 · Permission-aware retrieval & grounded answers\" violet 100,1060 3440×740\n      rewrite process \"User question → rewrite searches\" 160,1320 280×100\n      vector process \"Vector lookup\" 620,1180 280×100\n      keyword process \"Keyword lookup\" 620,1500 280×100\n      fuse process \"Fuse & rerank candidates\" 1080,1320 280×100\n      acl process \"Apply asking user's ACL\" 1520,1320 280×100\n      confidence decision \"Enough strong evidence?\" 1960,1320 280×100 shape=rounded-rect\n      generate process \"Generate from evidence + citations\" 2420,1320 280×100\n      unknown process \"I don't know\" 1960,1600 280×100\n      feedback process \"Feedback & coverage gaps\" 2980,1320 280×100\n    rebuild section \"4 · Background model rebuild & atomic switchover\" blue 100,1960 3440×540\n      coordinator process \"Model change → rebuild coordinator\" 160,2100 280×100\n      background process \"Re-embed corpus → new generation\" 680,2100 280×100\n      ready decision \"Complete & consistent?\" 1200,2100 280×100 shape=rounded-rect\n      promote process \"Atomically promote new generation\" 1720,2100 280×100\n      current process \"Current generation / serving pointer\" 2240,2100 280×100\n      prior process \"Prior generation retained for rollback\" 2820,2100 280×100\n      rebuild-repair process \"Continue rebuild / repair\" 1200,2320 280×100\nEDGES\n  a-e adapters→extract \"+ ACL\" · adapters ─(s0 h y=310)→ extract\n  eh extract→hash — · extract ─(s0 h y=310)→ hash\n  hc hash→chunk \"new\" · hash ─(s0 h y=310)→ chunk\n  ce chunk→embed — · chunk ─(s0 h y=310)→ embed\n  eq extract→quarantine \"unparseable\" red · extract (s0 v x=740) quarantine\n  hchanged hash→changed \"changed\" · hash (s0 v x=1180) changed\n  changedchunk changed→chunk — anchors=right→bottom · changed ─(s0 h y=570)→ ─(s1 h y=570)→ (s2 v x=1620) (s3 v x=1620) chunk\n  ew embed→write \"completed version\" · embed ─(s0 h y=310)→ write\n  wg write→gate \"verify\" · write ─(s0 h y=310)→ gate\n  gl gate→live \"yes\" green lp=0.85 · gate (s0 v x=3320) live\n  gr gate→repair \"partial\" red anchors=bottom→right lp=0.85 · gate (s0 v x=3320) (s1 v x=3320) ─(s2 h y=570)→ ─(s3 h y=570)→ repair\n  rv rewrite→vector — · rewrite ─(s0 h y=1370)→ ─(s1 h y=1370)→ (s2 v x=530) ─(s3 h y=1230)→ ─(s4 h y=1230)→ vector\n  rk rewrite→keyword — · rewrite ─(s0 h y=1370)→ ─(s1 h y=1370)→ (s2 v x=530) ─(s3 h y=1550)→ ─(s4 h y=1550)→ keyword\n  vf vector→fuse — · vector ─(s0 h y=1230)→ ─(s1 h y=1230)→ (s2 v x=990) ─(s3 h y=1370)→ ─(s4 h y=1370)→ fuse\n  kf keyword→fuse — · keyword ─(s0 h y=1550)→ ─(s1 h y=1550)→ (s2 v x=990) ─(s3 h y=1370)→ ─(s4 h y=1370)→ fuse\n  fa fuse→acl — · fuse ─(s0 h y=1370)→ acl\n  ac acl→confidence — · acl ─(s0 h y=1370)→ confidence\n  cg confidence→generate \"yes\" · confidence ─(s0 h y=1370)→ generate\n  cu confidence→unknown \"thin context / all scores low\" orange · confidence (s0 v x=2100) unknown\n  er embed→retry \"failure / retry\" red arrow=both · embed (s0 v x=2060) retry\n  rd retry→dead \"exhausted\" red · retry (s0 v x=2060) dead\n  hs hash→skip \"unchanged\" anchors=left→left lp=0.8@60 · hash ─(s0 h y=310)→ (s1 v x=1016) ─(s2 h y=790)→ skip\n  cb coordinator→background — · coordinator ─(s0 h y=2150)→ background\n  br background→ready — · background ─(s0 h y=2150)→ ready\n  rp ready→promote \"yes\" · ready ─(s0 h y=2150)→ promote\n  pc promote→current — · promote ─(s0 h y=2150)→ current\n  rollback current→prior \"retain / rollback\" arrow=both · current ─(s0 h y=2150)→ prior\n  gf generate→feedback \"thumbs + citation value\" · generate ─(s0 h y=1370)→ feedback\n  uf unknown→feedback \"unanswered questions\" anchors=right→bottom · unknown ─(s0 h y=1650)→ ─(s1 h y=1650)→ (s2 v x=3120) (s3 v x=3120) feedback\n  feedback-ingest feedback→ingest \"coverage gaps → ingestion priorities\" dashed teal anchors=top→bottom · feedback (s0 v x=3120) (s1 v x=3120) ─(s2 h y=1110)→ (s3 v x=1210) (s4 v x=1210) ingest\n  live-query live→query \"Only published versions are searchable\" blue anchors=bottom→top · live (s0 v x=3320) (s1 v x=3320) ─(s2 h y=940)→ (s3 v x=1820) (s4 v x=1820) query\n  serving-query current→query \"Live queries stay on current generation until promotion\" blue anchors=top→bottom wp=2380,1880→1820,1880 · current (s0 v x=2380) ─(s1 h y=1880)→ (s2 v x=1820) query\n  reprocess dead→embed \"reprocess\" dashed red anchors=right→right lp=0.25@-60 · dead ─(s0 h y=790)→ (s1 v x=2224) ─(s2 h y=310)→ embed\n  repair-recheck repair→write \"repair & recheck\" dashed blue anchors=top→bottom · repair (s0 v x=2880) (s1 v x=2880) ─(s2 h y=440)→ (s3 v x=2660) (s4 v x=2660) write\n  rebuild-wait ready→rebuild-repair \"no · continue rebuild / repair\" dashed blue anchors=bottom→top · ready (s0 v x=1340) rebuild-repair\n  resume-rebuild rebuild-repair→background \"retry\" dashed blue anchors=left→bottom · rebuild-repair ─(s0 h y=2370)→ ─(s1 h y=2370)→ (s2 v x=820) (s3 v x=820) background\nBOARD DIFF · base → draft · 74 ops\n  updateDescription  1557 chars\n  addSection ingest\n  addObject adapters\n  addObject extract\n  addObject hash\n  addObject chunk\n  addObject embed\n  addObject quarantine\n  addObject changed\n  addSection publish\n  addObject write\n  addObject gate\n  addObject live\n  addObject repair\n  addSection query\n  addObject rewrite\n  addObject vector\n  addObject keyword\n  addObject fuse\n  addObject acl\n  addObject confidence\n  addObject generate\n  addObject unknown\n  addSticky sources\n  addObject retry\n  addObject dead\n  addObject skip\n  addSection rebuild\n  addObject coordinator\n  addObject background\n  addObject ready\n  addObject promote\n  addObject current\n  addObject prior\n  addSticky fragment-rules\n  addObject feedback\n  addObject rebuild-repair\n  updateSection page-frame  resized\n  addConnection a-e\n  addConnection eh\n  addConnection hc\n  addConnection ce\n  addConnection eq\n  addConnection hchanged\n  addConnection changedchunk\n  addConnection ew\n  addConnection wg\n  addConnection gl\n  addConnection gr\n  addConnection rv\n  addConnection rk\n  addConnection vf\n  addConnection kf\n  addConnection fa\n  addConnection ac\n  addConnection cg\n  addConnection cu\n  addConnection er\n  addConnection rd\n  addConnection hs\n  addConnection cb\n  addConnection br\n  addConnection rp\n  addConnection pc\n  addConnection rollback\n  addConnection gf\n  addConnection uf\n  addConnection feedback-ingest\n  addConnection live-query\n  addConnection serving-query\n  addConnection reprocess\n  addConnection repair-recheck\n  addConnection rebuild-wait\n  addConnection resume-rebuild\nDIAGNOSTICS · clean\nROUTES\n  a-e  anchors right→left  path adapters ─(s0 h y=310)→ extract  through none\n  eh  anchors right→left  path extract ─(s0 h y=310)→ hash  through none\n  hc  anchors right→left  path hash ─(s0 h y=310)→ chunk  through none\n  ce  anchors right→left  path chunk ─(s0 h y=310)→ embed  through none\n  eq  anchors bottom→top  path extract (s0 v x=740) quarantine  through none\n  hchanged  anchors bottom→top  path hash (s0 v x=1180) changed  through none\n  changedchunk  anchors right→bottom  path changed ─(s0 h y=570)→ ─(s1 h y=570)→ (s2 v x=1620) (s3 v x=1620) chunk  through none\n  ew  anchors right→left  path embed ─(s0 h y=310)→ write  through none\n  wg  anchors right→left  path write ─(s0 h y=310)→ gate  through none\n  gl  anchors bottom→top  path gate (s0 v x=3320) live  through none\n  gr  anchors bottom→right  path gate (s0 v x=3320) (s1 v x=3320) ─(s2 h y=570)→ ─(s3 h y=570)→ repair  through none\n  rv  anchors right→left  path rewrite ─(s0 h y=1370)→ ─(s1 h y=1370)→ (s2 v x=530) ─(s3 h y=1230)→ ─(s4 h y=1230)→ vector  through none\n  rk  anchors right→left  path rewrite ─(s0 h y=1370)→ ─(s1 h y=1370)→ (s2 v x=530) ─(s3 h y=1550)→ ─(s4 h y=1550)→ keyword  through none\n  vf  anchors right→left  path vector ─(s0 h y=1230)→ ─(s1 h y=1230)→ (s2 v x=990) ─(s3 h y=1370)→ ─(s4 h y=1370)→ fuse  through none\n  kf  anchors right→left  path keyword ─(s0 h y=1550)→ ─(s1 h y=1550)→ (s2 v x=990) ─(s3 h y=1370)→ ─(s4 h y=1370)→ fuse  through none\n  fa  anchors right→left  path fuse ─(s0 h y=1370)→ acl  through none\n  ac  anchors right→left  path acl ─(s0 h y=1370)→ confidence  through none\n  cg  anchors right→left  path confidence ─(s0 h y=1370)→ generate  through none\n  cu  anchors bottom→top  path confidence (s0 v x=2100) unknown  through none\n  er  anchors bottom→top  path embed (s0 v x=2060) retry  through none\n  rd  anchors bottom→top  path retry (s0 v x=2060) dead  through none\n  hs  anchors left→left  path hash ─(s0 h y=310)→ (s1 v x=1016) ─(s2 h y=790)→ skip  through none\n  cb  anchors right→left  path coordinator ─(s0 h y=2150)→ background  through none\n  br  anchors right→left  path background ─(s0 h y=2150)→ ready  through none\n  rp  anchors right→left  path ready ─(s0 h y=2150)→ promote  through none\n  pc  anchors right→left  path promote ─(s0 h y=2150)→ current  through none\n  rollback  anchors right→left  path current ─(s0 h y=2150)→ prior  through none\n  gf  anchors right→left  path generate ─(s0 h y=1370)→ feedback  through none\n  uf  anchors right→bottom  path unknown ─(s0 h y=1650)→ ─(s1 h y=1650)→ (s2 v x=3120) (s3 v x=3120) feedback  through none\n  feedback-ingest  anchors top→bottom  path feedback (s0 v x=3120) (s1 v x=3120) ─(s2 h y=1110)→ (s3 v x=1210) (s4 v x=1210) ingest  through none\n  live-query  anchors bottom→top  path live (s0 v x=3320) (s1 v x=3320) ─(s2 h y=940)→ (s3 v x=1820) (s4 v x=1820) query  through none\n  serving-query  anchors top→bottom  path current (s0 v x=2380) ─(s1 h y=1880)→ (s2 v x=1820) query  through none\n  reprocess  anchors right→right  path dead ─(s0 h y=790)→ (s1 v x=2224) ─(s2 h y=310)→ embed  through none\n  repair-recheck  anchors top→bottom  path repair (s0 v x=2880) (s1 v x=2880) ─(s2 h y=440)→ (s3 v x=2660) (s4 v x=2660) write  through none\n  rebuild-wait  anchors bottom→top  path ready (s0 v x=1340) rebuild-repair  through none\n  resume-rebuild  anchors left→bottom  path rebuild-repair ─(s0 h y=2370)→ ─(s1 h y=2370)→ (s2 v x=820) (s3 v x=820) background  through none\nREQUESTS · none\nMEASURES · section page-frame 32,32 3600×2600\n  gaps x  ingest↔publish 140\n  gaps y  ingest↔query 160 · publish↔query 160 · query↔rebuild 160\n  pitch x 60 · 440 · 20 · 60 · 360 · 40 · 120 · 280 · +12 more\n  pitch y 120 · 260 · 140 · 60 · 20 · 320 · 120 · 140 · +5 more\n  free    left 44 · right 68 · top 56 · bottom 104\n  ink     11%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-8d9a2d61d4be.392.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 97,
+          "timestamp": "2026-09-08T18:54:43.153Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_aDPWGwNUlfyIdrNjeBxGGGSX|fc_00579ef4cc8ee763016aa059f1b19c87d18dba479250814228",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Created the RAG flow covering ingestion failures, version-consistent publication, permission-aware retrieval, grounded answers, feedback, and atomic index rebuilds with rollback."
+              },
+              "resultText": "Committed: Created the RAG flow covering ingestion failures, version-consistent publication, permission-aware retrieval, grounded answers, feedback, and atomic index rebuilds with rollback. (74 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

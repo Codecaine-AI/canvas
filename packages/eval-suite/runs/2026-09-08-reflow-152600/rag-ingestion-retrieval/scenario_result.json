@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-08-reflow-152600",
+  "tier": "system",
+  "scenario": "rag-ingestion-retrieval",
+  "board_id": "eval.2026-09-08-reflow-152600.rag-ingestion-retrieval",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-09-08T20:26:01.886Z",
+      "finished_at": "2026-09-08T20:41:00.486Z",
+      "wall_ms": 899177,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "11482486-bcee-4e61-ba6d-31f2e429b622"
+    ]
+  },
+  "finished_at": "2026-09-08T20:41:01.064Z",
+  "exit_code": 0
+}

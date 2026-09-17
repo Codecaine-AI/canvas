@@ -1,0 +1,611 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-20-engine-50-persistence-and-embedding",
+  "title": "Persistence and embedding",
+  "root": "b-engine-persist-root",
+  "blocks": {
+    "b-engine-persist-title-1": {
+      "id": "b-engine-persist-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Persistence and embedding"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-intro-2": {
+      "id": "b-engine-persist-intro-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Persistence is one canonical document store with one file API in front of it. Documents at rest are plain "
+        },
+        {
+          "insert": "*.canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " files; every surface — editor, read-only viewer, iframe embed, SVG preview, tests — reads the same canonical documents rather than keeping copies."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-api-heading-3": {
+      "id": "b-engine-persist-api-heading-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The /api/canvases file API"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-api-body-4": {
+      "id": "b-engine-persist-api-body-4",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The backend is one shared handler, "
+        },
+        {
+          "insert": "createCanvasFileApiHandler",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/server/canvas-file-api.ts",
+              "symbol": "createCanvasFileApiHandler"
+            }
+          }
+        },
+        {
+          "insert": ", mounted identically by the web and desktop shells so documents and previews behave the same in both. Ids must match the canvas id pattern and resolve to "
+        },
+        {
+          "insert": "${id}.canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " under the "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " directory. The contract:"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-api-list-5": {
+      "id": "b-engine-persist-api-list-5",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "GET /api/canvases",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — lists the directory as "
+        },
+        {
+          "insert": "{ id, title, updated_at }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "updated_at",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from file mtime, sorted newest first."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-api-get-6": {
+      "id": "b-engine-persist-api-get-6",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "GET /api/canvases/:id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — streams the file "
+        },
+        {
+          "insert": "without validating on read",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": "; a stored document is trusted at rest."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-api-post-7": {
+      "id": "b-engine-persist-api-post-7",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "POST",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — creates, returning "
+        },
+        {
+          "insert": "409",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " if the file already exists; "
+        },
+        {
+          "insert": "PUT",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — replaces. Both validate through "
+        },
+        {
+          "insert": "validateInteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/validate.ts",
+              "symbol": "validateInteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": ": invalid documents get "
+        },
+        {
+          "insert": "422",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with the issue list, valid documents are written as pretty-printed JSON."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-api-delete-8": {
+      "id": "b-engine-persist-api-delete-8",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "DELETE /api/canvases/:id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — unlinks the file."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-api-invariant-9": {
+      "id": "b-engine-persist-api-invariant-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The write/read asymmetry is deliberate: validation guards the write path, so the corpus stays clean at rest and reads stay cheap. Anything that produces a canvas file by another path must satisfy the same validator before writing."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-format-heading-10": {
+      "id": "b-engine-persist-format-heading-10",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The at-rest format"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-format-body-11": {
+      "id": "b-engine-persist-format-body-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A canvas file is a plain, pretty-printed "
+        },
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/document.ts",
+              "symbol": "InteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "Document model",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/10-document-model",
+              "label": "Document model"
+            }
+          }
+        },
+        {
+          "insert": ") — no envelope, no side-car metadata. Title lives in the document; timestamps come from the filesystem. Because the format is the schema itself, any tool that can produce a valid document can produce a board, and migrations operate on the files directly."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-autosave-heading-12": {
+      "id": "b-engine-persist-autosave-heading-12",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The autosave contract"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-autosave-body-13": {
+      "id": "b-engine-persist-autosave-body-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Editing hosts save continuously rather than on request: queue a save on every document change, skip writes when the document is unchanged from the loaded snapshot, debounce into a "
+        },
+        {
+          "insert": "PUT",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (800 ms in Studio), and flush pending writes on navigation and "
+        },
+        {
+          "insert": "beforeunload",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "keepalive",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " so closing a tab cannot drop the last edit. The trim reports the outcome as Saved or Save failed — retry. Opening a board deep-clones the fetched document and snapshots it for the dirty check."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-preview-heading-14": {
+      "id": "b-engine-persist-preview-heading-14",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "SVG previews"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-preview-body-15": {
+      "id": "b-engine-persist-preview-body-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "GET /api/canvases/:id/preview.svg?section=&w=&h=",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the lightweight read surface for dashboards, documentation cards, and other inline hosts. The API loads the document, renders it through "
+        },
+        {
+          "insert": "renderDocumentToSvg",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/static-svg.ts",
+              "symbol": "renderDocumentToSvg"
+            }
+          }
+        },
+        {
+          "insert": ", and returns a deterministic SVG with an ETag; matching "
+        },
+        {
+          "insert": "If-None-Match",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " requests receive "
+        },
+        {
+          "insert": "304",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a stable section id selecting a crop, and "
+        },
+        {
+          "insert": "w",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "h",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " set the requested render size. Determinism is the contract: the same document yields the same bytes, so previews cache."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-surfaces-heading-16": {
+      "id": "b-engine-persist-surfaces-heading-16",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Editing and embedding surfaces"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-surfaces-body-17": {
+      "id": "b-engine-persist-surfaces-body-17",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Three routes serve the same canonical documents: "
+        },
+        {
+          "insert": "/canvas/:id",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " mounts the interactive editor; "
+        },
+        {
+          "insert": "/view/:id?view=<section-id>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " opens the read-only viewer as a standalone page; and "
+        },
+        {
+          "insert": "/embed/:id?view=<section-id>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " renders the same viewer without surrounding trim for an iframe or full-screen host. The "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " query value maps directly to the viewer's "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " prop and the section view-crop ("
+        },
+        {
+          "insert": "Stage and viewport",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/40-stage-and-viewport",
+              "label": "Stage and viewport"
+            }
+          }
+        },
+        {
+          "insert": "), so a preview card, its expanded viewer, and the editor all address the same section by the same id."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-surfaces-decision-18": {
+      "id": "b-engine-persist-surfaces-decision-18",
+      "type": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Keep inline previews static; expand to navigate; edit separately"
+      },
+      "text": [
+        {
+          "insert": "An inline canvas card shows the section crop without capturing drag or wheel input. An explicit full-screen action promotes it to the interactive read-only viewer, where pan and zoom are expected. Authoring is a third context: an explicit edit action opens the editor separately so the reader does not lose the surrounding document or page state. This progression is a portable host contract, not behavior specific to any one embedding host."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-corpus-heading-19": {
+      "id": "b-engine-persist-corpus-heading-19",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Canvas files serve docs and tests alike"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-corpus-body-20": {
+      "id": "b-engine-persist-corpus-body-20",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " corpus does multiple duties from a single copy of each file: the studio lists and edits the files over the API, docs pages embed them as live samples, and the test suite imports individual files directly by path as fixtures. One canonical file per board, addressed by id everywhere — a board referenced from a doc, rendered as a preview, and asserted in a test is the same bytes in all three places."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-root": {
+      "id": "b-engine-persist-root",
+      "type": "paragraph",
+      "props": {
+        "covers": "How canvas documents persist and surface: the /api/canvases file API contract, canvases/*.canvas.json as the at-rest format, the autosave contract, deterministic SVG previews, and the editor, view-only, and iframe embedding surfaces.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "/api/canvases",
+          "canvas.json",
+          "autosave",
+          "SVG preview",
+          "view-only routes",
+          "iframe embedding"
+        ]
+      },
+      "children": [
+        "b-engine-persist-title-1",
+        "b-engine-persist-intro-2",
+        "b-engine-persist-api-heading-3",
+        "b-engine-persist-api-body-4",
+        "b-engine-persist-api-list-5",
+        "b-engine-persist-api-get-6",
+        "b-engine-persist-api-post-7",
+        "b-engine-persist-api-delete-8",
+        "b-engine-persist-api-invariant-9",
+        "b-engine-persist-format-heading-10",
+        "b-engine-persist-format-body-11",
+        "b-engine-persist-autosave-heading-12",
+        "b-engine-persist-autosave-body-13",
+        "b-engine-persist-preview-heading-14",
+        "b-engine-persist-preview-body-15",
+        "b-engine-persist-surfaces-heading-16",
+        "b-engine-persist-surfaces-body-17",
+        "b-engine-persist-surfaces-decision-18",
+        "b-engine-persist-corpus-heading-19",
+        "b-engine-persist-corpus-body-20"
+      ]
+    }
+  }
+}

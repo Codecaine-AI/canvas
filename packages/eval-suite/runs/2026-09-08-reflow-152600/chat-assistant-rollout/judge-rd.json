@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board is readable with effort, matching the 6–6.5 anchor because its major regions and primary flow are clear but several long cross-region routes and compact labels require close tracing.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Most icons and label chips have generous whitespace, but the small type and tighter routing around the experiment branches reduce arm's-length fluency."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "The live conversation, durable-memory, independent-quality, and experiment areas are clearly framed and titled, so their functional ownership is quickly apparent."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Arrowheads, colors, and labels usually clarify direction, but the red handoff loop, dashed cross-region route, and long blue, green, and red rollout paths create perimeter-scale detours that demand careful tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 6.5,
+        "note": "The main customer-to-reply flow and champion/challenger split are visually decomposed, though the lower rollout and rollback topology is spread across long routes and cannot be absorbed at a glance."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8367,
+    "output_tokens": 418
+  },
+  "flags": []
+}

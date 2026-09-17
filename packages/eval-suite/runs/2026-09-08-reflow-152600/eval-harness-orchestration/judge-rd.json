@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "score": 6,
+    "score_rationale": "The board is readable with effort, matching the 6 anchor: its three stages and color-coded branches are recoverable, but small text, scattered routing, and several very long edge runs prevent fluent arm’s-length reading.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 6,
+        "note": "Most nodes and label chips have clear surrounding space, but the typography is very small at the full-board scale and several chips sit closely against active routes."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "The cyan, pink, and gray stage regions clearly establish the three major functional groups, although the archive sits far below them and weakens its visual association."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5,
+        "note": "Colors, arrowheads, and labels usually convey direction, but the blue archive and baseline connections make large perimeter detours, while the red retry path and central grading routes require careful tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 6,
+        "note": "Decisions, retries, parallel graders, evidence validation, and comparison outcomes are visibly decomposed, but the oversized canvas, tiny labels, and distant shared-state routes obscure the main end-to-end flow."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7311,
+    "output_tokens": 401
+  },
+  "flags": []
+}

@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-08-reflow-152600",
+  "tier": "system",
+  "scenario": "eval-harness-orchestration",
+  "board_id": "eval.2026-09-08-reflow-152600.eval-harness-orchestration",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-09-08T20:26:01.866Z",
+      "finished_at": "2026-09-08T20:36:10.493Z",
+      "wall_ms": 609277,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "7d7f44f2-b9d9-4669-88c1-0a1b31121157"
+    ]
+  },
+  "finished_at": "2026-09-08T20:36:11.144Z",
+  "exit_code": 0
+}

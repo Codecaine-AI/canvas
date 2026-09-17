@@ -1,0 +1,100 @@
+{
+  "run_id": "2026-09-08-comp-134600",
+  "tier": "system",
+  "sut_thinking": "low",
+  "tool_call_cap": 3,
+  "tool_call_cap_source": "agent default",
+  "status": "completed",
+  "started_at": "2026-09-08T18:43:48.588Z",
+  "finished_at": "2026-09-08T19:13:48.726Z",
+  "scenarios": {
+    "agent-session-orchestration": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 34176,
+      "finished_at": "2026-09-08T19:10:52.211Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "chat-assistant-rollout": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 34178,
+      "finished_at": "2026-09-08T19:12:52.353Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "code-review-agents": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 34179,
+      "finished_at": "2026-09-08T19:00:15.472Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "eval-harness-orchestration": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 34180,
+      "finished_at": "2026-09-08T18:59:59.996Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "ivr-agent-handoff": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 34181,
+      "finished_at": "2026-09-08T18:57:57.277Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "llm-inference-gateway": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 34182,
+      "finished_at": "2026-09-08T19:13:48.695Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "rag-ingestion-retrieval": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 34183,
+      "finished_at": "2026-09-08T19:02:51.910Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    },
+    "sandboxed-tool-fleet": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 34184,
+      "finished_at": "2026-09-08T19:00:07.953Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    }
+  }
+}

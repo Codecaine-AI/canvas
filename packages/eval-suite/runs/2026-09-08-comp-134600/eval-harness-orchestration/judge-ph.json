@@ -1,0 +1,175 @@
+{
+  "axis": "ph",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: all 77 transcript tool calls returned APPLIED, LOOK, or a successful commit; none returned ERROR. The warnings attached to APPLIED results are not failed calls. There were no rejected calls, session retries, consecutive failure runs, repeated error classes, or parse/schema-validation fights.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "APPLIED · place_sticky contract ... LINTS · +1 −0",
+          "finding": "The operation applied; its clipped-text warning is not a failed call."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 76,
+          "transcript_excerpt": "Committed: Created the pinned-run evaluation flow ... (52 patch operations).",
+          "finding": "Finalize succeeded on the first attempt, with no blocked finalize or retry."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Two legal framed looks were used: an execution-section close-up during construction and a page-frame QA render before finalize. The first render was followed by substantial construction and the second verified the resulting board with clean diagnostics, yielding one render→adjust→render loop. This is good whole-board QA, though the dense grading/comparison work did not receive its own regional close-up, so it falls short of the fully pervasive close-up practice required for a 10.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 29,
+          "transcript_excerpt": "LOOK · 1 render · close-up exec ... DIAGNOSTICS · clean",
+          "finding": "A correctly framed regional look inspected the execution area immediately after that area was built."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 30,
+          "transcript_excerpt": "APPLIED · place_shape dispatch queue 1700,760 120×120",
+          "finding": "Editing resumed after the execution close-up, beginning the grading region; this starts the adjustment portion of the render→adjust→render loop."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 75,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... BOARD DIFF · base → draft · 52 ops ... DIAGNOSTICS · clean",
+          "finding": "A final framed whole-page QA render was read immediately before finalize and confirmed clean diagnostics."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Five E-class lint findings appeared under successful APPLIED operations, and all were resolved promptly. Four W1 clipped-text warnings also appeared and were fixed rather than overridden. No lint repeated for more than three consecutive turns, no lint fight occurred, and no warning remained to require a commit-summary override reason.",
+      "lint_error_count": 5,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 10,
+          "transcript_excerpt": "+ W1 clipped-text: contract ... needs 180×733",
+          "finding": "The warning was addressed first by resizing at turn 11 and then by shortening the text at turn 12; it was not fought or silently overridden."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 40,
+          "transcript_excerpt": "+ E1 containment: evidence extends 60px outside its section grade",
+          "finding": "The containment error was resolved on the next turn by resizing the grade section."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 47,
+          "transcript_excerpt": "+ E1 containment: compare extends 128px outside its section page-frame ... + E2 containment: compare extends 128px past the base section page-frame",
+          "finding": "Both containment errors were resolved on the next turn by enlarging page-frame."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 51,
+          "transcript_excerpt": "+ E1 covered-content: label \"verdict + evidence\" chip on va covers retrygrade",
+          "finding": "The covered-content error was resolved on the next turn by moving the label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 72,
+          "transcript_excerpt": "+ E1 covered-content: label \"retry has evidence\" chip on retry-valid lies on baseline-check's path for 30px",
+          "finding": "The error was resolved on the next turn by moving the retry-valid label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 75,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA confirmed that no lint errors or warnings remained."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The sole commit summary accurately describes the stage diff and final render. The diff contains a pinned immutable suite, bounded workers and isolated SUT, separate infrastructure and behavior-failure paths, concurrent evidence-gated grading, fingerprint-compatible comparison, promotion to baseline, and retained audit records. The final render reported clean diagnostics, and no seen defect was left undeclared.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 76,
+          "line": "Created the pinned-run evaluation flow with bounded isolated execution, distinct fault handling, concurrent evidence-backed grading, compatible baseline comparison, promotion, and retained audit records.",
+          "assessment": "Honest and supported by the diff: workers/SUT encode bounded isolated execution; fault and behavior nodes encode distinct fault handling; graders and Evidence? encode concurrent evidence-backed grading; Same fingerprint? and baseline paths encode compatible comparison; promote encodes promotion; and the retention section encodes audit records."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 75,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The final pre-commit render showed no outstanding diagnosed defect."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 76,
+          "transcript_excerpt": "Committed: Created the pinned-run evaluation flow with bounded isolated execution, distinct fault handling, concurrent evidence-backed grading, compatible baseline comparison, promotion, and retained audit records.",
+          "finding": "The finalized message matches both the 52-operation diff and the final rendered board."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session completed in about 9.2 minutes, within the 15-minute budget, and finalized far below the 300-turn limit. The 52 committed patch operations were proportionate to a large orchestration diagram. There were no repeated NO-OPs, add-delete-rebuild cycles, or other thrash; corrective edits responded directly to lint findings.",
+      "operation_count": 52,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 9.215,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "LINTS · +0 −1 ... − W1 clipped-text (resolved)",
+          "finding": "The contract-note correction used a changed strategy after resizing proved slightly insufficient, rather than repeatedly guessing or rebuilding."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 76,
+          "transcript_excerpt": "(52 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The board was successfully finalized with a proportionate patch count."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, container collision, proxy failure, or other declared infrastructure failure occurred. The one session was committed normally, so no session is excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 76,
+          "transcript_excerpt": "Committed: ... The proposal is now awaiting operator review.",
+          "finding": "The transcript ended with a successful finalize rather than an interrupted tool start or infrastructure failure."
+        }
+      ]
+    },
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 32710,
+    "output_tokens": 2594
+  },
+  "flags": []
+}

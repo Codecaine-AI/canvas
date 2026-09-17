@@ -1,0 +1,187 @@
+{
+  "axis": "ph",
+  "scenario": "agent-session-orchestration",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: 94 total tool calls were made, none returned ERROR, no call was rejected, and no retry or repeated parse/schema-validation error class occurred. All lint-bearing operations were APPLIED and therefore are not failed calls. Failure rate was 0%, and the longest failure run was 0.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · place_section control 100,140 900×520",
+          "finding": "The first tool call applied successfully; there was no pre-APPLIED failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 93,
+          "transcript_excerpt": "Committed: Created the session-lifecycle overview with streaming and replay, durable checkpoints, recovery, child-session budgets, orphan cleanup, and safe shutdown paths.",
+          "finding": "Finalize succeeded on the first attempt; there was no blocked finalize or retry."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Two legal framed looks were used, both on the page-frame section. The first at turn 64 was followed by substantial adjustments and expansion, and the second at turn 92 verified a clean final board, forming one render→adjust→render loop. However, the first look came only after extensive construction, and no close-up looks targeted the dense runner, lifecycle, durable-state, or session-tree regions during their detailed construction. Thus perception was functional and included final QA, but was not interleaved throughout dense-region work at the level required for a 9–10.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 64,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "First explicit framed render of the board. It occurred late, after most upper and middle regions had already been built."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 65,
+          "transcript_excerpt": "APPLIED · change_color runner",
+          "finding": "An immediate visible adjustment followed the first render, beginning the credited adjustment round."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 66,
+          "transcript_excerpt": "APPLIED · resize page-frame → 3700×2760",
+          "finding": "The agent materially revised the layout after reading the first render, then built the lower session-tree region."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 92,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "Final QA render completed the render→adjust→render loop and showed clean diagnostics before finalize."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint etiquette was good. Six E-class lint findings appeared under successful APPLIED operations, and all were resolved before commit. Numerous warnings—label clearance and clipped-text findings—were likewise corrected rather than overridden. There was no instance of the same lint firing for more than three consecutive turns without a strategy change. No warning remained to require a commit-summary override reason.",
+      "lint_error_count": 6,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 33,
+          "transcript_excerpt": "+ E1 covered-content: label \"Tool calls via orchestrator\" chip on calls lies on checkpoint's path for 30px",
+          "finding": "The covered-content error was addressed at turn 34 by moving the calls label, then the resulting clearance warning was resolved at turn 35 by shortening the label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 36,
+          "transcript_excerpt": "+ E1 covered-content: label \"Assign host\" chip on assign lies on events's path for 30px",
+          "finding": "The agent tried different label positions at turns 37–39 and ultimately resolved the error. The strategy changed between calls, so this was a short skirmish rather than a lint fight."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 49,
+          "transcript_excerpt": "+ E1 containment: lifecycle extends 408px outside its section page-frame ... + E2 containment: lifecycle extends 408px past the base section page-frame",
+          "finding": "Both containment errors were resolved on the next call by resizing page-frame at turn 50."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 85,
+          "transcript_excerpt": "+ E1 covered-content: label \"Completed turn / safe stop: checkpoint\" chip on checkpoint lies on resume-execution's path for 249px",
+          "finding": "The error was resolved on the next call at turn 86 by moving the checkpoint label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 92,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA showed no remaining lint errors or warnings, so there was no silent warning override."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary accurately describes the committed diff and final render. Streaming/replay, checkpoints, recovery, child budgets, orphan cleanup, and shutdown paths are all represented by committed objects, connections, or explanatory notes. The summary does not claim unsupported visual cleanup or conceal a known defect. Final diagnostics were clean, and no seen defect was left undeclared.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 93,
+          "line": "Created the session-lifecycle overview with streaming and replay, durable checkpoints, recovery, child-session budgets, orphan cleanup, and safe shutdown paths.",
+          "assessment": "Honest and supported by the diff: live/replay edges cover streaming and replay; checkpoint, snapshot, restore, crash, and resume-execution cover durable state and recovery; spawn, quota, and exhaust cover child budgets; orphan, reaper, and kill-child cover cleanup; safe-stop, shutdown-note, stop, and release-safe cover coordinated shutdown."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 89,
+          "transcript_excerpt": "APPLIED · update_description ... The lower panel expands parent/child orchestration: scoped budgets and returned results, aggregate tree/workspace allowances, pause for user decisions, and orphan reaping.",
+          "finding": "The detailed description is consistent with the committed session-tree objects and edges."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 92,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The final render did not expose an undeclared lint defect before the honest commit."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session used 50 committed patch operations and completed in about 10.49 minutes, within the 15-minute and 300-turn budgets. The work was proportionate to a broad orchestration-diagram request. There were no repeated NO-OPs. One anti-parallel response edge was added and then deleted before the existing prompt edge was converted to bidirectional; this was a localized lint-driven correction rather than a substantial build-delete-rebuild thrash cycle.",
+      "operation_count": 50,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 10.49,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 22,
+          "transcript_excerpt": "APPLIED · connect response model→orch ... + W1 broken-edges: prompt and response run anti-parallel",
+          "finding": "A newly added redundant reverse edge triggered lint."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 23,
+          "transcript_excerpt": "APPLIED · delete response (connection) ... − W1 broken-edges (resolved)",
+          "finding": "The agent immediately removed the redundant edge instead of fighting the lint."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 24,
+          "transcript_excerpt": "APPLIED · style_edge prompt ... prompt arrow forward → both",
+          "finding": "The existing edge was cleanly converted to the recommended bidirectional representation; this was a concise correction, not repeated rebuild thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 93,
+          "transcript_excerpt": "Committed ... (50 patch operations).",
+          "finding": "The session reached finalize successfully after 629.2 seconds, comfortably within the wall-time budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The only session remained healthy through a successful finalize, so nothing is excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 93,
+          "transcript_excerpt": "Committed: Created the session-lifecycle overview ... The proposal is now awaiting operator review.",
+          "finding": "Successful commit confirms that the transcript did not end in harness death, proxy failure, or a stuck ACTIVE session."
+        }
+      ]
+    },
+    "score": 8.5
+  },
+  "usage": {
+    "input_tokens": 37538,
+    "output_tokens": 2725
+  },
+  "flags": []
+}

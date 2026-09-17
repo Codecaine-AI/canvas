@@ -1,0 +1,1094 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-comp-134600.rag-ingestion-retrieval",
+  "title": "2026-09-08-comp-134600 · rag-ingestion-retrieval",
+  "description": "# Retrieval-augmented generation\nRead left to right across ingestion and publication, then retrieval; the lower lane shows background index rebuilds.\n\n- Source adapters import documents, wikis, tickets and code on schedules or change events, carrying ACLs. Normalization isolates unparseable documents in quarantine. Hash classification skips unchanged content and supersedes changed versions, deleting stale derived records. Overlapping chunks retain headings, source identity, permissions and version stamps. Rate-limited embedding workers retry transient failures; exhausted batches retain inputs and attempt history in dead-letter storage for reprocessing.\n- Publication stages the vector index, document store and keyword index. Only a matching version across all three becomes searchable; partial writes stay unavailable for repair or rollback and recheck.\n- Rewritten questions fan out to vector and keyword search, then merge through fusion and reranking. User ACL filtering precedes evidence assessment and generation. Strong evidence yields grounded answers with citations; thin context or uniformly low scores yields “I don't know.” Feedback captures thumbs, citation usefulness and unanswered questions, returning coverage gaps to ingestion priorities.\n- Model changes trigger background corpus re-embedding into a new generation. Incomplete rebuilds continue or repair. Complete, consistent generations are promoted atomically; live queries remain on the current serving pointer until promotion, with the prior generation retained for rollback.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-09-08-comp-134600 · rag-ingestion-retrieval",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3600,
+        "height": 2600
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "ingest",
+      "type": "section",
+      "text": "1 · Ingestion & failure isolation",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 140,
+        "width": 2220,
+        "height": 760
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "adapters",
+      "type": "process",
+      "text": "Source adapters",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 160,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "extract",
+      "type": "process",
+      "text": "Normalize formats; strip boilerplate",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 600,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "hash",
+      "type": "process",
+      "text": "Content hash classification",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1040,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "chunk",
+      "type": "process",
+      "text": "Chunk with overlap",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1480,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "embed",
+      "type": "process",
+      "text": "Rate-limited embedding batches",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1920,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "quarantine",
+      "type": "process",
+      "text": "Quarantine + failure context",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 600,
+        "y": 520,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "changed",
+      "type": "process",
+      "text": "Supersede version; delete stale records",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1040,
+        "y": 520,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "publish",
+      "type": "section",
+      "text": "2 · Version-consistent publication",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2460,
+        "y": 140,
+        "width": 1080,
+        "height": 760
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "write",
+      "type": "process",
+      "text": "Stage vector index, document store & keyword index",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 2520,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "gate",
+      "type": "decision",
+      "text": "All 3 at same version?",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 3180,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "live",
+      "type": "process",
+      "text": "Publish serving version",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 3180,
+        "y": 720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "repair",
+      "type": "process",
+      "text": "Unavailable: repair or roll back",
+      "color": "gray",
+      "parentId": "publish",
+      "geometry": {
+        "x": 2740,
+        "y": 520,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "query",
+      "type": "section",
+      "text": "3 · Permission-aware retrieval & grounded answers",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1060,
+        "width": 3440,
+        "height": 740
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "rewrite",
+      "type": "process",
+      "text": "User question → rewrite searches",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 160,
+        "y": 1320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "vector",
+      "type": "process",
+      "text": "Vector lookup",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 620,
+        "y": 1180,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "keyword",
+      "type": "process",
+      "text": "Keyword lookup",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 620,
+        "y": 1500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fuse",
+      "type": "process",
+      "text": "Fuse & rerank candidates",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 1080,
+        "y": 1320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "acl",
+      "type": "process",
+      "text": "Apply asking user's ACL",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 1520,
+        "y": 1320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "confidence",
+      "type": "decision",
+      "text": "Enough strong evidence?",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 1960,
+        "y": 1320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "generate",
+      "type": "process",
+      "text": "Generate from evidence + citations",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 2420,
+        "y": 1320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "unknown",
+      "type": "process",
+      "text": "I don't know",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 1960,
+        "y": 1600,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "sources",
+      "type": "sticky",
+      "text": "**Source adapters**\nDocs, wikis, tickets, code\nSchedules + change events\nFirst import or update; ACL travels",
+      "color": "yellow",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 160,
+        "y": 520,
+        "width": 360,
+        "height": 300
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "retry",
+      "type": "process",
+      "text": "Workers retry transient failures",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1920,
+        "y": 520,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "dead",
+      "type": "process",
+      "text": "Dead-letter: inputs + attempt history",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1920,
+        "y": 740,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "skip",
+      "type": "process",
+      "text": "Unchanged: skip processing",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1040,
+        "y": 740,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "rebuild",
+      "type": "section",
+      "text": "4 · Background model rebuild & atomic switchover",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1960,
+        "width": 3440,
+        "height": 540
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "coordinator",
+      "type": "process",
+      "text": "Model change → rebuild coordinator",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 160,
+        "y": 2100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "background",
+      "type": "process",
+      "text": "Re-embed corpus → new generation",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 680,
+        "y": 2100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "ready",
+      "type": "decision",
+      "text": "Complete & consistent?",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 1200,
+        "y": 2100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "promote",
+      "type": "process",
+      "text": "Atomically promote new generation",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 1720,
+        "y": 2100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "current",
+      "type": "process",
+      "text": "Current generation / serving pointer",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2240,
+        "y": 2100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "prior",
+      "type": "process",
+      "text": "Prior generation retained for rollback",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2820,
+        "y": 2100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fragment-rules",
+      "type": "sticky",
+      "text": "Fragments retain headings, source ID, ACL and version. Quarantine lets the batch continue.",
+      "color": "yellow",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1480,
+        "y": 660,
+        "width": 380,
+        "height": 220
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "feedback",
+      "type": "process",
+      "text": "Feedback & coverage gaps",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 2980,
+        "y": 1320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "rebuild-repair",
+      "type": "process",
+      "text": "Continue rebuild / repair",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 1200,
+        "y": 2320,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "a-e",
+      "from": {
+        "objectId": "adapters"
+      },
+      "to": {
+        "objectId": "extract"
+      },
+      "label": "+ ACL",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "eh",
+      "from": {
+        "objectId": "extract"
+      },
+      "to": {
+        "objectId": "hash"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "hc",
+      "from": {
+        "objectId": "hash"
+      },
+      "to": {
+        "objectId": "chunk"
+      },
+      "label": "new",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "ce",
+      "from": {
+        "objectId": "chunk"
+      },
+      "to": {
+        "objectId": "embed"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "eq",
+      "from": {
+        "objectId": "extract"
+      },
+      "to": {
+        "objectId": "quarantine"
+      },
+      "label": "unparseable",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "hchanged",
+      "from": {
+        "objectId": "hash"
+      },
+      "to": {
+        "objectId": "changed"
+      },
+      "label": "changed",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "changedchunk",
+      "from": {
+        "objectId": "changed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chunk",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "ew",
+      "from": {
+        "objectId": "embed"
+      },
+      "to": {
+        "objectId": "write"
+      },
+      "label": "completed version",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "wg",
+      "from": {
+        "objectId": "write"
+      },
+      "to": {
+        "objectId": "gate"
+      },
+      "label": "verify",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "gl",
+      "from": {
+        "objectId": "gate"
+      },
+      "to": {
+        "objectId": "live"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.85,
+        "offset": 0
+      }
+    },
+    {
+      "id": "gr",
+      "from": {
+        "objectId": "gate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "repair",
+        "anchor": "right"
+      },
+      "label": "partial",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "labelPosition": {
+        "along": 0.85,
+        "offset": 0
+      }
+    },
+    {
+      "id": "rv",
+      "from": {
+        "objectId": "rewrite"
+      },
+      "to": {
+        "objectId": "vector"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "rk",
+      "from": {
+        "objectId": "rewrite"
+      },
+      "to": {
+        "objectId": "keyword"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "vf",
+      "from": {
+        "objectId": "vector"
+      },
+      "to": {
+        "objectId": "fuse"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "kf",
+      "from": {
+        "objectId": "keyword"
+      },
+      "to": {
+        "objectId": "fuse"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "fa",
+      "from": {
+        "objectId": "fuse"
+      },
+      "to": {
+        "objectId": "acl"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "ac",
+      "from": {
+        "objectId": "acl"
+      },
+      "to": {
+        "objectId": "confidence"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "cg",
+      "from": {
+        "objectId": "confidence"
+      },
+      "to": {
+        "objectId": "generate"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "cu",
+      "from": {
+        "objectId": "confidence"
+      },
+      "to": {
+        "objectId": "unknown"
+      },
+      "label": "thin context / all scores low",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "er",
+      "from": {
+        "objectId": "embed"
+      },
+      "to": {
+        "objectId": "retry"
+      },
+      "label": "failure / retry",
+      "style": "solid",
+      "arrow": "both",
+      "color": "red"
+    },
+    {
+      "id": "rd",
+      "from": {
+        "objectId": "retry"
+      },
+      "to": {
+        "objectId": "dead"
+      },
+      "label": "exhausted",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "hs",
+      "from": {
+        "objectId": "hash",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "skip",
+        "anchor": "left"
+      },
+      "label": "unchanged",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.8,
+        "offset": 60
+      }
+    },
+    {
+      "id": "cb",
+      "from": {
+        "objectId": "coordinator"
+      },
+      "to": {
+        "objectId": "background"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "br",
+      "from": {
+        "objectId": "background"
+      },
+      "to": {
+        "objectId": "ready"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "rp",
+      "from": {
+        "objectId": "ready"
+      },
+      "to": {
+        "objectId": "promote"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "pc",
+      "from": {
+        "objectId": "promote"
+      },
+      "to": {
+        "objectId": "current"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "rollback",
+      "from": {
+        "objectId": "current"
+      },
+      "to": {
+        "objectId": "prior"
+      },
+      "label": "retain / rollback",
+      "style": "solid",
+      "arrow": "both"
+    },
+    {
+      "id": "gf",
+      "from": {
+        "objectId": "generate"
+      },
+      "to": {
+        "objectId": "feedback"
+      },
+      "label": "thumbs + citation value",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "uf",
+      "from": {
+        "objectId": "unknown",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "feedback",
+        "anchor": "bottom"
+      },
+      "label": "unanswered questions",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "feedback-ingest",
+      "from": {
+        "objectId": "feedback",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "ingest",
+        "anchor": "bottom"
+      },
+      "label": "coverage gaps → ingestion priorities",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "live-query",
+      "from": {
+        "objectId": "live",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "query",
+        "anchor": "top"
+      },
+      "label": "Only published versions are searchable",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "serving-query",
+      "from": {
+        "objectId": "current",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "query",
+        "anchor": "bottom"
+      },
+      "label": "Live queries stay on current generation until promotion",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          2380,
+          1880
+        ],
+        [
+          1820,
+          1880
+        ]
+      ]
+    },
+    {
+      "id": "reprocess",
+      "from": {
+        "objectId": "dead",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "embed",
+        "anchor": "right"
+      },
+      "label": "reprocess",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red",
+      "labelPosition": {
+        "along": 0.25,
+        "offset": -60
+      }
+    },
+    {
+      "id": "repair-recheck",
+      "from": {
+        "objectId": "repair",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "write",
+        "anchor": "bottom"
+      },
+      "label": "repair & recheck",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "rebuild-wait",
+      "from": {
+        "objectId": "ready",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "rebuild-repair",
+        "anchor": "top"
+      },
+      "label": "no · continue rebuild / repair",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "resume-rebuild",
+      "from": {
+        "objectId": "rebuild-repair",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "background",
+        "anchor": "bottom"
+      },
+      "label": "retry",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    }
+  ],
+  "annotations": []
+}

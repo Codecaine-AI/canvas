@@ -1,0 +1,636 @@
+{
+  "axis": "sf",
+  "scenario": "code-review-agents",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 8,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system is a multi-agent automated code-review pipeline whose main lifecycle begins with a pull-request event at intake and ends with publication of review comments and a policy-governed verdict.",
+        "brief_evidence": "Title: “Multi-agent automated code review.” The pipeline begins “when a pull request event reaches the intake service,” and surviving findings become “inline comments and a summary verdict.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction identifies “A budgeted pull-request code-review procedure” and recovers the ordered flow from “PR event → resolve intake” through context construction, specialist review, merge, verification, and “Inline comments + verdict.” However, its uncertainty list says the reviewer shapes do not identify them as “autonomous agents, model calls, humans, or another implementation.”",
+        "note": "The complete primary lifecycle is recovered, but the defining multi-agent implementation is not recoverable from the board."
+      },
+      {
+        "brief_element": "A pull-request event reaches the intake service.",
+        "brief_evidence": "“beginning when a pull request event reaches the intake service”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The primary flow begins at “PR event → resolve intake” inside “1 · Intake / no model work.”",
+        "note": "The starting event and intake stage are explicit."
+      },
+      {
+        "brief_element": "Intake resolves the diff.",
+        "brief_evidence": "“Intake resolves the diff”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The intake requirements are reconstructed as “Resolve the diff, changed files, review policy, and build status.”",
+        "note": "Exact responsibility recovered."
+      },
+      {
+        "brief_element": "Intake resolves the changed files.",
+        "brief_evidence": "“Intake resolves the diff, changed files”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The intake note explicitly lists “changed files.”",
+        "note": "Exact responsibility recovered."
+      },
+      {
+        "brief_element": "Intake resolves the repository review policy.",
+        "brief_evidence": "“Intake resolves the ... repository review policy”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The intake requirements include “review policy.”",
+        "note": "The repository qualifier is implicit in the surrounding pull-request pipeline and later repository-policy note."
+      },
+      {
+        "brief_element": "Intake resolves build status.",
+        "brief_evidence": "“Intake resolves the ... build status.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The intake requirements explicitly include “build status.”",
+        "note": "Exact responsibility recovered."
+      },
+      {
+        "brief_element": "Draft pull requests are rejected before model work.",
+        "brief_evidence": "“It rejects draft pull requests ... before invoking any model work.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The intake process contains “Reject drafts; filter paths,” and the region is titled “Intake / no model work.”",
+        "note": "The rejection and pre-model boundary are both clear."
+      },
+      {
+        "brief_element": "Vendored paths are excluded before model work.",
+        "brief_evidence": "“excludes vendored ... paths before invoking any model work”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The intake note says “Exclude vendored / generated paths before model work.”",
+        "note": "Exact filtering constraint recovered."
+      },
+      {
+        "brief_element": "Generated paths are excluded before model work.",
+        "brief_evidence": "“excludes ... generated paths before invoking any model work”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The intake note says “Exclude vendored / generated paths before model work.”",
+        "note": "Exact filtering constraint recovered."
+      },
+      {
+        "brief_element": "Only an eligible change proceeds from intake into model-assisted review work.",
+        "brief_evidence": "“For an eligible change, the context builder assembles...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The edge following draft rejection and path filtering is labeled “eligible” and enters “Rank & truncate context.”",
+        "note": "The eligibility gate and its ordering are explicit."
+      },
+      {
+        "brief_element": "The context builder assembles diff hunks.",
+        "brief_evidence": "“the context builder assembles diff hunks”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The shared-context note lists “Diff hunks + surrounding source.”",
+        "note": "Exact context content recovered."
+      },
+      {
+        "brief_element": "The context builder assembles surrounding source.",
+        "brief_evidence": "“the context builder assembles ... surrounding source”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The shared-context note lists “Diff hunks + surrounding source.”",
+        "note": "Exact context content recovered."
+      },
+      {
+        "brief_element": "The context builder assembles related tests.",
+        "brief_evidence": "“the context builder assembles ... related tests”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The shared-context note lists “Related tests + ownership.”",
+        "note": "Exact context content recovered."
+      },
+      {
+        "brief_element": "The context builder assembles ownership metadata.",
+        "brief_evidence": "“the context builder assembles ... ownership metadata”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The shared-context note lists “ownership.”",
+        "note": "The word metadata is omitted, but ownership as context is unambiguous."
+      },
+      {
+        "brief_element": "The context builder assembles prior review history for the touched files.",
+        "brief_evidence": "“prior review history for the touched files”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The shared-context note lists “Prior review history,” but does not preserve the constraint that this history is specifically for the touched files.",
+        "note": "The data type is recovered, while its file-scoping detail is softened."
+      },
+      {
+        "brief_element": "The context budget forces material to be ranked.",
+        "brief_evidence": "“Its budget forces it to rank the material”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The process is “Rank & truncate context,” and the note says “Rank within token budget.”",
+        "note": "The required ranking behavior is explicit."
+      },
+      {
+        "brief_element": "Lower-value context is truncated to satisfy the budget.",
+        "brief_evidence": "“truncate lower-value context”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The shared-context note says “truncate lower-value material.”",
+        "note": "Exact degraded-context behavior recovered."
+      },
+      {
+        "brief_element": "Everything dropped from context is recorded.",
+        "brief_evidence": "“record everything it drops”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The shared-context note says “log every omission.”",
+        "note": "The completeness requirement for omission recording is preserved."
+      },
+      {
+        "brief_element": "The planner partitions the change into review units.",
+        "brief_evidence": "“The planner partitions the change into review units”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The component is labeled “Planner: partition & dispatch,” and the reconstruction says it partitions review work, but neither the component nor flow explicitly preserves the term or concept “review units.”",
+        "note": "Partitioning is clear; the resulting unit boundary is not specified."
+      },
+      {
+        "brief_element": "The planner dispatches correctness, security, performance, test-coverage, and API-compatibility reviewers concurrently.",
+        "brief_evidence": "“dispatches correctness, security, performance, test-coverage, and API-compatibility reviewers concurrently”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The planner fans out to five named processes—Correctness, Security, Performance, Test coverage, and API compatibility—inside a region titled “Concurrent review / shared context.”",
+        "note": "All five specialties and concurrent fan-out are recovered."
+      },
+      {
+        "brief_element": "The specialist reviewers are agents participating in a multi-agent system.",
+        "brief_evidence": "Title: “Multi-agent automated code review,” together with the five dispatched reviewers.",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies the reviewers as autonomous agents. The reconstruction explicitly lists uncertainty because the reviewer boxes are ordinary process shapes and could represent “autonomous agents, model calls, humans, or another implementation.”",
+        "note": "The roles are visible, but their agent ownership and autonomy are not communicated."
+      },
+      {
+        "brief_element": "All specialist reviewers operate over the shared context.",
+        "brief_evidence": "“reviewers concurrently over the shared context”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The shared-context edge enters the planner, which fans out to all five reviewers, and the containing region is titled “Concurrent review / shared context.”",
+        "note": "Shared input and fan-out are clear."
+      },
+      {
+        "brief_element": "Each reviewer finding includes a current-file location.",
+        "brief_evidence": "“Each reviewer returns findings with a current-file location”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reviewer requirements say “Return current-file location, severity, rationale, confidence.”",
+        "note": "Exact field recovered."
+      },
+      {
+        "brief_element": "Each reviewer finding includes severity.",
+        "brief_evidence": "“Each reviewer returns findings with ... severity”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reviewer requirements explicitly list “severity.”",
+        "note": "Exact field recovered."
+      },
+      {
+        "brief_element": "Each reviewer finding includes rationale.",
+        "brief_evidence": "“Each reviewer returns findings with ... rationale”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reviewer requirements explicitly list “rationale.”",
+        "note": "Exact field recovered."
+      },
+      {
+        "brief_element": "Each reviewer finding includes confidence.",
+        "brief_evidence": "“Each reviewer returns findings with ... confidence.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reviewer requirements explicitly list “confidence.”",
+        "note": "Exact field recovered."
+      },
+      {
+        "brief_element": "Reviewers may invoke read-only repository search.",
+        "brief_evidence": "“Reviewers may call read-only repository search”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reviewer note lists “Read-only search.”",
+        "note": "The repository qualifier is implicit rather than repeated, but the capability and read-only boundary are clear."
+      },
+      {
+        "brief_element": "Reviewers may invoke symbol lookup.",
+        "brief_evidence": "“Reviewers may call ... symbol lookup”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reviewer note explicitly lists “symbol lookup.”",
+        "note": "Exact capability recovered."
+      },
+      {
+        "brief_element": "Reviewers may invoke test-history tools.",
+        "brief_evidence": "“Reviewers may call ... test-history tools”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reviewer note explicitly lists “test history.”",
+        "note": "The tool capability is recovered."
+      },
+      {
+        "brief_element": "Tool calls are limited by a per-review call budget.",
+        "brief_evidence": "“within a per-review call budget”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reviewer note says “Call budget exhausted,” but does not explicitly state that the budget is per review or attach it specifically to tool calls.",
+        "note": "A reviewer call allowance is visible, while its exact scope is softened."
+      },
+      {
+        "brief_element": "A reviewer that exhausts its call allowance returns available findings rather than delaying the run.",
+        "brief_evidence": "“A reviewer that exhausts this allowance returns its available findings rather than delaying the run.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reviewer requirements state “Call budget exhausted → return available findings.”",
+        "note": "The degraded reviewer outcome is explicit; avoiding delay follows directly from returning immediately."
+      },
+      {
+        "brief_element": "The aggregator merges results from the parallel reviewers.",
+        "brief_evidence": "“The aggregator merges the parallel results”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "All five reviewer outputs converge on “Merge & deduplicate findings.”",
+        "note": "The aggregation fan-in is unambiguous, although the component is named by its operation rather than “aggregator.”"
+      },
+      {
+        "brief_element": "The aggregator deduplicates overlapping findings.",
+        "brief_evidence": "“deduplicates overlapping findings”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The process is explicitly labeled “Merge & deduplicate findings.”",
+        "note": "The board does not repeat “overlapping,” but deduplication of merged findings preserves the behavior."
+      },
+      {
+        "brief_element": "The aggregator reconciles conflicting severities.",
+        "brief_evidence": "“reconciles conflicting severities”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The merge note says “Reconcile conflicting severities.”",
+        "note": "Exact responsibility recovered."
+      },
+      {
+        "brief_element": "The aggregator withholds low-confidence findings.",
+        "brief_evidence": "“withholds low-confidence findings”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The merge note says “withhold low confidence.”",
+        "note": "Exact filtering behavior recovered."
+      },
+      {
+        "brief_element": "The aggregator checks the current branch head.",
+        "brief_evidence": "“It checks the current branch head”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The merge note says “Check current head.”",
+        "note": "The branch qualifier is implicit in the pull-request context, but the required head check is clear."
+      },
+      {
+        "brief_element": "The aggregator drops a finding when its current-file location no longer exists.",
+        "brief_evidence": "“drops any finding whose location no longer exists”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The merge note states “drop findings whose locations no longer exist.”",
+        "note": "Exact stale-location behavior recovered."
+      },
+      {
+        "brief_element": "Before publication, the verifier rechecks every high-severity finding against the actual source.",
+        "brief_evidence": "“Before publication, the verifier rechecks every high-severity finding against the actual source.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The ordered flow sends survivors to “Verify high severity in source” before “Inline comments + verdict.”",
+        "note": "Severity scope, source validation, and pre-publication ordering are recovered."
+      },
+      {
+        "brief_element": "An unverified high-severity finding is demoted instead of posted.",
+        "brief_evidence": "“An unverified finding is demoted instead of posted”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red branch labeled “unverified” leads from verification to “Demote; do not post.”",
+        "note": "The trigger, route, and terminal outcome are exact."
+      },
+      {
+        "brief_element": "Avoiding false-positive pull-request comments is the team's highest-priority failure concern.",
+        "brief_evidence": "“because false positives on a pull request are the failure the team most wants to avoid.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The reconstruction clearly recovers the preventive behavior “Demote; do not post,” but no reconstruction entry states that false positives are the team's foremost failure priority.",
+        "note": "The mitigation survives, but the explicit operational priority does not."
+      },
+      {
+        "brief_element": "Surviving findings become inline comments.",
+        "brief_evidence": "“Surviving findings become inline comments”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The publication process is “Inline comments + verdict,” reached through survivor verification and the “eligible” edge.",
+        "note": "The publication artifact is explicit."
+      },
+      {
+        "brief_element": "The pipeline emits a summary verdict.",
+        "brief_evidence": "“and a summary verdict.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The publication process says “Inline comments + verdict,” but does not explicitly identify the verdict as a summary.",
+        "note": "A verdict is recovered; its summary character is softened."
+      },
+      {
+        "brief_element": "Repository policy may cause the pipeline to request changes.",
+        "brief_evidence": "“Depending on repository policy, the pipeline can request changes”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The repository-policy note lists “Request changes.”",
+        "note": "Exact policy outcome recovered."
+      },
+      {
+        "brief_element": "Repository policy may cause the pipeline to approve.",
+        "brief_evidence": "“Depending on repository policy, the pipeline can ... approve”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The repository-policy note lists “approve.”",
+        "note": "Exact policy outcome recovered."
+      },
+      {
+        "brief_element": "Repository policy may cause the pipeline to remain advisory.",
+        "brief_evidence": "“Depending on repository policy, the pipeline can ... remain advisory.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The repository-policy note lists “advisory.”",
+        "note": "Exact policy outcome recovered."
+      },
+      {
+        "brief_element": "Author replies return to the calibration process.",
+        "brief_evidence": "“Author replies ... return to the calibration process.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A “published review” arrow reaches “Author replies / disagreements,” which routes by “adjudicate” to “Record wrong findings; calibrate.”",
+        "note": "The post-publication feedback route is clear."
+      },
+      {
+        "brief_element": "Human reviewer disagreements return to the calibration process.",
+        "brief_evidence": "“human reviewer disagreements return to the calibration process.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The process says “Author replies / disagreements” and routes to calibration, but it does not identify the disagreements as coming from human reviewers.",
+        "note": "The disagreement feedback path survives, while its human ownership does not."
+      },
+      {
+        "brief_element": "A finding adjudicated as wrong is recorded.",
+        "brief_evidence": "“A finding resolved as wrong is recorded”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The feedback route labeled “adjudicate” enters “Record wrong findings; calibrate.”",
+        "note": "The adjudication and recording behavior are explicit."
+      },
+      {
+        "brief_element": "A calibration store owns the persisted calibration information.",
+        "brief_evidence": "“the calibration store adjusts...”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies a calibration store or any canonical store component. The reconstruction only identifies the process “Record wrong findings; calibrate.”",
+        "note": "Calibration activity is visible, but persistence ownership and the store boundary are absent."
+      },
+      {
+        "brief_element": "The calibration store adjusts the confidence threshold for the wrong finding's class.",
+        "brief_evidence": "“the calibration store adjusts the confidence threshold for that finding class”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A dashed feedback route is labeled “later: class thresholds” and returns toward “Merge & deduplicate findings.” The reconstruction itself notes uncertainty over “which classes or threshold values are changed.”",
+        "note": "Class-specific threshold feedback is suggested, but the threshold is not explicitly identified as a confidence threshold and its owning store is absent."
+      },
+      {
+        "brief_element": "Calibration changes affect later reviews rather than the current published review.",
+        "brief_evidence": "“in later reviews.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The feedback edge is dashed and labeled “later: class thresholds.”",
+        "note": "The temporal boundary is explicit."
+      },
+      {
+        "brief_element": "A head-change monitor detects a force-push or new commit.",
+        "brief_evidence": "“A head-change monitor ... when a force-push or new commit arrives”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The lifecycle area includes “Head change → cancel run” and a “Force-push / new commit” note, but no distinct component is identified as a head-change monitor.",
+        "note": "The trigger is recovered, while monitoring ownership is not."
+      },
+      {
+        "brief_element": "A force-push or new commit cancels an in-flight review.",
+        "brief_evidence": "“cancels an in-flight review when a force-push or new commit arrives”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The failure flow is “Head change → cancel run,” with the force-push/new-commit policy note.",
+        "note": "Trigger and cancellation outcome are explicit."
+      },
+      {
+        "brief_element": "After cancellation, the system starts a fresh review against the new head.",
+        "brief_evidence": "“starts a fresh review against the new head”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red dashed route labeled “new head: restart” returns to “PR event → resolve intake,” and the note says “Restart intake on the new head.”",
+        "note": "The recovery loop and new-head target are clear."
+      },
+      {
+        "brief_element": "Partial work from the cancelled review is discarded.",
+        "brief_evidence": "“discards partial work”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The lifecycle note states “Discard all partial work.”",
+        "note": "Exact cleanup behavior recovered."
+      },
+      {
+        "brief_element": "No partial result is published against the wrong or old diff.",
+        "brief_evidence": "“rather than publishing it against the wrong diff.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The lifecycle note says “never publish against the old diff.”",
+        "note": "The publication safety boundary is explicit."
+      },
+      {
+        "brief_element": "The telemetry service tracks cost.",
+        "brief_evidence": "“The telemetry service tracks cost”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The telemetry note lists “Cost.”",
+        "note": "Metric recovered."
+      },
+      {
+        "brief_element": "The telemetry service tracks latency.",
+        "brief_evidence": "“The telemetry service tracks ... latency”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The telemetry note lists “latency.”",
+        "note": "Metric recovered."
+      },
+      {
+        "brief_element": "The telemetry service tracks token usage by reviewer.",
+        "brief_evidence": "“The telemetry service tracks ... token usage by reviewer”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The telemetry note lists “tokens by reviewer.”",
+        "note": "Metric and per-reviewer dimension recovered."
+      },
+      {
+        "brief_element": "The telemetry service tracks cancellation rate.",
+        "brief_evidence": "“The telemetry service tracks ... cancellation rate”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The telemetry note lists “cancellation rate.”",
+        "note": "Metric recovered."
+      },
+      {
+        "brief_element": "The telemetry service tracks the accepted-versus-dismissed rate of published findings.",
+        "brief_evidence": "“the accepted-versus-dismissed rate of published findings.”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The telemetry note lists “accepted vs dismissed findings,” but does not explicitly preserve that this is a rate or that its population is limited to published findings.",
+        "note": "The measurement categories survive, while the exact metric definition is softened."
+      },
+      {
+        "brief_element": "Telemetry is owned by a telemetry service.",
+        "brief_evidence": "“The telemetry service tracks...”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A yellow annotation is headed “Telemetry service,” but the reconstruction notes that it has “no visible connecting edge to a telemetry store or service node” and that collection mechanisms and producers are not shown.",
+        "note": "The service is named in annotation, but it is not represented as an operationally connected component."
+      },
+      {
+        "brief_element": "Each repository has a daily review budget.",
+        "brief_evidence": "“When a repository exceeds its daily review budget”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The intake and telemetry notes both reference the “Daily repository budget.”",
+        "note": "Repository scope and daily budget are explicit."
+      },
+      {
+        "brief_element": "When a repository exceeds its daily review budget, intake degrades subsequent runs.",
+        "brief_evidence": "“intake degrades subsequent runs”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction states that the daily budget “limits later runs,” and the intake note says “Daily budget exceeded.”",
+        "note": "The trigger, owner, and later-run timing are recovered."
+      },
+      {
+        "brief_element": "The over-budget degraded mode runs correctness and security review only.",
+        "brief_evidence": "“to correctness and security review only.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Both the intake and telemetry notes say later runs are limited to “correctness + security only.”",
+        "note": "The exact degraded reviewer set is explicit."
+      },
+      {
+        "brief_element": "Failures and feedback alter the review lifecycle through reviewer-budget degradation, verification demotion, changed-head cancellation and restart, daily-budget reduction, and calibration feedback.",
+        "brief_evidence": "“The diagram should make clear how failures and feedback affect the review lifecycle.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction enumerates failure paths for call-budget exhaustion, unverified findings, changed-head cancellation/restart, daily-budget degradation, stale or low-confidence findings, and post-publication calibration.",
+        "note": "The operational lifecycle effects are among the board's strongest communicated aspects."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "The context budget is specifically a token budget.",
+        "reconstruction_evidence": "The reconstruction repeatedly says “token budget,” citing “Rank within token budget.”",
+        "why_unsupported": "The brief only says that the context builder has a budget that forces ranking and truncation. It does not define that context budget specifically in tokens, even though token usage is separately tracked by telemetry."
+      },
+      {
+        "claim": "Calibration adjusts generic classification thresholds.",
+        "reconstruction_evidence": "The reconstruction describes a dashed feedback route labeled “later: class thresholds” and concludes that “later classification thresholds are calibrated.”",
+        "why_unsupported": "The brief specifies adjustment of the confidence threshold for the finding class, not generic classification thresholds. The reconstruction's broader wording may refer to the same mechanism, but it is more general than the stated behavior."
+      },
+      {
+        "claim": "The calibration feedback terminates at or is applied by the merge-and-deduplicate step.",
+        "reconstruction_evidence": "The reconstruction says the dashed feedback route ends at “Merge & deduplicate findings” and returns “toward finding handling.”",
+        "why_unsupported": "The brief assigns threshold adjustment to a calibration store and only says that it affects later reviews. It does not state that the merge/deduplication component owns or directly applies calibration."
+      }
+    ],
+    "strongest_transmitted_behavior": "The complete operational review lifecycle is strongly transmitted: eligibility filtering, budgeted shared-context construction, concurrent five-specialty fan-out, aggregation and stale/low-confidence filtering, high-severity source verification, publication, changed-head cancellation and restart, and post-publication feedback are all recoverable in the correct order.",
+    "most_consequential_loss": "The board does not establish that the five specialist reviewers are autonomous agents, and it omits the calibration store as the owner of persisted, finding-class-specific confidence thresholds. This weakens two important ownership boundaries despite preserving the surrounding flows.",
+    "overall_summary": "The reconstruction recovers the full system shape and every critical happy-path, safety, degradation, cancellation, and recovery route. Most detailed inputs, outputs, policies, reviewer constraints, and telemetry metrics are also explicit. The main losses are architectural rather than procedural: the specialist reviewers read only as concurrent process steps rather than agents, the head-change monitor and telemetry service are not fully connected component boundaries, and calibration persistence plus the exact confidence-threshold semantics are only partially communicated. The board is highly actionable for lifecycle discussion, but an engineer would still need clarification on agent ownership and calibration-state ownership.",
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 13811,
+    "output_tokens": 13409
+  },
+  "flags": []
+}

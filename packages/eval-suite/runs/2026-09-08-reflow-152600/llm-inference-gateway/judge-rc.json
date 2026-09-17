@@ -1,0 +1,22 @@
+{
+  "axis": "rc",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 0
+  },
+  "score": null,
+  "verdict": {
+    "skipped_reason": "BamlError: BamlClientError: BamlTimeoutError: Request timed out"
+  },
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0
+  },
+  "flags": [
+    "ERROR(BamlError: BamlClientError: BamlTimeoutError: Request timed out)"
+  ]
+}

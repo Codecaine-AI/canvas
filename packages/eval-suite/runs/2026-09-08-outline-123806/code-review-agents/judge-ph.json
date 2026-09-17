@@ -1,0 +1,216 @@
+{
+  "axis": "ph",
+  "scenario": "code-review-agents",
+  "run_id": "2026-09-08-outline-123806",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: 0 failed calls across 63 tool calls, no rejected calls, no retries, no consecutive failure runs, and no repeated parse/schema/validation error class. The single NO-OP at turn 7 was legal and was not repeated.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "NO-OP · resize page-frame — the board already matches this, so nothing changed.",
+          "finding": "This was a legal NO-OP, not a failed call, and the agent did not repeat it."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 62,
+          "transcript_excerpt": "Committed: Created the five-stage review pipeline with concurrent specialists, verification safeguards, calibration feedback, head-change recovery, and budget controls. (43 patch operations).",
+          "finding": "Finalize succeeded on the first attempt; there was no rejected or blocked finalize."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Two explicit renders were read: one during construction and one immediately before finalize. This establishes one build-adjust-QA loop, but both looks framed the entire page rather than the denser region just edited. There were many edits between the two looks, so close-up inspection was not regularly interleaved with dense-region work. The final render reported clean diagnostics and the agent committed directly afterward.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean ... ink 1%",
+          "finding": "The agent inspected the whole page after creating the stage sections and initial intake/context nodes."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "APPLIED · place_shape correct agent 1300,320 120×120",
+          "finding": "Editing resumed immediately after the first render, beginning the adjustment portion of the loop."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 61,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean ... ink 22%",
+          "finding": "A final whole-board QA render was read after all substantive edits, completing one render-adjust-render loop. No focused section/object close-up was used for the dense reviewer, controls, or crossing-edge regions."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 62,
+          "transcript_excerpt": "Committed: Created the five-stage review pipeline with concurrent specialists, verification safeguards, calibration feedback, head-change recovery, and budget controls.",
+          "finding": "The clean final render was followed directly by finalize, with no additional uninspected board mutation."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was handled constructively. Six error-severity lint appearances were produced across three edits, and all were resolved through resizing, fitting, label movement, endpoint changes, or rerouting. Warnings were likewise fixed rather than overridden. No lint repeated for more than three consecutive turns, no lint fight occurred, and the final diagnostics were clean.",
+      "lint_error_count": 6,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 27,
+          "transcript_excerpt": "+ W1 unreadable-labels: label \"parallel units + context\" chip on dispatch ... bleeds onto planner",
+          "finding": "The warning was addressed on the next turn by shortening the label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 28,
+          "transcript_excerpt": "dispatch label \"parallel units + context\" → dispatch ... − W1 unreadable-labels (resolved)",
+          "finding": "Immediate strategy change resolved the unreadable-label warning."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 30,
+          "transcript_excerpt": "+ E1 containment: intake-detail extends 20px outside its section intake-zone",
+          "finding": "A containment error appeared after resizing the note."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 31,
+          "transcript_excerpt": "APPLIED · fit_section intake-zone ... − E1 containment (resolved)",
+          "finding": "The containment error was fixed on the next call."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 51,
+          "transcript_excerpt": "+ E1 covered-content ... + E2 covered-content ... + E3 covered-content",
+          "finding": "Three edge-label/path overlap errors appeared when the calibration edge was added."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 52,
+          "transcript_excerpt": "APPLIED · move_label calibrate-next ... − E1 covered-content, − E3 covered-content (resolved)",
+          "finding": "Two of the three overlap errors were resolved immediately by moving the calibration label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 53,
+          "transcript_excerpt": "APPLIED · move_label verified-publish ... − E1 covered-content (resolved)",
+          "finding": "The remaining overlap error was resolved on the following turn."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 56,
+          "transcript_excerpt": "+ E1 covered-content ... + E2 covered-content",
+          "finding": "Two new covered-content errors appeared on the initial daily-budget route."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 57,
+          "transcript_excerpt": "budget-mode route telemetry→planner → telemetry→intake-zone ... − E1 covered-content, − E2 covered-content (resolved)",
+          "finding": "Both errors were resolved by changing the endpoint; the resulting proximity warning was then handled separately."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 58,
+          "transcript_excerpt": "APPLIED · reroute budget-mode ... − W1 covered-content (resolved)",
+          "finding": "The remaining warning was resolved by rerouting, leaving no silent override."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 61,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA confirmed that no lint errors or warnings remained."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary accurately describes the stage diff and final render. The diff contains five named pipeline stages, five concurrent reviewer agents, merge and source-verification safeguards, calibration feedback edges and storage, head-change cancellation/restart controls, bounded tools, telemetry, and daily-budget degradation. The summary does not claim unsupported visual rebalancing or conceal a known defect, and final diagnostics were clean.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 62,
+          "line": "Created the five-stage review pipeline with concurrent specialists, verification safeguards, calibration feedback, head-change recovery, and budget controls.",
+          "assessment": "Honest and supported by the diff: five stage sections were added; five reviewer agents occupy the concurrent-review section; merge/verify nodes and safeguards are present; blue calibration feedback, red head-restart, bounded-tool, telemetry, and orange budget-control elements are all present."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 60,
+          "transcript_excerpt": "Dashed red is cancellation/restart, orange is daily-budget degradation to correctness and security only, and blue is calibration feedback. Section-level dispatch and results edges represent the concurrent reviewer group, not a sequential chain.",
+          "finding": "The board description explicitly and accurately explains the substitutions and edge semantics used in the committed diagram."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 61,
+          "transcript_excerpt": "review-zone section \"3 · Concurrent reviewers · shared context\" ... correct agent \"Correctness\" ... security agent \"Security\" ... performance agent \"Performance\" ... tests agent \"Test coverage\" ... compat agent \"API compatibility\"",
+          "finding": "The final render directly supports the summary's concurrent-specialists claim."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 61,
+          "transcript_excerpt": "feedback publish→calibration ... calibrate-next calibration→merge ... restart head-monitor→intake-zone ... budget-mode telemetry→intake-zone",
+          "finding": "The final edge inventory supports the calibration, head-change recovery, and budget-control claims."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session completed in about 7.03 minutes, well within the 15-minute budget, and finalized without retry. Metadata records 43 committed patch operations; the transcript contains 63 total tool calls including looks, intermediate mutations, one NO-OP, and finalize. There were no add-delete-rebuild cycles and no repeated NO-OP thrash. Some objects required separate place/resize/text calls, but this remained proportionate for the broad scenario.",
+      "operation_count": 43,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 7.03,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "NO-OP · resize page-frame — the board already matches this, so nothing changed.",
+          "finding": "A single redundant resize occurred, but it was not repeated and therefore does not constitute NO-OP thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 59,
+          "transcript_excerpt": "APPLIED · fit_section controls ... controls 120,1620 2360×540 → 140,1580 1840×620 ... LINTS · clean",
+          "finding": "The final section fit was a direct cleanup operation, not a build-delete-rebuild cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 62,
+          "transcript_excerpt": "Committed ... (43 patch operations).",
+          "finding": "The requested board was reached and finalized without exhausting the 300-turn budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The sole session remained usable through successful finalize, so no session is excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 27085,
+    "output_tokens": 2816
+  },
+  "flags": []
+}

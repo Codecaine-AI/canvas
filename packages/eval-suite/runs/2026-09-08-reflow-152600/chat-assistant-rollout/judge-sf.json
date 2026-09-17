@@ -1,0 +1,644 @@
+{
+  "axis": "sf",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 8,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system is a customer support assistant that both handles customer conversations and supports staged rollout of new assistant versions.",
+        "brief_evidence": "“how our customer support assistant works and how new versions of it reach production”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed purpose identifies “a support assistant” providing customer-chat replies and “stages versioned challenger variants through live monitoring, judged experiments, human promotion, rollback, or removal.”",
+        "note": "Both the runtime-assistance and deployment-governance halves of the system are communicated."
+      },
+      {
+        "brief_element": "Customers converse with the assistant through web and mobile chat surfaces.",
+        "brief_evidence": "“A customer converses with the assistant through our web and mobile chat surfaces.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Component “Customer Web / mobile chat” begins the live flow and emits an edge labeled “Turn.”",
+        "note": "The customer-facing channels and their role as the live-flow entry point are explicit."
+      },
+      {
+        "brief_element": "On every customer turn, the assistant gathers all required context before answering.",
+        "brief_evidence": "“On every turn, the assistant gathers what it needs before answering”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Guarded live reply” flow orders the allowed turn into “Assemble turn context,” gathers profile facts, conversation history, and relevant articles, emits “Assembled context,” and only then proceeds to “Generate reply / action.”",
+        "note": "This is the main end-to-end runtime flow, and the required gather-before-generation ordering is clear."
+      },
+      {
+        "brief_element": "The assembled context includes the customer's long-term profile.",
+        "brief_evidence": "“the customer's long-term profile”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Long-term profile” supplies an edge labeled “Profile facts” to “Assemble turn context.”",
+        "note": "The profile is visibly part of live-turn context."
+      },
+      {
+        "brief_element": "The long-term profile contains preferences accumulated across earlier conversations.",
+        "brief_evidence": "“preferences ... accumulated across earlier conversations”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The durable-memory note states “Preferences, issues, resolutions—not raw logs,” and the profile receives post-conversation durable updates.",
+        "note": "Preferences and their durable, cross-conversation character are communicated."
+      },
+      {
+        "brief_element": "The long-term profile contains past issues accumulated across earlier conversations.",
+        "brief_evidence": "“past issues ... accumulated across earlier conversations”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The durable-memory note states “Preferences, issues, resolutions—not raw logs,” while the post-conversation flow updates the long-term profile.",
+        "note": "Past issues are represented as distilled profile facts."
+      },
+      {
+        "brief_element": "The long-term profile contains prior resolutions accumulated across earlier conversations.",
+        "brief_evidence": "“prior resolutions accumulated across earlier conversations”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The durable-memory note explicitly includes “resolutions,” and “Distill durable facts” writes them into the long-term profile.",
+        "note": "Prior resolutions are explicitly included in durable memory."
+      },
+      {
+        "brief_element": "The assembled context includes the current conversation so far.",
+        "brief_evidence": "“the current conversation so far”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Live transcript” supplies “Conversation so far” to “Assemble turn context.”",
+        "note": "Current-session context is explicit and correctly directed into context assembly."
+      },
+      {
+        "brief_element": "The assistant searches the support corpus for relevant help-center articles.",
+        "brief_evidence": "“the most relevant help-center articles found by searching the support corpus”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Components “Support corpus” and “Search help center” are connected by “Search corpus,” and the search component supplies “Relevant articles” to context assembly.",
+        "note": "The retrieval component, corpus, and retrieved output are all visible."
+      },
+      {
+        "brief_element": "Only the most relevant retrieved help-center articles are included in the live context.",
+        "brief_evidence": "“the most relevant help-center articles”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The edge from “Search help center” into context assembly is labeled “Relevant articles.”",
+        "note": "Relevance filtering is conveyed, though no ranking implementation is specified or required."
+      },
+      {
+        "brief_element": "A model call produces the reply from the assembled context.",
+        "brief_evidence": "“A model call produces the reply from that assembled context.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A model component labeled “Generate reply / action” receives “Assembled context” and emits “Draft reply.”",
+        "note": "The model-generation step and its input/output are explicit."
+      },
+      {
+        "brief_element": "When a reply requires an action, the assistant invokes an integration rather than treating every reply as an action.",
+        "brief_evidence": "“When the reply requires an action ... the assistant invokes integrations”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“Generate reply / action” is connected to “Billing / account actions” by an “Action / result” loop.",
+        "note": "The action path is visible, but no explicit decision or conditional edge shows that it is taken only when the reply requires an action."
+      },
+      {
+        "brief_element": "Supported actions include issuing refunds.",
+        "brief_evidence": "“such as issuing a refund”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The action tool is labeled generically “Billing / account actions.”",
+        "note": "A refund is reasonably covered by billing actions, but the specific example is not named."
+      },
+      {
+        "brief_element": "Supported actions include changing a subscription.",
+        "brief_evidence": "“or changing a subscription”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The action tool is labeled generically “Billing / account actions.”",
+        "note": "Subscription changes are plausibly covered but are not explicitly named."
+      },
+      {
+        "brief_element": "The assistant invokes integrations with both billing and account systems.",
+        "brief_evidence": "“integrations with the billing and account systems”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A tool component labeled “Billing / account actions” participates in the “Action / result” round trip with generation.",
+        "note": "The two integration domains are communicated, though represented as one combined capability."
+      },
+      {
+        "brief_element": "Credentials for billing and account integrations live in a managed secrets vault.",
+        "brief_evidence": "“the credentials for those integrations live in a managed secrets vault”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A key component labeled “Managed secrets vault” supplies the billing/account action component.",
+        "note": "Credential ownership is explicit."
+      },
+      {
+        "brief_element": "Integration credentials are fetched separately for each invocation.",
+        "brief_evidence": "“are fetched per invocation”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The vault edge is labeled “Per-call secret,” and a note states “Secrets: fetched per invocation.”",
+        "note": "The per-invocation constraint is explicit."
+      },
+      {
+        "brief_element": "Integration credentials are never stored with the assistant.",
+        "brief_evidence": "“never stored with the assistant itself”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The live-region note states “never stored by the assistant.”",
+        "note": "The credential-storage boundary is directly communicated."
+      },
+      {
+        "brief_element": "A safety layer screens customer input before processing.",
+        "brief_evidence": "“A safety layer screens ... the customer's input”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Input safety” receives the customer “Turn,” and its “Allowed” route proceeds to context assembly.",
+        "note": "Input screening and its placement before generation are clear."
+      },
+      {
+        "brief_element": "A safety layer screens the assistant's outgoing reply before it is sent.",
+        "brief_evidence": "“A safety layer screens ... the assistant's outgoing reply.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Output safety” receives “Draft reply” and precedes “Reply to customer.”",
+        "note": "Output screening and its ordering are explicit."
+      },
+      {
+        "brief_element": "A reply screened out by output safety is replaced with a safe fallback.",
+        "brief_evidence": "“A screened-out reply is replaced with a safe fallback”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The sole edge from “Output safety” to “Reply to customer” is labeled “Pass / safe fallback”; the reconstruction itself notes that pass and fallback are combined rather than drawn as separate branches.",
+        "note": "The fallback outcome is named, but the board does not explicitly depict the rejection condition or replacement branch."
+      },
+      {
+        "brief_element": "Repeated safety triggers cause a human handoff.",
+        "brief_evidence": "“repeated safety triggers ... hand the conversation to a human support agent”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "A red route to “Support agent” is labeled “Repeated triggers / customer request • handoff,” but another associated label narrows this to “Repeated input triggers.”",
+        "note": "The repeated-trigger handoff is present, but the board ambiguously narrows the trigger to input safety rather than clearly covering safety triggers from either screening layer."
+      },
+      {
+        "brief_element": "An explicit customer request causes a human handoff.",
+        "brief_evidence": "“or an explicit customer request hand the conversation to a human support agent”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The red handoff route is labeled “customer request • handoff,” with a nearby label “requested agent,” and terminates at “Support agent.”",
+        "note": "The customer-request trigger and human destination are explicit."
+      },
+      {
+        "brief_element": "The human support agent receives the conversation transcript during handoff.",
+        "brief_evidence": "“together with the transcript”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The handoff note states “Handoff: transcript + profile context + actions attempted.”",
+        "note": "Transcript transfer is explicit."
+      },
+      {
+        "brief_element": "The human support agent receives the customer's profile context during handoff.",
+        "brief_evidence": "“the profile context”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The handoff note states “Handoff: transcript + profile context + actions attempted.”",
+        "note": "Profile-context transfer is explicit."
+      },
+      {
+        "brief_element": "The human support agent receives information about what the assistant has already attempted.",
+        "brief_evidence": "“and what has already been attempted”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The handoff note states “Handoff: transcript + profile context + actions attempted.”",
+        "note": "Prior attempted actions are explicitly included in handoff context."
+      },
+      {
+        "brief_element": "After a conversation ends, a separate extraction pass reviews the transcript.",
+        "brief_evidence": "“After a conversation ends, an extraction pass reviews the transcript”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Live transcript” sends “Conversation ended” to the model component “Distill durable facts.”",
+        "note": "The trigger, source data, and post-conversation processing step are all visible."
+      },
+      {
+        "brief_element": "The extraction pass writes durable facts into the customer's long-term profile.",
+        "brief_evidence": "“writes durable facts into the customer's profile”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Distill durable facts” sends “Upsert facts + source conversation” to “Long-term profile.”",
+        "note": "The durable write and destination are explicit."
+      },
+      {
+        "brief_element": "The profile update is a distillation rather than storage of the raw transcript.",
+        "brief_evidence": "“a distillation, not a raw log”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The processing component is labeled “Distill durable facts,” and the memory note says “Preferences, issues, resolutions—not raw logs.”",
+        "note": "The distinction between durable facts and raw logs is explicit."
+      },
+      {
+        "brief_element": "A new profile fact that contradicts an older fact supersedes the older fact.",
+        "brief_evidence": "“A new fact that contradicts an older one supersedes it”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The durable-memory note states “Contradictions supersede old facts.”",
+        "note": "Conflict-resolution semantics are directly stated."
+      },
+      {
+        "brief_element": "Each durable fact records its source conversation.",
+        "brief_evidence": "“with the source conversation recorded”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The update edge says “Upsert facts + source conversation,” and the note says “Keep source conversation IDs.”",
+        "note": "Fact provenance is explicit."
+      },
+      {
+        "brief_element": "Any durable fact can be traced back to the conversation where it was learned.",
+        "brief_evidence": "“so any fact can be traced to where it was learned”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The board requires source conversation IDs to be retained with upserted facts.",
+        "note": "The traceability capability follows directly from the explicit source-ID association."
+      },
+      {
+        "brief_element": "Raw conversations older than the retention window leave the live store.",
+        "brief_evidence": "“Raw conversations older than the retention window leave the live store”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A route from the live-transcript area is labeled “Retention expired • archive raw log” and points to “Cold history.”",
+        "note": "Retention expiry and removal to archival storage are clear."
+      },
+      {
+        "brief_element": "Expired raw conversations are moved into cold storage.",
+        "brief_evidence": "“for cold storage”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The archival route terminates at an archive component labeled “Cold history.”",
+        "note": "The cold-storage destination is explicit."
+      },
+      {
+        "brief_element": "Cold-stored conversations remain recoverable for compliance review.",
+        "brief_evidence": "“where they remain recoverable for compliance review”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The memory note states “Cold history: compliance recovery only.”",
+        "note": "Compliance recovery is explicitly identified as the cold-history use case."
+      },
+      {
+        "brief_element": "Cold-stored raw conversations are never retrieved into a live customer turn.",
+        "brief_evidence": "“but are never pulled into a live turn”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The memory note states “Cold history: compliance recovery only; never live retrieval.”",
+        "note": "The operational boundary between archival data and live context is explicit."
+      },
+      {
+        "brief_element": "The team proposes challenger variants to improve the assistant.",
+        "brief_evidence": "“The team improves the assistant by proposing challenger variants”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The rollout area contains “Versioned variants,” a “Challenger,” champion/challenger sampling, judging, reporting, and promotion controls.",
+        "note": "The challenger-based improvement model is clear."
+      },
+      {
+        "brief_element": "A challenger may change the assistant prompt.",
+        "brief_evidence": "“a different prompt”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies prompt changes as a supported challenger dimension.",
+        "note": "The board communicates generic versioned variants but not this specific variant type."
+      },
+      {
+        "brief_element": "A challenger may change the retrieval policy.",
+        "brief_evidence": "“retrieval policy”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies retrieval-policy changes as a supported challenger dimension.",
+        "note": "The variant mechanism is present, but this specific configurable dimension is absent."
+      },
+      {
+        "brief_element": "A challenger may change the model choice.",
+        "brief_evidence": "“or model choice”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "missed",
+        "reconstruction_evidence": "No matching reconstruction entry identifies model choice as a supported challenger dimension.",
+        "note": "The board does not enumerate which aspects of the assistant a variant can change."
+      },
+      {
+        "brief_element": "Challenger variants run alongside the production champion.",
+        "brief_evidence": "“that run alongside the production champion”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Sample conversations” branches concurrently to “Champion” and “Challenger,” which both feed the judge panel.",
+        "note": "Parallel champion/challenger operation is clear."
+      },
+      {
+        "brief_element": "Variant definitions are stored as versioned configuration.",
+        "brief_evidence": "“Variant definitions are versioned configuration”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A component labeled “Versioned variants” sends “Load config” to “Sample conversations.”",
+        "note": "Versioned configuration is directly communicated."
+      },
+      {
+        "brief_element": "A rollout changes configuration rather than redeploying the assistant service.",
+        "brief_evidence": "“so a rollout changes configuration rather than redeploying the service”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "The rollout path begins with “Versioned variants” and “Load config,” but no reconstruction entry explicitly states that service redeployment is unnecessary or prohibited.",
+        "note": "Configuration-driven rollout is visible; the no-redeployment operational property is not explicit."
+      },
+      {
+        "brief_element": "A small sampled share of live conversations is served by a challenger.",
+        "brief_evidence": "“A small sampled share of live conversations is served by a challenger”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Sample conversations” sends a branch labeled “Small sample” to “Challenger.”",
+        "note": "The challenger traffic allocation is explicit."
+      },
+      {
+        "brief_element": "The challenger sample is served instead of the champion for those selected conversations.",
+        "brief_evidence": "“served by a challenger instead of the champion”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The sampling component branches “Most traffic” to Champion and “Small sample” to Challenger as alternate destinations.",
+        "note": "The exclusive traffic split is adequately communicated by the branching structure."
+      },
+      {
+        "brief_element": "Automated judges score completed champion conversations.",
+        "brief_evidence": "“A panel of automated judges scores completed champion ... conversations”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Champion” sends “Completed champion chats” to “Judge panel.”",
+        "note": "The data source, completion state, and automated judging destination are clear."
+      },
+      {
+        "brief_element": "Automated judges score completed challenger conversations.",
+        "brief_evidence": "“and challenger conversations”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "partial",
+        "reconstruction_evidence": "“Challenger” sends “Challenger results” to “Judge panel.”",
+        "note": "Challenger evaluation is clear, but the challenger edge says “results” rather than explicitly identifying completed challenger conversations."
+      },
+      {
+        "brief_element": "Automated judges score conversation resolution.",
+        "brief_evidence": "“on resolution”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The experiment score note lists “Resolution.”",
+        "note": "The criterion is explicit."
+      },
+      {
+        "brief_element": "Automated judges score factual grounding against the customer profile.",
+        "brief_evidence": "“factual grounding against the profile”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The score note states “Grounding: profile + cited articles.”",
+        "note": "Profile-based grounding is explicit."
+      },
+      {
+        "brief_element": "Automated judges score factual grounding against cited help-center articles.",
+        "brief_evidence": "“and the cited articles”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The score note states “Grounding: profile + cited articles.”",
+        "note": "Article-grounding evaluation is explicit."
+      },
+      {
+        "brief_element": "Automated judges score tone.",
+        "brief_evidence": "“and tone”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The experiment score note lists “Tone.”",
+        "note": "The criterion is explicit."
+      },
+      {
+        "brief_element": "Judge verdicts accumulate into an experiment report.",
+        "brief_evidence": "“their verdicts accumulate into an experiment report”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Judge panel” sends “Accumulate verdicts” to “Experiment report.”",
+        "note": "The aggregation path and destination are explicit."
+      },
+      {
+        "brief_element": "There is a separate experiment report for each challenger.",
+        "brief_evidence": "“an experiment report per challenger”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The experiment-score note explicitly says “Report per challenger.”",
+        "note": "Per-challenger report scope is stated."
+      },
+      {
+        "brief_element": "Promotion is gated by human review rather than automated scores alone.",
+        "brief_evidence": "“Promotion is gated on people, not just scores”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The report proceeds through “Clears bar • review” to a human component labeled “Product owner,” which has approval and rejection outcomes.",
+        "note": "The human gate is explicit and cannot be bypassed in the depicted promotion flow."
+      },
+      {
+        "brief_element": "A challenger must first clear the experiment bar before product-owner review.",
+        "brief_evidence": "“when a challenger clears the bar, a product owner reviews the report”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The edge from “Experiment report” to “Product owner” is labeled “Clears bar • review.”",
+        "note": "The ordering from score threshold to human review is clear."
+      },
+      {
+        "brief_element": "The product owner reviews the experiment report.",
+        "brief_evidence": "“a product owner reviews the report”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Experiment report” connects through “Clears bar • review” to the human labeled “Product owner.”",
+        "note": "Reviewer identity and reviewed artifact are explicit."
+      },
+      {
+        "brief_element": "The product owner may approve promotion.",
+        "brief_evidence": "“and approves ... promotion”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "An outgoing control route is labeled “Approve: swap champion; retain old.”",
+        "note": "The approval outcome is explicit."
+      },
+      {
+        "brief_element": "The product owner may reject promotion.",
+        "brief_evidence": "“or rejects promotion”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red edge labeled “Reject” terminates at the stop node “Keep champion.”",
+        "note": "The rejection path and terminal outcome are explicit."
+      },
+      {
+        "brief_element": "Approval makes the challenger the new champion.",
+        "brief_evidence": "“Approval makes the challenger the new champion”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The approval route is labeled “Approve: swap champion; retain old” and returns toward versioned-variant control.",
+        "note": "The champion swap is explicit, although some segment direction is visually difficult according to the reconstruction uncertainty list."
+      },
+      {
+        "brief_element": "The displaced champion is retained after promotion.",
+        "brief_evidence": "“the displaced champion is retained”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The approval label says “retain old,” and a component is labeled “Previous champion.”",
+        "note": "Retention of the displaced production version is explicit."
+      },
+      {
+        "brief_element": "A single rollback step can restore the displaced champion.",
+        "brief_evidence": "“so a single rollback step can restore it”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The rollback route is labeled “Retain old ↔ one-step rollback” and is associated with “Previous champion.”",
+        "note": "The rollback target and one-step constraint are directly stated."
+      },
+      {
+        "brief_element": "Live quality monitoring operates independently of the champion/challenger experiment.",
+        "brief_evidence": "“Live quality monitoring runs independently of the experiment”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A separate “Quality by variant” component receives a dashed operational-events route, and the reconstruction identifies it as independent live-quality observation.",
+        "note": "The board separates monitoring from the judge/report/promotion procedure."
+      },
+      {
+        "brief_element": "Live quality monitoring tracks resolution rate for each variant.",
+        "brief_evidence": "“it tracks resolution rate ... per variant”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The independent-checks note lists “Resolution rate” and “Per variant.”",
+        "note": "Metric and dimensionality are explicit."
+      },
+      {
+        "brief_element": "Live quality monitoring tracks human-handoff rate for each variant.",
+        "brief_evidence": "“human-handoff rate ... per variant”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The independent-checks note lists “Human-handoff rate” and “Per variant.”",
+        "note": "Metric and dimensionality are explicit."
+      },
+      {
+        "brief_element": "Live quality monitoring tracks safety triggers for each variant.",
+        "brief_evidence": "“safety triggers per variant”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The independent-checks note lists “Safety triggers” and “Per variant,” while the dashed input includes “safety / handoff events.”",
+        "note": "Metric and dimensionality are explicit."
+      },
+      {
+        "brief_element": "A challenger that regresses on any monitored live metric is pulled from traffic.",
+        "brief_evidence": "“a challenger that regresses on any of these is pulled from traffic”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The monitoring note says “pull on any regression,” and the red route says “Any regression: remove challenger now.”",
+        "note": "The any-metric trigger and removal outcome are clear."
+      },
+      {
+        "brief_element": "A regressing challenger is removed immediately.",
+        "brief_evidence": "“pulled from traffic immediately”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The regression route is labeled “remove challenger now.”",
+        "note": "Immediate response is explicit."
+      },
+      {
+        "brief_element": "Regression removal does not wait for the experiment to conclude.",
+        "brief_evidence": "“rather than waiting for its experiment to conclude”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "Independent monitoring has its own direct “Any regression: remove challenger now” route to version control, separate from the judge, report, and product-owner sequence.",
+        "note": "The independent direct route, combined with “now,” clearly communicates bypass of experiment completion."
+      }
+    ],
+    "unsupported_claims": [
+      {
+        "claim": "Repeated-trigger handoff is specifically caused by repeated input-safety triggers.",
+        "reconstruction_evidence": "The reconstruction cites a board label reading “Repeated input triggers / requested agent” and describes the failure trigger as “Repeated input safety triggers.”",
+        "why_unsupported": "The brief says “repeated safety triggers” without restricting them to the input screen; the reconstruction adds a narrower trigger source. This is treated as unsupported narrowing rather than a full contradiction because another board label says only “Repeated triggers.”"
+      }
+    ],
+    "strongest_transmitted_behavior": "The strongest transmission is the complete operational lifecycle: a guarded customer turn gathers profile facts, current transcript context, and retrieved articles before model generation; credentialed actions and output safety are included; completed conversations then distill traceable durable facts while old raw logs move to compliance-only cold history.",
+    "most_consequential_loss": "The most consequential loss is precision in conditional safety and action branching: the board combines normal output and safe fallback on one edge, does not explicitly show the condition for invoking account actions, and ambiguously narrows repeated safety-trigger handoff to input triggers.",
+    "overall_summary": "The reconstruction preserves the full system shape, ownership boundaries, primary live-turn flow, durable-memory lifecycle, cold-storage boundary, champion/challenger experiment, human promotion gate, rollback, and independent regression pull. It is highly usable for architecture discussion and captures nearly all critical operational behavior. Fidelity falls short of the top tier because several branch semantics remain implicit or combined, the no-redeployment property is only indirectly conveyed, and the allowed challenger dimensions—prompt, retrieval policy, and model choice—are omitted.",
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 15121,
+    "output_tokens": 14022
+  },
+  "flags": []
+}

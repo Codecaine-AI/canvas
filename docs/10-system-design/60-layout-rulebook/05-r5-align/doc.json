@@ -1,0 +1,168 @@
+{
+ "schemaVersion": 1,
+ "id": "canvas-10-system-design-60-layout-rulebook-05-r5-align",
+ "title": "R5 \u2014 align: cross-branch registers",
+ "root": "b-r5-root",
+ "blocks": {
+  "b-r5-root": {
+   "id": "b-r5-root",
+   "type": "paragraph",
+   "props": {
+    "covers": "Alignment is a visual peer signal: centers share a line, exact geometry is copied from the digest, and the result is judged after each section batch rather than inferred by a register operation or lint.",
+    "format": "mdx",
+    "type": "design",
+    "concepts": [
+     "peer alignment",
+     "shared centerline",
+     "digest geometry",
+     "render judgment"
+    ]
+   },
+   "children": [
+    "b-r5-title-1",
+    "b-r5-align-opening",
+    "b-r5-card-2",
+    "b-r5-detect-3",
+    "b-r5-expand-4",
+    "b-r5-order-ascending-5",
+    "b-r5-order-carry-6",
+    "b-r5-order-excluded-7",
+    "b-r5-evidence-8"
+   ]
+  },
+  "b-r5-title-1": {
+   "id": "b-r5-title-1",
+   "type": "heading",
+   "props": {
+    "level": 1
+   },
+   "text": [
+    {
+     "insert": "R5 \u2014 align: cross-branch registers"
+    }
+   ],
+   "children": []
+  },
+  "b-r5-card-2": {
+   "id": "b-r5-card-2",
+   "type": "constraint",
+   "props": {
+    "title": "One shared centerline"
+   },
+   "text": [
+    {
+     "insert": "Place peers with their centers on one line. Alignment communicates equivalence only when it supports the section structure and the diagram's reading direction."
+    }
+   ],
+   "children": []
+  },
+  "b-r5-detect-3": {
+   "id": "b-r5-detect-3",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Mechanism:",
+     "attributes": {
+      "bold": true
+     }
+    },
+    {
+     "insert": " the "
+    },
+    {
+     "insert": "aesthetic",
+     "attributes": {
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+       "symbol": "style"
+      }
+     }
+    },
+    {
+     "insert": " asks peer rows and columns to reuse one exact gap with centers on one line. The agent performs the geometry edits directly: align puts a set of boxes on one edge or centerline, space_out sets the repeated gap along the flow axis, match_size copies a peer's dimensions, and any remaining coordinate comes from the latest BOARD digest. There is no automatic alignment pass and no dedicated alignment diagnostic."
+    }
+   ],
+   "children": []
+  },
+  "b-r5-expand-4": {
+   "id": "b-r5-expand-4",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Build:",
+     "attributes": {
+      "bold": true
+     }
+    },
+    {
+     "insert": " choose the row or column that best serves the diagram's reading direction, place the peers in their section's content batch, and inspect the pushed render. Exact alignment is aesthetic guidance rather than a diagnostic, so the agent must judge the signal visually. Preserve these composition constraints:"
+    }
+   ],
+   "children": []
+  },
+  "b-r5-order-ascending-5": {
+   "id": "b-r5-order-ascending-5",
+   "type": "list-item",
+   "props": {
+    "ordered": false
+   },
+   "text": [
+    {
+     "insert": "Keep the diagram's reading order intact; alignment must not make arrows reverse direction or scramble the sequence."
+    }
+   ],
+   "children": []
+  },
+  "b-r5-order-carry-6": {
+   "id": "b-r5-order-carry-6",
+   "type": "list-item",
+   "props": {
+    "ordered": false
+   },
+   "text": [
+    {
+     "insert": "Keep each group inside its section. Cross-section visual alignment may reinforce a flow, but it never replaces section membership or grouping."
+    }
+   ],
+   "children": []
+  },
+  "b-r5-order-excluded-7": {
+   "id": "b-r5-order-excluded-7",
+   "type": "list-item",
+   "props": {
+    "ordered": false
+   },
+   "text": [
+    {
+     "insert": "Copy the chosen peer's exact digest center and pitch instead of estimating a nearby register; the agent's 20 grid is only the quantization step."
+    }
+   ],
+   "children": []
+  },
+  "b-r5-evidence-8": {
+   "id": "b-r5-evidence-8",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Verification: the latest result is the geometry truth, including after a fit_section call. Compare peer centers in the digest and judge a look's render before building the next section."
+    }
+   ],
+   "children": []
+  },
+  "b-r5-align-opening": {
+   "id": "b-r5-align-opening",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Alignment is a visual peer signal: centers share a line, exact geometry is copied from the digest, and the result is judged after each section batch rather than inferred by a register operation or lint."
+    }
+   ],
+   "children": []
+  }
+ }
+}

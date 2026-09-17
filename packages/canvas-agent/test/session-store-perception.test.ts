@@ -407,12 +407,12 @@ describe("LINTS delta", () => {
     // A deliberate look establishes the clean diagnostic state.
     look(session, "alpha");
 
-    // Close the corridor to 40px: both findings explain the measured remedy in prose.
+    // Close the corridor to 40px: actual label fit explains the remedy in prose.
     const introduced = runOp(session, "move_to", { id: "beta", x: 200, y: 0 });
-    // Both the label-fit and arrow-corridor findings land in this delta.
-    expect(introduced.text).toContain("LINTS · +2 −0");
+    // The label-fit finding lands without a speculative box-spacing warning.
+    expect(introduced.text).toContain("LINTS · +1 −0");
     expect(introduced.text).toContain("+ W1 unreadable-labels:");
-    expect(introduced.text).toContain("+ W2 crowding:");
+    expect(introduced.text).not.toContain("crowding:");
     expect(introduced.text).toContain("open the alpha↔beta corridor to ≥");
     expect(introduced.text).not.toContain("suggested op:");
     expect(introduced.text).not.toContain('"type":"updateObject"');

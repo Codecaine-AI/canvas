@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-10-language-50-grid-example-grid",
+  "title": "Example grid (grid)",
+  "mode": "diagram",
+  "size": {
+    "width": 512,
+    "height": 336
+  },
+  "objects": [
+    {
+      "id": "table",
+      "type": "section",
+      "text": "grid 2x3 gap=32",
+      "label": "grid 2x3 gap=32",
+      "title": "grid 2x3 gap=32",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 512,
+        "height": 336
+      }
+    },
+    {
+      "id": "c1",
+      "type": "process",
+      "text": "c1",
+      "label": "c1",
+      "geometry": {
+        "x": 40,
+        "y": 116,
+        "width": 129,
+        "height": 67
+      }
+    },
+    {
+      "id": "c2",
+      "type": "process",
+      "text": "c2",
+      "label": "c2",
+      "geometry": {
+        "x": 192,
+        "y": 116,
+        "width": 129,
+        "height": 67
+      }
+    },
+    {
+      "id": "c3",
+      "type": "process",
+      "text": "c3",
+      "label": "c3",
+      "geometry": {
+        "x": 343,
+        "y": 116,
+        "width": 129,
+        "height": 67
+      }
+    },
+    {
+      "id": "c4",
+      "type": "process",
+      "text": "c4",
+      "label": "c4",
+      "geometry": {
+        "x": 40,
+        "y": 206,
+        "width": 129,
+        "height": 67
+      }
+    },
+    {
+      "id": "c5",
+      "type": "process",
+      "text": "c5",
+      "label": "c5",
+      "geometry": {
+        "x": 192,
+        "y": 206,
+        "width": 129,
+        "height": 67
+      }
+    },
+    {
+      "id": "c6",
+      "type": "process",
+      "text": "c6",
+      "label": "c6",
+      "geometry": {
+        "x": 343,
+        "y": 206,
+        "width": 129,
+        "height": 67
+      }
+    }
+  ],
+  "connections": []
+}

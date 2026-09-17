@@ -1,0 +1,569 @@
+{
+  "axis": "rc",
+  "scenario": "ivr-agent-handoff",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "Inbound calls enter the support system through a telephony trunk.",
+        "brief_evidence": "handles inbound calls through a telephony trunk",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 1, far left",
+            "observation": "A telephone icon labeled \"Inbound trunk\" begins the solid-arrow call flow."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=trunk]; connections[id=e1]",
+            "observation": "The \"Inbound trunk\" icon connects forward to the customer-record lookup."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "Before speaking to the caller, the call controller queries customer records using the caller number.",
+        "brief_evidence": "Before speaking, the call controller queries customer records by caller number.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 1, immediately after Inbound trunk",
+            "observation": "The first operation is \"Query customer records by caller number\"; both greeting branches occur after it."
+          },
+          {
+            "source": "json",
+            "locator": "section setup; objects[id=lookup]; connections e1-e3",
+            "observation": "The controller section routes trunk → lookup → greeting branches, establishing lookup before greeting."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "A successful customer-record match loads account context.",
+        "brief_evidence": "A match loads account context",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 1, upper branch after customer lookup",
+            "observation": "The arrow labeled \"Match\" leads to \"Load account context / Personalized greeting.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=personal]; connections[id=e2]",
+            "observation": "e2 is a forward edge labeled \"Match\" from lookup to the account-context process."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "A successful customer-record match results in a personalized greeting.",
+        "brief_evidence": "for a personalized greeting",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 1, upper Match branch",
+            "observation": "The destination box explicitly includes \"Personalized greeting.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=personal].text",
+            "observation": "The process text is \"Load account context\\nPersonalized greeting.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "A failed or unmatched customer lookup results in a generic greeting.",
+        "brief_evidence": "a failed or unmatched lookup gets a generic greeting",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 1, lower branch after customer lookup",
+            "observation": "The branch labeled \"Failed / no match\" leads to \"Generic greeting.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=generic]; connections[id=e3]",
+            "observation": "e3 is a forward edge labeled \"Failed / no match\" from lookup to the generic-greeting process."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "The controller captures recording and transcription consent up front.",
+        "brief_evidence": "The controller captures recording and transcription consent up front.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 1, after both greeting branches and before the voice menu",
+            "observation": "Both greeting paths converge on \"Capture recording & transcription consent,\" which then points to intent capture."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=consent]; connections e4-e6",
+            "observation": "Both greeting nodes feed the consent node, and consent precedes the menu in the directed flow."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "A short voice menu captures caller intent through speech.",
+        "brief_evidence": "A short voice menu captures intent through speech",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 1, right of consent",
+            "observation": "A process is labeled \"Short voice menu / Capture spoken intent.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=menu].text",
+            "observation": "The menu object explicitly states both the short-menu form and spoken-intent function."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Keypad intent entry is used when speech recognition is unreliable or the audio is noisy.",
+        "brief_evidence": "with keypad entry when recognition is unreliable or audio is noisy",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 1, branch from voice menu to Keypad intent entry",
+            "observation": "The forward branch is labeled \"Noisy / unreliable speech\" and terminates at \"Keypad intent entry.\""
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e7]; objects[id=keypad]",
+            "observation": "e7 carries the condition \"Noisy / unreliable speech\" from the menu to keypad entry."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "Routine intents are routed to the AI voice agent.",
+        "brief_evidence": "Routine intents pass to the AI voice agent",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 2, AI eligibility decision",
+            "observation": "The decision \"AI-eligible routine intent?\" sends its \"Yes\" branch to the AI voice agent."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=route], objects[id=agent], connections[id=e10]",
+            "observation": "A forward edge labeled \"Yes\" connects the routine-intent eligibility decision to the AI agent."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "The AI voice agent converses with callers in real time.",
+        "brief_evidence": "which converses in real time",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 2, central AI process",
+            "observation": "The process is labeled \"AI voice agent / Real-time conversation.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=agent].text",
+            "observation": "The AI agent object explicitly states \"Real-time conversation.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "The AI voice agent retrieves account facts through a read-only lookup service.",
+        "brief_evidence": "retrieves account facts through a read-only lookup service",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 2, AI agent to lower-left service",
+            "observation": "A bidirectional line labeled \"Retrieve facts\" links the AI agent and \"Read-only account lookup service.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=facts]; connections[id=facts-edge]",
+            "observation": "The agent is connected to the explicitly read-only account lookup service by an edge labeled \"Retrieve facts.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "The AI voice agent completes only a limited set of authorized self-service actions.",
+        "brief_evidence": "completes a limited set of authorized self-service actions",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 2, left of AI voice agent",
+            "observation": "The agent connects via \"Act / result\" to \"Authorized, limited self-service actions.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=actions]; connections[id=action-edge]",
+            "observation": "The actions object contains both authorization and limitation qualifiers and is directly connected to the agent."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "An unresolved request transfers the call to a human queue.",
+        "brief_evidence": "An unresolved request ... transfers the call to a human queue.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Orange escalation path from AI agent to Human queue",
+            "observation": "The forward escalation line includes the condition \"Unresolved\" and terminates at the human queue."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=escalate]",
+            "observation": "A forward edge from agent to transfer is labeled \"Unresolved / person requested / low confidence.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "An explicit request for a person transfers the call to a human queue.",
+        "brief_evidence": "an explicit request for a person ... transfers the call to a human queue",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 2 routes into Human queue",
+            "observation": "Both the direct routing branch \"No / person requested\" and the AI escalation line include a person-requested condition and point to the human queue."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=bypass] and connections[id=escalate]",
+            "observation": "The direct and post-AI transfer paths both visibly encode \"person requested.\""
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "The AI agent's own low-confidence risk flag transfers the call to a human queue.",
+        "brief_evidence": "the agent's own low-confidence risk flag transfers the call to a human queue",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Orange escalation path from AI voice agent to Human queue",
+            "observation": "The agent-originating transfer line is labeled \"Unresolved / person requested / low confidence.\""
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=escalate]",
+            "observation": "The edge from the AI agent to transfer includes \"low confidence,\" but neither the line nor its endpoints state that this is specifically a risk flag."
+          }
+        ],
+        "note": "The low-confidence escalation and its agent origin are clear, but the stated risk-flag qualifier is omitted."
+      },
+      {
+        "id": "R16",
+        "requirement": "A human transfer carries the call transcript.",
+        "brief_evidence": "The transfer carries the transcript",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 3, Handoff bundle note beside the transfer flow",
+            "observation": "The visible handoff bundle lists \"Transcript.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=payload].text",
+            "observation": "The note titled \"Handoff bundle\" explicitly includes transcript."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "A human transfer carries account context.",
+        "brief_evidence": "The transfer carries ... account context",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 3, Handoff bundle note",
+            "observation": "The visible handoff bundle lists \"Account context,\" and the human endpoint says \"Continue with context.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=payload] and objects[id=human]",
+            "observation": "Account context is included in the handoff bundle, and human support is labeled as continuing with context."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "A human transfer carries the detected intent.",
+        "brief_evidence": "The transfer carries ... detected intent",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 3, Handoff bundle note",
+            "observation": "The visible handoff bundle lists \"Detected intent.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=payload].text",
+            "observation": "Detected intent is explicitly included in the handoff bundle."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "A human transfer carries work already completed.",
+        "brief_evidence": "The transfer carries ... work already completed",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 3, Handoff bundle note",
+            "observation": "The visible handoff bundle lists \"Work already completed.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=payload].text",
+            "observation": "Completed work is explicitly included in the handoff bundle."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "The transfer context prevents the caller from having to repeat themselves.",
+        "brief_evidence": "so the caller does not repeat themselves",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 3, bottom of Handoff bundle note",
+            "observation": "The note explicitly states \"Caller need not repeat.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=payload].text",
+            "observation": "The visible note text includes the no-repeat outcome."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Human availability is evaluated against the queue's wait target.",
+        "brief_evidence": "If no human is available within the queue's wait target",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 3, between Human queue and Human support/callback",
+            "observation": "The queue points to \"Human available within wait target?\" with explicit Yes and wait-target-exceeded branches."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=available]; connections[id=wait-check], [id=human-yes], [id=timeout]",
+            "observation": "The directed queue flow includes a wait-target decision and labeled outcomes."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "When no human is available within the wait target, the system offers a callback instead of holding indefinitely.",
+        "brief_evidence": "the system offers a callback instead of holding indefinitely",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 3, downward branch from availability decision",
+            "observation": "The line labeled \"No — wait target exceeded\" points to \"Offer callback / End indefinite waiting.\""
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=callback]; connections[id=timeout]",
+            "observation": "A forward timeout branch leads to an offer-callback process that explicitly ends indefinite waiting."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "Every call is recorded.",
+        "brief_evidence": "Every call is recorded",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 4, leftmost quality-evidence process",
+            "observation": "A visible process says \"Record & transcribe calls,\" but it is not connected to the main call path and does not explicitly say every call."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=evidence]; all connections",
+            "observation": "The evidence object represents recording calls, but no edge from the call flow establishes universal application, and the word \"every\" is absent from visible object and edge text."
+          }
+        ],
+        "note": "Recording is represented as a system function, but the universal every-call constraint is not fully encoded."
+      },
+      {
+        "id": "R24",
+        "requirement": "Every call is transcribed for quality review.",
+        "brief_evidence": "Every call is ... transcribed for quality review.",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 4, Record & transcribe calls process and quality-evidence label",
+            "observation": "The process states \"Record & transcribe calls / Quality evidence,\" but it is not visibly tied to every branch of the call flow."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=evidence]; connections[id=evidence-review]",
+            "observation": "Transcription and its quality purpose are represented, while the connections only show selected unresolved/abandoned evidence proceeding to review; universal every-call scope is not stated."
+          }
+        ],
+        "note": "Transcription for quality is present, but the every-call qualifier is missing."
+      },
+      {
+        "id": "R25",
+        "requirement": "Unresolved calls feed a review loop.",
+        "brief_evidence": "Unresolved calls ... feed a review loop",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 4, dashed violet line into Review unresolved & abandoned calls",
+            "observation": "The quality-evidence process feeds the review process on a line labeled \"Unresolved / abandoned.\""
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=evidence-review]; objects[id=review]",
+            "observation": "A dashed forward edge carrying unresolved calls enters the review process."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "Abandoned calls feed a review loop.",
+        "brief_evidence": "and abandoned calls feed a review loop",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 4, dashed violet line into Review unresolved & abandoned calls",
+            "observation": "The incoming review line explicitly includes \"abandoned,\" and the destination repeats \"abandoned calls.\""
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=evidence-review]; objects[id=review]",
+            "observation": "The review input edge and review node both explicitly represent abandoned calls."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "The review loop adjusts which intents the AI voice agent may handle.",
+        "brief_evidence": "that adjusts which intents the AI voice agent may handle",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Band 4 and dashed violet return path to Band 2",
+            "observation": "Review leads through \"Refine scope\" to \"Adjust AI-eligible intents,\" followed by an \"Updated eligibility\" arrow returning to the AI-eligibility decision."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=policy]; connections[id=review-policy], [id=policy-loop]",
+            "observation": "The review process updates the policy object, which returns updated eligibility to the routine-intent routing decision."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.9423,
+    "caps_applied": [],
+    "strongest_covered_cluster": "The customer-identification, greeting, consent, speech/keypad intent capture, AI self-service, escalation, contextual human handoff, bounded wait, and callback flow is represented with explicit directed paths and conditions.",
+    "most_consequential_gap": "The quality band shows recording and transcription, but it does not fully encode the universal requirement that every call is recorded and transcribed; the AI low-confidence escalation also omits the specific risk-flag qualifier.",
+    "coverage_summary": "The board substantially covers the complete operating flow and all major failure, transfer, callback, and review-loop behavior. Three system-defining requirements are partial rather than absent: the low-confidence escalation lacks the stated risk-flag qualifier, and recording/transcription lack an explicit every-call scope. No system-defining requirement is absent or contradicted, so no cap applies.",
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 15138,
+    "output_tokens": 6096
+  },
+  "flags": [
+    "SCORE-RECOMPUTED"
+  ]
+}

@@ -46,12 +46,4 @@ export interface CraftTargets {
   sectionGutterStacked: number;
   /** Padding inside a frame before its first child. */
   framePadding: number;
-  /** Base-section area as a multiple of the summed node area. */
-  boardAreaMultiple: number;
-  /** The ink share that area multiple reads as on a finished board. */
-  inkShare: number;
-  /** Fewest nodes a section is worth making. */
-  nodesPerSectionMin: number;
-  /** Most nodes a section holds before it splits into two named ones. */
-  nodesPerSectionMax: number;
 }

@@ -57,14 +57,14 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
     },
     {
       // covered-content and crowding: boxes on top of each other, and boxes
-      // closer than a wire and its chip physically need.
+      // with nearly touching boundaries.
       name: "covered-and-crowded",
       document: makeDocument([
         box("page", 0, 0, 1200, 800, "section"),
         box("under", 80, 80, 200, 120, "process"),
         box("over", 120, 100, 200, 120, "process"),
         box("near-a", 600, 80, 160, 96, "process"),
-        box("near-b", 790, 80, 160, 96, "process"),
+        box("near-b", 768, 80, 160, 96, "process"),
       ]),
     },
     {

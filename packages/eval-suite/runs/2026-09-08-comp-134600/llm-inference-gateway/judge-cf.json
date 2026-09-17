@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 5,
+  "verdict": {
+    "score": 5,
+    "score_rationale": "This lands on the 5 anchor because the topology is readable and regionally organized, but pervasive plain gray boxes, weak registry vocabulary, uneven density, and visible routing remnants keep it from reading as a finished pin-up.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 4.5,
+        "note": "Large unexplained empty bands surround and separate the regions, especially below the upper-left flow and across the outer frame, while several containers are much larger than their contents require."
+      },
+      {
+        "name": "color",
+        "score": 5.5,
+        "note": "Colored region washes and route colors provide some discipline, but nearly every operational component is rendered as the same gray box rather than wearing registry-specific colors."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 4.5,
+        "note": "Visible dangling line stubs appear above the response cache and to the right of the self-hosted pool, and several long routed wires meet or pass around nodes in ways that expose construction machinery."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 5,
+        "note": "Boxes are locally consistent and the numbered regions establish hierarchy, but sparse oversized containers, scattered notes, long connector runs, and plain boxes substituting for richer operational-map objects create an uneven, unfinished rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8110,
+    "output_tokens": 413
+  },
+  "flags": []
+}

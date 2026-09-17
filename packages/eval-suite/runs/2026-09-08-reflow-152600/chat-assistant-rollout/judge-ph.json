@@ -1,0 +1,205 @@
+{
+  "axis": "ph",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 7.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean call execution: all 131 transcript tool calls returned APPLIED, LOOK, or a successful commit; none returned ERROR. There were no rejected calls, retries, repeated schema/validation errors, or failure runs.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · resize page-frame → 3400×2500",
+          "finding": "The first call applied successfully, so there was no before-first-APPLIED failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "transcript_excerpt": "Committed: Created the support-assistant diagram covering guarded turns, credentialed actions, durable memory and cold history, plus sampled challengers, human approval or rejection, rollback, and independent regression control.",
+          "finding": "Finalize succeeded on the first attempt; it was neither blocked nor retried."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Three framed renders were used. The agent inspected the whole board early, inspected the dense rollout region after building it, then made multiple targeted additions and routing/label corrections before a final whole-board QA render. This forms two render→adjust→render intervals. Close-up use was somewhat sparse for a 131-call, multi-region build, but the dense rollout region received a framed look and the final render reported clean diagnostics.",
+      "render_count": 3,
+      "adjustment_round_count": 2,
+      "render_adjust_render_loop_count": 2,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame",
+          "finding": "Early whole-board inspection established the initial live-conversation layout before the bulk of the build."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 106,
+          "transcript_excerpt": "LOOK · 1 render · close-up rollout",
+          "finding": "A framed close-up was spent on the dense rollout region after its main nodes and edges were created."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 111,
+          "transcript_excerpt": "LINTS · +2 −0 ... blocked-input",
+          "finding": "After the rollout close-up, the agent continued an adjustment round by adding and rerouting the explicit input-trigger handoff path."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "Final whole-board QA occurred immediately before finalize and showed no open diagnostics."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "All lint errors and warnings were resolved before commit. Sixteen newly reported E-class lint findings appeared across the build, primarily edge-label coverage and routing conflicts. The agent changed routes, anchors, label positions, wording, or edge representation rather than repeatedly issuing an unchanged operation. The articles-label sequence was a short skirmish, but the strategy changed on each turn and did not meet the rubric's lint-fight definition. No warning was committed or overridden, so no commit-summary override reason was required.",
+      "lint_error_count": 16,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 47,
+          "transcript_excerpt": "LINTS · +5 −0\n  + E1 covered-content: label \"Conversation so far\" chip on conversation overlaps label \"Upsert facts + source conversation\" chip on learn\n  + E2 covered-content: label \"Upsert facts + source conversation\" chip on learn lies on conversation's path for 30px",
+          "finding": "The most substantial routing conflict was acknowledged by lint and followed by rerouting and label-position changes."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 51,
+          "transcript_excerpt": "APPLIED · move_label learn → along 0.42, offset -140 ... LINTS · +0 −1\n  − E1 covered-content  (resolved)",
+          "finding": "The learn-edge conflict was fixed rather than overridden."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 90,
+          "transcript_excerpt": "+ W2 broken-edges: saveold and rollback run anti-parallel between variants and previous",
+          "finding": "The anti-parallel-edge warning prompted a representation change rather than being ignored."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 93,
+          "transcript_excerpt": "APPLIED · style_edge saveold ... saveold  arrow forward → both\nLINTS · clean",
+          "finding": "The separate rollback edge was consolidated into a bidirectional edge, clearing the lint."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 114,
+          "transcript_excerpt": "APPLIED · move_label articles → along 0.8, offset 40\nLINTS · +2 −1",
+          "finding": "This began a brief label-placement skirmish; subsequent calls varied along/offset values and responded to the newly reported conflicts."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 118,
+          "transcript_excerpt": "APPLIED · move_label articles → along 0.42, offset 0\nLINTS · +0 −1\n  − E1 covered-content  (resolved)",
+          "finding": "The articles-label skirmish ended cleanly without re-firing the same lint for more than three unchanged-strategy turns."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "No lint errors or warnings remained at final QA, so there was no silent warning override."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The sole commit summary accurately describes the stage diff. The diff contains guarded input/output flow, per-call vault credentials and action integrations, durable-profile extraction and cold-history archival, champion/challenger sampling, automated judging, product-owner approval and rejection, rollback retention, and independent regression removal. The final render was diagnostically clean, and no seen defect was left undeclared.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "line": "Created the support-assistant diagram covering guarded turns, credentialed actions, durable memory and cold history, plus sampled challengers, human approval or rejection, rollback, and independent regression control.",
+          "assessment": "Honest and supported by the diff: the named systems and control paths are all present, and the summary does not claim lint or layout fixes absent from the committed state."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 93,
+          "transcript_excerpt": "saveold  arrow forward → both\nLINTS · clean",
+          "finding": "The summary's rollback claim is supported by the bidirectional retained-champion edge later labeled as one-step rollback."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 126,
+          "transcript_excerpt": "APPLIED · connect reject owner→rejected",
+          "finding": "The summary's explicit 'approval or rejection' wording is supported by the owner-to-Keep-champion rejection branch."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "pull monitor→variants \"Any regression: remove challenger now\" red",
+          "finding": "The independent regression-control claim is directly supported in the final render and stage diff."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The committed patch contains 63 operations, proportionate to a complex four-region architecture diagram. The session completed in approximately 14.81 minutes, narrowly within the 15-minute budget, and finalized well below the 300-turn limit. There was one localized add–reroute–delete cycle for the rollback edge, but it was a prompt consolidation in response to an anti-parallel-edge lint rather than broad destructive thrashing.",
+      "operation_count": 63,
+      "thrash_cycle_count": 1,
+      "wall_time_minutes": 14.81,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 90,
+          "transcript_excerpt": "APPLIED · connect rollback previous→variants",
+          "finding": "A separate rollback edge was added."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 92,
+          "transcript_excerpt": "APPLIED · delete rollback (connection)",
+          "finding": "The newly added rollback edge was deleted after rerouting failed to remove the anti-parallel warning, constituting one localized add-delete cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 93,
+          "transcript_excerpt": "APPLIED · style_edge saveold ... arrow forward → both",
+          "finding": "The cycle ended with a coherent strategy change: retention and rollback were consolidated into one bidirectional connection."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "transcript_excerpt": "Committed ... (63 patch operations).",
+          "finding": "The agent reached finalize successfully; metadata reports 888.6 seconds, or 14.81 minutes."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The only session remained healthy through a successful finalize, so no session is excluded from scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 130,
+          "transcript_excerpt": "The proposal is now awaiting operator review.",
+          "finding": "The transcript ended normally after commit, not on a stuck tool start, proxy failure, or container collision."
+        }
+      ]
+    },
+    "score": 7.5
+  },
+  "usage": {
+    "input_tokens": 52265,
+    "output_tokens": 3155
+  },
+  "flags": []
+}

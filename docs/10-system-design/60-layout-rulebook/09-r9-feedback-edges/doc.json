@@ -1,0 +1,154 @@
+{
+ "schemaVersion": 1,
+ "id": "canvas-10-system-design-60-layout-rulebook-09-r9-feedback-edges",
+ "title": "R9 \u2014 Feedback edges and detours",
+ "root": "b-r9-root",
+ "blocks": {
+  "b-r9-root": {
+   "id": "b-r9-root",
+   "type": "paragraph",
+   "props": {
+    "covers": "Feedback edges use direct labels, flow-facing endpoint steering, and clear return corridors; the ROUTES block and edge-related diagnostics judge the production-routed result.",
+    "format": "mdx",
+    "type": "design",
+    "concepts": [
+     "feedback edges",
+     "direct edge labels",
+     "return corridors",
+     "connection steering",
+     "ROUTES",
+     "edge diagnostics"
+    ]
+   },
+   "children": [
+    "b-r9-title-1",
+    "b-r9-feedback-edges-opening",
+    "b-r9-card-2",
+    "b-r9-body-3",
+    "b-r9-evidence-4"
+   ]
+  },
+  "b-r9-title-1": {
+   "id": "b-r9-title-1",
+   "type": "heading",
+   "props": {
+    "level": 1
+   },
+   "text": [
+    {
+     "insert": "R9 \u2014 Feedback edges and detours"
+    }
+   ],
+   "children": []
+  },
+  "b-r9-card-2": {
+   "id": "b-r9-card-2",
+   "type": "constraint",
+   "props": {
+    "title": "Feedback uses a clear return corridor"
+   },
+   "text": [
+    {
+     "insert": "A feedback edge exits toward a clear return corridor, carries its meaning on the edge label, and routes without crossing boxes, merging with another run, or reading as a section border."
+    }
+   ],
+   "children": []
+  },
+  "b-r9-body-3": {
+   "id": "b-r9-body-3",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "The "
+    },
+    {
+     "insert": "connection capabilities",
+     "attributes": {
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas-agent/src/catalog/layout-editor/context/capabilities/kinds/connections.ts",
+       "symbol": "CONNECTIONS_SPEC"
+      }
+     }
+    },
+    {
+     "insert": " and "
+    },
+    {
+     "insert": "aesthetic",
+     "attributes": {
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+       "symbol": "style"
+      }
+     }
+    },
+    {
+     "insert": " together define the mechanism: label edges directly, enter and exit on faces that point along the flow, reserve air for the return, and keep two runs from sharing a line. The router chooses sides when steering is omitted. When the route needs help, steer minimally in order \u2014 anchor, then endpoint position, then waypoints \u2014 and read the returned ROUTES polyline and through list before judging it done. Enforcement is measured on that production-routed polyline by "
+    },
+    {
+     "insert": "broken-edges",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas-agent/src/board/lints/rules/broken-edges.ts",
+       "symbol": "rule"
+      }
+     }
+    },
+    {
+     "insert": ": a route through a non-endpoint box is an error that blocks a committed finalize, while shared runs, border hugging, stranded chips, and excessive crossings are warnings that must be fixed or explicitly overridden. "
+    },
+    {
+     "insert": "covered-content",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas-agent/src/board/lints/rules/covered-content.ts",
+       "symbol": "rule"
+      }
+     }
+    },
+    {
+     "insert": " separately catches a label chip covering a box, chip, or foreign routed wire. unreadable-labels checks whether a chip fits between its endpoints, and crowding warns when sibling gaps do not leave the minimum arrow corridor. Fixable findings carry ready-to-send "
+    },
+    {
+     "insert": "suggested op:",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " JSON."
+    }
+   ],
+   "children": []
+  },
+  "b-r9-evidence-4": {
+   "id": "b-r9-evidence-4",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Verification: add connections after section content is in place, then judge the returned ROUTES block and pushed render. A clean return has an empty through list, a readable direct label, and a path that owns its corridor."
+    }
+   ],
+   "children": []
+  },
+  "b-r9-feedback-edges-opening": {
+   "id": "b-r9-feedback-edges-opening",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Feedback edges use direct labels, flow-facing endpoint steering, and clear return corridors; the ROUTES block and edge-related diagnostics judge the production-routed result."
+    }
+   ],
+   "children": []
+  }
+ }
+}

@@ -1,0 +1,1123 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-comp-134600.chat-assistant-rollout",
+  "title": "2026-09-08-comp-134600 · chat-assistant-rollout",
+  "description": "# Support assistant · memory & staged rollout\n\nRead the teal live-turn region left to right: web/mobile input is screened, then profile facts, conversation history and retrieved help-center articles assemble the model context. Optional billing/account actions fetch vault credentials per invocation without retaining them. Output screening permits a reply or substitutes a safe fallback. The human-handoff callout specifies escalation triggers and the transcript, profile and attempted-action package.\n\nBelow left, completed transcripts are distilled into durable profile facts; conflicts supersede older facts with source-conversation provenance. Retention expiry moves raw history to compliance-recoverable cold storage, never live retrieval.\n\nBelow right, versioned prompt/retrieval/model configurations split traffic between champion and a small challenger sample. Completed conversations feed automated judges and a per-challenger report. Product-owner approval switches champion configuration while retaining the previous champion; rejection keeps the champion.\n\nThe bottom region independently monitors resolution, handoffs and safety triggers per variant. Any challenger regression immediately disables its traffic. A separate one-step rollback restores the retained champion configuration. Rollout is configuration-driven, not a service redeploy.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Support assistant · memory & staged rollout",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3400,
+        "height": 3100
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "live",
+      "type": "section",
+      "text": "1 · Live conversation — guarded turns",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 120,
+        "width": 3240,
+        "height": 1000
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "history",
+      "type": "section",
+      "text": "2 · Conversation lifecycle & durable memory",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1240,
+        "width": 1400,
+        "height": 1060
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "rollout",
+      "type": "section",
+      "text": "3 · Versioned experiments & human-controlled rollout",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1640,
+        "y": 1240,
+        "width": 1700,
+        "height": 1060
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "chat",
+      "type": "icon",
+      "text": "Customer\nWeb / mobile",
+      "color": "yellow",
+      "parentId": "live",
+      "geometry": {
+        "x": 180,
+        "y": 520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "message"
+    },
+    {
+      "id": "input",
+      "type": "icon",
+      "text": "Input safety",
+      "color": "red",
+      "parentId": "live",
+      "geometry": {
+        "x": 440,
+        "y": 520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "context",
+      "type": "process",
+      "text": "Assemble turn context",
+      "color": "gray",
+      "parentId": "live",
+      "geometry": {
+        "x": 760,
+        "y": 520,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "profile",
+      "type": "icon",
+      "text": "Customer profile",
+      "color": "blue",
+      "parentId": "live",
+      "geometry": {
+        "x": 760,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "search",
+      "type": "icon",
+      "text": "Search help center",
+      "color": "gray",
+      "parentId": "live",
+      "geometry": {
+        "x": 1100,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "generate",
+      "type": "icon",
+      "text": "Generate reply",
+      "color": "pink",
+      "parentId": "live",
+      "geometry": {
+        "x": 1440,
+        "y": 520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "output",
+      "type": "icon",
+      "text": "Output safety",
+      "color": "red",
+      "parentId": "live",
+      "geometry": {
+        "x": 2200,
+        "y": 520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "action",
+      "type": "icon",
+      "text": "Billing / account actions",
+      "color": "gray",
+      "parentId": "live",
+      "geometry": {
+        "x": 1820,
+        "y": 520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "vault",
+      "type": "icon",
+      "text": "Managed secrets vault",
+      "color": "yellow",
+      "parentId": "live",
+      "geometry": {
+        "x": 1820,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "key"
+    },
+    {
+      "id": "deliver",
+      "type": "icon",
+      "text": "Reply to customer",
+      "color": "green",
+      "parentId": "live",
+      "geometry": {
+        "x": 2600,
+        "y": 520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "send"
+    },
+    {
+      "id": "fallback",
+      "type": "process",
+      "text": "Safe fallback",
+      "color": "gray",
+      "parentId": "live",
+      "geometry": {
+        "x": 2140,
+        "y": 820,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "transcript",
+      "type": "icon",
+      "text": "Live transcript",
+      "color": "blue",
+      "parentId": "live",
+      "geometry": {
+        "x": 840,
+        "y": 820,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "human",
+      "type": "icon",
+      "text": "Human support",
+      "color": "yellow",
+      "parentId": "live",
+      "geometry": {
+        "x": 3000,
+        "y": 820,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "handoff-note",
+      "type": "sticky",
+      "text": "**Escalate to human**\nExplicit customer request or repeated input/output safety triggers.\nTransfer transcript, profile context and attempted actions.",
+      "color": "yellow",
+      "parentId": "live",
+      "geometry": {
+        "x": 2900,
+        "y": 240,
+        "width": 380,
+        "height": 440
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "extract",
+      "type": "icon",
+      "text": "Extract durable facts",
+      "color": "pink",
+      "parentId": "history",
+      "geometry": {
+        "x": 400,
+        "y": 1400,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "merge",
+      "type": "process",
+      "text": "Supersede conflicting facts",
+      "color": "gray",
+      "parentId": "history",
+      "geometry": {
+        "x": 760,
+        "y": 1400,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "cold",
+      "type": "icon",
+      "text": "Cold history",
+      "color": "gray",
+      "parentId": "history",
+      "geometry": {
+        "x": 400,
+        "y": 1800,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "memory-policy",
+      "type": "sticky",
+      "text": "**Durable memory, not a raw log**\nPreferences, past issues and prior resolutions; conflicting facts are superseded, with source conversation IDs.\n\n**Cold history**\nRecoverable for compliance review only. Never retrieved into live turns.",
+      "color": "yellow",
+      "parentId": "history",
+      "geometry": {
+        "x": 760,
+        "y": 1740,
+        "width": 640,
+        "height": 400
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "variants",
+      "type": "icon",
+      "text": "Versioned variants",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 1800,
+        "y": 1380,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "split",
+      "type": "decision",
+      "text": "Sample traffic",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2100,
+        "y": 1380,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "champion",
+      "type": "process",
+      "text": "Champion · most traffic",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2520,
+        "y": 1360,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "challenger",
+      "type": "process",
+      "text": "Challenger · small sample",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2520,
+        "y": 1580,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "judges",
+      "type": "icon",
+      "text": "Automated judge panel",
+      "color": "pink",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 3020,
+        "y": 1580,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "report",
+      "type": "icon",
+      "text": "Report per challenger",
+      "color": "white",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 3020,
+        "y": 1920,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "owner",
+      "type": "icon",
+      "text": "Product owner approval",
+      "color": "yellow",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2620,
+        "y": 1920,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "promote",
+      "type": "process",
+      "text": "Promote; retain prior champion",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2100,
+        "y": 1920,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "ops",
+      "type": "section",
+      "text": "4 · Independent live quality & recovery",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 2420,
+        "width": 3240,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "monitor",
+      "type": "icon",
+      "text": "Live quality by variant",
+      "color": "gray",
+      "parentId": "ops",
+      "geometry": {
+        "x": 900,
+        "y": 2580,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "pull",
+      "type": "process",
+      "text": "Immediately pull regressing challenger",
+      "color": "gray",
+      "parentId": "ops",
+      "geometry": {
+        "x": 1400,
+        "y": 2580,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "quality-note",
+      "type": "sticky",
+      "text": "**Independent of experiments**\nTrack resolution rate, human-handoff rate and safety triggers per variant. Pull on any regression without waiting for the report.",
+      "color": "yellow",
+      "parentId": "ops",
+      "geometry": {
+        "x": 180,
+        "y": 2540,
+        "width": 600,
+        "height": 340
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "rollback",
+      "type": "process",
+      "text": "One-step rollback to prior champion",
+      "color": "gray",
+      "parentId": "ops",
+      "geometry": {
+        "x": 2220,
+        "y": 2580,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "eval-detail",
+      "type": "sticky",
+      "text": "**Variant contract**\nVersioned prompt, retrieval policy and model choice; configuration switches, no service redeploy.\n**Judge rubric**\nResolution, grounding against profile + cited articles, and tone.",
+      "color": "yellow",
+      "parentId": "ops",
+      "geometry": {
+        "x": 2700,
+        "y": 2540,
+        "width": 560,
+        "height": 380
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "reject",
+      "type": "process",
+      "text": "Reject · keep champion",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2520,
+        "y": 2160,
+        "width": 280,
+        "height": 120
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": {
+        "objectId": "chat"
+      },
+      "to": {
+        "objectId": "input"
+      },
+      "label": "turn",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c2",
+      "from": {
+        "objectId": "input"
+      },
+      "to": {
+        "objectId": "context"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": -60
+      }
+    },
+    {
+      "id": "c3",
+      "from": {
+        "objectId": "profile"
+      },
+      "to": {
+        "objectId": "context"
+      },
+      "label": "durable facts",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.1,
+        "offset": -100
+      }
+    },
+    {
+      "id": "c4",
+      "from": {
+        "objectId": "search"
+      },
+      "to": {
+        "objectId": "context"
+      },
+      "label": "relevant articles",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c5",
+      "from": {
+        "objectId": "context"
+      },
+      "to": {
+        "objectId": "generate"
+      },
+      "label": "assembled context",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c6",
+      "from": {
+        "objectId": "generate"
+      },
+      "to": {
+        "objectId": "action"
+      },
+      "label": "if action needed",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "credentials",
+      "from": {
+        "objectId": "vault"
+      },
+      "to": {
+        "objectId": "action"
+      },
+      "label": "fetch per invocation; never retained",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "action-out",
+      "from": {
+        "objectId": "action"
+      },
+      "to": {
+        "objectId": "output"
+      },
+      "label": "outcome",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.35,
+        "offset": 0
+      }
+    },
+    {
+      "id": "allowed-out",
+      "from": {
+        "objectId": "output"
+      },
+      "to": {
+        "objectId": "deliver"
+      },
+      "label": "safe",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "blocked",
+      "from": {
+        "objectId": "output"
+      },
+      "to": {
+        "objectId": "fallback"
+      },
+      "label": "screened out",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "fallback-send",
+      "from": {
+        "objectId": "fallback",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "deliver",
+        "anchor": "bottom"
+      },
+      "label": "replacement",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "history-context",
+      "from": {
+        "objectId": "transcript"
+      },
+      "to": {
+        "objectId": "context"
+      },
+      "label": "conversation so far",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "no-action",
+      "from": {
+        "objectId": "generate",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "output",
+        "anchor": "top"
+      },
+      "label": "no action needed",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "handoff",
+      "from": {
+        "objectId": "handoff-note"
+      },
+      "to": {
+        "objectId": "human"
+      },
+      "label": "handoff",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "ended",
+      "from": {
+        "objectId": "transcript",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "extract",
+        "anchor": "top"
+      },
+      "label": "conversation ends",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.15,
+        "offset": 80
+      }
+    },
+    {
+      "id": "facts",
+      "from": {
+        "objectId": "extract"
+      },
+      "to": {
+        "objectId": "merge"
+      },
+      "label": "distilled facts",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "write-profile",
+      "from": {
+        "objectId": "merge",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "profile",
+        "anchor": "right"
+      },
+      "label": "upsert + source conversation",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          900,
+          1300
+        ],
+        [
+          600,
+          1300
+        ],
+        [
+          600,
+          180
+        ],
+        [
+          980,
+          180
+        ],
+        [
+          980,
+          300
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.2,
+        "offset": -160
+      }
+    },
+    {
+      "id": "retention",
+      "from": {
+        "objectId": "transcript",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "cold",
+        "anchor": "left"
+      },
+      "label": "retention expires",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          280,
+          880
+        ],
+        [
+          280,
+          1860
+        ]
+      ]
+    },
+    {
+      "id": "config-split",
+      "from": {
+        "objectId": "variants"
+      },
+      "to": {
+        "objectId": "split"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "majority",
+      "from": {
+        "objectId": "split"
+      },
+      "to": {
+        "objectId": "champion"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "sample",
+      "from": {
+        "objectId": "split",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "challenger",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "judge-champ",
+      "from": {
+        "objectId": "champion",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "judges",
+        "anchor": "top"
+      },
+      "label": "completed",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "judge-chall",
+      "from": {
+        "objectId": "challenger"
+      },
+      "to": {
+        "objectId": "judges"
+      },
+      "label": "completed",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "verdicts",
+      "from": {
+        "objectId": "judges"
+      },
+      "to": {
+        "objectId": "report"
+      },
+      "label": "verdicts accumulate",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "review",
+      "from": {
+        "objectId": "report"
+      },
+      "to": {
+        "objectId": "owner"
+      },
+      "label": "clears bar",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "approve",
+      "from": {
+        "objectId": "owner"
+      },
+      "to": {
+        "objectId": "promote"
+      },
+      "label": "approve",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "activate",
+      "from": {
+        "objectId": "promote",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "variants",
+        "anchor": "bottom"
+      },
+      "label": "switch champion config",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "regress",
+      "from": {
+        "objectId": "monitor"
+      },
+      "to": {
+        "objectId": "pull"
+      },
+      "label": "any regression",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "restore",
+      "from": {
+        "objectId": "rollback",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "promote",
+        "anchor": "bottom"
+      },
+      "label": "restore retained config",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "violet"
+    },
+    {
+      "id": "telemetry",
+      "from": {
+        "objectId": "live",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "monitor",
+        "anchor": "top"
+      },
+      "label": "live metrics per variant",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          1720,
+          1180
+        ],
+        [
+          1560,
+          1180
+        ],
+        [
+          1560,
+          2360
+        ],
+        [
+          960,
+          2360
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.85,
+        "offset": 0
+      }
+    },
+    {
+      "id": "pull-config",
+      "from": {
+        "objectId": "pull",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "variants",
+        "anchor": "left"
+      },
+      "label": "disable challenger traffic",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "labelPosition": {
+        "along": 0.08,
+        "offset": -180
+      }
+    },
+    {
+      "id": "reject-promotion",
+      "from": {
+        "objectId": "owner",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "reject",
+        "anchor": "top"
+      },
+      "label": "reject",
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ],
+  "annotations": []
+}
