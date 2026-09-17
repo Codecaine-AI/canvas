@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-10-language-70-align-example-align-contrast",
+  "title": "Example align contrast (align)",
+  "mode": "diagram",
+  "size": {
+    "width": 512,
+    "height": 336
+  },
+  "objects": [
+    {
+      "id": "left",
+      "type": "section",
+      "text": "Left",
+      "label": "Left",
+      "title": "Left",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 224,
+        "height": 336
+      }
+    },
+    {
+      "id": "a",
+      "type": "process",
+      "text": "a",
+      "label": "a",
+      "geometry": {
+        "x": 37,
+        "y": 91,
+        "width": 150,
+        "height": 78
+      }
+    },
+    {
+      "id": "b",
+      "type": "process",
+      "text": "b",
+      "label": "b",
+      "geometry": {
+        "x": 37,
+        "y": 221,
+        "width": 150,
+        "height": 78
+      }
+    },
+    {
+      "id": "right",
+      "type": "section",
+      "text": "Right",
+      "label": "Right",
+      "title": "Right",
+      "tint": "gray",
+      "geometry": {
+        "x": 288,
+        "y": 0,
+        "width": 224,
+        "height": 336
+      }
+    },
+    {
+      "id": "c",
+      "type": "process",
+      "text": "c",
+      "label": "c",
+      "geometry": {
+        "x": 325,
+        "y": 156,
+        "width": 150,
+        "height": 78
+      }
+    }
+  ],
+  "connections": []
+}

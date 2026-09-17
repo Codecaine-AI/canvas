@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 5,
+  "verdict": {
+    "score": 5,
+    "score_rationale": "The board is parseable but lands at the 5 anchor because small text, sprawling recovery routes, and several perimeter-scale detours make the central flow slow to follow at arm's length.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 5.5,
+        "note": "Most nodes and chips have clear local space, but the overall scale makes their text small, and several labels sit amid long vertical or horizontal edge traffic."
+      },
+      {
+        "name": "grouping",
+        "score": 7,
+        "note": "Six numbered regions clearly establish functional ownership, though the large recovery region overlaps the visual territory of execution and capacity flows."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 4,
+        "note": "Arrowheads, colors, and dashed styles help, but multiple dashed perimeter mega-detours, long return paths, and a clipped right-edge label require sustained tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 5,
+        "note": "The main stages, cache path, retries, failures, and accounting are represented, but the broad canvas and inter-region loops prevent the primary topology from reading at a glance."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8895,
+    "output_tokens": 508
+  },
+  "flags": []
+}

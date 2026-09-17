@@ -1,0 +1,775 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-reflow-152600.ivr-agent-handoff",
+  "title": "Phone support · AI agent handoff",
+  "description": "# Phone support · AI agent handoff\nRead down the call-controller intake, then across to AI self-service or human support. The inbound trunk supplies the caller number for lookup before any greeting: a match loads account context; no match or an error gets a generic greeting. Recording and transcription consent precedes the short speech menu, with keypad fallback for noisy or unreliable recognition.\n\nEligible routine intents reach the real-time AI voice agent, which uses a read-only account lookup and limited authorized actions. Resolved calls end; unresolved requests, requests for a person, and low-confidence flags transfer to the human queue. Ineligible intents bypass AI. Human handoff carries transcript, account context, detected intent, and completed work. A wait-target check leads either to a human or a callback offer, scheduled if accepted.\n\nThe blue evidence and quality-review path represents call-wide recordings and transcripts and review of unresolved and abandoned calls. Its dashed feedback updates the allowed AI intents. Consent-declined behavior is not specified and requires a policy decision.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1664,
+    "height": 1064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Phone support · AI agent handoff",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 60,
+        "y": 40,
+        "width": 2440,
+        "height": 1880
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "intake",
+      "type": "section",
+      "text": "1 · Call controller / intake",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 120,
+        "width": 720,
+        "height": 1520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "ai",
+      "type": "section",
+      "text": "2 · AI self-service",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 960,
+        "y": 920,
+        "width": 660,
+        "height": 720
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "human-region",
+      "type": "section",
+      "text": "3 · Human support",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1780,
+        "y": 920,
+        "width": 680,
+        "height": 860
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "trunk",
+      "type": "icon",
+      "text": "Inbound trunk",
+      "color": "gray",
+      "parentId": "intake",
+      "geometry": {
+        "x": 160,
+        "y": 200,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "voice"
+    },
+    {
+      "id": "lookup",
+      "type": "process",
+      "text": "Query records by caller number",
+      "color": "gray",
+      "parentId": "intake",
+      "geometry": {
+        "x": 480,
+        "y": 200,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "personal",
+      "type": "process",
+      "text": "Load context + personal greeting",
+      "color": "gray",
+      "parentId": "intake",
+      "geometry": {
+        "x": 160,
+        "y": 440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "generic",
+      "type": "process",
+      "text": "Generic greeting",
+      "color": "gray",
+      "parentId": "intake",
+      "geometry": {
+        "x": 480,
+        "y": 440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "consent",
+      "type": "process",
+      "text": "Capture recording + transcription consent",
+      "color": "gray",
+      "parentId": "intake",
+      "geometry": {
+        "x": 320,
+        "y": 660,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "menu",
+      "type": "process",
+      "text": "Short speech menu: capture intent",
+      "color": "gray",
+      "parentId": "intake",
+      "geometry": {
+        "x": 160,
+        "y": 880,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "keypad",
+      "type": "process",
+      "text": "Keypad intent entry",
+      "color": "gray",
+      "parentId": "intake",
+      "geometry": {
+        "x": 480,
+        "y": 1080,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "route",
+      "type": "decision",
+      "text": "AI-eligible intent?",
+      "color": "gray",
+      "parentId": "intake",
+      "geometry": {
+        "x": 320,
+        "y": 1360,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "voice-agent",
+      "type": "icon",
+      "text": "AI voice agent",
+      "color": "teal",
+      "parentId": "ai",
+      "geometry": {
+        "x": 1040,
+        "y": 1340,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "facts",
+      "type": "icon",
+      "text": "Read-only account lookup",
+      "color": "gray",
+      "parentId": "ai",
+      "geometry": {
+        "x": 1040,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "actions",
+      "type": "icon",
+      "text": "Authorized actions only",
+      "color": "gray",
+      "parentId": "ai",
+      "geometry": {
+        "x": 1420,
+        "y": 1020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "tool"
+    },
+    {
+      "id": "queue",
+      "type": "icon",
+      "text": "Human queue",
+      "color": "green",
+      "parentId": "human-region",
+      "geometry": {
+        "x": 1840,
+        "y": 1340,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "queue"
+    },
+    {
+      "id": "available",
+      "type": "decision",
+      "text": "Human within wait target?",
+      "color": "gray",
+      "parentId": "human-region",
+      "geometry": {
+        "x": 2140,
+        "y": 1340,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "person",
+      "type": "icon",
+      "text": "Human support agent",
+      "color": "yellow",
+      "parentId": "human-region",
+      "geometry": {
+        "x": 2220,
+        "y": 1040,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "callback",
+      "type": "process",
+      "text": "Offer callback; schedule if accepted",
+      "color": "gray",
+      "parentId": "human-region",
+      "geometry": {
+        "x": 2140,
+        "y": 1640,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "quality",
+      "type": "section",
+      "text": "4 · Call evidence & quality review",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1000,
+        "y": 460,
+        "width": 760,
+        "height": 240
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "evidence",
+      "type": "icon",
+      "text": "Recordings + transcripts",
+      "color": "blue",
+      "parentId": "quality",
+      "geometry": {
+        "x": 1040,
+        "y": 540,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "review",
+      "type": "process",
+      "text": "Review unresolved + abandoned calls",
+      "color": "gray",
+      "parentId": "quality",
+      "geometry": {
+        "x": 1440,
+        "y": 540,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "handoff-note",
+      "type": "sticky",
+      "text": "**Transfer with call**\n• Transcript\n• Account context\n• Detected intent\n• Work completed\nNo repeated details.",
+      "color": "yellow",
+      "parentId": "human-region",
+      "geometry": {
+        "x": 1820,
+        "y": 1000,
+        "width": 320,
+        "height": 280
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "resolved",
+      "type": "ellipse",
+      "text": "Resolved · end call",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1040,
+        "y": 1780,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "ellipse"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "c1",
+      "from": {
+        "objectId": "trunk"
+      },
+      "to": {
+        "objectId": "lookup"
+      },
+      "label": "Caller number",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c2",
+      "from": {
+        "objectId": "lookup",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "personal",
+        "anchor": "top"
+      },
+      "label": "Match",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c3",
+      "from": {
+        "objectId": "lookup",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "generic",
+        "anchor": "top"
+      },
+      "label": "No match / error",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 120
+      }
+    },
+    {
+      "id": "c4",
+      "from": {
+        "objectId": "personal",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "consent",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c5",
+      "from": {
+        "objectId": "generic",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "consent",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c6",
+      "from": {
+        "objectId": "consent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "menu",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c7",
+      "from": {
+        "objectId": "menu",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "keypad",
+        "anchor": "top"
+      },
+      "label": "Noisy / unreliable speech",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c8",
+      "from": {
+        "objectId": "menu",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "route",
+        "anchor": "left"
+      },
+      "label": "Recognized intent",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c9",
+      "from": {
+        "objectId": "keypad",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "route",
+        "anchor": "top"
+      },
+      "label": "Intent",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c10",
+      "from": {
+        "objectId": "route",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "voice-agent",
+        "anchor": "left"
+      },
+      "label": "Yes · routine intent + context",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.6,
+        "offset": -40
+      }
+    },
+    {
+      "id": "facts-link",
+      "from": {
+        "objectId": "voice-agent",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "facts",
+        "anchor": "bottom"
+      },
+      "label": "Query / account facts",
+      "style": "solid",
+      "arrow": "both"
+    },
+    {
+      "id": "action-link",
+      "from": {
+        "objectId": "voice-agent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "actions",
+        "anchor": "bottom"
+      },
+      "label": "Execute / result",
+      "style": "solid",
+      "arrow": "both"
+    },
+    {
+      "id": "transfer",
+      "from": {
+        "objectId": "voice-agent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "queue",
+        "anchor": "left"
+      },
+      "label": "Unresolved / person requested / low confidence",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1100,
+          1560
+        ],
+        [
+          1720,
+          1560
+        ],
+        [
+          1720,
+          1400
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.34,
+        "offset": 0
+      }
+    },
+    {
+      "id": "wait-check",
+      "from": {
+        "objectId": "queue"
+      },
+      "to": {
+        "objectId": "available"
+      },
+      "label": "Wait",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "answer",
+      "from": {
+        "objectId": "available",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "person",
+        "anchor": "bottom"
+      },
+      "label": "Yes · context handoff",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "timeout",
+      "from": {
+        "objectId": "available",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "callback",
+        "anchor": "top"
+      },
+      "label": "No · wait target exceeded",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "bypass",
+      "from": {
+        "objectId": "route",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "queue",
+        "anchor": "bottom"
+      },
+      "label": "No / person requested",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.18,
+        "offset": -40
+      }
+    },
+    {
+      "id": "record",
+      "from": {
+        "objectId": "consent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "evidence",
+        "anchor": "left"
+      },
+      "label": "Call-wide capture",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "evidence-review",
+      "from": {
+        "objectId": "evidence"
+      },
+      "to": {
+        "objectId": "review"
+      },
+      "label": "Flagged calls",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "feedback",
+      "from": {
+        "objectId": "review",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "route",
+        "anchor": "right",
+        "position": [
+          1,
+          0.6
+        ]
+      },
+      "label": "Adjust allowed AI intents",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          1580,
+          800
+        ],
+        [
+          880,
+          800
+        ],
+        [
+          880,
+          1240
+        ],
+        [
+          660,
+          1240
+        ],
+        [
+          660,
+          1420
+        ]
+      ]
+    },
+    {
+      "id": "success",
+      "from": {
+        "objectId": "voice-agent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "resolved",
+        "anchor": "top"
+      },
+      "label": "Resolved",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.87,
+        "offset": 0
+      }
+    }
+  ],
+  "annotations": [
+    {
+      "id": "annotation-1",
+      "target": {
+        "kind": "object",
+        "objectId": "consent"
+      },
+      "intent": "agent-request",
+      "body": "If a caller declines recording or transcription consent, should the call continue unrecorded, transfer to a person, or end?",
+      "status": "open",
+      "createdBy": "agent",
+      "createdAt": "2026-09-08T20:36:22.761Z",
+      "replies": []
+    }
+  ]
+}

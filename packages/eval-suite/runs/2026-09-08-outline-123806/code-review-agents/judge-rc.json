@@ -1,0 +1,789 @@
+{
+  "axis": "rc",
+  "scenario": "code-review-agents",
+  "run_id": "2026-09-08-outline-123806",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The pipeline begins when a pull request event reaches the intake service.",
+        "brief_evidence": "“beginning when a pull request event reaches the intake service”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 1, upper-left process",
+            "observation": "The first process is visibly labeled “PR event → Intake.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=intake]",
+            "observation": "Visible process text is “PR event → Intake,” and it starts the main connected flow."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "Intake resolves the diff, changed files, repository review policy, and build status.",
+        "brief_evidence": "“Intake resolves the diff, changed files, repository review policy, and build status.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 1 yellow intake note",
+            "observation": "The note states “Resolve diff, changed files, repository policy and build status.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=intake-detail].text",
+            "observation": "The rendered note explicitly lists diff, changed files, repository policy, and build status."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "Intake rejects draft pull requests before invoking any model work.",
+        "brief_evidence": "“It rejects draft pull requests ... before invoking any model work.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 1 section and second process",
+            "observation": "The section is labeled “Intake / no model work,” and the process says “Reject drafts; filter paths” before the eligible edge to context."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=intake-zone], objects[id=eligible], connections[id=e2]",
+            "observation": "Draft rejection is inside the “no model work” intake region and precedes the eligible transition to context."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "Intake excludes vendored and generated paths before invoking model work.",
+        "brief_evidence": "“excludes vendored or generated paths before invoking any model work”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 1 yellow intake note",
+            "observation": "The note says “Exclude vendored / generated paths before model work.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=intake-detail].text",
+            "observation": "Both path classes and the before-model-work boundary are explicit in rendered text."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "For an eligible change, the context builder assembles diff hunks, surrounding source, related tests, ownership metadata, and prior review history for touched files.",
+        "brief_evidence": "“For an eligible change, the context builder assembles diff hunks, surrounding source, related tests, ownership metadata, and prior review history for the touched files.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Eligible edge and Stage 2 yellow context note",
+            "observation": "The eligible arrow enters “Build ranked context”; the note lists “hunks, source, related tests, ownership and prior reviews.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e2], objects[id=context], objects[id=context-detail].text",
+            "observation": "The eligible transition feeds the context process, whose visible detail note contains all five requested context categories."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "The context budget forces the material to be ranked.",
+        "brief_evidence": "“Its budget forces it to rank the material”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 2 context process and yellow note",
+            "observation": "The process is “Build ranked context,” and the note says “Rank by value.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=context], objects[id=context-detail].text",
+            "observation": "Rendered labels explicitly encode ranked context and value ranking."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "The context builder truncates lower-value context to fit the budget.",
+        "brief_evidence": "“truncate lower-value context”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 2 yellow context note",
+            "observation": "The note says “Rank by value; truncate to budget,” communicating that lower-ranked material is removed to meet the budget."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=context-detail].text",
+            "observation": "Visible text couples value ranking with truncation to budget."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "The context builder records everything dropped during truncation.",
+        "brief_evidence": "“record everything it drops”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 2 yellow context note",
+            "observation": "The note states “log every dropped item.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=context-detail].text",
+            "observation": "Every dropped item is explicitly said to be logged."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "The planner partitions the change into review units.",
+        "brief_evidence": "“The planner partitions the change into review units”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 2 lower process",
+            "observation": "The planner process is labeled “Partition & dispatch units.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=planner].text",
+            "observation": "The rendered planner label explicitly includes partitioning units."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "The planner dispatches correctness, security, performance, test-coverage, and API-compatibility reviewers.",
+        "brief_evidence": "“dispatches correctness, security, performance, test-coverage, and API-compatibility reviewers”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Planner dispatch edge and Stage 3 reviewer column",
+            "observation": "A labeled “dispatch” arrow enters a reviewer region containing Correctness, Security, Performance, Test coverage, and API compatibility agents."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=dispatch], objects[id=correct|security|performance|tests|compat]",
+            "observation": "The dispatch connection targets the region containing all five named reviewer objects."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "The five reviewers run concurrently over shared context.",
+        "brief_evidence": "“reviewers concurrently over the shared context”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 3 section header",
+            "observation": "The reviewer region is visibly titled “Concurrent reviewers · shared context,” and the five agents are grouped in that region rather than chained sequentially."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=review-zone].text and child reviewer objects",
+            "observation": "The section text explicitly states concurrency and shared context; all reviewer agents are children of that section."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "Each reviewer returns findings containing a current-file location, severity, rationale, and confidence.",
+        "brief_evidence": "“Each reviewer returns findings with a current-file location, severity, rationale, and confidence.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lifecycle controls, tools yellow note",
+            "observation": "The note states “Each finding: current-file location, severity, rationale, confidence.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=tools-note].text",
+            "observation": "All four required finding fields are explicitly visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "Reviewers may use only read-only repository search, symbol lookup, and test-history tools.",
+        "brief_evidence": "“Reviewers may call read-only repository search, symbol lookup, and test-history tools”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Reviewer-to-tools dashed edge and lifecycle tools note",
+            "observation": "The bidirectional edge is labeled “Bounded read-only calls,” and the note lists repository search, symbol lookup, and test history."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=tool-access], objects[id=tools-note].text",
+            "observation": "The reviewer region is connected to the read-only tools component, with all three tool types named."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Reviewer tool use is constrained by a per-review call budget.",
+        "brief_evidence": "“within a per-review call budget”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lifecycle tools process and yellow note",
+            "observation": "The process says “Read-only tools · call budget,” and its note explicitly says “Per-review call budget.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=repo-tools], objects[id=tools-note].text",
+            "observation": "The per-review scope of the call budget is directly stated."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "A reviewer that exhausts its tool allowance returns available findings instead of delaying the run.",
+        "brief_evidence": "“A reviewer that exhausts this allowance returns its available findings rather than delaying the run.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lifecycle tools yellow note",
+            "observation": "The note says “on exhaustion, return available findings immediately.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=tools-note].text",
+            "observation": "Exhaustion behavior and immediate return of available findings are both explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "The aggregator merges the parallel reviewer results.",
+        "brief_evidence": "“The aggregator merges the parallel results”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 3 findings edge into Stage 4",
+            "observation": "The grouped concurrent reviewer region sends a “findings” arrow into “Merge & deduplicate.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=results], objects[id=merge]",
+            "observation": "A forward findings connection runs from the concurrent reviewer section to the merge process."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "The aggregator deduplicates overlapping findings.",
+        "brief_evidence": "“deduplicates overlapping findings”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 4 merge process",
+            "observation": "The process is labeled “Merge & deduplicate.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=merge].text",
+            "observation": "Deduplication is explicit in the rendered process label."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "The aggregator reconciles conflicting severities.",
+        "brief_evidence": "“reconciles conflicting severities”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 4 yellow quality note",
+            "observation": "The note states “Reconcile severities.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=quality-detail].text",
+            "observation": "Severity reconciliation is explicitly visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "The aggregator withholds low-confidence findings.",
+        "brief_evidence": "“withholds low-confidence findings”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 4 yellow quality note",
+            "observation": "The note states “withhold low confidence.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=quality-detail].text",
+            "observation": "The low-confidence withholding rule is explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "The aggregator checks the current branch head.",
+        "brief_evidence": "“It checks the current branch head”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 4 yellow quality note",
+            "observation": "The note says “Check current head.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=quality-detail].text",
+            "observation": "Current-head checking is directly stated."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "The aggregator drops a finding when its location no longer exists on the current head.",
+        "brief_evidence": "“drops any finding whose location no longer exists”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 4 yellow quality note",
+            "observation": "Immediately after the current-head check, the note says “drop locations that no longer exist.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=quality-detail].text",
+            "observation": "The stale-location drop outcome is explicitly coupled to the current-head check."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "Before publication, the verifier rechecks every high-severity finding against the actual source.",
+        "brief_evidence": "“Before publication, the verifier rechecks every high-severity finding against the actual source.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 4 verification process and outgoing publication edge",
+            "observation": "“Verify high severity in source” sits after merge and before the “surviving findings” arrow to publication."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=verify], connections[id=merge-verify], connections[id=verified-publish]",
+            "observation": "The verifier is sequenced between merge and publish, and its visible label specifies high severity and source."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "An unverified high-severity finding is demoted instead of being posted.",
+        "brief_evidence": "“An unverified finding is demoted instead of posted”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 4 yellow quality note",
+            "observation": "The note explicitly says “Unverified high-severity findings are demoted, not posted.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=quality-detail].text",
+            "observation": "Both the demotion outcome and prohibition on posting are visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "Avoiding false positives on pull requests is the team's highest-priority failure concern.",
+        "brief_evidence": "“because false positives on a pull request are the failure the team most wants to avoid”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 4 quality note and verifier-to-publication path",
+            "observation": "The board shows the false-positive mitigation—unverified high-severity findings are demoted and not posted—but does not visibly state that false positives are the failure the team most wants to avoid."
+          },
+          {
+            "source": "json",
+            "locator": "Searched all objects[].text and connection labels",
+            "observation": "No rendered text mentions “false positives” or explicitly identifies them as the highest-priority failure; only the mitigating behavior is present."
+          }
+        ],
+        "note": "The safety behavior is fully represented, but the stated priority/rationale that false positives are the team's foremost failure concern is omitted."
+      },
+      {
+        "id": "R25",
+        "requirement": "Surviving findings become inline comments.",
+        "brief_evidence": "“Surviving findings become inline comments”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 4-to-5 publication edge and publish process",
+            "observation": "An arrow labeled “surviving findings” enters “Inline comments + verdict.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=verified-publish], objects[id=publish]",
+            "observation": "The forward edge from verification is labeled “surviving findings,” and its target explicitly includes inline comments."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "Surviving findings produce a summary verdict.",
+        "brief_evidence": "“and a summary verdict”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 5 publish process",
+            "observation": "The publication process is labeled “Inline comments + verdict.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=publish].text",
+            "observation": "A verdict is explicitly included in the publication output."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "Repository policy determines whether the pipeline requests changes, approves, or remains advisory.",
+        "brief_evidence": "“Depending on repository policy, the pipeline can request changes, approve, or remain advisory.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 5 yellow publication-policy note",
+            "observation": "The note says “Repository policy selects: request changes, approve, or advisory.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=publication-policy].text",
+            "observation": "The policy dependency and all three possible dispositions are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R28",
+        "requirement": "Author replies and human reviewer disagreements feed back into calibration.",
+        "brief_evidence": "“Author replies and human reviewer disagreements return to the calibration process.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 5 blue dashed feedback edge and policy note",
+            "observation": "A blue dashed arrow labeled “Replies / disagreements” runs from publication to “Calibration thresholds,” while the note names author replies and human disagreements."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=feedback], objects[id=publication-policy].text, objects[id=calibration]",
+            "observation": "The directed feedback connection terminates at calibration and its rendered supporting note identifies both feedback sources."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "A finding resolved as wrong is recorded.",
+        "brief_evidence": "“A finding resolved as wrong is recorded”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 5 yellow publication-policy note",
+            "observation": "The note states “Record findings resolved as wrong.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=publication-policy].text",
+            "observation": "Recording wrong findings is explicitly visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R30",
+        "requirement": "The calibration store adjusts the confidence threshold for that finding class in later reviews.",
+        "brief_evidence": "“the calibration store adjusts the confidence threshold for that finding class in later reviews”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stage 5 calibration icon, publication note, and blue return edge",
+            "observation": "The note says “adjust later confidence thresholds by finding class,” and a blue dashed arrow labeled “Later confidence thresholds” returns from calibration to merge."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=calibration], objects[id=publication-policy].text, connections[id=calibrate-next]",
+            "observation": "A memory-style calibration component and directed later-threshold feedback represent persistent per-class adjustment for future processing."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "A head-change monitor responds when a force-push or new commit arrives.",
+        "brief_evidence": "“A head-change monitor ... when a force-push or new commit arrives”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lifecycle controls, head-monitor process and yellow note",
+            "observation": "The process is “Head monitor: cancel / restart,” and the note begins “Force-push / new commit.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=head-monitor], objects[id=cancel-note].text",
+            "observation": "The monitor component and both triggering head-change event types are visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "On a force-push or new commit, the monitor cancels the in-flight review.",
+        "brief_evidence": "“cancels an in-flight review when a force-push or new commit arrives”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lifecycle head-change note and red dashed lifecycle edge",
+            "observation": "The note states “cancel in-flight review,” and the red edge is labeled “Cancel; restart new head.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=cancel-note].text, connections[id=restart]",
+            "observation": "The cancellation action is explicit in both the note and the directed red restart control."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R33",
+        "requirement": "After a head change, the pipeline starts a fresh review against the new head.",
+        "brief_evidence": "“starts a fresh review against the new head”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Red dashed edge from head monitor to intake and cancellation note",
+            "observation": "The edge says “Cancel; restart new head,” and the note says “Restart intake on the new head.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=restart], objects[id=cancel-note].text",
+            "observation": "A forward restart connection targets the intake region, explicitly against the new head."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "After a head change, partial work is discarded rather than published against the wrong diff.",
+        "brief_evidence": "“discards partial work rather than publishing it against the wrong diff”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lifecycle cancellation yellow note",
+            "observation": "The note states “discard partial work; never publish against the old diff.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=cancel-note].text",
+            "observation": "Both discarding partial work and the prohibition on old-diff publication are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "Telemetry tracks cost, latency, token usage by reviewer, cancellation rate, and accepted-versus-dismissed rate for published findings.",
+        "brief_evidence": "“The telemetry service tracks cost, latency, token usage by reviewer, cancellation rate, and the accepted-versus-dismissed rate of published findings.”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lifecycle telemetry process and yellow note",
+            "observation": "The note lists cost, latency, token usage by reviewer, cancellation rate, and accepted versus dismissed findings."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=telemetry], objects[id=telemetry-note].text",
+            "observation": "A telemetry component is visible and its note contains every requested metric."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "Intake detects when a repository has exceeded its daily review budget.",
+        "brief_evidence": "“When a repository exceeds its daily review budget”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lifecycle telemetry note and orange dashed edge to intake",
+            "observation": "The note states “Daily repository budget exceeded,” and the orange control arrow runs to intake."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=telemetry-note].text, connections[id=budget-mode]",
+            "observation": "The daily-budget condition is explicit and drives a directed intake control."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R37",
+        "requirement": "After the daily repository budget is exceeded, subsequent runs are degraded to correctness and security review only.",
+        "brief_evidence": "“intake degrades subsequent runs to correctness and security review only”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lifecycle telemetry yellow note and orange dashed budget edge",
+            "observation": "The note says “intake limits subsequent runs to correctness + security only,” while the edge is labeled “Over daily budget: 2 reviewers.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=telemetry-note].text, connections[id=budget-mode]",
+            "observation": "The condition, subsequent-run scope, intake destination, and the two retained reviewer classes are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R38",
+        "requirement": "The diagram makes clear how failures and feedback affect the review lifecycle.",
+        "brief_evidence": "“The diagram should make clear how failures and feedback affect the review lifecycle.”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Full board, especially lower lifecycle-control region and blue/red/orange dashed paths",
+            "observation": "Failure and control effects are visibly mapped: tool-budget exhaustion returns findings, head changes cancel and restart, daily-budget excess degrades reviewer scope, stale and unverified findings are suppressed, and replies/disagreements feed calibration."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=feedback|calibrate-next|restart|tool-access|budget-mode] and related visible notes",
+            "observation": "Directed, labeled lifecycle connections represent calibration feedback, cancellation/restart, bounded tools, and budget degradation; visible notes state each associated outcome."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.9932,
+    "caps_applied": [],
+    "strongest_covered_cluster": "The merge, stale-location filtering, high-severity verification, publication, and calibration cluster is especially complete: sequencing, filtering rules, demotion behavior, policy outcomes, feedback sources, wrong-finding recording, and later per-class threshold adjustment are all explicit.",
+    "most_consequential_gap": "R24 is only partial: the board implements the false-positive mitigation by demoting unverified findings and withholding them from publication, but it never explicitly states that false positives are the team's highest-priority failure concern.",
+    "coverage_summary": "The board represents virtually the entire stated pipeline, including intake eligibility controls, budgeted context construction, five concurrent reviewers, bounded read-only tooling, aggregation and verification safeguards, policy-driven publication, calibration feedback, head-change recovery, telemetry, and daily-budget degradation. The sole gap is a supporting rationale/priority qualifier rather than missing architecture or failure behavior.",
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 12832,
+    "output_tokens": 8024
+  },
+  "flags": [
+    "SCORE-RECOMPUTED"
+  ]
+}

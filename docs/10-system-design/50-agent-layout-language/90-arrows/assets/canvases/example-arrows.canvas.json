@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-10-language-90-arrows-example-arrows",
+  "title": "Example arrows (arrows)",
+  "mode": "diagram",
+  "size": {
+    "width": 512,
+    "height": 339
+  },
+  "objects": [
+    {
+      "id": "s1",
+      "type": "section",
+      "text": "A",
+      "label": "A",
+      "title": "A",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 512,
+        "height": 97
+      }
+    },
+    {
+      "id": "a",
+      "type": "process",
+      "text": "a",
+      "label": "a",
+      "geometry": {
+        "x": 207,
+        "y": 30,
+        "width": 97,
+        "height": 51
+      }
+    },
+    {
+      "id": "s2",
+      "type": "section",
+      "text": "B",
+      "label": "B",
+      "title": "B",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 128,
+        "width": 512,
+        "height": 97
+      }
+    },
+    {
+      "id": "b",
+      "type": "process",
+      "text": "b",
+      "label": "b",
+      "geometry": {
+        "x": 207,
+        "y": 158,
+        "width": 97,
+        "height": 51
+      }
+    },
+    {
+      "id": "s3",
+      "type": "section",
+      "text": "C",
+      "label": "C",
+      "title": "C",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 256,
+        "width": 512,
+        "height": 83
+      }
+    },
+    {
+      "id": "c",
+      "type": "process",
+      "text": "c",
+      "label": "c",
+      "geometry": {
+        "x": 216,
+        "y": 281,
+        "width": 81,
+        "height": 42
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-1-a-b",
+      "from": {
+        "objectId": "a"
+      },
+      "to": {
+        "objectId": "b"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-2-b-c",
+      "from": {
+        "objectId": "b"
+      },
+      "to": {
+        "objectId": "c"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-3-c-a",
+      "from": {
+        "objectId": "c"
+      },
+      "to": {
+        "objectId": "a"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ]
+}

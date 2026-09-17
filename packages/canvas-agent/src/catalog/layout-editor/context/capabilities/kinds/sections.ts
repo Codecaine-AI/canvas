@@ -42,7 +42,7 @@ export const SECTIONS_SPEC: KindSpec = {
       topic: "title_and_color",
       items: [
         "the text field renders as the frame's title chip — the chip is not a separate object",
-        "color comes from the roster and defaults to gray",
+        "color comes from the roster and initially defaults to gray; the finished region tint can express its semantic role",
       ],
     },
   ],
@@ -50,7 +50,7 @@ export const SECTIONS_SPEC: KindSpec = {
     "design the section skeleton before placing content — the sections are the reading structure of the board",
     "size the base section to the diagram you are about to draw, and grow it whenever the content starts to feel tight — space is the cheapest thing on a board",
     "size a frame for the content you are about to put in it, then call fit_section once it is filled if you want the frame closed snugly around it",
-    "a section makes a good connection endpoint when a relationship belongs to the whole area rather than to one node inside it",
+    "a section endpoint intentionally treats the subsystem as one unit; participant endpoints expose individual causal handoffs, fan-out, or merge rather than hiding them at the frame",
     "when a frame gets dense, spend a look on its close-up view and judge it at readable scale",
     "before removing a section, remember the cascade — move children out first if you mean to keep them",
   ],

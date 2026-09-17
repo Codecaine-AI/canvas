@@ -1,0 +1,905 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-comp-134600.llm-inference-gateway",
+  "title": "2026-09-08-comp-134600 · llm-inference-gateway",
+  "description": "# LLM inference gateway\nClients use one endpoint and request a capability tier rather than a backend. Read across the upper row from identity and admission to prompt preparation, cache lookup and tier routing; backend outcomes descend into delivery, which reads right to left.\n\n- Admission enforces tenant concurrency and token rate. Excess work queues only until its deadline; expiration explicitly rejects it and asks the caller to retry.\n- Prompt assembly applies tenant context and safety policy. The cache serves exact or deterministic semantic matches, keyed by prompt, parameters and policy version.\n- Routing uses residency, live health, latency, queue depth and price within the requested tier. Capacity includes independently accounted hosted providers and a separately scheduled self-hosted pool. Circuit breakers drain traffic to healthy capacity and use trickle probes to recover.\n- Before the first token, failures are classified and retryable attempts return to tier fallback with a fresh deadline and the same idempotency key. The request ID follows every attempt. Non-retryable or exhausted attempts return errors. Once streaming begins, complete or visibly fail without silently retrying, preserving received tokens.\n- Accounting records tokens, latency, backend, cache outcome and cost in a billing stream and redacts prompts/responses for audit. Spend control first selects the cheapest capable option, then rejects new work.\n- A small structured evaluation sample is mirrored to an isolated shadow backend; its output never changes the client response.\n\nSolid wires show request/response paths; dashed wires show accounting, control and shadow traffic.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2624,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-09-08-comp-134600 · llm-inference-gateway",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3400,
+        "height": 2400
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "entry",
+      "type": "section",
+      "text": "1 · Identity & admission",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 140,
+        "width": 940,
+        "height": 780
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "routing",
+      "type": "section",
+      "text": "2 · Preparation & tier routing",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1180,
+        "y": 140,
+        "width": 900,
+        "height": 780
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "edge",
+      "type": "process",
+      "text": "Single endpoint\nAuth · tenant · quota · request ID",
+      "color": "gray",
+      "parentId": "entry",
+      "geometry": {
+        "x": 160,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "admit",
+      "type": "process",
+      "text": "Admission controller\nTenant concurrency · token rate",
+      "color": "gray",
+      "parentId": "entry",
+      "geometry": {
+        "x": 660,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "queue",
+      "type": "process",
+      "text": "Deadline-aware queue",
+      "color": "gray",
+      "parentId": "entry",
+      "geometry": {
+        "x": 660,
+        "y": 460,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "reject",
+      "type": "process",
+      "text": "Reject explicitly\nCaller must retry · never serve late",
+      "color": "gray",
+      "parentId": "entry",
+      "geometry": {
+        "x": 660,
+        "y": 700,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "assemble",
+      "type": "process",
+      "text": "Prompt assembler\nTenant context · safety policy",
+      "color": "gray",
+      "parentId": "routing",
+      "geometry": {
+        "x": 1240,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "cache",
+      "type": "process",
+      "text": "Response cache\nExact / deterministic semantic hit",
+      "color": "gray",
+      "parentId": "routing",
+      "geometry": {
+        "x": 1720,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "router",
+      "type": "process",
+      "text": "Tier router\nRank eligible backends",
+      "color": "gray",
+      "parentId": "routing",
+      "geometry": {
+        "x": 1720,
+        "y": 700,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "capacity",
+      "type": "section",
+      "text": "3 · Eligible capacity & protection",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2220,
+        "y": 440,
+        "width": 1080,
+        "height": 760
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "hosted",
+      "type": "process",
+      "text": "Hosted providers\nIndependent accounts A / B / …",
+      "color": "gray",
+      "parentId": "capacity",
+      "geometry": {
+        "x": 2300,
+        "y": 700,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "self",
+      "type": "process",
+      "text": "Self-hosted pool\nOwn scheduler",
+      "color": "gray",
+      "parentId": "capacity",
+      "geometry": {
+        "x": 2860,
+        "y": 700,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "delivery",
+      "type": "section",
+      "text": "4 · Attempts, fallback & client delivery",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1180,
+        "y": 1340,
+        "width": 2120,
+        "height": 820
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "attempt",
+      "type": "process",
+      "text": "Attempt outcome\nBefore first token",
+      "color": "gray",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 2300,
+        "y": 1440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "stream",
+      "type": "process",
+      "text": "Stream tokens to caller\nAs they arrive",
+      "color": "gray",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 1720,
+        "y": 1440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "classify",
+      "type": "process",
+      "text": "Classify failure\nRetryable?",
+      "color": "gray",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 2300,
+        "y": 1740,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "retry",
+      "type": "process",
+      "text": "Next backend in tier\nFresh deadline · same idempotency key",
+      "color": "gray",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 1720,
+        "y": 1740,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "terminal-error",
+      "type": "process",
+      "text": "Return error immediately\nNon-retryable / exhausted",
+      "color": "gray",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 2860,
+        "y": 1740,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "routing-rules",
+      "type": "sticky",
+      "text": "**Eligibility & ranking**\nResidency is mandatory.\nLive health · latency · queue depth · price within requested tier.",
+      "color": "yellow",
+      "parentId": "routing",
+      "geometry": {
+        "x": 1240,
+        "y": 660,
+        "width": 380,
+        "height": 240
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "cache-key",
+      "type": "sticky",
+      "text": "Cache key: prompt + parameters + policy version.\nRequest ID follows every attempt.",
+      "color": "yellow",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1240,
+        "y": 1040,
+        "width": 380,
+        "height": 220
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "stream-end",
+      "type": "process",
+      "text": "Complete or visibly fail\nPreserve received tokens · no retry",
+      "color": "gray",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 1240,
+        "y": 1440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "accounting",
+      "type": "section",
+      "text": "5 · Accounting & spend control",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1080,
+        "width": 940,
+        "height": 1080
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "meter",
+      "type": "process",
+      "text": "Meter every request / attempt",
+      "color": "gray",
+      "parentId": "accounting",
+      "geometry": {
+        "x": 660,
+        "y": 1440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "billing",
+      "type": "process",
+      "text": "Billing stream\nTokens · latency · backend · cache · cost",
+      "color": "gray",
+      "parentId": "accounting",
+      "geometry": {
+        "x": 660,
+        "y": 1820,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "audit",
+      "type": "process",
+      "text": "Audit store\nRedacted prompts & responses",
+      "color": "gray",
+      "parentId": "accounting",
+      "geometry": {
+        "x": 160,
+        "y": 1440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "spend",
+      "type": "process",
+      "text": "Spend ceiling\n1 Cheapest capable · 2 Reject new work",
+      "color": "gray",
+      "parentId": "accounting",
+      "geometry": {
+        "x": 160,
+        "y": 1180,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "breaker",
+      "type": "process",
+      "text": "Circuit breakers\nOpen on sustained errors / timeouts",
+      "color": "gray",
+      "parentId": "capacity",
+      "geometry": {
+        "x": 2300,
+        "y": 500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "probes",
+      "type": "process",
+      "text": "Trickle shadow probes\nHealthy → close circuit",
+      "color": "gray",
+      "parentId": "capacity",
+      "geometry": {
+        "x": 2860,
+        "y": 500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "shadow-region",
+      "type": "section",
+      "text": "6 · Shadow evaluation",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2260,
+        "y": 160,
+        "width": 360,
+        "height": 220
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "shadow",
+      "type": "process",
+      "text": "Shadow evaluation backend\nNever affects client response",
+      "color": "gray",
+      "parentId": "shadow-region",
+      "geometry": {
+        "x": 2300,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "failure-types",
+      "type": "sticky",
+      "text": "**Pre-token classification**\nTimeout · rate-limit rejection · content-policy refusal · backend overload · malformed response.",
+      "color": "yellow",
+      "parentId": "delivery",
+      "geometry": {
+        "x": 2320,
+        "y": 1900,
+        "width": 680,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "e1",
+      "from": {
+        "objectId": "edge"
+      },
+      "to": {
+        "objectId": "admit"
+      },
+      "label": "tier request",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 40
+      }
+    },
+    {
+      "id": "e2",
+      "from": {
+        "objectId": "admit"
+      },
+      "to": {
+        "objectId": "assemble"
+      },
+      "label": "admitted",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e3",
+      "from": {
+        "objectId": "admit",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "queue",
+        "anchor": "top"
+      },
+      "label": "over limit",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e4",
+      "from": {
+        "objectId": "queue"
+      },
+      "to": {
+        "objectId": "reject"
+      },
+      "label": "deadline expired",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "e5",
+      "from": {
+        "objectId": "queue",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "assemble",
+        "anchor": "bottom"
+      },
+      "label": "slot before deadline",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e6",
+      "from": {
+        "objectId": "assemble"
+      },
+      "to": {
+        "objectId": "cache"
+      },
+      "label": "lookup",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "miss",
+      "from": {
+        "objectId": "cache",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "router",
+        "anchor": "top"
+      },
+      "label": "miss",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "dispatch",
+      "from": {
+        "objectId": "router"
+      },
+      "to": {
+        "objectId": "hosted"
+      },
+      "label": "tier choice",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.6,
+        "offset": -40
+      }
+    },
+    {
+      "id": "dispatch-self",
+      "from": {
+        "objectId": "router",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "self",
+        "anchor": "bottom"
+      },
+      "label": "or self-hosted",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          1860,
+          880
+        ],
+        [
+          3000,
+          880
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.75,
+        "offset": 0
+      }
+    },
+    {
+      "id": "host-out",
+      "from": {
+        "objectId": "hosted",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "attempt",
+        "anchor": "top"
+      },
+      "label": "response / error",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "self-out",
+      "from": {
+        "objectId": "self",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "attempt",
+        "anchor": "right"
+      },
+      "label": "response / error",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "first-token",
+      "from": {
+        "objectId": "attempt"
+      },
+      "to": {
+        "objectId": "stream"
+      },
+      "label": "success · first token",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "failure",
+      "from": {
+        "objectId": "attempt"
+      },
+      "to": {
+        "objectId": "classify"
+      },
+      "label": "pre-token failure",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "yes-retry",
+      "from": {
+        "objectId": "classify"
+      },
+      "to": {
+        "objectId": "retry"
+      },
+      "label": "retryable",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "retry-loop",
+      "from": {
+        "objectId": "retry",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "router",
+        "anchor": "left"
+      },
+      "label": "reselect eligible fallback",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "no-retry",
+      "from": {
+        "objectId": "classify"
+      },
+      "to": {
+        "objectId": "terminal-error"
+      },
+      "label": "otherwise",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "cache-hit",
+      "from": {
+        "objectId": "cache",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "stream",
+        "anchor": "top"
+      },
+      "label": "cache hit",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.8,
+        "offset": 0
+      }
+    },
+    {
+      "id": "stream-finish",
+      "from": {
+        "objectId": "stream"
+      },
+      "to": {
+        "objectId": "stream-end"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": -60
+      }
+    },
+    {
+      "id": "meter-bill",
+      "from": {
+        "objectId": "meter"
+      },
+      "to": {
+        "objectId": "billing"
+      },
+      "label": "usage events",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "telemetry",
+      "from": {
+        "objectId": "delivery",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "meter",
+        "anchor": "right"
+      },
+      "label": "all outcomes",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "audit-write",
+      "from": {
+        "objectId": "meter"
+      },
+      "to": {
+        "objectId": "audit"
+      },
+      "label": "redact",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "breaker-route",
+      "from": {
+        "objectId": "breaker",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "router",
+        "anchor": "right"
+      },
+      "label": "drain to healthy",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "probe-loop",
+      "from": {
+        "objectId": "breaker",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "probes",
+        "anchor": "left"
+      },
+      "label": "test / recover",
+      "style": "dashed",
+      "arrow": "both",
+      "color": "orange"
+    },
+    {
+      "id": "mirror",
+      "from": {
+        "objectId": "cache",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "shadow",
+        "anchor": "left"
+      },
+      "label": "structured eval sample",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "violet",
+      "labelPosition": {
+        "along": 0.72,
+        "offset": 40
+      }
+    },
+    {
+      "id": "spend-enforce",
+      "from": {
+        "objectId": "spend",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "admit",
+        "anchor": "left"
+      },
+      "label": "spend gate",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue"
+    }
+  ],
+  "annotations": []
+}

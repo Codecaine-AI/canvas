@@ -1,0 +1,765 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-comp-134600.code-review-agents",
+  "title": "2026-09-08-comp-134600 · code-review-agents",
+  "description": "# Multi-agent automated code review\nRead left to right: intake resolves PR inputs and rejects drafts / excludes generated and vendored paths before model work. Budgeted context ranks source, hunks, tests, ownership and review history, logging omissions. The planner partitions work and fans out to five concurrent reviewers; their shared contract specifies read-only tools, call budgets and structured findings.\n\nResults merge into deduplication, severity reconciliation, confidence filtering and current-head location checks. High-severity findings are rechecked against source; unverified findings are demoted and withheld. Survivors become inline comments and a policy-driven verdict.\n\nThe lower control band documents head-change cancellation, partial-work disposal and restart on the new head. Publication feeds author replies and reviewer disagreements into calibration: wrong findings are recorded and class confidence thresholds inform later aggregation. Telemetry tracks cost, latency, reviewer tokens, cancellations and acceptance/dismissal; daily budget overruns limit subsequent reviews to correctness and security.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2624,
+    "height": 1664
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-09-08-comp-134600 · code-review-agents",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 60,
+        "y": 280,
+        "width": 3640,
+        "height": 1960
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "intake-area",
+      "type": "section",
+      "text": "1 · Intake / no model work",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 360,
+        "width": 440,
+        "height": 1100
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "context-area",
+      "type": "section",
+      "text": "2 · Budgeted context",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 640,
+        "y": 360,
+        "width": 440,
+        "height": 1100
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "review-area",
+      "type": "section",
+      "text": "3 · Concurrent review / shared context",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1180,
+        "y": 360,
+        "width": 980,
+        "height": 1100
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "intake",
+      "type": "process",
+      "text": "PR event → resolve intake",
+      "color": "gray",
+      "parentId": "intake-area",
+      "geometry": {
+        "x": 160,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "eligible",
+      "type": "process",
+      "text": "Reject drafts; filter paths",
+      "color": "gray",
+      "parentId": "intake-area",
+      "geometry": {
+        "x": 160,
+        "y": 720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "context",
+      "type": "process",
+      "text": "Rank & truncate context",
+      "color": "gray",
+      "parentId": "context-area",
+      "geometry": {
+        "x": 700,
+        "y": 720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "intake-note",
+      "type": "sticky",
+      "text": "Resolve diff, changed files, review policy and build status.\nExclude vendored / generated paths before model work.\nDaily budget exceeded → correctness + security only.",
+      "color": "yellow",
+      "parentId": "intake-area",
+      "geometry": {
+        "x": 160,
+        "y": 960,
+        "width": 340,
+        "height": 440
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "context-note",
+      "type": "sticky",
+      "text": "Shared context\n• Diff hunks + surrounding source\n• Related tests + ownership\n• Prior review history\nRank within token budget; truncate lower-value material and log every omission.",
+      "color": "yellow",
+      "parentId": "context-area",
+      "geometry": {
+        "x": 700,
+        "y": 960,
+        "width": 340,
+        "height": 440
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "planner",
+      "type": "process",
+      "text": "Planner: partition & dispatch",
+      "color": "gray",
+      "parentId": "review-area",
+      "geometry": {
+        "x": 1240,
+        "y": 720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "correctness",
+      "type": "process",
+      "text": "Correctness",
+      "color": "gray",
+      "parentId": "review-area",
+      "geometry": {
+        "x": 1780,
+        "y": 440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "security",
+      "type": "process",
+      "text": "Security",
+      "color": "gray",
+      "parentId": "review-area",
+      "geometry": {
+        "x": 1780,
+        "y": 640,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "performance",
+      "type": "process",
+      "text": "Performance",
+      "color": "gray",
+      "parentId": "review-area",
+      "geometry": {
+        "x": 1780,
+        "y": 840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "tests",
+      "type": "process",
+      "text": "Test coverage",
+      "color": "gray",
+      "parentId": "review-area",
+      "geometry": {
+        "x": 1780,
+        "y": 1040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "compat",
+      "type": "process",
+      "text": "API compatibility",
+      "color": "gray",
+      "parentId": "review-area",
+      "geometry": {
+        "x": 1780,
+        "y": 1240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "quality",
+      "type": "section",
+      "text": "4 · Merge, verify & publish",
+      "color": "green",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2300,
+        "y": 360,
+        "width": 1360,
+        "height": 1100
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "aggregate",
+      "type": "process",
+      "text": "Merge & deduplicate findings",
+      "color": "gray",
+      "parentId": "quality",
+      "geometry": {
+        "x": 2380,
+        "y": 720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "verify",
+      "type": "process",
+      "text": "Verify high severity in source",
+      "color": "gray",
+      "parentId": "quality",
+      "geometry": {
+        "x": 2820,
+        "y": 720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "publish",
+      "type": "process",
+      "text": "Inline comments + verdict",
+      "color": "gray",
+      "parentId": "quality",
+      "geometry": {
+        "x": 3280,
+        "y": 720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "merge-note",
+      "type": "sticky",
+      "text": "Reconcile conflicting severities; withhold low confidence. Check current head; drop findings whose locations no longer exist.",
+      "color": "yellow",
+      "parentId": "quality",
+      "geometry": {
+        "x": 2360,
+        "y": 1000,
+        "width": 340,
+        "height": 400
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "demote",
+      "type": "process",
+      "text": "Demote; do not post",
+      "color": "gray",
+      "parentId": "quality",
+      "geometry": {
+        "x": 2820,
+        "y": 1040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "controls",
+      "type": "section",
+      "text": "Lifecycle control · cancellation & budget",
+      "color": "red",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1640,
+        "width": 980,
+        "height": 480
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "cancel",
+      "type": "process",
+      "text": "Head change → cancel run",
+      "color": "gray",
+      "parentId": "controls",
+      "geometry": {
+        "x": 160,
+        "y": 1740,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "cancel-note",
+      "type": "sticky",
+      "text": "Force-push / new commit:\nDiscard all partial work; never publish against the old diff. Restart intake on the new head.",
+      "color": "yellow",
+      "parentId": "controls",
+      "geometry": {
+        "x": 580,
+        "y": 1740,
+        "width": 400,
+        "height": 300
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "feedback",
+      "type": "section",
+      "text": "Calibration & operational telemetry",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1180,
+        "y": 1640,
+        "width": 2480,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "human-feedback",
+      "type": "process",
+      "text": "Author replies / disagreements",
+      "color": "gray",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 3260,
+        "y": 1740,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "calibration",
+      "type": "process",
+      "text": "Record wrong findings; calibrate",
+      "color": "gray",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 2780,
+        "y": 1740,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "review-contract",
+      "type": "sticky",
+      "text": "Each reviewer\n• Read-only search, symbol lookup, test history\n• Call budget exhausted → return available findings\n• Return current-file location, severity, rationale, confidence",
+      "color": "yellow",
+      "parentId": "review-area",
+      "geometry": {
+        "x": 1240,
+        "y": 980,
+        "width": 340,
+        "height": 440
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "telemetry",
+      "type": "sticky",
+      "text": "Telemetry service\nCost, latency, tokens by reviewer; cancellation rate; accepted vs dismissed findings.\nDaily repository budget → intake limits later runs to correctness + security.",
+      "color": "yellow",
+      "parentId": "feedback",
+      "geometry": {
+        "x": 1240,
+        "y": 1740,
+        "width": 460,
+        "height": 360
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "verdict-policy",
+      "type": "sticky",
+      "text": "Repository policy:\nRequest changes,\napprove, or advisory.",
+      "color": "yellow",
+      "parentId": "quality",
+      "geometry": {
+        "x": 3260,
+        "y": 440,
+        "width": 320,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "i-e",
+      "from": {
+        "objectId": "intake"
+      },
+      "to": {
+        "objectId": "eligible"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "e-c",
+      "from": {
+        "objectId": "eligible"
+      },
+      "to": {
+        "objectId": "context"
+      },
+      "label": "eligible",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "c-p",
+      "from": {
+        "objectId": "context"
+      },
+      "to": {
+        "objectId": "planner"
+      },
+      "label": "shared context",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "p-correct",
+      "from": {
+        "objectId": "planner",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "correctness",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "p-sec",
+      "from": {
+        "objectId": "planner",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "security",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "p-perf",
+      "from": {
+        "objectId": "planner",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "performance",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "p-tests",
+      "from": {
+        "objectId": "planner",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "tests",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "p-api",
+      "from": {
+        "objectId": "planner",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "compat",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "correct-a",
+      "from": {
+        "objectId": "correctness",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "aggregate",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "sec-a",
+      "from": {
+        "objectId": "security",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "aggregate",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "perf-a",
+      "from": {
+        "objectId": "performance",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "aggregate",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "tests-a",
+      "from": {
+        "objectId": "tests",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "aggregate",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "api-a",
+      "from": {
+        "objectId": "compat",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "aggregate",
+        "anchor": "left"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "a-v",
+      "from": {
+        "objectId": "aggregate"
+      },
+      "to": {
+        "objectId": "verify"
+      },
+      "label": "survivors",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "v-p",
+      "from": {
+        "objectId": "verify"
+      },
+      "to": {
+        "objectId": "publish"
+      },
+      "label": "eligible",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "v-d",
+      "from": {
+        "objectId": "verify",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "demote",
+        "anchor": "top"
+      },
+      "label": "unverified",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "restart",
+      "from": {
+        "objectId": "cancel",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "intake",
+        "anchor": "left"
+      },
+      "label": "new head: restart",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "pub-feedback",
+      "from": {
+        "objectId": "publish",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "human-feedback",
+        "anchor": "top"
+      },
+      "label": "published review",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "feedback-cal",
+      "from": {
+        "objectId": "human-feedback"
+      },
+      "to": {
+        "objectId": "calibration"
+      },
+      "label": "adjudicate",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "cal-threshold",
+      "from": {
+        "objectId": "calibration",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "aggregate",
+        "anchor": "bottom"
+      },
+      "label": "later: class thresholds",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "blue",
+      "labelPosition": {
+        "along": 0.2,
+        "offset": 40
+      }
+    }
+  ],
+  "annotations": []
+}

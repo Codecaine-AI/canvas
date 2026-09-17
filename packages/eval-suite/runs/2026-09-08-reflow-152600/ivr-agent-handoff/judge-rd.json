@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "ivr-agent-handoff",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board is readable with effort at the 6–6.5 anchor: its regions and primary stages are clear, but several long feedback and handoff routes require close tracing.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Most nodes and label chips have generous clearance, though the lower AI-to-human handoff corridor packs multiple long lines and labels into the same horizontal band."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "The numbered intake, AI self-service, human support, and quality-review regions are visually distinct and make participant ownership immediately apparent."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Arrowheads, labels, colors, and dashed styles are generally visible, but the blue review feedback loop and gray unresolved/person-requested routes make large detours and force careful endpoint tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 6.5,
+        "note": "The intake branches, AI decision, resolution path, escalation, and callback outcome are discernible, but the widely distributed cross-region loops obscure the main end-to-end flow on first viewing."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8578,
+    "output_tokens": 442
+  },
+  "flags": []
+}

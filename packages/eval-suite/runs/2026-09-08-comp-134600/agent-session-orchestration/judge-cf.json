@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "agent-session-orchestration",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 5.5,
+  "verdict": {
+    "score": 5.5,
+    "score_rationale": "The board is readable and deliberately regioned, but it lands just above the flat 5 anchor because pervasive plain gray boxes replace registry objects and several loose or boundary-terminating routes keep the otherwise orderly composition from feeling finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 7,
+        "note": "The major regions distribute content across the frame with useful separation, though the broad central white channels and sparse upper lifecycle area create mildly dead bands."
+      },
+      {
+        "name": "color",
+        "score": 5,
+        "note": "Pastel containers distinguish regions, but operational nouns such as Orchestrator, Model, tools, API, snapshots, and child agents are rendered as uniform gray boxes rather than wearing their registry colors."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 5.5,
+        "note": "Several routes terminate or turn at container boundaries and in open space, including the top blue reattach line and orange lifecycle returns, producing ambiguous waypoint-like plumbing despite the absence of explicit crosshairs."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "Panels, labels, and repeated nodes generally hold clean local registers, but uneven internal density, oversized note blocks, and long connector runs weaken the main-flow hierarchy."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7899,
+    "output_tokens": 609
+  },
+  "flags": []
+}

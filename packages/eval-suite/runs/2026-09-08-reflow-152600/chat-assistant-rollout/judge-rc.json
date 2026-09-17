@@ -1,0 +1,907 @@
+{
+  "axis": "rc",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "Customers converse with the assistant through web and mobile chat surfaces.",
+        "brief_evidence": "“A customer converses with the assistant through our web and mobile chat surfaces.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation section, far left",
+            "observation": "Customer chat icon is visibly labeled “Customer / Web / mobile chat” and begins the turn flow."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=chat]",
+            "observation": "Visible text is “Customer\\nWeb / mobile chat.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "On every turn, the assistant gathers its required context before answering.",
+        "brief_evidence": "“On every turn, the assistant gathers what it needs before answering”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation central flow",
+            "observation": "The visible sequence runs Turn → Input safety → Assemble turn context → Generate reply/action."
+          },
+          {
+            "source": "json",
+            "locator": "connections turn, accepted, assembled",
+            "observation": "Forward arrows place context assembly before model generation."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The assembled context includes the customer's long-term profile containing preferences, past issues, and prior resolutions accumulated across earlier conversations.",
+        "brief_evidence": "“the customer's long-term profile — preferences, past issues, prior resolutions accumulated across earlier conversations”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation profile path and lifecycle memory note",
+            "observation": "“Long-term profile” feeds “Assemble turn context” through “Profile facts”; the visible Durable memory note lists “Preferences, issues, resolutions—not raw logs.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=profile], connections[id=facts], objects[id=memory-rules]",
+            "observation": "Profile facts are directed into context, and the rendered note specifies preferences, issues, and resolutions."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "The assembled context includes the current conversation so far.",
+        "brief_evidence": "“the current conversation so far”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation, below context assembly",
+            "observation": "“Live transcript” feeds “Assemble turn context” on an arrow labeled “Conversation so far.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=conversation]",
+            "observation": "Forward connection runs from history to context with label “Conversation so far.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "The assistant searches the support corpus and includes the most relevant help-center articles in the turn context.",
+        "brief_evidence": "“the most relevant help-center articles found by searching the support corpus”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation, upper middle",
+            "observation": "Support corpus points to Search help center via “Search corpus,” and Search help center points to context via “Relevant articles.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=retrieve], connections[id=articles]",
+            "observation": "Both retrieval relationships are explicit forward arrows with the stated labels."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "A model call produces the reply from the assembled context.",
+        "brief_evidence": "“A model call produces the reply from that assembled context.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation central flow",
+            "observation": "“Assemble turn context” points through “Assembled context” to the model-shaped “Generate reply / action” component."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=model], connections[id=assembled]",
+            "observation": "The model component receives a forward connection labeled “Assembled context.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "When a reply requires an action, the assistant invokes billing and account system integrations.",
+        "brief_evidence": "“When the reply requires an action, such as issuing a refund or changing a subscription, the assistant invokes integrations with the billing and account systems”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation, model-to-actions branch",
+            "observation": "Generate reply/action is connected bidirectionally to “Billing / account actions” by an “Action / result” line."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=invoke]",
+            "observation": "A both-arrow connection explicitly relates the model to billing/account actions."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Integration credentials live in a managed secrets vault.",
+        "brief_evidence": "“the credentials for those integrations live in a managed secrets vault”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation, lower action branch",
+            "observation": "A key icon labeled “Managed secrets vault” feeds the billing/account actions."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=vault], connections[id=credentials]",
+            "observation": "The vault is a visible component and is the source of the secret connection."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "Integration credentials are fetched per invocation and are never stored with the assistant.",
+        "brief_evidence": "“are fetched per invocation, never stored with the assistant itself”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation action branch and yellow handoff/secrets note",
+            "observation": "Vault-to-actions line says “Per-call secret”; the visible note says “Secrets: fetched per invocation, never stored by the assistant.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=credentials], objects[id=handoff-detail]",
+            "observation": "Both the per-call behavior and no-storage constraint are rendered as visible labels."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "A safety layer screens the customer's input.",
+        "brief_evidence": "“A safety layer screens both the customer's input”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation, immediately after customer",
+            "observation": "Every customer turn enters a shield labeled “Input safety” before context assembly."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=input], connections[id=turn], connections[id=accepted]",
+            "observation": "Input safety lies between chat and context on the directed flow."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "A safety layer screens the assistant's outgoing reply.",
+        "brief_evidence": "“and the assistant's outgoing reply.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live conversation, between model and reply delivery",
+            "observation": "Draft reply passes through the shield labeled “Output safety” before “Reply to customer.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=output], connections[id=draft], connections[id=safe]",
+            "observation": "Output safety is explicitly inserted in the directed reply path."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "A screened-out reply is replaced with a safe fallback.",
+        "brief_evidence": "“A screened-out reply is replaced with a safe fallback”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Output safety to reply delivery edge",
+            "observation": "The outgoing line is visibly labeled “Pass / safe fallback.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=safe]",
+            "observation": "Output safety points to customer delivery with label “Pass / safe fallback.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "Repeated safety triggers hand the conversation to a human support agent.",
+        "brief_evidence": "“repeated safety triggers ... hand the conversation to a human support agent”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Red escalation paths across top of live section",
+            "observation": "Output safety has a red path labeled “Repeated triggers / customer request • handoff” to Support agent; input safety has a separate repeated-input-trigger path."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=handoff], connections[id=blocked-input]",
+            "observation": "Both input and output safety trigger routes terminate at the human support agent."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "An explicit customer request hands the conversation to a human support agent.",
+        "brief_evidence": "“or an explicit customer request hand the conversation to a human support agent”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Red escalation paths to Support agent",
+            "observation": "Visible labels include “customer request • handoff” and “requested agent,” both terminating at Support agent."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=handoff], connections[id=blocked-input]",
+            "observation": "Customer-request conditions are explicit on forward handoff edges."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "Human handoff includes the transcript, profile context, and what has already been attempted.",
+        "brief_evidence": "“together with the transcript, the profile context, and what has already been attempted.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Yellow note beside Support agent",
+            "observation": "The visible note states “Handoff: transcript + profile context + actions attempted.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=handoff-detail]",
+            "observation": "The rendered sticky carries all three handoff payload elements."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "After a conversation ends, an extraction pass reviews the transcript and writes durable facts into the customer's profile.",
+        "brief_evidence": "“After a conversation ends, an extraction pass reviews the transcript and writes durable facts into the customer's profile”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live transcript and After the conversation section",
+            "observation": "“Conversation ended” points from Live transcript to “Distill durable facts,” which then points to Long-term profile through “Upsert facts + source conversation.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=ended], objects[id=extract], connections[id=learn]",
+            "observation": "The full ended-transcript → extraction → profile write path is explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Profile memory is a distillation rather than a raw conversation log.",
+        "brief_evidence": "“a distillation, not a raw log.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "After the conversation section",
+            "observation": "Extraction is labeled “Distill durable facts,” and the memory note says “Preferences, issues, resolutions—not raw logs.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=extract], objects[id=memory-rules]",
+            "observation": "The visible component and note expressly distinguish facts from raw logs."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "A new fact that contradicts an older fact supersedes the older fact.",
+        "brief_evidence": "“A new fact that contradicts an older one supersedes it”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Durable memory note",
+            "observation": "The visible note states “Contradictions supersede old facts.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=memory-rules]",
+            "observation": "Supersession behavior is explicitly rendered in the note."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "Each durable fact records its source conversation so it can be traced to where it was learned.",
+        "brief_evidence": "“with the source conversation recorded so any fact can be traced to where it was learned.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Extraction-to-profile path and Durable memory note",
+            "observation": "The write edge says “Upsert facts + source conversation,” and the note says “Keep source conversation IDs.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=learn], objects[id=memory-rules]",
+            "observation": "Source-conversation provenance is visible in both the relationship and note."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Raw conversations older than the retention window leave the live store for cold storage.",
+        "brief_evidence": "“Raw conversations older than the retention window leave the live store for cold storage”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Live transcript to Cold history path",
+            "observation": "A directed line labeled “Retention expired • archive raw log” leads from Live transcript to Cold history."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=retain]",
+            "observation": "The retention-expiry condition, raw-log payload, and cold-storage endpoint are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Cold-stored conversations remain recoverable for compliance review.",
+        "brief_evidence": "“where they remain recoverable for compliance review”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Durable memory note in lifecycle section",
+            "observation": "The note states “Cold history: compliance recovery only.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=memory-rules]",
+            "observation": "Compliance recovery is explicitly visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "Cold-stored raw conversations are never pulled into a live turn.",
+        "brief_evidence": "“but are never pulled into a live turn.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Durable memory note and live retrieval paths",
+            "observation": "The note states “never live retrieval”; the only profile/history retrieval lines into context originate from Long-term profile and Live transcript, not Cold history."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=memory-rules]; connections searched for objectId=cold",
+            "observation": "Cold history has only the inbound archive connection and no connection to context; the visible note explicitly prohibits live retrieval."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "The team can propose challenger variants that differ by prompt, retrieval policy, or model choice.",
+        "brief_evidence": "“proposing challenger variants — a different prompt, retrieval policy, or model choice”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Versioned variants section",
+            "observation": "“Versioned variants” and a distinct “Challenger” are visible, but the allowed variation dimensions—prompt, retrieval policy, and model choice—are not shown."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=variants], objects[id=challenger]; all object text and connection labels searched",
+            "observation": "No rendered text names prompt, retrieval policy, or model choice."
+          }
+        ],
+        "note": "Challenger variants are represented, but the stated examples of what may vary are omitted."
+      },
+      {
+        "id": "R24",
+        "requirement": "Challenger variants run alongside the production champion.",
+        "brief_evidence": "“that run alongside the production champion.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Versioned variants routing topology",
+            "observation": "Sample conversations visibly branches in parallel to Champion and Challenger."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=majority], connections[id=sample]",
+            "observation": "The same router directs live traffic to both champion and challenger."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "Variant definitions are versioned configuration.",
+        "brief_evidence": "“Variant definitions are versioned configuration”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Lower-right rollout section",
+            "observation": "The source component is explicitly labeled “Versioned variants” and connects to traffic sampling through “Load config.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=variants], connections[id=definitions]",
+            "observation": "The variant component uses a config icon and loads configuration into the router."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "A rollout changes configuration rather than redeploying the service.",
+        "brief_evidence": "“so a rollout changes configuration rather than redeploying the service.”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Versioned variants section",
+            "observation": "“Load config” and approval returning to Versioned variants show configuration-driven rollout, but no visible note or label states that service redeployment is not required."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=definitions], connections[id=approve]; all visible text searched for redeploy/deploy",
+            "observation": "Configuration loading and swapping are shown; no rendered object or edge states “no redeploy” or an equivalent operational boundary."
+          }
+        ],
+        "note": "The configuration-change mechanism is recognizable, but the explicit no-service-redeployment constraint is missing."
+      },
+      {
+        "id": "R27",
+        "requirement": "A small sampled share of live conversations is served by a challenger instead of the champion, while most traffic remains with the champion.",
+        "brief_evidence": "“A small sampled share of live conversations is served by a challenger instead of the champion.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Sample conversations routing split",
+            "observation": "The router sends “Most traffic” to Champion and “Small sample” to Challenger."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=majority], connections[id=sample]",
+            "observation": "Both traffic proportions and destinations are explicit on directed edges."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R28",
+        "requirement": "A panel of automated judges scores completed champion and challenger conversations.",
+        "brief_evidence": "“A panel of automated judges scores completed champion and challenger conversations”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Champion/Challenger to Judge panel paths",
+            "observation": "Champion sends “Completed champion chats” and Challenger sends “Challenger results” to the Judge panel."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=scorechamp], connections[id=scorechallenge], objects[id=judges]",
+            "observation": "Both variants' completed results terminate at the judge panel."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "Automated judges score resolution.",
+        "brief_evidence": "“on resolution”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Scores note beside Judge panel",
+            "observation": "The visible scoring note lists “Resolution.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=judge-rules]",
+            "observation": "Resolution is an explicit rendered score dimension."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R30",
+        "requirement": "Automated judges score factual grounding against the profile and cited articles.",
+        "brief_evidence": "“factual grounding against the profile and the cited articles”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Scores note beside Judge panel",
+            "observation": "The note states “Grounding: profile + cited articles.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=judge-rules]",
+            "observation": "Both grounding references are explicitly rendered."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "Automated judges score tone.",
+        "brief_evidence": "“and tone”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Scores note beside Judge panel",
+            "observation": "The visible scoring note lists “Tone.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=judge-rules]",
+            "observation": "Tone is an explicit rendered score dimension."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "Judge verdicts accumulate into an experiment report for each challenger.",
+        "brief_evidence": "“their verdicts accumulate into an experiment report per challenger.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Judge panel to Experiment report",
+            "observation": "Judge panel points to Experiment report via “Accumulate verdicts”; the scoring note says “Report per challenger.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=verdicts], objects[id=report], objects[id=judge-rules]",
+            "observation": "Accumulation and per-challenger scope are both visibly specified."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R33",
+        "requirement": "Promotion is gated by people rather than automated scores alone.",
+        "brief_evidence": "“Promotion is gated on people, not just scores”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Experiment report to Product owner path",
+            "observation": "The report proceeds through “Clears bar • review” to a human Product owner before any promotion path."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=review], objects[id=owner]",
+            "observation": "A human owner is explicitly interposed after the score report."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "When a challenger clears the bar, a product owner reviews the report.",
+        "brief_evidence": "“when a challenger clears the bar, a product owner reviews the report”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Report-to-owner connection",
+            "observation": "Experiment report points to Product owner on an edge labeled “Clears bar • review.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=review]",
+            "observation": "The condition, report source, reviewer, and direction are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "The product owner can approve or reject promotion.",
+        "brief_evidence": "“and approves or rejects promotion.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Branches leaving Product owner",
+            "observation": "A green approval path and a red “Reject” path to “Keep champion” are both visible."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=approve], connections[id=reject]",
+            "observation": "Distinct directed approve and reject outcomes leave the owner."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "Approval makes the challenger the new champion.",
+        "brief_evidence": "“Approval makes the challenger the new champion”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Green promotion path from Product owner",
+            "observation": "The approval edge is labeled “Approve: swap champion; retain old” and returns to Versioned variants."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=approve]",
+            "observation": "The visible edge explicitly states that approval swaps the champion."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R37",
+        "requirement": "The displaced champion is retained.",
+        "brief_evidence": "“while the displaced champion is retained”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Promotion/rollback paths and Previous champion component",
+            "observation": "Approval says “retain old,” and a separate component is labeled “Previous champion.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=approve], objects[id=previous], connections[id=saveold]",
+            "observation": "Retention of the old champion is represented in both component and edge text."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R38",
+        "requirement": "A single rollback step can restore the displaced champion.",
+        "brief_evidence": "“so a single rollback step can restore it.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Versioned variants to Previous champion blue path",
+            "observation": "The bidirectional path is labeled “Retain old ↔ one-step rollback.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=saveold]",
+            "observation": "A both-arrow connection explicitly names one-step rollback."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R39",
+        "requirement": "Live quality monitoring runs independently of the experiment.",
+        "brief_evidence": "“Live quality monitoring runs independently of the experiment”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Separate lower-left quality section",
+            "observation": "A distinct region is titled “Independent live quality • immediate traffic control,” separate from the experiment section."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=quality], objects[id=quality-metrics]",
+            "observation": "The section and visible note both explicitly call the checks independent."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R40",
+        "requirement": "Live quality monitoring tracks resolution rate per variant.",
+        "brief_evidence": "“it tracks resolution rate ... per variant”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Independent checks note",
+            "observation": "The note lists “Resolution rate” and states “Per variant.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=quality-metrics]",
+            "observation": "Metric and per-variant scope are visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R41",
+        "requirement": "Live quality monitoring tracks human-handoff rate per variant.",
+        "brief_evidence": "“human-handoff rate ... per variant”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Independent checks note",
+            "observation": "The note lists “Human-handoff rate” and states “Per variant.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=quality-metrics]",
+            "observation": "Metric and per-variant scope are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R42",
+        "requirement": "Live quality monitoring tracks safety triggers per variant.",
+        "brief_evidence": "“and safety triggers per variant”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Independent checks note",
+            "observation": "The note lists “Safety triggers” and states “Per variant.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=quality-metrics]",
+            "observation": "Metric and per-variant scope are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R43",
+        "requirement": "A challenger that regresses on any monitored quality metric is pulled from traffic immediately.",
+        "brief_evidence": "“a challenger that regresses on any of these is pulled from traffic immediately”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Quality monitor to Versioned variants red control path",
+            "observation": "The red directed line says “Any regression: remove challenger now”; the quality note says “pull on any regression.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=pull], objects[id=quality-metrics]",
+            "observation": "Any-regression condition, challenger removal, and immediacy are explicitly rendered."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R44",
+        "requirement": "A regressing challenger is pulled without waiting for its experiment to conclude.",
+        "brief_evidence": "“rather than waiting for its experiment to conclude.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Independent quality section and direct red traffic-control path",
+            "observation": "Independent monitoring directly controls Versioned variants through “remove challenger now,” bypassing the judge, report, and owner experiment flow."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=pull] compared with connections[id=verdicts], connections[id=review]",
+            "observation": "The pull edge directly targets variant traffic configuration and does not depend on report completion or review."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.9813,
+    "caps_applied": [],
+    "strongest_covered_cluster": "The live-turn operational path is exceptionally complete: web/mobile entry, both safety screens, profile/transcript/article context assembly, model generation, safe fallback, credentialed billing/account actions, and fully specified human handoff are all represented with explicit components, labels, and directed edges.",
+    "most_consequential_gap": "R26 is only partial: the board clearly shows configuration-driven loading and champion swapping, but it never explicitly states the operational constraint that rollout occurs without redeploying the service.",
+    "coverage_summary": "The board represents nearly the entire stated contract across live assistance, durable memory and retention, champion/challenger experimentation, human-gated promotion and rollback, and independent regression control. The only substantive qualifier gap is the omitted no-redeployment statement for configuration rollouts; the permitted challenger variation examples in R23 are also not enumerated. Weighted coverage is 0.9783, with no absent or contradicted system-defining requirement and therefore no cap.",
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 15301,
+    "output_tokens": 8187
+  },
+  "flags": []
+}

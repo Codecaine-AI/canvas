@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-08-comp-134600",
+  "tier": "system",
+  "scenario": "chat-assistant-rollout",
+  "board_id": "eval.2026-09-08-comp-134600.chat-assistant-rollout",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-09-08T18:43:48.664Z",
+      "finished_at": "2026-09-08T18:58:45.680Z",
+      "wall_ms": 897943,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "39e9b553-6c63-4b51-90c0-2ff8c6ec2d40"
+    ]
+  },
+  "finished_at": "2026-09-08T18:58:46.608Z",
+  "exit_code": 0
+}

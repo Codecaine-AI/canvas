@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board is deliberate and readable with coherent regions and routing, but it lands in the 6–6.5 anchor because large dead bands, uneven regional density, and note-heavy sparse areas keep it from feeling fully finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6,
+        "note": "The framed regions are clear, but broad unused bands across the center and within the lower-right and fleet panels make the canvas feel substantially underfilled."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Teal agents, blue storage, gray process/infrastructure shapes, and yellow notes form a restrained, legible palette, though most operational steps remain visually undifferentiated gray."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 7.5,
+        "note": "No crosshair junctions or obvious waypoint artifacts are visible, and arrowheads generally terminate cleanly, though several long dashed routes and detached-looking label pills expose the routing structure."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "Peer process boxes mostly share sizes and registers, but large shifts in density, long vertical runs, and oversized notes beside sparse icon areas weaken the overall rhythm and hierarchy."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8435,
+    "output_tokens": 480
+  },
+  "flags": []
+}

@@ -33,17 +33,14 @@ function topicBlock(id: string, prose: string): string {
 
 /** The craft targets as tight lines, one dimension per line. */
 export function formatCraftTargets(targets: CraftTargets = CRAFT_TARGETS): string {
-  const ink = Math.round(targets.inkShare * 100);
   return [
-    "Targets, not minimums to shave toward: a group that will not fit them wants splitting into two sections, not tightening. The lints mark the clearance below which a board breaks; these are where a finished board sits.",
+    "Starting dimensions for local peer groups, not composition mandates. Adjust them for content and actual routes; section sizes and counts follow meaning.",
     "",
     `- flow node: ${targets.nodeWidth}×${targets.nodeHeight}, never narrower than ${targets.nodeMinWidth}`,
     `- node gaps: ${targets.nodeGapRow} across a row, ${targets.nodeGapColumn} down a column`,
     `- arrow corridor: ${targets.arrowCorridor} of clear channel wherever a wire and its label pass between siblings`,
     `- section gutters: ${targets.sectionGutterSideBySide} side by side, ${targets.sectionGutterStacked} between stacked rows`,
     `- frame padding: ${targets.framePadding} inside every frame before its first child`,
-    `- section load: ${targets.nodesPerSectionMin}–${targets.nodesPerSectionMax} nodes; past ${targets.nodesPerSectionMax}, split into two named sections`,
-    `- board size: about ${targets.boardAreaMultiple}× the summed node area, so a finished board reads at about ${ink}% ink`,
   ].join("\n");
 }
 

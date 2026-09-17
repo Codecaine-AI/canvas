@@ -1,15 +1,6 @@
-/**
- * section-child-color — a section must not hold direct children wearing the
- * section's own color (warning tier, report-only).
- *
- * A colored section renders as a wash of its hue, so a child in the same hue
- * sinks into its own container — a red section must not hold red children
- * (docs/specs/operational-maps §Decisions, color guidance). Only the CHROMATIC
- * hues fire: gray and white are the neutral dress most boards are built from
- * (a gray shape in a gray section is the default look, and both stay legible
- * against the pale neutral wash), so same-neutral pairs are not findings.
- * Wording quotes the object-preference registry: when the child has a
- * preferred color to return to, the suggestion names it.
+/** Legacy same-hue diagnostic retained for explicit callers only.
+ * Excluded from LAYOUT_RULES and FINISHING_RULES: matching hue is not a
+ * contrast measurement. Judge text, borders, and tinted fills in the render.
  */
 import { objectPreferenceFor } from "../../../../../canvas/src/objects/registry";
 

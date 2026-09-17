@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-08-outline-123806",
+  "tier": "system",
+  "sut_thinking": "low",
+  "tool_call_cap": 3,
+  "tool_call_cap_source": "agent default",
+  "status": "completed",
+  "started_at": "2026-09-08T17:38:08.703Z",
+  "finished_at": "2026-09-08T17:53:12.891Z",
+  "scenarios": {
+    "code-review-agents": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 99666,
+      "finished_at": "2026-09-08T17:53:12.856Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    }
+  }
+}

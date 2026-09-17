@@ -1,0 +1,1899 @@
+{
+  "container_id": "bc967910-8482-5953-a046-7c7fe965f8b3",
+  "pi_sessions": [
+    {
+      "piSessionId": "01a08255-7536-7620-a769-7f318e4e5a59",
+      "file": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-7f318e4e5a59.jsonl",
+      "startedAt": "2026-09-08T18:43:53.782Z",
+      "userMessages": [
+        {
+          "text": "# Long-lived agent session orchestration\n\nWe need a diagram of how our platform runs long-lived AI agent sessions through a shared control plane. A client opens a session at the API tier, which authenticates the user, resolves the workspace and its quotas, and asks the session scheduler for placement. The scheduler selects a runner host with enough capacity while honoring workspace residency and isolation requirements. On that host, the orchestrator repeatedly assembles a model request from system context, conversation history, and the permitted tool surface. It calls the model, receives and executes tool calls, appends their results, and begins the next turn until the agent finishes or reaches its turn or token ceiling.\n\nTurn output streams to the client as it is produced, while the identical stream is committed to a durable event log. A disconnected client does not terminate the work. The session continues, and a returning client reattaches to the live stream after replaying missed events from its last acknowledged position. Every completed turn also creates a durable checkpoint containing conversation state, tool results, and the workspace file state. The checkpoint is a content-addressed snapshot whose parent is the prior snapshot, producing an immutable history that deduplicates unchanged content instead of rewriting a mutable copy.\n\nIdle sessions and sessions suspended on demand release their runners but retain their snapshot chains. Resume may occur on another host, which rehydrates the latest snapshot before continuing. A heartbeat monitor detects crashed runners, returns their capacity to the scheduler, and rescues affected sessions from the last checkpoint. Recovery replays at most the turn that was in flight, so every tool call that can change external state carries an idempotency key in case that call completed before the crash. Cancellation or interruption can also arrive during a turn. The orchestrator stops the model stream, abandons in-flight tool calls where possible, records their uncertain outcome when it cannot confirm termination, and commits a resumable checkpoint before releasing the runner.\n\nAn agent may spawn child sessions for independent subtasks. Each child receives scoped context and a budget drawn from its parent's remaining allowance, runs concurrently, and returns its result through the parent orchestrator. Cancellation and failure propagate through the session tree, and a reaper terminates any child that survives after its parent is gone. Quota enforcement therefore aggregates token spend, wall-clock time, tool-call counts, and concurrent sessions across the tree as well as across the workspace. Exhausting an allowance pauses the affected session for a user decision instead of silently truncating its work; held children remain accounted for while the parent waits.\n\nThe event log records each request, model response, tool call and result, checkpoint reference, budget decision, and lifecycle transition. It supports forensic reconstruction and replay while feeding usage metering and per-session cost accounting. Snapshot retention follows reachability: deleting a session makes its unreferenced chain eligible for collection, but a snapshot retained by a fork remains alive. Forking from an earlier checkpoint creates a divergent history with its own future checkpoints, without duplicating shared content. Orchestrator deployments must account for sessions that outlive a release, so hosts running the old version stop accepting placements and drain their active sessions through completion, suspension, or a safe checkpoint before replacement. The diagram should make clear how streaming execution, durable state, recovery, branching, quotas, and coordinated shutdown interact throughout a session's lifetime.\n",
+          "timestamp": "2026-09-08T18:43:53.880Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-09-08T18:44:00.722Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_iBlNvDM5ue5Xw3ZCowbQnyXF|fc_080c2067692996ea016aa0576e6abc87d1b8a212a033cce1e0",
+              "toolName": "update_text",
+              "params": {
+                "id": "page-frame",
+                "text": "Long-lived agent sessions · shared control plane"
+              },
+              "resultText": "APPLIED · update_text page-frame\nDELTA\n  page-frame  text \"2026-09-08-comp-134600 · agent-session-orchestration\" → \"Long-lived agent sessions · shared control plane\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-09-08T18:44:08.670Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_15rFFXRSpygahfbB9xMa3uBI|fc_080c2067692996ea016aa05777752087d185faa24c8d8e0a31",
+              "toolName": "place_section",
+              "params": {
+                "id": "control",
+                "text": "Admission · shared control plane",
+                "at": [
+                  100,
+                  140
+                ],
+                "size": {
+                  "width": 860,
+                  "height": 520
+                }
+              },
+              "resultText": "APPLIED · place_section control 100,140 860×520\nDELTA\n  + control  section 100,140 860×520 \"Admission · shared control plane\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-09-08T18:44:15.395Z",
+          "thinking": "**Planning an efficient build**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_TUAnpRMFT2wnEHJhAfZnopZz|fc_080c2067692996ea016aa0577ef94887d1ac80eb4c2c7e4fc5",
+              "toolName": "change_color",
+              "params": {
+                "id": "control",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · change_color control\nDELTA\n  control  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-09-08T18:44:20.242Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_1UEYFQOHAKKiT6b3ZiT3I6pV|fc_080c2067692996ea016aa05782f18887d1af77aadc77542179",
+              "toolName": "place_section",
+              "params": {
+                "id": "execution",
+                "text": "Runner host · active turn loop",
+                "at": [
+                  1100,
+                  140
+                ],
+                "size": {
+                  "width": 1120,
+                  "height": 720
+                }
+              },
+              "resultText": "APPLIED · place_section execution 1100,140 1120×720\nDELTA\n  + execution  section 1100,140 1120×720 \"Runner host · active turn loop\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-09-08T18:44:25.711Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_pYu98qwIGC3aa1GrpCNi0Yyd|fc_080c2067692996ea016aa057876a6087d1a3494327d09bb237",
+              "toolName": "change_color",
+              "params": {
+                "id": "execution",
+                "color": "teal"
+              },
+              "resultText": "APPLIED · change_color execution\nDELTA\n  execution  color gray → teal\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "timestamp": "2026-09-08T18:44:31.367Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_1JmcLnF1s6fKGgqaMLQmWgQj|fc_080c2067692996ea016aa0578e27dc87d1b25ca2e2a65f1f76",
+              "toolName": "place_shape",
+              "params": {
+                "id": "client",
+                "type": "human",
+                "at": [
+                  160,
+                  240
+                ]
+              },
+              "resultText": "APPLIED · place_shape client human 160,240 120×120\nDELTA\n  + client  human 160,240 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "timestamp": "2026-09-08T18:44:45.100Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5C3jvWwbAEFfpP3l8MsCTdEu|fc_080c2067692996ea016aa05797e27c87d1822ca6e2d10a10b5",
+              "toolName": "update_text",
+              "params": {
+                "id": "client",
+                "text": "Client"
+              },
+              "resultText": "APPLIED · update_text client\nDELTA\n  client  text \"\" → Client\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "timestamp": "2026-09-08T18:44:51.328Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_V6F3jnbKfYis9jwblwIawCQ0|fc_080c2067692996ea016aa057a2561087d18c7d2643a8a7eb1b",
+              "toolName": "place_shape",
+              "params": {
+                "id": "api",
+                "type": "process",
+                "at": [
+                  380,
+                  240
+                ]
+              },
+              "resultText": "APPLIED · place_shape api process 380,240 280×100\nDELTA\n  + api  process 380,240 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "timestamp": "2026-09-08T18:44:55.375Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_EquxGLfsxP0KtdzX2gz7KJaI|fc_080c2067692996ea016aa057a678f487d180dcfaaf5bcdedeb",
+              "toolName": "update_text",
+              "params": {
+                "id": "api",
+                "text": "API · authenticate\nWorkspace + quotas"
+              },
+              "resultText": "APPLIED · update_text api\nDELTA\n  api  text \"\" → \"API · authenticate\\nWorkspace + quotas\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "timestamp": "2026-09-08T18:45:02.347Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_6L5KFJLosZuZT3MivCfYs3RZ|fc_080c2067692996ea016aa057ad2bbc87d1a7ab33ff10379093",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "scheduler",
+                "at": [
+                  600,
+                  480
+                ],
+                "text": "Scheduler · capacity\nResidency + isolation"
+              },
+              "resultText": "APPLIED · clone scheduler from api 600,480 280×100\nDELTA\n  + scheduler  process 600,480 280×100 \"Scheduler · capacity\\nResidency + isolation\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "timestamp": "2026-09-08T18:45:08.316Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_f43WQRPnGV9aK5r9uPdgfrVF|fc_080c2067692996ea016aa057b242b887d19be417e6f57c51e1",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "orch",
+                "at": [
+                  1180,
+                  480
+                ],
+                "text": "Orchestrator\nAssemble next request"
+              },
+              "resultText": "APPLIED · clone orch from api 1180,480 280×100\nDELTA\n  + orch  process 1180,480 280×100 \"Orchestrator\\nAssemble next request\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "timestamp": "2026-09-08T18:45:12.541Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ByNfV5vl2LVvvN2ut81GqCur|fc_080c2067692996ea016aa057b794c487d1bffed03be08fcff5",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "model",
+                "at": [
+                  1840,
+                  480
+                ],
+                "text": "Model · stream response"
+              },
+              "resultText": "APPLIED · clone model from api 1840,480 280×100\nDELTA\n  + model  process 1840,480 280×100 \"Model · stream response\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "timestamp": "2026-09-08T18:45:17.045Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_onQgwMEK6meYfIv2tLTddLHx|fc_080c2067692996ea016aa057bbee8087d1b3ec50cc94d72659",
+              "toolName": "connect",
+              "params": {
+                "id": "open",
+                "from": {
+                  "objectId": "client"
+                },
+                "to": {
+                  "objectId": "api"
+                },
+                "label": "open session"
+              },
+              "resultText": "APPLIED · connect open client→api\nDELTA\n  + open  client → api\nLINTS · +1 −0\n  + W1 unreadable-labels: label \"open session\" chip on open (139×30px) bleeds onto client and api: 100px of corridor where the chip needs 172px (open the client↔api corridor to ≥172px so the chip and its 16px margins fit)\nROUTES\n  open  anchors right→left  path client ─(s0 h y=300)→ ─(s1 h y=300)→ (s2 v x=330) ─(s3 h y=290)→ ─(s4 h y=290)→ api  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "timestamp": "2026-09-08T18:45:21.595Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_UohVwXuUDxfVeDU8ij20vicJ|fc_080c2067692996ea016aa057c0d5d087d1b395e82678605ecf",
+              "toolName": "move_to",
+              "params": {
+                "id": "api",
+                "x": 500,
+                "y": 240
+              },
+              "resultText": "APPLIED · move_to api → (500, 240)\nDELTA\n  api  380,240 → 500,240\nLINTS · +0 −1\n  − W1 unreadable-labels  (resolved)\nROUTES\n  open  anchors right→left  path client ─(s0 h y=300)→ ─(s1 h y=300)→ (s2 v x=390) ─(s3 h y=290)→ ─(s4 h y=290)→ api  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "timestamp": "2026-09-08T18:45:26.166Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_yKTvcBQOMAy71vc5uNmQ8kHG|fc_080c2067692996ea016aa057c4e26c87d1bb78eaa8c7f0cf27",
+              "toolName": "connect",
+              "params": {
+                "id": "placement",
+                "from": {
+                  "objectId": "api",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "scheduler",
+                  "anchor": "top"
+                }
+              },
+              "resultText": "APPLIED · connect placement api→scheduler\nDELTA\n  + placement  api → scheduler\nLINTS · clean\nROUTES\n  placement  anchors bottom→top  path api (s0 v x=640) (s1 v x=640) ─(s2 h y=410)→ (s3 v x=740) (s4 v x=740) scheduler  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 15,
+          "timestamp": "2026-09-08T18:45:32.355Z",
+          "thinking": "**Checking current state**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_hwpQvWMyjFdOicjXOcputmnh|fc_080c2067692996ea016aa057cbc9cc87d1b3226475853a897d",
+              "toolName": "connect",
+              "params": {
+                "id": "assign",
+                "from": {
+                  "objectId": "scheduler"
+                },
+                "to": {
+                  "objectId": "orch"
+                },
+                "label": "place / resume"
+              },
+              "resultText": "APPLIED · connect assign scheduler→orch\nDELTA\n  + assign  scheduler → orch\nLINTS · clean\nROUTES\n  assign  anchors right→left  path scheduler ─(s0 h y=530)→ orch  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 16,
+          "timestamp": "2026-09-08T18:45:37.627Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ZZVRIjdMVByX6v5faIw8xXOw|fc_080c2067692996ea016aa057d047fc87d1ad39711b0f75b77a",
+              "toolName": "connect",
+              "params": {
+                "id": "request",
+                "from": {
+                  "objectId": "orch"
+                },
+                "to": {
+                  "objectId": "model"
+                },
+                "label": "context + history + tools"
+              },
+              "resultText": "APPLIED · connect request orch→model\nDELTA\n  + request  orch → model\nLINTS · clean\nROUTES\n  request  anchors right→left  path orch ─(s0 h y=530)→ model  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 17,
+          "timestamp": "2026-09-08T18:45:43.677Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_k9O4LaGOcVa7dkDfWaedRmIK|fc_080c2067692996ea016aa057d5280487d1a6cd9d62ba51e553",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "tools",
+                "at": [
+                  1840,
+                  700
+                ],
+                "text": "Execute tools\nIdempotency keys"
+              },
+              "resultText": "APPLIED · clone tools from api 1840,700 280×100\nDELTA\n  + tools  process 1840,700 280×100 \"Execute tools\\nIdempotency keys\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 18,
+          "timestamp": "2026-09-08T18:45:51.517Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_uKbCnswXM5V9xK8UPdzwGY6X|fc_080c2067692996ea016aa057de610887d1afc8e7506ac22562",
+              "toolName": "connect",
+              "params": {
+                "id": "calls",
+                "from": {
+                  "objectId": "model"
+                },
+                "to": {
+                  "objectId": "tools"
+                },
+                "label": "tool calls"
+              },
+              "resultText": "APPLIED · connect calls model→tools\nDELTA\n  + calls  model → tools\nLINTS · clean\nROUTES\n  calls  anchors bottom→top  path model (s0 v x=1980) tools  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 19,
+          "timestamp": "2026-09-08T18:45:58.638Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_IfkC47mCo9izHIBnNXxxkjR7|fc_080c2067692996ea016aa057e4a38087d1ae56c125f635298a",
+              "toolName": "connect",
+              "params": {
+                "id": "results",
+                "from": {
+                  "objectId": "tools",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "orch",
+                  "anchor": "bottom"
+                },
+                "label": "append results · next turn"
+              },
+              "resultText": "APPLIED · connect results tools→orch\nDELTA\n  + results  tools → orch\nLINTS · clean\nROUTES\n  results  anchors left→bottom  path tools ─(s0 h y=750)→ ─(s1 h y=750)→ (s2 v x=1320) (s3 v x=1320) orch  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 20,
+          "timestamp": "2026-09-08T18:46:04.638Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_1F49ZqBZzVbHMeT6P2ATPkE5|fc_080c2067692996ea016aa057ead6b487d192b099196fd18c1f",
+              "toolName": "place_section",
+              "params": {
+                "id": "durable",
+                "text": "Durability · replay and immutable history",
+                "at": [
+                  1100,
+                  1040
+                ],
+                "size": {
+                  "width": 1120,
+                  "height": 660
+                }
+              },
+              "resultText": "APPLIED · place_section durable 1100,1040 1120×660\nDELTA\n  + durable  section 1100,1040 1120×660 \"Durability · replay and immutable history\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 21,
+          "timestamp": "2026-09-08T18:46:10.459Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_2CZhlCyuJx09fsqmKJoDNx3Y|fc_080c2067692996ea016aa057f18e6c87d18e3327b7f01a28c2",
+              "toolName": "change_color",
+              "params": {
+                "id": "durable",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · change_color durable\nDELTA\n  durable  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 22,
+          "timestamp": "2026-09-08T18:46:16.799Z",
+          "thinking": "**Proceeding with partial work**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_sB4xe2n28NjZrwPAnsgr7tUG|fc_080c2067692996ea016aa057f8693487d18b222afe0a0fec88",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "log",
+                "at": [
+                  1180,
+                  1140
+                ],
+                "text": "Durable event log\nReplay + live tail"
+              },
+              "resultText": "APPLIED · clone log from api 1180,1140 280×100\nDELTA\n  + log  process 1180,1140 280×100 \"Durable event log\\nReplay + live tail\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 23,
+          "timestamp": "2026-09-08T18:46:23.151Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_9LFresEq5aJuySEo3HjUELQm|fc_080c2067692996ea016aa057fdbaa887d1800c0ab430cf8dc8",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "snapshot",
+                "at": [
+                  1840,
+                  1140
+                ],
+                "text": "Checkpoint each turn\nContent-addressed snapshot"
+              },
+              "resultText": "APPLIED · clone snapshot from api 1840,1140 280×100\nDELTA\n  + snapshot  process 1840,1140 280×100 \"Checkpoint each turn\\nContent-addressed snapshot\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 24,
+          "timestamp": "2026-09-08T18:46:30.129Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_DdPqWc4d91tEzhaQUypAWvOw|fc_080c2067692996ea016aa05804a26087d1ba0bc876dcba6faf",
+              "toolName": "connect",
+              "params": {
+                "id": "events",
+                "from": {
+                  "objectId": "execution",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "log",
+                  "anchor": "top"
+                },
+                "label": "identical output + audit events",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect events execution→log\nDELTA\n  + events  execution → log\nLINTS · clean\nROUTES\n  events  anchors bottom→top  path execution (s0 v x=1660) (s1 v x=1660) ─(s2 h y=1000)→ (s3 v x=1320) (s4 v x=1320) log  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 25,
+          "timestamp": "2026-09-08T18:46:35.599Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_EgYp0L8VWRAOWqCLZUvxP8vd|fc_080c2067692996ea016aa05809a70487d184a6420a289db310",
+              "toolName": "connect",
+              "params": {
+                "id": "checkpoint",
+                "from": {
+                  "objectId": "tools",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "snapshot",
+                  "anchor": "top"
+                },
+                "label": "completed turn",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect checkpoint tools→snapshot\nDELTA\n  + checkpoint  tools → snapshot\nLINTS · clean\nROUTES\n  checkpoint  anchors bottom→top  path tools (s0 v x=1980) snapshot  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 26,
+          "timestamp": "2026-09-08T18:46:40.919Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_h9M7Vh37yK0GTpSIUhWcESbw|fc_080c2067692996ea016aa0580f155487d1b45ffe4819cbf496",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "history",
+                "at": [
+                  1780,
+                  1380
+                ],
+                "text": "**Immutable history**\nConversation + tool results + files.\nParent = prior snapshot; unchanged content deduplicates.\nForks retain shared ancestors; delete collects only unreachable content."
+              },
+              "resultText": "APPLIED · place_sticky history 1780,1380 180×120\nDELTA\n  + history  sticky 1780,1380 180×120 \"**Immutable history**\\nConversation + tool results + files.\\nParent = prior snapshot; unchanged content deduplicates.\\nForks retain shared ancestors; delete collects only unreachable content.\"\nLINTS · +1 −0\n  + W1 clipped-text: history: sticky body clips at 180×120: 21 row(s), the note holds 1 — needs 180×805 (grow history to ≥180×805 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 27,
+          "timestamp": "2026-09-08T18:46:46.363Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_9PtHA9PcI5xZYIEfiukXdE52|fc_080c2067692996ea016aa05815885c87d1867bd57223f79979",
+              "toolName": "resize",
+              "params": {
+                "id": "history",
+                "width": 380,
+                "height": 300
+              },
+              "resultText": "APPLIED · resize history → 380×300\n  sticky body clips at 380×300: 9 row(s), the note holds 6 — needs 380×373\nDELTA\n  history  1780,1380 180×120 → 1780,1380 380×300\nLINTS · +1 −1\n  + W1 clipped-text: history: sticky body clips at 380×300: 9 row(s), the note holds 6 — needs 380×373 (grow history to ≥380×373 or shorten the text)\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 28,
+          "timestamp": "2026-09-08T18:46:52.655Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_SjFFtf4XuL7PoJ0OBSuC3PrO|fc_080c2067692996ea016aa0581afb3087d185a1f9d1995566b7",
+              "toolName": "update_text",
+              "params": {
+                "id": "history",
+                "text": "**Immutable snapshots**\nConversation, tools, files.\nParent = prior snapshot.\nDeduplicate unchanged content.\nForks share ancestors; collect only unreachable content."
+              },
+              "resultText": "APPLIED · update_text history\n  sticky body clips at 380×300: 8 row(s), the note holds 6 — needs 380×337\nDELTA\n  history  text \"**Immutable history**\\nConversation + tool results + files.\\nParent = prior snapshot; unchanged content deduplicates.\\nForks retain shared ancestors; delete collects only unreachable content.\" → \"**Immutable snapshots**\\nConversation, tools, files.\\nParent = prior snapshot.\\nDeduplicate unchanged content.\\nForks share ancestors; collect only unreachable content.\"\nLINTS · +1 −1\n  + W1 clipped-text: history: sticky body clips at 380×300: 8 row(s), the note holds 6 — needs 380×337 (grow history to ≥380×337 or shorten the text)\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 29,
+          "timestamp": "2026-09-08T18:46:57.401Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_CJ50i8RvfybH3NuI9lWK6ea2|fc_080c2067692996ea016aa0581fe91887d1b9befc92b8498f4f",
+              "toolName": "update_text",
+              "params": {
+                "id": "history",
+                "text": "**Immutable snapshots**\nConversation, tools, files.\nParent = prior snapshot.\nUnchanged content deduplicates."
+              },
+              "resultText": "APPLIED · update_text history\nDELTA\n  history  text \"**Immutable snapshots**\\nConversation, tools, files.\\nParent = prior snapshot.\\nDeduplicate unchanged content.\\nForks share ancestors; collect only unreachable content.\" → \"**Immutable snapshots**\\nConversation, tools, files.\\nParent = prior snapshot.\\nUnchanged content deduplicates.\"\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 30,
+          "timestamp": "2026-09-08T18:47:06.067Z",
+          "thinking": "**Structuring recovery notes**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_GTwIx75sJz5q10Tr5vSbMj33|fc_080c2067692996ea016aa05829a94087d18264cf84085b8709",
+              "toolName": "place_section",
+              "params": {
+                "id": "lifecycle",
+                "text": "Lifecycle · release, rescue and resume",
+                "at": [
+                  2380,
+                  140
+                ],
+                "size": {
+                  "width": 760,
+                  "height": 1560
+                }
+              },
+              "resultText": "APPLIED · place_section lifecycle 2380,140 760×1560\nDELTA\n  + lifecycle  section 2380,140 760×1560 \"Lifecycle · release, rescue and resume\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 31,
+          "timestamp": "2026-09-08T18:47:12.731Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_PlwSHmFKUYvDwcafTKbPz0KH|fc_080c2067692996ea016aa0582ff09087d1bb517d2b4a4ebafe",
+              "toolName": "change_color",
+              "params": {
+                "id": "lifecycle",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · change_color lifecycle\nDELTA\n  lifecycle  color gray → orange\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 32,
+          "timestamp": "2026-09-08T18:47:18.581Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_e1m5C5XvdDHKzypBF2RJVgHE|fc_080c2067692996ea016aa058355ab887d1af5e74e0920b75e3",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "stop",
+                "at": [
+                  2460,
+                  300
+                ],
+                "text": "Idle / suspend / interrupt\nSafe checkpoint + release"
+              },
+              "resultText": "APPLIED · clone stop from api 2460,300 280×100\nDELTA\n  + stop  process 2460,300 280×100 \"Idle / suspend / interrupt\\nSafe checkpoint + release\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 33,
+          "timestamp": "2026-09-08T18:47:26.396Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_6ffLfhscTgE6F8bVcDfRarZy|fc_080c2067692996ea016aa0583c5b4487d18815a3edfd7c1894",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "rescue",
+                "at": [
+                  2460,
+                  620
+                ],
+                "text": "Heartbeat loss\nReclaim capacity + rescue"
+              },
+              "resultText": "APPLIED · clone rescue from api 2460,620 280×100\nDELTA\n  + rescue  process 2460,620 280×100 \"Heartbeat loss\\nReclaim capacity + rescue\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 34,
+          "timestamp": "2026-09-08T18:47:31.088Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Ny2cEJqXruSByMydkgOedPCo|fc_080c2067692996ea016aa05841e08c87d180e5eaa34c191de1",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "resume",
+                "at": [
+                  2460,
+                  1000
+                ],
+                "text": "Re-place on available host\nRehydrate latest snapshot"
+              },
+              "resultText": "APPLIED · clone resume from api 2460,1000 280×100\nDELTA\n  + resume  process 2460,1000 280×100 \"Re-place on available host\\nRehydrate latest snapshot\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 35,
+          "timestamp": "2026-09-08T18:47:36.482Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_idGfiyJgVPHnylZA9yap6aHE|fc_080c2067692996ea016aa05846e2ec87d19851aaabe0eaf023",
+              "toolName": "connect",
+              "params": {
+                "id": "rescue-resume",
+                "from": {
+                  "objectId": "rescue",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "resume",
+                  "anchor": "top"
+                },
+                "label": "last checkpoint · ≤1 turn replay"
+              },
+              "resultText": "APPLIED · connect rescue-resume rescue→resume\nDELTA\n  + rescue-resume  rescue → resume\nLINTS · clean\nROUTES\n  rescue-resume  anchors bottom→top  path rescue (s0 v x=2600) resume  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 36,
+          "timestamp": "2026-09-08T18:47:42.921Z",
+          "thinking": "**Checking actual state**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ft0NwaZbeDtTh33XnjCEFVWC|fc_080c2067692996ea016aa0584e941887d1a3597314a22d5835",
+              "toolName": "connect",
+              "params": {
+                "id": "restore",
+                "from": {
+                  "objectId": "snapshot",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "resume",
+                  "anchor": "left"
+                },
+                "label": "latest snapshot",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect restore snapshot→resume\nDELTA\n  + restore  snapshot → resume\nLINTS · clean\nROUTES\n  restore  anchors right→left  path snapshot ─(s0 h y=1190)→ ─(s1 h y=1190)→ (s2 v x=2290) ─(s3 h y=1050)→ ─(s4 h y=1050)→ resume  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 37,
+          "timestamp": "2026-09-08T18:47:49.865Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_w0niPKFArbSJM0SSPS9oW7U4|fc_080c2067692996ea016aa058537a8c87d190807ff7f784a11b",
+              "toolName": "place_section",
+              "params": {
+                "id": "tree",
+                "text": "Session tree · concurrent work and quotas",
+                "at": [
+                  100,
+                  800
+                ],
+                "size": {
+                  "width": 860,
+                  "height": 900
+                }
+              },
+              "resultText": "APPLIED · place_section tree 100,800 860×900\nDELTA\n  + tree  section 100,800 860×900 \"Session tree · concurrent work and quotas\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 38,
+          "timestamp": "2026-09-08T18:47:54.367Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_1DwWShLCSn5WpH0w5TBqATiB|fc_080c2067692996ea016aa058598a7c87d18fd085dedd922e77",
+              "toolName": "change_color",
+              "params": {
+                "id": "tree",
+                "color": "teal"
+              },
+              "resultText": "APPLIED · change_color tree\nDELTA\n  tree  color gray → teal\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 39,
+          "timestamp": "2026-09-08T18:47:58.781Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_hCEqRfoPt3LjeFf7XMuZJa0A|fc_080c2067692996ea016aa0585dcfac87d1b79af6482859c326",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "parent",
+                "at": [
+                  380,
+                  900
+                ],
+                "text": "Parent orchestrator\nAllocate scoped budgets"
+              },
+              "resultText": "APPLIED · clone parent from api 380,900 280×100\nDELTA\n  + parent  process 380,900 280×100 \"Parent orchestrator\\nAllocate scoped budgets\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 40,
+          "timestamp": "2026-09-08T18:48:03.791Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_RJIQKGsMi2VqasM5DPNDGgm9|fc_080c2067692996ea016aa05862509c87d1a125f5003f25d657",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "child-a",
+                "at": [
+                  160,
+                  1140
+                ],
+                "text": "Child A · scoped context\nConcurrent subtask"
+              },
+              "resultText": "APPLIED · clone child-a from api 160,1140 280×100\nDELTA\n  + child-a  process 160,1140 280×100 \"Child A · scoped context\\nConcurrent subtask\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 41,
+          "timestamp": "2026-09-08T18:48:08.805Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_SNgXH8NGHrxZhZEWH8E5JacY|fc_080c2067692996ea016aa05867a6d087d18aa4eb8bcd88de73",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "child-a",
+                "id": "child-b",
+                "at": [
+                  600,
+                  1140
+                ],
+                "text": "Child B · scoped context\nConcurrent subtask"
+              },
+              "resultText": "APPLIED · clone child-b from child-a 600,1140 280×100\nDELTA\n  + child-b  process 600,1140 280×100 \"Child B · scoped context\\nConcurrent subtask\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 42,
+          "timestamp": "2026-09-08T18:48:18.149Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_caffPGw7l5957uN8CrFmlaJz|fc_080c2067692996ea016aa05870190087d1932441dc28c4fe21",
+              "toolName": "connect",
+              "params": {
+                "id": "spawn-a",
+                "from": {
+                  "objectId": "parent",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "child-a",
+                  "anchor": "top"
+                },
+                "label": "spawn / result",
+                "arrow": "both"
+              },
+              "resultText": "APPLIED · connect spawn-a parent→child-a\nDELTA\n  + spawn-a  parent → child-a\nLINTS · clean\nROUTES\n  spawn-a  anchors bottom→top  path parent (s0 v x=520) (s1 v x=520) ─(s2 h y=1070)→ (s3 v x=300) (s4 v x=300) child-a  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 43,
+          "timestamp": "2026-09-08T18:48:24.176Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_IOHmnYktWEHqpp7Jb3FD4llO|fc_080c2067692996ea016aa05876290087d18709ed6ff9932519",
+              "toolName": "connect",
+              "params": {
+                "id": "spawn-b",
+                "from": {
+                  "objectId": "parent",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "child-b",
+                  "anchor": "top"
+                },
+                "label": "spawn / result",
+                "arrow": "both"
+              },
+              "resultText": "APPLIED · connect spawn-b parent→child-b\nDELTA\n  + spawn-b  parent → child-b\nLINTS · +1 −0\n  + W1 unreadable-labels: label \"spawn / result\" chip on spawn-b (158×30px) bleeds onto parent: 140px of corridor where the chip needs 62px (open the parent↔child-b corridor to ≥62px so the chip and its 16px margins fit)\nROUTES\n  spawn-b  anchors right→top  path parent ─(s0 h y=950)→ ─(s1 h y=950)→ (s2 v x=740) (s3 v x=740) child-b  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 44,
+          "timestamp": "2026-09-08T18:48:29.272Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_uVY0SBhh6eDWeauWaLdOOqyd|fc_080c2067692996ea016aa0587c726087d1895fac15fa600598",
+              "toolName": "move_label",
+              "params": {
+                "id": "spawn-b",
+                "along": 0.8,
+                "offset": 0
+              },
+              "resultText": "APPLIED · move_label spawn-b → along 0.8, offset 0\nDELTA\n  spawn-b  labelPosition — → {\"along\":0.8,\"offset\":0}\nLINTS · +0 −1\n  − W1 unreadable-labels  (resolved)\nROUTES\n  spawn-b  anchors right→top  path parent ─(s0 h y=950)→ ─(s1 h y=950)→ (s2 v x=740) (s3 v x=740) child-b  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 45,
+          "timestamp": "2026-09-08T18:48:36.658Z",
+          "thinking": "**Finishing the task**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_yOBDD3w3fqwFbiYcD1IiC2xK|fc_080c2067692996ea016aa05883194c87d1b8e1aeacae17f991",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "quota-note",
+                "at": [
+                  160,
+                  1360
+                ],
+                "text": "**Tree-wide enforcement**\nTokens, time, tool calls and concurrency aggregate across tree + workspace.\nChildren draw from parent allowance; held children still count.\nExhaustion → pause for user decision.\nCancel / failure propagates; reaper kills orphan children."
+              },
+              "resultText": "APPLIED · place_sticky quota-note 160,1360 180×120\nDELTA\n  + quota-note  sticky 160,1360 180×120 \"**Tree-wide enforcement**\\nTokens, time, tool calls and concurrency aggregate across tree + workspace.\\nChildren draw from parent allowance; held children still count.\\nExhaustion → pause for user decision.\\nCancel / failure propagates; reaper kills orphan children.\"\nLINTS · +1 −0\n  + W1 clipped-text: quota-note: sticky body clips at 180×120: 29 row(s), the note holds 1 — needs 180×1093 (grow quota-note to ≥180×1093 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 46,
+          "timestamp": "2026-09-08T18:48:41.465Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ZqCJOdjssXhvFcmERk53PsEz|fc_080c2067692996ea016aa058885da487d18a444cad31c75b64",
+              "toolName": "resize",
+              "params": {
+                "id": "quota-note",
+                "width": 720,
+                "height": 300
+              },
+              "resultText": "APPLIED · resize quota-note → 720×300\n  sticky body clips at 720×300: 7 row(s), the note holds 6 — needs 720×301\nDELTA\n  quota-note  160,1360 180×120 → 160,1360 720×300\nLINTS · +1 −1\n  + W1 clipped-text: quota-note: sticky body clips at 720×300: 7 row(s), the note holds 6 — needs 720×301 (grow quota-note to ≥720×301 or shorten the text)\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 47,
+          "timestamp": "2026-09-08T18:48:46.627Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_yO1EBVhIIB46Gbf2cYq4ifGf|fc_080c2067692996ea016aa0588dfccc87d1b30e6b736d165026",
+              "toolName": "resize",
+              "params": {
+                "id": "quota-note",
+                "width": 720,
+                "height": 320
+              },
+              "resultText": "APPLIED · resize quota-note → 720×320\nDELTA\n  quota-note  160,1360 720×300 → 160,1360 720×320\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 48,
+          "timestamp": "2026-09-08T18:48:53.088Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_HGL3JKC6GMkM1FTkHq3zlk7v|fc_080c2067692996ea016aa0589403a087d19bbace82a70c3bf8",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "api",
+                "id": "stream",
+                "at": [
+                  1180,
+                  260
+                ],
+                "text": "Live output → client\nReplay after last ACK"
+              },
+              "resultText": "APPLIED · clone stream from api 1180,260 280×100\nDELTA\n  + stream  process 1180,260 280×100 \"Live output → client\\nReplay after last ACK\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 49,
+          "timestamp": "2026-09-08T18:49:00.390Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_r2ks3zPb3rTXzQoSXKZPsqIu|fc_080c2067692996ea016aa0589a473c87d1b866ae1242ad05ab",
+              "toolName": "connect",
+              "params": {
+                "id": "emit",
+                "from": {
+                  "objectId": "orch",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "stream",
+                  "anchor": "bottom"
+                },
+                "label": "turn output"
+              },
+              "resultText": "APPLIED · connect emit orch→stream\nDELTA\n  + emit  orch → stream\nLINTS · clean\nROUTES\n  emit  anchors top→bottom  path orch (s0 v x=1320) stream  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 50,
+          "timestamp": "2026-09-08T18:49:07.977Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_jqF8Cd5jeJ4FHvbhLpmhD17a|fc_080c2067692996ea016aa058a1169087d1a1563c54e5ac2370",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "interrupt-note",
+                "at": [
+                  2800,
+                  280
+                ],
+                "text": "Stop model stream; abandon tools where possible. Record uncertain outcomes. Checkpoint before release."
+              },
+              "resultText": "APPLIED · place_sticky interrupt-note 2800,280 180×120\nDELTA\n  + interrupt-note  sticky 2800,280 180×120 \"Stop model stream; abandon tools where possible. Record uncertain outcomes. Checkpoint before release.\"\nLINTS · +1 −0\n  + W1 clipped-text: interrupt-note: sticky body clips at 180×120: 11 row(s), the note holds 1 — needs 180×445 (grow interrupt-note to ≥180×445 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 51,
+          "timestamp": "2026-09-08T18:49:15.841Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_yuMuNBpZLDFyuMaYIg6KNnf1|fc_080c2067692996ea016aa058a8f18c87d180d48a388992e8ff",
+              "toolName": "resize",
+              "params": {
+                "id": "interrupt-note",
+                "width": 280,
+                "height": 420
+              },
+              "resultText": "APPLIED · resize interrupt-note → 280×420\nDELTA\n  interrupt-note  2800,280 180×120 → 2800,280 280×420\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 52,
+          "timestamp": "2026-09-08T18:49:25.346Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_xhQOf1wwUjDKR4aEOzXKO4iw|fc_080c2067692996ea016aa058b4157087d1ae2d39315287b7f9",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "audit-note",
+                "at": [
+                  1160,
+                  1360
+                ],
+                "text": "**Audit → metering**\nRequests, responses, tools + results, checkpoint refs, budget decisions and lifecycle events support forensics, replay and per-session costs."
+              },
+              "resultText": "APPLIED · place_sticky audit-note 1160,1360 180×120\nDELTA\n  + audit-note  sticky 1160,1360 180×120 \"**Audit → metering**\\nRequests, responses, tools + results, checkpoint refs, budget decisions and lifecycle events support forensics, replay and per-session costs.\"\nLINTS · +1 −0\n  + W1 clipped-text: audit-note: sticky body clips at 180×120: 18 row(s), the note holds 1 — needs 180×697 (grow audit-note to ≥180×697 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 53,
+          "timestamp": "2026-09-08T18:49:29.923Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_RU5LAGlk7kGSkPKFjlgJByra|fc_080c2067692996ea016aa058b8f59887d1881def5e3d7728fd",
+              "toolName": "resize",
+              "params": {
+                "id": "audit-note",
+                "width": 560,
+                "height": 320
+              },
+              "resultText": "APPLIED · resize audit-note → 560×320\nDELTA\n  audit-note  1160,1360 180×120 → 1160,1360 560×320\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 54,
+          "timestamp": "2026-09-08T18:49:37.328Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_4F8nFkvpZ9Fpy4vMkidW0b5R|fc_080c2067692996ea016aa058beb98487d183de4c1c30e4fab7",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "drain-note",
+                "at": [
+                  2440,
+                  1320
+                ],
+                "text": "**Rolling release**\nOld hosts reject placements. Drain via completion, suspension or safe checkpoint before replacement.\nDisconnect ≠ cancel: work continues.\nFinish exits; turn/token ceilings pause for user decision."
+              },
+              "resultText": "APPLIED · place_sticky drain-note 2440,1320 180×120\nDELTA\n  + drain-note  sticky 2440,1320 180×120 \"**Rolling release**\\nOld hosts reject placements. Drain via completion, suspension or safe checkpoint before replacement.\\nDisconnect ≠ cancel: work continues.\\nFinish exits; turn/token ceilings pause for user decision.\"\nLINTS · +1 −0\n  + W1 clipped-text: drain-note: sticky body clips at 180×120: 23 row(s), the note holds 1 — needs 180×877 (grow drain-note to ≥180×877 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 55,
+          "timestamp": "2026-09-08T18:49:41.632Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_q752O72YKRsUE54wcr3nlF45|fc_080c2067692996ea016aa058c5045487d1891df172118e2f8b",
+              "toolName": "resize",
+              "params": {
+                "id": "drain-note",
+                "width": 640,
+                "height": 320
+              },
+              "resultText": "APPLIED · resize drain-note → 640×320\nDELTA\n  drain-note  2440,1320 180×120 → 2440,1320 640×320\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 56,
+          "timestamp": "2026-09-08T18:49:47.473Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Dr1MOeZzYNftNZQ5WNgP5L7H|fc_080c2067692996ea016aa058ca303887d184acd0e8f5ec46a8",
+              "toolName": "look",
+              "params": {
+                "view": "page-frame"
+              },
+              "resultText": "LOOK · 1 render · close-up page-frame\nBOARD\n  page-frame section \"Long-lived agent sessions · shared control plane\" white 32,32 3200×2000\n    control section \"Admission · shared control plane\" blue 100,140 860×520\n      client human \"Client\" yellow 160,240 120×120\n      api process \"API · authenticate Workspace + quotas\" 500,240 280×100\n      scheduler process \"Scheduler · capacity Residency + isolation\" 600,480 280×100\n    execution section \"Runner host · active turn loop\" teal 1100,140 1120×720\n      orch process \"Orchestrator Assemble next request\" 1180,480 280×100\n      model process \"Model · stream response\" 1840,480 280×100\n      tools process \"Execute tools Idempotency keys\" 1840,700 280×100\n      stream process \"Live output → client Replay after last ACK\" 1180,260 280×100\n    durable section \"Durability · replay and immutable history\" blue 1100,1040 1120×660\n      log process \"Durable event log Replay + live tail\" 1180,1140 280×100\n      snapshot process \"Checkpoint each turn Content-addressed snapshot\" 1840,1140 280×100\n      history sticky \"**Immutable snapshots** Conversation, tools, files. Parent = prior snapshot. Unchanged content deduplicates.\" 1780,1380 380×300\n      audit-note sticky \"**Audit → metering** Requests, responses, tools + results, checkpoint refs, budget decisions and lifecycle events support forensics, replay and per-session costs.\" 1160,1360 560×320\n    lifecycle section \"Lifecycle · release, rescue and resume\" orange 2380,140 760×1560\n      stop process \"Idle / suspend / interrupt Safe checkpoint + release\" 2460,300 280×100\n      rescue process \"Heartbeat loss Reclaim capacity + rescue\" 2460,620 280×100\n      resume process \"Re-place on available host Rehydrate latest snapshot\" 2460,1000 280×100\n      interrupt-note sticky \"Stop model stream; abandon tools where possible. Record uncertain outcomes. Checkpoint before release.\" 2800,280 280×420\n      drain-note sticky \"**Rolling release** Old hosts reject placements. Drain via completion, suspension or safe checkpoint before replacement. Disconnect ≠ cancel: work continues. Finish exits; turn/token ceilings pause for user decision.\" 2440,1320 640×320\n    tree section \"Session tree · concurrent work and quotas\" teal 100,800 860×900\n      parent process \"Parent orchestrator Allocate scoped budgets\" 380,900 280×100\n      child-a process \"Child A · scoped context Concurrent subtask\" 160,1140 280×100\n      child-b process \"Child B · scoped context Concurrent subtask\" 600,1140 280×100\n      quota-note sticky \"**Tree-wide enforcement** Tokens, time, tool calls and concurrency aggregate across tree + workspace. Children draw from parent allowance; held children still count. Exhaustion → pause for user decision. Cancel / failure propagates; reaper kills orphan children.\" 160,1360 720×320\nEDGES\n  open client→api \"open session\" · client ─(s0 h y=300)→ ─(s1 h y=300)→ (s2 v x=390) ─(s3 h y=290)→ ─(s4 h y=290)→ api\n  placement api→scheduler — anchors=bottom→top · api (s0 v x=640) (s1 v x=640) ─(s2 h y=410)→ (s3 v x=740) (s4 v x=740) scheduler\n  assign scheduler→orch \"place / resume\" · scheduler ─(s0 h y=530)→ orch\n  request orch→model \"context + history + tools\" · orch ─(s0 h y=530)→ model\n  calls model→tools \"tool calls\" · model (s0 v x=1980) tools\n  results tools→orch \"append results · next turn\" anchors=left→bottom · tools ─(s0 h y=750)→ ─(s1 h y=750)→ (s2 v x=1320) (s3 v x=1320) orch\n  events execution→log \"identical output + audit events\" blue anchors=bottom→top · execution (s0 v x=1660) (s1 v x=1660) ─(s2 h y=1000)→ (s3 v x=1320) (s4 v x=1320) log\n  checkpoint tools→snapshot \"completed turn\" blue anchors=bottom→top · tools (s0 v x=1980) snapshot\n  rescue-resume rescue→resume \"last checkpoint · ≤1 turn replay\" anchors=bottom→top · rescue (s0 v x=2600) resume\n  restore snapshot→resume \"latest snapshot\" blue anchors=right→left · snapshot ─(s0 h y=1190)→ ─(s1 h y=1190)→ (s2 v x=2290) ─(s3 h y=1050)→ ─(s4 h y=1050)→ resume\n  spawn-a parent→child-a \"spawn / result\" arrow=both anchors=bottom→top · parent (s0 v x=520) (s1 v x=520) ─(s2 h y=1070)→ (s3 v x=300) (s4 v x=300) child-a\n  spawn-b parent→child-b \"spawn / result\" arrow=both anchors=right→top lp=0.8 · parent ─(s0 h y=950)→ ─(s1 h y=950)→ (s2 v x=740) (s3 v x=740) child-b\n  emit orch→stream \"turn output\" anchors=top→bottom · orch (s0 v x=1320) stream\nBOARD DIFF · base → draft · 39 ops\n  addSection control\n  addSection execution\n  addObject client\n  addObject api\n  addObject scheduler\n  addObject orch\n  addObject model\n  addObject tools\n  addSection durable\n  addObject log\n  addObject snapshot\n  addSticky history\n  addSection lifecycle\n  addObject stop\n  addObject rescue\n  addObject resume\n  addSection tree\n  addObject parent\n  addObject child-a\n  addObject child-b\n  addSticky quota-note\n  addObject stream\n  addSticky interrupt-note\n  addSticky audit-note\n  addSticky drain-note\n  updateSection page-frame  retexted\n  addConnection open\n  addConnection placement\n  addConnection assign\n  addConnection request\n  addConnection calls\n  addConnection results\n  addConnection events\n  addConnection checkpoint\n  addConnection rescue-resume\n  addConnection restore\n  addConnection spawn-a\n  addConnection spawn-b\n  addConnection emit\nDIAGNOSTICS · clean\nROUTES\n  open  anchors right→left  path client ─(s0 h y=300)→ ─(s1 h y=300)→ (s2 v x=390) ─(s3 h y=290)→ ─(s4 h y=290)→ api  through none\n  placement  anchors bottom→top  path api (s0 v x=640) (s1 v x=640) ─(s2 h y=410)→ (s3 v x=740) (s4 v x=740) scheduler  through none\n  assign  anchors right→left  path scheduler ─(s0 h y=530)→ orch  through none\n  request  anchors right→left  path orch ─(s0 h y=530)→ model  through none\n  calls  anchors bottom→top  path model (s0 v x=1980) tools  through none\n  results  anchors left→bottom  path tools ─(s0 h y=750)→ ─(s1 h y=750)→ (s2 v x=1320) (s3 v x=1320) orch  through none\n  events  anchors bottom→top  path execution (s0 v x=1660) (s1 v x=1660) ─(s2 h y=1000)→ (s3 v x=1320) (s4 v x=1320) log  through none\n  checkpoint  anchors bottom→top  path tools (s0 v x=1980) snapshot  through none\n  rescue-resume  anchors bottom→top  path rescue (s0 v x=2600) resume  through none\n  restore  anchors right→left  path snapshot ─(s0 h y=1190)→ ─(s1 h y=1190)→ (s2 v x=2290) ─(s3 h y=1050)→ ─(s4 h y=1050)→ resume  through none\n  spawn-a  anchors bottom→top  path parent (s0 v x=520) (s1 v x=520) ─(s2 h y=1070)→ (s3 v x=300) (s4 v x=300) child-a  through none\n  spawn-b  anchors right→top  path parent ─(s0 h y=950)→ ─(s1 h y=950)→ (s2 v x=740) (s3 v x=740) child-b  through none\n  emit  anchors top→bottom  path orch (s0 v x=1320) stream  through none\nREQUESTS · none\nMEASURES · section page-frame 32,32 3200×2000\n  gaps x  control↔execution 140 · tree↔durable 140 · tree↔execution 140 · durable↔lifecycle 160 · execution↔lifecycle 160\n  gaps y  control↔tree 140 · execution↔durable 180\n  pitch x 60 · 220 · 120 · 100 · 500 · 60 · 20 · 600 · +5 more\n  pitch y 100 · 20 · 20 · 20 · 180 · 140 · 80 · 100 · +7 more\n  free    left 44 · right 68 · top 56 · bottom 304\n  ink     20%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-7f318e4e5a59.232.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 57,
+          "timestamp": "2026-09-08T18:49:55.189Z",
+          "thinking": "**Improving bottom band**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_hUomMrWbRMbsZsexgjvPu8Z5|fc_080c2067692996ea016aa058d2bfb087d1a524a8612575939e",
+              "toolName": "connect",
+              "params": {
+                "id": "delivery",
+                "from": {
+                  "objectId": "stream",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "client",
+                  "anchor": "top"
+                },
+                "label": "live / reattach after replay",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect delivery stream→client\nDELTA\n  + delivery  stream → client\nLINTS · +1 −0\n  + E1 covered-content: label \"live / reattach after replay\" chip on delivery covers api (route delivery around api or move the label with a waypoint)\nROUTES\n  delivery  anchors top→top  path stream (s0 v x=1320) (s1 v x=1320) ─(s2 h y=226)→ (s3 v x=220) (s4 v x=220) client  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 58,
+          "timestamp": "2026-09-08T18:50:00.161Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_nphJZo7AW9DnBY45MgaMyneU|fc_080c2067692996ea016aa058d76a5887d1910151c0ec859014",
+              "toolName": "move_label",
+              "params": {
+                "id": "delivery",
+                "along": 0.25,
+                "offset": 20
+              },
+              "resultText": "APPLIED · move_label delivery → along 0.25, offset 20\nDELTA\n  delivery  labelPosition — → {\"along\":0.25,\"offset\":20}\nLINTS · +1 −1\n  + W1 unreadable-labels: label \"live / reattach after replay\" chip on delivery (293×30px) bleeds onto stream: 900px of corridor where the chip needs 325px (open the stream↔client corridor to ≥325px so the chip and its 16px margins fit)\n  − E1 covered-content  (resolved)\nROUTES\n  delivery  anchors top→top  path stream (s0 v x=1320) (s1 v x=1320) ─(s2 h y=226)→ (s3 v x=220) (s4 v x=220) client  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 59,
+          "timestamp": "2026-09-08T18:50:04.722Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Y9Up7E2oLatUBNjVbGzJhE8k|fc_080c2067692996ea016aa058db974087d189652cfbf3cd9461",
+              "toolName": "move_label",
+              "params": {
+                "id": "delivery",
+                "along": 0.45,
+                "offset": 40
+              },
+              "resultText": "APPLIED · move_label delivery → along 0.45, offset 40\nDELTA\n  delivery  labelPosition {\"along\":0.25,\"offset\":20} → {\"along\":0.45,\"offset\":40}\nLINTS · +1 −1\n  + E1 covered-content: label \"live / reattach after replay\" chip on delivery covers api (route delivery around api or move the label with a waypoint)\n  − W1 unreadable-labels  (resolved)\nROUTES\n  delivery  anchors top→top  path stream (s0 v x=1320) (s1 v x=1320) ─(s2 h y=226)→ (s3 v x=220) (s4 v x=220) client  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 60,
+          "timestamp": "2026-09-08T18:50:09.653Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_gI5pUQu1HGEilN8KA26NXibI|fc_080c2067692996ea016aa058e092a487d1a339c31397693f7b",
+              "toolName": "move_label",
+              "params": {
+                "id": "delivery",
+                "along": 0.45,
+                "offset": -20
+              },
+              "resultText": "APPLIED · move_label delivery → along 0.45, offset -20\nDELTA\n  delivery  labelPosition {\"along\":0.45,\"offset\":40} → {\"along\":0.45,\"offset\":-20}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  delivery  anchors top→top  path stream (s0 v x=1320) (s1 v x=1320) ─(s2 h y=226)→ (s3 v x=220) (s4 v x=220) client  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 61,
+          "timestamp": "2026-09-08T18:50:15.211Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_hYRDGm0XwOlWgj5beE0t7vQe|fc_080c2067692996ea016aa058e55ef887d1aacf79925cf5eab2",
+              "toolName": "connect",
+              "params": {
+                "id": "tree-detail",
+                "from": {
+                  "objectId": "orch",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "parent",
+                  "anchor": "top"
+                },
+                "label": "spawn subtasks",
+                "style": "dashed"
+              },
+              "resultText": "APPLIED · connect tree-detail orch→parent\nDELTA\n  + tree-detail  orch → parent\nLINTS · clean\nROUTES\n  tree-detail  anchors left→top  path orch ─(s0 h y=530)→ (s1 v x=1160) ─(s2 h y=740)→ (s3 v x=520) parent  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 62,
+          "timestamp": "2026-09-08T18:50:22.300Z",
+          "thinking": "**Expanding fork section**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_lnh0QVdqXEkStLTSiXIsdKo6|fc_080c2067692996ea016aa058ec760c87d1b98795bc8555d3a0",
+              "toolName": "place_section",
+              "params": {
+                "id": "branching",
+                "text": "Snapshot reachability · forks and collection",
+                "at": [
+                  100,
+                  1840
+                ],
+                "size": {
+                  "width": 3040,
+                  "height": 340
+                }
+              },
+              "resultText": "APPLIED · place_section branching 100,1840 3040×340\nDELTA\n  + branching  section 100,1840 3040×340 \"Snapshot reachability · forks and collection\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 63,
+          "timestamp": "2026-09-08T18:50:28.155Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_idBJIZ1JXowkH1MOOjZr2ufz|fc_080c2067692996ea016aa058f35f2c87d19f47751da671daa1",
+              "toolName": "resize",
+              "params": {
+                "id": "page-frame",
+                "width": 3200,
+                "height": 2440
+              },
+              "resultText": "APPLIED · resize page-frame → 3200×2440\nDELTA\n  page-frame  32,32 3200×2000 → 32,32 3200×2440\n  branching  parentId — → page-frame\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 64,
+          "timestamp": "2026-09-08T18:50:36.163Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_vF93hh3SigJ1FLTbGN5AXxXN|fc_080c2067692996ea016aa058f810d487d1bed0ae70b1f75fd0",
+              "toolName": "change_color",
+              "params": {
+                "id": "branching",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · change_color branching\nDELTA\n  branching  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 65,
+          "timestamp": "2026-09-08T18:50:46.212Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_BD2YS9tjo6feCZULd9pXdgX4|fc_080c2067692996ea016aa05905270487d1ae950b39c9dc1f26",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "snapshot",
+                "id": "s0",
+                "at": [
+                  180,
+                  1940
+                ],
+                "text": "Earlier snapshot · S0\nShared immutable content"
+              },
+              "resultText": "APPLIED · clone s0 from snapshot 180,1940 280×100\nDELTA\n  + s0  process 180,1940 280×100 \"Earlier snapshot · S0\\nShared immutable content\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 66,
+          "timestamp": "2026-09-08T18:50:51.465Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Ncecbq2120NFFSdwCRE7GWC1|fc_080c2067692996ea016aa0590a34f887d180d0a8ecad4e2c8a",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "s0",
+                "id": "s1",
+                "at": [
+                  760,
+                  1900
+                ],
+                "text": "Original history · S1\nParent = S0"
+              },
+              "resultText": "APPLIED · clone s1 from s0 760,1900 280×100\nDELTA\n  + s1  process 760,1900 280×100 \"Original history · S1\\nParent = S0\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 67,
+          "timestamp": "2026-09-08T18:50:57.997Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5IuACJ5nAeDXFsiaYc2Xwy3G|fc_080c2067692996ea016aa05910bf7487d195ab3c9fa8663c2b",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "s0",
+                "id": "fork",
+                "at": [
+                  760,
+                  2060
+                ],
+                "text": "Fork · F1\nParent = S0"
+              },
+              "resultText": "APPLIED · clone fork from s0 760,2060 280×100\nDELTA\n  + fork  process 760,2060 280×100 \"Fork · F1\\nParent = S0\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 68,
+          "timestamp": "2026-09-08T18:51:07.553Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_GZ1QCMRpYftwaD01WryT8vdE|fc_080c2067692996ea016aa05917ae4487d1a2f0df6e33b31942",
+              "toolName": "connect",
+              "params": {
+                "id": "original",
+                "from": {
+                  "objectId": "s0",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "s1",
+                  "anchor": "left"
+                },
+                "label": "next checkpoint",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect original s0→s1\nDELTA\n  + original  s0 → s1\nLINTS · clean\nROUTES\n  original  anchors right→left  path s0 ─(s0 h y=1990)→ ─(s1 h y=1990)→ (s2 v x=610) ─(s3 h y=1950)→ ─(s4 h y=1950)→ s1  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 69,
+          "timestamp": "2026-09-08T18:51:14.190Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_XnApvi2kIncq9e89wpKkctj2|fc_080c2067692996ea016aa05920a7dc87d1962dcaa2b85468f1",
+              "toolName": "connect",
+              "params": {
+                "id": "fork-edge",
+                "from": {
+                  "objectId": "s0",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "fork",
+                  "anchor": "left"
+                },
+                "label": "fork earlier state",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect fork-edge s0→fork\nDELTA\n  + fork-edge  s0 → fork\nLINTS · clean\nROUTES\n  fork-edge  anchors bottom→left  path s0 (s0 v x=320) (s1 v x=320) ─(s2 h y=2110)→ ─(s3 h y=2110)→ fork  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 70,
+          "timestamp": "2026-09-08T18:51:22.455Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5x2p5OhdGPOB6mfL7N4XWmmD|fc_080c2067692996ea016aa05926cc7887d1b6d7523d86550a20",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "gc-note",
+                "text": "**Reachability retention**\nDelete session → unreferenced snapshots eligible for collection.\nFork references keep shared ancestors alive; each branch writes its own future without copying shared content.",
+                "at": [
+                  1280,
+                  1900
+                ]
+              },
+              "resultText": "APPLIED · place_sticky gc-note 1280,1900 180×120\nDELTA\n  + gc-note  sticky 1280,1900 180×120 \"**Reachability retention**\\nDelete session → unreferenced snapshots eligible for collection.\\nFork references keep shared ancestors alive; each branch writes its own future without copying shared content.\"\nLINTS · +1 −0\n  + W1 clipped-text: gc-note: sticky body clips at 180×120: 22 row(s), the note holds 1 — needs 180×841 (grow gc-note to ≥180×841 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 71,
+          "timestamp": "2026-09-08T18:51:28.009Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_VaotyqZsTHqk8oSEX0z7MRU7|fc_080c2067692996ea016aa0592e6aac87d1aedcd26bfd52b692",
+              "toolName": "resize",
+              "params": {
+                "id": "gc-note",
+                "width": 1000,
+                "height": 260
+              },
+              "resultText": "APPLIED · resize gc-note → 1000×260\nDELTA\n  gc-note  1280,1900 180×120 → 1280,1900 1000×260\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 72,
+          "timestamp": "2026-09-08T18:51:35.041Z",
+          "thinking": "**Improving connections**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_QYlZgtXE9NxjBx8WZd5OtSJl|fc_080c2067692996ea016aa05936cf6887d19bfae7b44095556c",
+              "toolName": "connect",
+              "params": {
+                "id": "stop-path",
+                "from": {
+                  "objectId": "execution",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "stop",
+                  "anchor": "left"
+                },
+                "label": "suspend / cancel / interrupt",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · connect stop-path execution→stop\nDELTA\n  + stop-path  execution → stop\nLINTS · +1 −0\n  + W1 unreadable-labels: label \"suspend / cancel / interrupt\" chip on stop-path (293×30px) bleeds onto stop: 240px of corridor where the chip needs 325px (open the execution↔stop corridor to ≥325px so the chip and its 16px margins fit)\nROUTES\n  stop-path  anchors right→left  path execution ─(s0 h y=500)→ ─(s1 h y=500)→ (s2 v x=2340) ─(s3 h y=350)→ ─(s4 h y=350)→ stop  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 73,
+          "timestamp": "2026-09-08T18:51:40.326Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_v8h42DkHw2AkeASrSBBFd15B|fc_080c2067692996ea016aa0593b575487d1b96ddd7dc99b35f1",
+              "toolName": "update_text",
+              "params": {
+                "id": "stop-path",
+                "text": "interrupt / stop"
+              },
+              "resultText": "APPLIED · update_text stop-path\nDELTA\n  stop-path  label \"suspend / cancel / interrupt\" → \"interrupt / stop\"\nLINTS · +0 −1\n  − W1 unreadable-labels  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 74,
+          "timestamp": "2026-09-08T18:51:45.625Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Qpo5D46NRZ0qYPI3mYPQMjrI|fc_080c2067692996ea016aa059403f4487d18a7b4b49491e934a",
+              "toolName": "connect",
+              "params": {
+                "id": "resume-loop",
+                "from": {
+                  "objectId": "resume",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "execution",
+                  "anchor": "right"
+                },
+                "label": "continue",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · connect resume-loop resume→execution\nDELTA\n  + resume-loop  resume → execution\nLINTS · clean\nROUTES\n  resume-loop  anchors left→right  path resume ─(s0 h y=1050)→ ─(s1 h y=1050)→ (s2 v x=2340) ─(s3 h y=500)→ ─(s4 h y=500)→ execution  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 75,
+          "timestamp": "2026-09-08T18:51:51.397Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_L85tswQZexaOjfYZhcsoAkj8|fc_080c2067692996ea016aa05945fe0087d1833d6ecffadd2bd4",
+              "toolName": "change_connection",
+              "params": {
+                "id": "resume-loop",
+                "patch": {
+                  "to": {
+                    "objectId": "execution",
+                    "anchor": "right",
+                    "position": [
+                      1,
+                      0.85
+                    ]
+                  }
+                }
+              },
+              "resultText": "APPLIED · change_connection resume-loop\nDELTA\n  resume-loop  pos auto→auto → auto→1,0.85\nLINTS · clean\nROUTES\n  resume-loop  anchors left→right  path resume ─(s0 h y=1050)→ ─(s1 h y=1050)→ (s2 v x=2340) ─(s3 h y=752)→ ─(s4 h y=752)→ execution  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 76,
+          "timestamp": "2026-09-08T18:51:56.039Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_NFVOMDHPR4Kz1HNLQVHyDP0j|fc_080c2067692996ea016aa0594b497487d1a04264d39c3097f4",
+              "toolName": "fit_section",
+              "params": {
+                "id": "branching"
+              },
+              "resultText": "APPLIED · fit_section branching\nDELTA\n  branching  100,1840 3040×340 → 140,1820 2180×380\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 77,
+          "timestamp": "2026-09-08T18:52:03.038Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_LJykzLEdr5aHhLdpn9GTcJcp|fc_080c2067692996ea016aa05950873887d1a0a4c8d6643b9ca4",
+              "toolName": "fit_section",
+              "params": {
+                "id": "page-frame"
+              },
+              "resultText": "APPLIED · fit_section page-frame\nDELTA\n  page-frame  32,32 3200×2440 → 60,60 3120×2180\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 78,
+          "timestamp": "2026-09-08T18:52:15.906Z",
+          "thinking": "**Inspecting the current state**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_zUaJ13vdCkzZTYIZEhOQN7NR|fc_080c2067692996ea016aa059594d4487d1ba1c61b84a01369c",
+              "toolName": "update_description",
+              "params": {
+                "description": "# Long-lived agent session orchestration\nRead from admission at upper left into the runner's model/tool loop. The shared API authenticates and resolves workspace quotas; scheduling honors capacity, residency and isolation. The orchestrator builds requests from system context, history and permitted tools, appends results and advances turns.\n\nBlue paths represent durable output and checkpoints: live output reaches the client while identical output and audit events enter the event log. Reattachment replays after the last acknowledged position; disconnection does not cancel work. Each completed turn snapshots conversation, tools and files as content-addressed, parent-linked immutable state.\n\nThe orange lifecycle region covers suspension/interruption, heartbeat rescue, snapshot rehydration on an available host and continuation. Recovery replays at most the in-flight turn; externally mutating tools use idempotency keys. Interruption stops streams, attempts tool termination, records uncertain outcomes and checkpoints before release. Rolling deployments refuse new placements on old hosts and drain safely.\n\nThe lower-left tree expands concurrent child sessions and result return through the parent, with scoped context and parent-funded budgets. Its policy note covers workspace/tree quota aggregation, user-decision pauses, held-child accounting, cancellation/failure propagation and orphan reaping. The durability notes describe audit-driven metering and costs. The bottom inset shows original and forked futures sharing an earlier immutable snapshot; reachability determines collection eligibility."
+              },
+              "resultText": "APPLIED · update_description\nDELTA · description none → 1610 chars",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 79,
+          "timestamp": "2026-09-08T18:52:21.951Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ohNsFiI40mZsDEOgghyT18V1|fc_080c2067692996ea016aa0596410d487d19e11c17f5fda7e22",
+              "toolName": "look",
+              "params": {
+                "view": "page-frame"
+              },
+              "resultText": "LOOK · 1 render · close-up page-frame\nBOARD\n  page-frame section \"Long-lived agent sessions · shared control plane\" white 60,60 3120×2180\n    control section \"Admission · shared control plane\" blue 100,140 860×520\n      client human \"Client\" yellow 160,240 120×120\n      api process \"API · authenticate Workspace + quotas\" 500,240 280×100\n      scheduler process \"Scheduler · capacity Residency + isolation\" 600,480 280×100\n    execution section \"Runner host · active turn loop\" teal 1100,140 1120×720\n      orch process \"Orchestrator Assemble next request\" 1180,480 280×100\n      model process \"Model · stream response\" 1840,480 280×100\n      tools process \"Execute tools Idempotency keys\" 1840,700 280×100\n      stream process \"Live output → client Replay after last ACK\" 1180,260 280×100\n    durable section \"Durability · replay and immutable history\" blue 1100,1040 1120×660\n      log process \"Durable event log Replay + live tail\" 1180,1140 280×100\n      snapshot process \"Checkpoint each turn Content-addressed snapshot\" 1840,1140 280×100\n      history sticky \"**Immutable snapshots** Conversation, tools, files. Parent = prior snapshot. Unchanged content deduplicates.\" 1780,1380 380×300\n      audit-note sticky \"**Audit → metering** Requests, responses, tools + results, checkpoint refs, budget decisions and lifecycle events support forensics, replay and per-session costs.\" 1160,1360 560×320\n    lifecycle section \"Lifecycle · release, rescue and resume\" orange 2380,140 760×1560\n      stop process \"Idle / suspend / interrupt Safe checkpoint + release\" 2460,300 280×100\n      rescue process \"Heartbeat loss Reclaim capacity + rescue\" 2460,620 280×100\n      resume process \"Re-place on available host Rehydrate latest snapshot\" 2460,1000 280×100\n      interrupt-note sticky \"Stop model stream; abandon tools where possible. Record uncertain outcomes. Checkpoint before release.\" 2800,280 280×420\n      drain-note sticky \"**Rolling release** Old hosts reject placements. Drain via completion, suspension or safe checkpoint before replacement. Disconnect ≠ cancel: work continues. Finish exits; turn/token ceilings pause for user decision.\" 2440,1320 640×320\n    tree section \"Session tree · concurrent work and quotas\" teal 100,800 860×900\n      parent process \"Parent orchestrator Allocate scoped budgets\" 380,900 280×100\n      child-a process \"Child A · scoped context Concurrent subtask\" 160,1140 280×100\n      child-b process \"Child B · scoped context Concurrent subtask\" 600,1140 280×100\n      quota-note sticky \"**Tree-wide enforcement** Tokens, time, tool calls and concurrency aggregate across tree + workspace. Children draw from parent allowance; held children still count. Exhaustion → pause for user decision. Cancel / failure propagates; reaper kills orphan children.\" 160,1360 720×320\n    branching section \"Snapshot reachability · forks and collection\" blue 140,1820 2180×380\n      s0 process \"Earlier snapshot · S0 Shared immutable content\" 180,1940 280×100\n      s1 process \"Original history · S1 Parent = S0\" 760,1900 280×100\n      fork process \"Fork · F1 Parent = S0\" 760,2060 280×100\n      gc-note sticky \"**Reachability retention** Delete session → unreferenced snapshots eligible for collection. Fork references keep shared ancestors alive; each branch writes its own future without copying shared content.\" 1280,1900 1000×260\nEDGES\n  open client→api \"open session\" · client ─(s0 h y=300)→ ─(s1 h y=300)→ (s2 v x=390) ─(s3 h y=290)→ ─(s4 h y=290)→ api\n  placement api→scheduler — anchors=bottom→top · api (s0 v x=640) (s1 v x=640) ─(s2 h y=410)→ (s3 v x=740) (s4 v x=740) scheduler\n  assign scheduler→orch \"place / resume\" · scheduler ─(s0 h y=530)→ orch\n  request orch→model \"context + history + tools\" · orch ─(s0 h y=530)→ model\n  calls model→tools \"tool calls\" · model (s0 v x=1980) tools\n  results tools→orch \"append results · next turn\" anchors=left→bottom · tools ─(s0 h y=750)→ ─(s1 h y=750)→ (s2 v x=1320) (s3 v x=1320) orch\n  events execution→log \"identical output + audit events\" blue anchors=bottom→top · execution (s0 v x=1660) (s1 v x=1660) ─(s2 h y=1000)→ (s3 v x=1320) (s4 v x=1320) log\n  checkpoint tools→snapshot \"completed turn\" blue anchors=bottom→top · tools (s0 v x=1980) snapshot\n  rescue-resume rescue→resume \"last checkpoint · ≤1 turn replay\" anchors=bottom→top · rescue (s0 v x=2600) resume\n  restore snapshot→resume \"latest snapshot\" blue anchors=right→left · snapshot ─(s0 h y=1190)→ ─(s1 h y=1190)→ (s2 v x=2290) ─(s3 h y=1050)→ ─(s4 h y=1050)→ resume\n  spawn-a parent→child-a \"spawn / result\" arrow=both anchors=bottom→top · parent (s0 v x=520) (s1 v x=520) ─(s2 h y=1070)→ (s3 v x=300) (s4 v x=300) child-a\n  spawn-b parent→child-b \"spawn / result\" arrow=both anchors=right→top lp=0.8 · parent ─(s0 h y=950)→ ─(s1 h y=950)→ (s2 v x=740) (s3 v x=740) child-b\n  emit orch→stream \"turn output\" anchors=top→bottom · orch (s0 v x=1320) stream\n  delivery stream→client \"live / reattach after replay\" blue anchors=top→top lp=0.45@-20 · stream (s0 v x=1320) (s1 v x=1320) ─(s2 h y=226)→ (s3 v x=220) (s4 v x=220) client\n  tree-detail orch→parent \"spawn subtasks\" dashed anchors=left→top · orch ─(s0 h y=530)→ (s1 v x=1160) ─(s2 h y=740)→ (s3 v x=520) parent\n  original s0→s1 \"next checkpoint\" blue anchors=right→left · s0 ─(s0 h y=1990)→ ─(s1 h y=1990)→ (s2 v x=610) ─(s3 h y=1950)→ ─(s4 h y=1950)→ s1\n  fork-edge s0→fork \"fork earlier state\" blue anchors=bottom→left · s0 (s0 v x=320) (s1 v x=320) ─(s2 h y=2110)→ ─(s3 h y=2110)→ fork\n  stop-path execution→stop \"interrupt / stop\" orange anchors=right→left · execution ─(s0 h y=500)→ ─(s1 h y=500)→ (s2 v x=2340) ─(s3 h y=350)→ ─(s4 h y=350)→ stop\n  resume-loop resume→execution \"continue\" orange anchors=left→right pos=auto→1,0.85 · resume ─(s0 h y=1050)→ ─(s1 h y=1050)→ (s2 v x=2340) ─(s3 h y=752)→ ─(s4 h y=752)→ execution\nBOARD DIFF · base → draft · 51 ops\n  updateDescription  1610 chars\n  addSection control\n  addSection execution\n  addObject client\n  addObject api\n  addObject scheduler\n  addObject orch\n  addObject model\n  addObject tools\n  addSection durable\n  addObject log\n  addObject snapshot\n  addSticky history\n  addSection lifecycle\n  addObject stop\n  addObject rescue\n  addObject resume\n  addSection tree\n  addObject parent\n  addObject child-a\n  addObject child-b\n  addSticky quota-note\n  addObject stream\n  addSticky interrupt-note\n  addSticky audit-note\n  addSticky drain-note\n  addSection branching\n  addObject s0\n  addObject s1\n  addObject fork\n  addSticky gc-note\n  updateSection page-frame  moved · resized · retexted\n  addConnection open\n  addConnection placement\n  addConnection assign\n  addConnection request\n  addConnection calls\n  addConnection results\n  addConnection events\n  addConnection checkpoint\n  addConnection rescue-resume\n  addConnection restore\n  addConnection spawn-a\n  addConnection spawn-b\n  addConnection emit\n  addConnection delivery\n  addConnection tree-detail\n  addConnection original\n  addConnection fork-edge\n  addConnection stop-path\n  addConnection resume-loop\nDIAGNOSTICS · clean\nROUTES\n  open  anchors right→left  path client ─(s0 h y=300)→ ─(s1 h y=300)→ (s2 v x=390) ─(s3 h y=290)→ ─(s4 h y=290)→ api  through none\n  placement  anchors bottom→top  path api (s0 v x=640) (s1 v x=640) ─(s2 h y=410)→ (s3 v x=740) (s4 v x=740) scheduler  through none\n  assign  anchors right→left  path scheduler ─(s0 h y=530)→ orch  through none\n  request  anchors right→left  path orch ─(s0 h y=530)→ model  through none\n  calls  anchors bottom→top  path model (s0 v x=1980) tools  through none\n  results  anchors left→bottom  path tools ─(s0 h y=750)→ ─(s1 h y=750)→ (s2 v x=1320) (s3 v x=1320) orch  through none\n  events  anchors bottom→top  path execution (s0 v x=1660) (s1 v x=1660) ─(s2 h y=1000)→ (s3 v x=1320) (s4 v x=1320) log  through none\n  checkpoint  anchors bottom→top  path tools (s0 v x=1980) snapshot  through none\n  rescue-resume  anchors bottom→top  path rescue (s0 v x=2600) resume  through none\n  restore  anchors right→left  path snapshot ─(s0 h y=1190)→ ─(s1 h y=1190)→ (s2 v x=2290) ─(s3 h y=1050)→ ─(s4 h y=1050)→ resume  through none\n  spawn-a  anchors bottom→top  path parent (s0 v x=520) (s1 v x=520) ─(s2 h y=1070)→ (s3 v x=300) (s4 v x=300) child-a  through none\n  spawn-b  anchors right→top  path parent ─(s0 h y=950)→ ─(s1 h y=950)→ (s2 v x=740) (s3 v x=740) child-b  through none\n  emit  anchors top→bottom  path orch (s0 v x=1320) stream  through none\n  delivery  anchors top→top  path stream (s0 v x=1320) (s1 v x=1320) ─(s2 h y=226)→ (s3 v x=220) (s4 v x=220) client  through none\n  tree-detail  anchors left→top  path orch ─(s0 h y=530)→ (s1 v x=1160) ─(s2 h y=740)→ (s3 v x=520) parent  through none\n  original  anchors right→left  path s0 ─(s0 h y=1990)→ ─(s1 h y=1990)→ (s2 v x=610) ─(s3 h y=1950)→ ─(s4 h y=1950)→ s1  through none\n  fork-edge  anchors bottom→left  path s0 (s0 v x=320) (s1 v x=320) ─(s2 h y=2110)→ ─(s3 h y=2110)→ fork  through none\n  stop-path  anchors right→left  path execution ─(s0 h y=500)→ ─(s1 h y=500)→ (s2 v x=2340) ─(s3 h y=350)→ ─(s4 h y=350)→ stop  through none\n  resume-loop  anchors left→right  path resume ─(s0 h y=1050)→ ─(s1 h y=1050)→ (s2 v x=2340) ─(s3 h y=752)→ ─(s4 h y=752)→ execution  through none\nREQUESTS · none\nMEASURES · section page-frame 60,60 3120×2180\n  gaps x  control↔execution 140 · tree↔durable 140 · tree↔execution 140 · durable↔lifecycle 160 · execution↔lifecycle 160\n  gaps y  control↔tree 140 · execution↔durable 180 · tree↔branching 120 · durable↔branching 120\n  pitch x 40 · 20 · 20 · 200 · 120 · 100 · 160 · 340 · +9 more\n  pitch y 100 · 20 · 20 · 20 · 180 · 140 · 80 · 100 · +11 more\n  free    left 16 · right 16 · top 28 · bottom 12\n  ink     24%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-7f318e4e5a59.324.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 80,
+          "timestamp": "2026-09-08T18:52:31.468Z",
+          "thinking": "**Finalizing existing work**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_QeSgOnZ0bw4jPpthgS9Ct7C0|fc_080c2067692996ea016aa0596f001087d182a6748896fc59ff",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Created the session-lifetime diagram covering admission, streaming execution, durable checkpoints, recovery, concurrent children and quotas, snapshot forks, and safe deployment draining."
+              },
+              "resultText": "Committed: Created the session-lifetime diagram covering admission, streaming execution, durable checkpoints, recovery, concurrent children and quotas, snapshot forks, and safe deployment draining. (51 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

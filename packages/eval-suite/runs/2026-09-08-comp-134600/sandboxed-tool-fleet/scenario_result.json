@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-08-comp-134600",
+  "tier": "system",
+  "scenario": "sandboxed-tool-fleet",
+  "board_id": "eval.2026-09-08-comp-134600.sandboxed-tool-fleet",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-09-08T18:43:48.668Z",
+      "finished_at": "2026-09-08T18:53:32.328Z",
+      "wall_ms": 584310,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "501d844f-bdd2-462c-ab48-6a065243cd4f"
+    ]
+  },
+  "finished_at": "2026-09-08T18:53:32.979Z",
+  "exit_code": 0
+}

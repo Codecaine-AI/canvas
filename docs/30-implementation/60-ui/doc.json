@@ -1,0 +1,610 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation-60-ui",
+  "title": "UI",
+  "root": "b-ui-root-0",
+  "blocks": {
+    "b-ui-root-0": {
+      "id": "b-ui-root-0",
+      "type": "paragraph",
+      "props": {
+        "covers": "How UI code enters the package: the vendored-primitives duplication policy, the manifest-driven icon pipeline, the EDITOR_STYLE trim token table, and data-only toolbar specs on the defs.",
+        "type": "implementation",
+        "concepts": [
+          "ui-primitives",
+          "vendoring",
+          "icon-pipeline",
+          "nucleo",
+          "editor-style",
+          "toolbar-specs"
+        ]
+      },
+      "children": [
+        "b-ui-role-1",
+        "b-ui-sources-2",
+        "b-ui-gov-3",
+        "b-ui-gov-shape-4",
+        "b-ui-decisions-5",
+        "b-ui-vendored-decision-6",
+        "b-ui-vendored-why-7",
+        "b-ui-vendored-applies-8",
+        "b-ui-icons-decision-9",
+        "b-ui-icons-why-10",
+        "b-ui-icons-applies-11",
+        "b-ui-editor-style-decision-12",
+        "b-ui-editor-style-why-13",
+        "b-ui-editor-style-applies-14",
+        "b-ui-toolbar-specs-decision-15",
+        "b-ui-toolbar-specs-why-16",
+        "b-ui-toolbar-specs-applies-17"
+      ]
+    },
+    "b-ui-role-1": {
+      "id": "b-ui-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "UI building blocks: the vendored primitives and icon pipeline under "
+        },
+        {
+          "insert": "ui/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and the editor trim components under "
+        },
+        {
+          "insert": "stage/editor/components/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " they serve. Trim behavior and parity authority are owned by design; this area records how UI code enters the package."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-sources-2": {
+      "id": "b-ui-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "packages/canvas/src/ui",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui",
+              "label": "packages/canvas/src/ui"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "packages/canvas/src/stage/editor/components",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components",
+              "label": "packages/canvas/src/stage/editor/components"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-gov-3": {
+      "id": "b-ui-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-ui-gov-shape-4": {
+      "id": "b-ui-gov-shape-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The shape contract",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "The shape contract"
+            }
+          }
+        },
+        {
+          "insert": " — owns the contract trim reflects: color roles, the one-pick color model, and per-kind toolbar semantics."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-decisions-5": {
+      "id": "b-ui-decisions-5",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-ui-vendored-decision-6": {
+      "id": "b-ui-vendored-decision-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "UI primitives are duplicated into "
+        },
+        {
+          "insert": "ui/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui",
+              "label": "ui/"
+            }
+          }
+        },
+        {
+          "insert": " — Button, Input, Textarea, Badge, Tooltip, the "
+        },
+        {
+          "insert": "cn()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " helper — never imported from a host component library; the package carries zero dependency on any host app."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-vendored-why-7": {
+      "id": "b-ui-vendored-why-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was re-exporting a host's primitives, which is how the package was born entangled with its original host; self-containment beats import convenience."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-vendored-applies-8": {
+      "id": "b-ui-vendored-applies-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "ui/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui",
+              "label": "ui/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future primitive, which is copied in."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-icons-decision-9": {
+      "id": "b-ui-icons-decision-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "icons enter through one pipeline: "
+        },
+        {
+          "insert": "ui/icons/manifest.json",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/manifest.json",
+              "label": "ui/icons/manifest.json"
+            }
+          }
+        },
+        {
+          "insert": " selects them, "
+        },
+        {
+          "insert": "tools/nucleo-icons/generate.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "tools/nucleo-icons/generate.ts",
+              "label": "tools/nucleo-icons/generate.ts"
+            }
+          }
+        },
+        {
+          "insert": " emits one component per icon under "
+        },
+        {
+          "insert": "ui/icons/nucleo/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " plus the generated barrel, source SVGs are vendored used-assets-only under "
+        },
+        {
+          "insert": "nucleo/svg/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", hand-authored extras live in "
+        },
+        {
+          "insert": "custom-icons.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/custom-icons.tsx",
+              "label": "custom-icons.tsx"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "ui/icons/index.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons/index.ts",
+              "label": "ui/icons/index.ts"
+            }
+          }
+        },
+        {
+          "insert": " re-exports both. No ad-hoc icon imports, no icon dependency."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-icons-why-10": {
+      "id": "b-ui-icons-why-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was an icon-library dependency (the removed lucide-react), which drags a whole set for a handful of glyphs and puts the roster outside the repo's control."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-icons-applies-11": {
+      "id": "b-ui-icons-applies-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "ui/icons/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui/icons",
+              "label": "ui/icons/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future icon, which enters via the manifest and generator, or "
+        },
+        {
+          "insert": "custom-icons.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " when hand-authored."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-editor-style-decision-12": {
+      "id": "b-ui-editor-style-decision-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "trim dimensions come from the "
+        },
+        {
+          "insert": "EDITOR_STYLE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " token table in "
+        },
+        {
+          "insert": "editor-style.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/editor-style.ts",
+              "label": "editor-style.ts"
+            }
+          }
+        },
+        {
+          "insert": ": the 48px selection toolbar (radius 14, 36px controls, 30px popover swatches, flyouts opening above the toolbar centered on their trigger) deliberately exceeds the measured 29px FigJam pill — a product decision, not a parity gap. Future trim surfaces read "
+        },
+        {
+          "insert": "EDITOR_STYLE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rather than re-deriving sizes from the reference corpus."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-editor-style-why-13": {
+      "id": "b-ui-editor-style-why-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was matching the measured baseline literally — under-sized in this product's contexts — while scattering per-component sizes would make the deliberate deviation invisible and un-auditable."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-editor-style-applies-14": {
+      "id": "b-ui-editor-style-applies-14",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "editor-style.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/components/editor-style.ts",
+              "label": "editor-style.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future trim surface and flyout, which sources its metrics here."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-toolbar-specs-decision-15": {
+      "id": "b-ui-toolbar-specs-decision-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "selection-toolbar content is data on the defs: each ObjectDef (and the ConnectorDef) carries an icon-free "
+        },
+        {
+          "insert": "ToolbarControlSpec",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " list, the trim host "
+        },
+        {
+          "insert": "SelectionToolbar.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "label": "SelectionToolbar.tsx"
+            }
+          }
+        },
+        {
+          "insert": " stays generic — resolving glyphs from its own "
+        },
+        {
+          "insert": "ACTION_ICONS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " table — and the multi-select toolbar is computed as the capability intersection of the selected defs' lists, never hand-authored."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-toolbar-specs-why-16": {
+      "id": "b-ui-toolbar-specs-why-16",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was a toolbar component per object kind, which duplicates trim per kind and lets the multi-select toolbar drift from what the kinds actually share."
+        }
+      ],
+      "children": []
+    },
+    "b-ui-toolbar-specs-applies-17": {
+      "id": "b-ui-toolbar-specs-applies-17",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "SelectionToolbar.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/selection-toolbar/SelectionToolbar.tsx",
+              "label": "SelectionToolbar.tsx"
+            }
+          }
+        },
+        {
+          "insert": " and every def's "
+        },
+        {
+          "insert": "toolbar",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field — including every future object kind and toolbar control."
+        }
+      ],
+      "children": []
+    }
+  }
+}

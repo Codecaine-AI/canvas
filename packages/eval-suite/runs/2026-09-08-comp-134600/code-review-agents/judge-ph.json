@@ -1,0 +1,180 @@
+{
+  "axis": "ph",
+  "scenario": "code-review-agents",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean. Across 72 tool calls, no call returned ERROR, no call was rejected, and there were no retries or repeated parse/schema-validation errors. All calls either applied successfully or returned a successful LOOK/commit result.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · resize page-frame → 3800×2200",
+          "finding": "The first operation applied immediately; there was no pre-APPLIED failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 71,
+          "transcript_excerpt": "Committed: Created the code-review lifecycle diagram with five concurrent reviewers, verification and withholding, cancellation/restart, calibration feedback, and budget/telemetry notes. (51 patch operations).",
+          "finding": "Finalize succeeded on the first attempt and was not blocked or rejected."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "There were two explicit framed looks, both legally scoped to the page-frame. Turn 7 established the broad layout, substantial construction followed, and turn 70 provided a clean whole-board QA render before finalize. This forms one broad render→adjust/build→render loop. However, the dense reviewer fan-out, aggregation fan-in, and lower feedback routes were not inspected with region-specific close-ups during construction; nearly all detailed work occurred between the two whole-page looks. No adjustment followed the final QA render.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 7,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... gaps x intake-area↔context-area 100 · context-area↔review-area 100 ... free right 1648 ... ink 0%",
+          "finding": "An early whole-board render was read after the first three sections were laid out, and the agent subsequently populated and expanded the board."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 59,
+          "transcript_excerpt": "thinking: \"**Checking supplied state**\" ... place_sticky review-contract",
+          "finding": "Despite explicitly entering a checking phase, the agent continued editing a dense region without first taking a close-up of that region."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 70,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean ... free left 16 · right 16 · top 28 · bottom 12 · ink 19%",
+          "finding": "A final whole-board QA render was read immediately before finalize and showed clean diagnostics, but there was no subsequent render-driven adjustment."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint handling was disciplined. No lint ERROR occurred. Every warning was addressed rather than overridden: clipped stickies were resized or shortened, and unreadable edge labels were shortened. The review-contract resize at turn 60 missed the required height by five pixels, but the next turn changed strategy by shortening the text, so this was not a lint fight. Final diagnostics were clean, with no warning requiring a commit-summary override reason.",
+      "lint_error_count": 0,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "+ W1 clipped-text: intake-note ... needs 180×841",
+          "finding": "A clipped-text warning was introduced by an applied operation."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "APPLIED · resize intake-note → 340×440 ... − W1 clipped-text (resolved)",
+          "finding": "The warning from the preceding turn was fixed immediately."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 40,
+          "transcript_excerpt": "+ W1 unreadable-labels: label \"verified / eligible\" chip on v-p ...",
+          "finding": "The applied edge produced a label-legibility warning."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 41,
+          "transcript_excerpt": "v-p label \"verified / eligible\" → eligible ... − W1 unreadable-labels (resolved)",
+          "finding": "The label warning was resolved on the next turn by shortening the label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 60,
+          "transcript_excerpt": "sticky body clips at 340×440 ... needs 340×445 ... + W1 clipped-text",
+          "finding": "The first resize of review-contract remained five pixels too short."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 61,
+          "transcript_excerpt": "update_text review-contract ... − W1 clipped-text (resolved)",
+          "finding": "The remaining warning was resolved on the next turn through text reduction, avoiding repeated lint fighting."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 70,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The final QA state contained no outstanding lint warnings or errors."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary accurately describes the stage diff and final render. The diff contains five reviewer objects, aggregator and verifier paths including withheld/demoted findings, cancellation and restart controls, calibration feedback, and budget/telemetry notes. The summary does not claim visual rebalancing or unsupported behavior, and no defect explicitly seen or named by the agent remained undeclared at commit.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 71,
+          "line": "Created the code-review lifecycle diagram with five concurrent reviewers, verification and withholding, cancellation/restart, calibration feedback, and budget/telemetry notes.",
+          "assessment": "Accurate and proportionate. The stage diff and final render directly support every listed component."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 70,
+          "transcript_excerpt": "correctness ... security ... performance ... tests ... compat ... aggregate ... verify ... demote ... cancel ... calibration ... telemetry",
+          "finding": "The final render visibly substantiates the summary's five reviewers and its verification, withholding, cancellation, calibration, and telemetry claims."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 71,
+          "transcript_excerpt": "(51 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The committed operation total agrees with the board diff's 51 operations, and there is no misleading claim about unsupported or absent content."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session used 72 total tool calls producing 51 committed patch operations, proportionate to a large workflow with six sections, many nodes, and 20 connections. There were no add-delete-rebuild cycles, repeated NO-OPs, or other thrash. The 8.3-minute wall time was comfortably below the 15-minute session budget, and finalize was reached well below the 300-turn limit.",
+      "operation_count": 51,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 8.3,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "APPLIED · resize intake-note → 340×440",
+          "finding": "Corrective work modified the existing object rather than deleting and rebuilding it."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 69,
+          "transcript_excerpt": "APPLIED · fit_section page-frame ... 3640×1960 ... LINTS · clean",
+          "finding": "A single fit operation efficiently tightened the final frame before QA."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 71,
+          "transcript_excerpt": "Committed ... (51 patch operations).",
+          "finding": "The agent completed and finalized without exhausting either the wall-time or turn budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The sole session completed normally, had zero retries, and committed successfully, so no session is excluded from scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 8.5
+  },
+  "usage": {
+    "input_tokens": 30505,
+    "output_tokens": 2433
+  },
+  "flags": []
+}

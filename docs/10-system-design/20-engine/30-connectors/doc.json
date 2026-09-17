@@ -1,0 +1,710 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-20-engine-30-connectors",
+  "title": "Connectors",
+  "root": "b-engine-connectors-root",
+  "blocks": {
+    "b-engine-connectors-title-1": {
+      "id": "b-engine-connectors-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Connectors"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-intro-2": {
+      "id": "b-engine-connectors-intro-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A connection's visual path is never stored as a fixed drawing — it is computed from the current geometry of its two endpoint objects every time either side moves. "
+        },
+        {
+          "insert": "routeConnection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/routing.ts",
+              "symbol": "routeConnection"
+            }
+          }
+        },
+        {
+          "insert": " is the single object-to-object routing entry point: given the two endpoint objects and the connection's anchor/position/waypoint overrides, it returns a routed result — an SVG path, the true start and end anchor points, a label placement point, and the route's world-space vertex list. The router is style-agnostic: solid and dashed connectors share the same route, and there are no straight or smooth path algorithms."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-def-heading-3": {
+      "id": "b-engine-connectors-def-heading-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Connectors are not objects"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-def-body-4": {
+      "id": "b-engine-connectors-def-body-4",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Connections are a separate document collection with their own def — a "
+        },
+        {
+          "insert": "ConnectorDef",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", deliberately absent from the object registry — with "
+        },
+        {
+          "insert": "kind: \"connector\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the connector color role, and routed-midpoint label editing. Every connector is created gray: creation paths stamp "
+        },
+        {
+          "insert": "FIRST_USE_COLORS.connector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and unlike object color edits, a picked connector color is not remembered for future connectors. Dashed rendering applies "
+        },
+        {
+          "insert": "CONNECTOR_DASH_PATTERN_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/def.ts",
+              "symbol": "CONNECTOR_DASH_PATTERN_PX"
+            }
+          }
+        },
+        {
+          "insert": " only when "
+        },
+        {
+          "insert": "style === \"dashed\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; style never selects routing."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-routing-heading-5": {
+      "id": "b-engine-connectors-routing-heading-5",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Routing tiers"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-routing-body-6": {
+      "id": "b-engine-connectors-routing-body-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Routing resolves in tiers. If stored "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " exist and form an orthogonal polyline, they win. Otherwise the router tries an exact straight route when facing anchors are already aligned, then builds a simple elbow path. Only when that simple elbow crosses an extra obstacle does it invoke the orthogonal A* pathfinder ("
+        },
+        {
+          "insert": "PathGenerator",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/pathfinding/path-generator.ts",
+              "symbol": "PathGenerator"
+            }
+          }
+        },
+        {
+          "insert": "); if A* throws or yields no usable route, the already-computed simple elbow is the answer, so routing never fails outright."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-routing-path-7": {
+      "id": "b-engine-connectors-routing-path-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Whichever tier produces the route, consecutive duplicate points are removed and the polyline becomes a rendered SVG path with rounded interior corners — the radius clamps to half the shorter adjacent segment so short segments get a sane smaller radius — and the first and last rendered points pull back by a fixed end-gap along their own tangent so the drawn stroke never touches the target border. The connection's "
+        },
+        {
+          "insert": "start",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "end",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fields still carry the true, untouched anchor points for endpoint handles and label placement."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-routing-ortho-8": {
+      "id": "b-engine-connectors-routing-ortho-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Routes are orthogonal by invariant. Stored waypoints are accepted only when every segment is orthogonal within 0.5 px; diagonal waypoint edits are ignored and auto-routing resumes. Nearly-straight A* output is flattened to an exact two-point route — the anchor may slide along the objects' edge-overlap span, trimmed by the end gap — so aligned objects get a straight line instead of a tiny dogleg."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-anchor-heading-9": {
+      "id": "b-engine-connectors-anchor-heading-9",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Anchor resolution"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-anchor-body-10": {
+      "id": "b-engine-connectors-anchor-body-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Before any path is computed, the router decides which side of each endpoint object the connection attaches to. "
+        },
+        {
+          "insert": "autoPickAnchors",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/routing.ts",
+              "symbol": "autoPickAnchors"
+            }
+          }
+        },
+        {
+          "insert": " prefers genuinely facing sides: if the objects' vertical spans overlap within an 8-px tolerance it picks right/left, if their horizontal spans overlap it picks bottom/top, and otherwise the dominant center separation wins, horizontal on ties. That pick is only the fallback — an explicit "
+        },
+        {
+          "insert": "anchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " side override wins when set, and an explicit relative "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (a "
+        },
+        {
+          "insert": "[rx, ry]",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fraction of the object's bounds) overrides even the side, landing the endpoint at a specific point rather than a side midpoint."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-anchor-preview-11": {
+      "id": "b-engine-connectors-anchor-preview-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "routeConnectionToPoint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/routing.ts",
+              "symbol": "routeConnectionToPoint"
+            }
+          }
+        },
+        {
+          "insert": " handles the free-point preview while a connector is being dragged toward empty canvas: it anchors from the source object, picks the free endpoint side by dominant delta, and deliberately skips the A* obstacle pass while keeping the same rounded-corner and end-gap construction, so previews are cheap but look like committed routes."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-waypoint-heading-12": {
+      "id": "b-engine-connectors-waypoint-heading-12",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Waypoint reconciliation"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-waypoint-body-13": {
+      "id": "b-engine-connectors-waypoint-body-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Explicit waypoints are absolute world coordinates, so the routing layer does not keep them coherent when endpoints move — the reducer does, in the choke point wrapped around every document-changing action ("
+        },
+        {
+          "insert": "Document model",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/10-document-model",
+              "label": "Document model"
+            }
+          }
+        },
+        {
+          "insert": "). The rule is asymmetric by design, per connection: when both endpoint owners translate by the same delta with no resize, waypoints translate rigidly, preserving trunk-and-branch fan shapes; when owners move asymmetrically or either resizes, waypoints are dropped so the connector re-routes rather than sweeping stale bends through space that no longer means anything. The same split applies to live-preview drag frames, so a fan of waypointed connectors visibly tracks a dragged section instead of snapping into place on drop. Duplicate and paste translate cloned waypoints by their offset at creation time."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-bend-heading-14": {
+      "id": "b-engine-connectors-bend-heading-14",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Bend editing"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-bend-body-15": {
+      "id": "b-engine-connectors-bend-body-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "connectorBendSegments",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/bend-editing.ts",
+              "symbol": "connectorBendSegments"
+            }
+          }
+        },
+        {
+          "insert": " exposes every orthogonal segment of a selected connector as a draggable bend handle; when a label lies on a segment, the handle shifts away from it so the pill stays reachable. Dragging is axis-constrained — horizontal segments move only vertically, vertical segments only horizontally — and a direct one-segment connector expands into a stub-run-stub polyline instead of disappearing. During the drag, same-orientation segment snaps and endpoint straightening use a zoom-scaled tolerance and simplify the preview the moment a snap lands."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-bend-commit-16": {
+      "id": "b-engine-connectors-bend-commit-16",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "On release, "
+        },
+        {
+          "insert": "commitBendPolyline",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/bend-editing.ts",
+              "symbol": "commitBendPolyline"
+            }
+          }
+        },
+        {
+          "insert": " simplifies the polyline: nearly-orthogonal segments normalize, tiny hooks and near-duplicates collapse, collinear triples merge. Waypoints are cleared only when the simplified route is straight; otherwise the interior corners persist as "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Reconnecting either endpoint clears existing waypoints, so old bends cannot survive an endpoint change."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-gesture-heading-17": {
+      "id": "b-engine-connectors-gesture-heading-17",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Create, reconnect, quick connect"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-gesture-body-18": {
+      "id": "b-engine-connectors-gesture-body-18",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Three connector gestures ride the interaction pipeline ("
+        },
+        {
+          "insert": "Interaction",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/20-interaction",
+              "label": "Interaction"
+            }
+          }
+        },
+        {
+          "insert": "): endpoint drag, create, and bend drag. While dragging, the hover target resolves through "
+        },
+        {
+          "insert": "connectorCandidateAt",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/gestures.ts",
+              "symbol": "connectorCandidateAt"
+            }
+          }
+        },
+        {
+          "insert": ", which runs the connection cascade over paint order topmost-first, excluding the other endpoint's object, and stores an explicit "
+        },
+        {
+          "insert": "position",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " only when the snapped point is not a plain canonical side anchor."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-gesture-release-19": {
+      "id": "b-engine-connectors-gesture-release-19",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A create released on a candidate object commits "
+        },
+        {
+          "insert": "canvas.addConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Released on empty canvas it commits "
+        },
+        {
+          "insert": "canvas.quickConnect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": the engine duplicates the source object — same type, size, color, parent, and per-type fields, with empty text — centered at the drop point, connects to it in the same history entry, seeds inline text editing for the new object, and places a sub-threshold port click's ghost at an edge-to-edge gap of "
+        },
+        {
+          "insert": "max(width, 120) / 2",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from the source. An endpoint reconnect commits "
+        },
+        {
+          "insert": "canvas.updateConnection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and clears stored waypoints whenever the endpoint actually changed by object, anchor, or position."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-cascade-heading-20": {
+      "id": "b-engine-connectors-cascade-heading-20",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The connection cascade"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-cascade-body-21": {
+      "id": "b-engine-connectors-cascade-body-21",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "resolveConnectionCascade",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "symbol": "resolveConnectionCascade"
+            }
+          }
+        },
+        {
+          "insert": " decides where a dragged endpoint should snap. It iterates candidates in paint order and returns the first winner; for a candidate it requires the pointer inside the hover-expanded bounds, then tries the nearest cardinal anchor strictly within the screen-pixel snap radius, then the nearest outline point strictly within the world-pixel radius, then inside-shape resolution for eligible non-section shapes. No winner means "
+        },
+        {
+          "insert": "{ kind: \"free\", point }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Section interiors are deliberately free canvas — a drag across a section's body does not snap to it — but section anchors and outlines still participate in the higher tiers."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-cascade-anchors-22": {
+      "id": "b-engine-connectors-cascade-anchors-22",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Anchor candidates come from "
+        },
+        {
+          "insert": "getConnectionAnchors",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "symbol": "getConnectionAnchors"
+            }
+          }
+        },
+        {
+          "insert": ": four cardinal points offset outside the bounds and projected onto the object's real outline — ellipse curve, diamond, triangle, octagon, chevron — not its bounding box, with bbox fallback for every other kind. The same anchors feed the selected-object anchor dots and hit-testing, so attachment, affordance, and clicks can never disagree."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-mode-heading-23": {
+      "id": "b-engine-connectors-mode-heading-23",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Connector Mode"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-mode-body-24": {
+      "id": "b-engine-connectors-mode-body-24",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The dock tool "
+        },
+        {
+          "insert": "\"connector\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a wiring mode, not a placeable object type. Pointer-down on a port starts a create gesture with a pinned "
+        },
+        {
+          "insert": "fromAnchor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; pointer-down on an object body starts one without it, so routing auto-picks the facing side at route time; anything else stays idle, and double-click is a no-op. Completing or canceling a connection does not switch the tool back — the mode persists for wiring several connections in a row. While the mode is active, anchor dots render at any zoom; in select mode they gate at zoom 0.5 ("
+        },
+        {
+          "insert": "ANCHOR_DOTS_MIN_ZOOM",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
+              "symbol": "ANCHOR_DOTS_MIN_ZOOM"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-closing-25": {
+      "id": "b-engine-connectors-closing-25",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The net separation of concerns: routing computes world-space points and a path from endpoint geometry; rendering decides how to draw that path; interaction decides when a user-authored bend becomes persistent "
+        },
+        {
+          "insert": "waypoints",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". That keeps automatic routing disposable while preserving explicitly edited bends until a reconnect, asymmetric move, resize, or straightening simplification invalidates them. Where connector layers sit in the z stack is specified in "
+        },
+        {
+          "insert": "The layer cake",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "The layer cake"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-connectors-root": {
+      "id": "b-engine-connectors-root",
+      "type": "paragraph",
+      "props": {
+        "covers": "The connector behavioral model: connections are not objects, elbow/orthogonal routing with an A* fallback, anchor resolution, waypoint reconciliation, bend editing, the connection cascade, and the create/reconnect/quick-connect gestures plus Connector Mode.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "elbow routing",
+          "anchor resolution",
+          "waypoints",
+          "bend editing",
+          "connection cascade",
+          "quick connect",
+          "Connector Mode"
+        ]
+      },
+      "children": [
+        "b-engine-connectors-title-1",
+        "b-engine-connectors-intro-2",
+        "b-engine-connectors-def-heading-3",
+        "b-engine-connectors-def-body-4",
+        "b-engine-connectors-routing-heading-5",
+        "b-engine-connectors-routing-body-6",
+        "b-engine-connectors-routing-path-7",
+        "b-engine-connectors-routing-ortho-8",
+        "b-engine-connectors-anchor-heading-9",
+        "b-engine-connectors-anchor-body-10",
+        "b-engine-connectors-anchor-preview-11",
+        "b-engine-connectors-waypoint-heading-12",
+        "b-engine-connectors-waypoint-body-13",
+        "b-engine-connectors-bend-heading-14",
+        "b-engine-connectors-bend-body-15",
+        "b-engine-connectors-bend-commit-16",
+        "b-engine-connectors-gesture-heading-17",
+        "b-engine-connectors-gesture-body-18",
+        "b-engine-connectors-gesture-release-19",
+        "b-engine-connectors-cascade-heading-20",
+        "b-engine-connectors-cascade-body-21",
+        "b-engine-connectors-cascade-anchors-22",
+        "b-engine-connectors-mode-heading-23",
+        "b-engine-connectors-mode-body-24",
+        "b-engine-connectors-closing-25"
+      ]
+    }
+  }
+}

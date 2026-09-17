@@ -1,0 +1,795 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-comp-134600.agent-session-orchestration",
+  "title": "2026-09-08-comp-134600 · agent-session-orchestration",
+  "description": "# Long-lived agent session orchestration\nRead from admission at upper left into the runner's model/tool loop. The shared API authenticates and resolves workspace quotas; scheduling honors capacity, residency and isolation. The orchestrator builds requests from system context, history and permitted tools, appends results and advances turns.\n\nBlue paths represent durable output and checkpoints: live output reaches the client while identical output and audit events enter the event log. Reattachment replays after the last acknowledged position; disconnection does not cancel work. Each completed turn snapshots conversation, tools and files as content-addressed, parent-linked immutable state.\n\nThe orange lifecycle region covers suspension/interruption, heartbeat rescue, snapshot rehydration on an available host and continuation. Recovery replays at most the in-flight turn; externally mutating tools use idempotency keys. Interruption stops streams, attempts tool termination, records uncertain outcomes and checkpoints before release. Rolling deployments refuse new placements on old hosts and drain safely.\n\nThe lower-left tree expands concurrent child sessions and result return through the parent, with scoped context and parent-funded budgets. Its policy note covers workspace/tree quota aggregation, user-decision pauses, held-child accounting, cancellation/failure propagation and orphan reaping. The durability notes describe audit-driven metering and costs. The bottom inset shows original and forked futures sharing an earlier immutable snapshot; reachability determines collection eligibility.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3264,
+    "height": 2064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Long-lived agent sessions · shared control plane",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 60,
+        "y": 60,
+        "width": 3120,
+        "height": 2180
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "control",
+      "type": "section",
+      "text": "Admission · shared control plane",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 140,
+        "width": 860,
+        "height": 520
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "execution",
+      "type": "section",
+      "text": "Runner host · active turn loop",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1100,
+        "y": 140,
+        "width": 1120,
+        "height": 720
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "client",
+      "type": "icon",
+      "text": "Client",
+      "color": "yellow",
+      "parentId": "control",
+      "geometry": {
+        "x": 160,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "api",
+      "type": "process",
+      "text": "API · authenticate\nWorkspace + quotas",
+      "color": "gray",
+      "parentId": "control",
+      "geometry": {
+        "x": 500,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "scheduler",
+      "type": "process",
+      "text": "Scheduler · capacity\nResidency + isolation",
+      "color": "gray",
+      "parentId": "control",
+      "geometry": {
+        "x": 600,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "orch",
+      "type": "process",
+      "text": "Orchestrator\nAssemble next request",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1180,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "model",
+      "type": "process",
+      "text": "Model · stream response",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1840,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "tools",
+      "type": "process",
+      "text": "Execute tools\nIdempotency keys",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1840,
+        "y": 700,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "durable",
+      "type": "section",
+      "text": "Durability · replay and immutable history",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1100,
+        "y": 1040,
+        "width": 1120,
+        "height": 660
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "log",
+      "type": "process",
+      "text": "Durable event log\nReplay + live tail",
+      "color": "gray",
+      "parentId": "durable",
+      "geometry": {
+        "x": 1180,
+        "y": 1140,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "snapshot",
+      "type": "process",
+      "text": "Checkpoint each turn\nContent-addressed snapshot",
+      "color": "gray",
+      "parentId": "durable",
+      "geometry": {
+        "x": 1840,
+        "y": 1140,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "history",
+      "type": "sticky",
+      "text": "**Immutable snapshots**\nConversation, tools, files.\nParent = prior snapshot.\nUnchanged content deduplicates.",
+      "color": "yellow",
+      "parentId": "durable",
+      "geometry": {
+        "x": 1780,
+        "y": 1380,
+        "width": 380,
+        "height": 300
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "lifecycle",
+      "type": "section",
+      "text": "Lifecycle · release, rescue and resume",
+      "color": "orange",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2380,
+        "y": 140,
+        "width": 760,
+        "height": 1560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "stop",
+      "type": "process",
+      "text": "Idle / suspend / interrupt\nSafe checkpoint + release",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 2460,
+        "y": 300,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "rescue",
+      "type": "process",
+      "text": "Heartbeat loss\nReclaim capacity + rescue",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 2460,
+        "y": 620,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "resume",
+      "type": "process",
+      "text": "Re-place on available host\nRehydrate latest snapshot",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 2460,
+        "y": 1000,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "tree",
+      "type": "section",
+      "text": "Session tree · concurrent work and quotas",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 800,
+        "width": 860,
+        "height": 900
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "parent",
+      "type": "process",
+      "text": "Parent orchestrator\nAllocate scoped budgets",
+      "color": "gray",
+      "parentId": "tree",
+      "geometry": {
+        "x": 380,
+        "y": 900,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "child-a",
+      "type": "process",
+      "text": "Child A · scoped context\nConcurrent subtask",
+      "color": "gray",
+      "parentId": "tree",
+      "geometry": {
+        "x": 160,
+        "y": 1140,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "child-b",
+      "type": "process",
+      "text": "Child B · scoped context\nConcurrent subtask",
+      "color": "gray",
+      "parentId": "tree",
+      "geometry": {
+        "x": 600,
+        "y": 1140,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "quota-note",
+      "type": "sticky",
+      "text": "**Tree-wide enforcement**\nTokens, time, tool calls and concurrency aggregate across tree + workspace.\nChildren draw from parent allowance; held children still count.\nExhaustion → pause for user decision.\nCancel / failure propagates; reaper kills orphan children.",
+      "color": "yellow",
+      "parentId": "tree",
+      "geometry": {
+        "x": 160,
+        "y": 1360,
+        "width": 720,
+        "height": 320
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "stream",
+      "type": "process",
+      "text": "Live output → client\nReplay after last ACK",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1180,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "interrupt-note",
+      "type": "sticky",
+      "text": "Stop model stream; abandon tools where possible. Record uncertain outcomes. Checkpoint before release.",
+      "color": "yellow",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 2800,
+        "y": 280,
+        "width": 280,
+        "height": 420
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "audit-note",
+      "type": "sticky",
+      "text": "**Audit → metering**\nRequests, responses, tools + results, checkpoint refs, budget decisions and lifecycle events support forensics, replay and per-session costs.",
+      "color": "yellow",
+      "parentId": "durable",
+      "geometry": {
+        "x": 1160,
+        "y": 1360,
+        "width": 560,
+        "height": 320
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "drain-note",
+      "type": "sticky",
+      "text": "**Rolling release**\nOld hosts reject placements. Drain via completion, suspension or safe checkpoint before replacement.\nDisconnect ≠ cancel: work continues.\nFinish exits; turn/token ceilings pause for user decision.",
+      "color": "yellow",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 2440,
+        "y": 1320,
+        "width": 640,
+        "height": 320
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "branching",
+      "type": "section",
+      "text": "Snapshot reachability · forks and collection",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 140,
+        "y": 1820,
+        "width": 2180,
+        "height": 380
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "s0",
+      "type": "process",
+      "text": "Earlier snapshot · S0\nShared immutable content",
+      "color": "gray",
+      "parentId": "branching",
+      "geometry": {
+        "x": 180,
+        "y": 1940,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s1",
+      "type": "process",
+      "text": "Original history · S1\nParent = S0",
+      "color": "gray",
+      "parentId": "branching",
+      "geometry": {
+        "x": 760,
+        "y": 1900,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fork",
+      "type": "process",
+      "text": "Fork · F1\nParent = S0",
+      "color": "gray",
+      "parentId": "branching",
+      "geometry": {
+        "x": 760,
+        "y": 2060,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "gc-note",
+      "type": "sticky",
+      "text": "**Reachability retention**\nDelete session → unreferenced snapshots eligible for collection.\nFork references keep shared ancestors alive; each branch writes its own future without copying shared content.",
+      "color": "yellow",
+      "parentId": "branching",
+      "geometry": {
+        "x": 1280,
+        "y": 1900,
+        "width": 1000,
+        "height": 260
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "open",
+      "from": {
+        "objectId": "client"
+      },
+      "to": {
+        "objectId": "api"
+      },
+      "label": "open session",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "placement",
+      "from": {
+        "objectId": "api",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "scheduler",
+        "anchor": "top"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "assign",
+      "from": {
+        "objectId": "scheduler"
+      },
+      "to": {
+        "objectId": "orch"
+      },
+      "label": "place / resume",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "request",
+      "from": {
+        "objectId": "orch"
+      },
+      "to": {
+        "objectId": "model"
+      },
+      "label": "context + history + tools",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "calls",
+      "from": {
+        "objectId": "model"
+      },
+      "to": {
+        "objectId": "tools"
+      },
+      "label": "tool calls",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "results",
+      "from": {
+        "objectId": "tools",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "orch",
+        "anchor": "bottom"
+      },
+      "label": "append results · next turn",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "events",
+      "from": {
+        "objectId": "execution",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "log",
+        "anchor": "top"
+      },
+      "label": "identical output + audit events",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "checkpoint",
+      "from": {
+        "objectId": "tools",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "snapshot",
+        "anchor": "top"
+      },
+      "label": "completed turn",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "rescue-resume",
+      "from": {
+        "objectId": "rescue",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "resume",
+        "anchor": "top"
+      },
+      "label": "last checkpoint · ≤1 turn replay",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "restore",
+      "from": {
+        "objectId": "snapshot",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "resume",
+        "anchor": "left"
+      },
+      "label": "latest snapshot",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "spawn-a",
+      "from": {
+        "objectId": "parent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "child-a",
+        "anchor": "top"
+      },
+      "label": "spawn / result",
+      "style": "solid",
+      "arrow": "both"
+    },
+    {
+      "id": "spawn-b",
+      "from": {
+        "objectId": "parent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "child-b",
+        "anchor": "top"
+      },
+      "label": "spawn / result",
+      "style": "solid",
+      "arrow": "both",
+      "labelPosition": {
+        "along": 0.8,
+        "offset": 0
+      }
+    },
+    {
+      "id": "emit",
+      "from": {
+        "objectId": "orch",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "stream",
+        "anchor": "bottom"
+      },
+      "label": "turn output",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "delivery",
+      "from": {
+        "objectId": "stream",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "client",
+        "anchor": "top"
+      },
+      "label": "live / reattach after replay",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "labelPosition": {
+        "along": 0.45,
+        "offset": -20
+      }
+    },
+    {
+      "id": "tree-detail",
+      "from": {
+        "objectId": "orch",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "parent",
+        "anchor": "top"
+      },
+      "label": "spawn subtasks",
+      "style": "dashed",
+      "arrow": "forward"
+    },
+    {
+      "id": "original",
+      "from": {
+        "objectId": "s0",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "s1",
+        "anchor": "left"
+      },
+      "label": "next checkpoint",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "fork-edge",
+      "from": {
+        "objectId": "s0",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fork",
+        "anchor": "left"
+      },
+      "label": "fork earlier state",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "stop-path",
+      "from": {
+        "objectId": "execution",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "stop",
+        "anchor": "left"
+      },
+      "label": "interrupt / stop",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "resume-loop",
+      "from": {
+        "objectId": "resume",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "execution",
+        "anchor": "right",
+        "position": [
+          1,
+          0.85
+        ]
+      },
+      "label": "continue",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

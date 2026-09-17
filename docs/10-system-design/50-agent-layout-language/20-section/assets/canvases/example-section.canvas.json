@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-10-language-20-section-example-section",
+  "title": "Example section (section)",
+  "mode": "diagram",
+  "size": {
+    "width": 512,
+    "height": 336
+  },
+  "objects": [
+    {
+      "id": "outer",
+      "type": "section",
+      "text": "Automatic padding",
+      "label": "Automatic padding",
+      "title": "Automatic padding",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 512,
+        "height": 336
+      }
+    },
+    {
+      "id": "inner",
+      "type": "section",
+      "text": "Nested",
+      "label": "Nested",
+      "title": "Nested",
+      "tint": "gray",
+      "geometry": {
+        "x": 40.32,
+        "y": 94.08,
+        "width": 431.36,
+        "height": 201.6
+      }
+    },
+    {
+      "id": "content",
+      "type": "process",
+      "text": "content",
+      "label": "content",
+      "geometry": {
+        "x": 164,
+        "y": 163,
+        "width": 184,
+        "height": 96
+      }
+    }
+  ],
+  "connections": []
+}

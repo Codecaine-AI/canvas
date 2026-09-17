@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-08-outline-123806",
+  "tier": "system",
+  "scenario": "code-review-agents",
+  "board_id": "eval.2026-09-08-outline-123806.code-review-agents",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-09-08T17:38:08.757Z",
+      "finished_at": "2026-09-08T17:45:10.422Z",
+      "wall_ms": 422533,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "811da464-0463-4fc5-9227-5c6674cc86cc"
+    ]
+  },
+  "finished_at": "2026-09-08T17:45:11.295Z",
+  "exit_code": 0
+}

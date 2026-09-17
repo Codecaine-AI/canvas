@@ -1,0 +1,401 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-09-08-reflow-152600",
+  "status": "running",
+  "fingerprint": {
+    "repo": "f3e3fa00+dirty",
+    "model": "codex-lb/gpt-6-astra @ low",
+    "prompt": "ca32a18c",
+    "lints": "20ebe21e",
+    "styles": "8e3f0a16",
+    "surface": "2348f3aa",
+    "tool_call_cap": 3,
+    "tool_call_cap_source": "agent default"
+  },
+  "previous_run": {
+    "run_id": "2026-09-08-comp-134600",
+    "available": true,
+    "comparable": true,
+    "axis_set_changed": false,
+    "axes": [
+      "SF",
+      "RC",
+      "RD",
+      "CF",
+      "SD",
+      "PH"
+    ]
+  },
+  "sessions": {
+    "ok": 8,
+    "rejected": 0,
+    "abandoned": 0,
+    "invalidInfra": 0
+  },
+  "axes": [
+    {
+      "code": "SF",
+      "order": 1
+    },
+    {
+      "code": "RC",
+      "order": 2
+    },
+    {
+      "code": "RD",
+      "order": 3
+    },
+    {
+      "code": "CF",
+      "order": 4
+    },
+    {
+      "code": "SD",
+      "order": 5
+    },
+    {
+      "code": "PH",
+      "order": 6
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "agent-session-orchestration",
+      "label": "agent-session-orchestration",
+      "status": "graded",
+      "scores": {
+        "SF": null,
+        "RC": null,
+        "RD": 6.5,
+        "CF": 6.5,
+        "SD": null,
+        "PH": 8.5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": -0.5,
+        "CF": 1,
+        "SD": null,
+        "PH": 0
+      },
+      "flags": [
+        "ERROR(BamlError: BamlClientError: BamlTimeoutError: Request timed out)",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "chat-assistant-rollout",
+      "label": "chat-assistant-rollout",
+      "status": "graded",
+      "scores": {
+        "SF": 8,
+        "RC": 9,
+        "RD": 6.5,
+        "CF": 6.5,
+        "SD": null,
+        "PH": 7.5
+      },
+      "deltas": {
+        "SF": -1,
+        "RC": -1,
+        "RD": 0.5,
+        "CF": 0,
+        "SD": null,
+        "PH": -0.5
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "code-review-agents",
+      "label": "code-review-agents",
+      "status": "graded",
+      "scores": {
+        "SF": null,
+        "RC": null,
+        "RD": 6.5,
+        "CF": 6,
+        "SD": null,
+        "PH": 9
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": 0,
+        "CF": 0.5,
+        "SD": null,
+        "PH": 0.5
+      },
+      "flags": [
+        "ERROR(BamlError: BamlClientError: BamlTimeoutError: Request timed out)",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "eval-harness-orchestration",
+      "label": "eval-harness-orchestration",
+      "status": "graded",
+      "scores": {
+        "SF": 9,
+        "RC": 9,
+        "RD": 6,
+        "CF": 6.5,
+        "SD": null,
+        "PH": 6
+      },
+      "deltas": {
+        "SF": 0,
+        "RC": 0,
+        "RD": -0.5,
+        "CF": -0.5,
+        "SD": null,
+        "PH": -3
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "ivr-agent-handoff",
+      "label": "ivr-agent-handoff",
+      "status": "graded",
+      "scores": {
+        "SF": 8.5,
+        "RC": 9,
+        "RD": 6.5,
+        "CF": 6.5,
+        "SD": null,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": 1,
+        "RC": 1,
+        "RD": 0,
+        "CF": 1.5,
+        "SD": null,
+        "PH": -1.5
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "llm-inference-gateway",
+      "label": "llm-inference-gateway",
+      "status": "graded",
+      "scores": {
+        "SF": null,
+        "RC": null,
+        "RD": 5,
+        "CF": 6,
+        "SD": null,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": -1.5,
+        "CF": 1,
+        "SD": null,
+        "PH": 0
+      },
+      "flags": [
+        "ERROR(BamlError: BamlClientError: BamlTimeoutError: Request timed out)",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "rag-ingestion-retrieval",
+      "label": "rag-ingestion-retrieval",
+      "status": "graded",
+      "scores": {
+        "SF": 8.5,
+        "RC": null,
+        "RD": 6.5,
+        "CF": 6,
+        "SD": null,
+        "PH": 5
+      },
+      "deltas": {
+        "SF": -0.5,
+        "RC": null,
+        "RD": -0.5,
+        "CF": 0.5,
+        "SD": null,
+        "PH": -3.5
+      },
+      "flags": [
+        "ERROR(BamlError: BamlClientError: BamlClientHttpError: Request failed with status code: 502 Bad Gateway. {\"error\":{\"message\":\"native upstream response body failed\",\"type\":\"server_error\",\"code\":\"upstream_error\"}})",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "sandboxed-tool-fleet",
+      "label": "sandboxed-tool-fleet",
+      "status": "graded",
+      "scores": {
+        "SF": 8.5,
+        "RC": null,
+        "RD": 7,
+        "CF": 6.5,
+        "SD": null,
+        "PH": 5
+      },
+      "deltas": {
+        "SF": -1.5,
+        "RC": null,
+        "RD": -0.5,
+        "CF": 1,
+        "SD": null,
+        "PH": -3
+      },
+      "flags": [
+        "ERROR(BamlError: BamlClientError: BamlTimeoutError: Request timed out)",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    }
+  ],
+  "means": {
+    "scores": {
+      "SF": 8.5,
+      "RC": 9,
+      "RD": 6.31,
+      "CF": 6.31,
+      "SD": null,
+      "PH": 7.13
+    },
+    "deltas": {
+      "SF": -0.4,
+      "RC": 0,
+      "RD": -0.37,
+      "CF": 0.63,
+      "SD": null,
+      "PH": -1.37
+    },
+    "flags": [
+      "PARTIAL"
+    ]
+  },
+  "movements": [
+    {
+      "scenario": "agent-session-orchestration",
+      "axis": "CF",
+      "previous": 5.5,
+      "current": 6.5,
+      "delta": 1,
+      "evidence": "This lands at 6.5 because the board is deliberate, readable, and semantically colored, but it does not feel fully finished due to substantial dead space, uneven regional density, and an ambiguous wire convergence near rehydration."
+    },
+    {
+      "scenario": "chat-assistant-rollout",
+      "axis": "SF",
+      "previous": 9,
+      "current": 8,
+      "delta": -1,
+      "evidence": "The reconstruction preserves the full system shape, ownership boundaries, primary live-turn flow, durable-memory lifecycle, cold-storage boundary, champion/challenger experiment, human promotion gate, rollback, and independent regression pull. It is highly usable for architecture discussion and captures nearly all critical operational behavior. Fidelity falls short of the top tier because several branch semantics remain implicit or combined, the no-redeployment property is only indirectly conveyed, and the allowed challenger dimensions—prompt, retrieval policy, and model choice—are omitted."
+    },
+    {
+      "scenario": "chat-assistant-rollout",
+      "axis": "RC",
+      "previous": 10,
+      "current": 9,
+      "delta": -1,
+      "evidence": "The board represents nearly the entire stated contract across live assistance, durable memory and retention, champion/challenger experimentation, human-gated promotion and rollback, and independent regression control. The only substantive qualifier gap is the omitted no-redeployment statement for configuration rollouts; the permitted challenger variation examples in R23 are also not enumerated. Weighted coverage is 0.9783, with no absent or contradicted system-defining requirement and therefore no cap."
+    },
+    {
+      "scenario": "eval-harness-orchestration",
+      "axis": "PH",
+      "previous": 9,
+      "current": 6,
+      "delta": -3,
+      "evidence": "There were 88 total tool calls and 2 failed calls, for a 2.27% failure rate. The longest failure run was 1 because each failed reroute was followed by an APPLIED call. Both failures were the same validation class—reroute corners that could not connect orthogonally to the edge endpoints—so the error class recurred after it had already been explained at turn 27. Both instances were subsequently corrected. No resolve_request or finalize call was rejected, and session metadata records no harness retry."
+    },
+    {
+      "scenario": "ivr-agent-handoff",
+      "axis": "SF",
+      "previous": 7.5,
+      "current": 8.5,
+      "delta": 1,
+      "evidence": "The reconstruction is highly faithful and engineering-usable. It recovers the system boundaries, major components, ownership, ordered intake flow, lookup degradation, keypad fallback, AI capability constraints, human escalation triggers, handoff payload, wait-target callback behavior, call-wide evidence capture, and the review feedback loop. No system-defining flow is contradicted, and the main end-to-end process is complete. Fidelity falls short of near-exact because the real-time interaction constraint is absent, the risk-flag semantics are softened, the limited action-set constraint is conveyed indirectly, and two small operational details are added beyond the brief."
+    },
+    {
+      "scenario": "ivr-agent-handoff",
+      "axis": "RC",
+      "previous": 8,
+      "current": 9,
+      "delta": 1,
+      "evidence": "Weighted coverage is 46/47. Every system-defining requirement is represented, including lookup and greeting behavior, consent and intent capture, constrained AI capabilities, escalation semantics, context-rich human handoff, callback handling, call evidence, and the unresolved/abandoned-call review loop. The sole uncovered item is the supporting real-time conversation qualifier, so the board is nearly complete but not a perfect visual acceptance record."
+    },
+    {
+      "scenario": "ivr-agent-handoff",
+      "axis": "CF",
+      "previous": 5,
+      "current": 6.5,
+      "delta": 1.5,
+      "evidence": "This lands at 6.5 because the board has deliberate regional styling, readable semantics, and substantial operational-map vocabulary, but the oversized empty upper-right band and several awkward routing joins keep it from feeling fully finished."
+    },
+    {
+      "scenario": "ivr-agent-handoff",
+      "axis": "PH",
+      "previous": 9.5,
+      "current": 8,
+      "delta": -1.5,
+      "evidence": "One of 86 tool calls failed, for a failure rate of approximately 1.16%. The failed reroute was followed immediately by a strategy change, then succeeded on the subsequent reroute; the error class did not recur. There were no rejected resolve_request/finalize calls, retries, or parse/schema-validation fights."
+    },
+    {
+      "scenario": "llm-inference-gateway",
+      "axis": "RD",
+      "previous": 6.5,
+      "current": 5,
+      "delta": -1.5,
+      "evidence": "The board is parseable but lands at the 5 anchor because small text, sprawling recovery routes, and several perimeter-scale detours make the central flow slow to follow at arm's length."
+    },
+    {
+      "scenario": "llm-inference-gateway",
+      "axis": "CF",
+      "previous": 5,
+      "current": 6,
+      "delta": 1,
+      "evidence": "The board lands at the 6 anchor because its detailed, readable regional composition and restrained semantic palette are undermined by large dead areas, sprawling ambiguous return routes, a clipped edge label, and unfinished shape vocabulary."
+    },
+    {
+      "scenario": "rag-ingestion-retrieval",
+      "axis": "PH",
+      "previous": 8.5,
+      "current": 5,
+      "delta": -3.5,
+      "evidence": "Mechanically clean on call execution: 0 of 130 tool calls returned ERROR, so the failure rate was 0%, the longest failure run was 0, and there were no rejected calls or repeated parse/schema-validation errors. The lone NO-OP at turn 27 was legal and was not repeated. Session metadata reports no retries."
+    },
+    {
+      "scenario": "sandboxed-tool-fleet",
+      "axis": "SF",
+      "previous": 10,
+      "current": 8.5,
+      "delta": -1.5,
+      "evidence": "The reconstruction recovers the full system shape and all critical request-to-destruction paths: quota admission, warm-hit and cold-start placement, lease lifecycle enforcement, controlled execution, warm-supply management, host exclusion, and telemetry. Nearly all constraints and failure outcomes are accurate and actionable. A few supporting semantics require mild inference, chiefly how repeated boot failures trigger quarantine, the exact session-keying of artifacts, and the explicit rationale that prior-tenant filesystem and process state must not survive. There is no system-defining contradiction, and engineers could conduct a detailed design review from this reading with only limited clarification."
+    },
+    {
+      "scenario": "sandboxed-tool-fleet",
+      "axis": "CF",
+      "previous": 5.5,
+      "current": 6.5,
+      "delta": 1,
+      "evidence": "The board is deliberate and readable with coherent regions and routing, but it lands in the 6–6.5 anchor because large dead bands, uneven regional density, and note-heavy sparse areas keep it from feeling fully finished."
+    },
+    {
+      "scenario": "sandboxed-tool-fleet",
+      "axis": "PH",
+      "previous": 8,
+      "current": 5,
+      "delta": -3,
+      "evidence": "Mechanically clean on call validity: 0 failed calls across 90 total tool calls, for a 0% failure rate. There were no rejected calls, no retries, no consecutive failure runs, and no repeated parse or validation error class."
+    }
+  ],
+  "axis_correlation": {
+    "threshold": 6,
+    "denominator": 8,
+    "lockstep_pairs": []
+  }
+}

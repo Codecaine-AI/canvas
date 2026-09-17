@@ -290,7 +290,7 @@
                   "type": "paragraph",
                   "id": "node-phase-plan-objective-text",
                   "content": [
-                    "Turn the message into a shape: the sections that carry it, the pieces in each, and the vocabulary that expresses them."
+                    "Identify the system and its relationships, then sketch regions that make them readable."
                   ]
                 }
               ]
@@ -308,7 +308,7 @@
                       "type": "listItem",
                       "id": "node-phase-plan-step-skeleton",
                       "content": [
-                        "Decompose the message before placing anything: design a section skeleton of many small labelled groups, each holding a couple of pieces."
+                        "Before placing anything, identify the actors and components, ownership boundaries, main flow, branches, shared stores, and loops supported by the instruction."
                       ],
                       "children": [
                         {
@@ -319,14 +319,14 @@
                               "type": "listItem",
                               "id": "node-phase-plan-step-skeleton-detail-1",
                               "content": [
-                                "A forty-node diagram wants around twenty sections, not five."
+                                "Sketch a rough outline of named regions around those relationships, with variable sizes and proportions appropriate to their contents."
                               ]
                             },
                             {
                               "type": "listItem",
                               "id": "node-phase-plan-step-skeleton-detail-2",
                               "content": [
-                                "When a group outgrows the style guide's section load, split it into two named ones."
+                                "Choose sections for meaningful ownership or functional groups, without a nodes-per-section cap or a preallocated uniform grid."
                               ]
                             }
                           ]
@@ -337,7 +337,7 @@
                       "type": "listItem",
                       "id": "node-phase-plan-step-vocabulary",
                       "content": [
-                        "Choose each section's vocabulary from the capabilities rosters — object types, icons, colors."
+                        "Choose semantic types for participants, actions, decisions, stores, and artifacts before creating repeated objects."
                       ],
                       "children": [
                         {
@@ -348,14 +348,14 @@
                               "type": "listItem",
                               "id": "node-phase-plan-step-vocabulary-detail-1",
                               "content": [
-                                "Pick what expresses that process or system, not the same box for everything."
+                                "Use the capabilities meanings to distinguish actors and stores from process steps, then choose purposeful object colors for their roles."
                               ]
                             },
                             {
                               "type": "listItem",
                               "id": "node-phase-plan-step-vocabulary-detail-2",
                               "content": [
-                                "The rosters carry per-kind meaning; read them and use it."
+                                "Reuse tints for consistent roles or functions across objects and regions, with gray as a fallback rather than a required process or decision color."
                               ]
                             }
                           ]
@@ -377,7 +377,7 @@
                               "type": "listItem",
                               "id": "node-phase-plan-step-reading-flow-detail-1",
                               "content": [
-                                "There is no house reading direction to obey; arrows follow the flow you chose."
+                                "Choose the reading direction from the subject, then align directly connected endpoints on a common axis where that makes the route straight and readable."
                               ]
                             }
                           ]
@@ -388,7 +388,7 @@
                       "type": "listItem",
                       "id": "node-phase-plan-step-board-size",
                       "content": [
-                        "Size the board to the diagram: count the sections and their contents, then set the base section to the area the style guide's board-size target asks for."
+                        "Estimate room for the main flow, local detail, shared context, and actual routing corridors, then size the base section to that outline."
                       ],
                       "children": [
                         {
@@ -399,7 +399,7 @@
                               "type": "listItem",
                               "id": "node-phase-plan-step-board-size-detail-1",
                               "content": [
-                                "Grow it again the moment a region feels tight."
+                                "Treat the outline and page aspect ratio as provisional until the main graph is readable."
                               ]
                             }
                           ]
@@ -410,7 +410,7 @@
                       "type": "listItem",
                       "id": "node-phase-plan-step-arrow-corridors",
                       "content": [
-                        "Leave arrow corridors: gaps between sibling nodes wide enough for a routed wire and its label to pass between them."
+                        "Place closely related regions near each other and align the main connected endpoints before wiring, reserving clear space for the routes and their labels."
                       ],
                       "children": [
                         {
@@ -421,7 +421,7 @@
                               "type": "listItem",
                               "id": "node-phase-plan-step-arrow-corridors-detail-1",
                               "content": [
-                                "Never hugging a box, never detouring around the board."
+                                "Arrange parallel participants across the main direction with visible fan-out and merge, and place shared stores and feedback destinations near their consumers."
                               ]
                             },
                             {
@@ -473,7 +473,7 @@
                       "type": "listItem",
                       "id": "node-plan-constraint-balance",
                       "content": [
-                        "Distribute content evenly across the frame rather than packing it into isolated clusters."
+                        "Use purposeful whitespace to separate groups and expose the main flow, with density and region proportions shaped by the system."
                       ]
                     }
                   ]
@@ -500,7 +500,7 @@
                   "type": "paragraph",
                   "id": "node-phase-build-objective-text",
                   "content": [
-                    "Put it down and get it working: sections first, then content in reading order, then connections, then labels and styling."
+                    "Sketch provisional region outlines first, then build the main flow and refine the regions as details and connections land."
                   ]
                 }
               ]
@@ -518,7 +518,7 @@
                       "type": "listItem",
                       "id": "node-phase-build-step-sections-first",
                       "content": [
-                        "Sections first: place every section the diagram needs before any content exists."
+                        "Place the initial region outlines before filling details, without requiring every final section to exist before any node."
                       ],
                       "children": [
                         {
@@ -529,14 +529,14 @@
                               "type": "listItem",
                               "id": "node-phase-build-step-sections-first-detail-1",
                               "content": [
-                                "Size and place each one for the flow you planned, at the gutters and frame padding the style guide targets."
+                                "Size and position each region for its role and likely connections, then use change_color to apply the planned semantic tint while keeping readable gutters and frame padding."
                               ]
                             },
                             {
                               "type": "listItem",
                               "id": "node-phase-build-step-sections-first-detail-2",
                               "content": [
-                                "Every piece of content you plan should already have a section to land in — nothing floats on the bare frame."
+                                "Keep useful section addressability, while allowing page-level entry points, shared context, and notes when they belong to the whole board."
                               ]
                             }
                           ]
@@ -547,7 +547,7 @@
                       "type": "listItem",
                       "id": "node-phase-build-step-fill-sections",
                       "content": [
-                        "Fill section by section, in reading order."
+                        "Build the main participants and flow across the outline, then fill local detail in reading order."
                       ],
                       "children": [
                         {
@@ -558,14 +558,14 @@
                               "type": "listItem",
                               "id": "node-phase-build-step-fill-sections-detail-1",
                               "content": [
-                                "Place its pieces — objects and stickies — then size and space them into one register; the style guide's targets are what uniform means."
+                                "Draw major participants, parallel work, decisions, stores, handoffs, and failure or recovery paths explicitly when the instruction calls for them."
                               ]
                             },
                             {
                               "type": "listItem",
                               "id": "node-phase-build-step-fill-sections-detail-2",
                               "content": [
-                                "Look at the section, framed with `view`, before starting the next one."
+                                "Establish correctly typed and colored representatives before cloning, and clone only semantic peers rather than copying the first process box into every role."
                               ]
                             }
                           ]
@@ -576,14 +576,65 @@
                       "type": "listItem",
                       "id": "node-phase-build-step-connections",
                       "content": [
-                        "Then connections, wired object to object along the flow."
+                        "As endpoints appear, align them for a direct route and connect the actual participants with explicit handoffs before filling more detail."
+                      ],
+                      "children": [
+                        {
+                          "type": "bulletList",
+                          "id": "node-phase-build-step-connections-detail",
+                          "items": [
+                            {
+                              "type": "listItem",
+                              "id": "node-phase-build-step-connections-detail-1",
+                              "content": [
+                                "Make every important arrow identify its producer, recipient, payload or trigger, and direction through its endpoints, label, and arrowhead."
+                              ]
+                            },
+                            {
+                              "type": "listItem",
+                              "id": "node-phase-build-step-connections-detail-2",
+                              "content": [
+                                "Draw explicit store and control relationships, using section endpoints only when the whole subsystem is intentionally one abstraction rather than to avoid a component handoff."
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "id": "node-phase-build-step-recompose",
+                      "content": [
+                        "Once the main graph appears in <board>, recompose the provisional outline around its routes before filling remaining detail."
+                      ],
+                      "children": [
+                        {
+                          "type": "bulletList",
+                          "id": "node-phase-build-step-recompose-detail",
+                          "items": [
+                            {
+                              "type": "listItem",
+                              "id": "node-phase-build-step-recompose-detail-1",
+                              "content": [
+                                "Move and resize regions and change the page aspect ratio so related components sit together, rather than preserving equal bands and appending another row."
+                              ]
+                            },
+                            {
+                              "type": "listItem",
+                              "id": "node-phase-build-step-recompose-detail-2",
+                              "content": [
+                                "Use <views> to judge cross-region alignment and local branch clearance, keeping peer equality only where the objects have comparable roles."
+                              ]
+                            }
+                          ]
+                        }
                       ]
                     },
                     {
                       "type": "listItem",
                       "id": "node-phase-build-step-styling",
                       "content": [
-                        "Then labels and styling."
+                        "Use consistent region color families and concise edge labels, placing notes beside their subject outside the main flow corridors."
                       ]
                     },
                     {
@@ -647,14 +698,14 @@
                       "type": "listItem",
                       "id": "node-build-constraint-labels",
                       "content": [
-                        "Keep node text to a short, one-line label; put sentence-length explanation on a nearby sticky."
+                        "Keep node labels concise and use nearby stickies for rationale, constraints, examples, and operational detail, without replacing drawable structure with prose."
                       ]
                     },
                     {
                       "type": "listItem",
                       "id": "node-build-constraint-style",
                       "content": [
-                        "Use the style guide's target sizes and gaps; split an overcrowded group instead of tightening it."
+                        "Give node labels, edge labels, and branches readable local clearance by enlarging or repositioning their cluster, without scaling labels down or equalizing unrelated objects."
                       ]
                     },
                     {
@@ -690,7 +741,7 @@
           "tag": "phase",
           "attrs": {
             "id": 4,
-            "name": "qa"
+            "name": "verify_diagram"
           },
           "children": [
             {
@@ -702,7 +753,7 @@
                   "type": "paragraph",
                   "id": "node-phase-qa-objective-text",
                   "content": [
-                    "The visual pass: once the diagram works and says the right thing, make it look right."
+                    "Verify the diagram communicates its causal structure at readable scale, then finish the composition."
                   ]
                 }
               ]
@@ -720,7 +771,7 @@
                       "type": "listItem",
                       "id": "node-phase-qa-step-full-board",
                       "content": [
-                        "Judge the first attached current-board render for overall shape, balance, and an even spread across the frame."
+                        "Read <views> against <instruction> and <board> to find misleading hierarchy, oversized repeated bands, and a page aspect ratio that fights the graph."
                       ]
                     },
                     {
@@ -738,21 +789,21 @@
                               "type": "listItem",
                               "id": "node-phase-qa-step-sections-detail-1",
                               "content": [
-                                "is the spacing uniform"
+                                "Check that object types and tints distinguish participants, actions, decisions, stores, and artifacts by meaning."
                               ]
                             },
                             {
                               "type": "listItem",
                               "id": "node-phase-qa-step-sections-detail-2",
                               "content": [
-                                "are peers aligned on one register"
+                                "Check readable node and edge labels, open branch spacing, and consistent geometry among real peers only."
                               ]
                             },
                             {
                               "type": "listItem",
                               "id": "node-phase-qa-step-sections-detail-3",
                               "content": [
-                                "do sizes match across a group"
+                                "Reposition or enlarge tight clusters without shrinking labels, and keep notes outside flow corridors."
                               ]
                             }
                           ]
@@ -763,7 +814,7 @@
                       "type": "listItem",
                       "id": "node-phase-qa-step-wires",
                       "content": [
-                        "Follow the wires: are they routed the way someone drawing this by hand would route them."
+                        "Trace normal, failure, and feedback paths separately when required by <instruction> or depicted in <board>, without relying on explanatory notes."
                       ],
                       "children": [
                         {
@@ -774,21 +825,21 @@
                               "type": "listItem",
                               "id": "node-phase-qa-step-wires-detail-1",
                               "content": [
-                                "Entering and leaving on the faces that point along the flow."
+                                "Identify each important arrow's producer, recipient, payload or trigger, and direction, including fan-out, merge, shared stores, and controls that the board claims to show."
                               ]
                             },
                             {
                               "type": "listItem",
                               "id": "node-phase-qa-step-wires-detail-2",
                               "content": [
-                                "Elbows square and few."
+                                "Recompose any implied or misleading handoff by moving endpoints, regions, or obstructing notes before steering the wire."
                               ]
                             },
                             {
                               "type": "listItem",
                               "id": "node-phase-qa-step-wires-detail-3",
                               "content": [
-                                "No run doubling back or crossing where it need not."
+                                "Keep bends that serve branches or feedback, while checking that arrowheads and labels preserve the intended direction and causal meaning."
                               ]
                             }
                           ]
@@ -799,7 +850,7 @@
                       "type": "listItem",
                       "id": "node-phase-qa-step-fix-and-look",
                       "content": [
-                        "Fix what you find, then look again."
+                        "Fix the findings in the edited scope, then refresh the relevant views with look."
                       ],
                       "children": [
                         {
@@ -810,11 +861,18 @@
                               "type": "listItem",
                               "id": "node-phase-qa-step-fix-and-look-detail-1",
                               "content": [
-                                "The pass ends when the render is the one you want, not when the edits run out."
+                                "Loop to step 1 until the current <views> and <board> show readable labels and traceable normal, failure, and feedback paths required by <instruction>."
                               ]
                             }
                           ]
                         }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "id": "node-phase-qa-step-final-crop",
+                      "content": [
+                        "Fit the outer page to the composed content only after the paths and labels are readable, preserving useful whitespace and clear routing corridors."
                       ]
                     }
                   ]
@@ -904,7 +962,7 @@
                               "type": "listItem",
                               "id": "node-phase-finalize-step-walk-detail-2",
                               "content": [
-                                "Name each piece and what it hands to the next."
+                                "Name each participant, what it hands to the next, and where parallel paths merge or failures recover."
                               ]
                             }
                           ]

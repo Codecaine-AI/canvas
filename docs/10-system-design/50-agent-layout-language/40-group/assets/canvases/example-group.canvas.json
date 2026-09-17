@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-10-language-40-group-example-group",
+  "title": "Example group (group)",
+  "mode": "diagram",
+  "size": {
+    "width": 512,
+    "height": 336
+  },
+  "objects": [
+    {
+      "id": "cluster",
+      "type": "section",
+      "text": "A loose cluster",
+      "label": "A loose cluster",
+      "title": "A loose cluster",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 512,
+        "height": 336
+      }
+    },
+    {
+      "id": "note-a",
+      "type": "sticky",
+      "text": "note-a",
+      "label": "note-a",
+      "geometry": {
+        "x": 195,
+        "y": 106,
+        "width": 54,
+        "height": 40
+      }
+    },
+    {
+      "id": "note-b",
+      "type": "sticky",
+      "text": "note-b",
+      "label": "note-b",
+      "geometry": {
+        "x": 219,
+        "y": 159,
+        "width": 75,
+        "height": 56
+      }
+    },
+    {
+      "id": "note-c",
+      "type": "sticky",
+      "text": "note-c",
+      "label": "note-c",
+      "geometry": {
+        "x": 253,
+        "y": 228,
+        "width": 75,
+        "height": 56
+      }
+    }
+  ],
+  "connections": []
+}

@@ -93,7 +93,7 @@ export const CREATION_DEFAULTS: Readonly<Record<CreationKind, CreationDefault>> 
 
   // Sections — OBJECT_TYPE_DEFAULTS.section 480×360, already ×20, unchanged.
   // A frame is meant to wrap other objects, and 480×360 holds a 2-3 node
-  // column (nodesPerSectionMin/Max) at framePadding 48 without a fit.
+  // column at framePadding 48 without a fit; this is a creation convenience, not a section-load limit.
   section: {
     size: {
       width: toGrid(OBJECT_TYPE_DEFAULTS.section.geometry.width),

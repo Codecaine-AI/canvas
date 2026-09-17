@@ -1,0 +1,192 @@
+{
+  "axis": "ph",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "There were 96 tool calls and 2 failures, for a 2.08% failure rate. The longest failure run was 1. The malformed reroute was abandoned on the next call in favor of a legal endpoint change, and the blocked finalize was followed by the requested section fit. No error class was repeated after being named. Session metadata reports zero session retries.",
+      "failed_call_count": 2,
+      "rejected_call_count": 1,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 25,
+          "transcript_excerpt": "ERROR · reroute — these corners cannot be joined to the edge's ends without a diagonal leg",
+          "finding": "Single geometry-validation failure. Turn 26 changed the connection anchors instead of repeating the invalid corner specification."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 91,
+          "transcript_excerpt": "Finalize blocked; the run continues: - W1 frame-slack: shadow-region is 1080×240 around children needing 328×180 — 77% of the frame is unused",
+          "finding": "One blocked finalize, counted as a failed and rejected call. The named issue was corrected immediately at turn 92 with fit_section."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 92,
+          "transcript_excerpt": "APPLIED · fit_section shadow-region ... 2220,140 1080×240 → 2260,160 360×220\nLINTS · clean",
+          "finding": "Successful next-call correction of the blocked-finalize issue; no repeated error class."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Three framed renders were requested. The first was an early whole-board check, and QA included a whole-board render followed by a targeted correction and a close-up of the corrected shadow region. This forms one clear render-adjust-render loop. Close-ups were sparse relative to the board's density, but the final dense-board QA was not omitted and diagnostics were clean.",
+      "render_count": 3,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "Early whole-board inspection after laying out the first admission and routing elements."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 90,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean ... free left 44 · right 108 · top 56 · bottom 244",
+          "finding": "Whole-board QA render before the first finalize attempt."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 92,
+          "transcript_excerpt": "APPLIED · fit_section shadow-region ... 1080×240 → 360×220\nLINTS · clean",
+          "finding": "Adjustment made in response to the frame-slack defect exposed at finalize."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 94,
+          "transcript_excerpt": "LOOK · 1 render · close-up shadow-region ... free left 16 · right 16 · top 28 · bottom 12",
+          "finding": "Targeted verification of the corrected region completed the turn-90/91 to turn-92/93 to turn-94 render-adjust-render loop."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Ten lint error instances were emitted during construction, mainly covered-content conflicts, and each was resolved before commit. Warnings such as unreadable labels, clipped text, and frame slack were likewise addressed. The stream-finish label required several successive adjustments, but the strategy changed across turns and the lint did not re-fire for more than three consecutive turns without a strategy change, so it is not a rubric-defined lint fight. Final diagnostics were clean, with no warning override requiring a summary reason.",
+      "lint_error_count": 10,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 22,
+          "transcript_excerpt": "LINTS · +2 −0\n+ E1 covered-content ...\n+ W1 broken-edges",
+          "finding": "The first routing lint skirmish began here; subsequent rerouting resolved both issues rather than overriding them."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 28,
+          "transcript_excerpt": "LINTS · +0 −2\n− W1 covered-content, − W2 broken-edges (resolved)",
+          "finding": "The admission/queue routing conflict was cleared through a strategy change to queue→assemble."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 49,
+          "transcript_excerpt": "+ W1 clipped-text: routing-rules ... needs 180×481",
+          "finding": "The clipping warning was followed immediately by a resize at turn 50 that resolved it."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 56,
+          "transcript_excerpt": "+ E1 covered-content ...\n+ W1 unreadable-labels",
+          "finding": "The stream-finish label triggered a localized lint skirmish. Turns 57–60 shortened, repositioned, and finally removed the label, ending cleanly."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 88,
+          "transcript_excerpt": "LINTS · +0 −2\n− E1 covered-content, − W1 unreadable-labels (resolved)",
+          "finding": "The shadow mirror label errors were fully resolved before QA."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 94,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final targeted QA found no remaining lint errors or warnings, so there was no silent warning override."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single committed summary accurately describes the stage diff and final render. The diff contains explicit admission and deadline rejection, tier routing and cache paths, hosted/self-hosted fallback, pre-token retry classification and post-token streaming safeguards, circuit-breaker/probe controls, billing/audit/spend accounting, and a shadow evaluation path that never affects the client response. No seen defect remained undeclared at commit; the blocked frame-slack issue was fixed and re-inspected first.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 95,
+          "line": "Created the inference gateway diagram covering deadline-aware admission, tier routing, caching, provider fallback, streaming safeguards, circuit protection, accounting and isolated shadow evaluation.",
+          "assessment": "Honest and supported by the committed diff and final render; none of the listed areas is merely aspirational."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 90,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The whole-board QA state supported the substantive summary claims."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 91,
+          "transcript_excerpt": "Finalize blocked ... W1 frame-slack: shadow-region ... 77% of the frame is unused",
+          "finding": "The agent did not push through the known defect; it corrected it before committing."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 95,
+          "transcript_excerpt": "Committed: Created the inference gateway diagram covering deadline-aware admission, tier routing, caching, provider fallback, streaming safeguards, circuit protection, accounting and isolated shadow evaluation.",
+          "finding": "The final commit occurred only after clean targeted QA of the corrected shadow section."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The committed diff contains 58 patch operations, while the transcript contains 96 total tool calls including looks and finalize attempts. Work completed in approximately 10.94 minutes, within the 15-minute session budget and far below the 300-turn ceiling. There was no build-delete-rebuild cycle or repeated NO-OP. Some label and routing work was iterative, especially e5, stream-finish, and mirror, but it remained localized and converged rather than becoming rubric-level thrash.",
+      "operation_count": 58,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 10.94,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 25,
+          "transcript_excerpt": "ERROR · reroute — these corners cannot be joined ... without a diagonal leg",
+          "finding": "One unsuccessful routing operation added overhead, but it was not repeated."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 56,
+          "transcript_excerpt": "connect stream-finish ... label \"after first token\"",
+          "finding": "This label underwent several adjustments through turn 60 before being removed; it was a small localized inefficiency, not a full build-delete-rebuild cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 95,
+          "transcript_excerpt": "Committed ... (58 patch operations)",
+          "finding": "The session reached finalize successfully without exhausting either time or turn budgets."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, container collision, proxy failure, or other declared infrastructure failure appears in the payload. The single session is valid and fully scored.",
+      "invalid_infra_session_count": 0,
+      "moments": []
+    },
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 41743,
+    "output_tokens": 2882
+  },
+  "flags": []
+}

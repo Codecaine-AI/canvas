@@ -1,0 +1,296 @@
+{
+  "schema_version": 1,
+  "run_id": "2026-09-08-comp-134600",
+  "status": "running",
+  "fingerprint": {
+    "repo": "f3e3fa00+dirty",
+    "model": "codex-lb/gpt-6-astra @ low",
+    "prompt": "df39f45a",
+    "lints": "20ebe21e",
+    "styles": "9c3ca8e3",
+    "surface": "cc54fcdb",
+    "tool_call_cap": 3,
+    "tool_call_cap_source": "agent default"
+  },
+  "previous_run": {
+    "run_id": "2026-09-08-outline-123806",
+    "available": true,
+    "comparable": true,
+    "axis_set_changed": false,
+    "axes": [
+      "SF",
+      "RC",
+      "RD",
+      "CF",
+      "SD",
+      "PH"
+    ]
+  },
+  "sessions": {
+    "ok": 8,
+    "rejected": 0,
+    "abandoned": 0,
+    "invalidInfra": 0
+  },
+  "axes": [
+    {
+      "code": "SF",
+      "order": 1
+    },
+    {
+      "code": "RC",
+      "order": 2
+    },
+    {
+      "code": "RD",
+      "order": 3
+    },
+    {
+      "code": "CF",
+      "order": 4
+    },
+    {
+      "code": "SD",
+      "order": 5
+    },
+    {
+      "code": "PH",
+      "order": 6
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "agent-session-orchestration",
+      "label": "agent-session-orchestration",
+      "status": "graded",
+      "scores": {
+        "SF": null,
+        "RC": null,
+        "RD": 7,
+        "CF": 5.5,
+        "SD": null,
+        "PH": 8.5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "ERROR(BamlError: BamlClientError: BamlTimeoutError: Request timed out)",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "chat-assistant-rollout",
+      "label": "chat-assistant-rollout",
+      "status": "graded",
+      "scores": {
+        "SF": 9,
+        "RC": 10,
+        "RD": 6,
+        "CF": 6.5,
+        "SD": null,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "code-review-agents",
+      "label": "code-review-agents",
+      "status": "graded",
+      "scores": {
+        "SF": 8,
+        "RC": 9,
+        "RD": 6.5,
+        "CF": 5.5,
+        "SD": null,
+        "PH": 8.5
+      },
+      "deltas": {
+        "SF": -1,
+        "RC": 0,
+        "RD": 0,
+        "CF": -0.5,
+        "SD": null,
+        "PH": 0.5
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "eval-harness-orchestration",
+      "label": "eval-harness-orchestration",
+      "status": "graded",
+      "scores": {
+        "SF": 9,
+        "RC": 9,
+        "RD": 6.5,
+        "CF": 7,
+        "SD": null,
+        "PH": 9
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "ivr-agent-handoff",
+      "label": "ivr-agent-handoff",
+      "status": "graded",
+      "scores": {
+        "SF": 7.5,
+        "RC": 8,
+        "RD": 6.5,
+        "CF": 5,
+        "SD": null,
+        "PH": 9.5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "llm-inference-gateway",
+      "label": "llm-inference-gateway",
+      "status": "graded",
+      "scores": {
+        "SF": null,
+        "RC": 9,
+        "RD": 6.5,
+        "CF": 5,
+        "SD": null,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "ERROR(BamlError: BamlClientError: BamlTimeoutError: Request timed out)",
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "rag-ingestion-retrieval",
+      "label": "rag-ingestion-retrieval",
+      "status": "graded",
+      "scores": {
+        "SF": 9,
+        "RC": 9,
+        "RD": 7,
+        "CF": 5.5,
+        "SD": null,
+        "PH": 8.5
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SCORE-RECOMPUTED",
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    },
+    {
+      "id": "sandboxed-tool-fleet",
+      "label": "sandboxed-tool-fleet",
+      "status": "graded",
+      "scores": {
+        "SF": 10,
+        "RC": 10,
+        "RD": 7.5,
+        "CF": 5.5,
+        "SD": null,
+        "PH": 8
+      },
+      "deltas": {
+        "SF": null,
+        "RC": null,
+        "RD": null,
+        "CF": null,
+        "SD": null,
+        "PH": null
+      },
+      "flags": [
+        "SKIPPED(e1: system scenario has no follow-up edits)"
+      ]
+    }
+  ],
+  "means": {
+    "scores": {
+      "SF": 8.75,
+      "RC": 9.14,
+      "RD": 6.69,
+      "CF": 5.69,
+      "SD": null,
+      "PH": 8.5
+    },
+    "deltas": {
+      "SF": -1,
+      "RC": 0,
+      "RD": 0,
+      "CF": -0.5,
+      "SD": null,
+      "PH": 0.5
+    },
+    "flags": [
+      "PARTIAL"
+    ]
+  },
+  "movements": [
+    {
+      "scenario": "code-review-agents",
+      "axis": "SF",
+      "previous": 9,
+      "current": 8,
+      "delta": -1,
+      "evidence": "The reconstruction recovers the full system shape and every critical happy-path, safety, degradation, cancellation, and recovery route. Most detailed inputs, outputs, policies, reviewer constraints, and telemetry metrics are also explicit. The main losses are architectural rather than procedural: the specialist reviewers read only as concurrent process steps rather than agents, the head-change monitor and telemetry service are not fully connected component boundaries, and calibration persistence plus the exact confidence-threshold semantics are only partially communicated. The board is highly actionable for lifecycle discussion, but an engineer would still need clarification on agent ownership and calibration-state ownership."
+    }
+  ],
+  "axis_correlation": {
+    "threshold": 6,
+    "denominator": 8,
+    "lockstep_pairs": []
+  }
+}

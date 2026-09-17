@@ -1,0 +1,199 @@
+{
+  "axis": "ph",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean on call validity: 0 failed calls across 90 total tool calls, for a 0% failure rate. There were no rejected calls, no retries, no consecutive failure runs, and no repeated parse or validation error class.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · resize page-frame → 3000×2200",
+          "finding": "The first tool call applied successfully; there was no pre-APPLIED failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 89,
+          "transcript_excerpt": "Committed: Created the fleet diagram covering fair quota admission, warm and cold placement, disposable lease lifecycle, execution controls, supply management, quarantine, and operations telemetry.",
+          "finding": "Finalize succeeded on its first attempt. Session metadata also reports retries: 0."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Three explicit framed looks were used. Two genuine look→edit→look intervals occurred: the early page-frame inspection at turn 8 was followed by continued construction and the turn-73 inspection; turn 73 was followed by completeness adjustments and the final turn-88 QA render. The agent read the final clean diagnostics before committing. However, all looks framed the entire page-frame rather than the dense lifecycle, runtime, or admission regions, so close-up use during dense-region work was weaker than the top anchors require.",
+      "render_count": 3,
+      "adjustment_round_count": 2,
+      "render_adjust_render_loop_count": 2,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 8,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "An early whole-board inspection occurred after the initial admission and placement objects were created."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 73,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "The agent inspected the substantially built board, then adjusted what was shown by adding the explicit fair-wait queue, heartbeat wording, and unleased maximum-age path."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 74,
+          "transcript_excerpt": "APPLIED · place_shape fair-wait queue 160,500 120×120",
+          "finding": "This begins an adjustment round prompted after the turn-73 completeness inspection."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 88,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "A final QA render was read immediately before finalize, but it remained a full-page frame rather than a close-up of any dense region."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was handled responsively. Thirteen lint-error emissions occurred during construction, but all were resolved before commit; warnings were likewise fixed rather than overridden. No identical lint persisted for more than three consecutive turns without a strategy change, so there was no lint fight. There were no warning overrides requiring commit-summary justification.",
+      "lint_error_count": 13,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 14,
+          "transcript_excerpt": "+ W1 unreadable-labels: label \"Cold start; request waits\" chip on provision ... bleeds onto cold and boot",
+          "finding": "The warning was corrected on the next call by shortening the label to \"Cold start\" at turn 15."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 43,
+          "transcript_excerpt": "+ E1 covered-content: label \"Network policy\" chip on net lies on files's path for 105px",
+          "finding": "The error triggered a routing change at turn 44 and a label adjustment at turn 45; diagnostics returned clean."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 56,
+          "transcript_excerpt": "+ E1 covered-content ... + E2 covered-content",
+          "finding": "The retirement edge initially created two lint errors. The agent changed its connection geometry, moved labels, shortened the label, and moved the expiry label across turns 57–60 until the region was clean."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 64,
+          "transcript_excerpt": "+ E1 covered-content ... + E2 covered-content ... + E3 covered-content ... + W2 broken-edges",
+          "finding": "The separate output-stream edge produced three errors and two warnings. The agent removed it on the next turn and represented bidirectional traffic using one both-arrow edge at turns 66–67."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 77,
+          "transcript_excerpt": "+ E1 covered-content ... + E2 covered-content ... + E3 covered-content ... + E4 covered-content ... + W1 broken-edges",
+          "finding": "The separate fair-retry edge produced four errors and one warning. It was deleted on the next turn and consolidated into the existing quota-wait edge at turns 79–80."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 88,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA showed no remaining lint errors or warnings; therefore no warnings were silently overridden."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The sole commit summary accurately describes the major areas present in the stage diff and final render. The diff includes explicit quota admission and fair waiting, warm-hit and cold-boot placement, disposable lifecycle and destruction, runtime limits and proxy controls, warm-supply supervision, quarantine, and operations telemetry. The summary does not claim unsupported polishing or fixes, and final diagnostics were clean. No seen defect was committed undeclared.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 89,
+          "line": "Created the fleet diagram covering fair quota admission, warm and cold placement, disposable lease lifecycle, execution controls, supply management, quarantine, and operations telemetry.",
+          "assessment": "Honest and supported by the stage diff and final render: each named subject has corresponding objects and connections."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 88,
+          "transcript_excerpt": "fair-wait queue \"Fair wait\" ... unused-expiry ready→reclaimer \"Max age: unleased supply\" ... DIAGNOSTICS · clean",
+          "finding": "The final render supports the summary's admission and lifecycle coverage and shows a clean committed state."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 89,
+          "transcript_excerpt": "Committed: Created the fleet diagram covering fair quota admission, warm and cold placement, disposable lease lifecycle, execution controls, supply management, quarantine, and operations telemetry. (56 patch operations).",
+          "finding": "The commit message matches the actual 56-operation patch without claiming nonexistent rebalancing, perfection, or unsupported behavior."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session completed within both budgets: 56 committed patch operations, 90 total tool calls, approximately 9.91 minutes, and successful finalize. Most work was proportionate to a large diagram. However, there were two clear add→delete→replacement cycles: the output-stream edge and fair-retry edge were each added, immediately created five lint findings, deleted, and then represented by modifying another edge. Under the rubric, these are operation-thrash cycles even though recovery was prompt.",
+      "operation_count": 56,
+      "thrash_cycle_count": 2,
+      "wall_time_minutes": 9.91,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 64,
+          "transcript_excerpt": "APPLIED · connect stream execute→session-agent ... LINTS · +5 −0",
+          "finding": "The new stream edge immediately conflicted with the existing call/result routing."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 65,
+          "transcript_excerpt": "APPLIED · delete stream (connection) ... LINTS · +0 −5",
+          "finding": "The just-added stream edge was deleted, followed by rebuilding the concept through a both-arrow call edge at turns 66–67; this is one add-delete-rebuild cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 77,
+          "transcript_excerpt": "APPLIED · connect retry-admit fair-wait→quota ... LINTS · +5 −0",
+          "finding": "The new reverse retry edge immediately caused four errors and an anti-parallel warning."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 78,
+          "transcript_excerpt": "APPLIED · delete retry-admit (connection) ... LINTS · +0 −5",
+          "finding": "The just-added retry edge was deleted and its meaning rebuilt by making quota-wait bidirectional at turns 79–80; this is the second add-delete-rebuild cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 89,
+          "transcript_excerpt": "Committed ... (56 patch operations).",
+          "finding": "The task reached finalize without approaching the 300-turn limit; metadata reports a 594.4-second wall time, below the 15-minute budget."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or evidenced. The only session remained healthy through a successful commit, so no session is excluded from scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 89,
+          "transcript_excerpt": "The proposal is now awaiting operator review.",
+          "finding": "Normal successful completion; no harness death, collision, proxy failure, stuck ACTIVE state, or retry attributable to infrastructure."
+        }
+      ]
+    },
+    "score": 5
+  },
+  "usage": {
+    "input_tokens": 38575,
+    "output_tokens": 2907
+  },
+  "flags": []
+}

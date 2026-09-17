@@ -1,0 +1,205 @@
+{
+  "axis": "ph",
+  "scenario": "agent-session-orchestration",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8.5,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean: all 81 tool calls returned APPLIED, LOOK, or a successful commit; none returned ERROR, no finalize was blocked, and no retry occurred. Applied operations that emitted lint findings are not failed calls under the rubric.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · update_text page-frame",
+          "finding": "The first operation applied successfully; there was no pre-application failure run."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 57,
+          "transcript_excerpt": "APPLIED · connect delivery stream→client\nLINTS · +1 −0\n  + E1 covered-content",
+          "finding": "This call applied and merely introduced a lint error, so it is not counted as a failed call."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 80,
+          "transcript_excerpt": "Committed: Created the session-lifetime diagram covering admission, streaming execution, durable checkpoints, recovery, concurrent children and quotas, snapshot forks, and safe deployment draining.",
+          "finding": "Finalize succeeded on its first attempt."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Two legal framed looks inspected the page-frame. The first was followed by substantial refinement and the second confirmed a clean final state, yielding one render→adjust→render loop. However, both looks framed the entire page-frame rather than individual dense regions, and most detailed construction occurred before the first explicit close-up, so this falls short of the rubric's strongest close-up-interleaving standard.",
+      "render_count": 2,
+      "adjustment_round_count": 1,
+      "render_adjust_render_loop_count": 1,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 56,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame\nDIAGNOSTICS · clean\nMEASURES · section page-frame 32,32 3200×2000",
+          "finding": "The first explicit render reviewed the whole current board and provided diagnostics and measurements."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 57,
+          "transcript_excerpt": "APPLIED · connect delivery stream→client",
+          "finding": "Editing resumed immediately after the first render, beginning the adjustment phase."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 62,
+          "transcript_excerpt": "APPLIED · place_section branching 100,1840 3040×340",
+          "finding": "The post-render adjustment round expanded the board to cover snapshot branching and reachability."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 79,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame\nDIAGNOSTICS · clean\nMEASURES · section page-frame 60,60 3120×2180",
+          "finding": "The final QA render closed the render→adjust→render loop and showed clean diagnostics, but it again framed the whole page rather than a dense subsection."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "All lint findings were addressed rather than overridden. Two applied calls surfaced E1 lint errors during delivery-label placement; both were resolved through label-position changes. Numerous W1 clipping and readability warnings were also resolved. There was no lint fight: although delivery was adjusted across several consecutive turns, the agent changed position parameters and the lint class alternated before reaching clean status.",
+      "lint_error_count": 2,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 12,
+          "transcript_excerpt": "+ W1 unreadable-labels: label \"open session\" chip on open",
+          "finding": "The warning was resolved on the next turn by moving the API and opening the corridor."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 29,
+          "transcript_excerpt": "LINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+          "finding": "The history-note clipping warning was resolved after resizing and shortening the note."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 57,
+          "transcript_excerpt": "+ E1 covered-content: label \"live / reattach after replay\" chip on delivery covers api",
+          "finding": "The first lint error arose on an applied connection and prompted immediate label adjustment."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 59,
+          "transcript_excerpt": "+ E1 covered-content: label \"live / reattach after replay\" chip on delivery covers api",
+          "finding": "The covered-content lint briefly returned after a different label placement; this was not a repeated failed call and the strategy continued to change."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 60,
+          "transcript_excerpt": "LINTS · +0 −1\n  − E1 covered-content  (resolved)",
+          "finding": "The delivery-label error was cleared by changing the offset to -20."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 79,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA found no remaining lint errors or warnings, so there was no warning override requiring a commit-summary reason."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary accurately describes the stage diff. The diff contains admission and scheduling, an orchestrator/model/tool streaming loop, durable event logging and checkpoints, recovery and resume paths, child-session quota structures, a fork/reachability section, and rolling-release drain content. Final diagnostics were clean, and no known defect or warning was silently committed.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 80,
+          "line": "Created the session-lifetime diagram covering admission, streaming execution, durable checkpoints, recovery, concurrent children and quotas, snapshot forks, and safe deployment draining.",
+          "assessment": "Honest and supported by the committed diff: corresponding sections, objects, connections, and notes exist for every listed topic."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 79,
+          "transcript_excerpt": "BOARD DIFF · base → draft · 51 ops",
+          "finding": "The final render enumerated the additions supporting the summary and reported clean diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 79,
+          "transcript_excerpt": "branching section \"Snapshot reachability · forks and collection\"",
+          "finding": "Concrete evidence supports the summary's snapshot-forks claim."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 79,
+          "transcript_excerpt": "drain-note sticky \"**Rolling release** Old hosts reject placements. Drain via completion, suspension or safe checkpoint before replacement.",
+          "finding": "Concrete evidence supports the summary's safe deployment draining claim."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session completed in about 8.88 minutes, comfortably within the 15-minute budget, and finalized without retry. The metadata records 51 committed patch operations; the transcript contains 81 total tool calls including inspections, intermediate edits, and finalize. Operations were broadly proportionate to the unusually comprehensive request. There were no add-delete-rebuild cycles or repeated NO-OPs. Some sticky sizing and delivery-label placement required iterative correction, but these were progressive lint-driven refinements rather than destructive thrash.",
+      "operation_count": 51,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 8.88,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 27,
+          "transcript_excerpt": "APPLIED · resize history → 380×300",
+          "finding": "This began a short progressive resize/text-shortening sequence; the object was retained and ultimately made lint-clean rather than deleted and rebuilt."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 46,
+          "transcript_excerpt": "APPLIED · resize quota-note → 720×300",
+          "finding": "The remaining one-pixel clipping requirement was corrected on the next turn, showing targeted refinement rather than thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 77,
+          "transcript_excerpt": "APPLIED · fit_section page-frame",
+          "finding": "The final framing adjustment was followed by QA and successful finalize."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 80,
+          "transcript_excerpt": "(51 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The session reached finalize well before either the wall-time or 300-turn limit."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The only session remained healthy through successful finalize, so nothing is excluded from scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 80,
+          "transcript_excerpt": "Committed: Created the session-lifetime diagram",
+          "finding": "Successful commit confirms that the session did not end in harness death, proxy failure, or a stuck ACTIVE state."
+        }
+      ]
+    },
+    "score": 8.5
+  },
+  "usage": {
+    "input_tokens": 35831,
+    "output_tokens": 2693
+  },
+  "flags": []
+}

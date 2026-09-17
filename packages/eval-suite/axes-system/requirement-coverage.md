@@ -87,3 +87,7 @@ other axes' output, or any pre-derived checklist.
 - RC asks whether stated requirements landed; SF asks what a blind engineer actually
   reconstructs. A requirement can be technically present yet communicate too weakly
   to survive SF.
+
+Requirement coverage measures completeness. Explicit information in notes counts;
+readability and craft separately assess whether the board communicates its structure
+visually. Do not require invented architecture beyond the brief.

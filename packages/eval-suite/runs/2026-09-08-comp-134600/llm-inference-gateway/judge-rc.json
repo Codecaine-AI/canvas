@@ -1,0 +1,869 @@
+{
+  "axis": "rc",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The inference gateway exposes one endpoint to client applications.",
+        "brief_evidence": "“it exposes one endpoint to client applications”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Identity & admission region, upper-left process",
+            "observation": "A visible process is labeled “Single endpoint.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=edge]",
+            "observation": "Visible text begins “Single endpoint.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "Clients request a capability tier rather than a particular backend.",
+        "brief_evidence": "“which request a capability tier instead of a particular backend”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Connection from Single endpoint to Admission controller and subsequent routing region",
+            "observation": "The incoming edge is visibly labeled “tier request,” and the later component is labeled “Tier router,” with backend selection occurring only downstream."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e1]; objects[id=router]",
+            "observation": "e1 is labeled “tier request”; router is visibly labeled “Tier router · Rank eligible backends.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The edge service authenticates the caller.",
+        "brief_evidence": "“The edge service authenticates the caller”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Single endpoint process",
+            "observation": "The process visibly lists “Auth.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=edge].text",
+            "observation": "Visible text includes “Auth.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "The edge service resolves tenant identity.",
+        "brief_evidence": "“resolves tenant identity”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Single endpoint process",
+            "observation": "The process visibly lists “tenant.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=edge].text",
+            "observation": "Visible text includes “tenant.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "The edge service resolves tenant quota.",
+        "brief_evidence": "“resolves tenant identity and quota”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Single endpoint process",
+            "observation": "The process visibly lists “quota.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=edge].text",
+            "observation": "Visible text includes “quota.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "The edge stamps a request ID that follows every attempt.",
+        "brief_evidence": "“stamps a request id that follows every attempt”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Single endpoint process and yellow cache-key/request-ID note",
+            "observation": "The endpoint visibly lists “request ID,” and the note states “Request ID follows every attempt.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=edge]; objects[id=cache-key]",
+            "observation": "Their rendered text jointly shows request-ID assignment at the edge and propagation across every attempt."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "An admission controller enforces per-tenant concurrency limits.",
+        "brief_evidence": "“An admission controller enforces per-tenant concurrency”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Admission controller process",
+            "observation": "Visible text reads “Tenant concurrency.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=admit].text",
+            "observation": "The admission controller visibly specifies tenant concurrency."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "The admission controller enforces per-tenant token-rate limits.",
+        "brief_evidence": "“and token-rate limits”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Admission controller process",
+            "observation": "Visible text reads “token rate.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=admit].text",
+            "observation": "The admission controller visibly specifies token rate."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "Work exceeding admission limits waits in a deadline-aware queue.",
+        "brief_evidence": "“Excess work waits in a deadline-aware queue”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Admission controller to Deadline-aware queue",
+            "observation": "A directed edge labeled “over limit” enters the “Deadline-aware queue.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e3]; objects[id=queue]",
+            "observation": "e3 runs from admission to the queue with label “over limit.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "Queued work obtaining a slot before its deadline proceeds.",
+        "brief_evidence": "“Excess work waits in a deadline-aware queue”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Deadline-aware queue to Prompt assembler",
+            "observation": "A directed edge labeled “slot before deadline” proceeds to prompt assembly."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e5]",
+            "observation": "The queue-to-assembler path is visibly labeled “slot before deadline.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "If queued work's deadline passes, the controller explicitly rejects it, tells the caller to retry, and never serves it late.",
+        "brief_evidence": "“if its deadline passes, the controller rejects it explicitly and tells the caller to retry instead of serving it late”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Deadline-aware queue to Reject explicitly process",
+            "observation": "A red directed edge labeled “deadline expired” reaches a process labeled “Reject explicitly · Caller must retry · never serve late.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e4]; objects[id=reject]",
+            "observation": "The rendered edge condition and destination text include the deadline condition, explicit rejection, retry instruction, and no-late-service rule."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "The router selects a backend within the requested capability tier.",
+        "brief_evidence": "“The router selects a backend within the requested tier”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Tier router and dispatch edges",
+            "observation": "The router is labeled “Tier router · Rank eligible backends”; its hosted dispatch is labeled “tier choice,” and the ranking note says “within requested tier.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=router]; objects[id=routing-rules]; connections[id=dispatch]",
+            "observation": "The visible router, note, and dispatch label jointly constrain selection to the requested tier."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "Routing considers live backend health, measured latency, queue depth, and price.",
+        "brief_evidence": "“from live health, measured latency, queue depth, price”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Yellow Eligibility & ranking note",
+            "observation": "The visible note lists “Live health · latency · queue depth · price.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=routing-rules].text",
+            "observation": "Rendered note text enumerates all four routing signals."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Routing enforces the tenant's data-residency requirements.",
+        "brief_evidence": "“and the tenant's data-residency requirements”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Yellow Eligibility & ranking note",
+            "observation": "The note visibly states “Residency is mandatory.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=routing-rules].text",
+            "observation": "Rendered text makes residency a mandatory eligibility constraint."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "Eligible capacity includes hosted provider endpoints spread across independent accounts.",
+        "brief_evidence": "“Eligible capacity includes hosted provider endpoints spread across independent accounts”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Eligible capacity & protection region, Hosted providers process",
+            "observation": "The visible process reads “Hosted providers · Independent accounts A / B / …” and receives the router's “tier choice” edge."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=hosted]; connections[id=dispatch]",
+            "observation": "Hosted providers across independent accounts are visibly connected as eligible router capacity."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "Eligible capacity includes a self-hosted pool managed by its own scheduler.",
+        "brief_evidence": "“and a self-hosted pool managed by its own scheduler”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Eligible capacity & protection region, Self-hosted pool process",
+            "observation": "The process visibly reads “Self-hosted pool · Own scheduler,” reached by a router edge labeled “or self-hosted.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=self]; connections[id=dispatch-self]",
+            "observation": "The self-hosted pool and its own scheduler are visibly included as an alternate dispatch target."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Before dispatch, a prompt assembler applies tenant system context.",
+        "brief_evidence": "“Before dispatch, a prompt assembler applies tenant system context”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Prompt assembler in Preparation & tier routing region",
+            "observation": "The component visibly reads “Prompt assembler · Tenant context,” and appears upstream of cache lookup and router dispatch."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=assemble]; connections[id=e6], connections[id=miss]",
+            "observation": "Prompt assembly is visibly before cache lookup and routing."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "Before dispatch, the prompt assembler applies safety policy.",
+        "brief_evidence": "“and safety policy”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Prompt assembler process",
+            "observation": "The component visibly lists “safety policy.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=assemble].text",
+            "observation": "Rendered prompt-assembler text includes safety policy."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "A response cache returns exact matches.",
+        "brief_evidence": "“A response cache returns exact matches”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Response cache and green cache-hit path",
+            "observation": "The cache visibly says “Exact,” and a green edge labeled “cache hit” goes to streaming."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=cache]; connections[id=cache-hit]",
+            "observation": "The cache's rendered text and outgoing hit path represent exact-match serving."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "The response cache returns semantically near-duplicate deterministic results.",
+        "brief_evidence": "“and semantically near-duplicate deterministic results”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Response cache process",
+            "observation": "Visible text reads “Exact / deterministic semantic hit,” conveying deterministic semantic matching."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=cache].text",
+            "observation": "Rendered text explicitly identifies a deterministic semantic hit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Cache entries are keyed by prompt, parameters, and policy version.",
+        "brief_evidence": "“keyed by prompt, parameters, and policy version”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Yellow cache-key note below routing region",
+            "observation": "The note visibly states “Cache key: prompt + parameters + policy version.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=cache-key].text",
+            "observation": "Rendered note enumerates the complete cache key."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "The gateway streams tokens to the caller as they arrive.",
+        "brief_evidence": "“The gateway streams tokens to the caller as they arrive.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Attempts, fallback & client delivery region, Stream tokens process",
+            "observation": "The process visibly reads “Stream tokens to caller · As they arrive.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=stream].text",
+            "observation": "Rendered text directly states streaming behavior and timing."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "Before any token is emitted, failures are classified.",
+        "brief_evidence": "“Before any token is emitted, failures are classified”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Attempt outcome to Classify failure path",
+            "observation": "The attempt process is labeled “Before first token,” and a red edge labeled “pre-token failure” reaches “Classify failure · Retryable?”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=attempt], objects[id=classify]; connections[id=failure]",
+            "observation": "The visible sequence explicitly scopes classification to pre-token failures."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "Pre-token failure classes include timeout, rate-limit rejection, content-policy refusal, backend overload, and malformed response.",
+        "brief_evidence": "“failures are classified as timeout, rate-limit rejection, content-policy refusal, backend overload, or malformed response”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Yellow Pre-token classification note",
+            "observation": "The visible note lists all five required failure classes."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=failure-types].text",
+            "observation": "Rendered text enumerates timeout, rate-limit rejection, content-policy refusal, backend overload, and malformed response."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "Retryable failures move to the next backend in the tier's fallback order.",
+        "brief_evidence": "“Retryable failures move to the next backend in the tier's fallback order”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Classify failure to Next backend in tier and orange fallback loop",
+            "observation": "A directed edge labeled “retryable” reaches “Next backend in tier,” followed by “reselect eligible fallback” back to the router."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=yes-retry], objects[id=retry], connections[id=retry-loop]",
+            "observation": "The visible retry branch selects the next backend and loops to tier fallback selection."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "Each retryable fallback attempt receives a fresh deadline.",
+        "brief_evidence": "“with a fresh deadline”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Next backend in tier process",
+            "observation": "Visible text includes “Fresh deadline.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=retry].text",
+            "observation": "The retry process visibly specifies a fresh deadline."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "Fallback attempts retain the same idempotency key.",
+        "brief_evidence": "“and the same idempotency key”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Next backend in tier process",
+            "observation": "Visible text includes “same idempotency key.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=retry].text",
+            "observation": "The rendered retry process explicitly preserves the idempotency key."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R28",
+        "requirement": "Non-retryable failures return immediately.",
+        "brief_evidence": "“non-retryable failures return immediately”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Classify failure to Return error immediately",
+            "observation": "The “otherwise” branch reaches “Return error immediately · Non-retryable / exhausted.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=no-retry]; objects[id=terminal-error]",
+            "observation": "The directed non-retry branch explicitly returns an error immediately."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "After streaming begins, a backend failure cannot be silently retried on another backend.",
+        "brief_evidence": "“After streaming begins, a backend failure cannot be silently retried elsewhere”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Stream tokens to caller to Complete or visibly fail",
+            "observation": "The post-stream destination visibly says “no retry,” and there is no outgoing fallback edge from the streaming path."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=stream-end]; connections[id=stream-finish]",
+            "observation": "The rendered post-stream path terminates at “Complete or visibly fail · Preserve received tokens · no retry.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R30",
+        "requirement": "Once streaming has begun, the gateway either completes the stream or visibly fails it while preserving already received tokens.",
+        "brief_evidence": "“the gateway either completes the stream or visibly fails it while preserving what the caller already received”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Complete or visibly fail process",
+            "observation": "The visible text reads “Complete or visibly fail · Preserve received tokens.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=stream-end].text",
+            "observation": "Rendered text directly states both allowed outcomes and token preservation."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "Circuit breakers open after sustained backend errors or timeouts.",
+        "brief_evidence": "“Circuit breakers open after sustained backend errors or timeouts”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Eligible capacity & protection region, Circuit breakers process",
+            "observation": "The visible component reads “Open on sustained errors / timeouts.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=breaker].text",
+            "observation": "Rendered circuit-breaker text includes the sustained-error and timeout trigger."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "Open circuit breakers drain new traffic toward healthy capacity.",
+        "brief_evidence": "“and drain new traffic toward healthy capacity”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed orange breaker-to-router connection",
+            "observation": "The directed control edge is visibly labeled “drain to healthy.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=breaker-route]",
+            "observation": "The dashed directed connection from breaker to router carries the visible label “drain to healthy.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R33",
+        "requirement": "Circuit breakers admit a trickle of shadow probes before closing again.",
+        "brief_evidence": "“They admit a trickle of shadow probes before closing again.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Circuit breakers and Trickle shadow probes processes",
+            "observation": "A bidirectional dashed edge labeled “test / recover” links the breaker to “Trickle shadow probes · Healthy → close circuit.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=probes]; connections[id=probe-loop]",
+            "observation": "Rendered probe text and recovery connection show trickle probes preceding healthy circuit closure."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "Metering records tokens, latency, selected backend, cache outcome, and cost into a billing stream.",
+        "brief_evidence": "“Metering records tokens, latency, selected backend, cache outcome, and cost into a billing stream”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Meter every request / attempt to Billing stream",
+            "observation": "A dashed edge labeled “usage events” enters a billing stream visibly listing “Tokens · latency · backend · cache · cost.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=meter], objects[id=billing]; connections[id=meter-bill]",
+            "observation": "The visible metering-to-billing path enumerates all required accounting fields; “backend” and “cache” represent selected backend and cache outcome."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "Redacted prompts and responses enter an audit store.",
+        "brief_evidence": "“while redacted prompts and responses enter an audit store”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Meter to Audit store dashed connection",
+            "observation": "The edge is labeled “redact,” and its destination reads “Audit store · Redacted prompts & responses.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=audit-write]; objects[id=audit]",
+            "observation": "The rendered audit path explicitly covers redaction and storage of prompts and responses."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "When a tenant reaches its spend ceiling, it first degrades to the cheapest capable backend.",
+        "brief_evidence": "“A tenant that reaches its spend ceiling first degrades to the cheapest capable backend”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Accounting & spend control region, Spend ceiling process",
+            "observation": "The process visibly states “1 Cheapest capable.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=spend].text",
+            "observation": "Rendered numbered text establishes cheapest-capable degradation as the first spend-ceiling action."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R37",
+        "requirement": "After cheapest-capable degradation, new work is rejected.",
+        "brief_evidence": "“and then has new work rejected”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Spend ceiling process and spend-gate connection",
+            "observation": "The process visibly states “2 Reject new work,” and a dashed directed “spend gate” edge enters admission."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=spend]; connections[id=spend-enforce]",
+            "observation": "The numbered rendered text establishes the second action, and the visible spend gate connects enforcement to admission."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R38",
+        "requirement": "A small sample of structured evaluation traffic is mirrored to a shadow backend.",
+        "brief_evidence": "“A small sample of structured evaluation traffic is mirrored to a shadow backend”",
+        "importance": "supporting",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed violet connection from Response cache to Shadow evaluation backend",
+            "observation": "The directed mirror path is visibly labeled “structured eval sample,” but it does not explicitly qualify the sample as small."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=mirror]; objects[id=shadow]",
+            "observation": "The rendered edge label is “structured eval sample” and its destination is “Shadow evaluation backend”; no visible object or connection text states “small.”"
+          }
+        ],
+        "note": "Mirroring, structured evaluation, sampling, and the shadow-backend endpoint are represented, but the stated small-sample qualifier is omitted from the visible board."
+      },
+      {
+        "id": "R39",
+        "requirement": "The shadow backend's result never changes the client response.",
+        "brief_evidence": "“whose result never changes the client response”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Shadow evaluation backend process",
+            "observation": "The process visibly states “Never affects client response,” and has no response edge into the delivery path."
+          },
+          {
+            "source": "json",
+            "locator": "objects[id=shadow]; connections searched for from.objectId=shadow",
+            "observation": "The rendered node explicitly states non-interference, and the connection structure contains no outgoing shadow-result path."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R40",
+        "requirement": "The diagram makes clear how admission, routing, caching, fallback, streaming, capacity protection, and accounting interact.",
+        "brief_evidence": "“The diagram should make clear how admission, routing, caching, fallback, streaming, capacity protection, and accounting interact”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Full rendered board across regions 1 through 5",
+            "observation": "Directed request paths connect admission to preparation, cache, tier routing, hosted/self-hosted capacity, attempt classification, fallback, and streaming; dashed paths connect capacity protection and accounting."
+          },
+          {
+            "source": "json",
+            "locator": "objects sections entry, routing, capacity, delivery, accounting; connections e1-e6, miss, dispatch, dispatch-self, host-out, self-out, first-token, failure, yes-retry, retry-loop, cache-hit, telemetry, breaker-route",
+            "observation": "The visible labeled topology explicitly links every named interaction cluster."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R41",
+        "requirement": "The diagram especially makes clear request behavior under overload.",
+        "brief_evidence": "“especially how requests behave under overload”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Admission overload branch and backend-overload failure handling",
+            "observation": "Admission overload visibly branches through “over limit” to a deadline-aware queue, then either “slot before deadline” or “deadline expired” explicit rejection; “backend overload” also appears in pre-token classification."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=e3], connections[id=e4], connections[id=e5]; objects[id=failure-types]",
+            "observation": "The rendered structure shows both admission overload behavior and backend-overload classification."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R42",
+        "requirement": "The diagram especially makes clear request behavior under provider failure.",
+        "brief_evidence": "“and provider failure”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Provider response/error paths, pre-token classification, retry loop, terminal error, post-stream outcome, and circuit-breaker controls",
+            "observation": "Provider outcomes visibly feed pre-token success/failure handling; retryable failures loop to an eligible fallback, other failures return immediately, post-stream failures cannot retry, and circuit breakers drain traffic to healthy capacity."
+          },
+          {
+            "source": "json",
+            "locator": "connections[id=host-out], connections[id=self-out], connections[id=failure], connections[id=yes-retry], connections[id=retry-loop], connections[id=no-retry], objects[id=stream-end], connections[id=breaker-route]",
+            "observation": "The visible topology covers provider failure before streaming, after streaming, fallback, terminal failure, and capacity protection."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.9939,
+    "caps_applied": [],
+    "strongest_covered_cluster": "Failure and recovery semantics: deadline-aware admission overload, exhaustive pre-token classification, ordered fallback with fresh deadlines and stable identifiers, immediate non-retryable errors, and the no-silent-retry rule after streaming begins.",
+    "most_consequential_gap": "The shadow-evaluation path says “structured eval sample” but does not visibly preserve the brief's qualifier that the mirrored sample is small.",
+    "coverage_summary": "The board represents all system-defining requirements and nearly every supporting qualifier. Admission, tier routing, caching, heterogeneous capacity, streaming, fallback, circuit breaking, accounting, spend control, and shadow-result isolation are all visibly covered and connected. The only partial requirement is the omitted “small” qualifier on the structured evaluation sample.",
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 14508,
+    "output_tokens": 8484
+  },
+  "flags": [
+    "SCORE-RECOMPUTED"
+  ]
+}

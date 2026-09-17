@@ -1,0 +1,135 @@
+{
+  "schemaVersion": 1,
+  "id": "agent-layout-10-language-00-overview-example-nesting",
+  "title": "Example nesting (overview)",
+  "mode": "diagram",
+  "size": {
+    "width": 1024,
+    "height": 576
+  },
+  "objects": [
+    {
+      "id": "top",
+      "type": "section",
+      "text": "Top",
+      "label": "Top",
+      "title": "Top",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 320
+      }
+    },
+    {
+      "id": "a",
+      "type": "process",
+      "text": "a",
+      "label": "a",
+      "geometry": {
+        "x": 204,
+        "y": 138,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "b",
+      "type": "process",
+      "text": "b",
+      "label": "b",
+      "geometry": {
+        "x": 420,
+        "y": 138,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "c",
+      "type": "process",
+      "text": "c",
+      "label": "c",
+      "geometry": {
+        "x": 636,
+        "y": 138,
+        "width": 184,
+        "height": 96
+      }
+    },
+    {
+      "id": "bottom",
+      "type": "section",
+      "text": "Bottom",
+      "label": "Bottom",
+      "title": "Bottom",
+      "tint": "gray",
+      "geometry": {
+        "x": 0,
+        "y": 221,
+        "width": 1024,
+        "height": 355
+      }
+    },
+    {
+      "id": "note",
+      "type": "sticky",
+      "text": "note",
+      "label": "note",
+      "geometry": {
+        "x": 262,
+        "y": 237,
+        "width": 113,
+        "height": 84
+      }
+    },
+    {
+      "id": "core",
+      "type": "process",
+      "text": "core",
+      "label": "core",
+      "geometry": {
+        "x": 496,
+        "y": 242,
+        "width": 101,
+        "height": 53
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "conn-1-a-b",
+      "from": {
+        "objectId": "a"
+      },
+      "to": {
+        "objectId": "b"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-2-b-c",
+      "from": {
+        "objectId": "b"
+      },
+      "to": {
+        "objectId": "c"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conn-3-c-core",
+      "from": {
+        "objectId": "c"
+      },
+      "to": {
+        "objectId": "core"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    }
+  ]
+}

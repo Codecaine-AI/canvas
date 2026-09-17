@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "llm-inference-gateway",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "score": 6,
+    "score_rationale": "The board lands at the 6 anchor because its detailed, readable regional composition and restrained semantic palette are undermined by large dead areas, sprawling ambiguous return routes, a clipped edge label, and unfinished shape vocabulary.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6,
+        "note": "The six numbered regions organize the canvas, but oversized lower and central containers leave broad empty bands while several flows are packed into the upper half."
+      },
+      {
+        "name": "color",
+        "score": 7,
+        "note": "Gray infrastructure/process forms, green success paths, red failure paths, blue audit storage, and the yellow explanatory note remain restrained, consistent, and legible."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 5.5,
+        "note": "Long dashed return loops snake across multiple regions and merge near the router, while a right-edge route label is visibly clipped, exposing routing mechanics rather than a fully resolved presentation."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6,
+        "note": "Panels and primary nodes mostly hold local registers, but uneven density, very long connector runs, and the plain rectangular 'Tokens emitted?' decision weaken hierarchy and operational-map vocabulary."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8963,
+    "output_tokens": 458
+  },
+  "flags": []
+}

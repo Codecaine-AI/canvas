@@ -102,10 +102,10 @@ describe("style-guide loader", () => {
   test("craft targets open with their framing and distinguish targets from lint floors", async () => {
     const result = await styleGuideLoader.resolve({ kind: "style-guide" }, RESOLVE_CTX);
     expect(result.content).toContain(
-      "<craft_targets>\n    Targets, not minimums to shave toward:",
+      "<craft_targets>\n    Starting dimensions for local peer groups",
     );
     expect(result.content).toContain(
-      "The lints mark the clearance below which a board breaks",
+      "section sizes and counts follow meaning",
     );
   });
 
@@ -123,9 +123,6 @@ describe("style-guide loader", () => {
       "144 side by side",
       "160 between stacked rows",
       "48 inside every frame",
-      "2–3 nodes",
-      "7×",
-      "15% ink",
     ]) {
       expect(craft).toContain(renderedTarget);
     }
@@ -146,12 +143,12 @@ describe("style-guide loader", () => {
     const customTargets: CraftTargets = {
       ...CRAFT_TARGETS,
       nodeWidth: 333,
-      inkShare: 0.23,
+      arrowCorridor: 120,
     };
     const rendered = formatCraftTargets(customTargets);
 
     expect(rendered).toContain("flow node: 333×96");
-    expect(rendered).toContain("23% ink");
+    expect(rendered).toContain("arrow corridor: 120");
     expect(rendered).not.toContain("288×96");
     expect(rendered).not.toContain("15% ink");
   });

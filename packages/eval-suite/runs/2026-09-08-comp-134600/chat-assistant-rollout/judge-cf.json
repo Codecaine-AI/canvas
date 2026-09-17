@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board lands at 6.5 because its strong operational vocabulary and disciplined palette create a deliberate, readable composition, but large dead areas and conspicuous long-haul routing keep it from feeling fully finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6,
+        "note": "The four tinted regions organize the frame clearly, but the memory and recovery sections contain broad empty bands, while several elements sit far apart without enough visual structure to justify the space."
+      },
+      {
+        "name": "color",
+        "score": 8,
+        "note": "Registry colors are largely disciplined: memory is blue, models and judge elements are pink, safety is red, human/message/key elements are yellow, send is green, and infrastructure and process shapes are gray."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6,
+        "note": "No crosshair junctions are visible, but the long blue, purple, and dashed-red routes snake across region boundaries with exposed bends and visually ambiguous origins, making routing machinery conspicuous."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "The live-turn flow and experiment branches hold useful local registers, but spacing becomes uneven in the lower regions, with isolated boxes, oversized notes, and long connector runs weakening rhythm and hierarchy."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 10011,
+    "output_tokens": 480
+  },
+  "flags": []
+}

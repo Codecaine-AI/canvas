@@ -1,0 +1,847 @@
+{
+  "axis": "rc",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 10,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The board depicts a fleet of disposable execution environments used by agents to invoke tools and code.",
+        "brief_evidence": "We need a diagram of how our fleet of disposable execution environments works for agents that invoke tools and code.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Whole board, especially sections 2 and 3",
+            "observation": "The lifecycle terminates in Destroyed and is titled “no tenant reuse”; the leased-execution band shows a Leased agent invoking “Run tool.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects lifecycle, destroyed, caller, runtime; connections call and reclaim-destroy",
+            "observation": "The visible objects and directed paths establish agent tool execution in environments that are ultimately destroyed and never repooled."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "An agent sends the placement service an image and resource class.",
+        "brief_evidence": "An agent sends the placement service an image and resource class.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, leftmost Agent-to-quota path",
+            "observation": "The directed request path from Agent is labeled “Image + class.”"
+          },
+          {
+            "source": "json",
+            "locator": "connection a-q",
+            "observation": "Forward connection from agent to quota has visible label “Image + class.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The placement service first attempts to claim a compatible environment from the warm pool.",
+        "brief_evidence": "The service first claims a compatible environment from the warm pool",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Compatible warm instance? decision; Section 2, Ready · warm pool",
+            "observation": "Placement checks “Compatible warm instance?” before its cold-provisioning branch, and the lifecycle identifies ready environments as the warm pool."
+          },
+          {
+            "source": "json",
+            "locator": "objects warm and ready; connections q-w, hit, and miss",
+            "observation": "The compatible-warm decision precedes both the hit and miss branches."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "On a warm-pool hit, the environment is returned immediately.",
+        "brief_evidence": "returning it immediately on a hit.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, warm-decision top branch",
+            "observation": "The forward path to “Claim & return lease” is labeled “Hit · return immediately.”"
+          },
+          {
+            "source": "json",
+            "locator": "connection hit",
+            "observation": "Forward edge from warm to lease explicitly says “Hit · return immediately.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "On a warm-pool miss, placement selects a healthy host with capacity.",
+        "brief_evidence": "On a miss, it selects a healthy host with capacity",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, lower miss branch",
+            "observation": "The “Miss” arrow leads to “Select healthy host with capacity.”"
+          },
+          {
+            "source": "json",
+            "locator": "object host and connection miss",
+            "observation": "The miss edge points from the warm decision to the healthy-host-with-capacity process."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "After selecting a host on a miss, the service provisions a cold environment.",
+        "brief_evidence": "provisions a cold environment",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, cold path",
+            "observation": "A forward arrow runs from host selection to “Provision cold environment / Wait for boot.”"
+          },
+          {
+            "source": "json",
+            "locator": "object boot and connection host-boot",
+            "observation": "The host process points to the visibly labeled cold-environment provisioning process."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "A cold-path request remains waiting until boot completes before a lease is returned.",
+        "brief_evidence": "keeps the request waiting until boot completes.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, cold provisioning-to-lease path",
+            "observation": "The cold process says “Wait for boot,” and only a path labeled “Boot ready” reaches “Claim & return lease.”"
+          },
+          {
+            "source": "json",
+            "locator": "object boot and connection boot-lease",
+            "observation": "The visible process includes “Wait for boot”; the lease edge is conditioned by the “Boot ready” label."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Each environment progresses in order through provisioning, ready, leased, idle, draining, and destroyed states.",
+        "brief_evidence": "Each environment progresses through provisioning, ready, leased, idle, draining, and destroyed states.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, main lifecycle row",
+            "observation": "Six labeled states appear left to right with forward arrows: Provisioning → Ready · warm pool → Leased → Idle → Draining → Destroyed."
+          },
+          {
+            "source": "json",
+            "locator": "objects provisioning through destroyed; connections p-r, r-l, l-i, i-d, d-x",
+            "observation": "The JSON defines the complete ordered forward chain."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "A lease has a fixed term.",
+        "brief_evidence": "A lease has a fixed term",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, yellow lease-rules note",
+            "observation": "The note begins “Fixed-term lease.”"
+          },
+          {
+            "source": "json",
+            "locator": "object lease-rules.text",
+            "observation": "Visible note text explicitly states “Fixed-term lease.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "A lease remains valid only while the agent sends renewal heartbeats.",
+        "brief_evidence": "stays valid only while the agent sends renewal heartbeats.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, lease-rules note and Leased-to-Reclaimer path",
+            "observation": "The note says the lease requires agent renewal heartbeats, while stopping renewals exits Leased toward the Reclaimer."
+          },
+          {
+            "source": "json",
+            "locator": "object lease-rules and connection expiry",
+            "observation": "The visible note requires heartbeats and the outgoing edge is labeled “Renewals stop.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "When renewal heartbeats stop, the reclaimer takes the environment.",
+        "brief_evidence": "When renewals stop, the reclaimer takes the environment",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, red path below Leased",
+            "observation": "A red forward arrow labeled “Renewals stop” runs from Leased to Reclaimer."
+          },
+          {
+            "source": "json",
+            "locator": "connection expiry",
+            "observation": "The forward connection goes from leased to reclaimer with label “Renewals stop.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "The reclaimer destroys a reclaimed environment.",
+        "brief_evidence": "and destroys it",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, red Reclaimer-to-Destroyed path",
+            "observation": "The Reclaimer has a forward red path to Destroyed labeled “Destroy · never repool.”"
+          },
+          {
+            "source": "json",
+            "locator": "connection reclaim-destroy",
+            "observation": "The forward edge directly connects reclaimer to destroyed."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "A reclaimed environment must never return to the warm pool.",
+        "brief_evidence": "it never returns a reclaimed instance to the pool",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 heading and red destruction path",
+            "observation": "The section is titled “no tenant reuse,” and the destruction path is labeled “Destroy · never repool.”"
+          },
+          {
+            "source": "json",
+            "locator": "connection reclaim-destroy.label",
+            "observation": "The visible edge explicitly states “never repool.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Filesystem and process state from a prior tenant must not survive reclamation.",
+        "brief_evidence": "because filesystem and process state from a prior tenant must not survive.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, yellow lease-rules note",
+            "observation": "The note says “Local filesystem and processes never survive reclamation.”"
+          },
+          {
+            "source": "json",
+            "locator": "object lease-rules.text",
+            "observation": "The rendered note contains the full filesystem-and-process non-survival constraint."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "Every environment has an absolute maximum age.",
+        "brief_evidence": "Every environment also has an absolute maximum age.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, lease-rules note and Reclaimer process",
+            "observation": "The note says “Absolute maximum age applies to every environment,” and the Reclaimer includes “max age.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects lease-rules and reclaimer",
+            "observation": "Both the universal constraint and its enforcement mechanism are visibly labeled."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "Image releases retire older instances by marking them draining.",
+        "brief_evidence": "Image releases retire older instances by marking them draining",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, Image release process and dashed Mark path",
+            "observation": "“Image release · retire older instances” points via a dashed arrow labeled “Mark” to Draining."
+          },
+          {
+            "source": "json",
+            "locator": "object release and connection release-drain",
+            "observation": "The release object names older-instance retirement and the forward dashed edge marks Draining."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Instances retired by an image release are destroyed after active leases end.",
+        "brief_evidence": "destroying them after active leases end",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, dashed retirement path and Draining-to-Destroyed path",
+            "observation": "The retirement path is labeled “finish active lease”; Draining reaches Destroyed only over the edge labeled “No lease.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections live-retire and d-x",
+            "observation": "The first edge explicitly requires finishing the active lease and the destruction edge is conditioned on no lease."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "Image retirement must not interrupt live work.",
+        "brief_evidence": "without interrupting live work.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, Draining state and dashed Leased-to-Draining path",
+            "observation": "Draining says “Live work continues,” and the retirement edge says “finish active lease.”"
+          },
+          {
+            "source": "json",
+            "locator": "object draining and connection live-retire",
+            "observation": "Visible labels preserve live work through the active lease."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "Every tool call within a lease receives a timeout.",
+        "brief_evidence": "Within a lease, every tool call receives a timeout",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Run tool process",
+            "observation": "The leased execution process is labeled “Run tool · timeout / memory / CPU / network limits.”"
+          },
+          {
+            "source": "json",
+            "locator": "object runtime.text",
+            "observation": "Timeout is visibly listed as a limit on the tool runtime."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Every tool call within a lease receives a memory ceiling.",
+        "brief_evidence": "memory ceiling",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Run tool process",
+            "observation": "The runtime visibly lists “memory” among the per-call limits."
+          },
+          {
+            "source": "json",
+            "locator": "object runtime.text",
+            "observation": "The process text includes “memory” in its limits list."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Every tool call within a lease receives a CPU cap.",
+        "brief_evidence": "CPU cap",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Run tool process",
+            "observation": "The runtime visibly lists “CPU” among the per-call limits."
+          },
+          {
+            "source": "json",
+            "locator": "object runtime.text",
+            "observation": "The process text includes “CPU” in its limits list."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "Every tool call within a lease receives a network policy.",
+        "brief_evidence": "and network policy.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Run tool process and egress path",
+            "observation": "The runtime lists “network limits,” with all egress routed through an allowlist-only proxy."
+          },
+          {
+            "source": "json",
+            "locator": "object runtime; connections egress and allowed",
+            "observation": "The visible runtime constraint and proxy path jointly encode the network policy."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "Egress is limited to allowlisted destinations through a proxy.",
+        "brief_evidence": "Egress is limited to allowlisted destinations through a proxy.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, horizontal network path",
+            "observation": "Run tool points to “Egress proxy · allowlist only” over “All egress,” then to “Allowlisted destinations” over “Allowed only.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects proxy and destinations; connections egress and allowed",
+            "observation": "Forward labeled edges explicitly route all egress through the allowlisting proxy to allowed destinations only."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "The runtime kills an overlong tool call.",
+        "brief_evidence": "The runtime kills an overlong call",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, red deadline path",
+            "observation": "A red edge labeled “Deadline exceeded” leads from Run tool to “Kill call · TIMEOUT.”"
+          },
+          {
+            "source": "json",
+            "locator": "object timeout and connection timed",
+            "observation": "The deadline-exceeded forward edge terminates at the kill-call process."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "An overlong call is reported as a timeout rather than as a tool error.",
+        "brief_evidence": "and reports a timeout rather than a tool error.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, timeout outcome process",
+            "observation": "The outcome says “TIMEOUT / Not a tool error.”"
+          },
+          {
+            "source": "json",
+            "locator": "object timeout.text",
+            "observation": "The visible text explicitly distinguishes TIMEOUT from a tool error."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "The runtime streams capped output to the agent.",
+        "brief_evidence": "It streams capped output to the agent",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Leased agent-to-Run tool connection",
+            "observation": "The bidirectional call path is labeled “Call / capped output stream,” with the return arrow pointing toward the agent."
+          },
+          {
+            "source": "json",
+            "locator": "connection call",
+            "observation": "A both-arrow connection between caller and runtime visibly carries “capped output stream.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "Durable files are written to an artifact store keyed by session.",
+        "brief_evidence": "while durable files go to an artifact store keyed by session",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, lower durable-files branch",
+            "observation": "A forward edge labeled “Durable files” leads to “Artifact store · session key.”"
+          },
+          {
+            "source": "json",
+            "locator": "object artifacts and connection files",
+            "observation": "The runtime sends durable files to the visibly session-keyed artifact store."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R28",
+        "requirement": "Environment-local state is ephemeral.",
+        "brief_evidence": "because local state is ephemeral.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2 heading and lease-rules note; Section 3 artifact branch",
+            "observation": "The lifecycle is explicitly “no tenant reuse,” the note says local filesystem and processes never survive reclamation, and durable files are externalized to the artifact store."
+          },
+          {
+            "source": "json",
+            "locator": "objects lifecycle, lease-rules, artifacts; connection files",
+            "observation": "Visible labels encode destruction of local state and external persistence for durable data."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "The warm-pool supervisor watches host capacity, pool depth, and demand.",
+        "brief_evidence": "The warm-pool supervisor watches host capacity, pool depth, and demand",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, upper supervision path",
+            "observation": "“Host capacity / pool depth / demand” points to “Warm-pool supervisor” over an “Observe” edge."
+          },
+          {
+            "source": "json",
+            "locator": "objects signals and supervisor; connection watch",
+            "observation": "The three named signals are connected forward to the supervisor with label “Observe.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R30",
+        "requirement": "The warm-pool supervisor adjusts pre-booted supply.",
+        "brief_evidence": "then adjusts pre-booted supply.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, supervisor-to-supply path",
+            "observation": "The Warm-pool supervisor points over “Scale” to “Adjust pre-booted supply.”"
+          },
+          {
+            "source": "json",
+            "locator": "object supply and connection adjust",
+            "observation": "The supervisor has a forward edge to the pre-booted-supply adjustment process."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "Repeated boot failures quarantine a host.",
+        "brief_evidence": "Repeated boot failures quarantine a host",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, lower red failure path",
+            "observation": "“Repeated boot failures” points via a red threshold arrow to “Quarantine host.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects failures and quarantine; connection quarantine-trigger",
+            "observation": "A forward red edge connects repeated boot failures to host quarantine."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "A quarantined host is removed from placement.",
+        "brief_evidence": "and remove it from placement.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, quarantine outcome",
+            "observation": "The outcome process says “Quarantine host · exclude from placement.”"
+          },
+          {
+            "source": "json",
+            "locator": "object quarantine.text",
+            "observation": "The visible label explicitly states exclusion from placement."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R33",
+        "requirement": "Per-tenant quotas limit concurrent environments.",
+        "brief_evidence": "Per-tenant quotas limit concurrent environments",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, Tenant quota decision and yellow Tenant admission note",
+            "observation": "The note explicitly lists “Concurrent environment” quota under tenant admission."
+          },
+          {
+            "source": "json",
+            "locator": "objects quota and quota-note",
+            "observation": "The visible quota gate is supported by a note naming concurrent-environment quotas."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "Per-tenant quotas limit aggregate runtime.",
+        "brief_evidence": "and aggregate runtime",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, yellow Tenant admission note",
+            "observation": "The note explicitly lists “aggregate runtime quotas.”"
+          },
+          {
+            "source": "json",
+            "locator": "object quota-note.text",
+            "observation": "The rendered note includes the aggregate-runtime quota."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "Requests beyond either tenant quota wait fairly.",
+        "brief_evidence": "requests beyond either limit wait fairly",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, quota-to-wait-queue branch",
+            "observation": "The branch labeled “Either limit exceeded” leads to “Fair tenant wait queue.”"
+          },
+          {
+            "source": "json",
+            "locator": "object fair and connection quota-wait",
+            "observation": "The quota gate is connected to the fair queue with the visible condition “Either limit exceeded.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "Over-quota requests must not consume capacity reserved for other tenants.",
+        "brief_evidence": "instead of consuming capacity reserved for other tenants.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, yellow Tenant admission note",
+            "observation": "The note says “Fair waits preserve other tenants' reserved capacity.”"
+          },
+          {
+            "source": "json",
+            "locator": "object quota-note.text",
+            "observation": "The visible note expressly preserves other tenants’ reserved capacity."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R37",
+        "requirement": "Operations monitor boot latency.",
+        "brief_evidence": "Operations monitor boot latency",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, Operations monitor note",
+            "observation": "The note lists “Boot latency.”"
+          },
+          {
+            "source": "json",
+            "locator": "object ops.text",
+            "observation": "Boot latency appears in the rendered operations-monitor list."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R38",
+        "requirement": "Operations monitor lease reclamations.",
+        "brief_evidence": "lease reclamations",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, Operations monitor note",
+            "observation": "The note lists “Lease reclamations.”"
+          },
+          {
+            "source": "json",
+            "locator": "object ops.text",
+            "observation": "Lease reclamations appear in the rendered operations-monitor list."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R39",
+        "requirement": "Operations monitor tool timeouts.",
+        "brief_evidence": "tool timeouts",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, Operations monitor note",
+            "observation": "The note lists “Tool timeouts.”"
+          },
+          {
+            "source": "json",
+            "locator": "object ops.text",
+            "observation": "Tool timeouts appear in the rendered operations-monitor list."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R40",
+        "requirement": "Operations monitor escape-attempt signals.",
+        "brief_evidence": "and escape-attempt signals.",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, Operations monitor note",
+            "observation": "The note lists “Escape-attempt signals.”"
+          },
+          {
+            "source": "json",
+            "locator": "object ops.text",
+            "observation": "Escape-attempt signals appear in the rendered operations-monitor list."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R41",
+        "requirement": "The diagram makes clear how placement, lifecycle enforcement, resource and network controls, warm-pool management, host quarantine, and tenant quotas govern an environment from request through destruction.",
+        "brief_evidence": "The diagram should make clear how placement, lease lifecycle enforcement, resource and network controls, warm-pool management, host quarantine, and tenant quotas govern an environment from request through destruction.",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Whole board, sections 1–4",
+            "observation": "Four visible bands cover admission and placement, lifecycle through Destroyed, leased resource/network controls, and fleet supervision including warm-pool scaling and host quarantine."
+          },
+          {
+            "source": "json",
+            "locator": "section objects placement, lifecycle, execution, and fleet, plus their contained objects and connections",
+            "observation": "The board structure visibly contains all six named governance concerns and covers the operational span from Agent request to Destroyed."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 1,
+    "caps_applied": [],
+    "strongest_covered_cluster": "Lease lifecycle and safety semantics: all six lifecycle states, renewal-dependent fixed leases, reclamation, never-repool destruction, maximum age, and non-disruptive image retirement are explicitly represented with labeled states, notes, and directed paths.",
+    "most_consequential_gap": "No stated requirement is absent, partial, or contradicted.",
+    "coverage_summary": "All 41 atomic requirements are fully and consistently represented in the rendered board. Placement behavior, lifecycle and destruction semantics, per-call controls, durable-output handling, warm-pool supervision, quarantine, quotas, and operational monitoring are all present. Weighted coverage is complete and no cap applies.",
+    "score": 10
+  },
+  "usage": {
+    "input_tokens": 17851,
+    "output_tokens": 7706
+  },
+  "flags": []
+}

@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "ivr-agent-handoff",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "This lands at 6.5 because the board has deliberate regional styling, readable semantics, and substantial operational-map vocabulary, but the oversized empty upper-right band and several awkward routing joins keep it from feeling fully finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5.5,
+        "note": "The four numbered regions occupy meaningful zones, but a very large unexplained empty band dominates the upper center and right, making the lower content feel disproportionately packed."
+      },
+      {
+        "name": "color",
+        "score": 8,
+        "note": "Teal consistently identifies AI self-service, yellow marks human support, blue marks recordings and review flow, green marks queue/resolution, and gray supports neutral process steps with good text contrast."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6,
+        "note": "No crosshair waypoints are visible, but the long return paths around the AI decision, queue, and review areas create awkward near-merges and attachment points that expose routing mechanics."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "Local peers such as the intake process boxes and AI tools align reasonably well, yet region sizes, vertical placement, connector lengths, and the oversized handoff note produce uneven rhythm and a weak global register."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8646,
+    "output_tokens": 444
+  },
+  "flags": []
+}

@@ -1,0 +1,28 @@
+{
+  "run_id": "2026-09-08-reflow-152600",
+  "tier": "system",
+  "scenario": "code-review-agents",
+  "board_id": "eval.2026-09-08-reflow-152600.code-review-agents",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-09-08T20:26:01.861Z",
+      "finished_at": "2026-09-08T20:38:55.901Z",
+      "wall_ms": 774691,
+      "retries": 1
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "9cb20dfe-6f05-424a-98b1-b33b3474dc71",
+      "d61a0af7-e65a-41b1-a181-19d97483c530"
+    ]
+  },
+  "finished_at": "2026-09-08T20:38:56.553Z",
+  "exit_code": 0
+}

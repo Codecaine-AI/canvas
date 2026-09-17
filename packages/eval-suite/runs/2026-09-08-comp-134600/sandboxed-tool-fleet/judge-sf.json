@@ -1,0 +1,449 @@
+{
+  "axis": "sf",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "ReconstructSystem → ScoreSystemFidelity",
+    "attempts": 2
+  },
+  "score": 10,
+  "verdict": {
+    "elements": [
+      {
+        "brief_element": "The system is a fleet of disposable, sandboxed execution environments for agents that invoke tools and code.",
+        "brief_evidence": "“fleet of disposable execution environments works for agents that invoke tools and code”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstructed purpose identifies “A sandboxed tool fleet” for agents, and the components include Agent, environment lifecycle states, and “Run tool · timeout / memory / CPU / network limits.”",
+        "note": "The domain, disposable-environment model, agent role, and tool-execution purpose are all explicit."
+      },
+      {
+        "brief_element": "An agent sends the placement service an image and resource class.",
+        "brief_evidence": "“An agent sends the placement service an image and resource class.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The Agent component “requests an environment using an image and class,” with an edge labeled “Image + class” in region “1 · Placement service — admission & allocation.”",
+        "note": "The requester, destination boundary, and request payload are preserved."
+      },
+      {
+        "brief_element": "Placement first attempts to claim a compatible environment from the warm pool.",
+        "brief_evidence": "“The service first claims a compatible environment from the warm pool”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "After quota admission, the placement flow evaluates “Compatible warm instance?”; the lifecycle also identifies “Ready · warm pool” as the booted environment available for claim.",
+        "note": "Warm-pool lookup is shown before the cold-placement path."
+      },
+      {
+        "brief_element": "A compatible warm-pool hit is returned immediately.",
+        "brief_evidence": "“returning it immediately on a hit”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The warm-hit flow follows an edge labeled “Hit · return immediately” from “Compatible warm instance?” to “Claim & return lease.”",
+        "note": "The hit result and immediate-return behavior are explicit."
+      },
+      {
+        "brief_element": "On a warm-pool miss, placement selects a healthy host with capacity.",
+        "brief_evidence": "“On a miss, it selects a healthy host with capacity”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Miss” branch from “Compatible warm instance?” leads to “Select healthy host with capacity.”",
+        "note": "The branch condition and host eligibility requirements are preserved."
+      },
+      {
+        "brief_element": "After selecting a host on a miss, placement provisions a cold environment.",
+        "brief_evidence": "“provisions a cold environment”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The cold path proceeds from host selection to “Provision cold environment / Wait for boot.”",
+        "note": "Cold provisioning is ordered after host selection."
+      },
+      {
+        "brief_element": "A cold-placement request remains waiting until boot completes.",
+        "brief_evidence": "“keeps the request waiting until boot completes”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The step is labeled “Provision cold environment / Wait for boot,” and only the “Boot ready” edge proceeds to “Claim & return lease.”",
+        "note": "The request does not receive a lease before boot readiness."
+      },
+      {
+        "brief_element": "Every environment progresses through provisioning, ready, leased, idle, draining, and destroyed states.",
+        "brief_evidence": "“Each environment progresses through provisioning, ready, leased, idle, draining, and destroyed states.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The normal lifecycle is reconstructed as “Provisioning” → “Ready · warm pool” → “Leased” → “Idle” → “Draining · no new leases / Live work continues” → “Destroyed,” with visible transition labels.",
+        "note": "All six required lifecycle states and their ordering are communicated."
+      },
+      {
+        "brief_element": "A lease has a fixed term.",
+        "brief_evidence": "“A lease has a fixed term”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The lifecycle constraints include “Fixed-term lease requires agent renewal heartbeats.”",
+        "note": "The fixed-duration lease boundary is explicit."
+      },
+      {
+        "brief_element": "A lease remains valid only while the agent sends renewal heartbeats.",
+        "brief_evidence": "“stays valid only while the agent sends renewal heartbeats”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The lifecycle note states that the lease “requires agent renewal heartbeats,” and the failure route begins at “Renewals stop.”",
+        "note": "The heartbeat dependency and loss-of-renewal trigger are both present."
+      },
+      {
+        "brief_element": "When renewals stop, the reclaimer takes the environment.",
+        "brief_evidence": "“When renewals stop, the reclaimer takes the environment”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red edge labeled “Renewals stop” runs from “Leased” to “Reclaimer · expired renewal / max age.”",
+        "note": "The trigger, responsible component, and route are explicit."
+      },
+      {
+        "brief_element": "A reclaimed environment is destroyed.",
+        "brief_evidence": "“the reclaimer takes the environment and destroys it”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reclaimer connects to “Destroyed” through a red path labeled “Destroy · never repool.”",
+        "note": "Destruction is the explicit terminal outcome."
+      },
+      {
+        "brief_element": "A reclaimed environment never returns to the warm pool.",
+        "brief_evidence": "“it never returns a reclaimed instance to the pool”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The reclaimer-to-destruction edge is labeled “Destroy · never repool,” and the lifecycle region is titled “no tenant reuse.”",
+        "note": "The no-repool rule is unambiguous."
+      },
+      {
+        "brief_element": "Filesystem and process state from a prior tenant must not survive reclamation.",
+        "brief_evidence": "“because filesystem and process state from a prior tenant must not survive”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A lifecycle constraint states, “Local filesystem and processes never survive reclamation.”",
+        "note": "The security reason for destruction rather than reuse is directly stated."
+      },
+      {
+        "brief_element": "Every environment has an absolute maximum age.",
+        "brief_evidence": "“Every environment also has an absolute maximum age.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The lifecycle constraints say “Absolute maximum age applies to every environment,” and the reclaimer is labeled “expired renewal / max age.”",
+        "note": "Both the universal scope and enforcement association are communicated."
+      },
+      {
+        "brief_element": "Image releases retire older environment instances.",
+        "brief_evidence": "“Image releases retire older instances”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A process labeled “Image release · retire older instances” has a “Mark” path toward the draining state.",
+        "note": "The image-release trigger and affected older instances are explicit."
+      },
+      {
+        "brief_element": "Older instances retired by an image release are marked draining.",
+        "brief_evidence": "“by marking them draining”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The image-release process connects through a dashed edge labeled “Mark” to “Draining · no new leases / Live work continues.”",
+        "note": "The transition into draining is visible, although the blind reconstruction notes that the exact attachment of one related dashed retirement line is visually ambiguous."
+      },
+      {
+        "brief_element": "A draining instance is destroyed after its active lease ends.",
+        "brief_evidence": "“destroying them after active leases end”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A dashed path says “Image retired · finish active lease” and ends at draining; the draining state then reaches “Destroyed” on “No lease.”",
+        "note": "Lease completion is placed before destruction."
+      },
+      {
+        "brief_element": "Image retirement does not interrupt live work.",
+        "brief_evidence": "“without interrupting live work”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The state is explicitly labeled “Draining · no new leases / Live work continues,” and the retirement path says “finish active lease.”",
+        "note": "Non-interruption of active leases is explicit."
+      },
+      {
+        "brief_element": "Every tool call within a lease receives a timeout.",
+        "brief_evidence": "“Within a lease, every tool call receives a timeout”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The execution step is “Run tool · timeout / memory / CPU / network limits” inside region “Within a lease — isolated tool execution.”",
+        "note": "The timeout is shown as a per-call execution control."
+      },
+      {
+        "brief_element": "Every tool call receives a memory ceiling.",
+        "brief_evidence": "“memory ceiling”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The tool runner explicitly lists “memory” among its limits.",
+        "note": "The memory constraint is directly labeled."
+      },
+      {
+        "brief_element": "Every tool call receives a CPU cap.",
+        "brief_evidence": "“CPU cap”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The tool runner explicitly lists “CPU” among its limits.",
+        "note": "The CPU constraint is directly labeled."
+      },
+      {
+        "brief_element": "Every tool call receives a network policy.",
+        "brief_evidence": "“network policy”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The tool runner lists “network limits,” and its egress route passes through “Egress proxy · allowlist only.”",
+        "note": "Both the existence and concrete egress aspect of the network policy are communicated."
+      },
+      {
+        "brief_element": "Egress is restricted to allowlisted destinations through a proxy.",
+        "brief_evidence": "“Egress is limited to allowlisted destinations through a proxy.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The tool runner sends “All egress” to “Egress proxy · allowlist only,” which sends “Allowed only” traffic to “Allowlisted destinations.”",
+        "note": "The mandatory proxy route and allowlist boundary are exact."
+      },
+      {
+        "brief_element": "The runtime kills a tool call that exceeds its timeout.",
+        "brief_evidence": "“The runtime kills an overlong call”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red edge labeled “Deadline exceeded” leads from tool execution to “Kill call · TIMEOUT / Not a tool error.”",
+        "note": "The trigger and kill action are explicit."
+      },
+      {
+        "brief_element": "An overlong call is reported as a timeout rather than a tool error.",
+        "brief_evidence": "“reports a timeout rather than a tool error”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The timeout outcome is explicitly labeled “TIMEOUT / Not a tool error.”",
+        "note": "The externally visible error classification is exact."
+      },
+      {
+        "brief_element": "Tool output is streamed to the agent.",
+        "brief_evidence": "“It streams capped output to the agent”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A bidirectional edge between “Leased agent” and the tool runner is labeled “Call / capped output stream.”",
+        "note": "The return data path to the agent is visible."
+      },
+      {
+        "brief_element": "The output stream sent to the agent is capped.",
+        "brief_evidence": "“streams capped output”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The tool-to-agent response is labeled “capped output stream.”",
+        "note": "The output-volume constraint is explicit."
+      },
+      {
+        "brief_element": "Durable files are written to an artifact store.",
+        "brief_evidence": "“durable files go to an artifact store”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A tool-runner branch labeled “Durable files” terminates at “Artifact store · session key.”",
+        "note": "The durable-file destination and direction are clear."
+      },
+      {
+        "brief_element": "Artifacts are keyed by session.",
+        "brief_evidence": "“artifact store keyed by session”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The destination is labeled “Artifact store · session key.”",
+        "note": "The required artifact keying boundary is explicit."
+      },
+      {
+        "brief_element": "Environment-local state is ephemeral.",
+        "brief_evidence": "“because local state is ephemeral”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The lifecycle says “Local filesystem and processes never survive reclamation,” while durable files are separately routed to the artifact store.",
+        "note": "The durable-versus-local-state boundary is recoverable from the combined lifecycle and artifact paths."
+      },
+      {
+        "brief_element": "The warm-pool supervisor watches host capacity.",
+        "brief_evidence": "“The warm-pool supervisor watches host capacity”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Host capacity / pool depth / demand” feeds “Warm-pool supervisor” on an edge labeled “Observe.”",
+        "note": "Host capacity is explicitly one of the supervisor's inputs."
+      },
+      {
+        "brief_element": "The warm-pool supervisor watches pool depth.",
+        "brief_evidence": "“pool depth”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Host capacity / pool depth / demand” feeds the supervisor through “Observe.”",
+        "note": "Pool depth is explicitly listed."
+      },
+      {
+        "brief_element": "The warm-pool supervisor watches demand.",
+        "brief_evidence": "“and demand”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "“Host capacity / pool depth / demand” feeds the supervisor through “Observe.”",
+        "note": "Demand is explicitly listed."
+      },
+      {
+        "brief_element": "The warm-pool supervisor adjusts pre-booted supply from those observations.",
+        "brief_evidence": "“then adjusts pre-booted supply”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The observed signals feed “Warm-pool supervisor,” which sends a “Scale” edge to “Adjust pre-booted supply.”",
+        "note": "The input-to-supervisor-to-supply control flow is complete."
+      },
+      {
+        "brief_element": "Repeated boot failures quarantine a host.",
+        "brief_evidence": "“Repeated boot failures quarantine a host”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "A red path runs from “Repeated boot failures” through “Threshold” to “Quarantine host · exclude from placement.”",
+        "note": "The failure trigger and quarantine action are explicit."
+      },
+      {
+        "brief_element": "A quarantined host is removed from placement.",
+        "brief_evidence": "“and remove it from placement”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The quarantine outcome is labeled “Quarantine host · exclude from placement.”",
+        "note": "The operational effect of quarantine is explicit."
+      },
+      {
+        "brief_element": "Per-tenant quotas limit concurrent environments.",
+        "brief_evidence": "“Per-tenant quotas limit concurrent environments”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The placement constraint says “Tenant admission Concurrent environment + aggregate runtime quotas,” enforced through “Tenant quota available?”",
+        "note": "Concurrent-environment admission is explicit."
+      },
+      {
+        "brief_element": "Per-tenant quotas limit aggregate runtime.",
+        "brief_evidence": "“and aggregate runtime”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The placement note explicitly lists “aggregate runtime quotas.”",
+        "note": "The second quota dimension is preserved."
+      },
+      {
+        "brief_element": "A request beyond either tenant quota waits instead of being admitted.",
+        "brief_evidence": "“requests beyond either limit wait fairly”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Either limit exceeded” branch from “Tenant quota available?” leads to “Fair tenant wait queue.”",
+        "note": "The over-quota branch and non-admission outcome are clear."
+      },
+      {
+        "brief_element": "Over-quota requests wait fairly.",
+        "brief_evidence": "“wait fairly”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The queue is explicitly named “Fair tenant wait queue.”",
+        "note": "Fairness is directly stated, although the precise dequeue timing is not specified."
+      },
+      {
+        "brief_element": "Over-quota requests do not consume capacity reserved for other tenants.",
+        "brief_evidence": "“instead of consuming capacity reserved for other tenants”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The placement note says “Fair waits preserve other tenants' reserved capacity.”",
+        "note": "The cross-tenant isolation purpose of queueing is exact."
+      },
+      {
+        "brief_element": "Operations monitor boot latency.",
+        "brief_evidence": "“Operations monitor boot latency”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Operations monitor” note lists “Boot latency.”",
+        "note": "The monitored signal is explicit, though collection wiring is not shown or required by the brief."
+      },
+      {
+        "brief_element": "Operations monitor lease reclamations.",
+        "brief_evidence": "“lease reclamations”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Operations monitor” note lists “Lease reclamations.”",
+        "note": "The monitored signal is explicit."
+      },
+      {
+        "brief_element": "Operations monitor tool timeouts.",
+        "brief_evidence": "“tool timeouts”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Operations monitor” note lists “Tool timeouts.”",
+        "note": "The monitored signal is explicit."
+      },
+      {
+        "brief_element": "Operations monitor escape-attempt signals.",
+        "brief_evidence": "“escape-attempt signals”",
+        "importance": "supporting",
+        "is_main_end_to_end_flow": false,
+        "status": "recovered",
+        "reconstruction_evidence": "The “Operations monitor” note lists “Escape-attempt signals.”",
+        "note": "The security-monitoring signal is explicit."
+      },
+      {
+        "brief_element": "The complete operational story governs an environment from request through destruction, covering placement, lease lifecycle enforcement, resource and network controls, warm-pool management, host quarantine, and tenant quotas.",
+        "brief_evidence": "“The diagram should make clear how placement, lease lifecycle enforcement, resource and network controls, warm-pool management, host quarantine, and tenant quotas govern an environment from request through destruction.”",
+        "importance": "system_defining",
+        "is_main_end_to_end_flow": true,
+        "status": "recovered",
+        "reconstruction_evidence": "The reconstruction recovers placement admission and warm/cold allocation; provisioning-through-destruction lifecycle paths; heartbeat and maximum-age reclamation; isolated tool execution with timeout, memory, CPU, and egress controls; warm-pool observation and scaling; boot-failure quarantine; and fair tenant quota admission.",
+        "note": "The main end-to-end system shape is complete and supports engineering discussion from request admission through terminal destruction."
+      }
+    ],
+    "unsupported_claims": [],
+    "strongest_transmitted_behavior": "The strongest transmitted behavior is the complete allocation and lifecycle enforcement story: quota admission, immediate warm-pool hit or waiting cold boot, fixed-term heartbeat-backed leasing, non-disruptive image draining, and mandatory destruction without repooling after reclamation.",
+    "most_consequential_loss": "No material brief element is lost. The only notable residual ambiguity is visual rather than semantic: the exact source attachment of the dashed image-retirement path and the precise condition for dequeueing and retrying a quota-waiting request are not shown, but neither changes the required behavior.",
+    "overall_summary": "The reconstruction recovers every system-defining and supporting element in the brief without contradiction or unsupported specificity. Components, responsibilities, branch directions, ordering, failure outcomes, security boundaries, quota behavior, fleet supervision, monitoring, and destruction guarantees are all actionable. Minor uncertainty remains only around mechanics the brief itself does not specify, such as quota-queue release timing and monitoring data plumbing.",
+    "score": 10
+  },
+  "usage": {
+    "input_tokens": 17748,
+    "output_tokens": 10786
+  },
+  "flags": []
+}

@@ -1,0 +1,1295 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation",
+  "title": "Implementation Overview",
+  "root": "b-impl-root-0",
+  "blocks": {
+    "b-impl-root-0": {
+      "id": "b-impl-root-0",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "implementation",
+          "source-layout",
+          "structural-decisions",
+          "governed-by",
+          "testing-architecture",
+          "provenance-boundary"
+        ],
+        "covers": "Structural decisions about the canvas repo: how the source is organized and why, so future code conforms to the standing architecture instead of quietly restructuring it.",
+        "type": "implementation"
+      },
+      "children": [
+        "b-impl-opening-1",
+        "b-impl-areas-2",
+        "b-impl-area-theme-3",
+        "b-impl-area-state-4",
+        "b-impl-area-objects-5",
+        "b-impl-area-interaction-6",
+        "b-impl-area-connectors-7",
+        "b-impl-area-stage-8",
+        "b-impl-area-ui-9",
+        "b-impl-area-studio-10",
+        "b-impl-area-agent-11",
+        "b-impl-area-canvases-12",
+        "b-impl-area-navigation-13",
+        "b-impl-area-render-14",
+        "b-impl-area-themes-15",
+        "b-impl-area-reference-16",
+        "b-impl-area-eval-17",
+        "b-impl-tier-18",
+        "b-impl-tier-purpose-19",
+        "b-impl-tier-inclusion-20",
+        "b-impl-tier-conform-21",
+        "b-impl-tier-standard-22",
+        "b-impl-decisions-23",
+        "b-impl-dec-framing-24",
+        "b-impl-colocate-decision-25",
+        "b-impl-colocate-why-26",
+        "b-impl-colocate-applies-27",
+        "b-impl-assertions-decision-28",
+        "b-impl-assertions-why-29",
+        "b-impl-assertions-applies-30",
+        "b-impl-zzgate-decision-31",
+        "b-impl-zzgate-why-32",
+        "b-impl-zzgate-applies-33",
+        "b-impl-mpl-decision-34",
+        "b-impl-mpl-why-35",
+        "b-impl-mpl-applies-36"
+      ]
+    },
+    "b-impl-opening-1": {
+      "id": "b-impl-opening-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Structural decisions about the current canvas code: how the source is organized and why, so agents adding code conform to the standing architecture instead of quietly restructuring it."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-areas-2": {
+      "id": "b-impl-areas-2",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Source Areas"
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-theme-3": {
+      "id": "b-impl-area-theme-3",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/theme",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme",
+              "label": "packages/canvas/src/theme"
+            }
+          }
+        },
+        {
+          "insert": " — the palette and token leaf modules; decisions live under "
+        },
+        {
+          "insert": "Theme",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/05-theme",
+              "label": "Theme"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-state-4": {
+      "id": "b-impl-area-state-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/state",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state",
+              "label": "packages/canvas/src/state"
+            }
+          }
+        },
+        {
+          "insert": " — document schema, action vocabulary, reducer, and pure geometry helpers; decisions live under "
+        },
+        {
+          "insert": "State",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/10-state",
+              "label": "State"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-objects-5": {
+      "id": "b-impl-area-objects-5",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/objects",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects",
+              "label": "packages/canvas/src/objects"
+            }
+          }
+        },
+        {
+          "insert": " — the object-def registry, shape defs, text slots, and the object-preference registry; decisions live under "
+        },
+        {
+          "insert": "Objects",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/20-objects",
+              "label": "Objects"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-interaction-6": {
+      "id": "b-impl-area-interaction-6",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/interaction",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction",
+              "label": "packages/canvas/src/interaction"
+            }
+          }
+        },
+        {
+          "insert": " — the pure pointer kernel; decisions live under "
+        },
+        {
+          "insert": "Interaction",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/30-interaction",
+              "label": "Interaction"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-connectors-7": {
+      "id": "b-impl-area-connectors-7",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/connectors",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors",
+              "label": "packages/canvas/src/connectors"
+            }
+          }
+        },
+        {
+          "insert": " — routing, the connection cascade, connector gestures, and the vendored pathfinding core; decisions live under "
+        },
+        {
+          "insert": "Connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/40-connectors",
+              "label": "Connectors"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-stage-8": {
+      "id": "b-impl-area-stage-8",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/stage",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage",
+              "label": "packages/canvas/src/stage"
+            }
+          }
+        },
+        {
+          "insert": " — the presentation layer with its editor and viewer faces; decisions live under "
+        },
+        {
+          "insert": "Stage",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/50-stage",
+              "label": "Stage"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-ui-9": {
+      "id": "b-impl-area-ui-9",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/ui",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/ui",
+              "label": "packages/canvas/src/ui"
+            }
+          }
+        },
+        {
+          "insert": " — vendored UI primitives and the icon pipeline, serving the editor trim; decisions live under "
+        },
+        {
+          "insert": "UI",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/60-ui",
+              "label": "UI"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-studio-10": {
+      "id": "b-impl-area-studio-10",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/studio",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio",
+              "label": "packages/studio"
+            }
+          }
+        },
+        {
+          "insert": " — the standalone board app; decisions live under "
+        },
+        {
+          "insert": "Studio",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/70-studio",
+              "label": "Studio"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-agent-11": {
+      "id": "b-impl-area-agent-11",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas-agent",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent",
+              "label": "packages/canvas-agent"
+            }
+          }
+        },
+        {
+          "insert": " — the layout-agent harness; decisions live under "
+        },
+        {
+          "insert": "Canvas agent",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/80-canvas-agent",
+              "label": "Canvas agent"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-canvases-12": {
+      "id": "b-impl-area-canvases-12",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "canvases",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "canvases",
+              "label": "canvases"
+            }
+          }
+        },
+        {
+          "insert": " — the repo-root board corpus; decisions live under "
+        },
+        {
+          "insert": "Canvases",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/90-canvases",
+              "label": "Canvases"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-navigation-13": {
+      "id": "b-impl-area-navigation-13",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/navigation",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/navigation",
+              "label": "packages/canvas/src/navigation"
+            }
+          }
+        },
+        {
+          "insert": " — the shared viewport-navigation hook both stage faces consume; no page yet — decisions accrete here when the area earns them."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-render-14": {
+      "id": "b-impl-area-render-14",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/render",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render",
+              "label": "packages/canvas/src/render"
+            }
+          }
+        },
+        {
+          "insert": " — static rendering: painted bounds, named views, static SVG, text metrics; no page yet — decisions accrete lazily."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-themes-15": {
+      "id": "b-impl-area-themes-15",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "themes",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "themes",
+              "label": "themes"
+            }
+          }
+        },
+        {
+          "insert": " — docs-surface theme bundles ("
+        },
+        {
+          "insert": "themes/default",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "); configuration data for the doc viewer, not engine code."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-reference-16": {
+      "id": "b-impl-area-reference-16",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "reference",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "reference",
+              "label": "reference"
+            }
+          }
+        },
+        {
+          "insert": " — reference corpora, notably "
+        },
+        {
+          "insert": "reference/board-design-reference",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; inputs the engine's constants trace back to, never imported (see "
+        },
+        {
+          "insert": "Canvases",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/90-canvases",
+              "label": "Canvases"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-eval-17": {
+      "id": "b-impl-area-eval-17",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/eval-suite",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/eval-suite",
+              "label": "packages/eval-suite"
+            }
+          }
+        },
+        {
+          "insert": " — the layout-agent eval harness: runner, scenario and axes systems, recorded runs."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-tier-18": {
+      "id": "b-impl-tier-18",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Tier Contract"
+        }
+      ],
+      "children": []
+    },
+    "b-impl-tier-purpose-19": {
+      "id": "b-impl-tier-purpose-19",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "This tier records structural decisions so additions conform. Design owns behavior, state models, and load-bearing schemas; the code owns file-local detail; reports do not belong in the docs tree at all."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-tier-inclusion-20": {
+      "id": "b-impl-tier-inclusion-20",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Inclusion test",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": an entry states a rule that governs code that doesn't exist yet."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-tier-conform-21": {
+      "id": "b-impl-tier-conform-21",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Agents adding code either conform to the decisions recorded here or file a proposal to change them — never silently deviate."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-tier-standard-22": {
+      "id": "b-impl-tier-standard-22",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The canonical implementation-layer standard lives in the docs-system repo's doc-standards section (10-system-design/10-doc-standards/60-implementation-layer in that repo)."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-decisions-23": {
+      "id": "b-impl-decisions-23",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-impl-dec-framing-24": {
+      "id": "b-impl-dec-framing-24",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Two families of rules hold repo-wide: the testing architecture and the vendored-code license boundary."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-colocate-decision-25": {
+      "id": "b-impl-colocate-decision-25",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "tests are colocated with the code they cover — each slice owns its own "
+        },
+        {
+          "insert": "__tests__/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " directory ("
+        },
+        {
+          "insert": "state/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "objects/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "interaction/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connectors/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "stage/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and each feature slice under "
+        },
+        {
+          "insert": "stage/editor/features/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), with one small cross-cutting suite at "
+        },
+        {
+          "insert": "packages/canvas/src/__tests__",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/__tests__",
+              "label": "packages/canvas/src/__tests__"
+            }
+          }
+        },
+        {
+          "insert": ". Bun runs them on happy-dom via the repo-root "
+        },
+        {
+          "insert": "bunfig.toml",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "bunfig.toml",
+              "label": "bunfig.toml"
+            }
+          }
+        },
+        {
+          "insert": " preload of "
+        },
+        {
+          "insert": "happydom.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and the same config's "
+        },
+        {
+          "insert": "root = \"packages\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " keeps the vendored docs-framework submodule's tests out of discovery."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-colocate-why-26": {
+      "id": "b-impl-colocate-why-26",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was one collected test tree, which detaches coverage from the slice that owns the behavior and turns every refactor into a two-tree edit."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-colocate-applies-27": {
+      "id": "b-impl-colocate-applies-27",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas/src",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src",
+              "label": "packages/canvas/src"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "bunfig.toml",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "bunfig.toml",
+              "label": "bunfig.toml"
+            }
+          }
+        },
+        {
+          "insert": " — including every future slice, which ships its own "
+        },
+        {
+          "insert": "__tests__/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " beside its source."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-assertions-decision-28": {
+      "id": "b-impl-assertions-decision-28",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "pure logic layers ("
+        },
+        {
+          "insert": "state/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "interaction/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connectors/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") get plain unit tests — inputs to outputs, no rendering; "
+        },
+        {
+          "insert": "stage/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "stage/editor/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " get happy-dom DOM and geometry assertion tests — computed styles, element positions, class names, attribute values — never visual screenshot or snapshot-image tests."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-assertions-why-29": {
+      "id": "b-impl-assertions-why-29",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was screenshot comparison, whose failures are only legible by eyeballing image diffs; assertions on concrete diffable values (a computed pixel width, a hex color, a DOM attribute) keep failures readable."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-assertions-applies-30": {
+      "id": "b-impl-assertions-applies-30",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas/src/stage",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage",
+              "label": "packages/canvas/src/stage"
+            }
+          }
+        },
+        {
+          "insert": " — including every future rendering surface and trim component."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-zzgate-decision-31": {
+      "id": "b-impl-zzgate-decision-31",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the DOM-equivalence gate ("
+        },
+        {
+          "insert": "zz-dom-equivalence.test.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/zz-dom-equivalence.test.tsx",
+              "label": "zz-dom-equivalence.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": " over "
+        },
+        {
+          "insert": "zz-dom-fixtures.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", baseline "
+        },
+        {
+          "insert": "zz-dom-baseline.json",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/zz-dom-baseline.json",
+              "label": "zz-dom-baseline.json"
+            }
+          }
+        },
+        {
+          "insert": ", capture script "
+        },
+        {
+          "insert": "zz-dom-capture.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") re-renders a fixed corpus against a committed baseline, and the baseline is pruned, never regenerated: fixing a failure means updating the test or pruning the stale entry, not re-capturing a green baseline over unexplained drift."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-zzgate-why-32": {
+      "id": "b-impl-zzgate-why-32",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was regenerating the baseline whenever it went red, which converts unexplained rendering drift into a permanent green. In this repo the gate is \"failure set identical\", not \"suite green\"."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-zzgate-applies-33": {
+      "id": "b-impl-zzgate-applies-33",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "zz-dom-equivalence.test.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/zz-dom-equivalence.test.tsx",
+              "label": "zz-dom-equivalence.test.tsx"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "zz-dom-baseline.json",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/zz-dom-baseline.json",
+              "label": "zz-dom-baseline.json"
+            }
+          }
+        },
+        {
+          "insert": " — including every future addition to the fixture corpus."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-mpl-decision-34": {
+      "id": "b-impl-mpl-decision-34",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the MPL-2.0 boundary around BlockSuite-derived code is per-file, and the set is exact: "
+        },
+        {
+          "insert": "packages/canvas/src/connectors/pathfinding",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/pathfinding",
+              "label": "packages/canvas/src/connectors/pathfinding"
+            }
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "a-star.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "graph.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "priority-queue.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "path-generator.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "gfx-types.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") plus two out-of-directory ports — the connection cascade in "
+        },
+        {
+          "insert": "packages/canvas/src/connectors/connection-cascade.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/connection-cascade.ts",
+              "label": "packages/canvas/src/connectors/connection-cascade.ts"
+            }
+          }
+        },
+        {
+          "insert": " with its anchor port in "
+        },
+        {
+          "insert": "packages/canvas/src/objects/geometry.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "label": "packages/canvas/src/objects/geometry.ts"
+            }
+          }
+        },
+        {
+          "insert": ", and the distribution snap in "
+        },
+        {
+          "insert": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts",
+              "label": "packages/canvas/src/stage/editor/features/snapping/snap-distribution.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Every derived file carries an MPL-2.0 provenance header, and the repo-root "
+        },
+        {
+          "insert": "PROVENANCE.md",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " record enumerates the same set. New pathfinding or snap logic goes in fresh clean-room files with no MPL obligations, or into the listed files inheriting MPL-2.0 plus header-and-record upkeep — never a blend, and never with headers stripped."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-mpl-why-35": {
+      "id": "b-impl-mpl-why-35",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was blending derived logic into ordinary files, which smears file-level copyleft across the tree and makes the license boundary unauditable."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-mpl-applies-36": {
+      "id": "b-impl-mpl-applies-36",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the listed files — including every future file derived from BlockSuite. "
+        },
+        {
+          "insert": "PROVENANCE.md",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sits outside the docs links check's coverage, so its record is updated by hand, in the same change, whenever a listed file moves or changes."
+        }
+      ],
+      "children": []
+    }
+  }
+}

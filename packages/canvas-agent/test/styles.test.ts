@@ -42,9 +42,9 @@ describe("craft targets", () => {
   // Hard clearance floors live in src/board/lints/rules/crowding.ts
   // and src/board/lints/rules/containment.ts.
   const LINT_FLOORS = {
-    nodeGapRow: 80,
-    nodeGapColumn: 48,
-    arrowCorridor: 80,
+    nodeGapRow: 16,
+    nodeGapColumn: 16,
+    arrowCorridor: 16,
     framePadding: 16,
   } as const;
 
@@ -62,7 +62,7 @@ describe("craft targets", () => {
     expect(CRAFT_TARGETS.framePadding).not.toBe(LINT_FLOORS.framePadding);
   });
 
-  test("dimensions, gutters, section load, and board density stay coherent", () => {
+  test("dimensions and gutters stay coherent", () => {
     expect(CRAFT_TARGETS.nodeMinWidth).toBeLessThan(CRAFT_TARGETS.nodeWidth);
     expect(CRAFT_TARGETS.sectionGutterSideBySide).toBeGreaterThanOrEqual(
       CRAFT_TARGETS.nodeGapRow,
@@ -70,12 +70,7 @@ describe("craft targets", () => {
     expect(CRAFT_TARGETS.sectionGutterStacked).toBeGreaterThan(
       CRAFT_TARGETS.sectionGutterSideBySide,
     );
-    expect(CRAFT_TARGETS.nodesPerSectionMin).toBeLessThan(
-      CRAFT_TARGETS.nodesPerSectionMax,
-    );
-    expect(CRAFT_TARGETS.boardAreaMultiple).toBeGreaterThan(1);
-    expect(CRAFT_TARGETS.inkShare).toBeGreaterThan(0);
-    expect(CRAFT_TARGETS.inkShare).toBeLessThan(1);
+
   });
 
   test("every numeric field is positive and finite", () => {

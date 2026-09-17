@@ -1,2327 +1,2349 @@
 {
-  "schemaVersion": 1,
-  "id": "canvas-10-system-design-10-shape-api",
-  "title": "Shape API Structure",
-  "root": "b-shape-api-root",
-  "blocks": {
-    "b-shape-api-root": {
-      "id": "b-shape-api-root",
-      "type": "paragraph",
-      "props": {
-        "concepts": [
-          "ObjectDef",
-          "ShapeDef",
-          "TextSlot",
-          "OutlineSpec",
-          "CanvasColor",
-          "getConnectionAnchors"
-        ],
-        "covers": "The shipped shape contract after the object-definition overhaul: ObjectDef v2 and the two-tier ShapeDef registry, the text-slot preset library, def-declared outlines/anchors/hit-testing, the 10-pick ink/fill/wash color role system, and the end-to-end recipe for adding a shape.",
-        "format": "mdx",
-        "type": "design"
-      },
-      "children": [
-        "b-sapi-title-1",
-        "b-sapi-intro-1",
-        "b-sapi-intro-2",
-        "b-sapi-h2-registry",
-        "b-sapi-registry-p1",
-        "b-sapi-code-objectdef",
-        "b-sapi-registry-p2",
-        "b-sapi-registry-p3",
-        "b-sapi-code-connectordef",
-        "b-sapi-h3-shapedef",
-        "b-sapi-shapedef-p1",
-        "b-sapi-code-shapedef",
-        "b-sapi-shapedef-p2",
-        "b-sapi-h2-text",
-        "b-sapi-text-p1",
-        "b-sapi-code-textslot",
-        "b-sapi-text-p2",
-        "b-sapi-code-presets",
-        "b-sapi-text-p3",
-        "b-sapi-h2-outline",
-        "b-sapi-outline-p1",
-        "b-sapi-code-outlinespec",
-        "b-sapi-outline-p2",
-        "b-sapi-code-outlinespecfor",
-        "b-sapi-anchors-p1",
-        "b-sapi-anchors-p2",
-        "b-sapi-hit-p1",
-        "b-sapi-decision-outline-hit",
-        "b-sapi-h2-color",
-        "b-sapi-color-p1",
-        "b-sapi-code-colors",
-        "b-sapi-code-roster",
-        "b-sapi-color-p2",
-        "b-sapi-code-swatch",
-        "b-sapi-code-color-hexes",
-        "b-sapi-color-p3",
-        "b-sapi-color-p4",
-        "b-sapi-constraint-closed-roster",
-        "b-sapi-h2-tree",
-        "b-sapi-filetree",
-        "b-sapi-h2-howto",
-        "b-sapi-howto-p1",
-        "b-sapi-code-def-template",
-        "b-sapi-howto-p2",
-        "b-sapi-code-registration",
-        "b-sapi-howto-p3",
-        "b-sapi-constraint-closed-vocab",
-        "b-sapi-closing"
-      ]
-    },
-    "b-sapi-title-1": {
-      "id": "b-sapi-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "Shape API Structure"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-intro-1": {
-      "id": "b-sapi-intro-1",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "A "
-        },
-        {
-          "insert": "shape",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " in this engine is not a drawing primitive — it is a typed, agent-editable JSON record: a member of the closed "
-        },
-        {
-          "insert": "InteractiveCanvasObjectType",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": " union (31 types), carrying an axis-aligned "
-        },
-        {
-          "insert": "geometry",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "{ x, y, width, height }",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", no rotation anywhere in the schema), a single "
-        },
-        {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " field, and a single optional "
-        },
-        {
-          "insert": "color",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " pick from a closed 10-pick roster. Everything else about a kind — how it paints, where its text lives and is edited, its connection outline and anchors, its resize handles, its selection toolbar, its creation defaults — is declared on one registered definition object, and every consumer (render, routing, interaction, editor trim) derives its behavior from that declaration. There is no freeform vector path, no per-instance transform, and no plugin-registered shape class; every mutation flows through the single reducer documented in "
-        },
-        {
-          "insert": "canvas-10-model",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "20-implementation/10-model",
-              "label": "canvas-10-model"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-intro-2": {
-      "id": "b-sapi-intro-2",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "This is the shipped result of the object-definition overhaul ("
-        },
-        {
-          "insert": "OBJECT-DEF-OVERHAUL.md (retired; see git history)",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", decisions D1–D19, implemented 2026-07-08): the four legacy color vocabularies collapsed into one stored "
-        },
-        {
-          "insert": "CanvasColor",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/colors.ts",
-              "symbol": "CanvasColor"
-            }
-          }
-        },
-        {
-          "insert": " pick, the "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "body",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "title",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " text trio collapsed into one "
-        },
-        {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " field, outline geometry moved out of the routing layer into the defs, and the old ten-artifact add-a-shape checklist shrank to one def file plus a handful of one-line vocabulary entries. This doc specifies the shipped contract, bottom-up: the def types, the text-slot library, the outline/anchor system, the color system, the file layout, and the end-to-end recipe for adding a shape."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-h2-registry": {
-      "id": "b-sapi-h2-registry",
-      "type": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "ObjectDef v2 — the two-tier registry"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-registry-p1": {
-      "id": "b-sapi-registry-p1",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Tier 1 is "
-        },
-        {
-          "insert": "ObjectDef",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-def.ts",
-              "symbol": "ObjectDef"
-            }
-          }
-        },
-        {
-          "insert": ": the behavior contract for one kind of thing on the canvas. The specials — "
-        },
-        {
-          "insert": "sectionDef",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/section/def.tsx",
-              "symbol": "sectionDef"
-            }
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "stickyDef",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/sticky/def.tsx",
-              "symbol": "stickyDef"
-            }
-          }
-        },
-        {
-          "insert": " — are hand-written first-class defs (sections take "
-        },
-        {
-          "insert": "handles: \"corners\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "dragCapture: \"descendants\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; everything else takes the full 8-handle set); the uniform shape family gets its ObjectDef generated from a tier-2 "
-        },
-        {
-          "insert": "ShapeDef",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/shape-def.ts",
-              "symbol": "ShapeDef"
-            }
-          }
-        },
-        {
-          "insert": " by "
-        },
-        {
-          "insert": "shapeObjectDef()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/base.tsx",
-              "symbol": "shapeObjectDef"
-            }
-          }
-        },
-        {
-          "insert": ". Every field is consumed from the registry — none is decorative:"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-objectdef": {
-      "id": "b-sapi-code-objectdef",
-      "type": "code",
-      "props": {
-        "language": "ts"
-      },
-      "text": [
-        {
-          "insert": "// packages/canvas/src/objects/object-def.ts (doc comments trimmed)\nexport type ObjectHandles = \"all\" | \"corners\" | \"none\";\nexport type ObjectDragCapture = \"descendants\" | \"none\";\nexport interface TextEditingSpec {\n  editable: boolean;\n  markdown?: boolean;\n}\nexport type ObjectColorRole = \"shape\" | \"sticky\" | \"section\";\nexport type ObjectButtonBorderPolicy = \"painted\" | \"suppressed\";\n\nexport interface ObjectDef {\n  /** Registry key — the object `type` (every registered def's kind is an InteractiveCanvasObjectType). */\n  kind: string;\n  /** The object's world-layer renderer (receives the same props as stage/ObjectShape). */\n  render: ComponentType<ObjectRenderProps>;\n  /** This kind's global-CSS rules — CanvasStage composes its style tag from every registered def's css. */\n  css: string;\n  /** Per-type creation/placement defaults — stamped VERBATIM from state/schema/object-defaults.ts. */\n  defaults: ObjectTypeDefaults;\n  /** Palette role table this kind's color pick renders through (P1, §3.5). */\n  colorRole: ObjectColorRole;\n  buttonBorder: ObjectButtonBorderPolicy;   // \"painted\" | \"suppressed\"\n  /** The kind's geometric outline (P3, D4): anchors, anchor dots, outline snap,\n      and pointer hit-testing (D16) all derive from it. */\n  outline: OutlineSpec;\n  handles: ObjectHandles;\n  dragCapture: ObjectDragCapture;\n  /** Where and how this kind's `object.text` renders AND is edited (D3/D6/D14).\n      Absent = the kind renders no object text at all. */\n  textSlot?: TextSlot;\n  textEditing: TextEditingSpec;\n  /** This kind's selection toolbar: data-only control list. */\n  toolbar?: ToolbarSpec;\n  /** Picker metadata (P4, O7) — absent for kinds the Shapes panel never lists. */\n  catalog?: ObjectCatalogMeta;\n}"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-registry-p2": {
-      "id": "b-sapi-registry-p2",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "The registry is a pair of static tables in the same file: "
-        },
-        {
-          "insert": "OBJECT_DEFS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-def.ts",
-              "symbol": "OBJECT_DEFS"
-            }
-          }
-        },
-        {
-          "insert": " (all 31 registered defs, in stylesheet order — "
-        },
-        {
-          "insert": "OBJECT_DEFS_CSS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-def.ts",
-              "symbol": "OBJECT_DEFS_CSS"
-            }
-          }
-        },
-        {
-          "insert": " concatenates their "
-        },
-        {
-          "insert": "css",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " for CanvasStage's style tag) and the two dispatch maps behind "
-        },
-        {
-          "insert": "objectDefFor()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-def.ts",
-              "symbol": "objectDefFor"
-            }
-          }
-        },
-        {
-          "insert": ". Render dispatch mirrors the legacy renderer exactly: "
-        },
-        {
-          "insert": "section",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " dispatches on "
-        },
-        {
-          "insert": "object.type",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; every other kind dispatches on the effective render shape ("
-        },
-        {
-          "insert": "renderShapeFor()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-def.ts",
-              "symbol": "renderShapeFor"
-            }
-          }
-        },
-        {
-          "insert": " = "
-        },
-        {
-          "insert": "object.style?.shape ?? \"rounded-rect\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "). Behavior flags ("
-        },
-        {
-          "insert": "handles",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "dragCapture",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "textEditing",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") belong to the TYPE and are looked up via "
-        },
-        {
-          "insert": "objectDefForType()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-def.ts",
-              "symbol": "objectDefForType"
-            }
-          }
-        },
-        {
-          "insert": ". "
-        },
-        {
-          "insert": "ObjectShape",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/ObjectShape.tsx",
-              "symbol": "ObjectShape"
-            }
-          }
-        },
-        {
-          "insert": " is now a thin registry dispatcher: it resolves the def and renders "
-        },
-        {
-          "insert": "def.render",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; its generic fallback only fires for a render shape with no registered def (today solely an explicit "
-        },
-        {
-          "insert": "style.shape: \"section\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " on a non-section object). Multi-select toolbars are the capability intersection of the selected defs' control lists ("
-        },
-        {
-          "insert": "intersectToolbarControls()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-def.ts",
-              "symbol": "intersectToolbarControls"
-            }
-          }
-        },
-        {
-          "insert": ")."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-registry-p3": {
-      "id": "b-sapi-registry-p3",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Connectors are NOT objects (D19): they draw through "
-        },
-        {
-          "insert": "connectors/*",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", route through "
-        },
-        {
-          "insert": "connectors/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and are selected as their own selection kind. The "
-        },
-        {
-          "insert": "\"connector\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " CanvasTool is a mode, not an object type, so D19 still holds. Connectors get their own honest, small definition — deliberately absent from "
-        },
-        {
-          "insert": "OBJECT_DEFS",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ":"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-connectordef": {
-      "id": "b-sapi-code-connectordef",
-      "type": "code",
-      "props": {
-        "language": "ts"
-      },
-      "text": [
-        {
-          "insert": "// packages/canvas/src/objects/object-def.ts\nexport interface ConnectorDef {\n  kind: \"connector\";\n  toolbar: ToolbarSpec;\n  /** Connection color picks resolve through theme/palette.ts's \"connector\" role cells (resolveConnectorStroke). */\n  colorRole: \"connector\";\n  /** Labels edit in place at the routed midpoint, not via an object text slot. */\n  labelEditing: \"routed-midpoint\";\n}\n\n// The instance lives in packages/canvas/src/connectors/def.ts:\nexport const connectorDef: ConnectorDef = {\n  kind: \"connector\",\n  toolbar: CONNECTOR_TOOLBAR, // color / text / dash / arrowhead\n  colorRole: \"connector\",\n  labelEditing: \"routed-midpoint\",\n};"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-h3-shapedef": {
-      "id": "b-sapi-h3-shapedef",
-      "type": "heading",
-      "props": {
-        "level": 3
-      },
-      "text": [
-        {
-          "insert": "ShapeDef — tier-2 variant data"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-shapedef-p1": {
-      "id": "b-sapi-shapedef-p1",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Tier 2 is variant DATA for the uniform shape family: one file per shape, each tiny. A ShapeDef never mentions toolbars, handles, or hit-testing — "
-        },
-        {
-          "insert": "shapeObjectDef()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/shapes/base.tsx",
-              "symbol": "shapeObjectDef"
-            }
-          }
-        },
-        {
-          "insert": " adapts it into an ObjectDef carrying the ONE shared shape behavior (standard shape toolbar, full 8-handle set, in-place text editing, slot-driven text rendering):"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-shapedef": {
-      "id": "b-sapi-code-shapedef",
-      "type": "code",
-      "props": {
-        "language": "ts"
-      },
-      "text": [
-        {
-          "insert": "// packages/canvas/src/objects/shapes/shape-def.ts (doc comments trimmed)\nexport interface ShapeOutlineArgs {\n  object: InteractiveCanvasObject;\n  /** The color pick resolved through the \"shape\" palette role:\n      fill + border (border is always a hex; every pick renders a bordered shape)\n      + the fixed dark text color (D8). */\n  colors: ResolvedShapeObjectColors;\n  /** Resolved stroke width. */\n  strokeWidth: number;\n}\n\n/** The VISUAL spec: how the shape paints (distinct from the geometric `outline`). */\nexport interface SilhouetteSpec {\n  className?: string;\n  silhouette?: (args: ShapeOutlineArgs) => ReactNode;\n}\n\nexport type ShapeTextSpec = TextSlot | \"none\";\n\nexport interface ShapeDef {\n  type: InteractiveCanvasObjectType;\n  /** The `style.shape` variant this def renders. Usually same-named as `type`;\n      differs where history diverged (sticky → \"note\", process → \"rounded-rect\"). */\n  shape: NonNullable<CanvasObjectStyle[\"shape\"]>;\n  /** How the shape PAINTS (CSS class + optional SVG silhouette layer). */\n  silhouette: SilhouetteSpec;\n  /** Whether the outer button itself paints the shape border. Defaults to \"painted\". */\n  buttonBorder?: ObjectButtonBorderPolicy;\n  /** Geometric outline (D4) — omit for the bbox default (shapeObjectDef stamps BBOX_OUTLINE). */\n  outline?: OutlineSpec;\n  /** Text slot — omit for the \"center\" preset default; \"none\" = pure glyph, no text. */\n  text?: ShapeTextSpec;\n  /** This shape's global-CSS rules. */\n  css?: string;\n  /** Picker metadata — the catalog (objects/catalog.ts) derives entry labels/keywords from this. */\n  catalog: ObjectCatalogMeta;\n}"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-shapedef-p2": {
-      "id": "b-sapi-shapedef-p2",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "What "
-        },
-        {
-          "insert": "shapeObjectDef",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " stamps deserves one callout: "
-        },
-        {
-          "insert": "defaults",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is NOT authored on the def. Per-type creation/placement defaults are schema vocabulary — "
-        },
-        {
-          "insert": "OBJECT_TYPE_DEFAULTS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "OBJECT_TYPE_DEFAULTS"
-            }
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "geometry",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " / "
-        },
-        {
-          "insert": "shape",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " / "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " per type, an exhaustive "
-        },
-        {
-          "insert": "Record",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " so a new type without a row is a compile error) — because the reducer needs those rows at reduce time ("
-        },
-        {
-          "insert": "canvas.addObject",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "canvas.quickConnect",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "canvas.setObjectType",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "), "
-        },
-        {
-          "insert": "state/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " must not import "
-        },
-        {
-          "insert": "objects/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and "
-        },
-        {
-          "insert": "@codecaine-ai/canvas/actions",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is a standalone public API. The registry stamps every def's "
-        },
-        {
-          "insert": "defaults",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " from the same table via "
-        },
-        {
-          "insert": "objectTypeDefaults()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "objectTypeDefaults"
-            }
-          }
-        },
-        {
-          "insert": ", and "
-        },
-        {
-          "insert": "objects/__tests__/type-defaults.test.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " identity-locks the two so def-derived and reducer-derived defaults can never drift."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-h2-text": {
-      "id": "b-sapi-h2-text",
-      "type": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "Text: one field, slot presets"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-text-p1": {
-      "id": "b-sapi-text-p1",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Every object stores its text in the single required "
-        },
-        {
-          "insert": "text",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/objects.ts",
-              "symbol": "InteractiveCanvasObject"
-            }
-          }
-        },
-        {
-          "insert": " field (D3/D11; it may be empty). The kind decides rendering: sections render it as the floating title chip, stickies render simple markdown (D18: H1–H3, bullets, bold, inline code — "
-        },
-        {
-          "insert": "objects/sticky/markdown.tsx",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/sticky/markdown.tsx"
-            }
-          }
-        },
-        {
-          "insert": "), shapes render it in their declared slot. Connections keep their own separate "
-        },
-        {
-          "insert": "label",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". Where and how that text renders — and is edited — is a "
-        },
-        {
-          "insert": "TextSlot",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/text-slots.ts",
-              "symbol": "TextSlot"
-            }
-          }
-        },
-        {
-          "insert": " picked from a small named preset library, never per-shape ad-hoc CSS:"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-textslot": {
-      "id": "b-sapi-code-textslot",
-      "type": "code",
-      "props": {
-        "language": "ts"
-      },
-      "text": [
-        {
-          "insert": "// packages/canvas/src/objects/text-slots.ts (doc comments trimmed)\n/** Object-local rectangle (px, relative to the object's top-left corner). */\nexport interface LocalRect {\n  x: number;\n  y: number;\n  width: number;\n  height: number;\n}\n\nexport type TextPlacement =\n  | \"center\"\n  | \"below\"\n  | \"inset-body\"\n  | \"title-chip\"\n  | { rect: (object: InteractiveCanvasObject) => LocalRect };\n\n/** Applied identically to the at-rest text and the in-place editor (D14). */\nexport interface SlotTypography {\n  fontSizePx: number;\n  fontWeight: number;\n  /** CSS line-height value — unitless (\"1.2\") or px (\"36px\"). */\n  lineHeight: string;\n  textAlign: \"center\" | \"left\";\n  /** One fixed dark text color everywhere (D8) — presets pick their exact value. */\n  color: string;\n  /** Omit to inherit the canvas font for monospace slots. */\n  fontFamily?: string;\n}\n\nexport interface TextSlot {\n  placement: TextPlacement;\n  typography: SlotTypography;\n  /** \"chip-scale\" counter-scales when zoomed out (title-chip); everything else natural. */\n  zoom: \"natural\" | \"chip-scale\";\n  /** Optional compact cutoff for below-glyph labels. */\n  compactBelowHeightPx?: number;\n  verticalAlign: \"top\" | \"center\" | \"bottom\";\n  multiline: boolean;\n}"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-text-p2": {
-      "id": "b-sapi-text-p2",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "The invariant that fixed editing (D14): RENDERER AND EDITOR CONSUME THE SAME SLOT DESCRIPTOR. "
-        },
-        {
-          "insert": "resolveTextSlot()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/text-slots.ts",
-              "symbol": "resolveTextSlot"
-            }
-          }
-        },
-        {
-          "insert": " is the one rect/typography source; the at-rest renderer ("
-        },
-        {
-          "insert": "ObjectSlotText",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-shell.tsx",
-              "symbol": "ObjectSlotText"
-            }
-          }
-        },
-        {
-          "insert": ") and the in-place editor overlay ("
-        },
-        {
-          "insert": "stage/editor/features/text-editing/TextEditingOverlay.tsx",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/features/text-editing/TextEditingOverlay.tsx"
-            }
-          }
-        },
-        {
-          "insert": ") both call it, so at rest and mid-edit are pixel-identical, caret aside — no gray-out, no visually distinct overlay. While an object's text is being edited, the def's renderer receives "
-        },
-        {
-          "insert": "hideText",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " so the editor is the only visible copy. Adding a placement to the library automatically makes editing correct for every def that uses it."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-presets": {
-      "id": "b-sapi-code-presets",
-      "type": "code",
-      "props": {
-        "language": "ts"
-      },
-      "text": [
-        {
-          "insert": "// packages/canvas/src/objects/text-slots.ts — the presets (values verbatim, others elided)\nexport const OBJECT_TEXT_COLOR = \"#000000\"; // the one object-text color (D8)\n\nexport const SHAPE_TEXT_TYPOGRAPHY: SlotTypography = {\n  fontSizePx: 15,\n  fontWeight: 700,\n  lineHeight: \"1.2\",\n  textAlign: \"center\",\n  color: OBJECT_TEXT_COLOR,\n};\n\n/** \"center\" — inside the shape body, centered both ways. The default for shapes. */\nexport const CENTER_TEXT_SLOT: TextSlot = {\n  placement: \"center\",\n  typography: SHAPE_TEXT_TYPOGRAPHY,\n  zoom: \"natural\",\n  verticalAlign: \"center\",\n  multiline: true,\n};\n\n/** \"below\" — bold band under the icon glyph. */\nexport function belowTextSlot(options?: { compactBelowHeightPx?: number }): TextSlot;\nexport const BELOW_TEXT_SLOT: TextSlot = belowTextSlot();\n\n/** \"inset-body\" — padded multi-line body area (sticky): 24px/400, \"36px\" lines, left, top. */\nexport const INSET_BODY_TEXT_SLOT: TextSlot;\n\n/** \"title-chip\" — floating chip, top-left, zoom counter-scaled (section): 16px/700, single-line. */\nexport const TITLE_CHIP_TEXT_SLOT: TextSlot;\n\n/** The escape hatch: a def-provided object-local rect, shape-baseline typography unless overridden. */\nexport function rectTextSlot(\n  rect: (object: InteractiveCanvasObject) => LocalRect,\n  options?: Partial<Omit<TextSlot, \"placement\">>,\n): TextSlot;\n\n/** The ONE rect/typography source both the at-rest renderer and the in-place editor consume. */\nexport function resolveTextSlot(slot: TextSlot, object: InteractiveCanvasObject, zoom = 1): ResolvedTextSlot;"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-text-p3": {
-      "id": "b-sapi-text-p3",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Preset assignments in the shipped defs: most shapes take the \"center\" default (15px/700, centered, dark — D6's baseline); the icon glyph family takes \"below\"; sticky takes \"inset-body\"; section takes \"title-chip\", whose chip counter-scales sub-linearly when zoomed out (titleChipScale() = (1/zoom)^0.6 capped at 6×, geometry in TITLE_CHIP); arrow-shape and chevron declare rectTextSlot functions (text centers in the body excluding head/notch — replacing the old labelStyle margin hacks). No shipped def declares text: \"none\" today, but the capability remains: no slot, and textEditing.editable is false, so they refuse the editor."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-h2-outline": {
-      "id": "b-sapi-h2-outline",
-      "type": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "Outline and anchors"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-outline-p1": {
-      "id": "b-sapi-outline-p1",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "The outline is the geometric primitive (D4): each def declares its connection/hit geometry as an "
-        },
-        {
-          "insert": "OutlineSpec",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "OutlineSpec"
-            }
-          }
-        },
-        {
-          "insert": ", and connection anchors, anchor dots, outline snap, and pointer hit-testing all derive from it. It lives in "
-        },
-        {
-          "insert": "objects/geometry.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts"
-            }
-          }
-        },
-        {
-          "insert": " — a pure, React-free leaf module. The import-boundaries test allows "
-        },
-        {
-          "insert": "connectors/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " to import all of "
-        },
-        {
-          "insert": "objects/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; geometry.ts is where the connector-relevant outline math lives, but no single edge is pinned. A silhouette is how the shape paints; the outline is where connectors attach and clicks land — the two should trace the same curve, cross-checked by "
-        },
-        {
-          "insert": "objects/__tests__/geometry-def-agreement.test.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-outlinespec": {
-      "id": "b-sapi-code-outlinespec",
-      "type": "code",
-      "props": {
-        "language": "ts"
-      },
-      "text": [
-        {
-          "insert": "// packages/canvas/src/objects/geometry.ts\nexport type OutlineSpec =\n  | { kind: \"bbox\" }\n  | { kind: \"polygon\"; points: (bounds: CanvasBounds, object: InteractiveCanvasObject) => CanvasPoint[] }\n  | { kind: \"ellipse\" };\n\n// One shared spec object per outline family — a true-outline def declares its\n// `outline` by referencing the SAME exported const the dispatch tables use\n// (identity-asserted by objects/__tests__/geometry-def-agreement.test.ts):\nexport const BBOX_OUTLINE: OutlineSpec = { kind: \"bbox\" };\nexport const ELLIPSE_OUTLINE: OutlineSpec = { kind: \"ellipse\" };\nexport const DIAMOND_OUTLINE: OutlineSpec = { kind: \"polygon\", points: diamondPoints };\nexport const TRIANGLE_OUTLINE: OutlineSpec = {\n  kind: \"polygon\",\n  points: (bounds, object) => trianglePoints(bounds, object.direction === \"down\" ? \"down\" : \"up\"),\n};\n// … ELLIPSE_OUTLINE / DIAMOND_OUTLINE / TRIANGLE_OUTLINE / ARROW_SHAPE_OUTLINE / OCTAGON_OUTLINE …\n//   OCTAGON_OUTLINE / STAR_OUTLINE / PLUS_OUTLINE / CHEVRON_OUTLINE /\n//   OFF_PAGE_CONNECTOR_OUTLINE / TRAPEZOID_OUTLINE / MANUAL_INPUT_OUTLINE /\n\n/** True-outline dispatch by object TYPE (16 keys); everything else falls back to bbox. */\nexport const OUTLINES_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, OutlineSpec>>;\n\n/** Secondary dispatch by `style.shape` — ONLY diamond/ellipse, exactly the style keys the old switch honored\n    the pre-P3 outlineShapeFor() switch consulted style for. */\nexport const OUTLINES_BY_STYLE_SHAPE: Partial<\n  Record<NonNullable<CanvasObjectStyle[\"shape\"]>, OutlineSpec>\n> = {\n  diamond: DIAMOND_OUTLINE,\n  ellipse: ELLIPSE_OUTLINE,\n};"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-outline-p2": {
-      "id": "b-sapi-outline-p2",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "The per-object lookup, "
-        },
-        {
-          "insert": "outlineSpecFor()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "outlineSpecFor"
-            }
-          }
-        },
-        {
-          "insert": ", deliberately reproduces the deleted "
-        },
-        {
-          "insert": "outlineShapeFor()",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " switch's dispatch order VERBATIM — including its quirks — so connection geometry stayed byte-identical through the P3 move. The quirk is documented in the source and worth quoting exactly, because it is NOT the render dispatch:"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-outlinespecfor": {
-      "id": "b-sapi-code-outlinespecfor",
-      "type": "code",
-      "props": {
-        "language": "ts"
-      },
-      "text": [
-        {
-          "insert": "// packages/canvas/src/objects/geometry.ts — verbatim, including the ordering contract\n/**\n * Resolves the outline spec for an object. The ordering reproduces the\n * pre-P3 `outlineShapeFor()` switch VERBATIM — including its quirks — so\n * connection geometry is byte-identical (rationalizing dispatch is P4):\n *\n *   1. `type === \"arrow-shape\"` wins over everything;\n *   3. a diamond/ellipse `style.shape` override wins over the\n *      remaining TYPE checks (the old switch's style checks sat ABOVE the\n *      W5 type checks — e.g. `type: \"triangle\"` + `style.shape: \"diamond\"`\n *      resolves DIAMOND, while `type: \"process\"` + `style.shape:\n *      \"triangle\"` stays BBOX because triangle is never a style key);\n *   4. the type table;\n *   5. bbox fallback.\n *\n * NOTE this is deliberately NOT `objectDefFor`'s render-shape dispatch —\n * hit-testing (D16) and connection geometry stay consistent with each other\n * by both using THIS lookup. TODO(P4): unify outline dispatch with render\n * dispatch when defs consolidate.\n */\nexport function outlineSpecFor(object: InteractiveCanvasObject): OutlineSpec {\n  if (object.type === \"arrow-shape\") return ARROW_SHAPE_OUTLINE;\n  const styleShape = object.style?.shape;\n  const styleSpec = styleShape === undefined ? undefined : OUTLINES_BY_STYLE_SHAPE[styleShape];\n  if (styleSpec) return styleSpec;\n  return OUTLINES_BY_TYPE[object.type] ?? BBOX_OUTLINE;\n}"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-anchors-p1": {
-      "id": "b-sapi-anchors-p1",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Anchors are the 4-ray outline projection, and that is the default for every kind — no def declares anchor points explicitly. "
-        },
-        {
-          "insert": "getConnectionAnchors()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "getConnectionAnchors"
-            }
-          }
-        },
-        {
-          "insert": " (ported from BlockSuite's "
-        },
-        {
-          "insert": "getAnchors",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") builds four cardinal candidates offset "
-        },
-        {
-          "insert": "ANCHOR_OFFSET_PX",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "ANCHOR_OFFSET_PX"
-            }
-          }
-        },
-        {
-          "insert": " (10 world px) outside the bound, then projects each along the ray from the object's center onto the outline polygon ("
-        },
-        {
-          "insert": "outlinePolygon()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "outlinePolygon"
-            }
-          }
-        },
-        {
-          "insert": "), falling back to the bbox edge midpoint only for degenerate geometry. Three consumers read the same four points: the live connect cascade ("
-        },
-        {
-          "insert": "resolveConnectionCascade",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/connection-cascade.ts",
-              "symbol": "resolveConnectionCascade"
-            }
-          }
-        },
-        {
-          "insert": " — anchor snap within 8 view px, else outline snap within 8 world px, else inside, else free; unchanged from the pre-overhaul cascade, see "
-        },
-        {
-          "insert": "canvas-30-connectors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "20-implementation/30-connectors",
-              "label": "canvas-30-connectors"
-            }
-          }
-        },
-        {
-          "insert": "), the mid-drag target preview dots ("
-        },
-        {
-          "insert": "ConnectorDragPreview",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "), and the selected-object anchor dots below — so the dots you see, the ports you grab, and the points connections snap to can never disagree."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-anchors-p2": {
-      "id": "b-sapi-anchors-p2",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Anchor dots (D5/D15): "
-        },
-        {
-          "insert": "AnchorDots",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
-              "symbol": "AnchorDots"
-            }
-          }
-        },
-        {
-          "insert": " renders FigJam-style dots (8px white fill, selection-blue ring, 14px grab target) in CanvasStage's screen-space overlay. In select mode, dots appear for every SELECTED object, at the "
-        },
-        {
-          "insert": "getConnectionAnchors",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " positions mapped "
-        },
-        {
-          "insert": "worldToScreen",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; in Connector Mode, dots are hover-driven for the topmost object under the cursor and use "
-        },
-        {
-          "insert": "bypassZoomGate",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " so they are ungated by zoom. They replace the old invisible edge ports. Select-mode visibility and interactivity are zoom-gated by "
-        },
-        {
-          "insert": "ANCHOR_DOTS_MIN_ZOOM",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/connectors/AnchorDots.tsx",
-              "symbol": "ANCHOR_DOTS_MIN_ZOOM"
-            }
-          }
-        },
-        {
-          "insert": " (0.5) — below 50% zoom, select-mode dots are hidden and inert at "
-        },
-        {
-          "insert": "opacity: 0",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "pointer-events: none",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "; Connector Mode bypasses the gate so its dots stay visible and interactive. Resize corners are unaffected: SelectionBox shows at any zoom. A pointerdown on a visible, interactive dot bubbles to the stage's "
-        },
-        {
-          "insert": "[data-canvas-port]",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " resolver and starts a connector-create gesture exactly like the old ports."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-hit-p1": {
-      "id": "b-sapi-hit-p1",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Hit-testing derives from the outline (D16): "
-        },
-        {
-          "insert": "hitTestObjects()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/interaction/hit-testing.ts",
-              "symbol": "hitTestObjects"
-            }
-          }
-        },
-        {
-          "insert": " walks topmost-first, fast-rejects on the bbox, then asks "
-        },
-        {
-          "insert": "outlineContainsPoint()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "outlineContainsPoint"
-            }
-          }
-        },
-        {
-          "insert": " — bbox-outline kinds test the plain bounds (byte-identical to pre-D16), true-outline kinds test point-in-polygon expanded by "
-        },
-        {
-          "insert": "OUTLINE_HIT_TOLERANCE_WORLD_PX",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/geometry.ts",
-              "symbol": "OUTLINE_HIT_TOLERANCE_WORLD_PX"
-            }
-          }
-        },
-        {
-          "insert": " (4 world px) so the stroke itself stays clickable. A diamond's empty corners click through to whatever is behind. Three surfaces are DELIBERATELY still bbox-based, each documented in "
-        },
-        {
-          "insert": "interaction/hit-testing.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/interaction/hit-testing.ts"
-            }
-          }
-        },
-        {
-          "insert": ": drag-select membership ("
-        },
-        {
-          "insert": "objectsIntersectingBounds",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — a drag-select rectangle grabbing a diamond's empty corner still selects it, FigJam-consistent), drop targeting ("
-        },
-        {
-          "insert": "hitTestDropTarget",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — sections-only, and sections are bbox anyway), and snap-guide candidates ("
-        },
-        {
-          "insert": "gatherSnapCandidates",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — alignment targets are axis-aligned bounds regardless of outline shape)."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-decision-outline-hit": {
-      "id": "b-sapi-decision-outline-hit",
-      "type": "decision",
-      "props": {
-        "status": "accepted",
-        "title": "Clicks respect the declared outline; drag-select, drop targets, and snapping deliberately stay bbox"
-      },
-      "text": [
-        {
-          "insert": "Pointer hits consult "
-        },
-        {
-          "insert": "outlineContainsPoint",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " so true-outline shapes are only clickable where they actually paint, while drag-select, section drop-targeting, and snap-candidate gathering remain bounding-box tests on purpose — they are area/alignment semantics, not point-precision semantics, and FigJam behaves the same way. Bbox-outline kinds are byte-identical to the pre-D16 behavior by construction (their outline IS the bbox and no polygon is ever materialized), which is what made the cutover safe to gate on the existing interaction test suite."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-h2-color": {
-      "id": "b-sapi-h2-color",
-      "type": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "Color: one pick per object"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-color-p1": {
-      "id": "b-sapi-color-p1",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Color storage is one field: "
-        },
-        {
-          "insert": "object.color?: CanvasColor",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "connection.color?: CanvasColor",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (D1). The vocabulary is FigJam's color popover, minus the custom-color wheel and minus black (D7 + D12): 10 hues, one pick per hue. Each pick resolves through ink/fill/wash roles: ink is the picker swatch and every stroke, fill is the shape/sticky/chip fill, and wash is the section tint. Legacy `-soft` ids were remapped once by tools/migrate-canvas-docs/migrate.ts to the nearest bare hue; at runtime the validator simply drops unknown ids, so there is no live normalization path in isCanvasColor(). The ids are schema vocabulary in "
-        },
-        {
-          "insert": "state/schema/colors.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/colors.ts"
-            }
-          }
-        },
-        {
-          "insert": " — no hexes there, just the closed id set and its "
-        },
-        {
-          "insert": "isCanvasColor()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/colors.ts",
-              "symbol": "isCanvasColor"
-            }
-          }
-        },
-        {
-          "insert": " guard. "
-        },
-        {
-          "insert": "The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
-        },
-        {
-          "insert": "board-design-reference/analysis/palette-sheet.html",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "board-design-reference/analysis/palette-sheet.html"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-colors": {
-      "id": "b-sapi-code-colors",
-      "type": "code",
-      "props": {
-        "language": "ts"
-      },
-      "text": [
-        {
-          "insert": "// packages/canvas/src/state/schema/colors.ts\n/** The 10 FigJam hue families (black dropped per D12; \"white\" is a hue here, not a neutral escape hatch). */\nexport type CanvasHue =\n  | \"gray\"\n  | \"red\"\n  | \"orange\"\n  | \"yellow\"\n  | \"green\"\n  | \"teal\"\n  | \"blue\"\n  | \"violet\"\n  | \"pink\"\n  | \"white\";\n\n/** The stored color ids: 10 picks, one per hue. */\nexport type CanvasColor = CanvasHue;\n\n/** The 10 swatch ids in picker order. */\nexport const CANVAS_COLORS: readonly CanvasColor[] = CANVAS_HUES;\n\n/** Type guard for the closed 10-id roster — use at schema/validator boundaries. */\nexport function isCanvasColor(value: unknown): value is CanvasColor;"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-roster": {
-      "id": "b-sapi-code-roster",
-      "type": "code",
-      "props": {
-        "language": "text"
-      },
-      "text": [
-        {
-          "insert": "The 10-pick roster in picker order (CANVAS_COLORS — the single row every kind renders):\n\n  gray  red  orange  yellow  green  teal  blue  violet  pink  white\n\nLegacy ids ending in `-soft` were remapped once by tools/migrate-canvas-docs/migrate.ts to the nearest bare hue. At runtime, isCanvasColor drops unknown ids; there is no live normalization path."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-color-p2": {
-      "id": "b-sapi-color-p2",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "What each id LOOKS like per kind lives in "
-        },
-        {
-          "insert": "theme/palette.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme/palette.ts"
-            }
-          }
-        },
-        {
-          "insert": " — the canonical 10-row swatch table, a leaf module in theme/ (sibling of "
-        },
-        {
-          "insert": "theme/tokens.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ") deliberately outside both "
-        },
-        {
-          "insert": "state/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "objects/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " so "
-        },
-        {
-          "insert": "theme/tokens.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "objects/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and "
-        },
-        {
-          "insert": "stage/editor/",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " can all import it without layering violations. Every hex in the table is annotated inline as sampled (citing its FigJam source) or derived; that file is the single source of truth for the role hexes reproduced below. A row is a "
-        },
-        {
-          "insert": "Swatch",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme/palette.ts",
-              "symbol": "Swatch"
-            }
-          }
-        },
-        {
-          "insert": ": one picker-preview hex plus one expression cell per role:"
-        },
-        {
-          "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
-        },
-        {
-          "insert": "board-design-reference/analysis/palette-sheet.html",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "board-design-reference/analysis/palette-sheet.html"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-swatch": {
-      "id": "b-sapi-code-swatch",
-      "type": "code",
-      "props": {
-        "language": "ts"
-      },
-      "text": [
-        {
-          "insert": "// packages/canvas/src/theme/palette.ts\nexport type ShapeColors = {\n  fill: string;\n  /** Every shape pick renders with an ink border. */\n  border: string;\n};\n\nexport type SectionChipColors = {\n  fill: string;\n  border: string;\n};\n\nexport type SectionColors = {\n  tint: string;\n  chip: SectionChipColors;\n};\n\nexport type Swatch = {\n  /** The picker preview: ink, except white previews as #FFFFFF with its contrast ring. */\n  swatch: string;\n  /** fill + ink border. */\n  shape: ShapeColors;\n  /** wash tint + title-chip fill/border. */\n  section: SectionColors;\n  /** Sticky fill role. */\n  sticky: string;\n  /** Connector stroke: ink, with white using gray. */\n  connector: string;\n};\n\nexport const CANVAS_PALETTE: Record<CanvasColor, Swatch>;\n\n// The per-role resolvers — one per role table:\nexport function resolveShapeColors(color: CanvasColor): ShapeColors;\nexport function resolveSectionColors(color: CanvasColor): SectionColors;\nexport function resolveStickyFill(color: CanvasColor): string;\nexport function resolveConnectorStroke(color: CanvasColor): string;\nexport function resolveSwatchPreview(color: CanvasColor): string;"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-color-hexes": {
-      "id": "b-sapi-code-color-hexes",
-      "type": "code",
-      "props": {
-        "language": "text"
-      },
-      "text": [
-        {
-          "insert": "Authoritative role hexes:\n\nhue     ink      shape fill  sticky fill  section wash\ngray    #757575  #E6E6E6    #E6E6E6     #F9F9F9\nred     #D5322F  #FFD2CC    #FFBFB7     #FEF3F1\norange  #EB7500  #FFE0C2    #FFE0C2     #FFF7F0\nyellow  #E8A302  #FFECBD    #FFE299     #FFFBF0\ngreen   #019142  #C5E9CB    #C5E9CB     #F0F8F2\nteal    #369E94  #C6FAF6    #C6FAF6     #EAFDFB\nblue    #1A5CDF  #CDDFFF    #B9D2FF     #F1F6FE\nviolet  #9747FF  #DCCCFF    #DCCCFF     #F8F5FF\npink    #B74D85  #F9D1E3    #F9D1E3     #FDF3F7\nwhite   #757980  #FFFFFF    #FFFFFF     #FFFFFF\n\nWhite uses #757980 for strokes/connectors; its picker preview remains #FFFFFF with the existing contrast ring. The white section chip uses #DBDEE3 fill and #C1C4CB border so it remains visible on white wash."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-color-p3": {
-      "id": "b-sapi-color-p3",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "A pick is a direction; the def's "
-        },
-        {
-          "insert": "colorRole",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " decides rendering. For the "
-        },
-        {
-          "insert": "\"shape\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " role, every pick renders fill + ink border at the universal 4px stroke ("
-        },
-        {
-          "insert": "SHAPE_STROKE_WIDTH_PX",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/theme/tokens.ts",
-              "symbol": "SHAPE_STROKE_WIDTH_PX"
-            }
-          }
-        },
-        {
-          "insert": "); there is no borderless color treatment. White keeps a visible "
-        },
-        {
-          "insert": "#757980",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " stroke since a white stroke would vanish on the "
-        },
-        {
-          "insert": "#F5F5F5",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " board (light-only by D9). For "
-        },
-        {
-          "insert": "\"section\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", wash = the tint and the title chip uses fill + ink border; for "
-        },
-        {
-          "insert": "\"sticky\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", fill = the sticky hex; for connectors, ink = the stroke hex (default pick "
-        },
-        {
-          "insert": "\"gray\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "). The one resolver every object renderer goes through is "
-        },
-        {
-          "insert": "resolveObjectRoleColors()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-shell.tsx",
-              "symbol": "resolveObjectRoleColors"
-            }
-          }
-        },
-        {
-          "insert": ", which also fixes text: ALL object text is "
-        },
-        {
-          "insert": "OBJECT_TEXT_COLOR",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/text-slots.ts",
-              "symbol": "OBJECT_TEXT_COLOR"
-            }
-          }
-        },
-        {
-          "insert": " dark (D8) (one deviation: the sticky inset-body preset uses rgba(0, 0, 0, 0.8)) — no per-color text derivation and no user-pickable text color. D13 killed forced glyph colors: icon glyphs are ordinary colorable objects."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-color-p4": {
-      "id": "b-sapi-color-p4",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "New-object color is last-picked memory (D17), per kind so a red connector doesn't make the next sticky red: reducer state carries "
-        },
-        {
-          "insert": "lastPickedColor: Record<CanvasColorKind, CanvasColor>",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " seeded from "
-        },
-        {
-          "insert": "FIRST_USE_COLORS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "FIRST_USE_COLORS"
-            }
-          }
-        },
-        {
-          "insert": " ("
-        },
-        {
-          "insert": "shape: \"gray\", sticky: \"yellow\", section: \"gray\", connector: \"gray\"",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "); "
-        },
-        {
-          "insert": "canvas.addObject",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " reads the bucket via "
-        },
-        {
-          "insert": "colorKindForType()",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "colorKindForType"
-            }
-          }
-        },
-        {
-          "insert": " when no explicit color is supplied, and a "
-        },
-        {
-          "insert": "canvas.updateObject",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "canvas.updateConnection",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " color patch writes it back. The UI is ONE component: "
-        },
-        {
-          "insert": "ColorPicker",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
-              "symbol": "ColorPicker"
-            }
-          }
-        },
-        {
-          "insert": " renders the 10-pick row from "
-        },
-        {
-          "insert": "CANVAS_COLORS",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " via "
-        },
-        {
-          "insert": "resolveSwatchPreview",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " — identical previews for every kind, the current pick marked by a floating 2px #8C2EF2 rounded-square outline (the rainbow conic ring is retired) — replacing the old "
-        },
-        {
-          "insert": "ColorPalettePopover",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", section-tint flyout, and connector swatch row."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-constraint-closed-roster": {
-      "id": "b-sapi-constraint-closed-roster",
-      "type": "constraint",
-      "props": {
-        "severity": "hard",
-        "title": "The color roster is closed: 10 picks, no custom colors, ever"
-      },
-      "text": [
-        {
-          "insert": "Documents store swatch IDS, never hexes. "
-        },
-        {
-          "insert": "validateInteractiveCanvasDocument",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/validate.ts",
-              "symbol": "validateInteractiveCanvasDocument"
-            }
-          }
-        },
-        {
-          "insert": " soft-validates "
-        },
-        {
-          "insert": "color",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " against "
-        },
-        {
-          "insert": "isCanvasColor",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (unknown ids are dropped with a warning); the legacy "
-        },
-        {
-          "insert": "tone",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "paletteToken",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "style.fill",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/"
-        },
-        {
-          "insert": "style.stroke",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/section "
-        },
-        {
-          "insert": "tint",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "/raw connector hexes are deleted from the schema with no legacy read path (D10) — existing documents crossed over once via "
-        },
-        {
-          "insert": "tools/migrate-canvas-docs/migrate.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " (nearest-swatch mapping) and the old keys are now simply ignored as unknown. There is no custom-color wheel and no explicit-hex escape hatch; changing what a pick looks like means editing "
-        },
-        {
-          "insert": "theme/palette.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " cells, not documents."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-h2-tree": {
-      "id": "b-sapi-h2-tree",
-      "type": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "The shipped layout"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-filetree": {
-      "id": "b-sapi-filetree",
-      "type": "file-tree",
-      "props": {
-        "entries": [
-          {
-            "path": "packages/canvas/src/theme/palette.ts",
-            "note": "the canonical 10-pick role table + per-role resolvers; leaf module importable by theme tokens, objects, and stage editor alike"
-          },
-          {
-            "path": "packages/canvas/src/state/schema/colors.ts",
-            "note": "CanvasHue/CanvasColor id vocabulary (no hexes) + isCanvasColor guard"
-          },
-          {
-            "path": "packages/canvas/src/state/schema/object-defaults.ts",
-            "note": "OBJECT_TYPE_DEFAULTS (geometry/shape/label per type) + FIRST_USE_COLORS + colorKindForType — the reducer-readable defaults vocabulary the registry stamps onto defs"
-          },
-          {
-            "path": "packages/canvas/src/objects/object-def.ts",
-            "note": "ObjectDef v2 + ConnectorDef types, OBJECT_DEFS registry, objectDefFor/objectDefForType dispatch"
-          },
-          {
-            "path": "packages/canvas/src/objects/text-slots.ts",
-            "note": "text-slot preset library (center / below / inset-body / title-chip / rect) + resolveTextSlot — renderer and editor both consume it"
-          },
-          {
-            "path": "packages/canvas/src/objects/shape-geometry-constants.ts",
-            "note": "shared silhouette constants"
-          },
-          {
-            "path": "packages/canvas/src/objects/text-slot-constants.ts",
-            "note": "CENTER_TEXT_INSET_PX and friends"
-          },
-          {
-            "path": "packages/canvas/src/objects/inscribed-text-rects.ts",
-            "note": "per-silhouette inscribed text rects used by the center slot"
-          },
-          {
-            "path": "packages/canvas/src/objects/geometry.ts",
-            "note": "pure React-free outline builders, OutlineSpec consts + dispatch, getConnectionAnchors, outlineContainsPoint — connector-relevant outline math lives here"
-          },
-          {
-            "path": "packages/canvas/src/objects/catalog.ts",
-            "note": "Shapes-panel ARRANGEMENT only; entry labels/keywords derive from each def's catalog metadata"
-          },
-          {
-            "path": "packages/canvas/src/objects/object-shell.tsx",
-            "note": "shared object button trim, ObjectSlotText, resolveObjectRoleColors (color role resolution)"
-          },
-          {
-            "path": "packages/canvas/src/objects/section/",
-            "note": "sectionDef — title-chip slot, section color role, corner handles, descendants drag capture"
-          },
-          {
-            "path": "packages/canvas/src/objects/sticky/",
-            "note": "stickyDef (inset-body slot, sticky color role) + markdown.tsx simple-markdown renderer (D18)"
-          },
-          {
-            "path": "packages/canvas/src/connectors/",
-            "note": "connectorDef (ConnectorDef, D19) + connector style constants; deliberately not in OBJECT_DEFS"
-          },
-          {
-            "path": "packages/canvas/src/objects/shapes/",
-            "note": "shape-def.ts (ShapeDef) + base.tsx (shapeObjectDef adapter) + basic|flowchart|icon|misc one-file shape defs"
-          },
-          {
-            "path": "packages/canvas/src/connectors/connection-cascade.ts",
-            "note": "cascade only (resolveConnectionCascade); consumes objects/geometry.ts for connector-relevant outline math"
-          },
-          {
-            "path": "packages/canvas/src/connectors/AnchorDots.tsx",
-            "note": "zoom-gated FigJam-style anchor dots at the def-derived anchor positions (ANCHOR_DOTS_MIN_ZOOM = 0.5)"
-          },
-          {
-            "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
-            "note": "THE one 10-pick color picker, identical for every kind"
-          },
-          {
-            "path": "packages/canvas/src/stage/editor/features/text-editing/",
-            "note": "in-place text editor (use-text-editing.ts + TextEditingOverlay.tsx) — positioned/styled by the def's text slot; connector labels at the routed midpoint"
-          }
-        ],
-        "title": "Where the shape system lives (post-overhaul)"
-      },
-      "text": [],
-      "children": []
-    },
-    "b-sapi-h2-howto": {
-      "id": "b-sapi-h2-howto",
-      "type": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "How to add a shape"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-howto-p1": {
-      "id": "b-sapi-howto-p1",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "All behavior lives in ONE new file — a ShapeDef. The remaining touches are one-line entries in closed vocabularies and registries, each guided by a compile error or a test failure (the old duplication — catalog labels, four parallel default switches, the routing-layer outlineShapeFor() switch, per-shape editor placement — is gone; those all derive from the def now). Here is a real, complete, shipping def to copy — the octagon:"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-def-template": {
-      "id": "b-sapi-code-def-template",
-      "type": "code",
-      "props": {
-        "language": "tsx"
-      },
-      "text": [
-        {
-          "insert": "// packages/canvas/src/objects/shapes/basic/octagon.tsx — complete file (comments trimmed)\n\"use client\";\n\nimport type { CanvasPoint } from \"../../../state/geometry\";\nimport { OCTAGON_OUTLINE, octagonPoints } from \"../../geometry\";\nimport { shapeObjectDef } from \"../base\";\nimport type { ShapeDef } from \"../shape-def\";\n\nfunction pointsAttribute(points: CanvasPoint[]): string {\n  return points.map((point) => `${point.x},${point.y}`).join(\" \");\n}\n\nexport const octagonShapeDef: ShapeDef = {\n  type: \"octagon\",\n  shape: \"octagon\",\n  buttonBorder: \"suppressed\",\n  outline: OCTAGON_OUTLINE,\n  silhouette: {\n    className: \"interactive-canvas-object-octagon\",\n    silhouette: ({ object, colors, strokeWidth }) => {\n      const points = pointsAttribute(\n        octagonPoints({ x: 0, y: 0, width: object.geometry.width, height: object.geometry.height }),\n      );\n      return (\n        <svg\n          aria-hidden=\"true\"\n          className=\"interactive-canvas-true-outline-silhouette\"\n          data-canvas-shape-silhouette=\"octagon\"\n          viewBox={`0 0 ${object.geometry.width} ${object.geometry.height}`}\n          preserveAspectRatio=\"none\"\n          style={{ position: \"absolute\", inset: 0, width: \"100%\", height: \"100%\", overflow: \"visible\" }}\n        >\n          <polygon\n            points={points}\n            fill={colors.fill}\n            stroke={colors.border}\n            strokeWidth={strokeWidth}\n            strokeLinejoin=\"round\"\n          />\n        </svg>\n      );\n    },\n  },\n    css: `\n        .interactive-canvas-object-octagon {\n          border: none;\n          border-radius: 0;\n          background: transparent !important;\n          box-shadow: none;\n          overflow: visible;\n        }\n`,\n  catalog: { label: \"Octagon\", keywords: [\"octagon\", \"polygon\", \"eight-sided\"] },\n};\n\nexport const octagonDef = shapeObjectDef(octagonShapeDef);"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-howto-p2": {
-      "id": "b-sapi-howto-p2",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Note what the file does NOT contain: no toolbar, no handles, no defaults, no text slot (\"center\" is the omission default), no editor code — shapeObjectDef stamps all of that. The registration lines, quoted exactly as they exist for octagon today:"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-code-registration": {
-      "id": "b-sapi-code-registration",
-      "type": "code",
-      "props": {
-        "language": "ts"
-      },
-      "text": [
-        {
-          "insert": "// 1. state/schema/object-types.ts — add the literal to the closed type union:\n  | \"octagon\"\n\n// 2. state/schema/style.ts — add the same-named render-shape variant to CanvasObjectStyle[\"shape\"]:\n  | \"octagon\"\n\n// 3. state/schema/validate.ts — add the branch to the isCanvasObjectType guard:\n  value === \"octagon\" ||\n\n// 4. state/schema/object-defaults.ts — add the row to OBJECT_TYPE_DEFAULTS\n//    (exhaustive Record — the compiler errors until this exists):\n  octagon: { geometry: { x: 160, y: 160, width: 150, height: 100 }, shape: \"octagon\", label: \"Octagon\" },\n\n// 5. objects/object-def.ts — register the def (import + both tables):\nimport { octagonDef } from \"./shapes/flowchart/octagon\";\n// in DEFS_BY_RENDER_SHAPE:\n  octagon: octagonDef,\n// in OBJECT_DEFS (stylesheet order):\n  octagonDef,\n\n// 6. objects/catalog.ts — place the entry in a picker section (label/keywords derive from the def):\n  entry(\"flow-octagon\", \"octagon\"),\n\n// 7. stage/editor/components/shape-previews.tsx — picker glyph (derives from the outline builder):\nconst OctagonIcon = polygonIcon(octagonPoints(PREVIEW_BOUNDS));\n  \"flow-octagon\": OctagonIcon,"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-howto-p3": {
-      "id": "b-sapi-howto-p3",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Optionally, a true outline (skip both steps and the shape ships with correct bbox anchors — shapeObjectDef stamps BBOX_OUTLINE): add a points builder + exported spec const to objects/geometry.ts (octagon's is octagonPoints + octagon_OUTLINE), list it in OUTLINES_BY_TYPE, and reference the SAME const from the def's outline field. Two tests police the whole recipe: objects/__tests__/geometry-def-agreement.test.ts asserts the def's outline is identity-equal to the dispatch table's spec, and objects/__tests__/type-defaults.test.ts asserts the def's stamped defaults match the reducer's row. Run bun test packages/canvas and the compiler/tests walk you through anything missed."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-constraint-closed-vocab": {
-      "id": "b-sapi-constraint-closed-vocab",
-      "type": "constraint",
-      "props": {
-        "severity": "hard",
-        "title": "Shape vocabulary is closed and typed, not freeform SVG"
-      },
-      "text": [
-        {
-          "insert": "Extending the shape vocabulary means adding a value to "
-        },
-        {
-          "insert": "InteractiveCanvasObjectType",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
-            }
-          }
-        },
-        {
-          "insert": " and touching the fixed registration sites above — not authoring an arbitrary SVG path, a runtime-registered shape class, or a plugin. There is no registration API, no user-supplied path string field, and no mechanism for a canvas document to define a shape the engine doesn't already know how to validate and render. An agent (or a human) constructing a shape only ever writes valid JSON against the schema; the def registry is compile-time, closed, and fully enumerated in "
-        },
-        {
-          "insert": "OBJECT_DEFS",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/object-def.ts",
-              "symbol": "OBJECT_DEFS"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-closing": {
-      "id": "b-sapi-closing",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "For the schema and reducer these shapes are validated and mutated through, see "
-        },
-        {
-          "insert": "canvas-10-model",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "20-implementation/10-model",
-              "label": "canvas-10-model"
-            }
-          }
-        },
-        {
-          "insert": ". For the A*/anchor routing pipeline that consumes the outline/anchor contract, see "
-        },
-        {
-          "insert": "canvas-30-connectors",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "20-implementation/30-connectors",
-              "label": "canvas-30-connectors"
-            }
-          }
-        },
-        {
-          "insert": ". For the per-shape enumeration with computed anchor positions, see "
-        },
-        {
-          "insert": "canvas-20-implementation-80-shape-reference",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "20-implementation/80-shape-reference",
-              "label": "canvas-20-implementation-80-shape-reference"
-            }
-          }
-        },
-        {
-          "insert": " (note: its per-type prose predates the overhaul in places — this doc wins on the def/text/color contract). For how the shape set maps onto FigJam's own picker, see "
-        },
-        {
-          "insert": "canvas-10-system-design-20-figjam-parity",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "doc",
-              "path": "10-system-design/20-figjam-parity",
-              "label": "canvas-10-system-design-20-figjam-parity"
-            }
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
+ "schemaVersion": 1,
+ "id": "canvas-10-system-design-10-shape-api",
+ "title": "The shape contract",
+ "root": "b-shape-api-root",
+ "blocks": {
+  "b-shape-api-root": {
+   "id": "b-shape-api-root",
+   "type": "paragraph",
+   "props": {
+    "concepts": [
+     "ObjectDef",
+     "ShapeDef",
+     "TextSlot",
+     "OutlineSpec",
+     "CanvasColor",
+     "getConnectionAnchors"
+    ],
+    "covers": "The shape contract: ObjectDef v2 and the two-tier ShapeDef registry, the text-slot preset library, def-declared outlines/anchors/hit-testing, the connector style surface, and the 10-pick ink/fill/wash color role system.",
+    "format": "mdx",
+    "type": "design"
+   },
+   "children": [
+    "b-sapi-title-1",
+    "b-sapi-intro-1",
+    "b-sapi-intro-2",
+    "b-sapi-decision-id-rule",
+    "b-sapi-h2-registry",
+    "b-sapi-registry-p1",
+    "b-sapi-code-objectdef",
+    "b-sapi-registry-p2",
+    "b-sapi-registry-p3",
+    "b-sapi-code-connectordef",
+    "b-sapi-connector-surface-p1",
+    "b-sapi-decision-toolbar",
+    "b-sapi-h3-shapedef",
+    "b-sapi-shapedef-p1",
+    "b-sapi-code-shapedef",
+    "b-sapi-shapedef-p2",
+    "b-sapi-radius-p1",
+    "b-sapi-decision-parity-authority",
+    "b-sapi-h2-text",
+    "b-sapi-text-p1",
+    "b-sapi-code-textslot",
+    "b-sapi-text-p2",
+    "b-sapi-code-presets",
+    "b-sapi-text-p3",
+    "b-sapi-h2-outline",
+    "b-sapi-outline-p1",
+    "b-sapi-code-outlinespec",
+    "b-sapi-outline-p2",
+    "b-sapi-code-outlinespecfor",
+    "b-sapi-anchors-p1",
+    "b-sapi-anchors-p2",
+    "b-sapi-hit-p1",
+    "b-sapi-decision-outline-hit",
+    "b-sapi-h2-color",
+    "b-sapi-color-p1",
+    "b-sapi-code-colors",
+    "b-sapi-code-roster",
+    "b-sapi-color-p2",
+    "b-sapi-code-swatch",
+    "b-sapi-code-color-hexes",
+    "b-sapi-color-p3",
+    "b-sapi-color-p4",
+    "b-sapi-constraint-closed-roster",
+    "b-sapi-constraint-closed-vocab",
+    "b-sapi-closing"
+   ]
+  },
+  "b-sapi-title-1": {
+   "id": "b-sapi-title-1",
+   "type": "heading",
+   "props": {
+    "level": 1
+   },
+   "text": [
+    {
+     "insert": "The shape contract"
     }
+   ],
+   "children": []
+  },
+  "b-sapi-intro-1": {
+   "id": "b-sapi-intro-1",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "A "
+    },
+    {
+     "insert": "shape",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " in this engine is not a drawing primitive \u2014 it is a typed, agent-editable JSON record: a member of the closed "
+    },
+    {
+     "insert": "InteractiveCanvasObjectType",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/object-types.ts",
+       "symbol": "InteractiveCanvasObjectType"
+      }
+     }
+    },
+    {
+     "insert": " union (11 types), carrying an axis-aligned "
+    },
+    {
+     "insert": "geometry",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " ("
+    },
+    {
+     "insert": "{ x, y, width, height }",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", no rotation anywhere in the schema), a single "
+    },
+    {
+     "insert": "text",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " field, and a single optional "
+    },
+    {
+     "insert": "color",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " pick from a closed 10-pick roster. Everything else about a kind \u2014 how it paints, where its text lives and is edited, its connection outline and anchors, its resize handles, its selection toolbar, its creation defaults \u2014 is declared on one registered definition object, and every consumer (render, routing, interaction, editor trim) derives its behavior from that declaration. There is no freeform vector path, no per-instance transform, and no plugin-registered shape class; every mutation flows through the single reducer documented in "
+    },
+    {
+     "insert": "the document model",
+     "attributes": {
+      "reference": {
+       "kind": "doc",
+       "path": "10-system-design/20-engine/10-document-model",
+       "label": "the document model"
+      }
+     }
+    },
+    {
+     "insert": "."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-intro-2": {
+   "id": "b-sapi-intro-2",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "The contract descends from the object-definition overhaul (its decisions are cited as D1\u2013D19 throughout): the four legacy color vocabularies collapsed into one stored "
+    },
+    {
+     "insert": "CanvasColor",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/colors.ts",
+       "symbol": "CanvasColor"
+      }
+     }
+    },
+    {
+     "insert": " pick, the "
+    },
+    {
+     "insert": "label",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "/"
+    },
+    {
+     "insert": "body",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "/"
+    },
+    {
+     "insert": "title",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " text trio collapsed into one "
+    },
+    {
+     "insert": "text",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " field, and outline geometry lives in the defs, not the routing layer. This doc specifies the contract bottom-up: the def types, the text-slot library, the outline/anchor system, and the color system. Where each piece lives in source \u2014 and the recipe for adding a shape \u2014 is the implementation tier's to govern."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-decision-id-rule": {
+   "id": "b-sapi-decision-id-rule",
+   "type": "decision",
+   "props": {
+    "status": "accepted",
+    "title": "Decision ids cite their home page \u2014 bare ids are ambiguous across logs"
+   },
+   "text": [
+    {
+     "insert": "The D-ids on this page belong to the object-definition overhaul's decision log and are anchored here. They are not the only D-numbered log the corpus has carried: other pages' logs have used the same numbers for unrelated decisions \u2014 a \"D4\" elsewhere has named the view-crop feature and a \"D16\" a vocabulary wave, colliding with the overhaul's D4 (the outline primitive) and D16 (outline hit-testing). The citation rule this page follows: a decision id is only meaningful together with its home page, so cite \"D4\" as this page's D4, never as a bare id a reader must disambiguate."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-h2-registry": {
+   "id": "b-sapi-h2-registry",
+   "type": "heading",
+   "props": {
+    "level": 2
+   },
+   "text": [
+    {
+     "insert": "ObjectDef v2 \u2014 the two-tier registry"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-registry-p1": {
+   "id": "b-sapi-registry-p1",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Tier 1 is "
+    },
+    {
+     "insert": "ObjectDef",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/object-def.ts",
+       "symbol": "ObjectDef"
+      }
+     }
+    },
+    {
+     "insert": ": the behavior contract for one kind of thing on the canvas. The specials \u2014 "
+    },
+    {
+     "insert": "sectionDef",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/section/def.tsx",
+       "symbol": "sectionDef"
+      }
+     }
+    },
+    {
+     "insert": ", "
+    },
+    {
+     "insert": "stickyDef",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/sticky/def.tsx",
+       "symbol": "stickyDef"
+      }
+     }
+    },
+    {
+     "insert": " \u2014 are hand-written first-class defs (sections take "
+    },
+    {
+     "insert": "handles: \"corners\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " and "
+    },
+    {
+     "insert": "dragCapture: \"descendants\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "; everything else takes the full 8-handle set); the uniform shape family gets its ObjectDef generated from a tier-2 "
+    },
+    {
+     "insert": "ShapeDef",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/shapes/shape-def.ts",
+       "symbol": "ShapeDef"
+      }
+     }
+    },
+    {
+     "insert": " by "
+    },
+    {
+     "insert": "shapeObjectDef()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/shapes/base.tsx",
+       "symbol": "shapeObjectDef"
+      }
+     }
+    },
+    {
+     "insert": ". Every field is consumed from the registry \u2014 none is decorative:"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-objectdef": {
+   "id": "b-sapi-code-objectdef",
+   "type": "code",
+   "props": {
+    "language": "ts"
+   },
+   "text": [
+    {
+     "insert": "// packages/canvas/src/objects/object-def.ts (doc comments trimmed)\nexport type ObjectHandles = \"all\" | \"corners\" | \"none\";\nexport type ObjectDragCapture = \"descendants\" | \"none\";\nexport interface TextEditingSpec {\n  editable: boolean;\n  markdown?: boolean;\n}\nexport type ObjectColorRole = \"shape\" | \"sticky\" | \"section\";\nexport type ObjectButtonBorderPolicy = \"painted\" | \"suppressed\";\n\nexport interface ObjectDef {\n  /** Registry key \u2014 the object `type` (every registered def's kind is an InteractiveCanvasObjectType). */\n  kind: string;\n  /** The object's world-layer renderer (receives the same props as stage/ObjectShape). */\n  render: ComponentType<ObjectRenderProps>;\n  /** This kind's global-CSS rules \u2014 CanvasStage composes its style tag from every registered def's css. */\n  css: string;\n  /** Per-type creation/placement defaults \u2014 stamped VERBATIM from state/schema/object-defaults.ts. */\n  defaults: ObjectTypeDefaults;\n  /** Palette role table this kind's color pick renders through (P1, \u00a73.5). */\n  colorRole: ObjectColorRole;\n  buttonBorder: ObjectButtonBorderPolicy;   // \"painted\" | \"suppressed\"\n  /** The kind's geometric outline (P3, D4): anchors, anchor dots, outline snap,\n      and pointer hit-testing (D16) all derive from it. */\n  outline: OutlineSpec;\n  handles: ObjectHandles;\n  dragCapture: ObjectDragCapture;\n  /** Where and how this kind's `object.text` renders AND is edited (D3/D6/D14).\n      Absent = the kind renders no object text at all. */\n  textSlot?: TextSlot;\n  textEditing: TextEditingSpec;\n  /** This kind's selection toolbar: data-only control list. */\n  toolbar?: ToolbarSpec;\n  /** Picker metadata (P4, O7) \u2014 absent for kinds the Shapes panel never lists. */\n  catalog?: ObjectCatalogMeta;\n}"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-registry-p2": {
+   "id": "b-sapi-registry-p2",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "The registry is a pair of static tables in the same file: "
+    },
+    {
+     "insert": "OBJECT_DEFS",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/object-def.ts",
+       "symbol": "OBJECT_DEFS"
+      }
+     }
+    },
+    {
+     "insert": " (all 11 registered defs, in stylesheet order \u2014 "
+    },
+    {
+     "insert": "OBJECT_DEFS_CSS",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/object-def.ts",
+       "symbol": "OBJECT_DEFS_CSS"
+      }
+     }
+    },
+    {
+     "insert": " concatenates their "
+    },
+    {
+     "insert": "css",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " for CanvasStage's style tag) and the two dispatch maps behind "
+    },
+    {
+     "insert": "objectDefFor()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/object-def.ts",
+       "symbol": "objectDefFor"
+      }
+     }
+    },
+    {
+     "insert": ". Render dispatch mirrors the legacy renderer exactly: "
+    },
+    {
+     "insert": "section",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " dispatches on "
+    },
+    {
+     "insert": "object.type",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "; every other kind dispatches on the effective render shape ("
+    },
+    {
+     "insert": "renderShapeFor()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/object-def.ts",
+       "symbol": "renderShapeFor"
+      }
+     }
+    },
+    {
+     "insert": " = "
+    },
+    {
+     "insert": "object.style?.shape ?? \"rounded-rect\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "). Behavior flags ("
+    },
+    {
+     "insert": "handles",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "/"
+    },
+    {
+     "insert": "dragCapture",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "/"
+    },
+    {
+     "insert": "textEditing",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ") belong to the TYPE and are looked up via "
+    },
+    {
+     "insert": "objectDefForType()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/object-def.ts",
+       "symbol": "objectDefForType"
+      }
+     }
+    },
+    {
+     "insert": ". "
+    },
+    {
+     "insert": "ObjectShape",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/stage/ObjectShape.tsx",
+       "symbol": "ObjectShape"
+      }
+     }
+    },
+    {
+     "insert": " is a thin registry dispatcher: it resolves the def and renders "
+    },
+    {
+     "insert": "def.render",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "; its generic fallback only fires for a render shape with no registered def (today solely an explicit "
+    },
+    {
+     "insert": "style.shape: \"section\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " on a non-section object). Multi-select toolbars are the capability intersection of the selected defs' control lists ("
+    },
+    {
+     "insert": "intersectToolbarControls()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/object-def.ts",
+       "symbol": "intersectToolbarControls"
+      }
+     }
+    },
+    {
+     "insert": ")."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-registry-p3": {
+   "id": "b-sapi-registry-p3",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Connectors are NOT objects (D19): they draw through "
+    },
+    {
+     "insert": "connectors/*",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", route through "
+    },
+    {
+     "insert": "connectors/",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", and are selected as their own selection kind. The "
+    },
+    {
+     "insert": "\"connector\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " CanvasTool is a mode, not an object type, so D19 still holds. Connectors get their own honest, small definition \u2014 deliberately absent from "
+    },
+    {
+     "insert": "OBJECT_DEFS",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ":"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-connectordef": {
+   "id": "b-sapi-code-connectordef",
+   "type": "code",
+   "props": {
+    "language": "ts"
+   },
+   "text": [
+    {
+     "insert": "// packages/canvas/src/objects/object-def.ts\nexport interface ConnectorDef {\n  kind: \"connector\";\n  toolbar: ToolbarSpec;\n  /** Connection color picks resolve through theme/palette.ts's \"connector\" role cells (resolveConnectorStroke). */\n  colorRole: \"connector\";\n  /** Labels edit in place at the routed midpoint, not via an object text slot. */\n  labelEditing: \"routed-midpoint\";\n}\n\n// The instance lives in packages/canvas/src/connectors/def.ts:\nexport const connectorDef: ConnectorDef = {\n  kind: \"connector\",\n  toolbar: CONNECTOR_TOOLBAR, // color / text / dash / arrowhead\n  colorRole: \"connector\",\n  labelEditing: \"routed-midpoint\",\n};"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-connector-surface-p1": {
+   "id": "b-sapi-connector-surface-p1",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "The connection style surface is deliberately small. "
+    },
+    {
+     "insert": "connection.style",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/connections.ts",
+       "symbol": "CanvasConnectionStyle"
+      }
+     }
+    },
+    {
+     "insert": " is "
+    },
+    {
+     "insert": "\"solid\" | \"dashed\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " \u2014 dashed reuses the same routed path with the "
+    },
+    {
+     "insert": "CONNECTOR_DASH_PATTERN_PX",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/connectors/def.ts",
+       "symbol": "CONNECTOR_DASH_PATTERN_PX"
+      }
+     }
+    },
+    {
+     "insert": " dash array. "
+    },
+    {
+     "insert": "connection.arrow",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/connections.ts",
+       "symbol": "CanvasArrowDirection"
+      }
+     }
+    },
+    {
+     "insert": " is "
+    },
+    {
+     "insert": "\"none\" | \"forward\" | \"back\" | \"both\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", and there is exactly one arrowhead marker \u2014 a solid filled triangle colored via SVG "
+    },
+    {
+     "insert": "context-stroke",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " \u2014 with no per-endpoint cap choice. There are no elbow or smooth style values: the router itself is elbow/orthogonal by default, and persisted waypoints from bend editing are the only override. Labels render as midpoint chips, and new connectors are always stamped gray \u2014 a connector never tints from its source object."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-decision-toolbar": {
+   "id": "b-sapi-decision-toolbar",
+   "type": "decision",
+   "props": {
+    "status": "accepted",
+    "title": "Toolbar control sets are deliberately simplified \u2014 no text-formatting tier"
+   },
+   "text": [
+    {
+     "insert": "One typeface and one text size everywhere: bold/strikethrough/link/font/size/alignment controls are intentionally absent, and sticky bodies render live simple markdown instead (D18). Per-kind control sets are data on the defs: shape \u2014 color / text / shape-swap ("
+    },
+    {
+     "insert": "SHAPE_TOOLBAR",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/shapes/toolbar.ts",
+       "symbol": "SHAPE_TOOLBAR"
+      }
+     }
+    },
+    {
+     "insert": "); sticky \u2014 color / text; connector \u2014 color / text / dash / arrowhead ("
+    },
+    {
+     "insert": "connectorDef",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/connectors/def.ts",
+       "symbol": "connectorDef"
+      }
+     }
+    },
+    {
+     "insert": "); section \u2014 color / rename / fit-children / border-style / lock ("
+    },
+    {
+     "insert": "SECTION_TOOLBAR",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/section/toolbar.ts",
+       "symbol": "SECTION_TOOLBAR"
+      }
+     }
+    },
+    {
+     "insert": "). Multi-select shows the capability intersection of the selected defs' control lists."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-h3-shapedef": {
+   "id": "b-sapi-h3-shapedef",
+   "type": "heading",
+   "props": {
+    "level": 3
+   },
+   "text": [
+    {
+     "insert": "ShapeDef \u2014 tier-2 variant data"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-shapedef-p1": {
+   "id": "b-sapi-shapedef-p1",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Tier 2 is variant DATA for the uniform shape family: one file per shape, each tiny. A ShapeDef never mentions toolbars, handles, or hit-testing \u2014 "
+    },
+    {
+     "insert": "shapeObjectDef()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/shapes/base.tsx",
+       "symbol": "shapeObjectDef"
+      }
+     }
+    },
+    {
+     "insert": " adapts it into an ObjectDef carrying the ONE shared shape behavior (standard shape toolbar, full 8-handle set, in-place text editing, slot-driven text rendering):"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-shapedef": {
+   "id": "b-sapi-code-shapedef",
+   "type": "code",
+   "props": {
+    "language": "ts"
+   },
+   "text": [
+    {
+     "insert": "// packages/canvas/src/objects/shapes/shape-def.ts (doc comments trimmed)\nexport interface ShapeOutlineArgs {\n  object: InteractiveCanvasObject;\n  /** The color pick resolved through the \"shape\" palette role:\n      fill + border (border is always a hex; every pick renders a bordered shape)\n      + the fixed dark text color (D8). */\n  colors: ResolvedShapeObjectColors;\n  /** Resolved stroke width. */\n  strokeWidth: number;\n}\n\n/** The VISUAL spec: how the shape paints (distinct from the geometric `outline`). */\nexport interface SilhouetteSpec {\n  className?: string;\n  silhouette?: (args: ShapeOutlineArgs) => ReactNode;\n}\n\nexport type ShapeTextSpec = TextSlot | \"none\";\n\nexport interface ShapeDef {\n  type: InteractiveCanvasObjectType;\n  /** The `style.shape` variant this def renders. Usually same-named as `type`;\n      differs where history diverged (sticky \u2192 \"note\", process \u2192 \"rounded-rect\"). */\n  shape: NonNullable<CanvasObjectStyle[\"shape\"]>;\n  /** How the shape PAINTS (CSS class + optional SVG silhouette layer). */\n  silhouette: SilhouetteSpec;\n  /** Whether the outer button itself paints the shape border. Defaults to \"painted\". */\n  buttonBorder?: ObjectButtonBorderPolicy;\n  /** Geometric outline (D4) \u2014 omit for the bbox default (shapeObjectDef stamps BBOX_OUTLINE). */\n  outline?: OutlineSpec;\n  /** Text slot \u2014 omit for the \"center\" preset default; \"none\" = pure glyph, no text. */\n  text?: ShapeTextSpec;\n  /** This shape's global-CSS rules. */\n  css?: string;\n  /** Picker metadata \u2014 the catalog (objects/catalog.ts) derives entry labels/keywords from this. */\n  catalog: ObjectCatalogMeta;\n}"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-shapedef-p2": {
+   "id": "b-sapi-shapedef-p2",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "What "
+    },
+    {
+     "insert": "shapeObjectDef",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " stamps deserves one callout: "
+    },
+    {
+     "insert": "defaults",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " is NOT authored on the def. Per-type creation/placement defaults are schema vocabulary \u2014 "
+    },
+    {
+     "insert": "OBJECT_TYPE_DEFAULTS",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/object-defaults.ts",
+       "symbol": "OBJECT_TYPE_DEFAULTS"
+      }
+     }
+    },
+    {
+     "insert": " ("
+    },
+    {
+     "insert": "geometry",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " / "
+    },
+    {
+     "insert": "shape",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " / "
+    },
+    {
+     "insert": "label",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " per type, an exhaustive "
+    },
+    {
+     "insert": "Record",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " so a new type without a row is a compile error) \u2014 because the reducer needs those rows at reduce time ("
+    },
+    {
+     "insert": "canvas.addObject",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", "
+    },
+    {
+     "insert": "canvas.quickConnect",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", "
+    },
+    {
+     "insert": "canvas.setObjectType",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "), "
+    },
+    {
+     "insert": "state/",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " must not import "
+    },
+    {
+     "insert": "objects/",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", and "
+    },
+    {
+     "insert": "@codecaine-ai/canvas/actions",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " is a standalone public API. The registry stamps every def's "
+    },
+    {
+     "insert": "defaults",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " from the same table via "
+    },
+    {
+     "insert": "objectTypeDefaults()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/object-defaults.ts",
+       "symbol": "objectTypeDefaults"
+      }
+     }
+    },
+    {
+     "insert": ", and "
+    },
+    {
+     "insert": "objects/__tests__/type-defaults.test.ts",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " identity-locks the two so def-derived and reducer-derived defaults can never drift."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-radius-p1": {
+   "id": "b-sapi-radius-p1",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Corner radii follow the same rule as every other visual constant: they are def-owned constants, and "
+    },
+    {
+     "insert": "CanvasObjectStyle",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/style.ts",
+       "symbol": "CanvasObjectStyle"
+      }
+     }
+    },
+    {
+     "insert": " has no "
+    },
+    {
+     "insert": "cornerRadius",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " field \u2014 there is no per-object radius override. Changing how a kind looks means editing its def, never a document."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-decision-parity-authority": {
+   "id": "b-sapi-decision-parity-authority",
+   "type": "decision",
+   "props": {
+    "status": "accepted",
+    "title": "Reference recordings are the visual parity authority"
+   },
+   "text": [
+    {
+     "insert": "Where those def-owned constants come from is itself settled: "
+    },
+    {
+     "insert": "board-design-reference/",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "reference/board-design-reference",
+       "label": "board-design-reference/"
+      }
+     }
+    },
+    {
+     "insert": " \u2014 the FigJam and AFFiNE reference screen recordings plus the pixel-sampled "
+    },
+    {
+     "insert": "analysis/",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " corpus distilled from them \u2014 is the single parity authority for every FigJam-derived constant in the engine: colors, radii, stroke widths, spacing, motion. A parity question is settled against the recordings, not any individual engineer's judgment call. Two qualifiers. First, not every value in the analysis corpus is a direct measurement: some are flagged extrapolations for states the recordings never captured (the multi-object selection-toolbar variant is the standing example) \u2014 treat an extrapolated constant as a best guess and reconfirm against live FigJam before relying on it for a pixel-exact decision. Second, supersession is explicit, never silent: when shipping geometry deliberately departs from a measured value, the departure is a named decision and the measurement remains documented history \u2014 the recording measurement stays the recorded reference even when overruled."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-h2-text": {
+   "id": "b-sapi-h2-text",
+   "type": "heading",
+   "props": {
+    "level": 2
+   },
+   "text": [
+    {
+     "insert": "Text: one field, slot presets"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-text-p1": {
+   "id": "b-sapi-text-p1",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Every object stores its text in the single required "
+    },
+    {
+     "insert": "text",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/objects.ts",
+       "symbol": "InteractiveCanvasObject"
+      }
+     }
+    },
+    {
+     "insert": " field (D3/D11; it may be empty). The kind decides rendering: sections render it as the floating title chip, stickies render simple markdown (D18: H1\u2013H3, bullets, bold, inline code \u2014 "
+    },
+    {
+     "insert": "objects/sticky/markdown.tsx",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/sticky/markdown.tsx"
+      }
+     }
+    },
+    {
+     "insert": "), shapes render it in their declared slot. Connections keep their own separate "
+    },
+    {
+     "insert": "label",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ". Where and how that text renders \u2014 and is edited \u2014 is a "
+    },
+    {
+     "insert": "TextSlot",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/text-slots.ts",
+       "symbol": "TextSlot"
+      }
+     }
+    },
+    {
+     "insert": " picked from a small named preset library, never per-shape ad-hoc CSS:"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-textslot": {
+   "id": "b-sapi-code-textslot",
+   "type": "code",
+   "props": {
+    "language": "ts"
+   },
+   "text": [
+    {
+     "insert": "// packages/canvas/src/objects/text-slots.ts (doc comments trimmed)\n/** Object-local rectangle (px, relative to the object's top-left corner). */\nexport interface LocalRect {\n  x: number;\n  y: number;\n  width: number;\n  height: number;\n}\n\nexport type TextPlacement =\n  | \"center\"\n  | \"below\"\n  | \"inset-body\"\n  | \"title-chip\"\n  | { rect: (object: InteractiveCanvasObject) => LocalRect };\n\n/** Applied identically to the at-rest text and the in-place editor (D14). */\nexport interface SlotTypography {\n  fontSizePx: number;\n  fontWeight: number;\n  /** CSS line-height value \u2014 unitless (\"1.2\") or px (\"36px\"). */\n  lineHeight: string;\n  textAlign: \"center\" | \"left\";\n  /** One fixed dark text color everywhere (D8) \u2014 presets pick their exact value. */\n  color: string;\n  /** Omit to inherit the canvas font for monospace slots. */\n  fontFamily?: string;\n}\n\nexport interface TextSlot {\n  placement: TextPlacement;\n  typography: SlotTypography;\n  /** \"chip-scale\" counter-scales when zoomed out (title-chip); everything else natural. */\n  zoom: \"natural\" | \"chip-scale\";\n  /** Optional compact cutoff for below-glyph labels. */\n  compactBelowHeightPx?: number;\n  verticalAlign: \"top\" | \"center\" | \"bottom\";\n  multiline: boolean;\n}"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-text-p2": {
+   "id": "b-sapi-text-p2",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "The invariant that fixed editing (D14): RENDERER AND EDITOR CONSUME THE SAME SLOT DESCRIPTOR. "
+    },
+    {
+     "insert": "resolveTextSlot()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/text-slots.ts",
+       "symbol": "resolveTextSlot"
+      }
+     }
+    },
+    {
+     "insert": " is the one rect/typography source; the at-rest renderer ("
+    },
+    {
+     "insert": "ObjectSlotText",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/object-shell.tsx",
+       "symbol": "ObjectSlotText"
+      }
+     }
+    },
+    {
+     "insert": ") and the in-place editor overlay ("
+    },
+    {
+     "insert": "stage/editor/features/text-editing/TextEditingOverlay.tsx",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/stage/editor/features/text-editing/TextEditingOverlay.tsx"
+      }
+     }
+    },
+    {
+     "insert": ") both call it, so at rest and mid-edit are pixel-identical, caret aside \u2014 no gray-out, no visually distinct overlay. While an object's text is being edited, the def's renderer receives "
+    },
+    {
+     "insert": "hideText",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " so the editor is the only visible copy. Adding a placement to the library automatically makes editing correct for every def that uses it."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-presets": {
+   "id": "b-sapi-code-presets",
+   "type": "code",
+   "props": {
+    "language": "ts"
+   },
+   "text": [
+    {
+     "insert": "// packages/canvas/src/objects/text-slots.ts \u2014 the presets (values verbatim, others elided)\nexport const OBJECT_TEXT_COLOR = \"#000000\"; // the one object-text color (D8)\n\nexport const SHAPE_TEXT_TYPOGRAPHY: SlotTypography = {\n  fontSizePx: 15,\n  fontWeight: 700,\n  lineHeight: \"1.2\",\n  textAlign: \"center\",\n  color: OBJECT_TEXT_COLOR,\n};\n\n/** \"center\" \u2014 inside the shape body, centered both ways. The default for shapes. */\nexport const CENTER_TEXT_SLOT: TextSlot = {\n  placement: \"center\",\n  typography: SHAPE_TEXT_TYPOGRAPHY,\n  zoom: \"natural\",\n  verticalAlign: \"center\",\n  multiline: true,\n};\n\n/** \"below\" \u2014 bold band under the icon glyph. */\nexport function belowTextSlot(options?: { compactBelowHeightPx?: number }): TextSlot;\nexport const BELOW_TEXT_SLOT: TextSlot = belowTextSlot();\n\n/** \"inset-body\" \u2014 padded multi-line body area (sticky): 24px/400, \"36px\" lines, left, top. */\nexport const INSET_BODY_TEXT_SLOT: TextSlot;\n\n/** \"title-chip\" \u2014 floating chip, top-left, zoom counter-scaled (section): 16px/700, single-line. */\nexport const TITLE_CHIP_TEXT_SLOT: TextSlot;\n\n/** The escape hatch: a def-provided object-local rect, shape-baseline typography unless overridden. */\nexport function rectTextSlot(\n  rect: (object: InteractiveCanvasObject) => LocalRect,\n  options?: Partial<Omit<TextSlot, \"placement\">>,\n): TextSlot;\n\n/** The ONE rect/typography source both the at-rest renderer and the in-place editor consume. */\nexport function resolveTextSlot(slot: TextSlot, object: InteractiveCanvasObject, zoom = 1): ResolvedTextSlot;"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-text-p3": {
+   "id": "b-sapi-text-p3",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Preset assignments in the shipped defs: most shapes take the \"center\" default (15px/700, centered, dark \u2014 D6's baseline); the icon glyph family takes \"below\"; sticky takes \"inset-body\"; section takes \"title-chip\", whose chip counter-scales sub-linearly when zoomed out (titleChipScale() = (1/zoom)^0.6 capped at 6\u00d7, geometry in TITLE_CHIP); arrow-shape declares a rectTextSlot function (text centers in the body excluding the head). No shipped def declares text: \"none\" today, but the capability remains: no slot, and textEditing.editable is false, so they refuse the editor."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-h2-outline": {
+   "id": "b-sapi-h2-outline",
+   "type": "heading",
+   "props": {
+    "level": 2
+   },
+   "text": [
+    {
+     "insert": "Outline and anchors"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-outline-p1": {
+   "id": "b-sapi-outline-p1",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "The outline is the geometric primitive (D4): each def declares its connection/hit geometry as an "
+    },
+    {
+     "insert": "OutlineSpec",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/geometry.ts",
+       "symbol": "OutlineSpec"
+      }
+     }
+    },
+    {
+     "insert": ", and connection anchors, anchor dots, outline snap, and pointer hit-testing all derive from it. It lives in "
+    },
+    {
+     "insert": "objects/geometry.ts",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/geometry.ts"
+      }
+     }
+    },
+    {
+     "insert": " \u2014 a pure, React-free leaf module. The import-boundaries test allows "
+    },
+    {
+     "insert": "connectors/",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " to import all of "
+    },
+    {
+     "insert": "objects/",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "; geometry.ts is where the connector-relevant outline math lives, but no single edge is pinned. A silhouette is how the shape paints; the outline is where connectors attach and clicks land \u2014 the two should trace the same curve, cross-checked by "
+    },
+    {
+     "insert": "objects/__tests__/geometry-def-agreement.test.ts",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-outlinespec": {
+   "id": "b-sapi-code-outlinespec",
+   "type": "code",
+   "props": {
+    "language": "ts"
+   },
+   "text": [
+    {
+     "insert": "// packages/canvas/src/objects/geometry.ts\nexport type OutlineSpec =\n  | { kind: \"bbox\" }\n  | { kind: \"polygon\"; points: (bounds: CanvasBounds, object: InteractiveCanvasObject) => CanvasPoint[] }\n  | { kind: \"ellipse\" };\n\n// One shared spec object per outline family \u2014 a true-outline def declares its\n// `outline` by referencing the SAME exported const the dispatch tables use\n// (identity-asserted by objects/__tests__/geometry-def-agreement.test.ts):\nexport const BBOX_OUTLINE: OutlineSpec = { kind: \"bbox\" };\n/** True axis-aligned ellipse inscribed in the bounds (dense 32-segment polygon). */\nexport const ELLIPSE_OUTLINE: OutlineSpec = { kind: \"ellipse\" };\nexport const DIAMOND_OUTLINE: OutlineSpec = { kind: \"polygon\", points: diamondPoints };\n// Direction-aware: `object.direction` narrows to the 2-value subset each builder expects.\nexport const TRIANGLE_OUTLINE: OutlineSpec = {\n  kind: \"polygon\",\n  points: (bounds, object) => trianglePoints(bounds, object.direction === \"down\" ? \"down\" : \"up\"),\n};\nexport const ARROW_SHAPE_OUTLINE: OutlineSpec = {\n  kind: \"polygon\",\n  points: (bounds, object) => arrowShapePoints(bounds, object.direction === \"left\" ? \"left\" : \"right\"),\n};\nexport const OCTAGON_OUTLINE: OutlineSpec = { kind: \"polygon\", points: octagonPoints };\n\n/** True-outline dispatch by object TYPE; every other type falls back through\n    OUTLINES_BY_STYLE_SHAPE to BBOX_OUTLINE. Icon is intentionally NOT here \u2014\n    its connection outline is the plain box (bbox fallback, same tier as sticky/section). */\nexport const OUTLINES_BY_TYPE: Partial<Record<InteractiveCanvasObjectType, OutlineSpec>> = {\n  \"arrow-shape\": ARROW_SHAPE_OUTLINE,\n  ellipse: ELLIPSE_OUTLINE,\n  triangle: TRIANGLE_OUTLINE,\n  octagon: OCTAGON_OUTLINE,\n};\n\n/** Secondary dispatch by `style.shape` \u2014 ONLY diamond/ellipse, exactly the pair\n    the pre-P3 outlineShapeFor() switch consulted style for. */\nexport const OUTLINES_BY_STYLE_SHAPE: Partial<\n  Record<NonNullable<CanvasObjectStyle[\"shape\"]>, OutlineSpec>\n> = {\n  diamond: DIAMOND_OUTLINE,\n  ellipse: ELLIPSE_OUTLINE,\n};"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-outline-p2": {
+   "id": "b-sapi-outline-p2",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "The per-object lookup, "
+    },
+    {
+     "insert": "outlineSpecFor()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/geometry.ts",
+       "symbol": "outlineSpecFor"
+      }
+     }
+    },
+    {
+     "insert": ", deliberately reproduces the deleted "
+    },
+    {
+     "insert": "outlineShapeFor()",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " switch's dispatch order VERBATIM \u2014 including its quirks \u2014 so connection geometry stayed byte-identical through the P3 move. The quirk is documented in the source and worth quoting exactly, because it is NOT the render dispatch:"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-outlinespecfor": {
+   "id": "b-sapi-code-outlinespecfor",
+   "type": "code",
+   "props": {
+    "language": "ts"
+   },
+   "text": [
+    {
+     "insert": "// packages/canvas/src/objects/geometry.ts \u2014 verbatim, including the ordering contract\n/**\n * Resolves the outline spec for an object. The ordering reproduces the\n * pre-P3 `outlineShapeFor()` switch VERBATIM \u2014 including its quirks \u2014 so\n * connection geometry is byte-identical (rationalizing dispatch is P4):\n *\n *   1. `type === \"arrow-shape\"` wins over everything;\n *   2. a diamond/ellipse `style.shape` override wins over the\n *      remaining TYPE checks (the old switch's style checks sat ABOVE the\n *      W5 type checks \u2014 e.g. `type: \"triangle\"` + `style.shape: \"diamond\"`\n *      resolves DIAMOND, while `type: \"process\"` + `style.shape:\n *      \"triangle\"` stays BBOX because triangle is never a style key);\n *   3. the type table;\n *   4. bbox fallback.\n *\n * NOTE this is deliberately NOT `objectDefFor`'s render-shape dispatch \u2014\n * hit-testing (D16) and connection geometry stay consistent with each other\n * by both using THIS lookup. TODO(P4): unify outline dispatch with render\n * dispatch when defs consolidate.\n */\nexport function outlineSpecFor(object: InteractiveCanvasObject): OutlineSpec {\n  if (object.type === \"arrow-shape\") return ARROW_SHAPE_OUTLINE;\n  const styleShape = object.style?.shape;\n  const styleSpec = styleShape === undefined ? undefined : OUTLINES_BY_STYLE_SHAPE[styleShape];\n  if (styleSpec) return styleSpec;\n  return OUTLINES_BY_TYPE[object.type] ?? BBOX_OUTLINE;\n}"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-anchors-p1": {
+   "id": "b-sapi-anchors-p1",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Anchors are the 4-ray outline projection, and that is the default for every kind \u2014 no def declares anchor points explicitly. "
+    },
+    {
+     "insert": "getConnectionAnchors()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/geometry.ts",
+       "symbol": "getConnectionAnchors"
+      }
+     }
+    },
+    {
+     "insert": " (ported from BlockSuite's "
+    },
+    {
+     "insert": "getAnchors",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ") builds four cardinal candidates offset "
+    },
+    {
+     "insert": "ANCHOR_OFFSET_PX",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/geometry.ts",
+       "symbol": "ANCHOR_OFFSET_PX"
+      }
+     }
+    },
+    {
+     "insert": " (10 world px) outside the bound, then projects each along the ray from the object's center onto the outline polygon ("
+    },
+    {
+     "insert": "outlinePolygon()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/geometry.ts",
+       "symbol": "outlinePolygon"
+      }
+     }
+    },
+    {
+     "insert": "), falling back to the bbox edge midpoint only for degenerate geometry. Three consumers read the same four points: the live connect cascade ("
+    },
+    {
+     "insert": "resolveConnectionCascade",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/connectors/connection-cascade.ts",
+       "symbol": "resolveConnectionCascade"
+      }
+     }
+    },
+    {
+     "insert": " \u2014 anchor snap within 8 view px, else outline snap within 8 world px, else inside, else free; unchanged from the pre-overhaul cascade, see "
+    },
+    {
+     "insert": "connectors",
+     "attributes": {
+      "reference": {
+       "kind": "doc",
+       "path": "10-system-design/20-engine/30-connectors",
+       "label": "connectors"
+      }
+     }
+    },
+    {
+     "insert": "), the mid-drag target preview dots ("
+    },
+    {
+     "insert": "ConnectorDragPreview",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "), and the selected-object anchor dots below \u2014 so the dots you see, the ports you grab, and the points connections snap to can never disagree."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-anchors-p2": {
+   "id": "b-sapi-anchors-p2",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Anchor dots (D5/D15): "
+    },
+    {
+     "insert": "AnchorDots",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/connectors/AnchorDots.tsx",
+       "symbol": "AnchorDots"
+      }
+     }
+    },
+    {
+     "insert": " renders FigJam-style dots (8px white fill, selection-blue ring, 14px grab target) in CanvasStage's screen-space overlay. In select mode, dots appear for every SELECTED object, at the "
+    },
+    {
+     "insert": "getConnectionAnchors",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " positions mapped "
+    },
+    {
+     "insert": "worldToScreen",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "; in Connector Mode, dots are hover-driven for the topmost object under the cursor and use "
+    },
+    {
+     "insert": "bypassZoomGate",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " so they are ungated by zoom. They replace the old invisible edge ports. Select-mode visibility and interactivity are zoom-gated by "
+    },
+    {
+     "insert": "ANCHOR_DOTS_MIN_ZOOM",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/connectors/AnchorDots.tsx",
+       "symbol": "ANCHOR_DOTS_MIN_ZOOM"
+      }
+     }
+    },
+    {
+     "insert": " (0.5) \u2014 below 50% zoom, select-mode dots are hidden and inert at "
+    },
+    {
+     "insert": "opacity: 0",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " and "
+    },
+    {
+     "insert": "pointer-events: none",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "; Connector Mode bypasses the gate so its dots stay visible and interactive. Resize corners are unaffected: SelectionBox shows at any zoom. A pointerdown on a visible, interactive dot bubbles to the stage's "
+    },
+    {
+     "insert": "[data-canvas-port]",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " resolver and starts a connector-create gesture exactly like the old ports."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-hit-p1": {
+   "id": "b-sapi-hit-p1",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Hit-testing derives from the outline (D16): "
+    },
+    {
+     "insert": "hitTestObjects()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/interaction/hit-testing.ts",
+       "symbol": "hitTestObjects"
+      }
+     }
+    },
+    {
+     "insert": " walks topmost-first, fast-rejects on the bbox, then asks "
+    },
+    {
+     "insert": "outlineContainsPoint()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/geometry.ts",
+       "symbol": "outlineContainsPoint"
+      }
+     }
+    },
+    {
+     "insert": " \u2014 bbox-outline kinds test the plain bounds (byte-identical to pre-D16), true-outline kinds test point-in-polygon expanded by "
+    },
+    {
+     "insert": "OUTLINE_HIT_TOLERANCE_WORLD_PX",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/geometry.ts",
+       "symbol": "OUTLINE_HIT_TOLERANCE_WORLD_PX"
+      }
+     }
+    },
+    {
+     "insert": " (4 world px) so the stroke itself stays clickable. A diamond's empty corners click through to whatever is behind. Two surfaces are DELIBERATELY still bbox-based, each documented in "
+    },
+    {
+     "insert": "interaction/hit-testing.ts",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/interaction/hit-testing.ts"
+      }
+     }
+    },
+    {
+     "insert": ": drag-select membership ("
+    },
+    {
+     "insert": "objectsIntersectingBounds",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " \u2014 a drag-select rectangle grabbing a diamond's empty corner still selects it, FigJam-consistent) and snap-guide candidates ("
+    },
+    {
+     "insert": "gatherSnapCandidates",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " \u2014 alignment targets are axis-aligned bounds regardless of outline shape). Section drop targeting is not a point hit at all: it previews through the membership predicate over the dragged object's projected bounds, per "
+    },
+    {
+     "insert": "the layer cake",
+     "attributes": {
+      "reference": {
+       "kind": "doc",
+       "path": "10-system-design/30-layering",
+       "label": "the layer cake"
+      }
+     }
+    },
+    {
+     "insert": "."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-decision-outline-hit": {
+   "id": "b-sapi-decision-outline-hit",
+   "type": "decision",
+   "props": {
+    "status": "accepted",
+    "title": "Clicks respect the declared outline; drag-select and snapping deliberately stay bbox"
+   },
+   "text": [
+    {
+     "insert": "Pointer hits consult "
+    },
+    {
+     "insert": "outlineContainsPoint",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " so true-outline shapes are only clickable where they actually paint, while drag-select and snap-candidate gathering remain bounding-box tests on purpose \u2014 they are area/alignment semantics, not point-precision semantics, and FigJam behaves the same way. Bbox-outline kinds are byte-identical to the pre-D16 behavior by construction (their outline IS the bbox and no polygon is ever materialized), which is what made the cutover safe to gate on the existing interaction test suite."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-h2-color": {
+   "id": "b-sapi-h2-color",
+   "type": "heading",
+   "props": {
+    "level": 2
+   },
+   "text": [
+    {
+     "insert": "Color: one pick per object"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-color-p1": {
+   "id": "b-sapi-color-p1",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "Color storage is one field: "
+    },
+    {
+     "insert": "object.color?: CanvasColor",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " and "
+    },
+    {
+     "insert": "connection.color?: CanvasColor",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " (D1). The vocabulary is FigJam's color popover, minus the custom-color wheel and minus black (D7 + D12): 10 hues, one pick per hue. Each pick resolves through ink/fill/wash roles: ink is the picker swatch and every stroke, fill is the shape/sticky/chip fill, and wash is the section tint. Legacy `-soft` ids were remapped once by tools/migrate-canvas-docs/migrate.ts to the nearest bare hue; at runtime the validator simply drops unknown ids, so there is no live normalization path in isCanvasColor(). The ids are schema vocabulary in "
+    },
+    {
+     "insert": "state/schema/colors.ts",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/colors.ts"
+      }
+     }
+    },
+    {
+     "insert": " \u2014 no hexes there, just the closed id set and its "
+    },
+    {
+     "insert": "isCanvasColor()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/colors.ts",
+       "symbol": "isCanvasColor"
+      }
+     }
+    },
+    {
+     "insert": " guard. "
+    },
+    {
+     "insert": "The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
+    },
+    {
+     "insert": "board-design-reference/analysis/palette-sheet.html",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "reference/board-design-reference/analysis/palette-sheet.html"
+      }
+     }
+    },
+    {
+     "insert": "."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-colors": {
+   "id": "b-sapi-code-colors",
+   "type": "code",
+   "props": {
+    "language": "ts"
+   },
+   "text": [
+    {
+     "insert": "// packages/canvas/src/state/schema/colors.ts\n/** The 10 FigJam hue families (black dropped per D12; \"white\" is a hue here, not a neutral escape hatch). */\nexport type CanvasHue =\n  | \"gray\"\n  | \"red\"\n  | \"orange\"\n  | \"yellow\"\n  | \"green\"\n  | \"teal\"\n  | \"blue\"\n  | \"violet\"\n  | \"pink\"\n  | \"white\";\n\n/** The stored color ids: 10 picks, one per hue. */\nexport type CanvasColor = CanvasHue;\n\n/** The 10 swatch ids in picker order. */\nexport const CANVAS_COLORS: readonly CanvasColor[] = CANVAS_HUES;\n\n/** Type guard for the closed 10-id roster \u2014 use at schema/validator boundaries. */\nexport function isCanvasColor(value: unknown): value is CanvasColor;"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-roster": {
+   "id": "b-sapi-code-roster",
+   "type": "code",
+   "props": {
+    "language": "text"
+   },
+   "text": [
+    {
+     "insert": "The 10-pick roster in picker order (CANVAS_COLORS \u2014 the single row every kind renders):\n\n  gray  red  orange  yellow  green  teal  blue  violet  pink  white\n\nLegacy ids ending in `-soft` were remapped once by tools/migrate-canvas-docs/migrate.ts to the nearest bare hue. At runtime, isCanvasColor drops unknown ids; there is no live normalization path."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-color-p2": {
+   "id": "b-sapi-color-p2",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "What each id LOOKS like per kind lives in "
+    },
+    {
+     "insert": "theme/palette.ts",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/theme/palette.ts"
+      }
+     }
+    },
+    {
+     "insert": " \u2014 the canonical 10-row swatch table, a leaf module in theme/ (sibling of "
+    },
+    {
+     "insert": "theme/tokens.ts",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ") deliberately outside both "
+    },
+    {
+     "insert": "state/",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " and "
+    },
+    {
+     "insert": "objects/",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " so "
+    },
+    {
+     "insert": "theme/tokens.ts",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", "
+    },
+    {
+     "insert": "objects/",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", and "
+    },
+    {
+     "insert": "stage/editor/",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " can all import it without layering violations. Every hex in the table is annotated inline as sampled (citing its FigJam source) or derived; that file is the single source of truth for the role hexes reproduced below. A row is a "
+    },
+    {
+     "insert": "Swatch",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/theme/palette.ts",
+       "symbol": "Swatch"
+      }
+     }
+    },
+    {
+     "insert": ": one picker-preview hex plus one expression cell per role:"
+    },
+    {
+     "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
+    },
+    {
+     "insert": "board-design-reference/analysis/palette-sheet.html",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "reference/board-design-reference/analysis/palette-sheet.html"
+      }
+     }
+    },
+    {
+     "insert": "."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-swatch": {
+   "id": "b-sapi-code-swatch",
+   "type": "code",
+   "props": {
+    "language": "ts"
+   },
+   "text": [
+    {
+     "insert": "// packages/canvas/src/theme/palette.ts\nexport type ShapeColors = {\n  fill: string;\n  /** Every shape pick renders with an ink border. */\n  border: string;\n};\n\nexport type SectionChipColors = {\n  fill: string;\n  border: string;\n};\n\nexport type SectionColors = {\n  tint: string;\n  chip: SectionChipColors;\n};\n\nexport type Swatch = {\n  /** The picker preview: ink, except white previews as #FFFFFF with its contrast ring. */\n  swatch: string;\n  /** fill + ink border. */\n  shape: ShapeColors;\n  /** wash tint + title-chip fill/border. */\n  section: SectionColors;\n  /** Sticky fill role. */\n  sticky: string;\n  /** Connector stroke: ink, with white using gray. */\n  connector: string;\n};\n\nexport const CANVAS_PALETTE: Record<CanvasColor, Swatch>;\n\n// The per-role resolvers \u2014 one per role table:\nexport function resolveShapeColors(color: CanvasColor): ShapeColors;\nexport function resolveSectionColors(color: CanvasColor): SectionColors;\nexport function resolveStickyFill(color: CanvasColor): string;\nexport function resolveConnectorStroke(color: CanvasColor): string;\nexport function resolveSwatchPreview(color: CanvasColor): string;"
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-code-color-hexes": {
+   "id": "b-sapi-code-color-hexes",
+   "type": "code",
+   "props": {
+    "language": "text"
+   },
+   "text": [
+    {
+     "insert": "Authoritative role hexes:\n\nhue     ink      shape fill  sticky fill  section wash\ngray    #757575  #E6E6E6    #E6E6E6     #F9F9F9\nred     #D5322F  #FFD2CC    #FFBFB7     #FEF3F1\norange  #EB7500  #FFE0C2    #FFE0C2     #FFF7F0\nyellow  #E8A302  #FFECBD    #FFE299     #FFFBF0\ngreen   #019142  #C5E9CB    #C5E9CB     #F0F8F2\nteal    #369E94  #C6FAF6    #C6FAF6     #EAFDFB\nblue    #1A5CDF  #CDDFFF    #B9D2FF     #F1F6FE\nviolet  #9747FF  #DCCCFF    #DCCCFF     #F8F5FF\npink    #B74D85  #F9D1E3    #F9D1E3     #FDF3F7\nwhite   #757980  #FFFFFF    #FFFFFF     #FFFFFF\n\nWhite uses #757980 for strokes/connectors; its picker preview remains #FFFFFF with the existing contrast ring. The white section chip uses #DBDEE3 fill and #C1C4CB border so it remains visible on white wash."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-color-p3": {
+   "id": "b-sapi-color-p3",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "A pick is a direction; the def's "
+    },
+    {
+     "insert": "colorRole",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " decides rendering. For the "
+    },
+    {
+     "insert": "\"shape\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " role, every pick renders fill + ink border at the universal 4px stroke ("
+    },
+    {
+     "insert": "SHAPE_STROKE_WIDTH_PX",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/theme/tokens.ts",
+       "symbol": "SHAPE_STROKE_WIDTH_PX"
+      }
+     }
+    },
+    {
+     "insert": "); there is no borderless color treatment. White keeps a visible "
+    },
+    {
+     "insert": "#757980",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " stroke since a white stroke would vanish on the "
+    },
+    {
+     "insert": "#F5F5F5",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " board (light-only by D9). For "
+    },
+    {
+     "insert": "\"section\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", wash = the tint and the title chip uses fill + ink border; for "
+    },
+    {
+     "insert": "\"sticky\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", fill = the sticky hex; for connectors, ink = the stroke hex (default pick "
+    },
+    {
+     "insert": "\"gray\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "). The one resolver every object renderer goes through is "
+    },
+    {
+     "insert": "resolveObjectRoleColors()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/object-shell.tsx",
+       "symbol": "resolveObjectRoleColors"
+      }
+     }
+    },
+    {
+     "insert": ", which also fixes text: ALL object text is "
+    },
+    {
+     "insert": "OBJECT_TEXT_COLOR",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/text-slots.ts",
+       "symbol": "OBJECT_TEXT_COLOR"
+      }
+     }
+    },
+    {
+     "insert": " dark (D8) (one deviation: the sticky inset-body preset uses rgba(0, 0, 0, 0.8)) \u2014 no per-color text derivation and no user-pickable text color. D13 killed forced glyph colors: icon glyphs are ordinary colorable objects."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-color-p4": {
+   "id": "b-sapi-color-p4",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "New-object color is last-picked memory (D17), per kind so a red connector doesn't make the next sticky red: reducer state carries "
+    },
+    {
+     "insert": "lastPickedColor: Record<CanvasColorKind, CanvasColor>",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " seeded from "
+    },
+    {
+     "insert": "FIRST_USE_COLORS",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/object-defaults.ts",
+       "symbol": "FIRST_USE_COLORS"
+      }
+     }
+    },
+    {
+     "insert": " ("
+    },
+    {
+     "insert": "shape: \"gray\", sticky: \"yellow\", section: \"gray\", connector: \"gray\"",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "); "
+    },
+    {
+     "insert": "canvas.addObject",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " reads the bucket via "
+    },
+    {
+     "insert": "colorKindForType()",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/object-defaults.ts",
+       "symbol": "colorKindForType"
+      }
+     }
+    },
+    {
+     "insert": " when no explicit color is supplied, and a "
+    },
+    {
+     "insert": "canvas.updateObject",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "/"
+    },
+    {
+     "insert": "canvas.updateConnection",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " color patch writes it back. The UI is ONE component: "
+    },
+    {
+     "insert": "ColorPicker",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/stage/editor/components/ColorPicker.tsx",
+       "symbol": "ColorPicker"
+      }
+     }
+    },
+    {
+     "insert": " renders the 10-pick row from "
+    },
+    {
+     "insert": "CANVAS_COLORS",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " via "
+    },
+    {
+     "insert": "resolveSwatchPreview",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " \u2014 identical previews for every kind, the current pick marked by a floating 2px #8C2EF2 rounded-square outline (the rainbow conic ring is retired) \u2014 replacing the old "
+    },
+    {
+     "insert": "ColorPalettePopover",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": ", section-tint flyout, and connector swatch row."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-constraint-closed-roster": {
+   "id": "b-sapi-constraint-closed-roster",
+   "type": "constraint",
+   "props": {
+    "severity": "hard",
+    "title": "The color roster is closed: 10 picks, no custom colors, ever"
+   },
+   "text": [
+    {
+     "insert": "Documents store swatch IDS, never hexes. "
+    },
+    {
+     "insert": "validateInteractiveCanvasDocument",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/validate.ts",
+       "symbol": "validateInteractiveCanvasDocument"
+      }
+     }
+    },
+    {
+     "insert": " soft-validates "
+    },
+    {
+     "insert": "color",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " against "
+    },
+    {
+     "insert": "isCanvasColor",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " (unknown ids are dropped with a warning); the legacy "
+    },
+    {
+     "insert": "tone",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "/"
+    },
+    {
+     "insert": "paletteToken",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "/"
+    },
+    {
+     "insert": "style.fill",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "/"
+    },
+    {
+     "insert": "style.stroke",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "/section "
+    },
+    {
+     "insert": "tint",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": "/raw connector hexes are deleted from the schema with no legacy read path (D10) \u2014 existing documents crossed over once via "
+    },
+    {
+     "insert": "tools/migrate-canvas-docs/migrate.ts",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " (nearest-swatch mapping) and the old keys are now simply ignored as unknown. There is no custom-color wheel and no explicit-hex escape hatch; changing what a pick looks like means editing "
+    },
+    {
+     "insert": "theme/palette.ts",
+     "attributes": {
+      "code": true
+     }
+    },
+    {
+     "insert": " cells, not documents."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-constraint-closed-vocab": {
+   "id": "b-sapi-constraint-closed-vocab",
+   "type": "constraint",
+   "props": {
+    "severity": "hard",
+    "title": "Shape vocabulary is closed and typed, not freeform SVG"
+   },
+   "text": [
+    {
+     "insert": "Extending the shape vocabulary means adding a value to "
+    },
+    {
+     "insert": "InteractiveCanvasObjectType",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/state/schema/object-types.ts",
+       "symbol": "InteractiveCanvasObjectType"
+      }
+     }
+    },
+    {
+     "insert": " and registering a def through the closed compile-time vocabularies \u2014 not authoring an arbitrary SVG path, a runtime-registered shape class, or a plugin. There is no registration API, no user-supplied path string field, and no mechanism for a canvas document to define a shape the engine doesn't already know how to validate and render. An agent (or a human) constructing a shape only ever writes valid JSON against the schema; the def registry is compile-time, closed, and fully enumerated in "
+    },
+    {
+     "insert": "OBJECT_DEFS",
+     "attributes": {
+      "code": true,
+      "reference": {
+       "kind": "source",
+       "path": "packages/canvas/src/objects/object-def.ts",
+       "symbol": "OBJECT_DEFS"
+      }
+     }
+    },
+    {
+     "insert": "."
+    }
+   ],
+   "children": []
+  },
+  "b-sapi-closing": {
+   "id": "b-sapi-closing",
+   "type": "paragraph",
+   "props": {},
+   "text": [
+    {
+     "insert": "For the schema and reducer these shapes are validated and mutated through, see "
+    },
+    {
+     "insert": "the document model",
+     "attributes": {
+      "reference": {
+       "kind": "doc",
+       "path": "10-system-design/20-engine/10-document-model",
+       "label": "the document model"
+      }
+     }
+    },
+    {
+     "insert": ". For the A*/anchor routing pipeline that consumes the outline/anchor contract, see "
+    },
+    {
+     "insert": "connectors",
+     "attributes": {
+      "reference": {
+       "kind": "doc",
+       "path": "10-system-design/20-engine/30-connectors",
+       "label": "connectors"
+      }
+     }
+    },
+    {
+     "insert": ". For the semantic surface built on this contract \u2014 the eight-shape core, the glyph roster, and the preference registry \u2014 see "
+    },
+    {
+     "insert": "operational maps",
+     "attributes": {
+      "reference": {
+       "kind": "doc",
+       "path": "10-system-design/40-operational-maps",
+       "label": "operational maps"
+      }
+     }
+    },
+    {
+     "insert": "."
+    }
+   ],
+   "children": []
   }
+ }
 }
