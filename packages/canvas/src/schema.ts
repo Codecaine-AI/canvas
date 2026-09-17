@@ -11,7 +11,6 @@ export type InteractiveCanvasObjectType =
   | "text"
   | "sticky"
   | "source-node"
-  | "annotation-marker"
   // D16 — expanded vocabulary for the reference diagrams (checkpoint 5):
   | "document"
   | "person"
@@ -278,7 +277,6 @@ function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectTyp
     value === "text" ||
     value === "sticky" ||
     value === "source-node" ||
-    value === "annotation-marker" ||
     value === "document" ||
     value === "person" ||
     value === "database" ||

@@ -28,7 +28,7 @@
  *
  * Existing schema.ts vocabulary at time of writing (read-only import):
  *   container, process, decision, text, sticky, source-node,
- *   annotation-marker, document, person, database, chat.
+ *   document, person, database, chat.
  * New W2-model vocabulary expected (per parity-plan.md + task brief):
  *   section, pill, arrow-shape, predefined-process, code-block, chip-icon.
  */

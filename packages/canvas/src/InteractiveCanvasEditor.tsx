@@ -166,9 +166,6 @@ const DOCK_TOOL_TO_CANVAS_TOOL: Partial<Record<ToolId, CanvasTool>> = {
   text: "text",
   sticky: "sticky",
   connector: "select", // quick-connect is driven by hovering a port while in "select", not a distinct tool.
-  // FigJam's comment tool drops a pin annotation on the canvas — closest
-  // existing capability is the "annotation-marker" object tool.
-  comment: "annotation-marker",
 };
 
 /** Dock ids with no backing editor capability yet — rendered disabled with a tooltip. */
@@ -178,6 +175,7 @@ const DOCK_TOOLS_COMING_SOON = new Set<ToolId>([
   "table",
   "stamp",
   "widgets",
+  "comment",
 ]);
 
 /** Inverse of DOCK_TOOL_TO_CANVAS_TOOL, for reflecting reducer tool state back onto the dock's activeTool. */
@@ -186,7 +184,6 @@ const CANVAS_TOOL_TO_DOCK_TOOL: Partial<Record<CanvasTool, ToolId>> = {
   hand: "hand",
   text: "text",
   sticky: "sticky",
-  "annotation-marker": "comment",
 };
 
 /**
