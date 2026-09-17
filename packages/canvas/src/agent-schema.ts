@@ -15,7 +15,6 @@ const CanvasObjectTypeSchema = Type.Union([
   Type.Literal("text"),
   Type.Literal("sticky"),
   Type.Literal("source-node"),
-  Type.Literal("annotation-marker"),
   Type.Literal("document"),
   Type.Literal("person"),
   Type.Literal("database"),
