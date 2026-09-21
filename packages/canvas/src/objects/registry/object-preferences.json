@@ -3,25 +3,25 @@
     "name": "rectangle",
     "meaning": "A plain box — a message or payload container",
     "scenarios": ["messages, payloads, and containers that are not process steps"],
-    "color": "gray"
+    "color": "white"
   },
   {
     "name": "process",
     "meaning": "A rounded rectangle — one step in a procedure",
     "scenarios": ["a single action or stage in a walkthrough or pipeline"],
-    "color": "gray"
+    "color": "teal"
   },
   {
     "name": "decision",
     "meaning": "A branch — the flow forks on a condition",
     "scenarios": ["yes/no gates", "routing on the outcome of a check"],
-    "color": "gray"
+    "color": "yellow"
   },
   {
     "name": "predefined-process",
     "meaning": "A delegated step — work handed to another flow",
     "scenarios": ["spawned sub-agents, subroutines, enqueued tasks"],
-    "color": "gray"
+    "color": "teal"
   },
   {
     "name": "triangle",
@@ -33,7 +33,7 @@
     "name": "ellipse",
     "meaning": "A start or end terminator",
     "scenarios": ["the entry and exit points of a procedure"],
-    "color": "gray"
+    "color": "green"
   },
   {
     "name": "arrow-shape",
@@ -45,7 +45,7 @@
     "name": "octagon",
     "meaning": "A stop",
     "scenarios": ["hard stops, aborts, terminal failure states"],
-    "color": "gray"
+    "color": "red"
   },
   {
     "name": "agent",
@@ -57,13 +57,13 @@
     "name": "model",
     "meaning": "An LLM or model call",
     "scenarios": ["model invocations, completions, embedding calls"],
-    "color": "pink"
+    "color": "violet"
   },
   {
     "name": "human",
     "meaning": "A person in the loop",
     "scenarios": ["approvals, reviews, human handoffs"],
-    "color": "yellow"
+    "color": "pink"
   },
   {
     "name": "orchestrator",
@@ -90,7 +90,7 @@
     "name": "queue",
     "meaning": "A queue or stream of work items",
     "scenarios": ["task queues, streams, backlogs between stages"],
-    "color": "green"
+    "color": "yellow"
   },
   {
     "name": "server",
@@ -114,13 +114,13 @@
     "name": "api",
     "meaning": "An external API or connection point",
     "scenarios": ["third-party APIs, endpoints, integration seams"],
-    "color": "gray"
+    "color": "blue"
   },
   {
     "name": "message",
     "meaning": "A conversation or message surface",
     "scenarios": ["chat threads, transcripts, message payloads"],
-    "color": "yellow"
+    "color": "pink"
   },
   {
     "name": "send",
@@ -132,25 +132,25 @@
     "name": "event",
     "meaning": "A trigger or event",
     "scenarios": ["webhooks, triggers, scheduled firings"],
-    "color": "yellow"
+    "color": "green"
   },
   {
     "name": "guardrail",
     "meaning": "A safety gate",
     "scenarios": ["input/output filters, policy checks, blocked-content gates"],
-    "color": "red"
+    "color": "orange"
   },
   {
     "name": "monitor",
     "meaning": "Observation and tracing",
     "scenarios": ["dashboards, traces, telemetry watchpoints"],
-    "color": "gray"
+    "color": "blue"
   },
   {
     "name": "judge",
     "meaning": "An eval or verdict step",
     "scenarios": ["LLM judges, scoring passes, accept/reject verdicts"],
-    "color": "pink"
+    "color": "violet"
   },
   {
     "name": "document",
@@ -168,7 +168,7 @@
     "name": "activity",
     "meaning": "Traces, telemetry, run activity",
     "scenarios": ["run logs, activity feeds, execution traces"],
-    "color": "gray"
+    "color": "blue"
   },
   {
     "name": "archive",
@@ -186,48 +186,48 @@
     "name": "coin",
     "meaning": "Cost, billing, budgets",
     "scenarios": ["token spend, budgets, billing meters"],
-    "color": "yellow"
+    "color": "green"
   },
   {
     "name": "package",
     "meaning": "A build artifact, bundle, or deployment",
     "scenarios": ["builds, releases, deployable bundles"],
-    "color": "gray"
+    "color": "white"
   },
   {
     "name": "voice",
     "meaning": "A voice channel — the audio boundary where a human talks to the system",
     "scenarios": ["voice sessions, speech-to-text / text-to-speech seams, call surfaces"],
-    "color": "gray"
+    "color": "pink"
   },
   {
     "name": "search",
     "meaning": "Retrieval, lookup, similarity search",
     "scenarios": ["retrieval steps, lookups, similarity queries"],
-    "color": "gray"
+    "color": "blue"
   },
   {
     "name": "tool",
     "meaning": "A capability an agent can invoke — distinct from api and config",
     "scenarios": ["tool calls, function invocations, agent capabilities"],
-    "color": "gray"
+    "color": "teal"
   },
   {
     "name": "wait",
     "meaning": "A blocking wait, join barrier, or timeout",
     "scenarios": ["joins, barriers, debounces, timeouts"],
-    "color": "gray"
+    "color": "yellow"
   },
   {
     "name": "lock",
     "meaning": "A lease, claim, or mutual exclusion — key stays secrets",
     "scenarios": ["leases, claims, single-writer locks"],
-    "color": "gray"
+    "color": "yellow"
   },
   {
     "name": "eval",
     "meaning": "An experiment, eval set, or test harness",
     "scenarios": ["eval suites, experiments, regression harnesses"],
-    "color": "green"
+    "color": "violet"
   }
 ]

@@ -343,11 +343,11 @@ describe("session operations", () => {
     expect(result.text).toContain("APPLIED · move_to beta → (200, 0)");
     expect(result.text).toContain("DELTA");
     expect(result.text).toContain("beta  320,0 → 200,0");
-    expect(result.text).toContain("LINTS · +2 −0");
+    expect(result.text).toContain("LINTS · +1 −0");
     expect(result.text).toContain('W1 unreadable-labels: label "go" chip on edge');
-    expect(result.text).toContain("crowding: alpha and beta");
+    expect(result.text).not.toContain("crowding: alpha and beta");
     expect(result.text).not.toContain("[quickfix]");
-    expect(session.lastDiagnostics).toHaveLength(2);
+    expect(session.lastDiagnostics).toHaveLength(1);
     expect(session.draft.objects.find((object) => object.id === "beta")?.geometry)
       .toEqual({ x: 200, y: 0, width: 160, height: 96 });
     expect(session.events.map((event) => event.type)).toEqual(["proposal", "delta"]);

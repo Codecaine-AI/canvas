@@ -1,0 +1,461 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation-70-studio",
+  "title": "Studio",
+  "root": "b-studio-root-0",
+  "blocks": {
+    "b-studio-root-0": {
+      "id": "b-studio-root-0",
+      "type": "paragraph",
+      "props": {
+        "covers": "The structure of packages/studio: shared server handlers mounted by both shells, the dev flag over development-only surfaces, and per-surface client folders.",
+        "type": "implementation",
+        "concepts": [
+          "studio",
+          "app-server-split",
+          "shared-handlers",
+          "dev-flag",
+          "surface-folders"
+        ]
+      },
+      "children": [
+        "b-studio-role-1",
+        "b-studio-sources-2",
+        "b-studio-gov-3",
+        "b-studio-gov-persist-4",
+        "b-studio-decisions-5",
+        "b-studio-handlers-decision-6",
+        "b-studio-handlers-why-7",
+        "b-studio-handlers-applies-8",
+        "b-studio-dev-flag-decision-9",
+        "b-studio-dev-flag-why-10",
+        "b-studio-dev-flag-applies-11",
+        "b-studio-surfaces-decision-12",
+        "b-studio-surfaces-why-13",
+        "b-studio-surfaces-applies-14"
+      ]
+    },
+    "b-studio-role-1": {
+      "id": "b-studio-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The standalone board app: a Vite+React client, an Electron shell, and shared Node handlers. Persistence and embedding behavior are owned by design; this area records the app's structure."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-sources-2": {
+      "id": "b-studio-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "packages/studio",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio",
+              "label": "packages/studio"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-gov-3": {
+      "id": "b-studio-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-studio-gov-persist-4": {
+      "id": "b-studio-gov-persist-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Persistence and embedding",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/50-persistence-and-embedding",
+              "label": "Persistence and embedding"
+            }
+          }
+        },
+        {
+          "insert": " — owns the persistence model: the canvas file API, SVG previews, and the embedding progression."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-decisions-5": {
+      "id": "b-studio-decisions-5",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-studio-handlers-decision-6": {
+      "id": "b-studio-handlers-decision-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "backend logic lives in "
+        },
+        {
+          "insert": "packages/studio/server/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/server",
+              "label": "packages/studio/server/"
+            }
+          }
+        },
+        {
+          "insert": " as shared Node handlers ("
+        },
+        {
+          "insert": "canvas-file-api.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "agent-proxy.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "evals-api.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ") that the Vite dev server and the Electron shell both mount, so web and desktop behave identically; new API surfaces join "
+        },
+        {
+          "insert": "server/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as shared handlers, never as shell-specific code."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-handlers-why-7": {
+      "id": "b-studio-handlers-why-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was per-shell backends, which fork persistence behavior between web and desktop and double every fix."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-handlers-applies-8": {
+      "id": "b-studio-handlers-applies-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/studio/server/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/server",
+              "label": "packages/studio/server/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future API surface."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-dev-flag-decision-9": {
+      "id": "b-studio-dev-flag-decision-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "development-only surfaces gate behind "
+        },
+        {
+          "insert": "src/dev-flag.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/dev-flag.ts",
+              "label": "src/dev-flag.ts"
+            }
+          }
+        },
+        {
+          "insert": " and live under "
+        },
+        {
+          "insert": "src/dev/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/dev",
+              "label": "src/dev/"
+            }
+          }
+        },
+        {
+          "insert": " (the dev rail, the evals page); production routes never mount them unflagged."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-dev-flag-why-10": {
+      "id": "b-studio-dev-flag-why-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was shipping dev tooling unconditionally, which leaks internal surfaces into the product and blurs which routes are contract."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-dev-flag-applies-11": {
+      "id": "b-studio-dev-flag-applies-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "src/dev/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/dev",
+              "label": "src/dev/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future dev surface."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-surfaces-decision-12": {
+      "id": "b-studio-surfaces-decision-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "client code groups by surface — "
+        },
+        {
+          "insert": "src/agent/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/agent",
+              "label": "src/agent/"
+            }
+          }
+        },
+        {
+          "insert": " for the agent session rail, "
+        },
+        {
+          "insert": "src/project/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/project",
+              "label": "src/project/"
+            }
+          }
+        },
+        {
+          "insert": " for project-board integration, "
+        },
+        {
+          "insert": "src/dev/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for flagged dev tooling — each owning its components, state, and adapters, with "
+        },
+        {
+          "insert": "App.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as thin route wiring."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-surfaces-why-13": {
+      "id": "b-studio-surfaces-why-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was a flat component pile behind the router, which hides which code serves which surface and makes a surface impossible to remove cleanly."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-surfaces-applies-14": {
+      "id": "b-studio-surfaces-applies-14",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/studio/src/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src",
+              "label": "packages/studio/src/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future studio surface, which gets its own folder rather than accreting into "
+        },
+        {
+          "insert": "App.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    }
+  }
+}

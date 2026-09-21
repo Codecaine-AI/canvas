@@ -1,0 +1,1831 @@
+{
+  "container_id": "f5811a34-8399-58a4-b4bb-503c0a493a6b",
+  "pi_sessions": [
+    {
+      "piSessionId": "01a08255-7536-7620-a769-79d47ca614f1",
+      "file": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-79d47ca614f1.jsonl",
+      "startedAt": "2026-09-08T18:43:53.782Z",
+      "userMessages": [
+        {
+          "text": "# Offline evaluation harness orchestration\n\nWe need a diagram of how our offline evaluation harness executes scenario suites against an AI system and grades the results. Each run starts from a pinned suite containing frozen scenario definitions and a fingerprint of the tested revision, configuration, prompt versions, and rubric versions. Because wording changes invalidate historical comparisons, scenarios receive new versions instead of being edited in place.\n\nA scheduler fans work out to a bounded pool of workers targeting an isolated instance of the system under test, never the shared production instance. Each worker performs a scenario's steps in order and captures both the full transcript and final artifact. Infrastructure failures trigger retries, while failures caused by the tested system's behavior are recorded before the worker continues. Results preserve that distinction so operational faults cannot masquerade as product regressions.\n\nCompleted scenarios enter grading immediately. Independent graders score separate criteria concurrently under a global concurrency limit, while an artifact-only grader receives no original request and therefore avoids anchoring on it. Every verdict includes supporting evidence. A verdict without evidence is invalid, is retried, and is flagged if the retry also fails.\n\nAn assembler merges valid verdicts into a scorecard and compares it with a chosen baseline, narrating movements that cross a defined threshold. Comparison is permitted only when both runs share the same fingerprint. The harness retains every artifact, transcript, and verdict so disputed scores can be re-examined, and promoting a run makes it the baseline for future compatible runs. The diagram should make clear how a pinned run moves from bounded execution through evidence-backed grading and compatible baseline comparison, while keeping infrastructure failures distinct from product regressions.\n",
+          "timestamp": "2026-09-08T18:43:53.853Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-09-08T18:43:59.891Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_r9ASFwSINsPcLB6nYk7ymZKO|fc_06367ec108b33fae016aa0576e93fc87d0ad6823eef707f59d",
+              "toolName": "resize",
+              "params": {
+                "id": "page-frame",
+                "width": 3400,
+                "height": 2000
+              },
+              "resultText": "APPLIED · resize page-frame → 3400×2000\nDELTA\n  page-frame  32,32 1920×1200 → 32,32 3400×2000\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-09-08T18:44:13.435Z",
+          "thinking": "**Planning node layout**",
+          "text": "I’ll lay this out left to right, with explicit worker and grader fan-outs, separate fault handling, and a fingerprint gate before baseline comparison. A shared retention area will keep the evidence trail visible beneath the main flow.\n",
+          "toolCalls": [
+            {
+              "toolUseId": "call_C5ymBkvU1XgPLbi7hIucTIYp|fc_06367ec108b33fae016aa0577b857087d095560b90ecee14e4",
+              "toolName": "place_section",
+              "params": {
+                "id": "pin",
+                "text": "1 · Immutable run contract",
+                "at": [
+                  100,
+                  160
+                ],
+                "size": {
+                  "width": 420,
+                  "height": 740
+                }
+              },
+              "resultText": "APPLIED · place_section pin 100,160 420×740\nDELTA\n  + pin  section 100,160 420×740 \"1 · Immutable run contract\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-09-08T18:44:18.325Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Sa7O9LGXI83zVxZ8iVUEpeco|fc_06367ec108b33fae016aa05781edf087d0b05bee5eb17bfd14",
+              "toolName": "change_color",
+              "params": {
+                "id": "pin",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · change_color pin\nDELTA\n  pin  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-09-08T18:44:26.940Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ZpGPlXcU6HS8LFuzD4LjTh2S|fc_06367ec108b33fae016aa0578965c887d09525e1b5e32033aa",
+              "toolName": "place_section",
+              "params": {
+                "id": "exec",
+                "text": "2 · Bounded execution · isolated SUT",
+                "at": [
+                  660,
+                  160
+                ],
+                "size": {
+                  "width": 820,
+                  "height": 1280
+                }
+              },
+              "resultText": "APPLIED · place_section exec 660,160 820×1280\nDELTA\n  + exec  section 660,160 820×1280 \"2 · Bounded execution · isolated SUT\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-09-08T18:44:32.696Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_VRXo1vTHq0Odw9jDYuLmghzG|fc_06367ec108b33fae016aa0578feeac87d090c778492cbb246d",
+              "toolName": "change_color",
+              "params": {
+                "id": "exec",
+                "color": "teal"
+              },
+              "resultText": "APPLIED · change_color exec\nDELTA\n  exec  color gray → teal\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "timestamp": "2026-09-08T18:44:40.045Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_QkPDIwBbDo4I0yvPBM15Tyci|fc_06367ec108b33fae016aa05796052c87d0b8a3e7fdad8620bb",
+              "toolName": "place_section",
+              "params": {
+                "id": "grade",
+                "text": "3 · Concurrent grading · global limit G",
+                "at": [
+                  1620,
+                  160
+                ],
+                "size": {
+                  "width": 800,
+                  "height": 1280
+                }
+              },
+              "resultText": "APPLIED · place_section grade 1620,160 800×1280\nDELTA\n  + grade  section 1620,160 800×1280 \"3 · Concurrent grading · global limit G\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "timestamp": "2026-09-08T18:44:47.123Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_xq6maT3FyupkkX7agVapPYTW|fc_06367ec108b33fae016aa0579d0b2c87d0ac82ee02f45912d9",
+              "toolName": "change_color",
+              "params": {
+                "id": "grade",
+                "color": "pink"
+              },
+              "resultText": "APPLIED · change_color grade\nDELTA\n  grade  color gray → pink\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "timestamp": "2026-09-08T18:44:52.247Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_v0vMpWtCUe5J7cqVLIVVZQ50|fc_06367ec108b33fae016aa057a2b17887d0a99e61478248f6c0",
+              "toolName": "place_section",
+              "params": {
+                "id": "compare",
+                "text": "4 · Compatible comparison",
+                "at": [
+                  2560,
+                  160
+                ],
+                "size": {
+                  "width": 800,
+                  "height": 1280
+                }
+              },
+              "resultText": "APPLIED · place_section compare 2560,160 800×1280\nDELTA\n  + compare  section 2560,160 800×1280 \"4 · Compatible comparison\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "timestamp": "2026-09-08T18:44:58.567Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_hkFZfq2Jad8c69E8UnNQwezf|fc_06367ec108b33fae016aa057aa24f887d0b909056a43bf8e7f",
+              "toolName": "place_shape",
+              "params": {
+                "id": "suite",
+                "type": "document",
+                "at": [
+                  160,
+                  260
+                ]
+              },
+              "resultText": "APPLIED · place_shape suite document 160,260 120×120\nDELTA\n  + suite  document 160,260 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "timestamp": "2026-09-08T18:45:04.181Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ft6Uqt40OM66iZzHTqfYziPb|fc_06367ec108b33fae016aa057aee0a487d0b2fe81413950114c",
+              "toolName": "update_text",
+              "params": {
+                "id": "suite",
+                "text": "Pinned suite"
+              },
+              "resultText": "APPLIED · update_text suite\nDELTA\n  suite  text \"\" → \"Pinned suite\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "timestamp": "2026-09-08T18:45:11.332Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_zDY3lpI56ggXx3PvQr5BOvG7|fc_06367ec108b33fae016aa057b53cc487d09662a49ec41e7084",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "contract",
+                "text": "**Frozen contract**\nScenario definitions are immutable: wording changes create new versions.\n\nFingerprint: tested revision, configuration, prompt versions and rubric versions.",
+                "at": [
+                  160,
+                  480
+                ]
+              },
+              "resultText": "APPLIED · place_sticky contract 160,480 180×120\nDELTA\n  + contract  sticky 160,480 180×120 \"**Frozen contract**\\nScenario definitions are immutable: wording changes create new versions.\\n\\nFingerprint: tested revision, configuration, prompt versions and rubric versions.\"\nLINTS · +1 −0\n  + W1 clipped-text: contract: sticky body clips at 180×120: 19 row(s), the note holds 1 — needs 180×733 (grow contract to ≥180×733 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "timestamp": "2026-09-08T18:45:16.269Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Fntt6h6J8IWWAliyPnPTB9b0|fc_06367ec108b33fae016aa057bbae3c87d0abb62311f280420e",
+              "toolName": "resize",
+              "params": {
+                "id": "contract",
+                "width": 300,
+                "height": 420
+              },
+              "resultText": "APPLIED · resize contract → 300×420\n  sticky body clips at 300×420: 11 row(s), the note holds 10 — needs 300×445\nDELTA\n  contract  160,480 180×120 → 160,480 300×420\nLINTS · +1 −1\n  + W1 clipped-text: contract: sticky body clips at 300×420: 11 row(s), the note holds 10 — needs 300×445 (grow contract to ≥300×445 or shorten the text)\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "timestamp": "2026-09-08T18:45:24.888Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_PAS0NhSunzqfoGlbHlw8f6hs|fc_06367ec108b33fae016aa057c344c887d0949f346ac99d2f16",
+              "toolName": "update_text",
+              "params": {
+                "id": "contract",
+                "text": "**Frozen contract**\nWording changes → new scenario versions; never edit in place.\n\nFingerprint: revision, configuration, prompt versions, rubric versions."
+              },
+              "resultText": "APPLIED · update_text contract\nDELTA\n  contract  text \"**Frozen contract**\\nScenario definitions are immutable: wording changes create new versions.\\n\\nFingerprint: tested revision, configuration, prompt versions and rubric versions.\" → \"**Frozen contract**\\nWording changes → new scenario versions; never edit in place.\\n\\nFingerprint: revision, configuration, prompt versions, rubric versions.\"\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "timestamp": "2026-09-08T18:45:31.474Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_65fjVYzcwz2OrrCXrrhuFNru|fc_06367ec108b33fae016aa057caa2c487d09a306110ef3da0d5",
+              "toolName": "place_shape",
+              "params": {
+                "id": "scheduler",
+                "type": "orchestrator",
+                "at": [
+                  740,
+                  260
+                ]
+              },
+              "resultText": "APPLIED · place_shape scheduler orchestrator 740,260 120×120\nDELTA\n  + scheduler  orchestrator 740,260 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "timestamp": "2026-09-08T18:45:39.508Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_i0dMBwdiuHqdvY4l1mWPbreQ|fc_06367ec108b33fae016aa057d226fc87d086030a2157ab1a45",
+              "toolName": "update_text",
+              "params": {
+                "id": "scheduler",
+                "text": "Scheduler"
+              },
+              "resultText": "APPLIED · update_text scheduler\nDELTA\n  scheduler  text \"\" → Scheduler\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 15,
+          "timestamp": "2026-09-08T18:45:48.451Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_fALvlVZaitVY6QHcAXYgPHRd|fc_06367ec108b33fae016aa057dab77887d0b8fe34146fe13ed6",
+              "toolName": "place_shape",
+              "params": {
+                "id": "workers",
+                "type": "predefined-process",
+                "at": [
+                  1000,
+                  260
+                ]
+              },
+              "resultText": "APPLIED · place_shape workers predefined-process 1000,260 280×100\nDELTA\n  + workers  predefined-process 1000,260 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 16,
+          "timestamp": "2026-09-08T18:45:52.607Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ayqyFiDXTWbUQgjCweEcXA7H|fc_06367ec108b33fae016aa057dfe5f087d0859c9ccd961b626c",
+              "toolName": "update_text",
+              "params": {
+                "id": "workers",
+                "text": "Worker pool ≤ N\nOrdered scenario steps"
+              },
+              "resultText": "APPLIED · update_text workers\nDELTA\n  workers  text \"\" → \"Worker pool ≤ N\\nOrdered scenario steps\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 17,
+          "timestamp": "2026-09-08T18:45:59.539Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_JJjV2WxoK3yzCaQdSGkicJdS|fc_06367ec108b33fae016aa057e5331887d0987db049ea8289e2",
+              "toolName": "place_shape",
+              "params": {
+                "id": "sut",
+                "type": "server",
+                "at": [
+                  1080,
+                  480
+                ]
+              },
+              "resultText": "APPLIED · place_shape sut server 1080,480 120×120\nDELTA\n  + sut  server 1080,480 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 18,
+          "timestamp": "2026-09-08T18:46:07.703Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_d5h8c12YArscIvUVzjBx3utL|fc_06367ec108b33fae016aa057ee426087d082a2fce8e0177e4a",
+              "toolName": "update_text",
+              "params": {
+                "id": "sut",
+                "text": "Isolated SUT\nNever production"
+              },
+              "resultText": "APPLIED · update_text sut\nDELTA\n  sut  text \"\" → \"Isolated SUT\\nNever production\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 19,
+          "timestamp": "2026-09-08T18:46:16.334Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_UM72KIecyi7Apj2VoH4TZ85p|fc_06367ec108b33fae016aa057f65b7087d0a9f0b44c01b4ab27",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "workers",
+                "id": "results",
+                "at": [
+                  1000,
+                  760
+                ],
+                "text": "Completed scenario\nTranscript + final artifact\nTyped failure records"
+              },
+              "resultText": "APPLIED · clone results from workers 1000,760 280×100\nDELTA\n  + results  predefined-process 1000,760 280×100 \"Completed scenario\\nTranscript + final artifact\\nTyped failure records\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 20,
+          "timestamp": "2026-09-08T18:46:20.979Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_j1yUyFe7ewFtGnYvs6wVhKJ2|fc_06367ec108b33fae016aa057fbe3e487d0883a371403b19ce0",
+              "toolName": "connect",
+              "params": {
+                "id": "e1",
+                "from": {
+                  "objectId": "suite"
+                },
+                "to": {
+                  "objectId": "scheduler"
+                },
+                "label": "pinned run"
+              },
+              "resultText": "APPLIED · connect e1 suite→scheduler\nDELTA\n  + e1  suite → scheduler\nLINTS · clean\nROUTES\n  e1  anchors right→left  path suite ─(s0 h y=320)→ scheduler  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 21,
+          "timestamp": "2026-09-08T18:46:28.021Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_VSkNFHS8W9FOrxfCfz2MHkwz|fc_06367ec108b33fae016aa05802319487d0b0564e912df258fa",
+              "toolName": "connect",
+              "params": {
+                "id": "e2",
+                "from": {
+                  "objectId": "scheduler"
+                },
+                "to": {
+                  "objectId": "workers"
+                },
+                "label": "fan out"
+              },
+              "resultText": "APPLIED · connect e2 scheduler→workers\nDELTA\n  + e2  scheduler → workers\nLINTS · clean\nROUTES\n  e2  anchors right→left  path scheduler ─(s0 h y=320)→ ─(s1 h y=320)→ (s2 v x=930) ─(s3 h y=310)→ ─(s4 h y=310)→ workers  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 22,
+          "timestamp": "2026-09-08T18:46:34.860Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_8IzuGzDqKnMPmzkwU1DBSaBb|fc_06367ec108b33fae016aa0580a686c87d0a06466eb17fbc43b",
+              "toolName": "connect",
+              "params": {
+                "id": "e3",
+                "from": {
+                  "objectId": "workers",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "sut",
+                  "anchor": "top"
+                },
+                "label": "execute steps"
+              },
+              "resultText": "APPLIED · connect e3 workers→sut\nDELTA\n  + e3  workers → sut\nLINTS · clean\nROUTES\n  e3  anchors bottom→top  path workers (s0 v x=1140) sut  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 23,
+          "timestamp": "2026-09-08T18:46:42.823Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_oMqm0PLDkrjrZfEmVq2aKJOn|fc_06367ec108b33fae016aa058110a5887d09527338a5477c474",
+              "toolName": "connect",
+              "params": {
+                "id": "capture",
+                "from": {
+                  "objectId": "sut",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "results",
+                  "anchor": "top"
+                },
+                "label": "capture full run"
+              },
+              "resultText": "APPLIED · connect capture sut→results\nDELTA\n  + capture  sut → results\nLINTS · clean\nROUTES\n  capture  anchors bottom→top  path sut (s0 v x=1140) results  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 24,
+          "timestamp": "2026-09-08T18:46:50.679Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Ey7uVmn4xjkM7niLR6Y2GXlB|fc_06367ec108b33fae016aa058199d4487d0804f93e32254cecd",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "workers",
+                "id": "fault",
+                "at": [
+                  740,
+                  1020
+                ],
+                "text": "Infrastructure fault\nRecord separately + retry"
+              },
+              "resultText": "APPLIED · clone fault from workers 740,1020 280×100\nDELTA\n  + fault  predefined-process 740,1020 280×100 \"Infrastructure fault\\nRecord separately + retry\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 25,
+          "timestamp": "2026-09-08T18:46:55.515Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_o4vKvZ6OXIzjiUo7GdIIsTM2|fc_06367ec108b33fae016aa0581e201087d088e16e1b0fb7c3fe",
+              "toolName": "connect",
+              "params": {
+                "id": "infra",
+                "from": {
+                  "objectId": "sut",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "fault",
+                  "anchor": "top"
+                },
+                "label": "infrastructure failure",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · connect infra sut→fault\nDELTA\n  + infra  sut → fault\nLINTS · clean\nROUTES\n  infra  anchors left→top  path sut ─(s0 h y=540)→ ─(s1 h y=540)→ (s2 v x=880) (s3 v x=880) fault  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 26,
+          "timestamp": "2026-09-08T18:47:02.392Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_QykWAfPU7wMkau5cx5LQ6xqP|fc_06367ec108b33fae016aa058247f0487d0a2927253bbfea4a1",
+              "toolName": "connect",
+              "params": {
+                "id": "retryexec",
+                "from": {
+                  "objectId": "fault",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "workers",
+                  "anchor": "top"
+                },
+                "label": "retry infrastructure only",
+                "style": "dashed",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · connect retryexec fault→workers\nDELTA\n  + retryexec  fault → workers\nLINTS · clean\nROUTES\n  retryexec  anchors left→top  path fault ─(s0 h y=1070)→ (s1 v x=720) ─(s2 h y=240)→ (s3 v x=1140) workers  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 27,
+          "timestamp": "2026-09-08T18:47:07.804Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Aa3L1LW2Dy0NxzDbeTowSmR3|fc_06367ec108b33fae016aa0582a700c87d08f453588cf0ac700",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "workers",
+                "id": "behavior",
+                "at": [
+                  1100,
+                  1240
+                ],
+                "text": "Behavior failure\nRecord, then continue steps"
+              },
+              "resultText": "APPLIED · clone behavior from workers 1100,1240 280×100\nDELTA\n  + behavior  predefined-process 1100,1240 280×100 \"Behavior failure\\nRecord, then continue steps\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 28,
+          "timestamp": "2026-09-08T18:47:14.332Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_QDzUlxQNxZRxeMFK5GG3TwLk|fc_06367ec108b33fae016aa05830ec6c87d0a496f34c919f2ec5",
+              "toolName": "connect",
+              "params": {
+                "id": "behfail",
+                "from": {
+                  "objectId": "sut",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "behavior",
+                  "anchor": "right"
+                },
+                "label": "behavior failure",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect behfail sut→behavior\nDELTA\n  + behfail  sut → behavior\nLINTS · clean\nROUTES\n  behfail  anchors right→right  path sut ─(s0 h y=540)→ ─(s1 h y=540)→ (s2 v x=1314) ─(s3 h y=1290)→ ─(s4 h y=1290)→ behavior  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 29,
+          "timestamp": "2026-09-08T18:47:19.430Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_AKuPmv42rBo1uYBvqttSYWBK|fc_06367ec108b33fae016aa058368bd887d0842c80cca6c5bcde",
+              "toolName": "look",
+              "params": {
+                "view": "exec"
+              },
+              "resultText": "LOOK · 1 render · close-up exec\nBOARD\n  page-frame section \"2026-09-08-comp-134600 · eval-harness-orchestration\" white 32,32 3400×2000\n    pin section \"1 · Immutable run contract\" blue 100,160 420×740\n      suite document \"Pinned suite\" white 160,260 120×120\n      contract sticky \"**Frozen contract** Wording changes → new scenario versions; never edit in place. Fingerprint: revision, configuration, prompt versions, rubric versions.\" 160,480 300×420\n    exec section \"2 · Bounded execution · isolated SUT\" teal 660,160 820×1280\n      scheduler orchestrator \"Scheduler\" teal 740,260 120×120\n      workers predefined-process \"Worker pool ≤ N Ordered scenario steps\" 1000,260 280×100\n      sut server \"Isolated SUT Never production\" 1080,480 120×120\n      results predefined-process \"Completed scenario Transcript + final artifact Typed failure records\" 1000,760 280×100\n      fault predefined-process \"Infrastructure fault Record separately + retry\" 740,1020 280×100\n      behavior predefined-process \"Behavior failure Record, then continue steps\" 1100,1240 280×100\n    grade section \"3 · Concurrent grading · global limit G\" pink 1620,160 800×1280\n      (empty)\n    compare section \"4 · Compatible comparison\" 2560,160 800×1280\n      (empty)\nEDGES\n  e1 suite→scheduler \"pinned run\" · suite ─(s0 h y=320)→ scheduler\n  e2 scheduler→workers \"fan out\" · scheduler ─(s0 h y=320)→ ─(s1 h y=320)→ (s2 v x=930) ─(s3 h y=310)→ ─(s4 h y=310)→ workers\n  e3 workers→sut \"execute steps\" anchors=bottom→top · workers (s0 v x=1140) sut\n  capture sut→results \"capture full run\" anchors=bottom→top · sut (s0 v x=1140) results\n  infra sut→fault \"infrastructure failure\" orange anchors=left→top · sut ─(s0 h y=540)→ ─(s1 h y=540)→ (s2 v x=880) (s3 v x=880) fault\n  retryexec fault→workers \"retry infrastructure only\" dashed orange anchors=left→top · fault ─(s0 h y=1070)→ (s1 v x=720) ─(s2 h y=240)→ (s3 v x=1140) workers\n  behfail sut→behavior \"behavior failure\" red anchors=right→right · sut ─(s0 h y=540)→ ─(s1 h y=540)→ (s2 v x=1314) ─(s3 h y=1290)→ ─(s4 h y=1290)→ behavior\nBOARD DIFF · base → draft · 20 ops\n  addSection pin\n  addSection exec\n  addSection grade\n  addSection compare\n  addObject suite\n  addSticky contract\n  addObject scheduler\n  addObject workers\n  addObject sut\n  addObject results\n  addObject fault\n  addObject behavior\n  updateSection page-frame  resized\n  addConnection e1\n  addConnection e2\n  addConnection e3\n  addConnection capture\n  addConnection infra\n  addConnection retryexec\n  addConnection behfail\nDIAGNOSTICS · clean\nROUTES\n  e1  anchors right→left  path suite ─(s0 h y=320)→ scheduler  through none\n  e2  anchors right→left  path scheduler ─(s0 h y=320)→ ─(s1 h y=320)→ (s2 v x=930) ─(s3 h y=310)→ ─(s4 h y=310)→ workers  through none\n  e3  anchors bottom→top  path workers (s0 v x=1140) sut  through none\n  capture  anchors bottom→top  path sut (s0 v x=1140) results  through none\n  infra  anchors left→top  path sut ─(s0 h y=540)→ ─(s1 h y=540)→ (s2 v x=880) (s3 v x=880) fault  through none\n  retryexec  anchors left→top  path fault ─(s0 h y=1070)→ (s1 v x=720) ─(s2 h y=240)→ (s3 v x=1140) workers  through none\n  behfail  anchors right→right  path sut ─(s0 h y=540)→ ─(s1 h y=540)→ (s2 v x=1314) ─(s3 h y=1290)→ ─(s4 h y=1290)→ behavior  through none\nREQUESTS · none\nMEASURES · section exec 660,160 820×1280\n  gaps x  scheduler↔workers 140\n  gaps y  scheduler↔fault 640 · workers↔sut 120 · sut↔results 160 · results↔fault 160 · results↔behavior 380\n  pitch x 260 · 80 · 20\n  pitch y 220 · 280 · 260 · 220\n  free    left 56 · right 76 · top 48 · bottom 72\n  ink     15%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-79d47ca614f1.124.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 30,
+          "timestamp": "2026-09-08T18:47:24.496Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_U4kpePYyQfznpWtT1dzwflug|fc_06367ec108b33fae016aa0583c51f487d085165cf5ed79576d",
+              "toolName": "place_shape",
+              "params": {
+                "id": "dispatch",
+                "type": "queue",
+                "at": [
+                  1700,
+                  760
+                ]
+              },
+              "resultText": "APPLIED · place_shape dispatch queue 1700,760 120×120\nDELTA\n  + dispatch  queue 1700,760 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 31,
+          "timestamp": "2026-09-08T18:47:33.564Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_rH58JiQs1rCDCTCBdK5x7F45|fc_06367ec108b33fae016aa058449eec87d090c9f78ff214d90e",
+              "toolName": "update_text",
+              "params": {
+                "id": "dispatch",
+                "text": "Grade immediately\nGlobal limit G"
+              },
+              "resultText": "APPLIED · update_text dispatch\nDELTA\n  dispatch  text \"\" → \"Grade immediately\\nGlobal limit G\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 32,
+          "timestamp": "2026-09-08T18:47:40.125Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_1BmuZXBNNt1U7Mg0WfM03cOh|fc_06367ec108b33fae016aa0584aea2487d0b5ba83dea00e46a2",
+              "toolName": "connect",
+              "params": {
+                "id": "ready",
+                "from": {
+                  "objectId": "results",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "dispatch",
+                  "anchor": "left"
+                },
+                "label": "each completion"
+              },
+              "resultText": "APPLIED · connect ready results→dispatch\nDELTA\n  + ready  results → dispatch\nLINTS · clean\nROUTES\n  ready  anchors right→left  path results ─(s0 h y=810)→ ─(s1 h y=810)→ (s2 v x=1490) ─(s3 h y=820)→ ─(s4 h y=820)→ dispatch  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 33,
+          "timestamp": "2026-09-08T18:47:47.399Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_hLYcs8gj75KB7EQ6YUwHMXi7|fc_06367ec108b33fae016aa058524f5487d08a4270c2b8fe55a3",
+              "toolName": "place_shape",
+              "params": {
+                "id": "criteria",
+                "type": "judge",
+                "at": [
+                  1960,
+                  360
+                ]
+              },
+              "resultText": "APPLIED · place_shape criteria judge 1960,360 120×120\nDELTA\n  + criteria  judge 1960,360 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 34,
+          "timestamp": "2026-09-08T18:47:53.121Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Vj2PoAl6nSlXSG9pdFHc6s1J|fc_06367ec108b33fae016aa058585b2087d0a048071c928f41bb",
+              "toolName": "update_text",
+              "params": {
+                "id": "criteria",
+                "text": "Criterion A\nIndependent grader"
+              },
+              "resultText": "APPLIED · update_text criteria\nDELTA\n  criteria  text \"\" → \"Criterion A\\nIndependent grader\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 35,
+          "timestamp": "2026-09-08T18:47:59.288Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_yMqJKZfYobjcYu5GOJxbQJeI|fc_06367ec108b33fae016aa0585e202c87d0a8b2d22002e4c35e",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "criteria",
+                "id": "criteria-b",
+                "at": [
+                  1960,
+                  760
+                ],
+                "text": "Criterion B\nIndependent grader"
+              },
+              "resultText": "APPLIED · clone criteria-b from criteria 1960,760 120×120\nDELTA\n  + criteria-b  judge 1960,760 120×120 \"Criterion B\\nIndependent grader\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 36,
+          "timestamp": "2026-09-08T18:48:06.456Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_1u6gVjrDZWHOgGUXqmq1lCTf|fc_06367ec108b33fae016aa058637a6087d096f563b914488ace",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "criteria",
+                "id": "artifact-grade",
+                "at": [
+                  1960,
+                  1160
+                ],
+                "text": "Artifact-only grader\nNo original request"
+              },
+              "resultText": "APPLIED · clone artifact-grade from criteria 1960,1160 120×120\nDELTA\n  + artifact-grade  judge 1960,1160 120×120 \"Artifact-only grader\\nNo original request\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 37,
+          "timestamp": "2026-09-08T18:48:12.546Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_MEOKKEjfdpPPjUyOv9i5MgiR|fc_06367ec108b33fae016aa0586ad24087d08f403c15fdcd3e79",
+              "toolName": "connect",
+              "params": {
+                "id": "ga",
+                "from": {
+                  "objectId": "dispatch"
+                },
+                "to": {
+                  "objectId": "criteria"
+                },
+                "label": "criterion A"
+              },
+              "resultText": "APPLIED · connect ga dispatch→criteria\nDELTA\n  + ga  dispatch → criteria\nLINTS · clean\nROUTES\n  ga  anchors top→bottom  path dispatch (s0 v x=1760) (s1 v x=1760) ─(s2 h y=641)→ (s3 v x=2020) (s4 v x=2020) criteria  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 38,
+          "timestamp": "2026-09-08T18:48:18.561Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_O26EeM89aLRKu0Q81gsaL02a|fc_06367ec108b33fae016aa058712eb887d08b5218c5dd1c1161",
+              "toolName": "connect",
+              "params": {
+                "id": "gb",
+                "from": {
+                  "objectId": "dispatch",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "criteria-b",
+                  "anchor": "left"
+                }
+              },
+              "resultText": "APPLIED · connect gb dispatch→criteria-b\nDELTA\n  + gb  dispatch → criteria-b\nLINTS · clean\nROUTES\n  gb  anchors right→left  path dispatch ─(s0 h y=820)→ criteria-b  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 39,
+          "timestamp": "2026-09-08T18:48:23.591Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_9X4GV55BhTxvHNYDhMTxi77A|fc_06367ec108b33fae016aa058764b4c87d0a45a324b8e003447",
+              "toolName": "connect",
+              "params": {
+                "id": "gc",
+                "from": {
+                  "objectId": "dispatch",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "artifact-grade",
+                  "anchor": "left"
+                },
+                "label": "artifact only"
+              },
+              "resultText": "APPLIED · connect gc dispatch→artifact-grade\nDELTA\n  + gc  dispatch → artifact-grade\nLINTS · clean\nROUTES\n  gc  anchors bottom→left  path dispatch (s0 v x=1760) (s1 v x=1760) ─(s2 h y=1220)→ ─(s3 h y=1220)→ artifact-grade  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 40,
+          "timestamp": "2026-09-08T18:48:27.848Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_conz6tre63ENsKqlt3CB5jZT|fc_06367ec108b33fae016aa0587b0bb087d0a0cda0788177ce75",
+              "toolName": "place_shape",
+              "params": {
+                "id": "evidence",
+                "type": "decision",
+                "at": [
+                  2200,
+                  760
+                ]
+              },
+              "resultText": "APPLIED · place_shape evidence decision 2200,760 280×100\nDELTA\n  + evidence  decision 2200,760 280×100 \"\"\nLINTS · +1 −0\n  + E1 containment: evidence extends 60px outside its section grade (move_to evidence back inside grade, or resize grade to hold it — fit_section grade closes the frame around what is already inside)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 41,
+          "timestamp": "2026-09-08T18:48:32.779Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_cQYmAs6BuCIJ3tid0I7Ynt1b|fc_06367ec108b33fae016aa058801c5487d0bd04ad7dd57d3316",
+              "toolName": "resize",
+              "params": {
+                "id": "grade",
+                "width": 920,
+                "height": 1280
+              },
+              "resultText": "APPLIED · resize grade → 920×1280\nDELTA\n  grade  1620,160 800×1280 → 1620,160 920×1280\nLINTS · +0 −1\n  − E1 containment  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 42,
+          "timestamp": "2026-09-08T18:48:38.176Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_6m5StbRECMerz15NSHufQDzz|fc_06367ec108b33fae016aa05885137087d0aef17abe89d6c389",
+              "toolName": "update_text",
+              "params": {
+                "id": "evidence",
+                "text": "Evidence present?\nEach verdict"
+              },
+              "resultText": "APPLIED · update_text evidence\n  label clips at 280×100: 3 wrapped line(s), the box holds 2 — needs 280×132\nDELTA\n  evidence  text \"\" → \"Evidence present?\\nEach verdict\"\nLINTS · +1 −0\n  + W1 clipped-text: evidence: label clips at 280×100: 3 wrapped line(s), the box holds 2 — needs 280×132 (grow evidence to ≥280×132 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 43,
+          "timestamp": "2026-09-08T18:48:43.700Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_KIUNUdfBXk6Sr0ijZDsiJOBy|fc_06367ec108b33fae016aa0588b309087d09fa4b6e44a4a6909",
+              "toolName": "update_text",
+              "params": {
+                "id": "evidence",
+                "text": "Evidence?"
+              },
+              "resultText": "APPLIED · update_text evidence\nDELTA\n  evidence  text \"Evidence present?\\nEach verdict\" → \"Evidence?\"\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 44,
+          "timestamp": "2026-09-08T18:48:51.360Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_sq91vTz5GDh3QTv6kXeKTCLu|fc_06367ec108b33fae016aa0589174d887d09f5cceab7b2fe5f7",
+              "toolName": "connect",
+              "params": {
+                "id": "va",
+                "from": {
+                  "objectId": "criteria",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "evidence",
+                  "anchor": "top"
+                },
+                "label": "verdict + evidence"
+              },
+              "resultText": "APPLIED · connect va criteria→evidence\nDELTA\n  + va  criteria → evidence\nLINTS · clean\nROUTES\n  va  anchors right→top  path criteria ─(s0 h y=420)→ ─(s1 h y=420)→ (s2 v x=2340) (s3 v x=2340) evidence  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 45,
+          "timestamp": "2026-09-08T18:48:58.261Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_EOxNbrjAv0lSwYNcXZPvb4dG|fc_06367ec108b33fae016aa05898348487d08ccffc3fbc19045e",
+              "toolName": "connect",
+              "params": {
+                "id": "vb",
+                "from": {
+                  "objectId": "criteria-b",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "evidence",
+                  "anchor": "left"
+                }
+              },
+              "resultText": "APPLIED · connect vb criteria-b→evidence\nDELTA\n  + vb  criteria-b → evidence\nLINTS · clean\nROUTES\n  vb  anchors right→left  path criteria-b ─(s0 h y=820)→ ─(s1 h y=820)→ (s2 v x=2140) ─(s3 h y=810)→ ─(s4 h y=810)→ evidence  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 46,
+          "timestamp": "2026-09-08T18:49:03.423Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_r49vKf7yAMefECRaa1AZQDDv|fc_06367ec108b33fae016aa0589e58d887d08d4d7b83e537fe12",
+              "toolName": "connect",
+              "params": {
+                "id": "vc",
+                "from": {
+                  "objectId": "artifact-grade",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "evidence",
+                  "anchor": "bottom"
+                }
+              },
+              "resultText": "APPLIED · connect vc artifact-grade→evidence\nDELTA\n  + vc  artifact-grade → evidence\nLINTS · clean\nROUTES\n  vc  anchors right→bottom  path artifact-grade ─(s0 h y=1220)→ ─(s1 h y=1220)→ (s2 v x=2340) (s3 v x=2340) evidence  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 47,
+          "timestamp": "2026-09-08T18:49:09.442Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_0J3eHZ7IIZlX7RLvRi9akexb|fc_06367ec108b33fae016aa058a4c06887d0bd87773a6391c936",
+              "toolName": "move_to",
+              "params": {
+                "id": "compare",
+                "x": 2760,
+                "y": 160
+              },
+              "resultText": "APPLIED · move_to compare → (2760, 160)\nDELTA\n  compare  2560,160 → 2760,160\nLINTS · +2 −0\n  + E1 containment: compare extends 128px outside its section page-frame (move_to compare back inside page-frame, or resize page-frame to hold it — fit_section page-frame closes the frame around what is already inside)\n  + E2 containment: compare extends 128px past the base section page-frame (maximum 16px) (move_to compare inside page-frame, or resize page-frame to hold the diagram — the base section is the page, and it is yours to size)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 48,
+          "timestamp": "2026-09-08T18:49:16.753Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_aVFKlImADkVsSnRlrlwPB21l|fc_06367ec108b33fae016aa058ab9cc887d085e17bb343d57b69",
+              "toolName": "resize",
+              "params": {
+                "id": "page-frame",
+                "width": 3800,
+                "height": 2000
+              },
+              "resultText": "APPLIED · resize page-frame → 3800×2000\nDELTA\n  page-frame  32,32 3400×2000 → 32,32 3800×2000\nLINTS · +0 −2\n  − E1 containment, − E2 containment  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 49,
+          "timestamp": "2026-09-08T18:49:24.270Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_v4c0cRMmTeh5o2gyNW5LXbZA|fc_06367ec108b33fae016aa058b322e087d0960e3db1d7c4874c",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "results",
+                "id": "assemble",
+                "at": [
+                  2820,
+                  760
+                ],
+                "text": "Assemble valid verdicts\nScorecard"
+              },
+              "resultText": "APPLIED · clone assemble from results 2820,760 280×100\nDELTA\n  + assemble  predefined-process 2820,760 280×100 \"Assemble valid verdicts\\nScorecard\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 50,
+          "timestamp": "2026-09-08T18:49:29.324Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_0MEHtkYHyqiTSvwlydeCNoCd|fc_06367ec108b33fae016aa058b7ee4887d0af7daa38d5dd74d8",
+              "toolName": "connect",
+              "params": {
+                "id": "valid",
+                "from": {
+                  "objectId": "evidence",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "assemble",
+                  "anchor": "left"
+                },
+                "label": "yes · valid",
+                "color": "green"
+              },
+              "resultText": "APPLIED · connect valid evidence→assemble\nDELTA\n  + valid  evidence → assemble\nLINTS · clean\nROUTES\n  valid  anchors right→left  path evidence ─(s0 h y=810)→ ─(s1 h y=810)→ ─(s2 h y=810)→ assemble  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 51,
+          "timestamp": "2026-09-08T18:49:34.803Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_MsAyS2LcfaFj9TFDbsfYHWgN|fc_06367ec108b33fae016aa058bda74887d0bc801f04ba39297d",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "results",
+                "id": "retrygrade",
+                "at": [
+                  2200,
+                  520
+                ],
+                "text": "Invalid → retry grader once\nStill no evidence → flag"
+              },
+              "resultText": "APPLIED · clone retrygrade from results 2200,520 280×100\nDELTA\n  + retrygrade  predefined-process 2200,520 280×100 \"Invalid → retry grader once\\nStill no evidence → flag\"\nLINTS · +1 −0\n  + E1 covered-content: label \"verdict + evidence\" chip on va covers retrygrade (route va around retrygrade or move the label with a waypoint)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 52,
+          "timestamp": "2026-09-08T18:49:42.830Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_LFSRmK9lUjO2PSijsMwTjys8|fc_06367ec108b33fae016aa058c5f89087d08ab5c5cb1b44be60",
+              "toolName": "move_label",
+              "params": {
+                "id": "va",
+                "along": 0.15,
+                "offset": 20
+              },
+              "resultText": "APPLIED · move_label va → along 0.15, offset 20\nDELTA\n  va  labelPosition — → {\"along\":0.15,\"offset\":20}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  va  anchors right→top  path criteria (s0 v x=2080) ─(s1 h y=340)→ (s2 v x=2152) ─(s3 h y=740)→ (s4 v x=2340) evidence  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 53,
+          "timestamp": "2026-09-08T18:49:54.574Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_uKxG3lCXA4grbsSJ78NC6ihK|fc_06367ec108b33fae016aa058ccf88087d085e544652eea3f6e",
+              "toolName": "connect",
+              "params": {
+                "id": "invalid",
+                "from": {
+                  "objectId": "evidence",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "retrygrade",
+                  "anchor": "bottom"
+                },
+                "label": "no",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect invalid evidence→retrygrade\nDELTA\n  + invalid  evidence → retrygrade\nLINTS · clean\nROUTES\n  invalid  anchors top→bottom  path evidence (s0 v x=2340) (s1 v x=2340) (s2 v x=2340) retrygrade  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 54,
+          "timestamp": "2026-09-08T18:50:00.693Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ZoJJbeOUOeH07Tkhl1Wo2e1D|fc_06367ec108b33fae016aa058d7bc8887d09ef31e590133cfb9",
+              "toolName": "change_color",
+              "params": {
+                "id": "compare",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · change_color compare\nDELTA\n  compare  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 55,
+          "timestamp": "2026-09-08T18:50:06.567Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_IGNM8SJyby3ZOfi23XMQ1b0H|fc_06367ec108b33fae016aa058dd9d7887d0a63d382e2fb5d534",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "evidence",
+                "id": "compatible",
+                "at": [
+                  2820,
+                  1000
+                ],
+                "text": "Same fingerprint?"
+              },
+              "resultText": "APPLIED · clone compatible from evidence 2820,1000 280×100\nDELTA\n  + compatible  decision 2820,1000 280×100 \"Same fingerprint?\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 56,
+          "timestamp": "2026-09-08T18:50:16.839Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_XPqoGvMJ0uF0iiuvACZdTElD|fc_06367ec108b33fae016aa058e6487087d09593e3a2530ccdb9",
+              "toolName": "connect",
+              "params": {
+                "id": "score-check",
+                "from": {
+                  "objectId": "assemble",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "compatible",
+                  "anchor": "top"
+                }
+              },
+              "resultText": "APPLIED · connect score-check assemble→compatible\nDELTA\n  + score-check  assemble → compatible\nLINTS · clean\nROUTES\n  score-check  anchors bottom→top  path assemble (s0 v x=2960) (s1 v x=2960) (s2 v x=2960) compatible  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 57,
+          "timestamp": "2026-09-08T18:50:23.441Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_jH2EunNaFf2rhZ8hWDLuLmEh|fc_06367ec108b33fae016aa058ee2a3487d0843925a1f7437c6c",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "results",
+                "id": "narrate",
+                "at": [
+                  2820,
+                  1240
+                ],
+                "text": "Compare with baseline\nNarrate |Δ| ≥ threshold"
+              },
+              "resultText": "APPLIED · clone narrate from results 2820,1240 280×100\nDELTA\n  + narrate  predefined-process 2820,1240 280×100 \"Compare with baseline\\nNarrate |Δ| ≥ threshold\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 58,
+          "timestamp": "2026-09-08T18:50:31.992Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Qzyd7EWzdbc6sUJ5cWQJ2Ruw|fc_06367ec108b33fae016aa058f6089487d083823593b9cd065a",
+              "toolName": "connect",
+              "params": {
+                "id": "compatible-yes",
+                "from": {
+                  "objectId": "compatible",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "narrate",
+                  "anchor": "top"
+                },
+                "label": "yes",
+                "color": "green"
+              },
+              "resultText": "APPLIED · connect compatible-yes compatible→narrate\nDELTA\n  + compatible-yes  compatible → narrate\nLINTS · clean\nROUTES\n  compatible-yes  anchors bottom→top  path compatible (s0 v x=2960) (s1 v x=2960) (s2 v x=2960) narrate  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 59,
+          "timestamp": "2026-09-08T18:50:38.748Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_2vttkfN90o6VEBmmNg2meFdD|fc_06367ec108b33fae016aa058fca57887d0bef047871f91b6e9",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "assemble",
+                "id": "blocked",
+                "at": [
+                  3200,
+                  1000
+                ],
+                "text": "Incompatible\nDo not compare"
+              },
+              "resultText": "APPLIED · clone blocked from assemble 3200,1000 280×100\nDELTA\n  + blocked  predefined-process 3200,1000 280×100 \"Incompatible\\nDo not compare\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 60,
+          "timestamp": "2026-09-08T18:50:45.453Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_U7iEMrbnGucErqDSzr2uH2AJ|fc_06367ec108b33fae016aa0590422ec87d08515c9dc2be77ed8",
+              "toolName": "connect",
+              "params": {
+                "id": "no-compare",
+                "from": {
+                  "objectId": "compatible",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "blocked",
+                  "anchor": "left"
+                },
+                "label": "no",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect no-compare compatible→blocked\nDELTA\n  + no-compare  compatible → blocked\nLINTS · clean\nROUTES\n  no-compare  anchors right→left  path compatible ─(s0 h y=1050)→ ─(s1 h y=1050)→ ─(s2 h y=1050)→ blocked  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 61,
+          "timestamp": "2026-09-08T18:50:53.438Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_QKpfPXRwc0kTphFzLCEDXE0t|fc_06367ec108b33fae016aa0590b8c5887d080c9d94b8ac7fd99",
+              "toolName": "place_shape",
+              "params": {
+                "id": "baseline",
+                "type": "memory",
+                "at": [
+                  3260,
+                  480
+                ]
+              },
+              "resultText": "APPLIED · place_shape baseline memory 3260,480 120×120\nDELTA\n  + baseline  memory 3260,480 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 62,
+          "timestamp": "2026-09-08T18:50:58.582Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_YtnORmpc0yk3JLsmwGYK2RDM|fc_06367ec108b33fae016aa059118bc487d08c3bfd19c9d0eb3c",
+              "toolName": "update_text",
+              "params": {
+                "id": "baseline",
+                "text": "Chosen baseline"
+              },
+              "resultText": "APPLIED · update_text baseline\nDELTA\n  baseline  text \"\" → \"Chosen baseline\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 63,
+          "timestamp": "2026-09-08T18:51:08.195Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_K7UpPvYH0VDNS9Rrn5ze5tVl|fc_06367ec108b33fae016aa0591a671087d090a8d1de80dc18c7",
+              "toolName": "connect",
+              "params": {
+                "id": "baseline-check",
+                "from": {
+                  "objectId": "baseline",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "compatible",
+                  "anchor": "left"
+                },
+                "label": "baseline fingerprint",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect baseline-check baseline→compatible\nDELTA\n  + baseline-check  baseline → compatible\nLINTS · clean\nROUTES\n  baseline-check  anchors left→left  path baseline (s0 v x=3260) ─(s1 h y=460)→ (s2 v x=2800) ─(s3 h y=1050)→ compatible  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 64,
+          "timestamp": "2026-09-08T18:51:16.525Z",
+          "thinking": "**Finishing retention loops**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_s8WqTx9KXA32Agy51qaS86sU|fc_06367ec108b33fae016aa059243adc87d08f0a27c4b309d4d1",
+              "toolName": "connect",
+              "params": {
+                "id": "promote",
+                "from": {
+                  "objectId": "assemble",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "baseline",
+                  "anchor": "bottom"
+                },
+                "label": "promote run → future baseline",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect promote assemble→baseline\nDELTA\n  + promote  assemble → baseline\nLINTS · clean\nROUTES\n  promote  anchors top→bottom  path assemble (s0 v x=2960) (s1 v x=2960) ─(s2 h y=692)→ (s3 v x=3320) (s4 v x=3320) baseline  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 65,
+          "timestamp": "2026-09-08T18:51:23.151Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Txio39FidYW7OM9oBTVs9xLq|fc_06367ec108b33fae016aa05929712087d0a2152aff43f33135",
+              "toolName": "place_section",
+              "params": {
+                "id": "retention",
+                "text": "5 · Retained audit trail",
+                "at": [
+                  1620,
+                  1600
+                ],
+                "size": {
+                  "width": 920,
+                  "height": 320
+                }
+              },
+              "resultText": "APPLIED · place_section retention 1620,1600 920×320\nDELTA\n  + retention  section 1620,1600 920×320 \"5 · Retained audit trail\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 66,
+          "timestamp": "2026-09-08T18:51:31.095Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_p3LNAb1cXdqCm3RmLSke59Yo|fc_06367ec108b33fae016aa0592f620887d0ba8c5340de05ade6",
+              "toolName": "place_shape",
+              "params": {
+                "id": "audit",
+                "type": "memory",
+                "at": [
+                  1740,
+                  1700
+                ]
+              },
+              "resultText": "APPLIED · place_shape audit memory 1740,1700 120×120\nDELTA\n  + audit  memory 1740,1700 120×120 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 67,
+          "timestamp": "2026-09-08T18:51:37.470Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_zRzFmh8nIZskw0D5wvVnggGa|fc_06367ec108b33fae016aa05939064487d0a48568f39c1741a5",
+              "toolName": "update_text",
+              "params": {
+                "id": "audit",
+                "text": "Run archive"
+              },
+              "resultText": "APPLIED · update_text audit\nDELTA\n  audit  text \"\" → \"Run archive\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 68,
+          "timestamp": "2026-09-08T18:51:46.296Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_MOVwPaUTTm5V34MJK3Igt5IU|fc_06367ec108b33fae016aa05940ac0087d0a757e3ce9acf03e7",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "audit-note",
+                "text": "Retain every artifact, transcript and verdict, including invalid attempts and typed faults, for disputed-score review.",
+                "at": [
+                  2020,
+                  1680
+                ]
+              },
+              "resultText": "APPLIED · place_sticky audit-note 2020,1680 180×120\nDELTA\n  + audit-note  sticky 2020,1680 180×120 \"Retain every artifact, transcript and verdict, including invalid attempts and typed faults, for disputed-score review.\"\nLINTS · +1 −0\n  + W1 clipped-text: audit-note: sticky body clips at 180×120: 13 row(s), the note holds 1 — needs 180×517 (grow audit-note to ≥180×517 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 69,
+          "timestamp": "2026-09-08T18:51:53.437Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ICIAQ4BLu7c2YHh1XHBPVexL|fc_06367ec108b33fae016aa05948619887d0a2de8601e75e1178",
+              "toolName": "resize",
+              "params": {
+                "id": "audit-note",
+                "width": 460,
+                "height": 240
+              },
+              "resultText": "APPLIED · resize audit-note → 460×240\nDELTA\n  audit-note  2020,1680 180×120 → 2020,1680 460×240\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 70,
+          "timestamp": "2026-09-08T18:52:00.246Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_OjKYHMKhfoMsZMJcsKDSugIw|fc_06367ec108b33fae016aa0594f32b087d0bac4c8ff511a8458",
+              "toolName": "connect",
+              "params": {
+                "id": "retain-exec",
+                "from": {
+                  "objectId": "exec",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "audit",
+                  "anchor": "left"
+                },
+                "label": "transcripts · artifacts · typed faults",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect retain-exec exec→audit\nDELTA\n  + retain-exec  exec → audit\nLINTS · clean\nROUTES\n  retain-exec  anchors bottom→left  path exec (s0 v x=1070) (s1 v x=1070) ─(s2 h y=1760)→ ─(s3 h y=1760)→ audit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 71,
+          "timestamp": "2026-09-08T18:52:09.655Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_okh5h9JivyeMMVisGgsexZLP|fc_06367ec108b33fae016aa05957a66887d0af483b9e87598908",
+              "toolName": "connect",
+              "params": {
+                "id": "retain-grade",
+                "from": {
+                  "objectId": "grade",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "audit",
+                  "anchor": "top"
+                },
+                "label": "every verdict",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect retain-grade grade→audit\nDELTA\n  + retain-grade  grade → audit\nLINTS · clean\nROUTES\n  retain-grade  anchors bottom→top  path grade (s0 v x=2080) (s1 v x=2080) ─(s2 h y=1570)→ (s3 v x=1800) (s4 v x=1800) audit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 72,
+          "timestamp": "2026-09-08T18:52:19.133Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_F47BFYoYpAaPzn5DXRucz2AX|fc_06367ec108b33fae016aa05960531887d08fcf1fa8fd1e4112",
+              "toolName": "connect",
+              "params": {
+                "id": "retry-valid",
+                "from": {
+                  "objectId": "retrygrade",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "assemble",
+                  "anchor": "top"
+                },
+                "label": "retry has evidence",
+                "style": "dashed",
+                "color": "green"
+              },
+              "resultText": "APPLIED · connect retry-valid retrygrade→assemble\nDELTA\n  + retry-valid  retrygrade → assemble\nLINTS · +1 −0\n  + E1 covered-content: label \"retry has evidence\" chip on retry-valid lies on baseline-check's path for 30px (move the label with a waypoint or reroute baseline-check so the chip owns its wire)\nROUTES\n  retry-valid  anchors right→top  path retrygrade ─(s0 h y=570)→ ─(s1 h y=570)→ (s2 v x=2960) (s3 v x=2960) assemble  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 73,
+          "timestamp": "2026-09-08T18:52:26.964Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_gXpzKMopqKNJP7bYZUoXHNFZ|fc_06367ec108b33fae016aa05969a9bc87d08205cdfb31cb76b7",
+              "toolName": "move_label",
+              "params": {
+                "id": "retry-valid",
+                "along": 0.2,
+                "offset": 20
+              },
+              "resultText": "APPLIED · move_label retry-valid → along 0.2, offset 20\nDELTA\n  retry-valid  labelPosition — → {\"along\":0.2,\"offset\":20}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  retry-valid  anchors right→top  path retrygrade ─(s0 h y=570)→ ─(s1 h y=570)→ (s2 v x=2960) (s3 v x=2960) assemble  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 74,
+          "timestamp": "2026-09-08T18:52:38.993Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_EpXSZMO4GboTlQ3KpsGVsEMq|fc_06367ec108b33fae016aa059703e2087d0bed414c42d74fd06",
+              "toolName": "update_description",
+              "params": {
+                "description": "# Offline evaluation harness orchestration\nRead left to right: an immutable pinned suite and run fingerprint feed a scheduler and bounded worker pool against an isolated SUT, never production. Workers execute ordered steps and capture full transcripts, final artifacts and typed failure records. Infrastructure faults are recorded and retried; behavior failures are recorded before continuing.\n\nEach completed scenario immediately enters globally bounded concurrent grading. Independent criterion graders and an artifact-only grader (without the original request) produce verdicts requiring evidence. Missing evidence invalidates a verdict; retry once, flag repeated failure, and assemble only valid verdicts.\n\nThe assembler builds a scorecard. Comparison with the chosen baseline requires identical fingerprints; compatible movements crossing the threshold are narrated, while incompatible comparisons are blocked. Promotion sets the baseline for future compatible runs. The audit archive retains every artifact, transcript and verdict, including invalid attempts and typed faults, for review. Scenario wording changes create new versions rather than altering frozen definitions."
+              },
+              "resultText": "APPLIED · update_description\nDELTA · description none → 1180 chars",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 75,
+          "timestamp": "2026-09-08T18:52:46.383Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_DfxJjtkUSCY26b69l4U0dVzB|fc_06367ec108b33fae016aa0597def5087d097462ab8a44c9d26",
+              "toolName": "look",
+              "params": {
+                "view": "page-frame"
+              },
+              "resultText": "LOOK · 1 render · close-up page-frame\nBOARD\n  page-frame section \"2026-09-08-comp-134600 · eval-harness-orchestration\" white 32,32 3800×2000\n    pin section \"1 · Immutable run contract\" blue 100,160 420×740\n      suite document \"Pinned suite\" white 160,260 120×120\n      contract sticky \"**Frozen contract** Wording changes → new scenario versions; never edit in place. Fingerprint: revision, configuration, prompt versions, rubric versions.\" 160,480 300×420\n    exec section \"2 · Bounded execution · isolated SUT\" teal 660,160 820×1280\n      scheduler orchestrator \"Scheduler\" teal 740,260 120×120\n      workers predefined-process \"Worker pool ≤ N Ordered scenario steps\" 1000,260 280×100\n      sut server \"Isolated SUT Never production\" 1080,480 120×120\n      results predefined-process \"Completed scenario Transcript + final artifact Typed failure records\" 1000,760 280×100\n      fault predefined-process \"Infrastructure fault Record separately + retry\" 740,1020 280×100\n      behavior predefined-process \"Behavior failure Record, then continue steps\" 1100,1240 280×100\n    grade section \"3 · Concurrent grading · global limit G\" pink 1620,160 920×1280\n      dispatch queue \"Grade immediately Global limit G\" green 1700,760 120×120\n      criteria judge \"Criterion A Independent grader\" pink 1960,360 120×120\n      criteria-b judge \"Criterion B Independent grader\" pink 1960,760 120×120\n      artifact-grade judge \"Artifact-only grader No original request\" pink 1960,1160 120×120\n      evidence decision \"Evidence?\" 2200,760 280×100\n      retrygrade predefined-process \"Invalid → retry grader once Still no evidence → flag\" 2200,520 280×100\n    compare section \"4 · Compatible comparison\" blue 2760,160 800×1280\n      assemble predefined-process \"Assemble valid verdicts Scorecard\" 2820,760 280×100\n      compatible decision \"Same fingerprint?\" 2820,1000 280×100\n      narrate predefined-process \"Compare with baseline Narrate |Δ| ≥ threshold\" 2820,1240 280×100\n      blocked predefined-process \"Incompatible Do not compare\" 3200,1000 280×100\n      baseline memory \"Chosen baseline\" blue 3260,480 120×120\n    retention section \"5 · Retained audit trail\" 1620,1600 920×320\n      audit memory \"Run archive\" blue 1740,1700 120×120\n      audit-note sticky \"Retain every artifact, transcript and verdict, including invalid attempts and typed faults, for disputed-score review.\" 2020,1680 460×240\nEDGES\n  e1 suite→scheduler \"pinned run\" · suite ─(s0 h y=320)→ scheduler\n  e2 scheduler→workers \"fan out\" · scheduler ─(s0 h y=320)→ ─(s1 h y=320)→ (s2 v x=930) ─(s3 h y=310)→ ─(s4 h y=310)→ workers\n  e3 workers→sut \"execute steps\" anchors=bottom→top · workers (s0 v x=1140) sut\n  capture sut→results \"capture full run\" anchors=bottom→top · sut (s0 v x=1140) results\n  infra sut→fault \"infrastructure failure\" orange anchors=left→top · sut ─(s0 h y=540)→ ─(s1 h y=540)→ (s2 v x=880) (s3 v x=880) fault\n  retryexec fault→workers \"retry infrastructure only\" dashed orange anchors=left→top · fault ─(s0 h y=1070)→ (s1 v x=720) ─(s2 h y=240)→ (s3 v x=1140) workers\n  behfail sut→behavior \"behavior failure\" red anchors=right→right · sut ─(s0 h y=540)→ ─(s1 h y=540)→ (s2 v x=1314) ─(s3 h y=1290)→ ─(s4 h y=1290)→ behavior\n  ready results→dispatch \"each completion\" anchors=right→left · results ─(s0 h y=810)→ ─(s1 h y=810)→ (s2 v x=1490) ─(s3 h y=820)→ ─(s4 h y=820)→ dispatch\n  ga dispatch→criteria \"criterion A\" · dispatch (s0 v x=1760) (s1 v x=1760) ─(s2 h y=641)→ (s3 v x=2020) (s4 v x=2020) criteria\n  gb dispatch→criteria-b — anchors=right→left · dispatch ─(s0 h y=820)→ criteria-b\n  gc dispatch→artifact-grade \"artifact only\" anchors=bottom→left · dispatch (s0 v x=1760) (s1 v x=1760) ─(s2 h y=1220)→ ─(s3 h y=1220)→ artifact-grade\n  va criteria→evidence \"verdict + evidence\" anchors=right→top lp=0.15@20 · criteria (s0 v x=2080) ─(s1 h y=340)→ (s2 v x=2152) ─(s3 h y=740)→ (s4 v x=2340) evidence\n  vb criteria-b→evidence — anchors=right→left · criteria-b ─(s0 h y=820)→ ─(s1 h y=820)→ (s2 v x=2140) ─(s3 h y=810)→ ─(s4 h y=810)→ evidence\n  vc artifact-grade→evidence — anchors=right→bottom · artifact-grade ─(s0 h y=1220)→ ─(s1 h y=1220)→ (s2 v x=2340) (s3 v x=2340) evidence\n  valid evidence→assemble \"yes · valid\" green anchors=right→left · evidence ─(s0 h y=810)→ ─(s1 h y=810)→ ─(s2 h y=810)→ assemble\n  invalid evidence→retrygrade \"no\" red anchors=top→bottom · evidence (s0 v x=2340) (s1 v x=2340) (s2 v x=2340) retrygrade\n  score-check assemble→compatible — anchors=bottom→top · assemble (s0 v x=2960) (s1 v x=2960) (s2 v x=2960) compatible\n  compatible-yes compatible→narrate \"yes\" green anchors=bottom→top · compatible (s0 v x=2960) (s1 v x=2960) (s2 v x=2960) narrate\n  no-compare compatible→blocked \"no\" red anchors=right→left · compatible ─(s0 h y=1050)→ ─(s1 h y=1050)→ ─(s2 h y=1050)→ blocked\n  baseline-check baseline→compatible \"baseline fingerprint\" dashed blue anchors=left→left · baseline (s0 v x=3260) ─(s1 h y=460)→ (s2 v x=2800) ─(s3 h y=1050)→ compatible\n  promote assemble→baseline \"promote run → future baseline\" dashed blue anchors=top→bottom · assemble (s0 v x=2960) (s1 v x=2960) ─(s2 h y=692)→ (s3 v x=3320) (s4 v x=3320) baseline\n  retain-exec exec→audit \"transcripts · artifacts · typed faults\" dashed blue anchors=bottom→left · exec (s0 v x=1070) (s1 v x=1070) ─(s2 h y=1760)→ ─(s3 h y=1760)→ audit\n  retain-grade grade→audit \"every verdict\" dashed blue anchors=bottom→top · grade (s0 v x=2080) (s1 v x=2080) ─(s2 h y=1570)→ (s3 v x=1800) (s4 v x=1800) audit\n  retry-valid retrygrade→assemble \"retry has evidence\" dashed green anchors=right→top lp=0.2@20 · retrygrade ─(s0 h y=570)→ ─(s1 h y=570)→ (s2 v x=2960) (s3 v x=2960) assemble\nBOARD DIFF · base → draft · 52 ops\n  updateDescription  1180 chars\n  addSection pin\n  addSection exec\n  addSection grade\n  addSection compare\n  addObject suite\n  addSticky contract\n  addObject scheduler\n  addObject workers\n  addObject sut\n  addObject results\n  addObject fault\n  addObject behavior\n  addObject dispatch\n  addObject criteria\n  addObject criteria-b\n  addObject artifact-grade\n  addObject evidence\n  addObject assemble\n  addObject retrygrade\n  addObject compatible\n  addObject narrate\n  addObject blocked\n  addObject baseline\n  addSection retention\n  addObject audit\n  addSticky audit-note\n  updateSection page-frame  resized\n  addConnection e1\n  addConnection e2\n  addConnection e3\n  addConnection capture\n  addConnection infra\n  addConnection retryexec\n  addConnection behfail\n  addConnection ready\n  addConnection ga\n  addConnection gb\n  addConnection gc\n  addConnection va\n  addConnection vb\n  addConnection vc\n  addConnection valid\n  addConnection invalid\n  addConnection score-check\n  addConnection compatible-yes\n  addConnection no-compare\n  addConnection baseline-check\n  addConnection promote\n  addConnection retain-exec\n  addConnection retain-grade\n  addConnection retry-valid\nDIAGNOSTICS · clean\nROUTES\n  e1  anchors right→left  path suite ─(s0 h y=320)→ scheduler  through none\n  e2  anchors right→left  path scheduler ─(s0 h y=320)→ ─(s1 h y=320)→ (s2 v x=930) ─(s3 h y=310)→ ─(s4 h y=310)→ workers  through none\n  e3  anchors bottom→top  path workers (s0 v x=1140) sut  through none\n  capture  anchors bottom→top  path sut (s0 v x=1140) results  through none\n  infra  anchors left→top  path sut ─(s0 h y=540)→ ─(s1 h y=540)→ (s2 v x=880) (s3 v x=880) fault  through none\n  retryexec  anchors left→top  path fault ─(s0 h y=1070)→ (s1 v x=720) ─(s2 h y=240)→ (s3 v x=1140) workers  through none\n  behfail  anchors right→right  path sut ─(s0 h y=540)→ ─(s1 h y=540)→ (s2 v x=1314) ─(s3 h y=1290)→ ─(s4 h y=1290)→ behavior  through none\n  ready  anchors right→left  path results ─(s0 h y=810)→ ─(s1 h y=810)→ (s2 v x=1490) ─(s3 h y=820)→ ─(s4 h y=820)→ dispatch  through none\n  ga  anchors top→bottom  path dispatch (s0 v x=1760) (s1 v x=1760) ─(s2 h y=641)→ (s3 v x=2020) (s4 v x=2020) criteria  through none\n  gb  anchors right→left  path dispatch ─(s0 h y=820)→ criteria-b  through none\n  gc  anchors bottom→left  path dispatch (s0 v x=1760) (s1 v x=1760) ─(s2 h y=1220)→ ─(s3 h y=1220)→ artifact-grade  through none\n  va  anchors right→top  path criteria (s0 v x=2080) ─(s1 h y=340)→ (s2 v x=2152) ─(s3 h y=740)→ (s4 v x=2340) evidence  through none\n  vb  anchors right→left  path criteria-b ─(s0 h y=820)→ ─(s1 h y=820)→ (s2 v x=2140) ─(s3 h y=810)→ ─(s4 h y=810)→ evidence  through none\n  vc  anchors right→bottom  path artifact-grade ─(s0 h y=1220)→ ─(s1 h y=1220)→ (s2 v x=2340) (s3 v x=2340) evidence  through none\n  valid  anchors right→left  path evidence ─(s0 h y=810)→ ─(s1 h y=810)→ ─(s2 h y=810)→ assemble  through none\n  invalid  anchors top→bottom  path evidence (s0 v x=2340) (s1 v x=2340) (s2 v x=2340) retrygrade  through none\n  score-check  anchors bottom→top  path assemble (s0 v x=2960) (s1 v x=2960) (s2 v x=2960) compatible  through none\n  compatible-yes  anchors bottom→top  path compatible (s0 v x=2960) (s1 v x=2960) (s2 v x=2960) narrate  through none\n  no-compare  anchors right→left  path compatible ─(s0 h y=1050)→ ─(s1 h y=1050)→ ─(s2 h y=1050)→ blocked  through none\n  baseline-check  anchors left→left  path baseline (s0 v x=3260) ─(s1 h y=460)→ (s2 v x=2800) ─(s3 h y=1050)→ compatible  through none\n  promote  anchors top→bottom  path assemble (s0 v x=2960) (s1 v x=2960) ─(s2 h y=692)→ (s3 v x=3320) (s4 v x=3320) baseline  through none\n  retain-exec  anchors bottom→left  path exec (s0 v x=1070) (s1 v x=1070) ─(s2 h y=1760)→ ─(s3 h y=1760)→ audit  through none\n  retain-grade  anchors bottom→top  path grade (s0 v x=2080) (s1 v x=2080) ─(s2 h y=1570)→ (s3 v x=1800) (s4 v x=1800) audit  through none\n  retry-valid  anchors right→top  path retrygrade ─(s0 h y=570)→ ─(s1 h y=570)→ (s2 v x=2960) (s3 v x=2960) assemble  through none\nREQUESTS · none\nMEASURES · section page-frame 32,32 3800×2000\n  gaps x  pin↔exec 140 · exec↔grade 140 · grade↔compare 220\n  gaps y  grade↔retention 160\n  pitch x 60 · 500 · 80 · 260 · 80 · 20 · 520 · 80 · +8 more\n  pitch y 100 · 100 · 120 · 40 · 240 · 240 · 20 · 140 · +4 more\n  free    left 44 · right 248 · top 76 · bottom 84\n  ink     10%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-79d47ca614f1.308.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 76,
+          "timestamp": "2026-09-08T18:52:55.670Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_iclQj9cZMJSG6O7epaCXVUhV|fc_06367ec108b33fae016aa059863cf887d095f4f056e1c2fa86",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Created the pinned-run evaluation flow with bounded isolated execution, distinct fault handling, concurrent evidence-backed grading, compatible baseline comparison, promotion, and retained audit records."
+              },
+              "resultText": "Committed: Created the pinned-run evaluation flow with bounded isolated execution, distinct fault handling, concurrent evidence-backed grading, compatible baseline comparison, promotion, and retained audit records. (52 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,486 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation-05-theme",
+  "title": "Theme",
+  "root": "b-theme-root-0",
+  "blocks": {
+    "b-theme-root-0": {
+      "id": "b-theme-root-0",
+      "type": "paragraph",
+      "props": {
+        "covers": "Where theme code lives: palette.ts and tokens.ts as the two leaf modules under packages/canvas/src/theme/, the dispersal that keeps everything else beside its consumer, and the palette import boundary.",
+        "type": "implementation",
+        "concepts": [
+          "theme",
+          "palette",
+          "tokens",
+          "dispersal",
+          "import-boundary",
+          "leaf-module"
+        ]
+      },
+      "children": [
+        "b-theme-role-1",
+        "b-theme-sources-2",
+        "b-theme-gov-3",
+        "b-theme-gov-shape-4",
+        "b-theme-decisions-5",
+        "b-theme-split-decision-6",
+        "b-theme-split-why-7",
+        "b-theme-split-applies-8",
+        "b-theme-dispersal-decision-9",
+        "b-theme-dispersal-why-10",
+        "b-theme-dispersal-applies-11",
+        "b-theme-boundary-decision-12",
+        "b-theme-boundary-why-13",
+        "b-theme-boundary-applies-14"
+      ]
+    },
+    "b-theme-role-1": {
+      "id": "b-theme-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The theme area is two leaf modules: "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the closed 10-pick color table with its per-role resolvers, and "
+        },
+        {
+          "insert": "tokens.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the non-color remainder — canvas surface variables, the universal shape stroke, the text size hierarchy. The color model itself is owned by design; this area records only where theme code lives and what may import it."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-sources-2": {
+      "id": "b-theme-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "packages/canvas/src/theme",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme",
+              "label": "packages/canvas/src/theme"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-gov-3": {
+      "id": "b-theme-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-theme-gov-shape-4": {
+      "id": "b-theme-gov-shape-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The shape contract",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "The shape contract"
+            }
+          }
+        },
+        {
+          "insert": " — owns the color model: the 10-pick roster, the ink/fill/wash roles, and how a pick becomes pixels per kind."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-decisions-5": {
+      "id": "b-theme-decisions-5",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-theme-split-decision-6": {
+      "id": "b-theme-split-decision-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "theme/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " holds exactly two modules — "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "label": "palette.ts"
+            }
+          }
+        },
+        {
+          "insert": " owns everything color (the swatch table and the per-role resolvers), "
+        },
+        {
+          "insert": "tokens.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/tokens.ts",
+              "label": "tokens.ts"
+            }
+          }
+        },
+        {
+          "insert": " owns the small non-color remainder — and consumers reach color only through the resolvers, never by indexing the table."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-split-why-7": {
+      "id": "b-theme-split-why-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was one merged theme-constants module, which the repo had once and retired: it turned every visual constant into a cross-layer import magnet and let consumers depend on table layout instead of roles."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-split-applies-8": {
+      "id": "b-theme-split-applies-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas/src/theme",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme",
+              "label": "packages/canvas/src/theme"
+            }
+          }
+        },
+        {
+          "insert": " — including every future color role, which joins the table and gains a resolver rather than a new module."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-dispersal-decision-9": {
+      "id": "b-theme-dispersal-decision-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "theme/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " stays small by design: pixel-parity constants co-locate with their one consumer — grid constants in "
+        },
+        {
+          "insert": "stage/grid.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts",
+              "label": "stage/grid.ts"
+            }
+          }
+        },
+        {
+          "insert": ", object trim metrics beside the object defs, connector stroke and dash metrics in the connector slice — and only what is genuinely global (the palette, the universal stroke, surface variables, text sizes) lives in "
+        },
+        {
+          "insert": "theme/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-dispersal-why-10": {
+      "id": "b-theme-dispersal-why-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was the retired central mirror module of every sampled measurement, which decoupled constants from the renderers that consume them and made "
+        },
+        {
+          "insert": "theme/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " a dependency of everything."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-dispersal-applies-11": {
+      "id": "b-theme-dispersal-applies-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas/src/theme",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme",
+              "label": "packages/canvas/src/theme"
+            }
+          }
+        },
+        {
+          "insert": " — including every future sampled constant, which lands beside its consumer, not here."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-boundary-decision-12": {
+      "id": "b-theme-boundary-decision-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " may import only "
+        },
+        {
+          "insert": "state/schema/colors.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/colors.ts",
+              "label": "state/schema/colors.ts"
+            }
+          }
+        },
+        {
+          "insert": " — the id vocabulary — and must never import "
+        },
+        {
+          "insert": "tokens.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or anything under "
+        },
+        {
+          "insert": "objects/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "; the boundary is encoded in "
+        },
+        {
+          "insert": "import-boundaries.test.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/__tests__/import-boundaries.test.ts",
+              "label": "import-boundaries.test.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-boundary-why-13": {
+      "id": "b-theme-boundary-why-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "objects/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sits above "
+        },
+        {
+          "insert": "theme/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and both need the palette, so any other import either cycles or drags render code beneath the color table. The rejected alternative was letting the palette re-export schema vocabulary at runtime, which made it a schema surface instead of a leaf."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-boundary-applies-14": {
+      "id": "b-theme-boundary-applies-14",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "label": "palette.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future import added to the palette, which must clear the same test."
+        }
+      ],
+      "children": []
+    }
+  }
+}

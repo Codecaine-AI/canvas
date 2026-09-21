@@ -1,46 +1,31 @@
-/**
- * The house aesthetic — the semantic account of what uniform layout means.
- * The craft targets carry the numeric spacing ladder; the
- * crowding lint owns the hard floor.
- */
+/** Composition guidance. Numeric defaults are starting points for local groups. */
 import type { StyleTopic } from "./types";
 
-const PROSE = `Calm and uniform — uniformity is information.
+const PROSE = `Let the system determine the composition.
 
-- Readers decode layout; make every signal deliberate, never accidental:
-    - same size + same gap = peers
-    - a bigger box = more important
-    - an off-register box = an exception
-- Content first:
-    - size each box to what it says, with comfortable padding
-    - then make peers match, sized to the largest member
-- One gap per group, repeated exactly:
-    - the craft targets set the node size and the gaps — hold them, reused exactly down the row or column, centers on one line
-    - between sections, the wider gutter, also repeated
-- Match by copying, not estimating:
-    - the digest reports every peer's exact geometry — reuse a peer's size and pitch instead of inventing near-miss numbers
-    - work in 20px grid units; geometry snaps to the grid anyway
-- Air everywhere:
-    - nothing touches a section border or the board edge
-    - every label owns clear air
-- Space is free:
-    - the base section is the page — set it to the size the diagram wants, and it keeps that size
-    - start roomy: a board that feels sparse while building lands right when it is full
-    - when a region starts to feel tight, grow the base section and spread the content — never compress a diagram to fit the space you started with
-    - in an edit, leave the base section alone unless the work actually needs the room
-- Sections do the grouping — everything has a home:
-    - many small labelled groups with air between them read better than one crowded frame — split a group before you tighten it
-    - one theme, one section; content lives in a section, never floating on the bare frame
-    - sections are the addressable units: a diagram gets linked whole, and its sections get linked individually — a piece without a home cannot be referenced
-    - a parent sits centered over its children
-- Color restrained:
-    - neutral bodies by default; one accent per meaning, used consistently
-    - red only for failure, green only for success
-    - children contrast their parent's tint
-- Wires:
-    - label edges directly, never through relay nodes
-    - enter and exit on the faces that point along the flow
-    - two runs never share a line`;
+- Sketch regions for actors, ownership, stages, shared stores, and loops before filling details.
+- Give regions variable sizes and proportions according to their role, contents, and connections.
+- Match sizes and gaps among real peers locally; unrelated regions need not share a register or a rectangle.
+- Give node labels, edge labels, and branch points readable local clearance; enlarge or reposition a cluster instead of scaling its labels down.
+- Use the craft targets as starting points, adjusting spacing for actual labels and routes.
+- Work in 20px grid units and reuse exact peer geometry rather than near-miss estimates.
+- Leave purposeful whitespace between groups and around labels; reserve wider corridors where wires actually pass.
+- After the main graph exists, move and resize provisional regions and change the page aspect ratio around its routes; avoid preserving equal bands and appending rows.
+- Sections name useful ownership or functional groups and remain individually addressable.
+- Section count follows meaning, with no fixed node quota; page-level entries, shared context, and notes are appropriate when they concern the whole board.
+- Outline first, recompose after the main graph, and crop the outer page only after paths and labels are readable.
+- Establish semantic types for participants, actions, decisions, stores, and artifacts before repetition; clone only correctly typed semantic peers.
+- Stickies carry rationale, constraints, examples, and operational detail beside that structure; there is no required note per section.
+- Use tinted regions to distinguish meaningful roles or ownership families, reusing color for the same meaning; avoid one gray template or a rainbow of unrelated stage colors.
+- Use registry colors as starting points; process and decision tints may express consistent roles or functions, and gray is a fallback rather than a mandate.
+- Check actual text, border, and fill contrast in the render; a child may share its region's hue when it remains distinct and readable.
+- Place closely related regions near each other and align directly connected endpoints on a common axis across region boundaries before wiring, so main runs can be straight.
+- For parallel work, arrange participants across the main direction and connect the actual participants through visible fan-out and merge; a wire into their section alone does not show their individual work.
+- Place shared stores and feedback destinations near their consumers, with notes beside the subject outside the flow corridors.
+- Fix unnecessary elbows and long detours by moving objects or regions and clearing obstructions before adding route steering.
+- Keep bends where branches or feedback need them; choose direction from the subject rather than forcing every diagram into a linear sequence.
+- Make important arrows identify producer, recipient, payload or trigger, and direction through their endpoints, labels, and arrowheads; notes cannot replace a causal handoff.
+- Trace applicable normal, failure, and feedback paths separately without notes; recompose implied or misleading handoffs and check explicit store and control relationships.`;
 
 export const style: StyleTopic = {
   id: "aesthetic",

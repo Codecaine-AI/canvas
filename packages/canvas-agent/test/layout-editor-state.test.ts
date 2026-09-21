@@ -936,7 +936,7 @@ describe("a full mock turn sequence", () => {
     block = textOf(renderBoardWork(state, renderContext([], 3)).messages[0]!);
     expect(state.outcome).toEqual({ outcome: "committed", message: "Lined the steps up." });
     expect(block).toContain('<board fresh="yes" objects="3" edges="1">');
-    expect(block).toContain('gamma rectangle "Gamma" 960,0 280×100');
+    expect(block).toContain('gamma rectangle "Gamma" white 960,0 280×100');
     expect(block).toContain('<recent_ops total="2" showing="2">');
     expect(block).toContain("t1 move_to beta");
     expect(block).toContain("t3 place_shape gamma");

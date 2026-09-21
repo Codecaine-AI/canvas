@@ -14,7 +14,7 @@
  *
  *  1. Prefer the STYLE GUIDE's craft targets over the UI defaults. The UI's
  *     per-type table sits below the guide's own minimums for a node (a 184×96
- *     `process` is under `nodeMinWidth` 224), so a board built from UI
+ *     `process` is under `nodeMinWidth` 240), so a board built from UI
  *     defaults starts out failing the targets the agent is graded on.
  *  2. Round to a multiple of the agent's 20 grid
  *     (service/session/tools/grid.ts), so a placed object is already on-grid
@@ -65,14 +65,11 @@ function toGrid(value: number): number {
 }
 
 /**
- * The table. One row per kind; the comment on each row names its source and
- * its rounding, because "why 280 and not 288" is the question every reader of
- * this file arrives with.
+ * One row per kind. Each comment names its source and any grid rounding.
  */
 export const CREATION_DEFAULTS: Readonly<Record<CreationKind, CreationDefault>> = {
-  // Nodes/shapes — CRAFT_TARGETS.nodeWidth 288 → 280, nodeHeight 96 → 100.
-  // The style guide's target node, rounded to the grid (288 rounds DOWN to
-  // 280, 96 rounds UP to 100). Still comfortably above nodeMinWidth (224),
+  // Nodes/shapes — the style guide's 280×100 target is already on the grid.
+  // Still comfortably above nodeMinWidth (240),
   // which the UI's own 184×96 `process` default is not.
   shape: {
     size: { width: toGrid(CRAFT_TARGETS.nodeWidth), height: toGrid(CRAFT_TARGETS.nodeHeight) },
@@ -93,7 +90,7 @@ export const CREATION_DEFAULTS: Readonly<Record<CreationKind, CreationDefault>> 
 
   // Sections — OBJECT_TYPE_DEFAULTS.section 480×360, already ×20, unchanged.
   // A frame is meant to wrap other objects, and 480×360 holds a 2-3 node
-  // column (nodesPerSectionMin/Max) at framePadding 48 without a fit.
+  // column at framePadding 40 without a fit; this is a creation convenience, not a section-load limit.
   section: {
     size: {
       width: toGrid(OBJECT_TYPE_DEFAULTS.section.geometry.width),

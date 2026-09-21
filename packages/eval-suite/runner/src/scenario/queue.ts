@@ -674,7 +674,7 @@ export interface SourceFingerprints {
   surface: FileFingerprint;
 }
 
-async function collectSourceFingerprints(): Promise<SourceFingerprints> {
+export async function collectSourceFingerprints(): Promise<SourceFingerprints> {
   const [prompt, lints, styles, surface] = await Promise.all([
     hashFiles([
       resolve(LAYOUT_EDITOR_DIR, "prompt", "prompt.json"),
@@ -683,7 +683,14 @@ async function collectSourceFingerprints(): Promise<SourceFingerprints> {
     hashFiles([
       resolve(REPO_ROOT, "packages", "canvas-agent", "src", "board", "lints"),
     ]),
-    hashFiles([resolve(LAYOUT_EDITOR_DIR, "context", "style-guide")]),
+    hashFiles([
+      resolve(LAYOUT_EDITOR_DIR, "context", "style-guide"),
+      resolve(LAYOUT_EDITOR_DIR, "context", "index.ts"),
+      resolve(REPO_ROOT, "packages", "canvas-agent", "src", "authoring"),
+      resolve(REPO_ROOT, "packages", "canvas-agent", "src", "service", "loaders", "authoring.ts"),
+      resolve(REPO_ROOT, "packages", "canvas", "src", "objects", "registry"),
+      resolve(REPO_ROOT, "packages", "canvas", "src", "state", "schema", "object-types.ts"),
+    ]),
     hashFiles([
       resolve(REPO_ROOT, "packages", "canvas-agent", "src", "service", "session"),
       resolve(LAYOUT_EDITOR_DIR, "context", "capabilities"),

@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 5.5,
+  "verdict": {
+    "score": 5.5,
+    "score_rationale": "The board sits between the flat 5 anchor and the unfinished 6 anchor: it is readable and regionally organized, but pervasive generic gray boxes, weak registry vocabulary, and oversized empty bands prevent it from feeling pin-up finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5.5,
+        "note": "The four numbered regions establish a clear frame, but large unexplained vertical gaps and the sparsely occupied lower section leave substantial dead space."
+      },
+      {
+        "name": "color",
+        "score": 5,
+        "note": "Pastel region fills and colored routes provide grouping, yet nearly every operational object is rendered as the same gray box rather than carrying registry-specific colors."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 8,
+        "note": "Routes are generally clean, labeled, and free of visible crosshair waypoints or orphan badges, though several long feedback wires make the routing apparatus visually prominent."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6,
+        "note": "Local rows and box sizes align consistently, but repeated identical panels flatten hierarchy, decision points remain ordinary rectangles, and uneven regional density weakens the overall rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8216,
+    "output_tokens": 510
+  },
+  "flags": []
+}

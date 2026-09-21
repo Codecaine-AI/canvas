@@ -17,6 +17,7 @@ the scorecards. Entry point:
 ephemeral ports at run start and stopped at run end), BAML judges, scorecard assembly. Spec in [runner-spec/](runner-spec/). |
 | [runs/](runs/) | Run artifacts: per-scenario stage renders, judge evidence, `scorecard.md`. |
 | [feedback/](feedback/) | Review findings and fix-round decision records. |
+| [docs-eval/](docs-eval/) | Historical eval material: the 2026-07-22 rule-eval session (protocols, per-diagram findings, trial reports), moved unchanged from `docs/agent-eval/`. |
 
 ## Scenarios
 

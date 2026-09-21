@@ -222,7 +222,7 @@ function shapeSwapPatch(
 export const changeShape = defineOperationTool({
   name: "change_shape",
   description:
-    "Swap what a shape is, and which way it points. Icons are types: name the glyph and the object becomes that icon; name a shape and any glyph on it is dropped. Sections, stickies, and edges are not shapes and are not targets.",
+    "Swap what a shape is, and which way it points. Icons are types: name the glyph and the object becomes that icon; name a shape and any glyph on it is dropped. A direction the new type does not support is dropped with a note. Sections, stickies, and edges are not shapes and are not targets.",
   fields: { id: Id, patch: ShapeSwapPatch },
   validate: (ctx, p) => {
     const errors = ctx.requireShape(p.id);

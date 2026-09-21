@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "agent-session-orchestration",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "This lands at 6.5 because the board is deliberate, readable, and semantically colored, but it does not feel fully finished due to substantial dead space, uneven regional density, and an ambiguous wire convergence near rehydration.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6,
+        "note": "The major regions are clearly framed, but large unused bands—especially across the lower-right and between the durable-state and session-tree sections—make the canvas feel oversized."
+      },
+      {
+        "name": "color",
+        "score": 8,
+        "note": "Color meaning is consistent and legible: teal marks orchestration, pink the model, blue durable state, yellow humans and explanatory notes, red termination, and gray infrastructure/process elements."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6.5,
+        "note": "Most routing is clean, but the long teal and blue paths converge ambiguously at the left edge of “Rehydrate latest snapshot,” and several extended perimeter wires remain visually prominent."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "Local rows and icon spacing generally hold, but density varies awkwardly: compact operational chains sit beside oversized note cards and broad empty panel interiors, weakening the overall rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8541,
+    "output_tokens": 546
+  },
+  "flags": []
+}

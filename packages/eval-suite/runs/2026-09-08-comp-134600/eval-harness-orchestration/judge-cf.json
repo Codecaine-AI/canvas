@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 7,
+  "verdict": {
+    "score": 7,
+    "score_rationale": "This is a composed, readable operational map with disciplined regional color and mostly coherent registers, but broad empty bands, a few awkward long return routes, and minor vocabulary/color misses keep it at the 7 anchor rather than fully finished.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6.5,
+        "note": "The five numbered regions establish a clear left-to-right composition, but the oversized top margin and large gaps around the low audit-trail panel leave visible dead bands."
+      },
+      {
+        "name": "color",
+        "score": 7.5,
+        "note": "Teal execution, pink judges, green evaluation flow, blue storage, yellow notes, and gray shape-core steps are disciplined overall, though the blue database treatment for the labeled Run archive departs from the registry's gray archive semantics."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 7,
+        "note": "No crosshair junctions or orphaned badges are visible, but several long dashed routes and the looping verdict/evidence return path expose routing mechanics more than a polished final board should."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 7,
+        "note": "Section headers and major panels align consistently and the primary flow is legible, but sparse regions, uneven vertical occupancy, and long connector excursions weaken the overall rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 6526,
+    "output_tokens": 713
+  },
+  "flags": []
+}

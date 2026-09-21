@@ -1,0 +1,708 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-20-engine-40-stage-and-viewport",
+  "title": "Stage and viewport",
+  "root": "b-engine-stage-root",
+  "blocks": {
+    "b-engine-stage-title-1": {
+      "id": "b-engine-stage-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Stage and viewport"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-intro-2": {
+      "id": "b-engine-stage-intro-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The stage is the presentation side of the engine: given an "
+        },
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/document.ts",
+              "symbol": "InteractiveCanvasDocument"
+            }
+          }
+        },
+        {
+          "insert": " and a viewport, it draws objects, connections, sections, and annotations as a world-space DOM/SVG tree. It owns no editing state — it is the shared renderer both the read-only viewer and the interactive editor mount, driven entirely by props."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-draw-heading-3": {
+      "id": "b-engine-stage-draw-heading-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The z-tiered draw model"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-draw-body-4": {
+      "id": "b-engine-stage-draw-body-4",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasStage",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "symbol": "CanvasStage"
+            }
+          }
+        },
+        {
+          "insert": " owns the grid surface and the transformed world layer, and draws "
+        },
+        {
+          "insert": "document content only",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": section fills, connector paths, objects dispatched through their defs, selected-connection trim, and floating section header chips. Paint order derives from "
+        },
+        {
+          "insert": "paintOrderedObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/z-order.ts",
+              "symbol": "paintOrderedObjects"
+            }
+          }
+        },
+        {
+          "insert": " so sections form the backdrop and non-sections preserve schema order above them; the full derivation is "
+        },
+        {
+          "insert": "The layer cake",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "The layer cake"
+            }
+          }
+        },
+        {
+          "insert": ". The CSS tiers:"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-draw-tiers-5": {
+      "id": "b-engine-stage-draw-tiers-5",
+      "type": "code",
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "section bodies      z 0\nconnector SVG       z 1\nobjects             z 2\nsection headers,\nconnection trim     z 3\nworld overlay       z 4"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-draw-slots-6": {
+      "id": "b-engine-stage-draw-slots-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Everything ephemeral arrives through two overlay slots: "
+        },
+        {
+          "insert": "worldOverlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sits inside the transformed world layer at z 4, and "
+        },
+        {
+          "insert": "overlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sits after it in untransformed screen space. The stage imports no editor feedback components and assembles no overlays of its own; the editor face injects its feedback pair through the slots ("
+        },
+        {
+          "insert": "Interaction",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/20-interaction",
+              "label": "Interaction"
+            }
+          }
+        },
+        {
+          "insert": "). The selected-connection trim renders in its own z 3 layer, co-planar with section headers, so object bodies can cover connector lines without covering selection affordances. The board surface is a fixed light color regardless of host theme."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-draw-select-decision-7": {
+      "id": "b-engine-stage-draw-select-decision-7",
+      "type": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Board text is trim: user-select is off at the stage root"
+      },
+      "text": [
+        {
+          "insert": "Shape labels, section titles, and captions are plain DOM text, so a drag across the board would otherwise sweep a native browser text selection across every label it crossed. The stage root sets "
+        },
+        {
+          "insert": "user-select: none",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and every label inherits it: board text behaves like trim, not like document text. Only the active text editors opt back in with an explicit "
+        },
+        {
+          "insert": "user-select: text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — required, because contentEditable does not exempt itself from an inherited "
+        },
+        {
+          "insert": "user-select: none",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Deliberately not part of the guard: a "
+        },
+        {
+          "insert": "preventDefault()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on stage pointerdown — the default mousedown drives focus and blur, and clicking the canvas must keep blurring (and thereby committing) an open text editor."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-grid-heading-8": {
+      "id": "b-engine-stage-grid-heading-8",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Adaptive grid"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-grid-body-9": {
+      "id": "b-engine-stage-grid-body-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "gridBackground",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts",
+              "symbol": "gridBackground"
+            }
+          }
+        },
+        {
+          "insert": " computes a zoom-aware dot grid pinned to world coordinates. From a base step of "
+        },
+        {
+          "insert": "GRID_BASE_STEP_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts",
+              "symbol": "GRID_BASE_STEP_PX"
+            }
+          }
+        },
+        {
+          "insert": " = 8 logical px, it projects the step through the current zoom; while the projected pitch falls below "
+        },
+        {
+          "insert": "GRID_MIN_SCREEN_STEP_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/grid.ts",
+              "symbol": "GRID_MIN_SCREEN_STEP_PX"
+            }
+          }
+        },
+        {
+          "insert": " = 6.5 screen px, the world step doubles by powers of two until the grid is legible again. Dot radius is handled separately from the density tier and clamps between fixed bounds."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-grid-decision-10": {
+      "id": "b-engine-stage-grid-decision-10",
+      "type": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "Keep the grid legible via a screen-pixel step band, not a fixed world step"
+      },
+      "text": [
+        {
+          "insert": "A fixed world-space grid step would collapse into sub-pixel noise when zoomed far out, so the grid doubles its world step only when the projected pitch would fall below the minimum screen step. It does not halve at high zoom: zooming in lets dots spread out naturally instead of subdividing into a dense screen-space pattern. The comfort maximum is a reference, not an enforced band."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-viewport-heading-11": {
+      "id": "b-engine-stage-viewport-heading-11",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Viewport math"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-viewport-body-12": {
+      "id": "b-engine-stage-viewport-body-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "ViewportState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "ViewportState"
+            }
+          }
+        },
+        {
+          "insert": " stores the world point shown at screen origin as "
+        },
+        {
+          "insert": "x",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "y",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " plus "
+        },
+        {
+          "insert": "zoom",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "worldToScreen",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "worldToScreen"
+            }
+          }
+        },
+        {
+          "insert": " applies "
+        },
+        {
+          "insert": "(worldPoint - { x, y }) * zoom",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "screenToWorld",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "screenToWorld"
+            }
+          }
+        },
+        {
+          "insert": " is the inverse; the stage's world layer applies the matching CSS transform "
+        },
+        {
+          "insert": "translate(-x * zoom, -y * zoom) scale(zoom)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with origin "
+        },
+        {
+          "insert": "0 0",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Zoom clamps to "
+        },
+        {
+          "insert": "0.1",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "–"
+        },
+        {
+          "insert": "4",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " via "
+        },
+        {
+          "insert": "clampZoom",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "clampZoom"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-viewport-fit-13": {
+      "id": "b-engine-stage-viewport-fit-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "fitBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "fitBounds"
+            }
+          }
+        },
+        {
+          "insert": " pads the target bounds by 48 px, computes zoom as "
+        },
+        {
+          "insert": "min(screen.width / paddedWidth, screen.height / paddedHeight, 1)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and centers the bounds — fitting never zooms past 1.0. "
+        },
+        {
+          "insert": "fitDocument",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "fitDocument"
+            }
+          }
+        },
+        {
+          "insert": " fits over the unpadded document bounds to avoid double padding, and "
+        },
+        {
+          "insert": "containerViewBounds",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "containerViewBounds"
+            }
+          }
+        },
+        {
+          "insert": " is the view-crop input: it finds one section, gathers it plus its transitive "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " descendants, and returns their bounds with 32 px padding."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-viewer-heading-14": {
+      "id": "b-engine-stage-viewer-heading-14",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The viewer face"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-viewer-body-15": {
+      "id": "b-engine-stage-viewer-body-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "InteractiveCanvasViewer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewer/InteractiveCanvasViewer.tsx",
+              "symbol": "InteractiveCanvasViewer"
+            }
+          }
+        },
+        {
+          "insert": " is display-only "
+        },
+        {
+          "insert": "by construction",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": it has no tool prop, no mutation callback, and no interaction machine, so read-only behavior is structural rather than a mode flag on the editor. Setting "
+        },
+        {
+          "insert": "interactive",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " enables navigation only — wheel zoom, pointer pan, and Fit/+/− controls."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-viewer-fit-16": {
+      "id": "b-engine-stage-viewer-fit-16",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The viewer measures its shell and computes a fit viewport from the measured size: a "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " section id fits the section crop, otherwise the whole document. The interactive viewer refits when the document or "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " changes, while ordinary container resizes do not erase a user's chosen pan and zoom. A "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " id that resolves to no section renders a warning badge instead of a crop. "
+        },
+        {
+          "insert": "bare",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " removes the surrounding document trim for iframe and full-screen hosts, and the stage shell takes its aspect ratio from "
+        },
+        {
+          "insert": "document.size",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with a 16:9 fallback."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-embed-heading-17": {
+      "id": "b-engine-stage-embed-heading-17",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Embedding progression"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-embed-body-18": {
+      "id": "b-engine-stage-embed-body-18",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Hosts disclose interaction progressively: a static SVG crop in an inline card, the interactive read-only viewer only after an explicit expand action, and the Studio editor as a separate authoring context. The "
+        },
+        {
+          "insert": "view",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " value is a stable section id shared across all three surfaces, so the preview, the expanded viewer, and the editor address the same part of one canonical document. The routes and the preview endpoint are specified in "
+        },
+        {
+          "insert": "Persistence and embedding",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/50-persistence-and-embedding",
+              "label": "Persistence and embedding"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-stage-root": {
+      "id": "b-engine-stage-root",
+      "type": "paragraph",
+      "props": {
+        "covers": "The presentation model: the stage draws only the document through z-tiered layers and exposes two overlay slots for everything ephemeral; the adaptive dot grid, world/screen viewport math, the read-only viewer face, and the embedding progression.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "z tiers",
+          "overlay slots",
+          "adaptive grid",
+          "viewport math",
+          "viewer face",
+          "embedding progression"
+        ]
+      },
+      "children": [
+        "b-engine-stage-title-1",
+        "b-engine-stage-intro-2",
+        "b-engine-stage-draw-heading-3",
+        "b-engine-stage-draw-body-4",
+        "b-engine-stage-draw-tiers-5",
+        "b-engine-stage-draw-slots-6",
+        "b-engine-stage-draw-select-decision-7",
+        "b-engine-stage-grid-heading-8",
+        "b-engine-stage-grid-body-9",
+        "b-engine-stage-grid-decision-10",
+        "b-engine-stage-viewport-heading-11",
+        "b-engine-stage-viewport-body-12",
+        "b-engine-stage-viewport-fit-13",
+        "b-engine-stage-viewer-heading-14",
+        "b-engine-stage-viewer-body-15",
+        "b-engine-stage-viewer-fit-16",
+        "b-engine-stage-embed-heading-17",
+        "b-engine-stage-embed-body-18"
+      ]
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "agent-session-orchestration",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board is readable with effort, matching the 6–6.5 anchor because its strong regional organization is offset by very small labels, long routed connectors, and a topology that requires close tracing.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 6.5,
+        "note": "Most nodes and notes have ample whitespace, but many narrow edge-label chips and section headers are too small to read comfortably at arm's length."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Distinct framed regions clearly separate the shared control plane, active runner session, durable state, shutdown lifecycle, and concurrent session tree."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "Arrowheads and labels generally clarify direction, but several blue, teal, green, and orange routes make long perimeter-like journeys across regions and require deliberate endpoint tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 6.5,
+        "note": "The major lifecycle, recovery, and concurrency concepts are decomposed into recognizable sections, though oversized empty areas and multiple prose-heavy notes weaken the visual prominence of the central flow."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8473,
+    "output_tokens": 363
+  },
+  "flags": []
+}

@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation-30-interaction",
+  "title": "Interaction",
+  "root": "b-ixn-root-0",
+  "blocks": {
+    "b-ixn-root-0": {
+      "id": "b-ixn-root-0",
+      "type": "paragraph",
+      "props": {
+        "covers": "Where the pointer kernel lives: the DOM-free purity rule for packages/canvas/src/interaction/ and types.ts as the shared vocabulary home.",
+        "type": "implementation",
+        "concepts": [
+          "interaction",
+          "pointer-kernel",
+          "dom-free",
+          "hit-vocabulary",
+          "thresholds"
+        ]
+      },
+      "children": [
+        "b-ixn-role-1",
+        "b-ixn-sources-2",
+        "b-ixn-gov-3",
+        "b-ixn-gov-ixn-4",
+        "b-ixn-decisions-5",
+        "b-ixn-dom-free-decision-6",
+        "b-ixn-dom-free-why-7",
+        "b-ixn-dom-free-applies-8",
+        "b-ixn-vocabulary-decision-9",
+        "b-ixn-vocabulary-why-10",
+        "b-ixn-vocabulary-applies-11"
+      ]
+    },
+    "b-ixn-role-1": {
+      "id": "b-ixn-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The pointer kernel: normalized pointer events, the hit vocabulary, shared thresholds, and the pure utilities — hit-testing, frame coalescing, edge-pan math, the in-memory clipboard — that every gesture consumes. Gesture behavior is owned by design; this area records the purity boundary and where the vocabulary lives."
+        }
+      ],
+      "children": []
+    },
+    "b-ixn-sources-2": {
+      "id": "b-ixn-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "packages/canvas/src/interaction",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction",
+              "label": "packages/canvas/src/interaction"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-ixn-gov-3": {
+      "id": "b-ixn-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-ixn-gov-ixn-4": {
+      "id": "b-ixn-gov-ixn-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Interaction",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/20-interaction",
+              "label": "Interaction"
+            }
+          }
+        },
+        {
+          "insert": " — owns gesture behavior: the machine, threshold semantics, selection, clipboard, and edge-pan behavior."
+        }
+      ],
+      "children": []
+    },
+    "b-ixn-decisions-5": {
+      "id": "b-ixn-decisions-5",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-ixn-dom-free-decision-6": {
+      "id": "b-ixn-dom-free-decision-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "interaction/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " stays DOM-free pure TypeScript — no React, no DOM types, no listeners. The gesture-state union and the dispatcher assemble above the stage in "
+        },
+        {
+          "insert": "stage/editor/pipeline/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline",
+              "label": "stage/editor/pipeline/"
+            }
+          }
+        },
+        {
+          "insert": ", and DOM touch — event normalization, hit-attribute walking, window listeners — lives only at that editor edge."
+        }
+      ],
+      "children": []
+    },
+    "b-ixn-dom-free-why-7": {
+      "id": "b-ixn-dom-free-why-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was housing the machine and its DOM wiring in the kernel, which makes every gesture untestable without a browser and couples the shared vocabulary to one host."
+        }
+      ],
+      "children": []
+    },
+    "b-ixn-dom-free-applies-8": {
+      "id": "b-ixn-dom-free-applies-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas/src/interaction",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction",
+              "label": "packages/canvas/src/interaction"
+            }
+          }
+        },
+        {
+          "insert": " — including every future kernel utility, which takes plain data and returns plain data."
+        }
+      ],
+      "children": []
+    },
+    "b-ixn-vocabulary-decision-9": {
+      "id": "b-ixn-vocabulary-decision-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "interaction/types.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "label": "interaction/types.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the shared vocabulary home — "
+        },
+        {
+          "insert": "CanvasPointerEvent",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the "
+        },
+        {
+          "insert": "CanvasHit",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " union, the drag and snap thresholds, the resize-handle names; new hit kinds and shared thresholds join this file rather than being declared beside a consumer."
+        }
+      ],
+      "children": []
+    },
+    "b-ixn-vocabulary-why-10": {
+      "id": "b-ixn-vocabulary-why-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was slice-local redefinitions, which let two features disagree about what a hit is or when a press becomes a drag."
+        }
+      ],
+      "children": []
+    },
+    "b-ixn-vocabulary-applies-11": {
+      "id": "b-ixn-vocabulary-applies-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "types.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "label": "types.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future hit kind and threshold."
+        }
+      ],
+      "children": []
+    }
+  }
+}

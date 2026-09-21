@@ -96,7 +96,7 @@ describe("place gestures", () => {
     expect(placed.text).toBe("");
     expect(placed.direction).toBeUndefined();
     expect(placed.icon).toBeUndefined();
-    expect(placed.color).toBe(CREATION_DEFAULTS.shape.color);
+    expect(placed.color).toBe("teal");
     expect(placed.geometry).toEqual({ x: 200, y: 200, width: 280, height: 100 });
   });
 

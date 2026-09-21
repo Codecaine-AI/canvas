@@ -1,0 +1,1158 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-reflow-152600.rag-ingestion-retrieval",
+  "title": "2026-09-08-reflow-152600 · rag-ingestion-retrieval",
+  "description": "# RAG ingestion and retrieval\nRead ingestion left to right across the top, then publication at right and the query flow at left. Sources carry ACLs through normalization, hash classification, version replacement, overlapping chunks and rate-limited embedding. Parse failures are isolated; embedding workers retry and retain failed inputs and attempt history in a dead-letter store.\n\nVectors, text/metadata and keyword terms must agree on version before publication. Partial writes remain unavailable for repair or rollback. Parallel vector and keyword retrieval feeds fusion and reranking, followed by user permission filtering. Sufficient authorized evidence produces an answer with citations; thin or low-scoring context produces “I don't know.” Answer feedback and unanswered questions return coverage gaps to ingestion priorities.\n\nThe lower-right rebuild flow represents background re-embedding and atomic promotion of a complete, consistent index generation. Its note specifies continued use of the current generation during rebuild and retention of the previous generation for rollback. Blue connections denote serving data and publication state; red connections mark processing failures; the dashed teal loop carries feedback.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-09-08-reflow-152600 · rag-ingestion-retrieval",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3400,
+        "height": 2400
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "ingest",
+      "type": "section",
+      "text": "1 · Ingestion & failure isolation",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 120,
+        "width": 3200,
+        "height": 700
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "adapters",
+      "type": "process",
+      "text": "Source adapters",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 160,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "extract",
+      "type": "process",
+      "text": "Extract & normalize",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 600,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "hash",
+      "type": "decision",
+      "text": "Content hash: new / changed?",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1040,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "chunk",
+      "type": "process",
+      "text": "Chunk with overlap",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1920,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "supersede",
+      "type": "process",
+      "text": "Supersede; delete stale records",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1480,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "embed",
+      "type": "process",
+      "text": "Rate-limited embedding batches",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 2380,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "quarantine",
+      "type": "process",
+      "text": "Quarantine + failure context",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 600,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "skip",
+      "type": "process",
+      "text": "Unchanged: skip processing",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1040,
+        "y": 680,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "retry",
+      "type": "process",
+      "text": "Workers: bounded retry",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 2380,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "dlq",
+      "type": "process",
+      "text": "Dead-letter: inputs + attempts",
+      "color": "gray",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 2380,
+        "y": 680,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "publication",
+      "type": "section",
+      "text": "2 · Version-consistent publication",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1760,
+        "y": 940,
+        "width": 1540,
+        "height": 660
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "vectors",
+      "type": "icon",
+      "text": "Vector index",
+      "color": "blue",
+      "parentId": "publication",
+      "geometry": {
+        "x": 1840,
+        "y": 1060,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "docs",
+      "type": "icon",
+      "text": "Text + metadata",
+      "color": "blue",
+      "parentId": "publication",
+      "geometry": {
+        "x": 2240,
+        "y": 1060,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "terms",
+      "type": "icon",
+      "text": "Keyword index",
+      "color": "blue",
+      "parentId": "publication",
+      "geometry": {
+        "x": 2640,
+        "y": 1060,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "publish",
+      "type": "process",
+      "text": "Publish only if 3 versions match",
+      "color": "gray",
+      "parentId": "publication",
+      "geometry": {
+        "x": 2240,
+        "y": 1380,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "query",
+      "type": "section",
+      "text": "3 · Permission-aware retrieval & answers",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 940,
+        "width": 1480,
+        "height": 1340
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "rewrite",
+      "type": "process",
+      "text": "Question → rewrite searches",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 180,
+        "y": 1060,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "vsearch",
+      "type": "process",
+      "text": "Vector lookup",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 640,
+        "y": 1060,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "ksearch",
+      "type": "process",
+      "text": "Keyword lookup",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 640,
+        "y": 1300,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fuse",
+      "type": "process",
+      "text": "Fuse & rerank candidates",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 1160,
+        "y": 1180,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "acl",
+      "type": "process",
+      "text": "Filter by asking user's ACL",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 1160,
+        "y": 1540,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "confidence",
+      "type": "decision",
+      "text": "Enough context + strong score?",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 640,
+        "y": 1540,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "generate",
+      "type": "process",
+      "text": "Evidence-only answer + citations",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 640,
+        "y": 1840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "unknown",
+      "type": "process",
+      "text": "I don't know",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 180,
+        "y": 1540,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "rebuild",
+      "type": "section",
+      "text": "4 · Background rebuild & atomic promotion",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1760,
+        "y": 1740,
+        "width": 1540,
+        "height": 540
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "reembed",
+      "type": "process",
+      "text": "Coordinator: re-embed corpus",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 1840,
+        "y": 1840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "promote",
+      "type": "process",
+      "text": "Complete + consistent? Promote atomically",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2380,
+        "y": 1840,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "repair",
+      "type": "process",
+      "text": "Unavailable: repair or roll back",
+      "color": "gray",
+      "parentId": "publication",
+      "geometry": {
+        "x": 2900,
+        "y": 1380,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "source-detail",
+      "type": "sticky",
+      "text": "Scheduled pulls + changes\nDocs, wikis, tickets, code\nFirst imports & updates\nSource ACLs travel with text",
+      "color": "yellow",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 160,
+        "y": 480,
+        "width": 380,
+        "height": 300
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "live",
+      "type": "process",
+      "text": "Live generation + published versions",
+      "color": "gray",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 1840,
+        "y": 2100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "feedback",
+      "type": "process",
+      "text": "Feedback → coverage gaps",
+      "color": "gray",
+      "parentId": "query",
+      "geometry": {
+        "x": 640,
+        "y": 2100,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "chunk-detail",
+      "type": "sticky",
+      "text": "Fragments: headings, source ID, ACLs, version. Strip boilerplate.",
+      "color": "yellow",
+      "parentId": "ingest",
+      "geometry": {
+        "x": 1480,
+        "y": 660,
+        "width": 400,
+        "height": 160
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "rebuild-note",
+      "type": "sticky",
+      "text": "Model change triggers rebuild. Queries stay on current generation until atomic promotion; keep prior generation for rollback.",
+      "color": "yellow",
+      "parentId": "rebuild",
+      "geometry": {
+        "x": 2820,
+        "y": 1840,
+        "width": 400,
+        "height": 320
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "a-e",
+      "from": {
+        "objectId": "adapters"
+      },
+      "to": {
+        "objectId": "extract"
+      },
+      "label": "ACL + text",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "eh",
+      "from": {
+        "objectId": "extract"
+      },
+      "to": {
+        "objectId": "hash"
+      },
+      "label": "parsed",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.4,
+        "offset": 40
+      }
+    },
+    {
+      "id": "hc",
+      "from": {
+        "objectId": "hash"
+      },
+      "to": {
+        "objectId": "chunk"
+      },
+      "label": "new",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "hs",
+      "from": {
+        "objectId": "hash",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "supersede",
+        "anchor": "left"
+      },
+      "label": "changed",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "sc",
+      "from": {
+        "objectId": "supersede",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "chunk",
+        "anchor": "bottom"
+      },
+      "label": "replacement",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "ce",
+      "from": {
+        "objectId": "chunk"
+      },
+      "to": {
+        "objectId": "embed"
+      },
+      "label": "fragments",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 60
+      }
+    },
+    {
+      "id": "eq",
+      "from": {
+        "objectId": "extract",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "quarantine",
+        "anchor": "top"
+      },
+      "label": "unparseable; batch continues",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "hu",
+      "from": {
+        "objectId": "hash",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "skip",
+        "anchor": "left"
+      },
+      "label": "unchanged",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "er",
+      "from": {
+        "objectId": "embed",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "retry",
+        "anchor": "top"
+      },
+      "label": "failure / retry",
+      "style": "solid",
+      "arrow": "both",
+      "color": "red"
+    },
+    {
+      "id": "rd",
+      "from": {
+        "objectId": "retry"
+      },
+      "to": {
+        "objectId": "dlq"
+      },
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "labelPosition": {
+        "along": 0.9,
+        "offset": -40
+      }
+    },
+    {
+      "id": "ev",
+      "from": {
+        "objectId": "embed",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "vectors",
+        "anchor": "top"
+      },
+      "label": "completed version",
+      "style": "solid",
+      "arrow": "forward",
+      "waypoints": [
+        [
+          2260,
+          300
+        ],
+        [
+          2260,
+          880
+        ],
+        [
+          1900,
+          880
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.75,
+        "offset": 40
+      }
+    },
+    {
+      "id": "ed",
+      "from": {
+        "objectId": "embed",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "docs",
+        "anchor": "top"
+      },
+      "label": "text + metadata",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.78,
+        "offset": 140
+      }
+    },
+    {
+      "id": "et",
+      "from": {
+        "objectId": "embed",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "terms",
+        "anchor": "top"
+      },
+      "label": "terms",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.85,
+        "offset": -40
+      }
+    },
+    {
+      "id": "vp",
+      "from": {
+        "objectId": "vectors",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "publish",
+        "anchor": "left"
+      },
+      "label": "version",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.3,
+        "offset": 40
+      }
+    },
+    {
+      "id": "dp",
+      "from": {
+        "objectId": "docs",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "publish",
+        "anchor": "top"
+      },
+      "label": "version",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "tp",
+      "from": {
+        "objectId": "terms",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "publish",
+        "anchor": "right"
+      },
+      "label": "version",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "rv",
+      "from": {
+        "objectId": "rewrite"
+      },
+      "to": {
+        "objectId": "vsearch"
+      },
+      "label": "searches",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": -60
+      }
+    },
+    {
+      "id": "rk",
+      "from": {
+        "objectId": "rewrite",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "ksearch",
+        "anchor": "left"
+      },
+      "label": "parallel searches",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "vf",
+      "from": {
+        "objectId": "vsearch",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fuse",
+        "anchor": "top"
+      },
+      "label": "candidates",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "kf",
+      "from": {
+        "objectId": "ksearch",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "fuse",
+        "anchor": "bottom"
+      },
+      "label": "candidates",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.4,
+        "offset": -60
+      }
+    },
+    {
+      "id": "fa",
+      "from": {
+        "objectId": "fuse",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "acl",
+        "anchor": "top"
+      },
+      "label": "ranked fragments",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "ac",
+      "from": {
+        "objectId": "acl"
+      },
+      "to": {
+        "objectId": "confidence"
+      },
+      "label": "authorized context",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "cg",
+      "from": {
+        "objectId": "confidence"
+      },
+      "to": {
+        "objectId": "generate"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "cu",
+      "from": {
+        "objectId": "confidence"
+      },
+      "to": {
+        "objectId": "unknown"
+      },
+      "label": "no",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "re-promote",
+      "from": {
+        "objectId": "reembed"
+      },
+      "to": {
+        "objectId": "promote"
+      },
+      "label": "new generation",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "pub-fail",
+      "from": {
+        "objectId": "publish",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "repair",
+        "anchor": "bottom"
+      },
+      "label": "partial write",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "prom-live",
+      "from": {
+        "objectId": "promote",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "live",
+        "anchor": "right"
+      },
+      "label": "atomic swap",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "pub-live",
+      "from": {
+        "objectId": "publish",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "live",
+        "anchor": "left"
+      },
+      "label": "consistent versions only",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "vector-read",
+      "from": {
+        "objectId": "vectors",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "vsearch",
+        "anchor": "top"
+      },
+      "label": "published vectors",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          1680,
+          1120
+        ],
+        [
+          1680,
+          1000
+        ],
+        [
+          780,
+          1000
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.6,
+        "offset": 60
+      }
+    },
+    {
+      "id": "keyword-read",
+      "from": {
+        "objectId": "terms",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "ksearch",
+        "anchor": "top"
+      },
+      "label": "published terms",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          2580,
+          1120
+        ],
+        [
+          2580,
+          1020
+        ],
+        [
+          1000,
+          1020
+        ],
+        [
+          1000,
+          1220
+        ],
+        [
+          780,
+          1220
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.25,
+        "offset": -40
+      }
+    },
+    {
+      "id": "answer-feedback",
+      "from": {
+        "objectId": "generate"
+      },
+      "to": {
+        "objectId": "feedback"
+      },
+      "label": "thumbs + citation usefulness",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "unknown-feedback",
+      "from": {
+        "objectId": "unknown",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "feedback",
+        "anchor": "left"
+      },
+      "label": "unanswered questions",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "feedback-ingest",
+      "from": {
+        "objectId": "feedback",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "adapters",
+        "anchor": "left"
+      },
+      "label": "coverage gaps → priorities",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "teal",
+      "labelPosition": {
+        "along": 0.15,
+        "offset": 40
+      }
+    },
+    {
+      "id": "docs-context",
+      "from": {
+        "objectId": "docs",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "acl",
+        "anchor": "top"
+      },
+      "label": "text + ACLs",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          2180,
+          1120
+        ],
+        [
+          2180,
+          1480
+        ],
+        [
+          1300,
+          1480
+        ]
+      ]
+    }
+  ],
+  "annotations": []
+}

@@ -80,7 +80,7 @@ export const OP_REFERENCE: Record<string, OpReferenceEntry> = {
   clone: {
     group: "place",
     consequences: [
-      "the copy inherits kind, size, color, shape type, direction, and border, so a row of options matches without a number being re-specified anywhere",
+      "the copy inherits kind, size, color, shape type, direction, and border; choose a correctly typed source and copy only semantic peers",
       "two things it does not carry: the source's edges, and a section's contents — a cloned frame arrives empty, and filling it is yours",
       "a copy is never locked, whatever the source was",
     ],

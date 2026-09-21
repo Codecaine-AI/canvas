@@ -1,0 +1,884 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-comp-134600.sandboxed-tool-fleet",
+  "title": "2026-09-08-comp-134600 · sandboxed-tool-fleet",
+  "description": "# Sandboxed tool-execution fleet\nRead the four bands top to bottom, with local flows left to right.\n\n1. **Placement service:** the agent supplies an image and resource class. Concurrent-environment and aggregate-runtime quotas gate admission; excess requests wait fairly. A compatible warm instance returns immediately; a miss selects a healthy host with capacity and waits for cold boot before returning a lease.\n2. **Environment lifecycle:** provisioning → ready → leased → idle → draining → destroyed. Fixed-term leases require renewal heartbeats. The reclaimer destroys expired instances rather than returning tenant filesystem or process state to the pool. Every instance has an absolute maximum age. Image releases mark older instances draining, prohibit new leases, and let active work finish before destruction.\n3. **Within a lease:** each call has timeout, memory, CPU, and network limits. All egress uses an allowlisting proxy. Output streams are capped; durable files go to a session-keyed artifact store because local state is ephemeral. Overlong calls are killed and reported as TIMEOUT, not tool errors.\n4. **Fleet operations:** the supervisor observes host capacity, warm-pool depth, and demand to adjust pre-booted supply. Repeated boot failures quarantine hosts and exclude them from placement. Operations monitor boot latency, reclamations, tool timeouts, and escape-attempt signals.\n\nBlue regions describe control-plane admission and supply; teal describes lifecycle enforcement; violet describes leased execution. Red paths emphasize reclamation and failure handling; dashed paths show image retirement.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 1984,
+    "height": 1264
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "2026-09-08-comp-134600 · sandboxed-tool-fleet",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 2800,
+        "height": 3100
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "placement",
+      "type": "section",
+      "text": "1 · Placement service — admission & allocation",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 120,
+        "width": 2600,
+        "height": 640
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "agent",
+      "type": "icon",
+      "text": "Agent",
+      "color": "teal",
+      "parentId": "placement",
+      "geometry": {
+        "x": 140,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "quota",
+      "type": "decision",
+      "text": "Tenant quota available?",
+      "color": "gray",
+      "parentId": "placement",
+      "geometry": {
+        "x": 460,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "warm",
+      "type": "decision",
+      "text": "Compatible warm instance?",
+      "color": "gray",
+      "parentId": "placement",
+      "geometry": {
+        "x": 920,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "host",
+      "type": "process",
+      "text": "Select healthy host\nwith capacity",
+      "color": "gray",
+      "parentId": "placement",
+      "geometry": {
+        "x": 1380,
+        "y": 500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "boot",
+      "type": "process",
+      "text": "Provision cold environment\nWait for boot",
+      "color": "gray",
+      "parentId": "placement",
+      "geometry": {
+        "x": 1820,
+        "y": 500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "lease",
+      "type": "process",
+      "text": "Claim & return lease",
+      "color": "gray",
+      "parentId": "placement",
+      "geometry": {
+        "x": 2260,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fair",
+      "type": "process",
+      "text": "Fair tenant wait queue",
+      "color": "gray",
+      "parentId": "placement",
+      "geometry": {
+        "x": 460,
+        "y": 500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "lifecycle",
+      "type": "section",
+      "text": "2 · Environment lifecycle — no tenant reuse",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 860,
+        "width": 2600,
+        "height": 640
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "provisioning",
+      "type": "process",
+      "text": "Provisioning",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 160,
+        "y": 980,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "ready",
+      "type": "process",
+      "text": "Ready · warm pool",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 580,
+        "y": 980,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "leased",
+      "type": "process",
+      "text": "Leased",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 1000,
+        "y": 980,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "idle",
+      "type": "process",
+      "text": "Idle",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 1420,
+        "y": 980,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "draining",
+      "type": "process",
+      "text": "Draining · no new leases\nLive work continues",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 1840,
+        "y": 980,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "destroyed",
+      "type": "process",
+      "text": "Destroyed",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 2260,
+        "y": 980,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "quota-note",
+      "type": "sticky",
+      "text": "**Tenant admission**\nConcurrent environment + aggregate runtime quotas.\nFair waits preserve other tenants' reserved capacity.",
+      "color": "yellow",
+      "parentId": "placement",
+      "geometry": {
+        "x": 800,
+        "y": 500,
+        "width": 500,
+        "height": 240
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "reclaimer",
+      "type": "process",
+      "text": "Reclaimer · expired renewal / max age",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 1000,
+        "y": 1280,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "lease-rules",
+      "type": "sticky",
+      "text": "Fixed-term lease requires agent renewal heartbeats. Absolute maximum age applies to every environment. Local filesystem and processes never survive reclamation.",
+      "color": "yellow",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 160,
+        "y": 1180,
+        "width": 640,
+        "height": 260
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "execution",
+      "type": "section",
+      "text": "3 · Within a lease — isolated tool execution",
+      "color": "violet",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1600,
+        "width": 2600,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "runtime",
+      "type": "process",
+      "text": "Run tool · timeout / memory / CPU / network limits",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 740,
+        "y": 1720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "caller",
+      "type": "icon",
+      "text": "Leased agent",
+      "color": "teal",
+      "parentId": "execution",
+      "geometry": {
+        "x": 200,
+        "y": 1720,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "proxy",
+      "type": "process",
+      "text": "Egress proxy · allowlist only",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1380,
+        "y": 1720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "destinations",
+      "type": "process",
+      "text": "Allowlisted destinations",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 2200,
+        "y": 1720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "timeout",
+      "type": "process",
+      "text": "Kill call · TIMEOUT\nNot a tool error",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 740,
+        "y": 2040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "artifacts",
+      "type": "process",
+      "text": "Artifact store · session key",
+      "color": "gray",
+      "parentId": "execution",
+      "geometry": {
+        "x": 1380,
+        "y": 2040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "fleet",
+      "type": "section",
+      "text": "4 · Fleet supervision & operations",
+      "color": "blue",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 2340,
+        "width": 2600,
+        "height": 660
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "signals",
+      "type": "process",
+      "text": "Host capacity / pool depth / demand",
+      "color": "gray",
+      "parentId": "fleet",
+      "geometry": {
+        "x": 180,
+        "y": 2480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "supervisor",
+      "type": "process",
+      "text": "Warm-pool supervisor",
+      "color": "gray",
+      "parentId": "fleet",
+      "geometry": {
+        "x": 780,
+        "y": 2480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "supply",
+      "type": "process",
+      "text": "Adjust pre-booted supply",
+      "color": "gray",
+      "parentId": "fleet",
+      "geometry": {
+        "x": 1380,
+        "y": 2480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "failures",
+      "type": "process",
+      "text": "Repeated boot failures",
+      "color": "gray",
+      "parentId": "fleet",
+      "geometry": {
+        "x": 180,
+        "y": 2780,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "quarantine",
+      "type": "process",
+      "text": "Quarantine host · exclude from placement",
+      "color": "gray",
+      "parentId": "fleet",
+      "geometry": {
+        "x": 780,
+        "y": 2780,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "ops",
+      "type": "sticky",
+      "text": "**Operations monitor**\n- Boot latency\n- Lease reclamations\n- Tool timeouts\n- Escape-attempt signals",
+      "color": "yellow",
+      "parentId": "fleet",
+      "geometry": {
+        "x": 1980,
+        "y": 2460,
+        "width": 560,
+        "height": 300
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "release",
+      "type": "process",
+      "text": "Image release · retire older instances",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 1840,
+        "y": 1180,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "a-q",
+      "from": {
+        "objectId": "agent"
+      },
+      "to": {
+        "objectId": "quota"
+      },
+      "label": "Image + class",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "q-w",
+      "from": {
+        "objectId": "quota"
+      },
+      "to": {
+        "objectId": "warm"
+      },
+      "label": "Yes",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "hit",
+      "from": {
+        "objectId": "warm"
+      },
+      "to": {
+        "objectId": "lease"
+      },
+      "label": "Hit · return immediately",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "miss",
+      "from": {
+        "objectId": "warm",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "host",
+        "anchor": "left"
+      },
+      "label": "Miss",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "host-boot",
+      "from": {
+        "objectId": "host"
+      },
+      "to": {
+        "objectId": "boot"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "boot-lease",
+      "from": {
+        "objectId": "boot",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "lease",
+        "anchor": "bottom"
+      },
+      "label": "Boot ready",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "quota-wait",
+      "from": {
+        "objectId": "quota",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "fair",
+        "anchor": "top"
+      },
+      "label": "Either limit exceeded",
+      "style": "solid",
+      "arrow": "both"
+    },
+    {
+      "id": "p-r",
+      "from": {
+        "objectId": "provisioning"
+      },
+      "to": {
+        "objectId": "ready"
+      },
+      "label": "Boot OK",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "r-l",
+      "from": {
+        "objectId": "ready"
+      },
+      "to": {
+        "objectId": "leased"
+      },
+      "label": "Claim",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "l-i",
+      "from": {
+        "objectId": "leased"
+      },
+      "to": {
+        "objectId": "idle"
+      },
+      "label": "End",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "i-d",
+      "from": {
+        "objectId": "idle"
+      },
+      "to": {
+        "objectId": "draining"
+      },
+      "label": "Retire",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "d-x",
+      "from": {
+        "objectId": "draining"
+      },
+      "to": {
+        "objectId": "destroyed"
+      },
+      "label": "No lease",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "expiry",
+      "from": {
+        "objectId": "leased",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "reclaimer",
+        "anchor": "top"
+      },
+      "label": "Renewals stop",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "reclaim-destroy",
+      "from": {
+        "objectId": "reclaimer",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "destroyed",
+        "anchor": "bottom"
+      },
+      "label": "Destroy · never repool",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "call",
+      "from": {
+        "objectId": "caller"
+      },
+      "to": {
+        "objectId": "runtime"
+      },
+      "label": "Call / capped output stream",
+      "style": "solid",
+      "arrow": "both"
+    },
+    {
+      "id": "egress",
+      "from": {
+        "objectId": "runtime"
+      },
+      "to": {
+        "objectId": "proxy"
+      },
+      "label": "All egress",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 40
+      }
+    },
+    {
+      "id": "allowed",
+      "from": {
+        "objectId": "proxy"
+      },
+      "to": {
+        "objectId": "destinations"
+      },
+      "label": "Allowed only",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "timed",
+      "from": {
+        "objectId": "runtime",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "timeout",
+        "anchor": "top"
+      },
+      "label": "Deadline exceeded",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "files",
+      "from": {
+        "objectId": "runtime",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "artifacts",
+        "anchor": "top"
+      },
+      "label": "Durable files",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "watch",
+      "from": {
+        "objectId": "signals"
+      },
+      "to": {
+        "objectId": "supervisor"
+      },
+      "label": "Observe",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "adjust",
+      "from": {
+        "objectId": "supervisor"
+      },
+      "to": {
+        "objectId": "supply"
+      },
+      "label": "Scale",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "quarantine-trigger",
+      "from": {
+        "objectId": "failures"
+      },
+      "to": {
+        "objectId": "quarantine"
+      },
+      "label": "Threshold",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "release-drain",
+      "from": {
+        "objectId": "release",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "draining",
+        "anchor": "bottom"
+      },
+      "label": "Mark",
+      "style": "dashed",
+      "arrow": "forward"
+    },
+    {
+      "id": "live-retire",
+      "from": {
+        "objectId": "leased",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "draining",
+        "anchor": "top"
+      },
+      "label": "Image retired · finish active lease",
+      "style": "dashed",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": 40
+      }
+    }
+  ],
+  "annotations": []
+}

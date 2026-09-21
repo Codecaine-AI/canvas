@@ -24,9 +24,9 @@ import {
   type KernelInstance,
 } from "@agent-kernel/kernel";
 
-import { capabilitiesLoader } from "./loaders/capabilities";
 import { stateGrammarLoader } from "./loaders/state-grammar";
 import { styleGuideLoader } from "./loaders/style-guide";
+import { authoringLoaders } from "./loaders/authoring";
 import { promptEditSharedTools } from "./prompt-edit";
 import type { LayoutToolRuntime } from "./session/tools";
 
@@ -121,10 +121,10 @@ export const TOOL_CALL_CAP_OVERRIDE = toolCallCapOverride(
 
 /**
  * The `layout` model alias resolves to the model served by the codex-lb
- * provider in .pi-agent/models.json (gpt-5.6-sol today — retargeting the agent
+ * provider in .pi-agent/models.json (gpt-6-astra today — retargeting the agent
  * is this line plus, if the id changes, a models.json edit).
  */
-export const LAYOUT_MODEL = "codex-lb/gpt-5.6-sol";
+export const LAYOUT_MODEL = "codex-lb/gpt-6-astra";
 
 /**
  * The prompt-editor bundle (prompt-kit-agent catalog) declares model
@@ -230,7 +230,7 @@ export function createLayoutKernel(
     // Section ② only. The board / editor / user-request loaders retired when
     // the layout-editor's state/ sidecar took over the working picture (③);
     // their snapshots still travel on sessionData, read by seed() instead.
-    loaders: [capabilitiesLoader, stateGrammarLoader, styleGuideLoader],
+    loaders: [...authoringLoaders, stateGrammarLoader, styleGuideLoader],
     // Per-spawn tools hook: binds prompt-edit session tools onto
     // prompt-editor spawns (no-op for every other agent).
     sharedTools: promptEditSharedTools,

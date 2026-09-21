@@ -1,6 +1,5 @@
 /**
- * crowding — sibling nodes need enough clearance for routed wires and their
- * labels to pass between them (warning tier).
+ * crowding — sibling nodes need visible separation between their boundaries (warning tier).
  */
 import { kindOf } from "../../helpers";
 import { axisGap } from "../../measure";
@@ -8,18 +7,11 @@ import { axisGap } from "../../measure";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
 import type { LayoutRule } from "../types";
 
-/** Minimum horizontal gap between side-by-side siblings; a vertical wire and
- *  its label must fit in the corridor between them. */
-const MIN_HORIZONTAL_GAP = 80;
-/**
- * Minimum vertical gap between stacked siblings. Lower than its horizontal
- * counterpart because a wire between stacked peers usually runs along the gap
- * rather than across it — they are typically the pair the wire connects — and
- * because deliberate pairings like a label above its content sit close on
- * purpose. This is the clearance below which a route cannot pass, not a
- * preferred distance.
- */
-const MIN_VERTICAL_GAP = 48;
+/** Minimum visible separation between sibling node boxes, on either axis.
+ * Actual route and label clearance is checked against rendered geometry by
+ * covered-content and unreadable-labels, not inferred from unused gaps. */
+const MIN_HORIZONTAL_GAP = 16;
+const MIN_VERTICAL_GAP = 16;
 
 type Rect = InteractiveCanvasObject["geometry"];
 
@@ -34,14 +26,11 @@ function unionRect(a: Rect, b: Rect): Rect {
   };
 }
 
-const GUIDANCE = `Sibling nodes pressed close enough that a routed wire and its label cannot pass
-through the corridor between them:
-- side-by-side siblings need ≥${MIN_HORIZONTAL_GAP}px between their boxes, and stacked siblings
-  need ≥${MIN_VERTICAL_GAP}px;
-- diagonal pairs have open routing space and are out of scope; truly overlapping pairs are
-  also out of scope because covered-content owns that error;
-- these are the clearances a route physically needs. The spacing a composition
-  aims for is a separate question, and the system prompt answers it.`;
+const GUIDANCE = `Sibling node boxes need at least 16px of visible separation:
+- touching or nearly touching boxes obscure their separate boundaries;
+- unused gaps do not need a wire corridor;
+- actual wire and label obstructions are checked by covered-content and unreadable-labels;
+- diagonal pairs have open space, and true overlaps belong to covered-content.`;
 
 export const rule: LayoutRule = {
   id: "crowding",
@@ -88,8 +77,8 @@ export const rule: LayoutRule = {
           at: [a.id, b.id],
           where: unionRect(a.geometry, b.geometry),
           message: axis === "horizontal"
-            ? `${a.id} and ${b.id} sit ${roundedGap}px apart side by side where wires and labels need ≥${MIN_HORIZONTAL_GAP}px of corridor to route between them`
-            : `${a.id} and ${b.id} sit ${roundedGap}px apart stacked where wires and labels need ≥${MIN_VERTICAL_GAP}px of corridor to route between them`,
+            ? `${a.id} and ${b.id} sit ${roundedGap}px apart side by side where separate boundaries need ≥${MIN_HORIZONTAL_GAP}px of clearance`
+            : `${a.id} and ${b.id} sit ${roundedGap}px apart stacked where separate boundaries need ≥${MIN_VERTICAL_GAP}px of clearance`,
           suggestion: `open the ${a.id}↔${b.id} corridor to ≥${threshold}px`,
         });
       }

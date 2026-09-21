@@ -1,0 +1,1247 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-20-engine-20-interaction",
+  "title": "Interaction",
+  "root": "b-engine-interaction-root",
+  "blocks": {
+    "b-engine-interaction-title-1": {
+      "id": "b-engine-interaction-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "Interaction"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-intro-2": {
+      "id": "b-engine-interaction-intro-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every gesture travels one pipeline: a DOM pointer event is normalized into a "
+        },
+        {
+          "insert": "CanvasPointerEvent",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "CanvasPointerEvent"
+            }
+          }
+        },
+        {
+          "insert": ", hit resolution names what the pointer is over, a pure nine-state machine steps the active gesture, and the step's output is a batch of "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " dispatches plus an overlay description for feedback visuals. Nothing in the pipeline mutates the document directly; every mutation leaves as an action through the single reducer ("
+        },
+        {
+          "insert": "Document model",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/10-document-model",
+              "label": "Document model"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-vocab-heading-3": {
+      "id": "b-engine-interaction-vocab-heading-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The pointer vocabulary"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-vocab-event-4": {
+      "id": "b-engine-interaction-vocab-event-4",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "CanvasPointerEvent",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "CanvasPointerEvent"
+            }
+          }
+        },
+        {
+          "insert": " is the normalized event shape: "
+        },
+        {
+          "insert": "down",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "move",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "up",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "cancel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or "
+        },
+        {
+          "insert": "double",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", carrying "
+        },
+        {
+          "insert": "world",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "screen",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " coordinates, mouse button and modifier state, and a "
+        },
+        {
+          "insert": "CanvasHit",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "CanvasHit"
+            }
+          }
+        },
+        {
+          "insert": " — so the dispatcher and feature slices consume normalized data instead of raw DOM events. The "
+        },
+        {
+          "insert": "CanvasHit",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " union has seven kinds: "
+        },
+        {
+          "insert": "canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " when no target wins; "
+        },
+        {
+          "insert": "object",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " when an object body or section title chip wins; "
+        },
+        {
+          "insert": "handle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for resize handles; "
+        },
+        {
+          "insert": "connection",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for connector paths; "
+        },
+        {
+          "insert": "endpoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for connector endpoint handles; "
+        },
+        {
+          "insert": "bend-segment",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for selected connector bend pills; and "
+        },
+        {
+          "insert": "port",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for anchor-dot or port-proximity hits."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-vocab-thresholds-5": {
+      "id": "b-engine-interaction-vocab-thresholds-5",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Two shared thresholds decide gesture promotion: "
+        },
+        {
+          "insert": "DRAG_THRESHOLD",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "DRAG_THRESHOLD"
+            }
+          }
+        },
+        {
+          "insert": " = 3 world units before a press becomes a drag, and "
+        },
+        {
+          "insert": "SNAP_THRESHOLD_SCREEN_PX",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "SNAP_THRESHOLD_SCREEN_PX"
+            }
+          }
+        },
+        {
+          "insert": " = 6 screen px for zoom-normalized snapping. "
+        },
+        {
+          "insert": "ResizeHandle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/types.ts",
+              "symbol": "ResizeHandle"
+            }
+          }
+        },
+        {
+          "insert": " names the eight cardinal and intercardinal handles."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-hit-heading-6": {
+      "id": "b-engine-interaction-hit-heading-6",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Hit resolution"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-hit-dom-7": {
+      "id": "b-engine-interaction-hit-dom-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "resolveHit",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
+              "symbol": "resolveHit"
+            }
+          }
+        },
+        {
+          "insert": " walks DOM attributes in priority order: handle, endpoint, port, screen-space anchor-dot proximity, bend segment, connection, section title chip, object, then the pure world-space fallback, then canvas. A DOM-matched object is vetoed when the pointer sits outside its true outline ("
+        },
+        {
+          "insert": "outlineContainsPoint",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/geometry.ts",
+              "symbol": "outlineContainsPoint"
+            }
+          }
+        },
+        {
+          "insert": ") — a diamond's empty bbox corner falls through to whatever is behind it — and section title chips bypass that veto, because a counter-scaled chip can legitimately extend past its section rectangle."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-hit-pure-8": {
+      "id": "b-engine-interaction-hit-pure-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The fallback is pure and DOM-free: "
+        },
+        {
+          "insert": "hitTestObjects",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/hit-testing.ts",
+              "symbol": "hitTestObjects"
+            }
+          }
+        },
+        {
+          "insert": " walks the stage paint order from topmost to bottommost, with section title chips checked before ordinary object outlines, so clicks always agree with pixels. The same module supplies the shared geometry vocabulary every gesture reuses: selection union bounds, snap-candidate gathering, drag-select membership by stored-geometry intersection, and transitive descendant walking."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-machine-heading-9": {
+      "id": "b-engine-interaction-machine-heading-9",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The nine-state machine"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-machine-body-10": {
+      "id": "b-engine-interaction-machine-body-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "stepInteraction",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/core.ts",
+              "symbol": "stepInteraction"
+            }
+          }
+        },
+        {
+          "insert": " is a pure switch over the nine-kind "
+        },
+        {
+          "insert": "InteractionState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/state.ts",
+              "symbol": "InteractionState"
+            }
+          }
+        },
+        {
+          "insert": " union: "
+        },
+        {
+          "insert": "idle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "pressing",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "move",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "drag-select",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "place",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connector-endpoint-drag",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connector-create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "connector-bend-drag",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". It delegates one-for-one to per-feature "
+        },
+        {
+          "insert": "stepFrom*",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " functions and returns "
+        },
+        {
+          "insert": "{ state, dispatch: CanvasAction[], overlay }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "pressing",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the sub-threshold gate: a press becomes a click on release, a move when an object drag crosses the drag threshold, or a drag-select from empty canvas. Cancellation is pure as well: it returns restore actions for an active move or resize and otherwise idles with no dispatch."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-machine-decision-11": {
+      "id": "b-engine-interaction-machine-decision-11",
+      "type": "decision",
+      "props": {
+        "status": "accepted",
+        "title": "The dispatcher is pure; effects live at the hook edge"
+      },
+      "text": [
+        {
+          "insert": "stepInteraction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and every "
+        },
+        {
+          "insert": "stepFrom*",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " take (state, event, read-only context) and return a result object — no I/O, no React, no refs. The only place effects happen is the hook edge: assign the state ref, publish the overlay, loop the dispatch array into the reducer, and fire the one-shot text-edit request. This keeps every gesture unit-testable as data in, data out, and is why the gesture suites run without a DOM."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-wiring-heading-12": {
+      "id": "b-engine-interaction-wiring-heading-12",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "From DOM event to CanvasPointerEvent"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-wiring-body-13": {
+      "id": "b-engine-interaction-wiring-body-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Stage pointer-down records the active pointer, seeds the latest pointer snapshot, starts edge-pan, and steps a normalized "
+        },
+        {
+          "insert": "down",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " event. Window-level "
+        },
+        {
+          "insert": "pointermove",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "pointerup",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "/"
+        },
+        {
+          "insert": "pointercancel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " listeners guard on the active pointer for the gesture's lifetime, so fast drags that leave the stage still land. "
+        },
+        {
+          "insert": "buildPointerEvent",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
+              "symbol": "buildPointerEvent"
+            }
+          }
+        },
+        {
+          "insert": " normalizes native events into stage-relative screen coordinates, world coordinates via "
+        },
+        {
+          "insert": "screenToWorld",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/viewport.ts",
+              "symbol": "screenToWorld"
+            }
+          }
+        },
+        {
+          "insert": ", and a "
+        },
+        {
+          "insert": "CanvasHit",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " via hit resolution."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-raf-heading-14": {
+      "id": "b-engine-interaction-raf-heading-14",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Two rAF loops"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-raf-coalescer-15": {
+      "id": "b-engine-interaction-raf-coalescer-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Pointer-move work batches through "
+        },
+        {
+          "insert": "createFrameCoalescer",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/frame-coalescer.ts",
+              "symbol": "createFrameCoalescer"
+            }
+          }
+        },
+        {
+          "insert": ", whose contract is "
+        },
+        {
+          "insert": "push",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (record the latest value and schedule one frame if needed), "
+        },
+        {
+          "insert": "flush",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (cancel the pending frame and synchronously commit the queued value), "
+        },
+        {
+          "insert": "cancel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (drop the pending value), and "
+        },
+        {
+          "insert": "isPending",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The drag loop commits at most one snapshot per frame with latest-wins semantics and flushes before pointer-up so the final position is never dropped. The viewport's wheel handling is a second, independent coalescer instance that accumulates pan deltas and multiplicative zoom factors into one viewport commit per frame — trackpad pinch arrives as a "
+        },
+        {
+          "insert": "ctrlKey",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " wheel event and zooms toward the cursor."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-raf-edgepan-16": {
+      "id": "b-engine-interaction-raf-edgepan-16",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The second loop is a self-rescheduling edge-pan tick. It engages only while a drag-kind gesture is in progress ("
+        },
+        {
+          "insert": "EDGE_PAN_DRAG_KINDS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-interaction-pipeline.ts",
+              "symbol": "EDGE_PAN_DRAG_KINDS"
+            }
+          }
+        },
+        {
+          "insert": ": move, resize, drag-select, place, and the three connector drags — never "
+        },
+        {
+          "insert": "idle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "pressing",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), pans the viewport, then re-pushes the last pointer snapshot so the gesture re-steps against the moved viewport."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-edgepan-math-17": {
+      "id": "b-engine-interaction-edgepan-math-17",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "computeEdgePan",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/edge-pan.ts",
+              "symbol": "computeEdgePan"
+            }
+          }
+        },
+        {
+          "insert": " defines the pan velocity: given the pointer's stage-relative position, the stage's screen size, an edge "
+        },
+        {
+          "insert": "band",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " width, and a max speed, it returns a per-frame "
+        },
+        {
+          "insert": "{ dx, dy }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Each axis is computed independently, so a pointer parked in a corner pans diagonally. Velocity ramps linearly from 0 at "
+        },
+        {
+          "insert": "band",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " px inside the edge up to "
+        },
+        {
+          "insert": "maxSpeed",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at (or beyond) the edge; a pointer in the safe interior yields zero."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-feedback-heading-18": {
+      "id": "b-engine-interaction-feedback-heading-18",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Feedback and hover"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-feedback-body-19": {
+      "id": "b-engine-interaction-feedback-body-19",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The machine's overlay output renders through two slot components injected into the stage: "
+        },
+        {
+          "insert": "InteractionFeedbackWorld",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/InteractionFeedback.tsx",
+              "symbol": "InteractionFeedbackWorld"
+            }
+          }
+        },
+        {
+          "insert": " draws in the transformed world layer — the placement ghost is the drafted object rendered through the real "
+        },
+        {
+          "insert": "ObjectShape",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/ObjectShape.tsx",
+              "symbol": "ObjectShape"
+            }
+          }
+        },
+        {
+          "insert": " at reduced opacity — and "
+        },
+        {
+          "insert": "InteractionFeedbackScreen",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/InteractionFeedback.tsx",
+              "symbol": "InteractionFeedbackScreen"
+            }
+          }
+        },
+        {
+          "insert": " draws the screen-space set: selection box, hover highlight, anchor dots, connector drag preview, drag-select rectangle, place-preview fallback, snap guides, distribution guides, and spacing chips, each gated on its overlay field. The stage itself only ever draws the document; everything ephemeral arrives through these slots ("
+        },
+        {
+          "insert": "Stage and viewport",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/40-stage-and-viewport",
+              "label": "Stage and viewport"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-hover-body-20": {
+      "id": "b-engine-interaction-hover-body-20",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "useHoverTarget",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/editor/pipeline/use-hover-target.ts",
+              "symbol": "useHoverTarget"
+            }
+          }
+        },
+        {
+          "insert": " tracks hover for the connector tool only. Hover resolution combines the pure hit test with a section-outline tolerance and an expanded-bounds halo, so a hovered object keeps its anchor dots while the cursor travels out to them; the result feeds port-proximity hits and the anchor-dot set."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-slices-heading-21": {
+      "id": "b-engine-interaction-slices-heading-21",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Feature behavior"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-slices-intro-22": {
+      "id": "b-engine-interaction-slices-intro-22",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Each interaction feature owns its gesture logic and its visuals end to end, and features never reach into each other sideways — the one declared exception is snapping, a service whose math the move gesture consumes. The load-bearing behaviors:"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-slice-select-23": {
+      "id": "b-engine-interaction-slice-select-23",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Select and resize",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — drag-select enters from empty canvas with the select tool; Shift makes the marquee additive. Resize enters immediately from a handle hit with no click semantics, clamps to a 48-unit minimum, and snaps handle-aware."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-slice-move-24": {
+      "id": "b-engine-interaction-slice-move-24",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Move",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — entered when an object press crosses the drag threshold; the moved set folds in every section descendant, and the drop target is previewed by running "
+        },
+        {
+          "insert": "resolveSectionParent",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/section-membership.ts",
+              "symbol": "resolveSectionParent"
+            }
+          }
+        },
+        {
+          "insert": " against the primary dragged object's projected bounds — the same rule commit-time reconcile applies ("
+        },
+        {
+          "insert": "The layer cake",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "The layer cake"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-slice-place-25": {
+      "id": "b-engine-interaction-slice-place-25",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Place",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — armed tools place on click with default centered geometry, or on drag with each dimension clamped to a 24-unit minimum; the ghost previews the real drafted object."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-slice-snap-26": {
+      "id": "b-engine-interaction-slice-snap-26",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Snapping",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — live drags snap to sibling and section edges within the screen-px threshold, draw guide lines and spacing chips, and fall back to grid alignment; distribution alignment triggers within an 8-px threshold."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-slice-text-27": {
+      "id": "b-engine-interaction-slice-text-27",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Text editing",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " — double-click opens the editor for kinds whose def declares text editable; the editing overlay reuses the def's text-slot descriptor so mid-edit and at-rest text are pixel-identical, and gestures can request an editor session for objects that do not exist in React state yet (quick connect's predicted id). Hotkeys no-op whenever an editable element has focus."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-clipboard-heading-28": {
+      "id": "b-engine-interaction-clipboard-heading-28",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Clipboard"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-clipboard-body-29": {
+      "id": "b-engine-interaction-clipboard-body-29",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The clipboard is in-memory, not the OS clipboard. "
+        },
+        {
+          "insert": "copySelection",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/clipboard.ts",
+              "symbol": "copySelection"
+            }
+          }
+        },
+        {
+          "insert": " captures the selection plus every descendant (copying a section brings its children) plus every connection whose both endpoints land inside the captured set, deep-cloned, and records a "
+        },
+        {
+          "insert": "sourcePoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at the selection's bounds center. On paste, "
+        },
+        {
+          "insert": "buildPastePayload",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/interaction/clipboard.ts",
+              "symbol": "buildPastePayload"
+            }
+          }
+        },
+        {
+          "insert": " re-clones and translates every geometry — and every explicit connection waypoint, because waypoints are absolute world coordinates — by the delta between the drop point (or a default 24-unit offset) and "
+        },
+        {
+          "insert": "sourcePoint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so a fan of connectors pastes intact rather than re-routing from scratch. The whole paste lands as one "
+        },
+        {
+          "insert": "canvas.addObjects",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " action: one reducer call, one undo step."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-closing-30": {
+      "id": "b-engine-interaction-closing-30",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Connector gestures — create, reconnect, bend, quick connect, and Connector Mode — ride this same pipeline but have their own behavioral page: "
+        },
+        {
+          "insert": "Connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/30-connectors",
+              "label": "Connectors"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-interaction-root": {
+      "id": "b-engine-interaction-root",
+      "type": "paragraph",
+      "props": {
+        "covers": "The interaction model from pointer event to document mutation: the normalized pointer vocabulary, hit resolution, the pure nine-state gesture machine, the two rAF loops, slot-injected feedback, feature-slice behavior, edge-pan math, and the clipboard.",
+        "format": "mdx",
+        "type": "design",
+        "concepts": [
+          "CanvasPointerEvent",
+          "CanvasHit",
+          "nine-state machine",
+          "pure dispatcher",
+          "frame coalescer",
+          "edge pan",
+          "InteractionFeedback",
+          "clipboard"
+        ]
+      },
+      "children": [
+        "b-engine-interaction-title-1",
+        "b-engine-interaction-intro-2",
+        "b-engine-interaction-vocab-heading-3",
+        "b-engine-interaction-vocab-event-4",
+        "b-engine-interaction-vocab-thresholds-5",
+        "b-engine-interaction-hit-heading-6",
+        "b-engine-interaction-hit-dom-7",
+        "b-engine-interaction-hit-pure-8",
+        "b-engine-interaction-machine-heading-9",
+        "b-engine-interaction-machine-body-10",
+        "b-engine-interaction-machine-decision-11",
+        "b-engine-interaction-wiring-heading-12",
+        "b-engine-interaction-wiring-body-13",
+        "b-engine-interaction-raf-heading-14",
+        "b-engine-interaction-raf-coalescer-15",
+        "b-engine-interaction-raf-edgepan-16",
+        "b-engine-interaction-edgepan-math-17",
+        "b-engine-interaction-feedback-heading-18",
+        "b-engine-interaction-feedback-body-19",
+        "b-engine-interaction-hover-body-20",
+        "b-engine-interaction-slices-heading-21",
+        "b-engine-interaction-slices-intro-22",
+        "b-engine-interaction-slice-select-23",
+        "b-engine-interaction-slice-move-24",
+        "b-engine-interaction-slice-place-25",
+        "b-engine-interaction-slice-snap-26",
+        "b-engine-interaction-slice-text-27",
+        "b-engine-interaction-clipboard-heading-28",
+        "b-engine-interaction-clipboard-body-29",
+        "b-engine-interaction-closing-30"
+      ]
+    }
+  }
+}

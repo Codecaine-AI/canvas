@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 
 import {
   buildServiceIdentity,
+  collectSourceFingerprints,
   loopbackOrigin,
   pickEphemeralPort,
   toolCallCapOverrideEnv,
@@ -25,6 +26,17 @@ import {
 // run while a suite run is in flight.
 
 const tempDirs: string[] = [];
+
+test("eval style identity includes shared authoring and vocabulary dependencies", async () => {
+  const { styles } = await collectSourceFingerprints();
+  for (const path of [
+    "packages/canvas-agent/src/authoring/design.ts",
+    "packages/canvas-agent/src/authoring/vocabulary.ts",
+    "packages/canvas-agent/src/service/loaders/authoring.ts",
+    "packages/canvas-agent/src/catalog/layout-editor/context/index.ts",
+    "packages/canvas/src/objects/registry/object-preferences.json",
+  ]) expect(styles.files).toContain(path);
+});
 
 async function tempDir(): Promise<string> {
   const dir = await mkdtemp(resolve(tmpdir(), "eval-queue-test-"));

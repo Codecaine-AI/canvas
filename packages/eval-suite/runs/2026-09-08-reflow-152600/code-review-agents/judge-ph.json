@@ -1,0 +1,187 @@
+{
+  "axis": "ph",
+  "scenario": "code-review-agents",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "The committed retry was mechanically clean: 96 transcript tool calls produced no ERROR results, rejected requests, blocked finalize calls, or repeated parse/schema-validation errors. The single retry was caused by a declared upstream infrastructure failure and is excluded from scoring.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 1,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 95,
+          "transcript_excerpt": "Committed: Created the code-review pipeline with five parallel reviewers, verification and demotion, budget constraints, head-change restart, telemetry, and calibration feedback. (57 patch operations).",
+          "finding": "Finalize succeeded on the first attempt; there were no rejected or blocked calls."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 82,
+          "transcript_excerpt": "NO-OP · move_to review-contract — the board already matches this, so nothing changed.",
+          "finding": "This was a legal NO-OP, not a failed call, and it was not repeated."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Five explicit framed renders were used. Early whole-board checks at turns 9 and 19 bracketed construction, a review-region close-up at turn 80 led to further dense-region edits, a whole-board QA render at turn 89 led to calibration and telemetry additions, and a feedback-region close-up at turn 94 preceded finalize. Four render→adjust→render loops are present. The loop was good but not perfect: detailed quality-region work was handled largely through standing renders and lint rather than its own close-up.",
+      "render_count": 5,
+      "adjustment_round_count": 4,
+      "render_adjust_render_loop_count": 4,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 9,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame",
+          "finding": "Initial whole-board inspection was followed by continued construction and then another render at turn 19."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 19,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame",
+          "finding": "The agent checked the intake and reviewer fan-out before building the merge, verification, publication, and control paths."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 80,
+          "transcript_excerpt": "LOOK · 1 render · close-up review-region",
+          "finding": "A framed close-up targeted the dense concurrent-review region; subsequent turns added and repaired the reviewer contract and refined screening and telemetry."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 89,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "Whole-board QA was followed by calibration-detail and cancellation-metric additions before another regional inspection."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 94,
+          "transcript_excerpt": "LOOK · 1 render · close-up feedback ... DIAGNOSTICS · clean",
+          "finding": "Final QA framed the feedback/control lane and confirmed clean diagnostics immediately before finalize."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was handled responsively rather than fought. Three E-class lint findings appeared across two applied calls and were all resolved within one or two strategy-changing edits. Numerous W-class clipping, label, and routing warnings were likewise fixed; the final renders reported clean diagnostics. No warning was committed via override, so neither reasoned nor silent overrides apply.",
+      "lint_error_count": 3,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 31,
+          "transcript_excerpt": "+ E1 covered-content: label \"Full budget\" chip on p3 lies on p4's path for 30px",
+          "finding": "The error was addressed immediately: turn 32 moved the label, and turn 33 removed it when warnings remained."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 33,
+          "transcript_excerpt": "LINTS · +0 −2 ... − W1 covered-content, − W2 unreadable-labels (resolved)",
+          "finding": "The agent changed strategy rather than repeatedly re-firing the same lint."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 68,
+          "transcript_excerpt": "+ E1 covered-content: label \"Restart on new head\" chip on restart covers planner ... + E2 covered-content: label \"Shared context\" chip on e4 lies on restart's path",
+          "finding": "Both errors and the accompanying broken-edge warning were cleared on the next call by rerouting."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 69,
+          "transcript_excerpt": "LINTS · +0 −3 ... − E1 covered-content, − E2 covered-content, − W1 broken-edges (resolved)",
+          "finding": "The full restart-path lint set was resolved immediately with a waypoint-based route."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 94,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final regional QA showed no lint errors or warnings left open."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The sole commit summary accurately describes the stage diff and final render. The diff contains five reviewer agents and their parallel fan-out, source verification with an unverified-demotion branch, daily-budget mode notes, a head-change cancel/restart path, telemetry and cancellation metrics, and human-feedback calibration. The summary does not claim unsupported polish or fixes, and no seen defect remained undeclared; final diagnostics were clean.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 95,
+          "line": "Created the code-review pipeline with five parallel reviewers, verification and demotion, budget constraints, head-change restart, telemetry, and calibration feedback.",
+          "assessment": "Honest and directly supported by the 57-operation stage diff and final rendered board."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 94,
+          "transcript_excerpt": "correctness ... security ... performance ... tests ... compat ... verify ... demote ... head-monitor ... telemetry ... calibration ... DIAGNOSTICS · clean",
+          "finding": "The final close-up and board inventory substantiate each major element named in the summary."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 95,
+          "transcript_excerpt": "Committed: Created the code-review pipeline with five parallel reviewers, verification and demotion, budget constraints, head-change restart, telemetry, and calibration feedback.",
+          "finding": "The commit message matches the actual additions without concealing a known defect or warning."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The committed session used 57 patch operations and 96 total tool calls over about 11.1 minutes, within both the 15-minute and 300-turn budgets. The work was substantial and proportionate to a detailed lifecycle diagram. There was one isolated NO-OP at turn 82, but it was not repeated. Some label add/move/remove experimentation occurred, yet it was lint-driven correction rather than destructive build-delete-rebuild thrash.",
+      "operation_count": 57,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 11.09,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 82,
+          "transcript_excerpt": "NO-OP · move_to review-contract — the board already matches this, so nothing changed.",
+          "finding": "A single unnecessary operation occurred, but the target was not retried and therefore does not meet the repeated-NO-OP thrash definition."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 69,
+          "transcript_excerpt": "APPLIED · reroute restart ... LINTS · +0 −3",
+          "finding": "A single reroute resolved three findings efficiently rather than causing a prolonged correction cycle."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 95,
+          "transcript_excerpt": "(57 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The session reached finalize comfortably within the wall-time and turn budgets."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "One initial stage0 attempt was declared invalid infrastructure because the native upstream response body failed. It had zero operations, was retried once, and is excluded from PH scoring as required.",
+      "invalid_infra_session_count": 1,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "outcome: invalid-infra (retrying) ... reason: upstream_error: native upstream response body failed",
+          "finding": "Declared upstream infrastructure failure on attempt 1; excluded from agent process-health scoring."
+        }
+      ]
+    },
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 46136,
+    "output_tokens": 2708
+  },
+  "flags": []
+}

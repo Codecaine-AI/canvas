@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "score": 6,
+    "score_rationale": "The board fits the 6 anchor because its organized regional composition and readable flow are undermined by routing leakage, substantial dead space, and an unfinished reliance on generic gray process boxes.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 6,
+        "note": "Four titled regions create a clear overall frame, but the broad empty bottom band and oversized gaps within and between regions make the canvas feel underfilled."
+      },
+      {
+        "name": "color",
+        "score": 6.5,
+        "note": "Blue storage paths, red failure paths, teal feedback, and yellow notes are legible and mostly consistent, but the many undifferentiated gray boxes flatten operational roles that could carry stronger semantic color or registry objects."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 5,
+        "note": "Long blue routes visibly bend around regions and terminate in open bracket-like stubs near the database icons, while several gray vertical connectors and close parallel runs read as exposed routing machinery."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 6.5,
+        "note": "Peer boxes generally share sizes and local rows, but irregular vertical spacing, sprawling cross-region wires, and uneven panel density weaken rhythm and make the publication area noticeably busier than the rebuild area."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8118,
+    "output_tokens": 429
+  },
+  "flags": []
+}

@@ -1,0 +1,1017 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-reflow-152600.chat-assistant-rollout",
+  "title": "2026-09-08-reflow-152600 · chat-assistant-rollout",
+  "description": "# Support assistant and staged rollout\nRead the live conversation left to right: web/mobile chat passes input safety, then context assembly combines durable customer facts, the live transcript and relevant help-center articles. A model generates replies and invokes billing/account actions with per-call vault credentials. Output safety passes a reply or substitutes a safe fallback; repeated triggers or customer requests escalate with transcript, profile context and attempted actions.\n\nBelow, completed transcripts are distilled into durable profile facts, superseding contradictions and retaining source conversation IDs. Expired raw logs move to recoverable compliance-only cold history, excluded from live retrieval.\n\nAt lower right, versioned configuration selects champion versus a small challenger sample. Automated judges assess resolution, grounding and tone, accumulating a report per challenger. A product owner gates promotion; approved configuration swaps retain the previous champion for one-step rollback. Independent quality monitoring tracks per-variant resolution, handoffs and safety and immediately removes regressing challengers.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Support assistant • long-term memory & staged rollout",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3400,
+        "height": 2500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "live",
+      "type": "section",
+      "text": "Live conversation • guarded, context-aware assistance",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 100,
+        "width": 3200,
+        "height": 900
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "chat",
+      "type": "icon",
+      "text": "Customer\nWeb / mobile chat",
+      "color": "yellow",
+      "parentId": "live",
+      "geometry": {
+        "x": 160,
+        "y": 460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "message"
+    },
+    {
+      "id": "input",
+      "type": "icon",
+      "text": "Input safety",
+      "color": "red",
+      "parentId": "live",
+      "geometry": {
+        "x": 460,
+        "y": 460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "context",
+      "type": "icon",
+      "text": "Assemble turn context",
+      "color": "teal",
+      "parentId": "live",
+      "geometry": {
+        "x": 840,
+        "y": 460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "agent"
+    },
+    {
+      "id": "model",
+      "type": "icon",
+      "text": "Generate reply / action",
+      "color": "pink",
+      "parentId": "live",
+      "geometry": {
+        "x": 1260,
+        "y": 460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "output",
+      "type": "icon",
+      "text": "Output safety",
+      "color": "red",
+      "parentId": "live",
+      "geometry": {
+        "x": 1980,
+        "y": 460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "guardrail"
+    },
+    {
+      "id": "profile",
+      "type": "icon",
+      "text": "Long-term profile",
+      "color": "blue",
+      "parentId": "live",
+      "geometry": {
+        "x": 840,
+        "y": 200,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "search",
+      "type": "icon",
+      "text": "Search help center",
+      "color": "gray",
+      "parentId": "live",
+      "geometry": {
+        "x": 1260,
+        "y": 200,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "search"
+    },
+    {
+      "id": "corpus",
+      "type": "icon",
+      "text": "Support corpus",
+      "color": "blue",
+      "parentId": "live",
+      "geometry": {
+        "x": 1660,
+        "y": 200,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "knowledge"
+    },
+    {
+      "id": "delivery",
+      "type": "icon",
+      "text": "Reply to customer",
+      "color": "green",
+      "parentId": "live",
+      "geometry": {
+        "x": 2420,
+        "y": 460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "send"
+    },
+    {
+      "id": "history",
+      "type": "icon",
+      "text": "Live transcript",
+      "color": "blue",
+      "parentId": "live",
+      "geometry": {
+        "x": 840,
+        "y": 760,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "actions",
+      "type": "icon",
+      "text": "Billing / account actions",
+      "color": "gray",
+      "parentId": "live",
+      "geometry": {
+        "x": 1560,
+        "y": 760,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "vault",
+      "type": "icon",
+      "text": "Managed secrets vault",
+      "color": "yellow",
+      "parentId": "live",
+      "geometry": {
+        "x": 1980,
+        "y": 760,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "key"
+    },
+    {
+      "id": "lifecycle",
+      "type": "section",
+      "text": "After the conversation • durable facts & cold history",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1140,
+        "width": 1280,
+        "height": 640
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "extract",
+      "type": "icon",
+      "text": "Distill durable facts",
+      "color": "pink",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 840,
+        "y": 1240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "cold",
+      "type": "icon",
+      "text": "Cold history",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 240,
+        "y": 1240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "archive"
+    },
+    {
+      "id": "rollout",
+      "type": "section",
+      "text": "Versioned variants • experiments & human promotion",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1500,
+        "y": 1140,
+        "width": 1760,
+        "height": 1160
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "variants",
+      "type": "icon",
+      "text": "Versioned variants",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 1620,
+        "y": 1280,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "router",
+      "type": "icon",
+      "text": "Sample conversations",
+      "color": "teal",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2020,
+        "y": 1280,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "champion",
+      "type": "icon",
+      "text": "Champion",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2400,
+        "y": 1200,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "challenger",
+      "type": "icon",
+      "text": "Challenger",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2400,
+        "y": 1520,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "judges",
+      "type": "icon",
+      "text": "Judge panel",
+      "color": "pink",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2800,
+        "y": 1400,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "judge"
+    },
+    {
+      "id": "report",
+      "type": "icon",
+      "text": "Experiment report",
+      "color": "white",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2800,
+        "y": 1780,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "document"
+    },
+    {
+      "id": "owner",
+      "type": "icon",
+      "text": "Product owner",
+      "color": "yellow",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2400,
+        "y": 2040,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "previous",
+      "type": "icon",
+      "text": "Previous champion",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2020,
+        "y": 2040,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "config"
+    },
+    {
+      "id": "human",
+      "type": "icon",
+      "text": "Support agent",
+      "color": "yellow",
+      "parentId": "live",
+      "geometry": {
+        "x": 2900,
+        "y": 460,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "quality",
+      "type": "section",
+      "text": "Independent live quality • immediate traffic control",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1880,
+        "width": 1280,
+        "height": 420
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "monitor",
+      "type": "icon",
+      "text": "Quality by variant",
+      "color": "gray",
+      "parentId": "quality",
+      "geometry": {
+        "x": 840,
+        "y": 2020,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "memory-rules",
+      "type": "sticky",
+      "text": "Durable memory\n• Preferences, issues, resolutions—not raw logs\n• Contradictions supersede old facts\n• Keep source conversation IDs\nCold history: compliance recovery only; never live retrieval.",
+      "color": "yellow",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 480,
+        "y": 1460,
+        "width": 760,
+        "height": 280
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "quality-metrics",
+      "type": "sticky",
+      "text": "Independent checks\n• Resolution rate\n• Human-handoff rate\n• Safety triggers\nPer variant; pull on any regression.",
+      "color": "yellow",
+      "parentId": "quality",
+      "geometry": {
+        "x": 200,
+        "y": 2000,
+        "width": 480,
+        "height": 260
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "judge-rules",
+      "type": "sticky",
+      "text": "Scores\n• Resolution\n• Grounding: profile + cited articles\n• Tone\nReport per challenger",
+      "color": "yellow",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2980,
+        "y": 1420,
+        "width": 240,
+        "height": 380
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "handoff-detail",
+      "type": "sticky",
+      "text": "Handoff: transcript + profile context + actions attempted.\nSecrets: fetched per invocation, never stored by the assistant.",
+      "color": "yellow",
+      "parentId": "live",
+      "geometry": {
+        "x": 2560,
+        "y": 720,
+        "width": 640,
+        "height": 240
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "rejected",
+      "type": "octagon",
+      "text": "Keep champion",
+      "color": "gray",
+      "parentId": "rollout",
+      "geometry": {
+        "x": 2800,
+        "y": 2040,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "octagon"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "turn",
+      "from": {
+        "objectId": "chat"
+      },
+      "to": {
+        "objectId": "input"
+      },
+      "label": "Turn",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "accepted",
+      "from": {
+        "objectId": "input"
+      },
+      "to": {
+        "objectId": "context"
+      },
+      "label": "Allowed",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.75,
+        "offset": 60
+      }
+    },
+    {
+      "id": "facts",
+      "from": {
+        "objectId": "profile"
+      },
+      "to": {
+        "objectId": "context"
+      },
+      "label": "Profile facts",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "retrieve",
+      "from": {
+        "objectId": "corpus"
+      },
+      "to": {
+        "objectId": "search"
+      },
+      "label": "Search corpus",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "articles",
+      "from": {
+        "objectId": "search",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "context",
+        "anchor": "top"
+      },
+      "label": "Relevant articles",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.42,
+        "offset": 0
+      }
+    },
+    {
+      "id": "assembled",
+      "from": {
+        "objectId": "context"
+      },
+      "to": {
+        "objectId": "model"
+      },
+      "label": "Assembled context",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "draft",
+      "from": {
+        "objectId": "model"
+      },
+      "to": {
+        "objectId": "output"
+      },
+      "label": "Draft reply",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "safe",
+      "from": {
+        "objectId": "output"
+      },
+      "to": {
+        "objectId": "delivery"
+      },
+      "label": "Pass / safe fallback",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "conversation",
+      "from": {
+        "objectId": "history"
+      },
+      "to": {
+        "objectId": "context"
+      },
+      "label": "Conversation so far",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "invoke",
+      "from": {
+        "objectId": "model",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "actions",
+        "anchor": "top"
+      },
+      "label": "Action / result",
+      "style": "solid",
+      "arrow": "both"
+    },
+    {
+      "id": "credentials",
+      "from": {
+        "objectId": "vault"
+      },
+      "to": {
+        "objectId": "actions"
+      },
+      "label": "Per-call secret",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "ended",
+      "from": {
+        "objectId": "history",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "extract",
+        "anchor": "top"
+      },
+      "label": "Conversation ended",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "retain",
+      "from": {
+        "objectId": "history",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "cold",
+        "anchor": "top"
+      },
+      "label": "Retention expired • archive raw log",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "learn",
+      "from": {
+        "objectId": "extract",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "profile",
+        "anchor": "left"
+      },
+      "label": "Upsert facts + source conversation",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          680,
+          1300
+        ],
+        [
+          680,
+          260
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.2,
+        "offset": 0
+      }
+    },
+    {
+      "id": "definitions",
+      "from": {
+        "objectId": "variants"
+      },
+      "to": {
+        "objectId": "router"
+      },
+      "label": "Load config",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "majority",
+      "from": {
+        "objectId": "router"
+      },
+      "to": {
+        "objectId": "champion"
+      },
+      "label": "Most traffic",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "sample",
+      "from": {
+        "objectId": "router"
+      },
+      "to": {
+        "objectId": "challenger"
+      },
+      "label": "Small sample",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "scorechamp",
+      "from": {
+        "objectId": "champion"
+      },
+      "to": {
+        "objectId": "judges"
+      },
+      "label": "Completed champion chats",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "scorechallenge",
+      "from": {
+        "objectId": "challenger"
+      },
+      "to": {
+        "objectId": "judges"
+      },
+      "label": "Challenger results",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "verdicts",
+      "from": {
+        "objectId": "judges"
+      },
+      "to": {
+        "objectId": "report"
+      },
+      "label": "Accumulate verdicts",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "review",
+      "from": {
+        "objectId": "report"
+      },
+      "to": {
+        "objectId": "owner",
+        "anchor": "top"
+      },
+      "label": "Clears bar • review",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "approve",
+      "from": {
+        "objectId": "owner",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "variants",
+        "anchor": "bottom"
+      },
+      "label": "Approve: swap champion; retain old",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": -80
+      }
+    },
+    {
+      "id": "saveold",
+      "from": {
+        "objectId": "variants"
+      },
+      "to": {
+        "objectId": "previous"
+      },
+      "label": "Retain old ↔ one-step rollback",
+      "style": "solid",
+      "arrow": "both",
+      "color": "blue",
+      "labelPosition": {
+        "along": 0.85,
+        "offset": 60
+      }
+    },
+    {
+      "id": "handoff",
+      "from": {
+        "objectId": "output",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "human",
+        "anchor": "top"
+      },
+      "label": "Repeated triggers / customer request • handoff",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          2040,
+          380
+        ],
+        [
+          2960,
+          380
+        ]
+      ]
+    },
+    {
+      "id": "telemetry",
+      "from": {
+        "objectId": "history",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "monitor",
+        "anchor": "top"
+      },
+      "label": "Live outcomes + safety / handoff events",
+      "style": "dashed",
+      "arrow": "forward"
+    },
+    {
+      "id": "pull",
+      "from": {
+        "objectId": "monitor",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "variants",
+        "anchor": "left"
+      },
+      "label": "Any regression: remove challenger now",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "blocked-input",
+      "from": {
+        "objectId": "input",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "human",
+        "anchor": "top"
+      },
+      "label": "Repeated input triggers / requested agent",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red",
+      "waypoints": [
+        [
+          520,
+          340
+        ],
+        [
+          3100,
+          340
+        ],
+        [
+          3100,
+          420
+        ],
+        [
+          2960,
+          420
+        ]
+      ],
+      "labelPosition": {
+        "along": 0.72,
+        "offset": 60
+      }
+    },
+    {
+      "id": "reject",
+      "from": {
+        "objectId": "owner",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rejected",
+        "anchor": "left"
+      },
+      "label": "Reject",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    }
+  ],
+  "annotations": []
+}

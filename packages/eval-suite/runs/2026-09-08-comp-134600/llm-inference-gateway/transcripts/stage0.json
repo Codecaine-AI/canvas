@@ -1,0 +1,2279 @@
+{
+  "container_id": "bfea6424-20e9-53d6-b0a0-00a4504c9092",
+  "pi_sessions": [
+    {
+      "piSessionId": "01a08255-7536-7620-a769-9269b02e5df3",
+      "file": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-9269b02e5df3.jsonl",
+      "startedAt": "2026-09-08T18:43:53.782Z",
+      "userMessages": [
+        {
+          "text": "# LLM inference gateway with routing and fallback\n\nWe need a diagram of how our platform's inference gateway works: it exposes one endpoint to client applications, which request a capability tier instead of a particular backend. The edge service authenticates the caller, resolves tenant identity and quota, and stamps a request id that follows every attempt. An admission controller enforces per-tenant concurrency and token-rate limits. Excess work waits in a deadline-aware queue; if its deadline passes, the controller rejects it explicitly and tells the caller to retry instead of serving it late.\n\nThe router selects a backend within the requested tier from live health, measured latency, queue depth, price, and the tenant's data-residency requirements. Eligible capacity includes hosted provider endpoints spread across independent accounts and a self-hosted pool managed by its own scheduler. Before dispatch, a prompt assembler applies tenant system context and safety policy. A response cache returns exact matches and semantically near-duplicate deterministic results, keyed by prompt, parameters, and policy version.\n\nThe gateway streams tokens to the caller as they arrive. Before any token is emitted, failures are classified as timeout, rate-limit rejection, content-policy refusal, backend overload, or malformed response. Retryable failures move to the next backend in the tier's fallback order with a fresh deadline and the same idempotency key; non-retryable failures return immediately. After streaming begins, a backend failure cannot be silently retried elsewhere: the gateway either completes the stream or visibly fails it while preserving what the caller already received.\n\nCircuit breakers open after sustained backend errors or timeouts and drain new traffic toward healthy capacity. They admit a trickle of shadow probes before closing again. Metering records tokens, latency, selected backend, cache outcome, and cost into a billing stream, while redacted prompts and responses enter an audit store. A tenant that reaches its spend ceiling first degrades to the cheapest capable backend and then has new work rejected.\n\nA small sample of structured evaluation traffic is mirrored to a shadow backend, whose result never changes the client response. The diagram should make clear how admission, routing, caching, fallback, streaming, capacity protection, and accounting interact, especially how requests behave under overload and provider failure.\n",
+          "timestamp": "2026-09-08T18:43:53.973Z"
+        }
+      ],
+      "agentContext": null,
+      "turns": [
+        {
+          "index": 0,
+          "timestamp": "2026-09-08T18:43:59.486Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_YpZkHf0Fx5PElHOlTaKJ1kKS|fc_0414235b806e6dc7016aa0576e37d087d1b8f4a031845cd77d",
+              "toolName": "resize",
+              "params": {
+                "id": "page-frame",
+                "width": 3400,
+                "height": 2400
+              },
+              "resultText": "APPLIED · resize page-frame → 3400×2400\nDELTA\n  page-frame  32,32 2560×1600 → 32,32 3400×2400\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 1,
+          "timestamp": "2026-09-08T18:44:09.212Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Hn42S9CC5H6X2Eh9k3nHk8hr|fc_0414235b806e6dc7016aa05775742887d18738751a64a96871",
+              "toolName": "place_section",
+              "params": {
+                "id": "entry",
+                "text": "1 · Identity & admission",
+                "at": [
+                  100,
+                  140
+                ],
+                "size": {
+                  "width": 940,
+                  "height": 780
+                }
+              },
+              "resultText": "APPLIED · place_section entry 100,140 940×780\nDELTA\n  + entry  section 100,140 940×780 \"1 · Identity & admission\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 2,
+          "timestamp": "2026-09-08T18:44:16.142Z",
+          "thinking": "**Building four region nodes**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_POyHmLMKow7YDWsLjCcak5wa|fc_0414235b806e6dc7016aa0577f8ad487d192222a3a9ea16d4a",
+              "toolName": "change_color",
+              "params": {
+                "id": "entry",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · change_color entry\nDELTA\n  entry  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 3,
+          "timestamp": "2026-09-08T18:44:26.085Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_G188Gd32yKoTTTJ46bXeaEP3|fc_0414235b806e6dc7016aa0578865a087d184d0a9ae88f97908",
+              "toolName": "place_section",
+              "params": {
+                "id": "routing",
+                "text": "2 · Preparation & tier routing",
+                "at": [
+                  1180,
+                  140
+                ],
+                "size": {
+                  "width": 900,
+                  "height": 780
+                }
+              },
+              "resultText": "APPLIED · place_section routing 1180,140 900×780\nDELTA\n  + routing  section 1180,140 900×780 \"2 · Preparation & tier routing\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 4,
+          "timestamp": "2026-09-08T18:44:32.265Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_BFV0WIgDmvYVS77Izb5cJtTd|fc_0414235b806e6dc7016aa0578eb14c87d1967217c499367157",
+              "toolName": "change_color",
+              "params": {
+                "id": "routing",
+                "color": "teal"
+              },
+              "resultText": "APPLIED · change_color routing\nDELTA\n  routing  color gray → teal\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 5,
+          "timestamp": "2026-09-08T18:44:39.653Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_7Akh5j8fdeZFMQmrjDrFWIvP|fc_0414235b806e6dc7016aa05796997c87d1afc9c5ebead0c8d8",
+              "toolName": "place_shape",
+              "params": {
+                "id": "edge",
+                "type": "process",
+                "at": [
+                  160,
+                  240
+                ]
+              },
+              "resultText": "APPLIED · place_shape edge process 160,240 280×100\nDELTA\n  + edge  process 160,240 280×100 \"\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 6,
+          "timestamp": "2026-09-08T18:44:45.545Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_3p0yv3j7e3bTJy3aPx36Qmul|fc_0414235b806e6dc7016aa0579c5f2887d19e5ecb6e0af8147c",
+              "toolName": "update_text",
+              "params": {
+                "id": "edge",
+                "text": "Single endpoint\nAuth · tenant · quota · request ID"
+              },
+              "resultText": "APPLIED · update_text edge\nDELTA\n  edge  text \"\" → \"Single endpoint\\nAuth · tenant · quota · request ID\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 7,
+          "timestamp": "2026-09-08T18:44:52.862Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_lsWQU5NsSTz1qbkW68Vab9mY|fc_0414235b806e6dc7016aa057a3ed0887d1a55ac7a7438b3433",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "edge",
+                "id": "admit",
+                "at": [
+                  660,
+                  240
+                ],
+                "text": "Admission controller\nTenant concurrency · token rate"
+              },
+              "resultText": "APPLIED · clone admit from edge 660,240 280×100\nDELTA\n  + admit  process 660,240 280×100 \"Admission controller\\nTenant concurrency · token rate\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 8,
+          "timestamp": "2026-09-08T18:44:57.075Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_NriK5iBBkcVFpbLOXqyIicuK|fc_0414235b806e6dc7016aa057a8213487d1acd4b6fa48afc82f",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "edge",
+                "id": "queue",
+                "at": [
+                  660,
+                  460
+                ],
+                "text": "Deadline-aware queue"
+              },
+              "resultText": "APPLIED · clone queue from edge 660,460 280×100\nDELTA\n  + queue  process 660,460 280×100 \"Deadline-aware queue\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 9,
+          "timestamp": "2026-09-08T18:45:01.933Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_C62i1eMylnui0727UrG2n8kC|fc_0414235b806e6dc7016aa057ad422887d1905ff52d967a7198",
+              "toolName": "look",
+              "params": {
+                "view": "page-frame"
+              },
+              "resultText": "LOOK · 1 render · close-up page-frame\nBOARD\n  page-frame section \"2026-09-08-comp-134600 · llm-inference-gateway\" white 32,32 3400×2400\n    entry section \"1 · Identity & admission\" blue 100,140 940×780\n      edge process \"Single endpoint Auth · tenant · quota · request ID\" 160,240 280×100\n      admit process \"Admission controller Tenant concurrency · token rate\" 660,240 280×100\n      queue process \"Deadline-aware queue\" 660,460 280×100\n    routing section \"2 · Preparation & tier routing\" teal 1180,140 900×780\n      (empty)\nEDGES\n  (none)\nBOARD DIFF · base → draft · 6 ops\n  addSection entry\n  addSection routing\n  addObject edge\n  addObject admit\n  addObject queue\n  updateSection page-frame  resized\nDIAGNOSTICS · clean\nREQUESTS · none\nMEASURES · section page-frame 32,32 3400×2400\n  gaps x  entry↔routing 140\n  pitch x 60 · 500 · 520\n  pitch y 100 · 220\n  free    left 44 · right 1328 · top 56 · bottom 1484\n  ink     1%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-9269b02e5df3.44.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 10,
+          "timestamp": "2026-09-08T18:45:06.871Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_M6wdxpGKHQjx92iHxS7gyAcu|fc_0414235b806e6dc7016aa057b1b67487d1a8e0a3d6aa130391",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "edge",
+                "id": "reject",
+                "at": [
+                  660,
+                  700
+                ],
+                "text": "Reject explicitly\nCaller must retry · never serve late"
+              },
+              "resultText": "APPLIED · clone reject from edge 660,700 280×100\nDELTA\n  + reject  process 660,700 280×100 \"Reject explicitly\\nCaller must retry · never serve late\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 11,
+          "timestamp": "2026-09-08T18:45:11.889Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_x2XRTZiFcNhJVvsWsfvnUt4U|fc_0414235b806e6dc7016aa057b6913487d1a2aea7ceafbde941",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "edge",
+                "id": "assemble",
+                "at": [
+                  1240,
+                  240
+                ],
+                "text": "Prompt assembler\nTenant context · safety policy"
+              },
+              "resultText": "APPLIED · clone assemble from edge 1240,240 280×100\nDELTA\n  + assemble  process 1240,240 280×100 \"Prompt assembler\\nTenant context · safety policy\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 12,
+          "timestamp": "2026-09-08T18:45:17.447Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_LiY4IdcFUJB1fvjNxAlfveIE|fc_0414235b806e6dc7016aa057bc458487d19cbcd0adaf4d7790",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "edge",
+                "id": "cache",
+                "at": [
+                  1720,
+                  240
+                ],
+                "text": "Response cache\nExact / deterministic semantic hit"
+              },
+              "resultText": "APPLIED · clone cache from edge 1720,240 280×100\nDELTA\n  + cache  process 1720,240 280×100 \"Response cache\\nExact / deterministic semantic hit\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 13,
+          "timestamp": "2026-09-08T18:45:24.464Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_OYRSxIwF6FbV3VXjNnmJtvMf|fc_0414235b806e6dc7016aa057c2fc0887d1a5c3181f8b52fc9e",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "edge",
+                "id": "router",
+                "at": [
+                  1720,
+                  700
+                ],
+                "text": "Tier router\nRank eligible backends"
+              },
+              "resultText": "APPLIED · clone router from edge 1720,700 280×100\nDELTA\n  + router  process 1720,700 280×100 \"Tier router\\nRank eligible backends\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 14,
+          "timestamp": "2026-09-08T18:45:33.331Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_sio1wqjpYrSGTEhNu1QIasWc|fc_0414235b806e6dc7016aa057cc595887d1b8443b78614a2f0c",
+              "toolName": "place_section",
+              "params": {
+                "id": "capacity",
+                "text": "3 · Eligible capacity & protection",
+                "at": [
+                  2220,
+                  440
+                ],
+                "size": {
+                  "width": 1080,
+                  "height": 760
+                }
+              },
+              "resultText": "APPLIED · place_section capacity 2220,440 1080×760\nDELTA\n  + capacity  section 2220,440 1080×760 \"3 · Eligible capacity & protection\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 15,
+          "timestamp": "2026-09-08T18:45:39.115Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_i1yeJWkDgvnJxPxB4f1leHGk|fc_0414235b806e6dc7016aa057d1cbfc87d1aaad795a2ab7b89f",
+              "toolName": "change_color",
+              "params": {
+                "id": "capacity",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · change_color capacity\nDELTA\n  capacity  color gray → orange\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 16,
+          "timestamp": "2026-09-08T18:45:49.470Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_fExClr7s8WJefiidolIu9MQo|fc_0414235b806e6dc7016aa057d97e7487d198b99ea6e0188574",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "edge",
+                "id": "hosted",
+                "at": [
+                  2300,
+                  700
+                ],
+                "text": "Hosted providers\nIndependent accounts A / B / …"
+              },
+              "resultText": "APPLIED · clone hosted from edge 2300,700 280×100\nDELTA\n  + hosted  process 2300,700 280×100 \"Hosted providers\\nIndependent accounts A / B / …\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 17,
+          "timestamp": "2026-09-08T18:45:57.075Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_jRh3AOLQHdDaLD14SQRY00GH|fc_0414235b806e6dc7016aa057e4092487d1b1263e3767a517c8",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "edge",
+                "id": "self",
+                "at": [
+                  2860,
+                  700
+                ],
+                "text": "Self-hosted pool\nOwn scheduler"
+              },
+              "resultText": "APPLIED · clone self from edge 2860,700 280×100\nDELTA\n  + self  process 2860,700 280×100 \"Self-hosted pool\\nOwn scheduler\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 18,
+          "timestamp": "2026-09-08T18:46:04.184Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_GpAIaJXGcq8Fyy5LuRoorXwM|fc_0414235b806e6dc7016aa057ea120087d1b9c1ba1de8b340c7",
+              "toolName": "connect",
+              "params": {
+                "id": "e1",
+                "from": {
+                  "objectId": "edge"
+                },
+                "to": {
+                  "objectId": "admit"
+                },
+                "label": "tier request"
+              },
+              "resultText": "APPLIED · connect e1 edge→admit\nDELTA\n  + e1  edge → admit\nLINTS · clean\nROUTES\n  e1  anchors right→left  path edge ─(s0 h y=290)→ admit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 19,
+          "timestamp": "2026-09-08T18:46:09.998Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_H20vkHUOUhdCHJ7wOwngxzAw|fc_0414235b806e6dc7016aa057f0ea8887d18543a850ea0af4c7",
+              "toolName": "connect",
+              "params": {
+                "id": "e2",
+                "from": {
+                  "objectId": "admit"
+                },
+                "to": {
+                  "objectId": "assemble"
+                },
+                "label": "admitted"
+              },
+              "resultText": "APPLIED · connect e2 admit→assemble\nDELTA\n  + e2  admit → assemble\nLINTS · clean\nROUTES\n  e2  anchors right→left  path admit ─(s0 h y=290)→ assemble  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 20,
+          "timestamp": "2026-09-08T18:46:15.227Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_iQPGEH8gG7hN44OSD8rmfkwC|fc_0414235b806e6dc7016aa057f5eee487d1a47db52ab517087b",
+              "toolName": "connect",
+              "params": {
+                "id": "e3",
+                "from": {
+                  "objectId": "admit",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "queue",
+                  "anchor": "top"
+                },
+                "label": "over limit"
+              },
+              "resultText": "APPLIED · connect e3 admit→queue\nDELTA\n  + e3  admit → queue\nLINTS · clean\nROUTES\n  e3  anchors bottom→top  path admit (s0 v x=800) queue  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 21,
+          "timestamp": "2026-09-08T18:46:20.440Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_fdZOjSktySbG7YdTNC67M9ow|fc_0414235b806e6dc7016aa057fb2a3887d19a2e93f3fd3b0858",
+              "toolName": "connect",
+              "params": {
+                "id": "e4",
+                "from": {
+                  "objectId": "queue"
+                },
+                "to": {
+                  "objectId": "reject"
+                },
+                "label": "deadline expired",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect e4 queue→reject\nDELTA\n  + e4  queue → reject\nLINTS · clean\nROUTES\n  e4  anchors bottom→top  path queue (s0 v x=800) reject  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 22,
+          "timestamp": "2026-09-08T18:46:26.081Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_BSRaQRAYwITp7foIS2QTcBUM|fc_0414235b806e6dc7016aa05801e10c87d19551ed409d10279d",
+              "toolName": "connect",
+              "params": {
+                "id": "e5",
+                "from": {
+                  "objectId": "queue",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "admit",
+                  "anchor": "right"
+                },
+                "label": "slot before deadline"
+              },
+              "resultText": "APPLIED · connect e5 queue→admit\nDELTA\n  + e5  queue → admit\nLINTS · +2 −0\n  + E1 covered-content: label \"over limit\" chip on e3 overlaps label \"slot before deadline\" chip on e5 (separate the two edges (spacing or waypoints) so both labels read)\n  + W1 broken-edges: e3 and e5 run anti-parallel between admit and queue (use one edge with a both-ends arrow, or offset the two routes)\nROUTES\n  e5  anchors right→right  path queue ─(s0 h y=510)→ (s1 v x=964) ─(s2 h y=290)→ admit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 23,
+          "timestamp": "2026-09-08T18:46:30.607Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_SKfbNmuteBxVhkENTlrGoIbT|fc_0414235b806e6dc7016aa05805af1087d1b5d7c182dba07604",
+              "toolName": "shift_segment",
+              "params": {
+                "id": "e5",
+                "segment": 1,
+                "to": 1100
+              },
+              "resultText": "APPLIED · shift_segment e5\nDELTA\n  e5  wp none → 1100,510→1100,290\nLINTS · +1 −1\n  + E1 covered-content: label \"admitted\" chip on e2 lies on e5's path for 75px (move the label with a waypoint or reroute e5 so the chip owns its wire)\n  − E1 covered-content  (resolved)\nROUTES\n  e5  anchors right→right  path queue ─(s0 h y=510)→ (s1 v x=1100) ─(s2 h y=290)→ admit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 24,
+          "timestamp": "2026-09-08T18:46:36.095Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_hzzb4vXUrXangiKm650YQBZ3|fc_0414235b806e6dc7016aa0580a7b5487d191fe5fd904d91ec9",
+              "toolName": "change_connection",
+              "params": {
+                "id": "e5",
+                "patch": {
+                  "to": {
+                    "objectId": "admit",
+                    "anchor": "bottom",
+                    "position": [
+                      0.85,
+                      1
+                    ]
+                  }
+                }
+              },
+              "resultText": "APPLIED · change_connection e5\n  manual waypoints dropped — they described the old endpoints; the router owns this edge again\nDELTA\n  e5  anchors right→right → right→bottom\n  e5  pos auto→auto → auto→0.85,1\n  e5  wp 1100,510→1100,290 → none\nLINTS · +2 −1\n  + W1 covered-content: label \"slot before deadline\" chip on e5 sits within 16px of e3's path (offset e3 or move the label so it cannot read as e3's label)\n  + W3 unreadable-labels: label \"slot before deadline\" chip on e5 (216×30px) bleeds onto queue: 120px of corridor where the chip needs 62px (open the queue↔admit corridor to ≥62px so the chip and its 16px margins fit)\n  − E1 covered-content  (resolved)\nROUTES\n  e5  anchors right→bottom  path queue ─(s0 h y=510)→ ─(s1 h y=510)→ (s2 v x=898) (s3 v x=898) admit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 25,
+          "timestamp": "2026-09-08T18:46:41.977Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_D20aY24kYWx3t0rUd2Aaw8HC|fc_0414235b806e6dc7016aa05810226c87d1a58d655d7876eb0c",
+              "toolName": "reroute",
+              "params": {
+                "id": "e5",
+                "points": [
+                  [
+                    1100,
+                    510
+                  ],
+                  [
+                    1100,
+                    400
+                  ],
+                  [
+                    898,
+                    400
+                  ]
+                ]
+              },
+              "resultText": "ERROR · reroute — these corners cannot be joined to the edge's ends without a diagonal leg: the router attaches queue at 940,510 and admit at 898,340, so the first corner must share an x or a y with 940,510 and the last with 898,340.",
+              "isError": true,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 26,
+          "timestamp": "2026-09-08T18:46:53.086Z",
+          "thinking": "**Adjusting left queue routing**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_dwa12kHEX36sZRmlByjBzVje|fc_0414235b806e6dc7016aa0581bfecc87d1a14f8fbca4245943",
+              "toolName": "change_connection",
+              "params": {
+                "id": "e5",
+                "patch": {
+                  "from": {
+                    "objectId": "queue",
+                    "anchor": "left"
+                  },
+                  "to": {
+                    "objectId": "admit",
+                    "anchor": "left",
+                    "position": [
+                      0,
+                      0.8
+                    ]
+                  }
+                }
+              },
+              "resultText": "APPLIED · change_connection e5\nDELTA\n  e5  anchors right→bottom → left→left\n  e5  pos auto→0.85,1 → auto→0,0.8\nLINTS · +1 −2\n  + E1 covered-content: label \"over limit\" chip on e3 overlaps label \"slot before deadline\" chip on e5 (separate the two edges (spacing or waypoints) so both labels read)\n  − W1 covered-content, − W3 unreadable-labels  (resolved)\nROUTES\n  e5  anchors left→left  path queue ─(s0 h y=510)→ (s1 v x=636) ─(s2 h y=320)→ admit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 27,
+          "timestamp": "2026-09-08T18:47:02.926Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_415fWdTCQrs17IlnjvjjLFze|fc_0414235b806e6dc7016aa05825d84087d1b947495f213c249e",
+              "toolName": "shift_segment",
+              "params": {
+                "id": "e5",
+                "segment": 1,
+                "to": 520
+              },
+              "resultText": "APPLIED · shift_segment e5\nDELTA\n  e5  wp none → 520,510→520,320\nLINTS · +1 −1\n  + W1 covered-content: label \"tier request\" chip on e1 sits within 16px of e5's path (offset e5 or move the label so it cannot read as e5's label)\n  − E1 covered-content  (resolved)\nROUTES\n  e5  anchors left→left  path queue ─(s0 h y=510)→ (s1 v x=520) ─(s2 h y=320)→ admit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 28,
+          "timestamp": "2026-09-08T18:47:12.270Z",
+          "thinking": "**Resolving E1 label offset**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_w4KvkFIsb5WW3quwUTHcQolv|fc_0414235b806e6dc7016aa0582ffa3c87d1b79048f076464295",
+              "toolName": "change_connection",
+              "params": {
+                "id": "e5",
+                "patch": {
+                  "from": {
+                    "objectId": "queue",
+                    "anchor": "right"
+                  },
+                  "to": {
+                    "objectId": "assemble",
+                    "anchor": "bottom"
+                  }
+                }
+              },
+              "resultText": "APPLIED · change_connection e5\n  manual waypoints dropped — they described the old endpoints; the router owns this edge again\nDELTA\n  e5  route queue→admit → queue→assemble\n  e5  anchors left→left → right→bottom\n  e5  pos auto→0,0.8 → auto→auto\n  e5  wp 520,510→520,320 → none\nLINTS · +0 −2\n  − W1 covered-content, − W2 broken-edges  (resolved)\nROUTES\n  e5  anchors right→bottom  path queue ─(s0 h y=510)→ ─(s1 h y=510)→ (s2 v x=1380) (s3 v x=1380) assemble  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 29,
+          "timestamp": "2026-09-08T18:47:16.548Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_koyFBStSYFbz7RpJMsrpKb7W|fc_0414235b806e6dc7016aa058338c6c87d1bbb17c24c96f7dbe",
+              "toolName": "connect",
+              "params": {
+                "id": "e6",
+                "from": {
+                  "objectId": "assemble"
+                },
+                "to": {
+                  "objectId": "cache"
+                },
+                "label": "lookup"
+              },
+              "resultText": "APPLIED · connect e6 assemble→cache\nDELTA\n  + e6  assemble → cache\nLINTS · clean\nROUTES\n  e6  anchors right→left  path assemble ─(s0 h y=290)→ cache  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 30,
+          "timestamp": "2026-09-08T18:47:21.245Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_b40ECOtbxosDZvIBZUcR4u9i|fc_0414235b806e6dc7016aa0583804b087d1a46902e8d2c2a713",
+              "toolName": "connect",
+              "params": {
+                "id": "miss",
+                "from": {
+                  "objectId": "cache",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "router",
+                  "anchor": "top"
+                },
+                "label": "miss"
+              },
+              "resultText": "APPLIED · connect miss cache→router\nDELTA\n  + miss  cache → router\nLINTS · clean\nROUTES\n  miss  anchors bottom→top  path cache (s0 v x=1860) router  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 31,
+          "timestamp": "2026-09-08T18:47:32.178Z",
+          "thinking": "**Building full toolset**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_NACWa5LVGAtGcYy1reZ0zStO|fc_0414235b806e6dc7016aa058400f0c87d1bee27f066733c81f",
+              "toolName": "place_section",
+              "params": {
+                "id": "delivery",
+                "text": "4 · Attempts, fallback & client delivery",
+                "at": [
+                  1180,
+                  1340
+                ],
+                "size": {
+                  "width": 2120,
+                  "height": 820
+                }
+              },
+              "resultText": "APPLIED · place_section delivery 1180,1340 2120×820\nDELTA\n  + delivery  section 1180,1340 2120×820 \"4 · Attempts, fallback & client delivery\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 32,
+          "timestamp": "2026-09-08T18:47:37.551Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_L8JvF7XcrGkVvfrmD1iXchkd|fc_0414235b806e6dc7016aa05847f50887d1b43921b21107dec4",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "admit",
+                "id": "attempt",
+                "at": [
+                  2300,
+                  1440
+                ],
+                "text": "Attempt outcome\nBefore first token"
+              },
+              "resultText": "APPLIED · clone attempt from admit 2300,1440 280×100\nDELTA\n  + attempt  process 2300,1440 280×100 \"Attempt outcome\\nBefore first token\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 33,
+          "timestamp": "2026-09-08T18:47:44.224Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_m9BRnNkDmoLG6aV0EH9R0uAu|fc_0414235b806e6dc7016aa0584defe887d19ba7052cf63764af",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "attempt",
+                "id": "stream",
+                "at": [
+                  1720,
+                  1440
+                ],
+                "text": "Stream tokens to caller\nAs they arrive"
+              },
+              "resultText": "APPLIED · clone stream from attempt 1720,1440 280×100\nDELTA\n  + stream  process 1720,1440 280×100 \"Stream tokens to caller\\nAs they arrive\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 34,
+          "timestamp": "2026-09-08T18:47:50.292Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_1YnhaaMTrBMvXNgzTBhaJDL5|fc_0414235b806e6dc7016aa05854017887d1adcf589d21af4c54",
+              "toolName": "connect",
+              "params": {
+                "id": "dispatch",
+                "from": {
+                  "objectId": "router"
+                },
+                "to": {
+                  "objectId": "hosted"
+                },
+                "label": "tier choice"
+              },
+              "resultText": "APPLIED · connect dispatch router→hosted\nDELTA\n  + dispatch  router → hosted\nLINTS · clean\nROUTES\n  dispatch  anchors right→left  path router ─(s0 h y=750)→ hosted  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 35,
+          "timestamp": "2026-09-08T18:47:55.893Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_7dcobiASP4ZGEpfiGLTFXnNT|fc_0414235b806e6dc7016aa0585a47c087d18287e52ce5b1f7d0",
+              "toolName": "connect",
+              "params": {
+                "id": "dispatch-self",
+                "from": {
+                  "objectId": "router",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "self",
+                  "anchor": "bottom"
+                },
+                "label": "or self-hosted"
+              },
+              "resultText": "APPLIED · connect dispatch-self router→self\nDELTA\n  + dispatch-self  router → self\nLINTS · +1 −0\n  + W1 covered-content: label \"or self-hosted\" chip on dispatch-self sits within 16px of hosted (give the chip clear air — nudge hosted or reroute dispatch-self)\nROUTES\n  dispatch-self  anchors bottom→bottom  path router (s0 v x=1860) ─(s1 h y=824)→ (s2 v x=3000) self  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 36,
+          "timestamp": "2026-09-08T18:48:00.477Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_lA8QOZTKs6sb3O3oOebNhDCy|fc_0414235b806e6dc7016aa0585fccb887d1b2afb5f530375b58",
+              "toolName": "shift_segment",
+              "params": {
+                "id": "dispatch-self",
+                "segment": 1,
+                "to": 880
+              },
+              "resultText": "APPLIED · shift_segment dispatch-self\nDELTA\n  dispatch-self  wp none → 1860,880→3000,880\nLINTS · +0 −1\n  − W1 covered-content  (resolved)\nROUTES\n  dispatch-self  anchors bottom→bottom  path router (s0 v x=1860) ─(s1 h y=880)→ (s2 v x=3000) self  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 37,
+          "timestamp": "2026-09-08T18:48:08.305Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_B1rMBeVQ65J0SoHWdCgALVRX|fc_0414235b806e6dc7016aa05865bc0087d1a2b4d096e5a8d735",
+              "toolName": "connect",
+              "params": {
+                "id": "host-out",
+                "from": {
+                  "objectId": "hosted",
+                  "anchor": "bottom"
+                },
+                "to": {
+                  "objectId": "attempt",
+                  "anchor": "top"
+                },
+                "label": "response / error"
+              },
+              "resultText": "APPLIED · connect host-out hosted→attempt\nDELTA\n  + host-out  hosted → attempt\nLINTS · +1 −0\n  + E1 covered-content: label \"or self-hosted\" chip on dispatch-self lies on host-out's path for 30px (move the label with a waypoint or reroute host-out so the chip owns its wire)\nROUTES\n  host-out  anchors bottom→top  path hosted (s0 v x=2440) attempt  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 38,
+          "timestamp": "2026-09-08T18:48:13.192Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5foV4ti6p0ZNkhHdv4GS1MMW|fc_0414235b806e6dc7016aa0586c779887d1b1784febe43bb9bf",
+              "toolName": "move_label",
+              "params": {
+                "id": "dispatch-self",
+                "along": 0.75,
+                "offset": 0
+              },
+              "resultText": "APPLIED · move_label dispatch-self → along 0.75, offset 0\nDELTA\n  dispatch-self  labelPosition — → {\"along\":0.75,\"offset\":0}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  dispatch-self  anchors bottom→bottom  path router (s0 v x=1860) ─(s1 h y=880)→ (s2 v x=3000) self  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 39,
+          "timestamp": "2026-09-08T18:48:19.020Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_s4oT6MVNXQNWKEQu1gIKB7XX|fc_0414235b806e6dc7016aa05870acc487d194eb367332b5621c",
+              "toolName": "connect",
+              "params": {
+                "id": "self-out",
+                "from": {
+                  "objectId": "self",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "attempt",
+                  "anchor": "right"
+                },
+                "label": "response / error"
+              },
+              "resultText": "APPLIED · connect self-out self→attempt\nDELTA\n  + self-out  self → attempt\nLINTS · clean\nROUTES\n  self-out  anchors right→right  path self ─(s0 h y=750)→ ─(s1 h y=750)→ (s2 v x=2884) ─(s3 h y=1490)→ ─(s4 h y=1490)→ attempt  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 40,
+          "timestamp": "2026-09-08T18:48:25.406Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_KrfWUYCYv3oJHrgXIRR0YHPI|fc_0414235b806e6dc7016aa058778eb487d18f3f6d808e17d4b3",
+              "toolName": "connect",
+              "params": {
+                "id": "first-token",
+                "from": {
+                  "objectId": "attempt"
+                },
+                "to": {
+                  "objectId": "stream"
+                },
+                "label": "success · first token"
+              },
+              "resultText": "APPLIED · connect first-token attempt→stream\nDELTA\n  + first-token  attempt → stream\nLINTS · clean\nROUTES\n  first-token  anchors left→right  path attempt ─(s0 h y=1490)→ stream  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 41,
+          "timestamp": "2026-09-08T18:48:33.329Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_X4Noy3RveLYS2svmeZcsNqit|fc_0414235b806e6dc7016aa0587d32b487d1a8340eeb46dbbda9",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "attempt",
+                "id": "classify",
+                "at": [
+                  2300,
+                  1740
+                ],
+                "text": "Classify failure\nRetryable?"
+              },
+              "resultText": "APPLIED · clone classify from attempt 2300,1740 280×100\nDELTA\n  + classify  process 2300,1740 280×100 \"Classify failure\\nRetryable?\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 42,
+          "timestamp": "2026-09-08T18:48:38.732Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_B3eL55jTfC8gdIlEzZHOLU08|fc_0414235b806e6dc7016aa05884abd887d198df3dc2a00f9b13",
+              "toolName": "connect",
+              "params": {
+                "id": "failure",
+                "from": {
+                  "objectId": "attempt"
+                },
+                "to": {
+                  "objectId": "classify"
+                },
+                "label": "pre-token failure",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect failure attempt→classify\nDELTA\n  + failure  attempt → classify\nLINTS · clean\nROUTES\n  failure  anchors bottom→top  path attempt (s0 v x=2440) classify  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 43,
+          "timestamp": "2026-09-08T18:48:44.392Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_cV3nw7Oa7dSTFa26b55TsZB6|fc_0414235b806e6dc7016aa0588a99f887d1a3d95bd6eb7aac53",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "attempt",
+                "id": "retry",
+                "at": [
+                  1720,
+                  1740
+                ],
+                "text": "Next backend in tier\nFresh deadline · same idempotency key"
+              },
+              "resultText": "APPLIED · clone retry from attempt 1720,1740 280×100\nDELTA\n  + retry  process 1720,1740 280×100 \"Next backend in tier\\nFresh deadline · same idempotency key\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 44,
+          "timestamp": "2026-09-08T18:48:49.267Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_fFkj0mC3ytvtLs9Xk5lLxD2o|fc_0414235b806e6dc7016aa0588fec1c87d18e98548afb1790e4",
+              "toolName": "connect",
+              "params": {
+                "id": "yes-retry",
+                "from": {
+                  "objectId": "classify"
+                },
+                "to": {
+                  "objectId": "retry"
+                },
+                "label": "retryable",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · connect yes-retry classify→retry\nDELTA\n  + yes-retry  classify → retry\nLINTS · clean\nROUTES\n  yes-retry  anchors left→right  path classify ─(s0 h y=1790)→ retry  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 45,
+          "timestamp": "2026-09-08T18:48:55.994Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5SqUP6CtBRTTc31Og8DW8ekP|fc_0414235b806e6dc7016aa058974c5087d18d7fd41667d40029",
+              "toolName": "connect",
+              "params": {
+                "id": "retry-loop",
+                "from": {
+                  "objectId": "retry",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "router",
+                  "anchor": "left"
+                },
+                "label": "reselect eligible fallback",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · connect retry-loop retry→router\nDELTA\n  + retry-loop  retry → router\nLINTS · clean\nROUTES\n  retry-loop  anchors left→left  path retry ─(s0 h y=1790)→ (s1 v x=1696) ─(s2 h y=750)→ router  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 46,
+          "timestamp": "2026-09-08T18:49:01.461Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Rl7A6YRG2dFdh9R1bZiqhFAl|fc_0414235b806e6dc7016aa0589b814087d1ba22e582ef895c36",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "attempt",
+                "id": "terminal-error",
+                "at": [
+                  2860,
+                  1740
+                ],
+                "text": "Return error immediately\nNon-retryable / exhausted"
+              },
+              "resultText": "APPLIED · clone terminal-error from attempt 2860,1740 280×100\nDELTA\n  + terminal-error  process 2860,1740 280×100 \"Return error immediately\\nNon-retryable / exhausted\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 47,
+          "timestamp": "2026-09-08T18:49:06.863Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_3pQORARSayEVyJfBtY23hZu6|fc_0414235b806e6dc7016aa058a0f65087d1937109a54603ca8c",
+              "toolName": "connect",
+              "params": {
+                "id": "no-retry",
+                "from": {
+                  "objectId": "classify"
+                },
+                "to": {
+                  "objectId": "terminal-error"
+                },
+                "label": "non-retryable / exhausted",
+                "color": "red"
+              },
+              "resultText": "APPLIED · connect no-retry classify→terminal-error\nDELTA\n  + no-retry  classify → terminal-error\nLINTS · +1 −0\n  + W1 unreadable-labels: label \"non-retryable / exhausted\" chip on no-retry (264×30px) bleeds onto classify and terminal-error: 280px of corridor where the chip needs 296px (open the classify↔terminal-error corridor to ≥296px so the chip and its 16px margins fit)\nROUTES\n  no-retry  anchors right→left  path classify ─(s0 h y=1790)→ terminal-error  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 48,
+          "timestamp": "2026-09-08T18:49:13.401Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_NahhUFklNJnYUbyxxG4UEKP6|fc_0414235b806e6dc7016aa058a8013087d1a5d8e511cc14663e",
+              "toolName": "update_text",
+              "params": {
+                "id": "no-retry",
+                "text": "otherwise"
+              },
+              "resultText": "APPLIED · update_text no-retry\nDELTA\n  no-retry  label \"non-retryable / exhausted\" → otherwise\nLINTS · +0 −1\n  − W1 unreadable-labels  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 49,
+          "timestamp": "2026-09-08T18:49:18.555Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ph4PNOCSwHWW38KEzv271Yuu|fc_0414235b806e6dc7016aa058ace48c87d193b31cc9794a1ca7",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "routing-rules",
+                "text": "**Eligibility & ranking**\nResidency is mandatory.\nLive health · latency · queue depth · price within requested tier.",
+                "at": [
+                  1240,
+                  660
+                ]
+              },
+              "resultText": "APPLIED · place_sticky routing-rules 1240,660 180×120\nDELTA\n  + routing-rules  sticky 1240,660 180×120 \"**Eligibility & ranking**\\nResidency is mandatory.\\nLive health · latency · queue depth · price within requested tier.\"\nLINTS · +1 −0\n  + W1 clipped-text: routing-rules: sticky body clips at 180×120: 12 row(s), the note holds 1 — needs 180×481 (grow routing-rules to ≥180×481 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 50,
+          "timestamp": "2026-09-08T18:49:23.251Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Wi1FlPGjwlo6eKa6HUKEzwEe|fc_0414235b806e6dc7016aa058b295a087d1a16c30fd3119a9d9",
+              "toolName": "resize",
+              "params": {
+                "id": "routing-rules",
+                "width": 380,
+                "height": 240
+              },
+              "resultText": "APPLIED · resize routing-rules → 380×240\nDELTA\n  routing-rules  1240,660 180×120 → 1240,660 380×240\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 51,
+          "timestamp": "2026-09-08T18:49:30.518Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_bxGeBg3KvKmdawIcMmt2I0cm|fc_0414235b806e6dc7016aa058b9360087d198a5de1f0ed526cf",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "cache-key",
+                "text": "Cache key: prompt + parameters + policy version.\nRequest ID follows every attempt.",
+                "at": [
+                  1240,
+                  1040
+                ]
+              },
+              "resultText": "APPLIED · place_sticky cache-key 1240,1040 180×120\nDELTA\n  + cache-key  sticky 1240,1040 180×120 \"Cache key: prompt + parameters + policy version.\\nRequest ID follows every attempt.\"\nLINTS · +1 −0\n  + W1 clipped-text: cache-key: sticky body clips at 180×120: 9 row(s), the note holds 1 — needs 180×373 (grow cache-key to ≥180×373 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 52,
+          "timestamp": "2026-09-08T18:49:35.472Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_7qHatpmS0SSnudDn57OwxIUQ|fc_0414235b806e6dc7016aa058bebabc87d1b490583c1ae01207",
+              "toolName": "resize",
+              "params": {
+                "id": "cache-key",
+                "width": 380,
+                "height": 220
+              },
+              "resultText": "APPLIED · resize cache-key → 380×220\nDELTA\n  cache-key  1240,1040 180×120 → 1240,1040 380×220\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 53,
+          "timestamp": "2026-09-08T18:49:40.571Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_iyg1SmUTU0B1sHkO8G3cnXjS|fc_0414235b806e6dc7016aa058c3120087d18ab6001585d6c58e",
+              "toolName": "connect",
+              "params": {
+                "id": "cache-hit",
+                "from": {
+                  "objectId": "cache",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "stream",
+                  "anchor": "top"
+                },
+                "label": "cache hit",
+                "color": "green"
+              },
+              "resultText": "APPLIED · connect cache-hit cache→stream\nDELTA\n  + cache-hit  cache → stream\nLINTS · +1 −0\n  + E1 covered-content: label \"cache hit\" chip on cache-hit lies on dispatch-self's path for 110px (move the label with a waypoint or reroute dispatch-self so the chip owns its wire)\nROUTES\n  cache-hit  anchors right→top  path cache ─(s0 h y=290)→ (s1 v x=2020) ─(s2 h y=890)→ (s3 v x=1860) stream  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 54,
+          "timestamp": "2026-09-08T18:49:46.867Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_qssFw6LWRLH9yWj0WpgQvLV9|fc_0414235b806e6dc7016aa058c95dd487d1b7c02e10ee7baef0",
+              "toolName": "move_label",
+              "params": {
+                "id": "cache-hit",
+                "along": 0.8,
+                "offset": 0
+              },
+              "resultText": "APPLIED · move_label cache-hit → along 0.8, offset 0\nDELTA\n  cache-hit  labelPosition — → {\"along\":0.8,\"offset\":0}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  cache-hit  anchors right→top  path cache ─(s0 h y=290)→ (s1 v x=2020) ─(s2 h y=890)→ (s3 v x=1860) stream  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 55,
+          "timestamp": "2026-09-08T18:49:56.909Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_uzIwC0BtbYibHJypfzGaACDC|fc_0414235b806e6dc7016aa058d2ed6087d1be1bf6f5612232cf",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "stream",
+                "id": "stream-end",
+                "at": [
+                  1240,
+                  1440
+                ],
+                "text": "Complete or visibly fail\nPreserve received tokens · no retry"
+              },
+              "resultText": "APPLIED · clone stream-end from stream 1240,1440 280×100\nDELTA\n  + stream-end  process 1240,1440 280×100 \"Complete or visibly fail\\nPreserve received tokens · no retry\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 56,
+          "timestamp": "2026-09-08T18:50:01.981Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ZFJZvNxric8fo7up1xIu40Ot|fc_0414235b806e6dc7016aa058d8bcac87d1958cff1a519a942b",
+              "toolName": "connect",
+              "params": {
+                "id": "stream-finish",
+                "from": {
+                  "objectId": "stream"
+                },
+                "to": {
+                  "objectId": "stream-end"
+                },
+                "label": "after first token"
+              },
+              "resultText": "APPLIED · connect stream-finish stream→stream-end\nDELTA\n  + stream-finish  stream → stream-end\nLINTS · +2 −0\n  + E1 covered-content: label \"after first token\" chip on stream-finish lies on retry-loop's path for 30px (move the label with a waypoint or reroute retry-loop so the chip owns its wire)\n  + W1 unreadable-labels: label \"after first token\" chip on stream-finish (187×30px) bleeds onto stream and stream-end: 200px of corridor where the chip needs 220px (open the stream↔stream-end corridor to ≥220px so the chip and its 16px margins fit)\nROUTES\n  stream-finish  anchors left→right  path stream ─(s0 h y=1490)→ stream-end  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 57,
+          "timestamp": "2026-09-08T18:50:07.745Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_BI1od4Jug5BJ8mk8rEtP1QGO|fc_0414235b806e6dc7016aa058dea8e487d18a78569f444904bb",
+              "toolName": "update_text",
+              "params": {
+                "id": "stream-finish",
+                "text": "stream ends"
+              },
+              "resultText": "APPLIED · update_text stream-finish\nDELTA\n  stream-finish  label \"after first token\" → \"stream ends\"\nLINTS · +1 −2\n  + W1 covered-content: label \"stream ends\" chip on stream-finish sits within 16px of retry-loop's path (offset retry-loop or move the label so it cannot read as retry-loop's label)\n  − E1 covered-content, − W1 unreadable-labels  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 58,
+          "timestamp": "2026-09-08T18:50:12.972Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_mxqgvlJFeczpviO5NbvgJ5Kk|fc_0414235b806e6dc7016aa058e4088087d190bb55e27a5c3202",
+              "toolName": "move_label",
+              "params": {
+                "id": "stream-finish",
+                "along": 0.65,
+                "offset": -40
+              },
+              "resultText": "APPLIED · move_label stream-finish → along 0.65, offset -40\nDELTA\n  stream-finish  labelPosition — → {\"along\":0.65,\"offset\":-40}\nLINTS · +1 −1\n  + W1 unreadable-labels: label \"stream ends\" chip on stream-finish (130×30px) bleeds onto stream-end: 200px of corridor where the chip needs 162px (open the stream↔stream-end corridor to ≥162px so the chip and its 16px margins fit)\n  − W1 covered-content  (resolved)\nROUTES\n  stream-finish  anchors left→right  path stream ─(s0 h y=1490)→ stream-end  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 59,
+          "timestamp": "2026-09-08T18:50:18.068Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_CWajJG3SZkVgkboZDu1R9oCA|fc_0414235b806e6dc7016aa058e9148887d1872ae8463056d518",
+              "toolName": "move_label",
+              "params": {
+                "id": "stream-finish",
+                "along": 0.5,
+                "offset": -60
+              },
+              "resultText": "APPLIED · move_label stream-finish → along 0.5, offset -60\nDELTA\n  stream-finish  labelPosition {\"along\":0.65,\"offset\":-40} → {\"along\":0.5,\"offset\":-60}\nLINTS · +1 −1\n  + W1 covered-content: label \"stream ends\" chip on stream-finish sits within 16px of retry-loop's path (offset retry-loop or move the label so it cannot read as retry-loop's label)\n  − W1 unreadable-labels  (resolved)\nROUTES\n  stream-finish  anchors left→right  path stream ─(s0 h y=1490)→ stream-end  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 60,
+          "timestamp": "2026-09-08T18:50:27.506Z",
+          "thinking": "**Finishing missing work**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_zPt1bx9TiUWB9PpgclSbAIX2|fc_0414235b806e6dc7016aa058f2c3c487d19cf805edfbeda729",
+              "toolName": "update_text",
+              "params": {
+                "id": "stream-finish",
+                "text": ""
+              },
+              "resultText": "APPLIED · update_text stream-finish\nDELTA\n  stream-finish  label \"stream ends\" → —\nLINTS · +0 −1\n  − W1 covered-content  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 61,
+          "timestamp": "2026-09-08T18:50:32.757Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_jxPOt2wtUhe1qF22qNVdbHDu|fc_0414235b806e6dc7016aa058f72bb487d1a83ea104c5c38cf8",
+              "toolName": "place_section",
+              "params": {
+                "id": "accounting",
+                "text": "5 · Accounting & spend control",
+                "at": [
+                  100,
+                  1080
+                ],
+                "size": {
+                  "width": 940,
+                  "height": 1080
+                }
+              },
+              "resultText": "APPLIED · place_section accounting 100,1080 940×1080\nDELTA\n  + accounting  section 100,1080 940×1080 \"5 · Accounting & spend control\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 62,
+          "timestamp": "2026-09-08T18:50:40.334Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5wckvTWOLOsIrSF0Vz6wXJLl|fc_0414235b806e6dc7016aa058fcd23887d1971feb76747c4c57",
+              "toolName": "change_color",
+              "params": {
+                "id": "accounting",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · change_color accounting\nDELTA\n  accounting  color gray → blue\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 63,
+          "timestamp": "2026-09-08T18:50:46.818Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_7x0TJ6SxL9Q5DqgkkF0FENKA|fc_0414235b806e6dc7016aa05905965087d19363811379da6704",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "edge",
+                "id": "meter",
+                "at": [
+                  660,
+                  1440
+                ],
+                "text": "Meter every request / attempt"
+              },
+              "resultText": "APPLIED · clone meter from edge 660,1440 280×100\nDELTA\n  + meter  process 660,1440 280×100 \"Meter every request / attempt\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 64,
+          "timestamp": "2026-09-08T18:50:52.146Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_dhwwtDg6dRJtzbPOHbJE8ezC|fc_0414235b806e6dc7016aa0590a981c87d1b6f1a9738b9087c7",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "meter",
+                "id": "billing",
+                "at": [
+                  660,
+                  1820
+                ],
+                "text": "Billing stream\nTokens · latency · backend · cache · cost"
+              },
+              "resultText": "APPLIED · clone billing from meter 660,1820 280×100\nDELTA\n  + billing  process 660,1820 280×100 \"Billing stream\\nTokens · latency · backend · cache · cost\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 65,
+          "timestamp": "2026-09-08T18:51:00.568Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5ow4Xrjsilu6N07Adae87t13|fc_0414235b806e6dc7016aa0591135d487d1be5dd5054360bb64",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "meter",
+                "id": "audit",
+                "at": [
+                  160,
+                  1440
+                ],
+                "text": "Audit store\nRedacted prompts & responses"
+              },
+              "resultText": "APPLIED · clone audit from meter 160,1440 280×100\nDELTA\n  + audit  process 160,1440 280×100 \"Audit store\\nRedacted prompts & responses\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 66,
+          "timestamp": "2026-09-08T18:51:06.318Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_5jCWmonBFYs4NZc6YCUvyhDG|fc_0414235b806e6dc7016aa0591846f087d1b793a7e41ace27b9",
+              "toolName": "connect",
+              "params": {
+                "id": "meter-bill",
+                "from": {
+                  "objectId": "meter"
+                },
+                "to": {
+                  "objectId": "billing"
+                },
+                "label": "usage events",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect meter-bill meter→billing\nDELTA\n  + meter-bill  meter → billing\nLINTS · clean\nROUTES\n  meter-bill  anchors bottom→top  path meter (s0 v x=800) billing  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 67,
+          "timestamp": "2026-09-08T18:51:12.899Z",
+          "thinking": "**Finishing missing work**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_mVLbBt1q2h0LGcTxZR1JuwrZ|fc_0414235b806e6dc7016aa059200a7087d18c85153f55f0b912",
+              "toolName": "connect",
+              "params": {
+                "id": "telemetry",
+                "from": {
+                  "objectId": "delivery",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "meter",
+                  "anchor": "right"
+                },
+                "label": "all outcomes",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect telemetry delivery→meter\nDELTA\n  + telemetry  delivery → meter\nLINTS · clean\nROUTES\n  telemetry  anchors left→right  path delivery ─(s0 h y=1750)→ ─(s1 h y=1750)→ (s2 v x=1060) ─(s3 h y=1490)→ ─(s4 h y=1490)→ meter  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 68,
+          "timestamp": "2026-09-08T18:51:18.411Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_39T9aAqBwUizK3fTV5pSz3xd|fc_0414235b806e6dc7016aa05924e02487d187d90ea5d6df0a86",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "meter",
+                "id": "spend",
+                "at": [
+                  160,
+                  1180
+                ],
+                "text": "Spend ceiling\n1 Cheapest capable · 2 Reject new work"
+              },
+              "resultText": "APPLIED · clone spend from meter 160,1180 280×100\nDELTA\n  + spend  process 160,1180 280×100 \"Spend ceiling\\n1 Cheapest capable · 2 Reject new work\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 69,
+          "timestamp": "2026-09-08T18:51:26.599Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_XUYJW9U7RRq1tFyzamObSdW2|fc_0414235b806e6dc7016aa0592d1c2c87d1a112943443a377ae",
+              "toolName": "connect",
+              "params": {
+                "id": "audit-write",
+                "from": {
+                  "objectId": "meter"
+                },
+                "to": {
+                  "objectId": "audit"
+                },
+                "label": "redact",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect audit-write meter→audit\nDELTA\n  + audit-write  meter → audit\nLINTS · clean\nROUTES\n  audit-write  anchors left→right  path meter ─(s0 h y=1490)→ audit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 70,
+          "timestamp": "2026-09-08T18:51:32.733Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_fIRHkH4YNJEnl7EqzwDCjf0B|fc_0414235b806e6dc7016aa059327dbc87d185151f22882f3db3",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "meter",
+                "id": "breaker",
+                "at": [
+                  2300,
+                  500
+                ],
+                "text": "Circuit breakers\nOpen on sustained errors / timeouts"
+              },
+              "resultText": "APPLIED · clone breaker from meter 2300,500 280×100\nDELTA\n  + breaker  process 2300,500 280×100 \"Circuit breakers\\nOpen on sustained errors / timeouts\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 71,
+          "timestamp": "2026-09-08T18:51:38.447Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_163qIxK2yO18a8vyQJU6n3zE|fc_0414235b806e6dc7016aa05938acbc87d196798dc3b3f4d332",
+              "toolName": "connect",
+              "params": {
+                "id": "breaker-route",
+                "from": {
+                  "objectId": "breaker",
+                  "anchor": "left"
+                },
+                "to": {
+                  "objectId": "router",
+                  "anchor": "right"
+                },
+                "label": "drain to healthy",
+                "style": "dashed",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · connect breaker-route breaker→router\nDELTA\n  + breaker-route  breaker → router\nLINTS · +1 −0\n  + E1 covered-content: label \"tier choice\" chip on dispatch lies on breaker-route's path for 80px (move the label with a waypoint or reroute breaker-route so the chip owns its wire)\nROUTES\n  breaker-route  anchors left→right  path breaker ─(s0 h y=550)→ ─(s1 h y=550)→ (s2 v x=2150) ─(s3 h y=750)→ ─(s4 h y=750)→ router  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 72,
+          "timestamp": "2026-09-08T18:51:44.677Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_YEagM3GenNlGsPM1xdexkofh|fc_0414235b806e6dc7016aa0593ff2b487d18d8393d37cbacea6",
+              "toolName": "move_label",
+              "params": {
+                "id": "dispatch",
+                "along": 0.6,
+                "offset": -40
+              },
+              "resultText": "APPLIED · move_label dispatch → along 0.6, offset -40\nDELTA\n  dispatch  labelPosition — → {\"along\":0.6,\"offset\":-40}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  dispatch  anchors right→left  path router ─(s0 h y=750)→ hosted  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 73,
+          "timestamp": "2026-09-08T18:51:52.055Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_g0WbITgfh0rBmMLQFtzIstql|fc_0414235b806e6dc7016aa059456ec887d1a515227d303b7783",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "breaker",
+                "id": "probes",
+                "at": [
+                  2860,
+                  500
+                ],
+                "text": "Trickle shadow probes\nHealthy → close circuit"
+              },
+              "resultText": "APPLIED · clone probes from breaker 2860,500 280×100\nDELTA\n  + probes  process 2860,500 280×100 \"Trickle shadow probes\\nHealthy → close circuit\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 74,
+          "timestamp": "2026-09-08T18:51:59.543Z",
+          "thinking": "**Finishing remaining work**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_3wBZHzTVvJmNp2S9xAVkzgta|fc_0414235b806e6dc7016aa0594f081487d1873c930377541b6e",
+              "toolName": "connect",
+              "params": {
+                "id": "probe-loop",
+                "from": {
+                  "objectId": "breaker",
+                  "anchor": "right"
+                },
+                "to": {
+                  "objectId": "probes",
+                  "anchor": "left"
+                },
+                "label": "half-open → test → recover",
+                "arrow": "both",
+                "style": "dashed",
+                "color": "orange"
+              },
+              "resultText": "APPLIED · connect probe-loop breaker→probes\nDELTA\n  + probe-loop  breaker → probes\nLINTS · +1 −0\n  + W1 unreadable-labels: label \"half-open → test → recover\" chip on probe-loop (274×30px) bleeds onto breaker and probes: 280px of corridor where the chip needs 306px (open the breaker↔probes corridor to ≥306px so the chip and its 16px margins fit)\nROUTES\n  probe-loop  anchors right→left  path breaker ─(s0 h y=550)→ probes  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 75,
+          "timestamp": "2026-09-08T18:52:05.093Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_cLdFgo3J8SQmji9Zyq3cD62E|fc_0414235b806e6dc7016aa059543af087d196df5c4755d87be1",
+              "toolName": "update_text",
+              "params": {
+                "id": "probe-loop",
+                "text": "test / recover"
+              },
+              "resultText": "APPLIED · update_text probe-loop\nDELTA\n  probe-loop  label \"half-open → test → recover\" → \"test / recover\"\nLINTS · +0 −1\n  − W1 unreadable-labels  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 76,
+          "timestamp": "2026-09-08T18:52:10.664Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_DjASeNbWZPVGGo6cMr3vKvcn|fc_0414235b806e6dc7016aa05958c97487d18dafb7b277bce63e",
+              "toolName": "place_section",
+              "params": {
+                "id": "shadow-region",
+                "text": "6 · Isolated evaluation",
+                "at": [
+                  2220,
+                  140
+                ],
+                "size": {
+                  "width": 1080,
+                  "height": 240
+                }
+              },
+              "resultText": "APPLIED · place_section shadow-region 2220,140 1080×240\nDELTA\n  + shadow-region  section 2220,140 1080×240 \"6 · Isolated evaluation\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 77,
+          "timestamp": "2026-09-08T18:52:17.744Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_UW0hpgfKWj5o5ICkcrZ0GjTq|fc_0414235b806e6dc7016aa059609c3887d184b3008ea5668aaa",
+              "toolName": "clone",
+              "params": {
+                "sourceId": "hosted",
+                "id": "shadow",
+                "at": [
+                  2300,
+                  240
+                ],
+                "text": "Shadow backend\nSmall structured eval sample"
+              },
+              "resultText": "APPLIED · clone shadow from hosted 2300,240 280×100\nDELTA\n  + shadow  process 2300,240 280×100 \"Shadow backend\\nSmall structured eval sample\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 78,
+          "timestamp": "2026-09-08T18:52:28.136Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_UahvI4pq9Jz3AYuxENB5zF6q|fc_0414235b806e6dc7016aa05968db8c87d1b667485db05905b7",
+              "toolName": "connect",
+              "params": {
+                "id": "mirror",
+                "from": {
+                  "objectId": "cache",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "shadow",
+                  "anchor": "left"
+                },
+                "label": "mirror sample",
+                "style": "dashed",
+                "color": "violet"
+              },
+              "resultText": "APPLIED · connect mirror cache→shadow\nDELTA\n  + mirror  cache → shadow\nLINTS · +2 −0\n  + E1 covered-content: label \"mirror sample\" chip on mirror lies on cache-hit's path for 35px (move the label with a waypoint or reroute cache-hit so the chip owns its wire)\n  + W1 unreadable-labels: label \"mirror sample\" chip on mirror (149×30px) bleeds onto cache: 300px of corridor where the chip needs 181px (open the cache↔shadow corridor to ≥181px so the chip and its 16px margins fit)\nROUTES\n  mirror  anchors top→left  path cache (s0 v x=1860) (s1 v x=1860) ─(s2 h y=290)→ ─(s3 h y=290)→ shadow  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 79,
+          "timestamp": "2026-09-08T18:52:34.568Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_vl4pc3lldW4daSRzAQw9ADFp|fc_0414235b806e6dc7016aa05971c8e087d1aeb6e78f68ba61d4",
+              "toolName": "move_label",
+              "params": {
+                "id": "mirror",
+                "along": 0.8,
+                "offset": -40
+              },
+              "resultText": "APPLIED · move_label mirror → along 0.8, offset -40\nDELTA\n  mirror  labelPosition — → {\"along\":0.8,\"offset\":-40}\nLINTS · +0 −2\n  − E1 covered-content, − W1 unreadable-labels  (resolved)\nROUTES\n  mirror  anchors top→left  path cache (s0 v x=1860) (s1 v x=1860) ─(s2 h y=290)→ ─(s3 h y=290)→ shadow  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 80,
+          "timestamp": "2026-09-08T18:52:42.977Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_s5A4uUERzdKyCkxtFwM5wjkv|fc_0414235b806e6dc7016aa0597960a887d1b603ff53b06d3783",
+              "toolName": "update_text",
+              "params": {
+                "id": "shadow",
+                "text": "Shadow evaluation backend\nNever affects client response"
+              },
+              "resultText": "APPLIED · update_text shadow\nDELTA\n  shadow  text \"Shadow backend\\nSmall structured eval sample\" → \"Shadow evaluation backend\\nNever affects client response\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 81,
+          "timestamp": "2026-09-08T18:52:48.963Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_C2WmvIZ4NNkdCElNO75IVzjm|fc_0414235b806e6dc7016aa0597f808887d18ab28b3c923fb740",
+              "toolName": "change_color",
+              "params": {
+                "id": "shadow-region",
+                "color": "violet"
+              },
+              "resultText": "APPLIED · change_color shadow-region\nDELTA\n  shadow-region  color gray → violet\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 82,
+          "timestamp": "2026-09-08T18:52:56.653Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_ULaFnca3hgOfZ1hzugVtpCb6|fc_0414235b806e6dc7016aa05986dd3c87d1a6e272d4c7f28ca6",
+              "toolName": "connect",
+              "params": {
+                "id": "spend-enforce",
+                "from": {
+                  "objectId": "spend",
+                  "anchor": "top"
+                },
+                "to": {
+                  "objectId": "admit",
+                  "anchor": "left"
+                },
+                "label": "spend gate",
+                "style": "dashed",
+                "color": "blue"
+              },
+              "resultText": "APPLIED · connect spend-enforce spend→admit\nDELTA\n  + spend-enforce  spend → admit\nLINTS · +1 −0\n  + E1 covered-content: label \"tier request\" chip on e1 lies on spend-enforce's path for 85px (move the label with a waypoint or reroute spend-enforce so the chip owns its wire)\nROUTES\n  spend-enforce  anchors top→left  path spend (s0 v x=300) ─(s1 h y=760)→ (s2 v x=550) ─(s3 h y=290)→ admit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 83,
+          "timestamp": "2026-09-08T18:53:03.824Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_QNAvJ5eUi1BGclJ2PERCsd79|fc_0414235b806e6dc7016aa0598e428487d1932b733e4ccc4564",
+              "toolName": "move_label",
+              "params": {
+                "id": "e1",
+                "along": 0.5,
+                "offset": 40
+              },
+              "resultText": "APPLIED · move_label e1 → along 0.5, offset 40\nDELTA\n  e1  labelPosition — → {\"along\":0.5,\"offset\":40}\nLINTS · +0 −1\n  − E1 covered-content  (resolved)\nROUTES\n  e1  anchors right→left  path edge ─(s0 h y=290)→ admit  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 84,
+          "timestamp": "2026-09-08T18:53:10.361Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_dD1D6nOCJNOsYlAdq4RsW4w0|fc_0414235b806e6dc7016aa05994d5ec87d1aad9312e9504afeb",
+              "toolName": "place_sticky",
+              "params": {
+                "id": "failure-types",
+                "text": "**Pre-token classification**\nTimeout · rate-limit rejection · content-policy refusal · backend overload · malformed response.",
+                "at": [
+                  2320,
+                  1900
+                ]
+              },
+              "resultText": "APPLIED · place_sticky failure-types 2320,1900 180×120\nDELTA\n  + failure-types  sticky 2320,1900 180×120 \"**Pre-token classification**\\nTimeout · rate-limit rejection · content-policy refusal · backend overload · malformed response.\"\nLINTS · +1 −0\n  + W1 clipped-text: failure-types: sticky body clips at 180×120: 12 row(s), the note holds 1 — needs 180×481 (grow failure-types to ≥180×481 or shorten the text)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 85,
+          "timestamp": "2026-09-08T18:53:18.354Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_WYlectiTQaqnHsNt7nalOVtP|fc_0414235b806e6dc7016aa0599d624487d19f1a83af623e9040",
+              "toolName": "resize",
+              "params": {
+                "id": "failure-types",
+                "width": 680,
+                "height": 200
+              },
+              "resultText": "APPLIED · resize failure-types → 680×200\nDELTA\n  failure-types  2320,1900 180×120 → 2320,1900 680×200\nLINTS · +0 −1\n  − W1 clipped-text  (resolved)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 86,
+          "timestamp": "2026-09-08T18:53:27.942Z",
+          "thinking": "**Matching actual state**",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_HRQ6rz91dUdMfzPBqXz1Kagh|fc_0414235b806e6dc7016aa059a6131887d185b8bc4ffec2dd15",
+              "toolName": "update_text",
+              "params": {
+                "id": "mirror",
+                "text": "structured eval sample"
+              },
+              "resultText": "APPLIED · update_text mirror\nDELTA\n  mirror  label \"mirror sample\" → \"structured eval sample\"\nLINTS · +1 −0\n  + W1 unreadable-labels: label \"structured eval sample\" chip on mirror (235×30px) bleeds onto shadow: 300px of corridor where the chip needs 268px (open the cache↔shadow corridor to ≥268px so the chip and its 16px margins fit)",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 87,
+          "timestamp": "2026-09-08T18:53:37.076Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_YOrS6iFGnma4EId5DxRsyCX9|fc_0414235b806e6dc7016aa059b028d087d1bf5ad8fa2e93a531",
+              "toolName": "move_label",
+              "params": {
+                "id": "mirror",
+                "along": 0.58,
+                "offset": -40
+              },
+              "resultText": "APPLIED · move_label mirror → along 0.58, offset -40\nDELTA\n  mirror  labelPosition {\"along\":0.8,\"offset\":-40} → {\"along\":0.58,\"offset\":-40}\nLINTS · +2 −1\n  + E1 covered-content: label \"structured eval sample\" chip on mirror lies on cache-hit's path for 30px (move the label with a waypoint or reroute cache-hit so the chip owns its wire)\n  + W1 unreadable-labels: label \"structured eval sample\" chip on mirror (235×30px) bleeds onto cache: 300px of corridor where the chip needs 268px (open the cache↔shadow corridor to ≥268px so the chip and its 16px margins fit)\n  − W1 unreadable-labels  (resolved)\nROUTES\n  mirror  anchors top→left  path cache (s0 v x=1860) (s1 v x=1860) ─(s2 h y=290)→ ─(s3 h y=290)→ shadow  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 88,
+          "timestamp": "2026-09-08T18:53:43.796Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_IJNX0DazQB1UlxsnFEFXjGTf|fc_0414235b806e6dc7016aa059b7221487d19772900669e08a58",
+              "toolName": "move_label",
+              "params": {
+                "id": "mirror",
+                "along": 0.72,
+                "offset": 40
+              },
+              "resultText": "APPLIED · move_label mirror → along 0.72, offset 40\nDELTA\n  mirror  labelPosition {\"along\":0.58,\"offset\":-40} → {\"along\":0.72,\"offset\":40}\nLINTS · +0 −2\n  − E1 covered-content, − W1 unreadable-labels  (resolved)\nROUTES\n  mirror  anchors top→left  path cache (s0 v x=1860) (s1 v x=1860) ─(s2 h y=290)→ ─(s3 h y=290)→ shadow  through none",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 89,
+          "timestamp": "2026-09-08T18:53:58.473Z",
+          "thinking": "",
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_rm8TwhUZR9vvcoXFW31P1t3F|fc_0414235b806e6dc7016aa059be080087d197d8d1743299d306",
+              "toolName": "update_description",
+              "params": {
+                "description": "# LLM inference gateway\nClients use one endpoint and request a capability tier rather than a backend. Read across the upper row from identity and admission to prompt preparation, cache lookup and tier routing; backend outcomes descend into delivery, which reads right to left.\n\n- Admission enforces tenant concurrency and token rate. Excess work queues only until its deadline; expiration explicitly rejects it and asks the caller to retry.\n- Prompt assembly applies tenant context and safety policy. The cache serves exact or deterministic semantic matches, keyed by prompt, parameters and policy version.\n- Routing uses residency, live health, latency, queue depth and price within the requested tier. Capacity includes independently accounted hosted providers and a separately scheduled self-hosted pool. Circuit breakers drain traffic to healthy capacity and use trickle probes to recover.\n- Before the first token, failures are classified and retryable attempts return to tier fallback with a fresh deadline and the same idempotency key. The request ID follows every attempt. Non-retryable or exhausted attempts return errors. Once streaming begins, complete or visibly fail without silently retrying, preserving received tokens.\n- Accounting records tokens, latency, backend, cache outcome and cost in a billing stream and redacts prompts/responses for audit. Spend control first selects the cheapest capable option, then rejects new work.\n- A small structured evaluation sample is mirrored to an isolated shadow backend; its output never changes the client response.\n\nSolid wires show request/response paths; dashed wires show accounting, control and shadow traffic."
+              },
+              "resultText": "APPLIED · update_description\nDELTA · description none → 1673 chars",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 90,
+          "timestamp": "2026-09-08T18:54:03.063Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_Z1FZczkfHXIlQjN3coPvWicn|fc_0414235b806e6dc7016aa059cab51c87d1a1b4502523cd0008",
+              "toolName": "look",
+              "params": {
+                "view": "page-frame"
+              },
+              "resultText": "LOOK · 1 render · close-up page-frame\nBOARD\n  page-frame section \"2026-09-08-comp-134600 · llm-inference-gateway\" white 32,32 3400×2400\n    entry section \"1 · Identity & admission\" blue 100,140 940×780\n      edge process \"Single endpoint Auth · tenant · quota · request ID\" 160,240 280×100\n      admit process \"Admission controller Tenant concurrency · token rate\" 660,240 280×100\n      queue process \"Deadline-aware queue\" 660,460 280×100\n      reject process \"Reject explicitly Caller must retry · never serve late\" 660,700 280×100\n    routing section \"2 · Preparation & tier routing\" teal 1180,140 900×780\n      assemble process \"Prompt assembler Tenant context · safety policy\" 1240,240 280×100\n      cache process \"Response cache Exact / deterministic semantic hit\" 1720,240 280×100\n      router process \"Tier router Rank eligible backends\" 1720,700 280×100\n      routing-rules sticky \"**Eligibility & ranking** Residency is mandatory. Live health · latency · queue depth · price within requested tier.\" 1240,660 380×240\n    capacity section \"3 · Eligible capacity & protection\" orange 2220,440 1080×760\n      hosted process \"Hosted providers Independent accounts A / B / …\" 2300,700 280×100\n      self process \"Self-hosted pool Own scheduler\" 2860,700 280×100\n      breaker process \"Circuit breakers Open on sustained errors / timeouts\" 2300,500 280×100\n      probes process \"Trickle shadow probes Healthy → close circuit\" 2860,500 280×100\n    delivery section \"4 · Attempts, fallback & client delivery\" 1180,1340 2120×820\n      attempt process \"Attempt outcome Before first token\" 2300,1440 280×100\n      stream process \"Stream tokens to caller As they arrive\" 1720,1440 280×100\n      classify process \"Classify failure Retryable?\" 2300,1740 280×100\n      retry process \"Next backend in tier Fresh deadline · same idempotency key\" 1720,1740 280×100\n      terminal-error process \"Return error immediately Non-retryable / exhausted\" 2860,1740 280×100\n      stream-end process \"Complete or visibly fail Preserve received tokens · no retry\" 1240,1440 280×100\n      failure-types sticky \"**Pre-token classification** Timeout · rate-limit rejection · content-policy refusal · backend overload · malformed response.\" 2320,1900 680×200\n    cache-key sticky \"Cache key: prompt + parameters + policy version. Request ID follows every attempt.\" 1240,1040 380×220\n    accounting section \"5 · Accounting & spend control\" blue 100,1080 940×1080\n      meter process \"Meter every request / attempt\" 660,1440 280×100\n      billing process \"Billing stream Tokens · latency · backend · cache · cost\" 660,1820 280×100\n      audit process \"Audit store Redacted prompts & responses\" 160,1440 280×100\n      spend process \"Spend ceiling 1 Cheapest capable · 2 Reject new work\" 160,1180 280×100\n    shadow-region section \"6 · Isolated evaluation\" violet 2220,140 1080×240\n      shadow process \"Shadow evaluation backend Never affects client response\" 2300,240 280×100\nEDGES\n  e1 edge→admit \"tier request\" lp=0.5@40 · edge ─(s0 h y=290)→ admit\n  e2 admit→assemble \"admitted\" · admit ─(s0 h y=290)→ assemble\n  e3 admit→queue \"over limit\" anchors=bottom→top · admit (s0 v x=800) queue\n  e4 queue→reject \"deadline expired\" red · queue (s0 v x=800) reject\n  e5 queue→assemble \"slot before deadline\" anchors=right→bottom · queue ─(s0 h y=510)→ ─(s1 h y=510)→ (s2 v x=1380) (s3 v x=1380) assemble\n  e6 assemble→cache \"lookup\" · assemble ─(s0 h y=290)→ cache\n  miss cache→router \"miss\" anchors=bottom→top · cache (s0 v x=1860) router\n  dispatch router→hosted \"tier choice\" lp=0.6@-40 · router ─(s0 h y=750)→ hosted\n  dispatch-self router→self \"or self-hosted\" anchors=bottom→bottom wp=1860,880→3000,880 lp=0.75 · router (s0 v x=1860) ─(s1 h y=880)→ (s2 v x=3000) self\n  host-out hosted→attempt \"response / error\" anchors=bottom→top · hosted (s0 v x=2440) attempt\n  self-out self→attempt \"response / error\" anchors=right→right · self ─(s0 h y=750)→ ─(s1 h y=750)→ (s2 v x=2884) ─(s3 h y=1490)→ ─(s4 h y=1490)→ attempt\n  first-token attempt→stream \"success · first token\" · attempt ─(s0 h y=1490)→ stream\n  failure attempt→classify \"pre-token failure\" red · attempt (s0 v x=2440) classify\n  yes-retry classify→retry \"retryable\" orange · classify ─(s0 h y=1790)→ retry\n  retry-loop retry→router \"reselect eligible fallback\" orange anchors=left→left · retry ─(s0 h y=1790)→ (s1 v x=1696) ─(s2 h y=750)→ router\n  no-retry classify→terminal-error \"otherwise\" red · classify ─(s0 h y=1790)→ terminal-error\n  cache-hit cache→stream \"cache hit\" green anchors=right→top lp=0.8 · cache ─(s0 h y=290)→ (s1 v x=2020) ─(s2 h y=890)→ (s3 v x=1860) stream\n  stream-finish stream→stream-end — lp=0.5@-60 · stream ─(s0 h y=1490)→ stream-end\n  meter-bill meter→billing \"usage events\" dashed blue · meter (s0 v x=800) billing\n  telemetry delivery→meter \"all outcomes\" dashed blue anchors=left→right · delivery ─(s0 h y=1750)→ ─(s1 h y=1750)→ (s2 v x=1060) ─(s3 h y=1490)→ ─(s4 h y=1490)→ meter\n  audit-write meter→audit \"redact\" dashed blue · meter ─(s0 h y=1490)→ audit\n  breaker-route breaker→router \"drain to healthy\" dashed orange anchors=left→right · breaker ─(s0 h y=550)→ ─(s1 h y=550)→ (s2 v x=2150) ─(s3 h y=750)→ ─(s4 h y=750)→ router\n  probe-loop breaker→probes \"test / recover\" dashed orange arrow=both anchors=right→left · breaker ─(s0 h y=550)→ probes\n  mirror cache→shadow \"structured eval sample\" dashed violet anchors=top→left lp=0.72@40 · cache (s0 v x=1860) (s1 v x=1860) ─(s2 h y=290)→ ─(s3 h y=290)→ shadow\n  spend-enforce spend→admit \"spend gate\" dashed blue anchors=top→left · spend (s0 v x=300) ─(s1 h y=760)→ (s2 v x=550) ─(s3 h y=290)→ admit\nBOARD DIFF · base → draft · 58 ops\n  updateDescription  1673 chars\n  addSection entry\n  addSection routing\n  addObject edge\n  addObject admit\n  addObject queue\n  addObject reject\n  addObject assemble\n  addObject cache\n  addObject router\n  addSection capacity\n  addObject hosted\n  addObject self\n  addSection delivery\n  addObject attempt\n  addObject stream\n  addObject classify\n  addObject retry\n  addObject terminal-error\n  addSticky routing-rules\n  addSticky cache-key\n  addObject stream-end\n  addSection accounting\n  addObject meter\n  addObject billing\n  addObject audit\n  addObject spend\n  addObject breaker\n  addObject probes\n  addSection shadow-region\n  addObject shadow\n  addSticky failure-types\n  updateSection page-frame  resized\n  addConnection e1\n  addConnection e2\n  addConnection e3\n  addConnection e4\n  addConnection e5\n  addConnection e6\n  addConnection miss\n  addConnection dispatch\n  addConnection dispatch-self\n  addConnection host-out\n  addConnection self-out\n  addConnection first-token\n  addConnection failure\n  addConnection yes-retry\n  addConnection retry-loop\n  addConnection no-retry\n  addConnection cache-hit\n  addConnection stream-finish\n  addConnection meter-bill\n  addConnection telemetry\n  addConnection audit-write\n  addConnection breaker-route\n  addConnection probe-loop\n  addConnection mirror\n  addConnection spend-enforce\nDIAGNOSTICS · clean\nROUTES\n  e1  anchors right→left  path edge ─(s0 h y=290)→ admit  through none\n  e2  anchors right→left  path admit ─(s0 h y=290)→ assemble  through none\n  e3  anchors bottom→top  path admit (s0 v x=800) queue  through none\n  e4  anchors bottom→top  path queue (s0 v x=800) reject  through none\n  e5  anchors right→bottom  path queue ─(s0 h y=510)→ ─(s1 h y=510)→ (s2 v x=1380) (s3 v x=1380) assemble  through none\n  e6  anchors right→left  path assemble ─(s0 h y=290)→ cache  through none\n  miss  anchors bottom→top  path cache (s0 v x=1860) router  through none\n  dispatch  anchors right→left  path router ─(s0 h y=750)→ hosted  through none\n  dispatch-self  anchors bottom→bottom  path router (s0 v x=1860) ─(s1 h y=880)→ (s2 v x=3000) self  through none\n  host-out  anchors bottom→top  path hosted (s0 v x=2440) attempt  through none\n  self-out  anchors right→right  path self ─(s0 h y=750)→ ─(s1 h y=750)→ (s2 v x=2884) ─(s3 h y=1490)→ ─(s4 h y=1490)→ attempt  through none\n  first-token  anchors left→right  path attempt ─(s0 h y=1490)→ stream  through none\n  failure  anchors bottom→top  path attempt (s0 v x=2440) classify  through none\n  yes-retry  anchors left→right  path classify ─(s0 h y=1790)→ retry  through none\n  retry-loop  anchors left→left  path retry ─(s0 h y=1790)→ (s1 v x=1696) ─(s2 h y=750)→ router  through none\n  no-retry  anchors right→left  path classify ─(s0 h y=1790)→ terminal-error  through none\n  cache-hit  anchors right→top  path cache ─(s0 h y=290)→ (s1 v x=2020) ─(s2 h y=890)→ (s3 v x=1860) stream  through none\n  stream-finish  anchors left→right  path stream ─(s0 h y=1490)→ stream-end  through none\n  meter-bill  anchors bottom→top  path meter (s0 v x=800) billing  through none\n  telemetry  anchors left→right  path delivery ─(s0 h y=1750)→ ─(s1 h y=1750)→ (s2 v x=1060) ─(s3 h y=1490)→ ─(s4 h y=1490)→ meter  through none\n  audit-write  anchors left→right  path meter ─(s0 h y=1490)→ audit  through none\n  breaker-route  anchors left→right  path breaker ─(s0 h y=550)→ ─(s1 h y=550)→ (s2 v x=2150) ─(s3 h y=750)→ ─(s4 h y=750)→ router  through none\n  probe-loop  anchors right→left  path breaker ─(s0 h y=550)→ probes  through none\n  mirror  anchors top→left  path cache (s0 v x=1860) (s1 v x=1860) ─(s2 h y=290)→ ─(s3 h y=290)→ shadow  through none\n  spend-enforce  anchors top→left  path spend (s0 v x=300) ─(s1 h y=760)→ (s2 v x=550) ─(s3 h y=290)→ admit  through none\nREQUESTS · none\nMEASURES · section page-frame 32,32 3400×2400\n  gaps x  accounting↔delivery 140 · accounting↔cache-key 200 · entry↔routing 140 · routing↔capacity 140 · routing↔shadow-region 140 · cache-key↔capacity 600\n  gaps y  entry↔accounting 160 · routing↔cache-key 120 · shadow-region↔capacity 60 · capacity↔delivery 140 · cache-key↔delivery 80\n  pitch x 60 · 500 · 520 · 60 · 480 · 500 · 80 · 20 · +1 more\n  pitch y 100 · 200 · 20 · 40 · 160 · 40 · 340 · 40 · +6 more\n  free    left 44 · right 108 · top 56 · bottom 244\n  ink     11%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-9269b02e5df3.368.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 91,
+          "timestamp": "2026-09-08T18:54:10.023Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_uquvHOsFpYzWaASF8P5RDaFx|fc_0414235b806e6dc7016aa059d08d8887d1ba064b8b7a5a0eb8",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Created the inference gateway diagram covering deadline-aware admission, tier routing, caching, provider fallback, streaming safeguards, circuit protection, accounting and isolated shadow evaluation."
+              },
+              "resultText": "Finalize blocked; the run continues:\n- W1 frame-slack: shadow-region is 1080×240 around children needing 328×180 — 77% of the frame is unused, 696px of it on the right (fit_section shadow-region closes the frame around the children already inside it — leave the slack if it is space you are still filling)",
+              "isError": true,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 92,
+          "timestamp": "2026-09-08T18:54:18.522Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_uMuWtNwtLwZYGf4bEGGkKvd9|fc_0414235b806e6dc7016aa059d8eaa487d19e63da0945f66c7f",
+              "toolName": "fit_section",
+              "params": {
+                "id": "shadow-region"
+              },
+              "resultText": "APPLIED · fit_section shadow-region\nDELTA\n  shadow-region  2220,140 1080×240 → 2260,160 360×220\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 93,
+          "timestamp": "2026-09-08T18:54:27.678Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_0qzpXvV9KXDhNvMFwvqF82F3|fc_0414235b806e6dc7016aa059e27eb087d18fc9bc7d3a3b9147",
+              "toolName": "update_text",
+              "params": {
+                "id": "shadow-region",
+                "text": "6 · Shadow evaluation"
+              },
+              "resultText": "APPLIED · update_text shadow-region\nDELTA\n  shadow-region  text \"6 · Isolated evaluation\" → \"6 · Shadow evaluation\"\nLINTS · clean",
+              "isError": false,
+              "images": []
+            }
+          ]
+        },
+        {
+          "index": 94,
+          "timestamp": "2026-09-08T18:54:37.041Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_g7KoLzOMXMkqgrHInzjfNCgJ|fc_0414235b806e6dc7016aa059ec065487d1a661ea6714c979a8",
+              "toolName": "look",
+              "params": {
+                "view": "shadow-region"
+              },
+              "resultText": "LOOK · 1 render · close-up shadow-region\nBOARD\n  page-frame section \"2026-09-08-comp-134600 · llm-inference-gateway\" white 32,32 3400×2400\n    entry section \"1 · Identity & admission\" blue 100,140 940×780\n      edge process \"Single endpoint Auth · tenant · quota · request ID\" 160,240 280×100\n      admit process \"Admission controller Tenant concurrency · token rate\" 660,240 280×100\n      queue process \"Deadline-aware queue\" 660,460 280×100\n      reject process \"Reject explicitly Caller must retry · never serve late\" 660,700 280×100\n    routing section \"2 · Preparation & tier routing\" teal 1180,140 900×780\n      assemble process \"Prompt assembler Tenant context · safety policy\" 1240,240 280×100\n      cache process \"Response cache Exact / deterministic semantic hit\" 1720,240 280×100\n      router process \"Tier router Rank eligible backends\" 1720,700 280×100\n      routing-rules sticky \"**Eligibility & ranking** Residency is mandatory. Live health · latency · queue depth · price within requested tier.\" 1240,660 380×240\n    capacity section \"3 · Eligible capacity & protection\" orange 2220,440 1080×760\n      hosted process \"Hosted providers Independent accounts A / B / …\" 2300,700 280×100\n      self process \"Self-hosted pool Own scheduler\" 2860,700 280×100\n      breaker process \"Circuit breakers Open on sustained errors / timeouts\" 2300,500 280×100\n      probes process \"Trickle shadow probes Healthy → close circuit\" 2860,500 280×100\n    delivery section \"4 · Attempts, fallback & client delivery\" 1180,1340 2120×820\n      attempt process \"Attempt outcome Before first token\" 2300,1440 280×100\n      stream process \"Stream tokens to caller As they arrive\" 1720,1440 280×100\n      classify process \"Classify failure Retryable?\" 2300,1740 280×100\n      retry process \"Next backend in tier Fresh deadline · same idempotency key\" 1720,1740 280×100\n      terminal-error process \"Return error immediately Non-retryable / exhausted\" 2860,1740 280×100\n      stream-end process \"Complete or visibly fail Preserve received tokens · no retry\" 1240,1440 280×100\n      failure-types sticky \"**Pre-token classification** Timeout · rate-limit rejection · content-policy refusal · backend overload · malformed response.\" 2320,1900 680×200\n    cache-key sticky \"Cache key: prompt + parameters + policy version. Request ID follows every attempt.\" 1240,1040 380×220\n    accounting section \"5 · Accounting & spend control\" blue 100,1080 940×1080\n      meter process \"Meter every request / attempt\" 660,1440 280×100\n      billing process \"Billing stream Tokens · latency · backend · cache · cost\" 660,1820 280×100\n      audit process \"Audit store Redacted prompts & responses\" 160,1440 280×100\n      spend process \"Spend ceiling 1 Cheapest capable · 2 Reject new work\" 160,1180 280×100\n    shadow-region section \"6 · Shadow evaluation\" violet 2260,160 360×220\n      shadow process \"Shadow evaluation backend Never affects client response\" 2300,240 280×100\nEDGES\n  e1 edge→admit \"tier request\" lp=0.5@40 · edge ─(s0 h y=290)→ admit\n  e2 admit→assemble \"admitted\" · admit ─(s0 h y=290)→ assemble\n  e3 admit→queue \"over limit\" anchors=bottom→top · admit (s0 v x=800) queue\n  e4 queue→reject \"deadline expired\" red · queue (s0 v x=800) reject\n  e5 queue→assemble \"slot before deadline\" anchors=right→bottom · queue ─(s0 h y=510)→ ─(s1 h y=510)→ (s2 v x=1380) (s3 v x=1380) assemble\n  e6 assemble→cache \"lookup\" · assemble ─(s0 h y=290)→ cache\n  miss cache→router \"miss\" anchors=bottom→top · cache (s0 v x=1860) router\n  dispatch router→hosted \"tier choice\" lp=0.6@-40 · router ─(s0 h y=750)→ hosted\n  dispatch-self router→self \"or self-hosted\" anchors=bottom→bottom wp=1860,880→3000,880 lp=0.75 · router (s0 v x=1860) ─(s1 h y=880)→ (s2 v x=3000) self\n  host-out hosted→attempt \"response / error\" anchors=bottom→top · hosted (s0 v x=2440) attempt\n  self-out self→attempt \"response / error\" anchors=right→right · self ─(s0 h y=750)→ ─(s1 h y=750)→ (s2 v x=2884) ─(s3 h y=1490)→ ─(s4 h y=1490)→ attempt\n  first-token attempt→stream \"success · first token\" · attempt ─(s0 h y=1490)→ stream\n  failure attempt→classify \"pre-token failure\" red · attempt (s0 v x=2440) classify\n  yes-retry classify→retry \"retryable\" orange · classify ─(s0 h y=1790)→ retry\n  retry-loop retry→router \"reselect eligible fallback\" orange anchors=left→left · retry ─(s0 h y=1790)→ (s1 v x=1696) ─(s2 h y=750)→ router\n  no-retry classify→terminal-error \"otherwise\" red · classify ─(s0 h y=1790)→ terminal-error\n  cache-hit cache→stream \"cache hit\" green anchors=right→top lp=0.8 · cache ─(s0 h y=290)→ (s1 v x=2020) ─(s2 h y=890)→ (s3 v x=1860) stream\n  stream-finish stream→stream-end — lp=0.5@-60 · stream ─(s0 h y=1490)→ stream-end\n  meter-bill meter→billing \"usage events\" dashed blue · meter (s0 v x=800) billing\n  telemetry delivery→meter \"all outcomes\" dashed blue anchors=left→right · delivery ─(s0 h y=1750)→ ─(s1 h y=1750)→ (s2 v x=1060) ─(s3 h y=1490)→ ─(s4 h y=1490)→ meter\n  audit-write meter→audit \"redact\" dashed blue · meter ─(s0 h y=1490)→ audit\n  breaker-route breaker→router \"drain to healthy\" dashed orange anchors=left→right · breaker ─(s0 h y=550)→ ─(s1 h y=550)→ (s2 v x=2150) ─(s3 h y=750)→ ─(s4 h y=750)→ router\n  probe-loop breaker→probes \"test / recover\" dashed orange arrow=both anchors=right→left · breaker ─(s0 h y=550)→ probes\n  mirror cache→shadow \"structured eval sample\" dashed violet anchors=top→left lp=0.72@40 · cache (s0 v x=1860) (s1 v x=1860) ─(s2 h y=290)→ ─(s3 h y=290)→ shadow\n  spend-enforce spend→admit \"spend gate\" dashed blue anchors=top→left · spend (s0 v x=300) ─(s1 h y=760)→ (s2 v x=550) ─(s3 h y=290)→ admit\nBOARD DIFF · base → draft · 58 ops\n  updateDescription  1673 chars\n  addSection entry\n  addSection routing\n  addObject edge\n  addObject admit\n  addObject queue\n  addObject reject\n  addObject assemble\n  addObject cache\n  addObject router\n  addSection capacity\n  addObject hosted\n  addObject self\n  addSection delivery\n  addObject attempt\n  addObject stream\n  addObject classify\n  addObject retry\n  addObject terminal-error\n  addSticky routing-rules\n  addSticky cache-key\n  addObject stream-end\n  addSection accounting\n  addObject meter\n  addObject billing\n  addObject audit\n  addObject spend\n  addObject breaker\n  addObject probes\n  addSection shadow-region\n  addObject shadow\n  addSticky failure-types\n  updateSection page-frame  resized\n  addConnection e1\n  addConnection e2\n  addConnection e3\n  addConnection e4\n  addConnection e5\n  addConnection e6\n  addConnection miss\n  addConnection dispatch\n  addConnection dispatch-self\n  addConnection host-out\n  addConnection self-out\n  addConnection first-token\n  addConnection failure\n  addConnection yes-retry\n  addConnection retry-loop\n  addConnection no-retry\n  addConnection cache-hit\n  addConnection stream-finish\n  addConnection meter-bill\n  addConnection telemetry\n  addConnection audit-write\n  addConnection breaker-route\n  addConnection probe-loop\n  addConnection mirror\n  addConnection spend-enforce\nDIAGNOSTICS · clean\nROUTES\n  e1  anchors right→left  path edge ─(s0 h y=290)→ admit  through none\n  e2  anchors right→left  path admit ─(s0 h y=290)→ assemble  through none\n  e3  anchors bottom→top  path admit (s0 v x=800) queue  through none\n  e4  anchors bottom→top  path queue (s0 v x=800) reject  through none\n  e5  anchors right→bottom  path queue ─(s0 h y=510)→ ─(s1 h y=510)→ (s2 v x=1380) (s3 v x=1380) assemble  through none\n  e6  anchors right→left  path assemble ─(s0 h y=290)→ cache  through none\n  miss  anchors bottom→top  path cache (s0 v x=1860) router  through none\n  dispatch  anchors right→left  path router ─(s0 h y=750)→ hosted  through none\n  dispatch-self  anchors bottom→bottom  path router (s0 v x=1860) ─(s1 h y=880)→ (s2 v x=3000) self  through none\n  host-out  anchors bottom→top  path hosted (s0 v x=2440) attempt  through none\n  self-out  anchors right→right  path self ─(s0 h y=750)→ ─(s1 h y=750)→ (s2 v x=2884) ─(s3 h y=1490)→ ─(s4 h y=1490)→ attempt  through none\n  first-token  anchors left→right  path attempt ─(s0 h y=1490)→ stream  through none\n  failure  anchors bottom→top  path attempt (s0 v x=2440) classify  through none\n  yes-retry  anchors left→right  path classify ─(s0 h y=1790)→ retry  through none\n  retry-loop  anchors left→left  path retry ─(s0 h y=1790)→ (s1 v x=1696) ─(s2 h y=750)→ router  through none\n  no-retry  anchors right→left  path classify ─(s0 h y=1790)→ terminal-error  through none\n  cache-hit  anchors right→top  path cache ─(s0 h y=290)→ (s1 v x=2020) ─(s2 h y=890)→ (s3 v x=1860) stream  through none\n  stream-finish  anchors left→right  path stream ─(s0 h y=1490)→ stream-end  through none\n  meter-bill  anchors bottom→top  path meter (s0 v x=800) billing  through none\n  telemetry  anchors left→right  path delivery ─(s0 h y=1750)→ ─(s1 h y=1750)→ (s2 v x=1060) ─(s3 h y=1490)→ ─(s4 h y=1490)→ meter  through none\n  audit-write  anchors left→right  path meter ─(s0 h y=1490)→ audit  through none\n  breaker-route  anchors left→right  path breaker ─(s0 h y=550)→ ─(s1 h y=550)→ (s2 v x=2150) ─(s3 h y=750)→ ─(s4 h y=750)→ router  through none\n  probe-loop  anchors right→left  path breaker ─(s0 h y=550)→ probes  through none\n  mirror  anchors top→left  path cache (s0 v x=1860) (s1 v x=1860) ─(s2 h y=290)→ ─(s3 h y=290)→ shadow  through none\n  spend-enforce  anchors top→left  path spend (s0 v x=300) ─(s1 h y=760)→ (s2 v x=550) ─(s3 h y=290)→ admit  through none\nREQUESTS · none\nMEASURES · section shadow-region 2260,160 360×220\n  free    left 16 · right 16 · top 28 · bottom 12\n  ink     35%",
+              "isError": false,
+              "images": [
+                {
+                  "id": "2026-09-08T18-43-53-782Z_01a08255-7536-7620-a769-9269b02e5df3.384.1",
+                  "mimeType": "image/png"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "index": 95,
+          "timestamp": "2026-09-08T18:54:43.192Z",
+          "thinking": null,
+          "text": null,
+          "toolCalls": [
+            {
+              "toolUseId": "call_7K0yuWDnOZaxNTotjPZa5kyn|fc_0414235b806e6dc7016aa059f24ca887d1a11e112cb49f4c2f",
+              "toolName": "finalize",
+              "params": {
+                "outcome": "committed",
+                "message": "Created the inference gateway diagram covering deadline-aware admission, tier routing, caching, provider fallback, streaming safeguards, circuit protection, accounting and isolated shadow evaluation."
+              },
+              "resultText": "Committed: Created the inference gateway diagram covering deadline-aware admission, tier routing, caching, provider fallback, streaming safeguards, circuit protection, accounting and isolated shadow evaluation. (58 patch operations). The proposal is now awaiting operator review.",
+              "isError": false,
+              "images": []
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

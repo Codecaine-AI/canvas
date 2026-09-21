@@ -12,7 +12,7 @@
     },
     "packages/canvas": {
       "name": "@codecaine-ai/canvas",
-      "version": "0.1.0",
+      "version": "0.0.1",
       "dependencies": {
         "@sinclair/typebox": "^0.34",
         "class-variance-authority": "^0.7.1",
@@ -37,7 +37,7 @@
     },
     "packages/canvas-agent": {
       "name": "@codecaine-ai/canvas-agent",
-      "version": "0.1.0",
+      "version": "0.0.1",
       "dependencies": {
         "@agent-kernel/db": "link:@agent-kernel/db",
         "@agent-kernel/kernel": "link:@agent-kernel/kernel",
@@ -67,7 +67,7 @@
     },
     "packages/studio": {
       "name": "@codecaine-ai/studio",
-      "version": "0.1.0",
+      "version": "0.0.1",
       "dependencies": {
         "@codecaine-ai/canvas": "workspace:*",
         "@codecaine-ai/canvas-agent": "workspace:*",

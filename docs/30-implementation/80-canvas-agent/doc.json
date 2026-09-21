@@ -1,0 +1,1207 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation-80-canvas-agent",
+  "title": "Canvas agent",
+  "root": "b-agent-root-0",
+  "blocks": {
+    "b-agent-root-0": {
+      "id": "b-agent-root-0",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "canvas-agent",
+          "tool-discovery",
+          "registration-seam",
+          "runtime-binding",
+          "rosters",
+          "surface-hash",
+          "craft-targets",
+          "import-direction"
+        ],
+        "covers": "The layout-agent harness's structural rules: filename-convention tool discovery, side-effect-free registration with per-spawn runtime binding, the catalog/service seam, single-source rosters, one-way outward edges, and where craft numbers live.",
+        "type": "implementation"
+      },
+      "children": [
+        "b-agent-role-1",
+        "b-agent-sources-2",
+        "b-agent-gov-3",
+        "b-agent-gov-surface-4",
+        "b-agent-gov-kernel-5",
+        "b-agent-decisions-6",
+        "b-agent-discovery-decision-7",
+        "b-agent-discovery-why-8",
+        "b-agent-discovery-applies-9",
+        "b-agent-static-reg-decision-10",
+        "b-agent-static-reg-why-11",
+        "b-agent-static-reg-applies-12",
+        "b-agent-binding-decision-13",
+        "b-agent-binding-why-14",
+        "b-agent-binding-applies-15",
+        "b-agent-seam-decision-16",
+        "b-agent-seam-why-17",
+        "b-agent-seam-applies-18",
+        "b-agent-rosters-decision-19",
+        "b-agent-rosters-why-20",
+        "b-agent-rosters-applies-21",
+        "b-agent-order-hash-decision-22",
+        "b-agent-order-hash-why-23",
+        "b-agent-order-hash-applies-24",
+        "b-agent-edges-decision-25",
+        "b-agent-edges-why-26",
+        "b-agent-edges-applies-27",
+        "b-agent-craft-decision-28",
+        "b-agent-craft-why-29",
+        "b-agent-craft-applies-30",
+        "b-agent-firewall-decision-31",
+        "b-agent-firewall-why-32",
+        "b-agent-firewall-applies-33",
+        "b-agent-authoring-decision",
+        "b-agent-authoring-why",
+        "b-agent-authoring-applies",
+        "b-agent-roster-34"
+      ]
+    },
+    "b-agent-role-1": {
+      "id": "b-agent-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The layout-agent harness: board math, the model-facing catalog, the session service, and the run viewer. What the agent can do — tools, session lifecycle, perception — is owned by design; this area records the registration seam and the placement rules that keep the registered surface honest."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-sources-2": {
+      "id": "b-agent-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "packages/canvas-agent/src",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src",
+              "label": "packages/canvas-agent/src"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-gov-3": {
+      "id": "b-agent-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-agent-gov-surface-4": {
+      "id": "b-agent-gov-surface-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The agent tool surface",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/70-agent-tool-surface",
+              "label": "The agent tool surface"
+            }
+          }
+        },
+        {
+          "insert": " — owns the tool surface: the gestures, the grid and creation defaults, and the operation pipeline."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-gov-kernel-5": {
+      "id": "b-agent-gov-kernel-5",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The session and the kernel",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/70-agent-tool-surface/10-session-and-kernel",
+              "label": "The session and the kernel"
+            }
+          }
+        },
+        {
+          "insert": " — owns session lifecycle, the kernel, and perception."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-decisions-6": {
+      "id": "b-agent-decisions-6",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-agent-discovery-decision-7": {
+      "id": "b-agent-discovery-decision-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the kernel discovers a bundle's tools on disk by filename convention — a flat "
+        },
+        {
+          "insert": "tools.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " checked before a "
+        },
+        {
+          "insert": "tools/index.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " folder entry, exporting a register function as the default export or under the name "
+        },
+        {
+          "insert": "tools",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — and this bundle uses the folder form only: a flat "
+        },
+        {
+          "insert": "tools.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " must never exist beside "
+        },
+        {
+          "insert": "catalog/layout-editor/tools/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/tools",
+              "label": "catalog/layout-editor/tools/"
+            }
+          }
+        },
+        {
+          "insert": ", because the file form is checked first and would silently shadow the folder — the surface would be wrong with no error, no warning."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-discovery-why-8": {
+      "id": "b-agent-discovery-why-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was configured registration (a manifest field naming the entry point); the layout is the configuration, and the shadow ban is absolute because the failure mode is silent."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-discovery-applies-9": {
+      "id": "b-agent-discovery-applies-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "catalog/layout-editor/tools/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/tools",
+              "label": "catalog/layout-editor/tools/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future bundle, which uses one form and keeps the other absent."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-static-reg-decision-10": {
+      "id": "b-agent-static-reg-decision-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "registration is side-effect-free and constructible from static data alone — it reads descriptors and declares tools, touching no session, draft, or render — because registry boot dry-runs it with a stub registrar and no runtime at all, to harvest the allowlist before any spawn exists; each tool's execute defers the runtime check to call time via "
+        },
+        {
+          "insert": "packages/canvas-agent/src/catalog/layout-editor/tools/runtime.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/tools/runtime.ts",
+              "symbol": "requireRuntime"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-static-reg-why-11": {
+      "id": "b-agent-static-reg-why-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was checking for a bound runtime at registration, which would fail every boot — no session exists at boot — and any registration side effect would fire during the harvest."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-static-reg-applies-12": {
+      "id": "b-agent-static-reg-applies-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "catalog/layout-editor/tools/index.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/tools/index.ts",
+              "label": "catalog/layout-editor/tools/index.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future tool, whose declaration stays inert and whose execute calls "
+        },
+        {
+          "insert": "requireRuntime",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-binding-decision-13": {
+      "id": "b-agent-binding-decision-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the real runtime is bound per spawn through the kernel configuration's tool-runtime slot — the session store constructs the kernel with "
+        },
+        {
+          "insert": "packages/canvas-agent/src/service/session/tools/create-runtime.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/create-runtime.ts",
+              "symbol": "createToolRuntime"
+            }
+          }
+        },
+        {
+          "insert": " — and each runtime method resolves its session internally through the kernel run context, so the catalog sidecar stays a thin declaration-and-dispatch layer with no session knowledge of its own."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-binding-why-14": {
+      "id": "b-agent-binding-why-14",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was a module-level runtime the sidecar imports, which pins one session per process and drags service internals across the seam."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-binding-applies-15": {
+      "id": "b-agent-binding-applies-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "create-runtime.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/create-runtime.ts",
+              "label": "create-runtime.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future runtime capability, which joins the "
+        },
+        {
+          "insert": "LayoutToolRuntime",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " contract in "
+        },
+        {
+          "insert": "runtime.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-seam-decision-16": {
+      "id": "b-agent-seam-decision-16",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the catalog registers what the service defines: every descriptor — gesture or workflow call — carries its own name, label, description, and sealed parameter schema service-side under the session's tools folder, and the catalog forwards them verbatim; nothing declares tool truth on the catalog side."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-seam-why-17": {
+      "id": "b-agent-seam-why-17",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was per-tool files on the catalog side, which puts half of each tool's truth in the swappable bundle and half behind the runtime interface, making every schema change a two-file edit across the seam."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-seam-applies-18": {
+      "id": "b-agent-seam-applies-18",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "service/session/tools/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools",
+              "label": "service/session/tools/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future tool, defined service-side and forwarded."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-rosters-decision-19": {
+      "id": "b-agent-rosters-decision-19",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas-agent/src/service/session/tools/operations/index.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/operations/index.ts",
+              "symbol": "operationTools"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "packages/canvas-agent/src/service/session/tools/workflow/index.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/workflow/index.ts",
+              "symbol": "workflowTools"
+            }
+          }
+        },
+        {
+          "insert": " are the single sources for the surface — registration, the capabilities gesture reference, and the op ledger all derive from them — and the generated reference in "
+        },
+        {
+          "insert": "capabilities/ops.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/capabilities/ops.ts",
+              "label": "capabilities/ops.ts"
+            }
+          }
+        },
+        {
+          "insert": " guards completeness both ways at import: a registered tool with no prose throws, and prose for an unregistered tool throws."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-rosters-why-20": {
+      "id": "b-agent-rosters-why-20",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was parallel rosters — a registration list, a docs list, a ledger list — which drift. A tool not in its roster is simply not on the surface, and documentation drift is a build failure rather than a lie the model reads."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-rosters-applies-21": {
+      "id": "b-agent-rosters-applies-21",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the two roster files and "
+        },
+        {
+          "insert": "capabilities/ops.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " — including every future tool, which joins its roster and gains its prose in the same change."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-order-hash-decision-22": {
+      "id": "b-agent-order-hash-decision-22",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "registration order is pinned — the gesture roster in its own order, then the workflow roster, look first and finalize last, no duplicates — asserted by "
+        },
+        {
+          "insert": "tool-schema-parity.test.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/test/tool-schema-parity.test.ts",
+              "label": "tool-schema-parity.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " along with sealed root schemas and the rule that no mutator declares a viewing argument; and every eval run records a surface hash over the session tree plus the catalog's capabilities and tools directories, computed in "
+        },
+        {
+          "insert": "packages/eval-suite/runner/src/scenario/queue.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/eval-suite/runner/src/scenario/queue.ts",
+              "symbol": "collectSourceFingerprints"
+            }
+          }
+        },
+        {
+          "insert": ", so a surface change that skipped the prompt still reads as incomparable."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-order-hash-why-23": {
+      "id": "b-agent-order-hash-why-23",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternatives were treating order as cosmetic — but it is the order the model reads the surface in — and prompt-hash-only comparability, which would silently compare unlike runs. The hash is over file contents, so it also moves on a pure reorganization; that conservative answer is intended."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-order-hash-applies-24": {
+      "id": "b-agent-order-hash-applies-24",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "tool-schema-parity.test.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/test/tool-schema-parity.test.ts",
+              "label": "tool-schema-parity.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "queue.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/eval-suite/runner/src/scenario/queue.ts",
+              "label": "queue.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future roster or surface change."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-edges-decision-25": {
+      "id": "b-agent-edges-decision-25",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the harness's outward edges are one-way: "
+        },
+        {
+          "insert": "viewer/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/viewer",
+              "label": "viewer/"
+            }
+          }
+        },
+        {
+          "insert": " reads the service only over its HTTP routes and nothing under "
+        },
+        {
+          "insert": "service/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " imports the viewer; "
+        },
+        {
+          "insert": "protocol.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/protocol.ts",
+              "label": "protocol.ts"
+            }
+          }
+        },
+        {
+          "insert": " is types-only wire vocabulary with no runtime, pipeline, or kernel imports. The deliberate store-to-tools cycle stays safe because the tool files import the session as a type only — the store alone value-imports the runtime binding."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-edges-why-26": {
+      "id": "b-agent-edges-why-26",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was letting the service know about its viewer, or the sidecar construct sessions — a run would behave differently when watched, and a type-only edge turned into a value import converts a compile-time relationship into a load-order problem."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-edges-applies-27": {
+      "id": "b-agent-edges-applies-27",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "viewer/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/viewer",
+              "label": "viewer/"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "protocol.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/protocol.ts",
+              "label": "protocol.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "service/session/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session",
+              "label": "service/session/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future import across these edges: type-only stays type-only."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-craft-decision-28": {
+      "id": "b-agent-craft-decision-28",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "every presentation number the agent is asked to hit — node sizes and minimum width, row and column gaps, arrow corridors, section gutters, frame padding, board-area multiple and ink share — is one structured value, "
+        },
+        {
+          "insert": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/craft-targets.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/craft-targets.ts",
+              "symbol": "CRAFT_TARGETS"
+            }
+          }
+        },
+        {
+          "insert": ", rendered into the injected style guide; prompt phases reference the targets in judgment language rather than restating them, and every target is set above the corresponding diagnostic-registry floor on its own axis."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-craft-why-29": {
+      "id": "b-agent-craft-why-29",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was numbers in prompt prose, which lets a target drift between the prose that motivates it and the block that states it; and a target equal to a lint floor makes the ideal board indistinguishable from a barely-legal one."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-craft-applies-30": {
+      "id": "b-agent-craft-applies-30",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "craft-targets.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/craft-targets.ts",
+              "label": "craft-targets.ts"
+            }
+          }
+        },
+        {
+          "insert": " — including every future presentation number, which joins the structured value, above its floor."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-firewall-decision-31": {
+      "id": "b-agent-firewall-decision-31",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the prompt viewer's style rail ("
+        },
+        {
+          "insert": "PromptStyleSidebar.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/viewer/pages/PromptStyleSidebar.tsx",
+              "label": "PromptStyleSidebar.tsx"
+            }
+          }
+        },
+        {
+          "insert": ") is a cosmetic system for reading and editing prompts and must never host craft targets."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-firewall-why-32": {
+      "id": "b-agent-firewall-why-32",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "routing layout numbers through a prompt-editor's appearance settings would make the board's proportions a side effect of how someone likes their editor to look."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-firewall-applies-33": {
+      "id": "b-agent-firewall-applies-33",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "PromptStyleSidebar.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/viewer/pages/PromptStyleSidebar.tsx",
+              "label": "PromptStyleSidebar.tsx"
+            }
+          }
+        },
+        {
+          "insert": " — including every future viewer styling control."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-authoring-decision": {
+      "id": "b-agent-authoring-decision",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Shared authoring guidance lives outside the layout-editor catalog in "
+        },
+        {
+          "insert": "packages/canvas-agent/src/authoring/index.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/authoring/index.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Its exported getCanvasAuthoringGuidance function returns named topics, their rendered text, and a content fingerprint without starting a kernel. The internal agent consumes the same topics through individual context loaders. This export prepares external reuse but does not itself implement an MCP."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-authoring-why": {
+      "id": "b-agent-authoring-why",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Design knowledge and session behavior have separate owners. The shared topics explain visual patterns, multi-zoom composition, containment, and vocabulary. The system prompt owns core philosophy directly after purpose and depth assessment as its own phase. The prompt now applies the behavioral reference through orientate, assess_depth, understand, map_patterns, build_sections, render_validate, and finalize phases using the live state and Canvas tools at each step. Shape and color facts derive from the object-preference registry. The system prompt owns the quality checklist as success criteria. It links physical review questions to active lint rules without treating an automated pass as proof of conceptual quality."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-authoring-applies": {
+      "id": "b-agent-authoring-applies",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The runtime adapter is "
+        },
+        {
+          "insert": "packages/canvas-agent/src/service/loaders/authoring.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/loaders/authoring.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Future external adapters consume the shared authoring export rather than copying the internal system prompt. Changes to shared guidance and its vocabulary dependencies are included in evaluation style fingerprints. Core philosophy and the quality checklist are canonical Prompt Kit content covered by the prompt fingerprint."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-roster-34": {
+      "id": "b-agent-roster-34",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Roster: "
+        },
+        {
+          "insert": "service/session/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " owns lifecycle, perception, and the tool definitions ("
+        },
+        {
+          "insert": "operations/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "workflow/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", schemas, grid, creation defaults); "
+        },
+        {
+          "insert": "catalog/layout-editor/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " owns the prompt, context, capabilities, and registration; "
+        },
+        {
+          "insert": "board/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " owns digest, lints, document diff, and scope; "
+        },
+        {
+          "insert": "protocol.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the wire vocabulary; "
+        },
+        {
+          "insert": "viewer/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the run viewer; static rendering lives in "
+        },
+        {
+          "insert": "canvas/src/render/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    }
+  }
+}

@@ -1,0 +1,567 @@
+{
+  "axis": "rc",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "The board must depict an offline evaluation harness executing scenario suites against an AI system and grading the results.",
+        "brief_evidence": "“We need a diagram of how our offline evaluation harness executes scenario suites against an AI system and grades the results.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Full board, left-to-right flow across sections 1–4",
+            "observation": "The rendered flow runs from Pinned suite through Scheduler, Worker pool, Isolated SUT, concurrent graders, evidence validation, scorecard assembly, and baseline comparison."
+          },
+          {
+            "source": "json",
+            "locator": "objects suite, scheduler, workers, sut, dispatch, criteria, criteria-b, artifact-grade, assemble, compatible; connections e1 through score-check",
+            "observation": "The visible components and directed connections encode suite execution against the SUT followed by grading and comparison."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "Each run must start from a pinned suite.",
+        "brief_evidence": "“Each run starts from a pinned suite”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, left side",
+            "observation": "A document icon labeled “Pinned suite” begins the main flow, with an outgoing arrow labeled “pinned run.”"
+          },
+          {
+            "source": "json",
+            "locator": "object suite; connection e1",
+            "observation": "Object text is “Pinned suite”; e1 directs it to the scheduler and is labeled “pinned run.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "The pinned suite must contain frozen scenario definitions.",
+        "brief_evidence": "“a pinned suite containing frozen scenario definitions”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, yellow Frozen contract note adjacent to Pinned suite",
+            "observation": "The note is headed “Frozen contract” and states that scenarios are never edited in place."
+          },
+          {
+            "source": "json",
+            "locator": "object contract",
+            "observation": "The visible note text begins “Frozen contract” and specifies immutable versioning behavior."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "The pinned run fingerprint must identify the tested revision, configuration, prompt versions, and rubric versions.",
+        "brief_evidence": "“a fingerprint of the tested revision, configuration, prompt versions, and rubric versions”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, lower portion of yellow Frozen contract note",
+            "observation": "The rendered note lists “Fingerprint: revision, configuration, prompt versions, rubric versions.”"
+          },
+          {
+            "source": "json",
+            "locator": "object contract.text",
+            "observation": "The fingerprint visibly contains all four named inputs: revision, configuration, prompt versions, and rubric versions."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "Scenario wording changes must create new scenario versions rather than editing existing scenarios in place.",
+        "brief_evidence": "“Because wording changes invalidate historical comparisons, scenarios receive new versions instead of being edited in place.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 1, yellow Frozen contract note",
+            "observation": "The note says “Wording changes → new scenario versions; never edit in place.”"
+          },
+          {
+            "source": "json",
+            "locator": "object contract.text",
+            "observation": "The rendered note contains the complete new-version-versus-edit-in-place constraint."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R6",
+        "requirement": "A scheduler must fan scenario work out to workers.",
+        "brief_evidence": "“A scheduler fans work out to a bounded pool of workers”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, Scheduler to Worker pool",
+            "observation": "A forward arrow labeled “fan out” connects Scheduler to Worker pool ≤ N."
+          },
+          {
+            "source": "json",
+            "locator": "objects scheduler and workers; connection e2",
+            "observation": "e2 is a forward solid connection from scheduler to workers with label “fan out.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "The worker pool must be bounded.",
+        "brief_evidence": "“a bounded pool of workers”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, worker process near top",
+            "observation": "The process is labeled “Worker pool ≤ N,” explicitly showing a bound."
+          },
+          {
+            "source": "json",
+            "locator": "object workers.text",
+            "observation": "Visible text states “Worker pool ≤ N.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "Workers must target an isolated system-under-test instance and never the shared production instance.",
+        "brief_evidence": "“targeting an isolated instance of the system under test, never the shared production instance”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, central server icon",
+            "observation": "The server is labeled “Isolated SUT / Never production,” and the section heading also says “isolated SUT.”"
+          },
+          {
+            "source": "json",
+            "locator": "object sut; connection e3",
+            "observation": "The worker execution arrow targets an object whose visible text is “Isolated SUT\\nNever production.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "Each worker must perform a scenario's steps in order.",
+        "brief_evidence": "“Each worker performs a scenario's steps in order”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, Worker pool and its outgoing execution edge",
+            "observation": "The worker process says “Ordered scenario steps,” with a forward arrow to the SUT labeled “execute steps.”"
+          },
+          {
+            "source": "json",
+            "locator": "object workers.text; connection e3",
+            "observation": "The worker object explicitly includes “Ordered scenario steps,” and e3 directs execution to the SUT."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "Each scenario execution must capture both the full transcript and the final artifact.",
+        "brief_evidence": "“captures both the full transcript and final artifact”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, SUT to Completed scenario process",
+            "observation": "The edge says “capture full run,” and the destination lists “Transcript + final artifact.”"
+          },
+          {
+            "source": "json",
+            "locator": "object results.text; connection capture",
+            "observation": "The results object visibly names transcript and final artifact; capture is a forward edge from the SUT."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "Infrastructure failures must trigger retries.",
+        "brief_evidence": "“Infrastructure failures trigger retries”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, orange failure branch and dashed return path",
+            "observation": "An “infrastructure failure” edge reaches “Infrastructure fault / Record separately + retry,” followed by a dashed arrow labeled “retry infrastructure only” back to the worker pool."
+          },
+          {
+            "source": "json",
+            "locator": "object fault; connections infra and retryexec",
+            "observation": "The infrastructure-failure branch is explicitly connected to a retry path returning to workers."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "Failures caused by the tested system's behavior must be recorded before the worker continues the scenario steps.",
+        "brief_evidence": "“failures caused by the tested system's behavior are recorded before the worker continues”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, red behavior-failure branch",
+            "observation": "The branch from the SUT is labeled “behavior failure,” and its destination says “Record, then continue steps,” which explicitly establishes ordering."
+          },
+          {
+            "source": "json",
+            "locator": "object behavior.text; connection behfail",
+            "observation": "The visible behavior-failure process states “Record, then continue steps.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "Results must preserve the distinction between infrastructure faults and product-behavior failures so operational faults cannot appear as product regressions.",
+        "brief_evidence": "“Results preserve that distinction so operational faults cannot masquerade as product regressions.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 2, separate orange and red branches plus Completed scenario process",
+            "observation": "Infrastructure failures and behavior failures are separate, distinctly labeled paths with different outcomes; completed results also include “Typed failure records.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections infra, retryexec, behfail; objects fault, behavior, results",
+            "observation": "Infrastructure faults alone return through the retry edge, while behavior failures are recorded and continue; the results object explicitly preserves typed failure records."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R14",
+        "requirement": "Each completed scenario must enter grading immediately.",
+        "brief_evidence": "“Completed scenarios enter grading immediately.”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Boundary between sections 2 and 3",
+            "observation": "A forward arrow labeled “each completion” leads directly from Completed scenario to a queue labeled “Grade immediately.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects results and dispatch; connection ready",
+            "observation": "ready connects results directly to dispatch with label “each completion”; dispatch text says “Grade immediately.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "Independent graders must score separate criteria concurrently.",
+        "brief_evidence": "“Independent graders score separate criteria concurrently”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, grading fan-out",
+            "observation": "The grading dispatcher fans out to “Criterion A / Independent grader” and “Criterion B / Independent grader” on parallel branches."
+          },
+          {
+            "source": "json",
+            "locator": "objects criteria and criteria-b; connections ga and gb",
+            "observation": "Two separate independent-grader objects receive concurrent branches from the shared grading dispatch."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "Concurrent grading must operate under a global concurrency limit.",
+        "brief_evidence": "“under a global concurrency limit”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3 heading and grading dispatcher",
+            "observation": "The section is titled “Concurrent grading · global limit G,” and the dispatcher repeats “Global limit G.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects grade and dispatch",
+            "observation": "Both visible labels explicitly state a global concurrency limit G."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "An artifact-only grader must receive no original request and thereby avoid anchoring on the request.",
+        "brief_evidence": "“an artifact-only grader receives no original request and therefore avoids anchoring on it”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, bottom grader",
+            "observation": "The grader is explicitly labeled “Artifact-only grader / No original request.” The intended anti-anchoring outcome is not itself stated anywhere in the rendered grading section."
+          },
+          {
+            "source": "json",
+            "locator": "object artifact-grade.text and connection gc",
+            "observation": "The object text contains “Artifact-only grader\\nNo original request,” and gc is labeled “artifact only”; searches of visible object text and connection labels find no occurrence of “anchor” or “anchoring.”"
+          }
+        ],
+        "note": "The operational isolation from the original request is fully shown, but the stated purpose/outcome—avoiding anchoring—is not explicitly represented."
+      },
+      {
+        "id": "R18",
+        "requirement": "Every grader verdict must include supporting evidence.",
+        "brief_evidence": "“Every verdict includes supporting evidence.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, convergence from all three graders into Evidence? decision",
+            "observation": "All grader branches converge on the shared “Evidence?” gate; the upper verdict path is labeled “verdict + evidence.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections va, vb, vc; object evidence",
+            "observation": "All three graders feed the same Evidence? decision, and va explicitly labels the submitted item “verdict + evidence.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "A verdict without evidence must be invalid and retried.",
+        "brief_evidence": "“A verdict without evidence is invalid, is retried”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, Evidence? no branch",
+            "observation": "The red “no” branch from Evidence? reaches a process labeled “Invalid → retry grader once.”"
+          },
+          {
+            "source": "json",
+            "locator": "connection invalid; object retrygrade",
+            "observation": "The no-evidence branch is directed to visible text declaring the verdict invalid and requiring a grader retry."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "If the evidence retry also fails, the verdict must be flagged.",
+        "brief_evidence": "“is flagged if the retry also fails”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 3, retry process above Evidence? decision",
+            "observation": "The retry process says “Still no evidence → flag.”"
+          },
+          {
+            "source": "json",
+            "locator": "object retrygrade.text",
+            "observation": "Visible text explicitly states “Still no evidence → flag.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "An assembler must merge valid verdicts into a scorecard.",
+        "brief_evidence": "“An assembler merges valid verdicts into a scorecard”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, entry process from the Evidence? gate",
+            "observation": "The green “yes · valid” branch enters “Assemble valid verdicts / Scorecard”; the successful retry path also enters this assembler."
+          },
+          {
+            "source": "json",
+            "locator": "object assemble; connections valid and retry-valid",
+            "observation": "Both valid-evidence routes terminate at the scorecard assembler, whose text explicitly limits assembly to valid verdicts."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "The assembled scorecard must be compared with a chosen baseline.",
+        "brief_evidence": "“compares it with a chosen baseline”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, Chosen baseline, Same fingerprint? decision, and comparison process",
+            "observation": "A database icon is labeled “Chosen baseline,” feeds the compatibility decision, and the compatible path reaches “Compare with baseline.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects baseline, compatible, narrate; connections baseline-check and compatible-yes",
+            "observation": "The chosen baseline participates in the fingerprint check before the scorecard proceeds to baseline comparison."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "The comparison must narrate score movements that cross a defined threshold.",
+        "brief_evidence": "“narrating movements that cross a defined threshold”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, bottom comparison process",
+            "observation": "The process reads “Compare with baseline / Narrate |Δ| ≥ threshold.”"
+          },
+          {
+            "source": "json",
+            "locator": "object narrate.text",
+            "observation": "Visible text explicitly encodes narration when absolute movement reaches or exceeds the threshold."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "Comparison must be permitted only when the candidate run and baseline share the same fingerprint.",
+        "brief_evidence": "“Comparison is permitted only when both runs share the same fingerprint.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, Same fingerprint? decision",
+            "observation": "The “yes” branch proceeds to comparison, while the “no” branch goes to “Incompatible / Do not compare.” The baseline enters via a line labeled “baseline fingerprint.”"
+          },
+          {
+            "source": "json",
+            "locator": "object compatible; connections compatible-yes, no-compare, baseline-check",
+            "observation": "Only the yes outcome reaches narrate; the no outcome explicitly blocks comparison."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "The harness must retain every artifact, transcript, and verdict.",
+        "brief_evidence": "“The harness retains every artifact, transcript, and verdict”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5, Retained audit trail",
+            "observation": "The yellow note says “Retain every artifact, transcript and verdict,” while dashed archive inputs are labeled “transcripts · artifacts · typed faults” and “every verdict.”"
+          },
+          {
+            "source": "json",
+            "locator": "object audit-note; connections retain-exec and retain-grade",
+            "observation": "The visible retention note and both archive connections explicitly cover every artifact, transcript, and verdict."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "Retained records must support re-examination of disputed scores.",
+        "brief_evidence": "“so disputed scores can be re-examined”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 5, yellow audit note",
+            "observation": "The note says retained records are kept “for disputed-score review.”"
+          },
+          {
+            "source": "json",
+            "locator": "object audit-note.text",
+            "observation": "The visible note explicitly states the review purpose for disputed scores."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "Promoting a run must make it the baseline for future compatible runs.",
+        "brief_evidence": "“promoting a run makes it the baseline for future compatible runs”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Section 4, dashed blue promotion path and subsequent fingerprint gate",
+            "observation": "A dashed arrow labeled “promote run → future baseline” goes from the assembled scorecard to Chosen baseline; that baseline then feeds the Same fingerprint? compatibility gate."
+          },
+          {
+            "source": "json",
+            "locator": "connection promote; object baseline; connection baseline-check",
+            "observation": "The promotion edge makes the run the future baseline, and the baseline-fingerprint edge subjects its use to the compatibility check."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.98,
+    "caps_applied": [],
+    "strongest_covered_cluster": "Bounded execution and failure semantics are especially complete: scheduler fan-out, worker bound, isolated non-production SUT, ordered execution, full capture, infrastructure-only retry, behavior-failure continuation, and typed separation are all explicitly represented.",
+    "most_consequential_gap": "R17 is only partial because the board shows that the artifact-only grader receives no original request but does not explicitly state the resulting avoidance of anchoring.",
+    "coverage_summary": "The board represents the complete orchestration path from immutable pinned inputs through bounded isolated execution, evidence-gated concurrent grading, compatible baseline comparison, promotion, and audit retention. All system-defining requirements are present; the only incomplete qualifier is the explicit anti-anchoring rationale for withholding the original request from the artifact-only grader.",
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 12063,
+    "output_tokens": 6551
+  },
+  "flags": []
+}

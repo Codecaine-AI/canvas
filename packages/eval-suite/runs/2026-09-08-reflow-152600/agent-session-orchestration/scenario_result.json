@@ -1,0 +1,27 @@
+{
+  "run_id": "2026-09-08-reflow-152600",
+  "tier": "system",
+  "scenario": "agent-session-orchestration",
+  "board_id": "eval.2026-09-08-reflow-152600.agent-session-orchestration",
+  "stages": [
+    "stage0"
+  ],
+  "outcomes": {
+    "stage0": "committed"
+  },
+  "timings": {
+    "stage0": {
+      "started_at": "2026-09-08T20:26:01.844Z",
+      "finished_at": "2026-09-08T20:36:31.019Z",
+      "wall_ms": 630336,
+      "retries": 0
+    }
+  },
+  "session_ids": {
+    "stage0": [
+      "a1e0373d-5296-4286-8a94-83512c569387"
+    ]
+  },
+  "finished_at": "2026-09-08T20:36:32.181Z",
+  "exit_code": 0
+}

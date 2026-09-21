@@ -14,6 +14,8 @@ import type { Loader, LoaderResult } from "@agent-kernel/kernel/context";
 
 import { CRAFT_TARGETS, STYLE_TOPICS } from "../../catalog/layout-editor/context/style-guide";
 import type { CraftTargets } from "../../catalog/layout-editor/context/style-guide";
+import { formatCraftTargets } from "../../catalog/layout-editor/context/style-guide/craft-targets";
+export { formatCraftTargets } from "../../catalog/layout-editor/context/style-guide/craft-targets";
 
 function sha256(input: string): string {
   return createHash("sha256").update(input, "utf8").digest("hex");
@@ -29,22 +31,6 @@ function topicBlock(id: string, prose: string): string {
     .map((line) => (line.length > 0 ? `${INDENT}${line}` : line))
     .join("\n");
   return `<${tag}>\n${body}\n</${tag}>`;
-}
-
-/** The craft targets as tight lines, one dimension per line. */
-export function formatCraftTargets(targets: CraftTargets = CRAFT_TARGETS): string {
-  const ink = Math.round(targets.inkShare * 100);
-  return [
-    "Targets, not minimums to shave toward: a group that will not fit them wants splitting into two sections, not tightening. The lints mark the clearance below which a board breaks; these are where a finished board sits.",
-    "",
-    `- flow node: ${targets.nodeWidth}×${targets.nodeHeight}, never narrower than ${targets.nodeMinWidth}`,
-    `- node gaps: ${targets.nodeGapRow} across a row, ${targets.nodeGapColumn} down a column`,
-    `- arrow corridor: ${targets.arrowCorridor} of clear channel wherever a wire and its label pass between siblings`,
-    `- section gutters: ${targets.sectionGutterSideBySide} side by side, ${targets.sectionGutterStacked} between stacked rows`,
-    `- frame padding: ${targets.framePadding} inside every frame before its first child`,
-    `- section load: ${targets.nodesPerSectionMin}–${targets.nodesPerSectionMax} nodes; past ${targets.nodesPerSectionMax}, split into two named sections`,
-    `- board size: about ${targets.boardAreaMultiple}× the summed node area, so a finished board reads at about ${ink}% ink`,
-  ].join("\n");
 }
 
 /** A framing line, then prose topics and craft targets as nested XML blocks. */

@@ -4,7 +4,7 @@
  * FIRST the material: four nested XML kind blocks in reading order —
  * <sections>, <stickies>, <objects>, <connections> — each rendering as
  * <description> → <functionality> (one nested block per topic) → generated
- * rosters (<vocabulary> on objects, <fields> on connections) → <tips>. A kind
+ * connection fields → <tips>. The object catalog lives in <visual_vocabulary>. A kind
  * block says what the thing IS and how it behaves; it names no tools.
  *
  * THEN the gestures: one <gestures> block holding a child per verb group —
@@ -36,7 +36,6 @@ import {
 } from "./ops";
 import {
   CAPABILITIES_CONNECTION_FIELDS_GENERATED,
-  CAPABILITIES_OBJECTS_GENERATED,
 } from "./vocabulary.generated";
 
 export {
@@ -127,9 +126,7 @@ function formatKindSection(kind: CapabilityKind): string {
     lines.push(`${INDENT}</functionality>`);
   }
 
-  if (kind === "objects") {
-    lines.push(...tagBlock("vocabulary", CAPABILITIES_OBJECTS_GENERATED, 1));
-  } else if (kind === "connections") {
+  if (kind === "connections") {
     lines.push(...tagBlock("fields", CAPABILITIES_CONNECTION_FIELDS_GENERATED, 1));
   }
 

@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "code-review-agents",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 5.5,
+  "verdict": {
+    "score": 5.5,
+    "score_rationale": "The board sits between the 5 and 6 anchors: its flow is readable and regionally composed, but extensive plain-box vocabulary, oversized empty areas, and awkward long feedback routes keep it from reading as a finished artifact.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5,
+        "note": "The four-stage upper flow uses the width well, but the oversized telemetry region and broad lower-center expanse create conspicuous dead bands."
+      },
+      {
+        "name": "color",
+        "score": 6.5,
+        "note": "Pastel containers provide coherent grouping and red lifecycle feedback is meaningful, but the gray process treatment dominates where agent/reviewer and other registry-specific colors should appear."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 6,
+        "note": "No crosshair junctions are visible, but the very long dashed red and blue return routes, edge-hugging turns, and small pill labels expose routing mechanics."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 5.5,
+        "note": "The five reviewer boxes form a strong aligned register and the main pipeline is clear, but scattered note cards, underfilled lower panels, and long isolated routes disrupt the overall rhythm."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7160,
+    "output_tokens": 567
+  },
+  "flags": []
+}

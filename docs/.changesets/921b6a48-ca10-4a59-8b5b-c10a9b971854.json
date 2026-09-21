@@ -1,0 +1,17 @@
+{
+  "id": "921b6a48-ca10-4a59-8b5b-c10a9b971854",
+  "summary": "Create Documentation Access through MCP",
+  "status": "applied",
+  "entries": [],
+  "treeOps": [
+    {
+      "kind": "create-doc",
+      "docPath": "20-implementation/95-docs-mcp-access",
+      "title": "Documentation Access through MCP",
+      "position": 0
+    }
+  ],
+  "createdAt": "2026-09-09T02:19:53.358Z",
+  "resolvedAt": "2026-09-09T02:19:53.359Z",
+  "compoundPatchId": "a922b99f-edc3-4601-aa18-2db4e697e732"
+}

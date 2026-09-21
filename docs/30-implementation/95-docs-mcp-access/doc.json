@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "id": "doc-3dd72a2912fea4dfa456251889e09a8a",
+  "title": "Documentation Access through MCP",
+  "root": "root",
+  "blocks": {
+    "root": {
+      "id": "root",
+      "type": "paragraph",
+      "props": {},
+      "children": [
+        "mcp-guide-0",
+        "mcp-guide-1",
+        "mcp-guide-2",
+        "mcp-guide-3",
+        "mcp-guide-4",
+        "mcp-guide-5",
+        "mcp-guide-6",
+        "mcp-guide-7",
+        "mcp-guide-8"
+      ]
+    },
+    "mcp-guide-0": {
+      "id": "mcp-guide-0",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "External coding agents can read and update this Canvas documentation corpus through the Codecaine Docs MCP integration. This uses the Docs interaction service and does not launch the Canvas specialist agent."
+        }
+      ],
+      "children": []
+    },
+    "mcp-guide-1": {
+      "id": "mcp-guide-1",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Connect to This Corpus"
+        }
+      ],
+      "children": []
+    },
+    "mcp-guide-2": {
+      "id": "mcp-guide-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Install the Codecaine Docs client connection and companion skill once. Open the Canvas repository and call docs_discover, or discover the Core workspace to work on Canvas and Docs System documentation in the same request. Each tool call identifies its target project explicitly."
+        }
+      ],
+      "children": []
+    },
+    "mcp-guide-3": {
+      "id": "mcp-guide-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Choose and Edit Components"
+        }
+      ],
+      "children": []
+    },
+    "mcp-guide-4": {
+      "id": "mcp-guide-4",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Call docs_begin before editing. Its shared catalog explains when to use Canvas, Sequence, Process Outline, State Shape, Interaction Surface, and the other registered documentation components. Use docs_guidance for a focused component reference."
+        }
+      ],
+      "children": []
+    },
+    "mcp-guide-5": {
+      "id": "mcp-guide-5",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Read content through docs_read and apply changes through typed tools with the current revision hash. Existing embedded Canvas and Sequence actions also require the sidecar hash returned by docs_component_read. Run docs_check before reporting completion."
+        }
+      ],
+      "children": []
+    },
+    "mcp-guide-6": {
+      "id": "mcp-guide-6",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Runtime Boundary"
+        }
+      ],
+      "children": []
+    },
+    "mcp-guide-7": {
+      "id": "mcp-guide-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "This connection edits documentation and exposes component operations already supported by the Docs service. It does not replace the standalone Canvas authoring service. Use the shared Docs workbench to inspect the same editing authority as the MCP clients."
+        }
+      ],
+      "children": []
+    },
+    "mcp-guide-8": {
+      "id": "mcp-guide-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Publishing this corpus remains a separate website build or export. Local tool edits do not deploy a website."
+        }
+      ],
+      "children": []
+    }
+  }
+}

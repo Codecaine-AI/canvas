@@ -1,9 +1,10 @@
 {
   "name": "@codecaine-ai/canvas-agent",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "exports": {
+    "./authoring": "./src/authoring/index.ts",
     "./protocol": "./src/protocol.ts",
     "./viewer-extension": "./src/viewer-extension/index.ts"
   },

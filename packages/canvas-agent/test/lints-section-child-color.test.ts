@@ -92,12 +92,12 @@ describe("section-child-color lint", () => {
     expect(findings[0]!.at).toEqual(["inner", "outer"]);
   });
 
-  test("the default diagnostics roster carries the rule", () => {
+  test("the default diagnostics roster excludes categorical same-hue findings", () => {
     const section = { ...box("frame", 0, 0, 480, 360, "section"), color: "green" as const };
     const child = { ...box("node", 40, 60, 160, 96), color: "green" as const, parentId: "frame" };
     const findings = runDiagnostics(makeDocument([section, child]));
 
-    expect(findings).toContainEqual(expect.objectContaining({
+    expect(findings).not.toContainEqual(expect.objectContaining({
       rule: "section-child-color",
       at: ["node", "frame"],
     }));

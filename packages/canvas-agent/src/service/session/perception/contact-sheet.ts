@@ -6,6 +6,7 @@ import type {
 } from "@codecaine-ai/canvas/schema";
 
 // Relative imports keep the session harness away from the canvas React surface.
+import { preferredObjectColor } from "../../../../../canvas/src/objects/registry";
 import { ICON_GLYPH_IDS } from "../../../../../canvas/src/objects/shapes/icon/icon-glyphs";
 import { renderDocumentToSvg } from "../../../../../canvas/src/render/static-svg";
 import {
@@ -167,7 +168,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
         ? `**${type}**\n- markdown\n- supported`
         : type;
 
-      objects.push(draftPlacedObject(type, geometry, { id, text }));
+      objects.push(draftPlacedObject(type, geometry, { id, text, color: preferredObjectColor(type) }));
       // A separate, label-styled rounded chip keeps glyph-only and very small shapes
       // identifiable without maintaining another list of renderer exceptions.
       const labelWidth = labelWidths[index]!;
@@ -233,7 +234,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
           width: iconSize.width,
           height: iconSize.height,
         },
-        { id: `glyph-${glyph}`, text: glyph, icon: glyph },
+        { id: `glyph-${glyph}`, text: glyph, icon: glyph, color: preferredObjectColor(glyph) },
       ),
     );
   }

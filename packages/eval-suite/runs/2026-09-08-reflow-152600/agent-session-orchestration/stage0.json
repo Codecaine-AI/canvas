@@ -1,0 +1,768 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-08-reflow-152600.agent-session-orchestration",
+  "title": "Long-lived agent session orchestration",
+  "description": "# Long-lived agent session orchestration\nRead left to right from client admission and scheduler placement into the runner's model/tool turn loop. Live output continues across disconnects; the durable event log supports replay from the client's last ACK and audit/metering.\n\nCompleted turns write immutable, content-addressed snapshot chains containing conversation, tool results and workspace files. Notes describe deduplication, fork reachability and collection. Lifecycle paths show safe checkpoint/release and heartbeat-triggered restoration, potentially on another host, before execution continues. Recovery repeats at most the in-flight turn, with idempotency keys protecting external writes.\n\nThe lower panel expands parent/child orchestration: scoped budgets and returned results, aggregate tree/workspace allowances, pause for user decisions, and orphan reaping. Notes cover cancellation propagation, held-child accounting and old-version deployment draining.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 3264,
+    "height": 2064
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "Long-lived agent session orchestration",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3700,
+        "height": 2760
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "control",
+      "type": "section",
+      "text": "Shared control plane",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 140,
+        "width": 900,
+        "height": 760
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "runner",
+      "type": "section",
+      "text": "Runner host · active session",
+      "color": "teal",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 1140,
+        "y": 140,
+        "width": 1280,
+        "height": 760
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "client",
+      "type": "icon",
+      "text": "Client",
+      "color": "yellow",
+      "parentId": "control",
+      "geometry": {
+        "x": 160,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "api",
+      "type": "icon",
+      "text": "Session API",
+      "color": "gray",
+      "parentId": "control",
+      "geometry": {
+        "x": 460,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "api"
+    },
+    {
+      "id": "scheduler",
+      "type": "icon",
+      "text": "Scheduler",
+      "color": "teal",
+      "parentId": "control",
+      "geometry": {
+        "x": 780,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "orch",
+      "type": "icon",
+      "text": "Turn orchestrator",
+      "color": "teal",
+      "parentId": "runner",
+      "geometry": {
+        "x": 1220,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "model",
+      "type": "icon",
+      "text": "Model",
+      "color": "pink",
+      "parentId": "runner",
+      "geometry": {
+        "x": 1640,
+        "y": 240,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "model"
+    },
+    {
+      "id": "tools",
+      "type": "icon",
+      "text": "Tool executor",
+      "color": "gray",
+      "parentId": "runner",
+      "geometry": {
+        "x": 1640,
+        "y": 560,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "tool"
+    },
+    {
+      "id": "durable",
+      "type": "section",
+      "text": "Durable state · independent of runner lifetime",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1060,
+        "width": 2320,
+        "height": 760
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "log",
+      "type": "icon",
+      "text": "Event log",
+      "color": "blue",
+      "parentId": "durable",
+      "geometry": {
+        "x": 460,
+        "y": 1160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "snap",
+      "type": "icon",
+      "text": "Snapshot chain",
+      "color": "blue",
+      "parentId": "durable",
+      "geometry": {
+        "x": 1280,
+        "y": 1160,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "memory"
+    },
+    {
+      "id": "admission",
+      "type": "sticky",
+      "text": "### Admission & placement\nAuthenticate user; resolve workspace and quotas.\nSelect capacity within residency and isolation constraints.",
+      "color": "yellow",
+      "parentId": "control",
+      "geometry": {
+        "x": 160,
+        "y": 540,
+        "width": 740,
+        "height": 220
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "turn-detail",
+      "type": "sticky",
+      "text": "### Turn loop\nAssemble system context, history and permitted tools. Append results and repeat until done or a turn/token ceiling.\nExternal writes carry idempotency keys.",
+      "color": "yellow",
+      "parentId": "runner",
+      "geometry": {
+        "x": 1880,
+        "y": 240,
+        "width": 460,
+        "height": 400
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "snapshot-detail",
+      "type": "sticky",
+      "text": "### Immutable checkpoints\nConversation, tool results and workspace files.\nContent-addressed snapshots link to their parent; unchanged content is shared.\nForks retain earlier snapshots and diverge. Delete makes only unreachable content collectible.",
+      "color": "yellow",
+      "parentId": "durable",
+      "geometry": {
+        "x": 1180,
+        "y": 1400,
+        "width": 680,
+        "height": 340
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "lifecycle",
+      "type": "section",
+      "text": "Lifecycle & coordinated shutdown",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 2580,
+        "y": 180,
+        "width": 980,
+        "height": 1140
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "stop",
+      "type": "process",
+      "text": "Quiesce & checkpoint",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 2620,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "release",
+      "type": "process",
+      "text": "Release runner",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 3160,
+        "y": 260,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "shutdown-note",
+      "type": "sticky",
+      "text": "### Safe interruption\nIdle, suspend, cancel or deploy drain: stop model streaming; abandon tools where possible, record uncertain outcomes, then checkpoint.\nOld hosts reject new placements and drain before replacement.",
+      "color": "yellow",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 2620,
+        "y": 480,
+        "width": 900,
+        "height": 260
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "rescue",
+      "type": "process",
+      "text": "Rehydrate latest snapshot",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 2620,
+        "y": 1180,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "heartbeat",
+      "type": "icon",
+      "text": "Heartbeat monitor",
+      "color": "gray",
+      "parentId": "lifecycle",
+      "geometry": {
+        "x": 2700,
+        "y": 880,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "monitor"
+    },
+    {
+      "id": "tree",
+      "type": "section",
+      "text": "Concurrent session tree · shared allowances",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 100,
+        "y": 1980,
+        "width": 2320,
+        "height": 680
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "parent",
+      "type": "icon",
+      "text": "Parent orchestrator",
+      "color": "teal",
+      "parentId": "tree",
+      "geometry": {
+        "x": 200,
+        "y": 2120,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "children",
+      "type": "icon",
+      "text": "Child sessions",
+      "color": "teal",
+      "parentId": "tree",
+      "geometry": {
+        "x": 820,
+        "y": 2120,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "orchestrator"
+    },
+    {
+      "id": "quota",
+      "type": "process",
+      "text": "Aggregate allowances",
+      "color": "gray",
+      "parentId": "tree",
+      "geometry": {
+        "x": 1300,
+        "y": 2120,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "decision-user",
+      "type": "icon",
+      "text": "User decision",
+      "color": "yellow",
+      "parentId": "tree",
+      "geometry": {
+        "x": 2080,
+        "y": 2120,
+        "width": 120,
+        "height": 120
+      },
+      "style": {
+        "shape": "icon"
+      },
+      "icon": "human"
+    },
+    {
+      "id": "tree-detail",
+      "type": "sticky",
+      "text": "### Tree-wide control\nTokens, wall-clock time, tool calls and concurrent sessions count against tree AND workspace limits. Held children remain accounted for. Cancellation and failure propagate; results return through the parent.",
+      "color": "yellow",
+      "parentId": "tree",
+      "geometry": {
+        "x": 1200,
+        "y": 2360,
+        "width": 1080,
+        "height": 240
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "reaper",
+      "type": "process",
+      "text": "Reap orphan children",
+      "color": "gray",
+      "parentId": "tree",
+      "geometry": {
+        "x": 520,
+        "y": 2460,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "audit-detail",
+      "type": "sticky",
+      "text": "### Durable audit & recovery\nIdentical live output is persisted alongside requests, responses, tool calls/results, checkpoint refs, budget decisions and lifecycle events.\nForensics and replay feed usage metering and per-session costs.\nRecovery replays at most the in-flight turn; external writes reuse idempotency keys.",
+      "color": "yellow",
+      "parentId": "durable",
+      "geometry": {
+        "x": 200,
+        "y": 1400,
+        "width": 840,
+        "height": 340
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "open",
+      "from": {
+        "objectId": "client"
+      },
+      "to": {
+        "objectId": "api"
+      },
+      "label": "Open session",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "placement",
+      "from": {
+        "objectId": "api"
+      },
+      "to": {
+        "objectId": "scheduler"
+      },
+      "label": "Place session",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "assign",
+      "from": {
+        "objectId": "scheduler"
+      },
+      "to": {
+        "objectId": "orch"
+      },
+      "label": "Assign host",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.7,
+        "offset": -120
+      }
+    },
+    {
+      "id": "prompt",
+      "from": {
+        "objectId": "orch"
+      },
+      "to": {
+        "objectId": "model"
+      },
+      "label": "Prompt ⇄ response",
+      "style": "solid",
+      "arrow": "both"
+    },
+    {
+      "id": "calls",
+      "from": {
+        "objectId": "orch",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "tools",
+        "anchor": "left"
+      },
+      "label": "Calls ⇄ results",
+      "style": "solid",
+      "arrow": "both",
+      "labelPosition": {
+        "along": 0.8,
+        "offset": 0
+      }
+    },
+    {
+      "id": "checkpoint",
+      "from": {
+        "objectId": "orch",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "snap",
+        "anchor": "top"
+      },
+      "label": "Completed turn / safe stop: checkpoint",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "labelPosition": {
+        "along": 0.8,
+        "offset": 0
+      }
+    },
+    {
+      "id": "events",
+      "from": {
+        "objectId": "orch",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "log",
+        "anchor": "top"
+      },
+      "label": "Output + audit events",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "live",
+      "from": {
+        "objectId": "orch",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "client",
+        "anchor": "top"
+      },
+      "label": "Live output • disconnect does not stop work",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green",
+      "labelPosition": {
+        "along": 0.5,
+        "offset": -60
+      }
+    },
+    {
+      "id": "replay",
+      "from": {
+        "objectId": "log",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "client",
+        "anchor": "left"
+      },
+      "label": "Replay after last ACK; then reattach",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "release-safe",
+      "from": {
+        "objectId": "stop"
+      },
+      "to": {
+        "objectId": "release"
+      },
+      "label": "Snapshot durable",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "restore",
+      "from": {
+        "objectId": "snap",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "rescue",
+        "anchor": "left"
+      },
+      "label": "Resume / rescue on selected host",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue"
+    },
+    {
+      "id": "crash",
+      "from": {
+        "objectId": "heartbeat"
+      },
+      "to": {
+        "objectId": "rescue"
+      },
+      "label": "Crash: replace host",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "spawn",
+      "from": {
+        "objectId": "parent"
+      },
+      "to": {
+        "objectId": "children"
+      },
+      "label": "Scoped context + allocated budget ⇄ results",
+      "style": "solid",
+      "arrow": "both"
+    },
+    {
+      "id": "usage-tree",
+      "from": {
+        "objectId": "children"
+      },
+      "to": {
+        "objectId": "quota"
+      },
+      "label": "Tree + workspace usage",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "exhaust",
+      "from": {
+        "objectId": "quota"
+      },
+      "to": {
+        "objectId": "decision-user"
+      },
+      "label": "Exhausted: pause, ask user",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "orphan",
+      "from": {
+        "objectId": "parent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "reaper",
+        "anchor": "left"
+      },
+      "label": "Parent gone",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "kill-child",
+      "from": {
+        "objectId": "reaper"
+      },
+      "to": {
+        "objectId": "children",
+        "anchor": "bottom"
+      },
+      "label": "Terminate survivors",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "resume-execution",
+      "from": {
+        "objectId": "rescue",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "orch",
+        "anchor": "bottom"
+      },
+      "label": "Rehydrated: continue turns",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal"
+    },
+    {
+      "id": "safe-stop",
+      "from": {
+        "objectId": "orch",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "stop",
+        "anchor": "top"
+      },
+      "label": "Done / idle / suspend / interrupt / drain",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    }
+  ],
+  "annotations": []
+}

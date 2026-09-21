@@ -2,23 +2,22 @@
  * Section ② — the complete inventory of the layout-editor's standing context.
  *
  * Section ② is REFERENCE: what should be visible on every request and does not
- * move while the agent works. Everything the agent always sees is declared
- * here, and every declaration has a file next to this one:
+ * move while the agent works. Shared design topics live in src/authoring and
+ * appear as separate named blocks before the operating reference. The quality
+ * checklist belongs to the system prompt.
  *
- *   <capabilities>   ./capabilities/    the static op reference + vocabulary
- *                    rosters (generated from the validator's schema tables)
- *                    plus hand-written kind semantics; served by the
- *                    `capabilities` loader
+ *   Tool descriptions and parameter schemas are attached separately. The
+ *   former capabilities reference is not injected into standing context.
  *   <state_grammar>  ./state-grammar/   the reading key for the bare-value
  *                    state blocks and tool results, quoting its line grammars
  *                    from board/digest.ts and the lint registry; served by
  *                    the `state-grammar` loader
- *   <style_guide>    ./style-guide/     the authored craft topics and craft
- *                    targets; served by the static `style-guide` loader
+ *   Shared authoring blocks hold diagram design, visual vocabulary, the
+ *   palette, and Canvas conventions, including the existing craft targets.
  *   image 1          ./exemplar.ts      the house-style exemplar board
  *   image 2          ./contact-sheet.ts the object-vocabulary contact sheet
  *
- * The two loaders are registered app-side in service/kernel.ts; the two images
+ * The loaders are registered app-side in service/kernel.ts; the two images
  * are spawn-rendered by the harness (service/session/boot.ts) and travel on
  * `sessionData.bootImages`. In both cases the bundle owns the DECLARATION —
  * which block, which tag, which key, what the model is told it is — while the
@@ -44,6 +43,7 @@ import type {
   SpawnContext,
 } from "@agent-kernel/kernel/context";
 import { defineContext } from "@agent-kernel/kernel/agent-definition";
+import { canvasAuthoringTopics } from "../../../authoring";
 
 import { contactSheet } from "./contact-sheet";
 import { exemplar } from "./exemplar";
@@ -64,12 +64,15 @@ export interface BootImageDeclaration {
 
 /**
  * The text blocks of ②, in the order they appear in the context message: one
- * loader per block, and one folder in this directory per loader.
+ * loader per block. The design reference is shared with external consumers.
  */
+const AUTHORING_BLOCKS = canvasAuthoringTopics().map(topic => ({
+  kind: `canvas-${topic.id.replaceAll("_", "-")}`,
+  tag: topic.id,
+}));
 const TEXT_BLOCKS: ReadonlyArray<{ kind: string; tag: string }> = [
-  { kind: "capabilities", tag: "capabilities" },
+  ...AUTHORING_BLOCKS,
   { kind: "state-grammar", tag: "state_grammar" },
-  { kind: "style-guide", tag: "style_guide" },
 ];
 
 /** The reference images of ②, in the order they are delivered. */

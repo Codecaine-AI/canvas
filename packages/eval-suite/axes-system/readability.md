@@ -22,16 +22,11 @@ separately scored):
 1. **Corridors & air** — does every label chip own clear air; are the gaps between
    sequential stages wide enough to read at arm's length? (Ford's standing critique:
    "too close together if you're actually trying to read it.")
-2. **Grouping** — can a viewer tell which nodes belong together
-   without tracing edges? Tinted sections/regions must do real grouping work;
-   grouping implied only by proximity fails this check. Each region must also read
-   in one genre: either a system map (components — icons and stores — joined by
-   standing relationships) or a procedure (steps and branches joined by
-   then-edges, with a start and an end). Genres may mix freely across a board,
-   and a crossover edge (a step writing to a store) is normal; but a single
-   region that interleaves steps and components with no coherent reading
-   direction forces the viewer to re-decide what its edges mean mid-read, and
-   fails this check.
+2. **Grouping** — can a viewer tell which participants belong together and why?
+   Regions should express ownership, function, or a coherent stage. Position and
+   proximity can group page-level entries or shared context without a frame.
+   A system map and a procedure may share a region when the edge meanings and
+   reading direction stay clear. Equal panels are useful only for true peers.
 3. **Edge legibility** — crossings minimized and clean when unavoidable; no
    co-linear overlapping runs, no border-hugging marathons, no perimeter
    mega-detours forcing the eye to backtrack. An edge's meaning must also be
@@ -39,11 +34,16 @@ separately scored):
    the viewer can only guess at (an unlabeled edge whose meaning is not obvious
    from its endpoints, an ambiguous or missing arrowhead on a directional flow)
    is illegible even when the line is drawn cleanly.
-4. **Density & decomposition** — summed node area over painted board bounds, and how
-   many nodes a section holds. A finished board lands near 15% ink with two or three
-   nodes per section; air is the majority of a finished board. A board near 25% ink
-   with sections routinely holding seven reads as one crowded frame however clean its
-   topology.
+4. **Density & decomposition** — can the viewer discern the main flow, hierarchy,
+   parallel paths, shared state, decisions, and failure or recovery paths that the
+   board itself describes? Region sizes should follow their contents and roles.
+   Notes can carry rationale, constraints, examples, and operational detail, but
+   should not require the viewer to reconstruct the central topology from prose.
+   A uniform panel grid with one icon and a long note per panel can be complete
+   yet communicate little visually. Judge that failure here, without requiring
+   every board to contain concurrency, stores, or failures. Do not infer missing
+   requirements from an unseen brief. There is no ink-percentage target or
+   nodes-per-section quota; judge actual legibility and useful decomposition.
 
 ## Rubric
 
@@ -56,10 +56,10 @@ other board.
 | 9 | Effortless at arm's length: every chip breathes, every edge traceable at a glance, groups read instantly, nothing a reviewer would change. |
 | 8 | Fluent reading with one visible legibility flaw a reviewer would mention but not fix. |
 | 7 | Comfortably readable: wide corridors, groups read without tracing, clean edges; a couple of tight spots or one awkward crossing slow the eye. |
-| 6–6.5 | Readable with effort: corridors mostly wide but some chips touch edge traffic, one region packs too many nodes, or ink drifts toward 18–21% with sections holding four to six. |
-| 5 | Parseable but packed or flat: no overlaps, yet ink around 25% with sections averaging seven nodes, uniform crowding, long detour edges — you can read it, slowly. |
-| 4 | Reading is work: off-register rows, perimeter mega-detour edges dominate, crowding below ladder minimums in places — structure survives, fluency doesn't. |
-| 3 | Systematically hard to read: overlapping anti-parallel edges reading as bidirectional, floating label rectangles near but not on their edges, crowding below ladder minimums throughout. |
+| 6–6.5 | Readable with effort: some chips touch edge traffic, or hierarchy and branching take close reading to recover. |
+| 5 | Parseable but packed or flat: no overlaps, yet uniform panels or long notes conceal the central flow, shared state, or branch structure; long detours or crowding slow reading. |
+| 4 | Reading is work: off-register rows, perimeter mega-detour edges dominate, insufficient clearance around text or routes in places — structure survives, fluency doesn't. |
+| 3 | Systematically hard to read: overlapping anti-parallel edges reading as bidirectional, floating label rectangles near but not on their edges, insufficient clearance around text and routes throughout. |
 | 2 | Multiple text-covering collisions, a self-loop drawn through its own box, content running outside the locked frame. |
 | 1 | Wrecked: the layout communicates nothing. |
 

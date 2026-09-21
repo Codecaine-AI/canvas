@@ -1,0 +1,371 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-20-implementation-90-canvases",
+  "title": "Canvases",
+  "root": "b-cvs-root-0",
+  "blocks": {
+    "b-cvs-root-0": {
+      "id": "b-cvs-root-0",
+      "type": "paragraph",
+      "props": {
+        "covers": "What may live in the repo-root canvases/ corpus, how one corpus serves studio, tests, and docs, and the reference-corpus boundary under reference/.",
+        "type": "implementation",
+        "concepts": [
+          "canvases",
+          "board-corpus",
+          "fixtures",
+          "eval-boards",
+          "reference-corpus"
+        ]
+      },
+      "children": [
+        "b-cvs-role-1",
+        "b-cvs-sources-2",
+        "b-cvs-gov-3",
+        "b-cvs-gov-persist-4",
+        "b-cvs-gov-opmaps-5",
+        "b-cvs-decisions-6",
+        "b-cvs-corpus-decision-7",
+        "b-cvs-corpus-why-8",
+        "b-cvs-corpus-applies-9",
+        "b-cvs-reference-decision-10",
+        "b-cvs-reference-why-11",
+        "b-cvs-reference-applies-12"
+      ]
+    },
+    "b-cvs-role-1": {
+      "id": "b-cvs-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The repo-root board corpus: "
+        },
+        {
+          "insert": "canvases/*.canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", plain persisted documents. How boards are persisted, previewed, and embedded is owned by design; this area records what may live in the corpus and how it is consumed."
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-sources-2": {
+      "id": "b-cvs-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "canvases",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "canvases",
+              "label": "canvases"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "reference/board-design-reference",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "reference/board-design-reference",
+              "label": "reference/board-design-reference"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-gov-3": {
+      "id": "b-cvs-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-gov-persist-4": {
+      "id": "b-cvs-gov-persist-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Persistence and embedding",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/50-persistence-and-embedding",
+              "label": "Persistence and embedding"
+            }
+          }
+        },
+        {
+          "insert": " — owns the persistence and embedding behavior these files ride: the file API, previews, view crops."
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-gov-opmaps-5": {
+      "id": "b-cvs-gov-opmaps-5",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Operational maps",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/40-operational-maps",
+              "label": "Operational maps"
+            }
+          }
+        },
+        {
+          "insert": " — owns the diagram language the boards are written in."
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-decisions-6": {
+      "id": "b-cvs-decisions-6",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-corpus-decision-7": {
+      "id": "b-cvs-corpus-decision-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "canvases",
+              "label": "canvases/"
+            }
+          }
+        },
+        {
+          "insert": " holds plain "
+        },
+        {
+          "insert": "InteractiveCanvasDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " "
+        },
+        {
+          "insert": ".canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " files and nothing else — no TypeScript modules, no barrel — with eval-run boards under "
+        },
+        {
+          "insert": "canvases/evals/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". One corpus serves three consumers: the studio lists and loads it over the file API, tests import individual files by relative path, and docs embed boards by canvas id; "
+        },
+        {
+          "insert": "packages/canvas/src/index.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " exports none of them."
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-corpus-why-8": {
+      "id": "b-cvs-corpus-why-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternative was shipping sample documents through the package barrel, which turns fixture data into public API and couples the engine's import surface to the corpus."
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-corpus-applies-9": {
+      "id": "b-cvs-corpus-applies-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "canvases",
+              "label": "canvases/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future board and fixture, which is a data file consumed by path or id, never an export."
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-reference-decision-10": {
+      "id": "b-cvs-reference-decision-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "reference/board-design-reference/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "reference/board-design-reference",
+              "label": "reference/board-design-reference/"
+            }
+          }
+        },
+        {
+          "insert": " is a reference input, not a code location: the recordings and pixel-sampled analysis under it are what the engine's FigJam-derived constants trace back to, and every derived constant is dispersed beside its consumer with its provenance annotated at the site; nothing under "
+        },
+        {
+          "insert": "reference/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is imported by engine code."
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-reference-why-11": {
+      "id": "b-cvs-reference-why-11",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "the rejected alternatives were importing reference data at runtime or centralizing sampled constants into a mirror module — both make a research corpus load-bearing."
+        }
+      ],
+      "children": []
+    },
+    "b-cvs-reference-applies-12": {
+      "id": "b-cvs-reference-applies-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "reference/board-design-reference/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "reference/board-design-reference",
+              "label": "reference/board-design-reference/"
+            }
+          }
+        },
+        {
+          "insert": " — including every future reference recording or analysis, which informs constants but is never imported."
+        }
+      ],
+      "children": []
+    }
+  }
+}

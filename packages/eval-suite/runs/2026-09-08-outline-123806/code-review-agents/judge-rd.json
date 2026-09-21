@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "code-review-agents",
+  "run_id": "2026-09-08-outline-123806",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6.5,
+  "verdict": {
+    "score": 6.5,
+    "score_rationale": "The board is readable with effort, matching the 6–6.5 anchor because its stage grouping and primary left-to-right flow are clear, but small labels and several long dashed feedback routes require close tracing.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 7,
+        "note": "Main stages and notes have generous breathing room, though several small edge-label chips sit close to long routes and are difficult to read at arm's length."
+      },
+      {
+        "name": "grouping",
+        "score": 7.5,
+        "note": "Numbered stage regions, the vertical reviewer group, and the separate lifecycle-controls region make ownership and functional grouping readily apparent."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5.5,
+        "note": "The primary gray flow is clean and directional, but the orange budget route, red restart route, and blue calibration loop make long perimeter-like detours whose endpoints and associated labels take deliberate tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 6.5,
+        "note": "The central intake-to-publish topology and reviewer fan-out are discernible, but large prose notes carry much of the operational logic while recovery and budget behavior are visually remote from the steps they affect."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 7522,
+    "output_tokens": 426
+  },
+  "flags": []
+}

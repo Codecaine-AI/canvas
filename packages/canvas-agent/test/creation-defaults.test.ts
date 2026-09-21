@@ -56,8 +56,11 @@ describe("creation defaults (D5)", () => {
   });
 
   test("creationDefaultFor reads the kind row, with the registry's preferred color", () => {
-    // `process` prefers gray — the registry pick and the kind row agree.
-    expect(creationDefaultFor("process")).toEqual(CREATION_DEFAULTS.shape);
+    // A process uses the shape size with its preferred teal color.
+    expect(creationDefaultFor("process")).toEqual({
+      size: CREATION_DEFAULTS.shape.size,
+      color: "teal",
+    });
     // A glyph takes the icon SIZE row but its own registry color: memory is blue.
     expect(creationDefaultFor("memory")).toEqual({
       size: CREATION_DEFAULTS.icon.size,

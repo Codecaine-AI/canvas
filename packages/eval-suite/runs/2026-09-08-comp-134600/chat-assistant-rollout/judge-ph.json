@@ -1,0 +1,211 @@
+{
+  "axis": "ph",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 8,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "Mechanically clean on call execution. Across 130 transcript tool calls, no call returned ERROR, no finalize or resolve_request was rejected, and no schema, parse, geometry, identifier, or roster validation error occurred. The sole session committed on its first attempt.",
+      "failed_call_count": 0,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 0,
+          "transcript_excerpt": "APPLIED · resize page-frame → 3400×2440",
+          "finding": "The first call applied successfully; there was no failed-call run before the first APPLIED result."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "Committed: Created the support-assistant diagram covering guarded turns, durable memory and cold retention, human-approved challenger promotion, independent regression monitoring, and rollback.",
+          "finding": "Finalize succeeded on the first attempt and was not blocked or rejected."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Three framed renders were read, at turns 13, 22, and 128. The first two were followed by substantial board adjustments, and the final one served as QA before finalize. This establishes two broad render→adjust→render cycles. However, every look framed the entire page-frame rather than the dense live, history, rollout, or operations regions individually. Most detailed edge routing and lint correction from turns 27–127 therefore proceeded without region-specific close-ups, so the perception loop was adequate but below the strong 9–10 anchors.",
+      "render_count": 3,
+      "adjustment_round_count": 2,
+      "render_adjust_render_loop_count": 2,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 13,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... ink 1%",
+          "finding": "Early whole-board inspection occurred after the sections and first live-turn objects were placed; the agent then continued building."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 22,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... profile ... search ... generate ... output",
+          "finding": "A second whole-board render checked the expanded live region and was followed by connections, routing, memory, rollout, and monitoring work."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 128,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "The agent performed a final QA render immediately before finalize, confirming a clean diagnostic state."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 66,
+          "transcript_excerpt": "LINTS · +4 −0 ... label \"upsert + source conversation\" ...",
+          "finding": "Dense cross-region routing began producing multiple overlaps, but the agent did not frame the affected history/live region with a dedicated close-up."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 119,
+          "transcript_excerpt": "LINTS · +2 −0 ... telemetry ... pull-config ...",
+          "finding": "The dense rollout-to-operations routing was corrected through lint feedback without a region-specific rendered inspection."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Lint was treated constructively. Approximately 18 displayed E-class lint firings occurred, chiefly covered-content collisions, and warnings included unreadable labels, clipped text, and co-linear edges. All were resolved before commit, as shown by the final clean diagnostics. Several issues took multiple turns, but the agent changed tactics through anchor changes, label movement, text shortening, resizing, and rerouting; no identical lint was re-fired for more than three consecutive turns without a strategy change. No warning was silently overridden or committed open, so no warning-override reason was required in the summary.",
+      "lint_error_count": 18,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 31,
+          "transcript_excerpt": "LINTS · +2 −0\n  + E1 covered-content: label \"durable facts\" chip on c3 lies on c4's path ...\n  + W1 covered-content ...",
+          "finding": "The first edge-label collision was surfaced explicitly."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 33,
+          "transcript_excerpt": "LINTS · +0 −2\n  − E1 covered-content, − W1 covered-content  (resolved)",
+          "finding": "The initial collision was resolved within two corrective label moves."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 50,
+          "transcript_excerpt": "+ E1 covered-content: label \"reply + outcome\" chip on action-out lies on no-action's path",
+          "finding": "A routing collision initiated a short lint skirmish."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 56,
+          "transcript_excerpt": "LINTS · +0 −1\n  − E1 covered-content  (resolved)",
+          "finding": "The action/output collision was ultimately resolved after changing the target anchor, moving the label, and shortening its text; this was iterative correction rather than an unchanged lint fight."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 57,
+          "transcript_excerpt": "+ W1 clipped-text: handoff-note ... needs 180×625",
+          "finding": "The clipped sticky warning was accepted as actionable feedback."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 58,
+          "transcript_excerpt": "− W1 clipped-text  (resolved)",
+          "finding": "The handoff sticky warning was fixed on the next call by resizing."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 77,
+          "transcript_excerpt": "LINTS · +3 −0 ... covered-content ... broken-edges ...",
+          "finding": "Retention routing introduced three diagnostics."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 78,
+          "transcript_excerpt": "LINTS · +0 −3\n  − E1 covered-content, − W1 covered-content, − W2 broken-edges  (resolved)",
+          "finding": "All three retention diagnostics were resolved on the next call through a reroute."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 128,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "No lint errors or warnings remained at final QA, so there was no warning override."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary accurately describes the stage diff and final render. The diff contains guarded input/output turn flow, durable-profile extraction and cold retention, product-owner approval and rejection, independent live monitoring with challenger pull, and rollback. The summary is broad but not inflated and claims no unsupported polishing or completeness detail. The final render reported clean diagnostics, and there is no transcript evidence that the agent knowingly committed an undeclared defect.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "line": "Created the support-assistant diagram covering guarded turns, durable memory and cold retention, human-approved challenger promotion, independent regression monitoring, and rollback.",
+          "assessment": "Honest and supported by the 70-operation stage diff and final rendered board."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 128,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "The final render supports committing without an undeclared lint limitation."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "Created the support-assistant diagram covering guarded turns, durable memory and cold retention, human-approved challenger promotion, independent regression monitoring, and rollback.",
+          "finding": "Each listed feature is present in the final diff: live guardrails, profile/cold-history flow, owner-gated promotion, independent monitoring and pull, and retained-champion rollback."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session used 130 tool calls to produce 70 committed patch operations for a large, multi-region architecture diagram. The call count is substantial and many objects were placed and labeled in separate calls, but it remained proportionate to the unusually detailed ask. There were no add-delete-rebuild cycles, repeated NO-OPs, or abandonment. Label and route corrections were somewhat lengthy but were directed responses to changing lint and did not constitute destructive thrash. Wall time was 897 seconds (14.95 minutes), narrowly within the 15-minute budget, and finalize was reached well below the 300-turn ceiling.",
+      "operation_count": 130,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 14.95,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 50,
+          "transcript_excerpt": "+ E1 covered-content: label \"reply + outcome\" chip on action-out lies on no-action's path",
+          "finding": "This began the longest local correction sequence, but subsequent calls changed anchors, positions, and label text rather than deleting and rebuilding content."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 56,
+          "transcript_excerpt": "− E1 covered-content  (resolved)",
+          "finding": "The local correction sequence converged successfully."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "(70 patch operations). The proposal is now awaiting operator review.",
+          "finding": "The session reached finalize with a committed result before both the 15-minute and 300-turn limits."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No infrastructure failure was declared or visible. The only session remained healthy through a successful finalize, so no session was excluded from PH scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 129,
+          "transcript_excerpt": "Committed: ... The proposal is now awaiting operator review.",
+          "finding": "Normal successful termination rules out a transcript-ending harness or proxy failure."
+        }
+      ]
+    },
+    "score": 8
+  },
+  "usage": {
+    "input_tokens": 49395,
+    "output_tokens": 3065
+  },
+  "flags": []
+}

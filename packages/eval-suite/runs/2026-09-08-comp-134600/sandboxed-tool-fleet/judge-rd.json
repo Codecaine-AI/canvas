@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 7.5,
+  "verdict": {
+    "score": 7.5,
+    "score_rationale": "The board is comfortably readable with spacious regional grouping and mostly clean, labeled flows, though one overlapping two-way vertical route and several long return paths keep it below effortless fluency.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 8,
+        "note": "Most nodes and label chips have generous clearance, with wide gaps between stages; only a few chips sit directly amid route traffic."
+      },
+      {
+        "name": "grouping",
+        "score": 8.5,
+        "note": "Four tinted, titled regions make placement, lifecycle, execution, and operations ownership immediately distinct, while proximity clearly separates main flows from notes."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6.5,
+        "note": "Arrowheads, labels, colors, and dashed styling usually clarify direction, but the quota-to-wait-queue route overlays opposing arrows on one vertical line, and the long lifecycle return and destroy routes require extra tracing."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 7.5,
+        "note": "Main flows, decisions, failure paths, and shared operational context are visibly decomposed, although the oversized canvas and explanatory notes slightly dilute the visual hierarchy."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 11641,
+    "output_tokens": 463
+  },
+  "flags": []
+}

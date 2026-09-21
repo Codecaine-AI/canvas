@@ -1,0 +1,229 @@
+{
+  "axis": "ph",
+  "scenario": "eval-harness-orchestration",
+  "run_id": "2026-09-08-reflow-152600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgePromptHygiene",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "failed_calls_retries": {
+      "assessment": "There were 88 total tool calls and 2 failed calls, for a 2.27% failure rate. The longest failure run was 1 because each failed reroute was followed by an APPLIED call. Both failures were the same validation class—reroute corners that could not connect orthogonally to the edge endpoints—so the error class recurred after it had already been explained at turn 27. Both instances were subsequently corrected. No resolve_request or finalize call was rejected, and session metadata records no harness retry.",
+      "failed_call_count": 2,
+      "rejected_call_count": 0,
+      "retry_count": 0,
+      "parse_validation_fight_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 27,
+          "transcript_excerpt": "ERROR · reroute — these corners cannot be joined to the edge's ends without a diagonal leg: the router attaches outcome at 460,1090 and workers at 600,560, so the first corner must share an x or a y with 460,1090 and the last with 600,560.",
+          "finding": "First failed call. The agent changed strategy on the next turn by using shift_segment, which applied successfully."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 28,
+          "transcript_excerpt": "APPLIED · shift_segment retry-infra",
+          "finding": "The first failure was corrected immediately on the next call; no consecutive failure run developed."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 66,
+          "transcript_excerpt": "ERROR · reroute — these corners cannot be joined to the edge's ends without a diagonal leg: the router attaches evidence at 1840,750 and retained at 1660,1860, so the first corner must share an x or a y with 1840,750 and the last with 1660,1860.",
+          "finding": "Second failed call and recurrence of the same reroute/orthogonal-corner validation class already named at turn 27, although it involved a different edge."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 67,
+          "transcript_excerpt": "APPLIED · change_connection archive-verdicts",
+          "finding": "The second failure was followed immediately by an applied endpoint adjustment, then a successful reroute at turn 68."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 87,
+          "transcript_excerpt": "Committed: Created the pinned-run orchestration diagram with bounded isolated execution, distinct infrastructure retries, evidence-backed concurrent grading, compatible baseline comparison, promotion, and retained run material.",
+          "finding": "Finalize succeeded on the first attempt."
+        }
+      ]
+    },
+    "perception_loop": {
+      "assessment": "Three explicit framed renders were taken, all using view=\"page-frame\" rather than close-ups of individual dense regions. There were two render→adjust→render loops: turn 11 to turn 77 and turn 77 to turn 86. The second loop is meaningful QA: the turn-77 render was followed by label, containment, fitting, and description adjustments, then a clean turn-86 render. However, most dense grading and routing work from turns 31–76 proceeded without a region-specific close-up, so the perception practice was adequate but not exemplary.",
+      "render_count": 3,
+      "adjustment_round_count": 2,
+      "render_adjust_render_loop_count": 2,
+      "single_render_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 11,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame",
+          "finding": "Early whole-board inspection after establishing the three sections and initial execution objects."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 77,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "Whole-board inspection after the main build. It was followed by concrete adjustments rather than consecutive passive looks."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 78,
+          "transcript_excerpt": "APPLIED · update_text sw ... label — → \"fan out scenarios\"",
+          "finding": "The agent acted on the post-build review, beginning a QA adjustment round for the fan-out label."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 83,
+          "transcript_excerpt": "APPLIED · fit_section exec ... − E1 containment (resolved)",
+          "finding": "The QA adjustment round corrected the section-containment issue introduced while opening label space."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "transcript_excerpt": "LOOK · 1 render · close-up page-frame ... DIAGNOSTICS · clean",
+          "finding": "Final QA render confirmed a clean diagnostic state before finalize. No individual dense-region close-up was used."
+        }
+      ]
+    },
+    "lint_etiquette": {
+      "assessment": "Approximately 10 newly emitted error-level lint findings appeared during applied edits, chiefly covered-content conflicts, plus one containment error. The agent did not fight a single unchanged lint for more than three consecutive turns: it changed anchors, shifted segments, moved labels, shortened text, rerouted, and fitted sections. Every lint was resolved before commit, and the final two renders reported clean diagnostics. No warning was committed under an override, so neither a reasoned nor silent warning override occurred.",
+      "lint_error_count": 10,
+      "lint_fight_count": 0,
+      "reasoned_warning_override_count": 0,
+      "silent_warning_override_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 25,
+          "transcript_excerpt": "+ E1 covered-content: label \"log infra fault • retry\" chip on retry-infra covers sut",
+          "finding": "The infrastructure-retry edge initially created a label collision."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 30,
+          "transcript_excerpt": "APPLIED · update_text sw ... label \"fan out\" → — ... − W1 covered-content, − W2 unreadable-labels (resolved)",
+          "finding": "The agent resolved the first fan-out label conflict rather than repeatedly re-firing the same lint."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 65,
+          "transcript_excerpt": "+ E1 covered-content: label \"artifact only\" chip on db lies on archive-verdicts's path ... + E2 covered-content: label \"verdict + evidence\" chip on ce lies on archive-verdicts's path",
+          "finding": "Two routing errors were introduced by the archive-verdicts edge."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 68,
+          "transcript_excerpt": "APPLIED · reroute archive-verdicts ... − E1 covered-content, − E2 covered-content (resolved)",
+          "finding": "Both archive routing errors were resolved after an endpoint adjustment."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 79,
+          "transcript_excerpt": "+ E2 containment: scheduler extends 40px outside its section exec",
+          "finding": "Moving the scheduler to create label room introduced containment lint."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 83,
+          "transcript_excerpt": "APPLIED · fit_section exec ... − E1 containment (resolved)",
+          "finding": "The containment problem was repaired before commit."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "Final QA showed no open lint errors or warnings, so there was no warning override requiring a commit-summary reason."
+        }
+      ]
+    },
+    "commit_honesty": {
+      "assessment": "The single commit summary accurately describes the stage diff and final render. The diff contains a pinned-suite input and fingerprint note, bounded workers and an isolated SUT, a separately labeled infrastructure retry loop, concurrent criteria and artifact-only grading with evidence validation, fingerprint-gated baseline comparison, promotion, and archival connections. The final render reported clean diagnostics. No seen defect was left committed without declaration, and the summary does not claim unsupported rebalancing or perfection.",
+      "commit_count": 1,
+      "honest_summary_count": 1,
+      "inflated_claim_count": 0,
+      "undeclared_seen_defect_count": 0,
+      "summary_lines": [
+        {
+          "stage": "stage0",
+          "turn_number": 87,
+          "line": "Created the pinned-run orchestration diagram with bounded isolated execution, distinct infrastructure retries, evidence-backed concurrent grading, compatible baseline comparison, promotion, and retained run material.",
+          "assessment": "Accurate and proportionate. Each listed feature is present in the stage diff and the final board render."
+        }
+      ],
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "transcript_excerpt": "retry-infra outcome→workers \"log infra fault • retry\" ... criteria judge \"Independent criteria graders\" ... blind judge \"Artifact-only grader No original request\" ... compatible decision \"Same fingerprint?\" ... promote process \"Promote run Future compatible baseline\" ... retained memory \"Run archive Re-examine scores\"",
+          "finding": "The final render directly supports the summary's claims about distinct infrastructure retries, grading, compatible comparison, promotion, and retention."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 86,
+          "transcript_excerpt": "DIAGNOSTICS · clean",
+          "finding": "No known lint defect was silently pushed through."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 87,
+          "transcript_excerpt": "Committed: Created the pinned-run orchestration diagram with bounded isolated execution, distinct infrastructure retries, evidence-backed concurrent grading, compatible baseline comparison, promotion, and retained run material. (49 patch operations).",
+          "finding": "The commit completed successfully and its summary matches the recorded 49-operation diff."
+        }
+      ]
+    },
+    "economy": {
+      "assessment": "The session committed 49 patch operations through 88 tool calls in about 10.14 minutes, remaining within both the 15-minute and 300-turn budgets. The work was substantial but proportionate to a detailed orchestration diagram. There were localized label and route refinements, but no object-level build-delete-rebuild cycle, repeated NO-OP, abandon, or turn-budget exhaustion. The fan-out label was temporarily cleared and later restored during QA, but this was a lint-driven label strategy change rather than destructive board reconstruction.",
+      "operation_count": 49,
+      "thrash_cycle_count": 0,
+      "wall_time_minutes": 10.14,
+      "over_budget_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 30,
+          "transcript_excerpt": "APPLIED · update_text sw ... label \"fan out\" → —",
+          "finding": "A problematic edge label was removed to clear lint; this was a targeted corrective action."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 78,
+          "transcript_excerpt": "APPLIED · update_text sw ... label — → \"fan out scenarios\"",
+          "finding": "The label was revisited during final QA and then shortened and positioned successfully; this added some iteration but did not amount to destructive rebuild thrash."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 84,
+          "transcript_excerpt": "APPLIED · fit_section page-frame ... 3200×2200 → 3120×1900 ... LINTS · clean",
+          "finding": "A final proportional framing adjustment reduced unused canvas while preserving a clean state."
+        },
+        {
+          "stage": "stage0",
+          "turn_number": 87,
+          "transcript_excerpt": "Committed ... (49 patch operations).",
+          "finding": "The session reached finalize with ample turn budget remaining."
+        }
+      ]
+    },
+    "infra_exclusions": {
+      "assessment": "No harness death, stuck ACTIVE session, kernel collision, proxy failure, or other declared infrastructure failure occurred. The sole session committed normally and is included in scoring.",
+      "invalid_infra_session_count": 0,
+      "moments": [
+        {
+          "stage": "stage0",
+          "turn_number": 87,
+          "transcript_excerpt": "Committed: Created the pinned-run orchestration diagram ... The proposal is now awaiting operator review.",
+          "finding": "Normal successful termination; no infrastructure exclusion applies."
+        }
+      ]
+    },
+    "score": 6
+  },
+  "usage": {
+    "input_tokens": 38722,
+    "output_tokens": 3696
+  },
+  "flags": []
+}

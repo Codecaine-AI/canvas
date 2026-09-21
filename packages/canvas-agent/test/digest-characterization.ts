@@ -95,9 +95,8 @@ export const DIAGNOSTICS_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
   "digest-solo-section": CLEAN,
   "digest-clipping": `DIAGNOSTICS · 0 errors · 1 warning
   W1 clipped-text: wordy: label clips at 160×96: 16 wrapped line(s), the box holds 4 — needs 1750×96 (grow wordy to ≥1750×96 or shorten the text)`,
-  "perception-labeled-gap": `DIAGNOSTICS · 0 errors · 2 warnings
-  W1 unreadable-labels: label "go" chip on edge (43×30px) bleeds onto alpha and beta: 48px of corridor where the chip needs 76px (open the alpha↔beta corridor to ≥76px so the chip and its 16px margins fit)
-  W2 crowding: alpha and beta sit 48px apart side by side where wires and labels need ≥80px of corridor to route between them (open the alpha↔beta corridor to ≥80px)`,
+  "perception-labeled-gap": `DIAGNOSTICS · 0 errors · 1 warning
+  W1 unreadable-labels: label "go" chip on edge (43×30px) bleeds onto alpha and beta: 48px of corridor where the chip needs 76px (open the alpha↔beta corridor to ≥76px so the chip and its 16px margins fit)`,
   "perception-single": CLEAN,
   "perception-object-delta": CLEAN,
   "perception-membership": CLEAN,
@@ -106,9 +105,8 @@ export const DIAGNOSTICS_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
   "perception-two-overlaps": `DIAGNOSTICS · 2 errors · 0 warnings
   E1 covered-content: a1 and a2 overlap by 75% of the smaller box; covers the text center of a1 and a2 (move a2 clear of a1)
   E2 covered-content: b1 and b2 overlap by 75% of the smaller box; covers the text center of b1 and b2 (move b2 clear of b1)`,
-  "perception-quickfix": `DIAGNOSTICS · 0 errors · 2 warnings
-  W1 unreadable-labels: label "X" chip on edge (41×30px) bleeds onto alpha and beta: 44px of corridor where the chip needs 73px (open the alpha↔beta corridor to ≥73px so the chip and its 16px margins fit)
-  W2 crowding: alpha and beta sit 44px apart side by side where wires and labels need ≥80px of corridor to route between them (open the alpha↔beta corridor to ≥80px)`,
+  "perception-quickfix": `DIAGNOSTICS · 0 errors · 1 warning
+  W1 unreadable-labels: label "X" chip on edge (41×30px) bleeds onto alpha and beta: 44px of corridor where the chip needs 73px (open the alpha↔beta corridor to ≥73px so the chip and its 16px margins fit)`,
   "comprehensive-all-blocks": `DIAGNOSTICS · 12 errors · 4 warnings
   E1 covered-content: label "forward label" chip on edge-forward overlaps label "none label" chip on edge-none (separate the two edges (spacing or waypoints) so both labels read)
   E2 covered-content: label "forward label" chip on edge-forward overlaps label "back label" chip on edge-back (separate the two edges (spacing or waypoints) so both labels read)

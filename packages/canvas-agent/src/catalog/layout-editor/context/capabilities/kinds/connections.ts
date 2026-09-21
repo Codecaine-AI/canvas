@@ -27,7 +27,7 @@ export const CONNECTIONS_SPEC: KindSpec = {
     {
       topic: "routing",
       items: [
-        "the path is computed elbow routing from the endpoints — you never draw it, you steer it",
+        "the path uses orthogonal routing from the endpoints; aligned facing endpoints with a clear corridor can produce a straight run",
         "the route recomputes whenever an endpoint object moves or resizes",
         "the ROUTES block in the apply result reports the true routed polyline and names every box the wire crosses (`through`)",
       ],
@@ -48,7 +48,7 @@ export const CONNECTIONS_SPEC: KindSpec = {
   ],
   tips: [
     "wire object to object first, then read ROUTES before judging it done — a clean wire crosses nothing, so aim for an empty `through`",
-    "steer minimally and in order: try a different anchor before pinning a position, and reach for waypoints only when the corridor demands it",
-    "when a route detours around the board or hugs a frame edge, the fix is usually more corridor between the boxes, not more waypoints",
+    "place endpoints on a common axis for a direct route first; when steering is needed, try an anchor before pinning a position and use waypoints only when the corridor demands it",
+    "when a route detours around the board or hugs a frame edge, bring related regions closer, use aligned endpoints, or move the obstructing note or object before adding waypoints",
   ],
 };

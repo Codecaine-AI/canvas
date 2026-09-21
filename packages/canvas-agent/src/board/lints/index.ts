@@ -5,9 +5,11 @@
  * finalize gate runs; it adds polish-tier checks that would only nag while a
  * region is still being built.
  *
- * An always-on lint here only claims "a reader physically cannot read
- * something," measured on real geometry — never taste. Composition and craft
- * belong to the agent's renders and the style topics.
+ * Always-on lints check geometry defects and near-touching node boundaries.
+ * Crowding's 16px separation floor is a conservative readability heuristic,
+ * not proof that every closer pair is unreadable. Actual wire and label
+ * obstructions use rendered geometry. Hue and composition belong to visual
+ * judgment; categorical same-hue checks are excluded from both registries.
  *
  * The diagnostics runner calls each registry's lints in order and then floats
  * error-severity findings ahead of warnings when assigning ids, so registry
@@ -21,7 +23,6 @@ import { rule as brokenEdges } from "./rules/broken-edges";
 import { rule as unreadableLabels } from "./rules/unreadable-labels";
 import { rule as crowding } from "./rules/crowding";
 import { rule as clippedText } from "./rules/clipped-text";
-import { rule as sectionChildColor } from "./rules/section-child-color";
 import { rule as frameSlack } from "./rules/frame-slack";
 
 export const LAYOUT_RULES: readonly LayoutRule[] = [
@@ -31,7 +32,6 @@ export const LAYOUT_RULES: readonly LayoutRule[] = [
   unreadableLabels,
   crowding,
   clippedText,
-  sectionChildColor,
 ];
 
 export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES, frameSlack];

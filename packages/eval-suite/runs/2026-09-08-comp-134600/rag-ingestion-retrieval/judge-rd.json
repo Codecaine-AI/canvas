@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 7,
+  "verdict": {
+    "score": 7,
+    "score_rationale": "The board is comfortably readable with spacious, instantly recognizable regions and mostly clean flows, but several long cross-region feedback routes and relatively small text slow arm's-length tracing enough to fit the 7 anchor.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 8,
+        "note": "Nodes and label chips generally have generous clearance, though the small type inside many boxes and chips is difficult to read at arm's length."
+      },
+      {
+        "name": "grouping",
+        "score": 8.5,
+        "note": "Four large tinted, titled regions clearly separate ingestion, publication, retrieval, and model-rebuild responsibilities."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 6.5,
+        "note": "Local arrows and colored failure branches are clean, but the long blue and dashed teal routes spanning region boundaries require substantial eye travel and backtracking."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 7.5,
+        "note": "Main flows, decisions, retries, and fallback paths are visibly decomposed, although the oversized canvas and long feedback loops weaken the overall topology at a glance."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 8156,
+    "output_tokens": 414
+  },
+  "flags": []
+}

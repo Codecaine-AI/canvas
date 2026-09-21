@@ -464,7 +464,7 @@ function alignedCoordinate(
 export const align = defineOperationTool({
   name: "align",
   description:
-    "Put a row or column of boxes on one shared edge. This is the cross-axis gesture — it never changes spacing along the flow. Sections align by their own frame and carry their contents; edges are not targets, they re-route themselves.",
+    "Put a row or column of boxes on one shared edge. This is the cross-axis gesture — it never changes spacing along the flow. Sections align by their own frame and carry their contents; edges are not targets, they re-route themselves. A child of a listed section travels with its frame and is not an independent target; at least two independent targets must remain.",
   fields: { ids: ArrangeIds, edge: AlignEdge },
   validate: (ctx, p) => requireIndependentRoots(ctx, p.ids, "align"),
   apply: (ctx, p) => {

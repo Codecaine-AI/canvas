@@ -1,0 +1,43 @@
+{
+  "axis": "cf",
+  "scenario": "sandboxed-tool-fleet",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeCraft",
+    "attempts": 1
+  },
+  "score": 5.5,
+  "verdict": {
+    "score": 5.5,
+    "score_rationale": "The board is readable and deliberately sectioned, but extensive dead space and heavy reliance on generic gray boxes instead of registry objects leave it between the flat 5 anchor and the unfinished 6 anchor.",
+    "sub_checks": [
+      {
+        "name": "frame_use",
+        "score": 5,
+        "note": "The four horizontal regions are clearly framed, but the third and especially fourth panels contain large unexplained empty bands, with the operations content dispersed across only part of the available area."
+      },
+      {
+        "name": "color",
+        "score": 6,
+        "note": "Teal agents, gray shape-core elements, and red exception paths are disciplined, but yellow note cards and pastel region fills function decoratively while many operational nouns remain undifferentiated gray."
+      },
+      {
+        "name": "machinery_leakage",
+        "score": 8,
+        "note": "Routing is generally clean, with attached arrowheads and no visible crosshair junctions or orphaned badges; the branching and return paths remain visually traceable."
+      },
+      {
+        "name": "alignment_and_rhythm",
+        "score": 5.5,
+        "note": "Peers mostly share sizes and horizontal registers, but uneven regional density, oversized note blocks, and generic boxes for queue, tool, proxy, store, monitor, and infrastructure functions weaken hierarchy and operational-map vocabulary."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 11701,
+    "output_tokens": 574
+  },
+  "flags": []
+}

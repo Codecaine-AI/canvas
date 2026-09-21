@@ -140,10 +140,10 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     expect(result.isError).not.toBe(true);
     expect(result.text).toContain("APPLIED · move_to b");
     expect(result.text).toContain("DELTA");
-    // The tightened gap trips both label fit and the arrow-corridor floor.
-    expect(result.text).toContain("LINTS · +2 −0");
+    // Actual label fit still fires even though the boxes have visible separation.
+    expect(result.text).toContain("LINTS · +1 −0");
     expect(result.text).toContain('label "go" chip on edge (43×30px) bleeds onto a and b');
-    expect(result.text).toContain("W2 crowding: a and b sit 40px apart side by side");
+    expect(result.text).not.toContain("crowding:");
     expect(session.draft.objects.find((object) => object.id === "b")?.geometry.x).toBe(200);
     expect(session.status).toBe("running");
     expect(session.proposal).toBeNull();

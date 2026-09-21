@@ -1,0 +1,43 @@
+{
+  "axis": "rd",
+  "scenario": "chat-assistant-rollout",
+  "run_id": "2026-09-08-comp-134600",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeReadability",
+    "attempts": 1
+  },
+  "score": 6,
+  "verdict": {
+    "score": 6,
+    "score_rationale": "The board is readable with effort, matching the 6 anchor: its four regions and local flows are clear, but small text, long cross-region routes, and several tight edge-label placements require close inspection.",
+    "sub_checks": [
+      {
+        "name": "corridors_and_air",
+        "score": 6,
+        "note": "Most nodes have generous space, but many labels and chips are very small at full-board scale, while chips such as “no action needed” and “completed” sit tightly against route turns."
+      },
+      {
+        "name": "grouping",
+        "score": 8,
+        "note": "Four large, softly colored, numbered regions make the live conversation, memory, rollout, and recovery functions immediately distinguishable."
+      },
+      {
+        "name": "edge_legibility",
+        "score": 5,
+        "note": "Local arrows are generally clean and labeled, but the blue memory loop, dashed red monitoring route, and purple rollback route make long perimeter-style detours across region boundaries that are slow to trace."
+      },
+      {
+        "name": "density_and_decomposition",
+        "score": 6.5,
+        "note": "The main live-turn flow and rollout branches are visually decomposed, yet the very large canvas, sparse lower recovery lane, and prose-heavy yellow notes dilute hierarchy and make the complete topology harder to absorb at a glance."
+      }
+    ]
+  },
+  "usage": {
+    "input_tokens": 9951,
+    "output_tokens": 404
+  },
+  "flags": []
+}

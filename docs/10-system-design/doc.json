@@ -1,0 +1,470 @@
+{
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design",
+  "title": "System design — overview",
+  "root": "b-dov-root",
+  "blocks": {
+    "b-dov-root": {
+      "id": "b-dov-root",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "typed-action reducer",
+          "single mutation authority",
+          "world-space canvas",
+          "operational map",
+          "self-containment"
+        ],
+        "covers": "Orientation map for the canvas design tier: what the engine is, the commitments that shape every contract, and where each subject area's normative page lives.",
+        "format": "mdx",
+        "type": "design"
+      },
+      "children": [
+        "b-dov-title-1",
+        "b-dov-intro-2",
+        "b-dov-dataflow-3",
+        "b-dov-reducer-decision-4",
+        "b-dov-lightboard-decision-5",
+        "b-dov-selfcontained-6",
+        "b-dov-areas-heading-7",
+        "b-dov-area-shape-api-8",
+        "b-dov-area-engine-9",
+        "b-dov-engine-model-10",
+        "b-dov-engine-interaction-11",
+        "b-dov-engine-connectors-12",
+        "b-dov-engine-stage-13",
+        "b-dov-engine-persistence-14",
+        "b-dov-area-layering-15",
+        "b-dov-area-opmaps-16",
+        "b-dov-area-layout-language-17",
+        "b-dov-area-rulebook-18",
+        "b-dov-area-tool-surface-19"
+      ]
+    },
+    "b-dov-title-1": {
+      "id": "b-dov-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "System design — overview"
+        }
+      ],
+      "children": []
+    },
+    "b-dov-intro-2": {
+      "id": "b-dov-intro-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "@codecaine-ai/canvas",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is a typed-action, world-space diagramming engine: sticky notes, a small universal shape core, icon glyphs, sections, and routed connectors, purpose-built as Core's map layer for operational maps. The same engine embeds interactively for a person or drives headlessly for an agent. The pages in this tier are the design contracts — normative behavior, state models, and vocabularies; how the source is organized to honor them lives in the "
+        },
+        {
+          "insert": "implementation tier",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation",
+              "label": "implementation tier"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-dataflow-3": {
+      "id": "b-dov-dataflow-3",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Data flows one way: every edit — a pointer gesture or an agent operation — becomes a typed "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " through the reducer, derived state (paint order, section membership) recomputes from geometry, and the stage renders what the state says. No surface writes around the reducer."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-reducer-decision-4": {
+      "id": "b-dov-reducer-decision-4",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "status": "accepted",
+        "title": "One reducer is the single mutation authority"
+      },
+      "text": [
+        {
+          "insert": "Both interactive UI actions and external agent-driven edits dispatch through the same "
+        },
+        {
+          "insert": "reduceInteractiveCanvasState",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/actions/reducer.ts",
+              "symbol": "reduceInteractiveCanvasState"
+            }
+          }
+        },
+        {
+          "insert": " reducer over the single "
+        },
+        {
+          "insert": "CanvasAction",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " union — there is no second write path. This guarantees consistent undo/history behavior and consistent connector-waypoint reconciliation no matter which caller mutated the document, since every mutation is a typed action passing through the same authority rather than an ad hoc state patch."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-lightboard-decision-5": {
+      "id": "b-dov-lightboard-decision-5",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "status": "accepted",
+        "title": "Fixed light board background, independent of host app theme"
+      },
+      "text": [
+        {
+          "insert": "The engine renders on a fixed light background — "
+        },
+        {
+          "insert": "CANVAS_BG = \"#F5F5F5\"",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "symbol": "CANVAS_BG"
+            }
+          }
+        },
+        {
+          "insert": " — regardless of the host app's theme. This is an intentional \"light board under dark app theme\" design choice, not an oversight: diagramming boards are conventionally light regardless of the surrounding app trim, so the canvas does not follow a host's dark-mode setting."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-selfcontained-6": {
+      "id": "b-dov-selfcontained-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Self-containment is a design commitment, not an accident of extraction: the package vendors its own UI primitives and carries no dependency back on any host app, so embedding the engine never pulls in a host's design system."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-areas-heading-7": {
+      "id": "b-dov-areas-heading-7",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The subject areas"
+        }
+      ],
+      "children": []
+    },
+    "b-dov-area-shape-api-8": {
+      "id": "b-dov-area-shape-api-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The shape contract",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "The shape contract"
+            }
+          }
+        },
+        {
+          "insert": " — ObjectDef v2 and the two-tier ShapeDef registry: every kind declares its rendering, text slot, outline, anchors, hit-testing, and color role on one registered definition, and every consumer derives its behavior from that declaration. Includes the text-slot preset library and the closed 10-pick color roster."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-area-engine-9": {
+      "id": "b-dov-area-engine-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The engine",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine",
+              "label": "The engine"
+            }
+          }
+        },
+        {
+          "insert": " — the behavior contracts of the core, one page per concern:"
+        }
+      ],
+      "children": []
+    },
+    "b-dov-engine-model-10": {
+      "id": "b-dov-engine-model-10",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The document model",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/10-document-model",
+              "label": "The document model"
+            }
+          }
+        },
+        {
+          "insert": " — the persisted board schema, the action vocabulary, and the reducer's guarantees."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-engine-interaction-11": {
+      "id": "b-dov-engine-interaction-11",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Interaction",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/20-interaction",
+              "label": "Interaction"
+            }
+          }
+        },
+        {
+          "insert": " — the pointer state machine: selection, gestures, snapping, clipboard, text editing."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-engine-connectors-12": {
+      "id": "b-dov-engine-connectors-12",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/30-connectors",
+              "label": "Connectors"
+            }
+          }
+        },
+        {
+          "insert": " — elbow/orthogonal routing, the connection cascade, endpoints, and bend editing."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-engine-stage-13": {
+      "id": "b-dov-engine-stage-13",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Stage and viewport",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/40-stage-and-viewport",
+              "label": "Stage and viewport"
+            }
+          }
+        },
+        {
+          "insert": " — the rendering tiers, the world/screen coordinate model, and the camera."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-engine-persistence-14": {
+      "id": "b-dov-engine-persistence-14",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Persistence and embedding",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/50-persistence-and-embedding",
+              "label": "Persistence and embedding"
+            }
+          }
+        },
+        {
+          "insert": " — documents on disk and the editor/viewer surfaces a host embeds."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-area-layering-15": {
+      "id": "b-dov-area-layering-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The layer cake",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "The layer cake"
+            }
+          }
+        },
+        {
+          "insert": " — geometric section layering: "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as a reconciled geometry cache, paint order derived from containment, and hit-testing that agrees with the pixels."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-area-opmaps-16": {
+      "id": "b-dov-area-opmaps-16",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Operational maps",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/40-operational-maps",
+              "label": "Operational maps"
+            }
+          }
+        },
+        {
+          "insert": " — the diagram language: the two genres every board mixes, the object surface (eight universal shapes plus the glyph vocabulary), and the preference registry that keeps boards consistent."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-area-layout-language-17": {
+      "id": "b-dov-area-layout-language-17",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The agent layout language",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/50-agent-layout-language",
+              "label": "The agent layout language"
+            }
+          }
+        },
+        {
+          "insert": " — the declarative layout vocabulary an agent writes to arrange a board: rows and columns, sections, items, groups, grids, hug, align, fans, and arrows."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-area-rulebook-18": {
+      "id": "b-dov-area-rulebook-18",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The layout rulebook",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/60-layout-rulebook",
+              "label": "The layout rulebook"
+            }
+          }
+        },
+        {
+          "insert": " — the rules that make generated boards read well, stated as checkable constraints on spacing, alignment, flow, and containment."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-area-tool-surface-19": {
+      "id": "b-dov-area-tool-surface-19",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The agent tool surface",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/70-agent-tool-surface",
+              "label": "The agent tool surface"
+            }
+          }
+        },
+        {
+          "insert": " — how an agent drives the canvas: the session and kernel contract, the gesture vocabulary, grid and defaults, and the operation pipeline."
+        }
+      ],
+      "children": []
+    }
+  }
+}
