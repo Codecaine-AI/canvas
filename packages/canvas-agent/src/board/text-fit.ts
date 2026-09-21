@@ -1,7 +1,7 @@
 /**
  * text-fit — "would this text still be readable in this box?", answered by the
  * RENDERER's own wrap/clamp decision rather than a second implementation of
- * it (docs/30-agent-layout/50-tool-surface/10-gestures §Arrange, "Size has
+ * it (docs/10-system-design/70-agent-tool-surface/20-gestures §Arrange, "Size has
  * rules").
  *
  * `resize` shrinking a box below what its text needs, and `update_text`

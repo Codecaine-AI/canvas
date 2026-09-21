@@ -8,36 +8,22 @@
       "id": "b-arrows-root",
       "type": "paragraph",
       "props": {
-        "covers": "The arrows block is compact descriptive notation: one from > to line per connection, by reference number, conventionally placed last. It names connection intent; the production router chooses the route, steered when needed with anchors, endpoint positions, and waypoints.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "arrows",
           "connections",
           "routing",
           "feedback loops"
-        ]
+        ],
+        "covers": "The arrows block is compact descriptive notation: one from > to line per connection, by reference number, conventionally placed last. It names connection intent; the production router chooses the route, steered when needed with anchors, endpoint positions, and waypoints.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
-        "b-arrows-title-1",
         "b-arrows-body-2",
         "b-arrows-constraint-3",
         "b-arrows-code-4",
         "b-arrows-canvas-5"
       ]
-    },
-    "b-arrows-title-1": {
-      "id": "b-arrows-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "arrows — the connection block"
-        }
-      ],
-      "children": []
     },
     "b-arrows-body-2": {
       "id": "b-arrows-body-2",
@@ -79,8 +65,9 @@
     },
     "b-arrows-constraint-3": {
       "id": "b-arrows-constraint-3",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "severity": "hard",
         "title": "Arrow notation declares connection intent"
       },

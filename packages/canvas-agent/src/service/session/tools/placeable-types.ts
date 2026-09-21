@@ -3,7 +3,7 @@
  * `{ type: "icon", icon: glyph }` split is translated, in both directions.
  *
  * The model never sees that split
- * (docs/30-agent-layout/50-tool-surface/10-gestures §Place, "Icons are shape
+ * (docs/10-system-design/70-agent-tool-surface/20-gestures §Place, "Icons are shape
  * types"): placing `"memory"` and placing `"decision"` are the same gesture
  * with a different pick. The NAMES come from the object-preference registry
  * (packages/canvas/src/objects/registry) — the single roster shared by the

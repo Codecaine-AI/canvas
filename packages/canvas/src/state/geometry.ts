@@ -404,7 +404,7 @@ export type CanvasAlignAxis =
 /**
  * The alignment vocabulary plus the agent tool surface's spelling of the two
  * centering edges (`center_h` / `center_v`, per
- * docs/30-agent-layout/50-tool-surface/10-gestures §Arrange). `center_h`
+ * docs/10-system-design/70-agent-tool-surface/20-gestures §Arrange). `center_h`
  * aligns HORIZONTAL centers — every box ends on the same
  * center x, i.e. `center-x` — and `center_v` the vertical ones, matching the
  * usual "align horizontal centers" phrasing.

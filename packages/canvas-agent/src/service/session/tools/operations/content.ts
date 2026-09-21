@@ -1,6 +1,6 @@
 /**
  * The Content & appearance group — `update_text`, `change_color`,
- * `change_shape` (docs/30-agent-layout/50-tool-surface/10-gestures
+ * `change_shape` (docs/10-system-design/70-agent-tool-surface/20-gestures
  * §Content & appearance).
  *
  * ONE HOME PER CONCERN. All text goes through `update_text` and all color

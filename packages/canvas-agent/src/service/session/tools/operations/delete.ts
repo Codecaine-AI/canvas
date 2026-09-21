@@ -1,5 +1,5 @@
 /**
- * The Delete group (docs/30-agent-layout/50-tool-surface/10-gestures §Delete)
+ * The Delete group (docs/10-system-design/70-agent-tool-surface/20-gestures §Delete)
  * — one gesture, one id,
  * three cascades.
  *

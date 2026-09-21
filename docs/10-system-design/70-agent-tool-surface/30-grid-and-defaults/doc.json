@@ -8,9 +8,6 @@
       "id": "b-ts-gr-root",
       "type": "paragraph",
       "props": {
-        "covers": "The agent's 20px write grid: snap-not-reject, the rule that quantization is about what lands rather than what was typed, which fields quantize and which are deliberately exempt, how a fitted frame grows onto the grid, the three coexisting grids and their common divisor, and the per-kind size and color a bare placement lands at.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "agent grid",
           "snap-not-reject",
@@ -18,10 +15,12 @@
           "creation defaults",
           "first-use colors",
           "craft targets"
-        ]
+        ],
+        "covers": "The agent's 20px write grid: snap-not-reject, the rule that quantization is about what lands rather than what was typed, which fields quantize and which are deliberately exempt, how a fitted frame grows onto the grid, the three coexisting grids and their common divisor, and the per-kind size and color a bare placement lands at.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
-        "b-ts-gr-title-1",
         "b-ts-gr-lede-2",
         "b-ts-gr-snap-heading-3",
         "b-ts-gr-snap-body-4",
@@ -45,19 +44,6 @@
         "b-ts-gr-defaults-colors-22",
         "b-ts-gr-defaults-backedge-23"
       ]
-    },
-    "b-ts-gr-title-1": {
-      "id": "b-ts-gr-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "The grid and creation defaults"
-        }
-      ],
-      "children": []
     },
     "b-ts-gr-lede-2": {
       "id": "b-ts-gr-lede-2",
@@ -121,8 +107,9 @@
     },
     "b-ts-gr-lands-6": {
       "id": "b-ts-gr-lands-6",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "title": "The grid is about what lands"
       },
       "text": [
@@ -210,7 +197,6 @@
       "id": "b-ts-gr-table-9",
       "type": "structured-table",
       "props": {
-        "title": "The quantized and exempt fields",
         "columns": [
           "value",
           "where it arrives",
@@ -277,14 +263,16 @@
             "the untouched dimension of a width-only resize, the first box of a space_out run, the descendants a frame carries",
             "exempt — untouched values keep their exact relative geometry"
           ]
-        ]
+        ],
+        "title": "The quantized and exempt fields"
       },
       "children": []
     },
     "b-ts-gr-exempt-10": {
       "id": "b-ts-gr-exempt-10",
-      "type": "observation",
+      "type": "callout",
       "props": {
+        "kind": "observation",
         "title": "A snapped fraction would be a bug"
       },
       "text": [
@@ -334,8 +322,9 @@
     },
     "b-ts-gr-fit-outward-13": {
       "id": "b-ts-gr-fit-outward-13",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "title": "A fitted rect snaps outward, never nearest"
       },
       "text": [
@@ -360,8 +349,9 @@
     },
     "b-ts-gr-three-constraint-15": {
       "id": "b-ts-gr-three-constraint-15",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "title": "Twenty, sixteen, four — and they must not be confused"
       },
       "text": [
@@ -490,7 +480,6 @@
       "id": "b-ts-gr-defaults-table-20",
       "type": "structured-table",
       "props": {
-        "title": "What a bare placement lands as",
         "columns": [
           "kind",
           "size",
@@ -522,14 +511,16 @@
             "gray",
             "the UI's icon default, already a grid multiple. An icon is a glyph with its text captioned beneath rather than a labelled box, so the node target does not apply: it stays square and small, and it reads the shape color bucket."
           ]
-        ]
+        ],
+        "title": "What a bare placement lands as"
       },
       "children": []
     },
     "b-ts-gr-defaults-loadbearing-21": {
       "id": "b-ts-gr-defaults-loadbearing-21",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "title": "The defaults are load-bearing, not a convenience"
       },
       "text": [
@@ -566,8 +557,9 @@
     },
     "b-ts-gr-defaults-backedge-23": {
       "id": "b-ts-gr-defaults-backedge-23",
-      "type": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "One deliberate back-edge into the catalog"
       },

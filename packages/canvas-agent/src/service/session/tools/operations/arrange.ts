@@ -1,6 +1,6 @@
 /**
  * The Arrange group — `move_to`, `move_by`, `resize`, `match_size`, `align`, `space_out`
- * (docs/30-agent-layout/50-tool-surface/10-gestures §Arrange).
+ * (docs/10-system-design/70-agent-tool-surface/20-gestures §Arrange).
  *
  * These are the six gestures that write geometry and nothing else, so they
  * share three rules that live here rather than being restated per descriptor:

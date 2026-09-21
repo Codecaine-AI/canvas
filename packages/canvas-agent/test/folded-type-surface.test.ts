@@ -5,7 +5,7 @@
  * pins the boundary — no formatter the model reads may show the document's
  * `{ type: "icon", icon }` split, and `memory` must mean the same drawing
  * going in as coming out
- * (docs/30-agent-layout/50-tool-surface/10-gestures §Place).
+ * (docs/10-system-design/70-agent-tool-surface/20-gestures §Place).
  */
 import { describe, expect, test } from "bun:test";
 

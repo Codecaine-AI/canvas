@@ -8,9 +8,6 @@
       "id": "b-kernel-root",
       "type": "paragraph",
       "props": {
-        "covers": "The live layout session end to end: scope resolution, draft page-frame injection, per-run boot perception, the five-phase workflow and why each phase exists, the board description and annotation threads as the conversation medium, the thirty-two-tool gesture runtime, typed-gesture lowering, tiered operation results, painted-extent cameras, static rendering, and the finalize gates that hand a cumulative proposal to the studio.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "layout session",
           "five-phase workflow",
@@ -21,10 +18,12 @@
           "painted-extent camera",
           "static SVG renderer",
           "proposal-ready"
-        ]
+        ],
+        "covers": "The live layout session end to end: scope resolution, draft page-frame injection, per-run boot perception, the five-phase workflow and why each phase exists, the board description and annotation threads as the conversation medium, the thirty-two-tool gesture runtime, typed-gesture lowering, tiered operation results, painted-extent cameras, static rendering, and the finalize gates that hand a cumulative proposal to the studio.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
-        "b-kernel-title-1",
         "b-kernel-lede-2",
         "b-kernel-assumptions-3",
         "b-kernel-shape-heading-4",
@@ -84,19 +83,6 @@
         "b-kernel-review-preview-43",
         "b-kernel-review-verdict-44"
       ]
-    },
-    "b-kernel-title-1": {
-      "id": "b-kernel-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "The session and the kernel"
-        }
-      ],
-      "children": []
     },
     "b-kernel-lede-2": {
       "id": "b-kernel-lede-2",
@@ -265,6 +251,285 @@
       "text": [
         {
           "insert": "The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. Workflow contains five nested phase blocks—orientate, plan, build, qa, and finalize—and each phase carries objective, steps, and constraints. The phases run as a loop navigated by state rather than by turn count: a phase with nothing to do is skipped, and a problem found late sends the run back to the phase that can fix it. There is no separate rules section; phase constraints own those requirements. Build is sections-first: the section skeleton goes down first, content fills one section at a time with each render judged, a finished region closes with fit_section, then connections, labels, and styling follow.\n\nFive tagged blocks form the boot text, with every child line indented four spaces: editor_state describes the instruction, baseline, selection, resolved scope frame, boundary-edge count, and optional viewport; user_requests is the status-bearing annotation queue; capabilities is material then gestures — the four kind blocks (sections, stickies, objects, connections) each with description, named functionality topics, generated vocabulary or fields where applicable, and tips, naming no tools; followed by one gestures block holding a child per verb group, derived from the registration roster; style_guide contains the single nested aesthetic topic; and board_state contains the full, untruncated board digest followed by the current lint report. The object roster lists bare type names so the agent chooses geometry; icon glyphs and colors are enumerated one per line. During editing the standing picture is pushed rather than fetched: each turn's state block carries the live board digest, the cumulative diff, the current findings, the request queue, and a render of the board as it stands, so recall costs no tool call and look is spent on a close-up instead."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-loop-heading-13": {
+      "id": "b-dir-loop-heading-13",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Why the loop has these five phases"
+        }
+      ],
+      "children": []
+    },
+    "b-dir-loop-intro-14": {
+      "id": "b-dir-loop-intro-14",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The workflow in "
+        },
+        {
+          "insert": "prompt/system.md",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/prompt/system.md"
+            }
+          }
+        },
+        {
+          "insert": " runs orientate, plan, build, qa, finalize. The division is not arbitrary sequencing: each phase isolates one kind of judgment so that a failure in one does not contaminate the others."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-phase-orientate-15": {
+      "id": "b-dir-phase-orientate-15",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Orientate",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " separates understanding from acting. Reading the instruction, the open requests, the board, and the description is its own step because a run that starts editing before it knows what the diagram is trying to say produces confident work on the wrong premise."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-phase-plan-16": {
+      "id": "b-dir-phase-plan-16",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Plan",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " separates decomposition from placement. Choosing which sections carry the message, which pieces belong in each, and which vocabulary — types, icons, colors — expresses that process is the intellectual work the intent-level ask delegates. Doing it while placing objects collapses it into whatever the first few coordinates happened to suggest."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-phase-build-17": {
+      "id": "b-dir-phase-build-17",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Build",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " separates working from pretty. Its objective is a diagram that is correct and complete: sections down first, content filled section by section in reading order, then connections, then labels and styling. It is judged on whether the thing says the right thing, not on whether it looks finished."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-phase-qa-18": {
+      "id": "b-dir-phase-qa-18",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "QA",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " separates aesthetics from correctness, and is judged from renders rather than from the digest. Diagnostics own the hard findings; this pass owns whether the board actually looks clean — uniform spacing, peers on one register, matched sizes, wires routed the way someone drawing by hand would route them, elbows square and few. A clean lint report is not the same as a clean-looking board, which is exactly why the aesthetic judgment gets a phase of its own."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-phase-finalize-19": {
+      "id": "b-dir-phase-finalize-19",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Finalize",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " separates shipping from checking that the picture communicates. It is an explain-through: walk the diagram as if explaining it to someone, hold that walk against the description, and see whether information really flows the way the description claims. A mismatch means one of the two is wrong and sends the run back into the loop. Committing is the exit condition of this phase, not a phase of its own."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-loop-reentry-20": {
+      "id": "b-dir-loop-reentry-20",
+      "type": "callout",
+      "props": {
+        "kind": "observation",
+        "title": "State navigates the loop, not turn count"
+      },
+      "text": [
+        {
+          "insert": "The phases are a loop entered wherever the board needs work, not a checklist walked once. A phase with nothing to do is skipped — a small tweak may need no planning at all — and a problem found late sends the run back to the phase that can fix it and forward again through the ones after it. That re-entry is what lets one mechanism serve both a fresh build and a two-line correction on an existing board, and it is why the agent reads the pushed state block and the result that just landed to decide where it is, rather than tracking its own position."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-description-heading-21": {
+      "id": "b-dir-description-heading-21",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The board description"
+        }
+      ],
+      "children": []
+    },
+    "b-dir-description-intent-22": {
+      "id": "b-dir-description-intent-22",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The description is a small living document: what the diagram represents, its pieces, and how it reads. It is written as the board is built rather than reported afterwards, and trued up before a commit — the account of the work in progress, kept honest as the shape settles. Its first version is essentially the intake, drawn from what the user asked for; a board with no description has simply not been described yet. It is loosely templated markdown, guided by the prompt rather than enforced by schema."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-description-terms-23": {
+      "id": "b-dir-description-terms-23",
+      "type": "callout",
+      "props": {
+        "kind": "constraint",
+        "severity": "soft",
+        "title": "The description reads in the diagram's own terms"
+      },
+      "text": [
+        {
+          "insert": "There is no house reading direction to impose. A diagram may run linear, layered, branching, or circular, so the description says how this one flows instead of forcing it into top-to-bottom or left-to-right vocabulary it does not fit. The same restraint governs the plan phase: the agent decides how a diagram reads and says so in a sentence, and the arrows follow that choice."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-description-reentry-24": {
+      "id": "b-dir-description-reentry-24",
+      "type": "callout",
+      "props": {
+        "kind": "observation",
+        "title": "The description is the re-entry ground"
+      },
+      "text": [
+        {
+          "insert": "It serves two purposes at once. A returning agent orientates from the description instead of reverse-engineering intent out of geometry — the geometry is only the description's current expression, not its source. And it is the ground for clarifying exchanges: when a question is asked about the board, the description is the shared text both sides are arguing about. It surfaces in the AI panel ("
+        },
+        {
+          "insert": "packages/studio/src/agent/AgentSidebar.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/agent/AgentSidebar.tsx"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-annotations-heading-25": {
+      "id": "b-dir-annotations-heading-25",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Annotations are the conversation medium"
+        }
+      ],
+      "children": []
+    },
+    "b-dir-annotation-threads-26": {
+      "id": "b-dir-annotation-threads-26",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "An annotation is a conversation anchored to an object, and it runs in both directions. Either party can open one; the record carries an opening post, its author, everything said since, and a status that closes it ("
+        },
+        {
+          "insert": "packages/canvas/src/state/schema/annotations.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/annotations.ts"
+            }
+          }
+        },
+        {
+          "insert": "). The user posts in a thread; the agent can reply with a question, resolve the thread, or answer it by editing the board. Anchoring matters: a question about a particular part of a diagram belongs on that part of the diagram, where the answer is obvious in context, rather than in a chat log the user has to re-situate."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-annotation-restraint-27": {
+      "id": "b-dir-annotation-restraint-27",
+      "type": "callout",
+      "props": {
+        "kind": "constraint",
+        "severity": "hard",
+        "title": "Restraint is the point of the feature"
+      },
+      "text": [
+        {
+          "insert": "Agent-opened threads are for the few things that genuinely need the operator to decide. Asking whether every name is right, object by object, is a failure of judgment rather than diligence, and a board strewn with pins is a worse outcome than a board with one good question on it. Over-annotating is a UX failure the prompt guards against explicitly, not an excess to be tolerated."
+        }
+      ],
+      "children": []
+    },
+    "b-dir-annotation-nonblocking-28": {
+      "id": "b-dir-annotation-nonblocking-28",
+      "type": "callout",
+      "props": {
+        "kind": "constraint",
+        "severity": "hard",
+        "title": "Threads never block a run"
+      },
+      "text": [
+        {
+          "insert": "The agent leaves the question, proceeds on its best guess, and names the open question in the finalize message. The run does not wait for an answer. The user replies on their own time, and the next run picks the thread up while orientating. Asynchrony is what makes anchored questions affordable: because asking costs the run nothing, the agent can ask when it genuinely does not know instead of guessing to avoid a stall."
         }
       ],
       "children": []
@@ -736,280 +1001,6 @@
       "text": [
         {
           "insert": "Accept re-reads the saved canvas. If the baseline hash still matches, the store returns the proposal's CanvasAgentPatchOperation array to the studio. If the file changed, accept permits the handoff only when every baseline-scoped object still exists with the same geometry; otherwise it returns a conflict and the operator must run against the current board. Reject marks the session rejected without returning a patch."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-loop-heading-13": {
-      "id": "b-dir-loop-heading-13",
-      "type": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "Why the loop has these five phases"
-        }
-      ],
-      "children": []
-    },
-    "b-dir-loop-intro-14": {
-      "id": "b-dir-loop-intro-14",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "The workflow in "
-        },
-        {
-          "insert": "prompt/system.md",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/catalog/layout-editor/prompt/system.md"
-            }
-          }
-        },
-        {
-          "insert": " runs orientate, plan, build, qa, finalize. The division is not arbitrary sequencing: each phase isolates one kind of judgment so that a failure in one does not contaminate the others."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-phase-orientate-15": {
-      "id": "b-dir-phase-orientate-15",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "Orientate",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " separates understanding from acting. Reading the instruction, the open requests, the board, and the description is its own step because a run that starts editing before it knows what the diagram is trying to say produces confident work on the wrong premise."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-phase-plan-16": {
-      "id": "b-dir-phase-plan-16",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "Plan",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " separates decomposition from placement. Choosing which sections carry the message, which pieces belong in each, and which vocabulary — types, icons, colors — expresses that process is the intellectual work the intent-level ask delegates. Doing it while placing objects collapses it into whatever the first few coordinates happened to suggest."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-phase-build-17": {
-      "id": "b-dir-phase-build-17",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "Build",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " separates working from pretty. Its objective is a diagram that is correct and complete: sections down first, content filled section by section in reading order, then connections, then labels and styling. It is judged on whether the thing says the right thing, not on whether it looks finished."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-phase-qa-18": {
-      "id": "b-dir-phase-qa-18",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "QA",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " separates aesthetics from correctness, and is judged from renders rather than from the digest. Diagnostics own the hard findings; this pass owns whether the board actually looks clean — uniform spacing, peers on one register, matched sizes, wires routed the way someone drawing by hand would route them, elbows square and few. A clean lint report is not the same as a clean-looking board, which is exactly why the aesthetic judgment gets a phase of its own."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-phase-finalize-19": {
-      "id": "b-dir-phase-finalize-19",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "Finalize",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " separates shipping from checking that the picture communicates. It is an explain-through: walk the diagram as if explaining it to someone, hold that walk against the description, and see whether information really flows the way the description claims. A mismatch means one of the two is wrong and sends the run back into the loop. Committing is the exit condition of this phase, not a phase of its own."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-loop-reentry-20": {
-      "id": "b-dir-loop-reentry-20",
-      "type": "observation",
-      "props": {
-        "title": "State navigates the loop, not turn count"
-      },
-      "text": [
-        {
-          "insert": "The phases are a loop entered wherever the board needs work, not a checklist walked once. A phase with nothing to do is skipped — a small tweak may need no planning at all — and a problem found late sends the run back to the phase that can fix it and forward again through the ones after it. That re-entry is what lets one mechanism serve both a fresh build and a two-line correction on an existing board, and it is why the agent reads the pushed state block and the result that just landed to decide where it is, rather than tracking its own position."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-description-heading-21": {
-      "id": "b-dir-description-heading-21",
-      "type": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "The board description"
-        }
-      ],
-      "children": []
-    },
-    "b-dir-description-intent-22": {
-      "id": "b-dir-description-intent-22",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "The description is a small living document: what the diagram represents, its pieces, and how it reads. It is written as the board is built rather than reported afterwards, and trued up before a commit — the account of the work in progress, kept honest as the shape settles. Its first version is essentially the intake, drawn from what the user asked for; a board with no description has simply not been described yet. It is loosely templated markdown, guided by the prompt rather than enforced by schema."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-description-terms-23": {
-      "id": "b-dir-description-terms-23",
-      "type": "constraint",
-      "props": {
-        "severity": "soft",
-        "title": "The description reads in the diagram's own terms"
-      },
-      "text": [
-        {
-          "insert": "There is no house reading direction to impose. A diagram may run linear, layered, branching, or circular, so the description says how this one flows instead of forcing it into top-to-bottom or left-to-right vocabulary it does not fit. The same restraint governs the plan phase: the agent decides how a diagram reads and says so in a sentence, and the arrows follow that choice."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-description-reentry-24": {
-      "id": "b-dir-description-reentry-24",
-      "type": "observation",
-      "props": {
-        "title": "The description is the re-entry ground"
-      },
-      "text": [
-        {
-          "insert": "It serves two purposes at once. A returning agent orientates from the description instead of reverse-engineering intent out of geometry — the geometry is only the description's current expression, not its source. And it is the ground for clarifying exchanges: when a question is asked about the board, the description is the shared text both sides are arguing about. It surfaces in the AI panel ("
-        },
-        {
-          "insert": "packages/studio/src/agent/AgentSidebar.tsx",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/studio/src/agent/AgentSidebar.tsx"
-            }
-          }
-        },
-        {
-          "insert": ")."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-annotations-heading-25": {
-      "id": "b-dir-annotations-heading-25",
-      "type": "heading",
-      "props": {
-        "level": 2
-      },
-      "text": [
-        {
-          "insert": "Annotations are the conversation medium"
-        }
-      ],
-      "children": []
-    },
-    "b-dir-annotation-threads-26": {
-      "id": "b-dir-annotation-threads-26",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "An annotation is a conversation anchored to an object, and it runs in both directions. Either party can open one; the record carries an opening post, its author, everything said since, and a status that closes it ("
-        },
-        {
-          "insert": "packages/canvas/src/state/schema/annotations.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/state/schema/annotations.ts"
-            }
-          }
-        },
-        {
-          "insert": "). The user posts in a thread; the agent can reply with a question, resolve the thread, or answer it by editing the board. Anchoring matters: a question about a particular part of a diagram belongs on that part of the diagram, where the answer is obvious in context, rather than in a chat log the user has to re-situate."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-annotation-restraint-27": {
-      "id": "b-dir-annotation-restraint-27",
-      "type": "constraint",
-      "props": {
-        "severity": "hard",
-        "title": "Restraint is the point of the feature"
-      },
-      "text": [
-        {
-          "insert": "Agent-opened threads are for the few things that genuinely need the operator to decide. Asking whether every name is right, object by object, is a failure of judgment rather than diligence, and a board strewn with pins is a worse outcome than a board with one good question on it. Over-annotating is a UX failure the prompt guards against explicitly, not an excess to be tolerated."
-        }
-      ],
-      "children": []
-    },
-    "b-dir-annotation-nonblocking-28": {
-      "id": "b-dir-annotation-nonblocking-28",
-      "type": "constraint",
-      "props": {
-        "severity": "hard",
-        "title": "Threads never block a run"
-      },
-      "text": [
-        {
-          "insert": "The agent leaves the question, proceeds on its best guess, and names the open question in the finalize message. The run does not wait for an answer. The user replies on their own time, and the next run picks the thread up while orientating. Asynchrony is what makes anchored questions affordable: because asking costs the run nothing, the agent can ask when it genuinely does not know instead of guessing to avoid a stall."
         }
       ],
       "children": []

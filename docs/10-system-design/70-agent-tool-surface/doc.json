@@ -8,9 +8,6 @@
       "id": "b-ats-root",
       "type": "paragraph",
       "props": {
-        "covers": "The layout agent's tool surface and the edit it serves: how one scoped AI-driven canvas edit moves from operator instruction to a validated cumulative proposal, why the thirty-two tools are factored by editing gesture rather than by CRUD per kind, the full roster, the calls the surface absorbs, and the scope it deliberately excludes.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "scoped canvas edit",
           "deliberate perception",
@@ -20,11 +17,13 @@
           "painted-extent camera",
           "cumulative proposal",
           "surface scope"
-        ]
+        ],
+        "covers": "The layout agent's tool surface and the edit it serves: how one scoped AI-driven canvas edit moves from operator instruction to a validated cumulative proposal, why the thirty-two tools are factored by editing gesture rather than by CRUD per kind, the full roster, the calls the surface absorbs, and the scope it deliberately excludes.",
+        "format": "mdx",
+        "type": "design"
       },
       "text": [],
       "children": [
-        "b-overview-title-1",
         "b-overview-lede-2",
         "b-overview-sequence-heading-3",
         "b-overview-sequence-intro-4",
@@ -69,19 +68,6 @@
         "b-ts-ov-tier-pipeline-24"
       ]
     },
-    "b-overview-title-1": {
-      "id": "b-overview-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "The agent tool surface"
-        }
-      ],
-      "children": []
-    },
     "b-overview-lede-2": {
       "id": "b-overview-lede-2",
       "type": "paragraph",
@@ -119,10 +105,11 @@
     },
     "b-overview-sequence-mermaid-5": {
       "id": "b-overview-sequence-mermaid-5",
-      "type": "mermaid",
+      "type": "callout",
       "props": {
-        "title": "One scoped edit, from instruction to proposal",
-        "caption": "The model edits a session draft through typed single-operation tools, judges the whole board from the render riding each state block, and spends look on one framed region at a time; finalize proposes the cumulative baseline-to-draft diff."
+        "caption": "The model edits a session draft through typed single-operation tools, judges the whole board from the render riding each state block, and spends look on one framed region at a time; finalize proposes the cumulative baseline-to-draft diff.",
+        "kind": "mermaid",
+        "title": "One scoped edit, from instruction to proposal"
       },
       "text": [
         {
@@ -241,8 +228,9 @@
     },
     "b-overview-handoff-observation-12": {
       "id": "b-overview-handoff-observation-12",
-      "type": "observation",
+      "type": "callout",
       "props": {
+        "kind": "observation",
         "title": "The handoff is a cumulative patch"
       },
       "text": [
@@ -434,8 +422,9 @@
     },
     "b-ts-ov-trace-5": {
       "id": "b-ts-ov-trace-5",
-      "type": "observation",
+      "type": "callout",
       "props": {
+        "kind": "observation",
         "title": "A trace reads like an editing session"
       },
       "text": [
@@ -532,7 +521,6 @@
       "id": "b-ts-ov-roster-table-8",
       "type": "structured-table",
       "props": {
-        "title": "Thirty-two tools, in registration order",
         "columns": [
           "tool",
           "group",
@@ -699,7 +687,8 @@
             "Perceive, ask, finish",
             "end the run, with a proposal or without one"
           ]
-        ]
+        ],
+        "title": "Thirty-two tools, in registration order"
       },
       "children": []
     },
@@ -1029,8 +1018,9 @@
     },
     "b-ts-ov-scope-close-19": {
       "id": "b-ts-ov-scope-close-19",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "title": "The roster is the boundary"
       },
       "text": [

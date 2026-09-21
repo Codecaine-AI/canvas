@@ -8,9 +8,6 @@
       "id": "b-language-root",
       "type": "paragraph",
       "props": {
-        "covers": "The board layout vocabulary: a compact descriptive notation for composition patterns — its three-part shape (tree, alignment facts, arrows), reference numbers, statement anatomy, and the nine construct pages that define each statement.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "layout vocabulary",
           "description shape",
@@ -18,10 +15,12 @@
           "statement anatomy",
           "nesting",
           "notation conventions"
-        ]
+        ],
+        "covers": "The board layout vocabulary: a compact descriptive notation for composition patterns — its three-part shape (tree, alignment facts, arrows), reference numbers, statement anatomy, and the nine construct pages that define each statement.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
-        "b-language-title-1",
         "b-language-intro-2",
         "b-language-clarity-decision-3",
         "b-language-shape-heading-4",
@@ -51,19 +50,6 @@
         "b-language-deferred-sparse-28",
         "b-language-lab-pointer-29"
       ]
-    },
-    "b-language-title-1": {
-      "id": "b-language-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "The board layout vocabulary"
-        }
-      ],
-      "children": []
     },
     "b-language-intro-2": {
       "id": "b-language-intro-2",
@@ -101,8 +87,9 @@
     },
     "b-language-clarity-decision-3": {
       "id": "b-language-clarity-decision-3",
-      "type": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "Vocabulary in practice"
       },
@@ -462,7 +449,6 @@
       "id": "b-language-anatomy-table-16",
       "type": "structured-table",
       "props": {
-        "title": "Anatomy of an item line",
         "columns": [
           "token",
           "meaning"
@@ -492,7 +478,8 @@
             "at=C",
             "compass position — where in the region"
           ]
-        ]
+        ],
+        "title": "Anatomy of an item line"
       },
       "children": []
     },
@@ -511,7 +498,6 @@
       "id": "b-language-statements-table-18",
       "type": "structured-table",
       "props": {
-        "title": "The nine statements",
         "columns": [
           "statement",
           "meaning"
@@ -553,7 +539,8 @@
             "arrows",
             "the block of connections — always last, even when empty"
           ]
-        ]
+        ],
+        "title": "The nine statements"
       },
       "children": []
     },

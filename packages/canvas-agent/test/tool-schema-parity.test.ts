@@ -12,9 +12,9 @@
  *     takes the close-up, and an edit returns text.
  *
  * The roster count is asserted here too, so a tool added without a home in the
- * roster (docs/30-agent-layout/50-tool-surface/00-overview) has to be argued
+ * roster (docs/10-system-design/70-agent-tool-surface) has to be argued
  * for, and the pinned order is the registration order
- * (docs/30-agent-layout/50-tool-surface/40-registration-and-seam).
+ * (docs/30-implementation/80-canvas-agent).
  */
 import { describe, expect, test } from "bun:test";
 

@@ -8,9 +8,6 @@
       "id": "b-ts-ge-root",
       "type": "paragraph",
       "props": {
-        "covers": "The per-group gesture contracts: bare placement payloads and the folded shape vocabulary, the geometry gestures and their text-fit warnings, the kind-agnostic content gestures, section framing and the lock matrix, the six edge gestures with the fresh-polyline contract, the delete cascades, and the perception, annotation, and run-ending calls.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "gesture contract",
           "folded type vocabulary",
@@ -18,10 +15,12 @@
           "fresh polyline",
           "framed close-up",
           "finalize gate"
-        ]
+        ],
+        "covers": "The per-group gesture contracts: bare placement payloads and the folded shape vocabulary, the geometry gestures and their text-fit warnings, the kind-agnostic content gestures, section framing and the lock matrix, the six edge gestures with the fresh-polyline contract, the delete cascades, and the perception, annotation, and run-ending calls.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
-        "b-ts-ge-title-1",
         "b-ts-ge-lede-2",
         "b-ts-ge-place-heading-3",
         "b-ts-ge-place-payloads-4",
@@ -74,19 +73,6 @@
         "b-ts-ge-finish-finalize-51",
         "b-ts-ge-finish-assumption-52"
       ]
-    },
-    "b-ts-ge-title-1": {
-      "id": "b-ts-ge-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "The gestures"
-        }
-      ],
-      "children": []
     },
     "b-ts-ge-lede-2": {
       "id": "b-ts-ge-lede-2",
@@ -350,8 +336,9 @@
     },
     "b-ts-ge-place-collision-9": {
       "id": "b-ts-ge-place-collision-9",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "title": "One name, one thing"
       },
       "text": [
@@ -466,8 +453,9 @@
     },
     "b-ts-ge-arrange-sizerules-15": {
       "id": "b-ts-ge-arrange-sizerules-15",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "title": "Size has rules"
       },
       "text": [
@@ -940,7 +928,6 @@
       "id": "b-ts-ge-sections-lock-table-29",
       "type": "structured-table",
       "props": {
-        "title": "The lock matrix",
         "columns": [
           "the gesture writes",
           "gated when"
@@ -970,7 +957,8 @@
             "a placement (place_*, clone)",
             "never. A new id cannot be under a lock, and the frame it appears to land in is decided by membership reconcile, which already refuses to adopt into a section locked \"all\""
           ]
-        ]
+        ],
+        "title": "The lock matrix"
       },
       "children": []
     },
@@ -1251,8 +1239,9 @@
     },
     "b-ts-ge-edges-fresh-39": {
       "id": "b-ts-ge-edges-fresh-39",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "title": "The fresh-polyline contract"
       },
       "text": [
@@ -1556,8 +1545,9 @@
     },
     "b-ts-ge-finish-look-board-48": {
       "id": "b-ts-ge-finish-look-board-48",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "title": "look never renders the whole board"
       },
       "text": [
@@ -1731,9 +1721,10 @@
     },
     "b-ts-ge-finish-assumption-52": {
       "id": "b-ts-ge-finish-assumption-52",
-      "type": "assumption",
+      "type": "callout",
       "props": {
         "confidence": "medium",
+        "kind": "assumption",
         "title": "Finalize does not require a prior look"
       },
       "text": [
