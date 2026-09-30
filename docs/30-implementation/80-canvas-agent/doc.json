@@ -55,6 +55,9 @@
         "b-agent-firewall-decision-31",
         "b-agent-firewall-why-32",
         "b-agent-firewall-applies-33",
+        "b-agent-toolkit-decision-35",
+        "b-agent-toolkit-why-36",
+        "b-agent-toolkit-applies-37",
         "b-agent-authoring-decision",
         "b-agent-authoring-why",
         "b-agent-authoring-applies",
@@ -1061,6 +1064,164 @@
       ],
       "children": []
     },
+    "b-agent-toolkit-decision-35": {
+      "id": "b-agent-toolkit-decision-35",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": the file-session toolkit in "
+        },
+        {
+          "insert": "packages/canvas-agent/src/toolkit/index.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/toolkit/index.ts",
+              "label": "packages/canvas-agent/src/toolkit/index.ts"
+            }
+          }
+        },
+        {
+          "insert": " is a second host for "
+        },
+        {
+          "insert": "createToolRuntime",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and it loads without the kernel. The module and everything it reaches stay free of "
+        },
+        {
+          "insert": "@agent-kernel/*",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "service/kernel.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "service/session/store.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and React. It imports session internals by deep path, never through the "
+        },
+        {
+          "insert": "service/session",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " barrel, and takes "
+        },
+        {
+          "insert": "LayoutSession",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as a type only. It forwards the agent's tool descriptors unchanged and omits "
+        },
+        {
+          "insert": "finalize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-toolkit-why-36": {
+      "id": "b-agent-toolkit-why-36",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": an external host such as the "
+        },
+        {
+          "insert": "Canvas MCP",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/85-canvas-mcp",
+              "label": "Canvas MCP"
+            }
+          }
+        },
+        {
+          "insert": " runs the agent's tools in a process that has no kernel. The "
+        },
+        {
+          "insert": "service/session",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " barrel re-exports the kernel-backed store, so one barrel import would pull the kernel into that process."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-toolkit-applies-37": {
+      "id": "b-agent-toolkit-applies-37",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "toolkit/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and every module it imports, including every future session helper the toolkit needs, which it imports by deep path."
+        }
+      ],
+      "children": []
+    },
     "b-agent-authoring-decision": {
       "id": "b-agent-authoring-decision",
       "type": "paragraph",
@@ -1080,7 +1241,16 @@
           }
         },
         {
-          "insert": ". Its exported getCanvasAuthoringGuidance function returns named topics, their rendered text, and a content fingerprint without starting a kernel. The internal agent consumes the same topics through individual context loaders. This export prepares external reuse but does not itself implement an MCP."
+          "insert": ". Its exported getCanvasAuthoringGuidance function returns named topics, their rendered text, and a content fingerprint without starting a kernel. The internal agent consumes the same topics through individual context loaders. The Canvas MCP serves the same topics to external agents through its "
+        },
+        {
+          "insert": "canvas_guidance",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " tool."
         }
       ],
       "children": []
@@ -1115,7 +1285,7 @@
           }
         },
         {
-          "insert": ". Future external adapters consume the shared authoring export rather than copying the internal system prompt. Changes to shared guidance and its vocabulary dependencies are included in evaluation style fingerprints. Core philosophy and the quality checklist are canonical Prompt Kit content covered by the prompt fingerprint."
+          "insert": ". External adapters such as the Canvas MCP consume the shared authoring export rather than copying the internal system prompt. Changes to shared guidance and its vocabulary dependencies are included in evaluation style fingerprints. Core philosophy and the quality checklist are canonical Prompt Kit content covered by the prompt fingerprint."
         }
       ],
       "children": []
@@ -1172,6 +1342,24 @@
         },
         {
           "insert": " owns digest, lints, document diff, and scope; "
+        },
+        {
+          "insert": "toolkit/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " binds the same tools to a canvas file for hosts outside the kernel; "
+        },
+        {
+          "insert": "authoring/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " holds the shared guidance topics; "
         },
         {
           "insert": "protocol.ts",

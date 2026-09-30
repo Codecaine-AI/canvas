@@ -17,6 +17,7 @@
         "mcp-guide-5",
         "mcp-guide-6",
         "mcp-guide-7",
+        "mcp-guide-canvas-mcp-9",
         "mcp-guide-8"
       ]
     },
@@ -110,6 +111,39 @@
       "text": [
         {
           "insert": "This connection edits documentation and exposes component operations already supported by the Docs service. It does not replace the standalone Canvas authoring service. Use the shared Docs workbench to inspect the same editing authority as the MCP clients."
+        }
+      ],
+      "children": []
+    },
+    "mcp-guide-canvas-mcp-9": {
+      "id": "mcp-guide-canvas-mcp-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Boards under "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are edited through a different server. "
+        },
+        {
+          "insert": "Canvas MCP",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/85-canvas-mcp",
+              "label": "Canvas MCP"
+            }
+          }
+        },
+        {
+          "insert": " exposes the layout editor's tools for those files and compares the two connections."
         }
       ],
       "children": []

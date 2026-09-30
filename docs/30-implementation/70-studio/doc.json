@@ -8,15 +8,15 @@
       "id": "b-studio-root-0",
       "type": "paragraph",
       "props": {
-        "covers": "The structure of packages/studio: shared server handlers mounted by both shells, the dev flag over development-only surfaces, and per-surface client folders.",
-        "type": "implementation",
         "concepts": [
           "studio",
           "app-server-split",
           "shared-handlers",
           "dev-flag",
           "surface-folders"
-        ]
+        ],
+        "covers": "The structure of packages/studio: shared server handlers mounted by both shells, the dev flag over development-only surfaces, and per-surface client folders.",
+        "type": "implementation"
       },
       "children": [
         "b-studio-role-1",
@@ -27,6 +27,9 @@
         "b-studio-handlers-decision-6",
         "b-studio-handlers-why-7",
         "b-studio-handlers-applies-8",
+        "b-studio-watch-decision-15",
+        "b-studio-watch-why-16",
+        "b-studio-watch-applies-17",
         "b-studio-dev-flag-decision-9",
         "b-studio-dev-flag-why-10",
         "b-studio-dev-flag-applies-11",
@@ -234,6 +237,124 @@
         },
         {
           "insert": " — including every future API surface."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-watch-decision-15": {
+      "id": "b-studio-watch-decision-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": external-change notification is a shared module, "
+        },
+        {
+          "insert": "packages/studio/server/canvas-file-watch.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/server/canvas-file-watch.ts",
+              "label": "packages/studio/server/canvas-file-watch.ts"
+            }
+          }
+        },
+        {
+          "insert": ", that turns file events into "
+        },
+        {
+          "insert": "canvas:file-changed",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " payloads and takes its transport from the shell. The Vite dev server wires it to its file watcher and HMR channel in "
+        },
+        {
+          "insert": "vite.config.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The Electron shell mounts "
+        },
+        {
+          "insert": "canvas-file-api.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " without it, so desktop has the revision check and no live reload. This is the one current exception to identical web and desktop behavior."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-watch-why-16": {
+      "id": "b-studio-watch-why-16",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": the file API reports the hash of each write through "
+        },
+        {
+          "insert": "onCanvasWrite",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " before the write lands, and the notifier uses that record to tell Studio's own saves from external writers. With the filter in "
+        },
+        {
+          "insert": "server/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a shell supplies only a watcher and a way to reach the client."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-watch-applies-17": {
+      "id": "b-studio-watch-applies-17",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/studio/server/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", including a future Electron watcher, which calls the same notifier instead of adding shell-specific filtering."
         }
       ],
       "children": []

@@ -4,18 +4,53 @@
   "title": "Persistence and embedding",
   "root": "b-engine-persist-root",
   "blocks": {
-    "b-engine-persist-title-1": {
-      "id": "b-engine-persist-title-1",
-      "type": "heading",
+    "b-engine-persist-root": {
+      "id": "b-engine-persist-root",
+      "type": "paragraph",
       "props": {
-        "level": 1
+        "concepts": [
+          "/api/canvases",
+          "canvas.json",
+          "autosave",
+          "SVG preview",
+          "view-only routes",
+          "iframe embedding"
+        ],
+        "covers": "How canvas documents persist and surface: the /api/canvases file API contract, canvases/*.canvas.json as the at-rest format, the autosave contract, deterministic SVG previews, and the editor, view-only, and iframe embedding surfaces.",
+        "format": "mdx",
+        "type": "design"
       },
-      "text": [
-        {
-          "insert": "Persistence and embedding"
-        }
-      ],
-      "children": []
+      "children": [
+        "b-engine-persist-intro-2",
+        "b-engine-persist-api-heading-3",
+        "b-engine-persist-api-body-4",
+        "b-engine-persist-api-list-5",
+        "b-engine-persist-api-get-6",
+        "b-engine-persist-api-post-7",
+        "b-engine-persist-api-delete-8",
+        "b-engine-persist-api-invariant-9",
+        "b-engine-persist-format-heading-10",
+        "b-engine-persist-format-body-11",
+        "b-engine-persist-autosave-heading-12",
+        "b-engine-persist-autosave-body-13",
+        "b-engine-persist-revisions-heading-21",
+        "b-engine-persist-revisions-body-22",
+        "b-engine-persist-revisions-stale-23",
+        "b-engine-persist-revisions-watch-24",
+        "b-engine-persist-revisions-clean-25",
+        "b-engine-persist-revisions-dirty-26",
+        "b-engine-persist-revisions-agent-gate-30",
+        "b-engine-persist-revisions-limits-27",
+        "b-engine-persist-revisions-electron-28",
+        "b-engine-persist-revisions-tabs-29",
+        "b-engine-persist-preview-heading-14",
+        "b-engine-persist-preview-body-15",
+        "b-engine-persist-surfaces-heading-16",
+        "b-engine-persist-surfaces-body-17",
+        "b-engine-persist-surfaces-decision-18",
+        "b-engine-persist-corpus-heading-19",
+        "b-engine-persist-corpus-body-20"
+      ]
     },
     "b-engine-persist-intro-2": {
       "id": "b-engine-persist-intro-2",
@@ -144,7 +179,34 @@
           }
         },
         {
-          "insert": " — streams the file "
+          "insert": " returns "
+        },
+        {
+          "insert": "{ id, contentHash, canvas }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with an "
+        },
+        {
+          "insert": "ETag",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " header. "
+        },
+        {
+          "insert": "contentHash",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the sha256 of the file bytes. The handler reads the whole file before it answers, so the hash and the body name the same bytes. It reads "
         },
         {
           "insert": "without validating on read",
@@ -153,7 +215,7 @@
           }
         },
         {
-          "insert": "; a stored document is trusted at rest."
+          "insert": ", because a stored document is trusted at rest."
         }
       ],
       "children": []
@@ -172,7 +234,7 @@
           }
         },
         {
-          "insert": " — creates, returning "
+          "insert": " creates and returns "
         },
         {
           "insert": "409",
@@ -181,7 +243,7 @@
           }
         },
         {
-          "insert": " if the file already exists; "
+          "insert": " if the file already exists. "
         },
         {
           "insert": "PUT",
@@ -190,7 +252,7 @@
           }
         },
         {
-          "insert": " — replaces. Both validate through "
+          "insert": " replaces. Both validate through "
         },
         {
           "insert": "validateInteractiveCanvasDocument",
@@ -213,7 +275,70 @@
           }
         },
         {
-          "insert": " with the issue list, valid documents are written as pretty-printed JSON."
+          "insert": " with the issue list, and valid documents are written as pretty-printed JSON. A "
+        },
+        {
+          "insert": "PUT",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " that carries "
+        },
+        {
+          "insert": "If-Match",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " writes only when the file on disk still has that content hash. Otherwise it answers "
+        },
+        {
+          "insert": "412",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with the current hash and leaves the file alone. A "
+        },
+        {
+          "insert": "PUT",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " without "
+        },
+        {
+          "insert": "If-Match",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " overwrites. A successful "
+        },
+        {
+          "insert": "PUT",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " returns the new "
+        },
+        {
+          "insert": "contentHash",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -346,6 +471,281 @@
         },
         {
           "insert": " so closing a tab cannot drop the last edit. The trim reports the outcome as Saved or Save failed — retry. Opening a board deep-clones the fetched document and snapshots it for the dirty check."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-revisions-heading-21": {
+      "id": "b-engine-persist-revisions-heading-21",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Revisions and external changes"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-revisions-body-22": {
+      "id": "b-engine-persist-revisions-body-22",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A canvas file can change while an editor has it open: an agent saves through the Canvas MCP, a person edits the JSON, or git checks out another revision. One content hash, the sha256 of the file bytes, names one on-disk revision for every writer. The file API returns it, the layout agent's Accept compares it, and the Canvas MCP compares it before each save. No writer merges."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-revisions-stale-23": {
+      "id": "b-engine-persist-revisions-stale-23",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Studio sends the hash of its last load or save as "
+        },
+        {
+          "insert": "If-Match",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on every autosave. A "
+        },
+        {
+          "insert": "412",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " raises the notice "
+        },
+        {
+          "insert": "Canvas changed on disk",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "Reload",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "Keep mine",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ", and autosave holds the local edits until the operator picks one."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-revisions-watch-24": {
+      "id": "b-engine-persist-revisions-watch-24",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The Vite dev server watches "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " through "
+        },
+        {
+          "insert": "createCanvasChangeNotifier",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/server/canvas-file-watch.ts",
+              "symbol": "createCanvasChangeNotifier"
+            }
+          }
+        },
+        {
+          "insert": ". A changed file is rehashed and announced to the client as a "
+        },
+        {
+          "insert": "canvas:file-changed",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " HMR event carrying the canvas id and the new hash. The file API records the hash of each write before it lands, so Studio's own saves announce nothing."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-revisions-clean-25": {
+      "id": "b-engine-persist-revisions-clean-25",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A board with no pending or in-flight save reloads in place. Studio refetches the file and calls the editor's "
+        },
+        {
+          "insert": "loadDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Undo history, selection, and the active tool reset as on a fresh mount, and the camera stays where it is."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-revisions-dirty-26": {
+      "id": "b-engine-persist-revisions-dirty-26",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A board with unsaved edits shows the same notice instead of reloading. "
+        },
+        {
+          "insert": "Reload",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " drops the local edits and loads the file. "
+        },
+        {
+          "insert": "Keep mine",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " saves the local board without "
+        },
+        {
+          "insert": "If-Match",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and overwrites the external change."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-revisions-agent-gate-30": {
+      "id": "b-engine-persist-revisions-agent-gate-30",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "An unresolved conflict blocks the layout agent. Studio refuses to start an agent run until the operator picks "
+        },
+        {
+          "insert": "Reload",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "Keep mine",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ", because the board in memory is not the file the harness reads. A run would scope against one and patch the other."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-revisions-limits-27": {
+      "id": "b-engine-persist-revisions-limits-27",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Two limits apply to the current shells."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-revisions-electron-28": {
+      "id": "b-engine-persist-revisions-electron-28",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The Electron shell mounts the file API without the watcher and has no HMR channel. It gets the "
+        },
+        {
+          "insert": "412",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " check and no live reload, so an external change surfaces on the next save."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-revisions-tabs-29": {
+      "id": "b-engine-persist-revisions-tabs-29",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A second Studio tab receives no event for the first tab's saves, because Studio's own writes are filtered out. It learns of them from the "
+        },
+        {
+          "insert": "412",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on its next save."
         }
       ],
       "children": []
@@ -523,8 +923,9 @@
     },
     "b-engine-persist-surfaces-decision-18": {
       "id": "b-engine-persist-surfaces-decision-18",
-      "type": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "Keep inline previews static; expand to navigate; edit separately"
       },
@@ -567,45 +968,6 @@
         }
       ],
       "children": []
-    },
-    "b-engine-persist-root": {
-      "id": "b-engine-persist-root",
-      "type": "paragraph",
-      "props": {
-        "covers": "How canvas documents persist and surface: the /api/canvases file API contract, canvases/*.canvas.json as the at-rest format, the autosave contract, deterministic SVG previews, and the editor, view-only, and iframe embedding surfaces.",
-        "format": "mdx",
-        "type": "design",
-        "concepts": [
-          "/api/canvases",
-          "canvas.json",
-          "autosave",
-          "SVG preview",
-          "view-only routes",
-          "iframe embedding"
-        ]
-      },
-      "children": [
-        "b-engine-persist-title-1",
-        "b-engine-persist-intro-2",
-        "b-engine-persist-api-heading-3",
-        "b-engine-persist-api-body-4",
-        "b-engine-persist-api-list-5",
-        "b-engine-persist-api-get-6",
-        "b-engine-persist-api-post-7",
-        "b-engine-persist-api-delete-8",
-        "b-engine-persist-api-invariant-9",
-        "b-engine-persist-format-heading-10",
-        "b-engine-persist-format-body-11",
-        "b-engine-persist-autosave-heading-12",
-        "b-engine-persist-autosave-body-13",
-        "b-engine-persist-preview-heading-14",
-        "b-engine-persist-preview-body-15",
-        "b-engine-persist-surfaces-heading-16",
-        "b-engine-persist-surfaces-body-17",
-        "b-engine-persist-surfaces-decision-18",
-        "b-engine-persist-corpus-heading-19",
-        "b-engine-persist-corpus-body-20"
-      ]
     }
   }
 }

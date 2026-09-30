@@ -1,0 +1,2132 @@
+{
+  "schemaVersion": 1,
+  "id": "doc-4300ccf628a357ce4af24ea315b99f02",
+  "title": "Canvas MCP",
+  "root": "root",
+  "blocks": {
+    "root": {
+      "id": "root",
+      "type": "paragraph",
+      "props": {},
+      "children": [
+        "b-cmcp-role-1",
+        "b-cmcp-sources-2",
+        "b-cmcp-gov-3",
+        "b-cmcp-gov-surface-4",
+        "b-cmcp-gov-persist-5",
+        "b-cmcp-tools-heading-6",
+        "b-cmcp-tools-lede-7",
+        "b-cmcp-tools-table-8",
+        "b-cmcp-tools-verbatim-9",
+        "b-cmcp-tools-tuples-10",
+        "b-cmcp-life-heading-11",
+        "b-cmcp-life-lede-12",
+        "b-cmcp-life-outline-13",
+        "b-cmcp-life-reducer-14",
+        "b-cmcp-life-atomic-15",
+        "b-cmcp-life-residual-16",
+        "b-cmcp-life-baseline-17",
+        "b-cmcp-conflict-heading-18",
+        "b-cmcp-conflict-guard-19",
+        "b-cmcp-conflict-result-20",
+        "b-cmcp-conflict-sticky-21",
+        "b-cmcp-conflict-recover-22",
+        "b-cmcp-conflict-studio-23",
+        "b-cmcp-context-heading-24",
+        "b-cmcp-context-lede-25",
+        "b-cmcp-context-schemas-26",
+        "b-cmcp-context-open-27",
+        "b-cmcp-context-guidance-28",
+        "b-cmcp-workspace-heading-29",
+        "b-cmcp-workspace-lede-30",
+        "b-cmcp-workspace-flag-31",
+        "b-cmcp-workspace-env-32",
+        "b-cmcp-workspace-cwd-33",
+        "b-cmcp-workspace-fallback-34",
+        "b-cmcp-install-heading-35",
+        "b-cmcp-install-lede-36",
+        "b-cmcp-install-claude-37",
+        "b-cmcp-install-claude-code-38",
+        "b-cmcp-install-codex-39",
+        "b-cmcp-install-codex-code-40",
+        "b-cmcp-rel-heading-41",
+        "b-cmcp-rel-lede-42",
+        "b-cmcp-rel-table-43",
+        "b-cmcp-rel-kernel-44",
+        "b-cmcp-rel-docs-45",
+        "b-cmcp-decisions-heading-46",
+        "b-cmcp-verbatim-decision-47",
+        "b-cmcp-verbatim-why-48",
+        "b-cmcp-verbatim-applies-49",
+        "b-cmcp-gaps-heading-50",
+        "b-cmcp-gaps-lede-51",
+        "b-cmcp-gaps-descriptions-52",
+        "b-cmcp-gaps-render-53",
+        "b-cmcp-gaps-requests-54",
+        "b-cmcp-gaps-install-55",
+        "b-cmcp-files-heading-56",
+        "b-cmcp-files-cli-57",
+        "b-cmcp-files-mcp-58",
+        "b-cmcp-files-service-59",
+        "b-cmcp-files-toolkit-60",
+        "b-cmcp-files-authoring-61"
+      ]
+    },
+    "b-cmcp-role-1": {
+      "id": "b-cmcp-role-1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The Canvas MCP is a stdio MCP server that gives an external coding agent the layout editor's own tools against a "
+        },
+        {
+          "insert": "canvases/<id>.canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " file. It runs in-process for one client connection, with no daemon, no kernel, and no model process of its own. Every applied edit saves to the file immediately, so there is no proposal and no Accept step."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-sources-2": {
+      "id": "b-cmcp-sources-2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sources: "
+        },
+        {
+          "insert": "packages/canvas-mcp",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp",
+              "label": "packages/canvas-mcp"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "packages/canvas-agent/src/toolkit/index.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/toolkit/index.ts",
+              "label": "packages/canvas-agent/src/toolkit/index.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gov-3": {
+      "id": "b-cmcp-gov-3",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed by"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gov-surface-4": {
+      "id": "b-cmcp-gov-surface-4",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The agent tool surface",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/70-agent-tool-surface",
+              "label": "The agent tool surface"
+            }
+          }
+        },
+        {
+          "insert": " owns the gesture roster, the parameter schemas, and the result classes this server re-exposes."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gov-persist-5": {
+      "id": "b-cmcp-gov-persist-5",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Persistence and embedding",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/20-engine/50-persistence-and-embedding",
+              "label": "Persistence and embedding"
+            }
+          }
+        },
+        {
+          "insert": " owns the canvas file format, the write validator, and how Studio reacts when another writer changes a file."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-tools-heading-6": {
+      "id": "b-cmcp-tools-heading-6",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Tool Surface"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-tools-lede-7": {
+      "id": "b-cmcp-tools-lede-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The server lists 34 tools: three of its own, then the 31 toolkit tools in the agent's registration order. The toolkit is the agent's 25 operation tools plus six of its seven workflow tools. "
+        },
+        {
+          "insert": "finalize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is left out because a file session has no run to end and no proposal to commit."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-tools-table-8": {
+      "id": "b-cmcp-tools-table-8",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "Tools",
+          "Source",
+          "Role"
+        ],
+        "rows": [
+          [
+            [
+              {
+                "insert": "canvas_list",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Server",
+            "Lists the workspace canvases with id, title, and object count, and marks the open one."
+          ],
+          [
+            [
+              {
+                "insert": "canvas_open",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Server",
+            "Opens one canvas as the active board. Returns the board description, the full digest, the open lint findings, and the file hash."
+          ],
+          [
+            [
+              {
+                "insert": "canvas_guidance",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Server",
+            "Lists the authoring topics, or returns one topic in full."
+          ],
+          [
+            [
+              {
+                "insert": "place_section",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "place_sticky",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "place_shape",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "clone",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "connect",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Toolkit operation",
+            "Place gestures."
+          ],
+          [
+            [
+              {
+                "insert": "move_to",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "move_by",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "resize",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "match_size",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "align",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "space_out",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Toolkit operation",
+            "Arrange gestures."
+          ],
+          [
+            [
+              {
+                "insert": "update_text",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "change_color",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "change_shape",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Toolkit operation",
+            "Content and appearance gestures."
+          ],
+          [
+            [
+              {
+                "insert": "fit_section",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "change_section_border",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "lock",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "unlock",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Toolkit operation",
+            "Section gestures."
+          ],
+          [
+            [
+              {
+                "insert": "style_edge",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "change_connection",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "reroute",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "shift_segment",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "reset_route",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "move_label",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Toolkit operation",
+            "Edge gestures."
+          ],
+          [
+            [
+              {
+                "insert": "delete",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Toolkit operation",
+            "Deletes one object or connection with the cascade its kind implies."
+          ],
+          [
+            [
+              {
+                "insert": "look",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Toolkit workflow",
+            "Frames one region and returns it as PNG image content beside the text readout. It writes nothing."
+          ],
+          [
+            [
+              {
+                "insert": "update_description",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "set_board_title",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Toolkit workflow",
+            "Edit the board description and title. Both save like any edit."
+          ],
+          [
+            [
+              {
+                "insert": "add_annotation",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "reply_annotation",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "resolve_request",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Toolkit workflow",
+            "Open, answer, and dispose annotation threads. Thread content is document content and saves like any edit."
+          ]
+        ],
+        "title": "Canvas MCP tools in listing order"
+      },
+      "children": []
+    },
+    "b-cmcp-tools-verbatim-9": {
+      "id": "b-cmcp-tools-verbatim-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "service.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " builds each toolkit declaration from the agent's descriptor: the name, the label as the MCP title, the description, and the parameter schema. "
+        },
+        {
+          "insert": "callToolkitTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " validates every call against the agent's original schema with "
+        },
+        {
+          "insert": "validateToolArguments",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the check the agent runtime applies before "
+        },
+        {
+          "insert": "execute",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The per-gesture contracts are not repeated on this page."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-tools-tuples-10": {
+      "id": "b-cmcp-tools-tuples-10",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "One rewrite applies to the listed schemas only. TypeBox spells a tuple such as the "
+        },
+        {
+          "insert": "at: [x, y]",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " point as "
+        },
+        {
+          "insert": "items: [a, b]",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "additionalItems: false",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The Anthropic API requires "
+        },
+        {
+          "insert": "items",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to be a schema or a boolean and rejects the whole tool otherwise. "
+        },
+        {
+          "insert": "normalizeTuples",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " rewrites a tuple whose members share one schema into "
+        },
+        {
+          "insert": "items",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " holding that schema, with "
+        },
+        {
+          "insert": "minItems",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "maxItems",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " set to the tuple length. A mixed tuple becomes "
+        },
+        {
+          "insert": "prefixItems",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "items: false",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Both forms accept the same values as the original, and the server still validates against the original."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-life-heading-11": {
+      "id": "b-cmcp-life-heading-11",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Session and Save Lifecycle"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-life-lede-12": {
+      "id": "b-cmcp-life-lede-12",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The service holds one active canvas per server process. "
+        },
+        {
+          "insert": "canvas_open",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " replaces it with a fresh read of the file, and every toolkit call before the first "
+        },
+        {
+          "insert": "canvas_open",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is refused. The session is a complete "
+        },
+        {
+          "insert": "LayoutSession",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " bound to the same "
+        },
+        {
+          "insert": "createToolRuntime",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " the kernel path uses, so the tool bodies run unchanged."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-life-outline-13": {
+      "id": "b-cmcp-life-outline-13",
+      "type": "process-outline",
+      "props": {
+        "steps": [
+          {
+            "text": "Edit a canvas file through the Canvas MCP",
+            "steps": [
+              {
+                "text": "Start the server",
+                "steps": [
+                  {
+                    "text": "`Client` spawns `codecaine-canvas mcp` over stdio"
+                  },
+                  {
+                    "text": "`cli.ts` resolves the workspace directory"
+                  },
+                  {
+                    "text": "`mcp.ts` sends the instructions string at initialize"
+                  }
+                ]
+              },
+              {
+                "text": "Open a canvas",
+                "steps": [
+                  {
+                    "text": "`Client` calls `canvas_open` with a canvas id"
+                  },
+                  {
+                    "text": "`openCanvasFile` reads, validates, and hashes the file"
+                  },
+                  {
+                    "text": "Build the draft and inject a page frame",
+                    "steps": [
+                      {
+                        "text": "The frame is added only when the board has no root section.",
+                        "kind": "note"
+                      },
+                      {
+                        "text": "The injected frame stays in the draft and is never written.",
+                        "kind": "note"
+                      }
+                    ]
+                  },
+                  {
+                    "text": "Resolve the whole board as the scope"
+                  },
+                  {
+                    "text": "Seed the lint baseline and sync the request queue"
+                  },
+                  {
+                    "text": "Return the description, digest, lint findings, and file hash"
+                  }
+                ]
+              },
+              {
+                "text": "Apply one edit",
+                "steps": [
+                  {
+                    "text": "`Client` calls one toolkit tool"
+                  },
+                  {
+                    "text": "`callToolkitTool` validates the arguments against the agent's schema"
+                  },
+                  {
+                    "text": "Run the operation or workflow tool on the draft"
+                  },
+                  {
+                    "text": "Skip the save when the draft did not change",
+                    "steps": [
+                      {
+                        "text": "Errors, no-ops, and `look` leave the draft untouched.",
+                        "kind": "note"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "text": "Persist the edit",
+                "steps": [
+                  {
+                    "text": "`persistCanvasFile` re-reads the file and compares its hash"
+                  },
+                  {
+                    "text": "Refuse the save when the hash differs",
+                    "steps": [
+                      {
+                        "text": "The session stays conflicted until `canvas_open` runs again.",
+                        "kind": "note"
+                      }
+                    ]
+                  },
+                  {
+                    "text": "Diff the last persisted document against the draft"
+                  },
+                  {
+                    "text": "Replay the diff through `canvas.applyAgentPatch`"
+                  },
+                  {
+                    "text": "Validate the result and write it atomically"
+                  },
+                  {
+                    "text": "Advance the stored hash and the persisted base"
+                  },
+                  {
+                    "text": "Return the tool result with a `SAVED` line"
+                  }
+                ]
+              },
+              {
+                "text": "Repeat apply and persist until the client disconnects"
+              }
+            ]
+          }
+        ]
+      },
+      "children": []
+    },
+    "b-cmcp-life-reducer-14": {
+      "id": "b-cmcp-life-reducer-14",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The save reuses the proposal path. "
+        },
+        {
+          "insert": "diffDocuments",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the differ "
+        },
+        {
+          "insert": "finalize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " builds proposals with, and "
+        },
+        {
+          "insert": "canvas.applyAgentPatch",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the reducer action Studio's Accept dispatches. The file lands where an accepted proposal would leave it."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-life-atomic-15": {
+      "id": "b-cmcp-life-atomic-15",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The write goes to a sibling temp file that is renamed over the canvas file, in the pretty-printed format Studio writes. The result passes "
+        },
+        {
+          "insert": "validateInteractiveCanvasDocument",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " first, and a failed validation writes nothing."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-life-residual-16": {
+      "id": "b-cmcp-life-residual-16",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The saved file is the truth when the reducer derives something the draft did not predict. The tool result then carries a "
+        },
+        {
+          "insert": "NOTE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " line with the count of differing patch operations and asks for "
+        },
+        {
+          "insert": "canvas_open",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-life-baseline-17": {
+      "id": "b-cmcp-life-baseline-17",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The session baseline stays the document as opened, so the cumulative diff that "
+        },
+        {
+          "insert": "look",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " reports covers every edit since "
+        },
+        {
+          "insert": "canvas_open",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-conflict-heading-18": {
+      "id": "b-cmcp-conflict-heading-18",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Conflict Handling"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-conflict-guard-19": {
+      "id": "b-cmcp-conflict-guard-19",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The guard is the sha256 of the file bytes as the session last read or wrote them. A different hash at save time means another writer saved the file: Studio, a text editor, or git. The server never overwrites that change and never merges."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-conflict-result-20": {
+      "id": "b-cmcp-conflict-result-20",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The edit is not saved. The tool result is an error whose text ends with a "
+        },
+        {
+          "insert": "SAVE FAILED",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " line naming the fix."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-conflict-sticky-21": {
+      "id": "b-cmcp-conflict-sticky-21",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The session is marked conflicted, because its draft holds an edit the file never received. Every later toolkit call is refused with the same message."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-conflict-recover-22": {
+      "id": "b-cmcp-conflict-recover-22",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "canvas_open",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " reloads the current file and clears the conflict. The caller redoes the refused edit against the reloaded board."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-conflict-studio-23": {
+      "id": "b-cmcp-conflict-studio-23",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Studio guards the opposite direction with its own revision check and reloads an open board when the server writes it. That behavior belongs to Persistence and embedding."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-heading-24": {
+      "id": "b-cmcp-context-heading-24",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Context Model"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-lede-25": {
+      "id": "b-cmcp-context-lede-25",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A client receives context in three layers, and only the first arrives without a call. The server declares the tools capability only. It sends no system prompt, no boot images, and no per-turn state block."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-schemas-26": {
+      "id": "b-cmcp-context-schemas-26",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The tool schemas and descriptions arrive with a three-sentence "
+        },
+        {
+          "insert": "instructions",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " string, "
+        },
+        {
+          "insert": "MCP_INSTRUCTIONS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "mcp.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The string stays short because clients inline it into every session."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-open-27": {
+      "id": "b-cmcp-context-open-27",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "canvas_open",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " returns "
+        },
+        {
+          "insert": "boardStateSnapshot",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as text: the board description, the full digest, and the current lint report. The kernel path sends the same payload as its "
+        },
+        {
+          "insert": "board_state",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " block."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-guidance-28": {
+      "id": "b-cmcp-context-guidance-28",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "canvas_guidance",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " serves the topics from "
+        },
+        {
+          "insert": "getCanvasAuthoringGuidance()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on request. With no argument it lists each topic id, title, and approximate token size with the snapshot id. With a topic id it returns that topic in full. The topics are "
+        },
+        {
+          "insert": "diagram_design",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "visual_vocabulary",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "color_palette",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "canvas_conventions",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-workspace-heading-29": {
+      "id": "b-cmcp-workspace-heading-29",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Workspace Resolution"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-workspace-lede-30": {
+      "id": "b-cmcp-workspace-lede-30",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The workspace is the project whose "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " directory the tools edit. "
+        },
+        {
+          "insert": "cli.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " takes the first of these that is set:"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-workspace-flag-31": {
+      "id": "b-cmcp-workspace-flag-31",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "--workspace <dir>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " argument."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-workspace-env-32": {
+      "id": "b-cmcp-workspace-env-32",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "CLAUDE_PROJECT_DIR",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " environment variable."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-workspace-cwd-33": {
+      "id": "b-cmcp-workspace-cwd-33",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The current working directory."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-workspace-fallback-34": {
+      "id": "b-cmcp-workspace-fallback-34",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "If the resolved directory has no "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " folder, the server falls back to the canvas repository that contains the package. A user-scoped install therefore always has boards to edit, and those boards are this repository's own when the open project has none. A canvas id is the file name without "
+        },
+        {
+          "insert": ".canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and must match "
+        },
+        {
+          "insert": "[A-Za-z0-9][A-Za-z0-9_.-]*",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-install-heading-35": {
+      "id": "b-cmcp-install-heading-35",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Install"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-install-lede-36": {
+      "id": "b-cmcp-install-lede-36",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "There is no install command. The package is private and runs from source with Bun, so each client is registered by hand. "
+        },
+        {
+          "insert": "<bun>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the absolute path to the Bun binary and "
+        },
+        {
+          "insert": "<repo>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the canvas checkout."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-install-claude-37": {
+      "id": "b-cmcp-install-claude-37",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Claude Code, user scope:"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-install-claude-code-38": {
+      "id": "b-cmcp-install-claude-code-38",
+      "type": "code",
+      "props": {
+        "language": "bash"
+      },
+      "text": [
+        {
+          "insert": "claude mcp add -s user codecaine-canvas -- <bun> <repo>/packages/canvas-mcp/src/cli.ts mcp"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-install-codex-39": {
+      "id": "b-cmcp-install-codex-39",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Codex, in "
+        },
+        {
+          "insert": "~/.codex/config.toml",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ":"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-install-codex-code-40": {
+      "id": "b-cmcp-install-codex-code-40",
+      "type": "code",
+      "props": {
+        "language": "toml"
+      },
+      "text": [
+        {
+          "insert": "[mcp_servers.codecaine-canvas]\ncommand = \"<bun>\"\nargs = [\"<repo>/packages/canvas-mcp/src/cli.ts\", \"mcp\"]"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-rel-heading-41": {
+      "id": "b-cmcp-rel-heading-41",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Relation to the Kernel Agent and the Docs MCP"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-rel-lede-42": {
+      "id": "b-cmcp-rel-lede-42",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Three agent-facing paths edit canvas documents. The kernel agent path and the Canvas MCP share one toolkit and differ in the lifecycle around it. The Docs MCP is a separate tool set for canvases embedded in documentation."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-rel-table-43": {
+      "id": "b-cmcp-rel-table-43",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "Aspect",
+          "Kernel agent path",
+          "Canvas MCP",
+          "Docs MCP canvas tools"
+        ],
+        "rows": [
+          [
+            "Host",
+            "Studio starts a harness session and the kernel runs the layout-editor agent.",
+            "A stdio server the MCP client spawns. No kernel and no model process.",
+            "The Codecaine Docs service."
+          ],
+          [
+            "Target",
+            [
+              {
+                "insert": "A board under "
+              },
+              {
+                "insert": "canvases/",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", scoped to the operator's selection."
+              }
+            ],
+            [
+              {
+                "insert": "A board under "
+              },
+              {
+                "insert": "canvases/",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", scoped to the whole board."
+              }
+            ],
+            "A Canvas sidecar referenced by a block on a documentation page."
+          ],
+          [
+            "Tools",
+            "32: the 25 gestures and 7 workflow tools.",
+            "34: 3 server tools, the 25 gestures, and 6 workflow tools.",
+            [
+              {
+                "insert": "The "
+              },
+              {
+                "insert": "docs_canvas_*",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " object and connection tools."
+              }
+            ]
+          ],
+          [
+            "Save",
+            [
+              {
+                "insert": "finalize",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " proposes a cumulative patch, and the operator accepts it in Studio."
+              }
+            ],
+            "Each applied edit saves at once, guarded by the file hash.",
+            "Each edit applies at once, guarded by the doc revision hash and the sidecar hash."
+          ],
+          [
+            "Context",
+            "A system prompt, boot blocks, boot images, and a state block on every turn.",
+            [
+              {
+                "insert": "The instructions string, the "
+              },
+              {
+                "insert": "canvas_open",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " text, and "
+              },
+              {
+                "insert": "canvas_guidance",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " on request."
+              }
+            ],
+            [
+              {
+                "insert": "The "
+              },
+              {
+                "insert": "docs_begin",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " standards and component catalog."
+              }
+            ]
+          ]
+        ],
+        "title": "Agent paths that edit canvas documents"
+      },
+      "children": []
+    },
+    "b-cmcp-rel-kernel-44": {
+      "id": "b-cmcp-rel-kernel-44",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "This package does not change the kernel agent path. Studio starts a harness session, the kernel runs the layout-editor agent against a scoped draft, and the operator accepts a proposal. The Canvas MCP is a second host for the same toolkit. "
+        },
+        {
+          "insert": "Canvas agent",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/80-canvas-agent",
+              "label": "Canvas agent"
+            }
+          }
+        },
+        {
+          "insert": " records the rule that keeps the toolkit loadable without the kernel."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-rel-docs-45": {
+      "id": "b-cmcp-rel-docs-45",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Documentation Access through MCP",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/95-docs-mcp-access",
+              "label": "Documentation Access through MCP"
+            }
+          }
+        },
+        {
+          "insert": " describes the Docs MCP. Its canvas tools address a sidecar through a documentation block and do not carry the layout editor's gestures. Use the Canvas MCP for boards under "
+        },
+        {
+          "insert": "canvases/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-decisions-heading-46": {
+      "id": "b-cmcp-decisions-heading-46",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-verbatim-decision-47": {
+      "id": "b-cmcp-verbatim-decision-47",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": the server declares no tool truth for the toolkit. "
+        },
+        {
+          "insert": "service.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " derives every toolkit declaration from "
+        },
+        {
+          "insert": "toolkitTools",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and dispatches through "
+        },
+        {
+          "insert": "callToolkitTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". A client compatibility fix changes only the listed schema, as "
+        },
+        {
+          "insert": "normalizeTuples",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " does, and never the agent's schema or the validation path."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-verbatim-why-48": {
+      "id": "b-cmcp-verbatim-why-48",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": a second hand-written tool list would drift from the agent's rosters. "
+        },
+        {
+          "insert": "mcp.test.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " compares each listed operation name, description, and schema with the agent's descriptor, and asserts that no listed schema carries array-form "
+        },
+        {
+          "insert": "items",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-verbatim-applies-49": {
+      "id": "b-cmcp-verbatim-applies-49",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "packages/canvas-mcp/src/service.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp/src/service.ts",
+              "label": "packages/canvas-mcp/src/service.ts"
+            }
+          }
+        },
+        {
+          "insert": ", including every future agent tool, which reaches MCP clients through the rosters with no edit in this package."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gaps-heading-50": {
+      "id": "b-cmcp-gaps-heading-50",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Known Gaps"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gaps-lede-51": {
+      "id": "b-cmcp-gaps-lede-51",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Four gaps are open in the current code."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gaps-descriptions-52": {
+      "id": "b-cmcp-gaps-descriptions-52",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The workflow tool descriptions are the agent's text and describe the kernel run. "
+        },
+        {
+          "insert": "look",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " refers to the "
+        },
+        {
+          "insert": "<state>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " block, and "
+        },
+        {
+          "insert": "add_annotation",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "resolve_request",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " refer to "
+        },
+        {
+          "insert": "finalize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". This host has neither."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gaps-render-53": {
+      "id": "b-cmcp-gaps-render-53",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "canvas_open",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " returns text only. Call "
+        },
+        {
+          "insert": "look",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for a render."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gaps-requests-54": {
+      "id": "b-cmcp-gaps-requests-54",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Reopening a canvas builds a fresh request queue in which every annotation thread is open. A thread resolved in an earlier session appears as an open request again."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gaps-install-55": {
+      "id": "b-cmcp-gaps-install-55",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "There is no install command. Each client is registered by hand."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-files-heading-56": {
+      "id": "b-cmcp-files-heading-56",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Related Files"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-files-cli-57": {
+      "id": "b-cmcp-files-cli-57",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas-mcp/src/cli.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp/src/cli.ts",
+              "label": "packages/canvas-mcp/src/cli.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the command entry and resolves the workspace."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-files-mcp-58": {
+      "id": "b-cmcp-files-mcp-58",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas-mcp/src/mcp.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp/src/mcp.ts",
+              "label": "packages/canvas-mcp/src/mcp.ts"
+            }
+          }
+        },
+        {
+          "insert": " builds the stdio server and holds the instructions string."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-files-service-59": {
+      "id": "b-cmcp-files-service-59",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas-mcp/src/service.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp/src/service.ts",
+              "label": "packages/canvas-mcp/src/service.ts"
+            }
+          }
+        },
+        {
+          "insert": " declares the tools, dispatches calls, and holds the active canvas."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-files-toolkit-60": {
+      "id": "b-cmcp-files-toolkit-60",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas-agent/src/toolkit/index.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/toolkit/index.ts",
+              "label": "packages/canvas-agent/src/toolkit/index.ts"
+            }
+          }
+        },
+        {
+          "insert": " opens the file session, persists edits, and raises the conflict error."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-files-authoring-61": {
+      "id": "b-cmcp-files-authoring-61",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas-agent/src/authoring/index.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/authoring/index.ts",
+              "label": "packages/canvas-agent/src/authoring/index.ts"
+            }
+          }
+        },
+        {
+          "insert": " exports the guidance topics that "
+        },
+        {
+          "insert": "canvas_guidance",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " serves."
+        }
+      ],
+      "children": []
+    }
+  }
+}

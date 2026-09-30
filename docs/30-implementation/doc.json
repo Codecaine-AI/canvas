@@ -31,6 +31,7 @@
         "b-impl-area-ui-9",
         "b-impl-area-studio-10",
         "b-impl-area-agent-11",
+        "b-impl-area-canvas-mcp-37",
         "b-impl-area-canvases-12",
         "b-impl-area-navigation-13",
         "b-impl-area-render-14",
@@ -397,6 +398,42 @@
               "kind": "doc",
               "path": "30-implementation/80-canvas-agent",
               "label": "Canvas agent"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-canvas-mcp-37": {
+      "id": "b-impl-area-canvas-mcp-37",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas-mcp",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp",
+              "label": "packages/canvas-mcp"
+            }
+          }
+        },
+        {
+          "insert": " is the stdio MCP server that exposes the layout editor's toolkit to external coding agents and saves each edit to the canvas file. Decisions live under "
+        },
+        {
+          "insert": "Canvas MCP",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/85-canvas-mcp",
+              "label": "Canvas MCP"
             }
           }
         },

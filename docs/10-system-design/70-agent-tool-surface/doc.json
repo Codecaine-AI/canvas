@@ -60,6 +60,12 @@
         "b-ts-ov-scope-extend-17",
         "b-ts-ov-scope-annotation-18",
         "b-ts-ov-scope-close-19",
+        "b-ts-ov-hosts-heading-25",
+        "b-ts-ov-hosts-lede-26",
+        "b-ts-ov-hosts-finalize-27",
+        "b-ts-ov-hosts-scope-28",
+        "b-ts-ov-hosts-save-29",
+        "b-ts-ov-hosts-perception-30",
         "b-ts-ov-tier-heading-20",
         "b-ts-ov-tier-lede-21",
         "b-ats-child-session-1",
@@ -1026,6 +1032,131 @@
       "text": [
         {
           "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty-five gestures are the only way the draft changes."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-hosts-heading-25": {
+      "id": "b-ts-ov-hosts-heading-25",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Two hosts, one surface"
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-hosts-lede-26": {
+      "id": "b-ts-ov-hosts-lede-26",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The roster is defined once and reaches a board through one runtime binding, and two hosts supply the session behind that binding. The kernel host runs the edit this page opens with: a scoped draft, a model run, and a proposal the operator accepts. The file host opens a "
+        },
+        {
+          "insert": "canvases/<id>.canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " file directly as a session in "
+        },
+        {
+          "insert": "packages/canvas-agent/src/toolkit/index.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/toolkit/index.ts",
+              "label": "packages/canvas-agent/src/toolkit/index.ts"
+            }
+          }
+        },
+        {
+          "insert": ", with no kernel and no model process, and serves the tools to an external agent over MCP. Tool names, descriptions, schemas, and validation are identical on both hosts. The lifecycle around the tools differs in four ways."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-hosts-finalize-27": {
+      "id": "b-ts-ov-hosts-finalize-27",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The file host carries thirty-one of the thirty-two tools. "
+        },
+        {
+          "insert": "finalize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is absent because a file session has no run to end and no proposal to commit."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-hosts-scope-28": {
+      "id": "b-ts-ov-hosts-scope-28",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The file host has no operator selection, so its scope is the whole board."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-hosts-save-29": {
+      "id": "b-ts-ov-hosts-save-29",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The file host saves every applied edit at once. The diff since the last save replays onto the file through "
+        },
+        {
+          "insert": "canvas.applyAgentPatch",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the reducer action an accepted proposal dispatches, so both hosts leave the same document. The save is refused when the file changed on disk since the session last read or wrote it, and the caller reopens the canvas."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-hosts-perception-30": {
+      "id": "b-ts-ov-hosts-perception-30",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The file host pushes no boot context and no state block. The caller receives the board description, digest, and lint report when it opens the canvas, and calls "
+        },
+        {
+          "insert": "look",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for a render."
         }
       ],
       "children": []
