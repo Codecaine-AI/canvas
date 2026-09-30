@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from "react";
 import {
   AlertTriangleIcon,
   ArrowLeftIcon,
@@ -36,6 +44,9 @@ import {
   type BeforeAgentStartSnapshot,
   type PendingNote,
 } from "./agent";
+import type { ViteHotContext } from "vite/types/hot.d.ts";
+import type { CanvasFileChangedPayload } from "../server/canvas-file-watch";
+import { CanvasSaveConflictError, fetchCanvas, putCanvas } from "./canvas-file-client";
 import { GalleryPage } from "./GalleryPage";
 import { DevRail } from "./dev/DevRail";
 import { EvalsPage } from "./dev/EvalsPage";
@@ -219,6 +230,12 @@ type ProjectBoardHandle = {
   raw: unknown;
 };
 
+type SaveOptions = {
+  keepalive?: boolean;
+  /** Local boards only: skip the If-Match revision check ("Keep mine"). */
+  force?: boolean;
+};
+
 export function App() {
   const [route, setRoute] = useState<Route>(() => parseRoute(window.location.pathname, window.location.search));
   const [canvases, setCanvases] = useState<CanvasListItem[]>([]);
@@ -236,6 +253,12 @@ export function App() {
   const [projectSaveIssue, setProjectSaveIssue] =
     useState<"conflict" | "locked" | null>(null);
   const [projectReloadNonce, setProjectReloadNonce] = useState(0);
+  // Local board changed on disk under unsaved edits (or a PUT got 412).
+  // Autosave pauses until the user picks Reload or Keep mine.
+  const [diskConflict, setDiskConflictState] = useState(false);
+  const diskConflictRef = useRef(false);
+  /** sha256 of the local board file as last loaded or saved — sent as If-Match. */
+  const canvasHashRef = useRef<string | null>(null);
   const activeCanvasIdRef = useRef<string | null>(null);
   const projectBoardRef = useRef<ProjectBoardHandle | null>(null);
   // Dev rail plumbing (dev-pages flag only): the imperative editor handle
@@ -250,6 +273,11 @@ export function App() {
   const saveTimerRef = useRef<number | null>(null);
   const savedSnapshotRef = useRef<string | null>(null);
   const savedFadeTimerRef = useRef<number | null>(null);
+
+  const setDiskConflict = useCallback((value: boolean) => {
+    diskConflictRef.current = value;
+    setDiskConflictState(value);
+  }, []);
 
   const clearSaveTimer = useCallback(() => {
     if (!saveTimerRef.current) return;
@@ -266,28 +294,14 @@ export function App() {
     }, 900);
   }, []);
 
-  const putCanvas = useCallback(
-    async (id: string, document: InteractiveCanvasDocument, options?: { keepalive?: boolean }) => {
-      const response = await fetch(`/api/canvases/${encodeURIComponent(id)}`, {
-        method: "PUT",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ canvas: document }),
-        keepalive: options?.keepalive,
-      });
-      if (!response.ok) {
-        throw new Error(response.status === 409 ? "409 Conflict" : `${response.status} ${response.statusText}`);
-      }
-    },
-    [],
-  );
-
   /**
-   * Route-aware save: local boards PUT to the studio's own file API; project
-   * boards adapt back to the docs-side wire shape and PUT to the linked
-   * docs-server with the tracked content hash (rotated on success).
+   * Route-aware save: local boards PUT to the studio's own file API with the
+   * last known file hash as If-Match; project boards adapt back to the
+   * docs-side wire shape and PUT to the linked docs-server with the tracked
+   * content hash. Both rotate their hash on success.
    */
   const saveDocument = useCallback(
-    async (document: InteractiveCanvasDocument, options?: { keepalive?: boolean }) => {
+    async (document: InteractiveCanvasDocument, options?: SaveOptions) => {
       const project = projectBoardRef.current;
       if (project) {
         const wire = adaptStudioDocumentToProject(document, project.raw);
@@ -305,13 +319,17 @@ export function App() {
       }
       const id = activeCanvasIdRef.current;
       if (!id) return;
-      await putCanvas(id, document, options);
+      const contentHash = await putCanvas(id, document, {
+        ...options,
+        baseHash: canvasHashRef.current,
+      });
+      if (activeCanvasIdRef.current === id) canvasHashRef.current = contentHash;
     },
-    [putCanvas],
+    [],
   );
 
   const flushPendingSave = useCallback(
-    async (options?: { keepalive?: boolean }) => {
+    async (options?: SaveOptions) => {
       clearSaveTimer();
       while (true) {
         const existingSave = saveInFlightRef.current;
@@ -331,12 +349,15 @@ export function App() {
           try {
             await saveDocument(document, options);
             savedSnapshotRef.current = JSON.stringify(document);
+            if (options?.force) setDiskConflict(false);
             setSaveState("idle");
             if (!options?.keepalive) markSavedBriefly();
             return true;
           } catch (error) {
             if (!pendingSaveRef.current) pendingSaveRef.current = document;
-            if (error instanceof ProjectSaveConflictError) {
+            if (error instanceof CanvasSaveConflictError) {
+              setDiskConflict(true);
+            } else if (error instanceof ProjectSaveConflictError) {
               setProjectSaveIssue("conflict");
             } else if (error instanceof ProjectBoardLockedError) {
               setProjectSaveIssue("locked");
@@ -351,7 +372,7 @@ export function App() {
         if (!saved) return false;
       }
     },
-    [clearSaveTimer, markSavedBriefly, saveDocument],
+    [clearSaveTimer, markSavedBriefly, saveDocument, setDiskConflict],
   );
 
   const queueAutosave = useCallback(
@@ -368,6 +389,9 @@ export function App() {
       pendingSaveRef.current = clone(document);
       setSaveState("idle");
       clearSaveTimer();
+      // Every PUT would 412 while the disk conflict stands; hold the edits
+      // until Reload drops them or Keep mine force-saves them.
+      if (diskConflictRef.current) return;
       saveTimerRef.current = window.setTimeout(() => {
         void flushPendingSave();
       }, 800);
@@ -387,6 +411,11 @@ export function App() {
   }, [activeDocument]);
 
   const beforeAgentStart = useCallback(async (): Promise<BeforeAgentStartSnapshot> => {
+    // An unresolved disk conflict means the board in memory is not the file the
+    // harness will read, so a run would scope against one and patch the other.
+    if (diskConflictRef.current) {
+      throw new Error("The canvas changed on disk. Choose Reload or Keep mine before starting the agent.");
+    }
     if (!(await flushPendingSave())) {
       throw new Error("Save the board before starting the agent.");
     }
@@ -447,13 +476,17 @@ export function App() {
       projectBoardRef.current = null;
       setProjectSaveIssue(null);
     }
+    if (route.name !== "canvas") {
+      canvasHashRef.current = null;
+      setDiskConflict(false);
+    }
     if (route.name !== "canvas" && route.name !== "project") {
       clearSaveTimer();
       pendingSaveRef.current = null;
       savedSnapshotRef.current = null;
       setSaveState("idle");
     }
-  }, [clearSaveTimer, route]);
+  }, [clearSaveTimer, route, setDiskConflict]);
 
   const toggleAgent = useCallback(() => {
     const next = !showAgent;
@@ -538,18 +571,16 @@ export function App() {
       };
     }
 
-    fetch(`/api/canvases/${encodeURIComponent(route.id)}`)
-      .then(async (response) => {
-        if (response.status === 404) return null;
-        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-        return (await response.json()) as { id: string; canvas: InteractiveCanvasDocument };
-      })
+    canvasHashRef.current = null;
+    setDiskConflict(false);
+    fetchCanvas(route.id)
       .then((result) => {
         if (cancelled) return;
         if (!result) {
           setDocumentState("not-found");
           return;
         }
+        canvasHashRef.current = result.contentHash;
         applyLoadedDocument(clone(result.canvas));
       })
       .catch(() => {
@@ -559,7 +590,7 @@ export function App() {
     return () => {
       cancelled = true;
     };
-  }, [route, projectReloadNonce]);
+  }, [route, projectReloadNonce, setDiskConflict]);
 
   const agentNotes = useMemo(
     () => (activeDocument ? pendingNotes(activeDocument) : []),
@@ -663,6 +694,92 @@ export function App() {
     setProjectReloadNonce((nonce) => nonce + 1);
   }, [clearSaveTimer]);
 
+  /**
+   * Reload the open local board from disk in place: the editor keeps its
+   * camera, while undo history, selection, and tool reset exactly as on a
+   * fresh load (see InteractiveCanvasEditorHandle.loadDocument). Local
+   * pending edits are dropped — callers decide whether that is allowed;
+   * `onlyIfClean` re-checks after the fetch, since the user may have edited
+   * while it was in flight, and raises the conflict notice instead.
+   */
+  const reloadLocalCanvas = useCallback(
+    async (options?: { onlyIfClean?: boolean }) => {
+      const id = activeCanvasIdRef.current;
+      if (!id) return;
+      if (!options?.onlyIfClean) {
+        clearSaveTimer();
+        pendingSaveRef.current = null;
+        await saveInFlightRef.current;
+      }
+      let result: Awaited<ReturnType<typeof fetchCanvas>>;
+      try {
+        result = await fetchCanvas(id);
+      } catch {
+        return;
+      }
+      if (!result || activeCanvasIdRef.current !== id) return;
+      if (options?.onlyIfClean && (pendingSaveRef.current || saveInFlightRef.current)) {
+        setDiskConflict(true);
+        return;
+      }
+      clearSaveTimer();
+      pendingSaveRef.current = null;
+      canvasHashRef.current = result.contentHash;
+      const document = clone(result.canvas);
+      savedSnapshotRef.current = JSON.stringify(document);
+      setDiskConflict(false);
+      setSaveState("idle");
+      setActiveDocument(document);
+      editorRef.current?.loadDocument(clone(document));
+    },
+    [clearSaveTimer, setDiskConflict],
+  );
+
+  /** "Keep mine": overwrite the on-disk change with the local board. */
+  const keepLocalCanvas = useCallback(async () => {
+    if (!pendingSaveRef.current && !saveInFlightRef.current && activeDocument) {
+      pendingSaveRef.current = clone(activeDocument);
+    }
+    await flushPendingSave({ force: true });
+  }, [activeDocument, flushPendingSave]);
+
+  // External writers (the canvas MCP server, editors, git) announce changes
+  // through the dev server's file watcher (server/canvas-file-watch.ts).
+  // Studio's own PUTs are filtered server-side; the hash check here also
+  // drops anything this tab already has. A clean board reloads in place; a
+  // board with unsaved or in-flight edits gets the conflict notice instead —
+  // there is no auto-merge.
+  const handleCanvasFileChanged = useCallback(
+    (payload: CanvasFileChangedPayload) => {
+      if (payload.id !== activeCanvasIdRef.current) return;
+      if (payload.hash === canvasHashRef.current) return;
+      if (diskConflictRef.current || pendingSaveRef.current || saveInFlightRef.current) {
+        setDiskConflict(true);
+        return;
+      }
+      void reloadLocalCanvas({ onlyIfClean: true });
+    },
+    [reloadLocalCanvas, setDiskConflict],
+  );
+  const handleCanvasFileChangedRef = useRef(handleCanvasFileChanged);
+  handleCanvasFileChangedRef.current = handleCanvasFileChanged;
+
+  useEffect(() => {
+    // Dev server only: the Electron build has no HMR channel (its PUTs are
+    // still revision-checked, so a stale save surfaces as a 412 notice).
+    // Cast: @types/bun also declares import.meta.hot (Bun's HMR API) and its
+    // callback-less `on` signature wins the merge.
+    const hot = import.meta.hot as unknown as ViteHotContext | undefined;
+    if (!hot) return;
+    // Event name mirrors CANVAS_FILE_CHANGED_EVENT; importing the constant
+    // would pull the Node-side watcher module into the client bundle.
+    const listener = (payload: CanvasFileChangedPayload) => {
+      handleCanvasFileChangedRef.current(payload);
+    };
+    hot.on("canvas:file-changed", listener);
+    return () => hot.off("canvas:file-changed", listener);
+  }, []);
+
   const usedBoardNumbers = useMemo(() => {
     const numbers = new Set<number>();
     for (const canvas of canvases) {
@@ -699,9 +816,9 @@ export function App() {
 
   const handleBackToBoards = async () => {
     const saved = await flushPendingSave();
-    // A conflicted/locked project board can never flush — the on-disk copy is
-    // the source of truth there, so leaving must not be blocked by it.
-    if (saved || projectSaveIssue !== null) navigate("/");
+    // A conflicted/locked board can never flush — the on-disk copy is the
+    // source of truth there, so leaving must not be blocked by it.
+    if (saved || projectSaveIssue !== null || diskConflict) navigate("/");
   };
 
   if (isDocumentRoute(route) || route.name === "project") {
@@ -808,17 +925,37 @@ export function App() {
           screenOverlay={
             <>
               {!isLocalBoard && projectSaveIssue ? (
-                <div className="pointer-events-auto absolute left-1/2 top-4 z-30 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-50 px-4 py-2 text-sm text-amber-900 shadow-md">
-                  <AlertTriangleIcon className="h-4 w-4 shrink-0" />
-                  <span>
-                    {projectSaveIssue === "conflict"
+                <SaveIssueNotice
+                  message={
+                    projectSaveIssue === "conflict"
                       ? "Board changed on disk — reload to keep editing."
-                      : "Another session is editing this board — saving is blocked."}
-                  </span>
+                      : "Another session is editing this board — saving is blocked."
+                  }
+                >
                   <Button type="button" size="sm" variant="outline" onClick={reloadProjectBoard}>
                     Reload
                   </Button>
-                </div>
+                </SaveIssueNotice>
+              ) : null}
+              {isLocalBoard && diskConflict ? (
+                <SaveIssueNotice message="Canvas changed on disk.">
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void reloadLocalCanvas()}
+                  >
+                    Reload
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => void keepLocalCanvas()}
+                  >
+                    Keep mine
+                  </Button>
+                </SaveIssueNotice>
               ) : null}
               {cameraLocked && editorState ? (
                 <GhostPreviewScrim
@@ -999,6 +1136,17 @@ export function App() {
       </section>
 
       <ProjectBoardsSection />
+    </div>
+  );
+}
+
+/** Non-blocking amber notice pinned to the top of the editor's screen overlay. */
+function SaveIssueNotice({ message, children }: { message: string; children: ReactNode }) {
+  return (
+    <div className="pointer-events-auto absolute left-1/2 top-4 z-30 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-50 px-4 py-2 text-sm text-amber-900 shadow-md">
+      <AlertTriangleIcon className="h-4 w-4 shrink-0" />
+      <span>{message}</span>
+      {children}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { createReadStream, existsSync, promises as fs } from "node:fs";
+import { existsSync, promises as fs } from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { basename, resolve, sep } from "node:path";
 // Vite externalizes bare package imports while bundling its Node-side config.
@@ -94,6 +94,15 @@ function parsePreviewPadding(raw: string | null): number | undefined {
   return Math.min(400, value);
 }
 
+/**
+ * Content hash of a canvas file's raw bytes — sha256 hex, the same digest the
+ * agent harness uses for its accept-time rebase check, so one hash names one
+ * on-disk revision everywhere.
+ */
+export function canvasContentHash(contents: string | Buffer): string {
+  return createHash("sha256").update(contents).digest("hex");
+}
+
 function etagMatches(header: string | undefined, etag: string): boolean {
   if (!header) return false;
   return header
@@ -104,12 +113,18 @@ function etagMatches(header: string | undefined, etag: string): boolean {
 
 export function createCanvasFileApiHandler(options: {
   canvasesDir: string;
+  /**
+   * Called with the content hash of every canvas file this handler writes,
+   * *before* the write lands, so a file watcher can tell Studio's own saves
+   * apart from external writers (an MCP agent, a text editor, git).
+   */
+  onCanvasWrite?: (id: string, contentHash: string) => void;
 }): (
   req: IncomingMessage,
   res: ServerResponse,
   next: () => void,
 ) => void {
-  const { canvasesDir } = options;
+  const { canvasesDir, onCanvasWrite } = options;
 
   return (req, res, next) => {
     if (!req.url?.startsWith("/api/canvases")) {
@@ -185,7 +200,9 @@ export function createCanvasFileApiHandler(options: {
               sendJson(res, 422, { error: "Invalid canvas document.", issues: validation.issues });
               return;
             }
-            await writeFileAtomic(filePath, `${JSON.stringify(validation.document, null, 2)}\n`);
+            const contents = `${JSON.stringify(validation.document, null, 2)}\n`;
+            onCanvasWrite?.(body.id, canvasContentHash(contents));
+            await writeFileAtomic(filePath, contents);
             sendJson(res, 201, { id: body.id });
             return;
           }
@@ -261,16 +278,23 @@ export function createCanvasFileApiHandler(options: {
         }
 
         if (req.method === "GET") {
-          if (!existsSync(filePath)) {
+          // Buffered (not streamed) so the hash and the body name the same
+          // bytes even if an external writer replaces the file mid-request.
+          let raw: Buffer;
+          try {
+            raw = await fs.readFile(filePath);
+          } catch {
             sendJson(res, 404, { error: "Canvas not found." });
             return;
           }
+          const contentHash = canvasContentHash(raw);
           res.statusCode = 200;
           res.setHeader("content-type", "application/json; charset=utf-8");
-          res.write(`{"id":${JSON.stringify(id)},"canvas":`);
-          createReadStream(filePath)
-            .on("end", () => res.end("}\n"))
-            .pipe(res, { end: false });
+          res.setHeader("etag", `"${contentHash}"`);
+          res.setHeader("cache-control", "no-cache");
+          res.end(
+            `{"id":${JSON.stringify(id)},"contentHash":"${contentHash}","canvas":${raw.toString("utf8")}}\n`,
+          );
           return;
         }
 
@@ -285,8 +309,32 @@ export function createCanvasFileApiHandler(options: {
             sendJson(res, 422, { error: "Invalid canvas document.", issues: validation.issues });
             return;
           }
-          await writeFileAtomic(filePath, `${JSON.stringify(validation.document, null, 2)}\n`);
-          sendJson(res, 200, { id });
+          // Optimistic concurrency: with If-Match, the write only lands when
+          // the file on disk is still the revision the client loaded. Without
+          // it (older clients, "Keep mine" force-saves) last write wins.
+          const ifMatch = req.headers["if-match"];
+          if (ifMatch && ifMatch.trim() !== "*") {
+            let currentHash: string | null = null;
+            try {
+              currentHash = canvasContentHash(await fs.readFile(filePath));
+            } catch {
+              // Missing file — no revision can match.
+            }
+            if (!currentHash || !etagMatches(ifMatch, `"${currentHash}"`)) {
+              if (currentHash) res.setHeader("etag", `"${currentHash}"`);
+              sendJson(res, 412, {
+                error: "Canvas changed on disk since it was loaded.",
+                currentHash,
+              });
+              return;
+            }
+          }
+          const contents = `${JSON.stringify(validation.document, null, 2)}\n`;
+          const contentHash = canvasContentHash(contents);
+          onCanvasWrite?.(id, contentHash);
+          await writeFileAtomic(filePath, contents);
+          res.setHeader("etag", `"${contentHash}"`);
+          sendJson(res, 200, { id, contentHash });
           return;
         }
 

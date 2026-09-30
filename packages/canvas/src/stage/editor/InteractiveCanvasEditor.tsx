@@ -81,6 +81,12 @@ export interface InteractiveCanvasEditorHandle {
   dispatchAgentPatch(operations: CanvasAgentPatchOperation[], summary?: string): void;
   setTool(tool: CanvasTool): void;
   revealRect(rect: { x: number; y: number; width: number; height: number }): void;
+  /**
+   * Replace the document in place (canvas.reset): same as a fresh mount —
+   * undo history, selection, and tool reset, and onDocumentChange is not
+   * fired for the loaded document — but the live camera is kept.
+   */
+  loadDocument(document: InteractiveCanvasDocument): void;
 }
 
 export interface InteractiveCanvasEditorProps {
@@ -295,10 +301,19 @@ export function InteractiveCanvasEditor({
 
 
   const didReportInitialDocumentRef = useRef(false);
+  // A loadDocument() result is a load, not an edit: skip reporting it, just
+  // like the initial document.
+  const skipDocumentReportRef = useRef(false);
+  const currentDocumentRef = useRef(state.document);
+  currentDocumentRef.current = state.document;
 
   useEffect(() => {
     if (!didReportInitialDocumentRef.current) {
       didReportInitialDocumentRef.current = true;
+      return;
+    }
+    if (skipDocumentReportRef.current) {
+      skipDocumentReportRef.current = false;
       return;
     }
     onDocumentChange?.(state.document);
@@ -323,6 +338,14 @@ export function InteractiveCanvasEditor({
       }),
       dispatchAgentPatch: (operations, summary) => {
         dispatchCanvasAction({ type: "canvas.applyAgentPatch", operations, summary });
+      },
+      loadDocument: (nextDocument) => {
+        // Bypasses the cameraOnly gate like dispatchAgentPatch: an external
+        // reload must land even while an agent session locks editing.
+        // Same identity means no state.document change, so no report to skip.
+        if (nextDocument === currentDocumentRef.current) return;
+        skipDocumentReportRef.current = true;
+        dispatchCanvasAction({ type: "canvas.reset", document: nextDocument });
       },
       setTool: (tool) => {
         dispatch({ type: "canvas.setTool", tool });

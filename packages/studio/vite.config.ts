@@ -5,6 +5,10 @@ import react from "@vitejs/plugin-react";
 import { defineConfig, type Plugin } from "vite";
 import { createAgentProxyHandler } from "./server/agent-proxy";
 import { createCanvasFileApiHandler } from "./server/canvas-file-api";
+import {
+  CANVAS_FILE_CHANGED_EVENT,
+  createCanvasChangeNotifier,
+} from "./server/canvas-file-watch";
 import { createEvalsApiHandler } from "./server/evals-api";
 
 const STUDIO_DIR = dirname(fileURLToPath(import.meta.url));
@@ -22,10 +26,32 @@ function canvasFileApiPlugin(): Plugin {
         );
       }
 
+      // External writers (the canvas MCP server, editors, git) change canvas
+      // files under an open Studio. The canvases dir sits outside the Vite
+      // root, so add it to the watcher explicitly; nothing imports these
+      // files, so a change never triggers Vite's own HMR/full reload.
+      const changeNotifier = createCanvasChangeNotifier({
+        canvasesDir,
+        send: (payload) => {
+          server.ws.send({ type: "custom", event: CANVAS_FILE_CHANGED_EVENT, data: payload });
+        },
+      });
+      server.watcher.add(canvasesDir);
+      const onCanvasFileEvent = (path: string) => {
+        void changeNotifier.handleFileEvent(path);
+      };
+      server.watcher.on("add", onCanvasFileEvent);
+      server.watcher.on("change", onCanvasFileEvent);
+
       // The agent proxy mounts first: /api/canvases/:id/agent/* must reach
       // the harness, not the canvas file API's catch-all /api/canvases branch.
       server.middlewares.use(createAgentProxyHandler({}));
-      server.middlewares.use(createCanvasFileApiHandler({ canvasesDir }));
+      server.middlewares.use(
+        createCanvasFileApiHandler({
+          canvasesDir,
+          onCanvasWrite: changeNotifier.recordWrite,
+        }),
+      );
       // The dev server always has dev pages (import.meta.env.DEV), so the
       // evals API mounts unconditionally here; the Electron server gates it.
       server.middlewares.use(createEvalsApiHandler({ runsDir: evalRunsDir }));
