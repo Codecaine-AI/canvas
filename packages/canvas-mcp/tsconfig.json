@@ -1,0 +1,32 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    // The toolkit's import graph reaches the canvas package's .tsx object
+    // definitions (types only at runtime), so the program needs JSX settings
+    // and canvas-agent's single React type identity.
+    "jsx": "react-jsx",
+    "types": ["bun", "node"],
+    "paths": {
+      "react": ["../canvas-agent/node_modules/@types/react", "../../../node_modules/@types/react"],
+      "react/jsx-runtime": ["../canvas-agent/node_modules/@types/react/jsx-runtime", "../../../node_modules/@types/react/jsx-runtime"],
+      "react-dom": ["../canvas-agent/node_modules/@types/react-dom", "../../../node_modules/@types/react-dom"],
+      // A stale nested install under docs-system/ carries its own TypeBox;
+      // pin the one Core root installs so docs-model (reached through
+      // prompt-kit-server) and the canvas schema share one TSchema identity.
+      "@sinclair/typebox": ["../../../node_modules/@sinclair/typebox"],
+      "@sinclair/typebox/*": ["../../../node_modules/@sinclair/typebox/*"]
+    }
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
+}

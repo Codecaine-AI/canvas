@@ -1,0 +1,209 @@
+/**
+ * The canvas service against real canvas files: the toolkit edits a temp copy
+ * of a checked-in board and every applied edit lands on disk; an external
+ * save makes the next edit refuse instead of clobbering; the injected page
+ * frame never reaches the file.
+ */
+import { afterEach, describe, expect, test } from "bun:test";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import { createCanvasService } from "./service";
+
+const REPO_CANVASES = join(import.meta.dir, "..", "..", "..", "canvases");
+const SOURCE_ID = "v2-flow";
+
+const workspaces: string[] = [];
+afterEach(() => {
+  for (const dir of workspaces.splice(0)) rmSync(dir, { recursive: true, force: true });
+});
+
+/** A temp workspace whose canvases/ holds `id` with the given document. */
+function workspaceWith(id: string, document: unknown): { workspace: string; path: string } {
+  const workspace = mkdtempSync(join(tmpdir(), "canvas-mcp-"));
+  workspaces.push(workspace);
+  mkdirSync(join(workspace, "canvases"));
+  const path = join(workspace, "canvases", `${id}.canvas.json`);
+  writeFileSync(path, `${JSON.stringify(document, null, 2)}\n`);
+  return { workspace, path };
+}
+
+function realCanvas(): any {
+  return JSON.parse(readFileSync(join(REPO_CANVASES, `${SOURCE_ID}.canvas.json`), "utf8"));
+}
+
+function readDoc(path: string): any {
+  return JSON.parse(readFileSync(path, "utf8"));
+}
+
+function textOf(result: { content: Array<{ type: string; text?: string }> }): string {
+  return result.content.filter((item) => item.type === "text").map((item) => item.text).join("\n");
+}
+
+describe("canvas service", () => {
+  test("place_sticky then move_by save each edit to the canvas file", async () => {
+    const original = realCanvas();
+    const { workspace, path } = workspaceWith(SOURCE_ID, original);
+    const service = createCanvasService({ workspace });
+
+    const opened = await service.call("canvas_open", { canvas: SOURCE_ID });
+    expect(opened.isError).toBeUndefined();
+    expect(textOf(opened)).toContain("BOARD");
+    expect(opened.structuredContent?.hash).toMatch(/^sha256:[0-9a-f]{64}$/);
+
+    const placed = await service.call("place_sticky", { id: "mcp-note", text: "Hello from MCP", at: [960, 1600] });
+    expect(placed.isError).toBeUndefined();
+    expect(textOf(placed)).toContain("APPLIED · place_sticky mcp-note");
+    expect(textOf(placed)).toContain(`SAVED · canvases/${SOURCE_ID}.canvas.json`);
+    const afterPlace = readDoc(path);
+    expect(afterPlace.objects.find((object: any) => object.id === "mcp-note")?.geometry)
+      .toMatchObject({ x: 960, y: 1600 });
+
+    const moved = await service.call("move_by", { id: "mcp-note", dx: 64, dy: 32 });
+    expect(moved.isError).toBeUndefined();
+    // No residual: replaying the patch through the canvas reducer reproduced the draft.
+    expect(textOf(placed)).not.toContain("NOTE ·");
+    expect(textOf(moved)).not.toContain("NOTE ·");
+    const afterMove = readDoc(path);
+    const movedNote = afterMove.objects.find((object: any) => object.id === "mcp-note");
+    // The gesture snaps, so assert the move landed and matches the session's draft exactly.
+    expect(movedNote.geometry.x).toBeGreaterThan(960);
+    expect(movedNote.geometry.y).toBeGreaterThan(1600);
+    const draftNote = service.activeCanvas()!.session.draft.objects.find((object) => object.id === "mcp-note");
+    expect(movedNote.geometry).toEqual(draftNote!.geometry);
+
+    // Exactly one object was added: every original id survives, nothing else joined.
+    const ids = afterMove.objects.map((object: any) => object.id).sort();
+    expect(ids).toEqual([...original.objects.map((object: any) => object.id), "mcp-note"].sort());
+    expect(afterMove.connections).toEqual(original.connections);
+  });
+
+  test("an injected page frame is draft-only and never written", async () => {
+    // Drop every section so the board has no root frame and the session injects one at open.
+    const original = realCanvas();
+    const objects = original.objects
+      .filter((object: any) => object.type !== "section")
+      .map((object: any) => ({ ...object, parentId: null }));
+    const kept = new Set(objects.map((object: any) => object.id));
+    const frameless = {
+      ...original,
+      objects,
+      connections: original.connections.filter((connection: any) =>
+        kept.has(connection.from.objectId) && kept.has(connection.to.objectId)),
+      annotations: [],
+    };
+    const { workspace, path } = workspaceWith("frameless", frameless);
+    const service = createCanvasService({ workspace });
+
+    await service.call("canvas_open", { canvas: "frameless" });
+    expect(service.activeCanvas()?.injectedFrameId).toBe("page-frame");
+    expect(service.activeCanvas()?.session.draft.objects.some((object) => object.id === "page-frame")).toBe(true);
+
+    const placed = await service.call("place_sticky", { id: "frameless-note", text: "No frame", at: [960, 1600] });
+    expect(placed.isError).toBeUndefined();
+    const moved = await service.call("move_by", { id: "frameless-note", dx: 32, dy: 0 });
+    expect(moved.isError).toBeUndefined();
+    expect(textOf(moved)).toContain("SAVED ·");
+    expect(textOf(moved)).not.toContain("NOTE ·");
+
+    const saved = readDoc(path);
+    expect(saved.objects.some((object: any) => object.id === "page-frame")).toBe(false);
+    expect(saved.objects.some((object: any) => object.parentId === "page-frame")).toBe(false);
+    expect(saved.objects).toHaveLength(frameless.objects.length + 1);
+  });
+
+  test("an external write makes the next edit refuse until canvas_open", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = createCanvasService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+
+    // Someone else saves the board (Studio, a text editor) after the open.
+    const external = { ...readDoc(path), title: "Renamed elsewhere" };
+    const externalText = `${JSON.stringify(external, null, 2)}\n`;
+    writeFileSync(path, externalText);
+
+    const refused = await service.call("place_sticky", { id: "late-note", text: "Too late", at: [960, 1600] });
+    expect(refused.isError).toBe(true);
+    expect(textOf(refused)).toContain("changed on disk");
+    expect(textOf(refused)).toContain("canvas_open");
+    expect(readFileSync(path, "utf8")).toBe(externalText);
+
+    // The session stays refused, even for a call that would not write.
+    const stillRefused = await service.call("move_by", { id: "late-note", dx: 16, dy: 0 });
+    expect(stillRefused.isError).toBe(true);
+    expect(readFileSync(path, "utf8")).toBe(externalText);
+
+    // Re-opening reads the external save and edits resume on top of it.
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    const placed = await service.call("place_sticky", { id: "late-note", text: "After reload", at: [960, 1600] });
+    expect(placed.isError).toBeUndefined();
+    const saved = readDoc(path);
+    expect(saved.title).toBe("Renamed elsewhere");
+    expect(saved.objects.some((object: any) => object.id === "late-note")).toBe(true);
+  });
+
+  test("toolkit tools refuse before canvas_open and on invalid arguments", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const before = readFileSync(path, "utf8");
+    const service = createCanvasService({ workspace });
+
+    const closed = await service.call("move_by", { id: "page-frame", dx: 16, dy: 0 });
+    expect(closed.isError).toBe(true);
+    expect(textOf(closed)).toContain("canvas_open");
+
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    const invalid = await service.call("move_by", { id: "page-frame", by: [16, 0] });
+    expect(invalid.isError).toBe(true);
+    expect(textOf(invalid)).toContain("Validation failed");
+    expect(readFileSync(path, "utf8")).toBe(before);
+  });
+
+  test("workflow tools: look returns renders; set_board_title and add_annotation persist", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = createCanvasService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+
+    const looked = await service.call("look", { view: "page-frame" });
+    expect(looked.isError).toBeUndefined();
+    expect(looked.content.some((item) => item.type === "image" && item.mimeType === "image/png")).toBe(true);
+    expect(textOf(looked)).not.toContain("SAVED");
+
+    await service.call("set_board_title", { title: "Retitled by MCP" });
+    const target = readDoc(path).objects.find((object: any) => object.id !== "page-frame").id;
+    const asked = await service.call("add_annotation", { objectId: target, body: "Is this step still needed?" });
+    expect(asked.isError).toBeUndefined();
+
+    const saved = readDoc(path);
+    expect(saved.title).toBe("Retitled by MCP");
+    expect(saved.annotations.some((annotation: any) =>
+      annotation.target.objectId === target && annotation.createdBy === "agent")).toBe(true);
+
+    const names = service.listTools().map((tool) => tool.name);
+    expect(names).not.toContain("finalize");
+    expect(names).toEqual(expect.arrayContaining(["look", "update_description", "set_board_title", "add_annotation", "reply_annotation", "resolve_request"]));
+  });
+
+  test("canvas_list and canvas_guidance", async () => {
+    const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = createCanvasService({ workspace });
+
+    const listed = await service.call("canvas_list", {});
+    expect(listed.structuredContent?.canvases).toEqual([
+      expect.objectContaining({ id: SOURCE_ID, open: false }),
+    ]);
+
+    const topics = await service.call("canvas_guidance", {});
+    const topicIds = (topics.structuredContent?.topics as Array<{ id: string }>).map((topic) => topic.id);
+    expect(topicIds).toContain("diagram_design");
+    expect(textOf(topics)).toContain("tokens");
+
+    const topic = await service.call("canvas_guidance", { topic: "diagram_design" });
+    expect(topic.isError).toBeUndefined();
+    expect(textOf(topic).length).toBeGreaterThan(1000);
+
+    // Guidance is the lazy path: opening a board carries none of it.
+    const opened = await service.call("canvas_open", { canvas: SOURCE_ID });
+    expect(textOf(opened)).not.toContain(textOf(topic).split("\n").at(-1)!);
+  });
+});

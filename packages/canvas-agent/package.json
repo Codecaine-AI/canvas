@@ -6,6 +6,7 @@
   "exports": {
     "./authoring": "./src/authoring/index.ts",
     "./protocol": "./src/protocol.ts",
+    "./toolkit": "./src/toolkit/index.ts",
     "./viewer-extension": "./src/viewer-extension/index.ts"
   },
   "scripts": {

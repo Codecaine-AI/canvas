@@ -9,10 +9,11 @@
   "scripts": {
     "docs": "bun tools/docs-framework/packages/docs-cli/src/index.ts",
     "test": "bun test packages/canvas/src",
-    "typecheck": "bun run typecheck:canvas && bun run typecheck:studio && bun run typecheck:canvas-agent",
+    "typecheck": "bun run typecheck:canvas && bun run typecheck:studio && bun run typecheck:canvas-agent && bun run typecheck:canvas-mcp",
     "typecheck:canvas": "bunx --bun tsc -p packages/canvas/tsconfig.json --noEmit",
     "typecheck:studio": "bunx --bun tsc -p packages/studio/tsconfig.json --noEmit",
     "typecheck:canvas-agent": "bunx --bun tsc -p packages/canvas-agent/tsconfig.json --noEmit",
+    "typecheck:canvas-mcp": "bunx --bun tsc -p packages/canvas-mcp/tsconfig.json --noEmit",
     "dev:studio": "bun run --cwd packages/studio dev",
     "dev:harness": "bun run --cwd packages/canvas-agent harness",
     "dev:agent-viewer": "bun run --cwd packages/canvas-agent viewer"
