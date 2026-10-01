@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
-import { resolveSectionColors, resolveShapeColors, resolveStickyFill } from "../theme/palette";
+import { resolveSectionColors, resolveShapePaint, resolveStickyPaint } from "../theme/palette";
 import { resolveObjectStrokeWidth } from "../theme/tokens";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { useCanvasStyle } from "../theme/canvas-style-context";
@@ -13,7 +13,19 @@ import type {
   ObjectRenderProps,
   RenderObjectShape,
 } from "./object-def";
-import { OBJECT_TEXT_COLOR, resolveTextSlot, slotLineHeightPx, textPlacementName, type TextSlot } from "./text-slots";
+import {
+  OBJECT_TEXT_COLOR,
+  resolveTextSlot,
+  slotLineHeightPx,
+  slotNameLineCapacity,
+  textPlacementName,
+  textSlotClampLineCount,
+  type ResolvedSlotDetail,
+  type SlotTypography,
+  type TextSlot,
+} from "./text-slots";
+
+export { textSlotClampLineCount };
 
 /**
  * Shared shell for registry-driven object renderers: the outer `<button>`,
@@ -29,8 +41,9 @@ import { OBJECT_TEXT_COLOR, resolveTextSlot, slotLineHeightPx, textPlacementName
 /**
  * An object's color pick resolved through its def's palette role table (P1,
  * OBJECT-DEF-OVERHAUL.md §3.2/§3.5): one fill, an optional role border
- * (stickies suppress the button border with null), and the ONE fixed dark
- * text color (D8). Shape-role colors always carry an ink border.
+ * (stickies suppress the button border with null), and the text color —
+ * the style's name color (D8: one text color, never derived per pick).
+ * Shape-role colors always carry an ink border.
  */
 export type ResolvedObjectColors = {
   fill: string;
@@ -41,28 +54,34 @@ export type ResolvedObjectColors = {
 export type ResolvedShapeObjectColors = ResolvedObjectColors & { border: string };
 
 /**
- * Resolves `object.color` through the given role's palette cells (P1).
- * Absent color = the kind's first-use default (D17) — visually identical to
- * a freshly stamped default pick. Sections resolve fill = tint and border =
- * chip fill (per §3.2, the section border IS the title chip's fill color).
+ * Resolves `object.color` through the given role's palette cells (P1) under
+ * the workspace canvas style. Absent color = the kind's first-use default
+ * (D17) — visually identical to a freshly stamped default pick. Shapes take
+ * theme/palette.ts resolveShapePaint (`tint`: the pastel fill + ink border;
+ * `card`: the card fill + ink border) and stickies the sticky paint's fill.
+ * Sections resolve the flat role table: fill = tint and border = chip fill
+ * (per §3.2, the section border IS the title chip's fill color) — the
+ * section def paints its own themed frame. Under the default style every
+ * value is the figjam table's.
  */
 export function resolveObjectRoleColors(
   object: Pick<InteractiveCanvasObject, "color">,
   role: ObjectColorRole,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): ResolvedObjectColors {
   if (role === "sticky") {
     return {
-      fill: resolveStickyFill(object.color ?? FIRST_USE_COLORS.sticky),
+      fill: resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).fill,
       border: null,
-      text: OBJECT_TEXT_COLOR,
+      text: canvasStyle.textColor,
     };
   }
   if (role === "section") {
     const section = resolveSectionColors(object.color ?? FIRST_USE_COLORS.section);
     return { fill: section.tint, border: section.chip.fill, text: OBJECT_TEXT_COLOR };
   }
-  const shape = resolveShapeColors(object.color ?? FIRST_USE_COLORS.shape);
-  return { fill: shape.fill, border: shape.border, text: OBJECT_TEXT_COLOR };
+  const shape = resolveShapePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle);
+  return { fill: shape.fill, border: shape.border, text: shape.text };
 }
 
 /**
@@ -89,7 +108,7 @@ export function resolveObjectBorderWidth(
       canvasStyle.sectionBorderWidthPx
     );
   }
-  const colors = resolveObjectRoleColors(object, colorRole);
+  const colors = resolveObjectRoleColors(object, colorRole, canvasStyle);
   return colors.border === null ? 0 : resolveObjectStrokeWidth(object.style, canvasStyle);
 }
 
@@ -99,7 +118,7 @@ export function objectStyle(
   buttonBorder: ObjectButtonBorderPolicy = "painted",
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): CSSProperties {
-  const colors = resolveObjectRoleColors(object, colorRole);
+  const colors = resolveObjectRoleColors(object, colorRole, canvasStyle);
   const borderWidth = resolveObjectBorderWidth(object, colorRole, buttonBorder, undefined, canvasStyle);
   return {
     left: `${object.geometry.x}px`,
@@ -139,6 +158,7 @@ export function ObjectShell({
   onObjectSelect,
   onObjectContextMenu,
   children,
+  style,
 }: Pick<
   ObjectRenderProps,
   | "object"
@@ -157,6 +177,8 @@ export function ObjectShell({
   /** Whether the outer button itself contributes a CSS border/padding-box inset. */
   buttonBorder?: ObjectButtonBorderPolicy;
   children?: ReactNode;
+  /** A kind's own inline trim merged over the resolved object style (the card sticky's edges). */
+  style?: CSSProperties;
 }) {
   const canvasStyle = useCanvasStyle();
   return (
@@ -175,7 +197,11 @@ export function ObjectShell({
       data-drop-target={dropTarget ? "true" : undefined}
       data-editable={(editable ?? Boolean(onObjectSelect)) ? "true" : undefined}
       aria-label={object.text || object.type}
-      style={objectStyle(object, colorRole, buttonBorder, canvasStyle)}
+      style={
+        style
+          ? { ...objectStyle(object, colorRole, buttonBorder, canvasStyle), ...style }
+          : objectStyle(object, colorRole, buttonBorder, canvasStyle)
+      }
       onClick={(event) => {
         event.stopPropagation();
         onObjectSelect?.(object.id);
@@ -199,11 +225,57 @@ const SLOT_JUSTIFY: Record<TextSlot["verticalAlign"], CSSProperties["justifyCont
   bottom: "flex-end",
 };
 
-export function textSlotClampLineCount(rectHeightPx: number, lineHeightPx: number): number {
-  const safeHeight = Number.isFinite(rectHeightPx) ? Math.max(0, rectHeightPx) : 0;
-  const safeLineHeight =
-    Number.isFinite(lineHeightPx) && lineHeightPx > 0 ? lineHeightPx : 1;
-  return Math.max(1, Math.floor(safeHeight / safeLineHeight));
+/**
+ * The detail line's inline style (contract §4): one line in the detail
+ * font, ellipsized at the slot width, `gapPx` under the name block (no gap
+ * when there is no name above it).
+ */
+export function detailLineStyle(
+  detail: ResolvedSlotDetail,
+  textAlign: SlotTypography["textAlign"],
+  gap = true,
+): CSSProperties {
+  const { typography } = detail;
+  return {
+    display: "block",
+    width: "100%",
+    flexShrink: 0,
+    ...(gap ? { marginTop: `${detail.gapPx}px` } : null),
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    fontFamily: typography.fontFamily,
+    fontSize: `${typography.fontSizePx}px`,
+    fontWeight: typography.fontWeight,
+    lineHeight: `${typography.lineHeightPx}px`,
+    textAlign,
+    color: typography.color,
+  };
+}
+
+/**
+ * The detail line under a slot's name. Rendered by the at-rest slot text and
+ * by the in-place name editor (stage/editor/features/text-editing), so the
+ * line holds still while the name above it is edited.
+ */
+export function SlotDetailLine({
+  detail,
+  textAlign,
+  gap = true,
+}: {
+  detail: ResolvedSlotDetail;
+  textAlign: SlotTypography["textAlign"];
+  gap?: boolean;
+}) {
+  return (
+    <span
+      className="interactive-canvas-object-detail"
+      data-canvas-text-detail=""
+      style={detailLineStyle(detail, textAlign, gap)}
+    >
+      {detail.text}
+    </span>
+  );
 }
 
 /**
@@ -213,8 +285,14 @@ export function textSlotClampLineCount(rectHeightPx: number, lineHeightPx: numbe
  * SAME resolved slot, so editing is WYSIWYG for every kind that renders
  * through this component (D14).
  *
+ * Plain slot text carries the object's detail line under the name when the
+ * resolved slot has one: in a centered slot the name and the detail center
+ * as one block, and the name's line clamp gives up lines to keep the detail
+ * (slotNameLineCapacity); in the below band the detail follows the name.
+ *
  * `children` overrides the default plain-text rendering (sticky passes its
- * markdown lines) while keeping the shared rect/typography plumbing.
+ * markdown lines) while keeping the shared rect/typography plumbing; it
+ * never carries a detail line.
  */
 export function ObjectSlotText({
   object,
@@ -245,11 +323,15 @@ export function ObjectSlotText({
   const borderInset = resolveObjectBorderWidth(object, colorRole, buttonBorder, undefined, canvasStyle);
   const placementName = textPlacementName(slot.placement);
   const isBelowPlacement = placementName === "below";
+  const plainText = children === undefined;
+  const detail = plainText ? resolved.detail : null;
+  const hasName = !plainText || object.text !== "";
   const clampLineHeightPx = slotLineHeightPx(typography);
-  const clampLines = textSlotClampLineCount(rect.height, clampLineHeightPx);
+  const clampLines = detail
+    ? slotNameLineCapacity(resolved)
+    : textSlotClampLineCount(rect.height, clampLineHeightPx);
   const shouldClampContent = !isBelowPlacement && (children === undefined || clampChildrenToSlot);
   const clampMaxHeightPx = clampLines * clampLineHeightPx;
-  const plainText = children === undefined;
   const labelRef = useRef<HTMLSpanElement | null>(null);
 
   useLayoutEffect(() => {
@@ -270,7 +352,7 @@ export function ObjectSlotText({
   }, [shouldClampContent, clampLines, clampMaxHeightPx]);
 
   if (resolved.hidden) return null;
-  if (plainText && object.text === "") return null;
+  if (!hasName && !detail) return null;
   return (
     <span
       className="interactive-canvas-object-text-slot"
@@ -289,33 +371,36 @@ export function ObjectSlotText({
         zIndex: 1,
       }}
     >
-      <span
-        ref={labelRef}
-        className={className ? `interactive-canvas-object-label ${className}` : "interactive-canvas-object-label"}
-        style={{
-          display: shouldClampContent ? "-webkit-box" : "block",
-          width: "100%",
-          whiteSpace: "pre-wrap",
-          overflowWrap: "break-word",
-          overflow: isBelowPlacement ? "visible" : "hidden",
-          ...(shouldClampContent
-            ? {
-                WebkitBoxOrient: "vertical",
-                WebkitLineClamp: String(clampLines),
-                maxHeight: `${clampMaxHeightPx}px`,
-                textOverflow: "ellipsis",
-              }
-            : null),
-          fontSize: `${typography.fontSizePx}px`,
-          fontWeight: typography.fontWeight,
-          lineHeight: typography.lineHeight,
-          textAlign: typography.textAlign,
-          color: typography.color,
-          ...(typography.fontFamily ? { fontFamily: typography.fontFamily } : null),
-        }}
-      >
-        {children ?? object.text}
-      </span>
+      {hasName ? (
+        <span
+          ref={labelRef}
+          className={className ? `interactive-canvas-object-label ${className}` : "interactive-canvas-object-label"}
+          style={{
+            display: shouldClampContent ? "-webkit-box" : "block",
+            width: "100%",
+            whiteSpace: "pre-wrap",
+            overflowWrap: "break-word",
+            overflow: isBelowPlacement ? "visible" : "hidden",
+            ...(shouldClampContent
+              ? {
+                  WebkitBoxOrient: "vertical",
+                  WebkitLineClamp: String(clampLines),
+                  maxHeight: `${clampMaxHeightPx}px`,
+                  textOverflow: "ellipsis",
+                }
+              : null),
+            fontSize: `${typography.fontSizePx}px`,
+            fontWeight: typography.fontWeight,
+            lineHeight: typography.lineHeight,
+            textAlign: typography.textAlign,
+            color: typography.color,
+            ...(typography.fontFamily ? { fontFamily: typography.fontFamily } : null),
+          }}
+        >
+          {children ?? object.text}
+        </span>
+      ) : null}
+      {detail ? <SlotDetailLine detail={detail} textAlign={typography.textAlign} gap={hasName} /> : null}
     </span>
   );
 }

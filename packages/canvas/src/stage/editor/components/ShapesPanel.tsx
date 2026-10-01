@@ -2,6 +2,11 @@
 
 import { memo, useMemo, useState } from "react";
 import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../../../objects/catalog";
+import {
+  ICON_GLYPHS,
+  ICON_GLYPH_CATEGORIES,
+  type IconGlyphId,
+} from "../../../objects/shapes/icon/icon-glyphs";
 import { shapeCatalogPreview } from "./shape-previews";
 import { Tooltip, type TooltipAlign } from "../../../ui/Tooltip";
 import type { InteractiveCanvasObjectType } from "../../../state/schema";
@@ -12,8 +17,9 @@ import type { InteractiveCanvasObjectType } from "../../../state/schema";
  * height LEFT-docked white panel").
  *
  * Two sections mirroring the catalog's arrangement: Icons (the default face
- * — the 30-glyph semantic vocabulary in registry order) and Shapes (the
- * eight universal marks as a compact utility group). Connectors are the
+ * — the semantic glyph vocabulary, one small sub-grid per icon category in
+ * ICON_GLYPH_CATEGORIES order, brands last) and Shapes (the eight universal
+ * marks as a compact utility group). Connectors are the
  * dock's separate "connector" tool, not a Shapes-panel entry — see
  * CanvasDock.tsx's ToolId union.
  *
@@ -58,6 +64,14 @@ const SHAPE_BUTTON_SIZE_PX = 46;
 const PURPLE_FOCUS_RING = "#8C2EF2"; // TRIM.accentPurple
 /** Violet wash behind the armed shape's grid button (accentPurple at low alpha). */
 const SELECTED_SHAPE_BG = "rgba(140, 46, 242, 0.12)";
+/** Icon-category sub-heading ink: muted against the #333333 section headers, still AA on white. */
+const ICON_GROUP_HEADING_COLOR = "#767676";
+const SHAPE_GRID_STYLE: React.CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: `repeat(${SHAPE_GRID_COLUMNS}, ${SHAPE_BUTTON_SIZE_PX}px)`,
+  justifyContent: "space-between",
+  rowGap: 6,
+};
 const PANEL_ENTER_ANIMATION_NAME = "canvas-shapes-panel-enter";
 const PANEL_EXIT_ANIMATION_NAME = "canvas-shapes-panel-exit";
 const PANEL_ENTER_ANIMATION = `${PANEL_ENTER_ANIMATION_NAME} 180ms cubic-bezier(0.16, 1, 0.3, 1) both`;
@@ -231,6 +245,39 @@ function shapeTooltipCaretOffset(tooltipAlign: TooltipAlign) {
   return "50%";
 }
 
+/**
+ * Whether glyph `glyphId` matches a picker query (trimmed, lowercased): its
+ * label, its id, or its category's label or id — so "brand" lists every
+ * brand and "network" the whole Network group. Every icon picker (this
+ * panel, the Inspector's glyph picker) searches through here.
+ */
+export function iconGlyphMatchesQuery(glyphId: IconGlyphId, query: string): boolean {
+  const glyph = ICON_GLYPHS[glyphId];
+  if (!glyph) return false;
+  const category = ICON_GLYPH_CATEGORIES.find((candidate) => candidate.id === glyph.category);
+  return [glyph.label, glyph.id, category?.label, category?.id].some(
+    (term) => term !== undefined && term.toLowerCase().includes(query),
+  );
+}
+
+/**
+ * `items` bucketed by their glyph's category in ICON_GLYPH_CATEGORIES order
+ * (brands last), input order kept within a bucket; empty buckets drop.
+ * Shared by every icon picker so they group alike.
+ */
+export function groupByIconCategory<T>(
+  items: readonly T[],
+  glyphOf: (item: T) => IconGlyphId | undefined,
+): { category: (typeof ICON_GLYPH_CATEGORIES)[number]; items: T[] }[] {
+  return ICON_GLYPH_CATEGORIES.map((category) => ({
+    category,
+    items: items.filter((item) => {
+      const glyphId = glyphOf(item);
+      return glyphId !== undefined && ICON_GLYPHS[glyphId]?.category === category.id;
+    }),
+  })).filter((group) => group.items.length > 0);
+}
+
 function ShapesPanelComponent({
   onPick,
   onPickEntry,
@@ -250,12 +297,29 @@ function ShapesPanelComponent({
     if (!q) return SHAPE_CATALOG;
     return SHAPE_CATALOG.map((category) => ({
       ...category,
-      // Labels + def-declared catalog keywords (P4 catalog unification).
+      // Labels + def-declared catalog keywords (P4 catalog unification);
+      // icon entries also match their glyph id and icon category.
       entries: category.entries.filter(
-        (e) => e.label.toLowerCase().includes(q) || e.keywords?.some((k) => k.includes(q)),
+        (e) =>
+          e.label.toLowerCase().includes(q) ||
+          e.keywords?.some((k) => k.includes(q)) ||
+          (e.icon !== undefined && iconGlyphMatchesQuery(e.icon, q)),
       ),
     })).filter((category) => category.entries.length > 0);
   }, [query]);
+
+  // One grid's buttons: tooltip alignment follows the column within that grid.
+  const renderGridEntries = (entries: readonly ShapeCatalogEntry[]) =>
+    entries.map((entry, entryIndex) => (
+      <ShapeGridButton
+        key={entry.id}
+        entry={entry}
+        tooltipAlign={shapeTooltipAlign(entryIndex)}
+        selected={entry.id === selectedEntryId}
+        onPick={onPick}
+        onPickEntry={onPickEntry}
+      />
+    ));
 
   function toggleSection(id: string) {
     setCollapsedSections((prev) => {
@@ -347,28 +411,41 @@ function ShapesPanelComponent({
                 collapsed={collapsed}
                 onToggle={() => toggleSection(category.id)}
               />
-              {!collapsed ? (
-                <div
-                  data-shape-grid={category.id}
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: `repeat(${SHAPE_GRID_COLUMNS}, ${SHAPE_BUTTON_SIZE_PX}px)`,
-                    justifyContent: "space-between",
-                    rowGap: 6,
-                  }}
-                >
-                  {category.entries.map((entry, entryIndex) => (
-                    <ShapeGridButton
-                      key={entry.id}
-                      entry={entry}
-                      tooltipAlign={shapeTooltipAlign(entryIndex)}
-                      selected={entry.id === selectedEntryId}
-                      onPick={onPick}
-                      onPickEntry={onPickEntry}
-                    />
-                  ))}
+              {collapsed ? null : category.id === "icons" ? (
+                // One sub-grid per icon category under a muted sub-heading;
+                // the Icons header above stays the section's one collapsible.
+                <div data-shape-grid={category.id} style={{ display: "grid", rowGap: 8 }}>
+                  {groupByIconCategory(category.entries, (entry) => entry.icon).map(
+                    ({ category: group, items }) => (
+                      <div
+                        key={group.id}
+                        role="group"
+                        aria-label={group.label}
+                        data-icon-category={group.id}
+                      >
+                        <div
+                          aria-hidden="true"
+                          style={{
+                            padding: "2px 4px 4px",
+                            fontSize: 11,
+                            fontWeight: 500,
+                            color: ICON_GROUP_HEADING_COLOR,
+                          }}
+                        >
+                          {group.label}
+                        </div>
+                        <div data-icon-grid={group.id} style={SHAPE_GRID_STYLE}>
+                          {renderGridEntries(items)}
+                        </div>
+                      </div>
+                    ),
+                  )}
                 </div>
-              ) : null}
+              ) : (
+                <div data-shape-grid={category.id} style={SHAPE_GRID_STYLE}>
+                  {renderGridEntries(category.entries)}
+                </div>
+              )}
             </div>
           );
         })}

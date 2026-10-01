@@ -8,15 +8,15 @@
       "id": "b-cvs-root-0",
       "type": "paragraph",
       "props": {
-        "covers": "What may live in the repo-root canvases/ corpus, how one corpus serves studio, tests, and docs, and the reference-corpus boundary under reference/.",
-        "type": "implementation",
         "concepts": [
           "canvases",
           "board-corpus",
           "fixtures",
           "eval-boards",
           "reference-corpus"
-        ]
+        ],
+        "covers": "What may live in the repo-root canvases/ corpus, how one corpus serves studio, tests, and docs, and the reference-corpus boundary under reference/.",
+        "type": "implementation"
       },
       "children": [
         "b-cvs-role-1",
@@ -121,7 +121,7 @@
           }
         },
         {
-          "insert": " — owns the persistence and embedding behavior these files ride: the file API, previews, view crops."
+          "insert": " owns the persistence and embedding behavior these files ride: the file API, the style settings route, previews, and view crops."
         }
       ],
       "children": []
@@ -144,7 +144,7 @@
           }
         },
         {
-          "insert": " — owns the diagram language the boards are written in."
+          "insert": " owns the diagram language the boards are written in."
         }
       ],
       "children": []
@@ -205,7 +205,7 @@
           }
         },
         {
-          "insert": " files and nothing else — no TypeScript modules, no barrel — with eval-run boards under "
+          "insert": " files and one settings file, with no TypeScript modules and no barrel, and eval-run boards live under "
         },
         {
           "insert": "canvases/evals/",
@@ -214,7 +214,16 @@
           }
         },
         {
-          "insert": ". One corpus serves three consumers: the studio lists and loads it over the file API, tests import individual files by relative path, and docs embed boards by canvas id; "
+          "insert": ". The settings file is "
+        },
+        {
+          "insert": "canvas-style.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the workspace's theme and per-theme overrides, which Studio writes and every renderer and agent reads. One corpus serves three consumers: the studio lists and loads it over the file API, tests import individual files by relative path, and docs embed boards by canvas id. "
         },
         {
           "insert": "packages/canvas/src/index.ts",
@@ -273,7 +282,7 @@
           }
         },
         {
-          "insert": " — including every future board and fixture, which is a data file consumed by path or id, never an export."
+          "insert": ", including every future board and fixture, which is a data file consumed by path or id, never an export."
         }
       ],
       "children": []
@@ -329,10 +338,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternatives were importing reference data at runtime or centralizing sampled constants into a mirror module — both make a research corpus load-bearing."
+          "insert": ": the rejected alternatives were importing reference data at runtime or centralizing sampled constants into a mirror module, and both make a research corpus load-bearing."
         }
       ],
       "children": []
@@ -362,7 +368,7 @@
           }
         },
         {
-          "insert": " — including every future reference recording or analysis, which informs constants but is never imported."
+          "insert": ", including every future reference recording or analysis, which informs constants but is never imported."
         }
       ],
       "children": []

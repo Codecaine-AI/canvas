@@ -13,9 +13,13 @@ import { renderDocumentToSvg } from "../../canvas/src/render/static-svg.ts";
 // Same relative-import rule: the workspace-wide style settings contract.
 import {
   CANVAS_STYLE_FILENAME,
-  canvasStyleOverrides,
-  normalizeCanvasStyle,
+  DEFAULT_CANVAS_THEME_ID,
+  normalizeCanvasStyleOverrides,
+  normalizeCanvasStyleSettings,
+  resolveCanvasStyle,
   type CanvasStyle,
+  type CanvasStyleOverrides,
+  type CanvasStyleSettings,
 } from "../../canvas/src/theme/canvas-style.ts";
 
 const CANVAS_ID_PATTERN = /^[a-z0-9][a-z0-9._-]{0,63}$/;
@@ -82,36 +86,83 @@ async function writeFileAtomic(filePath: string, contents: string): Promise<void
 /** Studio's workspace-wide canvas style settings (see canvas-style.ts). */
 export const CANVAS_STYLE_ROUTE = "/api/canvas-style";
 
-export type CanvasStyleSettings = {
-  /** Fully resolved style: defaults filled, every value clamped. */
+/** What GET and PUT /api/canvas-style answer. */
+export type CanvasStyleState = {
+  /** The normalized settings document — exactly what the file stores. */
+  settings: CanvasStyleSettings;
+  /** The active theme resolved: its preset plus its overrides, every value clamped. */
   style: CanvasStyle;
-  /** Only the keys that differ from the defaults — what the file stores. */
-  overrides: Partial<CanvasStyle>;
+  /** The active theme's overrides — only the tokens that differ from its preset. */
+  overrides: CanvasStyleOverrides;
+  /**
+   * sha256 of the file bytes (null: no file) — the revision a client sends
+   * back as `baseHash` so its save cannot overwrite a write it never saw.
+   */
+  hash: string | null;
 };
 
-/**
- * Reads `<canvasesDir>/canvas-style.json`. A missing, unreadable, or
- * malformed file resolves to the defaults; unknown keys are dropped and
- * values clamped, so a hand edit can never break rendering.
- */
-export async function readCanvasStyleSettings(canvasesDir: string): Promise<CanvasStyleSettings> {
+/** The response for a normalized settings document. */
+export function canvasStyleState(settings: CanvasStyleSettings, hash: string | null): CanvasStyleState {
+  return {
+    settings,
+    style: resolveCanvasStyle(settings),
+    overrides: settings.themes[settings.theme] ?? {},
+    hash,
+  };
+}
+
+async function readCanvasStyleFile(canvasesDir: string): Promise<{ settings: CanvasStyleSettings; hash: string | null }> {
+  let bytes: Buffer;
+  try {
+    bytes = await fs.readFile(resolve(canvasesDir, CANVAS_STYLE_FILENAME));
+  } catch {
+    return { settings: normalizeCanvasStyleSettings(null), hash: null }; // Missing — defaults.
+  }
   let raw: unknown = null;
   try {
-    raw = JSON.parse(await fs.readFile(resolve(canvasesDir, CANVAS_STYLE_FILENAME), "utf8"));
+    raw = JSON.parse(bytes.toString("utf8"));
   } catch {
-    // Missing or malformed — defaults.
+    // Malformed — defaults.
   }
-  const style = normalizeCanvasStyle(raw);
-  return { style, overrides: canvasStyleOverrides(style) };
+  return { settings: normalizeCanvasStyleSettings(raw), hash: canvasContentHash(bytes) };
 }
 
 /**
- * GET  /api/canvas-style            -> { style, overrides }
- * PUT  /api/canvas-style { overrides } -> { style, overrides }
+ * Reads `<canvasesDir>/canvas-style.json`. A missing, unreadable, or
+ * malformed file resolves to the defaults (schematic-light, no overrides); unknown keys
+ * are dropped and values clamped, so a hand edit can never break rendering.
+ * A pre-theme file (a flat bag of overrides) reads as figjam's overrides.
+ */
+export async function readCanvasStyleState(canvasesDir: string): Promise<CanvasStyleState> {
+  const { settings, hash } = await readCanvasStyleFile(canvasesDir);
+  return canvasStyleState(settings, hash);
+}
+
+/** canvas-style.json writes run one at a time, so a `baseHash` check and its write are atomic. */
+let canvasStyleWrites: Promise<unknown> = Promise.resolve();
+
+function serializeCanvasStyleWrite<T>(task: () => Promise<T>): Promise<T> {
+  const run = canvasStyleWrites.then(task);
+  canvasStyleWrites = run.catch(() => {});
+  return run;
+}
+
+/**
+ * GET  /api/canvas-style                -> { settings, style, overrides, hash }
+ * PUT  /api/canvas-style { settings }   -> { settings, style, overrides, hash }
+ * PUT  /api/canvas-style { overrides }  -> same; the pre-theme body: the bag
+ *                                          replaces the ACTIVE theme's overrides
  *
- * PUT normalizes (clamp + drop unknown keys) and persists only the keys that
- * differ from the defaults, as pretty JSON. No overrides left deletes the
- * file, so a reset leaves nothing behind in the canvases directory.
+ * A PUT carrying `baseHash` (the `hash` its settings were built on; null = no
+ * file) writes only if the file still has that hash; otherwise it answers 409
+ * with the current state, so the client can replay its edits onto it — a
+ * second Studio tab or the Canvas MCP never has its write silently undone.
+ *
+ * PUT normalizes (clamp, drop unknown keys and preset-equal values, drop
+ * themes left without overrides) and persists `{ theme, themes }` as pretty
+ * JSON. Settings equal to the defaults (the default theme, schematic-light,
+ * with no overrides) delete the file, so a reset leaves nothing behind in the
+ * canvases directory; any other theme — figjam included — is written.
  */
 async function handleCanvasStyleRequest(
   req: IncomingMessage,
@@ -119,7 +170,7 @@ async function handleCanvasStyleRequest(
   options: { canvasesDir: string; onCanvasStyleWrite?: (contentHash: string | null) => void },
 ): Promise<void> {
   if (req.method === "GET") {
-    sendJson(res, 200, await readCanvasStyleSettings(options.canvasesDir));
+    sendJson(res, 200, await readCanvasStyleState(options.canvasesDir));
     return;
   }
   if (req.method !== "PUT") {
@@ -127,24 +178,45 @@ async function handleCanvasStyleRequest(
     return;
   }
   const body = await readJsonBody(req);
-  if (!isRecord(body) || !isRecord(body.overrides)) {
-    sendJson(res, 400, { error: "Expected body { overrides }." });
+  if (!isRecord(body) || !(isRecord(body.settings) || isRecord(body.overrides))) {
+    sendJson(res, 400, { error: "Expected body { settings } or { overrides }." });
     return;
   }
-  const style = normalizeCanvasStyle(body.overrides);
-  const overrides = canvasStyleOverrides(style);
-  const filePath = resolve(options.canvasesDir, CANVAS_STYLE_FILENAME);
-  if (Object.keys(overrides).length === 0) {
-    options.onCanvasStyleWrite?.(null);
-    await fs.unlink(filePath).catch((error: NodeJS.ErrnoException) => {
-      if (error.code !== "ENOENT") throw error;
-    });
-  } else {
-    const contents = `${JSON.stringify(overrides, null, 2)}\n`;
-    options.onCanvasStyleWrite?.(canvasContentHash(contents));
-    await writeFileAtomic(filePath, contents);
+  const baseHash = "baseHash" in body ? body.baseHash : undefined;
+  if (baseHash !== undefined && baseHash !== null && typeof baseHash !== "string") {
+    sendJson(res, 400, { error: "baseHash must be a string or null." });
+    return;
   }
-  sendJson(res, 200, { style, overrides } satisfies CanvasStyleSettings);
+  await serializeCanvasStyleWrite(async () => {
+    const current = await readCanvasStyleFile(options.canvasesDir);
+    if (baseHash !== undefined && baseHash !== current.hash) {
+      sendJson(res, 409, canvasStyleState(current.settings, current.hash));
+      return;
+    }
+    const settings = isRecord(body.settings)
+      ? normalizeCanvasStyleSettings(body.settings)
+      : normalizeCanvasStyleSettings({
+          theme: current.settings.theme,
+          themes: {
+            ...current.settings.themes,
+            [current.settings.theme]: normalizeCanvasStyleOverrides(body.overrides, current.settings.theme),
+          },
+        });
+    const filePath = resolve(options.canvasesDir, CANVAS_STYLE_FILENAME);
+    let hash: string | null = null;
+    if (settings.theme === DEFAULT_CANVAS_THEME_ID && Object.keys(settings.themes).length === 0) {
+      options.onCanvasStyleWrite?.(null);
+      await fs.unlink(filePath).catch((error: NodeJS.ErrnoException) => {
+        if (error.code !== "ENOENT") throw error;
+      });
+    } else {
+      const contents = `${JSON.stringify(settings, null, 2)}\n`;
+      hash = canvasContentHash(contents);
+      options.onCanvasStyleWrite?.(hash);
+      await writeFileAtomic(filePath, contents);
+    }
+    sendJson(res, 200, canvasStyleState(settings, hash));
+  });
 }
 
 function filePathForId(canvasesDir: string, id: string): string | null {
@@ -328,9 +400,10 @@ export function createCanvasFileApiHandler(options: {
             width = PREVIEW_DEFAULT_WIDTH;
           }
 
-          // The workspace style is part of the render, so it is part of the
-          // cache key: a style change re-renders every preview.
-          const { style: canvasStyle } = await readCanvasStyleSettings(canvasesDir);
+          // The workspace style (the active theme, resolved) is part of the
+          // render, so it is part of the cache key: a theme switch or a token
+          // edit re-renders every preview.
+          const { style: canvasStyle } = await readCanvasStyleState(canvasesDir);
           const etag = `"${createHash("sha1")
             .update(
               `${mtimeMs}|${sectionId ?? ""}|${width ?? ""}|${height ?? ""}|${fit ?? ""}|${padding ?? ""}|${JSON.stringify(canvasStyle)}`,

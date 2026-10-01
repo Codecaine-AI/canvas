@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import { FIGJAM_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
 
 import { resolveScope } from "../src/board/scope";
 import { createOpContext } from "../src/service/session/tools/operations/op-context";
@@ -14,6 +15,16 @@ import {
 import type { LookRequest } from "../src/service/session/tools";
 
 export const FIXTURES_DIR = join(import.meta.dir, "fixtures");
+
+/**
+ * The figjam preset, for tests that pin figjam geometry (30px sans label
+ * chips, 2px borders, floating section header chips). The default theme is
+ * schematic-light, so such tests must pass figjam explicitly.
+ */
+export { FIGJAM_CANVAS_STYLE };
+
+/** A lint/op context that measures in the figjam theme. */
+export const FIGJAM_CONTEXT = { canvasStyle: FIGJAM_CANVAS_STYLE } as const;
 
 /** The gesture roster, in the groups `operations/index.ts` orders it by. */
 export type OperationToolName =

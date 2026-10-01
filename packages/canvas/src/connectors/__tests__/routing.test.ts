@@ -4,6 +4,8 @@ import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../..
 import { dragOrthogonalSegment, polylineInteriorWaypoints } from "../bend-editing";
 import { autoPickAnchors, routeConnection, routeConnectionToPoint, type Anchor } from "../routing";
 import { CONNECTOR_END_GAP_PX } from "../routing";
+import { belowExtendedBoundsPx, iconGlyphBoxPx } from "../../objects/text-slots";
+import { CANVAS_THEME_PRESETS, DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 
 const EPSILON = 1e-6;
 const MIN_STUB = 24;
@@ -66,7 +68,7 @@ function normalFor(anchor: Anchor): CanvasPoint {
   return { x: -1, y: 0 };
 }
 
-function shortReversalSegments(points: ReadonlyArray<CanvasPoint>) {
+function shortReversalSegments(points: ReadonlyArray<CanvasPoint>, threshold = SHORT_REVERSAL_THRESHOLD) {
   const reversals = [];
   for (let index = 1; index < points.length - 1; index += 1) {
     const a = points[index - 1]!;
@@ -82,7 +84,7 @@ function shortReversalSegments(points: ReadonlyArray<CanvasPoint>) {
     if (
       Math.abs(cross) < EPSILON &&
       dot < -EPSILON &&
-      Math.min(firstLength, secondLength) < SHORT_REVERSAL_THRESHOLD
+      Math.min(firstLength, secondLength) < threshold
     ) {
       reversals.push({ index, firstLength, secondLength });
     }
@@ -419,7 +421,7 @@ describe("routing", () => {
             x: start.x + normal.x * 30 + tangent.x * offset,
             y: start.y + normal.y * 30 + tangent.y * offset,
           };
-          const routed = routeConnectionToPoint(from, anchor, point);
+          const routed = routeConnectionToPoint(from, anchor, point, FIGJAM_CANVAS_STYLE);
 
           expect({
             anchor,
@@ -435,5 +437,124 @@ describe("routing", () => {
         }
       }
     });
+
+    it("collapses the stub overshoot between close objects without leaving through either body", () => {
+      // Objects under 48px apart put the two 24px stubs past each other: the
+      // elbow used to run out 24px, double back a few px, and do it again
+      // at the target (the quick-connect ghost of a create drag hits this too).
+      const from = object("from", 0, 0);
+      for (const style of [DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE]) {
+        for (const [x, y] of [[140, 36], [140, -36], [-140, 36], [24, 90], [-24, -90]] as const) {
+          const routed = routeConnection(from, object("to", x, y), connection("solid"), undefined, style);
+          const points = routed.points ?? [];
+          const startNormal = normalFor(routed.startAnchor);
+          const endNormal = normalFor(routed.endAnchor);
+          const first = { x: points[1]!.x - points[0]!.x, y: points[1]!.y - points[0]!.y };
+          const last = {
+            x: points.at(-1)!.x - points.at(-2)!.x,
+            y: points.at(-1)!.y - points.at(-2)!.y,
+          };
+
+          expect({ x, y, reversals: shortReversalSegments(points, 16) }).toEqual({ x, y, reversals: [] });
+          expect(first.x * startNormal.x + first.y * startNormal.y).toBeGreaterThan(0);
+          expect(last.x * endNormal.x + last.y * endNormal.y).toBeLessThan(0);
+        }
+      }
+    });
+
+    it("collapses short free-point reversals regardless of the theme's bend radius", () => {
+      // The drag preview's cursor sits just past the stub tip: the stub runs
+      // 24px out, then the route used to double back ~9-11px before turning
+      // — a visible jog under schematic's 8px bend radius (and with no bend
+      // radius at all), which the collapse must remove the same as figjam's.
+      const from = object("from", 0, 0);
+      const anchors: Anchor[] = ["top", "right", "bottom", "left"];
+      const styles = [
+        CANVAS_THEME_PRESETS["schematic-light"],
+        CANVAS_THEME_PRESETS["schematic-dark"],
+        { ...DEFAULT_CANVAS_STYLE, connectorCornerRadiusPx: 0 },
+      ];
+
+      for (const style of styles) {
+        for (const anchor of anchors) {
+          const start = borderPoint(from, anchor);
+          const normal = normalFor(anchor);
+          const tangent = { x: -normal.y, y: normal.x };
+
+          for (let along = 10; along <= 16; along += 1) {
+            for (const offset of [-130, -80, 80, 130]) {
+              const point = {
+                x: start.x + normal.x * along + tangent.x * offset,
+                y: start.y + normal.y * along + tangent.y * offset,
+              };
+              const routed = routeConnectionToPoint(from, anchor, point, style);
+
+              expect({
+                radius: style.connectorCornerRadiusPx,
+                anchor,
+                along,
+                offset,
+                reversals: shortReversalSegments(routed.points ?? [], 12),
+              }).toEqual({
+                radius: style.connectorCornerRadiusPx,
+                anchor,
+                along,
+                offset,
+                reversals: [],
+              });
+            }
+          }
+        }
+      }
+    });
   });
+});
+
+describe("routeConnection: styled below-band captions", () => {
+  it("starts a bottom-anchored connection at the styled caption band's bottom", () => {
+    const style = { ...DEFAULT_CANVAS_STYLE, detailFontSizePx: 20 };
+    const icon: InteractiveCanvasObject = {
+      id: "from",
+      type: "icon",
+      icon: "database",
+      text: "DB",
+      detail: "port: 5432",
+      geometry: { x: 0, y: 0, width: 64, height: 64 },
+    };
+    const below = { ...object("to", -18, 300) };
+    const band = belowExtendedBoundsPx(icon, style);
+
+    const routed = routeConnection(icon, below, connection("solid", { from: "bottom", to: "top" }), undefined, style);
+
+    // The painted band starts at the tile top (band.y), so its bottom is band.y + band.height.
+    expectPointClose(routed.start, { x: band.x + band.width / 2, y: band.y + band.height });
+  });
+});
+
+describe("routeConnection: captions wider than the glyph", () => {
+  const source = object("from", 100, 102);
+
+  for (const [label, overrides] of [
+    ["a detail line", { text: "Orders", detail: "claude-sonnet-4 · 200k ctx" }],
+    ["a long name", { text: "Adapt Question Based on Interview History" }],
+  ] as const) {
+    it(`ends a left-side connection on the glyph edge for ${label}`, () => {
+      const icon: InteractiveCanvasObject = {
+        id: "to",
+        type: "icon",
+        icon: "database",
+        geometry: { x: 400, y: 100, width: 64, height: 64 },
+        ...overrides,
+      };
+      expect(belowExtendedBoundsPx(icon).width).toBeGreaterThan(icon.geometry.width);
+
+      const routed = routeConnection(source, icon, connection("solid"), [source, icon]);
+
+      expect(routed.endAnchor).toBe("left");
+      // The glyph edge is the tile's: 56px (iconTileMaxPx) centered in the 64px box, 4px in.
+      const glyph = iconGlyphBoxPx(icon);
+      expect(glyph.x).toBe(4);
+      expectClose(routed.end.x, icon.geometry.x + glyph.x);
+    });
+  }
 });

@@ -8,7 +8,7 @@ import {
 } from "../catalog";
 
 // Operational-maps surface trim: the picker's default face is the icon grid
-// (the 30-glyph semantic vocabulary, registry order) with the eight
+// (the glyph semantic vocabulary, registry order) with the eight
 // universal shapes as a compact utility group. Connectors remain a dock-only
 // tool, never a Shapes-panel entry.
 describe("shape-catalog data shape", () => {
@@ -41,9 +41,8 @@ describe("shape-catalog data shape", () => {
     }
   });
 
-  it("Icons has all 30 glyphs in registry order, each inserting type: 'icon' with the matching glyph id and its display name as the label", () => {
+  it("Icons has every glyph in registry order, each inserting type: 'icon' with the matching glyph id and its display name as the label", () => {
     const icons = SHAPE_CATALOG.find((c) => c.id === "icons")!;
-    expect(icons.entries.length).toBe(30);
     expect(icons.entries.length).toBe(ICON_GLYPH_IDS.length);
     expect(icons.entries.map((e) => e.icon)).toEqual([...ICON_GLYPH_IDS]);
     for (const [index, glyphId] of ICON_GLYPH_IDS.entries()) {

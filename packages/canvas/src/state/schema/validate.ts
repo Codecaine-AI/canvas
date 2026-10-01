@@ -15,6 +15,7 @@ import type {
 import { isCanvasColor } from "./colors";
 import type { CanvasColor } from "./colors";
 import type { InteractiveCanvasDocument } from "./document";
+import { CANVAS_ICON_GLYPHS } from "./object-types";
 import type {
   CanvasIconGlyph,
   CanvasShapeDirection,
@@ -84,39 +85,12 @@ function isTriangleDirection(value: unknown): value is "up" | "down" {
   return value === "up" || value === "down";
 }
 
+// The glyph roster is read from CANVAS_ICON_GLYPHS (object-types.ts) so ids
+// added to the vocabulary validate without a second list to keep in sync.
+const CANVAS_ICON_GLYPH_SET: ReadonlySet<string> = new Set(CANVAS_ICON_GLYPHS);
+
 function isCanvasIconGlyph(value: unknown): value is CanvasIconGlyph {
-  return (
-    value === "agent" ||
-    value === "model" ||
-    value === "human" ||
-    value === "orchestrator" ||
-    value === "memory" ||
-    value === "knowledge" ||
-    value === "queue" ||
-    value === "server" ||
-    value === "terminal" ||
-    value === "config" ||
-    value === "api" ||
-    value === "message" ||
-    value === "send" ||
-    value === "event" ||
-    value === "guardrail" ||
-    value === "monitor" ||
-    value === "judge" ||
-    value === "document" ||
-    value === "documents" ||
-    value === "activity" ||
-    value === "archive" ||
-    value === "key" ||
-    value === "coin" ||
-    value === "package" ||
-    value === "voice" ||
-    value === "search" ||
-    value === "tool" ||
-    value === "wait" ||
-    value === "lock" ||
-    value === "eval"
-  );
+  return typeof value === "string" && CANVAS_ICON_GLYPH_SET.has(value);
 }
 
 function normalizeConnectionStyle(value: unknown): CanvasConnectionStyle {
@@ -402,6 +376,8 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
     // W5 — icon requires a known glyph id; hard validation error (not a
     // warning) since an icon object with no resolvable glyph can't be
     // rendered at all (mirrors the section title/tint precedent above).
+    // Sections take the same field as an OPTIONAL header icon: an unknown id
+    // there only costs the icon, so it is dropped with a warning instead.
     let icon: CanvasIconGlyph | undefined;
     if (rawObject.type === "icon") {
       if (!isCanvasIconGlyph(rawObject.icon)) {
@@ -409,12 +385,51 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
         continue;
       }
       icon = rawObject.icon;
+    } else if (
+      rawObject.type === "section" &&
+      rawObject.icon !== undefined &&
+      rawObject.icon !== null
+    ) {
+      if (isCanvasIconGlyph(rawObject.icon)) {
+        icon = rawObject.icon;
+      } else {
+        warnings.push({
+          path: `${path}.icon`,
+          message: `Unknown icon glyph "${String(rawObject.icon)}" was dropped.`,
+        });
+      }
+    }
+
+    // The one-line `detail` under the name — shapes, icons, and sections
+    // only. Trimmed; empty means "no detail line" and is omitted. Stickies
+    // never carry one (their body is markdown), and a non-string value is
+    // dropped with a warning like an unknown color.
+    let detail: string | undefined;
+    if (rawObject.detail !== undefined && rawObject.detail !== null) {
+      if (typeof rawObject.detail !== "string") {
+        warnings.push({
+          path: `${path}.detail`,
+          message: "detail must be a string; it was dropped.",
+        });
+      } else if (rawObject.type === "sticky") {
+        if (rawObject.detail.trim()) {
+          warnings.push({
+            path: `${path}.detail`,
+            message: "Stickies have no detail line; detail was dropped.",
+          });
+        }
+      } else {
+        detail = rawObject.detail.trim() || undefined;
+      }
     }
 
     objects.push({
       id,
       type: rawObject.type,
       text,
+      // Spread (not `detail: undefined`) so objects without a detail keep
+      // exactly the key set they had before the field existed.
+      ...(detail !== undefined ? { detail } : null),
       color,
       parentId: typeof rawObject.parentId === "string" ? rawObject.parentId : null,
       geometry,

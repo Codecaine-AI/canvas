@@ -8,9 +8,6 @@
       "id": "b-layering-root",
       "type": "paragraph",
       "props": {
-        "covers": "The geometric section-layering model: parentId as a reconciled geometry cache, derived section paint order, hit-testing agreement, gesture reconcile points, and the v2-flow bug that motivated the layer cake.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "section membership",
           "parentId",
@@ -19,13 +16,16 @@
           "paintOrderedObjects",
           "hit testing",
           "migrateSectionMembership"
-        ]
+        ],
+        "covers": "The geometric section-layering model: parentId as a reconciled geometry cache, derived section paint order, hit-testing agreement, gesture reconcile points, and the v2-flow bug that motivated the layer cake.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
-        "b-layering-title-1",
         "b-layering-intro-2",
         "b-layering-mental-model-heading-3",
         "b-layering-mental-model-body-4",
+        "b-layering-mental-model-tints-39",
         "b-layering-derived-decision-5",
         "b-layering-predicate-heading-6",
         "b-layering-predicate-body-7",
@@ -38,6 +38,7 @@
         "b-layering-section-headers-heading-35",
         "b-layering-section-headers-body-36",
         "b-layering-section-headers-render-37",
+        "b-layering-section-headers-placement-40",
         "b-layering-section-headers-hit-testing-38",
         "b-layering-demo-canvas-14",
         "b-layering-reconcile-heading-15",
@@ -61,19 +62,6 @@
         "b-layering-tests-heading-33",
         "b-layering-tests-body-34"
       ]
-    },
-    "b-layering-title-1": {
-      "id": "b-layering-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "The layer cake: geometric section layering"
-        }
-      ],
-      "children": []
     },
     "b-layering-intro-2": {
       "id": "b-layering-intro-2",
@@ -147,10 +135,35 @@
       ],
       "children": []
     },
+    "b-layering-mental-model-tints-39": {
+      "id": "b-layering-mental-model-tints-39",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The schematic themes make the cake visible as well as ordered. A section's fill steps toward its ink with every level of nesting, so depth reads as a stack of tints and not only as paint order ("
+        },
+        {
+          "insert": "workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "workspace themes"
+            }
+          }
+        },
+        {
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
     "b-layering-derived-decision-5": {
       "id": "b-layering-derived-decision-5",
-      "type": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "Layering is derived from geometry"
       },
@@ -224,8 +237,9 @@
     },
     "b-layering-parent-cache-decision-8": {
       "id": "b-layering-parent-cache-decision-8",
-      "type": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "parentId is a persisted cache"
       },
@@ -247,8 +261,9 @@
     },
     "b-layering-retention-constraint-9": {
       "id": "b-layering-retention-constraint-9",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "severity": "hard",
         "title": "Locked-all sections do not adopt new members"
       },
@@ -270,8 +285,9 @@
     },
     "b-layering-acyclic-observation-10": {
       "id": "b-layering-acyclic-observation-10",
-      "type": "observation",
+      "type": "callout",
       "props": {
+        "kind": "observation",
         "title": "Strictly-larger sections make cycles impossible"
       },
       "text": [
@@ -352,7 +368,7 @@
       },
       "text": [
         {
-          "insert": "Floating section headers"
+          "insert": "Section Headers"
         }
       ],
       "children": []
@@ -449,6 +465,32 @@
       ],
       "children": []
     },
+    "b-layering-section-headers-placement-40": {
+      "id": "b-layering-section-headers-placement-40",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Where the chip sits is a theme token. A floating chip (figjam) sits just inside the section's top-left corner, and a pinned chip (schematic) sits flush in that corner, sharing the section's top and left border. Both placements render in this layer, counter-scale the same way, and report their rect through "
+        },
+        {
+          "insert": "sectionTitleChipWorldRect",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/title-chip-geometry.ts",
+              "symbol": "sectionTitleChipWorldRect",
+              "label": "sectionTitleChipWorldRect"
+            }
+          }
+        },
+        {
+          "insert": ", so hit-testing, painted bounds, and the agent's lints agree with the pixels. The chip holds the section's optional icon, its title, and its optional one-fact detail."
+        }
+      ],
+      "children": []
+    },
     "b-layering-section-headers-hit-testing-38": {
       "id": "b-layering-section-headers-hit-testing-38",
       "type": "paragraph",
@@ -491,8 +533,8 @@
       "id": "b-layering-demo-canvas-14",
       "type": "canvas",
       "props": {
-        "title": "Layer cake visualization",
-        "canvasId": "layer-cake"
+        "canvasId": "layer-cake",
+        "title": "Layer cake visualization"
       },
       "children": []
     },
@@ -637,8 +679,9 @@
     },
     "b-layering-live-divergence-constraint-20": {
       "id": "b-layering-live-divergence-constraint-20",
-      "type": "constraint",
+      "type": "callout",
       "props": {
+        "kind": "constraint",
         "severity": "hard",
         "title": "Only live gesture frames may diverge"
       },
@@ -821,8 +864,8 @@
       "id": "b-layering-case-canvas-26",
       "type": "canvas",
       "props": {
-        "title": "V2 Flow section layering case study",
-        "canvasId": "v2-flow"
+        "canvasId": "v2-flow",
+        "title": "V2 Flow section layering case study"
       },
       "children": []
     },

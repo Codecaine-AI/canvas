@@ -50,6 +50,19 @@ export type CanvasSelection =
   | { kind: "annotation"; annotationId: string }
   | { kind: "region"; region: CanvasGeometry };
 
+/**
+ * A patch over `T` that can also CLEAR: `null` on a field `T` declares
+ * optional removes it. `null` is the wire spelling of a clear — an agent
+ * patch reaches the reducer through JSON (the harness's accept response, the
+ * `proposal-ready` event), and JSON drops an own `undefined`, so a clear
+ * spelled that way would vanish in transit. The agent apply path reads `null`
+ * exactly like an in-process own `undefined`, which callers may still pass.
+ * Required fields take no `null`: they are replaced, never cleared.
+ */
+export type CanvasClearablePatch<T> = {
+  [K in keyof T]?: undefined extends T[K] ? T[K] | null : T[K];
+};
+
 export type CanvasAgentPatchOperation =
   /**
    * The board rename, the agent-path twin of `canvas.updateDocumentTitle`.
@@ -65,7 +78,7 @@ export type CanvasAgentPatchOperation =
   | {
       type: "updateObject";
       objectId: string;
-      patch: Partial<Omit<InteractiveCanvasObject, "id">>;
+      patch: CanvasClearablePatch<Omit<InteractiveCanvasObject, "id">>;
     }
   | {
       /**
@@ -83,7 +96,7 @@ export type CanvasAgentPatchOperation =
   | {
       type: "updateConnection";
       connectionId: string;
-      patch: Partial<Omit<InteractiveCanvasConnection, "id">>;
+      patch: CanvasClearablePatch<Omit<InteractiveCanvasConnection, "id">>;
     }
   | {
       type: "removeConnection";
@@ -111,13 +124,18 @@ export type CanvasAction =
       objectType: InteractiveCanvasObjectType;
       /** Seed for the object's unified `text` field; omit for the per-type default (type label for shapes/sections, empty for sticky). */
       text?: string;
+      /** Seed for the one-line `detail` under the name; omit (or empty) for none. Ignored for stickies. */
+      detail?: string;
       parentId?: string | null;
       geometry?: CanvasGeometry;
       /** Explicit color pick for the new object; omit to take the last-picked memory for its kind (D17). */
       color?: CanvasColor;
       /** Shapes-panel catalog-entry variant: orientation for direction-aware shapes (triangle up/down, arrow left/right). */
       direction?: CanvasShapeDirection;
-      /** Shapes-panel catalog-entry variant: Advanced-tier glyph for `objectType: "icon"` — without it an icon object renders blank. */
+      /**
+       * Glyph for `objectType: "icon"` (Shapes-panel catalog-entry variant — without it an icon object renders
+       * blank) or the optional header icon for `objectType: "section"`.
+       */
       icon?: CanvasIconGlyph;
     }
   | { type: "canvas.duplicateSelection" }

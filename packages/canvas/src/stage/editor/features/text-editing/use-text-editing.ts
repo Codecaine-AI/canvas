@@ -5,6 +5,7 @@ import { objectDefFor } from "../../../../objects/object-def";
 import type { CanvasAction } from "../../../../state/actions";
 import type { CanvasPoint } from "../../../../state/geometry";
 import { labelPointFor, routeConnection } from "../../../../connectors/routing";
+import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -48,6 +49,7 @@ export interface TextEditingApi {
  * editor).
  */
 export function useTextEditing({ document, dispatch }: UseTextEditingArgs): TextEditingApi {
+  const canvasStyle = useCanvasStyle();
   const [labelEditConnectionId, setLabelEditConnectionId] = useState<string | null>(null);
   const [labelEditValue, setLabelEditValue] = useState("");
   // In-place OBJECT text editor (4.2.1) — distinct from the connector label
@@ -71,7 +73,7 @@ export function useTextEditing({ document, dispatch }: UseTextEditingArgs): Text
       // The inline editor opens over the chip, so it reads the same effective
       // label point the chip is drawn at (S1.1 `labelPosition` pin included).
       ? labelPointFor(
-          routeConnection(labelEditFromObject, labelEditToObject, labelEditConnection, document.objects),
+          routeConnection(labelEditFromObject, labelEditToObject, labelEditConnection, document.objects, canvasStyle),
           labelEditConnection,
         )
       : null;

@@ -34,6 +34,8 @@
         "b-kernel-host-body-9",
         "b-kernel-host-d5-decision-10",
         "b-kernel-host-context-11",
+        "b-kernel-host-boot-11b",
+        "b-kernel-host-editing-11c",
         "b-dir-loop-heading-13",
         "b-dir-loop-intro-14",
         "b-dir-phase-orientate-15",
@@ -52,6 +54,7 @@
         "b-dir-annotation-nonblocking-28",
         "b-kernel-session-heading-12",
         "b-kernel-session-body-13",
+        "b-kernel-session-wire-13b",
         "b-kernel-session-tools-14",
         "b-kernel-session-delta-15",
         "b-kernel-session-whole-program-16",
@@ -61,6 +64,7 @@
         "b-kernel-diff-add-20",
         "b-kernel-diff-arrow-21",
         "b-kernel-diff-section-22",
+        "b-kernel-diff-locks-22b",
         "b-kernel-diff-parent-constraint-23",
         "b-kernel-diff-waypoints-constraint-24",
         "b-kernel-diff-d1-decision-25",
@@ -69,6 +73,8 @@
         "b-kernel-apply-action-28",
         "b-kernel-apply-handle-29",
         "b-kernel-apply-dispatch-30",
+        "b-kernel-apply-measures-30b",
+        "b-kernel-apply-board-30c",
         "b-kernel-apply-downstream-31",
         "b-kernel-camera-heading-45",
         "b-kernel-camera-body-46",
@@ -250,7 +256,29 @@
       "props": {},
       "text": [
         {
-          "insert": "The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. Workflow contains five nested phase blocks—orientate, plan, build, qa, and finalize—and each phase carries objective, steps, and constraints. The phases run as a loop navigated by state rather than by turn count: a phase with nothing to do is skipped, and a problem found late sends the run back to the phase that can fix it. There is no separate rules section; phase constraints own those requirements. Build is sections-first: the section skeleton goes down first, content fills one section at a time with each render judged, a finished region closes with fit_section, then connections, labels, and styling follow.\n\nFive tagged blocks form the boot text, with every child line indented four spaces: editor_state describes the instruction, baseline, selection, resolved scope frame, boundary-edge count, and optional viewport; user_requests is the status-bearing annotation queue; capabilities is material then gestures — the four kind blocks (sections, stickies, objects, connections) each with description, named functionality topics, generated vocabulary or fields where applicable, and tips, naming no tools; followed by one gestures block holding a child per verb group, derived from the registration roster; style_guide contains the single nested aesthetic topic; and board_state contains the full, untruncated board digest followed by the current lint report. The object roster lists bare type names so the agent chooses geometry; icon glyphs and colors are enumerated one per line. During editing the standing picture is pushed rather than fetched: each turn's state block carries the live board digest, the cumulative diff, the current findings, the request queue, and a render of the board as it stands, so recall costs no tool call and look is spent on a close-up instead."
+          "insert": "The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. Workflow contains five nested phase blocks (orientate, plan, build, qa, and finalize), and each phase carries objective, steps, and constraints. The phases run as a loop navigated by state rather than by turn count: a phase with nothing to do is skipped, and a problem found late sends the run back to the phase that can fix it. There is no separate rules section. Phase constraints own those requirements. Build is sections-first: the section skeleton goes down first, content fills one section at a time with each render judged, a finished region closes with fit_section, then connections, labels, and styling follow."
+        }
+      ],
+      "children": []
+    },
+    "b-kernel-host-boot-11b": {
+      "id": "b-kernel-host-boot-11b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Five tagged blocks form the boot text, with every child line indented four spaces: editor_state describes the instruction, baseline, selection, resolved scope frame, boundary-edge count, and optional viewport. user_requests is the status-bearing annotation queue. capabilities is material then gestures: the four kind blocks (sections, stickies, objects, connections) each with description, named functionality topics, generated vocabulary or fields where applicable, and tips, naming no tools, followed by one gestures block holding a child per verb group, derived from the registration roster. style_guide contains the single nested aesthetic topic. board_state contains the full, untruncated board digest followed by the current lint report."
+        }
+      ],
+      "children": []
+    },
+    "b-kernel-host-editing-11c": {
+      "id": "b-kernel-host-editing-11c",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The object roster lists bare type names so the agent chooses geometry. Icon glyphs and colors are enumerated one per line. During editing the standing picture is pushed rather than fetched: each turn's state block carries the live board digest, the cumulative diff, the current findings, the request queue, and a render of the board as it stands, so recall costs no tool call and look is spent on a close-up instead."
         }
       ],
       "children": []
@@ -325,7 +353,7 @@
           }
         },
         {
-          "insert": " separates decomposition from placement. Choosing which sections carry the message, which pieces belong in each, and which vocabulary — types, icons, colors — expresses that process is the intellectual work the intent-level ask delegates. Doing it while placing objects collapses it into whatever the first few coordinates happened to suggest."
+          "insert": " separates decomposition from placement. Choosing which sections carry the message, which pieces belong in each, and which vocabulary (types, icons, colors) expresses that process is the intellectual work the intent-level ask delegates. Doing it while placing objects collapses it into whatever the first few coordinates happened to suggest."
         }
       ],
       "children": []
@@ -363,7 +391,7 @@
           }
         },
         {
-          "insert": " separates aesthetics from correctness, and is judged from renders rather than from the digest. Diagnostics own the hard findings; this pass owns whether the board actually looks clean — uniform spacing, peers on one register, matched sizes, wires routed the way someone drawing by hand would route them, elbows square and few. A clean lint report is not the same as a clean-looking board, which is exactly why the aesthetic judgment gets a phase of its own."
+          "insert": " separates aesthetics from correctness, and is judged from renders rather than from the digest. Diagnostics own the hard findings. This pass owns whether the board actually looks clean: uniform spacing, peers on one register, matched sizes, wires routed the way someone drawing by hand would route them, elbows square and few. A clean lint report is not the same as a clean-looking board, which is exactly why the aesthetic judgment gets a phase of its own."
         }
       ],
       "children": []
@@ -396,7 +424,7 @@
       },
       "text": [
         {
-          "insert": "The phases are a loop entered wherever the board needs work, not a checklist walked once. A phase with nothing to do is skipped — a small tweak may need no planning at all — and a problem found late sends the run back to the phase that can fix it and forward again through the ones after it. That re-entry is what lets one mechanism serve both a fresh build and a two-line correction on an existing board, and it is why the agent reads the pushed state block and the result that just landed to decide where it is, rather than tracking its own position."
+          "insert": "The phases are a loop entered wherever the board needs work, not a checklist walked once. A phase with nothing to do is skipped (a small tweak may need no planning at all), and a problem found late sends the run back to the phase that can fix it and forward again through the ones after it. That re-entry is what lets one mechanism serve both a fresh build and a two-line correction on an existing board, and it is why the agent reads the pushed state block and the result that just landed to decide where it is, rather than tracking its own position."
         }
       ],
       "children": []
@@ -420,7 +448,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The description is a small living document: what the diagram represents, its pieces, and how it reads. It is written as the board is built rather than reported afterwards, and trued up before a commit — the account of the work in progress, kept honest as the shape settles. Its first version is essentially the intake, drawn from what the user asked for; a board with no description has simply not been described yet. It is loosely templated markdown, guided by the prompt rather than enforced by schema."
+          "insert": "The description is a small living document: what the diagram represents, its pieces, and how it reads. It is written as the board is built rather than reported afterwards, and trued up before a commit: the account of the work in progress, kept honest as the shape settles. Its first version is essentially the intake, drawn from what the user asked for. A board with no description has simply not been described yet. It is loosely templated markdown, guided by the prompt rather than enforced by schema."
         }
       ],
       "children": []
@@ -449,7 +477,7 @@
       },
       "text": [
         {
-          "insert": "It serves two purposes at once. A returning agent orientates from the description instead of reverse-engineering intent out of geometry — the geometry is only the description's current expression, not its source. And it is the ground for clarifying exchanges: when a question is asked about the board, the description is the shared text both sides are arguing about. It surfaces in the AI panel ("
+          "insert": "It serves two purposes at once. A returning agent orientates from the description instead of reverse-engineering intent out of geometry: the geometry is only the description's current expression, not its source. And it is the ground for clarifying exchanges: when a question is asked about the board, the description is the shared text both sides are arguing about. It surfaces in the AI panel ("
         },
         {
           "insert": "packages/studio/src/agent/AgentSidebar.tsx",
@@ -553,7 +581,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The model has exactly thirty-two tools, factored by editing gesture rather than by kind. Twenty-five board mutators — place, arrange, content and appearance, sections, edges, delete — are built from one shared operation factory; look, add_annotation, reply_annotation, resolve_request, update_description, set_board_title, and finalize complete the surface. The per-gesture contracts are documented in "
+          "insert": "The model has exactly thirty-two tools, factored by editing gesture rather than by kind. Twenty-five board mutators (place, arrange, content and appearance, sections, edges, delete) are built from one shared operation factory. look, add_annotation, reply_annotation, resolve_request, update_description, set_board_title, and finalize complete the surface. The per-gesture contracts are documented in "
         },
         {
           "insert": "The agent tool surface",
@@ -566,7 +594,7 @@
           }
         },
         {
-          "insert": "; their kernel declarations live in "
+          "insert": ". Their kernel declarations live in "
         },
         {
           "insert": "catalog/layout-editor/tools/index.ts",
@@ -579,7 +607,7 @@
           }
         },
         {
-          "insert": "; their session-bound implementations live in "
+          "insert": ". Their session-bound implementations live in "
         },
         {
           "insert": "service/session/tools/index.ts",
@@ -592,7 +620,18 @@
           }
         },
         {
-          "insert": ", with the twenty-five mutators under operations/ and look, the annotation threads, request disposal, board title, description, and finalize under workflow/. The runtime looks up the current layout session from the kernel run context. A mutator's wire schema is exactly its own gesture fields, sealed against keys it does not declare: an edit takes no view argument and returns no picture, because framing is look's alone. Every mutator declares sequential execution, so call order is guaranteed."
+          "insert": ", with the twenty-five mutators under operations/ and look, the annotation threads, request disposal, board title, description, and finalize under workflow/."
+        }
+      ],
+      "children": []
+    },
+    "b-kernel-session-wire-13b": {
+      "id": "b-kernel-session-wire-13b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The runtime looks up the current layout session from the kernel run context. A mutator's wire schema is exactly its own gesture fields, sealed against keys it does not declare: an edit takes no view argument and returns no picture, because framing is look's alone. Every mutator declares sequential execution, so call order is guaranteed."
         }
       ],
       "children": []
@@ -603,7 +642,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Each typed mutator names exactly one operation and accepts its operation-specific fields and nothing else. One call applies one edit, and an advisory per-turn allowance — one tool call by default, raisable to three — keeps a single message from planning several gestures against a board its own first call is about to change. look is the separate read-only call: it frames exactly one region, view naming a section or a single object and at cropping to a world rect, either/or per call, and returns that region rendered and measured. It never returns the board, which arrives with the state block instead."
+          "insert": "Each typed mutator names exactly one operation and accepts its operation-specific fields and nothing else. One call applies one edit, and an advisory per-turn allowance (one tool call by default, raisable to three) keeps a single message from planning several gestures against a board its own first call is about to change. look is the separate read-only call: it frames exactly one region, view naming a section or a single object and at cropping to a world rect, either/or per call, and returns that region rendered and measured. It never returns the board, which arrives with the state block instead."
         }
       ],
       "children": []
@@ -662,7 +701,7 @@
           }
         },
         {
-          "insert": " holds the neutral delta vocabulary a document diff is allowed to speak — added, changed, removed per entity kind, plus the one section-fit shape a resolver produces. It is deliberately not the tool roster: move_to, move_by, align, and space_out all land in the document as the same geometry change, so a diff cannot recover which gesture produced it. Twenty-five gesture specs own per-operation state validation, and OpContext owns lowering onto the internal patch grammar."
+          "insert": " holds the neutral delta vocabulary a document diff is allowed to speak: added, changed, removed per entity kind, plus the one section-fit shape a resolver produces. It is deliberately not the tool roster: move_to, move_by, align, and space_out all land in the document as the same geometry change, so a diff cannot recover which gesture produced it. Twenty-five gesture specs own per-operation state validation, and OpContext owns lowering onto the internal patch grammar."
         }
       ],
       "children": []
@@ -708,7 +747,7 @@
       "props": {},
       "text": [
         {
-          "insert": "delete is one verb whose cascade is chosen from the target's kind — a section takes its contents with it, an object or sticky takes its incident connections, a connection goes alone — and the board's last section is refused; the per-kind cascades and the lock matrix are enumerated in "
+          "insert": "delete is one verb whose cascade is chosen from the target's kind (a section takes its contents with it, an object or sticky takes its incident connections, a connection goes alone), and the board's last section is refused. The per-kind cascades and the lock matrix are enumerated in "
         },
         {
           "insert": "The gestures",
@@ -721,7 +760,18 @@
           }
         },
         {
-          "insert": ". Locks are enforced, not merely advised: a frame's own locked value refuses that frame's mutation in either mode, an ancestor locked all gates every descendant, and an edge is gated when either endpoint sits inside a locked-all closure — a background lock pins one frame's box and never gates an edge. Every refusal names the frame holding the lock and unlock as the one call that lifts it. Placements are ungated, because a new id cannot be under a lock and membership reconcile already refuses to adopt into a locked-all section."
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-kernel-diff-locks-22b": {
+      "id": "b-kernel-diff-locks-22b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Locks are enforced, not merely advised: a frame's own locked value refuses that frame's mutation in either mode, an ancestor locked all gates every descendant, and an edge is gated when either endpoint sits inside a locked-all closure. A background lock pins one frame's box and never gates an edge. Every refusal names the frame holding the lock and unlock as the one call that lifts it. Placements are ungated, because a new id cannot be under a lock and membership reconcile already refuses to adopt into a locked-all section."
         }
       ],
       "children": []
@@ -732,7 +782,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The operation context lowers every gesture onto the internal patch grammar (addObject, updateObject, removeObject and their connection siblings), stamping implied types where a kind is structural. classifyDelta performs the inverse classification when cumulative diffs are rendered back as neutral delta verbs — a document diff cannot recover which gesture produced it."
+          "insert": "The operation context lowers every gesture onto the internal patch grammar (addObject, updateObject, removeObject and their connection siblings), stamping implied types where a kind is structural. classifyDelta performs the inverse classification when cumulative diffs are rendered back as neutral delta verbs. A document diff cannot recover which gesture produced it."
         }
       ],
       "children": []
@@ -768,7 +818,7 @@
           }
         },
         {
-          "insert": " emits the ordered internal six-operation list. Derived parentId membership and read-only annotations are omitted so the live canvas can derive or keep them; endpoint anchors, endpoint positions, and waypoints are stored connection fields — agent steering, not derived routing — and are diffed and carried in the proposal."
+          "insert": " emits the ordered internal six-operation list. Derived parentId membership and read-only annotations are omitted so the live canvas can derive or keep them. Endpoint anchors, endpoint positions, and waypoints are stored connection fields (agent steering, not derived routing) and are diffed and carried in the proposal."
         }
       ],
       "children": []
@@ -803,7 +853,7 @@
       "props": {},
       "text": [
         {
-          "insert": "fit_section reads the named frame's children from a membership-reconciled draft, computes the fitted geometry, and lands it as an ordinary geometry update on that one section. No ancestor is touched: fitting is a finishing move, and a cascade would compress a parent around whichever children happen to exist — cascading fit is auto-fit at smaller scope, and the whole point of the explicit gesture is that geometry moves only where it is named. A childless section returns a no-op note. Because the result lowers to a plain section geometry patch, nothing below the lowering line needs a special case."
+          "insert": "fit_section reads the named frame's children from a membership-reconciled draft, computes the fitted geometry, and lands it as an ordinary geometry update on that one section. No ancestor is touched: fitting is a finishing move, and a cascade would compress a parent around whichever children happen to exist. Cascading fit is auto-fit at smaller scope, and the whole point of the explicit gesture is that geometry moves only where it is named. A childless section returns a no-op note. Because the result lowers to a plain section geometry patch, nothing below the lowering line needs a special case."
         }
       ],
       "children": []
@@ -825,7 +875,29 @@
       "props": {},
       "text": [
         {
-          "insert": "look is the framed close-up. One call frames exactly one region: view names a section or a single object, at crops to a world rect, and the two are either/or — sending both, or neither, is refused with the two legal calls spelled out concretely so the model re-sends rather than re-reads a rule. The framed region comes back as a 1400px render and a MEASURES block — per-pair gaps on each axis, row and column pitch, the section's free rect, and ink share — beside the standing text truth: a fresh BOARD digest, the cumulative baseline-to-draft BOARD DIFF rendered from the same diffDocuments operations that a committed finalize proposes, the complete lint list in prose, routed truth, and the full request queue. It mutates nothing and emits no run event. The board itself is never a look result: the 1600px board render rides the state block, refreshed by every commit, followed by up to three prior post-change renders. Each raster a look produces is logged on the session and noted as a lightweight ref in the agent's state object, while the image itself stays visible in the recent conversation tail."
+          "insert": "look is the framed close-up. One call frames exactly one region: view names a section or a single object, at crops to a world rect, and the two are either/or. Sending both, or neither, is refused with the two legal calls spelled out concretely so the model re-sends rather than re-reads a rule."
+        }
+      ],
+      "children": []
+    },
+    "b-kernel-apply-measures-30b": {
+      "id": "b-kernel-apply-measures-30b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The framed region comes back as a 1400px render and a MEASURES block (per-pair gaps on each axis, row and column pitch, the section's free rect, and ink share) beside the standing text truth: a fresh BOARD digest, the cumulative baseline-to-draft BOARD DIFF rendered from the same diffDocuments operations that a committed finalize proposes, the complete lint list in prose, routed truth, and the full request queue. It mutates nothing and emits no run event."
+        }
+      ],
+      "children": []
+    },
+    "b-kernel-apply-board-30c": {
+      "id": "b-kernel-apply-board-30c",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The board itself is never a look result: the 1600px board render rides the state block, refreshed by every commit, followed by up to three prior post-change renders. Each raster a look produces is logged on the session and noted as a lightweight ref in the agent's state object, while the image itself stays visible in the recent conversation tail."
         }
       ],
       "children": []
@@ -836,7 +908,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every mutator returns one of three result classes, distinguished by headline — APPLIED, NO-OP, or ERROR — and only the applied class changes the draft or emits an event; each envelope is sized to its own call rather than restating the standing picture the state block already carries. The three headlines and exactly what each one carries are set out in "
+          "insert": "Every mutator returns one of three result classes, distinguished by headline (APPLIED, NO-OP, or ERROR), and only the applied class changes the draft or emits an event. Each envelope is sized to its own call rather than restating the standing picture the state block already carries. The three headlines and exactly what each one carries are set out in "
         },
         {
           "insert": "The operation pipeline",
@@ -932,7 +1004,57 @@
       "props": {},
       "text": [
         {
-          "insert": "The static renderer emits deterministic, self-contained SVG without React, DOM APIs, external styles, or foreignObject. It uses the production connector router, the canvas palette and stroke rules, the same text slots as the live stage, and a true silhouette for predefined-process (the one shape whose look is not a plain outline)."
+          "insert": "The static renderer emits deterministic, self-contained SVG without React, DOM APIs, external styles, or foreignObject. It uses the production connector router, the canvas palette and stroke rules, the same text slots as the live stage, and a true silhouette for predefined-process (the one shape whose look is not a plain outline). Every static render the session produces resolves through one canvas style, set by the "
+        },
+        {
+          "insert": "workspace theme",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "Workspace themes"
+            }
+          }
+        },
+        {
+          "insert": " a person picks in Studio. The session reads it once at create: "
+        },
+        {
+          "insert": "loadCanvasStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/canvas-style.ts",
+              "symbol": "loadCanvasStyle"
+            }
+          }
+        },
+        {
+          "insert": " resolves "
+        },
+        {
+          "insert": "canvases/canvas-style.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "resolveCanvasStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/canvas-style.ts",
+              "symbol": "resolveCanvasStyle"
+            }
+          }
+        },
+        {
+          "insert": " into the active theme's preset plus that theme's overrides, and a missing or malformed file falls back to the figjam defaults. The agent reads the theme so its renders match Studio, and never writes it."
         }
       ],
       "children": []
@@ -943,7 +1065,30 @@
       "props": {},
       "text": [
         {
-          "insert": "Text wrapping and ellipsis use generated Inter advance tables for the regular and true wght-700 instances. Sticky notes are laid out from the same markdown parser into matching heading, bullet, bold, code, indentation, and line-box structure. The harness rasterizes SVG with resvg and bundled Inter. Before entering native code it validates the root viewport, caps raster dimensions, and rejects degenerate or wholly off-viewport nested SVG and filtered elements; the SVG renderer also omits rasterizer-unsafe features from off-camera elements."
+          "insert": "Text wrapping and ellipsis use generated Inter advance tables for the regular and true wght-700 instances. IBM Plex Mono runs need no table, because every glyph advances the same 0.6em ("
+        },
+        {
+          "insert": "measureMonoTextPx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/text-metrics.ts",
+              "symbol": "measureMonoTextPx"
+            }
+          }
+        },
+        {
+          "insert": "). Sticky notes are laid out from the same markdown parser into matching heading, bullet, bold, code, indentation, and line-box structure. The harness rasterizes SVG with resvg and the fonts bundled in "
+        },
+        {
+          "insert": "assets/fonts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": Inter beside IBM Plex Mono at weights 400, 500, and 600. Before entering native code it validates the root viewport, caps raster dimensions, and rejects degenerate or wholly off-viewport nested SVG and filtered elements. The SVG renderer also omits rasterizer-unsafe features from off-camera elements."
         }
       ],
       "children": []
@@ -967,7 +1112,34 @@
       "props": {},
       "text": [
         {
-          "insert": "A committed finalize runs the finishing registry—the six always-on diagnostics plus frame-slack, which asks whether a frame is far larger than its children need—then filters them to the baseline scope plus draft-created objects. Every finding surviving in that edited scope blocks finalization, warnings included: the call is refused, the run stays active, and the model fixes what it raised before calling again. Crowding is a warning-tier corridor floor for sibling nodes: 80px side by side and 48px stacked. Both are the clearance a routed wire and its chip physically need, not a preferred gap; stacked peers sit closer because a wire between them usually runs along the gap rather than across it."
+          "insert": "A committed finalize runs the finishing registry: the eight always-on diagnostics, "
+        },
+        {
+          "insert": "label-is-prose",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "detail-too-long",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " included, plus "
+        },
+        {
+          "insert": "frame-slack",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", which asks whether a frame is far larger than its children need. Its findings are filtered to the baseline scope plus draft-created objects. Every finding surviving in that edited scope blocks finalization, warnings included: the call is refused, the run stays active, and the model fixes what it raised before calling again. Crowding is a warning-tier corridor floor for sibling nodes: 80px side by side and 48px stacked. Both are the clearance a routed wire and its chip physically need, not a preferred gap. Stacked peers sit closer because a wire between them usually runs along the gap rather than across it."
         }
       ],
       "children": []

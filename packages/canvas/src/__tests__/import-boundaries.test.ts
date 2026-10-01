@@ -175,19 +175,34 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  // theme/canvas-style.ts is the pure-data canvas style leaf (it imports
-  // nothing); the stroke resolver and the React style context build on it.
+  // theme/canvas-style.ts is the pure-data canvas style leaf (it imports only
+  // the color-id vocabulary and the pure color math); the stroke resolver,
+  // the palette paints, and the React style context build on it. The Inter
+  // advance table is a generated data leaf the font measurement reads.
   test("theme/ imports no first-party code outside state/schema vocabulary and the canvas-style leaf", () => {
     expect(
       formatEdges(
         edgesFromDir("theme").filter(
-          (edge) => !targetStartsWith(edge, ["state/schema", "theme/canvas-style.ts"]),
+          (edge) =>
+            !targetStartsWith(edge, [
+              "state/schema",
+              "theme/canvas-style.ts",
+              "theme/color-math.ts",
+              "theme/inter-metrics.generated.ts",
+            ]),
         ),
       ),
     ).toEqual([]);
-    // The leaf itself stays import-free (it is served to Node via ./style).
+    expect(
+      formatEdges(allImportEdges().filter((edge) => edge.importer === "theme/inter-metrics.generated.ts")),
+    ).toEqual([]);
+    // The leaf stays Node-safe (it is served to Node via ./style): the color
+    // math is import-free and the leaf adds only the color vocabulary.
     expect(
       formatEdges(allImportEdges().filter((edge) => edge.importer === "theme/canvas-style.ts")),
+    ).toEqual(["theme/canvas-style.ts -> ../state/schema/colors", "theme/canvas-style.ts -> ./color-math"]);
+    expect(
+      formatEdges(allImportEdges().filter((edge) => edge.importer === "theme/color-math.ts")),
     ).toEqual([]);
   });
 
@@ -198,7 +213,11 @@ describe("import boundaries", () => {
     // palette.ts no longer imports and re-exports CANVAS_COLORS at runtime.
     expect(formatEdges(themeEdges.filter((edge) => !edge.typeOnly))).toEqual([
       "theme/canvas-style-context.tsx -> ./canvas-style",
+      "theme/canvas-style.ts -> ../state/schema/colors",
+      "theme/canvas-style.ts -> ./color-math",
+      "theme/inter-metrics.ts -> ./inter-metrics.generated",
       "theme/palette.ts -> ../state/schema/colors",
+      "theme/palette.ts -> ./color-math",
       "theme/tokens.ts -> ./canvas-style",
     ]);
   });

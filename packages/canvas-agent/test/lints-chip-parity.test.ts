@@ -4,6 +4,8 @@ import { chipFor, CHIP_HEIGHT, chipWidth } from "../src/board/lints/geometry";
 import { renderDocumentToSvg } from "../../canvas/src/render/static-svg.ts";
 import { box, connect, makeDocument } from "./synthetic";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import { canvasThemePreset, type CanvasStyle } from "@codecaine-ai/canvas/style";
+import { FIGJAM_CANVAS_STYLE } from "./helpers";
 
 /**
  * Lint chips ARE the renderer's chips. The CONNECTION_LABEL_* constants are
@@ -55,12 +57,16 @@ function labelsOf(document: InteractiveCanvasDocument): string[] {
   return document.connections.flatMap((edge) => (edge.label ? [edge.label] : []));
 }
 
-function expectRendererParity(document: InteractiveCanvasDocument): void {
+/** Parity under `canvasStyle` — figjam unless a test names another theme. */
+function expectRendererParity(
+  document: InteractiveCanvasDocument,
+  canvasStyle: CanvasStyle = FIGJAM_CANVAS_STYLE,
+): void {
   const lintChips = document.connections.flatMap((edge) => {
-    const chip = chipFor(edge, document);
+    const chip = chipFor(edge, document, canvasStyle);
     return chip ? [chip] : [];
   });
-  const rendererChips = svgChipRects(renderDocumentToSvg(document).svg, labelsOf(document));
+  const rendererChips = svgChipRects(renderDocumentToSvg(document, { canvasStyle }).svg, labelsOf(document));
   expect(rendererChips).toHaveLength(lintChips.length);
   for (let index = 0; index < lintChips.length; index += 1) {
     const lint = lintChips[index]!.rect;
@@ -74,20 +80,20 @@ function expectRendererParity(document: InteractiveCanvasDocument): void {
 }
 
 describe("lint chip / static renderer parity", () => {
-  test("short label: the renderer's 41px minimum width, 30px height", () => {
+  test("figjam short label: the renderer's 41px minimum width, 30px height", () => {
     const document = makeDocument(
       [box("a", 0, 0), box("b", 600, 0)],
       [{ ...connect("e", "a", "b"), label: "X" }],
     );
-    const chip = chipFor(document.connections[0]!, document)!;
+    const chip = chipFor(document.connections[0]!, document, FIGJAM_CANVAS_STYLE)!;
     expect(chip.rect.width).toBe(41);        // min width beats 1×9.6 + 24
     expect(chip.rect.height).toBe(CHIP_HEIGHT);
     expectRendererParity(document);
   });
 
-  test("mid and long labels: 9.6px per character plus 12px padding a side", () => {
-    expect(chipWidth("go live")).toBeCloseTo(7 * 9.6 + 24, 10);
-    expect(chipWidth("connect-to-database")).toBeCloseTo(19 * 9.6 + 24, 10);
+  test("figjam mid and long labels: 9.6px per character plus 12px padding a side", () => {
+    expect(chipWidth("go live", FIGJAM_CANVAS_STYLE)).toBeCloseTo(7 * 9.6 + 24, 10);
+    expect(chipWidth("connect-to-database", FIGJAM_CANVAS_STYLE)).toBeCloseTo(19 * 9.6 + 24, 10);
     const document = makeDocument(
       [
         box("a", 0, 0), box("b", 600, 0),
@@ -119,6 +125,21 @@ describe("lint chip / static renderer parity", () => {
     // Exactly one chip renders, and it matches the lint's.
     expectRendererParity(document);
     expect(svgChipRects(renderDocumentToSvg(document).svg, labelsOf(document))).toHaveLength(1);
+  });
+
+  test("schematic theme: the shorter mono chip is still exactly the renderer's", () => {
+    const style = canvasThemePreset("schematic-light");
+    const document = makeDocument(
+      [box("a", 0, 0), box("b", 600, 0), box("c", 0, 300), box("d", 600, 300)],
+      [
+        { ...connect("short", "a", "b"), label: "X" },
+        { ...connect("long", "c", "d"), label: "connect-to-database" },
+      ],
+    );
+    const chip = chipFor(document.connections[1]!, document, style)!;
+    expect(chip.rect.height).toBe(26);
+    expect(chip.rect.width).toBeCloseTo(19 * 8.4 + 2 * 7, 10);
+    expectRendererParity(document, style);
   });
 
   test("elbowed route: chip parity holds at the router's own labelPoint", () => {

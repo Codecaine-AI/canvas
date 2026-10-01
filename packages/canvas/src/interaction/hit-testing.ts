@@ -6,7 +6,7 @@
  * gesture state lives here — everything is a straight function of the
  * document + a world point/bounds, so it's independently unit-testable.
  */
-import { connectionBoundsForObject, outlineContainsPoint } from "../objects/geometry";
+import { hitBoundsForObject, outlineContainsPoint } from "../objects/geometry";
 import { sectionTitleChipWorldRect } from "../objects/section/title-chip-geometry";
 import { boundsForGeometries, boundsIntersect, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { CanvasGeometry, InteractiveCanvasDocument, InteractiveCanvasObject } from "../state/schema";
@@ -14,6 +14,13 @@ import { paintOrderedObjects } from "../state/z-order";
 
 export type HitTestOptions = {
   zoom?: number;
+  /**
+   * Workspace canvas style: section title chips hit where the theme draws
+   * them (floating or pinned), and below-band captions hit at the size it
+   * paints them. Default style when omitted. (Typed through the chip
+   * geometry — the kernel sits below theme/.)
+   */
+  canvasStyle?: Parameters<typeof sectionTitleChipWorldRect>[2];
 };
 
 export function objectGeometryMap(
@@ -75,7 +82,7 @@ export function hitTestObjects(
   for (let index = objects.length - 1; index >= 0; index -= 1) {
     const object = objects[index]!;
     if (object.type !== "section") continue;
-    const { x, y, width, height } = sectionTitleChipWorldRect(object, zoom);
+    const { x, y, width, height } = sectionTitleChipWorldRect(object, zoom, options.canvasStyle);
     const insideChip =
       worldPoint.x >= x && worldPoint.x <= x + width && worldPoint.y >= y && worldPoint.y <= y + height;
     if (insideChip) return object;
@@ -84,11 +91,11 @@ export function hitTestObjects(
     const object = objects[index]!;
     // Below-slot text lives outside stored geometry but remains part of the
     // clickable object footprint.
-    const { x, y, width, height } = connectionBoundsForObject(object);
+    const { x, y, width, height } = hitBoundsForObject(object, options.canvasStyle);
     const inside =
       worldPoint.x >= x && worldPoint.x <= x + width && worldPoint.y >= y && worldPoint.y <= y + height;
     if (!inside) continue;
-    if (!outlineContainsPoint(object, worldPoint)) continue;
+    if (!outlineContainsPoint(object, worldPoint, undefined, options.canvasStyle)) continue;
     return object;
   }
   return null;
@@ -112,11 +119,13 @@ export function selectionBounds(
  * objects themselves.
  *
  * Deliberately axis-aligned. Below-slot objects contribute their extended
- * glyph+text footprint so snap guides account for visible labels.
+ * glyph+text footprint (sized under `canvasStyle`, default when omitted) so
+ * snap guides account for visible labels.
  */
 export function gatherSnapCandidates(
   document: InteractiveCanvasDocument,
   objectIds: string[],
+  canvasStyle?: HitTestOptions["canvasStyle"],
 ): CanvasBounds[] {
   const draggedIds = new Set(objectIds);
   const parentIds = new Set(
@@ -130,7 +139,7 @@ export function gatherSnapCandidates(
     const isSibling = parentIds.has(object.parentId ?? null);
     const isSection = object.type === "section";
     if (!isSibling && !isSection) continue;
-    candidates.set(object.id, connectionBoundsForObject(object));
+    candidates.set(object.id, hitBoundsForObject(object, canvasStyle));
   }
   return Array.from(candidates.values());
 }

@@ -132,8 +132,9 @@ function objectOf(
 function numberedRouteOf(
   connection: InteractiveCanvasConnection,
   document: InteractiveCanvasDocument,
+  canvasStyle: OpContext["canvasStyle"],
 ): string {
-  const points = routedPolyline(connection, document);
+  const points = routedPolyline(connection, document, canvasStyle);
   return formatNumberedSegments(
     connection.from.objectId,
     connection.to.objectId,
@@ -282,12 +283,13 @@ function routerAcceptsWaypoints(
   connection: InteractiveCanvasConnection,
   document: InteractiveCanvasDocument,
   waypoints: ReadonlyArray<[number, number]>,
+  canvasStyle: OpContext["canvasStyle"],
 ): boolean {
   const candidate: InteractiveCanvasConnection = {
     ...connection,
     waypoints: waypoints.map(([x, y]) => [x, y] as [number, number]),
   };
-  const points = routedPolyline(candidate, document);
+  const points = routedPolyline(candidate, document, canvasStyle);
   if (points.length === 0) return false;
   const wanted = waypoints.map(([x, y]) => ({ x, y }));
   for (let start = 0; start + wanted.length <= points.length; start += 1) {
@@ -349,7 +351,7 @@ export const reroute = defineOperationTool({
       ];
     }
 
-    if (routerAcceptsWaypoints(connection, ctx.draft, points)) return [];
+    if (routerAcceptsWaypoints(connection, ctx.draft, points, ctx.canvasStyle)) return [];
 
     const attachment = autoAttachment(connection, ctx.draft);
     if (!attachment) {
@@ -387,14 +389,15 @@ function bendEndpointPatch(
   endpoint: InteractiveCanvasConnection["from"],
   object: InteractiveCanvasObject,
   point: WorldPoint,
+  canvasStyle: OpContext["canvasStyle"],
 ): InteractiveCanvasConnection["from"] | undefined {
-  const bounds = connectionBoundsForObject(object);
+  const bounds = connectionBoundsForObject(object, canvasStyle);
   const existingPoint = endpoint.position
     ? {
         x: bounds.x + endpoint.position[0] * bounds.width,
         y: bounds.y + endpoint.position[1] * bounds.height,
       }
-    : canonicalEndpointPoint(object, endpoint.anchor, point);
+    : canonicalEndpointPoint(object, endpoint.anchor, point, canvasStyle);
   if (existingPoint && pointsAlmostEqualBy(existingPoint, point, ENDPOINT_POSITION_EPSILON_PX)) {
     return undefined;
   }
@@ -412,12 +415,13 @@ function canonicalEndpointPoint(
   object: InteractiveCanvasObject,
   anchor: InteractiveCanvasConnection["from"]["anchor"],
   point: WorldPoint,
+  canvasStyle: OpContext["canvasStyle"],
 ): WorldPoint | undefined {
   if (anchor === "top" || anchor === "right" || anchor === "bottom" || anchor === "left") {
-    return pointForObjectAnchor(object, anchor);
+    return pointForObjectAnchor(object, anchor, canvasStyle);
   }
   return (["top", "right", "bottom", "left"] as const)
-    .map((candidate) => pointForObjectAnchor(object, candidate))
+    .map((candidate) => pointForObjectAnchor(object, candidate, canvasStyle))
     .find((candidate) => pointsAlmostEqualBy(candidate, point, ENDPOINT_POSITION_EPSILON_PX));
 }
 
@@ -448,8 +452,8 @@ export const shiftSegment = defineOperationTool({
     const errors = [...ctx.requireConnection(p.id), ...ctx.requireUnlockedEdge(p.id)];
     if (errors.length > 0) return errors;
     const connection = connectionOf(ctx, p.id)!;
-    const points = routedPolyline(connection, ctx.draft);
-    const printed = numberedRouteOf(connection, ctx.draft);
+    const points = routedPolyline(connection, ctx.draft, ctx.canvasStyle);
+    const printed = numberedRouteOf(connection, ctx.draft, ctx.canvasStyle);
     if (points.length < 2) {
       return [`connectionId "${p.id}" has no routed path to shift — one of its endpoint objects is missing.`];
     }
@@ -480,7 +484,7 @@ export const shiftSegment = defineOperationTool({
   },
   apply: (ctx, p) => {
     const connection = connectionOf(ctx, p.id)!;
-    const points = routedPolyline(connection, ctx.draft);
+    const points = routedPolyline(connection, ctx.draft, ctx.canvasStyle);
     const segment = connectorBendSegments(points)
       .find((candidate) => candidate.index === p.segment)!;
 
@@ -521,10 +525,10 @@ export const shiftSegment = defineOperationTool({
       const first = commit.points[0];
       const last = commit.points[commit.points.length - 1];
       const from = fromObject && first
-        ? bendEndpointPatch(connection.from, fromObject, first)
+        ? bendEndpointPatch(connection.from, fromObject, first, ctx.canvasStyle)
         : undefined;
       const to = toObject && last
-        ? bendEndpointPatch(connection.to, toObject, last)
+        ? bendEndpointPatch(connection.to, toObject, last, ctx.canvasStyle)
         : undefined;
       patch = {
         waypoints: commit.waypoints,

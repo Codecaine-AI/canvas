@@ -5,7 +5,9 @@
  * finalize gate runs; it adds polish-tier checks that would only nag while a
  * region is still being built.
  *
- * Always-on lints check geometry defects and near-touching node boundaries.
+ * Always-on lints check geometry defects and near-touching node boundaries,
+ * plus the name + detail text convention (../text-rules): a name that reads
+ * as prose, a detail longer than one fact.
  * Crowding's 16px separation floor is a conservative readability heuristic,
  * not proof that every closer pair is unreadable. Actual wire and label
  * obstructions use rendered geometry. Hue and composition belong to visual
@@ -23,6 +25,8 @@ import { rule as brokenEdges } from "./rules/broken-edges";
 import { rule as unreadableLabels } from "./rules/unreadable-labels";
 import { rule as crowding } from "./rules/crowding";
 import { rule as clippedText } from "./rules/clipped-text";
+import { rule as labelIsProse } from "./rules/label-is-prose";
+import { rule as detailTooLong } from "./rules/detail-too-long";
 import { rule as frameSlack } from "./rules/frame-slack";
 
 export const LAYOUT_RULES: readonly LayoutRule[] = [
@@ -32,6 +36,8 @@ export const LAYOUT_RULES: readonly LayoutRule[] = [
   unreadableLabels,
   crowding,
   clippedText,
+  labelIsProse,
+  detailTooLong,
 ];
 
 export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES, frameSlack];

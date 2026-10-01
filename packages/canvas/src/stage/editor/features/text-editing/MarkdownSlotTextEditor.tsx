@@ -38,6 +38,7 @@ import {
   type StickyMarkdownSelection,
 } from "../../../../objects/sticky/markdown-editing";
 import type { InteractiveCanvasObject } from "../../../../state/schema";
+import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import type { TextEditingApi } from "./use-text-editing";
 
 interface MarkdownSlotTextEditorProps {
@@ -372,7 +373,10 @@ export function MarkdownSlotTextEditor({
   setValue,
   commit,
 }: MarkdownSlotTextEditorProps) {
-  const resolved = resolveTextSlot(slot, target, 1, { draftText: value });
+  // The canvas style gives the body its sticky paint's text color (a card
+  // sticky on a dark board edits in light text, as it renders).
+  const canvasStyle = useCanvasStyle();
+  const resolved = resolveTextSlot(slot, target, 1, { draftText: value, canvasStyle });
   const { rect, typography } = resolved;
   const placementName = textPlacementName(slot.placement);
   const editableRef = useRef<HTMLDivElement | null>(null);

@@ -366,6 +366,42 @@ describe("canvas.applyAgentPatch", () => {
     expect(next.document.objects.find((object) => object.id === "e")?.parentId ?? null).toBe(null);
   });
 
+  it("reads a null that crossed JSON as a clear, and never stores the null", () => {
+    const state = createInteractiveCanvasState({
+      ...makeState().document,
+      objects: [
+        makeObject({
+          id: "sec-1",
+          type: "section",
+          icon: "agent",
+          geometry: { x: 480, y: 0, width: 320, height: 320 },
+        }),
+        makeObject({ id: "a", detail: ":5432" }),
+        makeObject({ id: "b", geometry: { x: 192, y: 0, width: 96, height: 64 } }),
+      ],
+      connections: [makeConnection({ id: "conn-ab", label: "writes" })],
+    });
+    // The wire form: JSON keeps a null where it would drop an own undefined.
+    const operations = JSON.parse(JSON.stringify([
+      { type: "updateObject", objectId: "a", patch: { detail: null } },
+      { type: "updateObject", objectId: "sec-1", patch: { icon: null } },
+      { type: "updateConnection", connectionId: "conn-ab", patch: { label: null } },
+    ])) as CanvasAgentPatchOperation[];
+
+    const next = apply(state, operations);
+
+    const objectById = (id: string) => next.document.objects.find((object) => object.id === id)!;
+    expect("detail" in objectById("a")).toBe(false);
+    // toBeUndefined fails on null, so these also pin that no null was stored.
+    expect(objectById("sec-1").icon).toBeUndefined();
+    expect(next.document.connections[0]!.label).toBeUndefined();
+    expect(JSON.parse(JSON.stringify(next.document.connections[0]))).toEqual({
+      id: "conn-ab",
+      from: { objectId: "a" },
+      to: { objectId: "b" },
+    });
+  });
+
   it("clears waypoints on connectors whose endpoint moved (post-reduce reconcile runs for this action)", () => {
     const state = makeState();
     expect(

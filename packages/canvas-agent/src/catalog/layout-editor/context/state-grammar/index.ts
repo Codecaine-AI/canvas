@@ -72,7 +72,15 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       DIGEST_DEFAULTS_LEGEND,
       {
         text: "object extras appear only when set:",
-        children: ["locked=", "shape=", "layout=mode,pad=,gap=", "dir=", "author= (who placed it)"],
+        children: [
+          "icon= (a section's header glyph; an icon object's glyph is its type)",
+          "detail= (the one-line fact under the name)",
+          "locked=",
+          "shape=",
+          "layout=mode,pad=,gap=",
+          "dir=",
+          "author= (who placed it)",
+        ],
       },
       {
         text: 'edge line: id from→to "label" [extras] · route',

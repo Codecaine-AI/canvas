@@ -26,6 +26,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "@codecaine-ai/canvas/schema";
+import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 
 export type Axis = "x" | "y";
 
@@ -223,6 +224,8 @@ function freeRectFor(
 export interface MeasureRegionOptions {
   /** The section the region frames, when the caller already knows it. */
   sectionId?: string;
+  /** The style the board is drawn in — it sizes an icon's caption band (defaults to DEFAULT_CANVAS_STYLE, schematic-light). */
+  canvasStyle?: CanvasStyle;
 }
 
 /**
@@ -248,7 +251,8 @@ export function measureRegion(
   const painted = members
     .filter((object) => kindOf(object) !== "section")
     .reduce(
-      (total, object) => total + rectIntersectionArea(objectPaintedBounds(object), region),
+      (total, object) =>
+        total + rectIntersectionArea(objectPaintedBounds(object, options?.canvasStyle), region),
       0,
     );
 

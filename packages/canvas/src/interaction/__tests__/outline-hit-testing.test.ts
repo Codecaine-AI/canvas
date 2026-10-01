@@ -8,10 +8,13 @@
 import { describe, expect, it } from "bun:test";
 import {
   connectionBoundsForObject,
+  hitBoundsForObject,
   outlineContainsPoint,
   OUTLINE_HIT_TOLERANCE_WORLD_PX,
 } from "../../objects/geometry";
 import { sectionTitleChipWorldRect } from "../../objects/section/title-chip-geometry";
+import { belowExtendedBoundsPx } from "../../objects/text-slots";
+import { DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 import { hitTestObjects } from "../hit-testing";
 
@@ -98,11 +101,17 @@ describe("hitTestObjects (D16)", () => {
       geometry: { x: 10, y: 20, width: 120, height: 140 },
       style: { shape: "icon" },
     };
-    const bounds = connectionBoundsForObject(person);
-    const hit = hitTestObjects(doc([person]), {
-      x: bounds.x + bounds.width / 2,
-      y: person.geometry.y + person.geometry.height + 12,
-    });
+    // Glyph style (figjam): the caption hangs under the whole object box. (In the schematic tile
+    // style this 120×140 box holds a 56px tile whose caption ends inside the box.)
+    const bounds = connectionBoundsForObject(person, FIGJAM_CANVAS_STYLE);
+    const hit = hitTestObjects(
+      doc([person]),
+      {
+        x: bounds.x + bounds.width / 2,
+        y: person.geometry.y + person.geometry.height + 12,
+      },
+      { canvasStyle: FIGJAM_CANVAS_STYLE },
+    );
 
     expect(hit?.id).toBe("person");
   });
@@ -127,5 +136,40 @@ describe("hitTestObjects (D16)", () => {
     expect(point.y).toBeGreaterThanOrEqual(overlappingRect.geometry.y);
     expect(point.y).toBeLessThanOrEqual(overlappingRect.geometry.y + overlappingRect.geometry.height);
     expect(hitTestObjects(doc([shortSection, overlappingRect]), point, { zoom })?.id).toBe("short-section");
+  });
+});
+
+describe("styled below-band captions", () => {
+  const icon: InteractiveCanvasObject = {
+    id: "db",
+    type: "icon",
+    icon: "database",
+    text: "DB",
+    detail: "port: 5432",
+    geometry: { x: 0, y: 0, width: 64, height: 64 },
+  };
+  const largeDetailStyle = { ...DEFAULT_CANVAS_STYLE, detailFontSizePx: 20 };
+
+  it("sizes the hit footprint and connection bounds with the active style's detail metrics", () => {
+    const painted = belowExtendedBoundsPx(icon, largeDetailStyle);
+
+    // The picture starts at the tile: 56px (iconTileMaxPx) centered in the 64px box.
+    expect(painted.y).toBe(4);
+    // Hit footprint = object box ∪ painted (the caption is wider than the box).
+    expect(hitBoundsForObject(icon, largeDetailStyle)).toEqual({
+      x: painted.x,
+      y: 0,
+      width: painted.width,
+      height: painted.y + painted.height,
+    });
+    // Connection bounds: the tile's columns, from the tile top down through the band.
+    expect(connectionBoundsForObject(icon, largeDetailStyle)).toEqual({ x: 4, y: 4, width: 56, height: painted.height });
+  });
+
+  it("hits the painted detail line that only the active style reaches", () => {
+    const point = { x: 32, y: 112 };
+
+    expect(hitTestObjects(doc([icon]), point, { canvasStyle: largeDetailStyle })?.id).toBe("db");
+    expect(hitTestObjects(doc([icon]), point)).toBeNull();
   });
 });

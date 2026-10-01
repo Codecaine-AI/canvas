@@ -101,7 +101,7 @@
           }
         },
         {
-          "insert": " — the palette and token leaf modules; decisions live under "
+          "insert": " holds the workspace style model, the palette with its paint resolvers, the color math, and the font stacks. Decisions live under "
         },
         {
           "insert": "Theme",
@@ -137,7 +137,7 @@
           }
         },
         {
-          "insert": " — document schema, action vocabulary, reducer, and pure geometry helpers; decisions live under "
+          "insert": " holds the document schema, action vocabulary, reducer, and pure geometry helpers. Decisions live under "
         },
         {
           "insert": "State",
@@ -173,7 +173,7 @@
           }
         },
         {
-          "insert": " — the object-def registry, shape defs, text slots, and the object-preference registry; decisions live under "
+          "insert": " holds the object-def registry, shape defs, text slots, and the object-preference registry. Decisions live under "
         },
         {
           "insert": "Objects",
@@ -209,7 +209,7 @@
           }
         },
         {
-          "insert": " — the pure pointer kernel; decisions live under "
+          "insert": " is the pure pointer kernel. Decisions live under "
         },
         {
           "insert": "Interaction",
@@ -245,7 +245,7 @@
           }
         },
         {
-          "insert": " — routing, the connection cascade, connector gestures, and the vendored pathfinding core; decisions live under "
+          "insert": " holds routing, the connection cascade, connector gestures, and the vendored pathfinding core. Decisions live under "
         },
         {
           "insert": "Connectors",
@@ -281,7 +281,7 @@
           }
         },
         {
-          "insert": " — the presentation layer with its editor and viewer faces; decisions live under "
+          "insert": " is the presentation layer with its editor and viewer faces. Decisions live under "
         },
         {
           "insert": "Stage",
@@ -317,7 +317,7 @@
           }
         },
         {
-          "insert": " — vendored UI primitives and the icon pipeline, serving the editor trim; decisions live under "
+          "insert": " holds vendored UI primitives and the icon pipeline, serving the editor trim. Decisions live under "
         },
         {
           "insert": "UI",
@@ -353,7 +353,7 @@
           }
         },
         {
-          "insert": " — the standalone board app; decisions live under "
+          "insert": " is the standalone board app. Decisions live under "
         },
         {
           "insert": "Studio",
@@ -389,7 +389,7 @@
           }
         },
         {
-          "insert": " — the layout-agent harness; decisions live under "
+          "insert": " is the layout-agent harness. Decisions live under "
         },
         {
           "insert": "Canvas agent",
@@ -461,7 +461,7 @@
           }
         },
         {
-          "insert": " — the repo-root board corpus; decisions live under "
+          "insert": " is the repo-root board corpus. Decisions live under "
         },
         {
           "insert": "Canvases",
@@ -497,7 +497,7 @@
           }
         },
         {
-          "insert": " — the shared viewport-navigation hook both stage faces consume; no page yet — decisions accrete here when the area earns them."
+          "insert": " holds the shared viewport-navigation hook both stage faces consume. It has no page yet, and decisions accrete here when the area earns them."
         }
       ],
       "children": []
@@ -520,7 +520,7 @@
           }
         },
         {
-          "insert": " — static rendering: painted bounds, named views, static SVG, text metrics; no page yet — decisions accrete lazily."
+          "insert": " covers static rendering: painted bounds, named views, static SVG, text metrics. It has no page yet, and decisions accrete lazily."
         }
       ],
       "children": []
@@ -543,7 +543,7 @@
           }
         },
         {
-          "insert": " — docs-surface theme bundles ("
+          "insert": " holds docs-surface theme bundles ("
         },
         {
           "insert": "themes/default",
@@ -552,7 +552,7 @@
           }
         },
         {
-          "insert": "); configuration data for the doc viewer, not engine code."
+          "insert": "). They are configuration data for the doc viewer, not engine code."
         }
       ],
       "children": []
@@ -575,7 +575,7 @@
           }
         },
         {
-          "insert": " — reference corpora, notably "
+          "insert": " holds reference corpora, notably "
         },
         {
           "insert": "reference/board-design-reference",
@@ -584,7 +584,7 @@
           }
         },
         {
-          "insert": "; inputs the engine's constants trace back to, never imported (see "
+          "insert": ". They are inputs the engine's constants trace back to, never imported (see "
         },
         {
           "insert": "Canvases",
@@ -620,7 +620,7 @@
           }
         },
         {
-          "insert": " — the layout-agent eval harness: runner, scenario and axes systems, recorded runs."
+          "insert": " is the layout-agent eval harness: runner, scenario and axes systems, recorded runs."
         }
       ],
       "children": []
@@ -672,7 +672,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Agents adding code either conform to the decisions recorded here or file a proposal to change them — never silently deviate."
+          "insert": "Agents adding code either conform to the decisions recorded here or file a proposal to change them. They never silently deviate."
         }
       ],
       "children": []
@@ -727,7 +727,7 @@
           "insert": ": "
         },
         {
-          "insert": "tests are colocated with the code they cover — each slice owns its own "
+          "insert": "tests are colocated with the code they cover. Each slice owns its own "
         },
         {
           "insert": "__tests__/",
@@ -897,7 +897,7 @@
           }
         },
         {
-          "insert": " — including every future slice, which ships its own "
+          "insert": ", including every future slice, which ships its own "
         },
         {
           "insert": "__tests__/",
@@ -953,7 +953,7 @@
           }
         },
         {
-          "insert": ") get plain unit tests — inputs to outputs, no rendering; "
+          "insert": ") get plain unit tests (inputs to outputs, no rendering). "
         },
         {
           "insert": "stage/",
@@ -971,7 +971,7 @@
           }
         },
         {
-          "insert": " get happy-dom DOM and geometry assertion tests — computed styles, element positions, class names, attribute values — never visual screenshot or snapshot-image tests."
+          "insert": " get happy-dom DOM and geometry assertion tests (computed styles, element positions, class names, attribute values), never visual screenshot or snapshot-image tests."
         }
       ],
       "children": []
@@ -1021,7 +1021,7 @@
           }
         },
         {
-          "insert": " — including every future rendering surface and trim component."
+          "insert": ", including every future rendering surface and trim component."
         }
       ],
       "children": []
@@ -1148,7 +1148,7 @@
           }
         },
         {
-          "insert": " — including every future addition to the fixture corpus."
+          "insert": ", including every future addition to the fixture corpus."
         }
       ],
       "children": []
@@ -1226,7 +1226,7 @@
           }
         },
         {
-          "insert": ") plus two out-of-directory ports — the connection cascade in "
+          "insert": ") plus two out-of-directory ports (the connection cascade in "
         },
         {
           "insert": "packages/canvas/src/connectors/connection-cascade.ts",
@@ -1265,7 +1265,7 @@
           }
         },
         {
-          "insert": ". Every derived file carries an MPL-2.0 provenance header, and the repo-root "
+          "insert": "). Every derived file carries an MPL-2.0 provenance header, and the repo-root "
         },
         {
           "insert": "PROVENANCE.md",
@@ -1274,7 +1274,7 @@
           }
         },
         {
-          "insert": " record enumerates the same set. New pathfinding or snap logic goes in fresh clean-room files with no MPL obligations, or into the listed files inheriting MPL-2.0 plus header-and-record upkeep — never a blend, and never with headers stripped."
+          "insert": " record enumerates the same set. New pathfinding or snap logic goes in fresh clean-room files with no MPL obligations, or into the listed files inheriting MPL-2.0 plus header-and-record upkeep, never a blend and never with headers stripped."
         }
       ],
       "children": []
@@ -1314,7 +1314,7 @@
           "insert": ": "
         },
         {
-          "insert": "the listed files — including every future file derived from BlockSuite. "
+          "insert": "the listed files, including every future file derived from BlockSuite. "
         },
         {
           "insert": "PROVENANCE.md",

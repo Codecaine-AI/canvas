@@ -1,130 +1,229 @@
 {
- "schemaVersion": 1,
- "id": "canvas-10-system-design-60-layout-rulebook-08-r8-size-semantics",
- "title": "R8 \u2014 Size semantics",
- "root": "b-r8-root",
- "blocks": {
-  "b-r8-root": {
-   "id": "b-r8-root",
-   "type": "paragraph",
-   "props": {
-    "covers": "Size follows content and communicates role: every node starts from one shared target rectangle, peers match the largest member, larger boxes signal importance, and off-target sizes signal exceptions; the capabilities roster keys no size to an object type.",
-    "format": "mdx",
-    "type": "design",
-    "concepts": [
-     "content-first sizing",
-     "target node size",
-     "peer sizing",
-     "size as signal",
-     "bare type roster",
-     "explicit geometry",
-     "sticky sizing"
-    ]
-   },
-   "children": [
-    "b-r8-title-1",
-    "b-r8-size-semantics-opening",
-    "b-r8-card-2",
-    "b-r8-target-5",
-    "b-r8-body-3",
-    "b-r8-sticky-4"
-   ]
-  },
-  "b-r8-title-1": {
-   "id": "b-r8-title-1",
-   "type": "heading",
-   "props": {
-    "level": 1
-   },
-   "text": [
-    {
-     "insert": "R8 \u2014 Size semantics"
-    }
-   ],
-   "children": []
-  },
-  "b-r8-card-2": {
-   "id": "b-r8-card-2",
-   "type": "constraint",
-   "props": {
-    "title": "Size is information"
-   },
-   "text": [
-    {
-     "insert": "Size each box for what it says, then make peers match the largest member. Use a larger box only as a deliberate importance signal and an off-register size only as a deliberate exception."
-    }
-   ],
-   "children": []
-  },
-  "b-r8-target-5": {
-   "id": "b-r8-target-5",
-   "type": "paragraph",
-   "props": {},
-   "text": [
-    {
-     "insert": "Sizing starts from a stated target rather than from a blank page: a node aims for 288\u00d796 and is never narrower than 224. That target belongs to every node equally \u2014 it is a rectangle to grow from, not a cap and not a lookup keyed by object type. Grow whichever dimension the label needs, then use match_size to match peers to the largest member without hand-copying its dimensions. What a box says decides its size; what kind of thing it is decides nothing."
-    }
-   ],
-   "children": []
-  },
-  "b-r8-body-3": {
-   "id": "b-r8-body-3",
-   "type": "paragraph",
-   "props": {},
-   "text": [
-    {
-     "insert": "Mechanism: the "
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-60-layout-rulebook-08-r8-size-semantics",
+  "title": "R8 — Size semantics",
+  "root": "b-r8-root",
+  "blocks": {
+    "b-r8-root": {
+      "id": "b-r8-root",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "content-first sizing",
+          "target node size",
+          "peer sizing",
+          "size as signal",
+          "bare type roster",
+          "explicit geometry",
+          "sticky sizing"
+        ],
+        "covers": "Size follows content and communicates role: every node starts from one shared target rectangle, peers match the largest member, larger boxes signal importance, and off-target sizes signal exceptions; the capabilities roster keys no size to an object type.",
+        "format": "mdx",
+        "type": "design"
+      },
+      "children": [
+        "b-r8-size-semantics-opening",
+        "b-r8-card-2",
+        "b-r8-target-5",
+        "b-r8-name-detail-6",
+        "b-r8-name-detail-lints-7",
+        "b-r8-name-detail-fit-8",
+        "b-r8-body-3",
+        "b-r8-sticky-4"
+      ]
     },
-    {
-     "insert": "aesthetic",
-     "attributes": {
-      "reference": {
-       "kind": "source",
-       "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
-       "symbol": "style"
-      }
-     }
+    "b-r8-size-semantics-opening": {
+      "id": "b-r8-size-semantics-opening",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Size follows content and communicates role: every node starts from one shared target rectangle, peers match the largest member, larger boxes signal importance, and off-target sizes signal exceptions; the capabilities roster keys no size to an object type."
+        }
+      ],
+      "children": []
     },
-    {
-     "insert": " defines content-first sizing and peer matching. The generated "
+    "b-r8-card-2": {
+      "id": "b-r8-card-2",
+      "type": "callout",
+      "props": {
+        "kind": "constraint",
+        "title": "Size is information"
+      },
+      "text": [
+        {
+          "insert": "Size each box for what it says, then make peers match the largest member. Use a larger box only as a deliberate importance signal and an off-register size only as a deliberate exception."
+        }
+      ],
+      "children": []
     },
-    {
-     "insert": "capabilities roster",
-     "attributes": {
-      "reference": {
-       "kind": "source",
-       "path": "packages/canvas-agent/src/catalog/layout-editor/context/capabilities/vocabulary.generated.ts",
-       "symbol": "CAPABILITIES_OBJECTS_GENERATED"
-      }
-     }
+    "b-r8-target-5": {
+      "id": "b-r8-target-5",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Sizing starts from a stated target rather than from a blank page: a node aims for 288×96 and is never narrower than 224. That target belongs to every node equally. It is a rectangle to grow from, not a cap and not a lookup keyed by object type. Grow whichever dimension the content needs, then use match_size to match peers to the largest member without hand-copying its dimensions. What a box says decides its size, and what kind of thing it is decides nothing."
+        }
+      ],
+      "children": []
     },
-    {
-     "insert": " lists bare type names, icon glyphs, and colors without default sizes, leaving every finite rectangle to the agent. The roster and the target do separate jobs: the roster refuses to attach a size to a type, and the target gives every node the same content-first place to start. The rectangles that result quantize to the agent's 20 grid after the semantic size has been chosen. No diagnostic assigns an importance class or preferred extent."
+    "b-r8-name-detail-6": {
+      "id": "b-r8-name-detail-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A box's content is its name plus at most one detail line. The name says what the thing is in about five words. The detail holds one fact of at most 48 characters, such as a port, path, version, model, or host. Prose goes on a sticky beside the box. Size the box for the name and the detail together."
+        }
+      ],
+      "children": []
+    },
+    "b-r8-name-detail-lints-7": {
+      "id": "b-r8-name-detail-lints-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "label-is-prose",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/label-is-prose.ts"
+            }
+          }
+        },
+        {
+          "insert": " lint warns when a name runs past six words or 40 characters or spans more than one line or sentence. The "
+        },
+        {
+          "insert": "detail-too-long",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/detail-too-long.ts"
+            }
+          }
+        },
+        {
+          "insert": " lint warns when a detail runs past 48 characters or spans more than one line or sentence. Both judge only text the agent wrote this session, so a person's own long name stays as it is."
+        }
+      ],
+      "children": []
+    },
+    "b-r8-name-detail-fit-8": {
+      "id": "b-r8-name-detail-fit-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Fit counts the detail line. The text-fit check ("
+        },
+        {
+          "insert": "text-fit.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/text-fit.ts",
+              "label": "text-fit.ts"
+            }
+          }
+        },
+        {
+          "insert": ") measures a shape's name in the slot left after the detail line's reserve, and a section title in its header chip as the workspace theme draws it, icon and detail included. "
+        },
+        {
+          "insert": "resize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "match_size",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "update_text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " warn when the name or the detail would clip, and the "
+        },
+        {
+          "insert": "clipped-text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " finding names the size the box needs or the characters the detail can keep."
+        }
+      ],
+      "children": []
+    },
+    "b-r8-body-3": {
+      "id": "b-r8-body-3",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Mechanism: the "
+        },
+        {
+          "insert": "aesthetic",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+              "symbol": "style"
+            }
+          }
+        },
+        {
+          "insert": " defines content-first sizing and peer matching. The generated "
+        },
+        {
+          "insert": "capabilities roster",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/capabilities/vocabulary.generated.ts",
+              "symbol": "CAPABILITIES_OBJECTS_GENERATED"
+            }
+          }
+        },
+        {
+          "insert": " lists bare type names, icon glyphs, and colors without default sizes, leaving every finite rectangle to the agent. The roster and the target do separate jobs: the roster refuses to attach a size to a type, and the target gives every node the same content-first place to start. The rectangles that result quantize to the agent's 20 grid after the semantic size has been chosen. No diagnostic assigns an importance class or preferred extent."
+        }
+      ],
+      "children": []
+    },
+    "b-r8-sticky-4": {
+      "id": "b-r8-sticky-4",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Stickies have no documentation-level base size or override. Size a note for its markdown content and role, keep it inside the section it explains, and use the pushed render to judge readability. Short names and one-fact details belong on objects. Prose belongs on stickies: summaries, legends, callouts, explanations, and open questions."
+        }
+      ],
+      "children": []
     }
-   ],
-   "children": []
-  },
-  "b-r8-sticky-4": {
-   "id": "b-r8-sticky-4",
-   "type": "paragraph",
-   "props": {},
-   "text": [
-    {
-     "insert": "Stickies have no documentation-level base size or override. Size a note for its markdown content and role, keep it inside the section it explains, and use the pushed render to judge readability. Short labels belong on objects; summaries, legends, callouts, explanations, and open questions belong on stickies."
-    }
-   ],
-   "children": []
-  },
-  "b-r8-size-semantics-opening": {
-   "id": "b-r8-size-semantics-opening",
-   "type": "paragraph",
-   "props": {},
-   "text": [
-    {
-     "insert": "Size follows content and communicates role: every node starts from one shared target rectangle, peers match the largest member, larger boxes signal importance, and off-target sizes signal exceptions; the capabilities roster keys no size to an object type."
-    }
-   ],
-   "children": []
   }
- }
 }

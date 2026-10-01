@@ -1,5 +1,8 @@
 import { describe, expect, it } from "bun:test";
 import { sectionTitleChipWorldRect } from "../../../../objects/section/title-chip-geometry";
+import { belowExtendedBoundsPx } from "../../../../objects/text-slots";
+import { ANCHOR_DOT_OFFSET_PX, HIT_TARGET_PX } from "../../../../connectors/AnchorDots";
+import { DEFAULT_CANVAS_STYLE } from "../../../../theme/canvas-style";
 import type { CanvasPoint } from "../../../../state/geometry";
 import type {
   InteractiveCanvasDocument,
@@ -109,5 +112,25 @@ describe("resolveHoverTarget", () => {
     const document = makeDocument([section, child]);
 
     expect(resolve(document, { x: 80, y: 70 })).toBe("child");
+  });
+});
+
+describe("resolveHoverTarget: styled below-band captions", () => {
+  it("keeps hover within the halo around the caption the active style paints", () => {
+    const style = { ...DEFAULT_CANVAS_STYLE, detailFontSizePx: 20 };
+    const icon: InteractiveCanvasObject = {
+      id: "db",
+      type: "icon",
+      icon: "database",
+      text: "DB",
+      detail: "port: 5432",
+      geometry: { x: 0, y: 0, width: 64, height: 64 },
+    };
+    const halo = ANCHOR_DOT_OFFSET_PX + HIT_TARGET_PX / 2 + 2;
+    const point = { x: 32, y: belowExtendedBoundsPx(icon, style).height + halo - 1 };
+    const args = { document: makeDocument([icon]), worldPoint: point, zoom: 1, previousHoveredObjectId: "db" };
+
+    expect(resolveHoverTarget({ ...args, canvasStyle: style })).toBe("db");
+    expect(resolveHoverTarget(args)).toBeNull();
   });
 });

@@ -6,7 +6,7 @@
  */
 import { objectById, type CanvasPoint } from "../state/geometry";
 import { connectionBoundsForObject, getConnectionAnchors } from "../objects/geometry";
-import { CONNECTOR_DASH_PATTERN_PX } from "./def";
+import { connectorDashArray } from "./def";
 import {
   autoPickAnchors,
   connectorPathFromPoints,
@@ -16,7 +16,7 @@ import {
 } from "./routing";
 import { worldToScreen, type ViewportState } from "../stage/viewport";
 import { ObjectShape } from "../stage/ObjectShape";
-import { resolveConnectorStroke } from "../theme/palette";
+import { resolveConnectorPaint } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import type {
   InteractiveCanvasConnection,
@@ -28,9 +28,8 @@ import { useCanvasStyle } from "../theme/canvas-style-context";
 import type { CanvasStyle } from "../theme/canvas-style";
 /** Selection outline/handle color — inlined from the old TRIM.selectionBlue (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
-const CONNECTOR_PREVIEW_STROKE = resolveConnectorStroke(FIRST_USE_COLORS.connector);
-// Preview stroke width + bend radius: the canvas style's connector settings,
-// so the preview matches the connector it becomes.
+// Preview stroke (the default pick's ink), width + bend radius: the canvas
+// style's connector settings, so the preview matches the connector it becomes.
 const CONNECTOR_PREVIEW_OPACITY = 0.6;
 
 function quickConnectGhostId(
@@ -102,7 +101,7 @@ export function ConnectorDragPreview({
 
     const previewPath = connectorPathFromPoints(drag.points, canvasStyle);
     const strokeDasharray =
-      connection.style === "dashed" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
+      connection.style === "dashed" ? connectorDashArray(canvasStyle) : undefined;
     const transform = worldSvgTransform(viewport);
 
     return (
@@ -150,7 +149,7 @@ export function ConnectorDragPreview({
 
   // True-outline port anchors (connection-cascade.ts getConnectionAnchors) in
   // a stable top/bottom/left/right order (matching its candidates array).
-  const portAnchors = candidateObject ? getConnectionAnchors(candidateObject) : [];
+  const portAnchors = candidateObject ? getConnectionAnchors(candidateObject, canvasStyle) : [];
   const PORT_ANCHOR_NAMES: Anchor[] = ["top", "bottom", "left", "right"];
   const snappedWorld = drag.candidate?.snapKind === "outline" ? drag.candidate.point : undefined;
   // The ghost renders at WORLD size inside a zoom-scaled wrapper (below) —
@@ -201,7 +200,7 @@ export function ConnectorDragPreview({
           <path
             d={previewPath}
             fill="none"
-            stroke={CONNECTOR_PREVIEW_STROKE}
+            stroke={resolveConnectorPaint(FIRST_USE_COLORS.connector, canvasStyle).stroke}
             strokeWidth={canvasStyle.connectorStrokeWidthPx}
             strokeLinecap="butt"
             markerEnd={markerEnd}
@@ -300,7 +299,7 @@ function routedPreviewPath(
       ).path;
     }
 
-    const routed = routeConnection(fromObject, toObject, connection, document.objects);
+    const routed = routeConnection(fromObject, toObject, connection, document.objects, canvasStyle);
     const fixedObject = drag.end === "from" ? toObject : fromObject;
     const fixedAnchor = drag.end === "from" ? routed.endAnchor : routed.startAnchor;
     return routeConnectionToPoint(fixedObject, fixedAnchor, drag.point, canvasStyle).path;
@@ -310,7 +309,7 @@ function routedPreviewPath(
 
   const fromAnchor =
     drag.fromAnchor ??
-    autoPickAnchors(connectionBoundsForObject(sourceObject), {
+    autoPickAnchors(connectionBoundsForObject(sourceObject, canvasStyle), {
       x: drag.point.x,
       y: drag.point.y,
       width: 0,

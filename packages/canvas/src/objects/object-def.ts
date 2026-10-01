@@ -59,6 +59,12 @@ export interface ObjectRenderProps {
   zoom?: number;
   /** True while this object's text is being edited in place (D14) — hides the at-rest text so the editor is the only visible copy. */
   hideText?: boolean;
+  /**
+   * Sections only: nesting depth (1 = top-level; state/section-depth.ts) — the
+   * layer-cake fill deepens with it. CanvasStage computes it once per
+   * document; absent = 1.
+   */
+  sectionDepth?: number;
   onObjectSelect?: (objectId: string) => void;
   onObjectContextMenu?: (
     event: ReactMouseEvent<HTMLElement>,

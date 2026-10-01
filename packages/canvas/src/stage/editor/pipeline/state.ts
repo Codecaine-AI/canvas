@@ -11,6 +11,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../../../state/schema";
+import type { CanvasStyle } from "../../../theme/canvas-style";
 import type { ViewportState } from "../../viewport";
 import type {
   ConnectorBendDragGesture,
@@ -141,6 +142,11 @@ export type InteractionContext = {
    * current document + candidates) and passes it in fresh each step.
    */
   snapResolver?: (candidateBounds: CanvasBounds, zoom: number) => SnapCorrection | null;
+  /**
+   * Workspace canvas style: sizes below-band captions for hit, snap, and
+   * anchor geometry. Default style when omitted.
+   */
+  canvasStyle?: CanvasStyle;
 };
 
 export type InteractionResult = {

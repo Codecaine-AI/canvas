@@ -9,7 +9,7 @@ import {
 } from "../../canvas/src/render/static-svg.ts";
 import { resolveTextSlot, slotLineHeightPx } from "../../canvas/src/objects/text-slots.ts";
 import { makeDocument } from "./synthetic";
-import { normalizeCanvasStyle } from "@codecaine-ai/canvas/style";
+import { canvasThemePreset, normalizeCanvasStyle } from "@codecaine-ai/canvas/style";
 
 import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
 
@@ -165,4 +165,38 @@ describe("text-fit / renderer parity — sticky bodies and section titles", () =
     expect(textFitReport(grown, grown.geometry, grown.text, style).fits).toBe(true);
     expect(styledSvg(grown)).not.toContain("…");
   });
+});
+
+describe("text-fit / renderer parity — the schematic themes", () => {
+  // The schematic name weight (600) measures with Inter's bold advances, and
+  // the detail line paints IBM Plex Mono — the verdict must still be exactly
+  // the clipping the styled render shows.
+  for (const theme of ["schematic-light", "schematic-dark"] as const) {
+    const style = canvasThemePreset(theme);
+    const styledSvg = (object: InteractiveCanvasObject) =>
+      renderDocumentToSvg(makeDocument([object]), { canvasStyle: style }).svg;
+
+    test(`${theme}: a clipping label renders an ellipsis; the reported needed size does not`, () => {
+      const tight = shape(LONG_LABEL, 160, 96);
+      const report = textFitReport(tight, tight.geometry, tight.text, style);
+      expect(report.fits).toBe(false);
+      expect(styledSvg(tight)).toContain("…");
+      const grown = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height);
+      expect(textFitReport(grown, grown.geometry, grown.text, style).fits).toBe(true);
+      expect(styledSvg(grown)).not.toContain("…");
+      const shy = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height - 1);
+      expect(styledSvg(shy)).toContain("…");
+    });
+
+    test(`${theme}: with a detail line the needed size holds the name AND the detail whole`, () => {
+      const tight = { ...shape(LONG_LABEL, 200, 96), detail: "postgres 16 · db.t3.micro" };
+      const report = textFitReport(tight, tight.geometry, tight.text, style);
+      expect(report.fits).toBe(false);
+      const grown = { ...tight, geometry: { ...tight.geometry, ...report.neededSize! } };
+      expect(textFitReport(grown, grown.geometry, grown.text, style).fits).toBe(true);
+      const svg = styledSvg(grown);
+      expect(svg).not.toContain("…");
+      expect(svg).toContain(">postgres 16 · db.t3.micro</text>");
+    });
+  }
 });

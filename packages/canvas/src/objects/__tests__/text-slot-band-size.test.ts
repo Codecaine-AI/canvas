@@ -12,12 +12,20 @@ import {
   belowExtendedBoundsPx,
   estimateSlotLineCount,
   estimateWrappedText,
+  iconTileRectPx,
   resolveTextSlot,
   slotLineHeightPx,
   textPlacementName,
   type TextSlot,
 } from "../text-slots";
 import type { InteractiveCanvasObject } from "../../state/schema";
+import { measureInterTextPx } from "../../theme/inter-metrics";
+import { DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE, canvasThemePreset } from "../../theme/canvas-style";
+import { wrapTextLines } from "../../render/static-svg";
+
+/** The default style's name size and line box (17.5px × 1.2 = 21px); figjam's is 15 / 18. */
+const NAME_PX = DEFAULT_CANVAS_STYLE.textFontSizePx;
+const NAME_LINE_PX = NAME_PX * 1.2;
 
 function makeObject(
   partial: Partial<InteractiveCanvasObject> & Pick<InteractiveCanvasObject, "id" | "type">,
@@ -47,20 +55,30 @@ describe("text slot below band sizing", () => {
       style: { shape: "icon" },
     });
     const slot = textSlotFor(object);
-    const expectedWidth = "Hello text".length * 15 * 0.62;
+    const expectedWidth = "Hello text".length * NAME_PX * 0.62;
+    const figjamWidth = "Hello text".length * 15 * 0.62;
 
     expect(estimateSlotLineCount("Hello text", BELOW_BAND_MIN_WIDTH_PX, slot.typography)).toBe(1);
     expect(slotLineHeightPx(slot.typography)).toBe(18);
     expect(belowBandSize(object.text, object)).toEqual({
       lines: 1,
       widthPx: expectedWidth,
-      heightPx: BELOW_TEXT_LINE_HEIGHT_PX,
+      heightPx: NAME_LINE_PX,
     });
+    // Default (schematic) tile style: the glyph box is the 56px tile centered in the 120×140 box
+    // (y 42..98); the band hangs BELOW_BAND_GAP_PX under it, centered on it.
     expect(resolveTextSlot(slot, object).rect).toEqual({
       x: (120 - expectedWidth) / 2,
-      y: 140 + BELOW_BAND_GAP_PX,
+      y: 42 + 56 + BELOW_BAND_GAP_PX,
       width: expectedWidth,
-      height: 18,
+      height: NAME_LINE_PX,
+    });
+    // Glyph style (figjam): the glyph box is the whole object box; names at 15px in 18px lines.
+    expect(resolveTextSlot(slot, object, 1, { canvasStyle: FIGJAM_CANVAS_STYLE }).rect).toEqual({
+      x: (120 - figjamWidth) / 2,
+      y: 140 + BELOW_BAND_GAP_PX,
+      width: figjamWidth,
+      height: BELOW_TEXT_LINE_HEIGHT_PX,
     });
   });
 
@@ -73,14 +91,40 @@ describe("text slot below band sizing", () => {
       geometry: { x: 10, y: 20, width: 120, height: 110 },
       style: { shape: "icon" },
     });
-    const estimate = estimateWrappedText(object.text, BELOW_BAND_MIN_WIDTH_PX);
+    const estimate = estimateWrappedText(object.text, BELOW_BAND_MIN_WIDTH_PX, NAME_PX);
     const size = belowBandSize(object.text, object);
 
     expect(belowBandMaxWidthPx(object)).toBe(BELOW_BAND_MIN_WIDTH_PX);
-    expect(size.lines).toBe(2);
+    // Two lines at figjam's 15px, three at the default 17.5px.
+    expect(belowBandSize(object.text, object, FIGJAM_CANVAS_STYLE).lines).toBe(2);
+    expect(size.lines).toBe(3);
     expect(size.widthPx).toBe(estimate.longestLineWidthPx);
     expect(size.widthPx).toBeGreaterThan(object.geometry.width);
     expect(size.widthPx).toBeLessThanOrEqual(BELOW_BAND_MIN_WIDTH_PX);
+  });
+
+  it("widens the band to a caption line's real Inter width, so a short word of wide glyphs never breaks", () => {
+    // 0.62em per character runs narrow for these: 4 × 9.3 = 37.2px, but "Code"
+    // measures 38.98px in Inter Bold — the band used to split it "Cod / e".
+    for (const style of [canvasThemePreset("figjam"), canvasThemePreset("schematic-light")]) {
+      for (const text of ["Code", "Bun", "Web App"]) {
+        const object = makeObject({ id: "short", type: "icon", icon: "code", text, geometry: { x: 0, y: 0, width: 64, height: 64 } });
+        const rect = resolveTextSlot(textSlotFor(object), object, 1, { canvasStyle: style }).rect;
+        expect(rect.width).toBeGreaterThan(measureInterTextPx(text, style.textFontSizePx, style.textFontWeight));
+        expect(rect.x).toBeCloseTo((64 - rect.width) / 2, 10);
+        // The static renderer wraps inside this width at the same advances.
+        expect(wrapTextLines(text, rect.width, style.textFontSizePx, style.textFontWeight)).toEqual([text]);
+        expect(belowBandSize(text, object, style).lines).toBe(1);
+      }
+    }
+  });
+
+  it("keeps the estimated width when every line already fits it", () => {
+    const object = makeObject({ id: "fits", type: "icon", icon: "database", text: "Postgres", geometry: { x: 0, y: 0, width: 64, height: 64 } });
+    expect(measureInterTextPx("Postgres", NAME_PX, DEFAULT_CANVAS_STYLE.textFontWeight) + 1).toBeLessThan(
+      8 * NAME_PX * 0.62,
+    );
+    expect(belowBandSize(object.text, object).widthPx).toBe(8 * NAME_PX * 0.62);
   });
 
   it("caps below band width at the object width when the glyph is wider than 200px", () => {
@@ -119,8 +163,8 @@ describe("text slot below band sizing", () => {
     expect(belowBandSize(empty.text, empty)).toEqual({ lines: 0, widthPx: 0, heightPx: 0 });
     expect(belowBandSize(compact.text, compact)).toEqual({
       lines: 1,
-      widthPx: "Hello text".length * 15 * 0.62,
-      heightPx: BELOW_TEXT_LINE_HEIGHT_PX,
+      widthPx: "Hello text".length * NAME_PX * 0.62,
+      heightPx: NAME_LINE_PX,
     });
     expect(resolveTextSlot(slot, compact).hidden).toBe(false);
   });
@@ -145,20 +189,34 @@ describe("text slot below band sizing", () => {
       geometry: { x: 10, y: 20, width: 120, height: 140 },
       style: { shape: "icon" },
     });
-    const band = belowBandSize(object.text, object);
-
-    expect(belowExtendedBoundsPx(object)).toEqual({
-      x: Math.min(0, (object.geometry.width - band.widthPx) / 2),
+    // Glyph style (figjam): the glyph box is the whole object box.
+    const figjamBand = belowBandSize(object.text, object, FIGJAM_CANVAS_STYLE);
+    expect(belowExtendedBoundsPx(object, FIGJAM_CANVAS_STYLE)).toEqual({
+      x: Math.min(0, (object.geometry.width - figjamBand.widthPx) / 2),
       y: 0,
-      width: Math.max(object.geometry.width, band.widthPx),
-      height: object.geometry.height + BELOW_BAND_GAP_PX + band.heightPx,
+      width: Math.max(object.geometry.width, figjamBand.widthPx),
+      height: object.geometry.height + BELOW_BAND_GAP_PX + figjamBand.heightPx,
     });
-    expect(belowExtendedBoundsPx({ ...object, text: "" })).toEqual({
+    expect(belowExtendedBoundsPx({ ...object, text: "" }, FIGJAM_CANVAS_STYLE)).toEqual({
       x: 0,
       y: 0,
       width: object.geometry.width,
       height: object.geometry.height,
     });
+
+    // Tile style (the schematic default): the tile is capped at iconTileMaxPx and centered both
+    // ways; the union starts at the tile top and the band sits under the tile, centered on it.
+    const tile = iconTileRectPx(120, 140, DEFAULT_CANVAS_STYLE.iconTileMaxPx);
+    expect(tile).toEqual({ x: 32, y: 42, width: 56, height: 56 });
+    const band = belowBandSize(object.text, object);
+    const bandX = tile.x + (tile.width - band.widthPx) / 2;
+    expect(belowExtendedBoundsPx(object)).toEqual({
+      x: Math.min(tile.x, bandX),
+      y: tile.y,
+      width: Math.max(tile.x + tile.width, bandX + band.widthPx) - Math.min(tile.x, bandX),
+      height: tile.height + BELOW_BAND_GAP_PX + band.heightPx,
+    });
+    expect(belowExtendedBoundsPx({ ...object, text: "" })).toEqual(tile);
   });
 
   it("keeps the object def below-slot table in sync with schema below types", () => {

@@ -26,6 +26,7 @@ import { shapeForType } from "../../state/schema/object-defaults";
 import type { InteractiveCanvasObject, InteractiveCanvasObjectType } from "../../state/schema";
 import { ALL_OBJECT_TYPES } from "../../zz-dom-fixtures";
 import { getConnectionAnchors, outlinePolygon } from "../geometry";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import { resolveConnectionCascade } from "../../connectors/connection-cascade";
 
 type GeometryVariant = { name: string; x: number; y: number; width: number; height: number };
@@ -127,9 +128,12 @@ export function buildOutlineAnchorBaseline(): OutlineAnchorBaseline {
           if (styleVariant.style) object.style = styleVariant.style;
           if (direction) object.direction = direction;
           const key = `${type}|${geometry.name}|${styleVariant.name}|dir=${direction ?? "none"}`;
+          // Pinned to the figjam style the fixture was recorded under (it predates the
+          // themes; figjam carries the renderers' original constants). The schematic
+          // default draws icons as a capped tile, which this corpus does not cover.
           outlines[key] = {
-            polygon: outlinePolygon(object),
-            anchors: getConnectionAnchors(object),
+            polygon: outlinePolygon(object, FIGJAM_CANVAS_STYLE),
+            anchors: getConnectionAnchors(object, FIGJAM_CANVAS_STYLE),
           };
         }
       }
@@ -150,10 +154,13 @@ export function buildOutlineAnchorBaseline(): OutlineAnchorBaseline {
     for (const zoom of [1, 4]) {
       const results: Record<string, unknown> = {};
       for (const probe of probes) {
+        // Same figjam pin as the outlines above.
         results[probe.label] = resolveConnectionCascade(
           { x: probe.x, y: probe.y },
           [object],
           zoom,
+          undefined,
+          FIGJAM_CANVAS_STYLE,
         );
       }
       perZoom[`zoom${zoom}`] = results;

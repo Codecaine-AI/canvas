@@ -8,8 +8,6 @@
       "id": "b-obj-root-0",
       "type": "paragraph",
       "props": {
-        "covers": "The layout of the object system under packages/canvas/src/objects/, the closed seven-file recipe for adding a shape, the shared outline constants, and the two-tier object-preference registry.",
-        "type": "implementation",
         "concepts": [
           "objects",
           "shape-def",
@@ -17,7 +15,9 @@
           "add-a-shape-recipe",
           "outline-specs",
           "object-preferences"
-        ]
+        ],
+        "covers": "The layout of the object system under packages/canvas/src/objects/, the closed seven-file recipe for adding a shape, the shared outline constants, and the two-tier object-preference registry.",
+        "type": "implementation"
       },
       "children": [
         "b-obj-role-1",
@@ -25,6 +25,7 @@
         "b-obj-gov-3",
         "b-obj-gov-shape-4",
         "b-obj-gov-opmaps-5",
+        "b-obj-gov-themes-17",
         "b-obj-decisions-6",
         "b-obj-recipe-decision-7",
         "b-obj-recipe-why-8",
@@ -35,6 +36,15 @@
         "b-obj-registry-decision-13",
         "b-obj-registry-why-14",
         "b-obj-registry-applies-15",
+        "b-obj-text-decision-18",
+        "b-obj-text-why-19",
+        "b-obj-text-applies-20",
+        "b-obj-glyphs-decision-21",
+        "b-obj-glyphs-why-22",
+        "b-obj-glyphs-applies-23",
+        "b-obj-vendor-decision-24",
+        "b-obj-vendor-why-25",
+        "b-obj-vendor-applies-26",
         "b-obj-roster-16"
       ]
     },
@@ -44,7 +54,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The object system: the ObjectDef/ShapeDef registry, per-kind defs, text slots, outline geometry, and the object-preference registry. The shape contract — what a def is, text slots, outlines and anchors, color roles — is owned by design; this area records the layout of "
+          "insert": "The object system: the ObjectDef and ShapeDef registry, per-kind defs, text slots, outline geometry, the icon glyph registry, and the object-preference registry. The shape contract (what a def is, text slots, outlines and anchors, color roles) is owned by design. This area records the layout of "
         },
         {
           "insert": "objects/",
@@ -53,7 +63,7 @@
           }
         },
         {
-          "insert": " and the closed recipe for extending it."
+          "insert": " and the closed recipes for extending it."
         }
       ],
       "children": []
@@ -113,7 +123,7 @@
           }
         },
         {
-          "insert": " — owns the shape contract: ObjectDef v2, ShapeDef, text slots, outlines and anchors, color roles."
+          "insert": " owns the shape contract: ObjectDef v2, ShapeDef, text slots and the detail line, outlines and anchors, and color roles."
         }
       ],
       "children": []
@@ -136,7 +146,30 @@
           }
         },
         {
-          "insert": " — owns the registry model: the entry shape, the one-canonical-name rule, and defaults as product."
+          "insert": " owns the registry model and the glyph vocabulary: the entry shape, the one-canonical-name rule, defaults as product, and the glyph bands."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-gov-themes-17": {
+      "id": "b-obj-gov-themes-17",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "Workspace themes"
+            }
+          }
+        },
+        {
+          "insert": " owns how objects paint per theme: icon packs and tiles, card shapes and stickies, and section headers."
         }
       ],
       "children": []
@@ -166,10 +199,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "a new shape is one new ShapeDef file under "
+          "insert": ": a new shape is one new ShapeDef file under "
         },
         {
           "insert": "objects/shapes/",
@@ -209,7 +239,7 @@
           }
         },
         {
-          "insert": ") — silhouette, css, catalog metadata, everything, in that file, with "
+          "insert": ") holding its silhouette, css, and catalog metadata, with "
         },
         {
           "insert": "shapeObjectDef",
@@ -218,7 +248,7 @@
           }
         },
         {
-          "insert": " stamping the rest — plus exactly seven one-line registrations: the type union in "
+          "insert": " stamping the rest, plus exactly seven one-line registrations. They are the type union in "
         },
         {
           "insert": "object-types.ts",
@@ -296,7 +326,7 @@
           }
         },
         {
-          "insert": " (labels and keywords derive from the def; the catalog is arrangement only), and the preview glyph in "
+          "insert": " (labels and keywords derive from the def, and the catalog is arrangement only), and the preview glyph in "
         },
         {
           "insert": "shape-previews.tsx",
@@ -331,7 +361,7 @@
           }
         },
         {
-          "insert": ", listed in the dispatch table and referenced from the def; skipping it ships correct bbox anchors."
+          "insert": ", listed in the dispatch table and referenced from the def. Skipping it ships correct bbox anchors."
         }
       ],
       "children": []
@@ -348,10 +378,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was per-shape logic spread across editor, renderer, and schema — how shape zoos rot. The closed recipe means the compiler and two tests ("
+          "insert": ": the rejected alternative was per-shape logic spread across editor, renderer, and schema, which is how shape zoos rot. The closed recipe means the compiler and two tests ("
         },
         {
           "insert": "geometry-def-agreement.test.ts",
@@ -407,7 +434,7 @@
           }
         },
         {
-          "insert": " — including every future shape, which touches exactly these files and nothing else."
+          "insert": ", including every future shape, which touches exactly these files and nothing else."
         }
       ],
       "children": []
@@ -424,10 +451,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "outline math is a pure, React-free concern of "
+          "insert": ": outline math is a pure, React-free concern of "
         },
         {
           "insert": "objects/geometry.ts",
@@ -458,7 +482,7 @@
           }
         },
         {
-          "insert": " exported spec const the dispatch tables use — identity, not duplication; "
+          "insert": " exported spec const the dispatch tables use: identity, not duplication. "
         },
         {
           "insert": "geometry-def-agreement.test.ts",
@@ -535,7 +559,7 @@
           }
         },
         {
-          "insert": " — including every future true-outline shape."
+          "insert": ", including every future true-outline shape."
         }
       ],
       "children": []
@@ -552,10 +576,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the object-preference registry is a repo file, not a service: "
+          "insert": ": the object-preference registry is a repo file, not a service. "
         },
         {
           "insert": "object-preferences.json",
@@ -568,7 +589,7 @@
           }
         },
         {
-          "insert": " holds the entries in roster order — the order is load-bearing; the picker and the agent's vocabulary listing walk it as-is — and "
+          "insert": " holds the entries in roster order, and the order is load-bearing: the agent's vocabulary listing walks it as-is, and the picker keeps it within each category group. "
         },
         {
           "insert": "registry/index.ts",
@@ -581,7 +602,7 @@
           }
         },
         {
-          "insert": " is the typed read surface every consumer shares, validating colors at load. There is no change event and no registry-editor surface; edits are edits to the JSON, picked up at the next load."
+          "insert": " is the typed read surface every consumer shares, validating colors at load. There is no change event and no registry-editor surface, so edits are edits to the JSON, picked up at the next load."
         }
       ],
       "children": []
@@ -631,7 +652,7 @@
           }
         },
         {
-          "insert": " — including every future vocabulary entry, which joins the JSON in roster order and is read only through "
+          "insert": ", including every future vocabulary entry, which joins the JSON in roster order and is read only through "
         },
         {
           "insert": "index.ts",
@@ -641,6 +662,405 @@
         },
         {
           "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-text-decision-18": {
+      "id": "b-obj-text-decision-18",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": every piece of object text geometry has one source module that the live stage, the static renderer, the in-place editors, and the agent's text fit all read. "
+        },
+        {
+          "insert": "text-slots.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/text-slots.ts",
+              "label": "text-slots.ts"
+            }
+          }
+        },
+        {
+          "insert": " resolves each slot's rect, its theme typography, and the detail line under the name ("
+        },
+        {
+          "insert": "ResolvedTextSlot.detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), and "
+        },
+        {
+          "insert": "section/title-chip-layout.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/title-chip-layout.ts",
+              "label": "section/title-chip-layout.ts"
+            }
+          }
+        },
+        {
+          "insert": " lays out the section header chip: placement, icon, title, detail, scale, and width budget."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-text-why-19": {
+      "id": "b-obj-text-why-19",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": a name, a detail, or a header chip measured one way and painted another clips on one surface and not the other, and the DOM-equivalence tests compare live and static output exactly. The rejected alternative was per-renderer layout code, where each surface measures text its own way."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-text-applies-20": {
+      "id": "b-obj-text-applies-20",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "text-slots.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/text-slots.ts",
+              "label": "text-slots.ts"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "title-chip-layout.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/title-chip-layout.ts",
+              "label": "title-chip-layout.ts"
+            }
+          }
+        },
+        {
+          "insert": ", including every future text element, which joins one of them rather than measuring itself."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-glyphs-decision-21": {
+      "id": "b-obj-glyphs-decision-21",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": icon glyphs are generated data joined to one hand-written registry. "
+        },
+        {
+          "insert": "CANVAS_ICON_GLYPHS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "object-types.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/schema/object-types.ts",
+              "label": "object-types.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the single id list the validator, the registry, and the agent's vocabulary read. Three generated modules beside the icon def hold the geometry: the Nucleo glyphs from "
+        },
+        {
+          "insert": "tools/nucleo-icons/generate.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and the Tabler outlines and Simple Icons logos from "
+        },
+        {
+          "insert": "tools/dev-icons/generate.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "tools/dev-icons/generate.ts",
+              "label": "tools/dev-icons/generate.ts"
+            }
+          }
+        },
+        {
+          "insert": ". "
+        },
+        {
+          "insert": "icon-glyphs.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/shapes/icon/icon-glyphs.ts",
+              "label": "icon-glyphs.ts"
+            }
+          }
+        },
+        {
+          "insert": " adds the labels, categories, and pack rules, and "
+        },
+        {
+          "insert": "resolveIconGlyph(id, pack)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the one theme-aware lookup every renderer and picker preview calls."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-glyphs-why-22": {
+      "id": "b-obj-glyphs-why-22",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": generated geometry stays traceable to its upstream SVGs and can be re-vendored, and one id list means a glyph added to the roster validates, renders, and reaches the agent with no second list to keep in sync. The rejected alternative was hand-authored path data per glyph, which drifts from its source."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-glyphs-applies-23": {
+      "id": "b-obj-glyphs-applies-23",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "objects/shapes/icon",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/shapes/icon",
+              "label": "objects/shapes/icon"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "tools/dev-icons",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "tools/dev-icons",
+              "label": "tools/dev-icons"
+            }
+          }
+        },
+        {
+          "insert": ", including every future glyph, which adds its id to "
+        },
+        {
+          "insert": "CANVAS_ICON_GLYPHS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a manifest entry, a label and category in "
+        },
+        {
+          "insert": "icon-glyphs.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and an entry in "
+        },
+        {
+          "insert": "object-preferences.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", then regenerates."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-vendor-decision-24": {
+      "id": "b-obj-vendor-decision-24",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": third-party icon art is vendored byte-verbatim and pinned. "
+        },
+        {
+          "insert": "tools/dev-icons/manifest.json",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "tools/dev-icons/manifest.json",
+              "label": "tools/dev-icons/manifest.json"
+            }
+          }
+        },
+        {
+          "insert": " pins each upstream package to an exact version and registry integrity hash, "
+        },
+        {
+          "insert": "vendor/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " holds exactly the SVGs it names plus each license file, and "
+        },
+        {
+          "insert": "vendor/VERSIONS.md",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " records the pins. The offline generator never touches the network. "
+        },
+        {
+          "insert": "--vendor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " downloads the pinned tarball, verifies its sha512, checks each brand's declared license against Simple Icons' own data, and only then rewrites the vendored files."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-vendor-why-25": {
+      "id": "b-obj-vendor-why-25",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": logos carry trademark and license obligations, so the repo shows exactly which upstream bytes it ships and under which terms, recorded in "
+        },
+        {
+          "insert": "THIRD-PARTY-NOTICES.md",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "tools/dev-icons/THIRD-PARTY-NOTICES.md",
+              "label": "THIRD-PARTY-NOTICES.md"
+            }
+          }
+        },
+        {
+          "insert": " with the three logos that carry their own licenses (Git under CC BY 3.0, Rust under CC BY-SA 4.0, Kafka under Apache-2.0). A deterministic offline build keeps regenerated modules reviewable as a diff. No AWS or OpenAI logo ships, and a brand the pinned release lacks, such as Slack in simple-icons 16.33.0, is dropped rather than drawn by hand."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-vendor-applies-26": {
+      "id": "b-obj-vendor-applies-26",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "tools/dev-icons",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "tools/dev-icons",
+              "label": "tools/dev-icons"
+            }
+          }
+        },
+        {
+          "insert": ", including every future icon set or version bump, which updates the pin and its integrity, re-vendors, and gets its regenerated diff reviewed."
         }
       ],
       "children": []
@@ -687,7 +1107,30 @@
           }
         },
         {
-          "insert": " adapter, one-file defs), "
+          "insert": " adapter, one-file defs, and "
+        },
+        {
+          "insert": "icon/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with the glyph registry, its generated geometry, and "
+        },
+        {
+          "insert": "icon-tile.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/shapes/icon/icon-tile.ts",
+              "label": "icon-tile.ts"
+            }
+          }
+        },
+        {
+          "insert": ", the tile geometry the live icon and the static renderer share), "
         },
         {
           "insert": "section/",
@@ -705,7 +1148,16 @@
           }
         },
         {
-          "insert": " (the two bespoke kinds), "
+          "insert": " (the two bespoke kinds, with the header chip layout in "
+        },
+        {
+          "insert": "section/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), "
         },
         {
           "insert": "text-slots.ts",

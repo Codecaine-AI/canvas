@@ -43,6 +43,11 @@
         "b-engine-persist-revisions-limits-27",
         "b-engine-persist-revisions-electron-28",
         "b-engine-persist-revisions-tabs-29",
+        "b-engine-persist-style-heading-31",
+        "b-engine-persist-style-body-32",
+        "b-engine-persist-style-get-33",
+        "b-engine-persist-style-put-34",
+        "b-engine-persist-style-watch-35",
         "b-engine-persist-preview-heading-14",
         "b-engine-persist-preview-body-15",
         "b-engine-persist-surfaces-heading-16",
@@ -67,7 +72,7 @@
           }
         },
         {
-          "insert": " files; every surface — editor, read-only viewer, iframe embed, SVG preview, tests — reads the same canonical documents rather than keeping copies."
+          "insert": " files. Every surface (editor, read-only viewer, iframe embed, SVG preview, tests) reads the same canonical documents rather than keeping copies."
         }
       ],
       "children": []
@@ -142,7 +147,7 @@
           }
         },
         {
-          "insert": " — lists the directory as "
+          "insert": " lists the directory as "
         },
         {
           "insert": "{ id, title, updated_at }",
@@ -357,7 +362,7 @@
           }
         },
         {
-          "insert": " — unlinks the file."
+          "insert": " unlinks the file."
         }
       ],
       "children": []
@@ -419,7 +424,7 @@
           }
         },
         {
-          "insert": ") — no envelope, no side-car metadata. Title lives in the document; timestamps come from the filesystem. Because the format is the schema itself, any tool that can produce a valid document can produce a board, and migrations operate on the files directly."
+          "insert": "): no envelope, no side-car metadata. Title lives in the document. Timestamps come from the filesystem. Because the format is the schema itself, any tool that can produce a valid document can produce a board, and migrations operate on the files directly."
         }
       ],
       "children": []
@@ -470,7 +475,7 @@
           }
         },
         {
-          "insert": " so closing a tab cannot drop the last edit. The trim reports the outcome as Saved or Save failed — retry. Opening a board deep-clones the fetched document and snapshots it for the dirty check."
+          "insert": " so closing a tab cannot drop the last edit. The trim reports the outcome as Saved or Save failed (retry). Opening a board deep-clones the fetched document and snapshots it for the dirty check."
         }
       ],
       "children": []
@@ -750,6 +755,166 @@
       ],
       "children": []
     },
+    "b-engine-persist-style-heading-31": {
+      "id": "b-engine-persist-style-heading-31",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Workspace Style Settings"
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-style-body-32": {
+      "id": "b-engine-persist-style-body-32",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "One more file lives beside the boards: "
+        },
+        {
+          "insert": "canvases/canvas-style.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the workspace's active theme and each theme's overrides ("
+        },
+        {
+          "insert": "workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "workspace themes"
+            }
+          }
+        },
+        {
+          "insert": "). It is a settings file, not a board, so it has its own route in the same shared handler and never passes through the canvas validator."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-style-get-33": {
+      "id": "b-engine-persist-style-get-33",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "GET /api/canvas-style",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " returns the normalized settings document as "
+        },
+        {
+          "insert": "settings",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the active theme resolved with every value clamped as "
+        },
+        {
+          "insert": "style",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and the active theme's overrides as "
+        },
+        {
+          "insert": "overrides",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". A missing or malformed file reads as figjam with no overrides."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-style-put-34": {
+      "id": "b-engine-persist-style-put-34",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "PUT /api/canvas-style",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " accepts "
+        },
+        {
+          "insert": "{ settings }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or the pre-theme body "
+        },
+        {
+          "insert": "{ overrides }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", which replaces the active theme's overrides. The handler normalizes the settings, drops preset-equal values and themes left without overrides, writes "
+        },
+        {
+          "insert": "{ theme, themes }",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as pretty JSON, and deletes the file when the settings equal the defaults."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-persist-style-watch-35": {
+      "id": "b-engine-persist-style-watch-35",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The dev server watches the file like a board and announces an external write as a "
+        },
+        {
+          "insert": "canvas:style-changed",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " HMR event carrying the new content hash, or null after a delete. Studio's own writes announce nothing, and a pushed value never overwrites a local edit made after the fetch started."
+        }
+      ],
+      "children": []
+    },
     "b-engine-persist-preview-heading-14": {
       "id": "b-engine-persist-preview-heading-14",
       "type": "heading",
@@ -784,12 +949,13 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/render/static-svg.ts",
-              "symbol": "renderDocumentToSvg"
+              "symbol": "renderDocumentToSvg",
+              "label": "renderDocumentToSvg"
             }
           }
         },
         {
-          "insert": ", and returns a deterministic SVG with an ETag; matching "
+          "insert": " in the workspace's resolved style, and returns a deterministic SVG with an ETag. Matching "
         },
         {
           "insert": "If-None-Match",
@@ -825,7 +991,7 @@
           }
         },
         {
-          "insert": "/"
+          "insert": " and "
         },
         {
           "insert": "h",
@@ -834,7 +1000,7 @@
           }
         },
         {
-          "insert": " set the requested render size. Determinism is the contract: the same document yields the same bytes, so previews cache."
+          "insert": " set the requested render size. Determinism is the contract: the same document in the same style yields the same bytes, so previews cache, and the style is part of the ETag so a theme change refreshes them."
         }
       ],
       "children": []
@@ -964,7 +1130,7 @@
           }
         },
         {
-          "insert": " corpus does multiple duties from a single copy of each file: the studio lists and edits the files over the API, docs pages embed them as live samples, and the test suite imports individual files directly by path as fixtures. One canonical file per board, addressed by id everywhere — a board referenced from a doc, rendered as a preview, and asserted in a test is the same bytes in all three places."
+          "insert": " corpus does multiple duties from a single copy of each file: the studio lists and edits the files over the API, docs pages embed them as live samples, and the test suite imports individual files directly by path as fixtures. One canonical file per board, addressed by id everywhere: a board referenced from a doc, rendered as a preview, and asserted in a test is the same bytes in all three places."
         }
       ],
       "children": []

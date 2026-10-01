@@ -10,7 +10,9 @@
  * The type column speaks the FOLDED vocabulary (service/session/
  * placeable-types.ts): the same names `place_shape` and `change_shape` accept,
  * so a row can be edited by reading it. The document's `{type:"icon", icon}`
- * split never appears — the glyph name is the type.
+ * split never appears — the glyph name is the type. A SECTION's header glyph is
+ * the one `icon` that is not a type (a frame stays a frame), so it prints as an
+ * `icon=` extra; the one-line fact under a name prints as `detail="…"`.
  */
 import type {
   InteractiveCanvasConnection,
@@ -82,6 +84,9 @@ function defaultColorFor(object: InteractiveCanvasObject): string {
 /** [extras] for an object line — only fields that are set and non-default. */
 function objectExtras(object: InteractiveCanvasObject): string[] {
   const extras: string[] = [];
+  // The header glyph and the detail line belong to the name, so they lead.
+  if (kindOf(object) === "section" && object.icon !== undefined) extras.push(`icon=${object.icon}`);
+  if (oneLine(object.detail) !== "") extras.push(`detail=${JSON.stringify(oneLine(object.detail))}`);
   if (object.locked !== undefined) extras.push(`locked=${object.locked}`);
   const defaultShape = OBJECT_TYPE_DEFAULTS[object.type]?.shape;
   if (object.style?.shape !== undefined && object.style.shape !== defaultShape) {

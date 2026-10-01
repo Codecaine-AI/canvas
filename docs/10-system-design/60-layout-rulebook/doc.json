@@ -8,9 +8,6 @@
       "id": "b-rulebook-root",
       "type": "paragraph",
       "props": {
-        "covers": "The normative layout rulebook for agent-produced boards: R1-R10 as lenses over the layout agent's actual mechanisms — the single aesthetic topic, six-phase workflow, entity capabilities, automatic op-path behavior, and the layout diagnostics.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "20 grid",
           "uniform gaps",
@@ -24,10 +21,12 @@
           "style guide",
           "automatic layout behavior",
           "lint diagnostics"
-        ]
+        ],
+        "covers": "The normative layout rulebook for agent-produced boards: R1-R10 as lenses over the layout agent's actual mechanisms — the single aesthetic topic, six-phase workflow, entity capabilities, automatic op-path behavior, and the layout diagnostics.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
-        "b-rulebook-title-1",
         "b-rulebook-intro-2",
         "b-rulebook-naming-3",
         "b-rulebook-rules-heading-4",
@@ -45,19 +44,6 @@
         "b-rulebook-lab-body-20"
       ]
     },
-    "b-rulebook-title-1": {
-      "id": "b-rulebook-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "The layout rulebook: rules R1-R10"
-        }
-      ],
-      "children": []
-    },
     "b-rulebook-intro-2": {
       "id": "b-rulebook-intro-2",
       "type": "paragraph",
@@ -73,7 +59,7 @@
           }
         },
         {
-          "insert": " — agent-flows-2, bubba-voice, claude-code-researcher, gc-decomp-harness, ink-diagrams, intent-classification-1 and -2, and v2-flow — and are enforced through the single "
+          "insert": " (agent-flows-2, bubba-voice, claude-code-researcher, gc-decomp-harness, ink-diagrams, intent-classification-1 and -2, and v2-flow) and are enforced through the single "
         },
         {
           "insert": "Calm and uniform — uniformity is information",
@@ -87,7 +73,7 @@
           }
         },
         {
-          "insert": " aesthetic topic and the constraints inside the six workflow phases. The system prompt's four top-level sections are purpose, board_model, state_grammar, and workflow; phase constraints carry the operational rules. Reference-board evidence is cited inline where a rule leans on it; the runtime surfaces named below own behavior."
+          "insert": " aesthetic topic and the constraints inside the four workflow phases. The system prompt has six top-level sections (purpose, state_structure, core_philosophy, workflow, success_criteria, and quality_checklist), and phase constraints carry the operational rules. Reference-board evidence is cited inline where a rule leans on it, and the runtime surfaces named below own behavior."
         }
       ],
       "children": []
@@ -176,7 +162,33 @@
           }
         },
         {
-          "insert": " lints judge production geometry. Error-tier findings block a committed finalize; warning-tier findings must be fixed or named as deliberate overrides. A fixable finding includes ready-to-send "
+          "insert": " lints judge production geometry. The "
+        },
+        {
+          "insert": "label-is-prose",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/label-is-prose.ts"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "detail-too-long",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/rules/detail-too-long.ts"
+            }
+          }
+        },
+        {
+          "insert": " lints judge object text against the name and detail convention: a short name plus at most one detail line, with prose on a sticky. Every finding in the edited scope, error or warning, blocks a committed finalize. A fixable finding includes ready-to-send "
         },
         {
           "insert": "suggested op:",
@@ -221,7 +233,7 @@
           }
         },
         {
-          "insert": " — object geometry is quantized to the agent's 20 grid; the grid is a snap unit, not a spacing prescription."
+          "insert": ": object geometry is quantized to the agent's 20 grid. The grid is a snap unit, not a spacing prescription."
         }
       ],
       "children": []
@@ -244,7 +256,7 @@
           }
         },
         {
-          "insert": " — each peer group repeats one exact gap, the ladder names every rung from 48px section padding up to the 160px section gutter, and the crowding warning supplies the corridor floor rather than a target gap."
+          "insert": ": each peer group repeats one exact gap, the ladder names every rung from 48px section padding up to the 160px section gutter, and the crowding warning supplies the corridor floor rather than a target gap."
         }
       ],
       "children": []
@@ -267,7 +279,7 @@
           }
         },
         {
-          "insert": " — sections supply grouping and addressability, children keep air from borders, and a frame is closed around its contents with fit_section when the region is done."
+          "insert": ": sections supply grouping and addressability, children keep air from borders, and a frame is closed around its contents with fit_section when the region is done."
         }
       ],
       "children": []
@@ -290,7 +302,7 @@
           }
         },
         {
-          "insert": " — repeated peers share the largest required size, one exact gap, and centers on a line, copied from digest geometry."
+          "insert": ": repeated peers share the largest required size, one exact gap, and centers on a line, copied from digest geometry."
         }
       ],
       "children": []
@@ -313,7 +325,7 @@
           }
         },
         {
-          "insert": " — peer alignment is a deliberate visual signal, copied exactly and judged from each pushed render."
+          "insert": ": peer alignment is a deliberate visual signal, copied exactly and judged from each pushed render."
         }
       ],
       "children": []
@@ -336,7 +348,7 @@
           }
         },
         {
-          "insert": " — a parent centers over peer children while their repeated gap leaves a readable wire corridor."
+          "insert": ": a parent centers over peer children while their repeated gap leaves a readable wire corridor."
         }
       ],
       "children": []
@@ -359,7 +371,7 @@
           }
         },
         {
-          "insert": " — content-sized side regions keep air around their contents and live in sections rather than stretching across unused space."
+          "insert": ": content-sized side regions keep air around their contents and live in sections rather than stretching across unused space."
         }
       ],
       "children": []
@@ -382,7 +394,7 @@
           }
         },
         {
-          "insert": " — content determines size from one shared 288×96 target, peers match the largest member, and deliberate size differences communicate importance or exception."
+          "insert": ": a box's content is a short name plus at most one detail line, and content determines size from one shared 288×96 target. Peers match the largest member, and deliberate size differences communicate importance or exception."
         }
       ],
       "children": []
@@ -405,7 +417,7 @@
           }
         },
         {
-          "insert": " — returns use flow-facing anchors, direct labels, and minimally steered routes through clear corridors."
+          "insert": ": returns use flow-facing anchors, direct labels, and minimally steered routes through clear corridors."
         }
       ],
       "children": []
@@ -428,7 +440,7 @@
           }
         },
         {
-          "insert": " — abstract align, fan, and lattice relations are not operation fields; complete geometry carries the placement and fresh digests plus renders carry the evidence."
+          "insert": ": abstract align, fan, and lattice relations are not operation fields. Complete geometry carries the placement, and fresh digests plus renders carry the evidence."
         }
       ],
       "children": []

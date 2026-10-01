@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { renderDocumentToSvg } from "../static-svg";
 import { resolveShapeColors } from "../../theme/palette";
 import { FIRST_USE_COLORS } from "../../state/schema/object-defaults";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import type {
   CanvasObjectStyle,
   InteractiveCanvasDocument,
@@ -38,7 +39,7 @@ function shapeDocument(type: InteractiveCanvasObjectType): InteractiveCanvasDocu
 }
 
 function render(type: InteractiveCanvasObjectType): string {
-  return renderDocumentToSvg(shapeDocument(type), { background: "transparent" }).svg;
+  return renderDocumentToSvg(shapeDocument(type), { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE }).svg;
 }
 
 const COLORS = resolveShapeColors(FIRST_USE_COLORS.shape);
@@ -46,7 +47,7 @@ const COLORS = resolveShapeColors(FIRST_USE_COLORS.shape);
 describe("custom silhouettes", () => {
   it("predefined-process: shape-radius rect plus two inner bars", () => {
     const svg = render("predefined-process");
-    // Default shape corner radius 2 minus the half-stroke inset (2px stroke) →
+    // Figjam shape corner radius 2 minus the half-stroke inset (2px stroke) →
     // rx 1, on exactly one rounded rect (the bars carry no radius).
     expect(count(svg, "rx=")).toBe(1);
     expect(count(svg, 'rx="1"')).toBe(1);
@@ -61,7 +62,7 @@ describe("custom silhouettes", () => {
     for (const type of ["predefined-process"] as const) {
       expect(render(type)).toBe(render(type));
     }
-    // A plain process still renders the base rounded rect (default 2px shape
+    // A plain process still renders the base rounded rect (figjam 2px shape
     // radius inset by half the 2px stroke).
     const process = renderDocumentToSvg(
       {
@@ -79,7 +80,7 @@ describe("custom silhouettes", () => {
         ],
         connections: [],
       },
-      { background: "transparent" },
+      { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE },
     ).svg;
     expect(process).toContain('rx="1" fill=');
   });

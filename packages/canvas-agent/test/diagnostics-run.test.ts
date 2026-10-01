@@ -5,6 +5,7 @@ import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 import { formatDiagnostics, runDiagnostics as runAll } from "../src/board/lints/run";
 import type { Diagnostic, LayoutRule } from "../src/board/lints/types";
 import { box, connect, makeDocument } from "./synthetic";
+import { FIGJAM_CONTEXT } from "./helpers";
 
 // Framework tests exercise the runner (ordering, ids, formatting), so they run
 // against two minimal fixture rules. Full-registry behavior belongs to the
@@ -155,7 +156,8 @@ describe("formatDiagnostics", () => {
       [box("alpha", 0, 0), box("beta", 204, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "X" }],
     );
-    const text = formatDiagnostics(runAll(document));
+    // Figjam chip geometry: the 41px "X" chip needs a 73px corridor.
+    const text = formatDiagnostics(runAll(document, undefined, FIGJAM_CONTEXT));
 
     expect(text).toContain("W1 unreadable-labels:");
     expect(text).toContain(

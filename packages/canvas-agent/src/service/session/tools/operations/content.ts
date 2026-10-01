@@ -9,7 +9,11 @@
  * four targets, not four tools. That is why the first two gate on
  * `requireBoardEntity` — mere existence — and dispatch on kind inside `apply`,
  * where the only difference is which document channel the patch names
- * (`text` on an object, `label` on a connection).
+ * (`text` on an object, `label` on a connection). A shape's, icon's, or
+ * section's one-line `detail` is text too, so it rides the same call: the name
+ * and its fact are written together or apart, never through a second tool. A
+ * detail sent to a sticky or an edge — kinds with no detail line — is dropped
+ * with a note rather than refused, so the rest of the call still lands.
  *
  * LOCKS GATE ALL THREE. Text and color are edits like any other, so a box under
  * a lock refuses them, and so does an edge whose ends sit inside a locked-all
@@ -20,7 +24,10 @@
  * `change_shape` is the exception: it is shapes-only (`requireShape`), because
  * a section is not a diamond and a sticky is not a cylinder. It is also the one
  * gesture that writes the folded type vocabulary, so it is the one place that
- * has to get the icon⇄shape transition right — see `shapeSwapPatch` below.
+ * has to get the icon⇄shape transition right — see `shapeSwapPatch` below. Its
+ * one section exception is the header glyph (`patch.icon`): picking a glyph is
+ * one gesture whatever it lands on, and a frame's glyph is the only part of a
+ * frame this tool can change — see `requireSwapTarget`.
  *
  * TEXT FIT. `update_text` runs the renderer's own wrap/clamp decision
  * (board/text-fit.ts) over the object's CURRENT box and the NEW text, and
@@ -44,6 +51,9 @@ import { Type } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
 
 import { textFitReport } from "../../../../board/text-fit";
+import { entityKindOf } from "../../perception/op-surface";
+import { detailDroppedNote, storedDetail } from "../detail-line";
+import { NO_GLYPH, isGlyphName, unknownGlyphMessage } from "../glyph-names";
 import { defineOperationTool } from "./operation-tool";
 import type { OpContext } from "./op-context";
 import {
@@ -51,8 +61,8 @@ import {
   toDocumentFields,
   type FoldedTypeName,
 } from "../placeable-types";
-import { Color, Id, ShapeSwapPatch } from "../schemas";
-import type { ConnectionPatch, ObjectPatch } from "../schemas";
+import { Color, DETAIL_RULE, Id, NAME_RULE, ShapeSwapPatch } from "../schemas";
+import type { ConnectionPatch, ObjectPatch, ShapeSwapPatch as ShapeSwap } from "../schemas";
 
 /** Whether this id names an edge rather than an object. */
 function isConnectionId(ctx: OpContext, id: string): boolean {
@@ -76,32 +86,56 @@ function requireUnlockedTarget(ctx: OpContext, id: string): string[] {
 export const updateText = defineOperationTool({
   name: "update_text",
   description:
-    "Write the text of anything that carries text — a sticky's body, a section's title, a shape's label, an edge's label. Text that no longer fits its box still applies, with a warning naming the size it would need.",
+    "Write the words on anything that carries them — a shape's, icon's, or section's name and its one-line detail, a sticky's body, an edge's label. Send text, detail, or both. Text that no longer fits its box still applies, with a warning naming the size it would need.",
   fields: {
     id: Id,
-    text: Type.String({
-      description: "The replacement text. Empty clears it.",
-    }),
+    text: Type.Optional(Type.String({
+      description:
+        `The replacement text. On a shape, icon, or section it is the name: ${NAME_RULE}. `
+        + "On a sticky it is the markdown body; on an edge, the label. Empty clears it.",
+    })),
+    detail: Type.Optional(Type.String({
+      description: `Shapes, icons, and sections only: ${DETAIL_RULE}. Empty clears it.`,
+    })),
   },
   validate: (ctx, p) => {
+    // Both fields are optional so either can be written alone; asking for
+    // neither is not a gesture. (A root-level "at least one" would be dropped
+    // by providers that keep only `properties` and `required`.)
+    if (p.text === undefined && p.detail === undefined) {
+      return ["name what to write — text, detail, or both; an update_text with neither changes nothing."];
+    }
     const errors = ctx.requireBoardEntity(p.id);
     return errors.length > 0 ? errors : requireUnlockedTarget(ctx, p.id);
   },
   apply: (ctx, p) => {
     if (isConnectionId(ctx, p.id)) {
+      const notes = p.detail === undefined ? [] : [detailDroppedNote("edge")];
+      if (p.text === undefined) return { status: "noop", note: detailDroppedNote("edge") };
       // An emptied label is a REMOVED label, not an empty chip: the spread-
       // merging applier reads an own `label: undefined` as "clear it".
       const patch = (p.text === "" ? { label: undefined } : { label: p.text }) as ConnectionPatch;
-      return ctx.mergeConnection(p.id, patch, `update_text ${p.id}`);
+      return ctx.mergeConnection(p.id, patch, `update_text ${p.id}`, notes);
     }
     const target = ctx.draft.objects.find((object) => object.id === p.id)!;
-    const report = textFitReport(target, target.geometry, p.text, ctx.canvasStyle);
-    return ctx.mergeObject(
-      p.id,
-      { text: p.text },
-      `update_text ${p.id}`,
-      report.fits ? [] : [report.detail],
-    );
+    const notes: string[] = [];
+    const patch: ObjectPatch = {};
+    if (p.text !== undefined) patch.text = p.text;
+    if (p.detail !== undefined) {
+      if (entityKindOf(target) === "sticky") {
+        notes.push(detailDroppedNote("sticky"));
+      } else {
+        // An own `detail: undefined` is how the applier clears it.
+        patch.detail = storedDetail(p.detail);
+      }
+    }
+    if (Object.keys(patch).length === 0) return { status: "noop", note: notes[0]! };
+    // The fit verdict is over the NEW name and the NEW detail line together:
+    // a detail added under a name that just fitted can push it into clipping.
+    const next = "detail" in patch ? { ...target, detail: patch.detail } : target;
+    const report = textFitReport(next, target.geometry, patch.text ?? target.text, ctx.canvasStyle);
+    if (!report.fits) notes.push(report.detail);
+    return ctx.mergeObject(p.id, patch, `update_text ${p.id}`, notes);
   },
 });
 
@@ -219,17 +253,58 @@ function shapeSwapPatch(
   };
 }
 
+/**
+ * The kind gate for `change_shape`, with its one section exception.
+ *
+ * A SHAPE (icons included) takes `type` and `direction` and refuses `icon`:
+ * its glyph is its type, so the refusal spells the call that does what was
+ * meant. A SECTION takes `icon` and nothing else — a frame is not a shape, but
+ * its header glyph is a glyph pick like any other, and this is the gesture
+ * that picks glyphs. Stickies and edges keep `requireShape`'s redirects.
+ */
+function requireSwapTarget(ctx: OpContext, id: string, patch: ShapeSwap): string[] {
+  const target = ctx.draft.objects.find((object) => object.id === id);
+  if (target && entityKindOf(target) === "section") {
+    if (patch.type !== undefined || patch.direction !== undefined) {
+      return [
+        `id "${id}" is a section — a frame is not a shape; change_shape sets only its header glyph`
+        + " (patch.icon), and change_section_border restrokes it.",
+      ];
+    }
+    if (patch.icon === undefined) {
+      return [`id "${id}" is a section — name its header glyph in patch.icon, or "${NO_GLYPH}" to remove it.`];
+    }
+    if (patch.icon !== NO_GLYPH && !isGlyphName(patch.icon)) {
+      return [unknownGlyphMessage("patch.icon", patch.icon)];
+    }
+    return [];
+  }
+  const errors = ctx.requireShape(id);
+  if (errors.length > 0 || patch.icon === undefined) return errors;
+  // A glyph that is a type is swapped by naming it as the type; say exactly that.
+  const glyph = isGlyphName(patch.icon) ? patch.icon : "<glyph>";
+  return [
+    `patch.icon is a section's header glyph — a shape's glyph is its type: send change_shape `
+    + `${JSON.stringify({ id, patch: { type: glyph } })} instead.`,
+  ];
+}
+
 export const changeShape = defineOperationTool({
   name: "change_shape",
   description:
-    "Swap what a shape is, and which way it points. Icons are types: name the glyph and the object becomes that icon; name a shape and any glyph on it is dropped. A direction the new type does not support is dropped with a note. Sections, stickies, and edges are not shapes and are not targets.",
+    "Swap what a shape is, and which way it points. Icons are types: name the glyph and the object becomes that icon; name a shape and any glyph on it is dropped. A direction the new type does not support is dropped with a note. On a section, patch.icon sets the frame's header glyph (\"none\" removes it) — the one thing a section takes here. Stickies and edges are not targets.",
   fields: { id: Id, patch: ShapeSwapPatch },
   validate: (ctx, p) => {
-    const errors = ctx.requireShape(p.id);
+    const errors = requireSwapTarget(ctx, p.id, p.patch);
     return errors.length > 0 ? errors : ctx.requireUnlocked(p.id);
   },
   apply: (ctx, p) => {
     const target = ctx.draft.objects.find((object) => object.id === p.id)!;
+    if (entityKindOf(target) === "section") {
+      // An own `icon: undefined` is how the applier removes the glyph.
+      const icon = p.patch.icon === NO_GLYPH ? undefined : p.patch.icon;
+      return ctx.mergeObject(p.id, { icon } as ObjectPatch, `change_shape ${p.id}`);
+    }
     const { patch, notes } = shapeSwapPatch(target, p.patch);
     return ctx.mergeObject(p.id, patch, `change_shape ${p.id}`, notes);
   },

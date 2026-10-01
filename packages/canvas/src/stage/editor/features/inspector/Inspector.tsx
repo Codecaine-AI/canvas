@@ -29,6 +29,14 @@ import type {
   InteractiveCanvasObject,
 } from "../../../../state/schema";
 import { animateSectionFitToChildren, isSectionFitted } from "../section-fit/animate-section-fit";
+import { IconGlyphPicker } from "./IconGlyphPicker";
+
+/**
+ * Past this many characters (trimmed) a detail reads as more than one fact —
+ * the agent's detail-too-long lint threshold (canvas-agent text-rules
+ * DETAIL_MAX_CHARS). The Inspector only warns; it never blocks typing.
+ */
+const DETAIL_SOFT_MAX_CHARS = 48;
 
 export interface InspectorProps {
   document: InteractiveCanvasDocument;
@@ -53,6 +61,7 @@ export function Inspector({
   const [annotationBody, setAnnotationBody] = useState("");
   const selectedSectionFitted =
     selectedObject?.type === "section" ? isSectionFitted(document, selectedObject.id) : false;
+  const detailLength = selectedObject?.detail?.trim().length ?? 0;
 
   const addAnnotation = () => {
     const body = annotationBody.trim();
@@ -67,7 +76,14 @@ export function Inspector({
   };
 
   return (
-    <aside className="absolute bottom-24 right-4 top-20 z-20 w-[320px] max-w-[calc(100vw-2rem)] overflow-auto rounded-md border border-border/70 bg-background/95 p-3 shadow-xl backdrop-blur">
+    <aside
+      aria-label="Inspector"
+      className="absolute bottom-24 right-4 top-20 z-20 w-[320px] max-w-[calc(100vw-2rem)] overflow-auto rounded-md border border-border/70 bg-background/95 p-3 shadow-xl backdrop-blur"
+      // Keys pressed on the Inspector's own controls (Backspace or an arrow
+      // on a just-used button) must not reach the window-level canvas
+      // hotkeys, which would delete or nudge the selection being edited.
+      onKeyDown={(event) => event.stopPropagation()}
+    >
     <div className="mb-3 flex items-center justify-between gap-3">
       <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         Inspector
@@ -94,6 +110,55 @@ export function Inspector({
             }
           />
         </label>
+        {/* Stickies carry no detail line: their body is markdown. */}
+        {selectedObject.type !== "sticky" && (
+          <div className="text-xs">
+            <label className="grid gap-1">
+              <span className="text-muted-foreground">Detail</span>
+              <Input
+                value={selectedObject.detail ?? ""}
+                placeholder="One short fact — a port, path, model"
+                onChange={(event) =>
+                  // Empty clears the detail (the reducer drops blank details).
+                  dispatch({
+                    type: "canvas.updateObject",
+                    objectId: selectedObject.id,
+                    patch: { detail: event.target.value },
+                  })
+                }
+              />
+            </label>
+            <div role="status" className="text-[11px] text-amber-600 dark:text-amber-400">
+              {detailLength > DETAIL_SOFT_MAX_CHARS ? (
+                <p className="mt-1">
+                  {detailLength} / {DETAIL_SOFT_MAX_CHARS} — keep it to one short fact
+                </p>
+              ) : null}
+            </div>
+          </div>
+        )}
+        {selectedObject.type === "section" && (
+          <IconGlyphPicker
+            key={selectedObject.id}
+            label="Icon"
+            value={selectedObject.icon}
+            allowNone
+            onPick={(icon) =>
+              // icon: undefined removes the header icon (JSON drops it on save).
+              dispatch({ type: "canvas.updateObject", objectId: selectedObject.id, patch: { icon } })
+            }
+          />
+        )}
+        {selectedObject.type === "icon" && (
+          <IconGlyphPicker
+            key={selectedObject.id}
+            label="Glyph"
+            value={selectedObject.icon}
+            onPick={(icon) =>
+              dispatch({ type: "canvas.updateObject", objectId: selectedObject.id, patch: { icon } })
+            }
+          />
+        )}
         <div className="grid grid-cols-4 gap-1">
           <Button
             type="button"
@@ -137,29 +202,29 @@ export function Inspector({
           </Button>
         </div>
         <div className="grid grid-cols-2 gap-2">
-          <Input
-            type="number"
-            aria-label="Object width"
+          <SizeInput
+            key={`${selectedObject.id}:width`}
+            label="Object width"
             value={selectedObject.geometry.width}
-            onChange={(event) =>
+            onCommit={(width) =>
               dispatch({
                 type: "canvas.resizeObject",
                 objectId: selectedObject.id,
-                width: Number(event.target.value),
+                width,
                 height: selectedObject.geometry.height,
               })
             }
           />
-          <Input
-            type="number"
-            aria-label="Object height"
+          <SizeInput
+            key={`${selectedObject.id}:height`}
+            label="Object height"
             value={selectedObject.geometry.height}
-            onChange={(event) =>
+            onCommit={(height) =>
               dispatch({
                 type: "canvas.resizeObject",
                 objectId: selectedObject.id,
                 width: selectedObject.geometry.width,
-                height: Number(event.target.value),
+                height,
               })
             }
           />
@@ -321,5 +386,41 @@ export function Inspector({
       <div>{selectionContext.annotations.length} annotations</div>
     </div>
     </aside>
+  );
+}
+
+/**
+ * A size field that edits a draft: the reducer snaps sizes to the grid (and
+ * floors them at 16), so applying every keystroke would turn a typed "200"
+ * into 1600. The typed value applies on Enter or blur; Escape drops it.
+ */
+function SizeInput({
+  label,
+  value,
+  onCommit,
+}: {
+  label: string;
+  value: number;
+  onCommit: (value: number) => void;
+}) {
+  const [draft, setDraft] = useState<string | null>(null);
+  const commit = () => {
+    if (draft === null) return;
+    setDraft(null);
+    const next = Number(draft);
+    if (draft.trim() !== "" && Number.isFinite(next) && next > 0 && next !== value) onCommit(next);
+  };
+  return (
+    <Input
+      type="number"
+      aria-label={label}
+      value={draft ?? value}
+      onChange={(event) => setDraft(event.target.value)}
+      onBlur={commit}
+      onKeyDown={(event) => {
+        if (event.key === "Enter") commit();
+        else if (event.key === "Escape") setDraft(null);
+      }}
+    />
   );
 }

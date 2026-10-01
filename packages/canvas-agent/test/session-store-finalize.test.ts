@@ -5,6 +5,7 @@ import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
 
 import { handleApplyAgentPatch } from "../../canvas/src/state/actions/agent-patch";
 import {
+  draftWithPageFrame,
   emitSessionEvent,
   syncSessionRequests,
   toolFinalize,
@@ -12,7 +13,7 @@ import {
 } from "../src/service/session";
 import type { LayoutToolTextResult } from "../src/service/session/tools";
 import type { AgentSessionAnnotation } from "../src/protocol";
-import { makeTestSession, runOp } from "./helpers";
+import { FIGJAM_CANVAS_STYLE, makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 
 function requestAnnotation(id: string, objectId: string, body: string): AgentSessionAnnotation {
@@ -72,7 +73,8 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
       box("a", 0, 0, 192, 96, "process"),
       box("b", 416, 0, 192, 96, "process"),  // gap 224 — clean baseline
     ], labeled);
-    const session = makeTestSession(baseline, ["a", "b"]);
+    // Figjam chip geometry: the "go" chip is 43×30px.
+    const session = makeTestSession(baseline, ["a", "b"], { canvasStyle: FIGJAM_CANVAS_STYLE });
     session.draft = makeDocument([
       box("a", 0, 0, 192, 96, "process"),
       box("b", 240, 0, 192, 96, "process"),  // gap 48 — under the "go" chip's 76px need
@@ -106,6 +108,40 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     expect(session.proposal!.lint).toBe("DIAGNOSTICS · clean");
   });
 
+  test("a person's own prose names never block; prose the agent writes into a name does until fixed", () => {
+    const prose = "Compare Generated Intents to Labeled Intents";
+    const theirs = { ...box("theirs", 0, 0, 400, 200, "process"), text: prose };
+    // Tall enough that the prose name wraps without clipping: only the prose rule speaks.
+    const task = box("task", 600, 0, 184, 120, "process");
+    // Frameless with a long board title: the session's first draft carries an
+    // injected page frame titled with it, which is scaffolding, not the agent's.
+    const baseline = { ...makeDocument([theirs, task]), title: "Intent Classifier Example: Support Ticket Classification" };
+    const session = makeTestSession(baseline, ["theirs", "task"], { draft: draftWithPageFrame(baseline) });
+
+    // The agent rewrites its neighbour's name into prose: that one is the agent's.
+    session.draft = {
+      ...session.draft,
+      objects: session.draft.objects.map((object) =>
+        object.id === "task" ? { ...object, text: `${prose} twice over` } : object),
+    };
+    expectBlocked(
+      toolFinalize(session, "committed", "Renamed the task", emitSessionEvent),
+      session,
+      "W1 label-is-prose: task's name has",
+    );
+
+    // A short name with its fact in the detail commits — with the person's own
+    // long name and the board-titled page frame both still in scope.
+    session.draft = {
+      ...session.draft,
+      objects: session.draft.objects.map((object) =>
+        object.id === "task" ? { ...object, text: "Compare intents", detail: "labeled set" } : object),
+    };
+    const committed = toolFinalize(session, "committed", "Renamed the task", emitSessionEvent);
+    expect(committed.isError).toBeUndefined();
+    expect(session.proposal!.lint).toBe("DIAGNOSTICS · clean");
+  });
+
   test("error-tier findings outside the scope do not block", () => {
     // A pre-existing escaped child the session was never asked to touch.
     const page = box("page", 0, 0, 1600, 1200, "section");
@@ -133,7 +169,7 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
       box("a", 0, 0, 160, 96, "process"),
       box("b", 320, 0, 160, 96, "process"),
     ], [{ ...connect("edge", "a", "b"), label: "go" }]);
-    const session = makeTestSession(baseline, ["a", "b"]);
+    const session = makeTestSession(baseline, ["a", "b"], { canvasStyle: FIGJAM_CANVAS_STYLE });
 
     const result = runOp(session, "move_to", { id: "b", x: 200, y: 0 });
 

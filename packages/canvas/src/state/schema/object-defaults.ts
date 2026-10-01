@@ -136,7 +136,9 @@ export function defaultTextFor(type: InteractiveCanvasObjectType): string {
  * user sees under the cursor is exactly what a click creates). `direction`
  * and `icon` carry the Shapes-panel catalog-entry variant (triangle up/down,
  * Advanced-tier glyph); `text` overrides the per-type default (e.g. an icon
- * entry's glyph name instead of the generic "Icon").
+ * entry's glyph name instead of the generic "Icon"). `detail` seeds the
+ * one-line detail under the name — trimmed, omitted when empty, and never
+ * stamped on a sticky.
  */
 export function draftPlacedObject(
   objectType: InteractiveCanvasObjectType,
@@ -144,6 +146,7 @@ export function draftPlacedObject(
   options?: {
     id?: string;
     text?: string;
+    detail?: string;
     parentId?: string | null;
     /** Color pick stamped on the new object (D17: last-picked memory); omit for the per-kind first-use fallback. */
     color?: CanvasColor;
@@ -151,10 +154,12 @@ export function draftPlacedObject(
     icon?: CanvasIconGlyph;
   },
 ): InteractiveCanvasObject {
+  const detail = objectType === "sticky" ? "" : (options?.detail?.trim() ?? "");
   return {
     id: options?.id ?? "",
     type: objectType,
     text: options?.text ?? defaultTextFor(objectType),
+    ...(detail ? { detail } : null),
     // D17 — new objects take the last-picked color for their kind; the
     // caller (reducer / ghost preview) passes the remembered pick, falling
     // back to the per-kind first-use color here.

@@ -18,8 +18,9 @@ import {
 } from "@codecaine-ai/canvas/schema";
 import { sectionDescendantIds, sectionFitGeometry } from "../../../../canvas/src/state/geometry";
 import { reconcileSectionMembership } from "../../../../canvas/src/state/section-membership";
+import { clearsAsUndefined } from "../../../../canvas/src/state/actions/agent-patch";
 import { nextId } from "../../../../canvas/src/state/actions/helpers";
-import { mergeObjectPatch } from "../../../../canvas/src/state/actions/objects";
+import { mergeObjectPatch, withNormalizedDetail } from "../../../../canvas/src/state/actions/objects";
 
 import type { AgentPatchOperation } from "../../protocol";
 import { snapRectOutward } from "./tools/grid";
@@ -100,14 +101,22 @@ export function applyOperationToDraft(
           touched: [object.id],
         };
       }
+      // `detail` follows the reducer's add rule (agent-patch.ts): an empty one,
+      // or one on a sticky, is no detail at all — so the draft and an accepted
+      // replay of it never disagree.
       return {
-        document: { ...document, objects: [...document.objects, { ...object, parentId: null }] },
+        document: {
+          ...document,
+          objects: [...document.objects, withNormalizedDetail({ ...object, parentId: null })],
+        },
         summary: `${label} ${object.id}`,
         touched: [object.id],
       };
     }
     case "updateObject": {
-      const { parentId: _ignored, ...patch } = operation.patch as Record<string, unknown>;
+      // A `null` is a clear in its wire spelling; it merges exactly as the
+      // reducer merges it (agent-patch.ts, clearsAsUndefined).
+      const { parentId: _ignored, ...patch } = clearsAsUndefined(operation.patch);
       return {
         document: {
           ...document,
@@ -191,7 +200,7 @@ export function applyOperationToDraft(
       )!;
       const updated = {
         ...existing,
-        ...operation.patch,
+        ...clearsAsUndefined(operation.patch),
       } as InteractiveCanvasConnection;
       return {
         document: {

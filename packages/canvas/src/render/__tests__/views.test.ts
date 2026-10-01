@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderBoardView, renderSectionView } from "../views";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import {
   connectionPaintedBounds,
   objectPaintedBounds,
@@ -157,14 +158,14 @@ describe("renderBoardView", () => {
 
   it("counter-scales section title chips at the view's effective zoom and keeps them in frame", () => {
     const document = fixtureDocument();
-    const view = renderBoardView(document, { width: 1200 });
+    const view = renderBoardView(document, { width: 1200, canvasStyle: FIGJAM_CANVAS_STYLE });
     const zoom = 1200 / view.camera.width;
     expect(zoom).toBeLessThan(1);
     // The stage grows title chips when zoomed out — the view mirrors it.
     expect(view.svg).toContain("scale(");
     for (const section of document.objects) {
       if (section.type !== "section" || section.text === "") continue;
-      expectContains(view.camera, sectionTitleChipWorldRect(section, zoom), 1);
+      expectContains(view.camera, sectionTitleChipWorldRect(section, zoom, FIGJAM_CANVAS_STYLE), 1);
     }
     expect(view.svg).toContain("Score gate");
   });
@@ -205,7 +206,7 @@ describe("renderSectionView", () => {
 
   it("retains boundary-crossing connections and their outside endpoints", () => {
     const document = fixtureDocument();
-    const view = renderSectionView(document, "section-hero", { width: 1200 });
+    const view = renderSectionView(document, "section-hero", { width: 1200, canvasStyle: FIGJAM_CANVAS_STYLE });
     // conn-knowledge-to-worker enters from section-knowledge (outside the
     // camera): its label chip renders, and the outside endpoint section comes
     // along so the edge aims at the true object — both clipped by the
@@ -235,7 +236,7 @@ describe("renderSectionView", () => {
 
   it("emits rasterizer-safe markup for retained off-viewport endpoints", () => {
     const document = farEndpointDocument();
-    const view = renderSectionView(document, "zone", { width: 800 });
+    const view = renderSectionView(document, "zone", { width: 800, canvasStyle: FIGJAM_CANVAS_STYLE });
 
     // Both boundary edges are retained (drawn clipped at the camera edge)…
     expect(count(view.svg, "<path ")).toBe(2);
@@ -251,7 +252,7 @@ describe("renderSectionView", () => {
 
     // Control: the board view has everything in frame, so the sticky keeps
     // its shadow and the icon its real glyph — and still rasterizes.
-    const board = renderBoardView(document, { width: 1200 });
+    const board = renderBoardView(document, { width: 1200, canvasStyle: FIGJAM_CANVAS_STYLE });
     expect(board.svg).toContain("url(#");
     expect(count(board.svg, "<svg")).toBe(2);
     const boardPng = rasterizeSvgToPng(board.svg);

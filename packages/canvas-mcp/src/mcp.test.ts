@@ -60,6 +60,29 @@ describe("canvas MCP server", () => {
     expect(tools).toHaveLength(3 + 25 + 6);
   });
 
+  test("tools/list carries the name + detail fields and the section header glyph", async () => {
+    const server = createCanvasMcpServer(tempWorkspace());
+    const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+    cleanups.push(() => client.close());
+
+    const { tools } = await client.listTools();
+    const schema = (name: string) => tools.find((tool) => tool.name === name)!.inputSchema as {
+      properties: Record<string, any>;
+      required?: string[];
+    };
+
+    expect(Object.keys(schema("place_section").properties)).toEqual(["id", "text", "at", "size", "detail", "icon"]);
+    expect(schema("place_section").required).toEqual(["id", "text", "at"]);
+    expect(Object.keys(schema("place_shape").properties)).toEqual(["id", "type", "at", "detail"]);
+    expect(Object.keys(schema("clone").properties)).toContain("detail");
+    // update_text: either field alone, so only the id is required.
+    expect(Object.keys(schema("update_text").properties)).toEqual(["id", "text", "detail"]);
+    expect(schema("update_text").required).toEqual(["id"]);
+    expect(Object.keys(schema("change_shape").properties.patch.properties)).toEqual(["type", "direction", "icon"]);
+  });
+
   test("no listed schema carries a draft-07 tuple, which the Anthropic API rejects", async () => {
     const server = createCanvasMcpServer(tempWorkspace());
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });

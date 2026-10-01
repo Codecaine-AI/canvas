@@ -40,11 +40,11 @@ interface OpReferenceEntry {
 /** What each verb group is FOR — one line under its tag, before the tools. */
 export const GESTURE_GROUP_BLURBS: Record<GestureGroup, string> = {
   place:
-    "Putting something new on the board. A placement carries an id, a position, and the text if the kind is created with text — nothing else. Size and color come from the defaults, and every property beyond them is its own gesture afterwards, if the object earns it.",
+    "Putting something new on the board. A placement carries an id, a position, and the text if the kind is created with text, plus a shape's or section's one-line detail and a section's header icon — nothing else. Size and color come from the defaults, and every property beyond them is its own gesture afterwards, if the object earns it.",
   arrange:
     "Moving and sizing what is already there. Sections travel and re-pitch as whole frames, carrying their contents with them. Edges are never targets here — they re-route themselves when the boxes they join move.",
   content:
-    "What a thing says and how it looks, one home per concern: all text goes through update_text and all color through change_color, whatever the kind — edges included.",
+    "What a thing says and how it looks, one home per concern: all text goes through update_text, names and detail lines included, and all color through change_color, whatever the kind — edges included.",
   sections:
     "A frame handled as a frame: close it around its contents, restroke it, protect or release its region.",
   edges:
@@ -60,6 +60,7 @@ export const OP_REFERENCE: Record<string, OpReferenceEntry> = {
     consequences: [
       "draws a titled frame that adopts whatever its edges already cover — membership is geometric, so a frame put down over existing boxes takes them in",
       "the frame keeps the footprint it lands with, however its children come and go, until you fit or resize it",
+      "the header chip shows the icon, the title, and the detail, in that order; an icon that is not a glyph name is refused with the closest names",
     ],
   },
   place_sticky: {
@@ -72,15 +73,16 @@ export const OP_REFERENCE: Record<string, OpReferenceEntry> = {
   place_shape: {
     group: "place",
     consequences: [
-      "the pick and the click, nothing else: the shape arrives blank, at the default size and color for its kind",
-      "labelling, resizing, recoloring, and turning it are each their own gesture afterwards",
+      "the pick and the click, plus at most its one-line detail: the shape arrives unnamed, at the default size and color for its kind",
+      "naming, resizing, recoloring, and turning it are each their own gesture afterwards",
       "containment follows geometry — a shape outside every frame belongs to no section",
     ],
   },
   clone: {
     group: "place",
     consequences: [
-      "the copy inherits kind, size, color, shape type, direction, and border; choose a correctly typed source and copy only semantic peers",
+      "the copy inherits kind, size, color, shape type, direction, glyph, detail line, and border; choose a correctly typed source and copy only semantic peers",
+      "a text or detail named in the call replaces the source's on the copy, and an empty detail leaves the copy without one",
       "two things it does not carry: the source's edges, and a section's contents — a cloned frame arrives empty, and filling it is yours",
       "a copy is never locked, whatever the source was",
     ],
@@ -142,9 +144,10 @@ export const OP_REFERENCE: Record<string, OpReferenceEntry> = {
   update_text: {
     group: "content",
     consequences: [
-      "one home for every kind's text — a sticky's body, a section's title, a shape's label, an edge's label",
-      "text that no longer fits its box still applies, with a warning naming the size the box would need",
-      "empty clears it; an emptied edge label is a removed chip, not a blank one",
+      "one home for every kind's words — a shape's, icon's, or section's name and its detail line, a sticky's body, an edge's label",
+      "text that no longer fits its box still applies, with a warning naming the size the box would need; the fit counts the detail line too",
+      "empty clears either; an emptied edge label is a removed chip, not a blank one",
+      "a detail sent to a sticky or an edge is dropped with a note, because neither has a detail line",
     ],
   },
   change_color: {
@@ -159,7 +162,8 @@ export const OP_REFERENCE: Record<string, OpReferenceEntry> = {
     consequences: [
       "swaps what a shape is and which way it points; glyphs are types, so naming a glyph makes the object that icon, and naming a shape drops any glyph it had",
       "a facing the new type does not accept is dropped with a note rather than refused",
-      "sections, stickies, and edges are not shapes and are refused",
+      "on a section it changes only the header icon: a glyph name sets it and \"none\" removes it; a type or facing for a section is refused, and so is an icon for a shape, whose glyph is its type",
+      "stickies and edges are not shapes and are refused",
     ],
   },
 

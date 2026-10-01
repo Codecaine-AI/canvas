@@ -99,7 +99,9 @@ export interface OpContext {
   /**
    * Require a shape — the gate for `change_shape` alone, since a section is not
    * a diamond and a sticky is not a cylinder. The redirects name what those two
-   * kinds CAN be restyled with.
+   * kinds CAN be restyled with. (`change_shape` answers a section itself before
+   * reaching this gate: a frame's header glyph is the one thing it changes on a
+   * section — operations/content.ts `requireSwapTarget`.)
    */
   requireShape(id: string): string[];
   requireConnection(id: string): string[];

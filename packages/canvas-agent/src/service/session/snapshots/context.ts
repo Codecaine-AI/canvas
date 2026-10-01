@@ -10,15 +10,7 @@
 import type {
   CanvasGeometry,
   InteractiveCanvasDocument,
-  InteractiveCanvasObject,
 } from "@codecaine-ai/canvas/schema";
-
-import {
-  CANVAS_GRID_SIZE,
-  GEOMETRY_NORMALIZATION_GRID,
-  boundsForGeometries,
-} from "../../../../../canvas/src/state/geometry";
-import { nextId } from "../../../../../canvas/src/state/actions/helpers";
 
 import type { Rect } from "../../../board/types";
 import { formatBoardDigest } from "../../../board/digest";
@@ -43,9 +35,6 @@ const MAX_RENDER_WORLD_COORDINATE = 1_000_000_000;
 const DOCUMENT_ITEM_MINIMUM = { width: 32, height: 24 } as const;
 /** Smallest useful empty section: a 16px placeholder cell plus corpus-mined trim (48px side padding, 64px header band). */
 export const MINIMUM_SECTION_DIMENSIONS = { width: 112, height: 176 } as const;
-const PAGE_FRAME_ID = "page-frame";
-const PAGE_FRAME_INSET = 32;
-const DEFAULT_PAGE_SIZE = { width: 1200, height: 720 } as const;
 
 export function round2(value: number): number {
   return Math.round(value * 100) / 100;
@@ -247,63 +236,10 @@ export function documentWithinCrop(
   return { ...document, objects, connections };
 }
 
-export function injectedPageFrame(
-  document: InteractiveCanvasDocument,
-): InteractiveCanvasObject | null {
-  if (document.objects.some((object) => (
-    object.type === "section"
-    && object.parentId == null
-  ))) return null;
-
-  let geometry: CanvasGeometry;
-  if (document.size) {
-    geometry = {
-      x: PAGE_FRAME_INSET,
-      y: PAGE_FRAME_INSET,
-      width: Math.max(CANVAS_GRID_SIZE, document.size.width - PAGE_FRAME_INSET * 2),
-      height: Math.max(CANVAS_GRID_SIZE, document.size.height - PAGE_FRAME_INSET * 2),
-    };
-  } else {
-    const bounds = boundsForGeometries(
-      document.objects.map((object) => object.geometry),
-      PAGE_FRAME_INSET,
-    );
-    if (bounds) {
-      // The injected frame is geometry the agent then reasons about and
-      // writes against, so it normalizes on the write grid (4), not the UI's
-      // interaction grid (16). Outward rounding still fully contains bounds.
-      const grid = GEOMETRY_NORMALIZATION_GRID;
-      const x = Math.floor(bounds.x / grid) * grid;
-      const y = Math.floor(bounds.y / grid) * grid;
-      const right = Math.ceil((bounds.x + bounds.width) / grid) * grid;
-      const bottom = Math.ceil((bounds.y + bounds.height) / grid) * grid;
-      geometry = { x, y, width: right - x, height: bottom - y };
-    } else {
-      geometry = {
-        x: PAGE_FRAME_INSET,
-        y: PAGE_FRAME_INSET,
-        width: DEFAULT_PAGE_SIZE.width - PAGE_FRAME_INSET * 2,
-        height: DEFAULT_PAGE_SIZE.height - PAGE_FRAME_INSET * 2,
-      };
-    }
-  }
-
-  const ids = document.objects.map((object) => object.id);
-  return {
-    id: ids.includes(PAGE_FRAME_ID) ? nextId(PAGE_FRAME_ID, ids) : PAGE_FRAME_ID,
-    type: "section",
-    text: document.title || "Canvas",
-    color: "white",
-    parentId: null,
-    geometry,
-    style: { shape: "section" },
-  };
-}
-
-export function draftWithPageFrame(document: InteractiveCanvasDocument): InteractiveCanvasDocument {
-  const frame = injectedPageFrame(document);
-  return frame ? { ...document, objects: [frame, ...document.objects] } : document;
-}
+// Page-frame injection is a pure board transformation, so it lives in the
+// board layer (where the lint authorship baseline also needs it); the session
+// surface keeps exporting it from here.
+export { draftWithPageFrame, injectedPageFrame } from "../../../board/page-frame";
 
 /**
  * The spawn-time <board_state> payload: description + full (untruncated)

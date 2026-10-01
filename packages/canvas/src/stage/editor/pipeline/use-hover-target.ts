@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { hitTestObjects } from "../../../interaction/hit-testing";
-import { connectionBoundsForObject } from "../../../objects/geometry";
+import { hitBoundsForObject } from "../../../objects/geometry";
 import { sectionTitleChipWorldRect } from "../../../objects/section/title-chip-geometry";
 import {
   ANCHOR_DOT_OFFSET_PX,
@@ -14,6 +14,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../../../state/schema";
+import type { CanvasStyle } from "../../../theme/canvas-style";
 
 const SECTION_OUTLINE_HIT_SCREEN_PX = 10;
 const HOVER_HALO_SCREEN_PX = ANCHOR_DOT_OFFSET_PX + HIT_TARGET_PX / 2 + 2;
@@ -22,6 +23,8 @@ type ResolveHoverTargetArgs = {
   document: InteractiveCanvasDocument;
   worldPoint: CanvasPoint;
   zoom?: number;
+  /** Workspace canvas style (where section title chips sit). Default style when omitted. */
+  canvasStyle?: CanvasStyle;
   previousHoveredObjectId?: string | null;
 };
 
@@ -29,6 +32,7 @@ export type UseHoverTargetArgs = {
   document: InteractiveCanvasDocument;
   tool: CanvasTool;
   zoom: number;
+  canvasStyle?: CanvasStyle;
 };
 
 export type HoverTargetApi = {
@@ -55,10 +59,11 @@ function sectionOutlineContainsPoint(
   section: InteractiveCanvasObject,
   point: CanvasPoint,
   zoom: number,
+  canvasStyle: CanvasStyle | undefined,
 ): boolean {
-  if (boundsContainPoint(sectionTitleChipWorldRect(section, zoom), point)) return true;
+  if (boundsContainPoint(sectionTitleChipWorldRect(section, zoom, canvasStyle), point)) return true;
 
-  const bounds = connectionBoundsForObject(section);
+  const bounds = hitBoundsForObject(section, canvasStyle);
   if (!boundsContainPoint(bounds, point)) return false;
 
   const tolerance = SECTION_OUTLINE_HIT_SCREEN_PX / zoom;
@@ -75,20 +80,22 @@ function hoverHitObject(
   document: InteractiveCanvasDocument,
   worldPoint: CanvasPoint,
   zoom: number,
+  canvasStyle: CanvasStyle | undefined,
 ): InteractiveCanvasObject | null {
-  const hit = hitTestObjects(document, worldPoint, { zoom });
+  const hit = hitTestObjects(document, worldPoint, { zoom, canvasStyle });
   if (!hit) return null;
   if (hit.type !== "section") return hit;
-  return sectionOutlineContainsPoint(hit, worldPoint, zoom) ? hit : null;
+  return sectionOutlineContainsPoint(hit, worldPoint, zoom, canvasStyle) ? hit : null;
 }
 
-function expandedConnectionBoundsContainPoint(
+function expandedHitBoundsContainPoint(
   object: InteractiveCanvasObject,
   point: CanvasPoint,
   zoom: number,
+  canvasStyle: CanvasStyle | undefined,
 ): boolean {
   const halo = HOVER_HALO_SCREEN_PX / zoom;
-  const bounds = connectionBoundsForObject(object);
+  const bounds = hitBoundsForObject(object, canvasStyle);
   return (
     point.x >= bounds.x - halo &&
     point.x <= bounds.x + bounds.width + halo &&
@@ -101,16 +108,17 @@ export function resolveHoverTarget({
   document,
   worldPoint,
   zoom: rawZoom,
+  canvasStyle,
   previousHoveredObjectId = null,
 }: ResolveHoverTargetArgs): string | null {
   const zoom = safeZoom(rawZoom);
-  const freshHit = hoverHitObject(document, worldPoint, zoom);
+  const freshHit = hoverHitObject(document, worldPoint, zoom, canvasStyle);
   if (freshHit) return freshHit.id;
 
   if (!previousHoveredObjectId) return null;
   const previous = document.objects.find((object) => object.id === previousHoveredObjectId);
   if (!previous) return null;
-  return expandedConnectionBoundsContainPoint(previous, worldPoint, zoom)
+  return expandedHitBoundsContainPoint(previous, worldPoint, zoom, canvasStyle)
     ? previous.id
     : null;
 }
@@ -119,6 +127,7 @@ export function useHoverTarget({
   document,
   tool,
   zoom,
+  canvasStyle,
 }: UseHoverTargetArgs): HoverTargetApi {
   const [hoveredObjectId, setHoveredObjectIdState] = useState<string | null>(null);
   const hoveredObjectIdRef = useRef<string | null>(null);
@@ -143,11 +152,12 @@ export function useHoverTarget({
           document,
           worldPoint,
           zoom,
+          canvasStyle,
           previousHoveredObjectId: hoveredObjectIdRef.current,
         }),
       );
     },
-    [clearHoverTarget, document, setHoveredObjectId, tool, zoom],
+    [canvasStyle, clearHoverTarget, document, setHoveredObjectId, tool, zoom],
   );
 
   useEffect(() => {

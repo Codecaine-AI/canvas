@@ -20,7 +20,8 @@ function fixtureDocument(): InteractiveCanvasDocument {
         type: "process",
         text: "INSIDE SECTION",
         parentId: "section-a",
-        geometry: { x: 160, y: 160, width: 120, height: 60 },
+        // Tall enough for both name lines at the default 17.5px (2 × 21px + 2 × 12px inset).
+        geometry: { x: 160, y: 160, width: 120, height: 70 },
       },
       {
         id: "outside",

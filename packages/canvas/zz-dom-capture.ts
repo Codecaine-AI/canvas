@@ -5,7 +5,12 @@
  *
  * Usage:
  *   bun packages/canvas/zz-dom-capture.ts <out.json>
+ *   bun packages/canvas/zz-dom-capture.ts --themes <out.json>
  *   bun packages/canvas/zz-dom-capture.ts --compare <a.json> <b.json>
+ *
+ * `--themes` captures the THEMED corpus (the schematic themes, plus the
+ * detail doc in all three themes) for packages/canvas/zz-dom-baseline-themes.json;
+ * recapture it whenever schematic-theme rendering changes on purpose.
  *
  * ZZ_CANVASES_DIR overrides the repo-root canvases/ fixture directory (used
  * to capture in an older worktree against the CURRENT fixture documents so
@@ -15,7 +20,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import {
   buildCorpus,
+  buildThemedCorpus,
   captureCorpus,
+  captureThemedCorpus,
   compareCaptures,
   partitionByAdversarial,
   type Capture,
@@ -51,16 +58,16 @@ function runCompare(pathA: string, pathB: string): number {
   return failures.normal.length > 0 ? 1 : 0;
 }
 
-function runCapture(outPath: string): number {
-  const corpus = buildCorpus();
+function runCapture(outPath: string, themed = false): number {
+  const corpus = themed ? buildThemedCorpus() : buildCorpus();
   if (corpus.failures.length > 0) {
     console.warn(`Fixture load/validation failures (${corpus.failures.length}):`);
     for (const failure of corpus.failures) console.warn(`  - ${failure.file}: ${failure.message}`);
   }
-  const capture = captureCorpus(corpus);
+  const capture = themed ? captureThemedCorpus(corpus) : captureCorpus(corpus);
   writeFileSync(outPath, JSON.stringify(capture, null, 1));
   console.log(
-    `Captured ${corpus.entries.length} documents x 3 profiles (${corpus.entries.filter((e) => e.adversarial).length} adversarial) -> ${outPath}`,
+    `Captured ${corpus.entries.length} documents${themed ? " (themed profiles)" : " x 3 profiles"} (${corpus.entries.filter((e) => e.adversarial).length} adversarial) -> ${outPath}`,
   );
   return 0;
 }
@@ -74,6 +81,14 @@ function main(): number {
       return 2;
     }
     return runCompare(pathA, pathB);
+  }
+  if (args[0] === "--themes") {
+    const themedOut = args[1];
+    if (!themedOut) {
+      console.error("Usage: bun packages/canvas/zz-dom-capture.ts --themes <out.json>");
+      return 2;
+    }
+    return runCapture(themedOut, true);
   }
   const outPath = args[0];
   if (!outPath) {

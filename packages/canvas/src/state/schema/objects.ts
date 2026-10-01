@@ -19,15 +19,24 @@ export type InteractiveCanvasObject = {
   id: string;
   type: InteractiveCanvasObjectType;
   /**
-   * The object's ONE text field (OBJECT-DEF-OVERHAUL.md D3/D11) — replaces
-   * the legacy `label`/`body`/`title` trio. The kind decides rendering:
-   * sections render it as the floating title chip, stickies render simple
+   * The object's main text — its name, or a sticky's body
+   * (OBJECT-DEF-OVERHAUL.md D3/D11) — replaces the legacy
+   * `label`/`body`/`title` trio; a shape, icon, or section may add one fact in
+   * `detail` below. The kind decides rendering:
+   * sections render it as the header title chip, stickies render simple
    * markdown (D18), shapes render it in their declared text slot
    * (objects/text-slots.ts). May be empty (a fresh sticky has no text yet).
    * Connections keep their own
    * separate `label`.
    */
   text: string;
+  /**
+   * Optional one-line detail under `text` (the name): a short fact such as a port, path, model, or spec —
+   * never prose. Rendered muted on one line (ellipsized), below the name for shapes and icons and inline
+   * after the title in a section's header. Shapes, icons, and sections only; stickies ignore it (their body
+   * is markdown). Absent / empty = no detail line.
+   */
+  detail?: string;
   /**
    * The object's ONE color pick (P1, OBJECT-DEF-OVERHAUL.md D1/D12/D17) —
    * a swatch id from the closed 10-id roster (state/schema/colors.ts). The
@@ -63,10 +72,13 @@ export type InteractiveCanvasObject = {
   /** `type: "sticky"` only (W2) — rendered bottom-left at 12px/40% black. */
   author?: string;
   /**
-   * `type: "icon"` only (W5) — REQUIRED glyph selector, one of the 30
-   * roster ids in `CanvasIconGlyph`. Missing/unknown is a hard
-   * validation error (mirrors the `section` title/tint precedent above),
-   * since an icon object with no glyph can't be rendered at all.
+   * Glyph selector, one of the roster ids in `CanvasIconGlyph`. Valid on
+   * `type: "icon"` and `type: "section"`, ignored on every other kind:
+   *  - icon (W5): REQUIRED. Missing/unknown is a hard validation error,
+   *    since an icon object with no glyph can't be rendered at all.
+   *  - section: OPTIONAL header icon, drawn before the title in the header
+   *    chip. An unknown id is dropped with a warning (the section still
+   *    renders, just without an icon).
    */
   icon?: CanvasIconGlyph;
 };

@@ -1238,13 +1238,64 @@
                                   "id": "node-map-concepts-patterns-labels",
                                   "content": [
                                     "Use native object labels and section titles for names."
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "bulletList",
+                                      "id": "node-map-concepts-patterns-name-rules",
+                                      "items": [
+                                        {
+                                          "type": "listItem",
+                                          "id": "node-map-concepts-patterns-name-length",
+                                          "content": [
+                                            "Keep each name to what the thing is, in about five words or fewer on one line, with no sentences."
+                                          ]
+                                        },
+                                        {
+                                          "type": "listItem",
+                                          "id": "node-map-concepts-patterns-name-detail",
+                                          "content": [
+                                            "Put at most one short fact, such as a port, path, version, model, or host, in the `detail` of a shape, icon, or section, within 48 characters."
+                                          ]
+                                        },
+                                        {
+                                          "type": "listItem",
+                                          "id": "node-map-concepts-patterns-name-example",
+                                          "content": [
+                                            "Write `Postgres` with the detail `16 · :5432`, not `Postgres database that stores user sessions`."
+                                          ]
+                                        }
+                                      ]
+                                    }
                                   ]
                                 },
                                 {
                                   "type": "listItem",
                                   "id": "node-map-concepts-patterns-stickies",
                                   "content": [
-                                    "Use Markdown stickies for explanations, annotations, and examples. Canvas has no standalone text object."
+                                    "Use Markdown stickies for explanations, annotations, and examples, placed beside their subject. Canvas has no standalone text object."
+                                  ]
+                                },
+                                {
+                                  "type": "listItem",
+                                  "id": "node-map-concepts-patterns-section-icons",
+                                  "content": [
+                                    "Give a section a header icon only when a glyph fits what it holds, never as decoration."
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "bulletList",
+                                      "id": "node-map-concepts-patterns-section-icon-rules",
+                                      "items": [
+                                        {
+                                          "type": "listItem",
+                                          "id": "node-map-concepts-patterns-section-icon-choice",
+                                          "content": [
+                                            "Use a generic glyph for a role, such as `database` or `users`, and a `brand-*` logo for a technology the diagram names, such as `brand-postgres`."
+                                          ]
+                                        }
+                                      ]
+                                    }
                                   ]
                                 },
                                 {
@@ -1252,6 +1303,28 @@
                                   "id": "node-map-concepts-patterns-connections",
                                   "content": [
                                     "Use supported objects and connections for trees, timelines, and cycles. The ASCII sketches show relationships, not literal free-drawn lines or free-floating text."
+                                  ]
+                                },
+                                {
+                                  "type": "listItem",
+                                  "id": "node-map-concepts-patterns-color",
+                                  "content": [
+                                    "Use color to encode kind, such as one hue shared by every data store, never as decoration."
+                                  ],
+                                  "children": [
+                                    {
+                                      "type": "bulletList",
+                                      "id": "node-map-concepts-patterns-color-rules",
+                                      "items": [
+                                        {
+                                          "type": "listItem",
+                                          "id": "node-map-concepts-patterns-color-theme",
+                                          "content": [
+                                            "The visual theme (figjam, schematic-light, or schematic-dark) is a workspace setting a person picks in Studio. Never change it or design for one theme; the same board renders in all three."
+                                          ]
+                                        }
+                                      ]
+                                    }
                                   ]
                                 }
                               ]
@@ -3003,6 +3076,13 @@
                           "content": [
                             "Do names use native object labels and section titles, with explanations and examples on Markdown stickies?"
                           ]
+                        },
+                        {
+                          "type": "listItem",
+                          "id": "node-checklist-container-discipline-2-detail-2",
+                          "content": [
+                            "Is each name a few words on one line, with at most one short fact in its `detail`? The `label-is-prose` and `detail-too-long` warnings report violations."
+                          ]
                         }
                       ]
                     }
@@ -3182,6 +3262,13 @@
                           "id": "node-checklist-technical-2-detail-1",
                           "content": [
                             "Object types, colors, and connection styles use the supported Canvas vocabulary."
+                          ]
+                        },
+                        {
+                          "type": "listItem",
+                          "id": "node-checklist-technical-2-detail-2",
+                          "content": [
+                            "Each section icon fits what its section holds, and each hue marks one kind of thing rather than decoration."
                           ]
                         }
                       ]

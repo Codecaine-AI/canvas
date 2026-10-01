@@ -3,6 +3,8 @@ import { describe, expect, test } from "bun:test";
 import { runDiagnostics } from "../src/board/lints/run";
 import { rule as unreadableLabels } from "../src/board/lints/rules/unreadable-labels";
 import { box, connect, makeDocument } from "./synthetic";
+import { canvasThemePreset } from "@codecaine-ai/canvas/style";
+import { FIGJAM_CONTEXT } from "./helpers";
 
 /**
  * The rule's claim is "the rendered chip does not fit where it renders" —
@@ -11,6 +13,8 @@ import { box, connect, makeDocument } from "./synthetic";
  * edge. No taste floor, no pair/window scan; chips hitting OTHER
  * boxes/chips/wires are covered-content's job.
  */
+// The chip numbers below are figjam's (30px sans chip, 9.6px per character,
+// 41px minimum), so every check measures in the figjam theme explicitly.
 describe("unreadable-labels lint", () => {
   test("declares its faces", () => {
     expect(unreadableLabels.id).toBe("unreadable-labels");
@@ -24,7 +28,7 @@ describe("unreadable-labels lint", () => {
     const findings = unreadableLabels.check(makeDocument(
       [box("a", 0, 0), box("b", 280, 0)],
       [{ ...connect("e", "a", "b"), label: "X" }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(0);
   });
 
@@ -35,7 +39,7 @@ describe("unreadable-labels lint", () => {
     const findings = unreadableLabels.check(makeDocument(
       [box("alpha", 0, 0), box("beta", 204, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "X" }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(1);
     expect(findings[0]).toMatchObject({
       rule: "unreadable-labels",
@@ -56,15 +60,26 @@ describe("unreadable-labels lint", () => {
     const fits = unreadableLabels.check(makeDocument(
       [box("a", 0, 0), box("b", 234, 0)],
       [{ ...connect("e", "a", "b"), label: "X" }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(fits).toHaveLength(0);
 
     const tight = unreadableLabels.check(makeDocument(
       [box("a", 0, 0), box("b", 232, 0)],
       [{ ...connect("e", "a", "b"), label: "X" }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(tight).toHaveLength(1);
     expect(tight[0]!.message).toContain("72px of corridor where the chip needs 73px");
+  });
+
+  test("the board's canvas style sizes the chip: the schematic mono chip fits a corridor the figjam chip cannot", () => {
+    // 27 chars in a 300px corridor: figjam 27×9.6 + 24 = 283.2px (+32 = 316 > 300);
+    // schematic 27×8.4 + 2×7 = 240.8px (+32 = 272.8 ≤ 300) on a 26px chip.
+    const document = makeDocument(
+      [box("a", 0, 0), box("b", 460, 0)],
+      [{ ...connect("e", "a", "b"), label: "a-very-long-edge-label-here" }],
+    );
+    expect(unreadableLabels.check(document, FIGJAM_CONTEXT)).toHaveLength(1);
+    expect(unreadableLabels.check(document, { canvasStyle: canvasThemePreset("schematic-light") })).toHaveLength(0);
   });
 
   test("no distance window: a long chip fires wherever it physically cannot fit", () => {
@@ -73,7 +88,7 @@ describe("unreadable-labels lint", () => {
     const findings = unreadableLabels.check(makeDocument(
       [box("a", 0, 0), box("b", 400, 0)],
       [{ ...connect("e", "a", "b"), label: "a-very-long-edge-label-here" }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(1);
     expect(findings[0]!.message).toContain("240px of corridor where the chip needs 316px");
   });
@@ -92,7 +107,7 @@ describe("unreadable-labels lint", () => {
         label: "X",
         waypoints: [[80, 300], [284, 300]],
       }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(0);
   });
 
@@ -103,7 +118,7 @@ describe("unreadable-labels lint", () => {
         connect("bare", "a", "b"),
         { ...connect("blank", "c", "d"), label: "   " },
       ],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(0);
   });
 
@@ -116,7 +131,7 @@ describe("unreadable-labels lint", () => {
         box("wrap2", 500, 0, 480, 320, "section"),
       ],
       [{ ...connect("e", "wrap1", "wrap2"), label: "X" }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(sectionPair).toHaveLength(0);
 
     // Section → node, 44px apart: the chip bleeds onto both endpoints but
@@ -124,7 +139,7 @@ describe("unreadable-labels lint", () => {
     const mixed = unreadableLabels.check(makeDocument(
       [box("wrap", 0, 0, 480, 320, "section"), box("b", 524, 112)],
       [{ ...connect("e", "wrap", "b"), label: "X" }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(mixed).toHaveLength(1);
     expect(mixed[0]!.at).toEqual(["e", "b"]);
     expect(mixed[0]!.message).toContain("bleeds onto b");
@@ -137,13 +152,13 @@ describe("unreadable-labels lint", () => {
       [box("alpha", 0, 0), box("beta", 204, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "X" }],
     );
-    expect(unreadableLabels.check(tight)).toHaveLength(1);
+    expect(unreadableLabels.check(tight, FIGJAM_CONTEXT)).toHaveLength(1);
 
     const opened = makeDocument(
       [box("alpha", 0, 0), box("beta", 240, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "X" }],
     );
-    expect(unreadableLabels.check(opened)).toHaveLength(0);
+    expect(unreadableLabels.check(opened, FIGJAM_CONTEXT)).toHaveLength(0);
   });
 
   test("opening a vertical run along y clears the finding", () => {
@@ -152,12 +167,12 @@ describe("unreadable-labels lint", () => {
       [box("top", 0, 0), box("bottom", 0, 140)],
       [{ ...connect("edge", "top", "bottom"), label: "X" }],
     );
-    expect(unreadableLabels.check(tight)).toHaveLength(1);
+    expect(unreadableLabels.check(tight, FIGJAM_CONTEXT)).toHaveLength(1);
 
     const opened = makeDocument(
       [box("top", 0, 0), box("bottom", 0, 160)],
       [{ ...connect("edge", "top", "bottom"), label: "X" }],
     );
-    expect(unreadableLabels.check(opened)).toHaveLength(0);
+    expect(unreadableLabels.check(opened, FIGJAM_CONTEXT)).toHaveLength(0);
   });
 });

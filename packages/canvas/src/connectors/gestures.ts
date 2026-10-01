@@ -26,6 +26,7 @@ import type {
 } from "../state/schema";
 import { paintOrderedObjects } from "../state/z-order";
 import type { CanvasAction } from "../state/actions";
+import type { CanvasStyle } from "../theme/canvas-style";
 import {
   DRAG_THRESHOLD,
   worldDistance,
@@ -46,6 +47,8 @@ const UNIT_INTERVAL_EPSILON = 0.000001;
 type ConnectorGestureContext = {
   document: InteractiveCanvasDocument;
   viewport: { zoom: number };
+  /** Workspace style: sizes below-band captions for anchors/endpoints. Default when omitted. */
+  canvasStyle?: CanvasStyle;
 };
 
 type ConnectorGestureResult = {
@@ -90,6 +93,7 @@ function connectorCandidateAt(
   worldPoint: CanvasPoint,
   excludeId: string | null,
   zoom: number,
+  canvasStyle: CanvasStyle | undefined,
 ): ConnectorAnchorCandidate | undefined {
   const candidates = [...paintOrderedObjects(document)].reverse();
   const cascade = resolveConnectionCascade(
@@ -97,6 +101,7 @@ function connectorCandidateAt(
     candidates,
     zoom,
     new Set(excludeId ? [excludeId] : []),
+    canvasStyle,
   );
   if (cascade.kind === "free") return undefined;
 
@@ -106,14 +111,14 @@ function connectorCandidateAt(
   if (cascade.kind === "inside") {
     return {
       objectId: cascade.objectId,
-      anchor: nearestObjectAnchor(object, worldPoint),
+      anchor: nearestObjectAnchor(object, worldPoint, canvasStyle),
       snapKind: "inside",
     };
   }
 
-  const anchor = nearestObjectAnchor(object, cascade.point);
+  const anchor = nearestObjectAnchor(object, cascade.point, canvasStyle);
   const plainBboxCanonical = pointForAnchor(object.geometry, anchor);
-  const objectCanonical = pointForObjectAnchor(object, anchor);
+  const objectCanonical = pointForObjectAnchor(object, anchor, canvasStyle);
   const isPlainBboxAnchor =
     Math.abs(plainBboxCanonical.x - cascade.point.x) < 0.5 &&
     Math.abs(plainBboxCanonical.y - cascade.point.y) < 0.5;
@@ -136,8 +141,9 @@ function connectorCandidateAt(
 export function quickConnectClickPoint(
   fromObject: InteractiveCanvasObject,
   fromAnchor: ConnectorCreateGesture["fromAnchor"],
+  canvasStyle?: CanvasStyle,
 ): CanvasPoint {
-  const { x, y, width, height } = connectionBoundsForObject(fromObject);
+  const { x, y, width, height } = connectionBoundsForObject(fromObject, canvasStyle);
   // Half a shape-width edge-to-edge (min 60px): the original full-width gap
   // read as "way too far" in review — the spawned duplicate should sit close
   // enough to feel attached to its source.
@@ -206,23 +212,25 @@ function bendEndpointPatch(
   endpoint: InteractiveCanvasConnection["from"],
   object: InteractiveCanvasObject,
   point: CanvasPoint,
+  canvasStyle: CanvasStyle | undefined,
 ): InteractiveCanvasConnection["from"] | undefined {
   const existingPoint = endpoint.position
-    ? pointForEndpointPosition(object, endpoint.position)
-    : pointForCanonicalEndpoint(object, endpoint.anchor, point);
+    ? pointForEndpointPosition(object, endpoint.position, canvasStyle)
+    : pointForCanonicalEndpoint(object, endpoint.anchor, point, canvasStyle);
   if (existingPoint && worldPointsAlmostEqual(existingPoint, point, BEND_ENDPOINT_POSITION_EPSILON_PX)) {
     return undefined;
   }
 
-  const position = relativeEndpointPosition(object, point);
+  const position = relativeEndpointPosition(object, point, canvasStyle);
   return position ? { ...endpoint, position } : undefined;
 }
 
 function pointForEndpointPosition(
   object: InteractiveCanvasObject,
   position: [number, number],
+  canvasStyle: CanvasStyle | undefined,
 ): CanvasPoint {
-  const bounds = connectionBoundsForObject(object);
+  const bounds = connectionBoundsForObject(object, canvasStyle);
   return {
     x: bounds.x + position[0] * bounds.width,
     y: bounds.y + position[1] * bounds.height,
@@ -233,13 +241,14 @@ function pointForCanonicalEndpoint(
   object: InteractiveCanvasObject,
   anchor: InteractiveCanvasConnection["from"]["anchor"],
   point: CanvasPoint,
+  canvasStyle: CanvasStyle | undefined,
 ): CanvasPoint | undefined {
   const explicit = explicitEndpointAnchor(anchor);
-  if (explicit) return pointForObjectAnchor(object, explicit);
+  if (explicit) return pointForObjectAnchor(object, explicit, canvasStyle);
 
   const anchors = ["top", "right", "bottom", "left"] as const;
   return anchors
-    .map((candidate) => pointForObjectAnchor(object, candidate))
+    .map((candidate) => pointForObjectAnchor(object, candidate, canvasStyle))
     .find((candidate) => worldPointsAlmostEqual(candidate, point, BEND_ENDPOINT_POSITION_EPSILON_PX));
 }
 
@@ -254,8 +263,9 @@ function explicitEndpointAnchor(
 function relativeEndpointPosition(
   object: InteractiveCanvasObject,
   point: CanvasPoint,
+  canvasStyle: CanvasStyle | undefined,
 ): [number, number] | undefined {
-  const bounds = connectionBoundsForObject(object);
+  const bounds = connectionBoundsForObject(object, canvasStyle);
   if (Math.abs(bounds.width) <= UNIT_INTERVAL_EPSILON || Math.abs(bounds.height) <= UNIT_INTERVAL_EPSILON) {
     return undefined;
   }
@@ -316,7 +326,13 @@ export function stepFromConnectorEndpointDrag(
 
   if (event.type !== "move") return { state, dispatch: [], overlay: { connectorDrag: state } };
 
-  const candidate = connectorCandidateAt(ctx.document, event.world, state.otherObjectId, ctx.viewport.zoom);
+  const candidate = connectorCandidateAt(
+    ctx.document,
+    event.world,
+    state.otherObjectId,
+    ctx.viewport.zoom,
+    ctx.canvasStyle,
+  );
   const nextState: ConnectorEndpointDragGesture = { ...state, point: event.world, candidate };
   return { state: nextState, dispatch: [], overlay: { connectorDrag: nextState } };
 }
@@ -354,7 +370,7 @@ export function stepFromConnectorCreate(
     }
     // Released on empty canvas: create-and-connect as a single history entry.
     const point = isClick && fromObject
-      ? quickConnectClickPoint(fromObject, state.fromAnchor)
+      ? quickConnectClickPoint(fromObject, state.fromAnchor, ctx.canvasStyle)
       : event.world;
     const editObjectTextId = fromObject
       ? quickConnectNewObjectId(ctx.document, fromObject)
@@ -379,7 +395,7 @@ export function stepFromConnectorCreate(
   const hasDragged =
     state.hasDragged || worldDistance(state.startWorld, event.world) >= DRAG_THRESHOLD;
   const candidate = hasDragged
-    ? connectorCandidateAt(ctx.document, event.world, state.fromObjectId, ctx.viewport.zoom)
+    ? connectorCandidateAt(ctx.document, event.world, state.fromObjectId, ctx.viewport.zoom, ctx.canvasStyle)
     : undefined;
   const nextState: ConnectorCreateGesture = { ...state, point: event.world, hasDragged, candidate };
   return { state: nextState, dispatch: [], overlay: { connectorDrag: nextState } };
@@ -417,8 +433,8 @@ export function stepFromConnectorBendDrag(
     if (!commit.clearedWaypoints) {
       const firstPoint = commit.points[0];
       const lastPoint = commit.points[commit.points.length - 1];
-      const from = firstPoint ? bendEndpointPatch(connection.from, fromObject, firstPoint) : undefined;
-      const to = lastPoint ? bendEndpointPatch(connection.to, toObject, lastPoint) : undefined;
+      const from = firstPoint ? bendEndpointPatch(connection.from, fromObject, firstPoint, ctx.canvasStyle) : undefined;
+      const to = lastPoint ? bendEndpointPatch(connection.to, toObject, lastPoint, ctx.canvasStyle) : undefined;
       if (from) patch.from = from;
       if (to) patch.to = to;
     }

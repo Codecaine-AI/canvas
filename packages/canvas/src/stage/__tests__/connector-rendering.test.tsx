@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render } from "@testing-library/react";
 import { CanvasStageWithInteraction as CanvasStage } from "./canvas-stage-test-utils";
 import { ConnectorDragPreview } from "../../connectors/ConnectorDragPreview";
 import { routeConnection } from "../../connectors/routing";
+import { renderFigjam } from "../../theme/__tests__/figjam";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
 afterEach(() => {
@@ -183,7 +184,7 @@ describe("CanvasStage: connector rendering (3.1.2 / 3.3.1)", () => {
 
   it("renders a label chip at the connector's label point", () => {
     const document = makeDocument();
-    const { container } = render(<CanvasStage document={document} viewport={viewport} />);
+    const { container } = renderFigjam(<CanvasStage document={document} viewport={viewport} />);
     const chip = container.querySelector('[data-canvas-connection-label="connection-a"]');
     const routed = routeConnection(
       document.objects[0]!,

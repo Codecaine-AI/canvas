@@ -1,6 +1,10 @@
 "use client";
 
-import { objectTypeDefaults } from "../../state/schema/object-defaults";
+import type { CSSProperties } from "react";
+import { FIRST_USE_COLORS, objectTypeDefaults } from "../../state/schema/object-defaults";
+import { withAlpha } from "../../theme/color-math";
+import { resolveStickyPaint, type StickyPaint } from "../../theme/palette";
+import { useCanvasStyle } from "../../theme/canvas-style-context";
 import { BBOX_OUTLINE } from "../geometry";
 import { ObjectShell, ObjectSlotText } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
@@ -17,6 +21,36 @@ export const STICKY_GEOMETRY = {
 } as const;
 
 /**
+ * Card sticky trim (the schematic themes' `stickyStyle: "card"`): the card
+ * fill (the shell's sticky role paint) edged by a hairline, a 2px rule in
+ * the color pick's ink down the left side, no shadow. Inline `code` chips
+ * tint with the text color.
+ */
+export const CARD_STICKY_GEOMETRY = {
+  ruleWidthPx: 2,
+  borderWidthPx: 1,
+  codeChipAlpha: 0.08,
+} as const;
+
+/** The "changed" ring the note CSS pairs with its shadow — kept when a card replaces the box-shadow. */
+const CHANGED_RING_SHADOW = "0 0 0 5px color-mix(in oklab, var(--primary) 18%, transparent)";
+
+/**
+ * A card sticky's edges as inset box-shadows — no CSS border, so the body
+ * slot keeps its exact position — replacing the paper shadow. Paper stickies
+ * get no override: the note CSS (shadow, changed ring) applies untouched.
+ */
+function cardStickyTrim(paint: StickyPaint, changed: boolean): CSSProperties | undefined {
+  if (paint.shadow) return undefined;
+  const shadows = [
+    ...(changed ? [CHANGED_RING_SHADOW] : []),
+    ...(paint.rule ? [`inset ${CARD_STICKY_GEOMETRY.ruleWidthPx}px 0 0 0 ${paint.rule}`] : []),
+    ...(paint.border ? [`inset 0 0 0 ${CARD_STICKY_GEOMETRY.borderWidthPx}px ${paint.border}`] : []),
+  ];
+  return { boxShadow: shadows.length > 0 ? shadows.join(", ") : "none" };
+}
+
+/**
  * FigJam sticky note (W2 upgrade, P2 text unification) — the generic button
  * trim plus the "inset-body" text slot rendering `object.text` as simple
  * markdown (D18: H1–H3, bullets, bold, inline code). Dispatched on the
@@ -28,12 +62,15 @@ export const STICKY_GEOMETRY = {
  */
 function StickyObjectView(props: ObjectRenderProps) {
   const { object, hideText } = props;
+  const canvasStyle = useCanvasStyle();
+  const paint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle);
   return (
     <ObjectShell
       object={object}
       renderShape="note"
       className="interactive-canvas-object interactive-canvas-object-note"
-      // Sticky fill resolves through the sticky role table; the trim border is suppressed.
+      // Sticky fill resolves through the sticky paint (paper or card); the
+      // trim border is suppressed — a card draws its edges as inset shadows.
       colorRole="sticky"
       selected={props.selected}
       changed={props.changed}
@@ -43,6 +80,7 @@ function StickyObjectView(props: ObjectRenderProps) {
       buttonBorder="painted"
       onObjectSelect={props.onObjectSelect}
       onObjectContextMenu={props.onObjectContextMenu}
+      style={cardStickyTrim(paint, props.changed)}
     >
       {!hideText && (
         <ObjectSlotText
@@ -53,7 +91,12 @@ function StickyObjectView(props: ObjectRenderProps) {
           clampChildrenToSlot
           className="interactive-canvas-sticky-body"
         >
-          <StickyMarkdown text={object.text} />
+          <StickyMarkdown
+            text={object.text}
+            codeBackground={
+              paint.shadow ? undefined : withAlpha(paint.text, CARD_STICKY_GEOMETRY.codeChipAlpha)
+            }
+          />
         </ObjectSlotText>
       )}
     </ObjectShell>

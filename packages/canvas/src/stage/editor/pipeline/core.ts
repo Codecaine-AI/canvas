@@ -218,7 +218,7 @@ function stepFromIdle(
     const toObject = objectById(ctx.document, connection.to.objectId);
     if (!fromObject || !toObject) return toIdle();
 
-    const routed = routeConnection(fromObject, toObject, connection, ctx.document.objects);
+    const routed = routeConnection(fromObject, toObject, connection, ctx.document.objects, ctx.canvasStyle);
     const points = routed.points ?? [];
     if (!connectorBendSegments(points).some((segment) => segment.index === hit.segmentIndex)) {
       return toIdle();

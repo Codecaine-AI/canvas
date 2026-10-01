@@ -6,6 +6,7 @@ import { CanvasStageWithInteraction as CanvasStage } from "./canvas-stage-test-u
 import { ANCHOR_DOT_OFFSET_PX, ANCHOR_DOTS_MIN_ZOOM } from "../../connectors/AnchorDots";
 import { connectionBoundsForObject } from "../../objects/geometry";
 import { CONNECTOR_END_GAP_PX } from "../../connectors/routing";
+import { renderFigjam } from "../../theme/__tests__/figjam";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 
 afterEach(() => {
@@ -123,7 +124,7 @@ describe("AnchorDots (P3 — D5/D15)", () => {
   });
 
   it("previews quick-connect on dot hover and clears it on unhover", () => {
-    const { container } = render(
+    const { container } = renderFigjam(
       <CanvasStage
         document={makeDocument([rect])}
         viewport={{ x: 0, y: 0, zoom: 1 }}

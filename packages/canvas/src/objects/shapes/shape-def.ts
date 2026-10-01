@@ -1,11 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type {
   CanvasObjectStyle,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
 } from "../../state/schema";
+import type { CanvasStyle } from "../../theme/canvas-style";
 import type { OutlineSpec } from "../geometry";
 import type { ObjectButtonBorderPolicy, ObjectCatalogMeta } from "../object-def";
 import type { ResolvedShapeObjectColors } from "../object-shell";
@@ -23,14 +24,35 @@ import type { TextSlot } from "../text-slots";
 export interface ShapeOutlineArgs {
   object: InteractiveCanvasObject;
   /**
-   * The object's color pick resolved through the "shape" palette role
-   * (object-shell.tsx resolveObjectRoleColors): fill + ink border + the
-   * fixed dark text color (D8). D13: no silhouette carries fixed colors
-   * anymore — this is the ONLY color input.
+   * The object's color pick resolved through the "shape" palette role under
+   * the canvas style (object-shell.tsx resolveObjectRoleColors): fill + ink
+   * border + the style's name color (D8). D13: no silhouette carries fixed
+   * colors anymore — this is the ONLY color input.
    */
   colors: ResolvedShapeObjectColors;
   /** Resolved stroke width. */
   strokeWidth: number;
+  /** The workspace canvas style the shape renders under. */
+  canvasStyle: CanvasStyle;
+  /**
+   * The border width when the shared shape view paints a CSS-trimmed shape's
+   * border as an SVG stroke (fractional widths outside figjam): the button's
+   * padding box then spans the whole box, so decorations that sat inside the
+   * CSS border inset themselves by this much. 0 while the CSS border insets
+   * the padding box.
+   */
+  strokedBorderPx: number;
+}
+
+/**
+ * How a shape's outer button paints under one canvas style, when that
+ * differs from the def's static trim (`buttonBorder` + the className's CSS).
+ */
+export interface ShapeTrim {
+  /** Replaces the def's `buttonBorder` (e.g. "suppressed" when a silhouette paints the border). */
+  buttonBorder?: ObjectButtonBorderPolicy;
+  /** Inline trim merged over the object's resolved button style. */
+  style?: CSSProperties;
 }
 
 /**
@@ -52,6 +74,13 @@ export interface SilhouetteSpec {
    * is pure CSS.
    */
   silhouette?: (args: ShapeOutlineArgs) => ReactNode;
+  /**
+   * Per-style trim: the button's paint under `canvasStyle` when it differs
+   * from the static trim (undefined keeps the static trim). Lets a shape
+   * whose CSS trim cannot carry a style's look swap in its silhouette —
+   * the decision diamond outside the figjam tint mode.
+   */
+  trim?: (canvasStyle: CanvasStyle) => ShapeTrim | undefined;
 }
 
 /**

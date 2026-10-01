@@ -142,7 +142,7 @@ export const rule: LayoutRule = {
   title: "Broken edges",
   tier: "error",
   guidance: GUIDANCE,
-  check(document) {
+  check(document, context) {
     const findings: ReturnType<LayoutRule["check"]> = [];
     const byId = new Map(document.objects.map((object) => [object.id, object]));
 
@@ -150,7 +150,7 @@ export const rule: LayoutRule = {
     // document as the obstacle set.
     const routed = new Map<string, Point[]>();
     for (const edge of document.connections) {
-      const points = routedPolyline(edge, document);
+      const points = routedPolyline(edge, document, context?.canvasStyle);
       if (points.length >= 2) routed.set(edge.id, points);
     }
 
@@ -161,7 +161,7 @@ export const rule: LayoutRule = {
       const toId = edge.to.objectId;
       const path = routed.get(edge.id);
       if (!path || fromId === toId) continue;
-      if (pathBoxViolationIds(path, fromId, toId, document.objects).length === 0) continue;
+      if (pathBoxViolationIds(path, fromId, toId, document.objects, context?.canvasStyle).length === 0) continue;
       findings.push({
         rule: "broken-edges",
         severity: "error",

@@ -11,7 +11,7 @@ import type { CanvasAction } from "../../../../state/actions";
 import type { CanvasPoint } from "../../../../state/geometry";
 import { computeSnapGuides, type SnapGuide } from "../snapping/snapping";
 import { gatherSnapCandidates } from "../../../../interaction/hit-testing";
-import { connectionBoundsForObject } from "../../../../objects/geometry";
+import { hitBoundsForObject } from "../../../../objects/geometry";
 import type { CanvasGeometry, InteractiveCanvasDocument } from "../../../../state/schema";
 import {
   SNAP_THRESHOLD_SCREEN_PX,
@@ -19,6 +19,7 @@ import {
   type ResizeHandle,
 } from "../../../../interaction/types";
 import type { ViewportState } from "../../../viewport";
+import type { CanvasStyle } from "../../../../theme/canvas-style";
 
 export type ResizeGesture = {
   kind: "resize";
@@ -32,6 +33,8 @@ export type ResizeGesture = {
 type ResizeContext = {
   document: InteractiveCanvasDocument;
   viewport: ViewportState;
+  /** Workspace style: sizes below-band captions in snap bounds. Default when omitted. */
+  canvasStyle?: CanvasStyle;
 };
 
 type ResizeResult = {
@@ -143,13 +146,13 @@ export function stepFromResize(
   const rawGeometry = applyResizeHandle(state.startGeometry, state.handle, dx, dy);
   const target = ctx.document.objects.find((object) => object.id === state.objectId);
   const snapBounds = target
-    ? connectionBoundsForObject({ ...target, geometry: rawGeometry })
+    ? hitBoundsForObject({ ...target, geometry: rawGeometry }, ctx.canvasStyle)
     : rawGeometry;
 
   // Live snap guides for resize: snap only the edges the handle actually
   // moves (the anchored opposite edge/corner must not move — applyResizeHandle
   // already clamps it, so we correct just the moving edge(s) toward alignment).
-  const candidates = gatherSnapCandidates(ctx.document, [state.objectId]);
+  const candidates = gatherSnapCandidates(ctx.document, [state.objectId], ctx.canvasStyle);
   const threshold = SNAP_THRESHOLD_SCREEN_PX / ctx.viewport.zoom;
   const snap = computeSnapGuides(snapBounds, candidates, threshold);
 

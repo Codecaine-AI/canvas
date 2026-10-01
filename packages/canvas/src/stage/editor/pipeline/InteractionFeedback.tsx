@@ -21,6 +21,7 @@ import { PlacePreview } from "../features/place/PlacePreview";
 import { SnapGuideLine } from "../features/snapping/SnapGuideLine";
 import { DistributionGuideLine } from "../features/snapping/DistributionGuideLine";
 import { SpacingChips } from "../features/snapping/SpacingChips";
+import { useCanvasStyle } from "../../../theme/canvas-style-context";
 
 type InteractionFeedbackBaseProps = {
   document: InteractiveCanvasDocument;
@@ -86,6 +87,7 @@ export function InteractionFeedbackScreen({
   interactionEnabled?: boolean;
 }) {
   const [hoveredAnchorDot, setHoveredAnchorDot] = useState<ActivePort | null>(null);
+  const canvasStyle = useCanvasStyle();
   const handToolActive = activeTool === "hand";
   const connectorToolActive = activeTool === "connector";
   const activeConnectorDrag = interactionOverlay?.connectorDrag ?? null;
@@ -120,7 +122,7 @@ export function InteractionFeedbackScreen({
           return {
             fromObjectId: hoveredAnchorDot.objectId,
             fromAnchor: hoveredAnchorDot.anchor,
-            point: quickConnectClickPoint(object, hoveredAnchorDot.anchor),
+            point: quickConnectClickPoint(object, hoveredAnchorDot.anchor, canvasStyle),
           } satisfies NonNullable<InteractionOverlay["connectorDrag"]>;
         })()
       : null;

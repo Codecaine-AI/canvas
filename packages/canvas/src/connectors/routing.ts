@@ -47,6 +47,16 @@ const END_GAP = CONNECTOR_END_GAP_PX;
 const AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX = 8;
 const STRAIGHT_EDGE_MARGIN_PX = CONNECTOR_END_GAP_PX;
 const ROUTE_EPSILON = 0.01;
+/**
+ * Shortest back-tracking run (board units) an elbow route keeps. A route that
+ * doubles back on itself by less than this reads as a kink, not a turn, so
+ * collapseShortReversingRuns removes it. It is a floor under the theme's bend
+ * radius — not tied to it — so a tight radius (schematic's 8, or 0) still
+ * collapses the ~1-15px reversals a drag preview or a close pair of objects
+ * makes when the 24px stubs overshoot. Only exact reversals collapse;
+ * doglegs (perpendicular jogs) never do.
+ */
+const MIN_REVERSAL_RUN_PX = 16;
 const WAYPOINT_ORTHOGONAL_EPSILON_PX = 0.5;
 
 export type { Anchor } from "../state/schema/connections";
@@ -160,7 +170,7 @@ export function routeConnection(
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): RoutedConnection {
   return withCornerRadius(
-    routeConnectionPolyline(fromObject, toObject, connection, obstacles),
+    routeConnectionPolyline(fromObject, toObject, connection, obstacles, canvasStyle),
     canvasStyle.connectorCornerRadiusPx,
   );
 }
@@ -169,15 +179,20 @@ function routeConnectionPolyline(
   fromObject: InteractiveCanvasObject,
   toObject: InteractiveCanvasObject,
   connection: InteractiveCanvasConnection,
-  obstacles?: ReadonlyArray<InteractiveCanvasObject>,
+  obstacles: ReadonlyArray<InteractiveCanvasObject> | undefined,
+  canvasStyle: CanvasStyle,
 ): RoutedConnection {
-  const fromBounds = connectionBoundsForObject(fromObject);
-  const toBounds = connectionBoundsForObject(toObject);
+  const fromBounds = connectionBoundsForObject(fromObject, canvasStyle);
+  const toBounds = connectionBoundsForObject(toObject, canvasStyle);
   const pickedAnchors = autoPickAnchors(fromBounds, toBounds);
   const startAnchor = explicitAnchor(connection.from.anchor) ?? pickedAnchors.startAnchor;
   const endAnchor = explicitAnchor(connection.to.anchor) ?? pickedAnchors.endAnchor;
-  const start = pointForObjectPosition(fromObject, connection.from.position) ?? pointForObjectAnchor(fromObject, startAnchor);
-  const end = pointForObjectPosition(toObject, connection.to.position) ?? pointForObjectAnchor(toObject, endAnchor);
+  const start =
+    pointForObjectPosition(fromObject, connection.from.position, canvasStyle) ??
+    pointForObjectAnchor(fromObject, startAnchor, canvasStyle);
+  const end =
+    pointForObjectPosition(toObject, connection.to.position, canvasStyle) ??
+    pointForObjectAnchor(toObject, endAnchor, canvasStyle);
 
   const explicitWaypoints = validWaypoints(connection.waypoints);
   if (explicitWaypoints) {
@@ -186,6 +201,7 @@ function routeConnectionPolyline(
       toObject,
       canSlideStart: !connection.from.position,
       canSlideEnd: !connection.to.position,
+      canvasStyle,
     });
     if (waypointRoute) return waypointRoute;
   }
@@ -196,6 +212,7 @@ function routeConnectionPolyline(
     start,
     end,
     obstacles ?? [],
+    canvasStyle,
   );
   const straight = routeStraightIfAligned(
     fromObject,
@@ -205,10 +222,11 @@ function routeConnectionPolyline(
     startAnchor,
     endAnchor,
     extraObstacleBounds,
+    canvasStyle,
   );
   if (straight) return straight;
 
-  const elbow = routeElbow(start, end, startAnchor, endAnchor);
+  const elbow = routeElbow(start, end, startAnchor, endAnchor, canvasStyle.connectorCornerRadiusPx);
   if (!polylineCrossesObstacles(elbow.points ?? [], extraObstacleBounds)) return elbow;
 
   const orthogonal = routeOrthogonalAStar(
@@ -219,6 +237,7 @@ function routeConnectionPolyline(
     startAnchor,
     endAnchor,
     extraObstacleBounds,
+    canvasStyle,
   );
   if (orthogonal) return orthogonal;
   return elbow;
@@ -237,7 +256,7 @@ export function routeConnectionToPoint(
   point: CanvasPoint,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): RoutedConnection {
-  const start = pointForObjectAnchor(fromObject, fromAnchor);
+  const start = pointForObjectAnchor(fromObject, fromAnchor, canvasStyle);
   const endAnchor = freePointEndAnchor(start, point);
   const cornerRadiusPx = canvasStyle.connectorCornerRadiusPx;
 
@@ -260,9 +279,10 @@ function pointForPosition(bounds: CanvasBounds, position?: [number, number]): Ca
 
 function pointForObjectPosition(
   object: InteractiveCanvasObject,
-  position?: [number, number],
+  position: [number, number] | undefined,
+  canvasStyle: CanvasStyle,
 ): CanvasPoint | null {
-  return pointForPosition(connectionBoundsForObject(object), position);
+  return pointForPosition(connectionBoundsForObject(object, canvasStyle), position);
 }
 
 /** Validates a connection's `waypoints` are a usable (2+) polyline; returns null otherwise. */
@@ -302,6 +322,7 @@ type WaypointEndpointContext = {
   toObject: InteractiveCanvasObject;
   canSlideStart: boolean;
   canSlideEnd: boolean;
+  canvasStyle: CanvasStyle;
 };
 
 function waypointEndpointCandidates(
@@ -335,6 +356,7 @@ function waypointEndpointCandidates(
       startAnchor,
       endAnchor,
       AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX,
+      endpointContext.canvasStyle,
     );
     if (straightEndpoints) addCandidate(straightEndpoints[0], straightEndpoints[1]);
   }
@@ -346,10 +368,10 @@ function waypointEndpointCandidates(
     const lastWaypoint = waypoints[waypoints.length - 1];
     addCandidate(
       endpointContext.canSlideStart && firstWaypoint
-        ? reconcileWaypointEndpoint(start, firstWaypoint, endpointContext.fromObject, startAnchor)
+        ? reconcileWaypointEndpoint(start, firstWaypoint, endpointContext.fromObject, startAnchor, endpointContext.canvasStyle)
         : start,
       endpointContext.canSlideEnd && lastWaypoint
-        ? reconcileWaypointEndpoint(end, lastWaypoint, endpointContext.toObject, endAnchor)
+        ? reconcileWaypointEndpoint(end, lastWaypoint, endpointContext.toObject, endAnchor, endpointContext.canvasStyle)
         : end,
     );
   }
@@ -362,12 +384,13 @@ function reconcileWaypointEndpoint(
   adjacent: CanvasPoint,
   object: InteractiveCanvasObject,
   anchor: Anchor,
+  canvasStyle: CanvasStyle,
 ): CanvasPoint {
   if (isOrthogonalSegment(endpoint, adjacent, WAYPOINT_ORTHOGONAL_EPSILON_PX)) {
     return endpoint;
   }
 
-  const span = edgeSlideSpan(object, anchor);
+  const span = edgeSlideSpan(object, anchor, canvasStyle);
   if (!span) return endpoint;
   const candidate = isHorizontalAnchor(anchor)
     ? { x: span.fixed, y: adjacent.y }
@@ -413,6 +436,7 @@ function routeOrthogonalAStar(
   startAnchor: Anchor,
   endAnchor: Anchor,
   extraObstacleBounds: ReadonlyArray<CanvasBounds>,
+  canvasStyle: CanvasStyle,
 ): RoutedConnection | null {
   const extraObstacles = extraObstacleBounds.map(toObstacle);
 
@@ -421,8 +445,8 @@ function routeOrthogonalAStar(
     const generator = new PathGenerator();
     waypoints = generator.generateOrthogonalConnectorPath(
       {
-        startBound: toObstacle(connectionBoundsForObject(fromObject)),
-        endBound: toObstacle(connectionBoundsForObject(toObject)),
+        startBound: toObstacle(connectionBoundsForObject(fromObject, canvasStyle)),
+        endBound: toObstacle(connectionBoundsForObject(toObject, canvasStyle)),
         startPoint: [start.x, start.y],
         endPoint: [end.x, end.y],
         obstacles: extraObstacles,
@@ -447,6 +471,7 @@ function routeOrthogonalAStar(
         startAnchor,
         endAnchor,
         AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX,
+        canvasStyle,
       )
     : null;
   const routedPoints = straightPoints ?? points;
@@ -462,6 +487,7 @@ function routingObstacleBounds(
   start: CanvasPoint,
   end: CanvasPoint,
   obstacles: ReadonlyArray<InteractiveCanvasObject>,
+  canvasStyle: CanvasStyle,
 ): CanvasBounds[] {
   const excludedIds = new Set<string>([fromObject.id, toObject.id]);
   collectAncestorIds(fromObject.id, excludedIds, obstacles);
@@ -471,10 +497,10 @@ function routingObstacleBounds(
     .filter(
       (object) =>
         !excludedIds.has(object.id) &&
-        !boundsStrictlyContain(connectionBoundsForObject(object), start) &&
-        !boundsStrictlyContain(connectionBoundsForObject(object), end),
+        !boundsStrictlyContain(connectionBoundsForObject(object, canvasStyle), start) &&
+        !boundsStrictlyContain(connectionBoundsForObject(object, canvasStyle), end),
     )
-    .map((object) => connectionBoundsForObject(object));
+    .map((object) => connectionBoundsForObject(object, canvasStyle));
 }
 
 function routeStraightIfAligned(
@@ -485,6 +511,7 @@ function routeStraightIfAligned(
   startAnchor: Anchor,
   endAnchor: Anchor,
   obstacleBounds: ReadonlyArray<CanvasBounds>,
+  canvasStyle: CanvasStyle,
 ): RoutedConnection | null {
   const points = exactStraightAnchoredPoints(
     fromObject,
@@ -494,6 +521,7 @@ function routeStraightIfAligned(
     startAnchor,
     endAnchor,
     AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX,
+    canvasStyle,
   );
   if (!points) return null;
 
@@ -509,12 +537,13 @@ function exactStraightAnchoredPoints(
   startAnchor: Anchor,
   endAnchor: Anchor,
   tolerance: number,
+  canvasStyle: CanvasStyle,
 ): [CanvasPoint, CanvasPoint] | null {
   const axis = straightRouteAxis(start, end, tolerance);
   if (!axis || !anchorsFaceAlongAxis(start, end, startAnchor, endAnchor, axis)) return null;
 
-  const startSpan = edgeSlideSpan(fromObject, startAnchor);
-  const endSpan = edgeSlideSpan(toObject, endAnchor);
+  const startSpan = edgeSlideSpan(fromObject, startAnchor, canvasStyle);
+  const endSpan = edgeSlideSpan(toObject, endAnchor, canvasStyle);
   if (!startSpan || !endSpan) return null;
 
   const overlapMin = Math.max(startSpan.min, endSpan.min);
@@ -547,9 +576,10 @@ type EdgeSlideSpan = {
 function edgeSlideSpan(
   object: InteractiveCanvasObject,
   anchor: Anchor,
+  canvasStyle: CanvasStyle,
 ): EdgeSlideSpan | null {
-  const bounds = connectionBoundsForObject(object);
-  const polygon = outlinePolygon(object);
+  const bounds = connectionBoundsForObject(object, canvasStyle);
+  const polygon = outlinePolygon(object, canvasStyle);
   const fixed = edgeFixedCoordinate(bounds, anchor);
   const slideCoordinate = isHorizontalAnchor(anchor) ? "y" : "x";
   let min = Infinity;
@@ -763,15 +793,18 @@ export function pointForAnchor(bounds: CanvasBounds, anchor: Anchor): CanvasPoin
   return { x: bounds.x, y: bounds.y + bounds.height / 2 };
 }
 
+/** World point of `object`'s `anchor` port; `canvasStyle` sizes below-band captions (default style when omitted). */
 export function pointForObjectAnchor(
   object: InteractiveCanvasObject,
   anchor: Anchor,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): CanvasPoint {
-  const anchors = getConnectionAnchors(object);
-  if (anchor === "top") return anchors[0]?.point ?? pointForAnchor(connectionBoundsForObject(object), anchor);
-  if (anchor === "bottom") return anchors[1]?.point ?? pointForAnchor(connectionBoundsForObject(object), anchor);
-  if (anchor === "left") return anchors[2]?.point ?? pointForAnchor(connectionBoundsForObject(object), anchor);
-  return anchors[3]?.point ?? pointForAnchor(connectionBoundsForObject(object), anchor);
+  const anchors = getConnectionAnchors(object, canvasStyle);
+  const fallback = () => pointForAnchor(connectionBoundsForObject(object, canvasStyle), anchor);
+  if (anchor === "top") return anchors[0]?.point ?? fallback();
+  if (anchor === "bottom") return anchors[1]?.point ?? fallback();
+  if (anchor === "left") return anchors[2]?.point ?? fallback();
+  return anchors[3]?.point ?? fallback();
 }
 
 /** The four side-anchor points for a bounds, in a stable ["top","right","bottom","left"] order. */
@@ -800,11 +833,13 @@ export function nearestAnchor(bounds: CanvasBounds, point: CanvasPoint): Anchor 
   return closest;
 }
 
+/** `object`'s port anchor nearest `point`; `canvasStyle` sizes below-band captions (default style when omitted). */
 export function nearestObjectAnchor(
   object: InteractiveCanvasObject,
   point: CanvasPoint,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): Anchor {
-  const anchors = getConnectionAnchors(object);
+  const anchors = getConnectionAnchors(object, canvasStyle);
   const entries: Array<[Anchor, CanvasPoint | undefined]> = [
     ["top", anchors[0]?.point],
     ["bottom", anchors[1]?.point],
@@ -840,11 +875,18 @@ function routeElbow(
   end: CanvasPoint,
   startAnchor: Anchor,
   endAnchor: Anchor,
+  cornerRadiusPx: number,
 ): RoutedConnection {
   const stubStart = addScaled(start, normalFor(startAnchor), MIN_STUB);
   const stubEnd = addScaled(end, normalFor(endAnchor), MIN_STUB);
   const corners = elbowCorners(stubStart, stubEnd, startAnchor, endAnchor);
-  const points = dedupeConsecutivePoints([start, stubStart, ...corners, stubEnd, end]);
+  // Close objects (and the quick-connect ghost under a create drag) put the
+  // two 24px stubs past each other, so the elbow doubles back a few px.
+  const points = collapseShortReversingRuns(
+    dedupeConsecutivePoints([start, stubStart, ...corners, stubEnd, end]),
+    cornerRadiusPx,
+    true,
+  );
 
   return routedConnectionFromPoints(points, start, end, startAnchor, endAnchor);
 }
@@ -867,7 +909,18 @@ function routeFreePointElbow(
   return routedConnectionFromPoints(points, start, end, startAnchor, endAnchor);
 }
 
-function collapseShortReversingRuns(points: CanvasPoint[], cornerRadiusPx: number): CanvasPoint[] {
+/**
+ * Drops the vertex of every exact reversal (a run that doubles straight back)
+ * whose shorter side is under max(bend radius, MIN_REVERSAL_RUN_PX).
+ * `keepEndDirections` refuses a collapse that would flip the first or last
+ * segment — i.e. leave or enter an anchored object through its own body.
+ */
+function collapseShortReversingRuns(
+  points: CanvasPoint[],
+  cornerRadiusPx: number,
+  keepEndDirections = false,
+): CanvasPoint[] {
+  const collapseBelowPx = Math.max(cornerRadiusPx, MIN_REVERSAL_RUN_PX);
   const result = [...points];
   let index = 1;
   while (index < result.length - 1) {
@@ -892,9 +945,12 @@ function collapseShortReversingRuns(points: CanvasPoint[], cornerRadiusPx: numbe
     const effectiveOutgoingLength =
       index === segmentCount - 1 ? Math.max(0, outgoingLength - END_GAP) : outgoingLength;
 
+    const flipsStart = index === 1 && outgoingLength > incomingLength + ROUTE_EPSILON;
+    const flipsEnd = index === segmentCount - 1 && incomingLength > outgoingLength + ROUTE_EPSILON;
     if (
       Math.min(effectiveIncomingLength, effectiveOutgoingLength) >
-      cornerRadiusPx + ROUTE_EPSILON
+        collapseBelowPx + ROUTE_EPSILON ||
+      (keepEndDirections && (flipsStart || flipsEnd))
     ) {
       index += 1;
       continue;

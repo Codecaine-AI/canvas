@@ -25,6 +25,7 @@ import {
   openCanvasFile,
   toolkitTools,
   type CanvasFileSession,
+  type CanvasStyle,
 } from "@codecaine-ai/canvas-agent/toolkit";
 
 export type CanvasToolContent =
@@ -123,6 +124,26 @@ function approximateTokens(chars: number): number {
   return Math.max(1, Math.round(chars / 4));
 }
 
+/**
+ * The STYLE line `canvas_open` prints: the active theme always, then the
+ * workspace's overrides of that theme's preset when there are any — palette
+ * inks one per color (`palette.red=#C8402F`), every other token as `key=value`.
+ */
+export function styleLine(canvasStyle: CanvasStyle): string {
+  const overrides: string[] = [];
+  for (const [key, value] of Object.entries(canvasStyleOverrides(canvasStyle))) {
+    if (key === "palette" && value && typeof value === "object") {
+      for (const [color, ink] of Object.entries(value)) overrides.push(`palette.${color}=${ink}`);
+    } else {
+      overrides.push(`${key}=${value}`);
+    }
+  }
+  return [
+    `STYLE · theme ${canvasStyle.theme}`,
+    ...(overrides.length > 0 ? [`workspace overrides: ${overrides.join(", ")}`] : []),
+  ].join(" · ");
+}
+
 /** The three server-owned tools, declared ahead of the toolkit roster. */
 const SERVER_TOOLS: CanvasToolDeclaration[] = [
   {
@@ -136,7 +157,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_open",
     title: "Open canvas",
     description:
-      "Open a canvas as the board every other canvas tool edits, reading it fresh from disk. Returns the board description, the full digest (every section, object, connection, and route with its id and geometry), and the open lint findings, plus the file hash. Also re-reads the workspace style settings (canvases/canvas-style.json: corner radii, border widths) that renders and lints use. Call it again to reload after the file changed elsewhere; any edit you make afterwards saves to the file immediately.",
+      "Open a canvas as the board every other canvas tool edits, reading it fresh from disk. Returns the board description, the full digest (every section, object, connection, and route with its id and geometry), and the open lint findings, plus the file hash. Also re-reads the workspace style settings (canvases/canvas-style.json: the visual theme — figjam, schematic-light, or schematic-dark — and its overrides) that renders and lints use; the STYLE line reports the active theme. The theme is the person's workspace choice: no tool changes it, and color still encodes what kind of thing an object is. Call it again to reload after the file changed elsewhere; any edit you make afterwards saves to the file immediately.",
     inputSchema: {
       type: "object",
       properties: {
@@ -240,17 +261,20 @@ export function createCanvasService(options: CanvasServiceOptions) {
     active = file;
     const title = file.session.draft.title ?? "";
     const canvasStyle = file.session.canvasStyle;
-    const overrides = canvasStyle ? Object.entries(canvasStyleOverrides(canvasStyle)) : [];
     return text(
       [
         `OPENED · ${id} ${JSON.stringify(title)} · sha256:${file.diskHash}`,
-        ...(overrides.length > 0
-          ? [`STYLE · workspace overrides: ${overrides.map(([key, value]) => `${key}=${value}`).join(", ")}`]
-          : []),
+        ...(canvasStyle ? [styleLine(canvasStyle)] : []),
         boardStateSnapshot(file.session),
       ].join("\n\n"),
       false,
-      { canvas: id, title, hash: `sha256:${file.diskHash}`, path, ...(canvasStyle ? { canvasStyle } : {}) },
+      {
+        canvas: id,
+        title,
+        hash: `sha256:${file.diskHash}`,
+        path,
+        ...(canvasStyle ? { theme: canvasStyle.theme, canvasStyle } : {}),
+      },
     );
   }
 

@@ -2,6 +2,10 @@ import { describe, expect, test } from "bun:test";
 
 import { rule as coveredContent } from "../src/board/lints/rules/covered-content";
 import { box, connect, makeDocument } from "./synthetic";
+import { FIGJAM_CONTEXT } from "./helpers";
+
+// Chip geometry here is figjam's (30px sans chip), so every check measures in
+// the figjam theme explicitly.
 
 describe("covered-content lint", () => {
   test("declares its faces", () => {
@@ -17,7 +21,7 @@ describe("covered-content lint", () => {
     const findings = coveredContent.check(makeDocument([
       box("a", 0, 0),
       box("b", 80, 0),
-    ]));
+    ]), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(1);
     expect(findings[0]).toMatchObject({
       rule: "covered-content",
@@ -33,7 +37,7 @@ describe("covered-content lint", () => {
     const findings = coveredContent.check(makeDocument([
       box("a", 0, 0),
       box("bar", 70, 38, 900, 20),
-    ]));
+    ]), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(1);
     expect(findings[0]!.message).toContain("covers the text center of a");
   });
@@ -45,7 +49,7 @@ describe("covered-content lint", () => {
       box("wrap", 0, 0, 480, 320, "section"),        // sections exempt
       box("note", 40, 40, 160, 96, "sticky"),        // stickies exempt
       { ...box("other", 8, 8), parentId: "wrap" },   // overlaps a, different parent
-    ]));
+    ]), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(0);
   });
 
@@ -53,13 +57,13 @@ describe("covered-content lint", () => {
     const atThreshold = coveredContent.check(makeDocument([
       box("a", 0, 0),
       box("b", 80, 48),
-    ]));
+    ]), FIGJAM_CONTEXT);
     expect(atThreshold).toHaveLength(0);
 
     const pastThreshold = coveredContent.check(makeDocument([
       box("a", 0, 0),
       box("b", 79, 48),  // intersection 81×48 = 25.3% of the smaller
-    ]));
+    ]), FIGJAM_CONTEXT);
     expect(pastThreshold).toHaveLength(1);
     expect(pastThreshold[0]!.message).toContain("25%");
   });
@@ -73,7 +77,7 @@ describe("covered-content lint", () => {
     const findings = coveredContent.check(makeDocument(
       [box("a", 0, 0), box("mid", 400, 0), box("b", 800, 0)],
       [{ ...connect("e", "a", "b"), label: "X", waypoints: [[480, 48]] }],
-    ));
+    ), FIGJAM_CONTEXT);
     const errors = findings.filter((finding) => finding.severity === "error");
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({
@@ -91,7 +95,7 @@ describe("covered-content lint", () => {
         { ...connect("labeled", "a", "b"), label: "connect()" },  // chip pokes into a and b only
         connect("bare", "far", "far2"),
       ],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(0);
   });
 
@@ -106,7 +110,7 @@ describe("covered-content lint", () => {
         label: "X",
         waypoints: [[160, 300], [800, 300]],
       }],
-    ));
+    ), FIGJAM_CONTEXT);
     const errors = findings.filter((finding) => finding.severity === "error");
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({ at: ["e", "w"] });
@@ -123,7 +127,7 @@ describe("covered-content lint", () => {
         label: "X",
         waypoints: [[160, 48], [800, 48]],
       }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(touching).toHaveLength(1);
     expect(touching[0]).toMatchObject({ severity: "warning", at: ["e", "t"] });
     expect(touching[0]!.message).toContain("sits within 16px of t");
@@ -136,7 +140,7 @@ describe("covered-content lint", () => {
         label: "X",
         waypoints: [[160, 48], [800, 48]],
       }],
-    ));
+    ), FIGJAM_CONTEXT);
     const errors = overlapping.filter((finding) => finding.severity === "error");
     expect(errors).toHaveLength(1);
     expect(errors[0]!.message).toContain("covers t");
@@ -148,7 +152,7 @@ describe("covered-content lint", () => {
     const atMargin = coveredContent.check(makeDocument(
       [box("a", 0, 0), box("t", 516, 0), box("b", 800, 0)],
       [{ ...connect("e", "a", "b"), label: "X" }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(atMargin.filter((finding) => finding.at.includes("t"))).toHaveLength(1);
     expect(atMargin[0]!.severity).toBe("warning");
 
@@ -156,7 +160,7 @@ describe("covered-content lint", () => {
     const clear = coveredContent.check(makeDocument(
       [box("a", 0, 0), box("t", 517, 0), box("b", 800, 0)],
       [{ ...connect("e", "a", "b"), label: "X" }],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(clear.filter((finding) => finding.at.includes("t"))).toHaveLength(0);
   });
 
@@ -172,7 +176,7 @@ describe("covered-content lint", () => {
         { ...connect("e1", "a", "b"), label: "X", waypoints: [[480, 48]] },
         { ...connect("e2", "c", "d"), label: "Y", waypoints: [[480, 68]] },
       ],
-    ));
+    ), FIGJAM_CONTEXT);
     const errors = findings.filter((finding) => finding.severity === "error");
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({ at: ["e1", "e2"] });
@@ -188,7 +192,7 @@ describe("covered-content lint", () => {
         { ...connect("e1", "a", "b"), label: "X", waypoints: [[480, 48]] },
         { ...connect("e2", "c", "d"), label: "Y", waypoints: [[480, 90]] },
       ],
-    ));
+    ), FIGJAM_CONTEXT);
     const chipChip = near.filter((finding) =>
       finding.at.includes("e1") && finding.at.includes("e2")
       && finding.message.includes("chip"));
@@ -212,7 +216,7 @@ describe("covered-content lint", () => {
         { ...connect("e", "a", "b"), label: "X" },
         { ...connect("f", "c", "d") },
       ],
-    ));
+    ), FIGJAM_CONTEXT);
     const errors = findings.filter((finding) => finding.severity === "error");
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({ at: ["e", "f"] });
@@ -230,7 +234,7 @@ describe("covered-content lint", () => {
         { ...connect("e", "a", "b"), label: "X" },
         { ...connect("f", "c", "d") },
       ],
-    ));
+    ), FIGJAM_CONTEXT);
     const chipEdge = near.filter((finding) => finding.at.includes("f"));
     expect(chipEdge).toHaveLength(1);
     expect(chipEdge[0]!.severity).toBe("warning");
@@ -246,7 +250,7 @@ describe("covered-content lint", () => {
         { ...connect("e", "a", "b"), label: "X" },
         { ...connect("f", "c", "d") },
       ],
-    ));
+    ), FIGJAM_CONTEXT);
     expect(clear.filter((finding) => finding.at.includes("f"))).toHaveLength(0);
   });
 
@@ -270,10 +274,10 @@ describe("covered-content lint", () => {
         waypoints: [[turnX, 36]] as Array<[number, number]>,
       },
     ];
-    const under = coveredContent.check(makeDocument(objectsFor(464), edgesFor(464)));
+    const under = coveredContent.check(makeDocument(objectsFor(464), edgesFor(464)), FIGJAM_CONTEXT);
     expect(under.filter((finding) => finding.severity === "error")).toHaveLength(0);
 
-    const over = coveredContent.check(makeDocument(objectsFor(466), edgesFor(466)));
+    const over = coveredContent.check(makeDocument(objectsFor(466), edgesFor(466)), FIGJAM_CONTEXT);
     const errors = over.filter((finding) => finding.severity === "error");
     expect(errors).toHaveLength(1);
     expect(errors[0]!.message).toContain("lies on f's path for 9px");

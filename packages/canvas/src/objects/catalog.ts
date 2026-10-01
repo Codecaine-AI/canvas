@@ -8,20 +8,21 @@
  * stays HERE is arrangement only: the category grouping (Icons / Shapes),
  * entry ordering, and the per-entry placement VARIANTS a single def fans out
  * into — direction variants ("Triangle up"/"Triangle down", left/right
- * arrows) and the 30 icon-glyph entries (one `type: "icon"` def × the glyph
- * registry). Variant entries carry a label override because their display
- * string is a property of the variant, not the def; everything else reads
- * the def's label verbatim.
+ * arrows) and one icon-glyph entry per roster glyph (one `type: "icon"` def ×
+ * the glyph registry: the 30 operational-map ids, the generic additions, and
+ * the `brand-*` logos — 95 ids in all). Variant entries carry a label
+ * override because their display string is a property of the variant, not
+ * the def; everything else reads the def's label verbatim.
  *
  * Entries are pure data (no JSX): the preview SVGs live in
  * stage/editor/components/shape-previews.tsx (interface JSX belongs to the editor),
  * mapped by entry id / glyph id.
  *
  * The picker's default face is the icon grid — icons carry the semantic
- * vocabulary (the operational-map glyph corpus, registry order) — and the
- * eight universal shapes render as a compact utility group. Every entry maps
- * to a live `InteractiveCanvasObjectType`, so there is no "coming soon"
- * disabled state.
+ * vocabulary (the glyph roster, registry order: operational-map ids, generic
+ * additions, brands last) — and the eight universal shapes render as a
+ * compact utility group. Every entry maps to a live
+ * `InteractiveCanvasObjectType`, so there is no "coming soon" disabled state.
  */
 
 import type { CanvasIconGlyph, CanvasShapeDirection, InteractiveCanvasObjectType } from "../state/schema";
@@ -35,7 +36,7 @@ export type ShapeCatalogEntry = {
   objectType: InteractiveCanvasObjectType;
   /** Direction/orientation field for direction-aware shapes (triangle up|down; arrow-shape left|right). Passed straight through to the inserted object's `direction`. */
   direction?: CanvasShapeDirection;
-  /** REQUIRED when objectType === "icon" — selects which of the 30 roster glyphs to insert. */
+  /** REQUIRED when objectType === "icon" — selects which roster glyph (CANVAS_ICON_GLYPHS) to insert. */
   icon?: CanvasIconGlyph;
   /** Extra search terms beyond the label — the def's catalog keywords. */
   keywords?: readonly string[];
@@ -77,7 +78,7 @@ function entry(
 }
 
 /**
- * The icon face: all 30 glyphs in registry (roster) order, each an
+ * The icon face: every roster glyph in registry (roster) order, each an
  * insertable `type: "icon"` entry. Labels come from the glyph registry's own
  * display names (the same DATA module IconShapeBody renders on-canvas — the
  * glyph registry IS the icon def's variant source, so identity still traces

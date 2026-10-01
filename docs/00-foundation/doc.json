@@ -82,7 +82,7 @@
       "props": {},
       "text": [
         {
-          "insert": "FigJam is the best tool for making aesthetic, easy-to-understand diagrams — it is obviously made by designers. But it does not integrate with AI tooling, and it carries a pile of features that software diagrams never need. Meanwhile every tool built specifically for software diagramming is obviously made by engineers and not designers — they all feel clunky. This canvas is the way in between: designer-grade FigJam aesthetics, scoped down to software diagramming, built agent-native so AI tooling can read and write the document model directly."
+          "insert": "FigJam is the best tool for making aesthetic, easy-to-understand diagrams: it is obviously made by designers. But it does not integrate with AI tooling, and it carries a pile of features that software diagrams never need. Meanwhile every tool built specifically for software diagramming is obviously made by engineers and not designers: they all feel clunky. This canvas is the way in between: designer-grade FigJam aesthetics, scoped down to software diagramming, built agent-native so AI tooling can read and write the document model directly."
         }
       ],
       "children": []
@@ -93,7 +93,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Take the FigJam half seriously: the reason FigJam feels good isn't an accident, it's craft — pastel fills, deliberate stroke weights, a soft grid, type that's actually been tuned. That's the bar this engine holds itself to. The FigJam visual language (colors, geometry, shadows, type sizes) is sampled and mirrored, not reinvented, because reinventing it is how you end up with the clunky-engineer look this project is explicitly trying to avoid."
+          "insert": "Take the FigJam half seriously: the reason FigJam feels good isn't an accident, it's craft (pastel fills, deliberate stroke weights, a soft grid, type that's actually been tuned). That's the bar this engine holds itself to. The FigJam visual language (colors, geometry, shadows, type sizes) is sampled and mirrored, not reinvented, because reinventing it is how you end up with the clunky-engineer look this project is explicitly trying to avoid."
         }
       ],
       "children": []
@@ -104,7 +104,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Take the engineer-tools half seriously too: general whiteboards are not built for agent integration, and dedicated software-diagramming tools are usually a document model bolted onto a GUI as an afterthought, never designed to be read or written programmatically. Neither gives you a clean surface for an AI agent to generate, inspect, or edit a diagram. This engine is designed the other way around — the document model comes first, the rendering is a projection of it, and the model is exactly as legible to an agent as it is to the reducer that drives the UI."
+          "insert": "Take the engineer-tools half seriously too: general whiteboards are not built for agent integration, and dedicated software-diagramming tools are usually a document model bolted onto a GUI as an afterthought, never designed to be read or written programmatically. Neither gives you a clean surface for an AI agent to generate, inspect, or edit a diagram. This engine is designed the other way around: the document model comes first, the rendering is a projection of it, and the model is exactly as legible to an agent as it is to the reducer that drives the UI."
         }
       ],
       "children": []
@@ -115,7 +115,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The wedge this project occupies: FigJam's aesthetics, a scope limited to software diagramming (not general whiteboarding), and a document model an agent can read and write directly — not a human-only GUI on top of an ad hoc data structure a script has to fight."
+          "insert": "This project sits between the two: designer-grade aesthetics, a scope limited to software diagramming (not general whiteboarding), and a document model an agent can read and write directly, not a human-only GUI on top of an ad hoc data structure a script has to fight. FigJam's look is the default theme, and two schematic themes render the same documents as flat technical drawings, light or dark."
         }
       ],
       "children": []
@@ -149,12 +149,11 @@
       "type": "callout",
       "props": {
         "kind": "constraint",
-        "severity": "hard",
         "title": "Not a general-purpose whiteboard"
       },
       "text": [
         {
-          "insert": "This is not a Miro/FigJam competitor for brainstorming, retros, voting, or freeform ideation. No sticky-note voting, no timers, no cursor-chat games, no generic canvas-for-anything ambition. Every feature earns its place by serving software diagramming — architecture diagrams, flows, system maps — or it doesn't ship."
+          "insert": "This is not a Miro/FigJam competitor for brainstorming, retros, voting, or freeform ideation. No sticky-note voting, no timers, no cursor-chat games, no generic canvas-for-anything ambition. Every feature earns its place by serving software diagramming (architecture diagrams, flows, system maps) or it doesn't ship."
         }
       ],
       "children": []
@@ -180,7 +179,7 @@
       "props": {},
       "text": [
         {
-          "insert": "What it is: a software-diagramming canvas — shapes, connectors, sections, stickies — rendered with FigJam-grade polish, backed by a document model that is a first-class, agent-writable artifact rather than an internal implementation detail."
+          "insert": "This is a software-diagramming canvas (shapes, connectors, sections, stickies) rendered with FigJam-grade polish, backed by a document model that is a first-class, agent-writable artifact rather than an internal implementation detail."
         }
       ],
       "children": []
@@ -203,12 +202,24 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
-        "title": "The board is light-surface only — no dark mode for the canvas itself"
+        "title": "The board's look is a workspace theme, never the host's"
       },
       "text": [
         {
-          "insert": "The board always renders on a fixed light background, regardless of the host app's theme. This mirrors FigJam's own convention: FigJam never dark-themes the board surface, even when the surrounding app trim is dark. Only the trim around the board may follow the host theme. How the stage enforces this is specified in "
+          "insert": "The board renders in the workspace's theme, whatever theme the host app runs. The default figjam theme keeps FigJam's own convention of a fixed light board, even when the surrounding app trim is dark. A dark board exists only as the schematic-dark theme, which a person chooses for the whole workspace, and a host's dark mode never switches it. Only the trim around the board follows the host theme. The themes are specified in "
+        },
+        {
+          "insert": "workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "workspace themes"
+            }
+          }
+        },
+        {
+          "insert": ", and how the stage paints the board in "
         },
         {
           "insert": "the stage and viewport",
@@ -231,12 +242,11 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
-        "title": "FigJam visual parity is ground truth"
+        "title": "FigJam visual parity is ground truth for the figjam theme"
       },
       "text": [
         {
-          "insert": "Rendering decisions — fills, stroke widths, corner radii, shadows, type sizes, dash patterns, arrowhead geometry — are not design opinions to be re-litigated per component. When a rendering question comes up, the answer is \"what does FigJam do,\" settled against sampled reference material rather than taste. The parity authority and the rules around it are specified in "
+          "insert": "Rendering decisions in the default figjam theme, such as fills, stroke widths, corner radii, shadows, type sizes, dash patterns, and arrowhead geometry, are not design opinions to be re-litigated per component. When a figjam rendering question comes up, the answer is \"what does FigJam do,\" settled against sampled reference material rather than taste. The schematic themes are a deliberate second look defined by their own presets, so parity questions do not apply to them, and no theme changes what a document says. The parity authority and the rules around it are specified in "
         },
         {
           "insert": "the shape contract",
@@ -259,12 +269,11 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
         "title": "Typed-action single mutation authority"
       },
       "text": [
         {
-          "insert": "Every mutation to the document — a human dragging a shape, a keyboard shortcut, a trim UI button, or an agent editing the board programmatically — is a typed action through one reducer. There is no second write path. This is what makes the \"agent-native\" claim true rather than aspirational: an agent doesn't get a degraded side-channel API — it dispatches the exact same actions a human's pointer interactions dispatch and gets the exact same guarantees. One authority, one history, no drift between \"what a person did\" and \"what an agent did.\" The action vocabulary and reducer are specified in "
+          "insert": "Every mutation to the document (a human dragging a shape, a keyboard shortcut, a trim UI button, or an agent editing the board programmatically) is a typed action through one reducer. There is no second write path. This is what makes the \"agent-native\" claim true rather than aspirational: an agent doesn't get a degraded side-channel API. It dispatches the exact same actions a human's pointer interactions dispatch and gets the exact same guarantees. One authority, one history, no drift between \"what a person did\" and \"what an agent did.\" The action vocabulary and reducer are specified in "
         },
         {
           "insert": "the document model",
@@ -287,12 +296,11 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
         "title": "The document model is agent-editable, not just human-editable"
       },
       "text": [
         {
-          "insert": "The persisted board is plain, validated JSON — no hidden runtime-only state, no opaque binary blobs, no proprietary format standing between the diagram and something that reads or writes it programmatically. An agent can generate a document from scratch, parse an existing one, or patch a piece of one, using nothing but the schema and the validator, exactly the same as the human-facing editor does. This is the other half of \"agent-native\": it isn't only that actions can be dispatched programmatically (the mutation authority above), it's that the artifact those actions produce is legible on its own, at rest. The schema and validator are specified in "
+          "insert": "The persisted board is plain, validated JSON: no hidden runtime-only state, no opaque binary blobs, no proprietary format standing between the diagram and something that reads or writes it programmatically. An agent can generate a document from scratch, parse an existing one, or patch a piece of one, using nothing but the schema and the validator, exactly the same as the human-facing editor does. This is the other half of \"agent-native\": it isn't only that actions can be dispatched programmatically (the mutation authority above), it's that the artifact those actions produce is legible on its own, at rest. The schema and validator are specified in "
         },
         {
           "insert": "the document model",
@@ -329,7 +337,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The canvas is the map layer of Codecaine Core, purpose-built for agentic diagramming, and the genre it serves has a name: the operational map (short form: op map). A board shows an agentic system whole — the agents, models, memories, tools, queues, and people it is made of, and the flows that join them. \"This agent feeds that knowledge base, which that tool reads.\" Other diagram forms are possible on the surface, but every design decision favors this one."
+          "insert": "The canvas is the map layer of Codecaine Core, purpose-built for agentic diagramming, and the genre it serves has a name: the operational map (short form: op map). A board shows an agentic system whole: the agents, models, memories, tools, queues, and people it is made of, and the flows that join them. \"This agent feeds that knowledge base, which that tool reads.\" Other diagram forms are possible on the surface, but every design decision favors this one."
         }
       ],
       "children": []
@@ -340,7 +348,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Composition is Factorio-style: nothing prescribes a layout. Objects are not required to live inside sections and there is no template a board must follow. Order emerges from what the pieces are and how they connect — unmistakable component identity, typed edges — the way a factory floor reads without anyone enforcing its shape. Sections group a subsystem when grouping earns its keep; structure and behavior mix freely on one open surface, and the most agentic content on a board is exactly where they touch: a procedure step writing to a shared memory."
+          "insert": "Composition is Factorio-style. Nothing prescribes a layout. Objects are not required to live inside sections and there is no template a board must follow. Order emerges from what the pieces are and how they connect (unmistakable component identity, typed edges), the way a factory floor reads without anyone enforcing its shape. Sections group a subsystem when grouping earns its keep. Structure and behavior mix freely on one open surface, and the most agentic content on a board is exactly where they touch: a procedure step writing to a shared memory."
         }
       ],
       "children": []
@@ -351,7 +359,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The board stays at the operational level, and depth lives in the docs: a doc section embeds a reference view of the board region it discusses, and the detailed diagrams specific to that subsystem — a sequence diagram, a fine-grained process flow — sit in the doc beside that reference. One board, many documentation lenses; the map never bloats to carry the detail."
+          "insert": "The board stays at the operational level, and depth lives in the docs: a doc section embeds a reference view of the board region it discusses, and the detailed diagrams specific to that subsystem (a sequence diagram, a fine-grained process flow) sit in the doc beside that reference. One board, many documentation lenses. The map never bloats to carry the detail."
         }
       ],
       "children": []
@@ -362,7 +370,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Consistency comes from vocabulary, not layout rules. Every semantic object has one recognizable look, edges carry their meaning on the line, and the icon vocabulary is agentic — agent, model, tool, knowledge base, memory, queue, human — not generic-tech clip art. The icons carry the semantics: with that vocabulary plus connector roles, a board can say \"this agent writes to this memory, which this tool reads\" with almost no shape semantics at all. Most boards will simply use the shipped base corpus, which is why the shipped defaults are the real product. The design of the genre — the genres, the object surface, the preference registry — is "
+          "insert": "Consistency comes from vocabulary, not layout rules. Every semantic object has one recognizable look, edges carry their meaning on the line, and the icon vocabulary is agentic first. Agent, model, tool, knowledge base, memory, queue, and human lead it, while generic infrastructure glyphs and brand logos name the concrete pieces a system runs on. The icons carry the semantics: with that vocabulary plus labeled edges, a board can say \"this agent writes to this memory, which this tool reads\" with almost no shape semantics at all. Most boards use the shipped base corpus, which is why the shipped defaults are the real product. The design of the genre, covering the genres, the object surface, and the preference registry, is "
         },
         {
           "insert": "operational maps",
@@ -399,7 +407,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The layout agent is built toward one end experience: a person says what a diagram should say, and the diagram appears, is discussed, and improves. Every design decision in the agent surface points at that experience — including the capabilities deliberately left out for now so the ones that matter arrive well made."
+          "insert": "The layout agent is built toward one end experience: a person says what a diagram should say, and the diagram appears, is discussed, and improves. Every design decision in the agent surface points at that experience, including the capabilities deliberately left out for now so the ones that matter arrive well made."
         }
       ],
       "children": []
@@ -410,7 +418,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A session is a conversation about a picture, not a remote control for a canvas. The full arc it aims at runs in five moves. Not every move is exercised in every session, and not all of them are reachable yet — but the shape of the system is the shape of this arc:"
+          "insert": "A session is a conversation about a picture, not a remote control for a canvas. The full arc it aims at runs in five moves. Not every move is exercised in every session, and not all of them are reachable yet, but the shape of the system is the shape of this arc:"
         }
       ],
       "children": []
@@ -429,7 +437,7 @@
           }
         },
         {
-          "insert": " — \"diagram this system,\" not a node-level specification. The ask names a subject and a purpose; it does not name boxes, counts, or positions."
+          "insert": ", \"diagram this system,\" not a node-level specification. The ask names a subject and a purpose, but it does not name boxes, counts, or positions."
         }
       ],
       "children": []
@@ -448,7 +456,7 @@
           }
         },
         {
-          "insert": " — the agent takes in code or other material, confirms what the diagram should say through a few clarifying exchanges, and only then builds."
+          "insert": ". The agent takes in code or other material, confirms what the diagram should say through a few clarifying exchanges, and only then builds."
         }
       ],
       "children": []
@@ -467,7 +475,7 @@
           }
         },
         {
-          "insert": " — the board that comes back is a proposal to react to, not a finished artifact to accept or discard whole."
+          "insert": ". The board that comes back is a proposal to react to, not a finished artifact to accept or discard whole."
         }
       ],
       "children": []
@@ -486,7 +494,7 @@
           }
         },
         {
-          "insert": " — where it needs follow-up while building, it anchors an annotation to that part of the diagram, opening a thread the user answers in place rather than in a separate channel."
+          "insert": ". Where it needs follow-up while building, it anchors an annotation to that part of the diagram, opening a thread the user answers in place rather than in a separate channel."
         }
       ],
       "children": []
@@ -505,7 +513,7 @@
           }
         },
         {
-          "insert": " — a board is a long-lived thing worked on across many sessions, so each run picks up where the last one left off without the user restating what the diagram is for."
+          "insert": ". A board is a long-lived thing worked on across many sessions, so each run picks up where the last one left off without the user restating what the diagram is for."
         }
       ],
       "children": []
@@ -515,12 +523,11 @@
       "type": "callout",
       "props": {
         "kind": "constraint",
-        "severity": "hard",
         "title": "Requests are intent, not geometry"
       },
       "text": [
         {
-          "insert": "The agent owns the whole translation from \"how this system functions\" into pieces, sections, vocabulary, and layout. Nothing on the request side — an operator instruction, a queued user request, or an eval seed brief — should need to mention nodes, counts, or coordinates to get a good board. A request that specifies geometry has taken the judgment the agent exists to supply."
+          "insert": "The agent owns the whole translation from \"how this system functions\" into pieces, sections, vocabulary, and layout. Nothing on the request side (an operator instruction, a queued user request, or an eval seed brief) should need to mention nodes, counts, or coordinates to get a good board. A request that specifies geometry has taken the judgment the agent exists to supply."
         }
       ],
       "children": []
@@ -546,7 +553,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The agent is an eval subject, and the eval philosophy follows the same principles. Scenario briefs are written at the level of intent — \"diagram how X functions\" — and never name nodes or counts, because orientation and planning are precisely what a brief is meant to exercise; a brief that specifies structure measures the agent's obedience instead of its judgment. Subjects come from AI engineering and distributed systems: complex, agent-shaped systems of the kind the layout agent is meant to serve."
+          "insert": "The agent is an eval subject, and the eval philosophy follows the same principles. Scenario briefs are written at the level of intent (\"diagram how X functions\") and never name nodes or counts, because orientation and planning are precisely what a brief is meant to exercise. A brief that specifies structure measures the agent's obedience instead of its judgment. Subjects come from AI engineering and distributed systems: complex, agent-shaped systems of the kind the layout agent is meant to serve."
         }
       ],
       "children": []
@@ -556,12 +563,11 @@
       "type": "callout",
       "props": {
         "kind": "constraint",
-        "severity": "hard",
         "title": "Scenario subjects are genre-mates, never the real systems"
       },
       "text": [
         {
-          "insert": "A scenario stands next to the systems the operator actually works on without being one of them: same genre, same class of complexity, different subject. Keeping the suite off the real systems keeps evaluation and production work independent — a board the operator builds by hand stays a piece of work rather than an answer key, and a scenario stays a measurement rather than a rehearsal of one known board. The rule assumes a genre-mate poses the same layout problems as the real system it stands beside; if a scenario turns out materially easier than the work it proxies, the subject is wrong rather than the rule."
+          "insert": "A scenario stands next to the systems the operator actually works on without being one of them: same genre, same class of complexity, different subject. Keeping the suite off the real systems keeps evaluation and production work independent: a board the operator builds by hand stays a piece of work rather than an answer key, and a scenario stays a measurement rather than a rehearsal of one known board. The rule assumes a genre-mate poses the same layout problems as the real system it stands beside. If a scenario turns out materially easier than the work it proxies, the subject is wrong rather than the rule."
         }
       ],
       "children": []
@@ -572,7 +578,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Parts of the session arc are deliberately excluded for now — each with a reason and a revisit intent, not an oversight to be filled in opportunistically:"
+          "insert": "Parts of the session arc are deliberately excluded for now, each with a reason and a revisit intent, not an oversight to be filled in opportunistically:"
         }
       ],
       "children": []
@@ -591,7 +597,7 @@
           }
         },
         {
-          "insert": " — a synchronous ask-and-wait, where a run halts until the operator answers, is not supported. Annotation threads are the asynchronous form of the same need and cover it without holding a run open across human latency. Revisited only if a class of question is found that genuinely cannot be answered after the fact by editing the board."
+          "insert": " (a synchronous ask-and-wait, where a run halts until the operator answers) are not supported. Annotation threads are the asynchronous form of the same need and cover it without holding a run open across human latency, so the exclusion is revisited only if a class of question is found that genuinely cannot be answered after the fact by editing the board."
         }
       ],
       "children": []
@@ -610,7 +616,7 @@
           }
         },
         {
-          "insert": " — the second move of the arc, ingesting source material and confirming what the diagram should say before building, is not built. The description already carries the output such an intake would produce, so the intake can be added ahead of the pipeline it feeds rather than requiring a redesign."
+          "insert": " (the second move of the arc, ingesting source material and confirming what the diagram should say before building) is not built. The description already carries the output such an intake would produce, so the intake can be added ahead of the pipeline it feeds rather than requiring a redesign."
         }
       ],
       "children": []
@@ -629,7 +635,7 @@
           }
         },
         {
-          "insert": " — the description is read in the AI panel and does not appear on the board. Putting it on the canvas raises questions the layout system has no answer for yet — whether it is an object subject to layout, how it renders in exports, whether the agent may move it — so it stays a panel-side artifact until those are settled."
+          "insert": " is not supported: the description is read in the AI panel and does not appear on the board. Putting it on the canvas raises questions the layout system has no answer for yet (whether it is an object subject to layout, how it renders in exports, whether the agent may move it), so it stays a panel-side artifact until those are settled."
         }
       ],
       "children": []
@@ -648,7 +654,7 @@
           }
         },
         {
-          "insert": " — the craft targets are a static value, identical for every session, so every board and every eval run is judged against the same proportions. Making them host-supplied is a contained change once there is demand."
+          "insert": " are not supported: the craft targets are a static value, identical for every session, so every board and every eval run is judged against the same proportions. Making them host-supplied is a contained change once there is demand."
         }
       ],
       "children": []
@@ -659,7 +665,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The surface the agent works through — the session model, gestures, grid and defaults, and the operation pipeline — is designed in "
+          "insert": "The surface the agent works through (the session model, gestures, grid and defaults, and the operation pipeline) is designed in "
         },
         {
           "insert": "the agent tool surface",
@@ -709,7 +715,7 @@
           }
         },
         {
-          "insert": ". The engine — document model, interaction, connectors, stage, persistence — is "
+          "insert": ". The engine, covering the document model, interaction, connectors, stage, and persistence, is "
         },
         {
           "insert": "the engine",
@@ -722,7 +728,7 @@
           }
         },
         {
-          "insert": "; the shape vocabulary is "
+          "insert": ". The shape vocabulary is "
         },
         {
           "insert": "the shape contract",
@@ -735,7 +741,20 @@
           }
         },
         {
-          "insert": "; section stacking is "
+          "insert": ", the visual themes are "
+        },
+        {
+          "insert": "workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "workspace themes"
+            }
+          }
+        },
+        {
+          "insert": ", section stacking is "
         },
         {
           "insert": "the layer cake",
@@ -748,7 +767,7 @@
           }
         },
         {
-          "insert": "; the op-map genre is "
+          "insert": ", and the op-map genre is "
         },
         {
           "insert": "operational maps",

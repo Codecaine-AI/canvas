@@ -13,6 +13,12 @@
  * annotation threads are compared and emitted; `parentId` is omitted because
  * it is derived from geometry and re-derived on accept.
  *
+ * A cleared optional channel is emitted as `null`, never as an own
+ * `undefined`: the proposal reaches the reducer through JSON (the accept
+ * response, the `proposal-ready` event), and JSON drops an own `undefined`, so
+ * that clear would vanish and the old detail, glyph, or label would survive
+ * Accept. The reducer reads `null` as the clear (CanvasClearablePatch).
+ *
  * The one exception to "emit every changed channel" is `waypoints`, and it is
  * there for the same reason `parentId` is omitted: the reducer DERIVES it.
  * `reconcileConnectionWaypoints` is an always-on choke point in
@@ -24,7 +30,10 @@
  * reconcile would not already produce the draft's value; see
  * `reducerReconciledWaypoints`.
  */
-import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
+import type {
+  CanvasAgentPatchOperation,
+  CanvasClearablePatch,
+} from "@codecaine-ai/canvas/actions";
 import { reconcileConnectionWaypoints } from "../../../canvas/src/state/actions/waypoints";
 import type {
   InteractiveCanvasAnnotation,
@@ -163,25 +172,29 @@ function annotationOperations(
 function objectPatch(
   baseline: InteractiveCanvasObject,
   draft: InteractiveCanvasObject,
-): Partial<Omit<InteractiveCanvasObject, "id">> {
-  const patch: Partial<Omit<InteractiveCanvasObject, "id">> = {};
+): CanvasClearablePatch<Omit<InteractiveCanvasObject, "id">> {
+  const patch: CanvasClearablePatch<Omit<InteractiveCanvasObject, "id">> = {};
 
   if (!structurallyEqual(baseline.geometry, draft.geometry)) {
     patch.geometry = { ...draft.geometry };
   }
   if (baseline.type !== draft.type) patch.type = draft.type;
   if (baseline.text !== draft.text) patch.text = draft.text;
-  if (baseline.color !== draft.color) patch.color = draft.color;
+  // Every optional channel below spells a clear as `null` (module doc). A
+  // cleared detail reaches the reducer's merge as "no detail line"
+  // (withNormalizedDetail).
+  if (baseline.detail !== draft.detail) patch.detail = draft.detail ?? null;
+  if (baseline.color !== draft.color) patch.color = draft.color ?? null;
   if (!structurallyEqual(baseline.style, draft.style)) {
-    patch.style = draft.style ? { ...draft.style } : undefined;
+    patch.style = draft.style ? { ...draft.style } : null;
   }
-  if (baseline.direction !== draft.direction) patch.direction = draft.direction;
-  if (baseline.icon !== draft.icon) patch.icon = draft.icon;
-  if (baseline.author !== draft.author) patch.author = draft.author;
+  if (baseline.direction !== draft.direction) patch.direction = draft.direction ?? null;
+  if (baseline.icon !== draft.icon) patch.icon = draft.icon ?? null;
+  if (baseline.author !== draft.author) patch.author = draft.author ?? null;
   if (!structurallyEqual(baseline.layout, draft.layout)) {
-    patch.layout = draft.layout ? { ...draft.layout } : undefined;
+    patch.layout = draft.layout ? { ...draft.layout } : null;
   }
-  if (baseline.locked !== draft.locked) patch.locked = draft.locked;
+  if (baseline.locked !== draft.locked) patch.locked = draft.locked ?? null;
 
   return patch;
 }
@@ -221,33 +234,34 @@ function connectionPatch(
   baseline: InteractiveCanvasConnection,
   draft: InteractiveCanvasConnection,
   reducerWaypoints: InteractiveCanvasConnection["waypoints"],
-): Partial<Omit<InteractiveCanvasConnection, "id">> {
-  const patch: Partial<Omit<InteractiveCanvasConnection, "id">> = {};
+): CanvasClearablePatch<Omit<InteractiveCanvasConnection, "id">> {
+  const patch: CanvasClearablePatch<Omit<InteractiveCanvasConnection, "id">> = {};
 
-  if (baseline.label !== draft.label) patch.label = draft.label;
-  if (baseline.style !== draft.style) patch.style = draft.style;
-  if (baseline.color !== draft.color) patch.color = draft.color;
-  if (baseline.arrow !== draft.arrow) patch.arrow = draft.arrow;
+  // Every optional channel spells a clear as `null` (module doc).
+  if (baseline.label !== draft.label) patch.label = draft.label ?? null;
+  if (baseline.style !== draft.style) patch.style = draft.style ?? null;
+  if (baseline.color !== draft.color) patch.color = draft.color ?? null;
+  if (baseline.arrow !== draft.arrow) patch.arrow = draft.arrow ?? null;
   if (!structurallyEqual(baseline.from, draft.from)) patch.from = cloneEndpoint(draft.from);
   if (!structurallyEqual(baseline.to, draft.to)) patch.to = cloneEndpoint(draft.to);
   // Waypoints are stored agent steering, but the reducer re-derives them from
   // endpoint movement on every replay (see the module doc). Emit the channel
   // only when that derivation would NOT already land on the draft's value: a
-  // draft that dropped them emits an explicit `waypoints: undefined` own
-  // property (the reducer merges patches by spread, so that clears the stored
-  // steering), while a rigid translation the reducer will redo itself is left
-  // to the reducer rather than written twice.
+  // draft that dropped them emits `waypoints: null` (the reducer merges
+  // patches by spread, so that clear overwrites the stored steering), while a
+  // rigid translation the reducer will redo itself is left to the reducer
+  // rather than written twice.
   if (
     !structurallyEqual(baseline.waypoints, draft.waypoints)
     && !structurallyEqual(reducerWaypoints, draft.waypoints)
   ) {
-    patch.waypoints = draft.waypoints ? cloneWaypoints(draft.waypoints) : undefined;
+    patch.waypoints = draft.waypoints ? cloneWaypoints(draft.waypoints) : null;
   }
   // The label-chip pin is authored steering too: a draft that clears it emits
-  // an explicit `labelPosition: undefined`, which the spread-merging reducer
-  // reads as "back to the routed midpoint".
+  // `labelPosition: null`, which the reducer reads as "back to the routed
+  // midpoint".
   if (!structurallyEqual(baseline.labelPosition, draft.labelPosition)) {
-    patch.labelPosition = draft.labelPosition ? { ...draft.labelPosition } : undefined;
+    patch.labelPosition = draft.labelPosition ? { ...draft.labelPosition } : null;
   }
 
   return patch;

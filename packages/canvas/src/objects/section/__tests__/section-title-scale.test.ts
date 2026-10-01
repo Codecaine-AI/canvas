@@ -7,6 +7,7 @@ import {
   titleChipMaxWidthPx,
   titleChipScale,
 } from "../../text-slots";
+import { FIGJAM_CANVAS_STYLE } from "../../../theme/canvas-style";
 import type { InteractiveCanvasObject } from "../../../state/schema";
 import { sectionDef } from "../def";
 
@@ -67,8 +68,8 @@ describe("section title chip scale", () => {
   });
 
   it("estimates chip width with a floor for short titles", () => {
-    expect(estimateTitleChipWidthPx("")).toBe(72);
-    expect(estimateTitleChipWidthPx("Narrow section")).toBeGreaterThan(72);
+    expect(estimateTitleChipWidthPx("", FIGJAM_CANVAS_STYLE)).toBe(72);
+    expect(estimateTitleChipWidthPx("Narrow section", FIGJAM_CANVAS_STYLE)).toBeGreaterThan(72);
   });
 
   it("declares bold section title chips that truncate with an ellipsis", () => {

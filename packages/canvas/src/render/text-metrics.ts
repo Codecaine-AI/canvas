@@ -1,81 +1,43 @@
 /**
- * Real Inter text measurement for the static renderer.
+ * Real text measurement for the static renderer.
  *
- * Wraps the generated per-glyph advance table (inter-metrics.generated.ts,
- * produced by scripts/generate-inter-metrics.ts from the app's bundled Inter
- * variable TTF) behind px-measurement helpers, so line-breaking and ellipsis
- * decisions in the static SVG output match what the browser's Inter layout
- * does in the live stage.
+ * Inter runs measure with the generated per-glyph advance table through
+ * theme/inter-metrics.ts (re-exported here, so render-side callers keep one
+ * import), so line-breaking and ellipsis decisions in the static SVG output
+ * match what the browser's Inter layout does in the live stage. The icon
+ * caption band (objects/text-slots.ts) sizes itself with the same helpers.
+ * The weight model and the documented approximations (no kerning, fallback
+ * advances) are described there.
  *
- * Weight model: the table carries the font's default instance (wght 400) and
- * its wght-700 instance (hmtx + HVAR — the exact advances the browser uses
- * for font-weight 700). Weights ≥ 600 measure with the bold table, everything
- * else with the regular one; the app only sets 400 and 700.
- *
- * Documented approximations:
- * - No kerning or ligatures. Inter's kern pairs only tighten a handful of
- *   combinations slightly, so measured widths err marginally wide — a line
- *   can wrap a word earlier than the browser, never paint wider than it.
- * - Codepoints outside the generated coverage use the table's fallback
- *   advance (the rounded mean of the covered set).
+ * Mono runs (the IBM Plex Mono metadata font, theme/fonts.ts) need no table:
+ * every glyph advances the same MONO_ADVANCE_EM — see measureMonoTextPx.
  */
 
-import {
-  INTER_ADVANCES_BOLD,
-  INTER_ADVANCES_REGULAR,
-  INTER_FALLBACK_ADVANCE_BOLD,
-  INTER_FALLBACK_ADVANCE_REGULAR,
+import { MONO_ADVANCE_EM } from "../theme/fonts";
+
+export {
+  INTER_BOLD_MIN_WEIGHT,
   INTER_UNITS_PER_EM,
-  type InterAdvanceRange,
-} from "./inter-metrics.generated";
-
-export { INTER_UNITS_PER_EM };
-
-/** Font weights at or above this measure with the wght-700 advance table. */
-export const INTER_BOLD_MIN_WEIGHT = 600;
-
-function buildAdvanceMap(ranges: readonly InterAdvanceRange[]): Map<number, number> {
-  const map = new Map<number, number>();
-  for (const range of ranges) {
-    for (let index = 0; index < range.advances.length; index += 1) {
-      map.set(range.start + index, range.advances[index]!);
-    }
-  }
-  return map;
-}
-
-const REGULAR_ADVANCES = buildAdvanceMap(INTER_ADVANCES_REGULAR);
-const BOLD_ADVANCES = buildAdvanceMap(INTER_ADVANCES_BOLD);
-
-/** Advance width of one codepoint in font units at the given font weight. */
-export function interAdvanceUnits(codePoint: number, fontWeight: number): number {
-  if (fontWeight >= INTER_BOLD_MIN_WEIGHT) {
-    return BOLD_ADVANCES.get(codePoint) ?? INTER_FALLBACK_ADVANCE_BOLD;
-  }
-  return REGULAR_ADVANCES.get(codePoint) ?? INTER_FALLBACK_ADVANCE_REGULAR;
-}
-
-/** Advance width of one codepoint in px at the given font size and weight. */
-export function interCharWidthPx(
-  codePoint: number,
-  fontSizePx: number,
-  fontWeight: number,
-): number {
-  return (interAdvanceUnits(codePoint, fontWeight) * fontSizePx) / INTER_UNITS_PER_EM;
-}
+  interAdvanceUnits,
+  interCharWidthPx,
+  measureInterTextPx,
+} from "../theme/inter-metrics";
 
 /**
- * Width of a text run in px: the sum of its codepoints' advances (iterated
- * by codepoint, so surrogate pairs measure once).
+ * Width of an IBM Plex Mono run in px: one MONO_ADVANCE_EM cell per codepoint
+ * (iterated by codepoint, so surrogate pairs measure once) at any weight, plus
+ * `letterSpacingEm` after every glyph, the last included — how browsers size
+ * a letter-spaced run and how resvg lays one out.
+ *
+ * Approximation: codepoints Plex Mono lacks (emoji, CJK) paint in a fallback
+ * font at their own width but still measure one cell.
  */
-export function measureInterTextPx(
+export function measureMonoTextPx(
   text: string,
   fontSizePx: number,
-  fontWeight: number,
+  letterSpacingEm = 0,
 ): number {
-  let units = 0;
-  for (const char of text) {
-    units += interAdvanceUnits(char.codePointAt(0)!, fontWeight);
-  }
-  return (units * fontSizePx) / INTER_UNITS_PER_EM;
+  let glyphs = 0;
+  for (const _char of text) glyphs += 1;
+  return glyphs * (MONO_ADVANCE_EM + letterSpacingEm) * fontSizePx;
 }

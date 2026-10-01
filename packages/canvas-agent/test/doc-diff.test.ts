@@ -138,7 +138,7 @@ describe("diffDocuments", () => {
     ]);
   });
 
-  test("clearing waypoints emits an explicit undefined the apply spread clears with", () => {
+  test("clearing waypoints emits a null, the clear that survives the JSON wire", () => {
     const baseline = makeDocument(
       [box("a", 0, 0), box("b", 192, 0)],
       [{ ...connect("steered", "a", "b"), waypoints: [[80, 112]] }],
@@ -157,11 +157,9 @@ describe("diffDocuments", () => {
     >;
     expect(operation.type).toBe("updateConnection");
     expect(operation.connectionId).toBe("steered");
-    // toEqual ignores undefined-valued keys, so assert the own property
-    // directly: it must exist so the reducer's patch spread overwrites the
-    // stored waypoints with undefined.
-    expect(Object.keys(operation.patch)).toEqual(["waypoints"]);
-    expect(operation.patch.waypoints).toBeUndefined();
+    // An own undefined would be dropped by JSON on the way to the reducer;
+    // the reducer reads the null as "clear the stored steering".
+    expect(operation.patch).toEqual({ waypoints: null });
   });
 
   test("a labelPosition pin diffs like any other authored channel", () => {
@@ -183,7 +181,7 @@ describe("diffDocuments", () => {
     ]);
   });
 
-  test("clearing a labelPosition emits an explicit undefined the apply spread clears with", () => {
+  test("clearing a labelPosition emits a null, the clear that survives the JSON wire", () => {
     const baseline = makeDocument(
       [box("a", 0, 0), box("b", 192, 0)],
       [{ ...connect("pinned", "a", "b"), labelPosition: { along: 0.3 } }],
@@ -199,8 +197,7 @@ describe("diffDocuments", () => {
       (typeof operations)[number],
       { type: "updateConnection" }
     >;
-    expect(Object.keys(operation.patch)).toEqual(["labelPosition"]);
-    expect(operation.patch.labelPosition).toBeUndefined();
+    expect(operation.patch).toEqual({ labelPosition: null });
   });
 
   test("an added connection carries its labelPosition, deep-copied", () => {

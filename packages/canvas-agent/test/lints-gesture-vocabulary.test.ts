@@ -111,14 +111,34 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
         { ...box("ember", 80, 120, 184, 96, "process"), color: "red", parentId: "hot" },
       ]),
     },
+    {
+      // label-is-prose: two sentences written where a name belongs.
+      name: "label-is-prose",
+      document: makeDocument([{
+        ...box("session-db", 0, 0, 400, 200, "process"),
+        text: "Postgres database that stores user sessions. It is the source of truth.",
+      }]),
+    },
+    {
+      // detail-too-long: an explanation crammed into the one-fact detail line.
+      name: "detail-too-long",
+      document: makeDocument([{
+        ...box("auth", 0, 0, 400, 200, "process"),
+        detail: "Handles auth. Retries 3 times on failure, then gives up.",
+      }]),
+    },
   ];
 }
 
 function everyDiagnostic(): { rule: string; text: string; source: string }[] {
   const collected: { rule: string; text: string; source: string }[] = [];
+  // Every fixture is read as the agent's own work — a session that started
+  // from an empty board — so the authorship rules (label-is-prose,
+  // detail-too-long) judge it like every other rule does.
+  const context = { baseline: makeDocument([]) };
   for (const { name, document } of fixtures()) {
     for (const rule of FINISHING_RULES) {
-      for (const finding of rule.check(document)) {
+      for (const finding of rule.check(document, context)) {
         collected.push({ rule: finding.rule, text: finding.message, source: `${name}/message` });
         if (finding.suggestion !== undefined) {
           collected.push({

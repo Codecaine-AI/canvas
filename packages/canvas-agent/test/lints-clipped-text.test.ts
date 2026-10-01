@@ -6,6 +6,7 @@ import { normalizeCanvasStyle } from "@codecaine-ai/canvas/style";
 import { runDiagnostics } from "../src/board/lints/run";
 import { rule as clippedText } from "../src/board/lints/rules/clipped-text";
 import { box, connect, makeDocument } from "./synthetic";
+import { FIGJAM_CONTEXT } from "./helpers";
 
 /**
  * Clipped text is a rendered fact: a shape label or sticky body loses lines
@@ -76,7 +77,8 @@ describe("clipped-text lint", () => {
     expect(findings[0]).toMatchObject({
       at: ["shape-clipped"],
       where: clipped.geometry,
-      suggestion: "grow shape-clipped to ≥160×114 or shorten the text",
+      // Default (schematic) names: 17.5px in 21px lines.
+      suggestion: "grow shape-clipped to ≥160×150 or shorten the text",
     });
     expect(findings[0]!.message).toStartWith("shape-clipped: label clips at 160×96");
     expect(clippedText.check(makeDocument([fitting]))).toEqual([]);
@@ -87,7 +89,8 @@ describe("clipped-text lint", () => {
       ...box("narrow-section", 20, 40, 200, 360, "section"),
       text: LONG_SECTION_TITLE,
     };
-    const findings = clippedText.check(makeDocument([section]));
+    // Measured in figjam: its floating title chip and 1.5px chip border.
+    const findings = clippedText.check(makeDocument([section]), FIGJAM_CONTEXT);
 
     expect(findings).toHaveLength(1);
     expect(findings[0]).toMatchObject({
@@ -101,7 +104,7 @@ describe("clipped-text lint", () => {
     // The workspace style's chip border is part of the measured width: 2.5px
     // more border a side asks for 5px more frame.
     const styled = clippedText.check(makeDocument([section]), {
-      canvasStyle: normalizeCanvasStyle({ titleChipBorderWidthPx: 4 }),
+      canvasStyle: normalizeCanvasStyle({ theme: "figjam", titleChipBorderWidthPx: 4 }),
     });
     expect(styled[0]!.suggestion).toBe("grow narrow-section to ≥352×360 or shorten the text");
   });

@@ -3,6 +3,7 @@ import { cleanup, render } from "@testing-library/react";
 import { CanvasStageWithInteraction as CanvasStage } from "./canvas-stage-test-utils";
 import type { InteractionOverlay } from "../editor/pipeline/state";
 import type { InteractiveCanvasDocument } from "../../state/schema";
+import { renderFigjam } from "../../theme/__tests__/figjam";
 import { DISTRIBUTION_GUIDE_COLOR } from "../editor/features/snapping/snapping";
 
 afterEach(() => {
@@ -121,7 +122,7 @@ describe("CanvasStage: connector drag hover ports (W3b)", () => {
   });
 
   it("renders a source-shaped empty-canvas ghost and gray preview stroke", () => {
-    const { container } = render(
+    const { container } = renderFigjam(
       <CanvasStage document={makeDocument()} viewport={viewport} interactionOverlay={dragOverlay(undefined)} />,
     );
     const ghost = container.querySelector("[data-canvas-quick-connect-ghost]") as HTMLElement;
@@ -351,14 +352,14 @@ describe("CanvasStage: connection color (P1 palette picks)", () => {
         },
       ],
     });
-    const { container } = render(<CanvasStage document={documentWithColor} viewport={viewport} />);
+    const { container } = renderFigjam(<CanvasStage document={documentWithColor} viewport={viewport} />);
     const group = container.querySelector('[data-canvas-connection-group="connection-a"]');
     const visiblePath = group!.querySelectorAll("path")[1]!;
     // The "orange" pick's connector cell is the sampled #EB7500 stroke.
     expect(visiblePath.getAttribute("stroke")).toBe("#EB7500");
 
     cleanup();
-    const { container: defaultContainer } = render(
+    const { container: defaultContainer } = renderFigjam(
       <CanvasStage document={makeDocument()} viewport={viewport} />,
     );
     const defaultGroup = defaultContainer.querySelector('[data-canvas-connection-group="connection-a"]');
@@ -376,7 +377,7 @@ describe("CanvasStage: connection color (P1 palette picks)", () => {
         },
       ],
     });
-    const { container } = render(
+    const { container } = renderFigjam(
       <CanvasStage document={documentWithColor} viewport={viewport} selectedConnectionId="connection-a" />,
     );
     const group = container.querySelector('[data-canvas-connection-group="connection-a"]');

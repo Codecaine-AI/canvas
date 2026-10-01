@@ -63,8 +63,14 @@ export function stickyMarkdownLineAttrs(line: StickyMarkdownLine): StickyMarkdow
   return attrs;
 }
 
+/** Inline `code` chip tint on a paper sticky (black at 8%). */
+export const STICKY_CODE_CHIP_BACKGROUND = "rgba(0, 0, 0, 0.08)";
+
 /** Inline pass: `**bold**` and `` `code` `` (no nesting), from the shared D18 tokens. */
-function renderInline(tokens: readonly StickyMarkdownInlineToken[]): ReactNode[] {
+function renderInline(
+  tokens: readonly StickyMarkdownInlineToken[],
+  codeBackground: string,
+): ReactNode[] {
   return tokens.map((token) => {
     if (token.kind === "text") return token.leaf.text;
     if (token.kind === "strong") {
@@ -76,7 +82,7 @@ function renderInline(tokens: readonly StickyMarkdownInlineToken[]): ReactNode[]
         style={{
           fontFamily: STICKY_MARKDOWN_MONO_FONT,
           fontSize: "0.85em",
-          background: "rgba(0, 0, 0, 0.08)",
+          background: codeBackground,
           borderRadius: "3px",
           padding: "0 0.15em",
         }}
@@ -87,7 +93,7 @@ function renderInline(tokens: readonly StickyMarkdownInlineToken[]): ReactNode[]
   });
 }
 
-function renderLine(line: StickyMarkdownLine): ReactNode {
+function renderLine(line: StickyMarkdownLine, codeBackground: string): ReactNode {
   if (line.kind === "heading") {
     const level = line.headingLevel!;
     return (
@@ -99,7 +105,7 @@ function renderLine(line: StickyMarkdownLine): ReactNode {
         {...stickyMarkdownLineAttrs(line)}
         style={{ ...HEADING_STYLE[level], fontWeight: 700 }}
       >
-        {renderInline(line.inline)}
+        {renderInline(line.inline, codeBackground)}
       </span>
     );
   }
@@ -112,12 +118,22 @@ function renderLine(line: StickyMarkdownLine): ReactNode {
     >
       {/* A blank line keeps its line box (nbsp) so at-rest paragraph spacing
           matches the raw-source line count the editor shows (D14). */}
-      {line.placeholder ? line.placeholder.text : renderInline(line.inline)}
+      {line.placeholder ? line.placeholder.text : renderInline(line.inline, codeBackground)}
     </span>
   );
 }
 
-/** Renders sticky `text` as the D18 markdown line stack. */
-export function StickyMarkdown({ text }: { text: string }) {
-  return <>{parseStickyMarkdown(text).lines.map((line) => renderLine(line))}</>;
+/**
+ * Renders sticky `text` as the D18 markdown line stack. `codeBackground`
+ * tints inline `code` chips (a card sticky passes its text color at low
+ * alpha so chips read on a dark card too).
+ */
+export function StickyMarkdown({
+  text,
+  codeBackground = STICKY_CODE_CHIP_BACKGROUND,
+}: {
+  text: string;
+  codeBackground?: string;
+}) {
+  return <>{parseStickyMarkdown(text).lines.map((line) => renderLine(line, codeBackground))}</>;
 }

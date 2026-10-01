@@ -74,8 +74,8 @@ describe("handleApplyAgentPatch updateConnection", () => {
           type: "updateConnection",
           connectionId: "connection",
           // The reducer merges connection patches by spread, so an own
-          // `waypoints: undefined` overwrites the stored steering — this is
-          // the clearing shape the document differ emits.
+          // `waypoints: undefined` overwrites the stored steering — the
+          // in-process spelling of the clear the differ emits as `null`.
           patch: { waypoints: undefined },
         },
       ],

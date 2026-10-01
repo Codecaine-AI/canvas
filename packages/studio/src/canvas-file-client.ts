@@ -10,7 +10,11 @@
  * server, an editor, git) always rotates it.
  */
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas";
-import type { CanvasStyle } from "@codecaine-ai/canvas/style";
+import type {
+  CanvasStyle,
+  CanvasStyleOverrides,
+  CanvasStyleSettings,
+} from "@codecaine-ai/canvas/style";
 
 export type LoadedCanvas = {
   canvas: InteractiveCanvasDocument;
@@ -77,34 +81,53 @@ export async function putCanvas(
 /**
  * Workspace-wide canvas style settings (server/canvas-file-api.ts):
  *
- *   GET /api/canvas-style            -> { style, overrides }
- *   PUT /api/canvas-style { overrides } -> { style, overrides }  (normalized)
+ *   GET /api/canvas-style                        -> { settings, style, overrides, hash }
+ *   PUT /api/canvas-style { settings, baseHash } -> { settings, style, overrides, hash }  (normalized)
+ *       409 { settings, style, overrides, hash }  the file changed since `baseHash`
  *
- * The file on disk (canvases/canvas-style.json) holds only `overrides`.
+ * The file on disk (canvases/canvas-style.json) holds `settings`: the active
+ * theme plus each theme's overrides. `style` is the active theme resolved,
+ * `overrides` the active theme's entry, and `hash` the file's sha256 (null:
+ * no file) — the revision a save names as its base.
  */
-export type CanvasStyleSettings = {
+export type CanvasStyleState = {
+  settings: CanvasStyleSettings;
   style: CanvasStyle;
-  overrides: Partial<CanvasStyle>;
+  overrides: CanvasStyleOverrides;
+  hash: string | null;
 };
+
+/** The settings file changed since the save's `baseHash`; `current` is what it holds now. */
+export class CanvasStyleConflictError extends Error {
+  constructor(readonly current: CanvasStyleState) {
+    super("canvas-style.json changed since it was loaded");
+  }
+}
 
 const CANVAS_STYLE_URL = "/api/canvas-style";
 
-export async function fetchCanvasStyle(): Promise<CanvasStyleSettings> {
+export async function fetchCanvasStyle(): Promise<CanvasStyleState> {
   const response = await fetch(CANVAS_STYLE_URL, { cache: "no-store" });
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-  return (await response.json()) as CanvasStyleSettings;
+  return (await response.json()) as CanvasStyleState;
 }
 
+/**
+ * PUT the whole settings document, built on the file revision `baseHash`;
+ * resolves the server's normalized copy, or rejects with
+ * CanvasStyleConflictError when the file has changed since.
+ */
 export async function putCanvasStyle(
-  overrides: Partial<CanvasStyle>,
-  options: { keepalive?: boolean } = {},
-): Promise<CanvasStyleSettings> {
+  settings: CanvasStyleSettings,
+  options: { baseHash: string | null; keepalive?: boolean },
+): Promise<CanvasStyleState> {
   const response = await fetch(CANVAS_STYLE_URL, {
     method: "PUT",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ overrides }),
+    body: JSON.stringify({ settings, baseHash: options.baseHash }),
     keepalive: options.keepalive,
   });
+  if (response.status === 409) throw new CanvasStyleConflictError((await response.json()) as CanvasStyleState);
   if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
-  return (await response.json()) as CanvasStyleSettings;
+  return (await response.json()) as CanvasStyleState;
 }

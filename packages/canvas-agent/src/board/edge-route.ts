@@ -48,6 +48,7 @@
  *
  * All printed coordinates are whole world units (`Math.round`).
  */
+import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
@@ -117,8 +118,9 @@ export function numberedSegmentsForPolyline(
 export function numberedRouteSegments(
   connection: InteractiveCanvasConnection,
   document: InteractiveCanvasDocument,
+  canvasStyle?: CanvasStyle,
 ): NumberedRouteSegment[] {
-  return numberedSegmentsForPolyline(routedPolyline(connection, document));
+  return numberedSegmentsForPolyline(routedPolyline(connection, document, canvasStyle));
 }
 
 function formatSegment(segment: NumberedRouteSegment): string {
@@ -148,10 +150,11 @@ export function formatNumberedSegments(
 export function formatNumberedRoute(
   connection: InteractiveCanvasConnection,
   document: InteractiveCanvasDocument,
+  canvasStyle?: CanvasStyle,
 ): string {
   return formatNumberedSegments(
     connection.from.objectId,
     connection.to.objectId,
-    numberedRouteSegments(connection, document),
+    numberedRouteSegments(connection, document, canvasStyle),
   );
 }

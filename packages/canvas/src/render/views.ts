@@ -21,6 +21,7 @@
 import { sectionDescendantIds } from "../state/geometry";
 import { titleChipScale } from "../objects/text-slots";
 import { sectionTitleChipWorldRect } from "../objects/section/title-chip-geometry";
+import { titleChipHasContent } from "../objects/section/title-chip-layout";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -94,7 +95,7 @@ function cameraFittingTitleChips(
     const zoom = widthPx / Math.max(1, current.width);
     let expanded = current;
     for (const section of sections) {
-      if (section.text === "") continue;
+      if (!titleChipHasContent(section, canvasStyle)) continue;
       expanded = unionRects(
         expanded,
         inflateRect(sectionTitleChipWorldRect(section, zoom, canvasStyle), VIEW_PADDING_PX),
@@ -181,7 +182,7 @@ export function renderSectionView(
     const internal =
       memberIds.has(connection.from.objectId) && memberIds.has(connection.to.objectId);
     if (!internal) continue;
-    const painted = connectionPaintedBounds(document, connection);
+    const painted = connectionPaintedBounds(document, connection, canvasStyle);
     if (painted) base = unionRects(base, painted);
   }
   const memberSections = document.objects.filter(
@@ -199,13 +200,13 @@ export function renderSectionView(
   const retainedObjectIds = new Set<string>();
   for (const object of document.objects) {
     let extent = objectPaintedBounds(object, canvasStyle);
-    if (object.type === "section" && object.text !== "") {
+    if (object.type === "section" && titleChipHasContent(object, canvasStyle)) {
       extent = unionRects(extent, sectionTitleChipWorldRect(object, chipZoom, canvasStyle));
     }
     if (rectsIntersect(extent, camera)) retainedObjectIds.add(object.id);
   }
   const connections = document.connections.filter((connection) => {
-    const painted = connectionPaintedBounds(document, connection);
+    const painted = connectionPaintedBounds(document, connection, canvasStyle);
     return painted !== null && rectsIntersect(painted, camera);
   });
   for (const connection of connections) {

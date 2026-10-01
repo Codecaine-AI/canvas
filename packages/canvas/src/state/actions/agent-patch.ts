@@ -26,6 +26,12 @@
  * geometry update like any other. Waypoints of connectors whose endpoint
  * owners moved are likewise handled downstream by the always-on
  * reconcileConnectionWaypoints choke point — nothing here duplicates it.
+ *
+ * A clear arrives as `null` (CanvasClearablePatch): the patch reaches this
+ * reducer through JSON, which drops an own `undefined`. updateObject and
+ * updateConnection read every `null` as that own `undefined`
+ * (clearsAsUndefined) before the shared merge, so a cleared detail, glyph, or
+ * label lands exactly as an in-process clear does and no `null` is stored.
  */
 import { sectionDescendantIds } from "../geometry";
 import { reconcileSectionMembership } from "../section-membership";
@@ -33,7 +39,7 @@ import type { InteractiveCanvasDocument } from "../schema";
 import { hasValidEndpoint, removeConnection } from "./connections";
 import { nextId } from "./helpers";
 import { withHistory } from "./history";
-import { mergeObjectPatch } from "./objects";
+import { mergeObjectPatch, withNormalizedDetail } from "./objects";
 import type {
   CanvasAction,
   CanvasAgentPatchOperation,
@@ -47,6 +53,19 @@ type PatchAccumulator = {
   changedConnectionIds: Set<string>;
   changedAnnotationIds: Set<string>;
 };
+
+/**
+ * Read a patch's wire clears back: every `null` becomes an own `undefined`,
+ * the spelling the shared merges treat as "remove it" (CanvasClearablePatch).
+ * An own `undefined` an in-process caller passed is kept as it is.
+ */
+export function clearsAsUndefined<Patch extends object>(
+  patch: Patch,
+): { [K in keyof Patch]: Exclude<Patch[K], null> } {
+  return Object.fromEntries(
+    Object.entries(patch).map(([key, value]) => [key, value === null ? undefined : value]),
+  ) as { [K in keyof Patch]: Exclude<Patch[K], null> };
+}
 
 function applyOperation(
   accumulator: PatchAccumulator,
@@ -76,8 +95,12 @@ function applyOperation(
       if (document.objects.some((object) => object.id === operation.object.id)) return;
       accumulator.document = {
         ...document,
-        // parentId is derived, never written — see module doc.
-        objects: [...document.objects, { ...operation.object, parentId: null }],
+        // parentId is derived, never written — see module doc. `detail`
+        // follows the same write rule as updateObject (empty / sticky → none).
+        objects: [
+          ...document.objects,
+          withNormalizedDetail({ ...operation.object, parentId: null }),
+        ],
       };
       accumulator.changedObjectIds.add(operation.object.id);
       return;
@@ -86,7 +109,7 @@ function applyOperation(
       const existing = document.objects.find((object) => object.id === operation.objectId);
       if (!existing) return; // unknown id → skip
       // Strip parentId — membership is derived from geometry downstream.
-      const { parentId: _ignored, ...patch } = operation.patch;
+      const { parentId: _ignored, ...patch } = clearsAsUndefined(operation.patch);
       accumulator.document = {
         ...document,
         objects: document.objects.map((object) =>
@@ -128,7 +151,7 @@ function applyOperation(
         ...document,
         connections: document.connections.map((connection) =>
           connection.id === operation.connectionId
-            ? { ...connection, ...operation.patch }
+            ? { ...connection, ...clearsAsUndefined(operation.patch) }
             : connection,
         ),
       };

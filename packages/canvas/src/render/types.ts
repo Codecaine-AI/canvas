@@ -46,7 +46,7 @@ export interface RenderStaticSvgOptions {
   height?: number;
   /** World-space padding around the content bounds. */
   padding?: number;
-  /** "board" paints the light board surface color; "transparent" omits it. */
+  /** "board" paints the board surface (the style's `boardBackground`); "transparent" omits it. */
   background?: "board" | "transparent";
   /**
    * Workspace canvas style (corner radii, border/stroke widths, connector

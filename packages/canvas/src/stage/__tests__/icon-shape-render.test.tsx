@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { InteractiveCanvasViewer } from "../viewer/InteractiveCanvasViewer";
+import { renderFigjam } from "../../theme/__tests__/figjam";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 
 afterEach(() => {
@@ -120,7 +121,7 @@ describe("Wave C render smoke: the `icon` object type", () => {
 
   it("sizes the glyph svg to the icon body without fixed pixel attributes", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
+      const { container } = renderFigjam(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
       const svg = container.querySelector('[data-canvas-object-id="icon-model"] [data-canvas-icon-glyph="model"]') as
         | SVGSVGElement
         | null;
@@ -135,7 +136,7 @@ describe("Wave C render smoke: the `icon` object type", () => {
 
   it("renders the default (gray) pick as glyph-interior fill + saturated stroke (P1/D13 — no fixed colors)", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
-      const { container } = render(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
+      const { container } = renderFigjam(<InteractiveCanvasViewer document={iconDocument(ICON_OBJECTS)} />);
       const svg = container.querySelector('[data-canvas-object-id="icon-model"] [data-canvas-icon-glyph="model"]');
       // gray shape cells: ink #757575 strokes the glyph, fill #E6E6E6 paints glyph interiors.
       expectGlyphFillAndInk(svg, "#E6E6E6", "#757575");
@@ -152,7 +153,7 @@ describe("Wave C render smoke: the `icon` object type", () => {
         ...iconObject("icon-bold", "config", 1),
         color: "red",
       };
-      const { container } = render(
+      const { container } = renderFigjam(
         <InteractiveCanvasViewer document={iconDocument([softObject, boldObject])} />,
       );
       const softSvg = container.querySelector('[data-canvas-object-id="icon-blue"] [data-canvas-icon-glyph="guardrail"]');
@@ -166,7 +167,7 @@ describe("Wave C render smoke: the `icon` object type", () => {
     withMeasuredShell(SCREEN.width, SCREEN.height, () => {
       const lineArtObject = iconObject("icon-tool", "tool", 0);
       const closedObject = iconObject("icon-model-closed", "model", 1);
-      const { container } = render(
+      const { container } = renderFigjam(
         <InteractiveCanvasViewer document={iconDocument([lineArtObject, closedObject])} />,
       );
 

@@ -20,9 +20,25 @@ import { withHistory } from "./history";
 import type { CanvasAction, InteractiveCanvasState } from "./types";
 
 /**
+ * The `detail` write rule every reducer path shares: an empty, whitespace-only,
+ * or non-string detail means "no detail line" and removes the key, and a
+ * sticky never carries one (its body is markdown). A non-empty value is kept
+ * verbatim — trimming on every write would eat the trailing space of a detail
+ * being typed; validate.ts trims on load. Returns `object` itself when there
+ * is nothing to drop.
+ */
+export function withNormalizedDetail(object: InteractiveCanvasObject): InteractiveCanvasObject {
+  if (!("detail" in object)) return object;
+  const { detail, ...rest } = object;
+  if (object.type !== "sticky" && typeof detail === "string" && detail.trim()) return object;
+  return rest;
+}
+
+/**
  * Merge an object patch the way canvas.updateObject does: geometry normalizes
  * to GEOMETRY_NORMALIZATION_GRID, style patches merge per-key (undefined
- * deletes). Shared with the agent apply path (./agent-patch.ts) so agent
+ * deletes), and `detail` follows withNormalizedDetail (undefined or "" clears
+ * it). Shared with the agent apply path (./agent-patch.ts) so agent
  * updates behave exactly like human ones.
  *
  * D1 — this is the write path, not an interaction path, so it rounds on 4 and
@@ -48,7 +64,7 @@ export function mergeObjectPatch(
         ) as CanvasObjectStyle)
       : object.style,
   };
-  return merged;
+  return withNormalizedDetail(merged);
 }
 
 export function handleAddObject(
@@ -69,6 +85,7 @@ export function handleAddObject(
     {
       id,
       text: action.text,
+      detail: action.detail,
       parentId: action.parentId ?? null,
       // D17 — new objects take the last-picked color for their kind unless
       // the action pins one explicitly.
@@ -203,7 +220,7 @@ export function handleAddObjects(
       ? createObjectId(objectDocument, object.text.trim() || objectTypeLabel(object.type))
       : object.id;
     oldIdToNewId.set(object.id, id);
-    const newObject = { ...object, id };
+    const newObject = withNormalizedDetail({ ...object, id });
     newObjects.push(newObject);
     objectDocument = { ...objectDocument, objects: [...objectDocument.objects, newObject] };
   }
@@ -302,16 +319,17 @@ export function handleSetObjectType(
   // geometry/text/color/parentId — only `type` + the derived `style.shape`
   // change (a color pick is a direction, D12: the new kind's role table
   // decides how the carried-over pick renders). The unified `text` field
-  // carries over unchanged.
+  // carries over unchanged, and so does `detail` (dropped only when the new
+  // kind is a sticky — withNormalizedDetail).
   const document = {
     ...state.document,
     objects: state.document.objects.map((object) =>
       object.id === action.objectId
-        ? {
+        ? withNormalizedDetail({
             ...object,
             type: action.objectType,
             style: { ...object.style, shape: shapeForType(action.objectType) },
-          }
+          })
         : object,
     ),
   };

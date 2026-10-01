@@ -9,6 +9,8 @@ import type { Anchor } from "./routing";
 import type { InteractiveCanvasDocument } from "../state/schema";
 import { connectionBoundsForObject } from "../objects/geometry";
 import { worldToScreen, type ViewportState } from "../stage/viewport";
+import type { CanvasStyle } from "../theme/canvas-style";
+import { useCanvasStyle } from "../theme/canvas-style-context";
 
 /** Selection outline/handle color — matches SelectionBox and the connector trim (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
@@ -36,12 +38,14 @@ export type ActivePort = {
   anchor: Anchor;
 };
 
+/** Screen-space center of `object`'s `anchor` dot; `canvasStyle` sizes below-band captions (default style when omitted). */
 export function anchorScreenPoint(
   viewport: ViewportState,
   object: InteractiveCanvasDocument["objects"][number],
   anchor: Anchor,
+  canvasStyle?: CanvasStyle,
 ) {
-  const bounds = connectionBoundsForObject(object);
+  const bounds = connectionBoundsForObject(object, canvasStyle);
   const top = worldToScreen(viewport, { x: bounds.x + bounds.width / 2, y: bounds.y });
   const bottom = worldToScreen(viewport, {
     x: bounds.x + bounds.width / 2,
@@ -103,6 +107,7 @@ export function AnchorDots({
   /** Emits the currently-hovered creation port so preview layers can render outside this overlay. */
   onHoveredAnchorChange?: (port: ActivePort | null) => void;
 }) {
+  const canvasStyle = useCanvasStyle();
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [pressedKey, setPressedKey] = useState<string | null>(null);
   useEffect(() => {
@@ -125,7 +130,7 @@ export function AnchorDots({
         .filter((object) => selected.has(object.id))
         .map((object) =>
           ANCHOR_NAMES.map((name) => {
-            const screen = anchorScreenPoint(viewport, object, name);
+            const screen = anchorScreenPoint(viewport, object, name, canvasStyle);
             const key = `${object.id}:${name}`;
             const isPressed =
               pressedKey === key ||

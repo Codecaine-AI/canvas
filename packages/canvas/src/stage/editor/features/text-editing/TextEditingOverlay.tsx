@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, type CSSProperties } from "react";
 import { objectDefFor } from "../../../../objects/object-def";
+import { SlotDetailLine } from "../../../../objects/object-shell";
 import {
   resolveTextSlot,
   slotLineHeightPx,
@@ -10,8 +11,11 @@ import {
   type ResolvedTextSlot,
   type TextSlot,
 } from "../../../../objects/text-slots";
-import { resolveSectionColors } from "../../../../theme/palette";
+import { resolveSectionPaint } from "../../../../theme/palette";
 import { FIRST_USE_COLORS } from "../../../../state/actions";
+import { CANVAS_MONO_FONT_STACK } from "../../../../theme/fonts";
+import { titleChipLayout } from "../../../../objects/section/title-chip-layout";
+import { useSectionDepth } from "../../../../objects/section/section-depth-context";
 import type { InteractiveCanvasObject } from "../../../../state/schema";
 import { MarkdownSlotTextEditor } from "./MarkdownSlotTextEditor";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";
@@ -41,16 +45,38 @@ interface SectionTitleEditorProps {
 
 /**
  * Section title editor — chip-exact (the proven WYSIWYG case from §1.2): the
- * input takes its rect, typography, and counter-scale from the SAME
- * title-chip slot preset the at-rest chip renders with. The rect is resolved
- * against the CURRENT draft value so the input tracks the chip's
- * width-follows-text behavior while typing.
+ * input takes its box, edges, typography, and counter-scale from the SAME
+ * title-chip layout the at-rest chip renders with (objects/section/
+ * title-chip-layout.ts), floating or pinned, and its text starts exactly
+ * where the chip's title starts (past the icon, when the section has one).
+ * The layout is resolved against the CURRENT draft value so the input
+ * tracks the chip's width-follows-text behavior while typing.
  */
 function SectionTitleEditor({ target, slot, value, setValue, commit, cancel, zoom }: SectionTitleEditorProps) {
   const canvasStyle = useCanvasStyle();
+  const depth = useSectionDepth(target.id);
   const draftTitle = value || target.text;
   const resolved = resolveTextSlot(slot, { ...target, text: draftTitle }, zoom, { canvasStyle });
-  const { rect, typography, scale } = resolved;
+  const { rect, scale } = resolved;
+  const layout = titleChipLayout({ ...target, text: draftTitle }, canvasStyle, zoom);
+  const { border, radius } = layout;
+  const font = layout.title.font;
+  const paint = resolveSectionPaint(target.color ?? FIRST_USE_COLORS.section, depth, canvasStyle);
+  // The chip paints its title past its left edge + padding (+ icon); the
+  // input's own left border takes the place of the chip's.
+  const paddingLeft = layout.title.x - border.left;
+  const edges =
+    layout.placement === "pinned"
+      ? {
+          borderStyle: "solid",
+          borderColor: "var(--primary)",
+          borderWidth: `${border.top}px ${border.right}px ${border.bottom}px ${border.left}px`,
+          borderRadius: `${radius.topLeft}px ${radius.topRight}px ${radius.bottomRight}px ${radius.bottomLeft}px`,
+        }
+      : {
+          border: `${border.top}px solid var(--primary)`,
+          borderRadius: `${radius.topLeft}px`,
+        };
 
   return (
     <input
@@ -84,14 +110,20 @@ function SectionTitleEditor({ target, slot, value, setValue, commit, cancel, zoo
         width: `${rect.width}px`,
         height: `${rect.height}px`,
         pointerEvents: "auto",
-        border: `${canvasStyle.titleChipBorderWidthPx}px solid var(--primary)`,
-        borderRadius: `${canvasStyle.titleChipCornerRadiusPx}px`,
-        padding: `0 ${TITLE_CHIP.paddingXPx}px`,
-        fontSize: `${typography.fontSizePx}px`,
-        fontWeight: typography.fontWeight,
-        lineHeight: `${rect.height}px`,
-        background: resolveSectionColors(target.color ?? FIRST_USE_COLORS.section).chip.fill,
-        color: typography.color,
+        ...edges,
+        padding:
+          paddingLeft === TITLE_CHIP.paddingXPx && layout.paddingRightPx === TITLE_CHIP.paddingXPx
+            ? `0 ${TITLE_CHIP.paddingXPx}px`
+            : `0 ${layout.paddingRightPx}px 0 ${paddingLeft}px`,
+        fontSize: `${font.fontSizePx}px`,
+        fontWeight: font.fontWeight,
+        ...(font.font === "mono" ? { fontFamily: CANVAS_MONO_FONT_STACK } : null),
+        ...(font.letterSpacingEm !== 0 ? { letterSpacing: `${font.letterSpacingEm}em` } : null),
+        ...(font.uppercase ? { textTransform: "uppercase" as const } : null),
+        // A pinned chip's content box is its height less the bottom edge.
+        lineHeight: `${layout.placement === "pinned" ? rect.height - border.top - border.bottom : rect.height}px`,
+        background: paint.chipFill,
+        color: paint.headerText,
         outline: "none",
         whiteSpace: "nowrap",
         boxSizing: "border-box",
@@ -122,9 +154,14 @@ interface SlotTextEditorProps {
  * flex-aligns an auto-height textarea for center/bottom slots and below-
  * glyph bands, and stretches it for top-anchored area slots (sticky body —
  * which shows its RAW markdown source here — and code blocks).
+ *
+ * The object's detail line (not edited here — the Inspector edits it) renders
+ * under the textarea exactly as it does at rest, so the name block + detail
+ * center as one block and the textarea sits exactly over the at-rest name.
  */
 function SlotTextEditor({ target, slot, value, setValue, commit, cancel }: SlotTextEditorProps) {
-  const resolved = resolveTextSlot(slot, target, 1, { draftText: value });
+  const canvasStyle = useCanvasStyle();
+  const resolved = resolveTextSlot(slot, target, 1, { draftText: value, canvasStyle });
   const { rect, typography } = resolved;
   const placementName = textPlacementName(slot.placement);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -132,13 +169,14 @@ function SlotTextEditor({ target, slot, value, setValue, commit, cancel }: SlotT
   // text block exactly where the at-rest span sits (a textarea can't align
   // its own content vertically).
   const fitHeight = resolved.verticalAlign !== "top" || placementName === "below";
+  const minLineHeightPx = slotLineHeightPx(typography);
   useLayoutEffect(() => {
     if (!fitHeight) return;
     const element = textareaRef.current;
     if (!element) return;
     element.style.height = "0px";
-    element.style.height = `${Math.max(element.scrollHeight, slotLineHeightPx(slot.typography))}px`;
-  }, [value, fitHeight, slot]);
+    element.style.height = `${Math.max(element.scrollHeight, minLineHeightPx)}px`;
+  }, [value, fitHeight, minLineHeightPx]);
 
   return (
     <div
@@ -209,6 +247,7 @@ function SlotTextEditor({ target, slot, value, setValue, commit, cancel }: SlotT
           WebkitUserSelect: "text",
         }}
       />
+      {resolved.detail ? <SlotDetailLine detail={resolved.detail} textAlign={typography.textAlign} /> : null}
     </div>
   );
 }

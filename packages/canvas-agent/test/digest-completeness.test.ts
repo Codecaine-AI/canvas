@@ -25,6 +25,7 @@ const OBJECT_FIELD_COVERAGE: Record<keyof InteractiveCanvasObject, Coverage> = {
   id: "rendered",
   type: "rendered",
   text: "rendered",
+  detail: "rendered", // detail="…" extra, whitespace collapsed like text
   color: "legend", // rendered when non-default; default declared in the legend
   parentId: "structural", // containment = tree indentation
   geometry: "rendered",
@@ -33,7 +34,9 @@ const OBJECT_FIELD_COVERAGE: Record<keyof InteractiveCanvasObject, Coverage> = {
   locked: "rendered",
   direction: "rendered",
   author: "rendered",
-  icon: "rendered", // folded INTO the type column — `memory`, not `icon icon=memory`
+  // An icon object's glyph is folded INTO the type column — `memory`, not
+  // `icon icon=memory`; a section's header glyph is the `icon=` extra.
+  icon: "rendered",
 };
 
 /** Compile-time exhaustive over the connection schema. */
@@ -124,6 +127,35 @@ describe("digest completeness invariant", () => {
     expect(digest).not.toContain(" icon ");
     expect(digest).toContain("pink");
     expect(digest).toContain('author="Ford"');
+  });
+
+  test("a detail line and a section's header glyph render as extras beside the name", () => {
+    const section = {
+      ...box("services", 0, 0, 640, 480, "section"),
+      text: "Bun services",
+      detail: "127.0.0.1",
+      icon: "agent" as const,
+    };
+    const shape = {
+      ...box("db", 40, 80, 280, 100, "process"),
+      parentId: "services",
+      text: "Postgres",
+      detail: "16 ·\n :5432",
+    };
+    const glyph = {
+      ...box("brain", 360, 80, 120, 120, "icon"),
+      parentId: "services",
+      icon: "model" as const,
+      detail: "claude-opus",
+    };
+    const digest = formatBoardDigest(makeDocument([section, shape, glyph]));
+
+    // The glyph and the fact lead the extras; whitespace collapses like text.
+    expect(digest).toContain('  services section "Bun services" 0,0 640×480 icon=agent detail="127.0.0.1"');
+    expect(digest).toContain('    db process "Postgres" 40,80 280×100 detail="16 · :5432"');
+    // An icon object's glyph stays folded into the type column — never `icon=`.
+    expect(digest).toContain('    brain model "brain" 360,80 120×120 detail="claude-opus"');
+    expect(digest.split("\n").find((line) => line.includes(" brain "))).not.toContain("icon=");
   });
 
   test("every rendered connection field appears in the digest when set non-default", () => {

@@ -39,6 +39,7 @@ import {
   formatDiagnostics,
   runDiagnostics,
   sessionDiagnostics,
+  sessionLintContext,
 } from "../../../board/lints/run";
 import { formatRegionMeasures, measureRegion } from "../../../board/measure";
 import type { Rect } from "../../../board/types";
@@ -49,6 +50,7 @@ import { documentWithinCrop, expandRect, renderCropError, round2 } from "../snap
 import { classifyDelta, deltaTargetId } from "./op-surface";
 import { fromDocumentFields } from "../tools/placeable-types";
 import { sessionCanvasStyle } from "../canvas-style";
+import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 import type { LayoutSession } from "../store";
 import { recordSessionView } from "./view-log";
 import {
@@ -82,6 +84,7 @@ interface ChannelField {
 
 const OBJECT_CHANNEL_FIELDS: readonly ChannelField[] = [
   { field: "text" },
+  { field: "detail" },
   { field: "color", fallback: "gray" },
   { field: "parentId" },
   { field: "style" },
@@ -112,6 +115,24 @@ function channelDeltaLines(
     lines.push(`${id}  ${field} ${fmt(previous)} → ${fmt(next)}`);
   }
   return lines;
+}
+
+function isSection(object: InteractiveCanvasObject): boolean {
+  return kindOf(object) === "section";
+}
+
+/**
+ * What an added object's DELTA line carries beyond type, box, and name: a
+ * section's header glyph and the one-line detail, when set — the same two
+ * extras the digest prints, in the same spelling.
+ */
+function addedObjectExtras(object: InteractiveCanvasObject): string {
+  const extras: string[] = [];
+  if (isSection(object) && object.icon !== undefined) extras.push(`icon=${object.icon}`);
+  if (object.detail !== undefined && object.detail.trim() !== "") {
+    extras.push(`detail=${JSON.stringify(object.detail)}`);
+  }
+  return extras.length > 0 ? ` ${extras.join(" ")}` : "";
 }
 
 export interface DocumentDelta {
@@ -177,7 +198,7 @@ export function documentDelta(
     if (!previous) {
       lines.push(
         `+ ${object.id}  ${fromDocumentFields(object)} ${fmtPos(object.geometry)} `
-        + `${fmtSize(object.geometry)} ${JSON.stringify(object.text)}`,
+        + `${fmtSize(object.geometry)} ${JSON.stringify(object.text)}${addedObjectExtras(object)}`,
       );
       touchedObjectIds.add(object.id);
       continue;
@@ -200,6 +221,12 @@ export function documentDelta(
     const nextType = fromDocumentFields(object);
     if (previousType !== nextType) {
       lines.push(`${object.id}  type ${previousType} → ${nextType}`);
+      touchedObjectIds.add(object.id);
+    }
+    // A section's header glyph is the one `icon` that is not folded into the
+    // type (a frame stays a frame), so it reports as a channel of its own.
+    if (isSection(object) && previous.icon !== object.icon) {
+      lines.push(`${object.id}  icon ${previous.icon ?? "—"} → ${object.icon ?? "—"}`);
       touchedObjectIds.add(object.id);
     }
     const channelLines = channelDeltaLines(
@@ -308,7 +335,7 @@ export function lintDeltaBlock(
   before?: InteractiveCanvasDocument,
 ): string {
   const previous = session.lastDiagnostics
-    ?? (before === undefined ? undefined : runDiagnostics(before, undefined, { canvasStyle: session.canvasStyle }));
+    ?? (before === undefined ? undefined : runDiagnostics(before, undefined, sessionLintContext(session)));
   session.lastDiagnostics = diagnostics;
   if (previous === undefined) return formatDiagnostics(diagnostics);
   const previousPrints = new Set(previous.map(diagnosticFingerprint));
@@ -339,15 +366,20 @@ export function lintDeltaBlock(
  * `type` and `icon` share one word on purpose: they are one channel to the
  * model (./placeable-types.ts), so a swap onto a glyph is "reshaped" once
  * rather than two lines, one of which would name a field the tool surface does
- * not have.
+ * not have. A SECTION's `icon` is the exception — its header glyph is not a
+ * type — and reads "reiconed" (see `updateObjectDescriptors`).
  */
 const OBJECT_DIFF_WORDS: Record<string, string> = {
   text: "retexted",
+  detail: "redetailed",
   color: "recolored",
   style: "restyled",
   type: "reshaped",
   icon: "reshaped",
 };
+
+/** The BOARD DIFF word for a section's header-glyph change. */
+const SECTION_ICON_DIFF_WORD = "reiconed";
 
 /** Descriptor words for updateConnection patch keys in the BOARD DIFF block. */
 const CONNECTION_DIFF_WORDS: Record<string, string> = {
@@ -361,7 +393,12 @@ function updateObjectDescriptors(
   operation: Extract<CanvasAgentPatchOperation, { type: "updateObject" }>,
 ): string[] {
   const parts: string[] = [];
+  const target = baseline.objects.find((object) => object.id === operation.objectId);
   for (const [key, value] of Object.entries(operation.patch)) {
+    if (key === "icon" && target !== undefined && isSection(target)) {
+      parts.push(SECTION_ICON_DIFF_WORD);
+      continue;
+    }
     if (key === "geometry") {
       const previous = baseline.objects.find(
         (object) => object.id === operation.objectId,
@@ -465,6 +502,7 @@ function connectionRouteRow(
   document: InteractiveCanvasDocument,
   connection: InteractiveCanvasConnection,
   objectsById: ReadonlyMap<string, InteractiveCanvasObject>,
+  canvasStyle: CanvasStyle,
 ): string {
   const from = objectsById.get(connection.from.objectId);
   const to = objectsById.get(connection.to.objectId);
@@ -476,7 +514,7 @@ function connectionRouteRow(
     const plural = missing.length === 1 ? "" : "s";
     return `  ${connection.id}  unroutable (missing endpoint${plural} ${missing.join(", ")})`;
   }
-  const routed = routeConnection(from, to, connection, document.objects);
+  const routed = routeConnection(from, to, connection, document.objects, canvasStyle);
   const points = routed.points ?? [routed.start, routed.end];
   const violations = connection.from.objectId === connection.to.objectId
     ? []
@@ -485,6 +523,7 @@ function connectionRouteRow(
       connection.from.objectId,
       connection.to.objectId,
       document.objects,
+      canvasStyle,
     );
   // Same numbered-segment string the digest prints and the routing ops
   // return, so `sN` means one thing everywhere the model can read it.
@@ -514,7 +553,7 @@ export function routesBlock(session: LayoutSession, delta: DocumentDelta): strin
   const lines = ["ROUTES"];
   for (const connection of session.draft.connections) {
     if (!touched.has(connection.id)) continue;
-    lines.push(connectionRouteRow(session.draft, connection, byId));
+    lines.push(connectionRouteRow(session.draft, connection, byId, sessionCanvasStyle(session)));
   }
   return lines.join("\n");
 }
@@ -526,7 +565,7 @@ export function boardRoutesBlock(session: LayoutSession): string | null {
   return [
     "ROUTES",
     ...session.draft.connections.map((connection) =>
-      connectionRouteRow(session.draft, connection, byId)),
+      connectionRouteRow(session.draft, connection, byId, sessionCanvasStyle(session))),
   ].join("\n");
 }
 
@@ -795,7 +834,7 @@ function frameRegions(
     const object = objectsById.get(id);
     const rect = object !== undefined
       ? object.geometry
-      : connectionPaintedBounds(session.draft, connectionsById.get(id)!);
+      : connectionPaintedBounds(session.draft, connectionsById.get(id)!, sessionCanvasStyle(session));
     if (rect !== null) measured = measured === null ? rect : unionRects(measured, rect);
   }
   return {
@@ -841,11 +880,10 @@ export function lookPerception(
   });
   const measures = framed.regions.map((region) => formatRegionMeasures(
     region.label,
-    measureRegion(
-      session.draft,
-      region.rect,
-      region.sectionId !== undefined ? { sectionId: region.sectionId } : undefined,
-    ),
+    measureRegion(session.draft, region.rect, {
+      ...(region.sectionId !== undefined ? { sectionId: region.sectionId } : {}),
+      canvasStyle: sessionCanvasStyle(session),
+    }),
   ));
   const blocks = [
     ...(options?.headline !== undefined ? [options.headline] : []),

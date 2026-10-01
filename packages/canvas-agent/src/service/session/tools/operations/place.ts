@@ -43,6 +43,8 @@ import { sectionDescendantIds } from "../../../../../../canvas/src/state/geometr
 import { draftPlacedObject } from "../../../../../../canvas/src/state/schema/object-defaults";
 
 import { creationDefaultFor } from "../creation-defaults";
+import { detailDroppedNote, storedDetail } from "../detail-line";
+import { NO_GLYPH, isGlyphName, unknownGlyphMessage } from "../glyph-names";
 import { snapPoint, snapSize } from "../grid";
 import { defineOperationTool } from "./operation-tool";
 import { toDocumentFields } from "../placeable-types";
@@ -70,9 +72,18 @@ export const placeSection = defineOperationTool({
     "Draw a titled frame. Membership is reconciled from geometry, so the frame "
     + "adopts whatever its edges already cover, and it keeps the footprint it "
     + "lands with until something fits or resizes it. Undrawn size takes the "
-    + "default section footprint.",
+    + "default section footprint. The header shows the optional icon, the "
+    + "title, and the optional one-fact detail.",
   fields: PlaceSectionParams.properties,
-  validate: (ctx, p) => ctx.requireFreeId(p.id),
+  validate: (ctx, p) => [
+    ...ctx.requireFreeId(p.id),
+    // An empty icon, or "none", is no icon; anything else must be a glyph by
+    // its exact name, and a near miss comes back with the names it was
+    // reaching for.
+    ...(p.icon !== undefined && p.icon !== "" && p.icon !== NO_GLYPH && !isGlyphName(p.icon)
+      ? [unknownGlyphMessage("icon", p.icon)]
+      : []),
+  ],
   apply: (ctx, p) => {
     const [x, y] = snapPoint(p.at);
     const defaults = creationDefaultFor("section");
@@ -84,7 +95,9 @@ export const placeSection = defineOperationTool({
         object: draftPlacedObject("section", geometry, {
           id: p.id,
           text: p.text,
+          detail: storedDetail(p.detail),
           color: defaults.color,
+          ...(p.icon !== undefined && isGlyphName(p.icon) ? { icon: p.icon } : {}),
         }),
       },
       `place_section ${p.id} ${placement(geometry)}`,
@@ -125,11 +138,11 @@ export const placeSticky = defineOperationTool({
 export const placeShape = defineOperationTool({
   name: "place_shape",
   description:
-    "Place a shape — the pick and the click, nothing else. It arrives untitled, "
-    + "at the default size and color for its kind; labelling, resizing, "
-    + "recoloring, and turning it are each their own gesture afterward. "
-    + "Containment follows geometry: a shape outside every frame belongs to no "
-    + "section.",
+    "Place a shape — the pick and the click, plus an optional one-fact detail "
+    + "line. It arrives untitled, at the default size and color for its kind; "
+    + "naming, resizing, recoloring, and turning it are each their own gesture "
+    + "afterward. Containment follows geometry: a shape outside every frame "
+    + "belongs to no section.",
   fields: PlaceShapeParams.properties,
   validate: (ctx, p) => ctx.requireFreeId(p.id),
   apply: (ctx, p) => {
@@ -154,6 +167,7 @@ export const placeShape = defineOperationTool({
           // a placed shape blank instead of taking draftPlacedObject's
           // per-type label. `update_text` fills it later.
           text: "",
+          detail: storedDetail(p.detail),
           color: defaults.color,
           ...(fields.icon ? { icon: fields.icon } : {}),
         }),
@@ -182,15 +196,22 @@ function clonedFrom(
   id: string,
   position: readonly [number, number],
   text: string | undefined,
+  detail: string | undefined,
 ): Record<string, unknown> {
   // The copy's size is a number this gesture WRITES, so it lands on the grid
   // even when the source's does not: cloning a hand-drawn 243×157 box gives a
   // 240×160 copy, and a row built from it stays on the grid.
   const size = snapSize(source.geometry);
+  // The detail travels like the name: carried over unless the call names one,
+  // and an empty one clears it. A sticky never carries one.
+  const copiedDetail = source.type === "sticky"
+    ? undefined
+    : detail !== undefined ? storedDetail(detail) : storedDetail(source.detail);
   return {
     id,
     type: source.type,
     text: text ?? source.text,
+    ...(copiedDetail !== undefined ? { detail: copiedDetail } : {}),
     geometry: {
       x: position[0],
       y: position[1],
@@ -199,6 +220,7 @@ function clonedFrom(
     },
     ...(source.color !== undefined ? { color: source.color } : {}),
     ...(source.direction !== undefined ? { direction: source.direction } : {}),
+    // An icon's glyph, and a section's header glyph — both are the same field.
     ...(source.icon !== undefined ? { icon: source.icon } : {}),
     // `style` carries the render-shape selector and a section's border stroke,
     // so a copy that dropped it would not look like its source.
@@ -213,8 +235,8 @@ export const clone = defineOperationTool({
   name: "clone",
   description:
     "Copy one object. The copy inherits the source's kind, size, color, shape "
-    + "type/direction/glyph, and border style, so a row of options matches "
-    + "without re-specifying a number. Two things it does NOT carry: edges "
+    + "type/direction/glyph, detail line, and border style, so a row of options "
+    + "matches without re-specifying a number. Two things it does NOT carry: edges "
     + "attached to the source (draw those with connect), and, for a section, "
     + "its contents — a cloned frame arrives empty, because copying "
     + "descendants without copying the edges between them would half-copy the "
@@ -236,12 +258,14 @@ export const clone = defineOperationTool({
         id: p.id,
         at: p.at,
         ...(p.text !== undefined ? { text: p.text } : {}),
+        ...(p.detail !== undefined ? { detail: p.detail } : {}),
       });
       const byCall = JSON.stringify({
         sourceId: p.sourceId,
         id: p.id,
         by: p.by,
         ...(p.text !== undefined ? { text: p.text } : {}),
+        ...(p.detail !== undefined ? { detail: p.detail } : {}),
       });
       errors.push(
         `one position source per call: send clone ${atCall} to set the copy's absolute corner, or clone ${byCall} to offset it from the source — never both; omit both for the paste offset.`,
@@ -261,21 +285,27 @@ export const clone = defineOperationTool({
       ? snapPoint(p.at)
       : snapPoint([source.geometry.x + offset[0], source.geometry.y + offset[1]]);
 
-    const object = clonedFrom(source, p.id, position, p.text);
+    const object = clonedFrom(source, p.id, position, p.text, p.detail);
     const geometry = object.geometry as { x: number; y: number; width: number; height: number };
     // The same descendant walk the remove cascade uses, so "what a clone left
     // behind" and "what a delete would have taken" can never disagree.
     const emptied = source.type === "section"
       ? sectionDescendantIds(ctx.draft, p.sourceId).size
       : 0;
-    return ctx.applyLowered(
-      { type: "addObject", object },
-      `clone ${p.id} from ${p.sourceId} ${placement(geometry)}`,
-      emptied > 0
+    const notes = [
+      ...(emptied > 0
         ? [
             `the frame copied without its ${emptied} descendant${emptied === 1 ? "" : "s"} — place or clone the contents into ${p.id} yourself`,
           ]
-        : undefined,
+        : []),
+      ...(source.type === "sticky" && storedDetail(p.detail) !== undefined
+        ? [detailDroppedNote("sticky")]
+        : []),
+    ];
+    return ctx.applyLowered(
+      { type: "addObject", object },
+      `clone ${p.id} from ${p.sourceId} ${placement(geometry)}`,
+      notes.length > 0 ? notes : undefined,
     );
   },
 });

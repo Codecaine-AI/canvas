@@ -20,7 +20,6 @@
         "type": "design"
       },
       "children": [
-        "b-dov-title-1",
         "b-dov-intro-2",
         "b-dov-dataflow-3",
         "b-dov-reducer-decision-4",
@@ -28,6 +27,7 @@
         "b-dov-selfcontained-6",
         "b-dov-areas-heading-7",
         "b-dov-area-shape-api-8",
+        "b-dov-area-themes-20",
         "b-dov-area-engine-9",
         "b-dov-engine-model-10",
         "b-dov-engine-interaction-11",
@@ -41,19 +41,6 @@
         "b-dov-area-tool-surface-19"
       ]
     },
-    "b-dov-title-1": {
-      "id": "b-dov-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "System design — overview"
-        }
-      ],
-      "children": []
-    },
     "b-dov-intro-2": {
       "id": "b-dov-intro-2",
       "type": "paragraph",
@@ -66,7 +53,7 @@
           }
         },
         {
-          "insert": " is a typed-action, world-space diagramming engine: sticky notes, a small universal shape core, icon glyphs, sections, and routed connectors, purpose-built as Core's map layer for operational maps. The same engine embeds interactively for a person or drives headlessly for an agent. The pages in this tier are the design contracts — normative behavior, state models, and vocabularies; how the source is organized to honor them lives in the "
+          "insert": " is a typed-action, world-space diagramming engine: sticky notes, a small universal shape core, icon glyphs, sections, and routed connectors, purpose-built as Core's map layer for operational maps. The same engine embeds interactively for a person or drives headlessly for an agent. The pages in this tier are the design contracts: normative behavior, state models, and vocabularies. How the source is organized to honor them lives in the "
         },
         {
           "insert": "implementation tier",
@@ -90,7 +77,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Data flows one way: every edit — a pointer gesture or an agent operation — becomes a typed "
+          "insert": "Data flows one way: every edit (a pointer gesture or an agent operation) becomes a typed "
         },
         {
           "insert": "CanvasAction",
@@ -109,7 +96,6 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
         "title": "One reducer is the single mutation authority"
       },
       "text": [
@@ -137,7 +123,7 @@
           }
         },
         {
-          "insert": " union — there is no second write path. This guarantees consistent undo/history behavior and consistent connector-waypoint reconciliation no matter which caller mutated the document, since every mutation is a typed action passing through the same authority rather than an ad hoc state patch."
+          "insert": " union. There is no second write path. This guarantees consistent undo/history behavior and consistent connector-waypoint reconciliation no matter which caller mutated the document, since every mutation is a typed action passing through the same authority rather than an ad hoc state patch."
         }
       ],
       "children": []
@@ -147,26 +133,60 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
-        "title": "Fixed light board background, independent of host app theme"
+        "title": "The board follows the workspace theme, never the host app theme"
       },
       "text": [
         {
-          "insert": "The engine renders on a fixed light background — "
+          "insert": "The board surface and its grid dots take the workspace theme's "
         },
         {
-          "insert": "CANVAS_BG = \"#F5F5F5\"",
+          "insert": "boardBackground",
           "attributes": {
-            "code": true,
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "gridDotColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", whatever theme the host app runs. The default figjam theme keeps the light "
+        },
+        {
+          "insert": "#F5F5F5",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " board that diagramming boards conventionally use, and a dark board exists only as the "
+        },
+        {
+          "insert": "schematic-dark",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " theme, which a person picks for the whole workspace. A host's dark-mode setting never switches the board. The theme model is specified in "
+        },
+        {
+          "insert": "Workspace themes",
+          "attributes": {
             "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/stage/CanvasStage.tsx",
-              "symbol": "CANVAS_BG"
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "Workspace themes"
             }
           }
         },
         {
-          "insert": " — regardless of the host app's theme. This is an intentional \"light board under dark app theme\" design choice, not an oversight: diagramming boards are conventionally light regardless of the surrounding app trim, so the canvas does not follow a host's dark-mode setting."
+          "insert": "."
         }
       ],
       "children": []
@@ -211,7 +231,28 @@
           }
         },
         {
-          "insert": " — ObjectDef v2 and the two-tier ShapeDef registry: every kind declares its rendering, text slot, outline, anchors, hit-testing, and color role on one registered definition, and every consumer derives its behavior from that declaration. Includes the text-slot preset library and the closed 10-pick color roster."
+          "insert": " defines ObjectDef v2 and the two-tier ShapeDef registry. Every kind declares its rendering, text slot, outline, anchors, hit-testing, and color role on one registered definition, and every consumer derives its behavior from that declaration. It includes the text-slot preset library, the name and one-line detail every shape, icon, and section carries, and the closed 10-pick color roster."
+        }
+      ],
+      "children": []
+    },
+    "b-dov-area-themes-20": {
+      "id": "b-dov-area-themes-20",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "Workspace themes"
+            }
+          }
+        },
+        {
+          "insert": " set how every board in a workspace renders: the figjam, schematic-light, and schematic-dark presets, the token set and the settings file that stores it, and the paint rules that turn a color pick into pixels."
         }
       ],
       "children": []
@@ -232,7 +273,7 @@
           }
         },
         {
-          "insert": " — the behavior contracts of the core, one page per concern:"
+          "insert": " covers the behavior contracts of the core, one page per concern:"
         }
       ],
       "children": []
@@ -255,7 +296,7 @@
           }
         },
         {
-          "insert": " — the persisted board schema, the action vocabulary, and the reducer's guarantees."
+          "insert": " covers the persisted board schema, the action vocabulary, and the reducer's guarantees."
         }
       ],
       "children": []
@@ -278,7 +319,7 @@
           }
         },
         {
-          "insert": " — the pointer state machine: selection, gestures, snapping, clipboard, text editing."
+          "insert": " covers the pointer state machine: selection, gestures, snapping, clipboard, text editing."
         }
       ],
       "children": []
@@ -301,7 +342,7 @@
           }
         },
         {
-          "insert": " — elbow/orthogonal routing, the connection cascade, endpoints, and bend editing."
+          "insert": " covers elbow/orthogonal routing, the connection cascade, endpoints, and bend editing."
         }
       ],
       "children": []
@@ -324,7 +365,7 @@
           }
         },
         {
-          "insert": " — the rendering tiers, the world/screen coordinate model, and the camera."
+          "insert": " covers the rendering tiers, the world/screen coordinate model, and the camera."
         }
       ],
       "children": []
@@ -347,7 +388,7 @@
           }
         },
         {
-          "insert": " — documents on disk and the editor/viewer surfaces a host embeds."
+          "insert": " covers documents on disk and the editor/viewer surfaces a host embeds."
         }
       ],
       "children": []
@@ -368,7 +409,7 @@
           }
         },
         {
-          "insert": " — geometric section layering: "
+          "insert": " covers geometric section layering: "
         },
         {
           "insert": "parentId",
@@ -398,7 +439,7 @@
           }
         },
         {
-          "insert": " — the diagram language: the two genres every board mixes, the object surface (eight universal shapes plus the glyph vocabulary), and the preference registry that keeps boards consistent."
+          "insert": " covers the diagram language: the two genres every board mixes, the object surface (eight universal shapes plus the glyph vocabulary), and the preference registry that keeps boards consistent."
         }
       ],
       "children": []
@@ -419,7 +460,7 @@
           }
         },
         {
-          "insert": " — the declarative layout vocabulary an agent writes to arrange a board: rows and columns, sections, items, groups, grids, hug, align, fans, and arrows."
+          "insert": " covers the declarative layout vocabulary an agent writes to arrange a board: rows and columns, sections, items, groups, grids, hug, align, fans, and arrows."
         }
       ],
       "children": []
@@ -440,7 +481,7 @@
           }
         },
         {
-          "insert": " — the rules that make generated boards read well, stated as checkable constraints on spacing, alignment, flow, and containment."
+          "insert": " covers the rules that make generated boards read well, stated as checkable constraints on spacing, alignment, flow, and containment."
         }
       ],
       "children": []
@@ -461,7 +502,7 @@
           }
         },
         {
-          "insert": " — how an agent drives the canvas: the session and kernel contract, the gesture vocabulary, grid and defaults, and the operation pipeline."
+          "insert": " covers how an agent drives the canvas: the session and kernel contract, the gesture vocabulary, grid and defaults, and the operation pipeline."
         }
       ],
       "children": []

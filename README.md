@@ -67,3 +67,8 @@ MIT — see `LICENSE`.
 
 The files under `packages/canvas/src/vendor/blocksuite/` are vendored from
 BlockSuite and remain under the MPL-2.0; see that directory's `NOTICE`.
+
+Canvas icon glyphs generated from `tools/dev-icons/vendor/` come from Tabler
+Icons (MIT) and Simple Icons (CC0, except three logos with their own licenses;
+the logos are trademarks of their owners). See
+`tools/dev-icons/THIRD-PARTY-NOTICES.md`.

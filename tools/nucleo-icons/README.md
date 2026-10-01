@@ -17,7 +17,9 @@ Dropbox Nucleo library (canonical)  →  manifest.json  →  generate.ts  →  p
    React component `export` and its Nucleo `source` path (relative to a library
    set, e.g. `nucleo_ui/outline/ui-layout/18px_check.svg`), unless marked
    `{ "custom": true }`. `glyphs` entries map a stable `id` to a `source` for
-   the canvas `icon` object glyph registry.
+   the canvas `icon` object glyph registry: the `nucleo` icon pack's 30
+   operational-map glyphs. The Tabler generic glyphs and the Simple Icons brand
+   logos come from `tools/dev-icons/generate.ts`.
 3. **generate.ts** — resolves and vendors the sources, then emits the outputs.
 
 Run it from anywhere in the repo with:
@@ -53,8 +55,9 @@ The generator owns `packages/canvas/src/ui/icons/nucleo/` — it rewrites every
   component per icon (e.g. `alert-triangle-icon.tsx` for `AlertTriangleIcon`).
 - `packages/canvas/src/ui/icons/nucleo/index.ts` — a barrel re-exporting every
   component and the shared `IconProps` type.
-- `packages/canvas/src/ui/icons/icon-glyph-data.generated.ts` — a single
-  serializable glyph-data registry (consumed whole).
+- `packages/canvas/src/objects/shapes/icon/icon-glyph-data.generated.ts` — a
+  single serializable glyph-data registry (consumed whole), beside the icon
+  object def.
 
 The shared `IconProps` type is hand-authored in
 `packages/canvas/src/ui/icons/icon-props.ts`.

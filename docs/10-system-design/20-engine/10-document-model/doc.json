@@ -4,18 +4,52 @@
   "title": "Document model",
   "root": "b-engine-model-root",
   "blocks": {
-    "b-engine-model-title-1": {
-      "id": "b-engine-model-title-1",
-      "type": "heading",
+    "b-engine-model-root": {
+      "id": "b-engine-model-root",
+      "type": "paragraph",
       "props": {
-        "level": 1
+        "concepts": [
+          "InteractiveCanvasDocument",
+          "CanvasAction",
+          "reduceInteractiveCanvasState",
+          "validation",
+          "waypoints",
+          "color roster",
+          "geometry helpers"
+        ],
+        "covers": "The data core of the canvas engine: the document schema, the closed typed-action vocabulary, the single reducer that performs every mutation, validation without throwing, and the pure geometry helpers.",
+        "format": "mdx",
+        "type": "design"
       },
-      "text": [
-        {
-          "insert": "Document model"
-        }
-      ],
-      "children": []
+      "children": [
+        "b-engine-model-intro-2",
+        "b-engine-model-schema-heading-3",
+        "b-engine-model-schema-doc-4",
+        "b-engine-model-schema-objects-5",
+        "b-engine-model-schema-detail-28",
+        "b-engine-model-schema-connections-6",
+        "b-engine-model-schema-style-7",
+        "b-engine-model-types-heading-8",
+        "b-engine-model-types-body-9",
+        "b-engine-model-color-body-10",
+        "b-engine-model-validate-heading-11",
+        "b-engine-model-validate-body-12",
+        "b-engine-model-validate-migration-13",
+        "b-engine-model-actions-heading-14",
+        "b-engine-model-actions-body-15",
+        "b-engine-model-actions-selection-16",
+        "b-engine-model-actions-objects-17",
+        "b-engine-model-actions-connections-18",
+        "b-engine-model-actions-sections-19",
+        "b-engine-model-actions-history-20",
+        "b-engine-model-actions-summary-21",
+        "b-engine-model-reducer-decision-22",
+        "b-engine-model-waypoint-choke-23",
+        "b-engine-model-geometry-heading-24",
+        "b-engine-model-geometry-body-25",
+        "b-engine-model-geometry-coords-26",
+        "b-engine-model-closing-27"
+      ]
     },
     "b-engine-model-intro-2": {
       "id": "b-engine-model-intro-2",
@@ -23,7 +57,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The model layer defines what a canvas document is (schema), the closed vocabulary of ways it can change (actions), the single function that performs every change (the reducer), and a small set of pure geometry helpers those changes lean on. Everything above this layer — pointer interaction, connector routing, rendering, the editor shell — reads and writes through these types and functions rather than inventing its own notion of canvas state."
+          "insert": "The model layer defines what a canvas document is (schema), the closed vocabulary of ways it can change (actions), the single function that performs every change (the reducer), and a small set of pure geometry helpers those changes lean on. Everything above this layer (pointer interaction, connector routing, rendering, the editor shell) reads and writes through these types and functions rather than inventing its own notion of canvas state."
         }
       ],
       "children": []
@@ -159,7 +193,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/schema/objects.ts",
-              "symbol": "InteractiveCanvasObject"
+              "symbol": "InteractiveCanvasObject",
+              "label": "InteractiveCanvasObject"
             }
           }
         },
@@ -173,7 +208,7 @@
           }
         },
         {
-          "insert": " from the closed object-type vocabulary, a single required "
+          "insert": " from the closed object-type vocabulary, a required "
         },
         {
           "insert": "text",
@@ -209,7 +244,7 @@
           }
         },
         {
-          "insert": " (x/y/width/height), and optional style/layout/per-type fields ("
+          "insert": " (x, y, width, and height), and optional style, layout, and per-type fields ("
         },
         {
           "insert": "direction",
@@ -230,6 +265,15 @@
           "insert": ", "
         },
         {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
           "insert": "icon",
           "attributes": {
             "code": true
@@ -237,6 +281,57 @@
         },
         {
           "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-schema-detail-28": {
+      "id": "b-engine-model-schema-detail-28",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Two of those per-type fields serve more than one kind. "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is an optional one-line fact under the name of a shape, icon, or section, such as a port, path, model, or version, and never prose. A sticky never keeps one, because its markdown body is its whole text, and every write path, agent patches included, clears an empty detail and drops one from a sticky. "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is required on an "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " object, where it names the glyph, and optional on a section, where it draws the header icon before the title. How each kind renders its name, detail, and icon is specified in "
+        },
+        {
+          "insert": "the shape contract",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "the shape contract"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -261,7 +356,7 @@
           }
         },
         {
-          "insert": " links two object endpoints — each with an optional side "
+          "insert": " links two object endpoints (each with an optional side "
         },
         {
           "insert": "anchor",
@@ -288,7 +383,7 @@
           }
         },
         {
-          "insert": " — and carries line style and arrow direction, its own separate "
+          "insert": ") and carries line style and arrow direction, its own separate "
         },
         {
           "insert": "label",
@@ -373,7 +468,7 @@
           }
         },
         {
-          "insert": ". Routing is always elbow/orthogonal through the routing layer; the style field never selects a path algorithm. "
+          "insert": ". Routing is always elbow/orthogonal through the routing layer. The style field never selects a path algorithm. "
         },
         {
           "insert": "waypoints",
@@ -382,7 +477,7 @@
           }
         },
         {
-          "insert": " are the user-bend mechanism: when present, routing honors the stored polyline instead of recomputing around obstacles, and the reducer keeps them coherent — translating them during rigid moves, dropping them after asymmetric moves or resizes, and clearing them when an endpoint object, anchor, or precise position changes, so a reconnected connector returns to auto-routing."
+          "insert": " are the user-bend mechanism: when present, routing honors the stored polyline instead of recomputing around obstacles, and the reducer keeps them coherent, translating them during rigid moves, dropping them after asymmetric moves or resizes, and clearing them when an endpoint object, anchor, or precise position changes, so a reconnected connector returns to auto-routing."
         }
       ],
       "children": []
@@ -406,7 +501,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The object-type vocabulary is closed: eleven kinds — "
+          "insert": "The object-type vocabulary is closed: eleven kinds ("
         },
         {
           "insert": "rectangle",
@@ -505,7 +600,7 @@
           }
         },
         {
-          "insert": " — each with a defaults row in "
+          "insert": "), each with a defaults row in "
         },
         {
           "insert": "OBJECT_TYPE_DEFAULTS",
@@ -570,7 +665,7 @@
           }
         },
         {
-          "insert": " — a swatch id from the closed 10-pick roster in "
+          "insert": ", a swatch id from the closed 10-pick roster in "
         },
         {
           "insert": "state/schema/colors.ts",
@@ -579,12 +674,13 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/schema/colors.ts",
-              "symbol": "CanvasColor"
+              "symbol": "CanvasColor",
+              "label": "state/schema/colors.ts"
             }
           }
         },
         {
-          "insert": ". The id carries no hex; what a pick looks like per kind resolves through the role tables in "
+          "insert": ". The id carries no hex. What a pick looks like per kind resolves through the workspace theme and the paint resolvers in "
         },
         {
           "insert": "theme/palette.ts",
@@ -593,7 +689,21 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/theme/palette.ts",
-              "symbol": "CANVAS_PALETTE"
+              "symbol": "CANVAS_PALETTE",
+              "label": "theme/palette.ts"
+            }
+          }
+        },
+        {
+          "insert": ", as specified in "
+        },
+        {
+          "insert": "workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "workspace themes"
             }
           }
         },
@@ -607,7 +717,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/schema/object-defaults.ts",
-              "symbol": "FIRST_USE_COLORS"
+              "symbol": "FIRST_USE_COLORS",
+              "label": "FIRST_USE_COLORS"
             }
           }
         },
@@ -630,7 +741,7 @@
           }
         },
         {
-          "insert": "). New objects take the per-kind last-picked color; connectors are the exception — every connector creation path stamps "
+          "insert": "). New objects take the per-kind last-picked color. Connectors are the exception: every connector creation path stamps "
         },
         {
           "insert": "FIRST_USE_COLORS.connector",
@@ -639,7 +750,7 @@
           }
         },
         {
-          "insert": ", and a picked connector color is not remembered for future connectors. All object text is one fixed dark color."
+          "insert": ", and a picked connector color is not remembered for future connectors. Object text color is the theme's, never a per-object field."
         }
       ],
       "children": []
@@ -669,7 +780,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/schema/validate.ts",
-              "symbol": "validateInteractiveCanvasDocument"
+              "symbol": "validateInteractiveCanvasDocument",
+              "label": "validateInteractiveCanvasDocument"
             }
           }
         },
@@ -710,7 +822,7 @@
           }
         },
         {
-          "insert": ". The key distinction is soft versus hard: an unknown "
+          "insert": ". The key distinction is soft versus hard. An unknown "
         },
         {
           "insert": "color",
@@ -719,7 +831,43 @@
           }
         },
         {
-          "insert": " is dropped with a warning and normalization continues, while invalid geometry, missing required text, duplicate ids, unknown object types, invalid section parenting, invalid connection endpoints or positions, or malformed "
+          "insert": ", an unknown glyph on a section's "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", a non-string "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and a detail on a sticky are dropped with a warning while normalization continues, and a kept "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is trimmed, with an empty one omitted. Invalid geometry, missing required text, duplicate ids, unknown object types, an "
+        },
+        {
+          "insert": "icon",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " object without a known glyph, invalid section parenting, invalid connection endpoints or positions, or malformed "
         },
         {
           "insert": "waypoints",
@@ -837,7 +985,7 @@
           }
         },
         {
-          "insert": " is a single discriminated union — every variant prefixed "
+          "insert": " is a single discriminated union (every variant prefixed "
         },
         {
           "insert": "canvas.",
@@ -846,7 +994,7 @@
           }
         },
         {
-          "insert": " — and this closed vocabulary is the entire surface through which a document can change. It covers:"
+          "insert": "), and this closed vocabulary is the entire surface through which a document can change. It covers:"
         }
       ],
       "children": []
@@ -859,7 +1007,7 @@
       },
       "text": [
         {
-          "insert": "selection and tools — "
+          "insert": "selection and tools, covering "
         },
         {
           "insert": "canvas.select",
@@ -877,7 +1025,7 @@
           }
         },
         {
-          "insert": ", "
+          "insert": ", and "
         },
         {
           "insert": "canvas.updateDocumentTitle",
@@ -886,7 +1034,7 @@
           }
         },
         {
-          "insert": ";"
+          "insert": "."
         }
       ],
       "children": []
@@ -899,7 +1047,7 @@
       },
       "text": [
         {
-          "insert": "object CRUD and geometry — add, bulk-add (paste), update, bulk geometry patch (with a history opt-out for live-preview frames), resize, nudge, duplicate, delete, and "
+          "insert": "object CRUD and geometry, covering add, bulk-add (paste), update, bulk geometry patch (with a history opt-out for live-preview frames), resize, nudge, duplicate, delete, and "
         },
         {
           "insert": "canvas.setObjectType",
@@ -908,7 +1056,7 @@
           }
         },
         {
-          "insert": " shape-swaps in place while preserving geometry, text, color, and parent;"
+          "insert": ", which shape-swaps in place while preserving geometry, text, detail, color, and parent."
         }
       ],
       "children": []
@@ -921,7 +1069,7 @@
       },
       "text": [
         {
-          "insert": "connection CRUD — add, update (endpoint changes clear waypoints), delete, and "
+          "insert": "connection CRUD, covering add, update (endpoint changes clear waypoints), delete, and "
         },
         {
           "insert": "canvas.quickConnect",
@@ -930,7 +1078,7 @@
           }
         },
         {
-          "insert": ", which connects to an existing object under the drop point or duplicates the source object with empty text and connects to it, in one history entry;"
+          "insert": ", which connects to an existing object under the drop point or duplicates the source object with empty text and connects to it, in one history entry."
         }
       ],
       "children": []
@@ -943,7 +1091,7 @@
       },
       "text": [
         {
-          "insert": "section and layout operations — "
+          "insert": "section and layout operations, covering "
         },
         {
           "insert": "canvas.setParent",
@@ -1001,7 +1149,7 @@
           }
         },
         {
-          "insert": ", "
+          "insert": ", and "
         },
         {
           "insert": "canvas.distributeSelection",
@@ -1010,7 +1158,7 @@
           }
         },
         {
-          "insert": ";"
+          "insert": "."
         }
       ],
       "children": []
@@ -1023,7 +1171,7 @@
       },
       "text": [
         {
-          "insert": "history — "
+          "insert": "history, covering "
         },
         {
           "insert": "canvas.undo",
@@ -1084,15 +1232,16 @@
           }
         },
         {
-          "insert": " — source, human-readable summary, and the ids touched — which backs both the undo ledger and any \"what just changed\" highlight in a consuming UI."
+          "insert": " (source, human-readable summary, and the ids touched), which backs both the undo ledger and any \"what just changed\" highlight in a consuming UI."
         }
       ],
       "children": []
     },
     "b-engine-model-reducer-decision-22": {
       "id": "b-engine-model-reducer-decision-22",
-      "type": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "Single reducer as mutation authority"
       },
@@ -1152,7 +1301,7 @@
           }
         },
         {
-          "insert": " compares each waypointed connection's two endpoint owners before and after. If both owners translated by the same delta with no resize — a multi-select drag, a nudge, a section carrying its members — every waypoint shifts by that delta, preserving trunk-and-branch fan shapes. If the owners moved asymmetrically or either resized, the waypoints are dropped so the connector falls back to obstacle-avoiding auto-routing. Because this runs inside the reducer, the waypoint change shares the triggering action's history entry: one undo restores geometry and waypoints together."
+          "insert": " compares each waypointed connection's two endpoint owners before and after. If both owners translated by the same delta with no resize (a multi-select drag, a nudge, a section carrying its members), every waypoint shifts by that delta, preserving trunk-and-branch fan shapes. If the owners moved asymmetrically or either resized, the waypoints are dropped so the connector falls back to obstacle-avoiding auto-routing. Because this runs inside the reducer, the waypoint change shares the triggering action's history entry: one undo restores geometry and waypoints together."
         }
       ],
       "children": []
@@ -1305,7 +1454,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every geometry and waypoint is a plain number pair in one flat world-space coordinate system — logical px, no separate world/screen unit split in the schema. The origin is not pinned to anything; objects may have negative coordinates or extend past the document's nominal "
+          "insert": "Every geometry and waypoint is a plain number pair in one flat world-space coordinate system: logical px, no separate world/screen unit split in the schema. The origin is not pinned to anything. Objects may have negative coordinates or extend past the document's nominal "
         },
         {
           "insert": "size",
@@ -1361,7 +1510,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every change to a document — pointer interaction, keyboard shortcut, toolbar edit, or external agent — must be expressed as a "
+          "insert": "Every change to a document (pointer interaction, keyboard shortcut, toolbar edit, or external agent) must be expressed as a "
         },
         {
           "insert": "CanvasAction",
@@ -1388,53 +1537,6 @@
         }
       ],
       "children": []
-    },
-    "b-engine-model-root": {
-      "id": "b-engine-model-root",
-      "type": "paragraph",
-      "props": {
-        "covers": "The data core of the canvas engine: the document schema, the closed typed-action vocabulary, the single reducer that performs every mutation, validation without throwing, and the pure geometry helpers.",
-        "format": "mdx",
-        "type": "design",
-        "concepts": [
-          "InteractiveCanvasDocument",
-          "CanvasAction",
-          "reduceInteractiveCanvasState",
-          "validation",
-          "waypoints",
-          "color roster",
-          "geometry helpers"
-        ]
-      },
-      "children": [
-        "b-engine-model-title-1",
-        "b-engine-model-intro-2",
-        "b-engine-model-schema-heading-3",
-        "b-engine-model-schema-doc-4",
-        "b-engine-model-schema-objects-5",
-        "b-engine-model-schema-connections-6",
-        "b-engine-model-schema-style-7",
-        "b-engine-model-types-heading-8",
-        "b-engine-model-types-body-9",
-        "b-engine-model-color-body-10",
-        "b-engine-model-validate-heading-11",
-        "b-engine-model-validate-body-12",
-        "b-engine-model-validate-migration-13",
-        "b-engine-model-actions-heading-14",
-        "b-engine-model-actions-body-15",
-        "b-engine-model-actions-selection-16",
-        "b-engine-model-actions-objects-17",
-        "b-engine-model-actions-connections-18",
-        "b-engine-model-actions-sections-19",
-        "b-engine-model-actions-history-20",
-        "b-engine-model-actions-summary-21",
-        "b-engine-model-reducer-decision-22",
-        "b-engine-model-waypoint-choke-23",
-        "b-engine-model-geometry-heading-24",
-        "b-engine-model-geometry-body-25",
-        "b-engine-model-geometry-coords-26",
-        "b-engine-model-closing-27"
-      ]
     }
   }
 }

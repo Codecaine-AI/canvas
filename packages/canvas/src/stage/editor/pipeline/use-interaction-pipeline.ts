@@ -49,6 +49,8 @@ import {
   anchorScreenPoint,
 } from "../../../connectors/AnchorDots";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
+import type { CanvasStyle } from "../../../theme/canvas-style";
+import { useCanvasStyle } from "../../../theme/canvas-style-context";
 import { animateSectionFitToChildren } from "../features/section-fit/animate-section-fit";
 import { useHoverTarget } from "./use-hover-target";
 
@@ -82,6 +84,8 @@ export const SELECTION_DRAG_KINDS: ReadonlySet<string> = new Set([
 
 type ResolveHitOptions = {
   zoom?: number;
+  /** Workspace canvas style (where section title chips sit; how big below-band captions are). */
+  canvasStyle?: CanvasStyle;
   viewport?: ViewportState;
   screen?: CanvasPoint;
   portProximityObjectIds?: readonly string[];
@@ -119,7 +123,7 @@ function resolvePortProximityHit(
   for (const object of document.objects) {
     if (!selected.has(object.id)) continue;
     for (const anchor of ANCHOR_NAMES) {
-      const center = anchorScreenPoint(options.viewport, object, anchor);
+      const center = anchorScreenPoint(options.viewport, object, anchor, options.canvasStyle);
       const dx = screen.x - center.x;
       const dy = screen.y - center.y;
       const distanceSq = dx * dx + dy * dy;
@@ -225,7 +229,7 @@ export function resolveHit(
       const object = document.objects.find((item) => item.id === objectId);
       // D16 outline veto (see doc comment above). An id with no matching
       // document object (stale DOM) keeps the pre-D16 behavior.
-      if (!object || outlineContainsPoint(object, world)) {
+      if (!object || outlineContainsPoint(object, world, undefined, options.canvasStyle)) {
         return { kind: "object", objectId };
       }
     }
@@ -341,6 +345,9 @@ export function useInteractionPipeline({
   };
   const viewportRef = useRef(viewport);
   viewportRef.current = viewport;
+  const canvasStyle = useCanvasStyle();
+  const canvasStyleRef = useRef(canvasStyle);
+  canvasStyleRef.current = canvasStyle;
   const {
     hoveredObjectId,
     hoveredObjectIdRef,
@@ -350,6 +357,7 @@ export function useInteractionPipeline({
     document,
     tool,
     zoom: viewport.zoom,
+    canvasStyle,
   });
 
   // Tracks the pointerId + stage element of an in-progress gesture so window-level
@@ -382,6 +390,7 @@ export function useInteractionPipeline({
           : undefined;
       const hit = resolveHit(target, stateRef.current.document, world, {
         zoom: viewportRef.current.zoom,
+        canvasStyle: canvasStyleRef.current,
         viewport: viewportRef.current,
         screen,
         portProximityObjectIds,
@@ -411,6 +420,7 @@ export function useInteractionPipeline({
         armedShape: stateRef.current.armedShape,
         lastPickedColor: stateRef.current.lastPickedColor,
         viewport: viewportRef.current,
+        canvasStyle: canvasStyleRef.current,
       };
       const result = stepInteraction(interactionStateRef.current, canvasEvent, ctx);
       interactionStateRef.current = result.state;

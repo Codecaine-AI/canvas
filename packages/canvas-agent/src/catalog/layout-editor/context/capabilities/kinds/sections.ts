@@ -42,12 +42,15 @@ export const SECTIONS_SPEC: KindSpec = {
       topic: "title_and_color",
       items: [
         "the text field renders as the frame's title chip — the chip is not a separate object",
+        "the chip can open with an `icon`, any glyph name, generic or `brand-*`, and close with a `detail` after the title: one short fact such as a host, runtime, or path",
         "color comes from the roster and initially defaults to gray; the finished region tint can express its semantic role",
       ],
     },
   ],
   tips: [
     "design the section skeleton before placing content — the sections are the reading structure of the board",
+    "title a frame with a short name and give its one distinguishing fact as the detail, like `Bun services` with `127.0.0.1`",
+    "give a frame an icon when a glyph fits what it holds: a generic glyph for its role, a `brand-*` logo for a technology the board names; when none fits, leave it off",
     "size the base section to the diagram you are about to draw, and grow it whenever the content starts to feel tight — space is the cheapest thing on a board",
     "size a frame for the content you are about to put in it, then call fit_section once it is filled if you want the frame closed snugly around it",
     "a section endpoint intentionally treats the subsystem as one unit; participant endpoints expose individual causal handoffs, fan-out, or merge rather than hiding them at the frame",

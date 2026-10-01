@@ -14,6 +14,7 @@
  */
 import { LAYOUT_RULES } from "./index";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import { draftWithPageFrame } from "../page-frame";
 import type { Diagnostic, LayoutRule, LintContext } from "./types";
 
 /**
@@ -44,16 +45,38 @@ export function runDiagnostics(
   ];
 }
 
+/** The parts of a layout session a lint pass reads. */
+export interface LintSession {
+  readonly draft: InteractiveCanvasDocument;
+  readonly canvasStyle?: LintContext["canvasStyle"];
+  /** The board as the session opened it; the authorship baseline derives from it. */
+  readonly baseline?: InteractiveCanvasDocument;
+}
+
 /**
- * `runDiagnostics` over a layout session's draft, measured with the session's
- * workspace canvas style. Every session-side caller goes through here so no
- * lint pass forgets the style.
+ * The lint context of a layout session: its workspace canvas style, and the
+ * draft it STARTED from as the authorship baseline — the opened board plus
+ * the page frame injected at open (`draftWithPageFrame`, the same call both
+ * session kinds build their first draft with), so harness scaffolding never
+ * reads as text the agent wrote.
+ */
+export function sessionLintContext(session: LintSession): LintContext {
+  return {
+    canvasStyle: session.canvasStyle,
+    ...(session.baseline ? { baseline: draftWithPageFrame(session.baseline) } : {}),
+  };
+}
+
+/**
+ * `runDiagnostics` over a layout session's draft, in the session's lint
+ * context (`sessionLintContext`). Every session-side caller goes through here
+ * so no lint pass forgets the style or the authorship baseline.
  */
 export function sessionDiagnostics(
-  session: { readonly draft: InteractiveCanvasDocument; readonly canvasStyle?: LintContext["canvasStyle"] },
+  session: LintSession,
   rules: readonly LayoutRule[] = LAYOUT_RULES,
 ): Diagnostic[] {
-  return runDiagnostics(session.draft, rules, { canvasStyle: session.canvasStyle });
+  return runDiagnostics(session.draft, rules, sessionLintContext(session));
 }
 
 /**

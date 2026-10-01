@@ -22,6 +22,7 @@
       },
       "children": [
         "b-sapi-intro-1",
+        "b-sapi-intro-1b",
         "b-sapi-intro-2",
         "b-sapi-decision-id-rule",
         "b-sapi-h2-registry",
@@ -44,13 +45,22 @@
         "b-sapi-text-p2",
         "b-sapi-code-presets",
         "b-sapi-text-p3",
+        "b-sapi-h3-detail",
+        "b-sapi-detail-p1",
+        "b-sapi-detail-center",
+        "b-sapi-detail-below",
+        "b-sapi-detail-chip",
+        "b-sapi-detail-p2",
+        "b-sapi-decision-detail",
         "b-sapi-h2-outline",
         "b-sapi-outline-p1",
         "b-sapi-code-outlinespec",
         "b-sapi-outline-p2",
         "b-sapi-code-outlinespecfor",
         "b-sapi-anchors-p1",
+        "b-sapi-anchors-p1b",
         "b-sapi-anchors-p2",
+        "b-sapi-anchors-p2b",
         "b-sapi-hit-p1",
         "b-sapi-decision-outline-hit",
         "b-sapi-h2-color",
@@ -61,6 +71,8 @@
         "b-sapi-code-swatch",
         "b-sapi-code-color-hexes",
         "b-sapi-color-p3",
+        "b-sapi-color-p3b",
+        "b-sapi-color-themes",
         "b-sapi-color-p4",
         "b-sapi-constraint-closed-roster",
         "b-sapi-constraint-closed-vocab",
@@ -82,7 +94,7 @@
           }
         },
         {
-          "insert": " in this engine is not a drawing primitive — it is a typed, agent-editable JSON record: a member of the closed "
+          "insert": " in this engine is not a drawing primitive but a typed, agent-editable JSON record: a member of the closed "
         },
         {
           "insert": "InteractiveCanvasObjectType",
@@ -91,7 +103,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/schema/object-types.ts",
-              "symbol": "InteractiveCanvasObjectType"
+              "symbol": "InteractiveCanvasObjectType",
+              "label": "InteractiveCanvasObjectType"
             }
           }
         },
@@ -114,7 +127,7 @@
           }
         },
         {
-          "insert": ", no rotation anywhere in the schema), a single "
+          "insert": ", no rotation anywhere in the schema), a "
         },
         {
           "insert": "text",
@@ -123,7 +136,16 @@
           }
         },
         {
-          "insert": " field, and a single optional "
+          "insert": " name with an optional one-line "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and a single optional "
         },
         {
           "insert": "color",
@@ -132,7 +154,18 @@
           }
         },
         {
-          "insert": " pick from a closed 10-pick roster. Everything else about a kind — how it paints, where its text lives and is edited, its connection outline and anchors, its resize handles, its selection toolbar, its creation defaults — is declared on one registered definition object, and every consumer (render, routing, interaction, editor trim) derives its behavior from that declaration. There is no freeform vector path, no per-instance transform, and no plugin-registered shape class; every mutation flows through the single reducer documented in "
+          "insert": " pick from a closed 10-pick roster. Everything else about a kind is declared on one registered definition object: how it paints, where its text lives and is edited, its connection outline and anchors, its resize handles, its selection toolbar, and its creation defaults."
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-intro-1b": {
+      "id": "b-sapi-intro-1b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every consumer (render, routing, interaction, editor trim) derives its behavior from that declaration. There is no freeform vector path, no per-instance transform, and no plugin-registered shape class, and every mutation flows through the single reducer documented in "
         },
         {
           "insert": "the document model",
@@ -206,7 +239,7 @@
           }
         },
         {
-          "insert": " field, and outline geometry lives in the defs, not the routing layer. This doc specifies the contract bottom-up: the def types, the text-slot library, the outline/anchor system, and the color system. Where each piece lives in source — and the recipe for adding a shape — is the implementation tier's to govern."
+          "insert": " field, and outline geometry lives in the defs, not the routing layer. This doc specifies the contract bottom-up: the def types, the text-slot library, the outline/anchor system, and the color system. Where each piece lives in source (and the recipe for adding a shape) is the implementation tier's to govern."
         }
       ],
       "children": []
@@ -216,12 +249,11 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
-        "title": "Decision ids cite their home page — bare ids are ambiguous across logs"
+        "title": "Decision ids cite their home page: bare ids are ambiguous across logs"
       },
       "text": [
         {
-          "insert": "The D-ids on this page belong to the object-definition overhaul's decision log and are anchored here. They are not the only D-numbered log the corpus has carried: other pages' logs have used the same numbers for unrelated decisions — a \"D4\" elsewhere has named the view-crop feature and a \"D16\" a vocabulary wave, colliding with the overhaul's D4 (the outline primitive) and D16 (outline hit-testing). The citation rule this page follows: a decision id is only meaningful together with its home page, so cite \"D4\" as this page's D4, never as a bare id a reader must disambiguate."
+          "insert": "The D-ids on this page belong to the object-definition overhaul's decision log and are anchored here. They are not the only D-numbered log the corpus has carried: other pages' logs have used the same numbers for unrelated decisions. A \"D4\" elsewhere has named the view-crop feature and a \"D16\" a vocabulary wave, colliding with the overhaul's D4 (the outline primitive) and D16 (outline hit-testing). The citation rule this page follows: a decision id is only meaningful together with its home page, so cite \"D4\" as this page's D4, never as a bare id a reader must disambiguate."
         }
       ],
       "children": []
@@ -234,7 +266,7 @@
       },
       "text": [
         {
-          "insert": "ObjectDef v2 — the two-tier registry"
+          "insert": "ObjectDef v2: The Two-Tier Registry"
         }
       ],
       "children": []
@@ -259,7 +291,7 @@
           }
         },
         {
-          "insert": ": the behavior contract for one kind of thing on the canvas. The specials — "
+          "insert": ", the behavior contract for one kind of thing on the canvas. The specials ("
         },
         {
           "insert": "sectionDef",
@@ -287,7 +319,7 @@
           }
         },
         {
-          "insert": " — are hand-written first-class defs (sections take "
+          "insert": ") are hand-written first-class defs (sections take "
         },
         {
           "insert": "handles: \"corners\"",
@@ -305,7 +337,7 @@
           }
         },
         {
-          "insert": "; everything else takes the full 8-handle set); the uniform shape family gets its ObjectDef generated from a tier-2 "
+          "insert": ", while everything else takes the full 8-handle set). The uniform shape family gets its ObjectDef generated from a tier-2 "
         },
         {
           "insert": "ShapeDef",
@@ -333,7 +365,7 @@
           }
         },
         {
-          "insert": ". Every field is consumed from the registry — none is decorative:"
+          "insert": ". Every field is consumed from the registry. None is decorative:"
         }
       ],
       "children": []
@@ -371,7 +403,7 @@
           }
         },
         {
-          "insert": " (all 11 registered defs, in stylesheet order — "
+          "insert": " (all 11 registered defs, in stylesheet order: "
         },
         {
           "insert": "OBJECT_DEFS_CSS",
@@ -426,7 +458,7 @@
           }
         },
         {
-          "insert": "; every other kind dispatches on the effective render shape ("
+          "insert": ". Every other kind dispatches on the effective render shape ("
         },
         {
           "insert": "renderShapeFor()",
@@ -513,7 +545,7 @@
           }
         },
         {
-          "insert": "; its generic fallback only fires for a render shape with no registered def (today solely an explicit "
+          "insert": ". Its generic fallback only fires for a render shape with no registered def (today solely an explicit "
         },
         {
           "insert": "style.shape: \"section\"",
@@ -574,7 +606,7 @@
           }
         },
         {
-          "insert": " CanvasTool is a mode, not an object type, so D19 still holds. Connectors get their own honest, small definition — deliberately absent from "
+          "insert": " CanvasTool is a mode, not an object type, so D19 still holds. Connectors get their own honest, small definition, deliberately absent from "
         },
         {
           "insert": "OBJECT_DEFS",
@@ -630,21 +662,21 @@
           }
         },
         {
-          "insert": " — dashed reuses the same routed path with the "
+          "insert": ". Dashed reuses the same routed path with the dash array from "
         },
         {
-          "insert": "CONNECTOR_DASH_PATTERN_PX",
+          "insert": "connectorDashArray",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/connectors/def.ts",
-              "symbol": "CONNECTOR_DASH_PATTERN_PX"
+              "symbol": "connectorDashArray"
             }
           }
         },
         {
-          "insert": " dash array. "
+          "insert": ": FigJam's 19/7 pattern scaled to the theme's connector line width. "
         },
         {
           "insert": "connection.arrow",
@@ -667,7 +699,7 @@
           }
         },
         {
-          "insert": ", and there is exactly one arrowhead marker — a solid filled triangle colored via SVG "
+          "insert": ", and there is exactly one arrowhead marker (a solid filled triangle colored via SVG "
         },
         {
           "insert": "context-stroke",
@@ -676,7 +708,7 @@
           }
         },
         {
-          "insert": " — with no per-endpoint cap choice. There are no elbow or smooth style values: the router itself is elbow/orthogonal by default, and persisted waypoints from bend editing are the only override. Labels render as midpoint chips, and new connectors are always stamped gray — a connector never tints from its source object."
+          "insert": ") with no per-endpoint cap choice. There are no elbow or smooth style values: the router itself is elbow/orthogonal by default, and persisted waypoints from bend editing are the only override. Labels render as midpoint chips, and new connectors are always stamped gray. A connector never tints from its source object."
         }
       ],
       "children": []
@@ -686,12 +718,11 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
-        "title": "Toolbar control sets are deliberately simplified — no text-formatting tier"
+        "title": "Toolbar control sets are deliberately simplified, with no text-formatting tier"
       },
       "text": [
         {
-          "insert": "One typeface and one text size everywhere: bold/strikethrough/link/font/size/alignment controls are intentionally absent, and sticky bodies render live simple markdown instead (D18). Per-kind control sets are data on the defs: shape — color / text / shape-swap ("
+          "insert": "Object text has no per-object formatting. Bold, strikethrough, link, font, size, and alignment controls are intentionally absent, the workspace theme sets every object's typeface, weight, and sizes, and sticky bodies render live simple markdown instead (D18). Per-kind control sets are data on the defs: shapes take color, text, and shape-swap ("
         },
         {
           "insert": "SHAPE_TOOLBAR",
@@ -700,12 +731,13 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/objects/shapes/toolbar.ts",
-              "symbol": "SHAPE_TOOLBAR"
+              "symbol": "SHAPE_TOOLBAR",
+              "label": "SHAPE_TOOLBAR"
             }
           }
         },
         {
-          "insert": "); sticky — color / text; connector — color / text / dash / arrowhead ("
+          "insert": "), stickies take color and text, connectors take color, text, dash, and arrowhead ("
         },
         {
           "insert": "connectorDef",
@@ -714,12 +746,13 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/connectors/def.ts",
-              "symbol": "connectorDef"
+              "symbol": "connectorDef",
+              "label": "connectorDef"
             }
           }
         },
         {
-          "insert": "); section — color / rename / fit-children / border-style / lock ("
+          "insert": "), and sections take color, rename, fit-children, border-style, and lock ("
         },
         {
           "insert": "SECTION_TOOLBAR",
@@ -728,7 +761,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/objects/section/toolbar.ts",
-              "symbol": "SECTION_TOOLBAR"
+              "symbol": "SECTION_TOOLBAR",
+              "label": "SECTION_TOOLBAR"
             }
           }
         },
@@ -746,7 +780,7 @@
       },
       "text": [
         {
-          "insert": "ShapeDef — tier-2 variant data"
+          "insert": "ShapeDef: Tier-2 Variant Data"
         }
       ],
       "children": []
@@ -757,7 +791,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Tier 2 is variant DATA for the uniform shape family: one file per shape, each tiny. A ShapeDef never mentions toolbars, handles, or hit-testing — "
+          "insert": "Tier 2 is variant DATA for the uniform shape family: one file per shape, each tiny. A ShapeDef never mentions toolbars, handles, or hit-testing. "
         },
         {
           "insert": "shapeObjectDef()",
@@ -784,7 +818,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/shapes/shape-def.ts (doc comments trimmed)\nexport interface ShapeOutlineArgs {\n  object: InteractiveCanvasObject;\n  /** The color pick resolved through the \"shape\" palette role:\n      fill + border (border is always a hex; every pick renders a bordered shape)\n      + the fixed dark text color (D8). */\n  colors: ResolvedShapeObjectColors;\n  /** Resolved stroke width. */\n  strokeWidth: number;\n}\n\n/** The VISUAL spec: how the shape paints (distinct from the geometric `outline`). */\nexport interface SilhouetteSpec {\n  className?: string;\n  silhouette?: (args: ShapeOutlineArgs) => ReactNode;\n}\n\nexport type ShapeTextSpec = TextSlot | \"none\";\n\nexport interface ShapeDef {\n  type: InteractiveCanvasObjectType;\n  /** The `style.shape` variant this def renders. Usually same-named as `type`;\n      differs where history diverged (sticky → \"note\", process → \"rounded-rect\"). */\n  shape: NonNullable<CanvasObjectStyle[\"shape\"]>;\n  /** How the shape PAINTS (CSS class + optional SVG silhouette layer). */\n  silhouette: SilhouetteSpec;\n  /** Whether the outer button itself paints the shape border. Defaults to \"painted\". */\n  buttonBorder?: ObjectButtonBorderPolicy;\n  /** Geometric outline (D4) — omit for the bbox default (shapeObjectDef stamps BBOX_OUTLINE). */\n  outline?: OutlineSpec;\n  /** Text slot — omit for the \"center\" preset default; \"none\" = pure glyph, no text. */\n  text?: ShapeTextSpec;\n  /** This shape's global-CSS rules. */\n  css?: string;\n  /** Picker metadata — the catalog (objects/catalog.ts) derives entry labels/keywords from this. */\n  catalog: ObjectCatalogMeta;\n}"
+          "insert": "// packages/canvas/src/objects/shapes/shape-def.ts (doc comments trimmed)\nexport interface ShapeOutlineArgs {\n  object: InteractiveCanvasObject;\n  /** The color pick resolved through the \"shape\" palette role under the\n      canvas style: fill + ink border (every pick renders a bordered shape)\n      + the style's name color (D8). */\n  colors: ResolvedShapeObjectColors;\n  /** Resolved stroke width. */\n  strokeWidth: number;\n}\n\n/** The VISUAL spec: how the shape paints (distinct from the geometric `outline`). */\nexport interface SilhouetteSpec {\n  className?: string;\n  silhouette?: (args: ShapeOutlineArgs) => ReactNode;\n}\n\nexport type ShapeTextSpec = TextSlot | \"none\";\n\nexport interface ShapeDef {\n  type: InteractiveCanvasObjectType;\n  /** The `style.shape` variant this def renders. Usually same-named as `type`;\n      differs where history diverged (sticky → \"note\", process → \"rounded-rect\"). */\n  shape: NonNullable<CanvasObjectStyle[\"shape\"]>;\n  /** How the shape PAINTS (CSS class + optional SVG silhouette layer). */\n  silhouette: SilhouetteSpec;\n  /** Whether the outer button itself paints the shape border. Defaults to \"painted\". */\n  buttonBorder?: ObjectButtonBorderPolicy;\n  /** Geometric outline (D4) — omit for the bbox default (shapeObjectDef stamps BBOX_OUTLINE). */\n  outline?: OutlineSpec;\n  /** Text slot — omit for the \"center\" preset default; \"none\" = pure glyph, no text. */\n  text?: ShapeTextSpec;\n  /** This shape's global-CSS rules. */\n  css?: string;\n  /** Picker metadata — the catalog (objects/catalog.ts) derives entry labels/keywords from this. */\n  catalog: ObjectCatalogMeta;\n}"
         }
       ],
       "children": []
@@ -813,7 +847,7 @@
           }
         },
         {
-          "insert": " is NOT authored on the def. Per-type creation/placement defaults are schema vocabulary — "
+          "insert": " is NOT authored on the def. Per-type creation/placement defaults are schema vocabulary, "
         },
         {
           "insert": "OBJECT_TYPE_DEFAULTS",
@@ -863,7 +897,7 @@
           }
         },
         {
-          "insert": " so a new type without a row is a compile error) — because the reducer needs those rows at reduce time ("
+          "insert": " so a new type without a row is a compile error), because the reducer needs those rows at reduce time ("
         },
         {
           "insert": "canvas.addObject",
@@ -983,7 +1017,7 @@
           }
         },
         {
-          "insert": " field — there is no per-object radius override. Changing how a kind looks means editing its def, never a document."
+          "insert": " field. There is no per-object radius override. Changing how a kind looks means editing its def, never a document."
         }
       ],
       "children": []
@@ -993,7 +1027,6 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
         "title": "Reference recordings are the visual parity authority"
       },
       "text": [
@@ -1012,7 +1045,7 @@
           }
         },
         {
-          "insert": " — the FigJam and AFFiNE reference screen recordings plus the pixel-sampled "
+          "insert": " (the FigJam and AFFiNE reference screen recordings plus the pixel-sampled "
         },
         {
           "insert": "analysis/",
@@ -1021,7 +1054,7 @@
           }
         },
         {
-          "insert": " corpus distilled from them — is the single parity authority for every FigJam-derived constant in the engine: colors, radii, stroke widths, spacing, motion. A parity question is settled against the recordings, not any individual engineer's judgment call. Two qualifiers. First, not every value in the analysis corpus is a direct measurement: some are flagged extrapolations for states the recordings never captured (the multi-object selection-toolbar variant is the standing example) — treat an extrapolated constant as a best guess and reconfirm against live FigJam before relying on it for a pixel-exact decision. Second, supersession is explicit, never silent: when shipping geometry deliberately departs from a measured value, the departure is a named decision and the measurement remains documented history — the recording measurement stays the recorded reference even when overruled."
+          "insert": " corpus distilled from them) is the single parity authority for every FigJam-derived constant in the engine: colors, radii, stroke widths, spacing, motion. A parity question is settled against the recordings, not any individual engineer's judgment call. Two qualifiers. First, not every value in the analysis corpus is a direct measurement: some are flagged extrapolations for states the recordings never captured (the multi-object selection-toolbar variant is the standing example). Treat an extrapolated constant as a best guess and reconfirm against live FigJam before relying on it for a pixel-exact decision. Second, supersession is explicit, never silent: when shipping geometry deliberately departs from a measured value, the departure is a named decision and the measurement remains documented history. The recording measurement stays the recorded reference even when overruled."
         }
       ],
       "children": []
@@ -1034,7 +1067,7 @@
       },
       "text": [
         {
-          "insert": "Text: one field, slot presets"
+          "insert": "Text: Name, Detail, and Slot Presets"
         }
       ],
       "children": []
@@ -1045,7 +1078,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every object stores its text in the single required "
+          "insert": "Every object stores its name in the single required "
         },
         {
           "insert": "text",
@@ -1054,12 +1087,13 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/schema/objects.ts",
-              "symbol": "InteractiveCanvasObject"
+              "symbol": "InteractiveCanvasObject",
+              "label": "text"
             }
           }
         },
         {
-          "insert": " field (D3/D11; it may be empty). The kind decides rendering: sections render it as the floating title chip, stickies render simple markdown (D18: H1–H3, bullets, bold, inline code — "
+          "insert": " field (D3/D11, and it may be empty). The kind decides rendering: sections render it as the title in their header chip, stickies render simple markdown (D18: H1 to H3, bullets, bold, and inline code in "
         },
         {
           "insert": "objects/sticky/markdown.tsx",
@@ -1067,12 +1101,22 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/objects/sticky/markdown.tsx"
+              "path": "packages/canvas/src/objects/sticky/markdown.tsx",
+              "label": "objects/sticky/markdown.tsx"
             }
           }
         },
         {
-          "insert": "), shapes render it in their declared slot. Connections keep their own separate "
+          "insert": "), and shapes render it in their declared slot. Shapes, icons, and sections can add an optional one-line "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " under the name, and connections keep their own separate "
         },
         {
           "insert": "label",
@@ -1081,7 +1125,7 @@
           }
         },
         {
-          "insert": ". Where and how that text renders — and is edited — is a "
+          "insert": ". Where and how that text renders, and is edited, is a "
         },
         {
           "insert": "TextSlot",
@@ -1090,7 +1134,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/objects/text-slots.ts",
-              "symbol": "TextSlot"
+              "symbol": "TextSlot",
+              "label": "TextSlot"
             }
           }
         },
@@ -1133,7 +1178,7 @@
           }
         },
         {
-          "insert": " is the one rect/typography source; the at-rest renderer ("
+          "insert": " is the one rect/typography source. The at-rest renderer ("
         },
         {
           "insert": "ObjectSlotText",
@@ -1160,7 +1205,7 @@
           }
         },
         {
-          "insert": ") both call it, so at rest and mid-edit are pixel-identical, caret aside — no gray-out, no visually distinct overlay. While an object's text is being edited, the def's renderer receives "
+          "insert": ") both call it, so at rest and mid-edit are pixel-identical, caret aside: no gray-out, no visually distinct overlay. While an object's text is being edited, the def's renderer receives "
         },
         {
           "insert": "hideText",
@@ -1182,7 +1227,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/objects/text-slots.ts — the presets (values verbatim, others elided)\nexport const OBJECT_TEXT_COLOR = \"#000000\"; // the one object-text color (D8)\n\nexport const SHAPE_TEXT_TYPOGRAPHY: SlotTypography = {\n  fontSizePx: 15,\n  fontWeight: 700,\n  lineHeight: \"1.2\",\n  textAlign: \"center\",\n  color: OBJECT_TEXT_COLOR,\n};\n\n/** \"center\" — inside the shape body, centered both ways. The default for shapes. */\nexport const CENTER_TEXT_SLOT: TextSlot = {\n  placement: \"center\",\n  typography: SHAPE_TEXT_TYPOGRAPHY,\n  zoom: \"natural\",\n  verticalAlign: \"center\",\n  multiline: true,\n};\n\n/** \"below\" — bold band under the icon glyph. */\nexport function belowTextSlot(options?: { compactBelowHeightPx?: number }): TextSlot;\nexport const BELOW_TEXT_SLOT: TextSlot = belowTextSlot();\n\n/** \"inset-body\" — padded multi-line body area (sticky): 24px/400, \"36px\" lines, left, top. */\nexport const INSET_BODY_TEXT_SLOT: TextSlot;\n\n/** \"title-chip\" — floating chip, top-left, zoom counter-scaled (section): 16px/700, single-line. */\nexport const TITLE_CHIP_TEXT_SLOT: TextSlot;\n\n/** The escape hatch: a def-provided object-local rect, shape-baseline typography unless overridden. */\nexport function rectTextSlot(\n  rect: (object: InteractiveCanvasObject) => LocalRect,\n  options?: Partial<Omit<TextSlot, \"placement\">>,\n): TextSlot;\n\n/** The ONE rect/typography source both the at-rest renderer and the in-place editor consume. */\nexport function resolveTextSlot(slot: TextSlot, object: InteractiveCanvasObject, zoom = 1): ResolvedTextSlot;"
+          "insert": "// packages/canvas/src/objects/text-slots.ts — the presets (values verbatim, others elided)\nexport const OBJECT_TEXT_COLOR = \"#000000\"; // the figjam text color (D8); live text takes the theme's textColor\n\nexport const SHAPE_TEXT_TYPOGRAPHY: SlotTypography = {\n  fontSizePx: 15,\n  fontWeight: 700,\n  lineHeight: \"1.2\",\n  textAlign: \"center\",\n  color: OBJECT_TEXT_COLOR,\n};\n\n/** \"center\" — inside the shape body, centered both ways. The default for shapes. */\nexport const CENTER_TEXT_SLOT: TextSlot = {\n  placement: \"center\",\n  typography: SHAPE_TEXT_TYPOGRAPHY,\n  zoom: \"natural\",\n  verticalAlign: \"center\",\n  multiline: true,\n};\n\n/** \"below\" — bold band under the icon glyph. */\nexport function belowTextSlot(options?: { compactBelowHeightPx?: number }): TextSlot;\nexport const BELOW_TEXT_SLOT: TextSlot = belowTextSlot();\n\n/** \"inset-body\" — padded multi-line body area (sticky): 24px/400, \"36px\" lines, left, top. */\nexport const INSET_BODY_TEXT_SLOT: TextSlot;\n\n/** \"title-chip\" — header chip, top-left (floating or pinned by the theme), zoom counter-scaled (section): figjam 16px/700, single-line. */\nexport const TITLE_CHIP_TEXT_SLOT: TextSlot;\n\n/** The escape hatch: a def-provided object-local rect, shape-baseline typography unless overridden. */\nexport function rectTextSlot(\n  rect: (object: InteractiveCanvasObject) => LocalRect,\n  options?: Partial<Omit<TextSlot, \"placement\">>,\n): TextSlot;\n\n/** The ONE rect/typography source both the at-rest renderer and the in-place editor consume:\n    the rect, the theme's name typography, and the detail line under the name. */\nexport function resolveTextSlot(\n  slot: TextSlot,\n  object: InteractiveCanvasObject,\n  zoom = 1,\n  options?: { draftText?: string; canvasStyle?: CanvasStyle },\n): ResolvedTextSlot;"
         }
       ],
       "children": []
@@ -1193,7 +1238,213 @@
       "props": {},
       "text": [
         {
-          "insert": "Preset assignments in the shipped defs: most shapes take the \"center\" default (15px/700, centered, dark — D6's baseline); the icon glyph family takes \"below\"; sticky takes \"inset-body\"; section takes \"title-chip\", whose chip counter-scales sub-linearly when zoomed out (titleChipScale() = (1/zoom)^0.6 capped at 6×, geometry in TITLE_CHIP); arrow-shape declares a rectTextSlot function (text centers in the body excluding the head). No shipped def declares text: \"none\" today, but the capability remains: no slot, and textEditing.editable is false, so they refuse the editor."
+          "insert": "In the shipped defs, most shapes take the \"center\" default (15px, centered, in the theme's name color and weight, which figjam sets to 700 black as D6's baseline). The icon glyph family takes \"below\" and sticky takes \"inset-body\". Section takes \"title-chip\", whose chip counter-scales sub-linearly when zoomed out (titleChipScale() = (1/zoom)^0.6 capped at 6×, geometry in TITLE_CHIP) and sits floating or pinned as the theme places it. Arrow-shape declares a rectTextSlot function (text centers in the body excluding the head). No shipped def declares text: \"none\" today, but the capability remains: no slot, and textEditing.editable is false, so they refuse the editor."
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-h3-detail": {
+      "id": "b-sapi-h3-detail",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "The Detail Line"
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-detail-p1": {
+      "id": "b-sapi-detail-p1",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A slot paints the detail line only when "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " holds non-blank text, with every whitespace run, newlines included, collapsed to one space. The line sets in the theme's detail typography ("
+        },
+        {
+          "insert": "workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "workspace themes"
+            }
+          }
+        },
+        {
+          "insert": "), 3px under the name block, and ellipsizes at the slot width instead of wrapping. Each placement fits it differently:"
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-detail-center": {
+      "id": "b-sapi-detail-center",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Center and rect slots",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-sapi-detail-center-body"
+      ]
+    },
+    "b-sapi-detail-center-body": {
+      "id": "b-sapi-detail-center-body",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The name and the detail form one vertically centered block. The detail reserves its line first, so the name loses lines before the detail does, and a slot too short for one name line plus the detail line drops the detail."
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-detail-below": {
+      "id": "b-sapi-detail-below",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The below slot",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-sapi-detail-below-body"
+      ]
+    },
+    "b-sapi-detail-below-body": {
+      "id": "b-sapi-detail-below-body",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "An icon's detail follows its label lines, and the band and the painted bounds grow by the gap plus one detail line."
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-detail-chip": {
+      "id": "b-sapi-detail-chip",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Title chips and sticky bodies",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-sapi-detail-chip-body"
+      ]
+    },
+    "b-sapi-detail-chip-body": {
+      "id": "b-sapi-detail-chip-body",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A section's detail renders inline in its header chip after the title, never in a text slot, and a sticky never paints one."
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-detail-p2": {
+      "id": "b-sapi-detail-p2",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The resolved slot carries the line as "
+        },
+        {
+          "insert": "ResolvedTextSlot.detail",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/text-slots.ts",
+              "symbol": "ResolvedSlotDetail",
+              "label": "ResolvedTextSlot.detail"
+            }
+          }
+        },
+        {
+          "insert": ", so the at-rest renderer, the static renderer, and the in-place editor draw the same line. The in-place editor edits the name only and shows the detail beneath its textarea exactly as at rest. The detail itself is edited in the Inspector's Detail field, which warns past 48 characters, or by an agent's "
+        },
+        {
+          "insert": "update_text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-decision-detail": {
+      "id": "b-sapi-decision-detail",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "One name plus one fact: the detail line is not a second body"
+      },
+      "text": [
+        {
+          "insert": "The detail line keeps D11's single-text model intact. "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " stays the one name every kind edits in place, and "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " holds at most one short fact under it, such as a port, path, version, model, or host. The line is muted, single, and ellipsized rather than wrapped, so prose has nowhere to grow, and explanations go on a sticky beside the subject. Stickies never carry a detail because their markdown body is already the whole note."
         }
       ],
       "children": []
@@ -1244,7 +1495,7 @@
           }
         },
         {
-          "insert": " — a pure, React-free leaf module. The import-boundaries test allows "
+          "insert": ", a pure, React-free leaf module. The import-boundaries test allows "
         },
         {
           "insert": "connectors/",
@@ -1262,7 +1513,7 @@
           }
         },
         {
-          "insert": "; geometry.ts is where the connector-relevant outline math lives, but no single edge is pinned. A silhouette is how the shape paints; the outline is where connectors attach and clicks land — the two should trace the same curve, cross-checked by "
+          "insert": ". geometry.ts is where the connector-relevant outline math lives, but no single edge is pinned. A silhouette is how the shape paints. The outline is where connectors attach and clicks land. The two should trace the same curve, cross-checked by "
         },
         {
           "insert": "objects/__tests__/geometry-def-agreement.test.ts",
@@ -1318,7 +1569,7 @@
           }
         },
         {
-          "insert": " switch's dispatch order VERBATIM — including its quirks — so connection geometry stayed byte-identical through the P3 move. The quirk is documented in the source and worth quoting exactly, because it is NOT the render dispatch:"
+          "insert": " switch's dispatch order VERBATIM, including its quirks, so connection geometry stayed byte-identical through the P3 move. The quirk is documented in the source and worth quoting exactly, because it is NOT the render dispatch:"
         }
       ],
       "children": []
@@ -1342,7 +1593,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Anchors are the 4-ray outline projection, and that is the default for every kind — no def declares anchor points explicitly. "
+          "insert": "Anchors are the 4-ray outline projection, and that is the default for every kind. No def declares anchor points explicitly. "
         },
         {
           "insert": "getConnectionAnchors()",
@@ -1393,7 +1644,18 @@
           }
         },
         {
-          "insert": "), falling back to the bbox edge midpoint only for degenerate geometry. Three consumers read the same four points: the live connect cascade ("
+          "insert": "), falling back to the bbox edge midpoint only for degenerate geometry."
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-anchors-p1b": {
+      "id": "b-sapi-anchors-p1b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Three consumers read the same four points: the live connect cascade ("
         },
         {
           "insert": "resolveConnectionCascade",
@@ -1407,7 +1669,7 @@
           }
         },
         {
-          "insert": " — anchor snap within 8 view px, else outline snap within 8 world px, else inside, else free; unchanged from the pre-overhaul cascade, see "
+          "insert": ": anchor snap within 8 view px, else outline snap within 8 world px, else inside, else free, unchanged from the pre-overhaul cascade, see "
         },
         {
           "insert": "connectors",
@@ -1429,7 +1691,7 @@
           }
         },
         {
-          "insert": "), and the selected-object anchor dots below — so the dots you see, the ports you grab, and the points connections snap to can never disagree."
+          "insert": "), and the selected-object anchor dots below. So the dots you see, the ports you grab, and the points connections snap to can never disagree."
         }
       ],
       "children": []
@@ -1440,7 +1702,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Anchor dots (D5/D15): "
+          "insert": "For anchor dots (D5/D15), "
         },
         {
           "insert": "AnchorDots",
@@ -1472,7 +1734,7 @@
           }
         },
         {
-          "insert": "; in Connector Mode, dots are hover-driven for the topmost object under the cursor and use "
+          "insert": ". In Connector Mode, dots are hover-driven for the topmost object under the cursor and use "
         },
         {
           "insert": "bypassZoomGate",
@@ -1481,7 +1743,18 @@
           }
         },
         {
-          "insert": " so they are ungated by zoom. They replace the old invisible edge ports. Select-mode visibility and interactivity are zoom-gated by "
+          "insert": " so they are ungated by zoom. They replace the old invisible edge ports."
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-anchors-p2b": {
+      "id": "b-sapi-anchors-p2b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Select-mode visibility and interactivity are zoom-gated by "
         },
         {
           "insert": "ANCHOR_DOTS_MIN_ZOOM",
@@ -1495,7 +1768,7 @@
           }
         },
         {
-          "insert": " (0.5) — below 50% zoom, select-mode dots are hidden and inert at "
+          "insert": " (0.5): below 50% zoom, select-mode dots are hidden and inert at "
         },
         {
           "insert": "opacity: 0",
@@ -1513,7 +1786,7 @@
           }
         },
         {
-          "insert": "; Connector Mode bypasses the gate so its dots stay visible and interactive. Resize corners are unaffected: SelectionBox shows at any zoom. A pointerdown on a visible, interactive dot bubbles to the stage's "
+          "insert": ". Connector Mode bypasses the gate so its dots stay visible and interactive. Resize corners are unaffected: SelectionBox shows at any zoom. A pointerdown on a visible, interactive dot bubbles to the stage's "
         },
         {
           "insert": "[data-canvas-port]",
@@ -1561,7 +1834,7 @@
           }
         },
         {
-          "insert": " — bbox-outline kinds test the plain bounds (byte-identical to pre-D16), true-outline kinds test point-in-polygon expanded by "
+          "insert": ". Bbox-outline kinds test the plain bounds (byte-identical to pre-D16), while true-outline kinds test point-in-polygon expanded by "
         },
         {
           "insert": "OUTLINE_HIT_TOLERANCE_WORLD_PX",
@@ -1597,7 +1870,7 @@
           }
         },
         {
-          "insert": " — a drag-select rectangle grabbing a diamond's empty corner still selects it, FigJam-consistent) and snap-guide candidates ("
+          "insert": ": a drag-select rectangle grabbing a diamond's empty corner still selects it, FigJam-consistent) and snap-guide candidates ("
         },
         {
           "insert": "gatherSnapCandidates",
@@ -1606,7 +1879,7 @@
           }
         },
         {
-          "insert": " — alignment targets are axis-aligned bounds regardless of outline shape). Section drop targeting is not a point hit at all: it previews through the membership predicate over the dragged object's projected bounds, per "
+          "insert": ": alignment targets are axis-aligned bounds regardless of outline shape). Section drop targeting is not a point hit at all: it previews through the membership predicate over the dragged object's projected bounds, per "
         },
         {
           "insert": "the layer cake",
@@ -1629,8 +1902,7 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
-        "title": "Clicks respect the declared outline; drag-select and snapping deliberately stay bbox"
+        "title": "Clicks respect the declared outline. Drag-select and snapping deliberately stay bbox"
       },
       "text": [
         {
@@ -1643,7 +1915,7 @@
           }
         },
         {
-          "insert": " so true-outline shapes are only clickable where they actually paint, while drag-select and snap-candidate gathering remain bounding-box tests on purpose — they are area/alignment semantics, not point-precision semantics, and FigJam behaves the same way. Bbox-outline kinds are byte-identical to the pre-D16 behavior by construction (their outline IS the bbox and no polygon is ever materialized), which is what made the cutover safe to gate on the existing interaction test suite."
+          "insert": " so true-outline shapes are only clickable where they actually paint, while drag-select and snap-candidate gathering remain bounding-box tests on purpose. They are area/alignment semantics, not point-precision semantics, and FigJam behaves the same way. Bbox-outline kinds are byte-identical to the pre-D16 behavior by construction (their outline IS the bbox and no polygon is ever materialized), which is what made the cutover safe to gate on the existing interaction test suite."
         }
       ],
       "children": []
@@ -1685,7 +1957,7 @@
           }
         },
         {
-          "insert": " (D1). The vocabulary is FigJam's color popover, minus the custom-color wheel and minus black (D7 + D12): 10 hues, one pick per hue. Each pick resolves through ink/fill/wash roles: ink is the picker swatch and every stroke, fill is the shape/sticky/chip fill, and wash is the section tint. Legacy `-soft` ids were remapped once by tools/migrate-canvas-docs/migrate.ts to the nearest bare hue; at runtime the validator simply drops unknown ids, so there is no live normalization path in isCanvasColor(). The ids are schema vocabulary in "
+          "insert": " (D1). The vocabulary is FigJam's color popover, minus the custom-color wheel and minus black (D7 + D12): 10 hues, one pick per hue. Each pick resolves through ink/fill/wash roles: ink is the picker swatch and every stroke, fill is the shape/sticky/chip fill, and wash is the section tint. Legacy `-soft` ids were remapped once by tools/migrate-canvas-docs/migrate.ts to the nearest bare hue. At runtime the validator simply drops unknown ids, so there is no live normalization path in isCanvasColor(). The ids are schema vocabulary in "
         },
         {
           "insert": "state/schema/colors.ts",
@@ -1698,7 +1970,7 @@
           }
         },
         {
-          "insert": " — no hexes there, just the closed id set and its "
+          "insert": ": no hexes there, just the closed id set and its "
         },
         {
           "insert": "isCanvasColor()",
@@ -1712,10 +1984,7 @@
           }
         },
         {
-          "insert": " guard. "
-        },
-        {
-          "insert": "The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
+          "insert": " guard. The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
         },
         {
           "insert": "board-design-reference/analysis/palette-sheet.html",
@@ -1778,7 +2047,7 @@
           }
         },
         {
-          "insert": " — the canonical 10-row swatch table, a leaf module in theme/ (sibling of "
+          "insert": ", the canonical 10-row swatch table, a leaf module in theme/ (sibling of "
         },
         {
           "insert": "theme/tokens.ts",
@@ -1832,7 +2101,7 @@
           }
         },
         {
-          "insert": " can all import it without layering violations. Every hex in the table is annotated inline as sampled (citing its FigJam source) or derived; that file is the single source of truth for the role hexes reproduced below. A row is a "
+          "insert": " can all import it without layering violations. Every hex in the table is annotated inline as sampled (citing its FigJam source) or derived. That file is the single source of truth for the role hexes reproduced below. A row is a "
         },
         {
           "insert": "Swatch",
@@ -1846,10 +2115,7 @@
           }
         },
         {
-          "insert": ": one picker-preview hex plus one expression cell per role:"
-        },
-        {
-          "insert": " The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
+          "insert": ": one picker-preview hex plus one expression cell per role: The design-intent palette sheet (per-hue ink/fill/wash swatches + hex table) lives at "
         },
         {
           "insert": "board-design-reference/analysis/palette-sheet.html",
@@ -1875,7 +2141,7 @@
       },
       "text": [
         {
-          "insert": "// packages/canvas/src/theme/palette.ts\nexport type ShapeColors = {\n  fill: string;\n  /** Every shape pick renders with an ink border. */\n  border: string;\n};\n\nexport type SectionChipColors = {\n  fill: string;\n  border: string;\n};\n\nexport type SectionColors = {\n  tint: string;\n  chip: SectionChipColors;\n};\n\nexport type Swatch = {\n  /** The picker preview: ink, except white previews as #FFFFFF with its contrast ring. */\n  swatch: string;\n  /** fill + ink border. */\n  shape: ShapeColors;\n  /** wash tint + title-chip fill/border. */\n  section: SectionColors;\n  /** Sticky fill role. */\n  sticky: string;\n  /** Connector stroke: ink, with white using gray. */\n  connector: string;\n};\n\nexport const CANVAS_PALETTE: Record<CanvasColor, Swatch>;\n\n// The per-role resolvers — one per role table:\nexport function resolveShapeColors(color: CanvasColor): ShapeColors;\nexport function resolveSectionColors(color: CanvasColor): SectionColors;\nexport function resolveStickyFill(color: CanvasColor): string;\nexport function resolveConnectorStroke(color: CanvasColor): string;\nexport function resolveSwatchPreview(color: CanvasColor): string;"
+          "insert": "// packages/canvas/src/theme/palette.ts\nexport type ShapeColors = {\n  fill: string;\n  /** Every shape pick renders with an ink border. */\n  border: string;\n};\n\nexport type SectionChipColors = {\n  fill: string;\n  border: string;\n};\n\nexport type SectionColors = {\n  tint: string;\n  chip: SectionChipColors;\n};\n\nexport type Swatch = {\n  /** The picker preview: ink, except white previews as #FFFFFF with its contrast ring. */\n  swatch: string;\n  /** fill + ink border. */\n  shape: ShapeColors;\n  /** wash tint + title-chip fill/border. */\n  section: SectionColors;\n  /** Sticky fill role. */\n  sticky: string;\n  /** Connector stroke: ink, with white using gray. */\n  connector: string;\n};\n\nexport const CANVAS_PALETTE: Record<CanvasColor, Swatch>;\n\n// The per-role resolvers — one per role table:\nexport function resolveShapeColors(color: CanvasColor): ShapeColors;\nexport function resolveSectionColors(color: CanvasColor): SectionColors;\nexport function resolveStickyFill(color: CanvasColor): string;\nexport function resolveConnectorStroke(color: CanvasColor): string;\nexport function resolveSwatchPreview(color: CanvasColor): string;\n\n// The theme-aware paints: every kind's colors under a CanvasStyle (figjam modes read the tables above):\nexport function resolveInk(color: CanvasColor, style: CanvasStyle): string;\nexport function resolveShapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint;\nexport function resolveSectionPaint(color: CanvasColor, depth: number, style: CanvasStyle): SectionPaint;\nexport function resolveIconPaint(color: CanvasColor, style: CanvasStyle): IconPaint;\nexport function resolveStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint;\nexport function resolveConnectorPaint(color: CanvasColor, style: CanvasStyle): ConnectorPaint;"
         }
       ],
       "children": []
@@ -1899,7 +2165,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A pick is a direction; the def's "
+          "insert": "A pick is a direction, and the def's "
         },
         {
           "insert": "colorRole",
@@ -1908,7 +2174,7 @@
           }
         },
         {
-          "insert": " decides rendering. For the "
+          "insert": " decides rendering. In the figjam theme, the "
         },
         {
           "insert": "\"shape\"",
@@ -1917,21 +2183,22 @@
           }
         },
         {
-          "insert": " role, every pick renders fill + ink border at the universal 4px stroke ("
+          "insert": " role renders fill plus ink border at the theme's shape border width ("
         },
         {
-          "insert": "SHAPE_STROKE_WIDTH_PX",
+          "insert": "resolveObjectStrokeWidth",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/theme/tokens.ts",
-              "symbol": "SHAPE_STROKE_WIDTH_PX"
+              "symbol": "resolveObjectStrokeWidth",
+              "label": "resolveObjectStrokeWidth"
             }
           }
         },
         {
-          "insert": "); there is no borderless color treatment. White keeps a visible "
+          "insert": ", 2px in figjam), and there is no borderless color treatment. White keeps a visible "
         },
         {
           "insert": "#757980",
@@ -1940,7 +2207,7 @@
           }
         },
         {
-          "insert": " stroke since a white stroke would vanish on the "
+          "insert": " stroke because a white stroke would vanish on the "
         },
         {
           "insert": "#F5F5F5",
@@ -1949,7 +2216,7 @@
           }
         },
         {
-          "insert": " board (light-only by D9). For "
+          "insert": " board. For "
         },
         {
           "insert": "\"section\"",
@@ -1958,7 +2225,7 @@
           }
         },
         {
-          "insert": ", wash = the tint and the title chip uses fill + ink border; for "
+          "insert": ", the wash is the tint and the title chip uses fill plus ink border. For "
         },
         {
           "insert": "\"sticky\"",
@@ -1967,7 +2234,7 @@
           }
         },
         {
-          "insert": ", fill = the sticky hex; for connectors, ink = the stroke hex (default pick "
+          "insert": ", the fill is the sticky hex, and for connectors, the ink is the stroke hex (default pick "
         },
         {
           "insert": "\"gray\"",
@@ -1976,7 +2243,18 @@
           }
         },
         {
-          "insert": "). The one resolver every object renderer goes through is "
+          "insert": ")."
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-color-p3b": {
+      "id": "b-sapi-color-p3b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The one resolver every object renderer goes through is "
         },
         {
           "insert": "resolveObjectRoleColors()",
@@ -1985,26 +2263,55 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/objects/object-shell.tsx",
-              "symbol": "resolveObjectRoleColors"
+              "symbol": "resolveObjectRoleColors",
+              "label": "resolveObjectRoleColors()"
             }
           }
         },
         {
-          "insert": ", which also fixes text: ALL object text is "
+          "insert": ", which also fixes text color: object text takes the theme's "
         },
         {
-          "insert": "OBJECT_TEXT_COLOR",
+          "insert": "textColor",
           "attributes": {
-            "code": true,
+            "code": true
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "#000000",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in figjam, D8), and the sticky body sets it at 80% opacity. There is no per-color text derivation beyond a contrast guard, and no user-pickable text color. D13 killed forced glyph colors: icon glyphs are ordinary colorable objects."
+        }
+      ],
+      "children": []
+    },
+    "b-sapi-color-themes": {
+      "id": "b-sapi-color-themes",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every hex on this page is the figjam theme's paint. The schematic themes keep the same picks and roles but derive their paint from a per-theme ink through the theme-aware resolvers: card shapes, depth-stepped section tints, icon tiles, and card stickies, as specified in "
+        },
+        {
+          "insert": "workspace themes",
+          "attributes": {
             "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/text-slots.ts",
-              "symbol": "OBJECT_TEXT_COLOR"
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "workspace themes"
             }
           }
         },
         {
-          "insert": " dark (D8) (one deviation: the sticky inset-body preset uses rgba(0, 0, 0, 0.8)) — no per-color text derivation and no user-pickable text color. D13 killed forced glyph colors: icon glyphs are ordinary colorable objects."
+          "insert": "."
         }
       ],
       "children": []
@@ -2047,7 +2354,7 @@
           }
         },
         {
-          "insert": "); "
+          "insert": "). "
         },
         {
           "insert": "canvas.addObject",
@@ -2120,7 +2427,7 @@
           }
         },
         {
-          "insert": " — identical previews for every kind, the current pick marked by a floating 2px #8C2EF2 rounded-square outline (the rainbow conic ring is retired) — replacing the old "
+          "insert": ", with identical previews for every kind and the current pick marked by a floating 2px #8C2EF2 rounded-square outline (the rainbow conic ring is retired), replacing the old "
         },
         {
           "insert": "ColorPalettePopover",
@@ -2139,7 +2446,6 @@
       "type": "callout",
       "props": {
         "kind": "constraint",
-        "severity": "hard",
         "title": "The color roster is closed: 10 picks, no custom colors, ever"
       },
       "text": [
@@ -2176,7 +2482,7 @@
           }
         },
         {
-          "insert": " (unknown ids are dropped with a warning); the legacy "
+          "insert": " (unknown ids are dropped with a warning). The legacy "
         },
         {
           "insert": "tone",
@@ -2221,7 +2527,7 @@
           }
         },
         {
-          "insert": "/raw connector hexes are deleted from the schema with no legacy read path (D10) — existing documents crossed over once via "
+          "insert": "/raw connector hexes are deleted from the schema with no legacy read path (D10). Existing documents crossed over once via "
         },
         {
           "insert": "tools/migrate-canvas-docs/migrate.ts",
@@ -2230,7 +2536,7 @@
           }
         },
         {
-          "insert": " (nearest-swatch mapping) and the old keys are now simply ignored as unknown. There is no custom-color wheel and no explicit-hex escape hatch; changing what a pick looks like means editing "
+          "insert": " (nearest-swatch mapping) and the old keys are now simply ignored as unknown. There is no custom-color wheel and no explicit-hex escape hatch. Changing what a pick looks like means editing "
         },
         {
           "insert": "theme/palette.ts",
@@ -2249,7 +2555,6 @@
       "type": "callout",
       "props": {
         "kind": "constraint",
-        "severity": "hard",
         "title": "Shape vocabulary is closed and typed, not freeform SVG"
       },
       "text": [
@@ -2268,7 +2573,7 @@
           }
         },
         {
-          "insert": " and registering a def through the closed compile-time vocabularies — not authoring an arbitrary SVG path, a runtime-registered shape class, or a plugin. There is no registration API, no user-supplied path string field, and no mechanism for a canvas document to define a shape the engine doesn't already know how to validate and render. An agent (or a human) constructing a shape only ever writes valid JSON against the schema; the def registry is compile-time, closed, and fully enumerated in "
+          "insert": " and registering a def through the closed compile-time vocabularies, not authoring an arbitrary SVG path, a runtime-registered shape class, or a plugin. There is no registration API, no user-supplied path string field, and no mechanism for a canvas document to define a shape the engine doesn't already know how to validate and render. An agent (or a human) constructing a shape only ever writes valid JSON against the schema. The def registry is compile-time, closed, and fully enumerated in "
         },
         {
           "insert": "OBJECT_DEFS",
@@ -2319,7 +2624,7 @@
           }
         },
         {
-          "insert": ". For the semantic surface built on this contract — the eight-shape core, the glyph roster, and the preference registry — see "
+          "insert": ". For the semantic surface built on this contract (the eight-shape core, the glyph roster, and the preference registry), see "
         },
         {
           "insert": "operational maps",

@@ -15,7 +15,7 @@
  * Coverage: ASCII, Latin-1, general punctuation, arrows U+2190–U+21FF and a
  * small symbol set; codepoints the font's cmap does not map are omitted.
  * Consumers use the fallback advances (rounded mean of the covered set) for
- * uncovered codepoints — see render/text-metrics.ts.
+ * uncovered codepoints — see theme/inter-metrics.ts.
  */
 
 export interface InterAdvanceRange {

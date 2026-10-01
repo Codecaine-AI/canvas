@@ -11,14 +11,7 @@
 
 import type { InteractiveCanvasDocument } from "../state/schema";
 import { renderDocumentToSvg } from "./static-svg";
-import type { CanvasStyle } from "../theme/canvas-style";
-
-/**
- * Board surface color — keep in sync with CANVAS_BG in stage/CanvasStage.tsx
- * (the board surface is light-only, even under the app's dark theme). Used to
- * pre-fill the PNG raster so no transparent letterbox survives rasterization.
- */
-const BOARD_BACKGROUND = "#F5F5F5";
+import { normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
 
 /**
  * Filename-safe slug from a document title/id: lowercased, whitespace runs
@@ -110,8 +103,9 @@ export interface ExportPngOptions extends ExportSvgOptions {
  * Download the document as a .png: renders the same natural-size board SVG,
  * loads it through a same-origin Blob object URL (which does not taint the
  * canvas), draws it onto an offscreen <canvas> at `scale`× resolution over a
- * board-color fill, and downloads the PNG encoding. Rejects on render, image
- * load, or encode failure.
+ * fill in the style's board color (`boardBackground`, so no transparent
+ * letterbox survives rasterization), and downloads the PNG encoding. Rejects
+ * on render, image load, or encode failure.
  */
 export async function exportDocumentAsPng(
   canvasDocument: InteractiveCanvasDocument,
@@ -130,7 +124,7 @@ export async function exportDocumentAsPng(
     canvas.height = Math.max(1, Math.round(height * scale));
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Canvas export: 2d canvas context unavailable");
-    context.fillStyle = BOARD_BACKGROUND;
+    context.fillStyle = normalizeCanvasStyle(canvasStyle).boardBackground;
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
     const pngBlob = await canvasToPngBlob(canvas);

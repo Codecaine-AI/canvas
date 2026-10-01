@@ -2,6 +2,13 @@ import { existsSync } from "node:fs";
 import { readdir, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { OBJECT_PREFERENCES } from "../../../../canvas/src/objects/registry/index.ts";
+import {
+  ICON_GLYPH_CATEGORIES,
+  resolveIconGlyph,
+} from "../../../../canvas/src/objects/shapes/icon/icon-glyphs.ts";
+import { CANVAS_COLORS } from "../../../../canvas/src/state/schema/colors.ts";
 import type {
   AxisCode,
   ScenarioId,
@@ -19,16 +26,48 @@ const SHARED_JUDGE_RULES = [
   "Every score must include the axis output contract and concrete evidence.",
   "Exclude declared infrastructure failures from scoring.",
   "Visual axes are scored absolutely against their rubric anchors; no comparison or reference board exists.",
-  "Boards are operational maps: icons carry the components, the small shape core carries steps and branches, and an edge means only what its line shows — label, arrowhead, style.",
+  "Boards are operational maps: icons carry the components (generic glyphs for a role, filled brand logos for a named product), the small shape core carries steps and branches, and an edge means only what its line shows — label, arrowhead, style.",
+  "An object's text is a short name. A shape or icon may add one muted detail line under its name, and a section one after its header title: a single fact such as a port, path, version, model, or host. A section header may also carry an icon for what the region holds. Read both as part of that object's label, not as stray text or decoration.",
+  "The render may use any workspace theme (figjam, schematic-light, schematic-dark). A theme restyles fills, borders, type, and icon tiles, never meaning; the theme itself is not graded.",
 ].join("\n");
+
+/** A registry name's glyph family, or undefined for a shape-core type. */
+const glyphCategoryOf = (name: string) => resolveIconGlyph(name, "nucleo")?.category;
+
+/**
+ * The icon lines of the notation legend: every registry glyph with its
+ * registry meaning, by glyph family in display order (brand logos last).
+ * Generated from the object-preference registry, so the judges read the
+ * vocabulary the agent places from.
+ */
+const ICON_NOTATION = ICON_GLYPH_CATEGORIES.flatMap(({ id, label }) => {
+  const glyphs = OBJECT_PREFERENCES.filter((entry) => glyphCategoryOf(entry.name) === id);
+  return glyphs.length === 0
+    ? []
+    : [`- ${label}: ${glyphs.map((entry) => `${entry.name} = ${entry.meaning}`).join("; ")}.`];
+});
 
 const OPERATIONAL_MAP_NOTATION = [
   "Notation legend — the operational-map board language (scenario-independent):",
-  "Icons name components and stores at fixed meanings: agent (autonomous agent), model (LLM/model call), human (person in the loop), orchestrator (coordination and spawn hierarchy), memory (store read/written across turns), knowledge (reference corpus or knowledge base), queue (queue or stream of work), server (infrastructure/service), terminal (CLI or exec surface), config (configuration), api (external API or connection point), message (conversation or message surface), send (emit/dispatch), event (trigger), guardrail (safety gate), monitor (observation/tracing), judge (eval or verdict step), document (produced artifact), documents (multiple documents: reports, corpora, batches), search (retrieval/lookup), tool (capability an agent can invoke), wait (blocking wait, join, timeout), lock (lease, claim, mutual exclusion), eval (experiment or test harness), activity (traces/telemetry), archive (cold storage), key (secrets/credentials), coin (cost/budget), package (build artifact or deployment), voice (audio boundary where a human talks to the system).",
+  "Icons name components and stores at fixed meanings, by family. Generic glyphs are outline pictograms for a role; brand-* glyphs are filled product logos that name that exact product.",
+  ...ICON_NOTATION,
   "The shape core names steps and branches: rectangle = message or payload container; rounded rectangle (process) = a step; predefined process = a delegated step (spawned sub-agent, subroutine, enqueued task); decision diamond = a branch; ellipse = start/end terminator; octagon = stop; arrow = routing outcome; triangle = directional marker.",
+  "Names and details: an object's text is a short name. A shape or icon may add one muted detail line under its name, and a section one after its header title: a single fact (a port, path, version, model, or host) about that object. A section header may also carry an icon for what the region holds. Explanations sit on sticky notes beside their subject.",
   "Any region of a board reads in one of two genres. System map: nodes are components, edges are standing relationships (reads, writes, feeds, informs) and time is not an axis. Procedure: nodes are steps, edges mean 'then', branch outcomes ride as on-line text, back-edges are loops, and time is the axis. Genres mix per region; a crossover edge (a procedure step touching a store) joins them.",
   "Edges say only what the line shows: label, arrowhead, and line style. Do not assume hidden semantics; put unreadable or ambiguous edge meaning in uncertain.",
 ].join("\n");
+
+/**
+ * Every registry name under its preferred color, in color-roster order: the
+ * defaults the CF color sub-check reads (axes-system/craft.md). Generated
+ * from the object-preference registry rather than copied into the rubric.
+ */
+const REGISTRY_COLORS: Record<string, string[]> = Object.fromEntries(
+  CANVAS_COLORS.flatMap((color) => {
+    const names = OBJECT_PREFERENCES.filter((entry) => entry.color === color).map((entry) => entry.name);
+    return names.length === 0 ? [] : [[color, names]];
+  }),
+);
 
 export interface JudgeImageInput {
   index: number;
@@ -389,7 +428,7 @@ export async function gatherScenarioJudgeInputs(
       rcMissing,
     );
 
-    const buildBoardVisualInput = (): PreparedJudgeInput => {
+    const buildBoardVisualInput = (context: Record<string, unknown> = {}): PreparedJudgeInput => {
       const missing: string[] = [];
       missingPath(finalPngPath, "final PNG", missing);
       return prepared(
@@ -397,13 +436,14 @@ export async function gatherScenarioJudgeInputs(
           attachment_manifest: [
             { index: 1, role: "board under grade" },
           ],
+          ...context,
         },
         [{ label: "board under grade", path: finalPngPath }],
         missing,
       );
     };
     const readability = buildBoardVisualInput();
-    const craft = buildBoardVisualInput();
+    const craft = buildBoardVisualInput({ registry_colors: REGISTRY_COLORS });
 
     const scopeDisciplineEdits: PreparedEditInput[] = [];
     const skippedScopeDisciplineEdits: Array<{ stage: `e${number}`; reason: string }> = [];

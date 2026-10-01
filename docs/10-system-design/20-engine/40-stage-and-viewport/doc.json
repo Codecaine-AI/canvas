@@ -4,18 +4,41 @@
   "title": "Stage and viewport",
   "root": "b-engine-stage-root",
   "blocks": {
-    "b-engine-stage-title-1": {
-      "id": "b-engine-stage-title-1",
-      "type": "heading",
+    "b-engine-stage-root": {
+      "id": "b-engine-stage-root",
+      "type": "paragraph",
       "props": {
-        "level": 1
+        "concepts": [
+          "z tiers",
+          "overlay slots",
+          "adaptive grid",
+          "viewport math",
+          "viewer face",
+          "embedding progression"
+        ],
+        "covers": "The presentation model: the stage draws only the document through z-tiered layers and exposes two overlay slots for everything ephemeral; the adaptive dot grid, world/screen viewport math, the read-only viewer face, and the embedding progression.",
+        "format": "mdx",
+        "type": "design"
       },
-      "text": [
-        {
-          "insert": "Stage and viewport"
-        }
-      ],
-      "children": []
+      "children": [
+        "b-engine-stage-intro-2",
+        "b-engine-stage-draw-heading-3",
+        "b-engine-stage-draw-body-4",
+        "b-engine-stage-draw-tiers-5",
+        "b-engine-stage-draw-slots-6",
+        "b-engine-stage-draw-select-decision-7",
+        "b-engine-stage-grid-heading-8",
+        "b-engine-stage-grid-body-9",
+        "b-engine-stage-grid-decision-10",
+        "b-engine-stage-viewport-heading-11",
+        "b-engine-stage-viewport-body-12",
+        "b-engine-stage-viewport-fit-13",
+        "b-engine-stage-viewer-heading-14",
+        "b-engine-stage-viewer-body-15",
+        "b-engine-stage-viewer-fit-16",
+        "b-engine-stage-embed-heading-17",
+        "b-engine-stage-embed-body-18"
+      ]
     },
     "b-engine-stage-intro-2": {
       "id": "b-engine-stage-intro-2",
@@ -37,7 +60,7 @@
           }
         },
         {
-          "insert": " and a viewport, it draws objects, connections, sections, and annotations as a world-space DOM/SVG tree. It owns no editing state — it is the shared renderer both the read-only viewer and the interactive editor mount, driven entirely by props."
+          "insert": " and a viewport, it draws objects, connections, sections, and annotations as a world-space DOM/SVG tree. It owns no editing state. It is the shared renderer both the read-only viewer and the interactive editor mount, driven entirely by props."
         }
       ],
       "children": []
@@ -67,7 +90,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/CanvasStage.tsx",
-              "symbol": "CanvasStage"
+              "symbol": "CanvasStage",
+              "label": "CanvasStage"
             }
           }
         },
@@ -81,7 +105,7 @@
           }
         },
         {
-          "insert": ": section fills, connector paths, objects dispatched through their defs, selected-connection trim, and floating section header chips. Paint order derives from "
+          "insert": ": section fills, connector paths, objects dispatched through their defs, selected-connection trim, and section header chips. Paint order derives from "
         },
         {
           "insert": "paintOrderedObjects",
@@ -90,12 +114,13 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/state/z-order.ts",
-              "symbol": "paintOrderedObjects"
+              "symbol": "paintOrderedObjects",
+              "label": "paintOrderedObjects"
             }
           }
         },
         {
-          "insert": " so sections form the backdrop and non-sections preserve schema order above them; the full derivation is "
+          "insert": " so sections form the backdrop and non-sections preserve schema order above them. The full derivation is "
         },
         {
           "insert": "The layer cake",
@@ -108,7 +133,22 @@
           }
         },
         {
-          "insert": ". The CSS tiers:"
+          "insert": ". The stage also computes every section's nesting depth once per document ("
+        },
+        {
+          "insert": "sectionDepthMap",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/section-depth.ts",
+              "symbol": "sectionDepthMap",
+              "label": "sectionDepthMap"
+            }
+          }
+        },
+        {
+          "insert": ") and hands it to the section renderer and its header chip, because a layer-cake theme tints each section by its depth. The CSS tiers:"
         }
       ],
       "children": []
@@ -150,7 +190,7 @@
           }
         },
         {
-          "insert": " sits after it in untransformed screen space. The stage imports no editor feedback components and assembles no overlays of its own; the editor face injects its feedback pair through the slots ("
+          "insert": " sits after it in untransformed screen space. The stage imports no editor feedback components and assembles no overlays of its own. The editor face injects its feedback pair through the slots ("
         },
         {
           "insert": "Interaction",
@@ -163,16 +203,38 @@
           }
         },
         {
-          "insert": "). The selected-connection trim renders in its own z 3 layer, co-planar with section headers, so object bodies can cover connector lines without covering selection affordances. The board surface is a fixed light color regardless of host theme."
+          "insert": "). The selected-connection trim renders in its own z 3 layer, co-planar with section headers, so object bodies can cover connector lines without covering selection affordances. The board surface takes the workspace theme's "
+        },
+        {
+          "insert": "boardBackground",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " whatever the host theme is, and every paint the stage draws resolves through the same theme ("
+        },
+        {
+          "insert": "workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "workspace themes"
+            }
+          }
+        },
+        {
+          "insert": ")."
         }
       ],
       "children": []
     },
     "b-engine-stage-draw-select-decision-7": {
       "id": "b-engine-stage-draw-select-decision-7",
-      "type": "decision",
+      "type": "callout",
       "props": {
-        "status": "accepted",
+        "kind": "decision",
         "title": "Board text is trim: user-select is off at the stage root"
       },
       "text": [
@@ -195,7 +257,7 @@
           }
         },
         {
-          "insert": " — required, because contentEditable does not exempt itself from an inherited "
+          "insert": " (required, because contentEditable does not exempt itself from an inherited "
         },
         {
           "insert": "user-select: none",
@@ -204,7 +266,7 @@
           }
         },
         {
-          "insert": ". Deliberately not part of the guard: a "
+          "insert": "). Deliberately not part of the guard: a "
         },
         {
           "insert": "preventDefault()",
@@ -213,7 +275,7 @@
           }
         },
         {
-          "insert": " on stage pointerdown — the default mousedown drives focus and blur, and clicking the canvas must keep blurring (and thereby committing) an open text editor."
+          "insert": " on stage pointerdown. The default mousedown drives focus and blur, and clicking the canvas must keep blurring (and thereby committing) an open text editor."
         }
       ],
       "children": []
@@ -243,7 +305,8 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/grid.ts",
-              "symbol": "gridBackground"
+              "symbol": "gridBackground",
+              "label": "gridBackground"
             }
           }
         },
@@ -257,12 +320,13 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/grid.ts",
-              "symbol": "GRID_BASE_STEP_PX"
+              "symbol": "GRID_BASE_STEP_PX",
+              "label": "GRID_BASE_STEP_PX"
             }
           }
         },
         {
-          "insert": " = 8 logical px, it projects the step through the current zoom; while the projected pitch falls below "
+          "insert": " = 8 logical px, it projects the step through the current zoom. While the projected pitch falls below "
         },
         {
           "insert": "GRID_MIN_SCREEN_STEP_PX",
@@ -271,20 +335,31 @@
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/stage/grid.ts",
-              "symbol": "GRID_MIN_SCREEN_STEP_PX"
+              "symbol": "GRID_MIN_SCREEN_STEP_PX",
+              "label": "GRID_MIN_SCREEN_STEP_PX"
             }
           }
         },
         {
-          "insert": " = 6.5 screen px, the world step doubles by powers of two until the grid is legible again. Dot radius is handled separately from the density tier and clamps between fixed bounds."
+          "insert": " = 6.5 screen px, the world step doubles by powers of two until the grid is legible again. Dot radius is handled separately from the density tier and clamps between fixed bounds, and the dots take the theme's "
+        },
+        {
+          "insert": "gridDotColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
     },
     "b-engine-stage-grid-decision-10": {
       "id": "b-engine-stage-grid-decision-10",
-      "type": "decision",
+      "type": "callout",
       "props": {
+        "kind": "decision",
         "status": "accepted",
         "title": "Keep the grid legible via a screen-pixel step band, not a fixed world step"
       },
@@ -470,7 +545,7 @@
           }
         },
         {
-          "insert": ", and centers the bounds — fitting never zooms past 1.0. "
+          "insert": ", and centers the bounds. Fitting never zooms past 1.0. "
         },
         {
           "insert": "fitDocument",
@@ -560,7 +635,7 @@
           }
         },
         {
-          "insert": " enables navigation only — wheel zoom, pointer pan, and Fit/+/− controls."
+          "insert": " enables navigation only: wheel zoom, pointer pan, and Fit/+/− controls."
         }
       ],
       "children": []
@@ -666,43 +741,6 @@
         }
       ],
       "children": []
-    },
-    "b-engine-stage-root": {
-      "id": "b-engine-stage-root",
-      "type": "paragraph",
-      "props": {
-        "covers": "The presentation model: the stage draws only the document through z-tiered layers and exposes two overlay slots for everything ephemeral; the adaptive dot grid, world/screen viewport math, the read-only viewer face, and the embedding progression.",
-        "format": "mdx",
-        "type": "design",
-        "concepts": [
-          "z tiers",
-          "overlay slots",
-          "adaptive grid",
-          "viewport math",
-          "viewer face",
-          "embedding progression"
-        ]
-      },
-      "children": [
-        "b-engine-stage-title-1",
-        "b-engine-stage-intro-2",
-        "b-engine-stage-draw-heading-3",
-        "b-engine-stage-draw-body-4",
-        "b-engine-stage-draw-tiers-5",
-        "b-engine-stage-draw-slots-6",
-        "b-engine-stage-draw-select-decision-7",
-        "b-engine-stage-grid-heading-8",
-        "b-engine-stage-grid-body-9",
-        "b-engine-stage-grid-decision-10",
-        "b-engine-stage-viewport-heading-11",
-        "b-engine-stage-viewport-body-12",
-        "b-engine-stage-viewport-fit-13",
-        "b-engine-stage-viewer-heading-14",
-        "b-engine-stage-viewer-body-15",
-        "b-engine-stage-viewer-fit-16",
-        "b-engine-stage-embed-heading-17",
-        "b-engine-stage-embed-body-18"
-      ]
     }
   }
 }

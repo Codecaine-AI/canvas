@@ -26,6 +26,16 @@ export interface Diagnostic {
  */
 export interface LintContext {
   canvasStyle?: CanvasStyle;
+  /**
+   * The board the session STARTED from (its first draft, injected page frame
+   * included) — what separates text the agent wrote from text it found. The
+   * authorship rules (label-is-prose, detail-too-long) judge a name or detail
+   * only when the object is absent from it or that field changed since it, so
+   * a person's own labels are never theirs to flag. Absent means nothing is
+   * attributable to the agent, and those rules stay silent. Every other rule
+   * ignores it.
+   */
+  baseline?: InteractiveCanvasDocument;
 }
 
 export interface LayoutRule {

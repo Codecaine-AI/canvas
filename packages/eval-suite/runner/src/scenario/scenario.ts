@@ -311,7 +311,10 @@ export function createInitialDocument(
       {
         id: "page-frame",
         type: "section",
-        text: title,
+        // A short name plus one fact, so the seeded frame never trips
+        // label-is-prose (the combined title runs past the 40-char name limit).
+        text: fixture.fixtureId,
+        detail: runId,
         color: "white",
         parentId: null,
         geometry: {

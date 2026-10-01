@@ -49,7 +49,7 @@ export function resolveContextMenuTarget(
   world: CanvasPoint,
   options: HitTestOptions = {},
 ): InteractiveCanvasObject | null {
-  if (outlineContainsPoint(clicked, world)) return clicked;
+  if (outlineContainsPoint(clicked, world, undefined, options.canvasStyle)) return clicked;
   return hitTestObjects(document, world, options);
 }
 
@@ -167,7 +167,7 @@ export function useCanvasContextMenu({
       const canvasPoint = canvasPointFromContextMenu(event);
       // D16: a right-click in a true-outline shape's empty bbox corner
       // retargets to the object behind it, or to the canvas menu.
-      const target = resolveContextMenuTarget(document, object, canvasPoint, { zoom });
+      const target = resolveContextMenuTarget(document, object, canvasPoint, { zoom, canvasStyle });
       if (!target) {
         openCanvasContextMenu(event, bounds);
         return;
@@ -186,7 +186,7 @@ export function useCanvasContextMenu({
         canvasPoint,
       });
     },
-    [canvasPointFromContextMenu, dispatch, document, openCanvasContextMenu, zoom],
+    [canvasPointFromContextMenu, canvasStyle, dispatch, document, openCanvasContextMenu, zoom],
   );
 
   const addObjectFromContextMenu = (objectType: InteractiveCanvasObjectType) => {

@@ -371,6 +371,7 @@ type CanvasOperation<Type extends CanvasAgentPatchOperation["type"]> = Extract<
  * The protocol intentionally mirrors the canvas patch type without importing
  * it, so its nested payloads arrive as records. Keep the bridge at this wire
  * boundary and exhaustively reconstruct the canvas union.
+ * A `null` patch value is a clear in its wire spelling; the reducer reads it as one.
  */
 function toCanvasOperation(
   operation: AgentPatchOperation,

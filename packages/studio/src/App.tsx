@@ -10,6 +10,7 @@ import {
 import {
   AlertTriangleIcon,
   ArrowLeftIcon,
+  BoxIcon,
   CheckIcon,
   PanelRightIcon,
   PlusIcon,
@@ -32,6 +33,7 @@ import type {
   AgentSessionViewport,
 } from "@codecaine-ai/canvas-agent/protocol";
 import { Button } from "@codecaine-ai/canvas/ui/button";
+import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 import {
   AgentSidebar,
   CameraLockPill,
@@ -71,13 +73,32 @@ import { StyleRail } from "./style/StyleRail";
 import { useCanvasStyleSettings } from "./style/use-canvas-style-settings";
 
 const STYLE_RAIL_OPEN_STORAGE_KEY = "canvas-studio-style-rail-open";
+const INSPECTOR_OPEN_STORAGE_KEY = "canvas-studio-inspector-open";
 
-function readStyleRailOpen(): boolean {
+function readPanelOpen(storageKey: string): boolean {
   try {
-    return window.localStorage.getItem(STYLE_RAIL_OPEN_STORAGE_KEY) === "1";
+    return window.localStorage.getItem(storageKey) === "1";
   } catch {
     return false;
   }
+}
+
+function writePanelOpen(storageKey: string, open: boolean): void {
+  try {
+    window.localStorage.setItem(storageKey, open ? "1" : "0");
+  } catch {
+    // Session-only when storage is unavailable.
+  }
+}
+
+/** Short stable key (djb2 of the JSON) naming one resolved style. */
+function styleCacheKey(style: CanvasStyle): string {
+  const text = JSON.stringify(style);
+  let hash = 5381;
+  for (let index = 0; index < text.length; index += 1) {
+    hash = ((hash << 5) + hash + text.charCodeAt(index)) | 0;
+  }
+  return (hash >>> 0).toString(36);
 }
 
 type CanvasListItem = {
@@ -259,10 +280,17 @@ export function App() {
     useState<"idle" | "loading" | "not-found" | "error">("idle");
   const [documentErrorDetail, setDocumentErrorDetail] = useState<string | null>(null);
   const [showAgent, setShowAgent] = useState(false);
-  // The Style rail and the Agent sidebar share the editor's right-hand slot:
-  // opening either one closes the other.
-  const [showStyle, setShowStyle] = useState(readStyleRailOpen);
+  // The Style rail, the Inspector, and the Agent sidebar share the editor's
+  // right-hand slot: opening one closes the others.
+  const [showStyle, setShowStyle] = useState(() => readPanelOpen(STYLE_RAIL_OPEN_STORAGE_KEY));
+  const [showInspector, setShowInspector] = useState(() => readPanelOpen(INSPECTOR_OPEN_STORAGE_KEY));
   const canvasStyleSettings = useCanvasStyleSettings();
+  // Board-list thumbnails are server renders: their URL carries the style the
+  // server holds, so a theme switch or token edit fetches fresh ones once its
+  // save lands, instead of reusing the document's cached image (or caching a
+  // render made before the save under the new key).
+  const thumbnailStyle = canvasStyleSettings.serverStyle ?? canvasStyleSettings.style;
+  const previewStyleKey = useMemo(() => styleCacheKey(thumbnailStyle), [thumbnailStyle]);
   const [agentPreviewRect, setAgentPreviewRect] = useState<AgentRect | null>(null);
   const [agentBaselineDocument, setAgentBaselineDocument] =
     useState<InteractiveCanvasDocument | null>(null);
@@ -513,21 +541,35 @@ export function App() {
   const toggleStyle = useCallback(() => {
     const next = !showStyle;
     setShowStyle(next);
-    if (next) setShowAgent(false);
+    if (next) {
+      setShowAgent(false);
+      setShowInspector(false);
+    }
   }, [showStyle]);
+
+  const toggleInspector = useCallback(() => {
+    const next = !showInspector;
+    setShowInspector(next);
+    if (next) {
+      setShowAgent(false);
+      setShowStyle(false);
+    }
+  }, [showInspector]);
 
   // The agent sidebar also opens itself (annotation tool, agent runs).
   useEffect(() => {
-    if (showAgent) setShowStyle(false);
+    if (!showAgent) return;
+    setShowStyle(false);
+    setShowInspector(false);
   }, [showAgent]);
 
   useEffect(() => {
-    try {
-      window.localStorage.setItem(STYLE_RAIL_OPEN_STORAGE_KEY, showStyle ? "1" : "0");
-    } catch {
-      // Session-only when storage is unavailable.
-    }
+    writePanelOpen(STYLE_RAIL_OPEN_STORAGE_KEY, showStyle);
   }, [showStyle]);
+
+  useEffect(() => {
+    writePanelOpen(INSPECTOR_OPEN_STORAGE_KEY, showInspector);
+  }, [showInspector]);
 
   const handleEditorStateChange = useCallback((state: InteractiveCanvasEditorState) => {
     setEditorState(state);
@@ -885,13 +927,15 @@ export function App() {
           canvasStyle={canvasStyleSettings.style}
         />
       );
+      // The page behind the viewer is the board itself: a dark theme gets no light frame.
+      const boardSurface = { background: canvasStyleSettings.style.boardBackground };
 
       if (route.name === "embed") {
-        return <main className="fixed inset-0 overflow-hidden bg-[#F5F5F5]">{viewer}</main>;
+        return <main className="fixed inset-0 overflow-hidden" style={boardSurface}>{viewer}</main>;
       }
 
       return (
-        <main className="fixed inset-0 overflow-hidden bg-[#F5F5F5]">
+        <main className="fixed inset-0 overflow-hidden" style={boardSurface}>
           {viewer}
           <header className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 p-4">
             <div className="pointer-events-auto flex min-w-0 items-center gap-2 rounded-xl border border-black/10 bg-white/95 p-1.5 shadow-md backdrop-blur">
@@ -933,6 +977,24 @@ export function App() {
           document={activeDocument}
           editableTitle
           canvasStyle={canvasStyleSettings.style}
+          showInspector={showInspector && !showAgent && !showStyle}
+          // A side panel, not a screenOverlay: the overlay sits inside the
+          // stage, where a click would hit-test the board under the rail and
+          // the wheel would pan the board instead of scrolling the rail.
+          sidePanel={
+            showStyle && !showAgent ? (
+              <StyleRail
+                settings={canvasStyleSettings.settings}
+                style={canvasStyleSettings.style}
+                overrides={canvasStyleSettings.overrides}
+                onSelectTheme={canvasStyleSettings.setTheme}
+                onChange={canvasStyleSettings.setToken}
+                onResetKey={canvasStyleSettings.resetToken}
+                onResetTheme={canvasStyleSettings.resetTheme}
+                onClose={() => setShowStyle(false)}
+              />
+            ) : undefined
+          }
           onDocumentChange={queueAutosave}
           topBarLeading={
             <Button
@@ -1045,18 +1107,6 @@ export function App() {
                   />
                 </div>
               ) : null}
-              {showStyle && !showAgent ? (
-                <div className="pointer-events-auto">
-                  <StyleRail
-                    style={canvasStyleSettings.style}
-                    overrides={canvasStyleSettings.overrides}
-                    onChange={canvasStyleSettings.setValue}
-                    onResetKey={canvasStyleSettings.resetKey}
-                    onResetAll={canvasStyleSettings.resetAll}
-                    onClose={() => setShowStyle(false)}
-                  />
-                </div>
-              ) : null}
               {cameraLocked ? (
                 <CameraLockPill onStop={() => void agentSession.stop()} />
               ) : null}
@@ -1064,6 +1114,17 @@ export function App() {
           }
           topBarActions={
             <>
+              <Button
+                type="button"
+                size="sm"
+                variant={showInspector && !showAgent && !showStyle ? "default" : "outline"}
+                aria-pressed={showInspector && !showAgent && !showStyle}
+                title="Toggle the inspector (text, detail, icon, size, color)"
+                onClick={toggleInspector}
+              >
+                <BoxIcon className="h-4 w-4" />
+                Inspect
+              </Button>
               <Button
                 type="button"
                 size="sm"
@@ -1113,7 +1174,10 @@ export function App() {
 
   if (route.name === "evals") {
     return devPagesEnabled() ? (
-      <EvalsPage onBack={() => navigate("/")} />
+      <EvalsPage
+        onBack={() => navigate("/")}
+        boardBackground={canvasStyleSettings.style.boardBackground}
+      />
     ) : (
       <StatusPage message="Evals are only available with dev pages enabled." />
     );
@@ -1167,9 +1231,12 @@ export function App() {
                 onClick={() => navigate(`/canvas/${encodeURIComponent(canvas.id)}`)}
                 className="group relative overflow-hidden rounded-md border border-border bg-card text-left transition-colors hover:bg-muted/50"
               >
-                <span className="block aspect-[16/10] w-full overflow-hidden border-b border-border bg-[#F5F5F5]">
+                <span
+                  className="block aspect-[16/10] w-full overflow-hidden border-b border-border"
+                  style={{ background: canvasStyleSettings.style.boardBackground }}
+                >
                   <img
-                    src={`/api/canvases/${encodeURIComponent(canvas.id)}/preview.svg`}
+                    src={`/api/canvases/${encodeURIComponent(canvas.id)}/preview.svg?style=${previewStyleKey}`}
                     loading="lazy"
                     alt=""
                     draggable={false}

@@ -1,7 +1,9 @@
 #!/usr/bin/env bun
 /**
- * Generates src/render/inter-metrics.generated.ts — the static renderer's
- * per-glyph advance-width table — from the app's bundled Inter variable TTF
+ * Generates src/theme/inter-metrics.generated.ts — the per-glyph advance-width
+ * table the canvas measures Inter text with (theme/inter-metrics.ts: the icon
+ * caption band's sizing and the static renderer's wrapping) — from the app's
+ * bundled Inter variable TTF
  * (packages/canvas-agent/assets/fonts/Inter-Variable.ttf, read here only).
  *
  * Run from the repo root (idempotent — same font in, byte-identical file out):
@@ -33,7 +35,7 @@ const FONT_PATH = join(
   SCRIPT_DIR,
   "../../canvas-agent/assets/fonts/Inter-Variable.ttf",
 );
-const OUTPUT_PATH = join(SCRIPT_DIR, "../src/render/inter-metrics.generated.ts");
+const OUTPUT_PATH = join(SCRIPT_DIR, "../src/theme/inter-metrics.generated.ts");
 
 /** Codepoint coverage: inclusive ranges plus a few singles (see file header). */
 const COVERAGE_RANGES: ReadonlyArray<readonly [number, number]> = [
@@ -437,7 +439,7 @@ const output = `/**
  * Coverage: ASCII, Latin-1, general punctuation, arrows U+2190–U+21FF and a
  * small symbol set; codepoints the font's cmap does not map are omitted.
  * Consumers use the fallback advances (rounded mean of the covered set) for
- * uncovered codepoints — see render/text-metrics.ts.
+ * uncovered codepoints — see theme/inter-metrics.ts.
  */
 
 export interface InterAdvanceRange {

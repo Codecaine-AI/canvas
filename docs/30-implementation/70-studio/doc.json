@@ -23,6 +23,7 @@
         "b-studio-sources-2",
         "b-studio-gov-3",
         "b-studio-gov-persist-4",
+        "b-studio-gov-themes-18",
         "b-studio-decisions-5",
         "b-studio-handlers-decision-6",
         "b-studio-handlers-why-7",
@@ -35,7 +36,19 @@
         "b-studio-dev-flag-applies-11",
         "b-studio-surfaces-decision-12",
         "b-studio-surfaces-why-13",
-        "b-studio-surfaces-applies-14"
+        "b-studio-surfaces-applies-14",
+        "b-studio-style-decision-19",
+        "b-studio-style-why-20",
+        "b-studio-style-applies-21",
+        "b-studio-boards-decision-22",
+        "b-studio-boards-why-23",
+        "b-studio-boards-applies-24",
+        "b-studio-settings-decision-25",
+        "b-studio-settings-why-26",
+        "b-studio-settings-applies-27",
+        "b-studio-panels-decision-28",
+        "b-studio-panels-why-29",
+        "b-studio-panels-applies-30"
       ]
     },
     "b-studio-role-1": {
@@ -104,7 +117,30 @@
           }
         },
         {
-          "insert": " — owns the persistence model: the canvas file API, SVG previews, and the embedding progression."
+          "insert": " owns the persistence model: the canvas file API, the workspace style settings route, SVG previews, and the embedding progression."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-gov-themes-18": {
+      "id": "b-studio-gov-themes-18",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "Workspace themes"
+            }
+          }
+        },
+        {
+          "insert": " owns the theme model the Style rail edits: the presets, the tokens and their controls, and the settings file."
         }
       ],
       "children": []
@@ -236,7 +272,7 @@
           }
         },
         {
-          "insert": " — including every future API surface."
+          "insert": ", including every future API surface."
         }
       ],
       "children": []
@@ -450,7 +486,7 @@
           }
         },
         {
-          "insert": " — including every future dev surface."
+          "insert": ", including every future dev surface."
         }
       ],
       "children": []
@@ -467,10 +503,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "client code groups by surface — "
+          "insert": ": client code groups by surface, with "
         },
         {
           "insert": "src/agent/",
@@ -499,13 +532,26 @@
           "insert": " for project-board integration, "
         },
         {
+          "insert": "src/style/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/style",
+              "label": "src/style/"
+            }
+          }
+        },
+        {
+          "insert": " for the workspace style rail, and "
+        },
+        {
           "insert": "src/dev/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " for flagged dev tooling — each owning its components, state, and adapters, with "
+          "insert": " for flagged dev tooling. Each owns its components, state, and adapters, and "
         },
         {
           "insert": "App.tsx",
@@ -514,7 +560,7 @@
           }
         },
         {
-          "insert": " as thin route wiring."
+          "insert": " stays thin route wiring."
         }
       ],
       "children": []
@@ -564,7 +610,7 @@
           }
         },
         {
-          "insert": " — including every future studio surface, which gets its own folder rather than accreting into "
+          "insert": ", including every future studio surface, which gets its own folder rather than accreting into "
         },
         {
           "insert": "App.tsx",
@@ -574,6 +620,418 @@
         },
         {
           "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-style-decision-19": {
+      "id": "b-studio-style-decision-19",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": the Style rail ("
+        },
+        {
+          "insert": "StyleRail.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/style/StyleRail.tsx",
+              "label": "StyleRail.tsx"
+            }
+          }
+        },
+        {
+          "insert": ") is generated from "
+        },
+        {
+          "insert": "CANVAS_STYLE_CONTROLS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". It shows one preview card per theme, then every token of the active theme in collapsible groups: numbers as a slider with an exact input, colors as a swatch with a text field that keeps alpha, selects as segmented controls, booleans as switches, and one ink row per palette color. Rows honor "
+        },
+        {
+          "insert": "visibleWhen",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and an overridden row that "
+        },
+        {
+          "insert": "visibleWhen",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " hides stays listed, dimmed, so it can still be reset. An override dot resets one token, and Reset theme clears the active theme's overrides."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-style-why-20": {
+      "id": "b-studio-style-why-20",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": a rail generated from the controls table exposes every token with no per-token UI code, so a token added to the style model appears in Studio by itself. The rejected alternative was a hand-built control per token, which lags the model it edits."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-style-applies-21": {
+      "id": "b-studio-style-applies-21",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "src/style/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/style",
+              "label": "src/style/"
+            }
+          }
+        },
+        {
+          "insert": ", including every future token or theme, which needs no change here."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-boards-decision-22": {
+      "id": "b-studio-boards-decision-22",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": every surface that renders a board receives the resolved style as "
+        },
+        {
+          "insert": "canvasStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": the editor, the view and embed routes, the gallery, and the server's SVG previews behind the board list's thumbnails. The view and embed pages and each board-list card paint the theme's "
+        },
+        {
+          "insert": "boardBackground",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " behind the board, so a dark board has no light frame, while the rest of Studio's chrome keeps its own look. Studio vendors IBM Plex Mono at weights 400, 500, and 600 as woff2 files in "
+        },
+        {
+          "insert": "src/fonts/",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/fonts",
+              "label": "src/fonts/"
+            }
+          }
+        },
+        {
+          "insert": ", declared in "
+        },
+        {
+          "insert": "index.css",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-boards-why-23": {
+      "id": "b-studio-boards-why-23",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": a surface that missed the style would show one board in two themes inside one workspace, and the mono metadata must render in the face the static renderer and the agent's text fit measure."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-boards-applies-24": {
+      "id": "b-studio-boards-applies-24",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "App.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/App.tsx",
+              "label": "App.tsx"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "GalleryPage.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/GalleryPage.tsx",
+              "label": "GalleryPage.tsx"
+            }
+          }
+        },
+        {
+          "insert": ", including every future board surface, which takes the style from "
+        },
+        {
+          "insert": "useCanvasStyleSettings",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-settings-decision-25": {
+      "id": "b-studio-settings-decision-25",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "use-canvas-style-settings.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/style/use-canvas-style-settings.ts",
+              "label": "use-canvas-style-settings.ts"
+            }
+          }
+        },
+        {
+          "insert": " owns the settings state: optimistic edits, a debounced PUT of the whole settings document, a localStorage copy for the first frame, and external changes pushed over the dev server. It also tracks the style the server last confirmed, and board-list thumbnails key their preview URLs on that style rather than on the local one."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-settings-why-26": {
+      "id": "b-studio-settings-why-26",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": a thumbnail keyed on an edit the server has not saved yet would fetch the old render and cache it under the new key, so it would never refresh. The rejected alternative was keying thumbnails on the local style."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-settings-applies-27": {
+      "id": "b-studio-settings-applies-27",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "use-canvas-style-settings.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/style/use-canvas-style-settings.ts",
+              "label": "use-canvas-style-settings.ts"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "App.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", including every future surface that caches a server render of a board."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-panels-decision-28": {
+      "id": "b-studio-panels-decision-28",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": the editor route opens one right-hand panel at a time: the Style rail, the editor's Inspector, or the agent sidebar. The editor mounts the rail in its "
+        },
+        {
+          "insert": "sidePanel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " slot, outside the stage, and shows its own Inspector when "
+        },
+        {
+          "insert": "showInspector",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is set, which Studio's Inspect toggle drives. The Inspector edits a selection's detail line and its glyph: an icon's Glyph field, and a section's Icon field with a None choice."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-panels-why-29": {
+      "id": "b-studio-panels-why-29",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": a panel inside the stage, as a "
+        },
+        {
+          "insert": "screenOverlay",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is, hit-tests clicks against the board under it and pans the board on a wheel scroll. A side panel in the editor's chrome keeps those events off the board, and editor popups stack above it. The rejected alternative was mounting the rail as a stage overlay."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-panels-applies-30": {
+      "id": "b-studio-panels-applies-30",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "App.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s editor route and the editor's "
+        },
+        {
+          "insert": "sidePanel",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " slot, including every future settings panel, which mounts there and joins the one-open-at-a-time rule."
         }
       ],
       "children": []

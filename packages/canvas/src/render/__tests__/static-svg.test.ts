@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { renderDocumentToSvg } from "../static-svg";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import {
   ICON_GLYPHS,
   iconGlyphStrokeWidthForSize,
@@ -110,7 +111,7 @@ describe("renderDocumentToSvg", () => {
   });
 
   it("renders the expected element inventory for the fixture", () => {
-    const { svg } = renderDocumentToSvg(fixtureDocument());
+    const { svg } = renderDocumentToSvg(fixtureDocument(), { canvasStyle: FIGJAM_CANVAS_STYLE });
     // Two connector paths.
     expect(count(svg, "<path ")).toBe(2);
     // Dashed connector carries the FigJam dash pattern.
@@ -135,7 +136,7 @@ describe("renderDocumentToSvg", () => {
   });
 
   it("XML-escapes hostile user text everywhere", () => {
-    const { svg } = renderDocumentToSvg(fixtureDocument());
+    const { svg } = renderDocumentToSvg(fixtureDocument(), { canvasStyle: FIGJAM_CANVAS_STYLE });
     expect(svg).not.toContain("<script>");
     expect(svg).toContain("&lt;script&gt;");
     // Section title with an angle bracket, escaped.
@@ -151,7 +152,7 @@ describe("renderDocumentToSvg", () => {
   });
 
   it("crops to a section, keeps members and retains boundary-crossing connections", () => {
-    const { svg } = renderDocumentToSvg(fixtureDocument(), { sectionId: "sec-1" });
+    const { svg } = renderDocumentToSvg(fixtureDocument(), { sectionId: "sec-1", canvasStyle: FIGJAM_CANVAS_STYLE });
     expect(svg).toContain(">Start</tspan>");
     expect(svg).toContain(">OK?</tspan>");
     // The unconnected sticky is gone.
@@ -229,9 +230,9 @@ describe("renderDocumentToSvg", () => {
       ],
       connections: [],
     };
-    const board = renderDocumentToSvg(doc, { background: "board" });
+    const board = renderDocumentToSvg(doc, { background: "board", canvasStyle: FIGJAM_CANVAS_STYLE });
     expect(board.svg).toContain('fill="#F5F5F5"');
-    const transparent = renderDocumentToSvg(doc, { background: "transparent" });
+    const transparent = renderDocumentToSvg(doc, { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE });
     expect(transparent.svg).not.toContain('fill="#F5F5F5"');
     // Empty text renders no text node at all.
     expect(transparent.svg).not.toContain("<text");
@@ -246,7 +247,7 @@ describe("renderDocumentToSvg", () => {
   });
 
   it("mirrors the stage's layer order: sections < connectors < objects < title chips", () => {
-    const { svg } = renderDocumentToSvg(fixtureDocument(), { background: "transparent" });
+    const { svg } = renderDocumentToSvg(fixtureDocument(), { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE });
     const sectionTint = svg.indexOf('fill="#F1F6FE"'); // section backdrop
     const connectorPath = svg.indexOf("<path ");
     const objectText = svg.indexOf(">Start</tspan>");
@@ -274,7 +275,7 @@ describe("renderDocumentToSvg", () => {
       ],
       connections: [],
     };
-    const { svg } = renderDocumentToSvg(doc, { background: "transparent" });
+    const { svg } = renderDocumentToSvg(doc, { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE });
     const glyph = ICON_GLYPHS.event;
     // Nested glyph svg with the registry's viewBox and stroke semantics.
     expect(svg).toContain(`<svg x="0" y="0" width="120" height="120" viewBox="0 0 ${glyph.viewBoxSize} ${glyph.viewBoxSize}"`);
@@ -318,7 +319,7 @@ describe("renderDocumentToSvg", () => {
       ],
       connections: [],
     };
-    const { svg } = renderDocumentToSvg(doc, { background: "transparent" });
+    const { svg } = renderDocumentToSvg(doc, { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE });
     expect(count(svg, "<svg")).toBe(1); // no nested glyph svg
     expect(svg).toContain('rx="1"'); // the neutral rounded rect body (2px radius − 1px half-stroke)
   });

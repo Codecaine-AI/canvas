@@ -90,12 +90,11 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "status": "accepted",
         "title": "Vocabulary in practice"
       },
       "text": [
         {
-          "insert": "The canvas document backs the draft. An operation result is sized to that operation — its change, its lint delta, and the routed truth for any edge it touched — while a look returns the whole board, its digest, and a measured close-up of any region it is asked to frame; a refused call changes nothing and returns only its error lines. Sections keep exactly the geometry they are given, and fit_section closes one around the children already inside it when asked. Section membership is reconciled from geometry rather than trusted from parentId. Six diagnostics judge document and routed geometry on every edit — covered-content, containment, broken-edges, unreadable-labels, crowding, and clipped-text — and a committed finalize adds frame-slack."
+          "insert": "The canvas document backs the draft. An operation result is sized to that operation: its change, its lint delta, and the routed truth for any edge it touched. A look returns the whole board, its digest, and a measured close-up of any region it is asked to frame. A refused call changes nothing and returns only its error lines. Sections keep exactly the geometry they are given, and fit_section closes one around the children already inside it when asked. Section membership is reconciled from geometry rather than trusted from parentId. Eight diagnostics run on every edit. Six judge document and routed geometry: covered-content, containment, broken-edges, unreadable-labels, crowding, and clipped-text. The other two, label-is-prose and detail-too-long, judge object text against the name and detail convention. A committed finalize adds frame-slack."
         }
       ],
       "children": []
@@ -138,7 +137,7 @@
           }
         },
         {
-          "insert": " — objects and how space is divided. Nested by indentation."
+          "insert": " describes the objects and how space is divided, nested by indentation."
         }
       ],
       "children": []
@@ -157,7 +156,7 @@
           }
         },
         {
-          "insert": " — "
+          "insert": " are "
         },
         {
           "insert": "align",
@@ -185,7 +184,7 @@
           }
         },
         {
-          "insert": " lines at the left margin. Cross-branch spatial claims; they reference objects by number."
+          "insert": " lines at the left margin. These cross-branch spatial claims reference objects by number."
         }
       ],
       "children": []
@@ -204,7 +203,7 @@
           }
         },
         {
-          "insert": " — the "
+          "insert": " are the "
         },
         {
           "insert": "arrows",
@@ -218,7 +217,7 @@
           }
         },
         {
-          "insert": " block, always last. The connections that exist in the document."
+          "insert": " block, always last. It lists the connections that exist in the document."
         }
       ],
       "children": []
@@ -320,7 +319,7 @@
           }
         },
         {
-          "insert": ") declares a positive integer, assigned in declaration order starting at 1. All later references — "
+          "insert": ") declares a positive integer, assigned in declaration order starting at 1. All later references ("
         },
         {
           "insert": "align",
@@ -362,7 +361,7 @@
           }
         },
         {
-          "insert": " — use these numbers. The number "
+          "insert": ") use these numbers. The number "
         },
         {
           "insert": "is",
@@ -371,7 +370,7 @@
           }
         },
         {
-          "insert": " the object's identity within the description; "
+          "insert": " the object's identity within the description. "
         },
         {
           "insert": "text=",
@@ -380,7 +379,7 @@
           }
         },
         {
-          "insert": " is only its short display name. Several objects may share the same text — references always go through numbers, so nothing is ambiguous. Declaring the same number twice is an error. A reference may instead be a JSON-quoted raw id ("
+          "insert": " is only its short display name. Several objects may share the same text. References always go through numbers, so nothing is ambiguous. Declaring the same number twice is an error. A reference may instead be a JSON-quoted raw id ("
         },
         {
           "insert": "\"some-id\"",
@@ -456,15 +455,15 @@
         "rows": [
           [
             "item",
-            "keyword — what this line declares"
+            "keyword (what this line declares)"
           ],
           [
             "2",
-            "reference number — declared once, reused later"
+            "reference number, declared once, reused later"
           ],
           [
             "text=checkout",
-            "the object's name — several objects can share it; the number is the identity"
+            "the object's name (several objects can share it). The number is the identity"
           ],
           [
             "type=pill",
@@ -472,11 +471,11 @@
           ],
           [
             "size=M",
-            "qualitative role size — S, M, or L; live geometry is chosen content-first, with peers matched exactly"
+            "qualitative role size (S, M, or L). Live geometry is chosen content-first, with peers matched exactly"
           ],
           [
             "at=C",
-            "compass position — where in the region"
+            "compass position (where in the region)"
           ]
         ],
         "title": "Anatomy of an item line"
@@ -505,11 +504,11 @@
         "rows": [
           [
             "item",
-            "a real object — one per line, every field labeled"
+            "a real object, one per line, every field labeled"
           ],
           [
             "section",
-            "a real container with a label — exactly one child"
+            "a real container with a label and exactly one child"
           ],
           [
             "group",
@@ -529,15 +528,15 @@
           ],
           [
             "align",
-            "put objects on one shared centerline — written after the tree"
+            "put objects on one shared centerline, written after the tree"
           ],
           [
             "fan",
-            "a hub with children spread out beside it — written after the tree"
+            "a hub with children spread out beside it, written after the tree"
           ],
           [
             "arrows",
-            "the block of connections — always last, even when empty"
+            "the block of connections, always last, even when empty"
           ]
         ],
         "title": "The nine statements"
@@ -915,7 +914,7 @@
           }
         },
         {
-          "insert": " — "
+          "insert": " stays off the line until a preview form is designed. "
         },
         {
           "insert": "text=",
@@ -924,7 +923,7 @@
           }
         },
         {
-          "insert": " is the object's short name, not the real sticky body text, which is sentences long and would destroy line readability. Body text stays off the line until a preview form is designed."
+          "insert": " is the object's short name, not the real sticky body text, which is sentences long and would destroy line readability."
         }
       ],
       "children": []
@@ -943,7 +942,7 @@
           }
         },
         {
-          "insert": " — these pages favor explicit facts so a reader does not have to infer omitted layout decisions."
+          "insert": " stay deferred, because these pages favor explicit facts so a reader does not have to infer omitted layout decisions."
         }
       ],
       "children": []

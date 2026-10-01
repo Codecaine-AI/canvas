@@ -33,10 +33,10 @@ semaphore, retry/AfterError, envelope, and render_md conventions.
 
 | code | measures | judge sees |
 |---|---|---|
-| SF | system fidelity — blind reconstruction: an engineer who has never seen the brief reads the board and writes down the system (components, data/control flow, failure paths); a second completion compares that reconstruction against the brief | blind: final PNG only. scorer: reconstruction + brief |
+| SF | system fidelity — blind reconstruction: an engineer who has never seen the brief reads the board and writes down the system (components, data/control flow, failure paths); a second completion compares that reconstruction against the brief | blind: final PNG + the scenario-independent notation legend (generated from the object-preference registry). scorer: reconstruction + brief |
 | RC | requirement coverage — every requirement STATED in the brief is represented somewhere on the board (judge extracts requirements from the brief at grade time; representation may take any visual form) | brief + final PNG + final JSON |
 | RD | readability — can a fresh viewer read the board at arm's length: corridors & air, grouping, edge legibility, density & decomposition; scored absolutely against the rubric anchors | final PNG only |
-| CF | craft — does the board read as a deliberately composed, finished artifact: frame use, color, machinery leakage, alignment & rhythm; scored absolutely against the rubric anchors | final PNG only |
+| CF | craft — does the board read as a deliberately composed, finished artifact: frame use, color, machinery leakage, alignment & rhythm; scored absolutely against the rubric anchors | final PNG + the registry color legend (generated from the object-preference registry) |
 | SD | scope discipline — ONLY when config has edits: per edit, did the agent do what was asked without collateral rework; derived entirely from the edit instruction + pre/post diff, no invariant lists | per edit: instruction + pre/post JSON + pre/post PNG + commit summary |
 | PH | process health — reads the transcripts to audit the agent's working process | transcripts + session metadata |
 

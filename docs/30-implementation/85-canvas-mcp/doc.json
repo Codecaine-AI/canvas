@@ -253,7 +253,20 @@
               }
             ],
             "Server",
-            "Opens one canvas as the active board. Returns the board description, the full digest, the open lint findings, and the file hash."
+            [
+              {
+                "insert": "Opens one canvas as the active board and re-reads the workspace style. Returns the file hash, a "
+              },
+              {
+                "insert": "STYLE",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " line with the active theme and any overrides, the board description, the full digest, and the open lint findings."
+              }
+            ]
           ],
           [
             [
@@ -617,6 +630,42 @@
           }
         },
         {
+          "insert": ". When a string argument misses a schema enum, the refusal adds one "
+        },
+        {
+          "insert": "hint ·",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " line per miss with up to four did-you-mean values, so "
+        },
+        {
+          "insert": "place_shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with type "
+        },
+        {
+          "insert": "postgres",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " points at "
+        },
+        {
+          "insert": "brand-postgres",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
           "insert": ". The per-gesture contracts are not repeated on this page."
         }
       ],
@@ -812,7 +861,7 @@
                     "text": "`Client` calls `canvas_open` with a canvas id"
                   },
                   {
-                    "text": "`openCanvasFile` reads, validates, and hashes the file"
+                    "text": "`openCanvasFile` reads, validates, and hashes the file and loads the workspace style"
                   },
                   {
                     "text": "Build the draft and inject a page frame",
@@ -834,7 +883,7 @@
                     "text": "Seed the lint baseline and sync the request queue"
                   },
                   {
-                    "text": "Return the description, digest, lint findings, and file hash"
+                    "text": "Return the file hash, the `STYLE` line, the description, the digest, and the lint findings"
                   }
                 ]
               },
@@ -1193,7 +1242,25 @@
           }
         },
         {
-          "insert": " returns "
+          "insert": " returns an "
+        },
+        {
+          "insert": "OPENED",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " line with the file hash, a "
+        },
+        {
+          "insert": "STYLE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " line, and "
         },
         {
           "insert": "boardStateSnapshot",
@@ -1202,7 +1269,7 @@
           }
         },
         {
-          "insert": " as text: the board description, the full digest, and the current lint report. The kernel path sends the same payload as its "
+          "insert": ", the board description, full digest, and current lint report that the kernel path sends as its "
         },
         {
           "insert": "board_state",
@@ -1211,7 +1278,65 @@
           }
         },
         {
-          "insert": " block."
+          "insert": " block. The "
+        },
+        {
+          "insert": "STYLE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " line always reads "
+        },
+        {
+          "insert": "STYLE · theme <id>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for the active "
+        },
+        {
+          "insert": "workspace theme",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "workspace theme"
+            }
+          }
+        },
+        {
+          "insert": " and appends "
+        },
+        {
+          "insert": "· workspace overrides: key=value, …, palette.<color>=<ink>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " when that theme has overrides, and the structured content carries "
+        },
+        {
+          "insert": "theme",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and the resolved "
+        },
+        {
+          "insert": "canvasStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -1230,7 +1355,7 @@
           }
         },
         {
-          "insert": " serves the topics from "
+          "insert": " lists each "
         },
         {
           "insert": "getCanvasAuthoringGuidance()",
@@ -1239,7 +1364,7 @@
           }
         },
         {
-          "insert": " on request. With no argument it lists each topic id, title, and approximate token size with the snapshot id. With a topic id it returns that topic in full. The topics are "
+          "insert": " topic's id, title, and approximate token size with the snapshot id when called with no argument, and returns one topic in full when given its id. The topics are "
         },
         {
           "insert": "diagram_design",
@@ -1275,7 +1400,7 @@
           }
         },
         {
-          "insert": "."
+          "insert": ", and together they carry the name and detail convention, the glyph vocabulary grouped by category, and the theme rule."
         }
       ],
       "children": []

@@ -9,6 +9,77 @@
 @source "../../canvas/src";
 
 /*
+ * IBM Plex Mono — the canvas metadata font (CANVAS_MONO_FONT_STACK in
+ * packages/canvas/src/theme/fonts.ts: detail lines, schematic section headers,
+ * connector labels). Vendored woff2 from IBM's @ibm/plex-mono 2.5.0 release
+ * (OFL-1.1, src/fonts/OFL-IBMPlexMono.txt). Vite fingerprints these into
+ * dist/assets/, which the Electron server serves as font/woff2.
+ */
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/IBMPlexMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/IBMPlexMono-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
+}
+
+/*
+ * Inter — the canvas content font (CANVAS_SANS_FONT_STACK: object names,
+ * sticky bodies, labels). Vendored static woff2 from the official rsms/inter
+ * 3.19 release ("Inter Web/", OFL-1.1, src/fonts/OFL-Inter.txt) at the weights
+ * the themes set (400 body/detail, 500, 600 schematic names, 700 figjam
+ * names), so the stage never falls back to system-ui on machines without
+ * Inter installed. Same family the agent camera bundles as TTF.
+ */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/Inter-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/Inter-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./fonts/Inter-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./fonts/Inter-Bold.woff2") format("woff2");
+}
+
+/*
  * Studio v1 theme: a static light-mode-only snapshot of Spectre's resolved
  * "spectre-light" design tokens (apps/frontend/src/theme/themes/spectre-light.json,
  * resolved via apps/frontend/src/theme/css-vars.ts at extraction time). Spectre
@@ -104,16 +175,73 @@ body {
   text-transform: uppercase;
 }
 
-.canvas-style-rail-control-group {
-  display: grid;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
+/* Token groups: a collapsible header per CANVAS_STYLE_GROUP, divided by rules. */
+.canvas-style-rail-group {
   border-top: 1px solid var(--border);
+}
+
+.canvas-style-rail-group:last-child {
   border-bottom: 1px solid var(--border);
 }
 
-.canvas-style-rail-control-group + .canvas-style-rail-section-label {
-  margin-top: 0.375rem;
+.canvas-style-rail-group-header {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  line-height: 1rem;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.canvas-style-rail-group-header:hover,
+.canvas-style-rail-group-header[aria-expanded="true"] {
+  color: var(--foreground);
+}
+
+.canvas-style-rail-group-header:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.canvas-style-rail-group-count {
+  display: inline-flex;
+  min-width: 1rem;
+  height: 1rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.3rem;
+  border-radius: 9999px;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  font-size: 10px;
+  letter-spacing: 0;
+}
+
+.canvas-style-rail-group-body {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.125rem 1rem 0.875rem;
+}
+
+/* An overridden token whose visibleWhen does not hold: shown dimmed so it can be reset. */
+.canvas-style-rail-inactive-row > :first-child {
+  opacity: 0.55;
+}
+
+.canvas-style-rail-inactive-note {
+  margin-top: 0.25rem;
+  color: var(--muted-foreground);
+  font-size: 10.5px;
+  line-height: 0.875rem;
 }
 
 .canvas-style-rail-row-label {
@@ -177,6 +305,363 @@ button.canvas-style-rail-row-override-dot:hover {
   height: 12px;
   width: 12px;
   border: none;
+  border-radius: 9999px;
+  background: var(--accent-foreground);
+}
+
+.canvas-style-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Exact value beside a slider; native spinners hidden (arrow keys still step). */
+.canvas-style-number {
+  width: 3.75rem;
+  height: 1.5rem;
+  padding: 0 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.canvas-style-number::-webkit-inner-spin-button,
+.canvas-style-number::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.canvas-style-number:focus-visible,
+.canvas-style-color-text:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+/* Color token: a swatch over a checkerboard (alpha shows) hiding the native picker, plus the text. */
+.canvas-style-swatch {
+  position: relative;
+  display: inline-flex;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(45deg, #d4d4d4 25%, transparent 25%),
+    linear-gradient(-45deg, #d4d4d4 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #d4d4d4 75%),
+    linear-gradient(-45deg, transparent 75%, #d4d4d4 75%);
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+  background-size: 8px 8px;
+  cursor: pointer;
+}
+
+.canvas-style-swatch-fill {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas-style-swatch input[type="color"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.canvas-style-swatch:has(input:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+.canvas-style-color-text {
+  width: 8.75rem;
+  height: 1.5rem;
+  padding: 0 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+}
+
+.canvas-style-color-text[aria-invalid="true"] {
+  border-color: var(--destructive);
+}
+
+/* Select token: a segmented control of native radios. */
+.canvas-style-segmented {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--radius);
+  background: var(--muted);
+}
+
+/* position: relative keeps the visually hidden radio inside its row, so focusing it never scrolls the rail. */
+.canvas-style-segment {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.375rem;
+  border-radius: calc(var(--radius) - 2px);
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1rem;
+  cursor: pointer;
+}
+
+.canvas-style-segment:hover {
+  color: var(--foreground);
+}
+
+.canvas-style-segment[data-active="true"] {
+  background: var(--card);
+  color: var(--foreground);
+  font-weight: 500;
+  box-shadow: 0 0 0 1px var(--border), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.canvas-style-segment:has(input:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 1px;
+}
+
+/* Boolean token: a switch. */
+.canvas-style-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 30px;
+  height: 17px;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.canvas-style-toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 13px;
+  height: 13px;
+  border-radius: 9999px;
+  background: var(--background);
+  box-shadow: 0 0 0 1px var(--border);
+  transition: transform 150ms ease;
+}
+
+.canvas-style-toggle:checked {
+  background: var(--accent-foreground);
+}
+
+.canvas-style-toggle:checked::after {
+  transform: translateX(13px);
+  box-shadow: none;
+}
+
+.canvas-style-toggle:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/*
+ * Theme picker: one radio card per theme with a miniature board — board +
+ * grid, a section with its header chip, a card, and four inks — painted
+ * inline from that theme's resolved style.
+ */
+.canvas-style-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding: 0 1rem 0.875rem;
+}
+
+.canvas-style-theme-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 0.25rem 0.25rem 0.375rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  cursor: pointer;
+}
+
+.canvas-style-theme-card:hover {
+  border-color: var(--input);
+}
+
+.canvas-style-theme-card[data-active="true"] {
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 1px var(--foreground);
+}
+
+.canvas-style-theme-card:has(input:focus-visible) {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.canvas-style-theme-preview {
+  position: relative;
+  display: block;
+  height: 3.5rem;
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 3px);
+  background-size: 7px 7px;
+}
+
+.canvas-style-theme-preview-section {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: 6px;
+  width: 64%;
+  border: 1px solid;
+  border-radius: 2px;
+}
+
+.canvas-style-theme-preview-chip {
+  position: absolute;
+  display: flex;
+  width: 46%;
+  height: 8px;
+  align-items: center;
+  padding: 0 3px;
+  border: 1px solid;
+  border-radius: 2px;
+}
+
+.canvas-style-theme-preview-chip[data-placement="floating"] {
+  top: 3px;
+  left: 3px;
+}
+
+/* Pinned: flush in the section's corner — top/left edges on the frame, only right + bottom drawn. */
+.canvas-style-theme-preview-chip[data-placement="pinned"] {
+  top: -1px;
+  left: -1px;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  border-radius: 2px 0 2px 0;
+}
+
+.canvas-style-theme-preview-chip > span {
+  display: block;
+  width: 70%;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.canvas-style-theme-preview-card {
+  position: absolute;
+  top: 16px;
+  left: 7px;
+  right: 9px;
+  display: flex;
+  height: 17px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 4px;
+  border: 1px solid;
+  border-radius: 2px;
+}
+
+.canvas-style-theme-preview-card > span {
+  display: block;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.canvas-style-theme-preview-card > span:first-child {
+  width: 62%;
+}
+
+.canvas-style-theme-preview-card > span:last-child {
+  width: 40%;
+  height: 1.5px;
+}
+
+.canvas-style-theme-preview-inks {
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  display: grid;
+  grid-template-columns: repeat(2, 6px);
+  gap: 3px;
+  transform: translateY(-50%);
+}
+
+.canvas-style-theme-preview-inks > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+}
+
+.canvas-style-theme-check {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: inline-flex;
+  width: 0.875rem;
+  height: 0.875rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--foreground);
+  color: var(--background);
+  /* A light ring keeps the badge visible on the dark theme's board too. */
+  box-shadow: 0 0 0 1.5px var(--card);
+}
+
+.canvas-style-theme-label {
+  display: flex;
+  min-height: 1.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 0.875rem;
+  text-align: center;
+}
+
+.canvas-style-theme-card[data-active="true"] .canvas-style-theme-label {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+.canvas-style-theme-edited {
+  width: 5px;
+  height: 5px;
+  flex: none;
   border-radius: 9999px;
   background: var(--accent-foreground);
 }

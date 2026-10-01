@@ -5,6 +5,7 @@
  * and caller-owned overlay slots. Editor feedback is composed outside.
  */
 import {
+  useMemo,
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
   type PointerEvent as ReactPointerEvent,
@@ -16,8 +17,10 @@ import {
   objectById,
   type CanvasBounds,
 } from "../state/geometry";
+import { sectionDepthMap } from "../state/section-depth";
 import { gridBackground } from "./grid";
 import { canvasSurfaceStyle } from "../theme/tokens";
+import { CANVAS_SANS_FONT_STACK } from "../theme/fonts";
 import type { CanvasStyle } from "../theme/canvas-style";
 import {
   CanvasStyleProvider,
@@ -29,25 +32,22 @@ import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector, ConnectorSelectionTrim } from "../connectors/Connector";
 import { SectionTitleChip } from "../objects/section/SectionTitleChip";
+import { SectionDepthProvider } from "../objects/section/section-depth-context";
 import type { CanvasTool } from "../state/actions";
 
 // ---------------------------------------------------------------------------
-// Stage surface constants (moved from theme/tokens.ts in the theme dispersal
-// — this stage is their consumer). The board surface is light-only: even the
-// app's dark theme renders the canvas SURFACE with these light values.
+// Stage surface constants. The board surface itself — background color and
+// grid-dot color — is the canvas style's `boardBackground` / `gridDotColor`
+// (theme/canvas-style.ts): it follows the workspace canvas theme, never the
+// app's light/dark chrome theme.
 // ---------------------------------------------------------------------------
 
-/** Board background. */
-const CANVAS_BG = "#F5F5F5";
-/** Dot color; this alpha reads as #B8B8B8 over the board background. */
-const GRID_DOT_COLOR = "rgba(0, 0, 0, 0.25)";
 /**
  * Canvas content font. Applied to canvas OBJECTS/labels/stickies via the
  * stage's content root class — never to app trim (toolbars, panels, etc.
  * keep the app's existing font stack).
  */
-const CANVAS_FONT_FAMILY =
-  '"Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif';
+const CANVAS_FONT_FAMILY = CANVAS_SANS_FONT_STACK;
 
 /**
  * Arrowhead geometry as multiples of the connector's stroke width. We use 5x
@@ -274,6 +274,10 @@ function CanvasStageSurface({
   const grid = gridBackground(zoom, { x: viewport.x, y: viewport.y });
   const orderedObjects = renderOrderedObjects(document.objects);
   const orderedSections = orderedObjects.filter((object) => object.type === "section");
+  // Section nesting depth (the layer-cake fill deepens per level), computed
+  // once per document: handed to each section body and title chip, and
+  // provided to overlays (the in-place title editor) via context.
+  const sectionDepths = useMemo(() => sectionDepthMap(document.objects), [document.objects]);
 
   const handToolActive = activeTool === "hand";
   const selectToolActive = activeTool === "select";
@@ -305,14 +309,13 @@ function CanvasStageSurface({
         overflow: "hidden",
         width: "100%",
         height: "100%",
-        // FigJam-parity board surface (theme/tokens.ts CANVAS_BG /
-        // GRID_DOT_COLOR): fixed light values in BOTH app themes — FigJam's
-        // board is light-only, it never dark-themes the canvas surface
-        // itself (only trim around it changes).
-        backgroundImage: `radial-gradient(circle, ${GRID_DOT_COLOR} ${grid.dotRadius}px, transparent ${grid.dotRadius}px)`,
+        // Board surface from the canvas style (boardBackground /
+        // gridDotColor): the workspace canvas theme decides it in BOTH app
+        // themes — the app's light/dark chrome never recolors the board.
+        backgroundImage: `radial-gradient(circle, ${resolvedCanvasStyle.gridDotColor} ${grid.dotRadius}px, transparent ${grid.dotRadius}px)`,
         backgroundPosition: grid.backgroundPosition,
         backgroundSize: grid.backgroundSize,
-        backgroundColor: CANVAS_BG,
+        backgroundColor: resolvedCanvasStyle.boardBackground,
         fontFamily: CANVAS_FONT_FAMILY,
         // Board text (labels, section titles, captions) is trim, not
         // document text — drags must never sweep a native DOM selection
@@ -503,6 +506,7 @@ function CanvasStageSurface({
               editable={Boolean(onObjectSelect || onStagePointerEvent)}
               zoom={zoom}
               hideText={editingTextObjectId === object.id}
+              sectionDepth={object.type === "section" ? sectionDepths.get(object.id) : undefined}
               onObjectSelect={onObjectSelect}
               onObjectContextMenu={onObjectContextMenu}
             />
@@ -555,6 +559,7 @@ function CanvasStageSurface({
                 key={section.id}
                 section={section}
                 zoom={zoom}
+                depth={sectionDepths.get(section.id)}
                 bounds={bounds}
                 onObjectSelect={onObjectSelect}
                 onObjectContextMenu={onObjectContextMenu}
@@ -567,7 +572,8 @@ function CanvasStageSurface({
           data-canvas-world-overlay-layer="true"
           style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none", zIndex: 4 }}
         >
-          {worldOverlay}
+          {/* World overlays (the in-place title editor) read section depths too. */}
+          <SectionDepthProvider depths={sectionDepths}>{worldOverlay}</SectionDepthProvider>
         </div>
       </div>
       <div

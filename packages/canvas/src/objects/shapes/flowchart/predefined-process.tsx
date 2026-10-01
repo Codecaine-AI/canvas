@@ -32,21 +32,29 @@ export const predefinedProcessShapeDef: ShapeDef = {
   shape: "predefined-process",
   silhouette: {
     className: "interactive-canvas-object-predefined-process",
-    silhouette: ({ colors }) => {
+    silhouette: ({ colors, strokedBorderPx }) => {
       // W2 — predefined-process: rect with two inner vertical bars inset from
       // each edge (PREDEFINED_PROCESS_GEOMETRY.barInsetRatio of total width).
       const barInsetPct = PREDEFINED_PROCESS_GEOMETRY.barInsetRatio * 100;
+      // A border painted as an SVG stroke (see shapes/base.tsx) leaves the
+      // padding box spanning the whole box: keep the bars inside the line, at
+      // the same ratio of the inner width (s + ratio·(W − 2s)).
+      const ratio = PREDEFINED_PROCESS_GEOMETRY.barInsetRatio;
+      const inset =
+        strokedBorderPx > 0 ? `calc(${strokedBorderPx * (1 - 2 * ratio)}px + ${barInsetPct}%)` : `${barInsetPct}%`;
+      const vertical =
+        strokedBorderPx > 0 ? { top: `${strokedBorderPx}px`, bottom: `${strokedBorderPx}px` } : null;
       return (
         <>
           <span
             aria-hidden="true"
             className="interactive-canvas-predefined-process-bar"
-            style={{ left: `${barInsetPct}%`, background: colors.border }}
+            style={{ left: inset, background: colors.border, ...vertical }}
           />
           <span
             aria-hidden="true"
             className="interactive-canvas-predefined-process-bar"
-            style={{ right: `${barInsetPct}%`, left: "auto", background: colors.border }}
+            style={{ right: inset, left: "auto", background: colors.border, ...vertical }}
           />
         </>
       );

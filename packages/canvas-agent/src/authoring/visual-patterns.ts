@@ -30,18 +30,26 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "hierarchy",
     name: "Hierarchy",
-    description: "Parent-child ownership or decomposition expressed through repeated local branches or justified nested sections. Label ownership separately from execution order. Use supported objects and connections for the branches.",
+    description: "Parent-child ownership or decomposition expressed through repeated local branches or justified nested sections. Label ownership separately from execution order. Use supported objects and connections for the branches. Nested sections read as layers, such as a machine holding a runtime holding a sandbox, when each header carries an icon and one fact.",
     ascii: `[Parent]
   +-- [Child A]
   |     +-- [Grandchild]
-  +-- [Child B]`,
+  +-- [Child B]
+
++-(icon) Mac  darwin-arm64 ----------------+
+|  +-(icon) Bun services  127.0.0.1 ----+  |
+|  |  [canvas-agent]    [docs kernel]   |  |
+|  |   harness · :4820   :4840          |  |
+|  +------------------------------------+  |
++------------------------------------------+`,
     useCase: "A service owns two subsystems, one of which owns a smaller component.",
   },
   {
     id: "sequence",
     name: "Sequence",
-    description: "Ordered stages or events form a readable chain with labeled transitions. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects.",
-    ascii: `[Start] --> [Step 1] --> [Step 2] --> [End]`,
+    description: "Ordered stages or events form a readable chain with labeled transitions. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects. The line under each stage is its detail: one fact, not a description.",
+    ascii: `[Request] --> [Validate] --> [Process] --> [Respond]
+ POST /runs    JSON schema    worker pool   201 Created`,
     useCase: "A request passes through validation, processing, and response delivery.",
   },
   {
@@ -97,7 +105,11 @@ function escapeXml(value: string): string {
     .replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&apos;");
 }
 
-/** Preserve sketch spacing and arrows while keeping every entry valid XML. */
+/**
+ * Preserve sketch spacing and arrows while keeping every entry valid XML. The
+ * sketch starts on its own line, so the block indentation applied around it
+ * shifts every row alike and the columns stay aligned.
+ */
 export function renderVisualPatterns(patterns: readonly VisualPattern[] = VISUAL_PATTERNS): string {
   return [
     "<patterns>",
@@ -105,7 +117,7 @@ export function renderVisualPatterns(patterns: readonly VisualPattern[] = VISUAL
       `  <pattern id="${escapeXml(pattern.id)}">`,
       `    <name>${escapeXml(pattern.name)}</name>`,
       `    <description>${escapeXml(pattern.description)}</description>`,
-      `    <ascii xml:space="preserve"><![CDATA[${pattern.ascii.replaceAll("]]>", "]]]]><![CDATA[>")}]]></ascii>`,
+      `    <ascii xml:space="preserve"><![CDATA[\n${pattern.ascii.replaceAll("]]>", "]]]]><![CDATA[>")}]]></ascii>`,
       `    <use_case>${escapeXml(pattern.useCase)}</use_case>`,
       "  </pattern>",
     ].join("\n")),

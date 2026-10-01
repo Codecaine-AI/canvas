@@ -21,15 +21,31 @@
  *     small hand-drawn inline SVG minis using the same visual motif the def
  *     renders — deliberately NOT derived: their real outlines are plain
  *     bboxes (or read better as motif minis at 20x20).
- *   - Icon entries (all 30 glyphs) reuse the glyph paths directly from the
- *     ICON_GLYPHS registry (the same registry IconShapeBody renders
- *     on-canvas) via `iconGlyphPreview()`.
+ *   - Icon entries (every glyph in the roster — the 30 operational-map ids,
+ *     the generic additions, and the `brand-*` logos) draw the glyph the
+ *     on-canvas IconShapeBody would draw under the active canvas style:
+ *     `resolveIconGlyph(id, style.iconPack)` geometry, outline glyphs at the
+ *     default placed icon's viewBox-normalized stroke, fill-paint (brand)
+ *     logos filled, and — in the `tile` icon style — set into the tile the
+ *     default placed icon gets (solid with the glyph knocked out, or tinted)
+ *     — see `IconGlyphPreview`.
  */
 
+import { useId } from "react";
 import type { CanvasBounds } from "../../../state/geometry";
 import { defaultGeometryFor } from "../../../state/schema/object-defaults";
 import type { ShapeCatalogEntry } from "../../../objects/catalog";
-import { ICON_GLYPHS, iconGlyphStrokeWidthForSize, type IconGlyphId } from "../../../objects/shapes/icon/icon-glyphs";
+import {
+  ICON_GLYPHS,
+  iconGlyphStrokeWidthForViewBox,
+  resolveIconGlyph,
+  type IconGlyphDefinition,
+  type IconGlyphElement,
+  type IconGlyphId,
+} from "../../../objects/shapes/icon/icon-glyphs";
+import { ICON_TILE, iconTileGlyphStrokeWidth, iconTileLayout } from "../../../objects/shapes/icon/icon-tile";
+import { iconTileModeFor } from "../../../theme/palette";
+import { useCanvasStyle } from "../../../theme/canvas-style-context";
 import {
   ellipsePoints,
   octagonPoints,
@@ -74,45 +90,144 @@ function svgIcon(children: string): ShapePreviewIcon {
 }
 
 /**
- * Stroke width (viewBox units) for the icon picker previews: the EXACT
- * stroke the on-canvas renderer (IconShapeBody) computes for an icon at
- * its default placed size, via the same `iconGlyphStrokeWidthForSize`
- * step-down. Stroke in viewBox units is scale-invariant, so the picker glyph
- * is a faithful miniature of the icon a click will draw — same line weight
- * relative to the glyph, no separate hand-tuned preview constant.
+ * The side of the default placed icon (the box its glyph is drawn into). The
+ * previews stroke with the EXACT stroke the on-canvas renderer
+ * (IconShapeBody) computes for an icon at that size, via the same
+ * viewBox-normalized `iconGlyphStrokeWidthForViewBox` step-down (tile
+ * glyphs: `iconTileGlyphStrokeWidth`). Stroke in viewBox units is
+ * scale-invariant, so the picker glyph is a faithful miniature of the icon a
+ * click will draw — same line weight relative to the glyph, no separate
+ * hand-tuned preview constant.
  */
 const iconDefaultGeometry = defaultGeometryFor("icon");
-const ICON_PREVIEW_STROKE_WIDTH = iconGlyphStrokeWidthForSize(
-  Math.min(iconDefaultGeometry.width, iconDefaultGeometry.height),
-);
+const ICON_PREVIEW_SIZE_PX = Math.min(iconDefaultGeometry.width, iconDefaultGeometry.height);
 
-/** Icon preview: renders the exact glyph path data from the ICON_GLYPHS registry (same source IconShapeBody draws on-canvas), re-projected onto the preview viewBox, stroked with the same width the default-size placed icon draws with (ICON_PREVIEW_STROKE_WIDTH). */
-function iconGlyphPreview(glyphId: IconGlyphId): ShapePreviewIcon {
-  const glyph = ICON_GLYPHS[glyphId];
-  return function IconGlyphPreview({ className }: { className?: string }) {
+/** A tinted tile's body in a monochrome preview: currentColor at this opacity (the canvas mixes 16% ink into the card fill). */
+const ICON_PREVIEW_TINT_OPACITY = 0.16;
+
+function glyphElementNode(element: IconGlyphElement, key: number) {
+  if (element.kind === "path") return <path key={key} d={element.d} />;
+  if (element.kind === "circle") return <circle key={key} cx={element.cx} cy={element.cy} r={element.r} />;
+  return <line key={key} x1={element.x1} y1={element.y1} x2={element.x2} y2={element.y2} />;
+}
+
+/** The glyph's elements in `color`: outline glyphs stroke at `strokeWidth`, fill-paint (brand) glyphs fill. */
+function GlyphElements({
+  glyph,
+  color,
+  strokeWidth,
+  transform,
+}: {
+  glyph: IconGlyphDefinition;
+  color: string;
+  strokeWidth: number;
+  transform?: string;
+}) {
+  const elements = glyph.elements.map(glyphElementNode);
+  if (glyph.paint === "fill") {
     return (
-      <svg viewBox={`0 0 ${glyph.viewBoxSize} ${glyph.viewBoxSize}`} className={className} fill="none" aria-hidden="true">
-        <g
-          stroke="currentColor"
-          strokeWidth={ICON_PREVIEW_STROKE_WIDTH}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          {glyph.elements.map((element, index) => {
-            if (element.kind === "path") {
-              // eslint-disable-next-line react/no-array-index-key -- glyph element lists are static, position-stable
-              return <path key={index} d={element.d} />;
-            }
-            if (element.kind === "circle") {
-              // eslint-disable-next-line react/no-array-index-key -- glyph element lists are static, position-stable
-              return <circle key={index} cx={element.cx} cy={element.cy} r={element.r} />;
-            }
-            // eslint-disable-next-line react/no-array-index-key -- glyph element lists are static, position-stable
-            return <line key={index} x1={element.x1} y1={element.y1} x2={element.x2} y2={element.y2} />;
-          })}
+      <g fill={color} stroke="none" transform={transform}>
+        {elements}
+      </g>
+    );
+  }
+  return (
+    <g
+      fill="none"
+      stroke={color}
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      transform={transform}
+    >
+      {elements}
+    </g>
+  );
+}
+
+/**
+ * Icon preview in the active canvas style: the glyph `resolveIconGlyph(id,
+ * iconPack)` resolves, in currentColor. Glyph style draws it bare, as before.
+ * Tile style draws the tile the default placed icon gets, scaled down: a
+ * solid currentColor tile with the glyph KNOCKED OUT of it (a mask) — so it
+ * reads on the light Shapes panel and the dark search popover alike — or,
+ * when that size gets a tinted tile (`iconTileFill`), a faint tile with a
+ * currentColor border and glyph.
+ */
+function IconGlyphPreview({ glyphId, className }: { glyphId: IconGlyphId; className?: string }) {
+  const canvasStyle = useCanvasStyle();
+  const maskId = useId();
+  const glyph = resolveIconGlyph(glyphId, canvasStyle.iconPack);
+  const box = glyph.viewBoxSize;
+  if (canvasStyle.iconStyle !== "tile") {
+    return (
+      <svg viewBox={`0 0 ${box} ${box}`} className={className} fill="none" aria-hidden="true">
+        <GlyphElements
+          glyph={glyph}
+          color="currentColor"
+          strokeWidth={iconGlyphStrokeWidthForViewBox(ICON_PREVIEW_SIZE_PX, box)}
+        />
+      </svg>
+    );
+  }
+  // The default placed icon's tile, scaled into the preview: its glyph box
+  // (capped, centered — icon-tile.ts) and its body (iconTileFill at that size).
+  const unit = box / ICON_PREVIEW_SIZE_PX;
+  const layout = iconTileLayout(ICON_PREVIEW_SIZE_PX, ICON_PREVIEW_SIZE_PX);
+  const glyphTransform = `translate(${layout.glyph.x * unit} ${layout.glyph.y * unit}) scale(${layout.glyph.width / ICON_PREVIEW_SIZE_PX})`;
+  const radius = ICON_TILE.cornerRadiusPx * unit;
+  if (iconTileModeFor(canvasStyle, ICON_PREVIEW_SIZE_PX) === "tint") {
+    // Tinted tile: a faint currentColor body, a currentColor border at the
+    // shape border width, and the glyph in currentColor.
+    const border = canvasStyle.shapeBorderWidthPx * unit;
+    return (
+      <svg viewBox={`0 0 ${box} ${box}`} className={className} fill="none" aria-hidden="true">
+        <g>
+          <rect
+            x={border / 2}
+            y={border / 2}
+            width={box - border}
+            height={box - border}
+            rx={Math.max(0, radius - border / 2)}
+            fill="currentColor"
+            fillOpacity={ICON_PREVIEW_TINT_OPACITY}
+            stroke="currentColor"
+            strokeWidth={border}
+          />
+          <GlyphElements
+            glyph={glyph}
+            color="currentColor"
+            strokeWidth={iconTileGlyphStrokeWidth(box)}
+            transform={glyphTransform}
+          />
         </g>
       </svg>
     );
+  }
+  return (
+    <svg viewBox={`0 0 ${box} ${box}`} className={className} fill="none" aria-hidden="true">
+      <defs>
+        <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width={box} height={box}>
+          <rect width={box} height={box} fill="white" />
+          <GlyphElements
+            glyph={glyph}
+            color="black"
+            strokeWidth={iconTileGlyphStrokeWidth(box)}
+            transform={glyphTransform}
+          />
+        </mask>
+      </defs>
+      <g>
+        <rect width={box} height={box} rx={radius} fill="currentColor" mask={`url(#${maskId})`} />
+      </g>
+    </svg>
+  );
+}
+
+/** One preview component per glyph id; it reads the canvas style when it renders. */
+function iconGlyphPreview(glyphId: IconGlyphId): ShapePreviewIcon {
+  return function IconGlyphPreviewForId({ className }: { className?: string }) {
+    return <IconGlyphPreview glyphId={glyphId} className={className} />;
   };
 }
 

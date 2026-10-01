@@ -30,7 +30,9 @@ import type { Static } from "@mariozechner/pi-ai";
 
 import { CANVAS_COLORS, CANVAS_ICON_GLYPHS } from "@codecaine-ai/canvas/schema";
 
+import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../../board/text-rules";
 import { SHAPE_OBJECT_TYPES } from "../perception/op-surface";
+import { BRAND_GLYPH_PREFIX } from "./glyph-names";
 import { PlaceableType } from "./placeable-types";
 
 /** Sealed objects reject unknown keys outright, which is what keeps a payload
@@ -63,6 +65,47 @@ export const ShapeType = StringEnum([...SHAPE_OBJECT_TYPES], {
 /** Glyph ids for `type: "icon"`. */
 export const Glyph = StringEnum([...CANVAS_ICON_GLYPHS], {
   description: "The glyph an icon object draws.",
+});
+
+// ---------------------------------------------------------------------------
+// Name + detail — the text convention the descriptions below teach
+// ---------------------------------------------------------------------------
+//
+// A shape, icon, or section carries a NAME (`text`) and at most ONE short fact
+// (`detail`), rendered muted on one line under the name — inline after a
+// section's title. Prose goes on a sticky. The numbers come from
+// board/text-rules.ts, the module the label-is-prose and detail-too-long lints
+// measure with, so a description can never quote a limit the lints disagree
+// with. The descriptions are the steering: the lints, not the schema, are the
+// enforcement, because an overlong name is legal and only reads badly.
+
+/** What a name is, said once for every field that writes one. */
+export const NAME_RULE =
+  `a short name — what the thing is in a few words (≤ ~${NAME_TARGET_WORDS}), one line, no sentences`;
+
+/** The limits every detail field quotes. */
+const DETAIL_LIMITS = `≤ ${DETAIL_MAX_CHARS} chars, one line, no sentences`;
+
+/**
+ * What a detail is, said once for every field that writes one. A free string
+ * with no length cap everywhere it appears: an overlong detail applies and the
+ * detail-too-long lint says so.
+ */
+export const DETAIL_RULE =
+  `ONE short fact shown under the name (beside a section's title): a port, path, version, model, or host — `
+  + `${DETAIL_LIMITS}. Explanations go on a sticky`;
+
+/**
+ * A section's header glyph, as a FREE STRING rather than the `Glyph` enum: an
+ * enum miss is refused by the schema with a bare "not allowed", while a free
+ * string reaches the operation's validator, which answers a near miss with the
+ * names it was reaching for (./glyph-names.ts).
+ */
+export const SectionIcon = Type.String({
+  description:
+    "Optional header glyph — any glyph name place_shape accepts: a generic pictogram for the region's role"
+    + ` ("database", "cloud") or a brand logo for a concrete technology it holds ("${BRAND_GLYPH_PREFIX}postgres").`
+    + " Omit it when no glyph fits.",
 });
 
 /** Facing for the shapes that have one; each type accepts its own subset. */
@@ -170,8 +213,10 @@ export const SectionPayload = Type.Object(
   {
     id: Id,
     text: Type.String(),
+    detail: Type.Optional(Type.String()),
     color: Type.Optional(Color),
     geometry: Geometry,
+    icon: Type.Optional(Glyph),
   },
   Seal,
 );
@@ -180,8 +225,10 @@ export type SectionPayload = Static<typeof SectionPayload>;
 export const SectionPatch = Type.Object(
   {
     text: Type.Optional(Type.String()),
+    detail: Type.Optional(Type.String()),
     color: Type.Optional(Color),
     geometry: Type.Optional(Geometry),
+    icon: Type.Optional(Glyph),
   },
   Patch,
 );
@@ -213,6 +260,7 @@ export const ObjectPayload = Type.Object(
     id: Id,
     type: ShapeType,
     text: Type.Optional(Type.String()),
+    detail: Type.Optional(Type.String()),
     color: Type.Optional(Color),
     geometry: Geometry,
     direction: Type.Optional(Direction),
@@ -226,6 +274,7 @@ export const ObjectPatch = Type.Object(
   {
     type: Type.Optional(ShapeType),
     text: Type.Optional(Type.String()),
+    detail: Type.Optional(Type.String()),
     color: Type.Optional(Color),
     geometry: Type.Optional(Geometry),
     direction: Type.Optional(Direction),
@@ -283,20 +332,30 @@ export type ConnectionPatch = Static<typeof ConnectionPatch>;
 // document patch. Section membership is reconciled from geometry afterwards.
 //
 // The payload/patch shapes above are not a second tool surface: they are the
-// internal vocabulary a gesture lowers onto, and nothing above this line is
-// offered to the model directly.
+// internal vocabulary a gesture lowers onto, and nothing above this line except
+// the SectionIcon field is offered to the model directly.
+//
+// The one-line `detail` is the exception to "typing is a later gesture": it is
+// the fact that belongs to the name, so a placement may carry it the way a
+// frame's title rides on place_section — one call per node instead of two.
 
 /**
  * `place_section` — drawing a frame. Titling it is part of the gesture, so
  * `text` is required; the drawn size is optional because a frame dropped
- * without a drag takes the default section footprint.
+ * without a drag takes the default section footprint. The header's detail and
+ * glyph are part of the same chip as the title, so they ride along too.
  */
 export const PlaceSectionParams = Type.Object(
   {
     id: Id,
-    text: Type.String({ description: "The frame's title." }),
+    text: Type.String({ description: `The frame's title: ${NAME_RULE}.` }),
     at: Point,
     size: Type.Optional(Size),
+    detail: Type.Optional(Type.String({
+      description:
+        `Optional: ONE short fact shown after the title in the frame's header — a host, version, or path; ${DETAIL_LIMITS}.`,
+    })),
+    icon: Type.Optional(SectionIcon),
   },
   { ...Seal, description: "Draw a section frame at `at` (its top-left corner)." },
 );
@@ -317,17 +376,23 @@ export const PlaceStickyParams = Type.Object(
 export type PlaceStickyParams = Static<typeof PlaceStickyParams>;
 
 /**
- * `place_shape` — the pick and the click, nothing else. No text, no color, no
- * direction: those are `update_text` / `change_color` / `change_shape`
- * afterward. `type` is the FOLDED vocabulary — shape types with the icon
- * glyphs folded in as types of their own — so placing "decision" and placing
- * "memory" are the same gesture with a different pick (see ./placeable-types).
+ * `place_shape` — the pick and the click, plus the optional one-line detail.
+ * No name, no color, no direction: those are `update_text` / `change_color` /
+ * `change_shape` afterward. `type` is the FOLDED vocabulary — shape types with
+ * the icon glyphs folded in as types of their own — so placing "decision" and
+ * placing "memory" are the same gesture with a different pick (see
+ * ./placeable-types).
  */
 export const PlaceShapeParams = Type.Object(
   {
     id: Id,
     type: PlaceableType,
     at: Point,
+    detail: Type.Optional(Type.String({
+      description:
+        `Optional: ONE short fact shown under the name — a port, path, version, model, or host; ${DETAIL_LIMITS}.`
+        + " The name is written afterwards with update_text; explanations go on a sticky.",
+    })),
   },
   { ...Seal, description: "Place a shape at `at` (its top-left corner)." },
 );
@@ -335,9 +400,10 @@ export type PlaceShapeParams = Static<typeof PlaceShapeParams>;
 
 /**
  * `clone` — "make another one of these". Everything about the source travels
- * with the copy (kind, size, color, shape type/direction/icon, border style),
- * which is the whole point: a row of options matches without re-specifying a
- * single number.
+ * with the copy (kind, size, color, shape type/direction/icon, detail, border
+ * style), which is the whole point: a row of options matches without
+ * re-specifying a single number. `text` and `detail` are the two things a row
+ * of peers differs in, so each can be overridden in the same call.
  *
  * `at` and `by` are MUTUALLY EXCLUSIVE and both optional — a constraint JSON
  * Schema cannot state without a `oneOf` at the root, which the wire rules above
@@ -352,6 +418,9 @@ export const CloneParams = Type.Object(
     by: Type.Optional(Point),
     text: Type.Optional(Type.String({
       description: "Text for the copy. Omit it and the source's text carries over.",
+    })),
+    detail: Type.Optional(Type.String({
+      description: "Detail line for the copy. Omit it and the source's detail carries over; empty clears it.",
     })),
   },
   {
@@ -449,10 +518,10 @@ export type DeleteParams = Static<typeof DeleteParams>;
 // ---------------------------------------------------------------------------
 //
 // `update_text` and `change_color` need no payload type of their own: their
-// parameters are `id` plus one scalar, declared inline by the descriptor
+// parameters are `id` plus scalars, declared inline by the descriptor
 // (operations/content.ts). `change_shape` is the one that carries a patch,
-// because "swap what this is" has two independent knobs and asking for
-// neither is not a gesture.
+// because "swap what this is" has independent knobs and asking for none of
+// them is not a gesture.
 
 /**
  * `change_shape`'s patch — what the object becomes. `type` is the FOLDED
@@ -464,13 +533,27 @@ export type DeleteParams = Static<typeof DeleteParams>;
  * per the document validator's per-type subsets. Asking for a direction on any
  * other type is legal input; the operation drops it and says so, rather than
  * spending a turn on a rejection.
+ *
+ * `icon` is a SECTION's header glyph — the one glyph that is not a type,
+ * because a frame stays a frame whatever it wears. It is the only key a
+ * section accepts, and the one key a shape refuses (a shape's glyph is its
+ * `type`), so "pick a glyph" has one gesture whatever it lands on. A free
+ * string for the same reason as `SectionIcon`, plus the word that removes it.
  */
 export const ShapeSwapPatch = Type.Object(
   {
     type: Type.Optional(PlaceableType),
     direction: Type.Optional(Direction),
+    icon: Type.Optional(Type.String({
+      description:
+        "Sections only: the frame's header glyph — any glyph name place_shape accepts, or \"none\" to"
+        + " remove it. A shape's or icon's glyph is its `type`, not this.",
+    })),
   },
-  { ...Patch, description: "What the shape becomes. Name at least one of the two." },
+  {
+    ...Patch,
+    description: "What the shape becomes (type, direction), or a section's header glyph (icon). Name at least one.",
+  },
 );
 export type ShapeSwapPatch = Static<typeof ShapeSwapPatch>;
 

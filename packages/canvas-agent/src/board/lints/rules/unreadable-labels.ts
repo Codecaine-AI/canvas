@@ -26,7 +26,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "@codecaine-ai/canvas/schema";
-import type { LayoutRule } from "../types";
+import type { LayoutRule, LintContext } from "../types";
 
 /** The axis the edge runs along: whichever separates the endpoints more. */
 function runAxis(from: InteractiveCanvasObject, to: InteractiveCanvasObject): Axis {
@@ -51,9 +51,10 @@ interface ChipFitFinding {
 
 function chipFitFinding(
   edge: InteractiveCanvasConnection, document: InteractiveCanvasDocument,
+  canvasStyle: LintContext["canvasStyle"],
 ): ChipFitFinding | undefined {
   if (edge.from.objectId === edge.to.objectId) return undefined;
-  const chip = chipFor(edge, document);
+  const chip = chipFor(edge, document, canvasStyle);
   if (!chip) return undefined;
   const byId = new Map(document.objects.map((object) => [object.id, object]));
   const from = byId.get(edge.from.objectId);
@@ -85,9 +86,9 @@ export const rule: LayoutRule = {
   title: "Unreadable labels",
   tier: "warning",
   guidance: GUIDANCE,
-  check(document) {
+  check(document, context) {
     return document.connections
-      .map((edge) => chipFitFinding(edge, document))
+      .map((edge) => chipFitFinding(edge, document, context?.canvasStyle))
       .filter((finding): finding is ChipFitFinding => finding !== undefined)
       .map((finding) => ({
         rule: "unreadable-labels",

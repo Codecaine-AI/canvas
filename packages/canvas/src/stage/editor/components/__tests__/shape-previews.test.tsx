@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { SHAPE_CATALOG_ENTRIES } from "../../../../objects/catalog";
+import { ICON_GLYPH_IDS } from "../../../../objects/shapes/icon/icon-glyphs";
 import { shapeCatalogPreview } from "../shape-previews";
 
 afterEach(() => {
@@ -29,8 +30,8 @@ describe("shape-previews catalog coverage", () => {
     const iconEntries = SHAPE_CATALOG_ENTRIES.filter((entry) => entry.objectType === "icon");
     const iconIdEntries = SHAPE_CATALOG_ENTRIES.filter((entry) => entry.id.startsWith("icon-"));
     // Icon glyphs live ONLY in the Icons category — no shape-row duplicates.
-    expect(iconEntries.length).toBe(30);
-    expect(iconIdEntries.length).toBe(30);
+    expect(iconEntries.length).toBe(ICON_GLYPH_IDS.length);
+    expect(iconIdEntries.length).toBe(ICON_GLYPH_IDS.length);
     for (const entry of iconEntries) {
       const Icon = shapeCatalogPreview(entry);
       const { container, unmount } = render(<Icon />);

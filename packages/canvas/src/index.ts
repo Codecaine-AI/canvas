@@ -4,13 +4,32 @@ export * from "./state/actions";
 // star-export collision would silently drop those names from this barrel.
 export {
   CANVAS_PALETTE,
+  resolveConnectorPaint,
   resolveConnectorStroke,
+  resolveIconPaint,
+  resolveInk,
   resolveSectionColors,
+  resolveSectionPaint,
   resolveShapeColors,
+  resolveShapePaint,
   resolveStickyFill,
+  resolveStickyPaint,
   resolveSwatchPreview,
 } from "./theme/palette";
-export type { SectionChipColors, SectionColors, ShapeColors, Swatch } from "./theme/palette";
+export type {
+  ConnectorPaint,
+  IconPaint,
+  SectionChipColors,
+  SectionColors,
+  SectionPaint,
+  ShapeColors,
+  ShapePaint,
+  StickyPaint,
+  Swatch,
+} from "./theme/palette";
+// The style tokens' color syntax (`#RRGGBB` / `rgba(r, g, b, a)`), for hosts that edit tokens.
+export { formatColor, formatHex, normalizeColor, parseColor } from "./theme/color-math";
+export type { RgbaColor } from "./theme/color-math";
 export * from "./stage/CanvasStage";
 export {
   exportDocumentAsPng,

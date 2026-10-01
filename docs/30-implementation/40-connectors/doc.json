@@ -23,13 +23,17 @@
         "b-conn-sources-2",
         "b-conn-gov-3",
         "b-conn-gov-conn-4",
+        "b-conn-gov-themes-12",
         "b-conn-decisions-5",
         "b-conn-quarantine-decision-6",
         "b-conn-quarantine-why-7",
         "b-conn-quarantine-applies-8",
         "b-conn-def-types-decision-9",
         "b-conn-def-types-why-10",
-        "b-conn-def-types-applies-11"
+        "b-conn-def-types-applies-11",
+        "b-conn-chip-decision-13",
+        "b-conn-chip-why-14",
+        "b-conn-chip-applies-15"
       ]
     },
     "b-conn-role-1": {
@@ -38,7 +42,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The connector slice: def, routing, cascade, gestures, overlays, and render components in one folder. Routing and gesture behavior are owned by design; this area records the slice's internal boundaries."
+          "insert": "The connector slice: def, routing, cascade, gestures, overlays, label chip metrics, and render components in one folder. Routing and gesture behavior are owned by design. This area records the slice's internal boundaries."
         }
       ],
       "children": []
@@ -98,7 +102,30 @@
           }
         },
         {
-          "insert": " — owns connector behavior: routing, anchor resolution, waypoints, bend editing, the connection cascade, and Connector Mode."
+          "insert": " owns connector behavior: routing, anchor resolution, waypoints, bend editing, the connection cascade, and Connector Mode."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-gov-themes-12": {
+      "id": "b-conn-gov-themes-12",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "Workspace themes"
+            }
+          }
+        },
+        {
+          "insert": " owns how a connector paints per theme: the stroke ink and the label chip's font, size, height, colors, and hairline border."
         }
       ],
       "children": []
@@ -141,7 +168,7 @@
           }
         },
         {
-          "insert": " is the quarantined vendored core — the BlockSuite-derived A* files and nothing else. Local routing logic ("
+          "insert": " is the quarantined vendored core, the BlockSuite-derived A* files and nothing else. Local routing logic ("
         },
         {
           "insert": "routing.ts",
@@ -168,7 +195,7 @@
           }
         },
         {
-          "insert": ") stays outside the folder and consumes it through imports. The license boundary itself — the exact file set, header rules, and the clean-room-or-listed-file rule — is the repo-wide provenance decision on "
+          "insert": ") stays outside the folder and consumes it through imports. The license boundary itself (the exact file set, the header rules, and the clean-room-or-listed-file rule) is the repo-wide provenance decision on "
         },
         {
           "insert": "Implementation Overview",
@@ -181,7 +208,7 @@
           }
         },
         {
-          "insert": "; this entry does not restate it."
+          "insert": ", and this entry does not restate it."
         }
       ],
       "children": []
@@ -231,7 +258,7 @@
           }
         },
         {
-          "insert": " — including every future routing algorithm, which is either clean-room outside the folder or a tracked derived file inside it."
+          "insert": ", including every future routing algorithm, which is either clean-room outside the folder or a tracked derived file inside it."
         }
       ],
       "children": []
@@ -248,10 +275,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the connector def lives in "
+          "insert": ": the connector def lives in "
         },
         {
           "insert": "connectors/def.ts",
@@ -282,7 +306,7 @@
           }
         },
         {
-          "insert": " — connections are their own document collection, not an object kind — and "
+          "insert": " because connections are their own document collection, not an object kind. "
         },
         {
           "insert": "connectors/types.ts",
@@ -295,7 +319,7 @@
           }
         },
         {
-          "insert": " owns the slice's gesture and overlay vocabulary, with the slice's gesture steppers in "
+          "insert": " owns the slice's gesture and overlay vocabulary, and the pipeline assembles the slice's gesture steppers in "
         },
         {
           "insert": "gestures.ts",
@@ -304,7 +328,7 @@
           }
         },
         {
-          "insert": " assembled into the editor's state union by the pipeline."
+          "insert": " into the editor's state union."
         }
       ],
       "children": []
@@ -321,10 +345,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was registering connectors as an ObjectDef, which forces object semantics — geometry, containment, object tools — onto what is a routed relation between objects."
+          "insert": ": the rejected alternative was registering connectors as an ObjectDef, which forces object semantics (geometry, containment, object tools) onto what is a routed relation between objects."
         }
       ],
       "children": []
@@ -367,7 +388,7 @@
           }
         },
         {
-          "insert": " — including every future connector capability, whose vocabulary joins "
+          "insert": ", including every future connector capability, whose vocabulary joins "
         },
         {
           "insert": "types.ts",
@@ -377,6 +398,101 @@
         },
         {
           "insert": " and whose gestures join the slice."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-chip-decision-13": {
+      "id": "b-conn-chip-decision-13",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "connectors/label-chip.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/label-chip.ts",
+              "label": "connectors/label-chip.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the one source of a connection label chip's size and typography. The live connector, the static renderer's "
+        },
+        {
+          "insert": "connectionLabelChipRect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and the agent's lint geometry all call "
+        },
+        {
+          "insert": "connectionLabelChipMetrics",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with the workspace style. A sans chip keeps the original character-count width, a mono chip measures exactly at IBM Plex Mono's 0.6em advance, and both take their height, font, and size from the style tokens."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-chip-why-14": {
+      "id": "b-conn-chip-why-14",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": a chip sized one way in the lints and painted another passes the crowding check while overlapping on screen, or fails it while reading fine. The rejected alternative was each consumer estimating the chip from its own constants, which held only while one theme existed."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-chip-applies-15": {
+      "id": "b-conn-chip-applies-15",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "label-chip.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/label-chip.ts",
+              "label": "label-chip.ts"
+            }
+          }
+        },
+        {
+          "insert": ", including every future chip consumer or chip token, which reads the metrics from this module."
         }
       ],
       "children": []

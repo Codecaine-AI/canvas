@@ -4,13 +4,15 @@ import {
   INTER_UNITS_PER_EM,
   interAdvanceUnits,
   measureInterTextPx,
+  measureMonoTextPx,
 } from "../text-metrics";
 import {
   INTER_FALLBACK_ADVANCE_BOLD,
   INTER_FALLBACK_ADVANCE_REGULAR,
-} from "../inter-metrics.generated";
+} from "../../theme/inter-metrics.generated";
 import { renderDocumentToSvg } from "../static-svg";
 import { CENTER_TEXT_INSET_PX } from "../../objects/text-slots";
+import { DEFAULT_CANVAS_STYLE } from "../../theme/canvas-style";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
 /** Body-text tspan strings from a rendered SVG, in document order. */
@@ -36,9 +38,9 @@ function processDocument(text: string, width: number, height: number): Interacti
   };
 }
 
-/** Shape body text renders bold (SHAPE_TEXT_TYPOGRAPHY fontWeight 700) at 15px. */
-const BODY_FONT_SIZE_PX = 15;
-const BODY_FONT_WEIGHT = 700;
+/** Shape body text renders in the default style's name size and weight (the renders below pass no style). */
+const BODY_FONT_SIZE_PX = DEFAULT_CANVAS_STYLE.textFontSizePx;
+const BODY_FONT_WEIGHT = DEFAULT_CANVAS_STYLE.textFontWeight;
 
 describe("inter text metrics", () => {
   it("exposes the font's real units-per-em and per-glyph advances", () => {
@@ -75,6 +77,20 @@ describe("inter text metrics", () => {
       (1648 * 10) / 2816,
       10,
     );
+  });
+});
+
+describe("mono text metrics", () => {
+  it("measures one 0.6em IBM Plex Mono cell per codepoint", () => {
+    // Narrow glyphs (i, t, .) take the same 600/1000 cell as wide ones.
+    expect(measureMonoTextPx("db.t3.micro", 12.5)).toBeCloseTo(11 * 0.6 * 12.5, 10);
+    expect(measureMonoTextPx("", 12.5)).toBe(0);
+    // A surrogate pair is one codepoint: one cell, not two.
+    expect(measureMonoTextPx("a\u{1D465}", 10)).toBeCloseTo(2 * 0.6 * 10, 10);
+  });
+
+  it("adds the letter spacing after every glyph", () => {
+    expect(measureMonoTextPx("API", 11.5, 0.08)).toBeCloseTo(3 * (0.6 + 0.08) * 11.5, 10);
   });
 });
 
@@ -131,7 +147,7 @@ describe("body-text wrapping on real metrics", () => {
 
   it("wraps real metrics more truthfully than the char-count heuristic", () => {
     // 24 lowercase letters: the 0.62em char-count heuristic calls this wider
-    // than 172px (24 × 15 × 0.62 = 223), but real Inter advances measure it
+    // than 172px (24 × 15+ × 0.62 ≥ 223), but real Inter advances measure it
     // narrower than the box — the browser keeps it on one line.
     const text = "iiiiiiiiiiiillllllllllll";
     const width = 200;
@@ -152,8 +168,9 @@ describe("body-text wrapping on real metrics", () => {
       background: "transparent",
     });
     const lines = tspanLines(svg);
-    // Center slot: height − 2×12 inset = 56px at 18px line height → 3 lines.
-    expect(lines.length).toBe(3);
+    // Center slot: height − 2×12 inset = 56px of name line boxes (1.2em each).
+    expect(lines.length).toBe(Math.floor(56 / (BODY_FONT_SIZE_PX * 1.2)));
+    expect(lines.length).toBeGreaterThan(1);
     const last = lines[lines.length - 1]!;
     expect(last.endsWith("…")).toBe(true);
     const available = width - CENTER_TEXT_INSET_PX.x * 2;

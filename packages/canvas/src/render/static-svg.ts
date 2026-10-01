@@ -26,12 +26,19 @@
  * table), sticky text lays out as its markdown line boxes
  * (render/sticky-text.ts mirroring objects/sticky/markdown.tsx), and the
  * types whose live defs draw custom inline-SVG silhouettes
- * (predefined-process) draw the same silhouette geometry here. Icon objects render their real Nucleo glyph via
- * the pure registry (objects/shapes/icon/icon-glyphs.ts), falling back to a
- * neutral rounded rect only for unknown glyph ids. Known approximations:
+ * (predefined-process) draw the same silhouette geometry here. Icon objects
+ * render their real glyph from the style's icon pack via the pure registry
+ * (objects/shapes/icon/icon-glyphs.ts) — bare or on a tile
+ * (objects/shapes/icon/icon-tile.ts) — falling back to a neutral rounded
+ * rect only for unknown glyph ids. Detail lines (one muted line under a
+ * shape's or icon's name) measure IBM Plex Mono at its fixed advance, or
+ * Inter's table, for their ellipsis. Known approximations:
  * measurement ignores kerning/ligatures (marginally conservative), and the
- * section title chip and connection label chip keep their char-count width
- * heuristics — those ARE the live stage's own sizing rules.
+ * section title chip and connection label chip size themselves through the
+ * shared geometry the live stage uses (objects/section/title-chip-layout.ts,
+ * connectors/label-chip.ts): exact cells for IBM Plex Mono, the char-count
+ * heuristics for Inter — those ARE the live stage's own sizing rules (a
+ * title chip carrying an icon or a detail measures its Inter runs exactly).
  */
 
 import {
@@ -49,46 +56,71 @@ import {
   ARROW_SHAPE_GEOMETRY,
 } from "../objects/geometry";
 import { labelPointFor, routeConnection, CONNECTOR_END_GAP_PX } from "../connectors/routing";
-import { CONNECTOR_DASH_PATTERN_PX } from "../connectors/def";
+import { connectorDashArray } from "../connectors/def";
 import {
-  resolveConnectorStroke,
-  resolveSectionColors,
-  resolveShapeColors,
-  resolveStickyFill,
+  resolveConnectorPaint,
+  resolveIconPaint,
+  resolveIconTilePaint,
+  resolveSectionPaint,
+  resolveShapePaint,
+  resolveStickyPaint,
+  type IconTilePaint,
+  type SectionPaint,
 } from "../theme/palette";
+import { sectionDepthMap } from "../state/section-depth";
+import {
+  titleChipHasContent,
+  titleChipIconDrawing,
+  titleChipLayout,
+  titleChipVisibleRuns,
+  type TitleChipFont,
+  type TitleChipIconDrawing,
+  type TitleChipLayout,
+} from "../objects/section/title-chip-layout";
+import {
+  CONNECTION_LABEL_CHIP,
+  connectionLabelChipMetrics,
+  connectionLabelChipRect as labelChipRect,
+} from "../connectors/label-chip";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
-import { resolveObjectStrokeWidth } from "../theme/tokens";
+import { resolveObjectStrokeWidth, resolveShapeCornerRadius } from "../theme/tokens";
 import { DEFAULT_CANVAS_STYLE, normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
+import { CANVAS_MONO_FONT_STACK_SVG, CANVAS_SANS_FONT_STACK_SVG } from "../theme/fonts";
 import {
   BELOW_TEXT_SLOT,
   CENTER_TEXT_SLOT,
   CENTER_TEXT_INSET_PX,
   INSET_BODY_TEXT_SLOT,
-  OBJECT_TEXT_COLOR,
-  TITLE_CHIP,
-  estimateTitleChipWidthPx,
+  iconTileRectPx,
   rectTextSlot,
   resolveTextSlot,
   slotLineHeightPx,
-  titleChipMaxWidthPx,
-  titleChipScale,
+  slotNameLineCapacity,
+  type DetailTypography,
   type LocalRect,
+  type ResolvedSlotDetail,
   type SlotTypography,
   type TextSlot,
 } from "../objects/text-slots";
 import {
-  ICON_GLYPHS,
-  iconGlyphStrokeWidthForSize,
+  resolveIconGlyph,
+  type IconGlyphDefinition,
   type IconGlyphElement,
-  type IconGlyphId,
 } from "../objects/shapes/icon/icon-glyphs";
+import {
+  ICON_TILE,
+  glyphHasClosedInterior,
+  iconBareGlyphStrokeWidth,
+  iconTileGlyphStrokeWidth,
+  iconTileLayout,
+} from "../objects/shapes/icon/icon-tile";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../state/schema";
 import { STICKY_MARKDOWN_MONO_FONT } from "../objects/sticky/markdown-editing";
-import { interCharWidthPx, measureInterTextPx } from "./text-metrics";
+import { interCharWidthPx, measureInterTextPx, measureMonoTextPx } from "./text-metrics";
 import {
   layoutStickyText,
   STICKY_CODE_MONO_ADVANCE_EM,
@@ -104,20 +136,20 @@ import type { RenderDocumentToSvg, RenderStaticSvgOptions, RenderedSvg } from ".
 // pointer to its source of truth.
 // ---------------------------------------------------------------------------
 
-/** Board surface color — mirrors CANVAS_BG in stage/CanvasStage.tsx. */
-const CANVAS_BG = "#F5F5F5";
 /**
- * Canvas content font — mirrors CANVAS_FONT_FAMILY in stage/CanvasStage.tsx
- * (quotes dropped: multi-word family names are valid unquoted CSS idents,
- * which keeps the attribute free of escaped quote noise).
+ * Canvas content font — the stage's stack from theme/fonts.ts, in its
+ * SVG-attribute form (quotes dropped: multi-word family names are valid
+ * unquoted CSS idents, which keeps the attribute free of escaped quote noise).
  */
-const CANVAS_FONT_FAMILY =
-  "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif";
+const CANVAS_FONT_FAMILY = CANVAS_SANS_FONT_STACK_SVG;
 
-// Corner radii and border/stroke widths (base rounded rect, section frame,
-// title chip, connector line, label chip, elbow bends) are NOT mirrored here:
-// they come from the scene's CanvasStyle (theme/canvas-style.ts) — the same
-// settings object the live stage resolves through useCanvasStyle.
+// The board color, corner radii and border/stroke widths (base rounded rect,
+// section frame, title chip, connector line, label chip, elbow bends), the
+// section/sticky/connector paints, and the label chip's font are NOT mirrored
+// here: they come from the scene's CanvasStyle (theme/canvas-style.ts) — the
+// same settings object the live stage resolves through useCanvasStyle — and
+// the shared pure geometry modules (objects/section/title-chip-layout.ts,
+// connectors/label-chip.ts) the live renderers read too.
 
 /** Arrowhead geometry in stroke-width units — mirrors the marker `<defs>` in stage/CanvasStage.tsx. */
 const ARROW_LENGTH_RATIO = 5;
@@ -125,28 +157,8 @@ const ARROW_WIDTH_RATIO = 5;
 /** The marker's refX is (length - 0.5): the tip overshoots the path end by half a stroke width. */
 const ARROW_TIP_OVERSHOOT_RATIO = 0.5;
 
-/** Connection label chip — mirrors the CONNECTION_LABEL_* constants in connectors/Connector.tsx. */
-const CONNECTION_LABEL_HEIGHT_PX = 30;
-const CONNECTION_LABEL_PADDING_X_PX = 12;
-const CONNECTION_LABEL_FONT_SIZE_PX = 16;
-const CONNECTION_LABEL_FONT_WEIGHT = 700;
-const CONNECTION_LABEL_AVERAGE_CHAR_WIDTH_PX = 9.6;
-const CONNECTION_LABEL_MIN_WIDTH_PX = 41;
-const CONNECTION_LABEL_BACKGROUND = "#F5F5F5";
-const CONNECTION_LABEL_BORDER = "#D9D9D9";
-/** Label text color — the stage uses var(--foreground); light-theme near-black inlined. */
-const CONNECTION_LABEL_TEXT_COLOR = OBJECT_TEXT_COLOR;
-
 /** Sticky shadow — mirrors STICKY_GEOMETRY.shadow ("0 3px 12px rgba(0,0,0,0.15)") in objects/sticky/def.tsx. */
 const STICKY_SHADOW = { dx: 0, dy: 3, stdDeviation: 6, opacity: 0.15 } as const;
-
-/**
- * Average glyph width as a fraction of font size — the char-count heuristic
- * the SECTION TITLE CHIP sizes itself with, live and here (objects/
- * text-slots.ts estimateTitleChipWidthPx). Body-text wrapping does NOT use
- * this: it measures real Inter advances (render/text-metrics.ts).
- */
-const CHAR_WIDTH_RATIO = 0.62;
 
 /** Default world padding, mirroring each bounds primitive's own default (documentBounds 80 / containerViewBounds 32). */
 const DEFAULT_DOCUMENT_PADDING_PX = 80;
@@ -346,7 +358,75 @@ export function clampLines(
 }
 
 /**
- * Renders wrapped slot text as a `<text>` with one `<tspan>` per line.
+ * Width of a detail-line run at its font's real advances: IBM Plex Mono's
+ * fixed cell (measureMonoTextPx) or Inter's per-glyph table.
+ */
+export function measureDetailTextPx(text: string, typography: DetailTypography): number {
+  return typography.font === "mono"
+    ? measureMonoTextPx(text, typography.fontSizePx)
+    : measureInterTextPx(text, typography.fontSizePx, typography.fontWeight);
+}
+
+/** Float slack for detail-line fit checks (far below any glyph advance). */
+const DETAIL_FIT_EPSILON_PX = 1e-6;
+
+/**
+ * The detail line as painted at `widthPx` (mirrors the live line's
+ * `text-overflow: ellipsis`): unchanged when it fits; otherwise the longest
+ * prefix that fits WITH a trailing ellipsis, trailing whitespace dropped.
+ * Exported (deep-import, like wrapTextLines / clampLines) so the agent's
+ * text-fit asks the renderer whether a detail is cut.
+ */
+export function ellipsizeDetailText(text: string, widthPx: number, typography: DetailTypography): string {
+  // Summed advances carry float error (ten 8.4px mono cells add up to
+  // 84.00000000000001), so a run that fits exactly must not lose a cell.
+  const fitWidthPx = widthPx + DETAIL_FIT_EPSILON_PX;
+  if (measureDetailTextPx(text, typography) <= fitWidthPx) return text;
+  const ellipsisWidth = measureDetailTextPx("…", typography);
+  const chars = [...text];
+  let used = 0;
+  let kept = 0;
+  for (const char of chars) {
+    const charWidth = measureDetailTextPx(char, typography);
+    if (used + charWidth + ellipsisWidth > fitWidthPx) break;
+    used += charWidth;
+    kept += 1;
+  }
+  return `${chars.slice(0, kept).join("").replace(/\s+$/, "")}…`;
+}
+
+/** One detail line as a `<text>`, centered vertically on `centerY` (world coordinates). */
+function renderDetailLine(
+  detail: ResolvedSlotDetail,
+  widthPx: number,
+  x: number,
+  centerY: number,
+  anchor: "middle" | "start",
+): string {
+  const { typography } = detail;
+  return tag(
+    "text",
+    {
+      x,
+      y: centerY,
+      fill: typography.color,
+      "font-size": typography.fontSizePx,
+      "font-weight": typography.fontWeight,
+      "text-anchor": anchor,
+      "dominant-baseline": "central",
+      // The root <svg> already carries the sans stack.
+      ...(typography.font === "mono" ? { "font-family": CANVAS_MONO_FONT_STACK_SVG } : null),
+    },
+    escapeXml(ellipsizeDetailText(detail.text, widthPx, typography)),
+  );
+}
+
+/**
+ * Renders wrapped slot text as a `<text>` with one `<tspan>` per line, plus
+ * the slot's detail line (its own `<text>`) when `options.detail` is set:
+ * the name block and the detail line lay out as ONE block anchored by
+ * `verticalAlign` (mirroring the live flex column), the name's clamp gives up
+ * the detail line's reserve, and the detail ellipsizes at the slot width.
  * `rect` is in world coordinates.
  */
 function renderSlotTextBlock(
@@ -354,26 +434,33 @@ function renderSlotTextBlock(
   rect: { x: number; y: number; width: number; height: number },
   typography: SlotTypography,
   verticalAlign: "top" | "center" | "bottom",
-  options?: { clampToRect?: boolean },
+  options?: { clampToRect?: boolean; detail?: ResolvedSlotDetail | null },
 ): string {
-  if (text === "" || rect.width <= 0) return "";
+  const detail = options?.detail ?? null;
+  if ((text === "" && !detail) || rect.width <= 0) return "";
   const lineHeight = slotLineHeightPx(typography);
-  let lines = wrapTextLines(text, rect.width, typography.fontSizePx, typography.fontWeight);
-  if (lines.length === 0) return "";
+  let lines = text === "" ? [] : wrapTextLines(text, rect.width, typography.fontSizePx, typography.fontWeight);
+  if (lines.length === 0 && !detail) return "";
   if (options?.clampToRect !== false && rect.height > 0) {
-    const maxLines = Math.max(1, Math.floor(rect.height / lineHeight));
+    // slotNameLineCapacity: the detail line's reserve comes off the name's lines.
+    const reserve = detail ? detail.gapPx + detail.typography.lineHeightPx : 0;
+    const maxLines = Math.max(1, Math.floor((rect.height - reserve) / lineHeight));
     lines = clampLines(lines, maxLines, rect.width, typography.fontSizePx, typography.fontWeight);
   }
 
-  const blockHeight = lines.length * lineHeight;
-  let firstLineCenterY: number;
+  const detailHeight = detail
+    ? (lines.length > 0 ? detail.gapPx : 0) + detail.typography.lineHeightPx
+    : 0;
+  const blockHeight = lines.length * lineHeight + detailHeight;
+  let top: number;
   if (verticalAlign === "top") {
-    firstLineCenterY = rect.y + lineHeight / 2;
+    top = rect.y;
   } else if (verticalAlign === "bottom") {
-    firstLineCenterY = rect.y + rect.height - blockHeight + lineHeight / 2;
+    top = rect.y + rect.height - blockHeight;
   } else {
-    firstLineCenterY = rect.y + (rect.height - blockHeight) / 2 + lineHeight / 2;
+    top = rect.y + (rect.height - blockHeight) / 2;
   }
+  const firstLineCenterY = top + lineHeight / 2;
 
   const anchor = typography.textAlign === "center" ? "middle" : "start";
   const x = typography.textAlign === "center" ? rect.x + rect.width / 2 : rect.x;
@@ -385,20 +472,25 @@ function renderSlotTextBlock(
         : tag("tspan", { x, y: firstLineCenterY + index * lineHeight }, escapeXml(line)),
     )
     .join("");
-  if (tspans === "") return "";
 
-  return tag(
-    "text",
-    {
-      fill: typography.color,
-      "font-size": typography.fontSizePx,
-      "font-weight": typography.fontWeight,
-      "text-anchor": anchor,
-      "dominant-baseline": "central",
-      ...(typography.fontFamily ? { "font-family": typography.fontFamily } : null),
-    },
-    tspans,
-  );
+  const name =
+    tspans === ""
+      ? ""
+      : tag(
+          "text",
+          {
+            fill: typography.color,
+            "font-size": typography.fontSizePx,
+            "font-weight": typography.fontWeight,
+            "text-anchor": anchor,
+            "dominant-baseline": "central",
+            ...(typography.fontFamily ? { "font-family": typography.fontFamily } : null),
+          },
+          tspans,
+        );
+  if (!detail) return name;
+  const detailCenterY = top + blockHeight - detail.typography.lineHeightPx / 2;
+  return name + renderDetailLine(detail, rect.width, x, detailCenterY, anchor);
 }
 
 // ---------------------------------------------------------------------------
@@ -445,14 +537,21 @@ export function effectiveRenderShape(object: InteractiveCanvasObject): string {
 // Object rendering
 // ---------------------------------------------------------------------------
 
-function renderObjectText(object: InteractiveCanvasObject): string {
-  if (object.text === "") return "";
+/**
+ * An object's slot text under `canvasStyle`: the name in the style's name
+ * color/weight, plus its detail line (resolveTextSlot decides whether one
+ * paints — never for stickies, which render their markdown body).
+ */
+function renderObjectText(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): string {
   // Sticky notes render their text as markdown line boxes, not plain slot text.
-  if (effectiveRenderShape(object) === "note") return renderStickyMarkdownText(object);
+  if (effectiveRenderShape(object) === "note") {
+    return object.text === "" ? "" : renderStickyMarkdownText(object, canvasStyle);
+  }
   const slot = textSlotForObject(object);
   if (!slot) return "";
-  const resolved = resolveTextSlot(slot, object);
+  const resolved = resolveTextSlot(slot, object, 1, { canvasStyle });
   if (resolved.hidden) return "";
+  if (object.text === "" && !resolved.detail) return "";
   const worldRect = {
     x: object.geometry.x + resolved.rect.x,
     y: object.geometry.y + resolved.rect.y,
@@ -460,10 +559,11 @@ function renderObjectText(object: InteractiveCanvasObject): string {
     height: resolved.rect.height,
   };
   // The "below" band renders every wrapped line (it sizes itself to the text)
-  // rather than clamping to the glyph box.
+  // rather than clamping to the glyph box; its detail line follows the name.
   const clampToRect = resolved.multiline && slot.placement !== "below";
   return renderSlotTextBlock(object.text, worldRect, resolved.typography, resolved.verticalAlign, {
     clampToRect,
+    detail: resolved.detail,
   });
 }
 
@@ -478,8 +578,81 @@ function polygonPointsAttribute(points: CanvasPoint[]): string {
 // visuals approximate the live CSS tastefully (same tint, radius, size).
 // ---------------------------------------------------------------------------
 
-/** Code chip visuals — mirrors the inline `<code>` CSS in objects/sticky/markdown.tsx. */
+/**
+ * Code chip visuals — mirrors the inline `<code>` CSS in objects/sticky/
+ * markdown.tsx: black at 8% on a paper sticky, the text color at 8% on a card
+ * (objects/sticky/def.tsx CARD_STICKY_GEOMETRY.codeChipAlpha).
+ */
 const STICKY_CODE_CHIP_FILL_OPACITY = 0.08;
+/** Card sticky edges — mirror objects/sticky/def.tsx CARD_STICKY_GEOMETRY (React; not importable here). */
+const CARD_STICKY_RULE_WIDTH_PX = 2;
+const CARD_STICKY_BORDER_WIDTH_PX = 1;
+
+/**
+ * The sticky note body under the style's sticky paint (theme/palette.ts
+ * resolveStickyPaint), mirroring objects/sticky/def.tsx. `paper`: the flat
+ * square sticky fill with the down-biased shadow (objects/sticky/def.tsx
+ * STICKY_GEOMETRY) — drawn without the filter when wholly outside the
+ * viewBox. `card`: the card fill, a hairline edge, and a 2px ink rule down
+ * the left side (the live inset box-shadows: inside the box, rule on top),
+ * no shadow.
+ */
+function renderStickyBody(
+  object: InteractiveCanvasObject,
+  stickyShadowFilterId: string | null,
+  insideViewBox: boolean,
+  canvasStyle: CanvasStyle,
+): string {
+  const { geometry } = object;
+  const paint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle);
+  if (paint.shadow) {
+    return tag("rect", {
+      x: geometry.x,
+      y: geometry.y,
+      width: geometry.width,
+      height: geometry.height,
+      fill: paint.fill,
+      ...(stickyShadowFilterId && insideViewBox
+        ? { filter: `url(#${stickyShadowFilterId})` }
+        : null),
+    });
+  }
+  const parts = [
+    tag("rect", {
+      x: geometry.x,
+      y: geometry.y,
+      width: geometry.width,
+      height: geometry.height,
+      fill: paint.fill,
+    }),
+  ];
+  if (paint.border) {
+    const inset = CARD_STICKY_BORDER_WIDTH_PX / 2;
+    parts.push(
+      tag("rect", {
+        x: geometry.x + inset,
+        y: geometry.y + inset,
+        width: Math.max(0, geometry.width - CARD_STICKY_BORDER_WIDTH_PX),
+        height: Math.max(0, geometry.height - CARD_STICKY_BORDER_WIDTH_PX),
+        fill: "none",
+        stroke: paint.border,
+        "stroke-width": CARD_STICKY_BORDER_WIDTH_PX,
+      }),
+    );
+  }
+  if (paint.rule) {
+    parts.push(
+      tag("rect", {
+        x: geometry.x,
+        y: geometry.y,
+        width: Math.min(CARD_STICKY_RULE_WIDTH_PX, geometry.width),
+        height: geometry.height,
+        fill: paint.rule,
+      }),
+    );
+  }
+  return parts.join("");
+}
 const STICKY_CODE_CHIP_RADIUS_PX = 3;
 /** Chip height in em of the code font size (approximates the inline box's height). */
 const STICKY_CODE_CHIP_HEIGHT_EM = 1.3;
@@ -535,8 +708,12 @@ function ellipsizeStickyRow(row: StickyTextRow, slotWidthPx: number): void {
  * the slot's height clamp are dropped and the last visible row ellipsized —
  * the same overflow the live -webkit-line-clamp shows.
  */
-function renderStickyMarkdownText(object: InteractiveCanvasObject): string {
-  const resolved = resolveTextSlot(INSET_BODY_TEXT_SLOT, object);
+function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): string {
+  // The slot typography carries the sticky paint's text color.
+  const resolved = resolveTextSlot(INSET_BODY_TEXT_SLOT, object, 1, { canvasStyle });
+  const codeChipFill = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).shadow
+    ? "#000000"
+    : resolved.typography.color;
   if (resolved.hidden) return "";
   const rect = {
     x: object.geometry.x + resolved.rect.x,
@@ -582,7 +759,7 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject): string {
             width: segment.widthPx,
             height: chipHeight,
             rx: STICKY_CODE_CHIP_RADIUS_PX,
-            fill: "#000000",
+            fill: codeChipFill,
             "fill-opacity": STICKY_CODE_CHIP_FILL_OPACITY,
           }),
         );
@@ -639,44 +816,58 @@ function isFillGlyphElement(element: IconGlyphElement): boolean {
   return element.kind === "path" || element.kind === "circle";
 }
 
-/**
- * SVG fills open paths by chord-closing them; all-open line-art glyphs would
- * expose naked chord-fill triangles, so the fill layer is gated on at least
- * one closed element — same rule as IconShapeBody's
- * glyphElementHasClosedInterior.
- */
-function glyphElementHasClosedInterior(element: IconGlyphElement): boolean {
-  return element.kind === "circle" || (element.kind === "path" && /[zZ]/.test(element.d));
+/** Paint attributes of a glyph `<svg>`: outline glyphs stroke, fill-paint (brand) glyphs fill — both in `color`. */
+function glyphPaintAttributes(
+  glyph: IconGlyphDefinition,
+  color: string,
+  strokeWidth: number,
+): Record<string, string | number> {
+  if (glyph.paint === "fill") return { fill: color, stroke: "none" };
+  return {
+    fill: "none",
+    stroke: color,
+    "stroke-width": strokeWidth,
+    "stroke-linecap": "round",
+    "stroke-linejoin": "round",
+  };
 }
 
 /**
- * The real icon glyph as a NESTED `<svg>` filling the object's bbox — the
- * nested viewBox keeps stroke widths in viewBox units (exactly how the live
- * IconShapeBody scales them) and the default-equivalent
- * preserveAspectRatio="xMidYMid meet" centers the square glyph in a
- * non-square bbox. Returns null for an unknown/missing glyph id (caller
- * falls back to the neutral rect).
+ * The real icon glyph for `object.icon` in the style's icon pack
+ * (resolveIconGlyph), painted per resolveIconTilePaint the way IconShapeBody
+ * paints it:
+ *  - glyph style: a NESTED `<svg>` filling the object's bbox — the nested
+ *    viewBox keeps stroke widths in viewBox units (exactly how the live body
+ *    scales them) and the default-equivalent preserveAspectRatio="xMidYMid
+ *    meet" centers the square glyph in a non-square bbox. Outline glyphs
+ *    stroke the ink with the shape fill in their closed interiors (SVG
+ *    chord-closes open paths, so all-open line art gets no fill layer);
+ *    fill-paint (brand) glyphs fill with the ink.
+ *  - tile style: renderIconTile.
+ * Returns null for an unknown/missing glyph id (caller falls back to the
+ * neutral rect).
  */
 function renderIconGlyph(
   object: InteractiveCanvasObject,
-  fill: string,
-  stroke: string,
+  viewBox: CanvasBounds,
+  canvasStyle: CanvasStyle,
 ): string | null {
-  const glyphId = object.icon as IconGlyphId | undefined;
-  const glyph = glyphId ? ICON_GLYPHS[glyphId] : undefined;
+  const glyph = resolveIconGlyph(object.icon, canvasStyle.iconPack);
   if (!glyph) return null;
-
   const { geometry } = object;
   const sizePx = Math.min(geometry.width, geometry.height);
-  const glyphStrokeWidth = iconGlyphStrokeWidthForSize(sizePx);
+  const tileSidePx = iconTileRectPx(geometry.width, geometry.height, canvasStyle.iconTileMaxPx).width;
+  const paint = resolveIconTilePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, tileSidePx);
+  if (paint.tileFill !== null) {
+    return renderIconTile(object, glyph, paint, viewBox, canvasStyle.iconTileMaxPx);
+  }
 
-  const shouldRenderFillLayer = Boolean(
-    fill && glyph.elements.some(glyphElementHasClosedInterior),
-  );
+  const fill = paint.glyphFill;
+  const shouldRenderFillLayer = Boolean(fill && glyph.paint !== "fill" && glyphHasClosedInterior(glyph));
   const fillLayer = shouldRenderFillLayer
     ? tag(
         "g",
-        { fill, stroke: "none" },
+        { fill: fill ?? undefined, stroke: "none" },
         glyph.elements
           .filter(isFillGlyphElement)
           .map(glyphElementMarkup)
@@ -694,13 +885,59 @@ function renderIconGlyph(
       height: Math.max(0, geometry.height),
       viewBox: `0 0 ${fmt(glyph.viewBoxSize)} ${fmt(glyph.viewBoxSize)}`,
       preserveAspectRatio: "xMidYMid meet",
-      fill: "none",
-      stroke,
-      "stroke-width": glyphStrokeWidth,
-      "stroke-linecap": "round",
-      "stroke-linejoin": "round",
+      ...glyphPaintAttributes(glyph, paint.glyph, iconBareGlyphStrokeWidth(sizePx, glyph)),
     },
     fillLayer + inkLayer,
+  );
+}
+
+/**
+ * Tile style (objects/shapes/icon/icon-tile.ts): the rounded tile in the
+ * glyph box — min(width, height, iconTileMaxPx), centered — painted per
+ * resolveIconTilePaint (solid ink, or a light tint with an ink border for a
+ * large icon; borders drawn inside the tile edge), then the glyph in a nested
+ * `<svg>` centered on it. The nested glyph viewport is emitted only when it
+ * intersects the camera viewBox (rasterizer safety, see paintsInsideViewBox):
+ * a crop that shows only a tile's rim draws the tile alone.
+ */
+function renderIconTile(
+  object: InteractiveCanvasObject,
+  glyph: IconGlyphDefinition,
+  paint: IconTilePaint,
+  viewBox: CanvasBounds,
+  tileMaxPx: number,
+): string {
+  const { geometry } = object;
+  const layout = iconTileLayout(geometry.width, geometry.height, tileMaxPx);
+  const border = paint.tileBorder ? paint.tileBorderWidthPx : 0;
+  const tile = tag("rect", {
+    x: geometry.x + layout.tile.x + border / 2,
+    y: geometry.y + layout.tile.y + border / 2,
+    width: Math.max(0, layout.tile.width - border),
+    height: Math.max(0, layout.tile.height - border),
+    rx: Math.max(0, ICON_TILE.cornerRadiusPx - border / 2),
+    fill: paint.tileFill ?? undefined,
+    ...(paint.tileBorder ? { stroke: paint.tileBorder, "stroke-width": border } : null),
+  });
+  const glyphRect = {
+    x: geometry.x + layout.glyph.x,
+    y: geometry.y + layout.glyph.y,
+    width: layout.glyph.width,
+    height: layout.glyph.height,
+  };
+  if (!paintsInsideViewBox(glyphRect, viewBox)) return tile;
+  return (
+    tile +
+    tag(
+      "svg",
+      {
+        ...glyphRect,
+        viewBox: `0 0 ${fmt(glyph.viewBoxSize)} ${fmt(glyph.viewBoxSize)}`,
+        preserveAspectRatio: "xMidYMid meet",
+        ...glyphPaintAttributes(glyph, paint.glyph, iconTileGlyphStrokeWidth(glyph.viewBoxSize)),
+      },
+      tag("g", {}, glyph.elements.map(glyphElementMarkup).join("")),
+    )
   );
 }
 
@@ -812,33 +1049,23 @@ function renderShapeBody(
   // elements that actually intersect the viewBox (paintsInsideViewBox).
   const insideViewBox = paintsInsideViewBox(geometry, viewBox);
 
-  // Sticky note ("note" render shape): flat square sticky fill, no border,
-  // down-biased shadow (objects/sticky/def.tsx STICKY_GEOMETRY). A sticky
-  // wholly outside the viewBox draws without the shadow filter.
+  // Sticky note ("note" render shape): the sticky paint's body (renderStickyBody).
   if (renderShape === "note") {
-    const fill = resolveStickyFill(object.color ?? FIRST_USE_COLORS.sticky);
-    return tag("rect", {
-      x: geometry.x,
-      y: geometry.y,
-      width: geometry.width,
-      height: geometry.height,
-      fill,
-      ...(stickyShadowFilterId && insideViewBox
-        ? { filter: `url(#${stickyShadowFilterId})` }
-        : null),
-    });
+    return renderStickyBody(object, stickyShadowFilterId, insideViewBox, canvasStyle);
   }
 
-  const colors = resolveShapeColors(object.color ?? FIRST_USE_COLORS.shape);
+  // The style's shape fill mode: `tint` (pastel fill + ink border) or `card`
+  // (card fill + ink border) — theme/palette.ts resolveShapePaint.
+  const colors = resolveShapePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle);
   const strokeWidth = resolveObjectStrokeWidth(object.style, canvasStyle);
 
-  // Icon glyph family: render the real Nucleo glyph via the pure registry
-  // (objects/shapes/icon/icon-glyphs.ts), mirroring IconShapeBody.tsx.
-  // Unknown/missing glyph id — or a glyph wholly outside the viewBox, whose
-  // nested <svg> would be rasterizer-unsafe — falls through to the
-  // neutral-rect bbox tier.
+  // Icon glyph family: render the real glyph from the style's icon pack via
+  // the pure registry (objects/shapes/icon/icon-glyphs.ts), bare or on a tile,
+  // mirroring IconShapeBody.tsx. Unknown/missing glyph id — or a glyph wholly
+  // outside the viewBox, whose nested <svg> would be rasterizer-unsafe —
+  // falls through to the neutral-rect bbox tier.
   if ((renderShape === "icon" || object.type === "icon") && insideViewBox) {
-    const glyphMarkup = renderIconGlyph(object, colors.fill, colors.border);
+    const glyphMarkup = renderIconGlyph(object, viewBox, canvasStyle);
     if (glyphMarkup !== null) return glyphMarkup;
   }
 
@@ -876,15 +1103,25 @@ function renderShapeBody(
 
   // Bbox tier: the base rounded-rect trim (the CSS border paints inside the
   // box, so inset by half the stroke).
-  return bboxRoundedRect(geometry, colors, strokeWidth, canvasStyle.shapeCornerRadiusPx);
+  return bboxRoundedRect(geometry, colors, strokeWidth, resolveShapeCornerRadius(renderShape, canvasStyle));
 }
 
 // ---------------------------------------------------------------------------
 // Sections
 // ---------------------------------------------------------------------------
 
-function renderSectionBackdrop(section: InteractiveCanvasObject, canvasStyle: CanvasStyle): string {
-  const family = resolveSectionColors(section.color ?? FIRST_USE_COLORS.section);
+/**
+ * A section's body + frame under the style's section paint at its nesting
+ * depth (theme/palette.ts resolveSectionPaint): figjam's flat wash framed in
+ * the title chip's fill color, or the opaque layer-cake tint framed in the
+ * ink — mirroring objects/section/def.tsx.
+ */
+function renderSectionBackdrop(
+  section: InteractiveCanvasObject,
+  depth: number,
+  canvasStyle: CanvasStyle,
+): string {
+  const paint = resolveSectionPaint(section.color ?? FIRST_USE_COLORS.section, depth, canvasStyle);
   const geometry = section.geometry;
   const borderStyle = section.style?.strokeStyle ?? "solid";
   const strokeWidth = section.style?.strokeWidth ?? canvasStyle.sectionBorderWidthPx;
@@ -897,7 +1134,7 @@ function renderSectionBackdrop(section: InteractiveCanvasObject, canvasStyle: Ca
       width: geometry.width,
       height: geometry.height,
       rx: canvasStyle.sectionCornerRadiusPx,
-      fill: family.tint,
+      fill: paint.fill,
     });
   }
 
@@ -907,74 +1144,228 @@ function renderSectionBackdrop(section: InteractiveCanvasObject, canvasStyle: Ca
     width: Math.max(0, geometry.width - strokeWidth),
     height: Math.max(0, geometry.height - strokeWidth),
     rx: canvasStyle.sectionCornerRadiusPx,
-    fill: family.tint,
-    // Per spec the section border IS the title chip's fill color.
-    stroke: family.chip.fill,
+    fill: paint.fill,
+    // figjam: the section border IS the title chip's fill color (§3.2).
+    stroke: paint.border,
     "stroke-width": strokeWidth,
     ...(borderStyle === "dashed"
-      ? { "stroke-dasharray": CONNECTOR_DASH_PATTERN_PX.join(" ") }
+      ? { "stroke-dasharray": connectorDashArray(canvasStyle) }
       : null),
   });
 }
 
+/** A scale factor with enough precision for glyph transforms (fmt keeps 2 decimals). */
+function fmtScale(value: number): string {
+  return String(Math.round(value * 1e4) / 1e4);
+}
+
+/**
+ * The header icon (objects/section/title-chip-layout.ts titleChipIconDrawing
+ * — the same primitives SectionTitleChip.tsx draws): the tile, then the
+ * glyph scaled into its box. A transformed group, not a nested <svg>, so it
+ * is rasterizer-safe wherever the camera crops.
+ */
+function renderTitleChipIcon(drawing: TitleChipIconDrawing, x: number, y: number): string {
+  const parts: string[] = [];
+  const { tile, glyph } = drawing;
+  if (tile) {
+    const inset = tile.border ? tile.borderWidthPx / 2 : 0;
+    parts.push(
+      tag("rect", {
+        x: x + inset,
+        y: y + inset,
+        width: drawing.sizePx - inset * 2,
+        height: drawing.sizePx - inset * 2,
+        rx: Math.max(0, tile.radiusPx - inset),
+        fill: tile.fill,
+        ...(tile.border ? { stroke: tile.border, "stroke-width": tile.borderWidthPx } : null),
+      }),
+    );
+  }
+  const stroked = glyph.paint === "stroke";
+  parts.push(
+    tag(
+      "g",
+      {
+        transform: `translate(${fmt(x + glyph.offsetPx)} ${fmt(y + glyph.offsetPx)}) scale(${fmtScale(
+          glyph.sizePx / glyph.viewBoxSize,
+        )})`,
+        fill: stroked ? "none" : glyph.color,
+        stroke: stroked ? glyph.color : "none",
+        "stroke-width": stroked ? fmtScale(glyph.strokeWidth) : undefined,
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round",
+      },
+      glyph.elements.map(glyphElementMarkup).join(""),
+    ),
+  );
+  return parts.join("");
+}
+
+/** A chip text run's `<text>` attributes (the header font; tracking in px). */
+function titleChipTextAttributes(font: TitleChipFont, x: number, y: number, fill: string) {
+  return {
+    x,
+    y,
+    fill,
+    "font-size": font.fontSizePx,
+    "font-weight": font.fontWeight,
+    "text-anchor": "start",
+    "dominant-baseline": "central",
+    ...(font.font === "mono" ? { "font-family": CANVAS_MONO_FONT_STACK_SVG } : null),
+    ...(font.letterSpacingEm !== 0 ? { "letter-spacing": font.letterSpacingEm * font.fontSizePx } : null),
+  };
+}
+
+/**
+ * The chip body. Floating: one rounded rect, the border stroked on its
+ * centerline inside the box (CSS border-box). Pinned: the box fill — its
+ * top-left corner following the frame's inner curve — plus only the right and
+ * bottom edges (the section frame is its top and left edge), stroked inside
+ * the box like a CSS border.
+ */
+function renderTitleChipBody(layout: TitleChipLayout, paint: SectionPaint, x: number, y: number): string {
+  const { box, border, radius } = layout;
+  if (layout.placement === "floating") {
+    const borderWidthPx = border.top;
+    const borderInset = borderWidthPx / 2;
+    return tag("rect", {
+      x: x + borderInset,
+      y: y + borderInset,
+      width: Math.max(0, box.width - borderWidthPx),
+      height: box.height - borderWidthPx,
+      rx: radius.topLeft,
+      fill: paint.chipFill,
+      stroke: paint.chipBorder,
+      "stroke-width": borderWidthPx,
+    });
+  }
+  const w = box.width;
+  const h = box.height;
+  const tl = Math.min(radius.topLeft, w / 2, h / 2);
+  const br = Math.min(radius.bottomRight, w / 2, h / 2);
+  const arc = (r: number, toX: number, toY: number) =>
+    r > 0 ? `A${fmt(r)} ${fmt(r)} 0 0 1 ${fmt(toX)} ${fmt(toY)}` : "";
+  const fillPath =
+    `M${fmt(x + tl)} ${fmt(y)}H${fmt(x + w)}V${fmt(y + h - br)}${arc(br, x + w - br, y + h)}` +
+    `H${fmt(x)}V${fmt(y + tl)}${arc(tl, x + tl, y)}Z`;
+  const edge = border.right;
+  const parts = [tag("path", { d: fillPath, fill: paint.chipFill })];
+  if (edge > 0) {
+    const right = x + w - edge / 2;
+    const bottom = y + h - edge / 2;
+    const bend = Math.max(0, br - edge / 2);
+    parts.push(
+      tag("path", {
+        d: `M${fmt(right)} ${fmt(y)}V${fmt(bottom - bend)}${arc(bend, right - bend, bottom)}H${fmt(x)}`,
+        fill: "none",
+        stroke: paint.chipBorder,
+        "stroke-width": edge,
+      }),
+    );
+  }
+  return parts.join("");
+}
+
+/**
+ * A section's title chip — `[icon] TITLE  detail` from the shared layout
+ * (objects/section/title-chip-layout.ts) and the section paint at its depth:
+ * floating (inset) or pinned (flush in the corner), ellipsized the way the
+ * live chip's text-overflow cuts the run.
+ */
 function renderSectionTitleChip(
   section: InteractiveCanvasObject,
-  scale: number,
+  depth: number,
+  zoom: number,
   canvasStyle: CanvasStyle,
+  clipId: string,
+  viewBox: CanvasBounds,
 ): string {
-  if (section.text === "") return "";
-  const family = resolveSectionColors(section.color ?? FIRST_USE_COLORS.section);
-  const borderWidthPx = canvasStyle.titleChipBorderWidthPx;
-  const maxWidth = titleChipMaxWidthPx(section.geometry.width, scale);
-  const estimated = estimateTitleChipWidthPx(section.text, canvasStyle);
-  const chipWidth = Math.min(estimated, maxWidth);
-  if (chipWidth <= 0) return "";
+  // The shared layout measures a chip carrying an icon or a detail on real
+  // Inter advances (the box hit-testing and text-fit use too); a plain title
+  // keeps the original char-count estimate (unchanged output).
+  if (!titleChipHasContent(section, canvasStyle)) return "";
+  const layout = titleChipLayout(section, canvasStyle, zoom);
+  const { box, scale } = layout;
+  if (box.width <= 0) return "";
+  const paint = resolveSectionPaint(section.color ?? FIRST_USE_COLORS.section, depth, canvasStyle);
   // The live chip counter-scales via a top-left-origin CSS transform pinned
-  // at the section-corner inset (SectionTitleChip.tsx + the chip CSS in
+  // at its anchor (SectionTitleChip.tsx + the chip CSS in
   // objects/section/def.tsx). Mirror that exactly: at scale 1 the chip is
   // drawn in absolute world coordinates; otherwise the same natural-size
   // markup is wrapped in a translate-to-anchor + scale group.
-  const anchorX = section.geometry.x + TITLE_CHIP.insetFromSectionCornerPx;
-  const anchorY = section.geometry.y + TITLE_CHIP.insetFromSectionCornerPx;
+  const anchorX = section.geometry.x + box.x;
+  const anchorY = section.geometry.y + box.y;
   const chipX = scale === 1 ? anchorX : 0;
   const chipY = scale === 1 ? anchorY : 0;
-  const borderInset = borderWidthPx / 2;
 
-  // Ellipsize when the estimated natural width exceeds the section's budget
-  // (mirrors the chip CSS's text-overflow: ellipsis).
-  let label = section.text;
-  if (estimated > maxWidth) {
-    const charWidth = TITLE_CHIP.fontSizePx * CHAR_WIDTH_RATIO;
-    const available =
-      chipWidth - TITLE_CHIP.paddingXPx * 2 - borderWidthPx * 2 - charWidth;
-    const maxChars = Math.max(1, Math.floor(available / charWidth));
-    label = `${section.text.slice(0, maxChars)}…`;
+  const body = renderTitleChipBody(layout, paint, chipX, chipY);
+  const parts: string[] = [];
+  // The live chip clips its contents at its padding box (overflow: hidden).
+  // Ellipsized runs always fit it; only an icon wider than a tight chip's
+  // room overflows — then the contents paint through a clip to that box.
+  const clipRight = box.width - layout.border.right;
+  const clipBottom = box.height - layout.border.bottom;
+  let clipped = false;
+  if (layout.icon) {
+    const drawing = titleChipIconDrawing(layout.icon.id, paint, canvasStyle);
+    if (drawing) {
+      clipped = layout.icon.x + drawing.sizePx > clipRight;
+      parts.push(
+        renderTitleChipIcon(drawing, chipX + layout.icon.x, chipY + layout.centerY - drawing.sizePx / 2),
+      );
+    }
   }
-
-  const rect = tag("rect", {
-    x: chipX + borderInset,
-    y: chipY + borderInset,
-    width: Math.max(0, chipWidth - borderWidthPx),
-    height: TITLE_CHIP.heightPx - borderWidthPx,
-    rx: canvasStyle.titleChipCornerRadiusPx,
-    fill: family.chip.fill,
-    stroke: family.chip.border,
-    "stroke-width": borderWidthPx,
-  });
-  const text = tag(
-    "text",
-    {
-      x: chipX + borderWidthPx + TITLE_CHIP.paddingXPx,
-      y: chipY + TITLE_CHIP.heightPx / 2,
-      fill: TITLE_CHIP.textColor,
-      "font-size": TITLE_CHIP.fontSizePx,
-      "font-weight": TITLE_CHIP.fontWeight,
-      "text-anchor": "start",
-      "dominant-baseline": "central",
-    },
-    escapeXml(label),
-  );
-  const markup = rect + text;
+  const runs = titleChipVisibleRuns(layout);
+  if (runs.title !== "") {
+    parts.push(
+      tag(
+        "text",
+        titleChipTextAttributes(layout.title.font, chipX + layout.title.x, chipY + layout.centerY, paint.headerText),
+        escapeXml(runs.title),
+      ),
+    );
+  }
+  if (layout.detail && runs.detail !== null) {
+    parts.push(
+      tag(
+        "text",
+        titleChipTextAttributes(
+          layout.detail.font,
+          chipX + layout.detail.x,
+          chipY + layout.centerY,
+          paint.headerDetail,
+        ),
+        escapeXml(runs.detail),
+      ),
+    );
+  }
+  let contents = parts.join("");
+  if (clipped && contents !== "") {
+    // Clip paths stay off chips the camera does not show (the rasterizer
+    // guard's viewport rule, as for filters and nested viewports).
+    const world = {
+      x: anchorX + layout.border.left * scale,
+      y: anchorY + layout.border.top * scale,
+      width: (clipRight - layout.border.left) * scale,
+      height: (clipBottom - layout.border.top) * scale,
+    };
+    if (paintsInsideViewBox(world, viewBox)) {
+      contents =
+        `<clipPath id="${escapeXml(clipId)}">` +
+        tag("rect", {
+          x: chipX + layout.border.left,
+          y: chipY + layout.border.top,
+          width: Math.max(0, clipRight - layout.border.left),
+          height: Math.max(0, clipBottom - layout.border.top),
+        }) +
+        `</clipPath>` +
+        tag("g", { "clip-path": `url(#${clipId})` }, contents);
+    } else {
+      contents = "";
+    }
+  }
+  const markup = body + contents;
   if (scale === 1) return markup;
   return tag(
     "g",
@@ -1033,32 +1424,21 @@ function arrowheadPolygon(
 }
 
 /**
- * World-space rect of a connection's label chip: fixed 30px height and the
- * min-41px char-width heuristic, centered on the route's halfway point —
- * the same chip the stage draws (connectors/Connector.tsx). The label chip
- * does NOT counter-scale with zoom: the stage renders it at natural document
- * size at every zoom level, so every consumer of this rect (the renderer
- * itself, painted-extent cameras) treats it as fixed world geometry.
- *
- * `_canvasStyle` is accepted for signature uniformity with the other
- * style-aware helpers: no canvas-style setting changes the chip's rect today
- * (only its corner radius, which a rect does not carry).
+ * World-space rect of a connection's label chip: the shared chip geometry
+ * (connectors/label-chip.ts — the chip the stage draws in
+ * connectors/Connector.tsx) under `canvasStyle`, centered on the route's
+ * label point. The label chip does NOT counter-scale with zoom: the stage
+ * renders it at natural document size at every zoom level, so every
+ * consumer of this rect (the renderer itself, painted-extent cameras, the
+ * agent lints) treats it as fixed world geometry. Its height and font are
+ * style tokens, so pass the board's style (default: DEFAULT_CANVAS_STYLE, schematic-light).
  */
 export function connectionLabelChipRect(
   label: string,
   center: CanvasPoint,
-  _canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): { x: number; y: number; width: number; height: number } {
-  const width = Math.max(
-    CONNECTION_LABEL_MIN_WIDTH_PX,
-    label.length * CONNECTION_LABEL_AVERAGE_CHAR_WIDTH_PX + CONNECTION_LABEL_PADDING_X_PX * 2,
-  );
-  return {
-    x: center.x - width / 2,
-    y: center.y - CONNECTION_LABEL_HEIGHT_PX / 2,
-    width,
-    height: CONNECTION_LABEL_HEIGHT_PX,
-  };
+  return labelChipRect(label, center, canvasStyle);
 }
 
 function renderConnector(
@@ -1073,7 +1453,7 @@ function renderConnector(
 
   const routed = routeConnection(fromObject, toObject, connection, obstacles, canvasStyle);
   const strokeWidth = canvasStyle.connectorStrokeWidthPx;
-  const stroke = resolveConnectorStroke(connection.color ?? FIRST_USE_COLORS.connector);
+  const stroke = resolveConnectorPaint(connection.color ?? FIRST_USE_COLORS.connector, canvasStyle).stroke;
   const dashed = connection.style === "dashed";
 
   const parts: string[] = [
@@ -1083,7 +1463,7 @@ function renderConnector(
       stroke,
       "stroke-width": strokeWidth,
       "stroke-linecap": "butt",
-      ...(dashed ? { "stroke-dasharray": CONNECTOR_DASH_PATTERN_PX.join(" ") } : null),
+      ...(dashed ? { "stroke-dasharray": connectorDashArray(canvasStyle) } : null),
     }),
   ];
 
@@ -1113,6 +1493,7 @@ function renderConnector(
   if (label) {
     const labelPoint = labelPointFor(routed, connection);
     const chip = connectionLabelChipRect(label, labelPoint, canvasStyle);
+    const metrics = connectionLabelChipMetrics(label, canvasStyle);
     const { x, y } = labelPoint;
     parts.push(
       tag("rect", {
@@ -1121,20 +1502,21 @@ function renderConnector(
         width: chip.width,
         height: chip.height,
         rx: canvasStyle.labelChipCornerRadiusPx,
-        fill: CONNECTION_LABEL_BACKGROUND,
-        stroke: CONNECTION_LABEL_BORDER,
-        "stroke-width": 1,
+        fill: canvasStyle.connectorLabelBackground,
+        stroke: canvasStyle.hairlineColor,
+        "stroke-width": CONNECTION_LABEL_CHIP.borderWidthPx,
       }),
       tag(
         "text",
         {
           x,
           y,
-          fill: CONNECTION_LABEL_TEXT_COLOR,
-          "font-size": CONNECTION_LABEL_FONT_SIZE_PX,
-          "font-weight": CONNECTION_LABEL_FONT_WEIGHT,
+          fill: canvasStyle.connectorLabelTextColor,
+          "font-size": metrics.fontSizePx,
+          "font-weight": metrics.fontWeight,
           "text-anchor": "middle",
           "dominant-baseline": "central",
+          ...(metrics.font === "mono" ? { "font-family": CANVAS_MONO_FONT_STACK_SVG } : null),
         },
         escapeXml(label),
       ),
@@ -1320,7 +1702,10 @@ export function renderSceneToSvg(
   const { bounds } = scene;
   const canvasStyle = normalizeCanvasStyle(options.canvasStyle);
   const { width, height } = resolvePixelSize(bounds, options);
-  const chipScale = titleChipScale(scene.chipZoom);
+  // Section nesting depth over the WHOLE document (a cropped scene still
+  // paints each section at its true depth) — the layer-cake fill deepens
+  // with it.
+  const sectionDepths = sectionDepthMap(document.objects);
 
   // The stage's five-tier layer cake, minus interactive tiers: section
   // backdrops → connectors → non-section objects → section title chips.
@@ -1329,8 +1714,13 @@ export function renderSceneToSvg(
   const nonSections = ordered.filter((object) => object.type !== "section");
   const objectsById = new Map(scene.objects.map((object) => [object.id, object]));
 
-  const hasSticky = nonSections.some((object) => effectiveRenderShape(object) === "note");
-  const stickyShadowFilterId = hasSticky ? `${idSlug(document.id)}-sticky-shadow` : null;
+  // Only paper stickies cast the shadow (card stickies have none).
+  const hasShadowSticky = nonSections.some(
+    (object) =>
+      effectiveRenderShape(object) === "note" &&
+      resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).shadow,
+  );
+  const stickyShadowFilterId = hasShadowSticky ? `${idSlug(document.id)}-sticky-shadow` : null;
 
   const parts: string[] = [];
 
@@ -1343,8 +1733,9 @@ export function renderSceneToSvg(
     );
   }
 
-  // "board" (the default) paints the light board surface across the world
-  // viewBox; letterbox bands outside the viewBox stay transparent either way.
+  // "board" (the default) paints the style's board surface (boardBackground)
+  // across the world viewBox; letterbox bands outside the viewBox stay
+  // transparent either way.
   if ((options.background ?? "board") === "board") {
     parts.push(
       tag("rect", {
@@ -1352,20 +1743,33 @@ export function renderSceneToSvg(
         y: bounds.y,
         width: bounds.width,
         height: bounds.height,
-        fill: CANVAS_BG,
+        fill: canvasStyle.boardBackground,
       }),
     );
   }
 
-  for (const section of sections) parts.push(renderSectionBackdrop(section, canvasStyle));
+  for (const section of sections) {
+    parts.push(renderSectionBackdrop(section, sectionDepths.get(section.id) ?? 1, canvasStyle));
+  }
   for (const connection of scene.connections) {
     parts.push(renderConnector(connection, objectsById, scene.obstacles, canvasStyle));
   }
   for (const object of nonSections) {
     parts.push(renderShapeBody(object, stickyShadowFilterId, bounds, canvasStyle));
-    parts.push(renderObjectText(object));
+    parts.push(renderObjectText(object, canvasStyle));
   }
-  for (const section of sections) parts.push(renderSectionTitleChip(section, chipScale, canvasStyle));
+  for (const section of sections) {
+    parts.push(
+      renderSectionTitleChip(
+        section,
+        sectionDepths.get(section.id) ?? 1,
+        scene.chipZoom,
+        canvasStyle,
+        `${idSlug(document.id)}-header-clip-${idSlug(section.id)}`,
+        bounds,
+      ),
+    );
+  }
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" ` +

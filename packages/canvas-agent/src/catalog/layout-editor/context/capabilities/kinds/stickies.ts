@@ -17,6 +17,7 @@ export const STICKIES_SPEC: KindSpec = {
             "headings, bullets, code, and bold all render on the board",
           ],
         },
+        "a sticky has no name or detail line: its whole text is the markdown body",
       ],
     },
     {
@@ -30,6 +31,7 @@ export const STICKIES_SPEC: KindSpec = {
   ],
   tips: [
     "any free-standing prose — summaries, legends, callouts, explanations, open questions — belongs on a sticky, never inside a rectangle; shapes are for diagram nodes",
+    "when a node's name or detail starts explaining, move the explanation onto a sticky beside it and leave the node its short name and one fact",
     "place the note inside the section it talks about, so it travels with the frame",
     "use the markdown: a heading line plus bullets reads far better at board scale than a paragraph",
   ],

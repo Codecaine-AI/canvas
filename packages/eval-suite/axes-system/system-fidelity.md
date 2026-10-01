@@ -10,10 +10,11 @@
 
 **Blind reconstruction judge** — Sees: the final PNG under an anonymous name, plus
 the operational-map notation legend (the scenario-independent board language: what
-each icon and shape means, the two region genres, and the rule that edges say only
-what the line shows). Its prompt contains no scenario name, brief vocabulary, or
-canvas JSON. Never sees: the brief, transcripts, configuration, or other axes'
-output.
+each icon and shape means, with the icon list generated from the object-preference
+registry; how names, detail lines, and section header icons read; the two region
+genres; and the rule that edges say only what the line shows). Its prompt contains
+no scenario name, brief vocabulary, or canvas JSON. Never sees: the brief,
+transcripts, configuration, or other axes' output.
 
 **Scorer** — Sees: the blind reconstruction and the brief, plus
 the shared judge rules and this file. Never sees: the board PNG or JSON,
@@ -23,7 +24,9 @@ transcripts, configuration, or other axes' output.
 
 1. The blind judge reads the board as a vocabulary-fluent engineer: icons name
    components at their canonical meanings (an agent glyph is an autonomous agent, a
-   memory glyph is a store, a tool glyph is an invocable capability); the shape core
+   memory glyph is a store, a tool glyph is an invocable capability, a brand logo is
+   that exact product); a muted detail line under a name, or after a section's title,
+   is one fact about that object; the shape core
    names steps and branches (a process is a step, a predefined process a delegated
    step, a decision a branch, an octagon a stop, an ellipse a terminator); each
    region reads either as a system map (components joined by standing

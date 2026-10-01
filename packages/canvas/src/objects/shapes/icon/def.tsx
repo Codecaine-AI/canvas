@@ -1,11 +1,13 @@
 "use client";
 
-import { IconShapeBody } from "./IconShapeBody";
-import { objectTypeDefaults } from "../../../state/schema/object-defaults";
+import { IconShapeBody, type IconShapeBodyColors } from "./IconShapeBody";
+import { FIRST_USE_COLORS, objectTypeDefaults } from "../../../state/schema/object-defaults";
+import { useCanvasStyle } from "../../../theme/canvas-style-context";
+import { resolveIconTilePaint } from "../../../theme/palette";
 import { BBOX_OUTLINE } from "../../geometry";
-import { ObjectShell, ObjectSlotText, resolveObjectRoleColors, type ResolvedShapeObjectColors } from "../../object-shell";
+import { ObjectShell, ObjectSlotText } from "../../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../../object-def";
-import { BELOW_TEXT_SLOT } from "../../text-slots";
+import { BELOW_TEXT_SLOT, iconTileRectPx } from "../../text-slots";
 import { SHAPE_TOOLBAR } from "../toolbar";
 
 /**
@@ -16,9 +18,26 @@ import { SHAPE_TOOLBAR } from "../toolbar";
  */
 function IconObjectView(props: ObjectRenderProps) {
   const { object, hideText } = props;
-  // P1/D13 — no fixed/inert-default carve-outs: fill paints glyph interiors
-  // and stroke is ink like every other shape.
-  const colors = resolveObjectRoleColors(object, "shape") as ResolvedShapeObjectColors;
+  // P1/D13 — no fixed/inert-default carve-outs. The canvas style picks the
+  // glyph corpus (iconPack) and the icon style: `glyph` strokes the ink with
+  // the shape fill in the glyph's interiors (figjam); `tile` sets the glyph
+  // on a tile — solid ink, or a light ink tint for a large tile
+  // (theme/palette.ts resolveIconTilePaint, sized by the capped tile side).
+  const canvasStyle = useCanvasStyle();
+  const paint = resolveIconTilePaint(
+    object.color ?? FIRST_USE_COLORS.shape,
+    canvasStyle,
+    iconTileRectPx(object.geometry.width, object.geometry.height, canvasStyle.iconTileMaxPx).width,
+  );
+  const colors: IconShapeBodyColors =
+    paint.tileFill === null
+      ? { stroke: paint.glyph, fill: paint.glyphFill ?? undefined }
+      : {
+          stroke: paint.glyph,
+          tileFill: paint.tileFill,
+          tileBorder: paint.tileBorder ?? undefined,
+          tileBorderWidthPx: paint.tileBorderWidthPx,
+        };
 
   return (
     <ObjectShell
@@ -35,14 +54,12 @@ function IconObjectView(props: ObjectRenderProps) {
       onObjectContextMenu={props.onObjectContextMenu}
     >
       {/* W5/Wave C — `icon` shape: IconShapeBody paints the glyph; the text
-          renders through the shared "below" slot preset. Colors (P1/D13): resolved palette pick —
-          fill paints glyph interiors; stroke is ink. */}
+          (name + detail line) renders through the shared "below" slot preset. */}
       <IconShapeBody
         object={object}
-        colors={{
-          stroke: colors.border,
-          fill: colors.fill,
-        }}
+        colors={colors}
+        iconPack={canvasStyle.iconPack}
+        tileMaxPx={canvasStyle.iconTileMaxPx}
       />
       {!hideText && (
         <ObjectSlotText

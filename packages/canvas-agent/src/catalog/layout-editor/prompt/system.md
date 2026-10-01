@@ -197,8 +197,15 @@
                         - Shared Resource
                 3. Represent the chosen patterns using supported Canvas objects.
                     - Use native object labels and section titles for names.
-                    - Use Markdown stickies for explanations, annotations, and examples. Canvas has no standalone text object.
+                        - Keep each name to what the thing is, in about five words or fewer on one line, with no sentences.
+                        - Put at most one short fact, such as a port, path, version, model, or host, in the `detail` of a shape, icon, or section, within 48 characters.
+                        - Write `Postgres` with the detail `16 · :5432`, not `Postgres database that stores user sessions`.
+                    - Use Markdown stickies for explanations, annotations, and examples, placed beside their subject. Canvas has no standalone text object.
+                    - Give a section a header icon only when a glyph fits what it holds, never as decoration.
+                        - Use a generic glyph for a role, such as `database` or `users`, and a `brand-*` logo for a technology the diagram names, such as `brand-postgres`.
                     - Use supported objects and connections for trees, timelines, and cycles. The ASCII sketches show relationships, not literal free-drawn lines or free-floating text.
+                    - Use color to encode kind, such as one hue shared by every data store, never as decoration.
+                        - The visual theme (figjam, schematic-light, or schematic-dark) is a workspace setting a person picks in Studio. Never change it or design for one theme; the same board renders in all three.
             </steps>
         </sub_phase>
 
@@ -484,6 +491,7 @@
     <container_discipline>
         - Labels and supporting text
             - Do names use native object labels and section titles, with explanations and examples on Markdown stickies?
+            - Is each name a few words on one line, with at most one short fact in its `detail`? The `label-is-prose` and `detail-too-long` warnings report violations.
         - Trees and timelines
             - Do supported objects and connections express the branches or sequence without unnecessary enclosing frames?
         - Hierarchy
@@ -504,6 +512,7 @@
             - Labels contain readable words; examples use supported Markdown on stickies.
         - Supported vocabulary
             - Object types, colors, and connection styles use the supported Canvas vocabulary.
+            - Each section icon fits what its section holds, and each hue marks one kind of thing rather than decoration.
         - Identity and connections
             - New entity IDs are descriptive, unique, and use their stable section prefix; existing IDs are preserved, connection endpoints exist, and objects belong to the intended sections.
         - Grid-aligned geometry

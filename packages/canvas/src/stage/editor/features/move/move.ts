@@ -12,7 +12,7 @@ import type { CanvasAction } from "../../../../state/actions";
 import { boundsForGeometries, type CanvasBounds, type CanvasPoint } from "../../../../state/geometry";
 import type { CanvasGeometry, InteractiveCanvasDocument } from "../../../../state/schema";
 import { resolveSectionParent } from "../../../../state/section-membership";
-import { connectionBoundsForObject } from "../../../../objects/geometry";
+import { hitBoundsForObject } from "../../../../objects/geometry";
 import { objectDefForType } from "../../../../objects/object-def";
 import {
   computeSnapCorrection,
@@ -28,6 +28,7 @@ import {
   type CanvasPointerEvent,
 } from "../../../../interaction/types";
 import type { ViewportState } from "../../../viewport";
+import type { CanvasStyle } from "../../../../theme/canvas-style";
 
 export type MoveGesture = {
   kind: "move";
@@ -43,6 +44,8 @@ type MoveContext = {
   document: InteractiveCanvasDocument;
   viewport: ViewportState;
   snapResolver?: (candidateBounds: CanvasBounds, zoom: number) => SnapCorrection | null;
+  /** Workspace style: sizes below-band captions in snap bounds. Default when omitted. */
+  canvasStyle?: CanvasStyle;
 };
 
 type MoveOverlay = {
@@ -189,13 +192,16 @@ export function stepFromMove(
     ctx.document.objects
       .filter((object) => state.objectIds.includes(object.id))
       .map((object) =>
-        connectionBoundsForObject({
-          ...object,
-          geometry: rawGeometries[object.id] ?? object.geometry,
-        }),
+        hitBoundsForObject(
+          {
+            ...object,
+            geometry: rawGeometries[object.id] ?? object.geometry,
+          },
+          ctx.canvasStyle,
+        ),
       ),
   );
-  const candidates = gatherSnapCandidates(ctx.document, state.objectIds);
+  const candidates = gatherSnapCandidates(ctx.document, state.objectIds, ctx.canvasStyle);
   const threshold = SNAP_THRESHOLD_SCREEN_PX / ctx.viewport.zoom;
   const resolverSnap = movingBounds ? ctx.snapResolver?.(movingBounds, ctx.viewport.zoom) : null;
   const snap: SnapCorrection & { distributionGuides?: DistributionGuideSegment[] } = movingBounds

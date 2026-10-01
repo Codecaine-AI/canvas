@@ -1,0 +1,2198 @@
+{
+  "schemaVersion": 1,
+  "id": "doc-64bb1e7d7d6d9bb38b7617da3c177ee9",
+  "title": "Workspace themes",
+  "root": "root",
+  "blocks": {
+    "root": {
+      "id": "root",
+      "type": "paragraph",
+      "props": {},
+      "children": [
+        "b-themes-intro",
+        "b-themes-h2-tokens",
+        "b-themes-tokens-lead",
+        "b-themes-presets-table",
+        "b-themes-palette-lead",
+        "b-themes-palette-table",
+        "b-themes-decision-workspace",
+        "b-themes-decision-figjam",
+        "b-themes-h2-settings",
+        "b-themes-settings-lead",
+        "b-themes-settings-shape",
+        "b-themes-settings-resolve",
+        "b-themes-settings-controls",
+        "b-themes-h2-paint",
+        "b-themes-paint-lead",
+        "b-themes-paint-shapes",
+        "b-themes-paint-sections",
+        "b-themes-paint-icons",
+        "b-themes-paint-stickies",
+        "b-themes-paint-connectors",
+        "b-themes-h3-cake",
+        "b-themes-cake-lead",
+        "b-themes-cake-code",
+        "b-themes-cake-guard",
+        "b-themes-cake-white",
+        "b-themes-h2-headers",
+        "b-themes-headers-lead",
+        "b-themes-headers-floating",
+        "b-themes-headers-pinned",
+        "b-themes-headers-contents",
+        "b-themes-h2-type",
+        "b-themes-type-lead",
+        "b-themes-type-detail",
+        "b-themes-type-mono",
+        "b-themes-type-faces"
+      ]
+    },
+    "b-themes-intro": {
+      "id": "b-themes-intro",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A workspace theme decides how every board in the workspace renders: the board surface, object text, shape and section paint, icons, connector labels, and stickies. Three themes ship. "
+        },
+        {
+          "insert": "figjam",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the default and keeps FigJam parity, while "
+        },
+        {
+          "insert": "schematic-light",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "schematic-dark",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " draw card shapes, depth-stepped section tints, pinned mono headers, and icon tiles. A document never records a theme, so the same board renders in all three."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-h2-tokens": {
+      "id": "b-themes-h2-tokens",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Themes and Tokens"
+        }
+      ],
+      "children": []
+    },
+    "b-themes-tokens-lead": {
+      "id": "b-themes-tokens-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A theme is a complete preset of tokens. Every renderer reads one flat, resolved "
+        },
+        {
+          "insert": "CanvasStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/canvas-style.ts",
+              "label": "CanvasStyle"
+            }
+          }
+        },
+        {
+          "insert": ": the active theme's preset with that theme's overrides applied. The nine geometry tokens set corner radii and border widths, and the rest fall into board, text, shapes, sections, icons, connectors, stickies, and palette groups. The presets ship these values:"
+        }
+      ],
+      "children": []
+    },
+    "b-themes-presets-table": {
+      "id": "b-themes-presets-table",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "token",
+          "figjam",
+          "schematic-light",
+          "schematic-dark"
+        ],
+        "rows": [
+          [
+            [
+              {
+                "insert": "shapeCornerRadiusPx",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "shapeBorderWidthPx",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "2 / 2",
+            "2 / 1.5",
+            "2 / 1.5"
+          ],
+          [
+            [
+              {
+                "insert": "sectionCornerRadiusPx",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "sectionBorderWidthPx",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "2 / 1.5",
+            "2 / 1",
+            "2 / 1"
+          ],
+          [
+            [
+              {
+                "insert": "titleChipCornerRadiusPx",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "titleChipBorderWidthPx",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "2 / 1.5",
+            "2 / 1",
+            "2 / 1"
+          ],
+          [
+            [
+              {
+                "insert": "labelChipCornerRadiusPx",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "2",
+            "2",
+            "2"
+          ],
+          [
+            [
+              {
+                "insert": "connectorStrokeWidthPx",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "connectorCornerRadiusPx",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "4 / 21.5",
+            "1.5 / 8",
+            "1.5 / 8"
+          ],
+          [
+            [
+              {
+                "insert": "boardBackground",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "#F5F5F5",
+            "#F6F8FA",
+            "#14171F"
+          ],
+          [
+            [
+              {
+                "insert": "gridDotColor",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "rgba(0, 0, 0, 0.25)",
+            "rgba(15, 30, 54, 0.13)",
+            "rgba(255, 255, 255, 0.07)"
+          ],
+          [
+            [
+              {
+                "insert": "hairlineColor",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "#D9D9D9",
+            "#D5DBE3",
+            "#2E3342"
+          ],
+          [
+            [
+              {
+                "insert": "textColor",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "textFontWeight",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "#000000 / 700",
+            "#0F1E36 / 600",
+            "#E4E6F2 / 600"
+          ],
+          [
+            [
+              {
+                "insert": "detailColor",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "detailFont",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "detailFontSizePx",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "#5C5C5C / sans / 13",
+            "#5B6578 / mono / 12.5",
+            "#8B93B5 / mono / 12.5"
+          ],
+          [
+            [
+              {
+                "insert": "shapeFill",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "cardFill",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "tint / #FFFFFF",
+            "card / #FFFFFF",
+            "card / #32363E"
+          ],
+          [
+            [
+              {
+                "insert": "sectionFill",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "flat",
+            "layer-cake",
+            "layer-cake"
+          ],
+          [
+            [
+              {
+                "insert": "sectionTintBase",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "sectionTintStep",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "sectionTintMax",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "0.07 / 0.035 / 0.16",
+            "0.07 / 0.035 / 0.16",
+            "0.10 / 0.05 / 0.22"
+          ],
+          [
+            [
+              {
+                "insert": "sectionTintMixBase",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "sectionBorderOpacity",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "#FFFFFF / 1",
+            "#FFFFFF / 0.5",
+            "#14171F / 0.5"
+          ],
+          [
+            [
+              {
+                "insert": "headerPlacement",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "headerFont",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "floating / sans",
+            "pinned / mono",
+            "pinned / mono"
+          ],
+          [
+            [
+              {
+                "insert": "headerUppercase",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "headerFontSizePx",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "headerChipMix",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "false / 16 / 0.16",
+            "true / 11.5 / 0.16",
+            "true / 11.5 / 0.20"
+          ],
+          [
+            [
+              {
+                "insert": "iconPack",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "iconStyle",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "iconTileGlyphColor",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "nucleo / glyph / #FFFFFF",
+            "tabler / tile / #FFFFFF",
+            "tabler / tile / #14171F"
+          ],
+          [
+            [
+              {
+                "insert": "iconTileFill",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "iconTileSolidMaxPx",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "auto / 152",
+            "auto / 152",
+            "auto / 152"
+          ],
+          [
+            [
+              {
+                "insert": "connectorLabelFont",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "connectorLabelFontSizePx",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "connectorLabelHeightPx",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "sans / 16 / 30",
+            "mono / 11.5 / 22",
+            "mono / 11.5 / 22"
+          ],
+          [
+            [
+              {
+                "insert": "connectorLabelBackground",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " / "
+              },
+              {
+                "insert": "connectorLabelTextColor",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "#F5F5F5 / #000000",
+            "#F6F8FA / #3A4659",
+            "#14171F / #A6ACCD"
+          ],
+          [
+            [
+              {
+                "insert": "stickyStyle",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "paper",
+            "card",
+            "card"
+          ]
+        ],
+        "title": "Theme presets"
+      },
+      "children": []
+    },
+    "b-themes-palette-lead": {
+      "id": "b-themes-palette-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "palette",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " group holds one ink per roster color: the line, border, and tile color every kind derives its paint from. The figjam inks are the FigJam connector strokes from the role tables. The schematic inks are tuned for thin lines on a cool light board and for pastel lines on a dark one."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-palette-table": {
+      "id": "b-themes-palette-table",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "color",
+          "figjam",
+          "schematic-light",
+          "schematic-dark"
+        ],
+        "rows": [
+          [
+            "gray",
+            "#757575",
+            "#5B6578",
+            "#6B7394"
+          ],
+          [
+            "red",
+            "#D5322F",
+            "#C8402F",
+            "#FD8A8A"
+          ],
+          [
+            "orange",
+            "#EB7500",
+            "#C2620A",
+            "#FFAB70"
+          ],
+          [
+            "yellow",
+            "#E8A302",
+            "#A87A00",
+            "#FFD580"
+          ],
+          [
+            "green",
+            "#019142",
+            "#2F8A3E",
+            "#85E89D"
+          ],
+          [
+            "teal",
+            "#369E94",
+            "#0F8A7A",
+            "#5DE4C7"
+          ],
+          [
+            "blue",
+            "#1A5CDF",
+            "#2F5BD3",
+            "#82AAFF"
+          ],
+          [
+            "violet",
+            "#9747FF",
+            "#6B4FC4",
+            "#C3A6FF"
+          ],
+          [
+            "pink",
+            "#B74D85",
+            "#B8407F",
+            "#F5A3D0"
+          ],
+          [
+            "white",
+            "#757980",
+            "#0F1E36",
+            "#E4E6F2"
+          ]
+        ],
+        "title": "Palette inks"
+      },
+      "children": []
+    },
+    "b-themes-decision-workspace": {
+      "id": "b-themes-decision-workspace",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "The theme is a workspace setting, not document state"
+      },
+      "text": [
+        {
+          "insert": "A board document stores color ids and no paint, and it carries no theme. The theme lives in the workspace settings file, a person picks it in Studio, and every surface that renders a board reads it: the editor, the viewer, previews, thumbnails, exports, and the layout agent's renders. The layout agent and the Canvas MCP read the theme so their pictures match Studio, and no agent tool writes it. Keeping paint out of documents is what lets one board render in all three themes, and it extends the closed color roster: a document names a color, and the theme decides its pixels."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-decision-figjam": {
+      "id": "b-themes-decision-figjam",
+      "type": "callout",
+      "props": {
+        "kind": "decision",
+        "title": "The figjam theme renders exactly as the board did before themes"
+      },
+      "text": [
+        {
+          "insert": "Every figjam preset value is the renderer constant it replaced, and every figjam paint mode reads the FigJam role tables unchanged, so the default theme is pixel-identical to the pre-theme board. FigJam visual parity stays the authority for the figjam theme. The schematic themes are a separate look, defined by their presets and the paint rules below, and parity questions do not apply to them."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-h2-settings": {
+      "id": "b-themes-h2-settings",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The Settings File"
+        }
+      ],
+      "children": []
+    },
+    "b-themes-settings-lead": {
+      "id": "b-themes-settings-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Studio persists the workspace's choice in "
+        },
+        {
+          "insert": "canvases/canvas-style.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", beside the boards: the active theme plus each theme's own overrides. An override is a token that differs from its theme's preset, so switching themes keeps every theme's edits. A file written before themes existed holds one flat bag of overrides and reads as the figjam theme's overrides."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-settings-shape": {
+      "id": "b-themes-settings-shape",
+      "type": "state-shape",
+      "props": {
+        "example": "{\n  \"theme\": \"schematic-dark\",\n  \"themes\": {\n    \"figjam\": { \"shapeCornerRadiusPx\": 6 },\n    \"schematic-dark\": {\n      \"sectionTintMax\": 0.26,\n      \"palette\": { \"teal\": \"#4FD1C5\" }\n    }\n  }\n}",
+        "fields": [
+          {
+            "name": "theme",
+            "type": "\"figjam\" | \"schematic-light\" | \"schematic-dark\"",
+            "description": "The active theme. A missing or unknown value reads as figjam."
+          },
+          {
+            "name": "themes",
+            "type": "object",
+            "description": "Overrides per theme. A theme with no overrides is omitted.",
+            "fields": [
+              {
+                "name": "<theme id>",
+                "type": "CanvasStyleOverrides",
+                "required": false,
+                "description": "Only the tokens that differ from this theme's preset.",
+                "fields": [
+                  {
+                    "name": "<token>",
+                    "type": "number | string | boolean",
+                    "required": false,
+                    "description": "Any token except theme and palette."
+                  },
+                  {
+                    "name": "palette",
+                    "type": "Partial<Record<CanvasColor, string>>",
+                    "required": false,
+                    "description": "Ink overrides, one per roster color."
+                  }
+                ]
+              }
+            ]
+          }
+        ],
+        "name": "CanvasStyleSettings",
+        "source": {
+          "path": "packages/canvas/src/theme/canvas-style.ts",
+          "symbol": "CanvasStyleSettings"
+        }
+      },
+      "children": []
+    },
+    "b-themes-settings-resolve": {
+      "id": "b-themes-settings-resolve",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "resolveCanvasStyle",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/canvas-style.ts",
+              "label": "resolveCanvasStyle"
+            }
+          }
+        },
+        {
+          "insert": " turns any parsed JSON into a complete style: the active theme's preset, then that theme's overrides. Validation is total. Numbers clamp to their control's range, colors must be "
+        },
+        {
+          "insert": "#RRGGBB",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "rgba(r, g, b, a)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and are stored in one canonical spelling, and enum and boolean tokens must hold one of their values. Anything else falls back to the preset value and unknown keys are dropped, so a malformed file can change how a board looks but never breaks a render."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-settings-controls": {
+      "id": "b-themes-settings-controls",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every token has one entry in "
+        },
+        {
+          "insert": "CANVAS_STYLE_CONTROLS",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/canvas-style.ts",
+              "label": "CANVAS_STYLE_CONTROLS"
+            }
+          }
+        },
+        {
+          "insert": ": its group, label, kind (number, color, select, or boolean), range or options, and an optional "
+        },
+        {
+          "insert": "visibleWhen",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " condition. The tint tokens, for example, show only while "
+        },
+        {
+          "insert": "sectionFill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is "
+        },
+        {
+          "insert": "layer-cake",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". The same table drives validation and Studio's Style tab, so every token is adjustable per theme."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-h2-paint": {
+      "id": "b-themes-h2-paint",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "How a Color Pick Paints"
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-lead": {
+      "id": "b-themes-paint-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A color pick names a direction, and the theme decides its pixels. The resolvers in "
+        },
+        {
+          "insert": "theme/palette.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/palette.ts",
+              "label": "theme/palette.ts"
+            }
+          }
+        },
+        {
+          "insert": " derive each kind's paint from the pick's ink and a few surface tokens. Each kind has a figjam mode, which reads the FigJam role tables of "
+        },
+        {
+          "insert": "the shape contract",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/10-shape-api",
+              "label": "the shape contract"
+            }
+          }
+        },
+        {
+          "insert": " unchanged, and a schematic mode that derives everything from the ink."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-shapes": {
+      "id": "b-themes-paint-shapes",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Shapes",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-paint-shapes-tint",
+        "b-themes-paint-shapes-card"
+      ]
+    },
+    "b-themes-paint-shapes-tint": {
+      "id": "b-themes-paint-shapes-tint",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fills a shape with its color's pastel fill and borders it with the ink. The name keeps "
+        },
+        {
+          "insert": "textColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " unless that falls below 4.5:1 contrast against the fill."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-shapes-card": {
+      "id": "b-themes-paint-shapes-card",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "card",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fills every shape with "
+        },
+        {
+          "insert": "cardFill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", borders it with the ink, and sets the name in "
+        },
+        {
+          "insert": "textColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-sections": {
+      "id": "b-themes-paint-sections",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Sections",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-paint-sections-flat",
+        "b-themes-paint-sections-cake"
+      ]
+    },
+    "b-themes-paint-sections-flat": {
+      "id": "b-themes-paint-sections-flat",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "flat",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " paints the color's wash, and the frame border takes the title chip's fill."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-sections-cake": {
+      "id": "b-themes-paint-sections-cake",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "layer-cake",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " paints an opaque tint that deepens with nesting depth, as the next section sets out."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-icons": {
+      "id": "b-themes-paint-icons",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Icons",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-paint-icons-glyph",
+        "b-themes-paint-icons-tile",
+        "b-themes-paint-icons-auto"
+      ]
+    },
+    "b-themes-paint-icons-glyph": {
+      "id": "b-themes-paint-icons-glyph",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "glyph",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " draws the bare glyph in the ink, with closed interiors in the shape fill."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-icons-tile": {
+      "id": "b-themes-paint-icons-tile",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "tile",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " centers the glyph on a square tile with 3px corners, inset about 22% of the side and never wider than 56px. "
+        },
+        {
+          "insert": "iconTileFill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " picks the tile body: "
+        },
+        {
+          "insert": "solid",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the ink under a glyph in "
+        },
+        {
+          "insert": "iconTileGlyphColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "tint",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " mixes 16% of the ink into "
+        },
+        {
+          "insert": "cardFill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", with an ink border at the shape border width and an ink glyph."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-icons-auto": {
+      "id": "b-themes-paint-icons-auto",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "auto",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the preset value, draws a solid tile while the icon's smaller side is at most "
+        },
+        {
+          "insert": "iconTileSolidMaxPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and a tinted tile above it, so a large icon never turns into a heavy block. A white icon on a light board keeps an outlined tile at every size: a "
+        },
+        {
+          "insert": "cardFill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " body with a 1px ink border and an ink glyph."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-stickies": {
+      "id": "b-themes-paint-stickies",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Stickies",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-paint-stickies-paper",
+        "b-themes-paint-stickies-card"
+      ]
+    },
+    "b-themes-paint-stickies-paper": {
+      "id": "b-themes-paint-stickies-paper",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "paper",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " keeps the colored note and its shadow."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-stickies-card": {
+      "id": "b-themes-paint-stickies-card",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "card",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " paints "
+        },
+        {
+          "insert": "cardFill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with a "
+        },
+        {
+          "insert": "hairlineColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " border, a 2px left rule in the ink, body text in "
+        },
+        {
+          "insert": "textColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and no shadow."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-connectors": {
+      "id": "b-themes-paint-connectors",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Connectors",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-paint-connectors-stroke",
+        "b-themes-paint-connectors-dash",
+        "b-themes-paint-connectors-chip"
+      ]
+    },
+    "b-themes-paint-connectors-stroke": {
+      "id": "b-themes-paint-connectors-stroke",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The stroke and arrowheads take the ink in every theme."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-connectors-dash": {
+      "id": "b-themes-paint-connectors-dash",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A dashed line scales FigJam's 19/7 pattern by "
+        },
+        {
+          "insert": "connectorStrokeWidthPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " over FigJam's 4px line, so figjam keeps exactly "
+        },
+        {
+          "insert": "19 7",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and a 1.5px schematic line dashes "
+        },
+        {
+          "insert": "7.13 2.63",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Dashed section frames take the same pattern from "
+        },
+        {
+          "insert": "connectorDashArray",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/def.ts",
+              "symbol": "connectorDashArray",
+              "label": "connectorDashArray"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-connectors-chip": {
+      "id": "b-themes-paint-connectors-chip",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The label chip takes the connector label tokens for font, size, height, background, and text, with a "
+        },
+        {
+          "insert": "hairlineColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " border and "
+        },
+        {
+          "insert": "labelChipCornerRadiusPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " corners. "
+        },
+        {
+          "insert": "label-chip.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/connectors/label-chip.ts",
+              "label": "label-chip.ts"
+            }
+          }
+        },
+        {
+          "insert": " sizes it for the live connector, the static renderer, and the agent's label lints alike."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-h3-cake": {
+      "id": "b-themes-h3-cake",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Layer-Cake Sections"
+        }
+      ],
+      "children": []
+    },
+    "b-themes-cake-lead": {
+      "id": "b-themes-cake-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A section's depth is 1 plus the number of sections above it on its "
+        },
+        {
+          "insert": "parentId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " chain ("
+        },
+        {
+          "insert": "sectionDepthMap",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/state/section-depth.ts",
+              "label": "sectionDepthMap"
+            }
+          }
+        },
+        {
+          "insert": "), so a top-level section is depth 1 and the walk stops safely on a broken chain. The fill steps toward the ink with each level, the same stacking "
+        },
+        {
+          "insert": "the layer cake",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/30-layering",
+              "label": "the layer cake"
+            }
+          }
+        },
+        {
+          "insert": " derives paint order from. Every mix is a plain per-channel sRGB mix, rounded to an opaque hex:"
+        }
+      ],
+      "children": []
+    },
+    "b-themes-cake-code": {
+      "id": "b-themes-cake-code",
+      "type": "code",
+      "props": {
+        "language": "text"
+      },
+      "text": [
+        {
+          "insert": "t(d)        = min(sectionTintMax, sectionTintBase + sectionTintStep × (d − 1))\nfill        = mix(ink, sectionTintMixBase, t(d))\nborder      = ink at sectionBorderOpacity\nchip fill   = mix(ink, fill, headerChipMix)\nchip border = ink at 0.5\ntitle       = textColor\ndetail      = mix(ink, chip fill, 0.6), pushed toward the ink until it reaches 3:1 against the chip"
+        }
+      ],
+      "children": []
+    },
+    "b-themes-cake-guard": {
+      "id": "b-themes-cake-guard",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Dark guard",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-cake-guard-step",
+        "b-themes-cake-guard-move",
+        "b-themes-cake-guard-parent",
+        "b-themes-cake-guard-shipped"
+      ]
+    },
+    "b-themes-cake-guard-step": {
+      "id": "b-themes-cake-guard-step",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A dark board under raised cards can land a fill on the cards' own color. The guard is on when the mix base stands at least 0.03 OKLab lightness from "
+        },
+        {
+          "insert": "cardFill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and it walks the levels from the top."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-cake-guard-move": {
+      "id": "b-themes-cake-guard-move",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A level moves when its fill sits within 0.03 OKLab distance of "
+        },
+        {
+          "insert": "cardFill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or would fold onto its parent. It takes the nearest qualifying weight between half of "
+        },
+        {
+          "insert": "sectionTintBase",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "sectionTintMax",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", trying the deeper weight first on a tie."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-cake-guard-parent": {
+      "id": "b-themes-cake-guard-parent",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A qualifying weight clears the cards and stays a distinct layer above the parent level, with a higher weight and at least 0.015 lightness between them. When no weight qualifies, the level keeps its own t(d), and its cards rely on their ink border."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-cake-guard-shipped": {
+      "id": "b-themes-cake-guard-shipped",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Under the shipped schematic-dark values no top-level section moves, so every depth-1 tint, the warm ones included, keeps its own weight and hue."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-cake-white": {
+      "id": "b-themes-cake-white",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "White sections",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-cake-white-light",
+        "b-themes-cake-white-dark"
+      ]
+    },
+    "b-themes-cake-white-light": {
+      "id": "b-themes-cake-white-light",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "On a light board a white section is a plain card: a "
+        },
+        {
+          "insert": "cardFill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " body, a "
+        },
+        {
+          "insert": "hairlineColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " frame and chip border, and a chip of "
+        },
+        {
+          "insert": "hairlineColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " mixed half into "
+        },
+        {
+          "insert": "cardFill",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-cake-white-dark": {
+      "id": "b-themes-cake-white-dark",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "On a dark board a white section paints with the gray ink."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-h2-headers": {
+      "id": "b-themes-h2-headers",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Section Headers"
+        }
+      ],
+      "children": []
+    },
+    "b-themes-headers-lead": {
+      "id": "b-themes-headers-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A section's header chip holds an optional icon, the title, and an optional one-fact detail, in that order. Its geometry lives in one module, "
+        },
+        {
+          "insert": "title-chip-layout.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/objects/section/title-chip-layout.ts",
+              "label": "title-chip-layout.ts"
+            }
+          }
+        },
+        {
+          "insert": ", which the live chip, the title editor, the static renderer, hit-testing, and the agent's title fit all read. "
+        },
+        {
+          "insert": "headerPlacement",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " decides where the chip sits:"
+        }
+      ],
+      "children": []
+    },
+    "b-themes-headers-floating": {
+      "id": "b-themes-headers-floating",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Floating",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-headers-floating-body"
+      ]
+    },
+    "b-themes-headers-floating-body": {
+      "id": "b-themes-headers-floating-body",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The figjam chip floats 3px inside the section's top-left corner and draws its full border, as FigJam draws it."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-headers-pinned": {
+      "id": "b-themes-headers-pinned",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Pinned",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-headers-pinned-flush",
+        "b-themes-headers-pinned-radii"
+      ]
+    },
+    "b-themes-headers-pinned-flush": {
+      "id": "b-themes-headers-pinned-flush",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The schematic chip sits flush in the section's top-left corner. Its top and left edges coincide with the section border, so there is no gap and no doubled line, and it draws only its right and bottom edges."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-headers-pinned-radii": {
+      "id": "b-themes-headers-pinned-radii",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Its bottom-right corner takes "
+        },
+        {
+          "insert": "titleChipCornerRadiusPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", its top-left corner follows the frame's inner corner ("
+        },
+        {
+          "insert": "sectionCornerRadiusPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " less the frame width), and its bottom edge sits 27px below the section's top edge, the floating chip's height. Zoomed out, it counter-scales about that inner corner, so it stays flush at every zoom."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-headers-contents": {
+      "id": "b-themes-headers-contents",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Contents",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-headers-contents-icon",
+        "b-themes-headers-contents-title",
+        "b-themes-headers-contents-detail"
+      ]
+    },
+    "b-themes-headers-contents-icon": {
+      "id": "b-themes-headers-contents-icon",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The icon fills a 16px box 6px before the title. In tile mode it is a tile with 2px corners and the glyph inset about 15%, and in glyph mode it is the bare glyph, painted like an icon object of the section's color."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-headers-contents-title": {
+      "id": "b-themes-headers-contents-title",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The title sets in "
+        },
+        {
+          "insert": "headerFont",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at "
+        },
+        {
+          "insert": "headerFontSizePx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "textFontWeight",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", uppercased when "
+        },
+        {
+          "insert": "headerUppercase",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is on, with 0.08em letter spacing for an uppercase mono title."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-headers-contents-detail": {
+      "id": "b-themes-headers-contents-detail",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The detail follows the title after a 10px gap, in the header detail color and "
+        },
+        {
+          "insert": "headerFont",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at regular weight, never uppercased. The chip's width estimate counts the icon and the detail, and both placements keep the zoom counter-scaling and the ellipsis at the chip's maximum width."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-h2-type": {
+      "id": "b-themes-h2-type",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Type"
+        }
+      ],
+      "children": []
+    },
+    "b-themes-type-lead": {
+      "id": "b-themes-type-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Shape and icon names set in Inter at 15px, in "
+        },
+        {
+          "insert": "textColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at "
+        },
+        {
+          "insert": "textFontWeight",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Metadata takes a font token per role, either "
+        },
+        {
+          "insert": "sans",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (Inter) or "
+        },
+        {
+          "insert": "mono",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (IBM Plex Mono): "
+        },
+        {
+          "insert": "detailFont",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for detail lines, "
+        },
+        {
+          "insert": "headerFont",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for section headers, and "
+        },
+        {
+          "insert": "connectorLabelFont",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for edge labels. The schematic themes set all three in IBM Plex Mono, and figjam keeps Inter. The font stacks live in "
+        },
+        {
+          "insert": "theme/fonts.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/fonts.ts",
+              "label": "theme/fonts.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-type-detail": {
+      "id": "b-themes-type-detail",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Detail lines",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-type-detail-set"
+      ]
+    },
+    "b-themes-type-detail-set": {
+      "id": "b-themes-type-detail-set",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A detail line sets in "
+        },
+        {
+          "insert": "detailColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at "
+        },
+        {
+          "insert": "detailFontSizePx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with a 1.3 line height, 3px under the name block, in Inter 400 or IBM Plex Mono 500."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-type-mono": {
+      "id": "b-themes-type-mono",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Mono measurement",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-type-mono-advance"
+      ]
+    },
+    "b-themes-type-mono-advance": {
+      "id": "b-themes-type-mono-advance",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "IBM Plex Mono advances every glyph 0.6em at every weight ("
+        },
+        {
+          "insert": "MONO_ADVANCE_EM",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). Static wrapping, chip widths, and the agent's text fit measure mono runs with that one number, as "
+        },
+        {
+          "insert": "measureMonoTextPx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/text-metrics.ts",
+              "symbol": "measureMonoTextPx",
+              "label": "measureMonoTextPx"
+            }
+          }
+        },
+        {
+          "insert": " applies it, while Inter keeps its generated advance tables."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-type-faces": {
+      "id": "b-themes-type-faces",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Vendored faces",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-type-faces-weights",
+        "b-themes-type-faces-sticky"
+      ]
+    },
+    "b-themes-type-faces-weights": {
+      "id": "b-themes-type-faces-weights",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "IBM Plex Mono ships at weights 400, 500, and 600 under the SIL Open Font License: TTF files for the agent's rasterizer and woff2 files for Studio."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-type-faces-sticky": {
+      "id": "b-themes-type-faces-sticky",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Sticky bodies stay in Inter, and sticky inline code keeps its own system mono stack."
+        }
+      ],
+      "children": []
+    }
+  }
+}

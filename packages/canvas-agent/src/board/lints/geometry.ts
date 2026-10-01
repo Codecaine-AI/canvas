@@ -4,17 +4,16 @@
  * obstacles honored — so lint verdicts and renders can never disagree
  * (pinned by test/lints-routing-truth.test.ts).
  *
- * Chip rects are the RENDERER's chips, not an estimate: width
- * max(41, chars×9.6 + 2×12), height 30, centered on the route's own
- * effective label point (`labelPointFor`: the arc-length midpoint, or the
- * connection's `labelPosition` pin), and no chip at all for
- * empty/whitespace labels — exactly
- * what `connectionLabelWidth` + CONNECTION_LABEL_* in
- * packages/canvas/src/connectors/Connector.tsx draw on the stage and
- * packages/canvas/src/render/static-svg.ts draws in the headless preview
- * export. Those constants are module-private in the read-only canvas
- * package, so they are restated ONCE here (nowhere else in the lints) and
- * pinned to the static renderer's actual SVG output by
+ * Chip rects are the RENDERER's chips, not an estimate: the canvas
+ * package's shared chip geometry (packages/canvas/src/connectors/
+ * label-chip.ts — what connectors/Connector.tsx draws on the stage and
+ * render/static-svg.ts draws in the headless preview export) under the
+ * board's canvas style, centered on the route's own effective label point
+ * (`labelPointFor`: the arc-length midpoint, or the connection's
+ * `labelPosition` pin), and no chip at all for empty/whitespace labels.
+ * Under the figjam style that is width max(41, chars×9.6 + 2×12),
+ * height 30 — the CHIP_* constants below; the schematic themes (the default
+ * is schematic-light) draw a shorter mono chip. Pinned to the static renderer's actual SVG output by
  * test/lints-chip-parity.test.ts — drift fails that test.
  *
  * CHIP_CLEARANCE: chips physically kissing boxes or wires read as merged
@@ -22,33 +21,33 @@
  * too (warning tier; true overlap stays error tier).
  */
 import { labelPointFor, routeConnection } from "../../../../canvas/src/connectors/routing.ts";
+import { connectionLabelChipMetrics } from "../../../../canvas/src/connectors/label-chip.ts";
+import { iconGlyphBoxPx } from "../../../../canvas/src/objects/text-slots.ts";
 
 import type {
   InteractiveCanvasConnection, InteractiveCanvasDocument, InteractiveCanvasObject,
 } from "@codecaine-ai/canvas/schema";
+import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 
 export interface Rect { x: number; y: number; width: number; height: number }
 export interface Point { x: number; y: number }
 
-/** Renderer chip height (Connector.tsx CONNECTION_LABEL_HEIGHT_PX). */
+/** Figjam-style chip height. */
 export const CHIP_HEIGHT = 30;
-/** Renderer per-character width approximation (CONNECTION_LABEL_AVERAGE_CHAR_WIDTH_PX). */
+/** Figjam-style per-character width approximation (16px × 0.6em). */
 export const CHIP_AVG_CHAR_WIDTH = 9.6;
-/** Renderer horizontal text padding, per side (CONNECTION_LABEL_PADDING_X_PX). */
+/** Figjam-style horizontal text padding, per side. */
 export const CHIP_PADDING_X = 12;
-/** Renderer minimum chip width (CONNECTION_LABEL_MIN_WIDTH_PX). */
+/** Figjam-style minimum chip width. */
 export const CHIP_MIN_WIDTH = 41;
 /** Clearance margin around a chip (nested-arch R1: kissing chips read merged). */
 export const CHIP_CLEARANCE = 16;
 
 export interface Chip { edge: InteractiveCanvasConnection; label: string; rect: Rect }
 
-/** The renderer's chip width — Connector.tsx `connectionLabelWidth`, exactly. */
-export function chipWidth(label: string): number {
-  return Math.max(
-    CHIP_MIN_WIDTH,
-    label.length * CHIP_AVG_CHAR_WIDTH + CHIP_PADDING_X * 2,
-  );
+/** The renderer's chip width for `label` under `canvasStyle` (default style when omitted), exactly. */
+export function chipWidth(label: string, canvasStyle?: CanvasStyle): number {
+  return connectionLabelChipMetrics(label, canvasStyle).width;
 }
 
 export function center(object: InteractiveCanvasObject): Point {
@@ -58,6 +57,22 @@ export function center(object: InteractiveCanvasObject): Point {
 
 export function rectOf(object: InteractiveCanvasObject): Rect {
   return object.geometry;
+}
+
+/**
+ * Where an object's box paints: its geometry, except a tile-style icon,
+ * which paints only its tile (capped at the style's `iconTileMaxPx`,
+ * centered in the box — the rect connectors meet and routes avoid).
+ * Default style when `canvasStyle` is omitted.
+ */
+export function drawnRectOf(object: InteractiveCanvasObject, canvasStyle?: CanvasStyle): Rect {
+  const local = iconGlyphBoxPx(object, canvasStyle);
+  return {
+    x: object.geometry.x + local.x,
+    y: object.geometry.y + local.y,
+    width: local.width,
+    height: local.height,
+  };
 }
 
 export function inflate(rect: Rect, margin: number): Rect {
@@ -89,6 +104,7 @@ function overlaps(a: Rect, b: Rect): boolean {
  */
 export function routedPolyline(
   edge: InteractiveCanvasConnection, document: InteractiveCanvasDocument,
+  canvasStyle?: CanvasStyle,
 ): Point[] {
   const byId = new Map(document.objects.map((object) => [object.id, object]));
   const fromId = edge.from.objectId;
@@ -96,7 +112,8 @@ export function routedPolyline(
   const from = byId.get(fromId);
   const to = byId.get(toId);
   if (!from || !to) return [];
-  const routed = routeConnection(from, to, edge, document.objects);
+  // The workspace style sizes icon captions, which set where edges attach.
+  const routed = routeConnection(from, to, edge, document.objects, canvasStyle);
   return (routed.points ?? [routed.start, routed.end])
     .map((point) => ({ x: point.x, y: point.y }));
 }
@@ -107,12 +124,15 @@ export function routedPolyline(
  * This preserves the long-standing broken-edge semantics: sections are not
  * violation boxes; endpoint ids and boxes overlapping a non-section endpoint
  * rect are ignored; samples land at most 4px apart and must be 0.5px inside.
+ * A box is judged where it paints (drawnRectOf under `canvasStyle`): a
+ * tile-style icon only by its tile, as the router avoids it.
  */
 export function pathBoxViolationIds(
   points: readonly Point[],
   fromId: string,
   toId: string,
   objects: readonly InteractiveCanvasObject[],
+  canvasStyle?: CanvasStyle,
 ): string[] {
   const boxes = objects.filter((object) => object.type !== "section");
   const byId = new Map(boxes.map((object) => [object.id, object]));
@@ -133,7 +153,7 @@ export function pathBoxViolationIds(
       const x = a.x + (b.x - a.x) * t;
       const y = a.y + (b.y - a.y) * t;
       for (const object of obstacles) {
-        const rect = rectOf(object);
+        const rect = drawnRectOf(object, canvasStyle);
         if (
           x > rect.x + 0.5
           && x < rect.x + rect.width - 0.5
@@ -163,6 +183,7 @@ export function pathBoxViolationIds(
  */
 export function chipFor(
   edge: InteractiveCanvasConnection, document: InteractiveCanvasDocument,
+  canvasStyle?: CanvasStyle,
 ): Chip | undefined {
   const label = edge.label;
   if (label === undefined || label.trim() === "") return undefined;
@@ -170,17 +191,17 @@ export function chipFor(
   const from = byId.get(edge.from.objectId);
   const to = byId.get(edge.to.objectId);
   if (!from || !to) return undefined;
-  const routed = routeConnection(from, to, edge, document.objects);
+  const routed = routeConnection(from, to, edge, document.objects, canvasStyle);
   const labelPoint = labelPointFor(routed, edge);
-  const width = chipWidth(label);
+  const { width, height } = connectionLabelChipMetrics(label, canvasStyle);
   return {
     edge,
     label,
     rect: {
       x: labelPoint.x - width / 2,
-      y: labelPoint.y - CHIP_HEIGHT / 2,
+      y: labelPoint.y - height / 2,
       width,
-      height: CHIP_HEIGHT,
+      height,
     },
   };
 }

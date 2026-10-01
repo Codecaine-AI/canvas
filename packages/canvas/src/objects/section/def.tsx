@@ -1,8 +1,8 @@
 "use client";
 
-import { resolveSectionColors } from "../../theme/palette";
+import { resolveSectionPaint } from "../../theme/palette";
 import { FIRST_USE_COLORS, objectTypeDefaults } from "../../state/schema/object-defaults";
-import { CONNECTOR_DASH_PATTERN_PX } from "../../connectors/def";
+import { connectorDashArray } from "../../connectors/def";
 import { BBOX_OUTLINE } from "../geometry";
 import { resolveObjectBorderWidth } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
@@ -26,14 +26,13 @@ export const SECTION_GEOMETRY = {
 } as const;
 
 /**
- * FigJam section (W2) — a large tinted backdrop with a floating title chip
- * in the top-left corner, per the title-chip slot preset. Deliberately NOT
- * built on the generic button/label trim the shape family shares: sections
- * have no centered text, no shadow, no edge ports, and their "border" is
- * literally the title chip's fill color (per spec, border = chip fill).
+ * FigJam section (W2) — a large tinted backdrop with a title chip in the
+ * top-left corner, per the title-chip slot preset. Deliberately NOT built on
+ * the generic button/label trim the shape family shares: sections have no
+ * centered text, no shadow, and no edge ports.
  *
- * CanvasStage owns the floating title chip layer; this renderer is only the
- * section body/backdrop and optional dashed frame.
+ * CanvasStage owns the title chip layer; this renderer is only the section
+ * body/backdrop and optional dashed frame.
  */
 function SectionObjectView({
   object,
@@ -41,15 +40,21 @@ function SectionObjectView({
   dropTarget,
   bounds,
   editable,
+  sectionDepth,
   onObjectSelect,
   onObjectContextMenu,
 }: ObjectRenderProps) {
-  // P1 — the section's color pick resolves through the palette's section
-  // role cells: body fill = tint, frame border = the title chip's FILL color
-  // (§3.2: chip fill IS the section border color), chip = fill + border pair.
+  // The color pick at this nesting depth resolves through the theme's
+  // section paint (theme/palette.ts resolveSectionPaint): figjam's flat wash
+  // with the frame border = the title chip's FILL color (§3.2), or the
+  // layer-cake tint that deepens per level with an ink frame.
   const canvasStyle = useCanvasStyle();
-  const family = resolveSectionColors(object.color ?? FIRST_USE_COLORS.section);
-  const borderColor = family.chip.fill;
+  const paint = resolveSectionPaint(
+    object.color ?? FIRST_USE_COLORS.section,
+    sectionDepth ?? 1,
+    canvasStyle,
+  );
+  const borderColor = paint.border;
   const borderStyle = object.style?.strokeStyle ?? "solid";
   const borderWidth = resolveObjectBorderWidth(object, "section", "painted", undefined, canvasStyle);
   const renderedStrokeWidth = object.style?.strokeWidth ?? canvasStyle.sectionBorderWidthPx;
@@ -75,7 +80,7 @@ function SectionObjectView({
         top: `${object.geometry.y}px`,
         width: `${object.geometry.width}px`,
         height: `${object.geometry.height}px`,
-        background: family.tint,
+        background: paint.fill,
         borderColor,
         borderStyle,
         borderWidth,
@@ -117,7 +122,7 @@ function SectionObjectView({
             fill="none"
             stroke={borderColor}
             strokeWidth={renderedStrokeWidth}
-            strokeDasharray={CONNECTOR_DASH_PATTERN_PX.join(" ")}
+            strokeDasharray={connectorDashArray(canvasStyle)}
           />
         </svg>
       ) : null}

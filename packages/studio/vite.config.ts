@@ -15,7 +15,11 @@ import { createEvalsApiHandler } from "./server/evals-api";
 const STUDIO_DIR = dirname(fileURLToPath(import.meta.url));
 
 function canvasFileApiPlugin(): Plugin {
-  const canvasesDir = resolve(STUDIO_DIR, "../..", "canvases");
+  // CANVAS_DIR points the dev server at another canvases directory (a scratch
+  // copy for experiments), the same override the Electron build honors.
+  const canvasesDir = process.env.CANVAS_DIR
+    ? resolve(process.env.CANVAS_DIR)
+    : resolve(STUDIO_DIR, "../..", "canvases");
   const evalRunsDir = resolve(STUDIO_DIR, "..", "eval-suite", "runs");
 
   return {

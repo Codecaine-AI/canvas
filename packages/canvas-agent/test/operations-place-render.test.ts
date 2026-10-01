@@ -7,7 +7,7 @@ import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
 import { renderShapeFor } from "../../canvas/src/objects/object-def";
 import { effectiveRenderShape } from "../../canvas/src/render/static-svg";
 import { creationDefaultFor } from "../src/service/session/tools/creation-defaults";
-import { makeTestSession, runOp } from "./helpers";
+import { FIGJAM_CANVAS_STYLE, makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 
 const NOTE_TEXT = "run `deploy` now";
@@ -129,7 +129,8 @@ describe("place gesture render parity", () => {
     expect(result.isError).toBeUndefined();
 
     const sticky = session.draft.objects.find((object) => object.id === "note")!;
-    const svg = renderDocumentToSvg(session.draft).svg;
+    // The drop shadow is figjam's sticky paper; the schematic themes draw flat.
+    const svg = renderDocumentToSvg(session.draft, { canvasStyle: FIGJAM_CANVAS_STYLE }).svg;
 
     expect(effectiveRenderShape(sticky)).toBe("note");
     expect(svg).toContain("<feDropShadow ");

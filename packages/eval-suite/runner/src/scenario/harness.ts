@@ -5,6 +5,7 @@ import {
   reduceInteractiveCanvasState,
   type CanvasAgentPatchOperation,
 } from "../../../../canvas/src/state/actions.ts";
+import { clearsAsUndefined } from "../../../../canvas/src/state/actions/agent-patch.ts";
 import {
   validateInteractiveCanvasDocument,
   type InteractiveCanvasDocument,
@@ -290,13 +291,14 @@ export function applyProposalOperations(
   return canonicalDocument(next.document);
 }
 
+/** The patch fields `current` lacks; a `null` (a clear) is held by an absent field. */
 function missingPatchFields<T extends Record<string, unknown>>(
   current: Record<string, unknown>,
   patch: T,
 ): Partial<T> {
   return Object.fromEntries(
     Object.entries(patch).filter(
-      ([field, value]) => !isDeepStrictEqual(current[field], value),
+      ([field, value]) => !isDeepStrictEqual(current[field], value ?? undefined),
     ),
   ) as Partial<T>;
 }
@@ -331,7 +333,7 @@ export function absentProposalOperations(
         }
         objects.set(operation.objectId, {
           ...current,
-          ...operation.patch,
+          ...clearsAsUndefined(operation.patch),
           geometry: operation.patch.geometry
             ? { ...current.geometry, ...operation.patch.geometry }
             : current.geometry,
@@ -365,7 +367,7 @@ export function absentProposalOperations(
         }
         connections.set(operation.connectionId, {
           ...current,
-          ...operation.patch,
+          ...clearsAsUndefined(operation.patch),
         });
         break;
       }

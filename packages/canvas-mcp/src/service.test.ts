@@ -198,29 +198,123 @@ describe("canvas service", () => {
       return createHash("sha256").update((image as { data: string }).data).digest("hex");
     };
 
-    // No style file: the defaults.
+    // No style file: the defaults — the schematic-light theme, reported, with no overrides.
     const plain = await service.call("canvas_open", { canvas: SOURCE_ID });
-    expect(textOf(plain)).not.toContain("STYLE ·");
+    expect(textOf(plain)).toContain("STYLE · theme schematic-light");
+    expect(textOf(plain)).not.toContain("workspace overrides");
+    expect(plain.structuredContent?.theme).toBe("schematic-light");
     const defaultPng = await lookPng();
 
     // A style saved in Studio is picked up by the next canvas_open and changes the render.
-    writeFileSync(stylePath, JSON.stringify({ shapeCornerRadiusPx: 16, shapeBorderWidthPx: 6, sectionCornerRadiusPx: 16 }));
+    // This is the pre-theme flat format, which reads as figjam overrides.
+    const overrides = { shapeCornerRadiusPx: 16, shapeBorderWidthPx: 6, sectionCornerRadiusPx: 16 };
+    writeFileSync(stylePath, JSON.stringify(overrides));
     const styled = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(styled.isError).toBeUndefined();
-    expect(textOf(styled)).toContain("STYLE · workspace overrides: shapeCornerRadiusPx=16, shapeBorderWidthPx=6, sectionCornerRadiusPx=16");
+    expect(textOf(styled)).toContain(
+      "STYLE · theme figjam · workspace overrides: shapeCornerRadiusPx=16, shapeBorderWidthPx=6, sectionCornerRadiusPx=16",
+    );
     expect(styled.structuredContent?.canvasStyle).toMatchObject({
+      theme: "figjam",
       shapeCornerRadiusPx: 16,
       shapeBorderWidthPx: 6,
       sectionCornerRadiusPx: 16,
     });
     expect(await lookPng()).not.toBe(defaultPng);
 
+    // The settings format Studio writes now: another active theme is reported by
+    // name, with palette overrides one ink per color.
+    writeFileSync(stylePath, JSON.stringify({
+      theme: "schematic-dark",
+      themes: { "schematic-dark": { shapeCornerRadiusPx: 4, palette: { red: "#FF0000" } }, figjam: overrides },
+    }));
+    const dark = await service.call("canvas_open", { canvas: SOURCE_ID });
+    expect(dark.isError).toBeUndefined();
+    expect(textOf(dark)).toContain("STYLE · theme schematic-dark · workspace overrides: shapeCornerRadiusPx=4, palette.red=#FF0000");
+    expect(dark.structuredContent?.theme).toBe("schematic-dark");
+    expect(dark.structuredContent?.canvasStyle).toMatchObject({ theme: "schematic-dark", shapeCornerRadiusPx: 4 });
+
     // A malformed file never blocks the open: it reads as the defaults.
     writeFileSync(stylePath, "{ not json");
     const malformed = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(malformed.isError).toBeUndefined();
-    expect(textOf(malformed)).not.toContain("STYLE ·");
+    expect(textOf(malformed)).toContain("STYLE · theme schematic-light");
+    expect(textOf(malformed)).not.toContain("workspace overrides");
+    expect(malformed.structuredContent?.theme).toBe("schematic-light");
     expect(await lookPng()).toBe(defaultPng);
+  });
+
+  test("canvas_open never flags a person's own prose names; prose the agent writes is flagged", async () => {
+    // v2-flow, as its author left it, holds two long names.
+    const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = createCanvasService({ workspace });
+
+    const opened = await service.call("canvas_open", { canvas: SOURCE_ID });
+    expect(textOf(opened)).toContain('"Does Response Provide Enough Context to Answer the Research Objective"');
+    expect(textOf(opened)).not.toContain("label-is-prose");
+
+    // An unrelated edit leaves them alone too.
+    const moved = await service.call("move_by", { id: "chip-adapt-question", dx: 0, dy: 20 });
+    expect(textOf(moved)).not.toContain("label-is-prose");
+
+    // A name the agent writes is the agent's, and the lint judges it.
+    const renamed = await service.call("update_text", {
+      id: "chip-adapt-question",
+      text: "Adapt the next question based on the whole interview history",
+    });
+    expect(renamed.isError).toBeUndefined();
+    expect(textOf(renamed)).toContain("label-is-prose: chip-adapt-question's name has");
+    expect(textOf(renamed)).not.toContain("emphasis-box-research-objective's name");
+  });
+
+  test("detail and a section's header glyph save to the file and read back in the digest", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = createCanvasService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+
+    const placed = await service.call("place_section", {
+      id: "mcp-services",
+      text: "Bun services",
+      at: [4000, 0],
+      size: { width: 480, height: 320 },
+      detail: "127.0.0.1",
+      icon: "brand-bun",
+    });
+    expect(placed.isError).toBeUndefined();
+    const shape = await service.call("place_shape", { id: "mcp-db", type: "database", at: [4040, 80], detail: ":5432" });
+    expect(shape.isError).toBeUndefined();
+    const named = await service.call("update_text", { id: "mcp-db", text: "Postgres", detail: "16 · :5432" });
+    expect(named.isError).toBeUndefined();
+    // No residual: the reducer's replay reproduced the draft, detail and glyph included.
+    for (const result of [placed, shape, named]) expect(textOf(result)).not.toContain("NOTE ·");
+
+    const saved = readDoc(path);
+    expect(saved.objects.find((object: any) => object.id === "mcp-services")).toMatchObject({
+      type: "section",
+      detail: "127.0.0.1",
+      icon: "brand-bun",
+    });
+    expect(saved.objects.find((object: any) => object.id === "mcp-db")).toMatchObject({
+      type: "icon",
+      icon: "database",
+      text: "Postgres",
+      detail: "16 · :5432",
+    });
+
+    const reopened = await service.call("canvas_open", { canvas: SOURCE_ID });
+    expect(textOf(reopened)).toContain('mcp-services section "Bun services"');
+    expect(textOf(reopened)).toContain('icon=brand-bun detail="127.0.0.1"');
+    expect(textOf(reopened)).toContain('mcp-db database "Postgres"');
+    expect(textOf(reopened)).toContain('detail="16 · :5432"');
+
+    // An enum miss on the folded type vocabulary comes back with the names it was
+    // reaching for, appended to the schema's own refusal.
+    const enumMiss = await service.call("place_shape", { id: "mcp-pg", type: "postgres", at: [4040, 240] });
+    expect(enumMiss.isError).toBe(true);
+    expect(textOf(enumMiss)).toContain("Validation failed");
+    expect(textOf(enumMiss)).toContain('hint · type "postgres": did you mean "brand-postgres"?');
+    const swapMiss = await service.call("change_shape", { id: "mcp-db", patch: { type: "Redis" } });
+    expect(textOf(swapMiss)).toContain('hint · patch.type "Redis": did you mean "brand-redis"?');
   });
 
   test("canvas_list and canvas_guidance", async () => {

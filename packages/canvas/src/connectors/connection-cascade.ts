@@ -36,6 +36,7 @@ import {
   toRelative,
   type ConnectionAnchor,
 } from "../objects/geometry";
+import type { CanvasStyle } from "../theme/canvas-style";
 
 /** Hover hit-zone expansion applied to an object's bound before it's considered a connect target. Upstream `:976`. */
 export const HOVER_HIT_EXPAND_PX = 10;
@@ -101,20 +102,24 @@ function canResolveInsideTier(candidate: InteractiveCanvasObject): boolean {
  * `zoom` converts the anchor-snap screen-px threshold to world space (worldPx
  * = screenPx / zoom), matching every other screen-constant threshold in this
  * engine (see interaction.ts's SNAP_THRESHOLD_SCREEN_PX).
+ *
+ * `canvasStyle` sizes below-band captions for the bounds, anchors, and
+ * outline (default style when omitted).
  */
 export function resolveConnectionCascade(
   point: CanvasPoint,
   candidates: ReadonlyArray<InteractiveCanvasObject>,
   zoom: number,
   excludeIds: ReadonlySet<string> = new Set(),
+  canvasStyle?: CanvasStyle,
 ): ConnectionCascadeResult {
   const anchorSnapWorldPx = ANCHOR_SNAP_VIEW_PX / zoom;
   for (const candidate of candidates) {
     if (excludeIds.has(candidate.id)) continue;
-    const bounds = connectionBoundsForObject(candidate);
+    const bounds = connectionBoundsForObject(candidate, canvasStyle);
     if (!boundsContainsPoint(expandBounds(bounds, HOVER_HIT_EXPAND_PX), point)) continue;
 
-    const anchors = getConnectionAnchors(candidate);
+    const anchors = getConnectionAnchors(candidate, canvasStyle);
     let nearestAnchorDistance = Infinity;
     let nearestAnchor: ConnectionAnchor | null = null;
     for (const anchor of anchors) {
@@ -129,7 +134,7 @@ export function resolveConnectionCascade(
       return { kind: "anchor", objectId: candidate.id, point: nearestAnchor.point, coord: nearestAnchor.coord };
     }
 
-    const polygon = outlinePolygon(candidate);
+    const polygon = outlinePolygon(candidate, canvasStyle);
     const nearestOutline = nearestOutlinePoint(point, polygon);
     if (distance(nearestOutline, point) < OUTLINE_SNAP_WORLD_PX) {
       return {

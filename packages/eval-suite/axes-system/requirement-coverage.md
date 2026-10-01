@@ -30,8 +30,10 @@ other axes' output, or any pre-derived checklist.
    shape, color, position, or diagram genre. Representation must be visible in the
    render: an edge's meaning lives on the line (its label, arrowhead, and style),
    and a fact carried only in unrendered JSON metadata — a field no reader can
-   see — represents nothing. The JSON disambiguates what the PNG shows; it never
-   substitutes for it.
+   see — represents nothing. An object's `detail` is rendered (the muted line
+   under its name, or after a section's title; an over-long one is cut off with an
+   ellipsis), so it counts as far as the render shows it. The JSON disambiguates
+   what the PNG shows; it never substitutes for it.
 4. Assign one status per requirement:
    - **represented** — the full stated meaning is present and unambiguous;
    - **partial** — a recognizable portion is present, but a stated qualifier,

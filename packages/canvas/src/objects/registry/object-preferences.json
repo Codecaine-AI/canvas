@@ -131,7 +131,7 @@
   {
     "name": "event",
     "meaning": "A trigger or event",
-    "scenarios": ["webhooks, triggers, scheduled firings"],
+    "scenarios": ["triggers, emitted events, state-change signals"],
     "color": "green"
   },
   {
@@ -143,7 +143,7 @@
   {
     "name": "monitor",
     "meaning": "Observation and tracing",
-    "scenarios": ["dashboards, traces, telemetry watchpoints"],
+    "scenarios": ["traces, telemetry watchpoints, health checks"],
     "color": "blue"
   },
   {
@@ -229,5 +229,395 @@
     "meaning": "An experiment, eval set, or test harness",
     "scenarios": ["eval suites, experiments, regression harnesses"],
     "color": "violet"
+  },
+  {
+    "name": "database",
+    "meaning": "A database — durable structured records",
+    "scenarios": ["relational and document databases, tables of record, primary stores"],
+    "color": "blue"
+  },
+  {
+    "name": "brain",
+    "meaning": "Reasoning or planning — the thinking step",
+    "scenarios": ["planning passes, reasoning loops, reflection steps"],
+    "color": "violet"
+  },
+  {
+    "name": "function",
+    "meaning": "A serverless or single-purpose function",
+    "scenarios": ["lambdas, cloud functions, request handlers"],
+    "color": "gray"
+  },
+  {
+    "name": "container",
+    "meaning": "A container or isolated runtime",
+    "scenarios": ["containers, pods, sandboxes, isolated workers"],
+    "color": "gray"
+  },
+  {
+    "name": "cloud",
+    "meaning": "A cloud provider, region, or hosted platform",
+    "scenarios": ["cloud accounts, regions, managed platforms"],
+    "color": "gray"
+  },
+  {
+    "name": "network",
+    "meaning": "A network or cluster of connected nodes",
+    "scenarios": ["VPCs, clusters, service meshes, peer networks"],
+    "color": "gray"
+  },
+  {
+    "name": "globe",
+    "meaning": "The public internet or a global audience",
+    "scenarios": ["the open web, public endpoints, CDNs, worldwide users"],
+    "color": "blue"
+  },
+  {
+    "name": "webhook",
+    "meaning": "A webhook — an inbound HTTP callback",
+    "scenarios": ["third-party callbacks, push integrations, inbound hooks"],
+    "color": "green"
+  },
+  {
+    "name": "branch",
+    "meaning": "A git branch — a parallel line of work",
+    "scenarios": ["feature branches, forks, parallel work"],
+    "color": "gray"
+  },
+  {
+    "name": "pull-request",
+    "meaning": "A pull request — a change awaiting review",
+    "scenarios": ["code review, change proposals, PR checks"],
+    "color": "gray"
+  },
+  {
+    "name": "merge",
+    "meaning": "A merge — lines of work joining",
+    "scenarios": ["branch merges, integrations, joined results"],
+    "color": "gray"
+  },
+  {
+    "name": "commit",
+    "meaning": "A commit — one recorded change",
+    "scenarios": ["commits, revisions, checkpoints in history"],
+    "color": "gray"
+  },
+  {
+    "name": "cache",
+    "meaning": "A cache — a fast, disposable copy of data",
+    "scenarios": ["caches, memoized results, read-through layers"],
+    "color": "blue"
+  },
+  {
+    "name": "schedule",
+    "meaning": "A schedule or timed trigger",
+    "scenarios": ["cron jobs, timers, scheduled runs"],
+    "color": "green"
+  },
+  {
+    "name": "code-file",
+    "meaning": "A source file or script",
+    "scenarios": ["source files, scripts, generated code"],
+    "color": "white"
+  },
+  {
+    "name": "folder",
+    "meaning": "A folder, directory, or workspace",
+    "scenarios": ["directories, repositories, workspaces"],
+    "color": "white"
+  },
+  {
+    "name": "users",
+    "meaning": "A group of people — a team or user base",
+    "scenarios": ["teams, end users, audiences, tenants"],
+    "color": "pink"
+  },
+  {
+    "name": "browser",
+    "meaning": "A web app or browser surface",
+    "scenarios": ["web frontends, browser sessions, web UIs"],
+    "color": "pink"
+  },
+  {
+    "name": "desktop",
+    "meaning": "A desktop app or workstation",
+    "scenarios": ["desktop apps, workstations, operator consoles"],
+    "color": "pink"
+  },
+  {
+    "name": "laptop",
+    "meaning": "A laptop or local machine",
+    "scenarios": ["developer machines, local runs, on-device work"],
+    "color": "pink"
+  },
+  {
+    "name": "mobile",
+    "meaning": "A mobile app or device",
+    "scenarios": ["iOS and Android apps, phones, mobile clients"],
+    "color": "pink"
+  },
+  {
+    "name": "plug",
+    "meaning": "A plugin, adapter, or connector",
+    "scenarios": ["plugins, adapters, MCP servers, integrations"],
+    "color": "blue"
+  },
+  {
+    "name": "dashboard",
+    "meaning": "A dashboard or admin console",
+    "scenarios": ["dashboards, admin panels, control consoles"],
+    "color": "blue"
+  },
+  {
+    "name": "chart",
+    "meaning": "Metrics or analytics",
+    "scenarios": ["metrics, KPIs, analytics reports"],
+    "color": "blue"
+  },
+  {
+    "name": "gauge",
+    "meaning": "A meter — load, quota, or performance level",
+    "scenarios": ["rate limits, quotas, latency and throughput meters"],
+    "color": "blue"
+  },
+  {
+    "name": "bell",
+    "meaning": "An alert or notification",
+    "scenarios": ["alerts, pages, notifications"],
+    "color": "orange"
+  },
+  {
+    "name": "mail",
+    "meaning": "Email",
+    "scenarios": ["email sends, inboxes, digests"],
+    "color": "pink"
+  },
+  {
+    "name": "loop",
+    "meaning": "A loop, retry, or recurring cycle",
+    "scenarios": ["retries, polling loops, iterate-until-done cycles"],
+    "color": "yellow"
+  },
+  {
+    "name": "code",
+    "meaning": "Code — a module, program, or codebase",
+    "scenarios": ["codebases, modules, code execution"],
+    "color": "gray"
+  },
+  {
+    "name": "bug",
+    "meaning": "A bug, defect, or failure",
+    "scenarios": ["bugs, incidents, failing cases"],
+    "color": "red"
+  },
+  {
+    "name": "cpu",
+    "meaning": "Compute capacity — a CPU, GPU, or accelerator",
+    "scenarios": ["GPUs, CPUs, inference hardware, compute pools"],
+    "color": "gray"
+  },
+  {
+    "name": "layers",
+    "meaning": "A stack of layers or tiers",
+    "scenarios": ["architecture layers, tiers, stacked environments"],
+    "color": "gray"
+  },
+  {
+    "name": "table",
+    "meaning": "A table or tabular dataset",
+    "scenarios": ["tables, spreadsheets, datasets"],
+    "color": "blue"
+  },
+  {
+    "name": "link",
+    "meaning": "A link or reference",
+    "scenarios": ["URLs, references, cross-links between resources"],
+    "color": "blue"
+  },
+  {
+    "name": "route",
+    "meaning": "A route — a path through a system",
+    "scenarios": ["routing rules, request paths, traffic steering"],
+    "color": "yellow"
+  },
+  {
+    "name": "filter",
+    "meaning": "A filter — narrowing a set",
+    "scenarios": ["filters, predicates, selection steps"],
+    "color": "yellow"
+  },
+  {
+    "name": "brand-postgres",
+    "meaning": "PostgreSQL, the relational database (brand logo)",
+    "scenarios": ["the board names PostgreSQL itself; use database for a generic store"],
+    "color": "blue"
+  },
+  {
+    "name": "brand-sqlite",
+    "meaning": "SQLite, the embedded database (brand logo)",
+    "scenarios": ["the board names SQLite itself; use database for a generic store"],
+    "color": "blue"
+  },
+  {
+    "name": "brand-redis",
+    "meaning": "Redis, the in-memory data store (brand logo)",
+    "scenarios": ["the board names Redis itself; use cache for a generic cache"],
+    "color": "blue"
+  },
+  {
+    "name": "brand-mongodb",
+    "meaning": "MongoDB, the document database (brand logo)",
+    "scenarios": ["the board names MongoDB itself; use database for a generic store"],
+    "color": "blue"
+  },
+  {
+    "name": "brand-docker",
+    "meaning": "Docker, the container platform (brand logo)",
+    "scenarios": ["the board names Docker itself; use container for a generic container"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-kubernetes",
+    "meaning": "Kubernetes, the container orchestrator (brand logo)",
+    "scenarios": ["the board names Kubernetes itself; use container or network otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-github",
+    "meaning": "GitHub, the code host (brand logo)",
+    "scenarios": ["the board names GitHub itself; use branch or pull-request otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-git",
+    "meaning": "Git, the version-control tool (brand logo)",
+    "scenarios": ["the board names Git itself; use branch, merge, or commit otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-anthropic",
+    "meaning": "Anthropic, the AI company (brand logo)",
+    "scenarios": ["the board names Anthropic or its API itself; use model otherwise"],
+    "color": "violet"
+  },
+  {
+    "name": "brand-claude",
+    "meaning": "Claude, Anthropic's model family (brand logo)",
+    "scenarios": ["the board names Claude itself; use model for a generic model call"],
+    "color": "violet"
+  },
+  {
+    "name": "brand-huggingface",
+    "meaning": "Hugging Face, the model hub (brand logo)",
+    "scenarios": ["the board names Hugging Face itself; use model otherwise"],
+    "color": "violet"
+  },
+  {
+    "name": "brand-ollama",
+    "meaning": "Ollama, the local model runtime (brand logo)",
+    "scenarios": ["the board names Ollama itself; use model otherwise"],
+    "color": "violet"
+  },
+  {
+    "name": "brand-bun",
+    "meaning": "Bun, the JavaScript runtime (brand logo)",
+    "scenarios": ["the board names Bun itself; use server or code otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-node",
+    "meaning": "Node.js, the JavaScript runtime (brand logo)",
+    "scenarios": ["the board names Node.js itself; use server or code otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-typescript",
+    "meaning": "TypeScript, the language (brand logo)",
+    "scenarios": ["the board names TypeScript itself; use code otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-python",
+    "meaning": "Python, the language (brand logo)",
+    "scenarios": ["the board names Python itself; use code otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-go",
+    "meaning": "Go, the language (brand logo)",
+    "scenarios": ["the board names Go itself; use code otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-rust",
+    "meaning": "Rust, the language (brand logo)",
+    "scenarios": ["the board names Rust itself; use code otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-react",
+    "meaning": "React, the UI library (brand logo)",
+    "scenarios": ["the board names React itself; use browser otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-nextjs",
+    "meaning": "Next.js, the React framework (brand logo)",
+    "scenarios": ["the board names Next.js itself; use browser otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-vite",
+    "meaning": "Vite, the frontend build tool (brand logo)",
+    "scenarios": ["the board names Vite itself; use package otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-electron",
+    "meaning": "Electron, the desktop app shell (brand logo)",
+    "scenarios": ["the board names Electron itself; use desktop otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-vercel",
+    "meaning": "Vercel, the hosting platform (brand logo)",
+    "scenarios": ["the board names Vercel itself; use cloud otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-cloudflare",
+    "meaning": "Cloudflare, the edge network (brand logo)",
+    "scenarios": ["the board names Cloudflare itself; use cloud or globe otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-supabase",
+    "meaning": "Supabase, the hosted Postgres backend (brand logo)",
+    "scenarios": ["the board names Supabase itself; use database otherwise"],
+    "color": "blue"
+  },
+  {
+    "name": "brand-terraform",
+    "meaning": "Terraform, infrastructure as code (brand logo)",
+    "scenarios": ["the board names Terraform itself; use config otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-kafka",
+    "meaning": "Apache Kafka, the event-streaming platform (brand logo)",
+    "scenarios": ["the board names Kafka itself; use queue for a generic stream"],
+    "color": "yellow"
+  },
+  {
+    "name": "brand-linear",
+    "meaning": "Linear, the issue tracker (brand logo)",
+    "scenarios": ["the board names Linear itself; use document otherwise"],
+    "color": "gray"
+  },
+  {
+    "name": "brand-figma",
+    "meaning": "Figma, the design tool (brand logo)",
+    "scenarios": ["the board names Figma itself; use document otherwise"],
+    "color": "gray"
   }
 ]

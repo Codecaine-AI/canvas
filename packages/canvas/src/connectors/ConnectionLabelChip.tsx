@@ -8,6 +8,7 @@ import type {
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
 } from "../state/schema";
+import { useCanvasStyle } from "../theme/canvas-style-context";
 import { labelPointFor, routeConnection } from "./routing";
 
 /**
@@ -31,8 +32,9 @@ export function ConnectionLabelChip({
   obstacles: ReadonlyArray<InteractiveCanvasObject>;
   onDoubleClick?: (connectionId: string) => void;
 }) {
+  const canvasStyle = useCanvasStyle();
   if (!connection.label) return null;
-  const routed = routeConnection(fromObject, toObject, connection, obstacles);
+  const routed = routeConnection(fromObject, toObject, connection, obstacles, canvasStyle);
   const labelPoint = labelPointFor(routed, connection);
   return (
     <div

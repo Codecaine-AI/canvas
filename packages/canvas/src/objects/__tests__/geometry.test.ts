@@ -2,10 +2,12 @@ import { describe, expect, it } from "bun:test";
 import {
   connectionBoundsForObject,
   getConnectionAnchors,
+  hitBoundsForObject,
   inscribedTextRect,
   nearestOutlinePoint,
   outlinePolygon,
 } from "../geometry";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import type { InteractiveCanvasObject } from "../../state/schema";
 
 function rectObject(overrides: Partial<InteractiveCanvasObject> = {}): InteractiveCanvasObject {
@@ -100,11 +102,14 @@ describe("outlinePolygon", () => {
   it("extends the bbox outline for icon objects with visible below text", () => {
     const object = iconObject();
     const polygon = outlinePolygon(object);
+    // Default (schematic) tile style: the 60px box holds a 56px tile (iconTileMaxPx), centered at
+    // (2, 2); the outline runs down from the tile top to the bottom of the one-line caption band
+    // (tile bottom 58 + 6px gap + one 21px line: 17.5px names × 1.2).
     expect(polygon).toEqual([
-      { x: 0, y: 0 },
-      { x: 60, y: 0 },
-      { x: 60, y: 84 },
-      { x: 0, y: 84 },
+      { x: 2, y: 2 },
+      { x: 58, y: 2 },
+      { x: 58, y: 85 },
+      { x: 2, y: 85 },
     ]);
   });
 });
@@ -222,7 +227,8 @@ describe("outlinePolygon: the universal shape core", () => {
 
   it("falls back to the bounding-rect outline for bbox-fallback types, extended for below-slot icon text", () => {
     for (const type of ["icon"] as const) {
-      const polygon = outlinePolygon(shapeObject(type));
+      // Glyph style (figjam): the glyph box is the whole bounding rect.
+      const polygon = outlinePolygon(shapeObject(type), FIGJAM_CANVAS_STYLE);
       const bottom = 124;
       expect(polygon).toEqual([
         { x: 0, y: 0 },
@@ -298,19 +304,22 @@ describe("getConnectionAnchors", () => {
     expect(top.coord).toEqual([0.5, 0]);
   });
 
-  it("uses the external below-text band for bbox outline and bottom anchor only", () => {
+  it("extends the connection outline down through the below-text band but never wider than the glyph", () => {
     const object = shapeObject("icon", {
       icon: "human",
       text: "Adapt Question Based on Interview History",
       geometry: { x: 10, y: 20, width: 120, height: 140 },
       style: { shape: "icon" },
     });
-    const bounds = connectionBoundsForObject(object);
-    const anchors = getConnectionAnchors(object);
+    // Glyph style (figjam): the glyph box is the whole object box.
+    const bounds = connectionBoundsForObject(object, FIGJAM_CANVAS_STYLE);
+    const anchors = getConnectionAnchors(object, FIGJAM_CANVAS_STYLE);
 
     expect(bounds.height).toBeGreaterThan(object.geometry.height);
-    expect(bounds.width).toBeGreaterThan(object.geometry.width);
-    expect(outlinePolygon(object)).toEqual([
+    expect(bounds.x).toBe(object.geometry.x);
+    expect(bounds.width).toBe(object.geometry.width);
+    expect(hitBoundsForObject(object, FIGJAM_CANVAS_STYLE).width).toBeGreaterThan(object.geometry.width);
+    expect(outlinePolygon(object, FIGJAM_CANVAS_STYLE)).toEqual([
       { x: bounds.x, y: bounds.y },
       { x: bounds.x + bounds.width, y: bounds.y },
       { x: bounds.x + bounds.width, y: bounds.y + bounds.height },
@@ -323,6 +332,45 @@ describe("getConnectionAnchors", () => {
     });
     expect(anchors[2]!.point).toEqual({ x: 10, y: 90 });
     expect(anchors[3]!.point).toEqual({ x: 130, y: 90 });
+  });
+
+  it("keeps glyph side anchors for a detail-only caption", () => {
+    const object = shapeObject("icon", {
+      icon: "database",
+      text: "",
+      detail: "postgres 16",
+      geometry: { x: 0, y: 0, width: 64, height: 64 },
+    });
+    const bounds = connectionBoundsForObject(object);
+    const anchors = getConnectionAnchors(object);
+
+    // Default (schematic) tile style: the glyph box is the 56px tile centered in the 64px box.
+    expect(bounds.height).toBeGreaterThan(object.geometry.height);
+    expect(bounds.x).toBe(4);
+    expect(bounds.width).toBe(56);
+    expect(anchors[0]!.point).toEqual({ x: 32, y: 4 });
+    expect(anchors[1]!.point).toEqual({ x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height });
+    expect(anchors[2]!.point).toEqual({ x: 4, y: 32 });
+    expect(anchors[3]!.point).toEqual({ x: 60, y: 32 });
+  });
+
+  it("in the tile style follows the capped, centered tile: sides on the tile, bottom under the caption", () => {
+    const object = shapeObject("icon", {
+      icon: "human",
+      text: "Adapt Question Based on Interview History",
+      geometry: { x: 10, y: 20, width: 120, height: 140 },
+      style: { shape: "icon" },
+    });
+    const bounds = connectionBoundsForObject(object);
+    const anchors = getConnectionAnchors(object);
+
+    // Tile: min(120, 140, iconTileMaxPx 56) = 56, centered → local (32, 42). The three-line caption
+    // (3 × 21px at 17.5px names) hangs 6px under the tile: bottom = 42 + 56 + 6 + 63 = 167 local.
+    expect(bounds).toEqual({ x: 42, y: 62, width: 56, height: 125 });
+    expect(anchors[0]!.point).toEqual({ x: 70, y: 62 });
+    expect(anchors[1]!.point).toEqual({ x: 70, y: 187 });
+    expect(anchors[2]!.point).toEqual({ x: 42, y: 90 });
+    expect(anchors[3]!.point).toEqual({ x: 98, y: 90 });
   });
 });
 

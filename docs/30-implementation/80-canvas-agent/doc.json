@@ -61,6 +61,15 @@
         "b-agent-authoring-decision",
         "b-agent-authoring-why",
         "b-agent-authoring-applies",
+        "b-agent-text-rules-decision-38",
+        "b-agent-text-rules-why-39",
+        "b-agent-text-rules-applies-40",
+        "b-agent-style-decision-41",
+        "b-agent-style-why-42",
+        "b-agent-style-applies-43",
+        "b-agent-glyphs-decision-44",
+        "b-agent-glyphs-why-45",
+        "b-agent-glyphs-applies-46",
         "b-agent-roster-34"
       ]
     },
@@ -70,7 +79,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The layout-agent harness: board math, the model-facing catalog, the session service, and the run viewer. What the agent can do — tools, session lifecycle, perception — is owned by design; this area records the registration seam and the placement rules that keep the registered surface honest."
+          "insert": "The layout-agent harness: board math, the model-facing catalog, the session service, and the run viewer. What the agent can do (tools, session lifecycle, perception) is owned by design. This area records the registration seam and the placement rules that keep the registered surface honest."
         }
       ],
       "children": []
@@ -130,7 +139,7 @@
           }
         },
         {
-          "insert": " — owns the tool surface: the gestures, the grid and creation defaults, and the operation pipeline."
+          "insert": " owns the tool surface: the gestures, the grid and creation defaults, and the operation pipeline."
         }
       ],
       "children": []
@@ -153,7 +162,7 @@
           }
         },
         {
-          "insert": " — owns session lifecycle, the kernel, and perception."
+          "insert": " owns session lifecycle, the kernel, and perception."
         }
       ],
       "children": []
@@ -186,7 +195,7 @@
           "insert": ": "
         },
         {
-          "insert": "the kernel discovers a bundle's tools on disk by filename convention — a flat "
+          "insert": "the kernel discovers a bundle's tools on disk by filename convention (a flat "
         },
         {
           "insert": "tools.ts",
@@ -213,7 +222,7 @@
           }
         },
         {
-          "insert": " — and this bundle uses the folder form only: a flat "
+          "insert": "), and this bundle uses the folder form only: a flat "
         },
         {
           "insert": "tools.ts",
@@ -235,7 +244,7 @@
           }
         },
         {
-          "insert": ", because the file form is checked first and would silently shadow the folder — the surface would be wrong with no error, no warning."
+          "insert": ", because the file form is checked first and would silently shadow the folder. The surface would be wrong with no error, no warning."
         }
       ],
       "children": []
@@ -285,7 +294,7 @@
           }
         },
         {
-          "insert": " — including every future bundle, which uses one form and keeps the other absent."
+          "insert": ", including every future bundle, which uses one form and keeps the other absent."
         }
       ],
       "children": []
@@ -305,7 +314,7 @@
           "insert": ": "
         },
         {
-          "insert": "registration is side-effect-free and constructible from static data alone — it reads descriptors and declares tools, touching no session, draft, or render — because registry boot dry-runs it with a stub registrar and no runtime at all, to harvest the allowlist before any spawn exists; each tool's execute defers the runtime check to call time via "
+          "insert": "registration is side-effect-free and constructible from static data alone (it reads descriptors and declares tools, touching no session, draft, or render), because registry boot dry-runs it with a stub registrar and no runtime at all, to harvest the allowlist before any spawn exists. Each tool's execute defers the runtime check to call time via "
         },
         {
           "insert": "packages/canvas-agent/src/catalog/layout-editor/tools/runtime.ts",
@@ -338,7 +347,7 @@
           "insert": ": "
         },
         {
-          "insert": "the rejected alternative was checking for a bound runtime at registration, which would fail every boot — no session exists at boot — and any registration side effect would fire during the harvest."
+          "insert": "the rejected alternative was checking for a bound runtime at registration, which would fail every boot (no session exists at boot), and any registration side effect would fire during the harvest."
         }
       ],
       "children": []
@@ -368,7 +377,7 @@
           }
         },
         {
-          "insert": " — including every future tool, whose declaration stays inert and whose execute calls "
+          "insert": ", including every future tool, whose declaration stays inert and whose execute calls "
         },
         {
           "insert": "requireRuntime",
@@ -397,7 +406,7 @@
           "insert": ": "
         },
         {
-          "insert": "the real runtime is bound per spawn through the kernel configuration's tool-runtime slot — the session store constructs the kernel with "
+          "insert": "the real runtime is bound per spawn through the kernel configuration's tool-runtime slot (the session store constructs the kernel with "
         },
         {
           "insert": "packages/canvas-agent/src/service/session/tools/create-runtime.ts",
@@ -410,7 +419,7 @@
           }
         },
         {
-          "insert": " — and each runtime method resolves its session internally through the kernel run context, so the catalog sidecar stays a thin declaration-and-dispatch layer with no session knowledge of its own."
+          "insert": "), and each runtime method resolves its session internally through the kernel run context, so the catalog sidecar stays a thin declaration-and-dispatch layer with no session knowledge of its own."
         }
       ],
       "children": []
@@ -460,7 +469,7 @@
           }
         },
         {
-          "insert": " — including every future runtime capability, which joins the "
+          "insert": ", including every future runtime capability, which joins the "
         },
         {
           "insert": "LayoutToolRuntime",
@@ -498,7 +507,7 @@
           "insert": ": "
         },
         {
-          "insert": "the catalog registers what the service defines: every descriptor — gesture or workflow call — carries its own name, label, description, and sealed parameter schema service-side under the session's tools folder, and the catalog forwards them verbatim; nothing declares tool truth on the catalog side."
+          "insert": "the catalog registers what the service defines: every descriptor (gesture or workflow call) carries its own name, label, description, and sealed parameter schema service-side under the session's tools folder, and the catalog forwards them verbatim. Nothing declares tool truth on the catalog side."
         }
       ],
       "children": []
@@ -548,7 +557,7 @@
           }
         },
         {
-          "insert": " — including every future tool, defined service-side and forwarded."
+          "insert": ", including every future tool, defined service-side and forwarded."
         }
       ],
       "children": []
@@ -591,7 +600,7 @@
           }
         },
         {
-          "insert": " are the single sources for the surface — registration, the capabilities gesture reference, and the op ledger all derive from them — and the generated reference in "
+          "insert": " are the single sources for the surface (registration, the capabilities gesture reference, and the op ledger all derive from them), and the generated reference in "
         },
         {
           "insert": "capabilities/ops.ts",
@@ -624,7 +633,7 @@
           "insert": ": "
         },
         {
-          "insert": "the rejected alternative was parallel rosters — a registration list, a docs list, a ledger list — which drift. A tool not in its roster is simply not on the surface, and documentation drift is a build failure rather than a lie the model reads."
+          "insert": "the rejected alternative was parallel rosters (a registration list, a docs list, a ledger list), which drift. A tool not in its roster is simply not on the surface, and documentation drift is a build failure rather than a lie the model reads."
         }
       ],
       "children": []
@@ -653,7 +662,7 @@
           }
         },
         {
-          "insert": " — including every future tool, which joins its roster and gains its prose in the same change."
+          "insert": ", including every future tool, which joins its roster and gains its prose in the same change."
         }
       ],
       "children": []
@@ -673,7 +682,7 @@
           "insert": ": "
         },
         {
-          "insert": "registration order is pinned — the gesture roster in its own order, then the workflow roster, look first and finalize last, no duplicates — asserted by "
+          "insert": "registration order is pinned (the gesture roster in its own order, then the workflow roster, look first and finalize last, no duplicates), asserted by "
         },
         {
           "insert": "tool-schema-parity.test.ts",
@@ -686,7 +695,7 @@
           }
         },
         {
-          "insert": " along with sealed root schemas and the rule that no mutator declares a viewing argument; and every eval run records a surface hash over the session tree plus the catalog's capabilities and tools directories, computed in "
+          "insert": " along with sealed root schemas and the rule that no mutator declares a viewing argument. Every eval run records a surface hash over the session tree plus the catalog's capabilities and tools directories, computed in "
         },
         {
           "insert": "packages/eval-suite/runner/src/scenario/queue.ts",
@@ -719,7 +728,7 @@
           "insert": ": "
         },
         {
-          "insert": "the rejected alternatives were treating order as cosmetic — but it is the order the model reads the surface in — and prompt-hash-only comparability, which would silently compare unlike runs. The hash is over file contents, so it also moves on a pure reorganization; that conservative answer is intended."
+          "insert": "the rejected alternatives were treating order as cosmetic (but it is the order the model reads the surface in) and prompt-hash-only comparability, which would silently compare unlike runs. The hash is over file contents, so it also moves on a pure reorganization. That conservative answer is intended."
         }
       ],
       "children": []
@@ -762,7 +771,7 @@
           }
         },
         {
-          "insert": " — including every future roster or surface change."
+          "insert": ", including every future roster or surface change."
         }
       ],
       "children": []
@@ -804,7 +813,7 @@
           }
         },
         {
-          "insert": " imports the viewer; "
+          "insert": " imports the viewer, and "
         },
         {
           "insert": "protocol.ts",
@@ -817,7 +826,7 @@
           }
         },
         {
-          "insert": " is types-only wire vocabulary with no runtime, pipeline, or kernel imports. The deliberate store-to-tools cycle stays safe because the tool files import the session as a type only — the store alone value-imports the runtime binding."
+          "insert": " is types-only wire vocabulary with no runtime, pipeline, or kernel imports. The deliberate store-to-tools cycle stays safe because the tool files import the session as a type only. The store alone value-imports the runtime binding."
         }
       ],
       "children": []
@@ -837,7 +846,7 @@
           "insert": ": "
         },
         {
-          "insert": "the rejected alternative was letting the service know about its viewer, or the sidecar construct sessions — a run would behave differently when watched, and a type-only edge turned into a value import converts a compile-time relationship into a load-order problem."
+          "insert": "the rejected alternative was letting the service know about its viewer, or the sidecar construct sessions. A run would behave differently when watched, and a type-only edge turned into a value import converts a compile-time relationship into a load-order problem."
         }
       ],
       "children": []
@@ -880,7 +889,7 @@
           }
         },
         {
-          "insert": ", "
+          "insert": ", and "
         },
         {
           "insert": "service/session/",
@@ -893,7 +902,7 @@
           }
         },
         {
-          "insert": " — including every future import across these edges: type-only stays type-only."
+          "insert": ", including every future import across these edges: type-only stays type-only."
         }
       ],
       "children": []
@@ -913,7 +922,7 @@
           "insert": ": "
         },
         {
-          "insert": "every presentation number the agent is asked to hit — node sizes and minimum width, row and column gaps, arrow corridors, section gutters, frame padding, board-area multiple and ink share — is one structured value, "
+          "insert": "every presentation number the agent is asked to hit (node sizes and minimum width, row and column gaps, arrow corridors, section gutters, frame padding, board-area multiple and ink share) is one structured value, "
         },
         {
           "insert": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/craft-targets.ts",
@@ -926,7 +935,7 @@
           }
         },
         {
-          "insert": ", rendered into the injected style guide; prompt phases reference the targets in judgment language rather than restating them, and every target is set above the corresponding diagnostic-registry floor on its own axis."
+          "insert": ", rendered into the injected style guide. Prompt phases reference the targets in judgment language rather than restating them, and every target is set above the corresponding diagnostic-registry floor on its own axis."
         }
       ],
       "children": []
@@ -976,7 +985,7 @@
           }
         },
         {
-          "insert": " — including every future presentation number, which joins the structured value, above its floor."
+          "insert": ", including every future presentation number, which joins the structured value, above its floor."
         }
       ],
       "children": []
@@ -1059,7 +1068,7 @@
           }
         },
         {
-          "insert": " — including every future viewer styling control."
+          "insert": ", including every future viewer styling control."
         }
       ],
       "children": []
@@ -1290,13 +1299,425 @@
       ],
       "children": []
     },
+    "b-agent-text-rules-decision-38": {
+      "id": "b-agent-text-rules-decision-38",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "board/text-rules.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/text-rules.ts",
+              "label": "board/text-rules.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the single source of the name and detail limits. "
+        },
+        {
+          "insert": "NAME_RULE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "DETAIL_RULE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "schemas.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the "
+        },
+        {
+          "insert": "label-is-prose",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "detail-too-long",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lints, the objects capabilities kind, and the authoring guidance all import its constants."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-text-rules-why-39": {
+      "id": "b-agent-text-rules-why-39",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": the rejected alternative was numbers written into each surface, which drift until a tool description quotes a limit the lints disagree with. The schema caps no length, so an overlong name or detail is still written and only the lints flag it."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-text-rules-applies-40": {
+      "id": "b-agent-text-rules-applies-40",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "board/text-rules.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", including every future text limit, which joins the module and is imported wherever a surface states it."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-style-decision-41": {
+      "id": "b-agent-style-decision-41",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": the agent reads the workspace theme and its overrides, as specified in "
+        },
+        {
+          "insert": "Workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "Workspace themes"
+            }
+          }
+        },
+        {
+          "insert": ", and never writes them. "
+        },
+        {
+          "insert": "loadCanvasStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "service/session/canvas-style.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/canvas-style.ts",
+              "label": "service/session/canvas-style.ts"
+            }
+          }
+        },
+        {
+          "insert": " resolves "
+        },
+        {
+          "insert": "canvases/canvas-style.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " through the canvas package's "
+        },
+        {
+          "insert": "resolveCanvasStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so there is no second parser. A session reads the file once when it opens: the in-app agent at session create, and the Canvas MCP on every "
+        },
+        {
+          "insert": "canvas_open",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-style-why-42": {
+      "id": "b-agent-style-why-42",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": the theme is the person's choice in Studio, so no agent tool writes it. Every render, text fit, and lint the session runs resolves through the one loaded value, and a second parser could read the file differently from Studio. A missing or malformed file yields the figjam defaults, never an error, because a style file changes only how a board is drawn."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-style-applies-43": {
+      "id": "b-agent-style-applies-43",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "canvas-style.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and every render or measurement a session runs, including every future one, which takes the session's "
+        },
+        {
+          "insert": "canvasStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " instead of reading the file again."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-glyphs-decision-44": {
+      "id": "b-agent-glyphs-decision-44",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": glyph names at the tool boundary come from "
+        },
+        {
+          "insert": "service/session/tools/glyph-names.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/session/tools/glyph-names.ts",
+              "label": "service/session/tools/glyph-names.ts"
+            }
+          }
+        },
+        {
+          "insert": ", which reads the schema's "
+        },
+        {
+          "insert": "CANVAS_ICON_GLYPHS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and keeps no second roster. A glyph parameter typed as a free string, such as a section's header icon on "
+        },
+        {
+          "insert": "place_section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "change_shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", is validated there and refused with up to four close names. The toolkit reuses "
+        },
+        {
+          "insert": "closeNames",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for its did-you-mean hints when a string misses a schema enum."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-glyphs-why-45": {
+      "id": "b-agent-glyphs-why-45",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": the rejected alternative was typing the section icon as the "
+        },
+        {
+          "insert": "Glyph",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " enum, which the schema refuses with a bare \"not allowed\" on any miss. A free string reaches the validator, which answers a near miss such as "
+        },
+        {
+          "insert": "postgres",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "brand-postgres",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Reading the schema's roster means a glyph added there is accepted and suggested with no second list to keep in sync."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-glyphs-applies-46": {
+      "id": "b-agent-glyphs-applies-46",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "glyph-names.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "toolkit/index.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", including every future glyph parameter, which validates with "
+        },
+        {
+          "insert": "isGlyphName",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and refuses with "
+        },
+        {
+          "insert": "unknownGlyphMessage",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
     "b-agent-roster-34": {
       "id": "b-agent-roster-34",
       "type": "paragraph",
       "props": {},
       "text": [
         {
-          "insert": "Roster: "
+          "insert": "The source tree divides by owner. "
         },
         {
           "insert": "service/session/",
@@ -1305,7 +1726,7 @@
           }
         },
         {
-          "insert": " owns lifecycle, perception, and the tool definitions ("
+          "insert": " owns lifecycle, perception, and the tool definitions: "
         },
         {
           "insert": "operations/",
@@ -1323,7 +1744,7 @@
           }
         },
         {
-          "insert": ", schemas, grid, creation defaults); "
+          "insert": ", schemas, grid, and creation defaults. "
         },
         {
           "insert": "catalog/layout-editor/",
@@ -1332,7 +1753,7 @@
           }
         },
         {
-          "insert": " owns the prompt, context, capabilities, and registration; "
+          "insert": " owns the prompt, context, capabilities, and registration. "
         },
         {
           "insert": "board/",
@@ -1341,7 +1762,16 @@
           }
         },
         {
-          "insert": " owns digest, lints, document diff, and scope; "
+          "insert": " owns the digest, lints, text fit, the name and detail limits in "
+        },
+        {
+          "insert": "text-rules.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", document diff, and scope. "
         },
         {
           "insert": "toolkit/",
@@ -1350,7 +1780,7 @@
           }
         },
         {
-          "insert": " binds the same tools to a canvas file for hosts outside the kernel; "
+          "insert": " binds the same tools to a canvas file for hosts outside the kernel, and "
         },
         {
           "insert": "authoring/",
@@ -1359,7 +1789,7 @@
           }
         },
         {
-          "insert": " holds the shared guidance topics; "
+          "insert": " holds the shared guidance topics. "
         },
         {
           "insert": "protocol.ts",
@@ -1368,7 +1798,7 @@
           }
         },
         {
-          "insert": " is the wire vocabulary; "
+          "insert": " is the wire vocabulary and "
         },
         {
           "insert": "viewer/",
@@ -1377,7 +1807,7 @@
           }
         },
         {
-          "insert": " is the run viewer; static rendering lives in "
+          "insert": " is the run viewer. Static rendering lives in "
         },
         {
           "insert": "canvas/src/render/",
@@ -1386,7 +1816,16 @@
           }
         },
         {
-          "insert": "."
+          "insert": ", and the package's "
+        },
+        {
+          "insert": "assets/fonts/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " holds the Inter and IBM Plex Mono faces the rasterizer loads."
         }
       ],
       "children": []

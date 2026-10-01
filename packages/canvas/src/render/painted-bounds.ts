@@ -18,6 +18,7 @@
 import { labelPointFor, routeConnection } from "../connectors/routing";
 import { belowExtendedBoundsPx } from "../objects/text-slots";
 import { sectionTitleChipWorldRect } from "../objects/section/title-chip-geometry";
+import { titleChipHasContent } from "../objects/section/title-chip-layout";
 import { connectionLabelChipRect } from "./static-svg";
 import { normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
 import type {
@@ -58,8 +59,9 @@ export function rectsIntersect(a: Rect, b: Rect): boolean {
 
 /**
  * The world-space painted extent of one object: its geometry rect, plus the
- * below-glyph caption band for below-text types (icon captions render under
- * the glyph box, unclamped), plus — for a titled section — the natural-size
+ * below-glyph caption band for below-text types (icon captions — the name,
+ * then the detail line — render under the glyph box, unclamped), plus — for
+ * a section whose header carries a title, icon, or detail — the natural-size
  * (scale 1) title chip. Chip counter-scale at a specific camera zoom is the
  * caller's concern (see render/views.ts): world-space painted bounds are
  * measured at zoom 1. `canvasStyle` (partial bags normalized) sizes the title
@@ -69,18 +71,20 @@ export function objectPaintedBounds(
   object: InteractiveCanvasObject,
   canvasStyle?: Partial<CanvasStyle>,
 ): Rect {
-  // belowExtendedBoundsPx returns the glyph box ∪ caption band in
-  // object-local coordinates (glyph box alone for types without a below
-  // band, or when the band is empty/hidden).
-  const local = belowExtendedBoundsPx(object);
+  // belowExtendedBoundsPx returns the glyph box ∪ caption band (name lines
+  // plus the detail line, sized in the style's detail font) in object-local
+  // coordinates (glyph box alone for types without a below band, or when
+  // the band is empty/hidden).
+  const local = belowExtendedBoundsPx(object, normalizeCanvasStyle(canvasStyle));
   let rect: Rect = {
     x: object.geometry.x + local.x,
     y: object.geometry.y + local.y,
     width: local.width,
     height: local.height,
   };
-  if (object.type === "section" && object.text !== "") {
-    rect = unionRects(rect, sectionTitleChipWorldRect(object, 1, normalizeCanvasStyle(canvasStyle)));
+  const style = normalizeCanvasStyle(canvasStyle);
+  if (object.type === "section" && titleChipHasContent(object, style)) {
+    rect = unionRects(rect, sectionTitleChipWorldRect(object, 1, style));
   }
   return rect;
 }
@@ -105,12 +109,13 @@ function routedConnectionBounds(
   connection: InteractiveCanvasConnection,
   objectsById: ReadonlyMap<string, InteractiveCanvasObject>,
   obstacles: ReadonlyArray<InteractiveCanvasObject>,
+  canvasStyle: CanvasStyle,
 ): Rect | null {
   const fromObject = objectsById.get(connection.from.objectId);
   const toObject = objectsById.get(connection.to.objectId);
   if (!fromObject || !toObject) return null;
 
-  const routed = routeConnection(fromObject, toObject, connection, obstacles);
+  const routed = routeConnection(fromObject, toObject, connection, obstacles, canvasStyle);
   const points = routed.points && routed.points.length > 0
     ? routed.points
     : [routed.start, routed.end];
@@ -120,8 +125,12 @@ function routedConnectionBounds(
   const label = connection.label?.trim() ? connection.label : null;
   // The chip is measured where it is DRAWN — the `labelPosition` pin when the
   // connection carries one, otherwise the routed midpoint. A pinned chip that
-  // sits off the wire still counts toward the painted extent.
-  if (label) rect = unionRects(rect, connectionLabelChipRect(label, labelPointFor(routed, connection)));
+  // sits off the wire still counts toward the painted extent — at the size
+  // the style draws it (connectors/label-chip.ts: a 22px mono chip in the
+  // schematic themes, the 30px sans chip in figjam).
+  if (label) {
+    rect = unionRects(rect, connectionLabelChipRect(label, labelPointFor(routed, connection), canvasStyle));
+  }
   return rect;
 }
 
@@ -131,13 +140,15 @@ function routedConnectionBounds(
  * its label chip when labeled. Routes against the WHOLE document's objects —
  * the same obstacle set the live board routes against — so the measured route
  * is the drawn route. Returns null when either endpoint object is missing.
+ * `canvasStyle` (partial bags normalized) sizes the label chip.
  */
 export function connectionPaintedBounds(
   document: InteractiveCanvasDocument,
   connection: InteractiveCanvasConnection,
+  canvasStyle?: Partial<CanvasStyle>,
 ): Rect | null {
   const objectsById = new Map(document.objects.map((object) => [object.id, object]));
-  return routedConnectionBounds(connection, objectsById, document.objects);
+  return routedConnectionBounds(connection, objectsById, document.objects, normalizeCanvasStyle(canvasStyle));
 }
 
 /**
@@ -168,6 +179,7 @@ export function paintedBounds(
   };
 
   for (const object of targetObjects) add(objectPaintedBounds(object, canvasStyle));
+  const style = normalizeCanvasStyle(canvasStyle);
 
   for (const connection of document.connections) {
     const touchesTarget =
@@ -176,7 +188,7 @@ export function paintedBounds(
       targetObjectIds.has(connection.from.objectId) ||
       targetObjectIds.has(connection.to.objectId);
     if (!touchesTarget) continue;
-    add(routedConnectionBounds(connection, objectsById, document.objects));
+    add(routedConnectionBounds(connection, objectsById, document.objects, style));
   }
 
   return (

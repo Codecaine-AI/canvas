@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Badge } from "@codecaine-ai/canvas/ui/badge";
 import { Button } from "@codecaine-ai/canvas/ui/button";
 import {
@@ -131,7 +131,14 @@ function fingerprintSummary(detail: EvalRunDetail): string | null {
   return summary || null;
 }
 
-export function EvalsPage({ onBack }: { onBack: () => void }) {
+export function EvalsPage({
+  onBack,
+  boardBackground,
+}: {
+  onBack: () => void;
+  /** The workspace theme's board color, painted behind (letterboxing) each render. */
+  boardBackground?: string;
+}) {
   const [runs, setRuns] = useState<EvalRunSummary[]>([]);
   const [runsState, setRunsState] = useState<"loading" | "idle" | "error">("loading");
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
@@ -199,7 +206,10 @@ export function EvalsPage({ onBack }: { onBack: () => void }) {
   }, [lightbox]);
 
   return (
-    <div className="flex h-screen flex-col bg-background">
+    <div
+      className="flex h-screen flex-col bg-background"
+      style={boardBackground ? ({ "--studio-board-background": boardBackground } as CSSProperties) : undefined}
+    >
       <header className="flex items-center justify-between gap-3 border-b border-border px-6 py-4">
         <div className="flex min-w-0 items-center gap-3">
           <CheckIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
@@ -469,7 +479,7 @@ function ScenarioCard({
         <Badge variant={statusBadgeVariant(status)}>{status}</Badge>
       </div>
 
-      <div className="mt-3 aspect-[16/10] w-full border-y border-border bg-[#F5F5F5]">
+      <div className="mt-3 aspect-[16/10] w-full border-y border-border bg-[color:var(--studio-board-background,#F5F5F5)]">
         {imageSrc && shownStage ? (
           <img
             src={imageSrc}

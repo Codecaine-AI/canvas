@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { createElement } from "react";
-import { render } from "@testing-library/react";
+import { FIGJAM_CANVAS_STYLE, renderFigjam } from "../../theme/__tests__/figjam";
 import { resolveObjectRoleColors } from "../object-shell";
 import { OBJECT_DEFS, objectDefForType } from "../object-def";
 import { OBJECT_TEXT_COLOR } from "../text-slots";
@@ -21,7 +21,7 @@ import {
 
 describe("resolveObjectRoleColors: shape role", () => {
   it("pick = fill + ink border", () => {
-    expect(resolveObjectRoleColors({ color: "red" }, "shape")).toEqual({
+    expect(resolveObjectRoleColors({ color: "red" }, "shape", FIGJAM_CANVAS_STYLE)).toEqual({
       fill: "#FFD2CC",
       border: "#D5322F",
       text: OBJECT_TEXT_COLOR,
@@ -29,22 +29,22 @@ describe("resolveObjectRoleColors: shape role", () => {
   });
 
   it("white keeps a visible ink border", () => {
-    const white = resolveObjectRoleColors({ color: "white" }, "shape");
+    const white = resolveObjectRoleColors({ color: "white" }, "shape", FIGJAM_CANVAS_STYLE);
     expect(white.fill).toBe("#FFFFFF");
     expect(white.border).toBe("#757980");
   });
 
   it("no pick falls back to the shape first-use default (gray)", () => {
-    expect(resolveObjectRoleColors({}, "shape")).toEqual(
-      resolveObjectRoleColors({ color: "gray" }, "shape"),
+    expect(resolveObjectRoleColors({}, "shape", FIGJAM_CANVAS_STYLE)).toEqual(
+      resolveObjectRoleColors({ color: "gray" }, "shape", FIGJAM_CANVAS_STYLE),
     );
-    expect(resolveObjectRoleColors({}, "shape").fill).toBe(resolveShapeColors("gray").fill);
+    expect(resolveObjectRoleColors({}, "shape", FIGJAM_CANVAS_STYLE).fill).toBe(resolveShapeColors("gray").fill);
   });
 });
 
 describe("resolveObjectRoleColors: sticky role", () => {
   it("resolves the exact sticky fill hex, borderless, dark text", () => {
-    expect(resolveObjectRoleColors({ color: "blue" }, "sticky")).toEqual({
+    expect(resolveObjectRoleColors({ color: "blue" }, "sticky", FIGJAM_CANVAS_STYLE)).toEqual({
       fill: resolveStickyFill("blue"),
       border: null,
       text: OBJECT_TEXT_COLOR,
@@ -52,8 +52,8 @@ describe("resolveObjectRoleColors: sticky role", () => {
   });
 
   it("no pick falls back to the classic yellow sticky", () => {
-    expect(resolveObjectRoleColors({}, "sticky").fill).toBe(resolveStickyFill("yellow"));
-    expect(resolveObjectRoleColors({}, "sticky").fill).toBe("#FFE299");
+    expect(resolveObjectRoleColors({}, "sticky", FIGJAM_CANVAS_STYLE).fill).toBe(resolveStickyFill("yellow"));
+    expect(resolveObjectRoleColors({}, "sticky", FIGJAM_CANVAS_STYLE).fill).toBe("#FFE299");
   });
 });
 
@@ -70,7 +70,7 @@ function makeStickyObject(color: CanvasObjectColor): InteractiveCanvasObject {
 }
 
 function expectRenderedStickyColor(color: CanvasObjectColor) {
-  const view = render(
+  const view = renderFigjam(
     createElement(ObjectShape, {
       object: makeStickyObject(color),
       selected: false,

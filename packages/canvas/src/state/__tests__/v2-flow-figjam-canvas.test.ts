@@ -7,6 +7,7 @@ import {
 } from "../schema";
 import { resolveShapeColors, resolveStickyFill } from "../../theme/palette";
 import { resolveObjectStrokeWidth } from "../../theme/tokens";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 
 const v2FlowDocument = v2FlowCanvas as InteractiveCanvasDocument;
 
@@ -131,8 +132,8 @@ describe("v2-flow canvas JSON", () => {
     for (const chip of labelChips) {
       expect(chip.color).toBe("white");
       expect(resolveShapeColors("white")).toEqual({ fill: "#FFFFFF", border: "#757980" });
-      // No explicit strokeWidth — the canvas style's 2px shape border applies.
-      expect(resolveObjectStrokeWidth(chip.style)).toBe(2);
+      // No explicit strokeWidth — the figjam style's 2px shape border applies.
+      expect(resolveObjectStrokeWidth(chip.style, FIGJAM_CANVAS_STYLE)).toBe(2);
     }
   });
 
@@ -161,7 +162,7 @@ describe("v2-flow canvas JSON", () => {
       (object) => object.id === "emphasis-box-research-objective",
     );
     expect(emphasisBox?.color).toBe("red");
-    expect(resolveObjectStrokeWidth(emphasisBox?.style)).toBe(2);
+    expect(resolveObjectStrokeWidth(emphasisBox?.style, FIGJAM_CANVAS_STYLE)).toBe(2);
   });
 
   it("stickies migrated to picks that resolve to the exact classic sticky hexes", () => {

@@ -16,6 +16,7 @@ import type { PointerEvent as ReactPointerEvent, MouseEvent as ReactMouseEvent }
 import { renderToStaticMarkup } from "react-dom/server";
 import { InteractionFeedbackScreen } from "./stage/editor/pipeline/InteractionFeedback";
 import { CanvasStage, type CanvasStageProps } from "./stage/CanvasStage";
+import { canvasThemePreset, FIGJAM_CANVAS_STYLE, type CanvasStyle, type CanvasThemeId } from "./theme/canvas-style";
 import { defaultGeometryFor, shapeForType } from "./state/schema/object-defaults";
 import {
   validateInteractiveCanvasDocument,
@@ -408,6 +409,121 @@ function buildAdversarialDoc(): InteractiveCanvasDocument {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Synthetic doc E — "detail": the object `detail` line and the schematic-era
+// icon vocabulary — details in center slots (fitting, ellipsized, hidden by a
+// short box, newline-collapsed, detail-only), icon captions with details,
+// Tabler-pack generic glyphs, brand (fill-paint) glyphs, every color incl.
+// `white`, a sticky that must ignore a detail, and a titled section with an
+// icon and a detail. Rendered only into the THEMED baseline (all three
+// themes), so the figjam baseline file stays exactly as captured.
+// ---------------------------------------------------------------------------
+
+function buildDetailDoc(): InteractiveCanvasDocument {
+  const colors = ["gray", "red", "orange", "yellow", "green", "teal", "blue", "violet", "pink", "white"] as const;
+  const objects: InteractiveCanvasObject[] = [];
+  const shapes: Array<[InteractiveCanvasObjectType, ShapeName | undefined, string, string, number, number]> = [
+    ["rectangle", undefined, "Run Executor LLM", "Function Calling LLM", 240, 80],
+    ["process", "rounded-rect", "Orders service", "postgres 16 · db.t3.micro", 240, 80],
+    ["decision", "diamond", "Is Function Call Required?", "tool_calls.length > 0", 280, 170],
+    ["predefined-process", "predefined-process", "Add to History", ":4820", 260, 72],
+    ["ellipse", "ellipse", "User Input", "voice · 16 kHz", 220, 140],
+    ["triangle", "triangle", "Alert", "p95 > 2s", 220, 160],
+    ["octagon", "octagon", "Stop", "SIGTERM", 200, 140],
+    ["arrow-shape", "arrow-shape", "Next", "retry 3x", 240, 100],
+    ["rectangle", undefined, "Normalize and deduplicate every inbound record", "s3://customer-data/normalized/2026/records.parquet", 220, 96],
+    ["rectangle", undefined, "Short box", ":4820", 200, 40],
+    ["process", "rounded-rect", "Collapsed", "line one\nline two\n  line three", 240, 72],
+    ["process", "rounded-rect", "", "detail only", 220, 64],
+  ];
+  shapes.forEach(([type, shape, text, detail, width, height], index) => {
+    objects.push({
+      id: `e-shape-${index}`,
+      type,
+      text,
+      detail,
+      parentId: null,
+      geometry: { x: 40 + (index % 4) * 320, y: 40 + Math.floor(index / 4) * 220, width, height },
+      ...(shape ? { style: { shape } } : {}),
+      color: colors[index % colors.length],
+    });
+  });
+  const icons: Array<[NonNullable<InteractiveCanvasObject["icon"]>, string, string | undefined, number]> = [
+    ["agent", "Planner", "harness · :4820", 64],
+    ["database", "Orders DB", "postgres 16", 64],
+    ["webhook", "Webhook", "POST /hooks/github", 64],
+    ["brand-docker", "Docker", undefined, 64],
+    ["brand-anthropic", "Anthropic API", "api.anthropic.com", 64],
+    ["brand-bun", "canvas-agent", "bun 1.2", 120],
+    ["server", "Server", undefined, 120],
+    ["key", "", "detail only", 64],
+    ["event", "Long caption that wraps onto a second line", "a detail that runs well past the band and ellipsizes", 64],
+    ["monitor", "White tile", "outlined in light", 64],
+  ];
+  icons.forEach(([icon, text, detail, side], index) => {
+    objects.push({
+      id: `e-icon-${index}`,
+      type: "icon",
+      icon,
+      text,
+      ...(detail !== undefined ? { detail } : {}),
+      parentId: null,
+      geometry: { x: 60 + (index % 5) * 260, y: 720 + Math.floor(index / 5) * 280, width: side, height: side },
+      style: { shape: "icon" },
+      color: index === 9 ? "white" : colors[index % colors.length],
+    });
+  });
+  objects.push({
+    id: "e-sticky",
+    type: "sticky",
+    text: "Stickies never draw a detail line.",
+    // Validation drops a sticky's detail; the renderers must ignore one anyway.
+    detail: "ignored",
+    parentId: null,
+    geometry: { x: 1400, y: 40, width: 240, height: 180 },
+    style: { shape: "note" },
+    color: "yellow",
+  });
+  objects.push({
+    id: "e-section",
+    type: "section",
+    text: "Bun services",
+    detail: "127.0.0.1",
+    icon: "server",
+    parentId: null,
+    geometry: { x: 1360, y: 300, width: 520, height: 360 },
+    style: { shape: "section" },
+    color: "teal",
+  });
+  objects.push({
+    id: "e-section-child",
+    type: "process",
+    text: "Docs kernel",
+    detail: ":4840",
+    parentId: "e-section",
+    geometry: { x: 1420, y: 400, width: 220, height: 72 },
+    style: { shape: "rounded-rect" },
+    color: "teal",
+  });
+  return {
+    schemaVersion: 1,
+    id: "zz-e-detail",
+    title: "zz detail",
+    mode: "diagram",
+    objects,
+    connections: [
+      {
+        id: "conn-e-0",
+        from: { objectId: "e-shape-0", anchor: "right" },
+        to: { objectId: "e-shape-1", anchor: "left" },
+        label: "HTTP",
+        style: "solid",
+        arrow: "forward",
+      },
+    ],
+  };
+}
+
 export function buildCorpus(canvasesDir?: string): Corpus {
   const { entries, failures } = loadFixtureDocuments(canvasesDir);
   return {
@@ -475,8 +591,12 @@ function stageProps(document: InteractiveCanvasDocument, profile: ProfileName): 
 export function renderProfileHtml(
   document: InteractiveCanvasDocument,
   profile: ProfileName,
+  canvasStyle?: CanvasStyle,
 ): string {
-  return renderToStaticMarkup(createElement(CanvasStage, stageProps(document, profile)));
+  const props = stageProps(document, profile);
+  return renderToStaticMarkup(
+    createElement(CanvasStage, canvasStyle ? { ...props, canvasStyle } : props),
+  );
 }
 
 export function captureCorpus(corpus: Corpus): Capture {
@@ -484,7 +604,60 @@ export function captureCorpus(corpus: Corpus): Capture {
   for (const entry of corpus.entries) {
     const perProfile: Record<string, string> = {};
     for (const profile of PROFILE_NAMES) {
-      perProfile[profile] = renderProfileHtml(entry.document, profile);
+      // Explicit figjam: the figjam gate pins figjam, not whatever theme is the default.
+      perProfile[profile] = renderProfileHtml(entry.document, profile, FIGJAM_CANVAS_STYLE);
+    }
+    capture[entry.name] = perProfile;
+  }
+  return capture;
+}
+
+// ---------------------------------------------------------------------------
+// Themed capture — the same gate under the schematic themes. A SEPARATE
+// baseline file (zz-dom-baseline-themes.json) so the figjam baseline above
+// stays untouched: the whole corpus under each schematic theme's preset
+// (viewer profile), plus the detail doc under all three themes and every
+// profile. Profile keys read `<profile>@<theme>`.
+// ---------------------------------------------------------------------------
+
+/** The schematic themes the themed baseline renders the whole corpus under. */
+export const THEMED_CORPUS_THEMES = ["schematic-light", "schematic-dark"] as const satisfies readonly CanvasThemeId[];
+
+/** The detail doc's themes: figjam included (its figjam render is new, so it lives in the themed file). */
+export const DETAIL_DOC_THEMES = ["figjam", "schematic-light", "schematic-dark"] as const satisfies readonly CanvasThemeId[];
+
+export const DETAIL_DOC_NAME = "zz-e-detail";
+
+/** The real boards the themed corpus keeps (the full fixture set stays in the figjam gate). */
+export const THEMED_FIXTURE_NAMES: ReadonlySet<string> = new Set([
+  "fixture:intent-classification-1",
+  "fixture:bubba-voice",
+]);
+
+/** The synthetic docs, two real boards, and the detail doc. */
+export function buildThemedCorpus(canvasesDir?: string): Corpus {
+  const corpus = buildCorpus(canvasesDir);
+  return {
+    entries: [
+      ...corpus.entries.filter((entry) => !entry.name.startsWith("fixture:") || THEMED_FIXTURE_NAMES.has(entry.name)),
+      { name: DETAIL_DOC_NAME, document: buildDetailDoc(), adversarial: false },
+    ],
+    failures: corpus.failures,
+  };
+}
+
+export function captureThemedCorpus(corpus: Corpus): Capture {
+  const capture: Capture = {};
+  for (const entry of corpus.entries) {
+    const perProfile: Record<string, string> = {};
+    const detailDoc = entry.name === DETAIL_DOC_NAME;
+    const themes: readonly CanvasThemeId[] = detailDoc ? DETAIL_DOC_THEMES : THEMED_CORPUS_THEMES;
+    const profiles: readonly ProfileName[] = detailDoc ? PROFILE_NAMES : ["viewer"];
+    for (const theme of themes) {
+      const canvasStyle = canvasThemePreset(theme);
+      for (const profile of profiles) {
+        perProfile[`${profile}@${theme}`] = renderProfileHtml(entry.document, profile, canvasStyle);
+      }
     }
     capture[entry.name] = perProfile;
   }

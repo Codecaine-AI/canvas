@@ -29,6 +29,7 @@ export type {
   CanvasAction,
   CanvasAgentPatchOperation,
   CanvasChangeSummary,
+  CanvasClearablePatch,
   CanvasSelection,
   CanvasTool,
   InteractiveCanvasState,

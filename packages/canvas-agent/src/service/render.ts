@@ -3,11 +3,17 @@
  * (KERNEL-PROPOSAL §4, D3).
  *
  * The SVG comes from packages/canvas's deterministic renderDocumentToSvg; this
- * module only rasterizes. Fonts: assets/fonts/ bundles the Inter variable
- * TTF (OFL license alongside), so the canvas font stack ("Inter, …")
- * resolves to the bundled face first; system fonts remain as fallback for
- * anything outside Inter's coverage. Bundled-font renders are stable across
- * machines for the glyphs Inter covers.
+ * module only rasterizes. Fonts: assets/fonts/ bundles Inter 3.19 as static
+ * Regular/Medium/SemiBold/Bold TTFs (OFL license alongside), so the canvas
+ * font stack ("Inter, …") resolves to the bundled face at the weight the SVG
+ * asks for; system fonts remain as fallback for anything outside Inter's
+ * coverage. Bundled-font renders are stable across machines for the glyphs
+ * Inter covers.
+ *
+ * The Inter variable TTF beside them is NOT handed to resvg: resvg does not
+ * instance variable fonts, so it would only add a second wght-400 face (every
+ * weight painted regular before the static instances were vendored). It stays
+ * as the source scripts/generate-inter-metrics.ts reads advances from.
  */
 import { existsSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -15,6 +21,8 @@ import { join, resolve } from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 
 const FONTS_DIR = resolve(import.meta.dir, "..", "..", "assets", "fonts");
+/** The metrics-source variable font (see the header) — not a raster face. */
+const VARIABLE_FONT_FILE = /-Variable\.ttf$/i;
 /** Keep native allocations bounded even if an SVG declares absurd dimensions. */
 const MAX_RASTER_DIMENSION = 4096;
 
@@ -28,7 +36,7 @@ interface SvgViewport {
 function bundledFontFiles(): string[] {
   if (!existsSync(FONTS_DIR)) return [];
   return readdirSync(FONTS_DIR)
-    .filter((file) => /\.(ttf|otf|ttc)$/i.test(file))
+    .filter((file) => /\.(ttf|otf|ttc)$/i.test(file) && !VARIABLE_FONT_FILE.test(file))
     .sort()
     .map((file) => join(FONTS_DIR, file));
 }

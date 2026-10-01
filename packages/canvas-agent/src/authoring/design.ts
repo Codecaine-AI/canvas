@@ -1,3 +1,4 @@
+import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../board/text-rules";
 import { renderVisualPatterns } from "./visual-patterns";
 
 /** Shared diagram-design knowledge. No agent state, tools, or model runtime. */
@@ -41,7 +42,7 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
         | Card grid layout | Visual structure matches conceptual structure |
         | Icons decorating text | Shapes that ARE the meaning |
         | Same container for everything | Distinct visual vocabulary per concept |
-        | Everything in a diagram node | Short native labels and Markdown stickies, with selective section containers |
+        | Everything in a diagram node | Short names with one detail line, Markdown stickies for prose, and selective section containers |
     </bad_vs_good>
 </multi_zoom_architecture>
 
@@ -77,6 +78,26 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         - Section titles briefly name the group or responsibility.
 
         Use native labels and titles. Canvas has no standalone text object.
+
+        <name_and_detail>
+            Shapes, icons, and sections each carry a name and at most one detail line.
+
+            - The name (\`text\`) says what the thing is in ${NAME_TARGET_WORDS} words or fewer, on one line, with no sentences.
+            - The detail (\`detail\`) is one short fact, such as a port, path, version, model, host, or size. It renders muted on one line under the name, or after a section's title. Keep it to ${DETAIL_MAX_CHARS} characters or fewer, with no sentences.
+            - Explanations, rationale, caveats, and examples go on a Markdown sticky beside the subject.
+
+            | Bad | Good |
+            | --- | --- |
+            | name \`Postgres database that stores user sessions\` | name \`Postgres\`, detail \`16 · :5432\`, and a sticky about the sessions it stores |
+            | name \`canvas-agent\` with \`port 4820\` on a second line | name \`canvas-agent\`, detail \`harness · :4820\` |
+            | detail \`Handles auth. Retries 3 times on failure.\` | detail \`3 retries · 30s timeout\`, and the auth explanation on a sticky |
+        </name_and_detail>
+
+        <section_icons>
+            A section's header can start with an icon. Give a section one when a glyph fits what the region holds: a generic glyph for its role, such as \`database\`, \`cloud\`, \`users\`, or \`server\`, or a brand logo for a technology the diagram names, such as \`brand-postgres\`, \`brand-docker\`, or \`brand-anthropic\`. When no glyph fits, leave the icon off. Never add one for decoration.
+
+            Example: title \`Bun services\`, detail \`127.0.0.1\`, icon \`brand-bun\`.
+        </section_icons>
     </labels>
 
     <stickies>
@@ -101,7 +122,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
             - API/method names: real function calls and endpoints.
         </artifact_types>
 
-        Put code, payloads, and longer examples in Markdown stickies. Use actual API, method, and event names in short labels where they belong.
+        Put code, payloads, and longer examples in Markdown stickies. Use actual API, method, and event names in short labels where they belong, and a real port, path, or version in the detail line of the node it describes.
 
         Draw event and step sequences with supported objects and connections.
 

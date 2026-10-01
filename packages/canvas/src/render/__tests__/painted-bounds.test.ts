@@ -7,6 +7,7 @@ import {
 } from "../painted-bounds";
 import { routeConnection } from "../../connectors/routing";
 import { belowExtendedBoundsPx } from "../../objects/text-slots";
+import { canvasThemePreset, FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -84,7 +85,7 @@ describe("paintedBounds", () => {
       [a, b],
       [{ id: "c", from: { objectId: "a" }, to: { objectId: "b" }, arrow: "forward", label }],
     );
-    const painted = paintedBounds(document);
+    const painted = paintedBounds(document, undefined, FIGJAM_CANVAS_STYLE);
     expect(painted.x).toBeCloseTo(50 - 321.6 / 2, 5);
     expect(painted.x + painted.width).toBeCloseTo(50 + 321.6 / 2, 5);
   });
@@ -98,7 +99,7 @@ describe("paintedBounds", () => {
       style: { shape: "section" },
     };
     // Chip: 3px inset + 27px tall → bottom edge at y 30, below the 20px frame.
-    expect(paintedBounds(makeDocument([section]))).toEqual({ x: 0, y: 0, width: 300, height: 30 });
+    expect(paintedBounds(makeDocument([section]), undefined, FIGJAM_CANVAS_STYLE)).toEqual({ x: 0, y: 0, width: 300, height: 30 });
   });
 
   it("includes an icon's caption band below the glyph box", () => {
@@ -115,6 +116,27 @@ describe("paintedBounds", () => {
     expect(painted).toEqual({ x: local.x, y: local.y, width: local.width, height: local.height });
     expect(painted.y + painted.height).toBeGreaterThan(120);
     expect(objectPaintedBounds(icon)).toEqual(painted);
+  });
+
+  it("includes an icon's detail line under the caption, sized in the style's detail font", () => {
+    const icon: InteractiveCanvasObject = {
+      id: "i",
+      type: "icon",
+      icon: "database",
+      text: "Orders DB",
+      detail: "s3://customer-data/normalized/2026/records.parquet",
+      geometry: { x: 0, y: 0, width: 64, height: 64 },
+      style: { shape: "icon" },
+    };
+    const plain = { ...icon, detail: undefined };
+    const light = canvasThemePreset("schematic-light");
+    // Name line (18) + 3px gap + one 14px mono line at 1.3.
+    expect(objectPaintedBounds(icon, light).height).toBe(objectPaintedBounds(plain, light).height + 3 + 14 * 1.3);
+    // The long detail widens the band to its 200px max.
+    expect(objectPaintedBounds(icon, light).width).toBe(200);
+    // Figjam's detail line is 13px sans.
+    expect(objectPaintedBounds(icon, FIGJAM_CANVAS_STYLE).height).toBe(objectPaintedBounds(plain, FIGJAM_CANVAS_STYLE).height + 3 + 13 * 1.3);
+    expect(paintedBounds(makeDocument([icon]), undefined, light)).toEqual(objectPaintedBounds(icon, light));
   });
 
   it("targets a subset: connections touching a target count, unrelated objects do not", () => {
@@ -143,5 +165,21 @@ describe("paintedBounds", () => {
       [{ id: "c", from: { objectId: "a" }, to: { objectId: "b" }, arrow: "forward", label: "edge" }],
     );
     expect(paintedBounds(document)).toEqual(paintedBounds(document));
+  });
+});
+
+describe("painted bounds under a theme", () => {
+  it("measures connection label chips at the size the style draws them", () => {
+    const document = makeDocument(
+      [box("a", 0, 0), box("b", 600, 0)],
+      [{ id: "c", from: { objectId: "a" }, to: { objectId: "b" }, arrow: "forward", label: "read/write" }],
+    );
+    const connection = document.connections[0]!;
+    const figjam = connectionPaintedBounds(document, connection, FIGJAM_CANVAS_STYLE)!;
+    const light = connectionPaintedBounds(document, connection, canvasThemePreset("schematic-light"))!;
+    // A straight route at y 40: the chip alone sets the height (30px sans vs 26px mono).
+    expect(figjam.height).toBe(30);
+    expect(light.height).toBe(26);
+    expect(paintedBounds(document, new Set(["c"]), canvasThemePreset("schematic-light"))).toEqual(light);
   });
 });

@@ -1,11 +1,9 @@
 import { sanitizeExportFilename } from "../../../../render/download";
 import { renderDocumentToSvg } from "../../../../render/static-svg";
 import type { InteractiveCanvasDocument } from "../../../../state/schema";
-import type { CanvasStyle } from "../../../../theme/canvas-style";
+import { normalizeCanvasStyle, type CanvasStyle } from "../../../../theme/canvas-style";
 
 export type SectionExportFormat = "svg" | "png";
-
-const BOARD_BACKGROUND = "#F5F5F5";
 
 export function renderSectionForExport(
   document: InteractiveCanvasDocument,
@@ -91,7 +89,8 @@ async function exportSectionAsPng(
     canvas.height = Math.max(1, Math.round(height * scale));
     const context = canvas.getContext("2d");
     if (!context) throw new Error("Canvas section export: 2d canvas context unavailable");
-    context.fillStyle = BOARD_BACKGROUND;
+    // Pre-fill with the theme's board color so no transparent letterbox survives.
+    context.fillStyle = normalizeCanvasStyle(canvasStyle).boardBackground;
     context.fillRect(0, 0, canvas.width, canvas.height);
     context.drawImage(image, 0, 0, canvas.width, canvas.height);
     const pngBlob = await canvasToPngBlob(canvas);

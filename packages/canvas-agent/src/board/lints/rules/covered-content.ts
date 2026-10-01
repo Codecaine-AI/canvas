@@ -67,7 +67,7 @@ export const rule: LayoutRule = {
   title: "Covered content",
   tier: "error",
   guidance: GUIDANCE,
-  check(document) {
+  check(document, context) {
     const findings: ReturnType<LayoutRule["check"]> = [];
     const boxes = document.objects.filter((object) => kindOf(object) === "node");
 
@@ -103,7 +103,7 @@ export const rule: LayoutRule = {
     }
 
     const chips = document.connections
-      .map((edge) => chipFor(edge, document))
+      .map((edge) => chipFor(edge, document, context?.canvasStyle))
       .filter((chip): chip is Chip => chip !== undefined);
 
     // 2 — chip vs box (own endpoints exempt): overlap E, 16px contact W.
@@ -169,7 +169,7 @@ export const rule: LayoutRule = {
     for (const chip of chips) {
       for (const edge of document.connections) {
         if (edge.id === chip.edge.id) continue;
-        const polyline = routedPolyline(edge, document);
+        const polyline = routedPolyline(edge, document, context?.canvasStyle);
         if (polyline.length < 2) continue;
         const rawRun = polylineLengthInRect(polyline, chip.rect);
         if (rawRun > EDGE_RUN_TOLERANCE) {

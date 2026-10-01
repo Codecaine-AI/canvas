@@ -682,6 +682,8 @@ export async function collectSourceFingerprints(): Promise<SourceFingerprints> {
     ]),
     hashFiles([
       resolve(REPO_ROOT, "packages", "canvas-agent", "src", "board", "lints"),
+      // The name/detail limits the label-is-prose and detail-too-long lints apply.
+      resolve(REPO_ROOT, "packages", "canvas-agent", "src", "board", "text-rules.ts"),
     ]),
     hashFiles([
       resolve(LAYOUT_EDITOR_DIR, "context", "style-guide"),
@@ -823,7 +825,7 @@ async function writeFingerprint(options: {
     `- style hash: \`${styles.hash}\``,
     `- surface hash: \`${surface.hash}\``,
     `- judge client: model \`${options.judgeClient.model}\`, effort \`${options.judgeClient.effort}\`, base URL \`${options.judgeClient.baseUrl}\``,
-    "- snapshot fonts: bundled Inter + system fallback (Helvetica default/sans-serif)",
+    "- snapshot fonts: bundled Inter + IBM Plex Mono + system fallback (Helvetica default/sans-serif)",
     `- harness start time: ${harness?.startedAt ?? "unknown"} (ephemeral, spawned for this run and stopped at run end)`,
     `- eval services: harness \`${harness?.origin ?? "unknown"}\` pid \`${harness?.pid ?? "unknown"}\`, file API \`${fileApi?.origin ?? "unknown"}\` pid \`${fileApi?.pid ?? "unknown"}\` (see \`services/identity.json\`)`,
     `- eval canvas directory: \`${relative(REPO_ROOT, EVAL_CANVASES_DIR)}\``,

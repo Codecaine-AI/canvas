@@ -25,6 +25,7 @@
       "text": [],
       "children": [
         "b-overview-lede-2",
+        "b-overview-lede-loop-2b",
         "b-overview-sequence-heading-3",
         "b-overview-sequence-intro-4",
         "b-overview-sequence-mermaid-5",
@@ -80,7 +81,18 @@
       "props": {},
       "text": [
         {
-          "insert": "An edit starts when the operator selects canvas objects and tells the studio what should change. The harness resolves that scope, opens a draft from the current document, and gives the model a complete textual and visual starting point. The model edits the draft directly through validated, id-addressed operations. Each applied operation returns a focused account of its effect and re-renders the draft, so the standing picture — digest, cumulative diff, findings, and a render of the board as it stands — rides the state block into the next turn; look is the deliberate close-up on one region on top of it. The saved board is not changed until a cumulative proposal passes the run gates and the operator accepts it."
+          "insert": "An edit starts when the operator selects canvas objects and tells the studio what should change. The harness resolves that scope, opens a draft from the current document, and gives the model a complete textual and visual starting point. The model edits the draft directly through validated, id-addressed operations."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-lede-loop-2b": {
+      "id": "b-overview-lede-loop-2b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Each applied operation returns a focused account of its effect and re-renders the draft, so the standing picture (digest, cumulative diff, findings, and a render of the board as it stands) rides the state block into the next turn. look is the deliberate close-up on one region on top of it. The saved board is not changed until a cumulative proposal passes the run gates and the operator accepts it."
         }
       ],
       "children": []
@@ -104,7 +116,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The studio owns the operator-facing session. The harness owns the baseline, scope, draft, request queue, and tool runtime. The model supplies layout judgment, and every picture it judges from — the board render riding each state block and the region look frames — comes from the canvas renderer, so the model reads the same routed visual truth the product draws."
+          "insert": "The studio owns the operator-facing session. The harness owns the baseline, scope, draft, request queue, and tool runtime. The model supplies layout judgment, and every picture it judges from (the board render riding each state block and the region look frames) comes from the canvas renderer, so the model reads the same routed visual truth the product draws."
         }
       ],
       "children": []
@@ -170,7 +182,7 @@
           }
         },
         {
-          "insert": " Five blocks arrive in order: editor_state, user_requests, capabilities, style_guide, and board_state. Nested XML children are indented four spaces. The capabilities block comes in two halves: first the material — sections, stickies, objects, and connections, each with its description, named functionality, and tips, while objects adds generated vocabulary and connections adds generated fields — and then one gestures block, a child per verb group, naming each tool and what it does to the board. A kind block says what the thing is and names no tools; the gesture half is read off the registration roster, so it cannot drift from the surface. The style guide carries one nested aesthetic topic: “Calm and uniform — uniformity is information.” It treats matched size and gap as a peer signal, sizes content first, repeats one gap per group, uses the 20 grid only for quantization, leaves air, groups through sections, reserves red for failure and green for success, and labels edges directly. board_state supplies the full digest and diagnostics. The image hook adds the current full-board render first, the house exemplar second, and the vocabulary contact sheet third; the sheet renders every type, icon glyph, and color plus connection demonstrations, including a wire ending on a section."
+          "insert": " Five blocks arrive in order: editor_state, user_requests, capabilities, style_guide, and board_state. Nested XML children are indented four spaces. The capabilities block comes in two halves: first the material (sections, stickies, objects, and connections, each with its description, named functionality, and tips, while objects adds generated vocabulary and connections adds generated fields) and then one gestures block, a child per verb group, naming each tool and what it does to the board. A kind block says what the thing is and names no tools. The gesture half is read off the registration roster, so it cannot drift from the surface. The style guide carries one nested aesthetic topic: “Calm and uniform: uniformity is information.” It treats matched size and gap as a peer signal, sizes content first, repeats one gap per group, uses the 20 grid only for quantization, leaves air, groups through sections, reserves red for failure and green for success, and labels edges directly. board_state supplies the full digest and diagnostics. The image hook adds the current full-board render first, the house exemplar second, and the vocabulary contact sheet third. The sheet renders every type, icon glyph, and color plus connection demonstrations, including a wire ending on a section."
         }
       ],
       "children": []
@@ -189,7 +201,7 @@
           }
         },
         {
-          "insert": " Twenty-five typed mutators are factored by editing gesture rather than by kind — place, arrange, content, sections, edges, delete — and each call is one gesture. look is the read-only inspection tool. Creation is per-kind and carries only what the UI's creation gesture carries, so a placement is a bare payload and everything else about the new object comes from defaults; the closed shape-and-icon type roster folds icon glyphs in under their own names. The roster intentionally gives bare type names, with icon glyphs and colors enumerated one per line, and geometry the agent writes lands on its own 20 grid."
+          "insert": " Twenty-five typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool. Creation is per-kind and carries only what the UI's creation gesture carries, so a placement is a bare payload and everything else about the placed object comes from defaults. The exceptions travel with the name: place_shape and place_section may carry the one-line detail, and place_section may also carry a header icon for the section's title chip. The closed shape-and-icon type roster folds icon glyphs in under their own names. The roster intentionally gives bare type names, with icon glyphs and colors enumerated one per line, and geometry the agent writes lands on its own 20 grid."
         }
       ],
       "children": []
@@ -208,7 +220,7 @@
           }
         },
         {
-          "insert": " After every operation, section membership and connection waypoints are both reconciled from geometry. Sections hold exactly the geometry they are given and close around their children only when fit_section names them; ancestors keep their slack until named too. An applied operation returns its APPLIED line, any notes, the document-derived DELTA exposing snapped geometry, reconciled parentId and anchor, endpoint-position, or waypoint steering changes, the lint delta, and ROUTES for any connection it touched — every edge gesture returns that edge's fresh numbered polyline, including on a no-op, so a second routing call in the same turn chains off the result rather than off a stale digest. A no-op returns its note, and an error returns its error lines; neither changes the draft. Every draft write goes through one commit choke point that assigns the draft and captures fresh pixels in the same move, so the state block on the next turn carries the board as it now stands together with the digest, the cumulative diff, the findings, and the queue. An edit takes no view argument and returns no picture: framing is look's alone, and one call frames one region — view for a section or a single object, at for a world rect — returning it rendered and measured beside that same standing text. Lints explain what is wrong in prose; the model chooses the fix."
+          "insert": " After every operation, section membership and connection waypoints are both reconciled from geometry. Sections hold exactly the geometry they are given and close around their children only when fit_section names them. Ancestors keep their slack until named too. An applied operation returns its APPLIED line, any notes, the document-derived DELTA exposing snapped geometry, reconciled parentId and anchor, endpoint-position, or waypoint steering changes, the lint delta, and ROUTES for any connection it touched. Every edge gesture returns that edge's fresh numbered polyline, including on a no-op, so a second routing call in the same turn chains off the result rather than off a stale digest. A no-op returns its note, and an error returns its error lines. Neither changes the draft. Every draft write goes through one commit choke point that assigns the draft and captures fresh pixels in the same move, so the state block on the next turn carries the board as it now stands together with the digest, the cumulative diff, the findings, and the queue. An edit takes no view argument and returns no picture: framing is look's alone, and one call frames one region (view for a section or a single object, at for a world rect), returning it rendered and measured beside that same standing text. Lints explain what is wrong in prose. The model chooses the fix."
         }
       ],
       "children": []
@@ -227,7 +239,7 @@
           }
         },
         {
-          "insert": " resolve_request marks one queue entry done or declined, records a note for the operator, and returns only the updated queue. finalize with outcome committed reruns diagnostics in the edited scope, requires every finding there to be cleared — warnings block exactly as errors do — and no user request left open, and proposes the cumulative baseline-to-draft patch. A blocked finalize leaves the run going, so the model fixes what it raised and calls again. outcome none ends without a proposal and explains why."
+          "insert": " resolve_request marks one queue entry done or declined, records a note for the operator, and returns only the updated queue. finalize with outcome committed reruns diagnostics in the edited scope, requires every finding there to be cleared (warnings block exactly as errors do) and no user request left open, and proposes the cumulative baseline-to-draft patch. A blocked finalize leaves the run going, so the model fixes what it raised and calls again. outcome none ends without a proposal and explains why."
         }
       ],
       "children": []
@@ -284,7 +296,25 @@
           }
         },
         {
-          "insert": " The standing picture arrives on its own: every turn's state block carries the board digest, the cumulative change, the complete lints, routed truth, the request queue, and a render of the board as it stands, followed by up to three prior post-change renders. The digest is an indented containment tree followed by one EDGES block; the legend declares elided defaults, and object text is never truncated. look is the deliberate close-up layered on that — exactly one region per call, view taking a section or a single object and at cropping to a world rect, either/or and never both — and the framed region comes back both rendered and measured: per-pair gaps on each axis, row and column pitch, the section's free margins, and ink share, so conformance is read rather than computed. Operation results stay focused on what they touched and carry no render at all."
+          "insert": " The standing picture arrives on its own: every turn's state block carries the board digest, the cumulative change, the complete lints, routed truth, the request queue, and a render of the board as it stands, followed by up to three prior post-change renders. The digest is an indented containment tree followed by one EDGES block. Its legend declares elided defaults, and object text is never truncated. An object line's extras open with "
+        },
+        {
+          "insert": "icon=<glyph>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for a section's header icon and "
+        },
+        {
+          "insert": "detail=\"…\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for a detail line, each printed only when set. look is the deliberate close-up layered on that. It frames exactly one region per call, with view taking a section or a single object and at cropping to a world rect, either/or and never both. The framed region comes back both rendered and measured: per-pair gaps on each axis, row and column pitch, the section's free margins, and ink share. Conformance is therefore read rather than computed. Operation results stay focused on what they touched and carry no render at all."
         }
       ],
       "children": []
@@ -335,13 +365,13 @@
       },
       "text": [
         {
-          "insert": "Diagnostics measure legibility; the model judges composition.",
+          "insert": "Diagnostics measure legibility, and the model judges composition.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": " Six always-on diagnostics check covered content, containment, broken edges, unreadable labels, crowding, and clipped text against production geometry, and a committed finalize adds frame-slack, a polish check that would only nag while a region is still being built. Clipped text fires when a shape label, sticky body, or section title would drop words behind an ellipsis, and names the measured box size that shows the text whole. Crowding is a warning-tier arrow-corridor floor: it flags sibling gaps under 80px side by side or 48px stacked, the clearance a routed wire and its chip physically need rather than a preferred distance. Every finding in the edited scope blocks a committed finalize, warnings included: the call is refused, the run continues, and the model fixes what it raised before calling again."
+          "insert": " Eight always-on diagnostics run at spawn and on every edit. Six check covered content, containment, broken edges, unreadable labels, crowding, and clipped text against production geometry. The other two, label-is-prose and detail-too-long, hold object text to the name and detail convention. A shape, icon, or section name stays a few words on one line, its detail holds one short fact, and prose goes on a sticky. A committed finalize adds frame-slack, a polish check that would only nag while a region is still being built. Clipped text fires when a shape label, sticky body, or section title would drop words behind an ellipsis, or a detail line would be cut short or hidden. It names the measured box size that shows the text whole. Crowding is a warning-tier arrow-corridor floor: it flags sibling gaps under 80px side by side or 48px stacked, the clearance a routed wire and its chip physically need rather than a preferred distance. Every finding in the edited scope blocks a committed finalize, warnings included: the call is refused, the run continues, and the model fixes what it raised before calling again."
         }
       ],
       "children": []
@@ -365,7 +395,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The agent's complete tool surface — every board-mutating gesture plus the perception, annotation, and run-lifecycle calls — is factored by "
+          "insert": "The agent's complete tool surface (every board-mutating gesture plus the perception, annotation, and run-lifecycle calls) is factored by "
         },
         {
           "insert": "editing gesture",
@@ -402,7 +432,7 @@
           }
         },
         {
-          "insert": " existing and its schema naming its target kind — not by prose inside a catch-all patch."
+          "insert": " existing and its schema naming its target kind, not by prose inside a catch-all patch."
         }
       ],
       "children": []
@@ -444,7 +474,7 @@
           }
         },
         {
-          "insert": " — the sequence a person would perform, in the order they would perform it. That is what the playback rail animates and what the eval judges read."
+          "insert": ", the sequence a person would perform, in the order they would perform it. That is what the playback rail animates and what the eval judges read."
         }
       ],
       "children": []
@@ -536,7 +566,7 @@
           [
             "place_section",
             "Place",
-            "draw a titled frame, which adopts whatever its edges already cover"
+            "draw a titled frame that adopts whatever its edges already cover, with an optional header icon and one-fact detail"
           ],
           [
             "place_sticky",
@@ -546,12 +576,12 @@
           [
             "place_shape",
             "Place",
-            "the pick and the click — a shape or glyph at its default size, untitled"
+            "the pick and the click: an untitled shape or glyph at its default size, with an optional one-fact detail"
           ],
           [
             "clone",
             "Place",
-            "copy one object's kind, size, and look onto a new id"
+            "copy one object's kind, size, and look onto a new id, its detail line and glyph included"
           ],
           [
             "connect",
@@ -591,7 +621,7 @@
           [
             "update_text",
             "Content & appearance",
-            "write the text of anything that carries text"
+            "write a name and its one-line detail, a sticky's body, or an edge's label"
           ],
           [
             "change_color",
@@ -601,7 +631,7 @@
           [
             "change_shape",
             "Content & appearance",
-            "swap what a shape is, and which way it points"
+            "swap what a shape is and which way it points, or set a section's header icon"
           ],
           [
             "fit_section",
@@ -616,7 +646,7 @@
           [
             "lock",
             "Sections",
-            "protect a region — the frame alone, or the frame and everything in it"
+            "protect a region, either the frame alone or the frame and everything in it"
           ],
           [
             "unlock",
@@ -631,7 +661,7 @@
           [
             "change_connection",
             "Edges",
-            "repoint one end of an edge; neither endpoint object changes"
+            "repoint one end of an edge, leaving both endpoint objects unchanged"
           ],
           [
             "reroute",
@@ -661,7 +691,7 @@
           [
             "look",
             "Perceive, ask, finish",
-            "study one framed region close up — rendered and measured"
+            "study one framed region close up, rendered and measured"
           ],
           [
             "update_description",
@@ -763,7 +793,7 @@
           }
         },
         {
-          "insert": " measured — per-pair gaps on each axis, row and column pitch, the section's free margins, ink share — so conformance is read rather than computed in context."
+          "insert": " measured (per-pair gaps on each axis, row and column pitch, the section's free margins, ink share), so conformance is read rather than computed in context."
         }
       ],
       "children": []
@@ -810,7 +840,7 @@
           }
         },
         {
-          "insert": " is not on the surface. Route cleanup is deliberate elbow work — "
+          "insert": " is not on the surface. Route cleanup is deliberate elbow work ("
         },
         {
           "insert": "shift_segment",
@@ -828,7 +858,7 @@
           }
         },
         {
-          "insert": " for the whole path — not a hint handed to a solver."
+          "insert": " for the whole path), not a hint handed to a solver."
         }
       ],
       "children": []
@@ -907,7 +937,7 @@
           }
         },
         {
-          "insert": " — the UI's selection grammar. Batching would speed a run but cuts against one gesture, one operation; the two multi-id gestures that do exist, "
+          "insert": " (the UI's selection grammar). Batching would speed a run but cuts against one gesture, one operation. The two multi-id gestures that do exist, "
         },
         {
           "insert": "align",
@@ -944,7 +974,7 @@
           }
         },
         {
-          "insert": " — an "
+          "insert": ", an "
         },
         {
           "insert": "extend(fromId, id, direction, text?)",
@@ -999,7 +1029,7 @@
           }
         },
         {
-          "insert": " anchors a thread to exactly one object — there are no intent or region targets — and "
+          "insert": " anchors a thread to exactly one object (there are no intent or region targets), and "
         },
         {
           "insert": "delete",
@@ -1203,7 +1233,7 @@
           }
         },
         {
-          "insert": " — the session lifecycle end to end: boot perception, the five-phase workflow, the runtime, operation results, cameras, static rendering, and the finalize gates."
+          "insert": " covers the session lifecycle end to end: boot perception, the five-phase workflow, the runtime, operation results, cameras, static rendering, and the finalize gates."
         }
       ],
       "children": []
@@ -1226,7 +1256,7 @@
           }
         },
         {
-          "insert": " — the per-group contracts: every signature, what each gesture refuses, and the lock matrix."
+          "insert": " covers the per-group contracts: every signature, what each gesture refuses, and the lock matrix."
         }
       ],
       "children": []
@@ -1249,7 +1279,7 @@
           }
         },
         {
-          "insert": " — which numbers quantize, which are exempt, and what a bare placement lands as."
+          "insert": " covers which numbers quantize, which are exempt, and what a bare placement lands as."
         }
       ],
       "children": []
@@ -1272,7 +1302,7 @@
           }
         },
         {
-          "insert": " — the stages every gesture runs through, and the three result classes they return."
+          "insert": " covers the stages every gesture runs through, and the three result classes they return."
         }
       ],
       "children": []

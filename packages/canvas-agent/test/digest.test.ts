@@ -9,6 +9,7 @@ import {
   siblingsOf,
 } from "../src/board/helpers";
 import { formatDiagnostics, runDiagnostics } from "../src/board/lints/run";
+import { FIGJAM_CONTEXT } from "./helpers";
 import {
   DIAGNOSTICS_TEXT_SNAPSHOTS,
   DIGEST_TEXT_SNAPSHOTS,
@@ -212,7 +213,8 @@ describe("digest characterization", () => {
     const actual = Object.fromEntries(
       characterizationDocuments().map(({ name, document }) => [
         name,
-        formatDiagnostics(runDiagnostics(document)),
+        // The snapshots pin figjam chip geometry (30px sans chips).
+        formatDiagnostics(runDiagnostics(document, undefined, FIGJAM_CONTEXT)),
       ]),
     );
     expect(actual).toEqual(DIAGNOSTICS_TEXT_SNAPSHOTS);

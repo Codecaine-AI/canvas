@@ -36,7 +36,8 @@ import type {
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
 } from "../state/schema";
-import { belowBandSize, belowExtendedBoundsPx } from "./text-slots";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
+import { belowBandSize, belowExtendedBoundsPx, iconGlyphBoxPx } from "./text-slots";
 export { inscribedTextRect, type InscribedTextRectResolver } from "./inscribed-text-rects";
 
 /**
@@ -191,18 +192,55 @@ function rectPoints(bounds: CanvasBounds): CanvasPoint[] {
   ];
 }
 
-export function connectionBoundsForObject(object: InteractiveCanvasObject): CanvasBounds {
-  const local = belowExtendedBoundsPx(object);
+/**
+ * World-space hit footprint: the object box ∪ its painted picture (the glyph
+ * box — a tile-style icon's tile — and any below-slot caption band, band
+ * width included), sized under `canvasStyle` (the workspace style — its
+ * detail metrics grow the band, its tile cap places it). Hit testing, hover,
+ * and snap candidates read it. Default style when omitted.
+ */
+export function hitBoundsForObject(
+  object: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): CanvasBounds {
+  const local = belowExtendedBoundsPx(object, canvasStyle);
+  const minX = Math.min(0, local.x);
+  const minY = Math.min(0, local.y);
+  const maxX = Math.max(object.geometry.width, local.x + local.width);
+  const maxY = Math.max(object.geometry.height, local.y + local.height);
   return {
-    x: object.geometry.x + local.x,
+    x: object.geometry.x + minX,
+    y: object.geometry.y + minY,
+    width: maxX - minX,
+    height: maxY - minY,
+  };
+}
+
+/**
+ * World-space connection bounds (anchors, routing, endpoint positions,
+ * obstacles): the glyph box's x/width — a tile-style icon's tile, so
+ * connectors meet the tile — extended DOWN through any below-slot caption
+ * band so the bottom anchor sits under the caption. A caption wider than the
+ * glyph never widens it — side endpoints land on the glyph. Default style
+ * when `canvasStyle` is omitted.
+ */
+export function connectionBoundsForObject(
+  object: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): CanvasBounds {
+  const glyph = iconGlyphBoxPx(object, canvasStyle);
+  const local = belowExtendedBoundsPx(object, canvasStyle);
+  return {
+    x: object.geometry.x + glyph.x,
     y: object.geometry.y + local.y,
-    width: local.width,
+    width: glyph.width,
     height: local.height,
   };
 }
 
-function hasExternalBelowBand(object: InteractiveCanvasObject): boolean {
-  return belowBandSize(object.text, object).lines > 0;
+/** Whether a caption (name lines and/or a detail line) paints below the glyph — detail-only captions count. */
+function hasExternalBelowBand(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): boolean {
+  return belowBandSize(object.text, object, canvasStyle).heightPx > 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -302,9 +340,12 @@ export function outlinePolygonForSpec(
   return rectPoints(bounds);
 }
 
-/** Closed outline polygon for `object`, in its real shape where we model one (rect/diamond/ellipse/triangle/octagon/arrow-shape), falling back to the axis-aligned bounds rect otherwise. */
-export function outlinePolygon(object: InteractiveCanvasObject): CanvasPoint[] {
-  return outlinePolygonForSpec(outlineSpecFor(object), connectionBoundsForObject(object), object);
+/** Closed outline polygon for `object`, in its real shape where we model one (rect/diamond/ellipse/triangle/octagon/arrow-shape), falling back to the axis-aligned bounds rect otherwise. `canvasStyle` sizes below-band captions (default style when omitted). */
+export function outlinePolygon(
+  object: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): CanvasPoint[] {
+  return outlinePolygonForSpec(outlineSpecFor(object), connectionBoundsForObject(object, canvasStyle), object);
 }
 
 /** Segment-segment intersection (finite segments only), returning the intersection point or null. Same algorithm as the vendored `lineIntersects` in gfx-types.ts, inlined here to avoid coupling this pure geometry module to the routing vendor tree. */
@@ -402,12 +443,23 @@ export function pointInPolygon(point: CanvasPoint, polygon: CanvasPoint[]): bool
  * onto the object's real outline — i.e. where the line from the object's center to
  * that offset candidate actually crosses the shape's border, not the bounding box.
  * Falls back to the bounding-box edge midpoint when the candidate ray doesn't
- * cross the polygon (degenerate/zero-size objects).
+ * cross the polygon (degenerate/zero-size objects). Objects with a below-slot
+ * caption keep top/left/right on the glyph and put bottom under the caption
+ * band, which `canvasStyle` sizes (default style when omitted).
  */
-export function getConnectionAnchors(object: InteractiveCanvasObject): ConnectionAnchor[] {
-  if (hasExternalBelowBand(object)) {
-    const glyph = object.geometry;
-    const bounds = connectionBoundsForObject(object);
+export function getConnectionAnchors(
+  object: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): ConnectionAnchor[] {
+  if (hasExternalBelowBand(object, canvasStyle)) {
+    const local = iconGlyphBoxPx(object, canvasStyle);
+    const glyph = {
+      x: object.geometry.x + local.x,
+      y: object.geometry.y + local.y,
+      width: local.width,
+      height: local.height,
+    };
+    const bounds = connectionBoundsForObject(object, canvasStyle);
     const glyphCenterY = glyph.y + glyph.height / 2;
     const points: CanvasPoint[] = [
       { x: glyph.x + glyph.width / 2, y: glyph.y },
@@ -418,9 +470,9 @@ export function getConnectionAnchors(object: InteractiveCanvasObject): Connectio
     return points.map((point) => ({ point, coord: toRelative(bounds, point) }));
   }
 
-  const bounds = connectionBoundsForObject(object);
+  const bounds = connectionBoundsForObject(object, canvasStyle);
   const center: CanvasPoint = { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height / 2 };
-  const polygon = outlinePolygon(object);
+  const polygon = outlinePolygon(object, canvasStyle);
 
   const candidates: CanvasPoint[] = [
     { x: center.x, y: bounds.y - ANCHOR_OFFSET_PX },
@@ -454,18 +506,22 @@ export const OUTLINE_HIT_TOLERANCE_WORLD_PX = 4;
  * outline? Bbox-outline kinds test the plain bounds — byte-identical to the
  * pre-D16 bbox hit test (and cheap: no polygon materialized). True-outline
  * kinds test point-in-polygon, expanded by `tolerance` world px around the
- * boundary so the stroke itself stays clickable.
+ * boundary so the stroke itself stays clickable. Tests against the hit
+ * footprint (hitBoundsForObject); `canvasStyle` sizes below-band captions
+ * (default style when omitted).
  */
 export function outlineContainsPoint(
   object: InteractiveCanvasObject,
   point: CanvasPoint,
   tolerance: number = OUTLINE_HIT_TOLERANCE_WORLD_PX,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): boolean {
-  const { x, y, width, height } = connectionBoundsForObject(object);
+  const bounds = hitBoundsForObject(object, canvasStyle);
+  const { x, y, width, height } = bounds;
   const inBounds = point.x >= x && point.x <= x + width && point.y >= y && point.y <= y + height;
   const spec = outlineSpecFor(object);
   if (spec.kind === "bbox") return inBounds;
-  const polygon = outlinePolygonForSpec(spec, connectionBoundsForObject(object), object);
+  const polygon = outlinePolygonForSpec(spec, bounds, object);
   if (pointInPolygon(point, polygon)) return true;
   return distance(nearestOutlinePoint(point, polygon), point) <= tolerance;
 }

@@ -18,6 +18,7 @@ import {
   type Ref,
 } from "react";
 import {
+  buildSelectionContext,
   createInteractiveCanvasState,
   reduceInteractiveCanvasState,
   type CanvasAction,
@@ -43,6 +44,7 @@ import { useAnnotateMode } from "./features/annotate/use-annotate-mode";
 import { SelectionToolbarLayer } from "./features/selection-toolbar/SelectionToolbarLayer";
 import { useSelectionToolbar } from "./features/selection-toolbar/use-selection-toolbar";
 import { useInteractionPipeline } from "./pipeline/use-interaction-pipeline";
+import { Inspector } from "./features/inspector/Inspector";
 import { TextEditingOverlay } from "./features/text-editing/TextEditingOverlay";
 import { useTextEditing } from "./features/text-editing/use-text-editing";
 import {
@@ -115,6 +117,19 @@ export interface InteractiveCanvasEditorProps {
   screenOverlay?: ReactNode;
   /** Locks document and selection editing while keeping viewport navigation active. */
   cameraOnly?: boolean;
+  /**
+   * Shows the Inspector side panel (right edge) for the selection: text,
+   * detail, section/icon glyph, size, color, and annotation fields. Hidden
+   * while `cameraOnly`. Off by default.
+   */
+  showInspector?: boolean;
+  /**
+   * Caller-owned side panel (e.g. a settings rail), mounted in the editor
+   * chrome beside the Inspector rather than inside the stage like
+   * `screenOverlay`: pointer and wheel events in it never reach the canvas,
+   * and editor popups (context menu, selection toolbar) stack above it.
+   */
+  sidePanel?: ReactNode;
   /**
    * Workspace canvas style overrides (corner radii, border/stroke widths),
    * merged over any enclosing CanvasStyleProvider. Drives the stage, the
@@ -192,6 +207,8 @@ function InteractiveCanvasEditorBody({
   worldOverlay,
   screenOverlay,
   cameraOnly = false,
+  showInspector = false,
+  sidePanel,
 }: Omit<InteractiveCanvasEditorProps, "canvasStyle">) {
   // The provider InteractiveCanvasEditor mounts: exports render with it too.
   const resolvedCanvasStyle = useCanvasStyle();
@@ -308,7 +325,13 @@ function InteractiveCanvasEditorBody({
     openObjectTextEditor,
     openConnectionLabelEditor,
   });
-  const { setOpenFlyout } = selectionToolbar;
+  const { setOpenFlyout, applyColorToSelection } = selectionToolbar;
+  // The Inspector's selection context is only built while the panel shows.
+  const inspectorVisible = showInspector && !cameraOnly;
+  const inspectorSelectionContext = useMemo(
+    () => (inspectorVisible ? buildSelectionContext(state.document, state.selection) : null),
+    [inspectorVisible, state.document, state.selection],
+  );
 
   useEffect(() => {
     if (!annotateModeActive) return;
@@ -703,6 +726,20 @@ function InteractiveCanvasEditorBody({
         topBarLeading={topBarLeading}
         topBarActions={topBarActions}
       />
+
+      {inspectorSelectionContext ? (
+        <Inspector
+          document={state.document}
+          lastChange={state.lastChange}
+          selectedObject={state.document.objects.find((object) => object.id === selectedIds[0])}
+          selectedConnection={selectedConnection}
+          selectionContext={inspectorSelectionContext}
+          dispatch={dispatch}
+          applyColorToSelection={applyColorToSelection}
+        />
+      ) : null}
+
+      {sidePanel}
 
       <SelectionToolbarLayer
         toolbar={selectionToolbar}

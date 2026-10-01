@@ -11,13 +11,17 @@ import type {
 } from "../state/schema";
 import { connectorBendSegments } from "./bend-editing";
 import { labelPointFor, routeConnection } from "./routing";
-import { CONNECTOR_DASH_PATTERN_PX } from "./def";
-import { resolveConnectorStroke } from "../theme/palette";
+import { connectorDashArray } from "./def";
+import { CONNECTION_LABEL_CHIP, connectionLabelChipMetrics } from "./label-chip";
+import { resolveConnectorPaint } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
+import { CANVAS_MONO_FONT_STACK } from "../theme/fonts";
 import { useCanvasStyle } from "../theme/canvas-style-context";
 
-// Connector stroke width, label-chip corner radius and elbow bend radius come
-// from the workspace canvas style (theme/canvas-style.ts) via useCanvasStyle.
+// Connector stroke width, ink, label chip (size, font, colors, corner radius)
+// and elbow bend radius come from the workspace canvas style
+// (theme/canvas-style.ts) via useCanvasStyle; the chip's geometry is shared
+// with the static renderer and the agent lints (./label-chip.ts).
 /** Selection outline/handle color — inlined from the old TRIM.selectionBlue (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 
@@ -27,22 +31,7 @@ const ENDPOINT_HANDLE_STROKE_WIDTH_PX = 2.5;
 const BEND_HANDLE_LENGTH_PX = 26;
 const BEND_HANDLE_THICKNESS_PX = 8;
 const BEND_HANDLE_RADIUS_PX = 4;
-const CONNECTION_LABEL_HEIGHT_PX = 30;
-const CONNECTION_LABEL_PADDING_X_PX = 12;
-const CONNECTION_LABEL_FONT_SIZE_PX = 16;
-const CONNECTION_LABEL_FONT_WEIGHT = 700;
-const CONNECTION_LABEL_AVERAGE_CHAR_WIDTH_PX = 9.6;
-const CONNECTION_LABEL_MIN_WIDTH_PX = 41;
-const CONNECTION_LABEL_BACKGROUND = "#F5F5F5";
-const CONNECTION_LABEL_BORDER = "#D9D9D9";
 export const BEND_HANDLES_MIN_ZOOM = 0.4;
-
-function connectionLabelWidth(label: string): number {
-  return Math.max(
-    CONNECTION_LABEL_MIN_WIDTH_PX,
-    label.length * CONNECTION_LABEL_AVERAGE_CHAR_WIDTH_PX + CONNECTION_LABEL_PADDING_X_PX * 2,
-  );
-}
 
 /**
  * One routed connector: an invisible wide hit path (for click-to-select),
@@ -72,21 +61,20 @@ export function Connector({
 }) {
   const canvasStyle = useCanvasStyle();
   const routed = routeConnection(fromObject, toObject, connection, document.objects, canvasStyle);
-  // FigJam's dash pattern (theme/tokens.ts, CONNECTOR_DASH_PATTERN_PX).
-  const strokeDasharray =
-    connection.style === "dashed" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
+  // FigJam's dash pattern scaled with the style's line width (./def.ts).
+  const strokeDasharray = connection.style === "dashed" ? connectorDashArray(canvasStyle) : undefined;
   const arrow = connection.arrow ?? "forward";
   const showForwardArrow = arrow === "forward" || arrow === "both";
   const showBackArrow = arrow === "back" || arrow === "both";
-  // Per-connection color pick (P1) resolved through the palette's connector
-  // role cells, falling back to the neutral "gray" pick.
-  // Arrowheads inherit via the markers' fill="context-stroke" (see <defs>).
-  const stroke = resolveConnectorStroke(connection.color ?? FIRST_USE_COLORS.connector);
+  // Per-connection color pick (P1) resolved to the theme's ink, falling back
+  // to the neutral "gray" pick. Arrowheads inherit via the markers'
+  // fill="context-stroke" (see <defs>).
+  const stroke = resolveConnectorPaint(connection.color ?? FIRST_USE_COLORS.connector, canvasStyle).stroke;
   const label = connection.label?.trim() ? connection.label : null;
   // The pinned chip center (S1.1) — `routed.labelPoint` unless the connection
   // carries a `labelPosition`.
   const labelPoint = labelPointFor(routed, connection);
-  const labelWidth = label ? connectionLabelWidth(label) : 0;
+  const chip = label ? connectionLabelChipMetrics(label, canvasStyle) : null;
 
   return (
     <g data-canvas-connection-group={connection.id}>
@@ -116,7 +104,7 @@ export function Connector({
         markerEnd={showForwardArrow ? `url(#${document.id}-arrow-forward)` : undefined}
         markerStart={showBackArrow ? `url(#${document.id}-arrow-back)` : undefined}
       />
-      {label ? (
+      {label && chip ? (
         <g
           data-canvas-connection-label={connection.id}
           data-canvas-connection-id={connection.id}
@@ -129,21 +117,22 @@ export function Connector({
           }}
         >
           <rect
-            x={-labelWidth / 2}
-            y={-CONNECTION_LABEL_HEIGHT_PX / 2}
-            width={labelWidth}
-            height={CONNECTION_LABEL_HEIGHT_PX}
+            x={-chip.width / 2}
+            y={-chip.height / 2}
+            width={chip.width}
+            height={chip.height}
             rx={canvasStyle.labelChipCornerRadiusPx}
-            fill={CONNECTION_LABEL_BACKGROUND}
-            stroke={CONNECTION_LABEL_BORDER}
-            strokeWidth={1}
+            fill={canvasStyle.connectorLabelBackground}
+            stroke={canvasStyle.hairlineColor}
+            strokeWidth={CONNECTION_LABEL_CHIP.borderWidthPx}
           />
           <text
             textAnchor="middle"
             dominantBaseline="central"
-            fill="var(--foreground)"
-            fontSize={CONNECTION_LABEL_FONT_SIZE_PX}
-            fontWeight={CONNECTION_LABEL_FONT_WEIGHT}
+            fill={canvasStyle.connectorLabelTextColor}
+            fontSize={chip.fontSizePx}
+            fontWeight={chip.fontWeight}
+            fontFamily={chip.font === "mono" ? CANVAS_MONO_FONT_STACK : undefined}
             style={{ pointerEvents: "none", userSelect: "none" }}
           >
             {label}
@@ -174,7 +163,8 @@ export function ConnectorSelectionTrim({
   toObject: InteractiveCanvasObject;
   zoom: number;
 }) {
-  const routed = routeConnection(fromObject, toObject, connection, document.objects);
+  const canvasStyle = useCanvasStyle();
+  const routed = routeConnection(fromObject, toObject, connection, document.objects, canvasStyle);
   const safeZoom = Math.max(zoom, 0.001);
   const label = connection.label?.trim() ? connection.label : null;
   const endpointRadius = ENDPOINT_HANDLE_RADIUS_PX / safeZoom;
@@ -182,7 +172,7 @@ export function ConnectorSelectionTrim({
   const bendHandleLength = BEND_HANDLE_LENGTH_PX / safeZoom;
   const bendHandleThickness = BEND_HANDLE_THICKNESS_PX / safeZoom;
   const bendHandleRadius = BEND_HANDLE_RADIUS_PX / safeZoom;
-  const labelWidth = label ? connectionLabelWidth(label) : 0;
+  const labelWidth = label ? connectionLabelChipMetrics(label, canvasStyle).width : 0;
   const bendSegments =
     safeZoom >= BEND_HANDLES_MIN_ZOOM
       ? connectorBendSegments(routed.points ?? [], {

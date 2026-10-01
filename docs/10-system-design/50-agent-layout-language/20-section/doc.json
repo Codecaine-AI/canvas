@@ -8,37 +8,23 @@
       "id": "b-section-root",
       "type": "paragraph",
       "props": {
-        "covers": "The section notation: a real container object with a title and one nested composition; the frame is closed around its children with fit_section, and sections give every idea a home while serving as addressable, linkable units.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "section",
           "label",
           "container",
           "automatic frame",
           "shrink to fit"
-        ]
+        ],
+        "covers": "The section notation: a real container object with a title and one nested composition; the frame is closed around its children with fit_section, and sections give every idea a home while serving as addressable, linkable units.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
-        "b-section-title-1",
         "b-section-body-2",
         "b-section-frame-3",
         "b-section-code-4",
         "b-section-canvas-5"
       ]
-    },
-    "b-section-title-1": {
-      "id": "b-section-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "section — a real container object"
-        }
-      ],
-      "children": []
     },
     "b-section-body-2": {
       "id": "b-section-body-2",
@@ -64,7 +50,7 @@
           }
         },
         {
-          "insert": " (a JSON string; the literal "
+          "insert": " (a JSON string). The literal "
         },
         {
           "insert": "label=undefined",
@@ -73,7 +59,7 @@
           }
         },
         {
-          "insert": " denotes a label that is explicitly unspecified — distinct from no "
+          "insert": " denotes a label that is explicitly unspecified, distinct from no "
         },
         {
           "insert": "label=",
@@ -82,7 +68,7 @@
           }
         },
         {
-          "insert": " at all). A section has "
+          "insert": " at all. A section has "
         },
         {
           "insert": "exactly one",
@@ -105,7 +91,7 @@
           }
         },
         {
-          "insert": " — they are always declared with "
+          "insert": ". They are always declared with "
         },
         {
           "insert": "section",
@@ -125,7 +111,7 @@
       "props": {},
       "text": [
         {
-          "insert": "On the live board, the section's text renders as its title chip; the chip is not a separate object. Give the title and content clear air, and repeat one deliberate gap through each group. A section keeps exactly the geometry it is given; fit_section closes one around the children already inside it, and only that section, when the region is finished. Sections do the grouping: every idea has a home, and each section is an addressable, linkable unit. Nest sections for hierarchy."
+          "insert": "On the live board, the section's text renders as the title in its header chip. An optional icon, which can be any glyph, opens the chip, and an optional one-fact detail closes it. The chip is not a separate object. Give the title and content clear air, and repeat one deliberate gap through each group. A section keeps exactly the geometry it is given. When the region is finished, fit_section closes that one section around the children already inside it and leaves every other section alone. Sections do the grouping: every idea has a home, and each section is an addressable, linkable unit. Nest sections for hierarchy."
         }
       ],
       "children": []

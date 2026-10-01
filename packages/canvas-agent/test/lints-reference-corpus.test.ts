@@ -13,16 +13,27 @@ import { LAYOUT_RULES } from "../src/board/lints";
 
 const CORPUS_DIR = join(import.meta.dir, "..", "..", "..", "canvases");
 
-/** Measured ceilings; inspect individual findings before changing these. */
+/**
+ * Measured ceilings; inspect individual findings before changing these.
+ * The text-convention rules (label-is-prose, detail-too-long) judge only text
+ * an agent wrote in its session, and these boards are people's own work read
+ * with no session, so those rules never contribute here.
+ */
 const CEILING: Record<string, number> = {
   "agent-flows-2": 2,
-  "bubba-voice": 1,
+  // 1 → 2 with the schematic 17.5px names: rect-prompt-code's 34-line XML
+  // prompt no longer fits its 800×640 box (29 lines of 21px) — a real clip.
+  "bubba-voice": 2,
   "claude-code-researcher": 0,
   "gc-decomp-harness": 13,
   "ink-diagrams": 17,
   "intent-classification-1": 1,
   "intent-classification-2": 0,
-  "v2-flow": 1,
+  // 1 → 2 with the schematic 56px icon-tile cap: chip-generate-transition-response's
+  // left anchor moved onto its (now centered, smaller) tile, which pulls the router's
+  // mid-elbow leg to 3.7px from `section`'s left border for 447px — a real
+  // border-hugging route, not a measurement artifact.
+  "v2-flow": 2,
 };
 
 const TOTAL_CEILING = 35;

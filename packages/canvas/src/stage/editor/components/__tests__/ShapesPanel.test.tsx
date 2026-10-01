@@ -2,10 +2,30 @@ import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { ShapesPanel, SHAPES_PANEL_WIDTH_PX } from "../ShapesPanel";
 import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../../../../objects/catalog";
+import {
+  ICON_GLYPHS,
+  ICON_GLYPH_CATEGORIES,
+  ICON_GLYPH_IDS,
+} from "../../../../objects/shapes/icon/icon-glyphs";
 
 afterEach(() => {
   cleanup();
 });
+
+/** The rendered icon groups, in DOM order: category id + the glyph ids inside it. */
+function renderedIconGroups(container: HTMLElement) {
+  return Array.from(container.querySelectorAll("[data-icon-category]")).map((group) => ({
+    category: group.getAttribute("data-icon-category"),
+    glyphs: Array.from(group.querySelectorAll("[data-shape-entry]")).map((button) =>
+      button.getAttribute("data-icon"),
+    ),
+  }));
+}
+
+/** Roster glyph ids in `category`, roster order. */
+function glyphsIn(category: string) {
+  return ICON_GLYPH_IDS.filter((glyph) => ICON_GLYPHS[glyph].category === category);
+}
 
 describe("ShapesPanel geometry", () => {
   it("renders a full-height white panel at the expanded picker width", () => {
@@ -90,19 +110,45 @@ describe("ShapesPanel sections", () => {
     expect(container.querySelector('[data-shape-grid="icons"]')).toBeTruthy();
   });
 
-  it("renders the correct entry count for each section (Icons=30, Shapes=10)", () => {
+  it("renders the correct entry count for each section (Shapes=10)", () => {
     const { container } = render(<ShapesPanel />);
     for (const category of SHAPE_CATALOG) {
-      const grid = container.querySelector(`[data-shape-grid="${category.id}"]`) as HTMLElement;
-      expect(grid.style.gridTemplateColumns).toBe("repeat(4, 46px)");
-      expect(grid.style.justifyContent).toBe("space-between");
-      expect(grid.style.rowGap).toBe("6px");
-      expect(grid.querySelectorAll("[data-shape-entry]").length).toBe(category.entries.length);
+      const section = container.querySelector(`[data-shape-grid="${category.id}"]`) as HTMLElement;
+      expect(section.querySelectorAll("[data-shape-entry]").length).toBe(category.entries.length);
+      // Icons hold one 4-column grid per icon category; Shapes is one grid.
+      const grids =
+        category.id === "icons"
+          ? Array.from(section.querySelectorAll<HTMLElement>("[data-icon-grid]"))
+          : [section];
+      expect(grids.length).toBeGreaterThan(0);
+      for (const grid of grids) {
+        expect(grid.style.gridTemplateColumns).toBe("repeat(4, 46px)");
+        expect(grid.style.justifyContent).toBe("space-between");
+        expect(grid.style.rowGap).toBe("6px");
+      }
     }
-    const icons = SHAPE_CATALOG.find((c) => c.id === "icons")!;
     const shapes = SHAPE_CATALOG.find((c) => c.id === "shapes")!;
-    expect(icons.entries.length).toBe(30);
     expect(shapes.entries.length).toBe(10);
+  });
+
+  it("groups icons by category in ICON_GLYPH_CATEGORIES order, brands last, every glyph exactly once", () => {
+    const { container, getByRole } = render(<ShapesPanel />);
+    const groups = renderedIconGroups(container);
+
+    const expected = ICON_GLYPH_CATEGORIES.map((category) => ({
+      category: category.id,
+      glyphs: glyphsIn(category.id),
+    })).filter((group) => group.glyphs.length > 0);
+    expect(groups).toEqual(expected);
+    expect(groups.at(-1)?.category).toBe("brands");
+
+    const rendered = groups.flatMap((group) => group.glyphs);
+    expect(rendered.length).toBe(ICON_GLYPH_IDS.length);
+    expect(new Set(rendered)).toEqual(new Set(ICON_GLYPH_IDS));
+
+    // Each group is labeled by its category's visible sub-heading.
+    const brands = getByRole("group", { name: "Brands" });
+    expect(brands.textContent).toContain("Brands");
   });
 });
 
@@ -114,6 +160,36 @@ describe("ShapesPanel search", () => {
     // "Octagon" only appears in Shapes per the catalog data.
     expect(categories.length).toBe(1);
     expect(categories[0].getAttribute("data-shape-category")).toBe("shapes");
+  });
+
+  it('"brand" lists every brand and nothing else, still grouped', () => {
+    const { getByLabelText, container } = render(<ShapesPanel />);
+    fireEvent.change(getByLabelText("Search shapes"), { target: { value: "brand" } });
+
+    const categories = Array.from(container.querySelectorAll("[data-shape-category]")).map((c) =>
+      c.getAttribute("data-shape-category"),
+    );
+    expect(categories).toEqual(["icons"]);
+    expect(renderedIconGroups(container)).toEqual([
+      { category: "brands", glyphs: glyphsIn("brands") },
+    ]);
+  });
+
+  it("lists a whole icon category when the query matches the category's name", () => {
+    const { getByLabelText, container } = render(<ShapesPanel />);
+    const search = getByLabelText("Search shapes");
+
+    // The whole group, not just the glyph that is also named "Network".
+    fireEvent.change(search, { target: { value: "network" } });
+    expect(renderedIconGroups(container)).toEqual([
+      { category: "network", glyphs: glyphsIn("network") },
+    ]);
+
+    // "control" appears only in the "Status & control" label.
+    fireEvent.change(search, { target: { value: "Control" } });
+    expect(renderedIconGroups(container)).toEqual([
+      { category: "status", glyphs: glyphsIn("status") },
+    ]);
   });
 });
 
@@ -138,9 +214,11 @@ describe("ShapesPanel interaction", () => {
 
   it("shows shape tooltips below icons and aligns edge-column labels inside the panel", () => {
     const { container } = render(<ShapesPanel />);
-    const iconEntries = SHAPE_CATALOG.find((c) => c.id === "icons")!.entries;
-    const firstColumnButton = container.querySelector(`[data-shape-entry="${iconEntries[0].id}"]`) as HTMLElement;
-    const lastColumnButton = container.querySelector(`[data-shape-entry="${iconEntries[3].id}"]`) as HTMLElement;
+    // Columns count within each icon-category grid: the second grid's first
+    // button is column 0 even when the first grid's last row is partial.
+    const [firstGrid, secondGrid] = Array.from(container.querySelectorAll("[data-icon-grid]"));
+    const firstColumnButton = secondGrid.querySelector("[data-shape-entry]") as HTMLElement;
+    const lastColumnButton = firstGrid.querySelectorAll<HTMLElement>("[data-shape-entry]")[3];
 
     fireEvent.pointerEnter(firstColumnButton);
 

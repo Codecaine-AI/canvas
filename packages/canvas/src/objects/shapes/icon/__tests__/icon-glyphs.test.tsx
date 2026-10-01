@@ -2,11 +2,13 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import {
   ICON_GLYPHS,
+  ICON_GLYPH_BASE_VIEWBOX_SIZE,
   ICON_GLYPH_CANVAS_STROKE_WIDTH,
   ICON_GLYPH_IDS,
   ICON_GLYPH_REFERENCE_SIZE_PX,
   ICON_GLYPH_STROKE_WIDTH,
   iconGlyphStrokeWidthForSize,
+  iconGlyphStrokeWidthForViewBox,
   type IconGlyphId,
 } from "../icon-glyphs";
 import { IconShapeBody } from "../IconShapeBody";
@@ -15,7 +17,10 @@ afterEach(() => {
   cleanup();
 });
 
-const EXPECTED_IDS: IconGlyphId[] = [
+// The 30 operational-map ids. Documents have persisted them since the first
+// icon release, so they stay first in the roster, in this order, and keep
+// drawing their Nucleo geometry in the default (nucleo) pack.
+const BASE_IDS: IconGlyphId[] = [
   "agent",
   "model",
   "human",
@@ -49,31 +54,30 @@ const EXPECTED_IDS: IconGlyphId[] = [
 ];
 
 describe("ICON_GLYPH_IDS", () => {
-  it("has exactly 30 entries matching the operational-map roster", () => {
-    expect(ICON_GLYPH_IDS.length).toBe(30);
-    expect([...ICON_GLYPH_IDS].sort()).toEqual([...EXPECTED_IDS].sort());
+  it("starts with the 30 operational-map ids, in roster order", () => {
+    expect(ICON_GLYPH_IDS.slice(0, BASE_IDS.length)).toEqual(BASE_IDS);
   });
 });
 
 describe("ICON_GLYPHS registry", () => {
   it("has exactly one definition per glyph id, keyed consistently", () => {
-    const keys = Object.keys(ICON_GLYPHS);
-    expect(keys.length).toBe(30);
-    for (const id of EXPECTED_IDS) {
-      expect(ICON_GLYPHS[id]).toBeDefined();
+    expect(Object.keys(ICON_GLYPHS)).toEqual([...ICON_GLYPH_IDS]);
+    for (const id of ICON_GLYPH_IDS) {
       expect(ICON_GLYPHS[id].id).toBe(id);
     }
   });
 
-  it("every glyph has an 18x18 (native Nucleo grid) viewBox and at least one drawable element", () => {
-    for (const id of EXPECTED_IDS) {
+  it("every operational-map glyph keeps its Nucleo outline: 18x18 grid, stroke paint, at least one drawable element", () => {
+    for (const id of BASE_IDS) {
       const glyph = ICON_GLYPHS[id];
+      expect(glyph.source).toBe("nucleo");
+      expect(glyph.paint).toBe("stroke");
       expect(glyph.viewBoxSize).toBe(18);
       expect(glyph.elements.length).toBeGreaterThan(0);
     }
   });
 
-  for (const id of EXPECTED_IDS) {
+  for (const id of BASE_IDS) {
     it(`renders valid, non-empty SVG markup for "${id}"`, () => {
       const glyph = ICON_GLYPHS[id];
       const { container } = render(
@@ -108,6 +112,23 @@ describe("iconGlyphStrokeWidthForSize", () => {
   it("falls back to the canvas base glyph stroke for non-positive sizes", () => {
     expect(iconGlyphStrokeWidthForSize(0)).toBe(ICON_GLYPH_CANVAS_STROKE_WIDTH);
     expect(iconGlyphStrokeWidthForSize(-1)).toBe(ICON_GLYPH_CANVAS_STROKE_WIDTH);
+  });
+});
+
+describe("iconGlyphStrokeWidthForViewBox", () => {
+  it("draws a glyph on any grid at the Nucleo glyph's rendered pixel weight for the same box", () => {
+    // A stroke of w viewBox units on a V-unit grid drawn into a B px box renders w * B / V px.
+    for (const sizePx of [20, 64, ICON_GLYPH_REFERENCE_SIZE_PX, 520]) {
+      const nucleoPx = (iconGlyphStrokeWidthForSize(sizePx) * sizePx) / ICON_GLYPH_BASE_VIEWBOX_SIZE;
+      const tablerPx = (iconGlyphStrokeWidthForViewBox(sizePx, 24) * sizePx) / 24;
+      expect(tablerPx).toBeCloseTo(nucleoPx, 10);
+    }
+  });
+
+  it("returns the Nucleo-grid stroke bit-for-bit, so renderers can switch helpers without moving a pixel", () => {
+    for (let sizePx = 1; sizePx <= 1024; sizePx += 1) {
+      expect(iconGlyphStrokeWidthForViewBox(sizePx, ICON_GLYPH_BASE_VIEWBOX_SIZE)).toBe(iconGlyphStrokeWidthForSize(sizePx));
+    }
   });
 });
 

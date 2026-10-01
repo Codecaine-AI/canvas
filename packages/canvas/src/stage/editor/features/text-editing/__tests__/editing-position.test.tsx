@@ -7,7 +7,7 @@
  * slot, so mid-edit and at-rest text are pixel-identical (caret aside).
  */
 import { afterEach, describe, expect, it } from "bun:test";
-import { cleanup, render } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
 import { objectDefFor } from "../../../../../objects/object-def";
 import {
   resolveObjectBorderWidth,
@@ -19,6 +19,7 @@ import {
   slotLineHeightPx,
 } from "../../../../../objects/text-slots";
 import { CanvasStage } from "../../../../CanvasStage";
+import { FIGJAM_CANVAS_STYLE, renderFigjam } from "../../../../../theme/__tests__/figjam";
 import { ObjectShape } from "../../../../ObjectShape";
 import type { InteractiveCanvasObject } from "../../../../../state/schema";
 import { TextEditingOverlay } from "../TextEditingOverlay";
@@ -55,7 +56,7 @@ function apiFor(target: InteractiveCanvasObject, value?: string): TextEditingApi
 }
 
 function renderEditor(object: InteractiveCanvasObject, zoom = 1, value?: string) {
-  const view = render(<TextEditingOverlay textEditing={apiFor(object, value)} zoom={zoom} />);
+  const view = renderFigjam(<TextEditingOverlay textEditing={apiFor(object, value)} zoom={zoom} />);
   const editor = view.container.querySelector<HTMLElement>("[data-canvas-text-editor]");
   expect(editor).not.toBeNull();
   return { view, editor: editor! };
@@ -78,7 +79,7 @@ function cssPx(value: string): number {
 function expectEditorOnSlot(object: InteractiveCanvasObject, zoom = 1) {
   const def = objectDefFor(object);
   expect(def?.textSlot).toBeDefined();
-  const resolved = resolveTextSlot(def!.textSlot!, object, zoom);
+  const resolved = resolveTextSlot(def!.textSlot!, object, zoom, { canvasStyle: FIGJAM_CANVAS_STYLE });
   const { editor } = renderEditor(object, zoom);
   expect(editor.style.left).toBe(`${object.geometry.x + resolved.rect.x}px`);
   expect(editor.style.top).toBe(`${object.geometry.y + resolved.rect.y}px`);
@@ -90,15 +91,17 @@ function expectEditorOnSlot(object: InteractiveCanvasObject, zoom = 1) {
 /** The at-rest slot/chip must land at the same world rect the editor uses. */
 function expectAtRestMatchesEditor(object: InteractiveCanvasObject) {
   const def = objectDefFor(object);
-  const resolved = resolveTextSlot(def!.textSlot!, object);
+  const resolved = resolveTextSlot(def!.textSlot!, object, 1, { canvasStyle: FIGJAM_CANVAS_STYLE });
   const effectiveButtonBorderWidth = resolveObjectBorderWidth(
     object,
     def!.colorRole,
     def!.buttonBorder,
+    undefined,
+    FIGJAM_CANVAS_STYLE,
   );
   const view =
     object.type === "section"
-      ? render(
+      ? renderFigjam(
           <CanvasStage
             document={{
               schemaVersion: 1,
@@ -110,7 +113,7 @@ function expectAtRestMatchesEditor(object: InteractiveCanvasObject) {
             viewport={{ x: 0, y: 0, zoom: 1 }}
           />,
         )
-      : render(
+      : renderFigjam(
           <ObjectShape
             object={object}
             selected={false}
@@ -142,7 +145,7 @@ function expectAtRestMatchesEditor(object: InteractiveCanvasObject) {
 /** Editor control typography must equal the slot typography (D14: no visual jump). */
 function expectEditorTypography(object: InteractiveCanvasObject) {
   const def = objectDefFor(object);
-  const { typography } = resolveTextSlot(def!.textSlot!, object);
+  const { typography } = resolveTextSlot(def!.textSlot!, object, 1, { canvasStyle: FIGJAM_CANVAS_STYLE });
   const { editor } = renderEditor(object);
   const control = def?.textEditing.markdown
     ? editor.querySelector<HTMLElement>('[role="textbox"][aria-label="Object text"]')
@@ -175,7 +178,7 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
       {
         label: "painted soft shape",
         object: makeObject({ id: "bw-process", type: "process", style: { shape: "rounded-rect" } }),
-        // DEFAULT_CANVAS_STYLE.shapeBorderWidthPx
+        // FIGJAM_CANVAS_STYLE.shapeBorderWidthPx
         expected: 2,
       },
       {
@@ -210,7 +213,7 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
       {
         label: "section solid frame",
         object: makeObject({ id: "bw-section", type: "section", style: { shape: "section" } }),
-        // DEFAULT_CANVAS_STYLE.sectionBorderWidthPx
+        // FIGJAM_CANVAS_STYLE.sectionBorderWidthPx
         expected: 1.5,
       },
       {
@@ -229,7 +232,7 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
       expect(def).toBeDefined();
       expect({
         label,
-        width: resolveObjectBorderWidth(object, def!.colorRole, def!.buttonBorder),
+        width: resolveObjectBorderWidth(object, def!.colorRole, def!.buttonBorder, undefined, FIGJAM_CANVAS_STYLE),
       }).toEqual({ label, width: expected });
     }
   });

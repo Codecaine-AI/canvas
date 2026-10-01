@@ -8,8 +8,6 @@
       "id": "b-theme-root-0",
       "type": "paragraph",
       "props": {
-        "covers": "Where theme code lives: palette.ts and tokens.ts as the two leaf modules under packages/canvas/src/theme/, the dispersal that keeps everything else beside its consumer, and the palette import boundary.",
-        "type": "implementation",
         "concepts": [
           "theme",
           "palette",
@@ -17,13 +15,16 @@
           "dispersal",
           "import-boundary",
           "leaf-module"
-        ]
+        ],
+        "covers": "Where theme code lives: palette.ts and tokens.ts as the two leaf modules under packages/canvas/src/theme/, the dispersal that keeps everything else beside its consumer, and the palette import boundary.",
+        "type": "implementation"
       },
       "children": [
         "b-theme-role-1",
         "b-theme-sources-2",
         "b-theme-gov-3",
         "b-theme-gov-shape-4",
+        "b-theme-gov-themes-15",
         "b-theme-decisions-5",
         "b-theme-split-decision-6",
         "b-theme-split-why-7",
@@ -33,7 +34,16 @@
         "b-theme-dispersal-applies-11",
         "b-theme-boundary-decision-12",
         "b-theme-boundary-why-13",
-        "b-theme-boundary-applies-14"
+        "b-theme-boundary-applies-14",
+        "b-theme-presets-decision-16",
+        "b-theme-presets-why-17",
+        "b-theme-presets-applies-18",
+        "b-theme-resolvers-decision-19",
+        "b-theme-resolvers-why-20",
+        "b-theme-resolvers-applies-21",
+        "b-theme-context-decision-22",
+        "b-theme-context-why-23",
+        "b-theme-context-applies-24"
       ]
     },
     "b-theme-role-1": {
@@ -42,25 +52,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The theme area is two leaf modules: "
-        },
-        {
-          "insert": "palette.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", the closed 10-pick color table with its per-role resolvers, and "
-        },
-        {
-          "insert": "tokens.ts",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", the non-color remainder — canvas surface variables, the universal shape stroke, the text size hierarchy. The color model itself is owned by design; this area records only where theme code lives and what may import it."
+          "insert": "The theme area turns the workspace's style settings into the one resolved style every renderer reads, and into the paint each color pick takes under it. The theme model is owned by design. This area records where theme code lives, how it splits, and what may import it."
         }
       ],
       "children": []
@@ -120,7 +112,30 @@
           }
         },
         {
-          "insert": " — owns the color model: the 10-pick roster, the ink/fill/wash roles, and how a pick becomes pixels per kind."
+          "insert": " owns the color model: the 10-pick roster, the ink, fill, and wash roles, and how a pick becomes pixels per kind."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-gov-themes-15": {
+      "id": "b-theme-gov-themes-15",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes",
+              "label": "Workspace themes"
+            }
+          }
+        },
+        {
+          "insert": " owns the theme model: the presets and tokens, the settings file, and the paint rules each theme applies."
         }
       ],
       "children": []
@@ -159,11 +174,26 @@
           }
         },
         {
-          "insert": " holds exactly two modules — "
+          "insert": " splits by concern into pure leaves. "
+        },
+        {
+          "insert": "canvas-style.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/canvas-style.ts",
+              "label": "canvas-style.ts"
+            }
+          }
+        },
+        {
+          "insert": " owns the style model (theme ids, presets, controls, validation, settings resolution), "
         },
         {
           "insert": "palette.ts",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/theme/palette.ts",
@@ -172,11 +202,40 @@
           }
         },
         {
-          "insert": " owns everything color (the swatch table and the per-role resolvers), "
+          "insert": " owns everything color (the role tables and every paint resolver), "
+        },
+        {
+          "insert": "color-math.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/color-math.ts",
+              "label": "color-math.ts"
+            }
+          }
+        },
+        {
+          "insert": " owns the color arithmetic, "
+        },
+        {
+          "insert": "fonts.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/fonts.ts",
+              "label": "fonts.ts"
+            }
+          }
+        },
+        {
+          "insert": " the font stacks, and "
         },
         {
           "insert": "tokens.ts",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/theme/tokens.ts",
@@ -185,7 +244,7 @@
           }
         },
         {
-          "insert": " owns the small non-color remainder — and consumers reach color only through the resolvers, never by indexing the table."
+          "insert": " the small non-color remainder. Consumers reach color only through the resolvers, never by indexing the table."
         }
       ],
       "children": []
@@ -235,7 +294,7 @@
           }
         },
         {
-          "insert": " — including every future color role, which joins the table and gains a resolver rather than a new module."
+          "insert": ", including every future color role or token, which joins its owning module and gains a resolver or a control rather than a new module."
         }
       ],
       "children": []
@@ -261,7 +320,7 @@
           }
         },
         {
-          "insert": " stays small by design: pixel-parity constants co-locate with their one consumer — grid constants in "
+          "insert": " stays small by design. Pixel-parity constants co-locate with their one consumer: grid constants in "
         },
         {
           "insert": "stage/grid.ts",
@@ -274,7 +333,7 @@
           }
         },
         {
-          "insert": ", object trim metrics beside the object defs, connector stroke and dash metrics in the connector slice — and only what is genuinely global (the palette, the universal stroke, surface variables, text sizes) lives in "
+          "insert": ", object trim metrics beside the object defs, the title-chip layout beside the section, and the label-chip metrics in the connector slice. Only what is genuinely global lives in "
         },
         {
           "insert": "theme/",
@@ -283,7 +342,7 @@
           }
         },
         {
-          "insert": "."
+          "insert": ": the style tokens, the palette, the font stacks, the surface variables, and the text sizes."
         }
       ],
       "children": []
@@ -342,7 +401,7 @@
           }
         },
         {
-          "insert": " — including every future sampled constant, which lands beside its consumer, not here."
+          "insert": ", including every future sampled constant, which lands beside its consumer, not here."
         }
       ],
       "children": []
@@ -362,13 +421,49 @@
           "insert": ": "
         },
         {
-          "insert": "palette.ts",
+          "insert": "theme/",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " may import only "
+          "insert": " imports only "
+        },
+        {
+          "insert": "state/schema",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and inside it the leaves import downward only. "
+        },
+        {
+          "insert": "color-math.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "fonts.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " import nothing, "
+        },
+        {
+          "insert": "canvas-style.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " imports only "
         },
         {
           "insert": "state/schema/colors.ts",
@@ -381,16 +476,34 @@
           }
         },
         {
-          "insert": " — the id vocabulary — and must never import "
+          "insert": " and "
         },
         {
-          "insert": "tokens.ts",
+          "insert": "color-math.ts",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " or anything under "
+          "insert": ", and "
+        },
+        {
+          "insert": "palette.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " adds only the "
+        },
+        {
+          "insert": "CanvasStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " type. No theme module imports "
         },
         {
           "insert": "objects/",
@@ -399,7 +512,7 @@
           }
         },
         {
-          "insert": "; the boundary is encoded in "
+          "insert": ", and "
         },
         {
           "insert": "import-boundaries.test.ts",
@@ -412,7 +525,7 @@
           }
         },
         {
-          "insert": "."
+          "insert": " encodes every edge."
         }
       ],
       "children": []
@@ -464,6 +577,197 @@
           }
         },
         {
+          "insert": ": every module under "
+        },
+        {
+          "insert": "packages/canvas/src/theme",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme",
+              "label": "packages/canvas/src/theme"
+            }
+          }
+        },
+        {
+          "insert": ", including every future import, which must clear the same test."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-presets-decision-16": {
+      "id": "b-theme-presets-decision-16",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": a theme is data. Every theme is a complete "
+        },
+        {
+          "insert": "CanvasStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " preset in "
+        },
+        {
+          "insert": "CANVAS_THEME_PRESETS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and every token has one entry in "
+        },
+        {
+          "insert": "CANVAS_STYLE_CONTROLS",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " that drives validation, clamping, and Studio's Style tab. The figjam preset holds the renderer constants it replaced."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-presets-why-17": {
+      "id": "b-theme-presets-why-17",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": generic controls mean a new token needs no per-token parser or UI code, and a figjam preset equal to the old constants keeps the DOM-equivalence baseline the regression guard for the default look. The rejected alternative was theme branches inside renderers, which would scatter each theme's look across every paint site."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-presets-applies-18": {
+      "id": "b-theme-presets-applies-18",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "canvas-style.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/canvas-style.ts",
+              "label": "canvas-style.ts"
+            }
+          }
+        },
+        {
+          "insert": ", including every future token, which adds a "
+        },
+        {
+          "insert": "CanvasStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field, a value in all three presets, and one control entry."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-resolvers-decision-19": {
+      "id": "b-theme-resolvers-decision-19",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": every paint resolver takes the resolved style as an argument ("
+        },
+        {
+          "insert": "resolveShapePaint(color, style)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resolveSectionPaint(color, depth, style)",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and their siblings), and the pre-theme exports (the role tables and "
+        },
+        {
+          "insert": "resolveShapeColors",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with its siblings) stay as the figjam paint the figjam modes read."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-resolvers-why-20": {
+      "id": "b-theme-resolvers-why-20",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": an explicit style argument keeps the resolvers pure and callable from Node, so the static SVG renderer, Studio's server, and the agent's camera paint exactly what the live stage paints. Keeping the old exports unchanged let themes land without moving a default pixel."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-resolvers-applies-21": {
+      "id": "b-theme-resolvers-applies-21",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
           "insert": ": "
         },
         {
@@ -477,7 +781,156 @@
           }
         },
         {
-          "insert": " — including every future import added to the palette, which must clear the same test."
+          "insert": ", including every future kind, which adds a resolver that takes the style."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-context-decision-22": {
+      "id": "b-theme-context-decision-22",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "@codecaine-ai/canvas/style",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " exports the style model alone for Node hosts, and "
+        },
+        {
+          "insert": "canvas-style-context.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/canvas-style-context.tsx",
+              "label": "canvas-style-context.tsx"
+            }
+          }
+        },
+        {
+          "insert": " is the only React module in "
+        },
+        {
+          "insert": "theme/",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Its "
+        },
+        {
+          "insert": "CanvasStyleProvider",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " resolves nested partial values, where a value naming another theme starts from that theme's preset, and "
+        },
+        {
+          "insert": "canvasStyleCssVariables",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " publishes every color and number token as "
+        },
+        {
+          "insert": "--canvas-<kebab-key>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " plus "
+        },
+        {
+          "insert": "--canvas-ink-<color>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", keeping the original six variable names."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-context-why-23": {
+      "id": "b-theme-context-why-23",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": Studio's server and the Canvas MCP resolve settings files without React, and static per-kind CSS cannot interpolate runtime values, so it reads the variables through "
+        },
+        {
+          "insert": "canvasStyleCssVar",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", which falls back to the figjam value outside a stage."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-context-applies-24": {
+      "id": "b-theme-context-applies-24",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": ": "
+        },
+        {
+          "insert": "canvas-style-context.tsx",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/canvas-style-context.tsx",
+              "label": "canvas-style-context.tsx"
+            }
+          }
+        },
+        {
+          "insert": " and the package's "
+        },
+        {
+          "insert": "./style",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " export, including every future token, whose variable comes from the controls table with no extra code."
         }
       ],
       "children": []

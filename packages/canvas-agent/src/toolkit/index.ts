@@ -61,6 +61,7 @@ import {
 } from "../service/session/snapshots/context";
 import type { LayoutSession } from "../service/session/store";
 import { createToolRuntime } from "../service/session/tools/create-runtime";
+import { closeNames } from "../service/session/tools/glyph-names";
 import { operationTools, type OperationTool } from "../service/session/tools/operations";
 import type {
   LayoutToolRenderResult,
@@ -358,6 +359,39 @@ export function persistCanvasFile(
   };
 }
 
+/**
+ * "Did you mean" lines for every string argument that missed its enum.
+ *
+ * The schema refusal names the field and says the value is not allowed; it
+ * does not say what was close. Walking the arguments beside the schema finds
+ * each string an enum rejected (top-level, or inside a patch object) and offers
+ * the nearest members, so `place_shape {type: "postgres"}` comes back pointing
+ * at "brand-postgres" instead of at a hundred-name list.
+ */
+function enumMissHints(schema: unknown, args: unknown, path = ""): string[] {
+  if (schema === null || typeof schema !== "object") return [];
+  const node = schema as { enum?: unknown; properties?: Record<string, unknown>; anyOf?: unknown[] };
+  const members = Array.isArray(node.enum)
+    ? node.enum
+    : (node.anyOf ?? []).flatMap((option) => {
+        const values = (option as { enum?: unknown } | null)?.enum;
+        return Array.isArray(values) ? values : [];
+      });
+  const roster = members.filter((member): member is string => typeof member === "string");
+  if (typeof args === "string" && roster.length > 0 && !roster.includes(args)) {
+    const close = closeNames(args, roster);
+    return close.length > 0
+      ? [`${path} "${args}": did you mean ${close.map((name) => `"${name}"`).join(", ")}?`]
+      : [];
+  }
+  if (node.properties === undefined || args === null || typeof args !== "object" || Array.isArray(args)) {
+    return [];
+  }
+  const record = args as Record<string, unknown>;
+  return Object.entries(node.properties).flatMap(([key, child]) =>
+    key in record ? enumMissHints(child, record[key], path === "" ? key : `${path}.${key}`) : []);
+}
+
 /** The result of one toolkit call, with what the persist step did. */
 export interface ToolkitCallResult extends LayoutToolRenderResult {
   persisted?: PersistResult;
@@ -392,9 +426,13 @@ export async function callToolkitTool(
       { type: "toolCall", id: randomUUID(), name: tool.name, arguments: args },
     ) as Record<string, unknown>;
   } catch (error) {
+    const hints = enumMissHints(tool.parameters, args);
     return {
       isError: true,
-      text: `ERROR · ${name} — ${error instanceof Error ? error.message : String(error)}`,
+      text: [
+        `ERROR · ${name} — ${error instanceof Error ? error.message : String(error)}`,
+        ...hints.map((hint) => `  hint · ${hint}`),
+      ].join("\n"),
     };
   }
 
