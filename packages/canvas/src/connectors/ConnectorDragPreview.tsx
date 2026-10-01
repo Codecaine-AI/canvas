@@ -25,6 +25,7 @@ import type {
 } from "../state/schema";
 import type { ConnectorDragOverlay } from "./types";
 import { useCanvasStyle } from "../theme/canvas-style-context";
+import { useArrowMarkerUrl } from "./arrow-markers";
 import type { CanvasStyle } from "../theme/canvas-style";
 /** Selection outline/handle color — inlined from the old TRIM.selectionBlue (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
@@ -95,6 +96,7 @@ export function ConnectorDragPreview({
   drag: ConnectorDragOverlay;
 }) {
   const canvasStyle = useCanvasStyle();
+  const forwardMarkerUrl = useArrowMarkerUrl(document.id, "forward");
   if (drag.connectionId && drag.points && drag.points.length >= 2) {
     const connection = document.connections.find((item) => item.id === drag.connectionId);
     if (!connection) return null;
@@ -144,7 +146,7 @@ export function ConnectorDragPreview({
   );
   if (!previewPath) return null;
   const markerEnd = previewShowsForwardArrowhead(document, drag)
-    ? `url(#${document.id}-arrow-forward)`
+    ? forwardMarkerUrl
     : undefined;
 
   // True-outline port anchors (connection-cascade.ts getConnectionAnchors) in

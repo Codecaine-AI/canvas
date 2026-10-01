@@ -153,7 +153,7 @@ describe("AnchorDots (P3 — D5/D15)", () => {
     // Ghost sits half a source-width away (quickConnectClickPoint gap / 2);
     // the drawn end stops CONNECTOR_END_GAP_PX short of its near edge.
     expect(previewPath.getAttribute("d")).toBe("M 410 50 L 450 50");
-    expect(previewPath.getAttribute("marker-end")).toBe("url(#anchor-dots-doc-arrow-forward)");
+    expect(previewPath.getAttribute("marker-end")).toMatch(/^url\(#anchor-dots-doc-.+-arrow-forward\)$/);
 
     fireEvent.pointerLeave(right!);
 

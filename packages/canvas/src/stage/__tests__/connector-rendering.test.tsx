@@ -73,6 +73,27 @@ function rectCenter(rect: Element): { x: number; y: number } {
 }
 
 describe("CanvasStage: connector rendering (3.1.2 / 3.3.1)", () => {
+  it("scopes arrowhead markers per stage so two stages of one document each resolve their own", () => {
+    // An inline embed (hidden) plus its fullscreen viewer mount two stages for
+    // the same document. url(#id) resolves to the first id in the page, so a
+    // shared id would point the visible stage at the hidden stage's marker.
+    const { container } = render(
+      <>
+        <CanvasStage document={makeDocument()} viewport={viewport} />
+        <CanvasStage document={makeDocument()} viewport={viewport} />
+      </>,
+    );
+    const stages = [...container.querySelectorAll("svg.interactive-canvas-layer:has(marker)")];
+    expect(stages.length).toBe(2);
+    const markerIds = [...container.querySelectorAll("marker")].map((marker) => marker.id);
+    expect(new Set(markerIds).size).toBe(markerIds.length);
+    for (const stage of stages) {
+      const line = stage.querySelector("[data-canvas-connection-group] path[marker-end]")!;
+      const id = /^url\(#(.+)\)$/.exec(line.getAttribute("marker-end")!)![1]!;
+      expect(stage.querySelector(`marker[id="${id}"]`)).toBeTruthy();
+    }
+  });
+
   it("renders a wide invisible hit path with data-canvas-connection-id", () => {
     const { container } = render(<CanvasStage document={makeDocument()} viewport={viewport} />);
     const hitPath = container.querySelector('[data-canvas-connection-id="connection-a"]');

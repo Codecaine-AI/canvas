@@ -17,6 +17,7 @@ import { resolveConnectorPaint } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { CANVAS_MONO_FONT_STACK } from "../theme/fonts";
 import { useCanvasStyle } from "../theme/canvas-style-context";
+import { useArrowMarkerUrl } from "./arrow-markers";
 
 // Connector stroke width, ink, label chip (size, font, colors, corner radius)
 // and elbow bend radius come from the workspace canvas style
@@ -60,6 +61,8 @@ export function Connector({
   onDoubleClick?: (connectionId: string) => void;
 }) {
   const canvasStyle = useCanvasStyle();
+  const forwardMarkerUrl = useArrowMarkerUrl(document.id, "forward");
+  const backMarkerUrl = useArrowMarkerUrl(document.id, "back");
   const routed = routeConnection(fromObject, toObject, connection, document.objects, canvasStyle);
   // FigJam's dash pattern scaled with the style's line width (./def.ts).
   const strokeDasharray = connection.style === "dashed" ? connectorDashArray(canvasStyle) : undefined;
@@ -101,8 +104,8 @@ export function Connector({
         strokeDasharray={strokeDasharray}
         opacity={dimmed ? 0.35 : 1}
         pointerEvents="none"
-        markerEnd={showForwardArrow ? `url(#${document.id}-arrow-forward)` : undefined}
-        markerStart={showBackArrow ? `url(#${document.id}-arrow-back)` : undefined}
+        markerEnd={showForwardArrow ? forwardMarkerUrl : undefined}
+        markerStart={showBackArrow ? backMarkerUrl : undefined}
       />
       {label && chip ? (
         <g

@@ -147,7 +147,7 @@ describe("CanvasStage: connector drag hover ports (W3b)", () => {
     expect(previewPath.getAttribute("stroke")).toBe("#757575");
     expect(previewPath.getAttribute("stroke-width")).toBe("4");
     expect(previewPath.getAttribute("stroke-dasharray")).toBeNull();
-    expect(previewPath.getAttribute("marker-end")).toBe("url(#w3b-overlay-doc-arrow-forward)");
+    expect(previewPath.getAttribute("marker-end")).toMatch(/^url\(#w3b-overlay-doc-.+-arrow-forward\)$/);
   });
 
   it("renders an empty-canvas create preview as a routed elbow, not a diagonal line", () => {
@@ -182,7 +182,7 @@ describe("CanvasStage: connector drag hover ports (W3b)", () => {
     const toPreviewPath = toDrag.container.querySelector(
       "[data-canvas-connector-preview-path]",
     ) as SVGPathElement;
-    expect(toPreviewPath.getAttribute("marker-end")).toBe("url(#w3b-overlay-doc-arrow-forward)");
+    expect(toPreviewPath.getAttribute("marker-end")).toMatch(/^url\(#w3b-overlay-doc-.+-arrow-forward\)$/);
     toDrag.unmount();
 
     const fromDrag = render(

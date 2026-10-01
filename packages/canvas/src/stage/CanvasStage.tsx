@@ -5,6 +5,7 @@
  * and caller-owned overlay slots. Editor feedback is composed outside.
  */
 import {
+  useId,
   useMemo,
   type CSSProperties,
   type MouseEvent as ReactMouseEvent,
@@ -31,6 +32,7 @@ import {
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector, ConnectorSelectionTrim } from "../connectors/Connector";
+import { ArrowMarkerScopeProvider, arrowMarkerId, arrowMarkerScope } from "../connectors/arrow-markers";
 import { SectionTitleChip } from "../objects/section/SectionTitleChip";
 import { SectionDepthProvider } from "../objects/section/section-depth-context";
 import type { CanvasTool } from "../state/actions";
@@ -278,6 +280,8 @@ function CanvasStageSurface({
   // once per document: handed to each section body and title chip, and
   // provided to overlays (the in-place title editor) via context.
   const sectionDepths = useMemo(() => sectionDepthMap(document.objects), [document.objects]);
+  // Marker ids are page-global; scope them per stage instance (arrow-markers.ts).
+  const markerScope = arrowMarkerScope(document.id, useId());
 
   const handToolActive = activeTool === "hand";
   const selectToolActive = activeTool === "select";
@@ -296,6 +300,7 @@ function CanvasStageSurface({
             : undefined);
 
   return (
+    <ArrowMarkerScopeProvider value={markerScope}>
     <div
       ref={stageRef}
       className={`interactive-canvas-stage${className ? ` ${className}` : ""}`}
@@ -429,7 +434,7 @@ function CanvasStageSurface({
               connector's stroke color/width.
             */}
             <marker
-              id={`${document.id}-arrow-forward`}
+              id={arrowMarkerId(markerScope, "forward")}
               markerHeight={ARROW_WIDTH_RATIO}
               markerWidth={ARROW_LENGTH_RATIO}
               orient="auto"
@@ -445,7 +450,7 @@ function CanvasStageSurface({
               />
             </marker>
             <marker
-              id={`${document.id}-arrow-back`}
+              id={arrowMarkerId(markerScope, "back")}
               markerHeight={ARROW_WIDTH_RATIO}
               markerWidth={ARROW_LENGTH_RATIO}
               orient="auto-start-reverse"
@@ -587,5 +592,6 @@ function CanvasStageSurface({
         {overlay}
       </div>
     </div>
+    </ArrowMarkerScopeProvider>
   );
 }
