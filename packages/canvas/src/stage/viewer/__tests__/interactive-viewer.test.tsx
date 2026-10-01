@@ -85,3 +85,35 @@ describe("InteractiveCanvasViewer navigation", () => {
     });
   });
 });
+
+describe("InteractiveCanvasViewer fit on open", () => {
+  it("fits to the stage's layout size while a host animation scales it down", () => {
+    const isStage = (element: HTMLElement) =>
+      element.classList.contains("interactive-canvas-shell") || element.dataset.canvasStage === "true";
+    const originalRect = HTMLElement.prototype.getBoundingClientRect;
+    const originalWidth = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientWidth");
+    const originalHeight = Object.getOwnPropertyDescriptor(HTMLElement.prototype, "clientHeight");
+    // Mid-animation the stage's rect is a tenth of its laid-out size.
+    HTMLElement.prototype.getBoundingClientRect = function getBoundingClientRect() {
+      if (!isStage(this)) return originalRect.call(this);
+      return { x: 0, y: 0, left: 0, top: 0, width: 96, height: 54, right: 96, bottom: 54, toJSON: () => ({}) } as DOMRect;
+    };
+    Object.defineProperty(HTMLElement.prototype, "clientWidth", {
+      configurable: true,
+      get() { return isStage(this) ? 960 : 0; },
+    });
+    Object.defineProperty(HTMLElement.prototype, "clientHeight", {
+      configurable: true,
+      get() { return isStage(this) ? 540 : 0; },
+    });
+    try {
+      const { getByRole } = render(<InteractiveCanvasViewer document={document} interactive bare />);
+      // 540 / (600 + 2 * 48 padding) at 960x540; the scaled rect bottoms out at 10%.
+      expect(getByRole("button", { name: /^Zoom level/ }).getAttribute("aria-label")).toBe("Zoom level 78%");
+    } finally {
+      HTMLElement.prototype.getBoundingClientRect = originalRect;
+      if (originalWidth) Object.defineProperty(HTMLElement.prototype, "clientWidth", originalWidth);
+      if (originalHeight) Object.defineProperty(HTMLElement.prototype, "clientHeight", originalHeight);
+    }
+  });
+});

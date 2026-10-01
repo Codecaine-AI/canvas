@@ -50,11 +50,15 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable;
 }
 
+// Layout size, not getBoundingClientRect: a host's open animation can mount
+// the stage under a scale transform, and fitting to the scaled rect strands
+// the content at a tiny zoom in the top-left corner.
 function stageScreenSize(stage: HTMLElement | null): ScreenSize | null {
   if (!stage) return null;
-  const rect = stage.getBoundingClientRect();
-  if (rect.width <= 0 || rect.height <= 0) return null;
-  return { width: rect.width, height: rect.height };
+  const width = stage.clientWidth;
+  const height = stage.clientHeight;
+  if (width <= 0 || height <= 0) return null;
+  return { width, height };
 }
 
 function stagePointFromClient(
