@@ -1,6 +1,7 @@
 "use client";
 
 import { resolveObjectStrokeWidth } from "../../theme/tokens";
+import { useCanvasStyle } from "../../theme/canvas-style-context";
 import { objectTypeDefaults } from "../../state/schema/object-defaults";
 import { BBOX_OUTLINE } from "../geometry";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
@@ -35,8 +36,9 @@ export function shapeObjectDef(shape: ShapeDef): ObjectDef {
     const { object, hideText } = props;
     // P1/D13 — every shape (silhouettes included) takes its resolved palette
     // fill plus ink border.
+    const canvasStyle = useCanvasStyle();
     const colors = resolveObjectRoleColors(object, "shape") as ResolvedShapeObjectColors;
-    const strokeWidth = resolveObjectStrokeWidth(object.style);
+    const strokeWidth = resolveObjectStrokeWidth(object.style, canvasStyle);
     const silhouette = shape.silhouette.silhouette?.({ object, colors, strokeWidth });
     return (
       <ObjectShell

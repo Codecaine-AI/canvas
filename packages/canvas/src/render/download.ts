@@ -11,6 +11,7 @@
 
 import type { InteractiveCanvasDocument } from "../state/schema";
 import { renderDocumentToSvg } from "./static-svg";
+import type { CanvasStyle } from "../theme/canvas-style";
 
 /**
  * Board surface color — keep in sync with CANVAS_BG in stage/CanvasStage.tsx
@@ -82,19 +83,25 @@ function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   });
 }
 
+export interface ExportSvgOptions {
+  /** Workspace canvas style the export renders with (defaults when omitted). */
+  canvasStyle?: Partial<CanvasStyle>;
+}
+
 /**
  * Download the document as a standalone .svg file, rendered at natural size
  * (zoom 1) with the board background. Rejects when rendering fails.
  */
 export async function exportDocumentAsSvg(
   canvasDocument: InteractiveCanvasDocument,
+  { canvasStyle }: ExportSvgOptions = {},
 ): Promise<void> {
-  const { svg } = renderDocumentToSvg(canvasDocument, { background: "board" });
+  const { svg } = renderDocumentToSvg(canvasDocument, { background: "board", canvasStyle });
   const blob = new Blob([svg], { type: "image/svg+xml" });
   downloadBlob(blob, exportFilenameFor(canvasDocument, "svg"));
 }
 
-export interface ExportPngOptions {
+export interface ExportPngOptions extends ExportSvgOptions {
   /** Raster scale over the natural SVG size (2 = retina-crisp default). */
   scale?: number;
 }
@@ -108,9 +115,12 @@ export interface ExportPngOptions {
  */
 export async function exportDocumentAsPng(
   canvasDocument: InteractiveCanvasDocument,
-  { scale = 2 }: ExportPngOptions = {},
+  { scale = 2, canvasStyle }: ExportPngOptions = {},
 ): Promise<void> {
-  const { svg, width, height } = renderDocumentToSvg(canvasDocument, { background: "board" });
+  const { svg, width, height } = renderDocumentToSvg(canvasDocument, {
+    background: "board",
+    canvasStyle,
+  });
   const svgBlob = new Blob([svg], { type: "image/svg+xml" });
   const svgUrl = URL.createObjectURL(svgBlob);
   try {

@@ -15,10 +15,13 @@ import {
 import { Badge } from "@codecaine-ai/canvas/ui/badge";
 import { Button } from "@codecaine-ai/canvas/ui/button";
 import { ArrowLeftIcon, ShapesIcon } from "@codecaine-ai/canvas/ui/icons";
+import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 import { withRootPageFrame } from "./new-document";
 
 type GalleryPageProps = {
   onBack: () => void;
+  /** Workspace style settings (Style rail), so the gallery matches the boards. */
+  canvasStyle?: Partial<CanvasStyle>;
 };
 
 type GalleryTile = {
@@ -51,7 +54,7 @@ const RETIRED_ICON_GALLERY_VARIANTS = [
   { glyph: "model", label: "model" },
 ] as const satisfies readonly { glyph: NonNullable<InteractiveCanvasObject["icon"]>; label: string }[];
 
-export function GalleryPage({ onBack }: GalleryPageProps) {
+export function GalleryPage({ onBack, canvasStyle }: GalleryPageProps) {
   const groups = useMemo(() => buildGalleryGroups(), []);
   const objectTypeCount = OBJECT_TYPES.length;
 
@@ -107,6 +110,7 @@ export function GalleryPage({ onBack }: GalleryPageProps) {
                     document={tile.document}
                     compact
                     className="gallery-canvas-viewer"
+                    canvasStyle={canvasStyle}
                   />
                 </section>
               ))}

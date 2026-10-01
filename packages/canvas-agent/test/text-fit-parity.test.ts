@@ -9,6 +9,7 @@ import {
 } from "../../canvas/src/render/static-svg.ts";
 import { resolveTextSlot, slotLineHeightPx } from "../../canvas/src/objects/text-slots.ts";
 import { makeDocument } from "./synthetic";
+import { normalizeCanvasStyle } from "@codecaine-ai/canvas/style";
 
 import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
 
@@ -144,5 +145,24 @@ describe("text-fit / renderer parity — sticky bodies and section titles", () =
     const grown = section(LONG_TITLE, report.neededSize!.width, report.neededSize!.height);
     expect(textFitReport(grown, grown.geometry, grown.text).fits).toBe(true);
     expect(svgOf(grown)).not.toContain("…");
+  });
+
+  test("a workspace title-chip border moves the title's fit threshold exactly as the renderer does", () => {
+    const style = normalizeCanvasStyle({ titleChipBorderWidthPx: 4 });
+    const styledSvg = (object: InteractiveCanvasObject) =>
+      renderDocumentToSvg(makeDocument([object]), { canvasStyle: style }).svg;
+    const probe = section(LONG_TITLE, 200, 360);
+    const needed = textFitReport(probe, probe.geometry, probe.text, style).neededSize!;
+
+    // One pixel narrower than the styled chip needs: clipped under the style, in the
+    // report and in the pixels — yet the thinner default border still fits it.
+    const shy = section(LONG_TITLE, needed.width - 1, 360);
+    expect(textFitReport(shy, shy.geometry, shy.text, style).fits).toBe(false);
+    expect(styledSvg(shy)).toContain("…");
+    expect(textFitReport(shy, shy.geometry, shy.text).fits).toBe(true);
+
+    const grown = section(LONG_TITLE, needed.width, 360);
+    expect(textFitReport(grown, grown.geometry, grown.text, style).fits).toBe(true);
+    expect(styledSvg(grown)).not.toContain("…");
   });
 });

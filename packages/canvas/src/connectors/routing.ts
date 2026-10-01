@@ -9,18 +9,21 @@ import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../st
 import type { Anchor } from "../state/schema/connections";
 import { connectionBoundsForObject, getConnectionAnchors, outlinePolygon } from "../objects/geometry";
 import { PathGenerator, type OrthogonalObstacle } from "./pathfinding/path-generator";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 // Connector routing figures (moved from theme/tokens.ts in the theme
 // dispersal — this router is their consumer; the routing tests import them
 // from here). Logical px.
 
 /**
- * Elbow corner radius, logical px, on the stroke CENTERLINE (the correct
- * figure for our stroked-centerline path construction). Short segments clamp
- * it smaller — `roundedPolylinePath` already clamps to half the shorter
- * adjacent segment length — so this constant is a ceiling, not a fixed
- * radius.
+ * DEFAULT elbow corner radius, logical px, on the stroke CENTERLINE (the
+ * correct figure for our stroked-centerline path construction). The live
+ * value is `CanvasStyle.connectorCornerRadiusPx`, passed as the trailing
+ * `canvasStyle` argument of routeConnection / routeConnectionToPoint /
+ * connectorPathFromPoints. Short segments clamp it smaller —
+ * `roundedPolylinePath` clamps to half the shorter adjacent segment length —
+ * so it is a ceiling, not a fixed radius.
  */
-export const CONNECTOR_ELBOW_CORNER_RADIUS_PX = 21.5;
+export const CONNECTOR_ELBOW_CORNER_RADIUS_PX = DEFAULT_CANVAS_STYLE.connectorCornerRadiusPx;
 
 /**
  * Endpoint gap: connectors stop short of the target border rather than
@@ -31,14 +34,6 @@ export const CONNECTOR_ELBOW_CORNER_RADIUS_PX = 21.5;
 export const CONNECTOR_END_GAP_PX = 10;
 
 const MIN_STUB = 24;
-/**
- * Elbow/polyline corner radius, world px. FigJam measures ~21.5 logical px
- * centerline radius on an unconstrained turn (theme/tokens.ts,
- * CONNECTOR_ELBOW_CORNER_RADIUS_PX) — `roundedPolylinePath` already clamps
- * this down to half the shorter adjacent segment length, so short segments
- * still get a sane (smaller) rounded corner instead of overshooting.
- */
-const CORNER_RADIUS = CONNECTOR_ELBOW_CORNER_RADIUS_PX;
 /**
  * Endpoints never touch the target border (theme/tokens.ts,
  * CONNECTOR_END_GAP_PX — 10px, between the measured 8px plain-end and 12px
@@ -71,8 +66,24 @@ export type RoutedConnection = {
   points?: CanvasPoint[];
 };
 
-export function connectorPathFromPoints(points: ReadonlyArray<CanvasPoint>): string {
-  return roundedPolylinePath(dedupeConsecutivePoints(points.map((point) => ({ ...point }))));
+export function connectorPathFromPoints(
+  points: ReadonlyArray<CanvasPoint>,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): string {
+  return roundedPolylinePath(
+    dedupeConsecutivePoints(points.map((point) => ({ ...point }))),
+    canvasStyle.connectorCornerRadiusPx,
+  );
+}
+
+/**
+ * Re-renders a route's drawn path with a non-default bend radius. Only the
+ * SVG path depends on the radius — the polyline, anchors and label point
+ * (everything hit-testing and bend editing read) do not.
+ */
+function withCornerRadius(routed: RoutedConnection, cornerRadiusPx: number): RoutedConnection {
+  if (cornerRadiusPx === CONNECTOR_ELBOW_CORNER_RADIUS_PX || !routed.points) return routed;
+  return { ...routed, path: roundedPolylinePath(routed.points, cornerRadiusPx) };
 }
 
 /** Picks facing side anchors from relative object centers and overlapping spans. */
@@ -146,6 +157,19 @@ export function routeConnection(
   toObject: InteractiveCanvasObject,
   connection: InteractiveCanvasConnection,
   obstacles?: ReadonlyArray<InteractiveCanvasObject>,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): RoutedConnection {
+  return withCornerRadius(
+    routeConnectionPolyline(fromObject, toObject, connection, obstacles),
+    canvasStyle.connectorCornerRadiusPx,
+  );
+}
+
+function routeConnectionPolyline(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  connection: InteractiveCanvasConnection,
+  obstacles?: ReadonlyArray<InteractiveCanvasObject>,
 ): RoutedConnection {
   const fromBounds = connectionBoundsForObject(fromObject);
   const toBounds = connectionBoundsForObject(toObject);
@@ -211,15 +235,20 @@ export function routeConnectionToPoint(
   fromObject: InteractiveCanvasObject,
   fromAnchor: Anchor,
   point: CanvasPoint,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): RoutedConnection {
   const start = pointForObjectAnchor(fromObject, fromAnchor);
   const endAnchor = freePointEndAnchor(start, point);
+  const cornerRadiusPx = canvasStyle.connectorCornerRadiusPx;
 
   if (isStraightFromAnchorToPoint(start, point, fromAnchor)) {
     return routedConnectionFromPoints([start, point], start, point, fromAnchor, endAnchor);
   }
 
-  return routeFreePointElbow(start, point, fromAnchor, endAnchor);
+  return withCornerRadius(
+    routeFreePointElbow(start, point, fromAnchor, endAnchor, cornerRadiusPx),
+    cornerRadiusPx,
+  );
 }
 
 /** Returns the relative-position anchor point for `bounds`, or null when `position` is absent. */
@@ -825,18 +854,20 @@ function routeFreePointElbow(
   end: CanvasPoint,
   startAnchor: Anchor,
   endAnchor: Anchor,
+  cornerRadiusPx: number,
 ): RoutedConnection {
   const stubStart = addScaled(start, normalFor(startAnchor), MIN_STUB);
   const stubEnd = addScaled(end, normalFor(endAnchor), MIN_STUB);
   const corners = elbowCorners(stubStart, stubEnd, startAnchor, endAnchor);
   const points = collapseShortReversingRuns(
     dedupeConsecutivePoints([start, stubStart, ...corners, stubEnd, end]),
+    cornerRadiusPx,
   );
 
   return routedConnectionFromPoints(points, start, end, startAnchor, endAnchor);
 }
 
-function collapseShortReversingRuns(points: CanvasPoint[]): CanvasPoint[] {
+function collapseShortReversingRuns(points: CanvasPoint[], cornerRadiusPx: number): CanvasPoint[] {
   const result = [...points];
   let index = 1;
   while (index < result.length - 1) {
@@ -863,7 +894,7 @@ function collapseShortReversingRuns(points: CanvasPoint[]): CanvasPoint[] {
 
     if (
       Math.min(effectiveIncomingLength, effectiveOutgoingLength) >
-      CORNER_RADIUS + ROUTE_EPSILON
+      cornerRadiusPx + ROUTE_EPSILON
     ) {
       index += 1;
       continue;
@@ -944,7 +975,10 @@ function isHorizontalAnchor(anchor: Anchor): boolean {
  * so the connector still visually aims directly at the anchor, it just stops
  * short of it.
  */
-function roundedPolylinePath(points: CanvasPoint[]): string {
+function roundedPolylinePath(
+  points: CanvasPoint[],
+  cornerRadiusPx: number = CONNECTOR_ELBOW_CORNER_RADIUS_PX,
+): string {
   if (points.length < 2) {
     const point = points[0] ?? { x: 0, y: 0 };
     return `M ${point.x} ${point.y}`;
@@ -958,7 +992,7 @@ function roundedPolylinePath(points: CanvasPoint[]): string {
     const previous = renderPoints[index - 1];
     const corner = renderPoints[index];
     const next = renderPoints[index + 1];
-    const radius = Math.min(CORNER_RADIUS, distance(previous, corner) / 2, distance(corner, next) / 2);
+    const radius = Math.min(cornerRadiusPx, distance(previous, corner) / 2, distance(corner, next) / 2);
 
     if (radius <= 0) {
       path += ` L ${corner.x} ${corner.y}`;

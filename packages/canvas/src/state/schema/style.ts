@@ -27,8 +27,9 @@ export type CanvasObjectStyle = {
     | "octagon"
     | "icon";
   /**
-   * Stroke width in logical px. Overrides the universal FigJam shape stroke
-   * (SHAPE_STROKE_WIDTH_PX = 4) applied to shape ink borders.
+   * Stroke width in logical px. Overrides the workspace canvas style's
+   * shape/section border width (CanvasStyle.shapeBorderWidthPx /
+   * sectionBorderWidthPx) for this object.
    */
   strokeWidth?: number;
   /** Section border style. Sections default to solid when omitted. */

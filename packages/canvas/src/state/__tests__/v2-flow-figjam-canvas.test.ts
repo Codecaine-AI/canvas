@@ -131,8 +131,8 @@ describe("v2-flow canvas JSON", () => {
     for (const chip of labelChips) {
       expect(chip.color).toBe("white");
       expect(resolveShapeColors("white")).toEqual({ fill: "#FFFFFF", border: "#757980" });
-      // No explicit strokeWidth — FigJam's universal 4px default applies.
-      expect(resolveObjectStrokeWidth(chip.style)).toBe(4);
+      // No explicit strokeWidth — the canvas style's 2px shape border applies.
+      expect(resolveObjectStrokeWidth(chip.style)).toBe(2);
     }
   });
 
@@ -156,12 +156,12 @@ describe("v2-flow canvas JSON", () => {
     expect(resolveShapeColors("blue")).toEqual({ fill: "#CDDFFF", border: "#1A5CDF" });
   });
 
-  it("the emphasis box migrated to soft red on the universal stroke", () => {
+  it("the emphasis box migrated to soft red on the default shape stroke", () => {
     const emphasisBox = v2FlowDocument.objects.find(
       (object) => object.id === "emphasis-box-research-objective",
     );
     expect(emphasisBox?.color).toBe("red");
-    expect(resolveObjectStrokeWidth(emphasisBox?.style)).toBe(4);
+    expect(resolveObjectStrokeWidth(emphasisBox?.style)).toBe(2);
   });
 
   it("stickies migrated to picks that resolve to the exact classic sticky hexes", () => {

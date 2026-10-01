@@ -24,12 +24,12 @@ export const rule: LayoutRule = {
   title: "Clipped text",
   tier: "warning",
   guidance: GUIDANCE,
-  check(document) {
+  check(document, context) {
     const findings: ReturnType<LayoutRule["check"]> = [];
 
     for (const object of document.objects) {
       if (object.text === undefined || object.text === "") continue;
-      const report = textFitReport(object, object.geometry, object.text);
+      const report = textFitReport(object, object.geometry, object.text, context?.canvasStyle);
       if (report.fits) continue;
 
       findings.push({

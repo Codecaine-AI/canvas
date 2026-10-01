@@ -24,6 +24,7 @@
  * there — see `requireUnlocked` for the full rule.
  */
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "@codecaine-ai/canvas/style";
 
 import type { AgentPatchOperation } from "../../../../protocol";
 
@@ -53,6 +54,11 @@ export type OpOutcome =
 /** State checks and document mutations available to an operation spec. */
 export interface OpContext {
   readonly draft: InteractiveCanvasDocument;
+  /**
+   * The workspace canvas style the board renders with — what readability
+   * verdicts (text fit) measure borders and chips against.
+   */
+  readonly canvasStyle: CanvasStyle;
 
   // ── Validation ───────────────────────────────────────────────────────────
 
@@ -254,7 +260,10 @@ function lockClause(hold: LockHold): string {
 }
 
 /** Build the context for one operation over the session's current draft. */
-export function createOpContext(draft: InteractiveCanvasDocument): OpContext {
+export function createOpContext(
+  draft: InteractiveCanvasDocument,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): OpContext {
   /** The single lowering path; every mutator below is a spelling of this. */
   const lower = (
     operation: AgentPatchOperation,
@@ -272,6 +281,7 @@ export function createOpContext(draft: InteractiveCanvasDocument): OpContext {
 
   return {
     draft,
+    canvasStyle,
 
     // ── Validation ─────────────────────────────────────────────────────────
 

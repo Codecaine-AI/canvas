@@ -22,6 +22,7 @@ import {
   type CanvasViewportControls,
 } from "../../navigation/use-canvas-viewport";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
+import type { CanvasStyle } from "../../theme/canvas-style";
 
 export interface InteractiveCanvasViewerProps {
   document: InteractiveCanvasDocument;
@@ -50,6 +51,11 @@ export interface InteractiveCanvasViewerProps {
     bounds: CanvasBounds,
   ) => void;
   className?: string;
+  /**
+   * Workspace canvas style overrides (corner radii, border/stroke widths),
+   * merged over any enclosing CanvasStyleProvider. Omit to inherit.
+   */
+  canvasStyle?: Partial<CanvasStyle>;
 }
 
 const MIN_STAGE_HEIGHT = 360;
@@ -156,6 +162,7 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
   onCanvasContextMenu,
   onObjectContextMenu,
   className,
+  canvasStyle,
 }: InteractiveCanvasViewerProps) {
   const [measureRef, measuredSize] = useMeasuredSize();
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -210,6 +217,7 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
         onCanvasSelect={onCanvasSelect}
         onCanvasContextMenu={onCanvasContextMenu}
         onObjectContextMenu={onObjectContextMenu}
+        canvasStyle={canvasStyle}
         className="h-full"
         style={{
           cursor: navigation.isPanning ? "grabbing" : interactive ? "grab" : undefined,

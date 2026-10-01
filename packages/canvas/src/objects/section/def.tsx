@@ -7,17 +7,22 @@ import { BBOX_OUTLINE } from "../geometry";
 import { resolveObjectBorderWidth } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { TITLE_CHIP, TITLE_CHIP_TEXT_SLOT } from "../text-slots";
+import { DEFAULT_CANVAS_STYLE } from "../../theme/canvas-style";
+import { canvasStyleCssVar, useCanvasStyle } from "../../theme/canvas-style-context";
 import { SECTION_TOOLBAR } from "./toolbar";
 
 /**
- * Section frame geometry. The title CHIP's geometry/typography/scale live on
- * the "title-chip" text-slot preset (objects/text-slots.ts TITLE_CHIP) — the
+ * DEFAULT section frame geometry (back-compat export). The live radius and
+ * border width come from the workspace canvas style
+ * (`CanvasStyle.sectionCornerRadiusPx` / `sectionBorderWidthPx`, read via
+ * useCanvasStyle). The title CHIP's geometry/typography/scale live on the
+ * "title-chip" text-slot preset (objects/text-slots.ts TITLE_CHIP) — the
  * single source the at-rest chip, the in-place title editor, and this def's
  * CSS all consume.
  */
 export const SECTION_GEOMETRY = {
-  cornerRadiusPx: 8.5,
-  borderWidthPx: 2,
+  cornerRadiusPx: DEFAULT_CANVAS_STYLE.sectionCornerRadiusPx,
+  borderWidthPx: DEFAULT_CANVAS_STYLE.sectionBorderWidthPx,
 } as const;
 
 /**
@@ -42,13 +47,13 @@ function SectionObjectView({
   // P1 — the section's color pick resolves through the palette's section
   // role cells: body fill = tint, frame border = the title chip's FILL color
   // (§3.2: chip fill IS the section border color), chip = fill + border pair.
+  const canvasStyle = useCanvasStyle();
   const family = resolveSectionColors(object.color ?? FIRST_USE_COLORS.section);
   const borderColor = family.chip.fill;
   const borderStyle = object.style?.strokeStyle ?? "solid";
-  const borderWidth = resolveObjectBorderWidth(object, "section", "painted", {
-    defaultSectionBorderWidthPx: SECTION_GEOMETRY.borderWidthPx,
-  });
-  const renderedStrokeWidth = object.style?.strokeWidth ?? SECTION_GEOMETRY.borderWidthPx;
+  const borderWidth = resolveObjectBorderWidth(object, "section", "painted", undefined, canvasStyle);
+  const renderedStrokeWidth = object.style?.strokeWidth ?? canvasStyle.sectionBorderWidthPx;
+  const cornerRadius = canvasStyle.sectionCornerRadiusPx;
   const title = object.text;
   return (
     <button
@@ -74,7 +79,7 @@ function SectionObjectView({
         borderColor,
         borderStyle,
         borderWidth,
-        borderRadius: SECTION_GEOMETRY.cornerRadiusPx,
+        borderRadius: cornerRadius,
         // W4 z-layering: section backdrops stay below the connector layer (z 1).
         zIndex: 0,
       }}
@@ -107,8 +112,8 @@ function SectionObjectView({
             y={renderedStrokeWidth / 2}
             width={`calc(100% - ${renderedStrokeWidth}px)`}
             height={`calc(100% - ${renderedStrokeWidth}px)`}
-            rx={SECTION_GEOMETRY.cornerRadiusPx}
-            ry={SECTION_GEOMETRY.cornerRadiusPx}
+            rx={cornerRadius}
+            ry={cornerRadius}
             fill="none"
             stroke={borderColor}
             strokeWidth={renderedStrokeWidth}
@@ -129,8 +134,8 @@ export const sectionDef: ObjectDef = {
            section-header layer. */
         .interactive-canvas-object-section {
           border-style: solid;
-          border-width: ${SECTION_GEOMETRY.borderWidthPx}px;
-          border-radius: ${SECTION_GEOMETRY.cornerRadiusPx}px;
+          border-width: ${canvasStyleCssVar("sectionBorderWidthPx")};
+          border-radius: ${canvasStyleCssVar("sectionCornerRadiusPx")};
           padding: 0;
           box-shadow: none;
           align-items: stretch;
@@ -152,8 +157,8 @@ export const sectionDef: ObjectDef = {
           display: flex;
           align-items: center;
           border-style: solid;
-          border-width: ${TITLE_CHIP.borderWidthPx}px;
-          border-radius: 6px;
+          border-width: ${canvasStyleCssVar("titleChipBorderWidthPx")};
+          border-radius: ${canvasStyleCssVar("titleChipCornerRadiusPx")};
           padding: 0 ${TITLE_CHIP.paddingXPx}px;
           font-size: ${TITLE_CHIP.fontSizePx}px;
           font-weight: ${TITLE_CHIP.fontWeight};

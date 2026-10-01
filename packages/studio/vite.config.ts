@@ -7,6 +7,7 @@ import { createAgentProxyHandler } from "./server/agent-proxy";
 import { createCanvasFileApiHandler } from "./server/canvas-file-api";
 import {
   CANVAS_FILE_CHANGED_EVENT,
+  CANVAS_STYLE_CHANGED_EVENT,
   createCanvasChangeNotifier,
 } from "./server/canvas-file-watch";
 import { createEvalsApiHandler } from "./server/evals-api";
@@ -35,6 +36,10 @@ function canvasFileApiPlugin(): Plugin {
         send: (payload) => {
           server.ws.send({ type: "custom", event: CANVAS_FILE_CHANGED_EVENT, data: payload });
         },
+        // canvas-style.json (workspace style settings) edited by an agent or by hand.
+        sendStyleChanged: (payload) => {
+          server.ws.send({ type: "custom", event: CANVAS_STYLE_CHANGED_EVENT, data: payload });
+        },
       });
       server.watcher.add(canvasesDir);
       const onCanvasFileEvent = (path: string) => {
@@ -42,6 +47,8 @@ function canvasFileApiPlugin(): Plugin {
       };
       server.watcher.on("add", onCanvasFileEvent);
       server.watcher.on("change", onCanvasFileEvent);
+      // Only canvas-style.json acts on deletes; canvas unlinks are ignored.
+      server.watcher.on("unlink", onCanvasFileEvent);
 
       // The agent proxy mounts first: /api/canvases/:id/agent/* must reach
       // the harness, not the canvas file API's catch-all /api/canvases branch.
@@ -50,6 +57,7 @@ function canvasFileApiPlugin(): Plugin {
         createCanvasFileApiHandler({
           canvasesDir,
           onCanvasWrite: changeNotifier.recordWrite,
+          onCanvasStyleWrite: changeNotifier.recordStyleWrite,
         }),
       );
       // The dev server always has dev pages (import.meta.env.DEV), so the

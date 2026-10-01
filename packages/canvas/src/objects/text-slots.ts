@@ -3,6 +3,7 @@
 import type { InteractiveCanvasObject, InteractiveCanvasObjectType } from "../state/schema";
 import { inscribedTextRect } from "./inscribed-text-rects";
 import { CENTER_TEXT_INSET_PX } from "./text-slot-constants";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 
 export { CENTER_TEXT_INSET_PX };
 
@@ -280,7 +281,12 @@ export function belowExtendedBoundsPx(object: InteractiveCanvasObject): LocalRec
 
 export const TITLE_CHIP = {
   heightPx: 27,
-  borderWidthPx: 2,
+  /**
+   * DEFAULT chip border width — the live value is
+   * `CanvasStyle.titleChipBorderWidthPx` (theme/canvas-style.ts); this field
+   * stays for back-compat.
+   */
+  borderWidthPx: DEFAULT_CANVAS_STYLE.titleChipBorderWidthPx,
   textColor: OBJECT_TEXT_COLOR,
   fontSizePx: 16,
   fontWeight: 700,
@@ -294,8 +300,12 @@ export const TITLE_CHIP = {
 } as const;
 
 /** Heuristic screen width of the title chip at zoom 1 — mirrors the chip's CSS auto-sizing. */
-export function estimateTitleChipWidthPx(text: string): number {
-  const { fontSizePx, paddingXPx, borderWidthPx } = TITLE_CHIP;
+export function estimateTitleChipWidthPx(
+  text: string,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): number {
+  const { fontSizePx, paddingXPx } = TITLE_CHIP;
+  const borderWidthPx = canvasStyle.titleChipBorderWidthPx;
   return Math.max(72, text.length * fontSizePx * 0.62 + paddingXPx * 2 + borderWidthPx * 2);
 }
 
@@ -411,7 +421,11 @@ export function resolveTextSlot(
   slot: TextSlot,
   object: InteractiveCanvasObject,
   zoom = 1,
-  options?: { draftText?: string },
+  options?: {
+    draftText?: string;
+    /** Workspace canvas style (title-chip width tracks its border width). */
+    canvasStyle?: CanvasStyle;
+  },
 ): ResolvedTextSlot {
   const { width, height } = object.geometry;
   const hidden = belowTextHidden(object, slot);
@@ -445,7 +459,7 @@ export function resolveTextSlot(
   } else {
     // title-chip: width tracks the text (heuristic mirror of the chip's CSS
     // auto width), capped to the section's inner width at every zoom.
-    const estimated = estimateTitleChipWidthPx(object.text);
+    const estimated = estimateTitleChipWidthPx(object.text, options?.canvasStyle);
     const chipWidth = Math.min(estimated, titleChipMaxWidthPx(width, scale));
     rect = {
       x: TITLE_CHIP.insetFromSectionCornerPx,

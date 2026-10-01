@@ -10,7 +10,7 @@
  */
 import { Type } from "@mariozechner/pi-ai";
 
-import { formatDiagnostics, runDiagnostics } from "../../../../board/lints/run";
+import { formatDiagnostics, sessionDiagnostics } from "../../../../board/lints/run";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { SessionEventSink } from "../../perception/perception";
 import type { LayoutSession } from "../../store";
@@ -40,7 +40,7 @@ export function toolSetBoardTitle(
   const previous = session.draft.title;
   const label = "set_board_title";
   commitDraft(session, { ...session.draft, title: next }, label);
-  const diagnostics = runDiagnostics(session.draft);
+  const diagnostics = sessionDiagnostics(session);
   emit(session, {
     type: "proposal",
     sessionId: session.id,

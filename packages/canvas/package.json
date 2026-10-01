@@ -11,6 +11,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./render": "./src/render/index.ts",
+    "./style": "./src/theme/canvas-style.ts",
     "./schema": "./src/state/schema.ts",
     "./actions": "./src/state/actions.ts",
     "./agent-schema": "./src/agent-schema.ts",

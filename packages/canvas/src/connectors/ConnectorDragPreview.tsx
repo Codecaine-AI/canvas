@@ -24,10 +24,13 @@ import type {
   InteractiveCanvasObject,
 } from "../state/schema";
 import type { ConnectorDragOverlay } from "./types";
+import { useCanvasStyle } from "../theme/canvas-style-context";
+import type { CanvasStyle } from "../theme/canvas-style";
 /** Selection outline/handle color — inlined from the old TRIM.selectionBlue (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 const CONNECTOR_PREVIEW_STROKE = resolveConnectorStroke(FIRST_USE_COLORS.connector);
-const CONNECTOR_PREVIEW_STROKE_WIDTH_PX = 4;
+// Preview stroke width + bend radius: the canvas style's connector settings,
+// so the preview matches the connector it becomes.
 const CONNECTOR_PREVIEW_OPACITY = 0.6;
 
 function quickConnectGhostId(
@@ -92,11 +95,12 @@ export function ConnectorDragPreview({
   viewport: ViewportState;
   drag: ConnectorDragOverlay;
 }) {
+  const canvasStyle = useCanvasStyle();
   if (drag.connectionId && drag.points && drag.points.length >= 2) {
     const connection = document.connections.find((item) => item.id === drag.connectionId);
     if (!connection) return null;
 
-    const previewPath = connectorPathFromPoints(drag.points);
+    const previewPath = connectorPathFromPoints(drag.points, canvasStyle);
     const strokeDasharray =
       connection.style === "dashed" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
     const transform = worldSvgTransform(viewport);
@@ -111,7 +115,7 @@ export function ConnectorDragPreview({
             d={previewPath}
             fill="none"
             stroke={SELECTION_BLUE}
-            strokeWidth={4}
+            strokeWidth={canvasStyle.connectorStrokeWidthPx}
             strokeLinecap="butt"
             strokeDasharray={strokeDasharray}
             data-canvas-connector-bend-preview-path="true"
@@ -131,7 +135,14 @@ export function ConnectorDragPreview({
           quickConnectGhostId(sourceObject, document.objects),
         )
       : null;
-  const previewPath = routedPreviewPath(document, drag, sourceObject, candidateObject, ghostWorldObject);
+  const previewPath = routedPreviewPath(
+    document,
+    drag,
+    sourceObject,
+    candidateObject,
+    ghostWorldObject,
+    canvasStyle,
+  );
   if (!previewPath) return null;
   const markerEnd = previewShowsForwardArrowhead(document, drag)
     ? `url(#${document.id}-arrow-forward)`
@@ -191,7 +202,7 @@ export function ConnectorDragPreview({
             d={previewPath}
             fill="none"
             stroke={CONNECTOR_PREVIEW_STROKE}
-            strokeWidth={CONNECTOR_PREVIEW_STROKE_WIDTH_PX}
+            strokeWidth={canvasStyle.connectorStrokeWidthPx}
             strokeLinecap="butt"
             markerEnd={markerEnd}
             opacity={CONNECTOR_PREVIEW_OPACITY}
@@ -258,6 +269,7 @@ function routedPreviewPath(
   sourceObject: InteractiveCanvasObject | undefined,
   candidateObject: InteractiveCanvasObject | undefined,
   ghostWorldObject: InteractiveCanvasObject | null,
+  canvasStyle: CanvasStyle,
 ): string | null {
   if (drag.connectionId) {
     const connection = document.connections.find((item) => item.id === drag.connectionId);
@@ -284,13 +296,14 @@ function routedPreviewPath(
         previewToObject,
         previewConnection,
         document.objects,
+        canvasStyle,
       ).path;
     }
 
     const routed = routeConnection(fromObject, toObject, connection, document.objects);
     const fixedObject = drag.end === "from" ? toObject : fromObject;
     const fixedAnchor = drag.end === "from" ? routed.endAnchor : routed.startAnchor;
-    return routeConnectionToPoint(fixedObject, fixedAnchor, drag.point).path;
+    return routeConnectionToPoint(fixedObject, fixedAnchor, drag.point, canvasStyle).path;
   }
 
   if (!sourceObject) return null;
@@ -314,7 +327,8 @@ function routedPreviewPath(
         ...(drag.candidate.position ? { position: drag.candidate.position } : {}),
       },
     };
-    return routeConnection(sourceObject, candidateObject, previewConnection, document.objects).path;
+    return routeConnection(sourceObject, candidateObject, previewConnection, document.objects, canvasStyle)
+      .path;
   }
 
   if (ghostWorldObject) {
@@ -323,10 +337,11 @@ function routedPreviewPath(
       from: { objectId: sourceObject.id, anchor: fromAnchor },
       to: { objectId: ghostWorldObject.id },
     };
-    return routeConnection(sourceObject, ghostWorldObject, previewConnection, document.objects).path;
+    return routeConnection(sourceObject, ghostWorldObject, previewConnection, document.objects, canvasStyle)
+      .path;
   }
 
-  return routeConnectionToPoint(sourceObject, fromAnchor, drag.point).path;
+  return routeConnectionToPoint(sourceObject, fromAnchor, drag.point, canvasStyle).path;
 }
 
 function previewShowsForwardArrowhead(

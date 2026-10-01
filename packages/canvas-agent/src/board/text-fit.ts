@@ -17,6 +17,7 @@
  *                        advances (render/text-metrics.ts)
  *   - sticky bodies     `layoutStickyText` + `STICKY_LINE_PITCH_PX`
  *   - section titles    `estimateTitleChipWidthPx` + `titleChipMaxWidthPx`
+ *                        (chip border from the workspace `CanvasStyle`)
  *   - edge labels       `chipWidth` + `CHIP_HEIGHT` (lints/geometry.ts, itself
  *                        pinned to the renderer by lints-chip-parity.test.ts)
  * Those renderer internals are module-private to the read-only canvas package
@@ -55,6 +56,8 @@ import {
   TITLE_CHIP,
   titleChipMaxWidthPx,
 } from "../../../canvas/src/objects/text-slots.ts";
+
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "@codecaine-ai/canvas/style";
 
 import { CHIP_CLEARANCE, CHIP_HEIGHT, chipWidth } from "./lints/geometry";
 
@@ -304,8 +307,13 @@ function stickyBodyReport(
 // chip, which only ever clips it sooner.
 // ---------------------------------------------------------------------------
 
-function sectionTitleReport(size: TextFitSize, text: string): TextFitReport {
-  const chip = estimateTitleChipWidthPx(text);
+function sectionTitleReport(
+  size: TextFitSize,
+  text: string,
+  canvasStyle: CanvasStyle,
+): TextFitReport {
+  // The chip's border is part of its width, and the workspace style sets it.
+  const chip = estimateTitleChipWidthPx(text, canvasStyle);
   const budget = titleChipMaxWidthPx(size.width, 1);
   if (chip <= budget) {
     return fitted(
@@ -372,11 +380,15 @@ function fmtSize(size: TextFitSize): string {
  * needed HEIGHT is measured at the given width, and the width grows only when
  * a single word cannot fit it (or, for a section title, when the chip itself
  * overruns the frame).
+ *
+ * `canvasStyle` is the workspace style the board renders with (the session's
+ * `canvasStyle`); border and chip widths come from it.
  */
 export function textFitReport(
   object: TextFitTarget,
   size: TextFitSize,
   text: string,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): TextFitReport {
   if (isConnection(object)) {
     if (text.trim() === "") return fitted("none", "no label to fit");
@@ -386,7 +398,7 @@ export function textFitReport(
   if (size.width <= 0 || size.height <= 0) {
     return { fits: false, detail: "a zero-sized box paints no text", slot: "none" };
   }
-  if (object.type === "section") return sectionTitleReport(size, text);
+  if (object.type === "section") return sectionTitleReport(size, text, canvasStyle);
   if (effectiveRenderShape(object) === "note") return stickyBodyReport(object, size, text);
   return shapeLabelReport(object, size, text);
 }

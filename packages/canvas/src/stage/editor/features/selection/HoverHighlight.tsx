@@ -6,6 +6,7 @@
 import { connectionBoundsForObject } from "../../../../objects/geometry";
 import type { InteractiveCanvasDocument } from "../../../../state/schema";
 import { worldToScreen, type ViewportState } from "../../../viewport";
+import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 
 const SELECTION_BLUE = "#0D99FF";
 const HIGHLIGHT_OUTSET_PX = 3;
@@ -19,6 +20,7 @@ export function HoverHighlight({
   viewport: ViewportState;
   objectId: string | null;
 }) {
+  const canvasStyle = useCanvasStyle();
   if (!objectId) return null;
   const object = document.objects.find((item) => item.id === objectId);
   if (!object) return null;
@@ -41,7 +43,8 @@ export function HoverHighlight({
         width: `${bottomRight.x - topLeft.x + HIGHLIGHT_OUTSET_PX * 2}px`,
         height: `${bottomRight.y - topLeft.y + HIGHLIGHT_OUTSET_PX * 2}px`,
         border: `1.5px solid ${SELECTION_BLUE}`,
-        borderRadius: "10px",
+        // Concentric with the shape's (screen-scaled) corner, pushed out by the outset.
+        borderRadius: `${canvasStyle.shapeCornerRadiusPx * viewport.zoom + HIGHLIGHT_OUTSET_PX}px`,
         boxSizing: "border-box",
         opacity: 0.65,
         pointerEvents: "none",

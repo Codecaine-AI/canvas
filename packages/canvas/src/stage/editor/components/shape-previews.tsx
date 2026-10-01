@@ -134,7 +134,7 @@ const OctagonIcon = polygonIcon(octagonPoints(PREVIEW_BOUNDS));
 // ---------------------------------------------------------------------------
 
 const SquareIcon = svgIcon(`<rect x="4" y="4" width="12" height="12" rx="1.5" stroke="currentColor" stroke-width="${S}" />`);
-const RoundedRectIcon = svgIcon(`<rect x="3.5" y="5.5" width="13" height="9" rx="3" stroke="currentColor" stroke-width="${S}" />`);
+const RoundedRectIcon = svgIcon(`<rect x="3.5" y="5.5" width="13" height="9" rx="1" stroke="currentColor" stroke-width="${S}" />`);
 const DiamondIcon = svgIcon(`<path d="M10 3.5 16.5 10 10 16.5 3.5 10Z" stroke="currentColor" stroke-width="${S}" stroke-linejoin="round" />`);
 const PredefinedProcessIcon = svgIcon(
   `<rect x="3.5" y="5.5" width="13" height="9" stroke="currentColor" stroke-width="${S}" /><path d="M6.5 5.5v9M13.5 5.5v9" stroke="currentColor" stroke-width="${S}" />`,

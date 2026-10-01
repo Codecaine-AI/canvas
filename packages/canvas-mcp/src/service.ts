@@ -21,6 +21,7 @@ import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas-agent/authoring
 import {
   boardStateSnapshot,
   callToolkitTool,
+  canvasStyleOverrides,
   openCanvasFile,
   toolkitTools,
   type CanvasFileSession,
@@ -135,7 +136,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_open",
     title: "Open canvas",
     description:
-      "Open a canvas as the board every other canvas tool edits, reading it fresh from disk. Returns the board description, the full digest (every section, object, connection, and route with its id and geometry), and the open lint findings, plus the file hash. Call it again to reload after the file changed elsewhere; any edit you make afterwards saves to the file immediately.",
+      "Open a canvas as the board every other canvas tool edits, reading it fresh from disk. Returns the board description, the full digest (every section, object, connection, and route with its id and geometry), and the open lint findings, plus the file hash. Also re-reads the workspace style settings (canvases/canvas-style.json: corner radii, border widths) that renders and lints use. Call it again to reload after the file changed elsewhere; any edit you make afterwards saves to the file immediately.",
     inputSchema: {
       type: "object",
       properties: {
@@ -238,13 +239,18 @@ export function createCanvasService(options: CanvasServiceOptions) {
     }
     active = file;
     const title = file.session.draft.title ?? "";
+    const canvasStyle = file.session.canvasStyle;
+    const overrides = canvasStyle ? Object.entries(canvasStyleOverrides(canvasStyle)) : [];
     return text(
       [
         `OPENED · ${id} ${JSON.stringify(title)} · sha256:${file.diskHash}`,
+        ...(overrides.length > 0
+          ? [`STYLE · workspace overrides: ${overrides.map(([key, value]) => `${key}=${value}`).join(", ")}`]
+          : []),
         boardStateSnapshot(file.session),
       ].join("\n\n"),
       false,
-      { canvas: id, title, hash: `sha256:${file.diskHash}`, path },
+      { canvas: id, title, hash: `sha256:${file.diskHash}`, path, ...(canvasStyle ? { canvasStyle } : {}) },
     );
   }
 

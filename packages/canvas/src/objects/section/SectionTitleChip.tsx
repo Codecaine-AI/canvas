@@ -7,6 +7,7 @@ import type { CanvasBounds } from "../../state/geometry";
 import type { InteractiveCanvasObject } from "../../state/schema";
 import { titleChipMaxWidthPx } from "../text-slots";
 import { resolveSectionTitleChipSlot } from "./title-chip-geometry";
+import { useCanvasStyle } from "../../theme/canvas-style-context";
 
 export interface SectionTitleChipProps {
   section: InteractiveCanvasObject;
@@ -28,7 +29,10 @@ export function SectionTitleChip({
   onObjectContextMenu,
 }: SectionTitleChipProps) {
   const family = resolveSectionColors(section.color ?? FIRST_USE_COLORS.section);
-  const resolved = resolveSectionTitleChipSlot(section, zoom);
+  // Chip border width/radius paint via the def CSS's canvas-style custom
+  // properties; the width estimate needs the border width directly.
+  const canvasStyle = useCanvasStyle();
+  const resolved = resolveSectionTitleChipSlot(section, zoom, canvasStyle);
   const titleScale = resolved.scale;
 
   return (

@@ -58,6 +58,7 @@ import {
 } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { resolveObjectStrokeWidth } from "../theme/tokens";
+import { DEFAULT_CANVAS_STYLE, normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
 import {
   BELOW_TEXT_SLOT,
   CENTER_TEXT_SLOT,
@@ -113,16 +114,11 @@ const CANVAS_BG = "#F5F5F5";
 const CANVAS_FONT_FAMILY =
   "Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif";
 
-/** Base rounded-rect corner radius — mirrors the `.interactive-canvas-object` CSS (border-radius: 8px). */
-const BASE_CORNER_RADIUS_PX = 8;
-/** Section frame — mirrors SECTION_GEOMETRY in objects/section/def.tsx. */
-const SECTION_CORNER_RADIUS_PX = 8.5;
-const SECTION_BORDER_WIDTH_PX = 2;
-/** Section title chip corner radius — mirrors the chip CSS in objects/section/def.tsx (border-radius: 6px). */
-const TITLE_CHIP_CORNER_RADIUS_PX = 6;
+// Corner radii and border/stroke widths (base rounded rect, section frame,
+// title chip, connector line, label chip, elbow bends) are NOT mirrored here:
+// they come from the scene's CanvasStyle (theme/canvas-style.ts) — the same
+// settings object the live stage resolves through useCanvasStyle.
 
-/** Connector stroke width — mirrors CONNECTOR_STROKE_WIDTH_PX in connectors/Connector.tsx. */
-const CONNECTOR_STROKE_WIDTH_PX = 4;
 /** Arrowhead geometry in stroke-width units — mirrors the marker `<defs>` in stage/CanvasStage.tsx. */
 const ARROW_LENGTH_RATIO = 5;
 const ARROW_WIDTH_RATIO = 5;
@@ -134,7 +130,6 @@ const CONNECTION_LABEL_HEIGHT_PX = 30;
 const CONNECTION_LABEL_PADDING_X_PX = 12;
 const CONNECTION_LABEL_FONT_SIZE_PX = 16;
 const CONNECTION_LABEL_FONT_WEIGHT = 700;
-const CONNECTION_LABEL_RADIUS_PX = 15;
 const CONNECTION_LABEL_AVERAGE_CHAR_WIDTH_PX = 9.6;
 const CONNECTION_LABEL_MIN_WIDTH_PX = 41;
 const CONNECTION_LABEL_BACKGROUND = "#F5F5F5";
@@ -723,9 +718,11 @@ function renderIconGlyph(
 type ShapePaint = { fill: string; border: string };
 type WorldRect = { x: number; y: number; width: number; height: number };
 
-/** Mirrors PREDEFINED_PROCESS_GEOMETRY in objects/shapes/flowchart/predefined-process.tsx. */
+/**
+ * Mirrors PREDEFINED_PROCESS_GEOMETRY in objects/shapes/flowchart/predefined-process.tsx
+ * (its corner radius is the canvas style's shape radius, like every bbox shape).
+ */
 const PREDEFINED_PROCESS_GEOMETRY = {
-  cornerRadiusPx: 5,
   barWidthPx: 4,
   barInsetRatio: 0.047,
 } as const;
@@ -759,6 +756,7 @@ function renderPredefinedProcessSilhouette(
   rect: WorldRect,
   paint: ShapePaint,
   strokeWidth: number,
+  cornerRadiusPx: number,
 ): string {
   const innerX = rect.x + strokeWidth;
   const innerY = rect.y + strokeWidth;
@@ -774,7 +772,7 @@ function renderPredefinedProcessSilhouette(
       fill: paint.border,
     });
   return (
-    bboxRoundedRect(rect, paint, strokeWidth, PREDEFINED_PROCESS_GEOMETRY.cornerRadiusPx) +
+    bboxRoundedRect(rect, paint, strokeWidth, cornerRadiusPx) +
     bar(innerX + barInset) +
     bar(innerX + innerWidth - barInset - PREDEFINED_PROCESS_GEOMETRY.barWidthPx)
   );
@@ -786,10 +784,11 @@ function renderCustomSilhouette(
   rect: WorldRect,
   paint: ShapePaint,
   strokeWidth: number,
+  canvasStyle: CanvasStyle,
 ): string | null {
   switch (renderShape) {
     case "predefined-process":
-      return renderPredefinedProcessSilhouette(rect, paint, strokeWidth);
+      return renderPredefinedProcessSilhouette(rect, paint, strokeWidth, canvasStyle.shapeCornerRadiusPx);
     default:
       return null;
   }
@@ -805,6 +804,7 @@ function renderShapeBody(
   object: InteractiveCanvasObject,
   stickyShadowFilterId: string | null,
   viewBox: CanvasBounds,
+  canvasStyle: CanvasStyle,
 ): string {
   const geometry = object.geometry;
   const renderShape = effectiveRenderShape(object);
@@ -830,7 +830,7 @@ function renderShapeBody(
   }
 
   const colors = resolveShapeColors(object.color ?? FIRST_USE_COLORS.shape);
-  const strokeWidth = resolveObjectStrokeWidth(object.style);
+  const strokeWidth = resolveObjectStrokeWidth(object.style, canvasStyle);
 
   // Icon glyph family: render the real Nucleo glyph via the pure registry
   // (objects/shapes/icon/icon-glyphs.ts), mirroring IconShapeBody.tsx.
@@ -844,7 +844,7 @@ function renderShapeBody(
 
   // Custom silhouettes — types whose live defs draw inline-SVG/CSS
   // silhouettes rather than an outline-module polygon.
-  const custom = renderCustomSilhouette(renderShape, geometry, colors, strokeWidth);
+  const custom = renderCustomSilhouette(renderShape, geometry, colors, strokeWidth, canvasStyle);
   if (custom !== null) return custom;
 
   const spec = outlineSpecFor(object);
@@ -876,18 +876,18 @@ function renderShapeBody(
 
   // Bbox tier: the base rounded-rect trim (the CSS border paints inside the
   // box, so inset by half the stroke).
-  return bboxRoundedRect(geometry, colors, strokeWidth, BASE_CORNER_RADIUS_PX);
+  return bboxRoundedRect(geometry, colors, strokeWidth, canvasStyle.shapeCornerRadiusPx);
 }
 
 // ---------------------------------------------------------------------------
 // Sections
 // ---------------------------------------------------------------------------
 
-function renderSectionBackdrop(section: InteractiveCanvasObject): string {
+function renderSectionBackdrop(section: InteractiveCanvasObject, canvasStyle: CanvasStyle): string {
   const family = resolveSectionColors(section.color ?? FIRST_USE_COLORS.section);
   const geometry = section.geometry;
   const borderStyle = section.style?.strokeStyle ?? "solid";
-  const strokeWidth = section.style?.strokeWidth ?? SECTION_BORDER_WIDTH_PX;
+  const strokeWidth = section.style?.strokeWidth ?? canvasStyle.sectionBorderWidthPx;
   const inset = strokeWidth / 2;
 
   if (borderStyle === "none") {
@@ -896,7 +896,7 @@ function renderSectionBackdrop(section: InteractiveCanvasObject): string {
       y: geometry.y,
       width: geometry.width,
       height: geometry.height,
-      rx: SECTION_CORNER_RADIUS_PX,
+      rx: canvasStyle.sectionCornerRadiusPx,
       fill: family.tint,
     });
   }
@@ -906,7 +906,7 @@ function renderSectionBackdrop(section: InteractiveCanvasObject): string {
     y: geometry.y + inset,
     width: Math.max(0, geometry.width - strokeWidth),
     height: Math.max(0, geometry.height - strokeWidth),
-    rx: SECTION_CORNER_RADIUS_PX,
+    rx: canvasStyle.sectionCornerRadiusPx,
     fill: family.tint,
     // Per spec the section border IS the title chip's fill color.
     stroke: family.chip.fill,
@@ -917,11 +917,16 @@ function renderSectionBackdrop(section: InteractiveCanvasObject): string {
   });
 }
 
-function renderSectionTitleChip(section: InteractiveCanvasObject, scale = 1): string {
+function renderSectionTitleChip(
+  section: InteractiveCanvasObject,
+  scale: number,
+  canvasStyle: CanvasStyle,
+): string {
   if (section.text === "") return "";
   const family = resolveSectionColors(section.color ?? FIRST_USE_COLORS.section);
+  const borderWidthPx = canvasStyle.titleChipBorderWidthPx;
   const maxWidth = titleChipMaxWidthPx(section.geometry.width, scale);
-  const estimated = estimateTitleChipWidthPx(section.text);
+  const estimated = estimateTitleChipWidthPx(section.text, canvasStyle);
   const chipWidth = Math.min(estimated, maxWidth);
   if (chipWidth <= 0) return "";
   // The live chip counter-scales via a top-left-origin CSS transform pinned
@@ -933,7 +938,7 @@ function renderSectionTitleChip(section: InteractiveCanvasObject, scale = 1): st
   const anchorY = section.geometry.y + TITLE_CHIP.insetFromSectionCornerPx;
   const chipX = scale === 1 ? anchorX : 0;
   const chipY = scale === 1 ? anchorY : 0;
-  const borderInset = TITLE_CHIP.borderWidthPx / 2;
+  const borderInset = borderWidthPx / 2;
 
   // Ellipsize when the estimated natural width exceeds the section's budget
   // (mirrors the chip CSS's text-overflow: ellipsis).
@@ -941,7 +946,7 @@ function renderSectionTitleChip(section: InteractiveCanvasObject, scale = 1): st
   if (estimated > maxWidth) {
     const charWidth = TITLE_CHIP.fontSizePx * CHAR_WIDTH_RATIO;
     const available =
-      chipWidth - TITLE_CHIP.paddingXPx * 2 - TITLE_CHIP.borderWidthPx * 2 - charWidth;
+      chipWidth - TITLE_CHIP.paddingXPx * 2 - borderWidthPx * 2 - charWidth;
     const maxChars = Math.max(1, Math.floor(available / charWidth));
     label = `${section.text.slice(0, maxChars)}…`;
   }
@@ -949,17 +954,17 @@ function renderSectionTitleChip(section: InteractiveCanvasObject, scale = 1): st
   const rect = tag("rect", {
     x: chipX + borderInset,
     y: chipY + borderInset,
-    width: Math.max(0, chipWidth - TITLE_CHIP.borderWidthPx),
-    height: TITLE_CHIP.heightPx - TITLE_CHIP.borderWidthPx,
-    rx: TITLE_CHIP_CORNER_RADIUS_PX,
+    width: Math.max(0, chipWidth - borderWidthPx),
+    height: TITLE_CHIP.heightPx - borderWidthPx,
+    rx: canvasStyle.titleChipCornerRadiusPx,
     fill: family.chip.fill,
     stroke: family.chip.border,
-    "stroke-width": TITLE_CHIP.borderWidthPx,
+    "stroke-width": borderWidthPx,
   });
   const text = tag(
     "text",
     {
-      x: chipX + TITLE_CHIP.borderWidthPx + TITLE_CHIP.paddingXPx,
+      x: chipX + borderWidthPx + TITLE_CHIP.paddingXPx,
       y: chipY + TITLE_CHIP.heightPx / 2,
       fill: TITLE_CHIP.textColor,
       "font-size": TITLE_CHIP.fontSizePx,
@@ -1034,10 +1039,15 @@ function arrowheadPolygon(
  * does NOT counter-scale with zoom: the stage renders it at natural document
  * size at every zoom level, so every consumer of this rect (the renderer
  * itself, painted-extent cameras) treats it as fixed world geometry.
+ *
+ * `_canvasStyle` is accepted for signature uniformity with the other
+ * style-aware helpers: no canvas-style setting changes the chip's rect today
+ * (only its corner radius, which a rect does not carry).
  */
 export function connectionLabelChipRect(
   label: string,
   center: CanvasPoint,
+  _canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): { x: number; y: number; width: number; height: number } {
   const width = Math.max(
     CONNECTION_LABEL_MIN_WIDTH_PX,
@@ -1055,12 +1065,14 @@ function renderConnector(
   connection: InteractiveCanvasConnection,
   objectsById: Map<string, InteractiveCanvasObject>,
   obstacles: ReadonlyArray<InteractiveCanvasObject>,
+  canvasStyle: CanvasStyle,
 ): string {
   const fromObject = objectsById.get(connection.from.objectId);
   const toObject = objectsById.get(connection.to.objectId);
   if (!fromObject || !toObject) return "";
 
-  const routed = routeConnection(fromObject, toObject, connection, obstacles);
+  const routed = routeConnection(fromObject, toObject, connection, obstacles, canvasStyle);
+  const strokeWidth = canvasStyle.connectorStrokeWidthPx;
   const stroke = resolveConnectorStroke(connection.color ?? FIRST_USE_COLORS.connector);
   const dashed = connection.style === "dashed";
 
@@ -1069,7 +1081,7 @@ function renderConnector(
       d: routed.path,
       fill: "none",
       stroke,
-      "stroke-width": CONNECTOR_STROKE_WIDTH_PX,
+      "stroke-width": strokeWidth,
       "stroke-linecap": "butt",
       ...(dashed ? { "stroke-dasharray": CONNECTOR_DASH_PATTERN_PX.join(" ") } : null),
     }),
@@ -1084,12 +1096,12 @@ function renderConnector(
     const beforeLast = points[points.length - 2]!;
     if (arrow === "forward" || arrow === "both") {
       parts.push(
-        arrowheadPolygon(renderedEndpoint(last, beforeLast), beforeLast, CONNECTOR_STROKE_WIDTH_PX, stroke),
+        arrowheadPolygon(renderedEndpoint(last, beforeLast), beforeLast, strokeWidth, stroke),
       );
     }
     if (arrow === "back" || arrow === "both") {
       parts.push(
-        arrowheadPolygon(renderedEndpoint(first, second), second, CONNECTOR_STROKE_WIDTH_PX, stroke),
+        arrowheadPolygon(renderedEndpoint(first, second), second, strokeWidth, stroke),
       );
     }
   }
@@ -1100,7 +1112,7 @@ function renderConnector(
   const label = connection.label?.trim() ? connection.label : null;
   if (label) {
     const labelPoint = labelPointFor(routed, connection);
-    const chip = connectionLabelChipRect(label, labelPoint);
+    const chip = connectionLabelChipRect(label, labelPoint, canvasStyle);
     const { x, y } = labelPoint;
     parts.push(
       tag("rect", {
@@ -1108,7 +1120,7 @@ function renderConnector(
         y: chip.y,
         width: chip.width,
         height: chip.height,
-        rx: CONNECTION_LABEL_RADIUS_PX,
+        rx: canvasStyle.labelChipCornerRadiusPx,
         fill: CONNECTION_LABEL_BACKGROUND,
         stroke: CONNECTION_LABEL_BORDER,
         "stroke-width": 1,
@@ -1303,9 +1315,10 @@ export interface RenderScene {
 export function renderSceneToSvg(
   document: InteractiveCanvasDocument,
   scene: RenderScene,
-  options: Pick<RenderStaticSvgOptions, "width" | "height" | "background"> = {},
+  options: Pick<RenderStaticSvgOptions, "width" | "height" | "background" | "canvasStyle"> = {},
 ): RenderedSvg {
   const { bounds } = scene;
+  const canvasStyle = normalizeCanvasStyle(options.canvasStyle);
   const { width, height } = resolvePixelSize(bounds, options);
   const chipScale = titleChipScale(scene.chipZoom);
 
@@ -1344,15 +1357,15 @@ export function renderSceneToSvg(
     );
   }
 
-  for (const section of sections) parts.push(renderSectionBackdrop(section));
+  for (const section of sections) parts.push(renderSectionBackdrop(section, canvasStyle));
   for (const connection of scene.connections) {
-    parts.push(renderConnector(connection, objectsById, scene.obstacles));
+    parts.push(renderConnector(connection, objectsById, scene.obstacles, canvasStyle));
   }
   for (const object of nonSections) {
-    parts.push(renderShapeBody(object, stickyShadowFilterId, bounds));
+    parts.push(renderShapeBody(object, stickyShadowFilterId, bounds, canvasStyle));
     parts.push(renderObjectText(object));
   }
-  for (const section of sections) parts.push(renderSectionTitleChip(section, chipScale));
+  for (const section of sections) parts.push(renderSectionTitleChip(section, chipScale, canvasStyle));
 
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" ` +

@@ -18,9 +18,17 @@ export {
   exportFilenameFor,
   sanitizeExportFilename,
 } from "./render/download";
-export type { ExportPngOptions } from "./render/download";
+export type { ExportPngOptions, ExportSvgOptions } from "./render/download";
 export * from "./interaction/clipboard";
 export * from "./theme/tokens";
+export * from "./theme/canvas-style";
+export {
+  CanvasStyleProvider,
+  useCanvasStyle,
+  useResolvedCanvasStyle,
+  canvasStyleCssVariables,
+} from "./theme/canvas-style-context";
+export type { CanvasStyleProviderProps } from "./theme/canvas-style-context";
 export * from "./state/geometry";
 export * from "./interaction/interaction";
 export {

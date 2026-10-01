@@ -52,6 +52,8 @@ import {
 import { TopBar } from "./components/TopBar";
 import { useCanvasHotkeys } from "./use-canvas-hotkeys";
 import { useCanvasViewport } from "../../navigation/use-canvas-viewport";
+import type { CanvasStyle } from "../../theme/canvas-style";
+import { CanvasStyleProvider, useCanvasStyle } from "../../theme/canvas-style-context";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObjectType,
@@ -113,6 +115,12 @@ export interface InteractiveCanvasEditorProps {
   screenOverlay?: ReactNode;
   /** Locks document and selection editing while keeping viewport navigation active. */
   cameraOnly?: boolean;
+  /**
+   * Workspace canvas style overrides (corner radii, border/stroke widths),
+   * merged over any enclosing CanvasStyleProvider. Drives the stage, the
+   * editor overlays, and the board/section exports. Omit to inherit.
+   */
+  canvasStyle?: Partial<CanvasStyle>;
 }
 
 function reducer(state: ReturnType<typeof createInteractiveCanvasState>, action: CanvasAction) {
@@ -161,7 +169,15 @@ function dockToolForCanvasTool(tool: CanvasTool): ToolId | null {
   return CANVAS_TOOL_TO_DOCK_TOOL[tool] ?? null;
 }
 
-export function InteractiveCanvasEditor({
+export function InteractiveCanvasEditor({ canvasStyle, ...props }: InteractiveCanvasEditorProps) {
+  return (
+    <CanvasStyleProvider value={canvasStyle}>
+      <InteractiveCanvasEditorBody {...props} />
+    </CanvasStyleProvider>
+  );
+}
+
+function InteractiveCanvasEditorBody({
   document,
   onSave,
   onCancel,
@@ -176,7 +192,9 @@ export function InteractiveCanvasEditor({
   worldOverlay,
   screenOverlay,
   cameraOnly = false,
-}: InteractiveCanvasEditorProps) {
+}: Omit<InteractiveCanvasEditorProps, "canvasStyle">) {
+  // The provider InteractiveCanvasEditor mounts: exports render with it too.
+  const resolvedCanvasStyle = useCanvasStyle();
   const [state, dispatchCanvasAction] = useReducer(reducer, document, createInteractiveCanvasState);
   const cameraOnlyRef = useRef(cameraOnly);
   cameraOnlyRef.current = cameraOnly;
@@ -249,6 +267,7 @@ export function InteractiveCanvasEditor({
     dispatch,
     screenToWorld,
     zoom: viewport.zoom,
+    canvasStyle: resolvedCanvasStyle,
   });
   const {
     isContextMenuOpen,

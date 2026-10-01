@@ -11,6 +11,7 @@ import {
   AlertTriangleIcon,
   ArrowLeftIcon,
   CheckIcon,
+  PanelRightIcon,
   PlusIcon,
   ShapesIcon,
   TrashIcon,
@@ -66,6 +67,18 @@ import {
   saveProjectBoard,
 } from "./project/docs-server";
 import { ProjectBoardsSection } from "./project/ProjectBoardsSection";
+import { StyleRail } from "./style/StyleRail";
+import { useCanvasStyleSettings } from "./style/use-canvas-style-settings";
+
+const STYLE_RAIL_OPEN_STORAGE_KEY = "canvas-studio-style-rail-open";
+
+function readStyleRailOpen(): boolean {
+  try {
+    return window.localStorage.getItem(STYLE_RAIL_OPEN_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
 
 type CanvasListItem = {
   id: string;
@@ -246,6 +259,10 @@ export function App() {
     useState<"idle" | "loading" | "not-found" | "error">("idle");
   const [documentErrorDetail, setDocumentErrorDetail] = useState<string | null>(null);
   const [showAgent, setShowAgent] = useState(false);
+  // The Style rail and the Agent sidebar share the editor's right-hand slot:
+  // opening either one closes the other.
+  const [showStyle, setShowStyle] = useState(readStyleRailOpen);
+  const canvasStyleSettings = useCanvasStyleSettings();
   const [agentPreviewRect, setAgentPreviewRect] = useState<AgentRect | null>(null);
   const [agentBaselineDocument, setAgentBaselineDocument] =
     useState<InteractiveCanvasDocument | null>(null);
@@ -492,6 +509,25 @@ export function App() {
     const next = !showAgent;
     setShowAgent(next);
   }, [showAgent]);
+
+  const toggleStyle = useCallback(() => {
+    const next = !showStyle;
+    setShowStyle(next);
+    if (next) setShowAgent(false);
+  }, [showStyle]);
+
+  // The agent sidebar also opens itself (annotation tool, agent runs).
+  useEffect(() => {
+    if (showAgent) setShowStyle(false);
+  }, [showAgent]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(STYLE_RAIL_OPEN_STORAGE_KEY, showStyle ? "1" : "0");
+    } catch {
+      // Session-only when storage is unavailable.
+    }
+  }, [showStyle]);
 
   const handleEditorStateChange = useCallback((state: InteractiveCanvasEditorState) => {
     setEditorState(state);
@@ -846,6 +882,7 @@ export function App() {
           interactive
           bare
           showNavigationControls
+          canvasStyle={canvasStyleSettings.style}
         />
       );
 
@@ -895,6 +932,7 @@ export function App() {
           key={`${activeDocument.id}:${editorDocumentRevision}`}
           document={activeDocument}
           editableTitle
+          canvasStyle={canvasStyleSettings.style}
           onDocumentChange={queueAutosave}
           topBarLeading={
             <Button
@@ -1007,30 +1045,55 @@ export function App() {
                   />
                 </div>
               ) : null}
+              {showStyle && !showAgent ? (
+                <div className="pointer-events-auto">
+                  <StyleRail
+                    style={canvasStyleSettings.style}
+                    overrides={canvasStyleSettings.overrides}
+                    onChange={canvasStyleSettings.setValue}
+                    onResetKey={canvasStyleSettings.resetKey}
+                    onResetAll={canvasStyleSettings.resetAll}
+                    onClose={() => setShowStyle(false)}
+                  />
+                </div>
+              ) : null}
               {cameraLocked ? (
                 <CameraLockPill onStop={() => void agentSession.stop()} />
               ) : null}
             </>
           }
           topBarActions={
-            isLocalBoard ? (
+            <>
               <Button
                 type="button"
                 size="sm"
-                variant={showAgent ? "default" : "outline"}
-                aria-pressed={showAgent}
-                title="Toggle AI"
-                onClick={toggleAgent}
+                variant={showStyle && !showAgent ? "default" : "outline"}
+                aria-pressed={showStyle && !showAgent}
+                title="Toggle style settings"
+                onClick={toggleStyle}
               >
-                <span aria-hidden="true">✦</span>
-                AI
-                {agentNotes.length > 0 ? (
-                  <span className="rounded-full bg-current/10 px-1.5 text-[10px] leading-4">
-                    {agentNotes.length}
-                  </span>
-                ) : null}
+                <PanelRightIcon className="h-4 w-4" />
+                Style
               </Button>
-            ) : undefined
+              {isLocalBoard ? (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={showAgent ? "default" : "outline"}
+                  aria-pressed={showAgent}
+                  title="Toggle AI"
+                  onClick={toggleAgent}
+                >
+                  <span aria-hidden="true">✦</span>
+                  AI
+                  {agentNotes.length > 0 ? (
+                    <span className="rounded-full bg-current/10 px-1.5 text-[10px] leading-4">
+                      {agentNotes.length}
+                    </span>
+                  ) : null}
+                </Button>
+              ) : null}
+            </>
           }
         />
         {devRail ? (
@@ -1045,7 +1108,7 @@ export function App() {
   }
 
   if (route.name === "gallery") {
-    return <GalleryPage onBack={() => navigate("/")} />;
+    return <GalleryPage onBack={() => navigate("/")} canvasStyle={canvasStyleSettings.style} />;
   }
 
   if (route.name === "evals") {

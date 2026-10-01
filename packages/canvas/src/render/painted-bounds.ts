@@ -19,6 +19,7 @@ import { labelPointFor, routeConnection } from "../connectors/routing";
 import { belowExtendedBoundsPx } from "../objects/text-slots";
 import { sectionTitleChipWorldRect } from "../objects/section/title-chip-geometry";
 import { connectionLabelChipRect } from "./static-svg";
+import { normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
@@ -61,9 +62,13 @@ export function rectsIntersect(a: Rect, b: Rect): boolean {
  * the glyph box, unclamped), plus — for a titled section — the natural-size
  * (scale 1) title chip. Chip counter-scale at a specific camera zoom is the
  * caller's concern (see render/views.ts): world-space painted bounds are
- * measured at zoom 1.
+ * measured at zoom 1. `canvasStyle` (partial bags normalized) sizes the title
+ * chip the way the renderer draws it.
  */
-export function objectPaintedBounds(object: InteractiveCanvasObject): Rect {
+export function objectPaintedBounds(
+  object: InteractiveCanvasObject,
+  canvasStyle?: Partial<CanvasStyle>,
+): Rect {
   // belowExtendedBoundsPx returns the glyph box ∪ caption band in
   // object-local coordinates (glyph box alone for types without a below
   // band, or when the band is empty/hidden).
@@ -75,7 +80,7 @@ export function objectPaintedBounds(object: InteractiveCanvasObject): Rect {
     height: local.height,
   };
   if (object.type === "section" && object.text !== "") {
-    rect = unionRects(rect, sectionTitleChipWorldRect(object, 1));
+    rect = unionRects(rect, sectionTitleChipWorldRect(object, 1, normalizeCanvasStyle(canvasStyle)));
   }
   return rect;
 }
@@ -148,6 +153,7 @@ export function connectionPaintedBounds(
 export function paintedBounds(
   document: InteractiveCanvasDocument,
   targetIds?: ReadonlySet<string>,
+  canvasStyle?: Partial<CanvasStyle>,
 ): Rect {
   const objectsById = new Map(document.objects.map((object) => [object.id, object]));
   const targetObjects = targetIds
@@ -161,7 +167,7 @@ export function paintedBounds(
     rect = rect ? unionRects(rect, candidate) : candidate;
   };
 
-  for (const object of targetObjects) add(objectPaintedBounds(object));
+  for (const object of targetObjects) add(objectPaintedBounds(object, canvasStyle));
 
   for (const connection of document.connections) {
     const touchesTarget =

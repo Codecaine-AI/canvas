@@ -14,6 +14,7 @@ import { resolveSectionColors } from "../../../../theme/palette";
 import { FIRST_USE_COLORS } from "../../../../state/actions";
 import type { InteractiveCanvasObject } from "../../../../state/schema";
 import { MarkdownSlotTextEditor } from "./MarkdownSlotTextEditor";
+import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import type { TextEditingApi } from "./use-text-editing";
 
 export interface TextEditingOverlayProps {
@@ -46,8 +47,9 @@ interface SectionTitleEditorProps {
  * width-follows-text behavior while typing.
  */
 function SectionTitleEditor({ target, slot, value, setValue, commit, cancel, zoom }: SectionTitleEditorProps) {
+  const canvasStyle = useCanvasStyle();
   const draftTitle = value || target.text;
-  const resolved = resolveTextSlot(slot, { ...target, text: draftTitle }, zoom);
+  const resolved = resolveTextSlot(slot, { ...target, text: draftTitle }, zoom, { canvasStyle });
   const { rect, typography, scale } = resolved;
 
   return (
@@ -82,8 +84,8 @@ function SectionTitleEditor({ target, slot, value, setValue, commit, cancel, zoo
         width: `${rect.width}px`,
         height: `${rect.height}px`,
         pointerEvents: "auto",
-        border: `${TITLE_CHIP.borderWidthPx}px solid var(--primary)`,
-        borderRadius: "6px",
+        border: `${canvasStyle.titleChipBorderWidthPx}px solid var(--primary)`,
+        borderRadius: `${canvasStyle.titleChipCornerRadiusPx}px`,
         padding: `0 ${TITLE_CHIP.paddingXPx}px`,
         fontSize: `${typography.fontSizePx}px`,
         fontWeight: typography.fontWeight,

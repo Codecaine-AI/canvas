@@ -14,15 +14,20 @@
  */
 import { LAYOUT_RULES } from "./index";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
-import type { Diagnostic, LayoutRule } from "./types";
+import type { Diagnostic, LayoutRule, LintContext } from "./types";
 
+/**
+ * `context` carries the workspace canvas style for the rules that measure
+ * painted borders or chips; a session passes its own (`session.canvasStyle`).
+ */
 export function runDiagnostics(
   document: InteractiveCanvasDocument,
   rules: readonly LayoutRule[] = LAYOUT_RULES,
+  context: LintContext = {},
 ): Diagnostic[] {
   const collected: Omit<Diagnostic, "id">[] = [];
   for (const rule of rules) {
-    for (const finding of rule.check(document)) {
+    for (const finding of rule.check(document, context)) {
       collected.push(finding);
     }
   }
@@ -37,6 +42,18 @@ export function runDiagnostics(
     ...assign(collected.filter((finding) => finding.severity === "error"), "E"),
     ...assign(collected.filter((finding) => finding.severity === "warning"), "W"),
   ];
+}
+
+/**
+ * `runDiagnostics` over a layout session's draft, measured with the session's
+ * workspace canvas style. Every session-side caller goes through here so no
+ * lint pass forgets the style.
+ */
+export function sessionDiagnostics(
+  session: { readonly draft: InteractiveCanvasDocument; readonly canvasStyle?: LintContext["canvasStyle"] },
+  rules: readonly LayoutRule[] = LAYOUT_RULES,
+): Diagnostic[] {
+  return runDiagnostics(session.draft, rules, { canvasStyle: session.canvasStyle });
 }
 
 /**

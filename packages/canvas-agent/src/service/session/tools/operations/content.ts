@@ -95,7 +95,7 @@ export const updateText = defineOperationTool({
       return ctx.mergeConnection(p.id, patch, `update_text ${p.id}`);
     }
     const target = ctx.draft.objects.find((object) => object.id === p.id)!;
-    const report = textFitReport(target, target.geometry, p.text);
+    const report = textFitReport(target, target.geometry, p.text, ctx.canvasStyle);
     return ctx.mergeObject(
       p.id,
       { text: p.text },

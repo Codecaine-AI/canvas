@@ -3,6 +3,8 @@
 import { useLayoutEffect, useRef, type CSSProperties, type ReactNode } from "react";
 import { resolveSectionColors, resolveShapeColors, resolveStickyFill } from "../theme/palette";
 import { resolveObjectStrokeWidth } from "../theme/tokens";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
+import { useCanvasStyle } from "../theme/canvas-style-context";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import type { InteractiveCanvasObject } from "../state/schema";
 import type {
@@ -63,29 +65,42 @@ export function resolveObjectRoleColors(
   return { fill: shape.fill, border: shape.border, text: OBJECT_TEXT_COLOR };
 }
 
+/**
+ * The CSS border width an object's button paints (logical px): 0 when the
+ * def suppresses the button border, the section frame width (per-object
+ * `style.strokeWidth`, else `canvasStyle.sectionBorderWidthPx`; dashed/none
+ * frames paint via SVG or not at all) for sections, and the shape stroke
+ * (resolveObjectStrokeWidth) for bordered shape roles.
+ */
 export function resolveObjectBorderWidth(
   object: InteractiveCanvasObject,
   colorRole: ObjectColorRole = "shape",
   buttonBorder: ObjectButtonBorderPolicy = "painted",
   options?: { defaultSectionBorderWidthPx?: number },
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): number {
   if (buttonBorder === "suppressed") return 0;
   if (colorRole === "section") {
     const borderStyle = object.style?.strokeStyle ?? "solid";
     if (borderStyle === "none" || borderStyle === "dashed") return 0;
-    return object.style?.strokeWidth ?? options?.defaultSectionBorderWidthPx ?? 2;
+    return (
+      object.style?.strokeWidth ??
+      options?.defaultSectionBorderWidthPx ??
+      canvasStyle.sectionBorderWidthPx
+    );
   }
   const colors = resolveObjectRoleColors(object, colorRole);
-  return colors.border === null ? 0 : resolveObjectStrokeWidth(object.style);
+  return colors.border === null ? 0 : resolveObjectStrokeWidth(object.style, canvasStyle);
 }
 
 export function objectStyle(
   object: InteractiveCanvasObject,
   colorRole: ObjectColorRole = "shape",
   buttonBorder: ObjectButtonBorderPolicy = "painted",
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): CSSProperties {
   const colors = resolveObjectRoleColors(object, colorRole);
-  const borderWidth = resolveObjectBorderWidth(object, colorRole, buttonBorder);
+  const borderWidth = resolveObjectBorderWidth(object, colorRole, buttonBorder, undefined, canvasStyle);
   return {
     left: `${object.geometry.x}px`,
     top: `${object.geometry.y}px`,
@@ -93,8 +108,8 @@ export function objectStyle(
     height: `${object.geometry.height}px`,
     background: colors.fill,
     borderColor: colors.border ?? "transparent",
-    // Soft picks (and bold white) carry FigJam's universal 4px stroke (or
-    // the object's own strokeWidth); suppressed button borders render width 0.
+    // Bordered picks carry the canvas style's shape border (or the object's
+    // own strokeWidth); suppressed button borders render width 0.
     borderWidth: borderWidth === 0 ? 0 : `${borderWidth}px`,
     color: colors.text,
     // W4 z-layering (see the connector <svg> comment in CanvasStage): non-
@@ -143,6 +158,7 @@ export function ObjectShell({
   buttonBorder?: ObjectButtonBorderPolicy;
   children?: ReactNode;
 }) {
+  const canvasStyle = useCanvasStyle();
   return (
     <button
       type="button"
@@ -159,7 +175,7 @@ export function ObjectShell({
       data-drop-target={dropTarget ? "true" : undefined}
       data-editable={(editable ?? Boolean(onObjectSelect)) ? "true" : undefined}
       aria-label={object.text || object.type}
-      style={objectStyle(object, colorRole, buttonBorder)}
+      style={objectStyle(object, colorRole, buttonBorder, canvasStyle)}
       onClick={(event) => {
         event.stopPropagation();
         onObjectSelect?.(object.id);
@@ -221,9 +237,12 @@ export function ObjectSlotText({
   clampChildrenToSlot?: boolean;
   children?: ReactNode;
 }) {
-  const resolved = resolveTextSlot(slot, object);
+  const canvasStyle = useCanvasStyle();
+  const resolved = resolveTextSlot(slot, object, 1, { canvasStyle });
   const { rect, typography } = resolved;
-  const borderInset = resolveObjectBorderWidth(object, colorRole, buttonBorder);
+  // Absolute children position from the button's padding edge, so the
+  // border-box slot rect shifts back by the painted border width.
+  const borderInset = resolveObjectBorderWidth(object, colorRole, buttonBorder, undefined, canvasStyle);
   const placementName = textPlacementName(slot.placement);
   const isBelowPlacement = placementName === "below";
   const clampLineHeightPx = slotLineHeightPx(typography);

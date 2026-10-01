@@ -34,6 +34,7 @@ import {
   type Rect,
 } from "./painted-bounds";
 import { renderSceneToSvg } from "./static-svg";
+import { normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
 import type { RenderedSvg } from "./types";
 
 /** A rendered named view: the SVG plus the world-space camera it framed. */
@@ -44,6 +45,8 @@ export interface RenderedView extends RenderedSvg {
 export interface RenderViewOptions {
   /** Output width in px; height derives from the camera's aspect ratio. */
   width: number;
+  /** Workspace canvas style (see RenderStaticSvgOptions.canvasStyle). */
+  canvasStyle?: Partial<CanvasStyle>;
 }
 
 /** World padding framing a view's painted content. */
@@ -84,6 +87,7 @@ function cameraFittingTitleChips(
   camera: Rect,
   widthPx: number,
   sections: ReadonlyArray<InteractiveCanvasObject>,
+  canvasStyle: CanvasStyle,
 ): Rect {
   let current = camera;
   for (let pass = 0; pass < CHIP_FIT_MAX_PASSES; pass += 1) {
@@ -93,7 +97,7 @@ function cameraFittingTitleChips(
       if (section.text === "") continue;
       expanded = unionRects(
         expanded,
-        inflateRect(sectionTitleChipWorldRect(section, zoom), VIEW_PADDING_PX),
+        inflateRect(sectionTitleChipWorldRect(section, zoom, canvasStyle), VIEW_PADDING_PX),
       );
     }
     if (rectsAlmostEqual(expanded, current)) return current;
@@ -112,11 +116,13 @@ export function renderBoardView(
   document: InteractiveCanvasDocument,
   opts: RenderViewOptions,
 ): RenderedView {
+  const canvasStyle = normalizeCanvasStyle(opts.canvasStyle);
   const sections = document.objects.filter((object) => object.type === "section");
   const camera = cameraFittingTitleChips(
-    inflateRect(paintedBounds(document), VIEW_PADDING_PX),
+    inflateRect(paintedBounds(document, undefined, canvasStyle), VIEW_PADDING_PX),
     opts.width,
     sections,
+    canvasStyle,
   );
   const chipZoom = opts.width / Math.max(1, camera.width);
   const rendered = renderSceneToSvg(
@@ -128,7 +134,7 @@ export function renderBoardView(
       obstacles: document.objects,
       chipZoom,
     },
-    { width: opts.width },
+    { width: opts.width, canvasStyle },
   );
   return { ...rendered, camera };
 }
@@ -160,6 +166,7 @@ export function renderSectionView(
     throw new Error(`renderSectionView: "${sectionId}" is not a section on this document`);
   }
 
+  const canvasStyle = normalizeCanvasStyle(opts.canvasStyle);
   const descendantIds = sectionDescendantIds(document, sectionId);
   const memberIds = new Set([sectionId, ...descendantIds]);
 
@@ -168,7 +175,7 @@ export function renderSectionView(
   let base: Rect = { ...section.geometry };
   for (const object of document.objects) {
     if (!descendantIds.has(object.id)) continue;
-    base = unionRects(base, objectPaintedBounds(object));
+    base = unionRects(base, objectPaintedBounds(object, canvasStyle));
   }
   for (const connection of document.connections) {
     const internal =
@@ -184,15 +191,16 @@ export function renderSectionView(
     inflateRect(base, VIEW_PADDING_PX),
     opts.width,
     memberSections,
+    canvasStyle,
   );
   const chipZoom = opts.width / Math.max(1, camera.width);
 
   // Retention by painted-extent intersection with the camera.
   const retainedObjectIds = new Set<string>();
   for (const object of document.objects) {
-    let extent = objectPaintedBounds(object);
+    let extent = objectPaintedBounds(object, canvasStyle);
     if (object.type === "section" && object.text !== "") {
-      extent = unionRects(extent, sectionTitleChipWorldRect(object, chipZoom));
+      extent = unionRects(extent, sectionTitleChipWorldRect(object, chipZoom, canvasStyle));
     }
     if (rectsIntersect(extent, camera)) retainedObjectIds.add(object.id);
   }
@@ -209,7 +217,7 @@ export function renderSectionView(
   const rendered = renderSceneToSvg(
     document,
     { bounds: camera, objects, connections, obstacles: document.objects, chipZoom },
-    { width: opts.width },
+    { width: opts.width, canvasStyle },
   );
   return { ...rendered, camera };
 }

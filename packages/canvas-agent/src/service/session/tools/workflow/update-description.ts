@@ -5,7 +5,7 @@
  */
 import { Type } from "@mariozechner/pi-ai";
 
-import { formatDiagnostics, runDiagnostics } from "../../../../board/lints/run";
+import { formatDiagnostics, sessionDiagnostics } from "../../../../board/lints/run";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { SessionEventSink } from "../../perception/perception";
 import type { LayoutSession } from "../../store";
@@ -34,7 +34,7 @@ export function toolUpdateDescription(
   const previous = session.draft.description;
   const label = "update_description";
   commitDraft(session, { ...session.draft, description }, label);
-  const diagnostics = runDiagnostics(session.draft);
+  const diagnostics = sessionDiagnostics(session);
   emit(session, {
     type: "proposal",
     sessionId: session.id,

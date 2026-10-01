@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import { normalizeCanvasStyle } from "@codecaine-ai/canvas/style";
 
 import { runDiagnostics } from "../src/board/lints/run";
 import { rule as clippedText } from "../src/board/lints/rules/clipped-text";
@@ -92,9 +93,17 @@ describe("clipped-text lint", () => {
     expect(findings[0]).toMatchObject({
       at: ["narrow-section"],
       where: section.geometry,
-      suggestion: "grow narrow-section to ≥348×360 or shorten the text",
+      // The chip at the default 1.5px title-chip border.
+      suggestion: "grow narrow-section to ≥347×360 or shorten the text",
     });
     expect(findings[0]!.message).toContain("section title ellipsizes");
+
+    // The workspace style's chip border is part of the measured width: 2.5px
+    // more border a side asks for 5px more frame.
+    const styled = clippedText.check(makeDocument([section]), {
+      canvasStyle: normalizeCanvasStyle({ titleChipBorderWidthPx: 4 }),
+    });
+    expect(styled[0]!.suggestion).toBe("grow narrow-section to ≥352×360 or shorten the text");
   });
 
   test("a long edge label is excluded from clipped-text", () => {

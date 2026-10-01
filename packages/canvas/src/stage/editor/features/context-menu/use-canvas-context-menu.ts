@@ -15,6 +15,7 @@ import type {
 } from "../../../../state/schema";
 import { animateSectionFitToChildren, isSectionFitted } from "../section-fit/animate-section-fit";
 import { exportDocumentAsPng, exportDocumentAsSvg } from "../../../../render/download";
+import type { CanvasStyle } from "../../../../theme/canvas-style";
 import {
   exportCanvasSection,
   type SectionExportFormat,
@@ -70,8 +71,14 @@ export interface UseCanvasContextMenuArgs {
   dispatch: (action: CanvasAction) => void;
   screenToWorld: (point: CanvasPoint) => CanvasPoint;
   zoom?: number;
+  /** Canvas style exports render with — the editor passes its live style so files match the board. */
+  canvasStyle?: CanvasStyle;
   exportSection?: typeof exportCanvasSection;
-  exportBoard?: (document: InteractiveCanvasDocument, format: SectionExportFormat) => Promise<void>;
+  exportBoard?: (
+    document: InteractiveCanvasDocument,
+    format: SectionExportFormat,
+    canvasStyle?: CanvasStyle,
+  ) => Promise<void>;
 }
 
 export interface CanvasContextMenuApi {
@@ -112,11 +119,12 @@ export function useCanvasContextMenu({
   dispatch,
   screenToWorld,
   zoom = 1,
+  canvasStyle,
   exportSection = exportCanvasSection,
-  exportBoard = (canvasDocument, format) =>
+  exportBoard = (canvasDocument, format, boardCanvasStyle) =>
     format === "svg"
-      ? exportDocumentAsSvg(canvasDocument)
-      : exportDocumentAsPng(canvasDocument),
+      ? exportDocumentAsSvg(canvasDocument, { canvasStyle: boardCanvasStyle })
+      : exportDocumentAsPng(canvasDocument, { canvasStyle: boardCanvasStyle }),
 }: UseCanvasContextMenuArgs): CanvasContextMenuApi {
   const [contextMenu, setContextMenu] = useState<CanvasContextMenuState | null>(null);
 
@@ -275,7 +283,7 @@ export function useCanvasContextMenu({
     const contextObject = document.objects.find((object) => object.id === contextMenu.objectId);
     if (contextObject?.type !== "section") return;
     setContextMenu(null);
-    exportSection(document, contextObject.id, format).catch((error: unknown) => {
+    exportSection(document, contextObject.id, format, canvasStyle).catch((error: unknown) => {
       // No toast surface exists yet; match the TopBar export failure behavior.
       console.error("Canvas section export failed", error);
     });
@@ -284,7 +292,7 @@ export function useCanvasContextMenu({
   const exportContextBoard = (format: SectionExportFormat) => {
     if (contextMenu?.kind !== "canvas") return;
     setContextMenu(null);
-    exportBoard(document, format).catch((error: unknown) => {
+    exportBoard(document, format, canvasStyle).catch((error: unknown) => {
       // No toast surface exists yet; keep failures loud in the console.
       console.error("Canvas export failed", error);
     });

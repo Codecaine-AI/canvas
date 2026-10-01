@@ -175,7 +175,8 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
       {
         label: "painted soft shape",
         object: makeObject({ id: "bw-process", type: "process", style: { shape: "rounded-rect" } }),
-        expected: 4,
+        // DEFAULT_CANVAS_STYLE.shapeBorderWidthPx
+        expected: 2,
       },
       {
         label: "painted shape custom stroke width",
@@ -194,7 +195,7 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
           color: "red",
           style: { shape: "rounded-rect" },
         }),
-        expected: 4,
+        expected: 2,
       },
       {
         label: "suppressed SVG silhouette shape",
@@ -209,7 +210,8 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
       {
         label: "section solid frame",
         object: makeObject({ id: "bw-section", type: "section", style: { shape: "section" } }),
-        expected: 2,
+        // DEFAULT_CANVAS_STYLE.sectionBorderWidthPx
+        expected: 1.5,
       },
       {
         label: "section dashed frame paints outside the button border",
@@ -238,9 +240,10 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     // Center preset = content box (bbox minus the 14/12 trim inset).
     expect(resolved.rect).toEqual({ x: 14, y: 12, width: 220 - 28, height: 140 - 24 });
     const { slot, effectiveButtonBorderWidth } = expectAtRestMatchesEditor(object);
-    expect(effectiveButtonBorderWidth).toBe(4);
-    expect(slot.style.left).toBe("10px");
-    expect(slot.style.top).toBe("8px");
+    expect(effectiveButtonBorderWidth).toBe(2);
+    // The 14/12 slot inset minus the 2px button border (padding-edge origin).
+    expect(slot.style.left).toBe("12px");
+    expect(slot.style.top).toBe("10px");
     expectEditorTypography(object);
   });
 
@@ -502,7 +505,7 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
     expect(resolved.rect.height).toBe(27);
     expect(editor.getAttribute("data-canvas-section-title-editor")).toBe("se1");
     const { slot, effectiveButtonBorderWidth } = expectAtRestMatchesEditor(object);
-    expect(effectiveButtonBorderWidth).toBe(2);
+    expect(effectiveButtonBorderWidth).toBe(1.5);
     expect(slot.style.left).toBe("43px");
     expect(slot.style.top).toBe("43px");
   });

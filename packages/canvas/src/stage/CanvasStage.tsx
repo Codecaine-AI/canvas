@@ -18,6 +18,13 @@ import {
 } from "../state/geometry";
 import { gridBackground } from "./grid";
 import { canvasSurfaceStyle } from "../theme/tokens";
+import type { CanvasStyle } from "../theme/canvas-style";
+import {
+  CanvasStyleProvider,
+  canvasStyleCssVar,
+  canvasStyleCssVariables,
+  useCanvasStyle,
+} from "../theme/canvas-style-context";
 import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector, ConnectorSelectionTrim } from "../connectors/Connector";
@@ -138,6 +145,11 @@ export interface CanvasStageProps {
   style?: CSSProperties;
   /** Ref to the root stage element (`[data-canvas-stage="true"]`), e.g. for useCanvasViewport. */
   stageRef?: Ref<HTMLDivElement>;
+  /**
+   * Workspace canvas style overrides (corner radii, border/stroke widths),
+   * merged over any enclosing CanvasStyleProvider. Omit to inherit.
+   */
+  canvasStyle?: Partial<CanvasStyle>;
 }
 
 /**
@@ -212,7 +224,15 @@ export { annotationTargetLabel, renderOrderedObjects, ObjectShape };
  *      - world overlays/editors at z 4
  *  - an untransformed screen-space `overlay` slot for caller-owned feedback.
  */
-export function CanvasStage({
+export function CanvasStage({ canvasStyle, ...props }: CanvasStageProps) {
+  return (
+    <CanvasStyleProvider value={canvasStyle}>
+      <CanvasStageSurface {...props} />
+    </CanvasStyleProvider>
+  );
+}
+
+function CanvasStageSurface({
   document,
   viewport,
   selectedObjectIds = [],
@@ -237,7 +257,8 @@ export function CanvasStage({
   className,
   style,
   stageRef,
-}: CanvasStageProps) {
+}: Omit<CanvasStageProps, "canvasStyle">) {
+  const resolvedCanvasStyle = useCanvasStyle();
   const selected = new Set(selectedObjectIds);
   const changed = new Set(changedObjectIds);
   const zoom = viewport.zoom;
@@ -299,6 +320,8 @@ export function CanvasStage({
         // text.
         userSelect: "none",
         WebkitUserSelect: "none",
+        // Canvas-style radii/border widths for the static per-kind CSS below.
+        ...canvasStyleCssVariables(resolvedCanvasStyle),
         ...style,
         cursor: stageCursor,
       }}
@@ -322,8 +345,8 @@ export function CanvasStage({
           justify-content: center;
           gap: 6px;
           overflow: hidden;
-          border: 2px solid var(--border);
-          border-radius: 8px;
+          border: ${canvasStyleCssVar("shapeBorderWidthPx")} solid var(--border);
+          border-radius: ${canvasStyleCssVar("shapeCornerRadiusPx")};
           padding: 12px 14px;
           text-align: left;
           font: inherit;

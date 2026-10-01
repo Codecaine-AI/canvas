@@ -12,7 +12,7 @@ import {
 import type { AgentProposal } from "../../../../protocol";
 import { diffDocuments } from "../../../../board/doc-diff";
 import { FINISHING_RULES } from "../../../../board/lints";
-import { diagnosticLines, formatDiagnostics, runDiagnostics } from "../../../../board/lints/run";
+import { diagnosticLines, formatDiagnostics, sessionDiagnostics } from "../../../../board/lints/run";
 import { describePatchOperation } from "../../apply-ops";
 import { scopedDiagnostics } from "../../snapshots/context";
 import type { SessionEventSink } from "../../perception/perception";
@@ -52,7 +52,7 @@ export function toolFinalize(
   }
 
   // The finishing registry adds the polish rules that would only nag mid-build.
-  const diagnostics = runDiagnostics(session.draft, FINISHING_RULES);
+  const diagnostics = sessionDiagnostics(session, FINISHING_RULES);
   const scoped = scopedDiagnostics(session, diagnostics);
   const blocking = scoped;
   // A thread the agent opened is a question left for the user, answered on

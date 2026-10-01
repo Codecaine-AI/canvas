@@ -22,7 +22,7 @@ import { nextId } from "../../../../../canvas/src/state/actions/helpers";
 
 import type { Rect } from "../../../board/types";
 import { formatBoardDigest } from "../../../board/digest";
-import { formatDiagnostics, runDiagnostics } from "../../../board/lints/run";
+import { formatDiagnostics, sessionDiagnostics } from "../../../board/lints/run";
 import type { Diagnostic } from "../../../board/lints";
 import { rectIntersectionArea } from "../../../board/measure";
 
@@ -315,7 +315,7 @@ export function draftWithPageFrame(document: InteractiveCanvasDocument): Interac
  * than restating the whole report it already has.
  */
 export function boardStateSnapshot(session: LayoutSession): string {
-  const diagnostics = runDiagnostics(session.draft);
+  const diagnostics = sessionDiagnostics(session);
   session.lastDiagnostics = diagnostics;
   return [
     formatBoardDescription(session.draft.description),
@@ -405,7 +405,7 @@ export function boardReport(session: LayoutSession): {
   diagnostics: Diagnostic[];
   diagnosticsText: string;
 } {
-  const diagnostics = runDiagnostics(session.draft);
+  const diagnostics = sessionDiagnostics(session);
   return {
     digest: formatBoardDigest(session.draft),
     diagnostics,

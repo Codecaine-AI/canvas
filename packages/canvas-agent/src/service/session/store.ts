@@ -10,7 +10,7 @@
  */
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 
 import { updateContainerStatus, type KernelDatabase } from "@agent-kernel/db";
 import { getRunContext, type KernelInstance } from "@agent-kernel/kernel";
@@ -22,7 +22,7 @@ import { renderDocumentToSvg } from "../../../../canvas/src/render/static-svg";
 
 import { resolveScope, type ScopeResolution } from "../../board/scope";
 import type { Diagnostic } from "../../board/lints";
-import { runDiagnostics } from "../../board/lints/run";
+import { sessionDiagnostics } from "../../board/lints/run";
 import type {
   AcceptAgentSessionResponse,
   AgentProposal,
@@ -35,6 +35,7 @@ import type {
 } from "../../protocol";
 
 import { emitBoardRenderTraceEvent } from "./board-trace";
+import { loadCanvasStyle, sessionCanvasStyle, type CanvasStyle } from "./canvas-style";
 import type { RequestQueueEntry } from "./snapshots/user-requests";
 import {
   AGENT_KERNEL_DIR,
@@ -138,6 +139,13 @@ export interface LayoutSession {
   changeRenders: ChangeRender[];
   /** Latest eager current-board raster failure, shown in the state <views> block. */
   currentBoardRenderFailure?: string;
+  /**
+   * The workspace canvas style (corner radii, border widths) read from
+   * `canvases/canvas-style.json` when the session opened (./canvas-style).
+   * Every static render and border/chip-dependent measurement the session
+   * makes resolves through it; absent means the defaults.
+   */
+  canvasStyle?: CanvasStyle;
 }
 
 function sha256(input: string | Buffer): string {
@@ -270,10 +278,11 @@ export class LayoutSessionStore {
       views: [],
       viewCount: 0,
       changeRenders: [],
+      canvasStyle: loadCanvasStyle(dirname(canvasPath)),
     };
     // Every operation reports its lint delta against a baseline, so the session
     // starts with one: the findings already on the board before the first edit.
-    session.lastDiagnostics = runDiagnostics(session.draft);
+    session.lastDiagnostics = sessionDiagnostics(session);
     syncSessionRequests(session);
     this.sessions.set(sessionId, session);
     this.byContainer.set(container.id, session);
@@ -405,6 +414,7 @@ export class LayoutSessionStore {
     return renderDocumentToSvg(documentWithinCrop(session.draft, crop), {
       cropRect: crop,
       width: GHOST_PREVIEW_WIDTH,
+      canvasStyle: sessionCanvasStyle(session),
     });
   }
 

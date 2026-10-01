@@ -299,7 +299,7 @@ function applySize(
   // and the summary has to be the board's number, not the descriptor's.
   const landed = (document.objects.find((object) => object.id === id) ?? target).geometry;
   // The readability verdict is taken on the box that LANDED.
-  const report = textFitReport(target, landed, target.text ?? "");
+  const report = textFitReport(target, landed, target.text ?? "", ctx.canvasStyle);
   return {
     status: "applied",
     draft: document,

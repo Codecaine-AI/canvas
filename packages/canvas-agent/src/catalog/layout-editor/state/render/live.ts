@@ -29,7 +29,7 @@ import {
   formatBoardEdgesDigest,
   formatBoardObjectsDigest,
 } from "../../../../board/digest";
-import { diagnosticLines, runDiagnostics } from "../../../../board/lints/run";
+import { diagnosticLines, sessionDiagnostics } from "../../../../board/lints/run";
 import { boardDiffBlock } from "../../../../service/session/perception/perception";
 import type { LayoutSession } from "../../../../service/session/store";
 
@@ -69,7 +69,7 @@ export function tryLivePicture(session: LayoutSession): LivePicture | null {
 
 function livePicture(session: LayoutSession): LivePicture {
   const draft = session.draft;
-  const diagnostics = runDiagnostics(draft);
+  const diagnostics = sessionDiagnostics(session);
   const bySeverity = (severity: "error" | "warning"): string[] =>
     diagnostics
       .filter((finding) => finding.severity === severity)

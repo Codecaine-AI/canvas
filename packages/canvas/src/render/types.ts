@@ -1,4 +1,5 @@
 import type { InteractiveCanvasDocument } from "../state/schema";
+import type { CanvasStyle } from "../theme/canvas-style";
 
 /**
  * Options for the static document → SVG renderer (render/static-svg.ts).
@@ -47,6 +48,13 @@ export interface RenderStaticSvgOptions {
   padding?: number;
   /** "board" paints the light board surface color; "transparent" omits it. */
   background?: "board" | "transparent";
+  /**
+   * Workspace canvas style (corner radii, border/stroke widths, connector
+   * bend radius). Partial bags are normalized (defaults filled, clamped) —
+   * omit for the defaults. Hosts pass the same overrides the live stage uses
+   * so exports and previews match the app.
+   */
+  canvasStyle?: Partial<CanvasStyle>;
 }
 
 export interface RenderedSvg {

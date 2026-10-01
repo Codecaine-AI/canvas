@@ -6,6 +6,7 @@
  * operation pipeline.
  */
 import type { AgentSessionEvent } from "../../../protocol";
+import { sessionCanvasStyle } from "../canvas-style";
 import type { SessionEventSink } from "../perception/perception";
 import type { LayoutSession } from "../store";
 import { findOperationTool } from "./operations";
@@ -54,7 +55,7 @@ export function toolOperation(
   }
   const host: OperationHost = {
     currentSession: () => session,
-    context: (draft) => createOpContext(draft),
+    context: (draft) => createOpContext(draft, sessionCanvasStyle(session)),
     emit,
   };
   return tool.execute(params, host);

@@ -10,6 +10,7 @@
  * server, an editor, git) always rotates it.
  */
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas";
+import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 
 export type LoadedCanvas = {
   canvas: InteractiveCanvasDocument;
@@ -71,4 +72,39 @@ export async function putCanvas(
   }
   const payload = (await response.json().catch(() => ({}))) as { contentHash?: string };
   return payload.contentHash ?? null;
+}
+
+/**
+ * Workspace-wide canvas style settings (server/canvas-file-api.ts):
+ *
+ *   GET /api/canvas-style            -> { style, overrides }
+ *   PUT /api/canvas-style { overrides } -> { style, overrides }  (normalized)
+ *
+ * The file on disk (canvases/canvas-style.json) holds only `overrides`.
+ */
+export type CanvasStyleSettings = {
+  style: CanvasStyle;
+  overrides: Partial<CanvasStyle>;
+};
+
+const CANVAS_STYLE_URL = "/api/canvas-style";
+
+export async function fetchCanvasStyle(): Promise<CanvasStyleSettings> {
+  const response = await fetch(CANVAS_STYLE_URL, { cache: "no-store" });
+  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+  return (await response.json()) as CanvasStyleSettings;
+}
+
+export async function putCanvasStyle(
+  overrides: Partial<CanvasStyle>,
+  options: { keepalive?: boolean } = {},
+): Promise<CanvasStyleSettings> {
+  const response = await fetch(CANVAS_STYLE_URL, {
+    method: "PUT",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ overrides }),
+    keepalive: options.keepalive,
+  });
+  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+  return (await response.json()) as CanvasStyleSettings;
 }

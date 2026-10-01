@@ -14,6 +14,8 @@ import {
   OBJECT_TYPE_DEFAULTS,
 } from "../../../../../canvas/src/state/schema/object-defaults";
 
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "@codecaine-ai/canvas/style";
+
 import { rasterizeSvgToPng } from "../../render";
 import { PLACEABLE_SHAPE_TYPES } from "../tools/placeable-types";
 
@@ -80,8 +82,12 @@ const ARROW_DEMOS: Record<CanvasArrowDirection, true> = {
   forward: true, back: true, both: true, none: true,
 };
 
-/** undefined = not yet attempted; null = unrenderable; Buffer = cached. */
-let sheetCache: Buffer | null | undefined;
+/**
+ * Per canvas style (JSON key): absent = not yet attempted; null = unrenderable;
+ * Buffer = cached. A workspace has one style at a time, so this holds one or
+ * two entries in practice.
+ */
+const sheetCache = new Map<string, Buffer | null>();
 
 function positiveDefaultSize(type: InteractiveCanvasObjectType): {
   width: number;
@@ -322,21 +328,28 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
  * The full board vocabulary rendered as labeled specimens: every object type
  * grouped by family, every icon glyph, every roster color, and a demo wire
  * per connection arrow kind plus dashed style and a section endpoint.
- * Returns null — never throws — when construction or rendering fails, and
- * caches that result for the life of the process.
+ * Drawn in the workspace `canvasStyle`, so the specimens carry the radii and
+ * borders the board does. Returns null — never throws — when construction or
+ * rendering fails, and caches that result per style for the life of the
+ * process.
  */
-export function vocabularyContactSheet(): Buffer | null {
-  if (sheetCache !== undefined) return sheetCache;
+export function vocabularyContactSheet(canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE): Buffer | null {
+  const key = JSON.stringify(canvasStyle);
+  const cached = sheetCache.get(key);
+  if (cached !== undefined) return cached;
+  let sheet: Buffer | null;
   try {
     const document = buildVocabularyDocument();
     const rendered = renderDocumentToSvg(document, {
       fit: "content",
       padding: 24,
       width: VIEW_WIDTH,
+      canvasStyle,
     });
-    sheetCache = rasterizeSvgToPng(rendered.svg).png;
+    sheet = rasterizeSvgToPng(rendered.svg).png;
   } catch {
-    sheetCache = null;
+    sheet = null;
   }
-  return sheetCache;
+  sheetCache.set(key, sheet);
+  return sheet;
 }

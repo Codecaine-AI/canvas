@@ -36,4 +36,4 @@ export const LAYOUT_RULES: readonly LayoutRule[] = [
 
 export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES, frameSlack];
 
-export type { Diagnostic, LayoutRule, Severity } from "./types";
+export type { Diagnostic, LayoutRule, LintContext, Severity } from "./types";

@@ -175,21 +175,31 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("theme/ imports no first-party code outside state/schema vocabulary", () => {
+  // theme/canvas-style.ts is the pure-data canvas style leaf (it imports
+  // nothing); the stroke resolver and the React style context build on it.
+  test("theme/ imports no first-party code outside state/schema vocabulary and the canvas-style leaf", () => {
     expect(
       formatEdges(
-        edgesFromDir("theme").filter((edge) => !targetStartsWith(edge, ["state/schema"])),
+        edgesFromDir("theme").filter(
+          (edge) => !targetStartsWith(edge, ["state/schema", "theme/canvas-style.ts"]),
+        ),
       ),
+    ).toEqual([]);
+    // The leaf itself stays import-free (it is served to Node via ./style).
+    expect(
+      formatEdges(allImportEdges().filter((edge) => edge.importer === "theme/canvas-style.ts")),
     ).toEqual([]);
   });
 
-  test("theme/ has only the current runtime palette vocabulary exception", () => {
+  test("theme/ has only the current runtime palette vocabulary and canvas-style exceptions", () => {
     const themeEdges = edgesFromDir("theme");
 
     // TODO(layout): tighten theme to type-only state/schema imports once
     // palette.ts no longer imports and re-exports CANVAS_COLORS at runtime.
     expect(formatEdges(themeEdges.filter((edge) => !edge.typeOnly))).toEqual([
+      "theme/canvas-style-context.tsx -> ./canvas-style",
       "theme/palette.ts -> ../state/schema/colors",
+      "theme/tokens.ts -> ./canvas-style",
     ]);
   });
 

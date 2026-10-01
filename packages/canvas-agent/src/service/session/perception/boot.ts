@@ -21,7 +21,10 @@ import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 // Relative import so the harness never loads the package's React surface.
 import { renderDocumentToSvg } from "../../../../../canvas/src/render/static-svg";
 
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "@codecaine-ai/canvas/style";
+
 import { CANVASES_DIR } from "../../kernel";
+import { sessionCanvasStyle } from "../canvas-style";
 import { rasterizeSvgToPng } from "../../render";
 import { vocabularyContactSheet } from "./contact-sheet";
 import { boardStateSnapshot } from "../snapshots/context";
@@ -53,21 +56,25 @@ export interface BootPerception {
   boardView: boolean;
 }
 
-/** undefined = not yet attempted; null = missing/unrenderable; Buffer = cached. */
-let exemplarCache: Buffer | null | undefined;
+/** Per canvas style (JSON key): absent = not yet attempted; null = missing/unrenderable; Buffer = cached. */
+const exemplarCache = new Map<string, Buffer | null>();
 
 /**
  * The house-style exemplar image: the exemplar canvas rendered to a PNG,
- * cached for the life of the process (the exemplar is static disk content).
+ * drawn in the workspace `canvasStyle` and cached per style for the life of
+ * the process (the exemplar is static disk content).
  * Returns null — never throws — when the canvas is missing or unrenderable.
  */
-export function houseStyleExemplar(): Buffer | null {
-  if (exemplarCache !== undefined) return exemplarCache;
+export function houseStyleExemplar(canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE): Buffer | null {
+  const key = JSON.stringify(canvasStyle);
+  const cached = exemplarCache.get(key);
+  if (cached !== undefined) return cached;
   const path = join(CANVASES_DIR, `${EXEMPLAR_CANVAS_ID}.canvas.json`);
   if (!existsSync(path)) {
-    exemplarCache = null;
+    exemplarCache.set(key, null);
     return null;
   }
+  let exemplar: Buffer | null;
   try {
     const document = JSON.parse(readFileSync(path, "utf8")) as InteractiveCanvasDocument;
     const pageFrame = document.objects.find(
@@ -78,12 +85,14 @@ export function houseStyleExemplar(): Buffer | null {
       fit: "content",
       padding: 16,
       width: EXEMPLAR_VIEW_WIDTH,
+      canvasStyle,
     });
-    exemplarCache = rasterizeSvgToPng(rendered.svg).png;
+    exemplar = rasterizeSvgToPng(rendered.svg).png;
   } catch {
-    exemplarCache = null;
+    exemplar = null;
   }
-  return exemplarCache;
+  exemplarCache.set(key, exemplar);
+  return exemplar;
 }
 
 /**
@@ -100,9 +109,10 @@ export function bootPerception(session: LayoutSession): BootPerception {
       + `${session.currentBoardRenderFailure ?? "unknown render failure"}; `
       + "the render is retried on every state assembly)";
   }
-  const exemplar = houseStyleExemplar();
+  const canvasStyle = sessionCanvasStyle(session);
+  const exemplar = houseStyleExemplar(canvasStyle);
   if (exemplar) images.exemplar = exemplar.toString("base64");
-  const sheet = vocabularyContactSheet();
+  const sheet = vocabularyContactSheet(canvasStyle);
   if (sheet) images.contactSheet = sheet.toString("base64");
   return { boardState, images, boardView };
 }

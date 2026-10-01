@@ -34,7 +34,12 @@ import { formatNumberedSegments, numberedSegmentsForPolyline } from "../../../bo
 import { kindOf } from "../../../board/helpers";
 import type { Diagnostic } from "../../../board/lints";
 import { pathBoxViolationIds } from "../../../board/lints/geometry";
-import { diagnosticLines, formatDiagnostics, runDiagnostics } from "../../../board/lints/run";
+import {
+  diagnosticLines,
+  formatDiagnostics,
+  runDiagnostics,
+  sessionDiagnostics,
+} from "../../../board/lints/run";
 import { formatRegionMeasures, measureRegion } from "../../../board/measure";
 import type { Rect } from "../../../board/types";
 import type { AgentSessionEvent } from "../../../protocol";
@@ -43,6 +48,7 @@ import type { LayoutToolRenderResult } from "../tools/runtime";
 import { documentWithinCrop, expandRect, renderCropError, round2 } from "../snapshots/context";
 import { classifyDelta, deltaTargetId } from "./op-surface";
 import { fromDocumentFields } from "../tools/placeable-types";
+import { sessionCanvasStyle } from "../canvas-style";
 import type { LayoutSession } from "../store";
 import { recordSessionView } from "./view-log";
 import {
@@ -302,7 +308,7 @@ export function lintDeltaBlock(
   before?: InteractiveCanvasDocument,
 ): string {
   const previous = session.lastDiagnostics
-    ?? (before === undefined ? undefined : runDiagnostics(before));
+    ?? (before === undefined ? undefined : runDiagnostics(before, undefined, { canvasStyle: session.canvasStyle }));
   session.lastDiagnostics = diagnostics;
   if (previous === undefined) return formatDiagnostics(diagnostics);
   const previousPrints = new Set(previous.map(diagnosticFingerprint));
@@ -563,7 +569,7 @@ export function renderPerception(
       const rendered = renderSectionView(
         session.draft,
         options.view,
-        { width: SECTION_VIEW_WIDTH },
+        { width: SECTION_VIEW_WIDTH, canvasStyle: sessionCanvasStyle(session) },
       );
       const { png } = rasterizeSvgToPng(rendered.svg);
       pngs.push(png);
@@ -585,7 +591,11 @@ export function renderPerception(
       // static renderer frame exactly the rect it was given.
       const rendered = renderDocumentToSvg(
         documentWithinCrop(session.draft, crop.rect),
-        { cropRect: crop.rect, width: crop.width ?? CROP_VIEW_WIDTH },
+        {
+          cropRect: crop.rect,
+          width: crop.width ?? CROP_VIEW_WIDTH,
+          canvasStyle: sessionCanvasStyle(session),
+        },
       );
       const { png } = rasterizeSvgToPng(rendered.svg);
       pngs.push(png);
@@ -629,7 +639,7 @@ export function operationPerception(
   options?: OperationPerceptionOptions,
 ): PerceptionResult {
   const delta = documentDelta(before, session.draft);
-  const diagnostics = runDiagnostics(session.draft);
+  const diagnostics = sessionDiagnostics(session);
   const lintText = lintDeltaBlock(session, diagnostics, before);
   const routes = routesBlock(session, delta);
   const noteLines = (options?.notes ?? []).flatMap((note) =>
@@ -769,7 +779,10 @@ function frameRegions(
       }
     }
   }
-  const framed = expandRect(paintedBounds(session.draft, targets), VIEW_CROP_RING);
+  const framed = expandRect(
+    paintedBounds(session.draft, targets, sessionCanvasStyle(session)),
+    VIEW_CROP_RING,
+  );
   const label = idSetLabel(known);
   const cropError = renderCropError(framed);
   if (cropError) {
@@ -817,7 +830,7 @@ export function lookPerception(
   session: LayoutSession,
   options?: LookPerceptionOptions,
 ): PerceptionResult {
-  const diagnostics = runDiagnostics(session.draft);
+  const diagnostics = sessionDiagnostics(session);
   session.lastDiagnostics = diagnostics;
   const routes = boardRoutesBlock(session);
   const framed = frameRegions(session, options ?? {});

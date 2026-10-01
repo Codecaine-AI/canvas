@@ -5,6 +5,7 @@
  * frame never reaches the file.
  */
 import { afterEach, describe, expect, test } from "bun:test";
+import { createHash } from "node:crypto";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -182,6 +183,44 @@ describe("canvas service", () => {
     const names = service.listTools().map((tool) => tool.name);
     expect(names).not.toContain("finalize");
     expect(names).toEqual(expect.arrayContaining(["look", "update_description", "set_board_title", "add_annotation", "reply_annotation", "resolve_request"]));
+  });
+
+  test("canvas_open reads canvases/canvas-style.json, and look renders with it", async () => {
+    const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
+    const stylePath = join(workspace, "canvases", "canvas-style.json");
+    const service = createCanvasService({ workspace });
+    /** sha256 of the close-up PNG `look` returns — the pixels, compared by digest. */
+    const lookPng = async (): Promise<string> => {
+      const looked = await service.call("look", { view: "section-interview-inputs" });
+      expect(looked.isError).toBeUndefined();
+      const image = looked.content.find((item) => item.type === "image");
+      expect(image).toBeDefined();
+      return createHash("sha256").update((image as { data: string }).data).digest("hex");
+    };
+
+    // No style file: the defaults.
+    const plain = await service.call("canvas_open", { canvas: SOURCE_ID });
+    expect(textOf(plain)).not.toContain("STYLE ·");
+    const defaultPng = await lookPng();
+
+    // A style saved in Studio is picked up by the next canvas_open and changes the render.
+    writeFileSync(stylePath, JSON.stringify({ shapeCornerRadiusPx: 16, shapeBorderWidthPx: 6, sectionCornerRadiusPx: 16 }));
+    const styled = await service.call("canvas_open", { canvas: SOURCE_ID });
+    expect(styled.isError).toBeUndefined();
+    expect(textOf(styled)).toContain("STYLE · workspace overrides: shapeCornerRadiusPx=16, shapeBorderWidthPx=6, sectionCornerRadiusPx=16");
+    expect(styled.structuredContent?.canvasStyle).toMatchObject({
+      shapeCornerRadiusPx: 16,
+      shapeBorderWidthPx: 6,
+      sectionCornerRadiusPx: 16,
+    });
+    expect(await lookPng()).not.toBe(defaultPng);
+
+    // A malformed file never blocks the open: it reads as the defaults.
+    writeFileSync(stylePath, "{ not json");
+    const malformed = await service.call("canvas_open", { canvas: SOURCE_ID });
+    expect(malformed.isError).toBeUndefined();
+    expect(textOf(malformed)).not.toContain("STYLE ·");
+    expect(await lookPng()).toBe(defaultPng);
   });
 
   test("canvas_list and canvas_guidance", async () => {

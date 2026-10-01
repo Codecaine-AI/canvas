@@ -22,6 +22,7 @@
  */
 
 import type { CanvasObjectStyle } from "../state/schema";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "./canvas-style";
 
 export const canvasSurfaceStyle = {
   "--interactive-canvas-grid": "color-mix(in oklab, var(--border) 52%, transparent)",
@@ -29,17 +30,23 @@ export const canvasSurfaceStyle = {
   "--interactive-canvas-highlight": "color-mix(in oklab, var(--primary) 18%, transparent)",
 } as const;
 
-/** Universal shape stroke width, logical px (consumed by resolveObjectStrokeWidth). */
-export const SHAPE_STROKE_WIDTH_PX = 4;
+/**
+ * Default shape stroke width, logical px — kept for back-compat; the live
+ * value is `CanvasStyle.shapeBorderWidthPx` (theme/canvas-style.ts).
+ */
+export const SHAPE_STROKE_WIDTH_PX = DEFAULT_CANVAS_STYLE.shapeBorderWidthPx;
 
 /**
- * Border width for an object's trim (logical px): the FigJam universal
- * shape stroke (SHAPE_STROKE_WIDTH_PX, 4px), overridable per object via
- * `style.strokeWidth`.
+ * Border width for an object's trim (logical px): the workspace canvas
+ * style's shape border (`canvasStyle.shapeBorderWidthPx`), overridable per
+ * object via `style.strokeWidth`.
  */
-export function resolveObjectStrokeWidth(style: CanvasObjectStyle | undefined): number {
+export function resolveObjectStrokeWidth(
+  style: CanvasObjectStyle | undefined,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): number {
   if (style?.strokeWidth !== undefined && style.strokeWidth > 0) return style.strokeWidth;
-  return SHAPE_STROKE_WIDTH_PX;
+  return canvasStyle.shapeBorderWidthPx;
 }
 
 // ---------------------------------------------------------------------------

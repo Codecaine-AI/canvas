@@ -5,6 +5,7 @@
  * and how to fix it (documentation — not injected into the model's context).
  */
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 
 export type Severity = "error" | "warning";
 
@@ -18,8 +19,17 @@ export interface Diagnostic {
   suggestion?: string;   // e.g. `nearest rungs 96 / 128`
 }
 
+/**
+ * What a rule may know beyond the document: the workspace canvas style, for
+ * the rules whose verdict depends on painted border or chip geometry (a
+ * section title chip's width includes its border). Absent means the defaults.
+ */
+export interface LintContext {
+  canvasStyle?: CanvasStyle;
+}
+
 export interface LayoutRule {
   id: string; title: string; tier: Severity;
   guidance: string;      // the rule stated in prose: what fires, why, how to fix (multi-line GUIDANCE const)
-  check(document: InteractiveCanvasDocument): Omit<Diagnostic, "id">[];
+  check(document: InteractiveCanvasDocument, context?: LintContext): Omit<Diagnostic, "id">[];
 }

@@ -35,7 +35,7 @@
  */
 import { createHash, randomUUID } from "node:crypto";
 import { readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
-import { basename } from "node:path";
+import { basename, dirname } from "node:path";
 
 import { validateToolArguments, type TSchema } from "@mariozechner/pi-ai";
 import {
@@ -49,8 +49,10 @@ import {
 } from "@codecaine-ai/canvas/schema";
 
 import { diffDocuments } from "../board/doc-diff";
-import { runDiagnostics } from "../board/lints/run";
+import { sessionDiagnostics } from "../board/lints/run";
 import { resolveScope } from "../board/scope";
+import { canvasStyleOverrides } from "@codecaine-ai/canvas/style";
+import { loadCanvasStyle, type CanvasStyle } from "../service/session/canvas-style";
 import {
   boardStateSnapshot,
   draftWithPageFrame,
@@ -68,7 +70,8 @@ import { workflowTools } from "../service/session/tools/workflow";
 import type { WorkflowTool } from "../service/session/tools/workflow/workflow-tool";
 
 export { boardStateSnapshot, operationTools, workflowTools };
-export type { LayoutSession, LayoutToolRenderResult, LayoutToolRuntime, OperationTool, WorkflowTool };
+export { canvasStyleOverrides, loadCanvasStyle };
+export type { CanvasStyle, LayoutSession, LayoutToolRenderResult, LayoutToolRuntime, OperationTool, WorkflowTool };
 
 /**
  * Workflow tools with no meaning outside a kernel run. `finalize` ends a run
@@ -182,8 +185,17 @@ function canvasIdOf(canvasPath: string): string {
  * included — since an external caller edits the board rather than a selection.
  * `containerId` and `sessionDir` are inert labels: nothing outside the kernel
  * store reads them.
+ *
+ * The workspace canvas style is read here too, from `canvas-style.json` beside
+ * the canvas file (defaults when it is missing or malformed), so every render
+ * and lint the session makes matches what Studio draws. Opening again re-reads
+ * it — that is how a style change made in Studio reaches an open session.
+ * `options.canvasStyle` overrides the file.
  */
-export function openCanvasFile(canvasPath: string): CanvasFileSession {
+export function openCanvasFile(
+  canvasPath: string,
+  options: { canvasStyle?: CanvasStyle } = {},
+): CanvasFileSession {
   const raw = readFileSync(canvasPath);
   const baseline = JSON.parse(raw.toString("utf8")) as InteractiveCanvasDocument;
   const validation = validateInteractiveCanvasDocument(baseline);
@@ -223,8 +235,9 @@ export function openCanvasFile(canvasPath: string): CanvasFileSession {
     views: [],
     viewCount: 0,
     changeRenders: [],
+    canvasStyle: options.canvasStyle ?? loadCanvasStyle(dirname(canvasPath)),
   };
-  session.lastDiagnostics = runDiagnostics(session.draft);
+  session.lastDiagnostics = sessionDiagnostics(session);
   syncSessionRequests(session);
 
   // Run-UX events (proposal/delta/annotations) feed Studio's live agent panel;

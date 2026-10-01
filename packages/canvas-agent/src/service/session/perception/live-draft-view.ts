@@ -10,6 +10,7 @@
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
 import { rasterizeSvgToPng } from "../../render";
+import { sessionCanvasStyle } from "../canvas-style";
 import type { CurrentBoardRender, LayoutSession } from "../store";
 import { BOARD_VIEW_WIDTH, renderBoardView } from "./views";
 
@@ -25,7 +26,10 @@ export interface LiveDraftView {
 }
 
 function renderBoardPng(session: LayoutSession): Buffer {
-  const rendered = renderBoardView(session.draft, { width: BOARD_VIEW_WIDTH });
+  const rendered = renderBoardView(session.draft, {
+    width: BOARD_VIEW_WIDTH,
+    canvasStyle: sessionCanvasStyle(session),
+  });
   return rasterizeSvgToPng(rendered.svg).png;
 }
 

@@ -10,6 +10,13 @@ import type { InteractiveCanvasDocument } from "../../canvas/src/state/schema.ts
 // Same relative-import rule as the schema import above: the Electron esbuild
 // bundle must resolve the renderer from source, not the package name.
 import { renderDocumentToSvg } from "../../canvas/src/render/static-svg.ts";
+// Same relative-import rule: the workspace-wide style settings contract.
+import {
+  CANVAS_STYLE_FILENAME,
+  canvasStyleOverrides,
+  normalizeCanvasStyle,
+  type CanvasStyle,
+} from "../../canvas/src/theme/canvas-style.ts";
 
 const CANVAS_ID_PATTERN = /^[a-z0-9][a-z0-9._-]{0,63}$/;
 const JSON_LIMIT_BYTES = 5 * 1024 * 1024;
@@ -72,6 +79,74 @@ async function writeFileAtomic(filePath: string, contents: string): Promise<void
   }
 }
 
+/** Studio's workspace-wide canvas style settings (see canvas-style.ts). */
+export const CANVAS_STYLE_ROUTE = "/api/canvas-style";
+
+export type CanvasStyleSettings = {
+  /** Fully resolved style: defaults filled, every value clamped. */
+  style: CanvasStyle;
+  /** Only the keys that differ from the defaults — what the file stores. */
+  overrides: Partial<CanvasStyle>;
+};
+
+/**
+ * Reads `<canvasesDir>/canvas-style.json`. A missing, unreadable, or
+ * malformed file resolves to the defaults; unknown keys are dropped and
+ * values clamped, so a hand edit can never break rendering.
+ */
+export async function readCanvasStyleSettings(canvasesDir: string): Promise<CanvasStyleSettings> {
+  let raw: unknown = null;
+  try {
+    raw = JSON.parse(await fs.readFile(resolve(canvasesDir, CANVAS_STYLE_FILENAME), "utf8"));
+  } catch {
+    // Missing or malformed — defaults.
+  }
+  const style = normalizeCanvasStyle(raw);
+  return { style, overrides: canvasStyleOverrides(style) };
+}
+
+/**
+ * GET  /api/canvas-style            -> { style, overrides }
+ * PUT  /api/canvas-style { overrides } -> { style, overrides }
+ *
+ * PUT normalizes (clamp + drop unknown keys) and persists only the keys that
+ * differ from the defaults, as pretty JSON. No overrides left deletes the
+ * file, so a reset leaves nothing behind in the canvases directory.
+ */
+async function handleCanvasStyleRequest(
+  req: IncomingMessage,
+  res: ServerResponse,
+  options: { canvasesDir: string; onCanvasStyleWrite?: (contentHash: string | null) => void },
+): Promise<void> {
+  if (req.method === "GET") {
+    sendJson(res, 200, await readCanvasStyleSettings(options.canvasesDir));
+    return;
+  }
+  if (req.method !== "PUT") {
+    sendJson(res, 405, { error: "Method not allowed." });
+    return;
+  }
+  const body = await readJsonBody(req);
+  if (!isRecord(body) || !isRecord(body.overrides)) {
+    sendJson(res, 400, { error: "Expected body { overrides }." });
+    return;
+  }
+  const style = normalizeCanvasStyle(body.overrides);
+  const overrides = canvasStyleOverrides(style);
+  const filePath = resolve(options.canvasesDir, CANVAS_STYLE_FILENAME);
+  if (Object.keys(overrides).length === 0) {
+    options.onCanvasStyleWrite?.(null);
+    await fs.unlink(filePath).catch((error: NodeJS.ErrnoException) => {
+      if (error.code !== "ENOENT") throw error;
+    });
+  } else {
+    const contents = `${JSON.stringify(overrides, null, 2)}\n`;
+    options.onCanvasStyleWrite?.(canvasContentHash(contents));
+    await writeFileAtomic(filePath, contents);
+  }
+  sendJson(res, 200, { style, overrides } satisfies CanvasStyleSettings);
+}
+
 function filePathForId(canvasesDir: string, id: string): string | null {
   if (!CANVAS_ID_PATTERN.test(id)) return null;
   const filePath = resolve(canvasesDir, `${id}.canvas.json`);
@@ -119,14 +194,28 @@ export function createCanvasFileApiHandler(options: {
    * apart from external writers (an MCP agent, a text editor, git).
    */
   onCanvasWrite?: (id: string, contentHash: string) => void;
+  /**
+   * Same as onCanvasWrite for canvas-style.json: the hash of the contents
+   * about to be written, or null when the write deletes the file.
+   */
+  onCanvasStyleWrite?: (contentHash: string | null) => void;
 }): (
   req: IncomingMessage,
   res: ServerResponse,
   next: () => void,
 ) => void {
-  const { canvasesDir, onCanvasWrite } = options;
+  const { canvasesDir, onCanvasWrite, onCanvasStyleWrite } = options;
 
   return (req, res, next) => {
+    if (req.url?.split("?")[0] === CANVAS_STYLE_ROUTE) {
+      void handleCanvasStyleRequest(req, res, { canvasesDir, onCanvasStyleWrite }).catch((error) => {
+        sendJson(res, 400, {
+          error: error instanceof Error ? error.message : "Bad request.",
+        });
+      });
+      return;
+    }
+
     if (!req.url?.startsWith("/api/canvases")) {
       next();
       return;
@@ -239,9 +328,12 @@ export function createCanvasFileApiHandler(options: {
             width = PREVIEW_DEFAULT_WIDTH;
           }
 
+          // The workspace style is part of the render, so it is part of the
+          // cache key: a style change re-renders every preview.
+          const { style: canvasStyle } = await readCanvasStyleSettings(canvasesDir);
           const etag = `"${createHash("sha1")
             .update(
-              `${mtimeMs}|${sectionId ?? ""}|${width ?? ""}|${height ?? ""}|${fit ?? ""}|${padding ?? ""}`,
+              `${mtimeMs}|${sectionId ?? ""}|${width ?? ""}|${height ?? ""}|${fit ?? ""}|${padding ?? ""}|${JSON.stringify(canvasStyle)}`,
             )
             .digest("hex")}"`;
           res.setHeader("etag", etag);
@@ -263,6 +355,7 @@ export function createCanvasFileApiHandler(options: {
               width,
               height,
               background: "board",
+              canvasStyle,
             }).svg;
           } catch {
             res.statusCode = 500;

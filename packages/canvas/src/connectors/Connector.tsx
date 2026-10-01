@@ -14,9 +14,10 @@ import { labelPointFor, routeConnection } from "./routing";
 import { CONNECTOR_DASH_PATTERN_PX } from "./def";
 import { resolveConnectorStroke } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
+import { useCanvasStyle } from "../theme/canvas-style-context";
 
-/** Default connector stroke width, logical px (moved from theme/tokens.ts in the theme dispersal). */
-const CONNECTOR_STROKE_WIDTH_PX = 4;
+// Connector stroke width, label-chip corner radius and elbow bend radius come
+// from the workspace canvas style (theme/canvas-style.ts) via useCanvasStyle.
 /** Selection outline/handle color — inlined from the old TRIM.selectionBlue (stage must not import stage/editor/components/editor-style). */
 const SELECTION_BLUE = "#0D99FF";
 
@@ -30,7 +31,6 @@ const CONNECTION_LABEL_HEIGHT_PX = 30;
 const CONNECTION_LABEL_PADDING_X_PX = 12;
 const CONNECTION_LABEL_FONT_SIZE_PX = 16;
 const CONNECTION_LABEL_FONT_WEIGHT = 700;
-const CONNECTION_LABEL_RADIUS_PX = 15;
 const CONNECTION_LABEL_AVERAGE_CHAR_WIDTH_PX = 9.6;
 const CONNECTION_LABEL_MIN_WIDTH_PX = 41;
 const CONNECTION_LABEL_BACKGROUND = "#F5F5F5";
@@ -70,7 +70,8 @@ export function Connector({
   zoom: number;
   onDoubleClick?: (connectionId: string) => void;
 }) {
-  const routed = routeConnection(fromObject, toObject, connection, document.objects);
+  const canvasStyle = useCanvasStyle();
+  const routed = routeConnection(fromObject, toObject, connection, document.objects, canvasStyle);
   // FigJam's dash pattern (theme/tokens.ts, CONNECTOR_DASH_PATTERN_PX).
   const strokeDasharray =
     connection.style === "dashed" ? CONNECTOR_DASH_PATTERN_PX.join(" ") : undefined;
@@ -107,7 +108,7 @@ export function Connector({
         d={routed.path}
         fill="none"
         stroke={stroke}
-        strokeWidth={CONNECTOR_STROKE_WIDTH_PX}
+        strokeWidth={canvasStyle.connectorStrokeWidthPx}
         strokeLinecap="butt"
         strokeDasharray={strokeDasharray}
         opacity={dimmed ? 0.35 : 1}
@@ -132,7 +133,7 @@ export function Connector({
             y={-CONNECTION_LABEL_HEIGHT_PX / 2}
             width={labelWidth}
             height={CONNECTION_LABEL_HEIGHT_PX}
-            rx={CONNECTION_LABEL_RADIUS_PX}
+            rx={canvasStyle.labelChipCornerRadiusPx}
             fill={CONNECTION_LABEL_BACKGROUND}
             stroke={CONNECTION_LABEL_BORDER}
             strokeWidth={1}

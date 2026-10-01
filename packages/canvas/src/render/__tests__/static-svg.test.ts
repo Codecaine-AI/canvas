@@ -117,12 +117,12 @@ describe("renderDocumentToSvg", () => {
     expect(count(svg, 'stroke-dasharray="19 7"')).toBe(1);
     // Polygons: decision diamond + one arrowhead per connection.
     expect(count(svg, "<polygon ")).toBe(3);
-    // Section backdrop radius (8.5) once; connection label chip radius (15) once;
-    // rx=6 appears for the two base rounded rects (8px radius, inset by half
-    // the 4px stroke) plus the section title chip.
-    expect(count(svg, 'rx="8.5"')).toBe(1);
-    expect(count(svg, 'rx="15"')).toBe(1);
-    expect(count(svg, 'rx="6"')).toBe(3);
+    // Default canvas style: the section backdrop, the connection label chip
+    // and the section title chip take their 2px radii as-is; the two base
+    // rounded rects take the 2px shape radius inset by half the 2px stroke.
+    expect(count(svg, 'rx="2"')).toBe(3);
+    expect(count(svg, 'rx="1"')).toBe(2);
+    expect(count(svg, "rx=")).toBe(5);
     // Sticky drop-shadow filter is defined once and referenced once.
     expect(count(svg, "<feDropShadow ")).toBe(1);
     expect(count(svg, "url(#render-fixture-sticky-shadow)")).toBe(1);
@@ -297,8 +297,8 @@ describe("renderDocumentToSvg", () => {
     expect(svg.includes('<g fill="#E6E6E6" stroke="none">')).toBe(hasClosedInterior);
     // The below-slot label still renders.
     expect(svg).toContain(">Bolt</tspan>");
-    // No neutral-rect fallback body for a known glyph.
-    expect(svg).not.toContain('rx="6"');
+    // No neutral-rect fallback body (or any rounded rect) for a known glyph.
+    expect(svg).not.toContain("rx=");
   });
 
   it("falls back to the neutral rect for an unknown icon glyph id", () => {
@@ -320,7 +320,7 @@ describe("renderDocumentToSvg", () => {
     };
     const { svg } = renderDocumentToSvg(doc, { background: "transparent" });
     expect(count(svg, "<svg")).toBe(1); // no nested glyph svg
-    expect(svg).toContain('rx="6"'); // the neutral rounded rect body
+    expect(svg).toContain('rx="1"'); // the neutral rounded rect body (2px radius − 1px half-stroke)
   });
 
   it("smoke-renders a real canvas file when present", () => {

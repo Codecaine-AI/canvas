@@ -17,23 +17,42 @@ import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
 interface Rect { x: number; y: number; width: number; height: number }
 
-/** Connection-label chip <rect>s from a static render — rx=15 is chip-only
- * (base shapes use rx 8, section title chips rx 6). */
-function svgChipRects(svg: string): Rect[] {
+function attributesOf(source: string): Record<string, string> {
+  return Object.fromEntries(
+    [...source.matchAll(/([a-zA-Z-]+)="([^"]*)"/g)].map((pair) => [pair[1], pair[2]]),
+  );
+}
+
+/**
+ * Connection-label chip <rect>s from a static render, located by structure
+ * rather than by a corner radius (the radius is a workspace style setting,
+ * so it cannot tell a chip from a shape): a chip is the <rect> painted
+ * immediately before the <text> carrying one of the document's labels, and
+ * that text sits at the rect's exact center (the label point).
+ */
+function svgChipRects(svg: string, labels: readonly string[]): Rect[] {
+  const wanted = new Set(labels);
   const rects: Rect[] = [];
-  for (const match of svg.matchAll(/<rect ([^>]*?)\/>/g)) {
-    const attributes = Object.fromEntries(
-      [...match[1]!.matchAll(/([a-zA-Z-]+)="([^"]*)"/g)].map((pair) => [pair[1], pair[2]]),
-    );
-    if (attributes["rx"] !== "15") continue;
-    rects.push({
-      x: Number(attributes["x"]),
-      y: Number(attributes["y"]),
-      width: Number(attributes["width"]),
-      height: Number(attributes["height"]),
-    });
+  for (const match of svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>([^<]*)<\/text>/g)) {
+    if (!wanted.has(match[3]!)) continue;
+    const rect = attributesOf(match[1]!);
+    const text = attributesOf(match[2]!);
+    const chip = {
+      x: Number(rect["x"]),
+      y: Number(rect["y"]),
+      width: Number(rect["width"]),
+      height: Number(rect["height"]),
+    };
+    // 2-decimal attribute rounding on both sides: allow one rounding step.
+    if (Math.abs(chip.x + chip.width / 2 - Number(text["x"])) > 0.02) continue;
+    if (Math.abs(chip.y + chip.height / 2 - Number(text["y"])) > 0.02) continue;
+    rects.push(chip);
   }
   return rects;
+}
+
+function labelsOf(document: InteractiveCanvasDocument): string[] {
+  return document.connections.flatMap((edge) => (edge.label ? [edge.label] : []));
 }
 
 function expectRendererParity(document: InteractiveCanvasDocument): void {
@@ -41,7 +60,7 @@ function expectRendererParity(document: InteractiveCanvasDocument): void {
     const chip = chipFor(edge, document);
     return chip ? [chip] : [];
   });
-  const rendererChips = svgChipRects(renderDocumentToSvg(document).svg);
+  const rendererChips = svgChipRects(renderDocumentToSvg(document).svg, labelsOf(document));
   expect(rendererChips).toHaveLength(lintChips.length);
   for (let index = 0; index < lintChips.length; index += 1) {
     const lint = lintChips[index]!.rect;
@@ -99,7 +118,7 @@ describe("lint chip / static renderer parity", () => {
     expect(chipFor(document.connections[2]!, document)).toBeUndefined();
     // Exactly one chip renders, and it matches the lint's.
     expectRendererParity(document);
-    expect(svgChipRects(renderDocumentToSvg(document).svg)).toHaveLength(1);
+    expect(svgChipRects(renderDocumentToSvg(document).svg, labelsOf(document))).toHaveLength(1);
   });
 
   test("elbowed route: chip parity holds at the router's own labelPoint", () => {

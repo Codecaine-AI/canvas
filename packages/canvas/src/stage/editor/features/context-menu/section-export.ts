@@ -1,6 +1,7 @@
 import { sanitizeExportFilename } from "../../../../render/download";
 import { renderDocumentToSvg } from "../../../../render/static-svg";
 import type { InteractiveCanvasDocument } from "../../../../state/schema";
+import type { CanvasStyle } from "../../../../theme/canvas-style";
 
 export type SectionExportFormat = "svg" | "png";
 
@@ -9,10 +10,12 @@ const BOARD_BACKGROUND = "#F5F5F5";
 export function renderSectionForExport(
   document: InteractiveCanvasDocument,
   sectionId: string,
+  canvasStyle?: Partial<CanvasStyle>,
 ) {
   return renderDocumentToSvg(document, {
     background: "board",
     sectionId,
+    canvasStyle,
   });
 }
 
@@ -65,8 +68,9 @@ function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
 async function exportSectionAsSvg(
   document: InteractiveCanvasDocument,
   sectionId: string,
+  canvasStyle?: Partial<CanvasStyle>,
 ): Promise<void> {
-  const { svg } = renderSectionForExport(document, sectionId);
+  const { svg } = renderSectionForExport(document, sectionId, canvasStyle);
   const blob = new Blob([svg], { type: "image/svg+xml" });
   downloadBlob(blob, sectionExportFilename(document, sectionId, "svg"));
 }
@@ -74,9 +78,10 @@ async function exportSectionAsSvg(
 async function exportSectionAsPng(
   document: InteractiveCanvasDocument,
   sectionId: string,
+  canvasStyle?: Partial<CanvasStyle>,
   scale = 2,
 ): Promise<void> {
-  const { svg, width, height } = renderSectionForExport(document, sectionId);
+  const { svg, width, height } = renderSectionForExport(document, sectionId, canvasStyle);
   const svgBlob = new Blob([svg], { type: "image/svg+xml" });
   const svgUrl = URL.createObjectURL(svgBlob);
   try {
@@ -100,10 +105,11 @@ export async function exportCanvasSection(
   document: InteractiveCanvasDocument,
   sectionId: string,
   format: SectionExportFormat,
+  canvasStyle?: Partial<CanvasStyle>,
 ): Promise<void> {
   if (format === "svg") {
-    await exportSectionAsSvg(document, sectionId);
+    await exportSectionAsSvg(document, sectionId, canvasStyle);
     return;
   }
-  await exportSectionAsPng(document, sectionId);
+  await exportSectionAsPng(document, sectionId, canvasStyle);
 }
