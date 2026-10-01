@@ -13,6 +13,9 @@ import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 import { startMcp } from "./mcp";
+import { loadCodecaineEnv } from "./codecaine-env";
+// Background and client-launched processes do not inherit the shell. See codecaine-env.ts.
+loadCodecaineEnv();
 
 const args = process.argv.slice(2);
 const command = args.shift() ?? "help";
