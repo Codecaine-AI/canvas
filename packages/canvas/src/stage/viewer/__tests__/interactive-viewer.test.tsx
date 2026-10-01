@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "bun:test";
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { act, cleanup, fireEvent, render } from "@testing-library/react";
 
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { InteractiveCanvasViewer } from "../InteractiveCanvasViewer";
@@ -115,5 +115,57 @@ describe("InteractiveCanvasViewer fit on open", () => {
       if (originalWidth) Object.defineProperty(HTMLElement.prototype, "clientWidth", originalWidth);
       if (originalHeight) Object.defineProperty(HTMLElement.prototype, "clientHeight", originalHeight);
     }
+  });
+});
+
+describe("InteractiveCanvasViewer wheel zoom", () => {
+  // Wheel deltas commit through a rAF coalescer; queue frames and flush them
+  // explicitly so the assertion sees the committed viewport.
+  function withQueuedFrames(run: (flushFrames: () => void) => void) {
+    const originalRequest = globalThis.requestAnimationFrame;
+    const originalCancel = globalThis.cancelAnimationFrame;
+    let queued: FrameRequestCallback[] = [];
+    globalThis.requestAnimationFrame = (callback) => queued.push(callback);
+    globalThis.cancelAnimationFrame = () => {};
+    const flushFrames = () =>
+      act(() => {
+        const frames = queued;
+        queued = [];
+        for (const frame of frames) frame(0);
+      });
+    try {
+      run(flushFrames);
+    } finally {
+      globalThis.requestAnimationFrame = originalRequest;
+      globalThis.cancelAnimationFrame = originalCancel;
+    }
+  }
+
+  function zoomLabel(getByRole: (role: string, options: { name: RegExp }) => HTMLElement) {
+    return getByRole("button", { name: /^Zoom level/ }).getAttribute("aria-label");
+  }
+
+  it("zooms on a plain wheel when wheelZoom is set, and pans without it", () => {
+    withMeasuredStage(() => {
+      withQueuedFrames((flushFrames) => {
+        const zoomed = render(<InteractiveCanvasViewer document={document} interactive wheelZoom bare />);
+        const zoomStage = zoomed.container.querySelector("[data-canvas-stage='true']") as HTMLElement;
+        const before = zoomLabel(zoomed.getByRole);
+        fireEvent.wheel(zoomStage, { deltaY: -100, clientX: 480, clientY: 270 });
+        flushFrames();
+        expect(zoomLabel(zoomed.getByRole)).not.toBe(before);
+        cleanup();
+
+        const panned = render(<InteractiveCanvasViewer document={document} interactive bare />);
+        const panStage = panned.container.querySelector("[data-canvas-stage='true']") as HTMLElement;
+        const worldLayer = panned.container.querySelector(".interactive-canvas-world-layer") as HTMLElement;
+        const zoomBefore = zoomLabel(panned.getByRole);
+        const transformBefore = worldLayer.style.transform;
+        fireEvent.wheel(panStage, { deltaY: -100, clientX: 480, clientY: 270 });
+        flushFrames();
+        expect(zoomLabel(panned.getByRole)).toBe(zoomBefore);
+        expect(worldLayer.style.transform).not.toBe(transformBefore);
+      });
+    });
   });
 });

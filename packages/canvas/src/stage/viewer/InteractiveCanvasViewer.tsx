@@ -32,6 +32,8 @@ export interface InteractiveCanvasViewerProps {
   view?: string;
   /** Enables wheel/pinch zoom and drag/trackpad panning without enabling edits. */
   interactive?: boolean;
+  /** With `interactive`, a plain mouse wheel zooms toward the cursor instead of panning. */
+  wheelZoom?: boolean;
   /** Removes the document card trim and makes the stage fill its parent. */
   bare?: boolean;
   /** Shows compact fit/zoom controls over an interactive stage. */
@@ -146,6 +148,7 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
   compact,
   view,
   interactive = false,
+  wheelZoom = false,
   bare = false,
   showNavigationControls = interactive,
   onObjectSelect,
@@ -173,6 +176,7 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
     stageRef,
     enabled: interactive,
     panOnPlainDrag: interactive,
+    wheelZoom,
     fitTarget: viewBounds,
     fitTargetKey: `${document.id}:${view ?? ""}`,
   });

@@ -23,6 +23,11 @@ export type UseCanvasViewportArgs = {
   enabled?: boolean;
   /** Pan on plain left-drag (hand tool). Space/middle-mouse pan always works. */
   panOnPlainDrag?: boolean;
+  /**
+   * Plain mouse wheel zooms toward the cursor instead of panning (read-only
+   * viewers). Shift+wheel still pans; ctrl/meta wheel zooms either way.
+   */
+  wheelZoom?: boolean;
   /** Optional bounds used by fit-on-mount and the public fit control. */
   fitTarget?: CanvasBounds | null;
   /** Changing this key re-fits the viewport, e.g. when a deep-linked section changes. */
@@ -82,6 +87,7 @@ export function useCanvasViewport({
   stageRef,
   enabled = true,
   panOnPlainDrag = false,
+  wheelZoom = false,
   fitTarget = null,
   fitTargetKey,
 }: UseCanvasViewportArgs): UseCanvasViewportResult {
@@ -100,6 +106,9 @@ export function useCanvasViewport({
 
   const panOnPlainDragRef = useRef(panOnPlainDrag);
   panOnPlainDragRef.current = panOnPlainDrag;
+
+  const wheelZoomRef = useRef(wheelZoom);
+  wheelZoomRef.current = wheelZoom;
 
   const setViewport = useCallback(
     (updater: ViewportState | ((viewport: ViewportState) => ViewportState)) => {
@@ -187,7 +196,8 @@ export function useCanvasViewport({
   }, [document.id, enabled, fitTargetKey, stageRef]);
 
   // Wheel: plain pan, ctrl/meta = zoom toward cursor (trackpad pinch also
-  // fires as a ctrlKey wheel event in browsers). Rapid wheel events (a fast
+  // fires as a ctrlKey wheel event in browsers). With `wheelZoom`, a plain
+  // wheel zooms too and only shift+wheel pans. Rapid wheel events (a fast
   // trackpad pinch or mouse wheel can fire many events within one frame) are
   // rAF-coalesced into a single viewport commit per frame (T1.1.2): each
   // event only accumulates into a pending "frame" of pan deltas + a
@@ -231,9 +241,17 @@ export function useCanvasViewport({
 
     const onWheel = (event: WheelEvent) => {
       event.preventDefault();
-      if (event.ctrlKey || event.metaKey) {
+      const zoomGesture =
+        event.ctrlKey || event.metaKey || (wheelZoomRef.current && !event.shiftKey);
+      if (zoomGesture) {
         const point = stagePointFromClient(stage, event.clientX, event.clientY);
-        const zoomFactor = Math.exp(-event.deltaY * 0.01);
+        // A mouse-wheel notch reports ~100px (or a line count), which would
+        // zoom ~2.7x per notch; read-only viewers cap each event to a gentle
+        // step. Pinch deltas are small, so they pass through unchanged.
+        const deltaY = wheelZoomRef.current
+          ? Math.max(-30, Math.min(30, event.deltaY * (event.deltaMode === 1 ? 16 : 1)))
+          : event.deltaY;
+        const zoomFactor = Math.exp(-deltaY * 0.01);
         pendingFrame.zoomFactor *= zoomFactor;
         pendingFrame.zoomPoint = point;
       } else {
