@@ -4,6 +4,51 @@
   "title": "Connectors",
   "root": "b-engine-connectors-root",
   "blocks": {
+    "b-engine-connectors-root": {
+      "id": "b-engine-connectors-root",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "elbow routing",
+          "anchor resolution",
+          "waypoints",
+          "bend editing",
+          "connection cascade",
+          "quick connect",
+          "Connector Mode"
+        ],
+        "covers": "The connector behavioral model: connections are not objects, elbow/orthogonal routing with an A* fallback, anchor resolution, waypoint reconciliation, bend editing, the connection cascade, and the create/reconnect/quick-connect gestures plus Connector Mode.",
+        "format": "mdx",
+        "type": "design"
+      },
+      "children": [
+        "b-engine-connectors-title-1",
+        "b-engine-connectors-intro-2",
+        "b-engine-connectors-def-heading-3",
+        "b-engine-connectors-def-body-4",
+        "b-engine-connectors-routing-heading-5",
+        "b-engine-connectors-routing-body-6",
+        "b-engine-connectors-routing-path-7",
+        "b-engine-connectors-routing-ortho-8",
+        "b-engine-connectors-anchor-heading-9",
+        "b-engine-connectors-anchor-body-10",
+        "b-engine-connectors-anchor-preview-11",
+        "b-engine-connectors-waypoint-heading-12",
+        "b-engine-connectors-waypoint-body-13",
+        "b-engine-connectors-bend-heading-14",
+        "b-engine-connectors-bend-body-15",
+        "b-engine-connectors-bend-commit-16",
+        "b-engine-connectors-gesture-heading-17",
+        "b-engine-connectors-gesture-body-18",
+        "b-engine-connectors-gesture-release-19",
+        "b-engine-connectors-cascade-heading-20",
+        "b-engine-connectors-cascade-body-21",
+        "b-engine-connectors-cascade-anchors-22",
+        "b-engine-connectors-mode-heading-23",
+        "b-engine-connectors-mode-body-24",
+        "b-engine-connectors-closing-25"
+      ]
+    },
     "b-engine-connectors-title-1": {
       "id": "b-engine-connectors-title-1",
       "type": "heading",
@@ -61,7 +106,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Connections are a separate document collection with their own def — a "
+          "insert": "Connections are a separate document collection with their own def (a "
         },
         {
           "insert": "ConnectorDef",
@@ -70,7 +115,7 @@
           }
         },
         {
-          "insert": ", deliberately absent from the object registry — with "
+          "insert": ", deliberately absent from the object registry) with "
         },
         {
           "insert": "kind: \"connector\"",
@@ -111,7 +156,7 @@
           }
         },
         {
-          "insert": "; style never selects routing."
+          "insert": ". Style never selects routing."
         }
       ],
       "children": []
@@ -169,7 +214,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Whichever tier produces the route, consecutive duplicate points are removed and the polyline becomes a rendered SVG path with rounded interior corners — the radius clamps to half the shorter adjacent segment so short segments get a sane smaller radius — and the first and last rendered points pull back by a fixed end-gap along their own tangent so the drawn stroke never touches the target border. The connection's "
+          "insert": "Whichever tier produces the route, consecutive duplicate points are removed and the polyline becomes a rendered SVG path with rounded interior corners (the radius clamps to half the shorter adjacent segment so short segments get a sane smaller radius) and the first and last rendered points pull back by a fixed end-gap along their own tangent so the drawn stroke never touches the target border. The connection's "
         },
         {
           "insert": "start",
@@ -198,7 +243,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Routes are orthogonal by invariant. Stored waypoints are accepted only when every segment is orthogonal within 0.5 px; diagonal waypoint edits are ignored and auto-routing resumes. Nearly-straight A* output is flattened to an exact two-point route — the anchor may slide along the objects' edge-overlap span, trimmed by the end gap — so aligned objects get a straight line instead of a tiny dogleg."
+          "insert": "Routes are orthogonal by invariant. Stored waypoints are accepted only when every segment is orthogonal within 0.5 px. Diagonal waypoint edits are ignored and auto-routing resumes. Nearly-straight A* output is flattened to an exact two-point route (the anchor may slide along the objects' edge-overlap span, trimmed by the end gap), so aligned objects get a straight line instead of a tiny dogleg."
         }
       ],
       "children": []
@@ -236,7 +281,7 @@
           }
         },
         {
-          "insert": " prefers genuinely facing sides: if the objects' vertical spans overlap within an 8-px tolerance it picks right/left, if their horizontal spans overlap it picks bottom/top, and otherwise the dominant center separation wins, horizontal on ties. That pick is only the fallback — an explicit "
+          "insert": " prefers genuinely facing sides: if the objects' vertical spans overlap within an 8-px tolerance it picks right/left, if their horizontal spans overlap it picks bottom/top, and otherwise the dominant center separation wins, horizontal on ties. That pick is only the fallback. An explicit "
         },
         {
           "insert": "anchor",
@@ -285,7 +330,7 @@
           }
         },
         {
-          "insert": " handles the free-point preview while a connector is being dragged toward empty canvas: it anchors from the source object, picks the free endpoint side by dominant delta, and deliberately skips the A* obstacle pass while keeping the same rounded-corner and end-gap construction, so previews are cheap but look like committed routes."
+          "insert": " handles the free-point preview while a connector is being dragged toward empty canvas. The function anchors from the source object, picks the free endpoint side by dominant delta, and deliberately skips the A* obstacle pass while keeping the same rounded-corner and end-gap construction, so previews are cheap but look like committed routes."
         }
       ],
       "children": []
@@ -357,7 +402,7 @@
           }
         },
         {
-          "insert": " exposes every orthogonal segment of a selected connector as a draggable bend handle; when a label lies on a segment, the handle shifts away from it so the pill stays reachable. Dragging is axis-constrained — horizontal segments move only vertically, vertical segments only horizontally — and a direct one-segment connector expands into a stub-run-stub polyline instead of disappearing. During the drag, same-orientation segment snaps and endpoint straightening use a zoom-scaled tolerance and simplify the preview the moment a snap lands."
+          "insert": " exposes every orthogonal segment of a selected connector as a draggable bend handle. When a label lies on a segment, the handle shifts away from it so the pill stays reachable. Dragging is axis-constrained (horizontal segments move only vertically, vertical segments only horizontally) and a direct one-segment connector expands into a stub-run-stub polyline instead of disappearing. During the drag, same-orientation segment snaps and endpoint straightening use a zoom-scaled tolerance and simplify the preview the moment a snap lands."
         }
       ],
       "children": []
@@ -382,7 +427,7 @@
           }
         },
         {
-          "insert": " simplifies the polyline: nearly-orthogonal segments normalize, tiny hooks and near-duplicates collapse, collinear triples merge. Waypoints are cleared only when the simplified route is straight; otherwise the interior corners persist as "
+          "insert": " simplifies the polyline: nearly-orthogonal segments normalize, tiny hooks and near-duplicates collapse, collinear triples merge. Waypoints are cleared only when the simplified route is straight. Otherwise, the interior corners persist as "
         },
         {
           "insert": "waypoints",
@@ -480,7 +525,7 @@
           }
         },
         {
-          "insert": ": the engine duplicates the source object — same type, size, color, parent, and per-type fields, with empty text — centered at the drop point, connects to it in the same history entry, seeds inline text editing for the new object, and places a sub-threshold port click's ghost at an edge-to-edge gap of "
+          "insert": ": the engine duplicates the source object (same type, size, color, parent, and per-type fields, with empty text) centered at the drop point, connects to it in the same history entry, seeds inline text editing for the new object, and places a sub-threshold port click's ghost at an edge-to-edge gap of "
         },
         {
           "insert": "max(width, 120) / 2",
@@ -567,7 +612,7 @@
           }
         },
         {
-          "insert": ": four cardinal points offset outside the bounds and projected onto the object's real outline — ellipse curve, diamond, triangle, octagon, chevron — not its bounding box, with bbox fallback for every other kind. The same anchors feed the selected-object anchor dots and hit-testing, so attachment, affordance, and clicks can never disagree."
+          "insert": ": four cardinal points offset outside the bounds and projected onto the object's real outline (ellipse curve, diamond, triangle, octagon, chevron), not its bounding box, with bbox fallback for every other kind. The same anchors feed the selected-object anchor dots and hit-testing, so attachment, affordance, and clicks can never disagree."
         }
       ],
       "children": []
@@ -660,51 +705,6 @@
         }
       ],
       "children": []
-    },
-    "b-engine-connectors-root": {
-      "id": "b-engine-connectors-root",
-      "type": "paragraph",
-      "props": {
-        "covers": "The connector behavioral model: connections are not objects, elbow/orthogonal routing with an A* fallback, anchor resolution, waypoint reconciliation, bend editing, the connection cascade, and the create/reconnect/quick-connect gestures plus Connector Mode.",
-        "format": "mdx",
-        "type": "design",
-        "concepts": [
-          "elbow routing",
-          "anchor resolution",
-          "waypoints",
-          "bend editing",
-          "connection cascade",
-          "quick connect",
-          "Connector Mode"
-        ]
-      },
-      "children": [
-        "b-engine-connectors-title-1",
-        "b-engine-connectors-intro-2",
-        "b-engine-connectors-def-heading-3",
-        "b-engine-connectors-def-body-4",
-        "b-engine-connectors-routing-heading-5",
-        "b-engine-connectors-routing-body-6",
-        "b-engine-connectors-routing-path-7",
-        "b-engine-connectors-routing-ortho-8",
-        "b-engine-connectors-anchor-heading-9",
-        "b-engine-connectors-anchor-body-10",
-        "b-engine-connectors-anchor-preview-11",
-        "b-engine-connectors-waypoint-heading-12",
-        "b-engine-connectors-waypoint-body-13",
-        "b-engine-connectors-bend-heading-14",
-        "b-engine-connectors-bend-body-15",
-        "b-engine-connectors-bend-commit-16",
-        "b-engine-connectors-gesture-heading-17",
-        "b-engine-connectors-gesture-body-18",
-        "b-engine-connectors-gesture-release-19",
-        "b-engine-connectors-cascade-heading-20",
-        "b-engine-connectors-cascade-body-21",
-        "b-engine-connectors-cascade-anchors-22",
-        "b-engine-connectors-mode-heading-23",
-        "b-engine-connectors-mode-body-24",
-        "b-engine-connectors-closing-25"
-      ]
     }
   }
 }

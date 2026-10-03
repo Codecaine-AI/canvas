@@ -85,7 +85,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every tool on the surface, group by group: what its payload carries, what it refuses, and the rules it shares with its neighbours. The signatures below are the model-facing shapes; each root schema is a sealed object with every shape inlined."
+          "insert": "Every tool on the surface, group by group: what its payload carries, what it refuses, and the rules it shares with its neighbours. The signatures below are the model-facing shapes. Each root schema is a sealed object with every shape inlined."
         }
       ],
       "children": []
@@ -118,7 +118,7 @@
           }
         },
         {
-          "insert": ": the pick, the click, and the typing that happens in the same motion. Everything else comes from "
+          "insert": ": the pick, the click, and the typing that occurs in the same motion. Everything else comes from "
         },
         {
           "insert": "creation-defaults.ts",
@@ -965,7 +965,7 @@
           }
         },
         {
-          "insert": " hands the fit check the name and detail line as the write leaves them, because a detail added under a name that just fitted can push it into clipping. An edge label is the deliberate exception: a chip never truncates, it grows, so the verdict there is a crowding one and belongs to the unreadable-labels finding, which measures the routed corridor."
+          "insert": " hands the fit check the name and detail line as the write leaves them, because a detail added under a name that just fitted can push it into clipping. An edge label is the deliberate exception. A chip never truncates, it grows, so the verdict there is a crowding one and belongs to the unreadable-labels finding, which measures the routed corridor."
         }
       ],
       "children": []
@@ -1529,7 +1529,7 @@
           }
         },
         {
-          "insert": " is the segment's new x when it is vertical and its new y when it is horizontal, so orthogonality is preserved by construction. It drives the canvas package's own bend machinery with a synthetic drag, which is why a model-driven shift and a pointer-driven one land the same document patch, endpoint re-pins included. An index the edge does not have is refused with the available segments listed, and a near-diagonal run, which has no bend handle on stage either, is refused with a redirect to "
+          "insert": " is the segment's new x when it is vertical and its new y when it is horizontal, so orthogonality is preserved by construction. It drives the canvas package's own bend machinery with a synthetic drag, which is why a model-driven shift and a pointer-driven one land the same document patch, endpoint re-pins included. An index the edge does not have is refused with the available segments listed. A near-diagonal run, which has no bend handle on stage either, is refused with a redirect to "
         },
         {
           "insert": "reroute",
@@ -1920,7 +1920,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The two knobs are either/or, not composable. A call carrying both is refused and told to drop the one that is not the close-up it meant; a bare call with neither is refused and shown what each knob frames. Both refusals spell out the two legal calls concretely, so the model re-sends a corrected call rather than re-reading a rule ("
+          "insert": "The two knobs are either/or, not composable. A call carrying both is refused and told to drop the one that is not the close-up it meant. A bare call with neither is refused and shown what each knob frames. Both refusals spell out the two legal calls concretely, so the model re-sends a corrected call rather than re-reading a rule ("
         },
         {
           "insert": "look.ts",

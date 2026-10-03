@@ -1054,7 +1054,7 @@
           }
         },
         {
-          "insert": " corpus distilled from them) is the single parity authority for every FigJam-derived constant in the engine: colors, radii, stroke widths, spacing, motion. A parity question is settled against the recordings, not any individual engineer's judgment call. Two qualifiers. First, not every value in the analysis corpus is a direct measurement: some are flagged extrapolations for states the recordings never captured (the multi-object selection-toolbar variant is the standing example). Treat an extrapolated constant as a best guess and reconfirm against live FigJam before relying on it for a pixel-exact decision. Second, supersession is explicit, never silent: when shipping geometry deliberately departs from a measured value, the departure is a named decision and the measurement remains documented history. The recording measurement stays the recorded reference even when overruled."
+          "insert": " corpus distilled from them) is the single parity authority for every FigJam-derived constant in the engine: colors, radii, stroke widths, spacing, motion. A parity question is settled against the recordings, not any individual engineer's judgment call. Two qualifiers. First, not every value in the analysis corpus is a direct measurement: some are flagged extrapolations for states the recordings never captured (the multi-object selection-toolbar variant is the standing example). Treat an extrapolated constant as a best guess. Reconfirm against live FigJam before relying on it for a pixel-exact decision. Second, supersession is explicit, never silent: when shipping geometry deliberately departs from a measured value, the departure is a named decision and the measurement remains documented history. The recording measurement stays the recorded reference even when overruled."
         }
       ],
       "children": []
@@ -1435,7 +1435,7 @@
           }
         },
         {
-          "insert": " stays the one name every kind edits in place, and "
+          "insert": " stays the one name every kind edits in place. "
         },
         {
           "insert": "detail",
@@ -1630,7 +1630,7 @@
           }
         },
         {
-          "insert": " (10 world px) outside the bound, then projects each along the ray from the object's center onto the outline polygon ("
+          "insert": " (10 world px) outside the bound. It then projects each along the ray from the object's center onto the outline polygon ("
         },
         {
           "insert": "outlinePolygon()",
@@ -2269,7 +2269,7 @@
           }
         },
         {
-          "insert": ", which also fixes text color: object text takes the theme's "
+          "insert": ". It also fixes text color: object text takes the theme's "
         },
         {
           "insert": "textColor",

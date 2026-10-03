@@ -8,8 +8,6 @@
       "id": "b-state-root-0",
       "type": "paragraph",
       "props": {
-        "covers": "Where state code lives: the schema/actions/reducer/geometry split under packages/canvas/src/state/, the per-domain action layout, and the single mutation path.",
-        "type": "implementation",
         "concepts": [
           "state",
           "schema",
@@ -18,7 +16,9 @@
           "geometry",
           "mutation-authority",
           "creation-defaults"
-        ]
+        ],
+        "covers": "Where state code lives: the schema/actions/reducer/geometry split under packages/canvas/src/state/, the per-domain action layout, and the single mutation path.",
+        "type": "implementation"
       },
       "children": [
         "b-state-role-1",
@@ -44,7 +44,7 @@
       "props": {},
       "text": [
         {
-          "insert": "State code for the canvas engine: the document schema, the closed action vocabulary, the single reducer, and the pure geometry helpers. The document model — schema semantics, actions, validation, history — is owned by design; this area records only where state code lives and how it is split."
+          "insert": "State code for the canvas engine: the document schema, the closed action vocabulary, the single reducer, and the pure geometry helpers. The document model (schema semantics, actions, validation, history) is owned by design. This area records only where state code lives and how it is split."
         }
       ],
       "children": []
@@ -104,7 +104,7 @@
           }
         },
         {
-          "insert": " — owns the document model: schema, the action vocabulary's semantics, the reducer contract, validation, and history."
+          "insert": " owns the document model: schema, the action vocabulary's semantics, the reducer contract, validation, and history."
         }
       ],
       "children": []
@@ -127,7 +127,7 @@
           }
         },
         {
-          "insert": " — owns section membership and paint-order behavior."
+          "insert": " owns section membership and paint-order behavior."
         }
       ],
       "children": []
@@ -157,10 +157,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the action layer is split by domain under "
+          "insert": ": the action layer is split by domain under "
         },
         {
           "insert": "state/actions/",
@@ -173,7 +170,7 @@
           }
         },
         {
-          "insert": " — objects, connections, annotations, geometry-ops, history, waypoints, plus shared helpers and types — with "
+          "insert": " (objects, connections, annotations, geometry-ops, history, waypoints, plus shared helpers and types), with "
         },
         {
           "insert": "state/actions.ts",
@@ -212,10 +209,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was one monolithic actions file, which the vocabulary had outgrown; the per-domain split keeps each handler family reviewable and keeps the reducer a thin dispatch."
+          "insert": ": the rejected alternative was one monolithic actions file, which the vocabulary had outgrown. The per-domain split keeps each handler family reviewable and keeps the reducer a thin dispatch."
         }
       ],
       "children": []
@@ -245,7 +239,7 @@
           }
         },
         {
-          "insert": " — including every future action, which joins its domain file (or adds one) and dispatches through "
+          "insert": ", including every future action, which joins its domain file (or adds one) and dispatches through "
         },
         {
           "insert": "reducer.ts",
@@ -271,10 +265,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "every document mutation is a "
+          "insert": ": every document mutation is a "
         },
         {
           "insert": "CanvasAction",
@@ -292,7 +283,7 @@
           }
         },
         {
-          "insert": "; new capabilities add action handlers there, and no code outside the reducer path may write to a document."
+          "insert": ". New capabilities add action handlers there, and no code outside the reducer path may write to a document."
         }
       ],
       "children": []
@@ -342,7 +333,7 @@
           }
         },
         {
-          "insert": " — including every future mutation source (gesture, trim, agent), which dispatches the same actions."
+          "insert": ", including every future mutation source (gesture, trim, agent), which dispatches the same actions."
         }
       ],
       "children": []
@@ -359,10 +350,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "creation defaults live in "
+          "insert": ": creation defaults live in "
         },
         {
           "insert": "state/schema/object-defaults.ts",
@@ -375,7 +363,7 @@
           }
         },
         {
-          "insert": " — a reducer-readable table — not on the object defs, because "
+          "insert": " (a reducer-readable table), not on the object defs, because "
         },
         {
           "insert": "state/",
@@ -393,7 +381,7 @@
           }
         },
         {
-          "insert": " and the actions surface is a standalone public API; the identity lock between def-stamped and reducer defaults is "
+          "insert": " and the actions surface is a standalone public API. The identity lock between def-stamped and reducer defaults is "
         },
         {
           "insert": "type-defaults.test.ts",
@@ -456,7 +444,7 @@
           }
         },
         {
-          "insert": " — including every future object type, which adds its row here first."
+          "insert": ", including every future object type, which adds its row here first."
         }
       ],
       "children": []

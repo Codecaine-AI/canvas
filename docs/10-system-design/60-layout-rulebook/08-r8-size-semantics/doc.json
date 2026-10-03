@@ -38,7 +38,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Size follows content and communicates role: every node starts from one shared target rectangle, peers match the largest member, larger boxes signal importance, and off-target sizes signal exceptions; the capabilities roster keys no size to an object type."
+          "insert": "Size follows content and communicates role: every node starts from one shared target rectangle, peers match the largest member, larger boxes signal importance, and off-target sizes signal exceptions. The capabilities roster keys no size to an object type."
         }
       ],
       "children": []
@@ -163,7 +163,7 @@
           }
         },
         {
-          "insert": " warn when the name or the detail would clip, and the "
+          "insert": " warn when the name or the detail would clip. The "
         },
         {
           "insert": "clipped-text",

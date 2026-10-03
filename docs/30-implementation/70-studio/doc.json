@@ -57,7 +57,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The standalone board app: a Vite+React client, an Electron shell, and shared Node handlers. Persistence and embedding behavior are owned by design; this area records the app's structure."
+          "insert": "The standalone board app: a Vite+React client, an Electron shell, and shared Node handlers. Persistence and embedding behavior are owned by design. This area records the app's structure."
         }
       ],
       "children": []
@@ -170,10 +170,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "backend logic lives in "
+          "insert": ": backend logic lives in "
         },
         {
           "insert": "packages/studio/server/",
@@ -213,7 +210,7 @@
           }
         },
         {
-          "insert": ") that the Vite dev server and the Electron shell both mount, so web and desktop behave identically; new API surfaces join "
+          "insert": ") that the Vite dev server and the Electron shell both mount, so web and desktop behave identically. New API surfaces join "
         },
         {
           "insert": "server/",
@@ -355,7 +352,7 @@
           }
         },
         {
-          "insert": " before the write lands, and the notifier uses that record to tell Studio's own saves from external writers. With the filter in "
+          "insert": " before the write lands. The notifier uses that record to tell Studio's own saves from external writers. With the filter in "
         },
         {
           "insert": "server/",
@@ -407,10 +404,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "development-only surfaces gate behind "
+          "insert": ": development-only surfaces gate behind "
         },
         {
           "insert": "src/dev-flag.ts",
@@ -436,7 +430,7 @@
           }
         },
         {
-          "insert": " (the dev rail, the evals page); production routes never mount them unflagged."
+          "insert": " (the dev rail, the evals page). Production routes never mount them unflagged."
         }
       ],
       "children": []
@@ -503,7 +497,7 @@
           }
         },
         {
-          "insert": ": client code groups by surface, with "
+          "insert": ": client code groups by surface. "
         },
         {
           "insert": "src/agent/",
@@ -516,7 +510,7 @@
           }
         },
         {
-          "insert": " for the agent session rail, "
+          "insert": " is for the agent session rail, "
         },
         {
           "insert": "src/project/",
@@ -577,10 +571,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was a flat component pile behind the router, which hides which code serves which surface and makes a surface impossible to remove cleanly."
+          "insert": ": the rejected alternative was a flat component pile behind the router. The pile hides which code serves which surface and makes a surface impossible to remove cleanly."
         }
       ],
       "children": []
@@ -797,7 +788,7 @@
           }
         },
         {
-          "insert": ": a surface that missed the style would show one board in two themes inside one workspace, and the mono metadata must render in the face the static renderer and the agent's text fit measure."
+          "insert": ": a surface that missed the style would show one board in two themes inside one workspace. The mono metadata must render in the face the static renderer and the agent's text fit measure."
         }
       ],
       "children": []

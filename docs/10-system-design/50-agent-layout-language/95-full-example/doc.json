@@ -8,14 +8,14 @@
       "id": "b-fullexample-root",
       "type": "paragraph",
       "props": {
-        "covers": "A complete composition description exercising splits, sections, a grid, align, fan, and arrows — with the example board and a read-aloud walkthrough of what the notation says.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "full example",
           "worked composition",
           "read-aloud"
-        ]
+        ],
+        "covers": "A complete composition description exercising splits, sections, a grid, align, fan, and arrows — with the example board and a read-aloud walkthrough of what the notation says.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
         "b-fullexample-title-1",
@@ -44,7 +44,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every pattern in one compact description — the tree, both alignment facts, and the arrows block:"
+          "insert": "Every pattern in one compact description (the tree, both alignment facts, and the arrows block):"
         }
       ],
       "children": []

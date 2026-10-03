@@ -164,7 +164,7 @@
           }
         },
         {
-          "insert": " board that diagramming boards conventionally use, and a dark board exists only as the "
+          "insert": " board that diagramming boards conventionally use. A dark board exists only as the "
         },
         {
           "insert": "schematic-dark",
@@ -231,7 +231,7 @@
           }
         },
         {
-          "insert": " defines ObjectDef v2 and the two-tier ShapeDef registry. Every kind declares its rendering, text slot, outline, anchors, hit-testing, and color role on one registered definition, and every consumer derives its behavior from that declaration. It includes the text-slot preset library, the name and one-line detail every shape, icon, and section carries, and the closed 10-pick color roster."
+          "insert": " defines ObjectDef v2 and the two-tier ShapeDef registry. Every kind declares its rendering, text slot, outline, anchors, hit-testing, and color role on one registered definition. Every consumer derives its behavior from that declaration. It includes the text-slot preset library, the name and one-line detail every shape, icon, and section carries, and the closed 10-pick color roster."
         }
       ],
       "children": []

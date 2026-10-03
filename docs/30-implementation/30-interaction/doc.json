@@ -8,15 +8,15 @@
       "id": "b-ixn-root-0",
       "type": "paragraph",
       "props": {
-        "covers": "Where the pointer kernel lives: the DOM-free purity rule for packages/canvas/src/interaction/ and types.ts as the shared vocabulary home.",
-        "type": "implementation",
         "concepts": [
           "interaction",
           "pointer-kernel",
           "dom-free",
           "hit-vocabulary",
           "thresholds"
-        ]
+        ],
+        "covers": "Where the pointer kernel lives: the DOM-free purity rule for packages/canvas/src/interaction/ and types.ts as the shared vocabulary home.",
+        "type": "implementation"
       },
       "children": [
         "b-ixn-role-1",
@@ -38,7 +38,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The pointer kernel: normalized pointer events, the hit vocabulary, shared thresholds, and the pure utilities — hit-testing, frame coalescing, edge-pan math, the in-memory clipboard — that every gesture consumes. Gesture behavior is owned by design; this area records the purity boundary and where the vocabulary lives."
+          "insert": "The pointer kernel: normalized pointer events, the hit vocabulary, shared thresholds, and the pure utilities (hit-testing, frame coalescing, edge-pan math, the in-memory clipboard) that every gesture consumes. Gesture behavior is owned by design. This area records the purity boundary and where the vocabulary lives."
         }
       ],
       "children": []
@@ -167,10 +167,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was housing the machine and its DOM wiring in the kernel, which makes every gesture untestable without a browser and couples the shared vocabulary to one host."
+          "insert": ": the rejected alternative was housing the machine and its DOM wiring in the kernel. The alternative makes every gesture untestable without a browser and couples the shared vocabulary to one host."
         }
       ],
       "children": []
@@ -200,7 +197,7 @@
           }
         },
         {
-          "insert": " — including every future kernel utility, which takes plain data and returns plain data."
+          "insert": ", including every future kernel utility, which takes plain data and returns plain data."
         }
       ],
       "children": []
@@ -265,10 +262,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was slice-local redefinitions, which let two features disagree about what a hit is or when a press becomes a drag."
+          "insert": ": the rejected alternative was slice-local redefinitions. Slice-local redefinitions let two features disagree about what a hit is or when a press becomes a drag."
         }
       ],
       "children": []
@@ -298,7 +292,7 @@
           }
         },
         {
-          "insert": " — including every future hit kind and threshold."
+          "insert": ", including every future hit kind and threshold."
         }
       ],
       "children": []

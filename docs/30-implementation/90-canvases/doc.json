@@ -48,7 +48,7 @@
           }
         },
         {
-          "insert": ", plain persisted documents. How boards are persisted, previewed, and embedded is owned by design; this area records what may live in the corpus and how it is consumed."
+          "insert": ", plain persisted documents. How boards are persisted, previewed, and embedded is owned by design. This area records what may live in the corpus and how it is consumed."
         }
       ],
       "children": []
@@ -249,10 +249,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was shipping sample documents through the package barrel, which turns fixture data into public API and couples the engine's import surface to the corpus."
+          "insert": ": the rejected alternative was shipping sample documents through the package barrel. The alternative turns fixture data into public API and couples the engine's import surface to the corpus."
         }
       ],
       "children": []
@@ -312,7 +309,7 @@
           }
         },
         {
-          "insert": " is a reference input, not a code location: the recordings and pixel-sampled analysis under it are what the engine's FigJam-derived constants trace back to, and every derived constant is dispersed beside its consumer with its provenance annotated at the site; nothing under "
+          "insert": " is a reference input, not a code location. The recordings and pixel-sampled analysis under it are what the engine's FigJam-derived constants trace back to. Every derived constant is dispersed beside its consumer with its provenance annotated at the site. Nothing under "
         },
         {
           "insert": "reference/",

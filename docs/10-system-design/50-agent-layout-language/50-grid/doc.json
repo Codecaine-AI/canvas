@@ -8,16 +8,16 @@
       "id": "b-grid-root",
       "type": "paragraph",
       "props": {
-        "covers": "The descriptive grid pattern: RxC identical cells filled in row-major order, with one gap= value repeated exactly; cells keep row and column identity, anchoring later placement.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "grid",
           "gap",
           "uniform gap",
           "lattice",
           "row-major"
-        ]
+        ],
+        "covers": "The descriptive grid pattern: RxC identical cells filled in row-major order, with one gap= value repeated exactly; cells keep row and column identity, anchoring later placement.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
         "b-grid-title-1",
@@ -63,7 +63,7 @@
           }
         },
         {
-          "insert": " — the one shared gap repeated exactly between cells. Children are item lines in row-major order; the count must fit the lattice (more than (R−1)×C, at most R×C). Cells keep their row and column identity, and that skeleton anchors everything placed later. On the live board, same size plus the same gap signals peers: choose the gap from content and corridor needs, then copy exact geometry across the group. The crowding diagnostic warns below about 80px between side-by-side sibling boxes or 96px between stacked siblings; those measurements are the physical floor for wires and labels, not prescribed spacing."
+          "insert": " (the one shared gap repeated exactly between cells). Children are item lines in row-major order. The count must fit the lattice (more than (R−1)×C, at most R×C). Cells keep their row and column identity, and that skeleton anchors everything placed later. On the live board, same size plus the same gap signals peers: choose the gap from content and corridor needs, then copy exact geometry across the group. The crowding diagnostic warns below about 80px between side-by-side sibling boxes or 96px between stacked siblings. Those measurements are the physical floor for wires and labels, not prescribed spacing."
         }
       ],
       "children": []

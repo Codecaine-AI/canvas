@@ -464,7 +464,7 @@
           }
         },
         {
-          "insert": ", and a true-outline def declares its "
+          "insert": ". A true-outline def declares its "
         },
         {
           "insert": "outline",
@@ -526,10 +526,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was per-def outline copies, which drift from the hit-testing and anchor dispatch tables and let a connector land where the shape isn't drawn."
+          "insert": ": the rejected alternative was per-def outline copies, which drift from the hit-testing and anchor dispatch tables. The copies let a connector land where the shape isn't drawn."
         }
       ],
       "children": []
@@ -619,10 +616,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was a registry service with change notifications, which buys live propagation nobody needs at the cost of a runtime dependency in every reader."
+          "insert": ": the rejected alternative was a registry service with change notifications. The registry service buys live propagation nobody needs at the cost of a runtime dependency in every reader."
         }
       ],
       "children": []
@@ -873,7 +867,7 @@
           }
         },
         {
-          "insert": ": generated geometry stays traceable to its upstream SVGs and can be re-vendored, and one id list means a glyph added to the roster validates, renders, and reaches the agent with no second list to keep in sync. The rejected alternative was hand-authored path data per glyph, which drifts from its source."
+          "insert": ": generated geometry stays traceable to its upstream SVGs and can be re-vendored. One id list means a glyph added to the roster validates, renders, and reaches the agent with no second list to keep in sync. The rejected alternative was hand-authored path data per glyph, which drifts from its source."
         }
       ],
       "children": []
@@ -1030,7 +1024,7 @@
           }
         },
         {
-          "insert": " with the three logos that carry their own licenses (Git under CC BY 3.0, Rust under CC BY-SA 4.0, Kafka under Apache-2.0). A deterministic offline build keeps regenerated modules reviewable as a diff. No AWS or OpenAI logo ships, and a brand the pinned release lacks, such as Slack in simple-icons 16.33.0, is dropped rather than drawn by hand."
+          "insert": " with the three logos that carry their own licenses (Git under CC BY 3.0, Rust under CC BY-SA 4.0, Kafka under Apache-2.0). A deterministic offline build keeps regenerated modules reviewable as a diff. No AWS or OpenAI logo ships. A brand the pinned release lacks, such as Slack in simple-icons 16.33.0, is dropped rather than drawn by hand."
         }
       ],
       "children": []

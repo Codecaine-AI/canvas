@@ -4,6 +4,33 @@
   "title": "The canvas engine",
   "root": "b-engine-root",
   "blocks": {
+    "b-engine-root": {
+      "id": "b-engine-root",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "document model",
+          "interaction pipeline",
+          "connectors",
+          "stage and viewport",
+          "persistence",
+          "section layering"
+        ],
+        "covers": "The behavioral model of the canvas engine in five areas: the document model and its single reducer, the interaction pipeline from pointer event to action, connector routing and gestures, the stage and viewport, and persistence and embedding.",
+        "format": "mdx",
+        "type": "design"
+      },
+      "children": [
+        "b-engine-title-1",
+        "b-engine-intro-2",
+        "b-engine-map-model-3",
+        "b-engine-map-interaction-4",
+        "b-engine-map-connectors-5",
+        "b-engine-map-stage-6",
+        "b-engine-map-persist-7",
+        "b-engine-layering-pointer-8"
+      ]
+    },
     "b-engine-title-1": {
       "id": "b-engine-title-1",
       "type": "heading",
@@ -51,7 +78,7 @@
           }
         },
         {
-          "insert": " vocabulary is the only way it changes, one reducer performs every change, and everything on screen — paint order, connector paths, overlays — is derived from that state rather than stored beside it. This page tree specifies that behavior in five areas."
+          "insert": " vocabulary is the only way it changes, one reducer performs every change, and everything on screen (paint order, connector paths, overlays) is derived from that state rather than stored beside it. This page tree specifies that behavior in five areas."
         }
       ],
       "children": []
@@ -74,7 +101,7 @@
           }
         },
         {
-          "insert": " — the schema, the action vocabulary, the single-reducer discipline, validation, and the geometry helpers."
+          "insert": ": the schema, the action vocabulary, the single-reducer discipline, validation, and the geometry helpers."
         }
       ],
       "children": []
@@ -120,7 +147,7 @@
           }
         },
         {
-          "insert": " — routing, anchor resolution, waypoints and bends, the connection cascade, and the connector gestures."
+          "insert": ": routing, anchor resolution, waypoints and bends, the connection cascade, and the connector gestures."
         }
       ],
       "children": []
@@ -143,7 +170,7 @@
           }
         },
         {
-          "insert": " — the z-tiered draw model, the adaptive grid, world/screen transform math, and the read-only viewer face."
+          "insert": ": the z-tiered draw model, the adaptive grid, world/screen transform math, and the read-only viewer face."
         }
       ],
       "children": []
@@ -166,7 +193,7 @@
           }
         },
         {
-          "insert": " — the file API contract, the on-disk canvas format, previews, and the editor/view/embed surfaces."
+          "insert": ": the file API contract, the on-disk canvas format, previews, and the editor/view/embed surfaces."
         }
       ],
       "children": []
@@ -177,7 +204,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Section layering — how "
+          "insert": "Section layering (how "
         },
         {
           "insert": "parentId",
@@ -186,7 +213,7 @@
           }
         },
         {
-          "insert": " is reconciled from geometry and how the section stack is derived from it — is engine behavior too, but it has its own sibling page: "
+          "insert": " is reconciled from geometry and how the section stack is derived from it) is engine behavior too, but it has its own sibling page: "
         },
         {
           "insert": "The layer cake",
@@ -216,33 +243,6 @@
         }
       ],
       "children": []
-    },
-    "b-engine-root": {
-      "id": "b-engine-root",
-      "type": "paragraph",
-      "props": {
-        "covers": "The behavioral model of the canvas engine in five areas: the document model and its single reducer, the interaction pipeline from pointer event to action, connector routing and gestures, the stage and viewport, and persistence and embedding.",
-        "format": "mdx",
-        "type": "design",
-        "concepts": [
-          "document model",
-          "interaction pipeline",
-          "connectors",
-          "stage and viewport",
-          "persistence",
-          "section layering"
-        ]
-      },
-      "children": [
-        "b-engine-title-1",
-        "b-engine-intro-2",
-        "b-engine-map-model-3",
-        "b-engine-map-interaction-4",
-        "b-engine-map-connectors-5",
-        "b-engine-map-stage-6",
-        "b-engine-map-persist-7",
-        "b-engine-layering-pointer-8"
-      ]
     }
   }
 }

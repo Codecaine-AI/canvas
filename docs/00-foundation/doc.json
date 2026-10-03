@@ -246,7 +246,7 @@
       },
       "text": [
         {
-          "insert": "Rendering decisions in the default figjam theme, such as fills, stroke widths, corner radii, shadows, type sizes, dash patterns, and arrowhead geometry, are not design opinions to be re-litigated per component. When a figjam rendering question comes up, the answer is \"what does FigJam do,\" settled against sampled reference material rather than taste. The schematic themes are a deliberate second look defined by their own presets, so parity questions do not apply to them, and no theme changes what a document says. The parity authority and the rules around it are specified in "
+          "insert": "Rendering decisions in the default figjam theme, such as fills, stroke widths, corner radii, shadows, type sizes, dash patterns, and arrowhead geometry, are not design opinions to be re-litigated per component. When a figjam rendering question comes up, the answer is \"what does FigJam do,\" settled against sampled reference material rather than taste. The schematic themes are a deliberate second look defined by their own presets, so parity questions do not apply to them. No theme changes what a document says. The parity authority and the rules around it are specified in "
         },
         {
           "insert": "the shape contract",

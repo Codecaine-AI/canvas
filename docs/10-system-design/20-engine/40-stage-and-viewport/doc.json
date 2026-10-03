@@ -46,7 +46,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The stage is the presentation side of the engine: given an "
+          "insert": "The stage is the presentation side of the engine. Given an "
         },
         {
           "insert": "InteractiveCanvasDocument",
@@ -60,7 +60,7 @@
           }
         },
         {
-          "insert": " and a viewport, it draws objects, connections, sections, and annotations as a world-space DOM/SVG tree. It owns no editing state. It is the shared renderer both the read-only viewer and the interactive editor mount, driven entirely by props."
+          "insert": " and a viewport, the stage draws objects, connections, sections, and annotations as a world-space DOM/SVG tree. It owns no editing state. It is the shared renderer both the read-only viewer and the interactive editor mount, driven entirely by props."
         }
       ],
       "children": []
@@ -464,7 +464,7 @@
           }
         },
         {
-          "insert": " is the inverse; the stage's world layer applies the matching CSS transform "
+          "insert": " is the inverse. The stage's world layer applies the matching CSS transform "
         },
         {
           "insert": "translate(-x * zoom, -y * zoom) scale(zoom)",
@@ -559,7 +559,7 @@
           }
         },
         {
-          "insert": " fits over the unpadded document bounds to avoid double padding, and "
+          "insert": " fits over the unpadded document bounds to avoid double padding. "
         },
         {
           "insert": "containerViewBounds",

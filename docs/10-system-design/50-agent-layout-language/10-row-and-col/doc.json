@@ -8,16 +8,16 @@
       "id": "b-rowcol-root",
       "type": "paragraph",
       "props": {
-        "covers": "The row and col notation: |-separated weights describe proportional bands along the axis, exactly one child per weight, with clear corridors between neighboring bands.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "row",
           "col",
           "weighted splits",
           "weights",
           "corridors"
-        ]
+        ],
+        "covers": "The row and col notation: |-separated weights describe proportional bands along the axis, exactly one child per weight, with clear corridors between neighboring bands.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
         "b-rowcol-title-1",
@@ -54,7 +54,7 @@
           }
         },
         {
-          "insert": "-separated numbers; the space divides proportionally along the axis ("
+          "insert": "-separated numbers. The space divides proportionally along the axis ("
         },
         {
           "insert": "row",

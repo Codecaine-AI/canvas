@@ -271,7 +271,7 @@
           }
         },
         {
-          "insert": ": invalid documents get "
+          "insert": ". Invalid documents get "
         },
         {
           "insert": "422",
@@ -280,7 +280,7 @@
           }
         },
         {
-          "insert": " with the issue list, and valid documents are written as pretty-printed JSON. A "
+          "insert": " with the issue list. Valid documents are written as pretty-printed JSON. A "
         },
         {
           "insert": "PUT",
@@ -373,7 +373,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The write/read asymmetry is deliberate: validation guards the write path, so the corpus stays clean at rest and reads stay cheap. Anything that produces a canvas file by another path must satisfy the same validator before writing."
+          "insert": "The write/read asymmetry is deliberate. Validation guards the write path, so the corpus stays clean at rest and reads stay cheap. Anything that produces a canvas file by another path must satisfy the same validator before writing."
         }
       ],
       "children": []

@@ -681,7 +681,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The document / file / page-corner family collapses into one well-chosen document glyph; storage cylinders yield to the database glyph; the picker's default face is icons, with this shape core as a small utility row."
+          "insert": "The document / file / page-corner family collapses into one well-chosen document glyph. Storage cylinders yield to the database glyph. The picker's default face is icons, with this shape core as a small utility row."
         }
       ],
       "children": []
@@ -705,7 +705,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every shape, icon, and section carries a short name and at most one detail line. The name says what the thing is in about five words on one line. The detail is one muted fact under it, such as a port, path, version, model, or host, in 48 characters or fewer. Prose goes on a Markdown sticky beside its subject: the why, the how, caveats, and examples. Two lint warnings enforce it: "
+          "insert": "Every shape, icon, and section carries a short name and at most one detail line. The name says what the thing is in about five words on one line. The detail is one muted fact under it, such as a port, path, version, model, or host, in 48 characters or fewer. Prose goes on a Markdown sticky beside its subject: the why, the how, caveats, and examples. Two lint warnings enforce it. "
         },
         {
           "insert": "label-is-prose",
@@ -714,7 +714,7 @@
           }
         },
         {
-          "insert": " flags a name over six words or 40 characters, or with a sentence or line break, and "
+          "insert": " flags a name over six words or 40 characters, or with a sentence or line break. "
         },
         {
           "insert": "detail-too-long",
@@ -907,7 +907,7 @@
           }
         },
         {
-          "insert": " values in that order, and the glyph registry beside the icon def ("
+          "insert": " values in that order. The glyph registry beside the icon def ("
         },
         {
           "insert": "objects/shapes/icon/icon-glyphs.ts",
@@ -1662,7 +1662,7 @@
           }
         },
         {
-          "insert": " were considered for this corpus and declined, having no clear job on the audited boards, and "
+          "insert": " were considered for this corpus and declined, having no clear job on the audited boards. "
         },
         {
           "insert": "branch",
@@ -2500,7 +2500,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Placement and color. Creation does not accept a color, and that is a feature, not a gap: placing an object stamps the registry's preferred color, and recoloring is its own later gesture (change_color). The two-step forces the right thinking: place it, then look at the board and ask whether this spot warrants a different color at all. The agent's loop already supports this literally: every placement attaches a fresh draft render to the pushed state, so the agent sees the default-colored object in situ before any recolor decision. Most of the time the answer is the default, which is the consistency working."
+          "insert": "Placement and color. Creation does not accept a color. That is a feature, not a gap: placing an object stamps the registry's preferred color, and recoloring is its own later gesture (change_color). The two-step forces the right thinking: place it, then look at the board and ask whether this spot warrants a different color at all. The agent's loop already supports this literally: every placement attaches a fresh draft render to the pushed state, so the agent sees the default-colored object in situ before any recolor decision. Most of the time the answer is the default, which is the consistency working."
         }
       ],
       "children": []
@@ -2527,7 +2527,7 @@
       },
       "text": [
         {
-          "insert": "The canvas is Core's map layer, designed for agentic systems; other diagram forms are incidental. When design choices pull apart, the agentic use case wins."
+          "insert": "The canvas is Core's map layer, designed for agentic systems. Other diagram forms are incidental. When design choices pull apart, the agentic use case wins."
         }
       ],
       "children": []
@@ -2555,7 +2555,7 @@
       },
       "text": [
         {
-          "insert": "Icons carry semantics; the placeable shapes are exactly the eight listed above, with arrow (left/right) and triangle (up/down) as directional variants. Predefined process stays a shape (needs inline text, reads universally). Pill is connector furniture only. The document family collapses into a single glyph."
+          "insert": "Icons carry semantics. The placeable shapes are exactly the eight listed above, with arrow (left/right) and triangle (up/down) as directional variants. Predefined process stays a shape (needs inline text, reads universally). Pill is connector furniture only. The document family collapses into a single glyph."
         }
       ],
       "children": []
@@ -2569,7 +2569,7 @@
       },
       "text": [
         {
-          "insert": "The registry's key field is name, and that string is the single canonical id across the whole system: registry key, picker label, the string the agent types to place the object, and the string lints cite. There is no renders field: the name IS the stored glyph or shape id, so an entry cannot drift from the art it names. Changing the art behind a name is a manifest change and a regeneration, not a registry alias."
+          "insert": "The registry's key field is name. That string is the single canonical id across the whole system: registry key, picker label, the string the agent types to place the object, and the string lints cite. There is no renders field: the name IS the stored glyph or shape id, so an entry cannot drift from the art it names. Changing the art behind a name is a manifest change and a regeneration, not a registry alias."
         }
       ],
       "children": []
@@ -2583,7 +2583,7 @@
       },
       "text": [
         {
-          "insert": "The registry ships a default base corpus (meanings, scenarios, colors), and the defaults cover the vast majority of placements. Most boards use them unmodified. Color is the single per-placement override, warranted by section fills and palette collisions. Meaning and scenarios are shared language, fixed across users and boards, and their primary consumer is the agent's context: the vocabulary listing that teaches the system what each object is and when to use it. Overrides ripple to the picker and the agent via the registry.changed event."
+          "insert": "The registry ships a default base corpus (meanings, scenarios, colors), and the defaults cover the vast majority of placements. Most boards use them unmodified. Color is the single per-placement override, warranted by section fills and palette collisions. Meaning and scenarios are shared language, fixed across users and boards. Their primary consumer is the agent's context: the vocabulary listing that teaches the system what each object is and when to use it. Overrides ripple to the picker and the agent via the registry.changed event."
         }
       ],
       "children": []

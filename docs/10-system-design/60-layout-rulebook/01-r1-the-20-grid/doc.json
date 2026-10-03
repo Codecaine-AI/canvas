@@ -30,7 +30,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The 20 grid is geometry quantization: every number a gesture writes to board geometry lands on a multiple of 20, while spacing is chosen from content and repeated peer geometry rather than from a grid-derived target."
+          "insert": "The 20 grid is geometry quantization. Every number a gesture writes to board geometry lands on a multiple of 20, while spacing is chosen from content and repeated peer geometry rather than from a grid-derived target."
         }
       ],
       "children": []
@@ -82,7 +82,7 @@
           }
         },
         {
-          "insert": " before it is lowered onto a document patch, and they snap rather than refuse: an off-grid value is corrected to the nearest multiple and the result reports the geometry that landed, so a correction is something the agent reads back rather than something it is told about. Not every number is a world distance — an endpoint fraction and a label's position along a routed path stay off the grid — and "
+          "insert": " before it is lowered onto a document patch, and they snap rather than refuse: an off-grid value is corrected to the nearest multiple and the result reports the geometry that landed, so a correction is something the agent reads back rather than something it is told about. Not every number is a world distance (an endpoint fraction and a label's position along a routed path stay off the grid), and "
         },
         {
           "insert": "the grid and creation defaults",
@@ -115,7 +115,7 @@
           }
         },
         {
-          "insert": " rectangle. Operation results and looks report the post-snap geometry in their digest rows, which is the value to read when matching peers."
+          "insert": " rectangle. Operation results and looks report the post-snap geometry in their digest rows. The post-snap geometry is the value to read when matching peers."
         }
       ],
       "children": []

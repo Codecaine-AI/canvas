@@ -552,7 +552,7 @@
           }
         },
         {
-          "insert": "). They are configuration data for the doc viewer, not engine code."
+          "insert": "). The bundles are configuration data for the doc viewer, not engine code."
         }
       ],
       "children": []
@@ -644,7 +644,7 @@
       "props": {},
       "text": [
         {
-          "insert": "This tier records structural decisions so additions conform. Design owns behavior, state models, and load-bearing schemas; the code owns file-local detail; reports do not belong in the docs tree at all."
+          "insert": "This tier records structural decisions so additions conform. Design owns behavior, state models, and load-bearing schemas. The code owns file-local detail. Reports do not belong in the docs tree at all."
         }
       ],
       "children": []
@@ -724,10 +724,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "tests are colocated with the code they cover. Each slice owns its own "
+          "insert": ": tests are colocated with the code they cover. Each slice owns its own "
         },
         {
           "insert": "__tests__/",
@@ -825,7 +822,7 @@
           }
         },
         {
-          "insert": ", and the same config's "
+          "insert": ". The same config's "
         },
         {
           "insert": "root = \"packages\"",
@@ -988,10 +985,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was screenshot comparison, whose failures are only legible by eyeballing image diffs; assertions on concrete diffable values (a computed pixel width, a hex color, a DOM attribute) keep failures readable."
+          "insert": ": the rejected alternative was screenshot comparison. Failures of screenshot comparison are only legible by eyeballing image diffs. Assertions on concrete diffable values (a computed pixel width, a hex color, a DOM attribute) keep failures readable."
         }
       ],
       "children": []
@@ -1038,10 +1032,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the DOM-equivalence gate ("
+          "insert": ": the DOM-equivalence gate ("
         },
         {
           "insert": "zz-dom-equivalence.test.tsx",
@@ -1085,7 +1076,7 @@
           }
         },
         {
-          "insert": ") re-renders a fixed corpus against a committed baseline, and the baseline is pruned, never regenerated: fixing a failure means updating the test or pruning the stale entry, not re-capturing a green baseline over unexplained drift."
+          "insert": ") re-renders a fixed corpus against a committed baseline. The baseline is pruned, never regenerated: fixing a failure means updating the test or pruning the stale entry, not re-capturing a green baseline over unexplained drift."
         }
       ],
       "children": []
@@ -1165,10 +1156,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the MPL-2.0 boundary around BlockSuite-derived code is per-file, and the set is exact: "
+          "insert": ": the MPL-2.0 boundary around BlockSuite-derived code is per-file. The set is exact: "
         },
         {
           "insert": "packages/canvas/src/connectors/pathfinding",

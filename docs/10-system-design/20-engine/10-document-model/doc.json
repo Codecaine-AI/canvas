@@ -849,7 +849,7 @@
           }
         },
         {
-          "insert": ", and a detail on a sticky are dropped with a warning while normalization continues, and a kept "
+          "insert": ", and a detail on a sticky are dropped with a warning while normalization continues. A kept "
         },
         {
           "insert": "detail",
@@ -914,7 +914,7 @@
           }
         },
         {
-          "insert": "; "
+          "insert": ", "
         },
         {
           "insert": "\"elbow\"",
@@ -1443,7 +1443,7 @@
           }
         },
         {
-          "insert": "), and stable id generation. All are pure document-in/document-out; the corresponding actions are thin reducer cases that call them and run the result through history."
+          "insert": "), and stable id generation. All are pure document-in/document-out. The corresponding actions are thin reducer cases that call them and run the result through history."
         }
       ],
       "children": []

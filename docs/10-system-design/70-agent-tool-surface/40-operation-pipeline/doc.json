@@ -64,7 +64,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every board mutator is built from one factory and runs one shared pipeline. A gesture contributes only what is unique to it (its schema fields, its state-dependent checks, and its mutation), and the factory owns everything else: how a refusal reads, when the draft is committed, what the model gets back, and which run-UX events fire. The payoff is that adding a gesture cannot accidentally change the shape of a result, and reading one gesture's file tells you the whole gesture."
+          "insert": "Every board mutator is built from one factory and runs one shared pipeline. A gesture contributes only what is unique to it (its schema fields, its state-dependent checks, and its mutation). The factory owns everything else: how a refusal reads, when the draft is committed, what the model gets back, and which run-UX events fire. The payoff is that adding a gesture cannot accidentally change the shape of a result, and reading one gesture's file tells you the whole gesture."
         }
       ],
       "children": []
@@ -239,7 +239,7 @@
           }
         },
         {
-          "insert": " assigns it and then unconditionally refreshes the current-board render for it, so no write can leave the state attachments carrying pixels of a board that no longer exists. A geometry-bearing gesture additionally records its raster into the change history; bookkeeping writes such as the title or a thread do not."
+          "insert": " assigns it and then unconditionally refreshes the current-board render for it, so no write can leave the state attachments carrying pixels of a board that no longer exists. A geometry-bearing gesture additionally records its raster into the change history. Bookkeeping writes such as the title or a thread do not."
         }
       ],
       "children": []
@@ -336,7 +336,7 @@
       },
       "text": [
         {
-          "insert": "Lock refusals are the second family, and they carry two things: that the lock is a person's don't-touch mark rather than an accident of state, and the one call that lifts it. The message names the frame holding the lock and points at unlock, so the model can weigh unlocking against the request instead of hunting for a way around the refusal. The rule mirrors the interactive surface's own, which is the point: a gesture the pointer cannot perform is a gesture the agent cannot perform either."
+          "insert": "Lock refusals are the second family. They carry two things: that the lock is a person's don't-touch mark rather than an accident of state, and the one call that lifts it. The message names the frame holding the lock and points at unlock, so the model can weigh unlocking against the request instead of hunting for a way around the refusal. The rule mirrors the interactive surface's own, which is the point: a gesture the pointer cannot perform is a gesture the agent cannot perform either."
         }
       ],
       "children": []
@@ -403,7 +403,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every mutator returns one of three classes, distinguished by headline so the model never has to infer from an empty delta what happened. The sizing is deliberate: repeating a full digest and a whole-board render after every call would multiply image tokens to re-show a board where one rectangle moved, while returning nothing recreates the blind-model failure the surface exists to prevent."
+          "insert": "Every mutator returns one of three classes, distinguished by headline so the model never has to infer from an empty delta what occurred. The sizing is deliberate. Repeating a full digest and a whole-board render after every call would multiply image tokens to re-show a board where one rectangle moved, while returning nothing recreates the blind-model failure the surface exists to prevent."
         }
       ],
       "children": []
@@ -472,7 +472,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Zero delta is a no-op, wherever it comes from. After both reconciliations the pipeline compares the pre-operation document against the result, and a patch that asked for exactly what the board already holds falls into the no-op class rather than printing an APPLIED headline over an empty delta. That pairing (a line claiming an edit above a delta showing none) is the most confusing thing the surface could hand the model, and it is why the check sits after reconciliation rather than before the mutation."
+          "insert": "Zero delta is a no-op, wherever it comes from. After both reconciliations the pipeline compares the pre-operation document against the result, and a patch that asked for exactly what the board already holds falls into the no-op class rather than printing an APPLIED headline over an empty delta. That pairing (a line claiming an edit above a delta showing none) is the most confusing thing the surface could hand the model. It is why the check sits after reconciliation rather than before the mutation."
         }
       ],
       "children": []
@@ -640,7 +640,7 @@
           }
         },
         {
-          "insert": " take a free string rather than the glyph enum, because an enum miss is refused by the schema with a bare \"not allowed\". A string reaches the operation's validator instead, which refuses an unknown name with up to four close glyph names ("
+          "insert": " take a free string rather than the glyph enum, because an enum miss is refused by the schema with a bare \"not allowed\". A string reaches the operation's validator instead. The validator refuses an unknown name with up to four close glyph names ("
         },
         {
           "insert": "glyph-names.ts",
@@ -810,7 +810,7 @@
           }
         },
         {
-          "insert": " so it cannot be rediscovered as a mystery; closing it means reconciling against the baseline the replay will use rather than against the immediately preceding draft."
+          "insert": " so it cannot be rediscovered as a mystery. Closing the gap means reconciling against the baseline the replay will use rather than against the immediately preceding draft."
         }
       ],
       "children": []

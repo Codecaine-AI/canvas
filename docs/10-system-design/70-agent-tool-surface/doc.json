@@ -352,7 +352,7 @@
           }
         },
         {
-          "insert": " renderBoardView measures object rectangles, routed polylines, connection-label chips, zoom-scaled section-title chips, and icon captions, then adds padding. renderSectionView retains every painted item intersecting its camera; boundary-crossing connections remain visible to the frame edge and are clipped there rather than dropped."
+          "insert": " renderBoardView measures object rectangles, routed polylines, connection-label chips, zoom-scaled section-title chips, and icon captions, then adds padding. renderSectionView keeps every painted item intersecting its camera. Boundary-crossing connections remain visible to the frame edge and are clipped there rather than dropped."
         }
       ],
       "children": []
@@ -1029,7 +1029,7 @@
           }
         },
         {
-          "insert": " anchors a thread to exactly one object (there are no intent or region targets), and "
+          "insert": " anchors a thread to exactly one object (there are no intent or region targets). "
         },
         {
           "insert": "delete",
@@ -1164,7 +1164,7 @@
           }
         },
         {
-          "insert": ", the reducer action an accepted proposal dispatches, so both hosts leave the same document. The save is refused when the file changed on disk since the session last read or wrote it, and the caller reopens the canvas."
+          "insert": " (the reducer action an accepted proposal dispatches), so both hosts leave the same document. The save is refused when the file changed on disk since the session last read or wrote it, and the caller reopens the canvas."
         }
       ],
       "children": []

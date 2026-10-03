@@ -1,139 +1,140 @@
 {
- "schemaVersion": 1,
- "id": "canvas-10-system-design-60-layout-rulebook-07-r7-hug",
- "title": "R7 \u2014 hug: margin rails that never stretch",
- "root": "b-r7-root",
- "blocks": {
-  "b-r7-root": {
-   "id": "b-r7-root",
-   "type": "paragraph",
-   "props": {
-    "covers": "Content-first sizing keeps side regions proportional to what they contain, while sections provide the region's home, air, and automatic fit; there is no hug operation or threshold.",
-    "format": "mdx",
-    "type": "design",
-    "concepts": [
-     "content-first sizing",
-     "side region",
-     "section home",
-     "air",
-     "fit_section"
-    ]
-   },
-   "children": [
-    "b-r7-title-1",
-    "b-r7-hug-opening",
-    "b-r7-card-2",
-    "b-r7-detect-3",
-    "b-r7-expand-4",
-    "b-r7-corpus-5",
-    "b-r7-intrinsic-6"
-   ]
-  },
-  "b-r7-title-1": {
-   "id": "b-r7-title-1",
-   "type": "heading",
-   "props": {
-    "level": 1
-   },
-   "text": [
-    {
-     "insert": "R7 \u2014 hug: margin rails that never stretch"
-    }
-   ],
-   "children": []
-  },
-  "b-r7-card-2": {
-   "id": "b-r7-card-2",
-   "type": "constraint",
-   "props": {
-    "title": "Content determines the region's size"
-   },
-   "text": [
-    {
-     "insert": "Size a side region for its actual notes or nodes, keep air around them, and place the whole region inside a section. Empty board area does not by itself call for stretching the region."
-    }
-   ],
-   "children": []
-  },
-  "b-r7-detect-3": {
-   "id": "b-r7-detect-3",
-   "type": "paragraph",
-   "props": {},
-   "text": [
-    {
-     "insert": "Mechanism:",
-     "attributes": {
-      "bold": true
-     }
+  "schemaVersion": 1,
+  "id": "canvas-10-system-design-60-layout-rulebook-07-r7-hug",
+  "title": "R7 — hug: margin rails that never stretch",
+  "root": "b-r7-root",
+  "blocks": {
+    "b-r7-root": {
+      "id": "b-r7-root",
+      "type": "paragraph",
+      "props": {
+        "concepts": [
+          "content-first sizing",
+          "side region",
+          "section home",
+          "air",
+          "fit_section"
+        ],
+        "covers": "Content-first sizing keeps side regions proportional to what they contain, while sections provide the region's home, air, and automatic fit; there is no hug operation or threshold.",
+        "format": "mdx",
+        "type": "design"
+      },
+      "children": [
+        "b-r7-title-1",
+        "b-r7-hug-opening",
+        "b-r7-card-2",
+        "b-r7-detect-3",
+        "b-r7-expand-4",
+        "b-r7-corpus-5",
+        "b-r7-intrinsic-6"
+      ]
     },
-    {
-     "insert": " the "
+    "b-r7-title-1": {
+      "id": "b-r7-title-1",
+      "type": "heading",
+      "props": {
+        "level": 1
+      },
+      "text": [
+        {
+          "insert": "R7 — hug: margin rails that never stretch"
+        }
+      ],
+      "children": []
     },
-    {
-     "insert": "aesthetic",
-     "attributes": {
-      "reference": {
-       "kind": "source",
-       "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
-       "symbol": "style"
-      }
-     }
+    "b-r7-hug-opening": {
+      "id": "b-r7-hug-opening",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Content-first sizing keeps side regions proportional to what they contain, while sections provide the region's home, air, and automatic fit. There is no hug operation or threshold."
+        }
+      ],
+      "children": []
     },
-    {
-     "insert": " says to size content first, provide air everywhere, and give every theme a section. The agent chooses complete explicit geometry for the region; no hug operation, occupancy ratio, maximum rail length, or dedicated hug diagnostic assigns that geometry."
-    }
-   ],
-   "children": []
-  },
-  "b-r7-expand-4": {
-   "id": "b-r7-expand-4",
-   "type": "paragraph",
-   "props": {},
-   "text": [
-    {
-     "insert": "Automatic behavior:",
-     "attributes": {
-      "bold": true
-     }
+    "b-r7-card-2": {
+      "id": "b-r7-card-2",
+      "type": "callout",
+      "props": {
+        "kind": "constraint",
+        "title": "Content determines the region's size"
+      },
+      "text": [
+        {
+          "insert": "Size a side region for its actual notes or nodes. Keep air around them, and place the whole region inside a section. Empty board area does not by itself call for stretching the region."
+        }
+      ],
+      "children": []
     },
-    {
-     "insert": " geometry-derived membership decides which children a frame holds, and fit_section closes that frame around them when the region is finished. A section otherwise keeps exactly the geometry it is given, so the hug is a deliberate act rather than a consequence of moving a child. The agent's 20 grid quantizes the rectangles that are written but does not determine the region's extent or its internal gap."
+    "b-r7-detect-3": {
+      "id": "b-r7-detect-3",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Mechanism:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " the "
+        },
+        {
+          "insert": "aesthetic",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+              "symbol": "style"
+            }
+          }
+        },
+        {
+          "insert": " says to size content first, provide air everywhere, and give every theme a section. The agent chooses complete explicit geometry for the region. No hug operation, occupancy ratio, maximum rail length, or dedicated hug diagnostic assigns that geometry."
+        }
+      ],
+      "children": []
+    },
+    "b-r7-expand-4": {
+      "id": "b-r7-expand-4",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Automatic behavior:",
+          "attributes": {
+            "bold": true
+          }
+        },
+        {
+          "insert": " geometry-derived membership decides which children a frame holds, and fit_section closes that frame around them when the region is finished. A section otherwise keeps exactly the geometry it is given, so the hug is a deliberate act rather than a consequence of moving a child. The agent's 20 grid quantizes the rectangles that are written but does not determine the region's extent or its internal gap."
+        }
+      ],
+      "children": []
+    },
+    "b-r7-corpus-5": {
+      "id": "b-r7-corpus-5",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Workflow: create the side region as part of the section skeleton, fill it during that section's content batch, and judge the pushed render before continuing. The full-board finish pass checks whether the region balances the frame without becoming an unrelated dense cluster."
+        }
+      ],
+      "children": []
+    },
+    "b-r7-intrinsic-6": {
+      "id": "b-r7-intrinsic-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Content-first extent is compositional: size each object or sticky for what it says, make peers match the largest member, repeat one gap for the group, and let the section fit the children. The capabilities roster supplies bare type names rather than default sizes because geometry is the agent's choice."
+        }
+      ],
+      "children": []
     }
-   ],
-   "children": []
-  },
-  "b-r7-corpus-5": {
-   "id": "b-r7-corpus-5",
-   "type": "paragraph",
-   "props": {},
-   "text": [
-    {
-     "insert": "Workflow: create the side region as part of the section skeleton, fill it during that section's content batch, and judge the pushed render before continuing. The full-board finish pass checks whether the region balances the frame without becoming an unrelated dense cluster."
-    }
-   ],
-   "children": []
-  },
-  "b-r7-intrinsic-6": {
-   "id": "b-r7-intrinsic-6",
-   "type": "paragraph",
-   "props": {},
-   "text": [
-    {
-     "insert": "Content-first extent is compositional: size each object or sticky for what it says, make peers match the largest member, repeat one gap for the group, and let the section fit the children. The capabilities roster supplies bare type names rather than default sizes because geometry is the agent's choice."
-    }
-   ],
-   "children": []
-  },
-  "b-r7-hug-opening": {
-   "id": "b-r7-hug-opening",
-   "type": "paragraph",
-   "props": {},
-   "text": [
-    {
-     "insert": "Content-first sizing keeps side regions proportional to what they contain, while sections provide the region's home, air, and automatic fit; there is no hug operation or threshold."
-    }
-   ],
-   "children": []
   }
- }
 }

@@ -256,7 +256,7 @@
           }
         },
         {
-          "insert": ": each peer group repeats one exact gap, the ladder names every rung from 48px section padding up to the 160px section gutter, and the crowding warning supplies the corridor floor rather than a target gap."
+          "insert": ": each peer group repeats one exact gap. The ladder names every rung from 48px section padding up to the 160px section gutter, and the crowding warning supplies the corridor floor rather than a target gap."
         }
       ],
       "children": []
@@ -279,7 +279,7 @@
           }
         },
         {
-          "insert": ": sections supply grouping and addressability, children keep air from borders, and a frame is closed around its contents with fit_section when the region is done."
+          "insert": ": sections supply grouping and addressability, and children keep air from borders. A frame is closed around its contents with fit_section when the region is done."
         }
       ],
       "children": []
@@ -464,7 +464,7 @@
       "props": {},
       "text": [
         {
-          "insert": "R1-R10 are navigation names for recurring composition concerns. Each rule page names the aesthetic, workflow, capability, op-path, and diagnostic mechanisms that own its concern; those mechanisms, not the rule text, are the enforcement surface. The "
+          "insert": "R1-R10 are navigation names for recurring composition concerns. Each rule page names the aesthetic, workflow, capability, op-path, and diagnostic mechanisms that own its concern. Those mechanisms, not the rule text, are the enforcement surface. The "
         },
         {
           "insert": "agent layout language",
@@ -477,7 +477,7 @@
           }
         },
         {
-          "insert": " section demonstrates the resulting composition patterns."
+          "insert": " section shows the resulting composition patterns."
         }
       ],
       "children": []

@@ -2189,7 +2189,7 @@
       },
       "text": [
         {
-          "insert": "Sticky bodies stay in Inter, and sticky inline code keeps its own system mono stack."
+          "insert": "Sticky bodies stay in Inter. Sticky inline code keeps its own system mono stack."
         }
       ],
       "children": []

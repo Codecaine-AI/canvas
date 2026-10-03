@@ -225,10 +225,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was mixing vendored and local routing code in one folder, which makes the MPL file set impossible to police and invites edits that blend obligations into clean files."
+          "insert": ": the rejected alternative was mixing vendored and local routing code in one folder. That alternative makes the MPL file set impossible to police and invites edits that blend obligations into clean files."
         }
       ],
       "children": []
@@ -445,7 +442,7 @@
           }
         },
         {
-          "insert": " with the workspace style. A sans chip keeps the original character-count width, a mono chip measures exactly at IBM Plex Mono's 0.6em advance, and both take their height, font, and size from the style tokens."
+          "insert": " with the workspace style. A sans chip keeps the original character-count width, and a mono chip measures exactly at IBM Plex Mono's 0.6em advance. Both take their height, font, and size from the style tokens."
         }
       ],
       "children": []

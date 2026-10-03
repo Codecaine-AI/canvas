@@ -107,7 +107,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The saved canvas document is the baseline and the session draft is the working truth. Geometry, containment, routing, diagnostics, and renders are recomputed from documents; the model never edits an intermediate layout representation. The operator remains the authority that accepts or rejects a proposal."
+          "insert": "The saved canvas document is the baseline and the session draft is the working truth. Geometry, containment, routing, diagnostics, and renders are recomputed from documents. The model never edits an intermediate layout representation. The operator remains the authority that accepts or rejects a proposal."
         }
       ],
       "children": []
@@ -182,7 +182,7 @@
           }
         },
         {
-          "insert": " ensures the draft has a root section locked as background. If the saved document has no such frame, the harness derives one from the document size or object bounds, gives it the conventional id page-frame when available, and inserts it into the draft. The frame is the page boundary. No section resizes itself, and the page frame cannot be removed through the model surface; like any section, it can be resized or fitted on request."
+          "insert": " makes sure the draft has a root section locked as background. If the saved document has no such frame, the harness derives one from the document size or object bounds, gives it the conventional id page-frame when available, and inserts it into the draft. The frame is the page boundary. No section resizes itself, and the page frame cannot be removed through the model surface; like any section, it can be resized or fitted on request."
         }
       ],
       "children": []
@@ -653,7 +653,7 @@
       "props": {},
       "text": [
         {
-          "insert": "resolve_request({ id, status, note }) disposes one open queue entry as done or declined. The note is required and the response is the updated REQUESTS block only. Queue entries retain their stable R-number and do not disappear merely because an annotation is removed from the draft."
+          "insert": "resolve_request({ id, status, note }) disposes one open queue entry as done or declined. The note is required and the response is the updated REQUESTS block only. Queue entries keep their stable R-number and do not disappear merely because an annotation is removed from the draft."
         }
       ],
       "children": []
@@ -842,7 +842,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Before execute, the runtime validates the tool schema. The shared factory then resolves the session and snapshots its draft; a state-validation failure returns ERROR with no mutation, perception, or event. The apply stage can return a no-op note and stop. A changing call reconciles waypoints and then membership from geometry, commits the new draft through the one choke point that assigns it and captures fresh board pixels in the same move, derives DELTA and the lint delta, reports routes for a touched connection, and emits one run-UX event. The result text carries no image of its own; the refreshed render reaches the model on the next state block. At every turn end the session also publishes that current-board raster as an app:board-render trace event, which the kernel harness consumes to show turn-by-turn board progress in the trace viewer; the publication is fire-and-forget, so a failure there never touches the run. Adds start with parentId null and object updates strip parentId because containment derives from geometry."
+          "insert": "Before execute, the runtime validates the tool schema. The shared factory then resolves the session and snapshots its draft. A state-validation failure returns ERROR with no mutation, perception, or event. The apply stage can return a no-op note and stop. A changing call reconciles waypoints and then membership from geometry, commits the new draft through the one choke point that assigns it and captures fresh board pixels in the same move, derives DELTA and the lint delta, reports routes for a touched connection, and emits one run-UX event. The result text carries no image of its own. The refreshed render reaches the model on the next state block. At every turn end the session also publishes that current-board raster as an app:board-render trace event, which the kernel harness consumes to show turn-by-turn board progress in the trace viewer. The publication is fire-and-forget, so a failure there never touches the run. Adds start with parentId null and object updates strip parentId because containment derives from geometry."
         }
       ],
       "children": []
@@ -897,7 +897,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The board itself is never a look result: the 1600px board render rides the state block, refreshed by every commit, followed by up to three prior post-change renders. Each raster a look produces is logged on the session and noted as a lightweight ref in the agent's state object, while the image itself stays visible in the recent conversation tail."
+          "insert": "The board itself is never a look result. The 1600px board render rides the state block, refreshed by every commit, followed by up to three prior post-change renders. Each raster a look produces is logged on the session and noted as a lightweight ref in the agent's state object, while the image itself stays visible in the recent conversation tail."
         }
       ],
       "children": []
@@ -956,7 +956,7 @@
       "props": {},
       "text": [
         {
-          "insert": "renderSectionView frames the named section, its descendants, and fully internal connections. It retains every object or connection whose painted extent intersects the camera and retains the true endpoint objects needed to route those connections. A connection crossing the section boundary is drawn to the frame edge and visibly clipped by the SVG viewBox; it is never dropped. Routing always uses the whole document as the obstacle set, so a camera does not change the route."
+          "insert": "renderSectionView frames the named section, its descendants, and fully internal connections. It keeps every object or connection whose painted extent intersects the camera and keeps the true endpoint objects needed to route those connections. A connection crossing the section boundary is drawn to the frame edge and visibly clipped by the SVG viewBox; it is never dropped. Routing always uses the whole document as the obstacle set, so a camera does not change the route."
         }
       ],
       "children": []
@@ -1150,7 +1150,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every user-authored request must also be done or declined, and open entries block finalization beside the scoped diagnostics; a thread the agent itself opened is a question left for the operator to answer on their own time, so it never traps the run. If the draft matches the baseline and no proposal already exists, there is nothing to propose and the committed finalize is rejected."
+          "insert": "Every user-authored request must also be done or declined. Open entries block finalization beside the scoped diagnostics. A thread the agent itself opened is a question left for the operator to answer on their own time, so it never traps the run. If the draft matches the baseline and no proposal already exists, there is nothing to propose and the committed finalize is rejected."
         }
       ],
       "children": []

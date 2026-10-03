@@ -192,10 +192,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the kernel discovers a bundle's tools on disk by filename convention (a flat "
+          "insert": ": the kernel discovers a bundle's tools on disk by filename convention (a flat "
         },
         {
           "insert": "tools.ts",
@@ -222,7 +219,7 @@
           }
         },
         {
-          "insert": "), and this bundle uses the folder form only: a flat "
+          "insert": "). This bundle uses the folder form only. A flat "
         },
         {
           "insert": "tools.ts",
@@ -261,10 +258,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was configured registration (a manifest field naming the entry point); the layout is the configuration, and the shadow ban is absolute because the failure mode is silent."
+          "insert": ": the rejected alternative was configured registration (a manifest field naming the entry point). The layout is the configuration, and the shadow ban is absolute because the failure mode is silent."
         }
       ],
       "children": []
@@ -344,10 +338,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was checking for a bound runtime at registration, which would fail every boot (no session exists at boot), and any registration side effect would fire during the harvest."
+          "insert": ": the rejected alternative was checking for a bound runtime at registration, which would fail every boot (no session exists at boot). Any registration side effect would fire during the harvest."
         }
       ],
       "children": []
@@ -504,10 +495,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the catalog registers what the service defines: every descriptor (gesture or workflow call) carries its own name, label, description, and sealed parameter schema service-side under the session's tools folder, and the catalog forwards them verbatim. Nothing declares tool truth on the catalog side."
+          "insert": ": the catalog registers what the service defines. Every descriptor (gesture or workflow call) carries its own name, label, description, and sealed parameter schema service-side under the session's tools folder, and the catalog forwards them verbatim. Nothing declares tool truth on the catalog side."
         }
       ],
       "children": []
@@ -524,10 +512,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was per-tool files on the catalog side, which puts half of each tool's truth in the swappable bundle and half behind the runtime interface, making every schema change a two-file edit across the seam."
+          "insert": ": the rejected alternative was per-tool files on the catalog side. That alternative puts half of each tool's truth in the swappable bundle and half behind the runtime interface, making every schema change a two-file edit across the seam."
         }
       ],
       "children": []
@@ -600,7 +585,7 @@
           }
         },
         {
-          "insert": " are the single sources for the surface (registration, the capabilities gesture reference, and the op ledger all derive from them), and the generated reference in "
+          "insert": " are the single sources for the surface (registration, the capabilities gesture reference, and the op ledger all derive from them). The generated reference in "
         },
         {
           "insert": "capabilities/ops.ts",
@@ -630,10 +615,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was parallel rosters (a registration list, a docs list, a ledger list), which drift. A tool not in its roster is simply not on the surface, and documentation drift is a build failure rather than a lie the model reads."
+          "insert": ": the rejected alternative was parallel rosters (a registration list, a docs list, a ledger list), which drift. A tool not in its roster is simply not on the surface. Documentation drift is a build failure rather than a lie the model reads."
         }
       ],
       "children": []
@@ -725,10 +707,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternatives were treating order as cosmetic (but it is the order the model reads the surface in) and prompt-hash-only comparability, which would silently compare unlike runs. The hash is over file contents, so it also moves on a pure reorganization. That conservative answer is intended."
+          "insert": ": the rejected alternatives were treating order as cosmetic (but it is the order the model reads the surface in) and prompt-hash-only comparability. Prompt-hash-only comparability would silently compare unlike runs. The hash is over file contents, so it also moves on a pure reorganization. That conservative answer is intended."
         }
       ],
       "children": []
@@ -919,10 +898,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "every presentation number the agent is asked to hit (node sizes and minimum width, row and column gaps, arrow corridors, section gutters, frame padding, board-area multiple and ink share) is one structured value, "
+          "insert": ": every presentation number the agent is asked to hit (node sizes and minimum width, row and column gaps, arrow corridors, section gutters, frame padding, board-area multiple and ink share) is one structured value, "
         },
         {
           "insert": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/craft-targets.ts",
@@ -935,7 +911,7 @@
           }
         },
         {
-          "insert": ", rendered into the injected style guide. Prompt phases reference the targets in judgment language rather than restating them, and every target is set above the corresponding diagnostic-registry floor on its own axis."
+          "insert": ", rendered into the injected style guide. Prompt phases reference the targets in judgment language rather than restating them. Every target is set above the corresponding diagnostic-registry floor on its own axis."
         }
       ],
       "children": []
@@ -952,10 +928,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was numbers in prompt prose, which lets a target drift between the prose that motivates it and the block that states it; and a target equal to a lint floor makes the ideal board indistinguishable from a barely-legal one."
+          "insert": ": the rejected alternative was numbers in prompt prose. That alternative lets a target drift between the prose that motivates it and the block that states it. A target equal to a lint floor makes the ideal board indistinguishable from a barely-legal one."
         }
       ],
       "children": []
@@ -1508,7 +1481,7 @@
           }
         },
         {
-          "insert": ": the theme is the person's choice in Studio, so no agent tool writes it. Every render, text fit, and lint the session runs resolves through the one loaded value, and a second parser could read the file differently from Studio. A missing or malformed file yields the figjam defaults, never an error, because a style file changes only how a board is drawn."
+          "insert": ": the theme is the person's choice in Studio, so no agent tool writes it. Every render, text fit, and lint the session runs resolves through the one loaded value. A second parser could read the file differently from Studio. A missing or malformed file yields the figjam defaults, never an error, because a style file changes only how a board is drawn."
         }
       ],
       "children": []

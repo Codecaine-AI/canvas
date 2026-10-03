@@ -8,8 +8,6 @@
       "id": "b-stage-root-0",
       "type": "paragraph",
       "props": {
-        "covers": "How the presentation layer is assembled: editor/ and viewer/ as faces under stage/, the single composition root and feature-slice rule, the hotkey table's one home, and the overlay-slot rule.",
-        "type": "implementation",
         "concepts": [
           "stage",
           "editor-face",
@@ -18,7 +16,9 @@
           "feature-slices",
           "hotkeys",
           "overlay-slots"
-        ]
+        ],
+        "covers": "How the presentation layer is assembled: editor/ and viewer/ as faces under stage/, the single composition root and feature-slice rule, the hotkey table's one home, and the overlay-slot rule.",
+        "type": "implementation"
       },
       "children": [
         "b-stage-role-1",
@@ -175,7 +175,7 @@
           }
         },
         {
-          "insert": " — owns the gesture behavior the editor face wires up."
+          "insert": " owns the gesture behavior the editor face wires up."
         }
       ],
       "children": []
@@ -240,7 +240,7 @@
           }
         },
         {
-          "insert": ", not beside it — they are faces of the stage, thin compositions over the same core renderer and viewport math, and the shared pieces ("
+          "insert": ", not beside it. They are faces of the stage, thin compositions over the same core renderer and viewport math, and the shared pieces ("
         },
         {
           "insert": "CanvasStage.tsx",
@@ -302,10 +302,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was top-level "
+          "insert": ": the rejected alternative was top-level "
         },
         {
           "insert": "editor/",
@@ -332,7 +329,7 @@
           }
         },
         {
-          "insert": ", which reads as three renderers and invites the faces to fork the core instead of composing it."
+          "insert": ". That alternative reads as three renderers and invites the faces to fork the core instead of composing it."
         }
       ],
       "children": []
@@ -362,7 +359,7 @@
           }
         },
         {
-          "insert": " — including every future face (a print face, a thumbnail face), which is a subdivision under "
+          "insert": ", including every future face (a print face, a thumbnail face), which is a subdivision under "
         },
         {
           "insert": "stage/",
@@ -401,7 +398,7 @@
           }
         },
         {
-          "insert": " is the one composition root: it owns the reducer instance and wires viewport, hotkeys, the interaction pipeline, text editing, context menu, toolbar, and trim around one stage instance. Feature slices under "
+          "insert": " is the one composition root. The composition root owns the reducer instance and wires viewport, hotkeys, the interaction pipeline, text editing, context menu, toolbar, and trim around one stage instance. Feature slices under "
         },
         {
           "insert": "stage/editor/features/",
@@ -414,7 +411,7 @@
           }
         },
         {
-          "insert": " own their gesture logic end to end and never import each other sideways — "
+          "insert": " own their gesture logic end to end and never import each other sideways. "
         },
         {
           "insert": "snapping/",
@@ -473,7 +470,7 @@
           }
         },
         {
-          "insert": " — including every future editor feature, which lands as a slice and is wired at the root."
+          "insert": ", including every future editor feature, which lands as a slice and is wired at the root."
         }
       ],
       "children": []
@@ -553,7 +550,7 @@
           }
         },
         {
-          "insert": " — including every future binding."
+          "insert": ", including every future binding."
         }
       ],
       "children": []
@@ -570,10 +567,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "everything ephemeral the editor draws — selection boxes, drag rectangles, snap guides, placement ghosts, connector previews — enters the stage through its two overlay slots (screen-space and transformed-world); "
+          "insert": ": everything ephemeral the editor draws (selection boxes, drag rectangles, snap guides, placement ghosts, connector previews) enters the stage through its two overlay slots (screen-space and transformed-world). "
         },
         {
           "insert": "CanvasStage.tsx",
@@ -603,10 +597,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was painting editor feedback inside the stage core, which couples the shared renderer to editing state the viewer face must not know about."
+          "insert": ": the rejected alternative was painting editor feedback inside the stage core. The alternative couples the shared renderer to editing state the viewer face must not know about."
         }
       ],
       "children": []
@@ -636,7 +627,7 @@
           }
         },
         {
-          "insert": " — including every future feedback visual, which renders through a slot."
+          "insert": ", including every future feedback visual, which renders through a slot."
         }
       ],
       "children": []

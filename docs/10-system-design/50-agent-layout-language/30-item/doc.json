@@ -8,16 +8,16 @@
       "id": "b-item-root",
       "type": "paragraph",
       "props": {
-        "covers": "The item notation: one real object per line with every field labeled — number, text=, type=, size=, at=, hug= — plus the compass placement rules for when at= is required or forbidden.",
-        "format": "mdx",
-        "type": "design",
         "concepts": [
           "item",
           "compass placement",
           "at=",
           "content-first sizing",
           "reference numbers"
-        ]
+        ],
+        "covers": "The item notation: one real object per line with every field labeled — number, text=, type=, size=, at=, hug= — plus the compass placement rules for when at= is required or forbidden.",
+        "format": "mdx",
+        "type": "design"
       },
       "children": [
         "b-item-title-1",
@@ -48,7 +48,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A real object on the board — one per line, every field labeled. In this descriptive notation, an item says what it is and where it sits by compass rather than by pixel coordinates. The size label is human shorthand: live add geometry and geometry patches carry a complete finite {x, y, width, height}. The agent chooses dimensions from content and role, then matches peers by copying exact digest geometry; the 16px grid quantizes geometry rather than prescribing a size or spacing amount. Fields, in fixed order:"
+          "insert": "A real object on the board: one per line, every field labeled. In this descriptive notation, an item says what it is and where it sits by compass rather than by pixel coordinates. The size label is human shorthand: live add geometry and geometry patches carry a complete finite {x, y, width, height}. The agent chooses dimensions from content and role, then matches peers by copying exact digest geometry. The 16px grid quantizes geometry rather than prescribing a size or spacing amount. Fields, in fixed order:"
         }
       ],
       "children": []
@@ -57,7 +57,6 @@
       "id": "b-item-table-3",
       "type": "structured-table",
       "props": {
-        "title": "item fields",
         "columns": [
           "field",
           "required",
@@ -94,7 +93,8 @@
             "optional",
             "compass corner; only on direct children of a split"
           ]
-        ]
+        ],
+        "title": "item fields"
       },
       "children": []
     },
@@ -181,8 +181,9 @@
     },
     "b-item-compass-observation-5": {
       "id": "b-item-compass-observation-5",
-      "type": "observation",
+      "type": "callout",
       "props": {
+        "kind": "observation",
         "title": "Nine compass values, three jobs"
       },
       "text": [

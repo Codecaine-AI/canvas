@@ -557,7 +557,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Reconciliation happens at the points where geometry becomes durable state. The exception is an in-progress drag or resize frame, where geometry may temporarily diverge from the cached "
+          "insert": "Reconciliation occurs at the points where geometry becomes durable state. The exception is an in-progress drag or resize frame, where geometry may temporarily diverge from the cached "
         },
         {
           "insert": "parentId",
@@ -593,7 +593,7 @@
           }
         },
         {
-          "insert": ", which reconciles the incoming document before it becomes editor state; undo, redo, and "
+          "insert": ", which reconciles the incoming document before it becomes editor state. Undo, redo, and "
         },
         {
           "insert": "canvas.reset",
@@ -855,7 +855,7 @@
           }
         },
         {
-          "insert": ". A large \"Section\" was drawn around existing content, but nothing adopted the sections under it. All six sections stayed depth-1 siblings, and array-order tie-breaking painted the newest large section on top, fully burying Memory Bank, Memory Actions, Structure, and Probing Response."
+          "insert": ". A large \"Section\" was drawn around existing content, but nothing adopted the sections under it. All six sections stayed depth-1 siblings. Array-order tie-breaking painted the newest large section on top, fully burying Memory Bank, Memory Actions, Structure, and Probing Response."
         }
       ],
       "children": []
@@ -921,7 +921,7 @@
           }
         },
         {
-          "insert": " sections retain existing members but never adopt new members. "
+          "insert": " sections keep existing members but never adopt new members. "
         },
         {
           "insert": "locked: \"background\"",

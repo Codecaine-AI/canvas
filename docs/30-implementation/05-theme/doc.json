@@ -359,10 +359,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was the retired central mirror module of every sampled measurement, which decoupled constants from the renderers that consume them and made "
+          "insert": ": the rejected alternative was the retired central mirror module of every sampled measurement, which decoupled constants from the renderers that consume them. The module made "
         },
         {
           "insert": "theme/",
@@ -625,7 +622,7 @@
           }
         },
         {
-          "insert": ", and every token has one entry in "
+          "insert": ". Every token has one entry in "
         },
         {
           "insert": "CANVAS_STYLE_CONTROLS",
@@ -651,7 +648,7 @@
           }
         },
         {
-          "insert": ": generic controls mean a new token needs no per-token parser or UI code, and a figjam preset equal to the old constants keeps the DOM-equivalence baseline the regression guard for the default look. The rejected alternative was theme branches inside renderers, which would scatter each theme's look across every paint site."
+          "insert": ": generic controls mean a new token needs no per-token parser or UI code. A figjam preset equal to the old constants keeps the DOM-equivalence baseline the regression guard for the default look. The rejected alternative was theme branches inside renderers, which would scatter each theme's look across every paint site."
         }
       ],
       "children": []
@@ -725,7 +722,7 @@
           }
         },
         {
-          "insert": ", and their siblings), and the pre-theme exports (the role tables and "
+          "insert": ", and their siblings). The pre-theme exports (the role tables and "
         },
         {
           "insert": "resolveShapeColors",

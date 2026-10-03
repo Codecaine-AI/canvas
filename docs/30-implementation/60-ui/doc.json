@@ -8,8 +8,6 @@
       "id": "b-ui-root-0",
       "type": "paragraph",
       "props": {
-        "covers": "How UI code enters the package: the vendored-primitives duplication policy, the manifest-driven icon pipeline, the EDITOR_STYLE trim token table, and data-only toolbar specs on the defs.",
-        "type": "implementation",
         "concepts": [
           "ui-primitives",
           "vendoring",
@@ -17,7 +15,9 @@
           "nucleo",
           "editor-style",
           "toolbar-specs"
-        ]
+        ],
+        "covers": "How UI code enters the package: the vendored-primitives duplication policy, the manifest-driven icon pipeline, the EDITOR_STYLE trim token table, and data-only toolbar specs on the defs.",
+        "type": "implementation"
       },
       "children": [
         "b-ui-role-1",
@@ -63,7 +63,7 @@
           }
         },
         {
-          "insert": " they serve. Trim behavior and parity authority are owned by design; this area records how UI code enters the package."
+          "insert": " they serve. Trim behavior and parity authority are owned by design. This area records how UI code enters the package."
         }
       ],
       "children": []
@@ -136,7 +136,7 @@
           }
         },
         {
-          "insert": " — owns the contract trim reflects: color roles, the one-pick color model, and per-kind toolbar semantics."
+          "insert": " owns the contract trim reflects: color roles, the one-pick color model, and per-kind toolbar semantics."
         }
       ],
       "children": []
@@ -166,10 +166,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "UI primitives are duplicated into "
+          "insert": ": UI primitives are duplicated into "
         },
         {
           "insert": "ui/",
@@ -182,7 +179,7 @@
           }
         },
         {
-          "insert": " — Button, Input, Textarea, Badge, Tooltip, the "
+          "insert": " (Button, Input, Textarea, Badge, Tooltip, the "
         },
         {
           "insert": "cn()",
@@ -191,7 +188,7 @@
           }
         },
         {
-          "insert": " helper — never imported from a host component library; the package carries zero dependency on any host app."
+          "insert": " helper), never imported from a host component library. The package carries zero dependency on any host app."
         }
       ],
       "children": []
@@ -208,10 +205,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was re-exporting a host's primitives, which is how the package was born entangled with its original host; self-containment beats import convenience."
+          "insert": ": the rejected alternative was re-exporting a host's primitives, which is how the package was born entangled with its original host. Self-containment beats import convenience."
         }
       ],
       "children": []
@@ -241,7 +235,7 @@
           }
         },
         {
-          "insert": " — including every future primitive, which is copied in."
+          "insert": ", including every future primitive, which is copied in."
         }
       ],
       "children": []
@@ -348,10 +342,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was an icon-library dependency (the removed lucide-react), which drags a whole set for a handful of glyphs and puts the roster outside the repo's control."
+          "insert": ": the rejected alternative was an icon-library dependency (the removed lucide-react). The dependency drags a whole set for a handful of glyphs and puts the roster outside the repo's control."
         }
       ],
       "children": []
@@ -381,7 +372,7 @@
           }
         },
         {
-          "insert": " — including every future icon, which enters via the manifest and generator, or "
+          "insert": ", including every future icon, which enters via the manifest and generator, or "
         },
         {
           "insert": "custom-icons.tsx",
@@ -491,7 +482,7 @@
           }
         },
         {
-          "insert": " — including every future trim surface and flyout, which sources its metrics here."
+          "insert": ", including every future trim surface and flyout, which sources its metrics here."
         }
       ],
       "children": []
@@ -508,10 +499,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "selection-toolbar content is data on the defs: each ObjectDef (and the ConnectorDef) carries an icon-free "
+          "insert": ": selection-toolbar content is data on the defs: each ObjectDef (and the ConnectorDef) carries an icon-free "
         },
         {
           "insert": "ToolbarControlSpec",
@@ -533,7 +521,7 @@
           }
         },
         {
-          "insert": " stays generic — resolving glyphs from its own "
+          "insert": " stays generic (resolving glyphs from its own "
         },
         {
           "insert": "ACTION_ICONS",
@@ -542,7 +530,7 @@
           }
         },
         {
-          "insert": " table — and the multi-select toolbar is computed as the capability intersection of the selected defs' lists, never hand-authored."
+          "insert": " table), and the multi-select toolbar is computed as the capability intersection of the selected defs' lists, never hand-authored."
         }
       ],
       "children": []
@@ -559,10 +547,7 @@
           }
         },
         {
-          "insert": ": "
-        },
-        {
-          "insert": "the rejected alternative was a toolbar component per object kind, which duplicates trim per kind and lets the multi-select toolbar drift from what the kinds actually share."
+          "insert": ": the rejected alternative was a toolbar component per object kind. That alternative duplicates trim per kind and lets the multi-select toolbar drift from what the kinds actually share."
         }
       ],
       "children": []
@@ -601,7 +586,7 @@
           }
         },
         {
-          "insert": " field — including every future object kind and toolbar control."
+          "insert": " field, including every future object kind and toolbar control."
         }
       ],
       "children": []

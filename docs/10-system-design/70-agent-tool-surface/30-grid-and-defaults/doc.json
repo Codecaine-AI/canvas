@@ -51,7 +51,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Two small modules decide what a board built by the agent physically looks like. The quantizer decides where every number it writes is allowed to land, and the creation defaults decide how big and what color a new object is when the gesture that placed it carried neither. Both exist for the same reason: the model should spend its turns on structure, not on inventing near-miss numbers."
+          "insert": "Two small modules decide what a board built by the agent physically looks like. The quantizer decides where every number it writes is allowed to land. The creation defaults decide how big and what color a new object is when the gesture that placed it carried neither. Both exist for the same reason: the model should spend its turns on structure, not on inventing near-miss numbers."
         }
       ],
       "children": []
@@ -100,7 +100,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Non-finite input is the one degenerate case. A coordinate or a gap resolves to 0 and a size to one grid unit, rather than propagating a NaN into the document. Sizes clamp at one grid unit on each side so a snap can never produce a zero- or negative-area box; a gap clamps at 0 instead, because boxes flush against one another is a meaning a size does not have."
+          "insert": "Non-finite input is the one degenerate case. A coordinate or a gap resolves to 0 and a size to one grid unit, rather than propagating a NaN into the document. Sizes clamp at one grid unit on each side so a snap can never produce a zero- or negative-area box. A gap clamps at 0 instead, because boxes flush against one another is a meaning a size does not have."
         }
       ],
       "children": []
@@ -114,7 +114,7 @@
       },
       "text": [
         {
-          "insert": "The rule is not \"arguments are rounded\" but \"every number that reaches board geometry is a multiple of 20\". For an absolute argument the two are the same thing; for a relative one they are not, and the result is what counts. "
+          "insert": "The rule is not \"arguments are rounded\" but \"every number that reaches board geometry is a multiple of 20\". For an absolute argument the two are the same thing. For a relative one they are not, and the result is what counts. "
         },
         {
           "insert": "move_by 20",
@@ -329,7 +329,7 @@
       },
       "text": [
         {
-          "insert": "snapRectOutward floors the top-left and ceils the bottom-right, so every edge lands on a multiple and the snapped rect always contains the input. Rounding each field to the nearest multiple independently would be wrong here: an x nudged right and a width nudged down can together bite up to a grid unit off the far edge, which for a fitted frame means clipping into the very child it was measured around. Growing can only add air. On the normal path — on-grid children, grid-multiple padding — this is an identity; on the off-grid one, a frame closed around hand-drawn boxes, it is the safety net."
+          "insert": "snapRectOutward floors the top-left and ceils the bottom-right, so every edge lands on a multiple and the snapped rect always contains the input. Rounding each field to the nearest multiple independently would be wrong here: an x nudged right and a width nudged down can together bite up to a grid unit off the far edge, which for a fitted frame means clipping into the very child it was measured around. Growing can only add air. On the normal path (on-grid children, grid-multiple padding) this is an identity. On the off-grid one, a frame closed around hand-drawn boxes, it is the safety net."
         }
       ],
       "children": []
@@ -420,7 +420,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The agent grid also has its own rule in the layout rulebook — "
+          "insert": "The agent grid also has its own rule in the layout rulebook ("
         },
         {
           "insert": "R1 — The 20 grid",
@@ -433,7 +433,7 @@
           }
         },
         {
-          "insert": " — which states it as a rule the model is held to: quantization decides where a number lands and never how much air a layout gets. That page is the rule; this page is the mechanism and the field-by-field list. The 16 grid appears in neither: it belongs to the interactive canvas, not to anything the agent writes."
+          "insert": "), which states it as a rule the model is held to: quantization decides where a number lands and never how much air a layout gets. That page is the rule. This page is the mechanism and the field-by-field list. The 16 grid appears in neither: it belongs to the interactive canvas, not to anything the agent writes."
         }
       ],
       "children": []
@@ -471,7 +471,7 @@
           }
         },
         {
-          "insert": " is the entire answer to \"how big is a new node\". The table has one row per creation kind rather than one per document type, because the default size is a property of the kind, not of which pictogram it draws — every shape and every glyph collapses into one of the four."
+          "insert": " is the entire answer to \"how big is a new node\". The table has one row per creation kind rather than one per document type, because the default size is a property of the kind, not of which pictogram it draws. Every shape and every glyph collapses into one of the four."
         }
       ],
       "children": []
@@ -525,7 +525,7 @@
       },
       "text": [
         {
-          "insert": "Two rules produce every number in the table, applied in order: prefer the style guide's craft targets over the UI's per-type table where the guide speaks, then round to a multiple of the agent grid so a placed object is already on-grid and every later move, resize, or match keeps it there. Preferring the guide is not a preference — the UI's per-type sizes sit below the guide's own node minimum, so a board built from UI defaults would start out failing the targets the agent is graded on. Neither source table is edited; this module is the enforcement, and whether the UI adopts these numbers is a separate product call."
+          "insert": "Two rules produce every number in the table, applied in order: prefer the style guide's craft targets over the UI's per-type table where the guide speaks, then round to a multiple of the agent grid so a placed object is already on-grid and every later move, resize, or match keeps it there. Preferring the guide is not a preference. The UI's per-type sizes sit below the guide's own node minimum, so a board built from UI defaults would start out failing the targets the agent is graded on. Neither source table is edited. This module is the enforcement, and whether the UI adopts these numbers is a separate product call."
         }
       ],
       "children": []
@@ -550,7 +550,7 @@
           }
         },
         {
-          "insert": " — the same values a fresh board gives an object a person drops on it before any color pick has been made. An agent-placed object and a hand-placed one therefore look identical on a fresh board, which is what keeps a reviewer's eye on the layout rather than on which tool put each box down. Recoloring is its own gesture afterwards, if the object earns it."
+          "insert": " (the same values a fresh board gives an object a person drops on it before any color pick has been made). An agent-placed object and a hand-placed one therefore look identical on a fresh board, which is what keeps a reviewer's eye on the layout rather than on which tool put each box down. Recoloring is its own gesture afterwards, if the object earns it."
         }
       ],
       "children": []
