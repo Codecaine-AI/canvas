@@ -2,6 +2,9 @@
  * Same-hue regions are judged visually. Crowding checks visible box separation;
  * rendered wire and label obstructions retain their dedicated checks.
  * Count ceilings catch unexpected expansion, not correctness of each finding.
+ * They count the findings that block a finalize; notes (text within a pixel of
+ * its box edge, characters the bundled fonts lack) never block and are pinned
+ * separately.
  */
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
@@ -47,8 +50,12 @@ function corpus(): { name: string; document: InteractiveCanvasDocument }[] {
     }));
 }
 
+function findings(document: InteractiveCanvasDocument) {
+  return LAYOUT_RULES.flatMap((rule) => rule.check(document));
+}
+
 function findingCount(document: InteractiveCanvasDocument): number {
-  return LAYOUT_RULES.reduce((total, rule) => total + rule.check(document).length, 0);
+  return findings(document).filter((finding) => finding.severity !== "note").length;
 }
 
 describe("lint calibration against the reference corpus", () => {
@@ -60,6 +67,17 @@ describe("lint calibration against the reference corpus", () => {
     for (const { name, document } of corpus()) {
       expect(findingCount(document), name).toBeLessThanOrEqual(CEILING[name]!);
     }
+  });
+
+  test("its notes only say what cannot be promised: estimated glyphs and edge-of-box fits", () => {
+    const notes = corpus().flatMap((entry) =>
+      findings(entry.document)
+        .filter((finding) => finding.severity === "note")
+        .map((finding) => ({ board: entry.name, rule: finding.rule, message: finding.message })),
+    );
+    // claude-code-researcher's directory tree draws └ ─ ├, which Inter lacks.
+    expect(notes).toContainEqual(expect.objectContaining({ board: "claude-code-researcher", rule: "clipped-text" }));
+    for (const note of notes) expect(note.message).toMatch(/estimated:|can't promise/);
   });
 
   test("the corpus total stays within its ceiling", () => {

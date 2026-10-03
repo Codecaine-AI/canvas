@@ -177,8 +177,9 @@ describe("import boundaries", () => {
 
   // theme/canvas-style.ts is the pure-data canvas style leaf (it imports only
   // the color-id vocabulary and the pure color math); the stroke resolver,
-  // the palette paints, and the React style context build on it. The Inter
-  // advance table is a generated data leaf the font measurement reads.
+  // the palette paints, and the React style context build on it.
+  // theme/text-measure.ts is the measuring leaf: it imports only the
+  // @codecaine-ai/text-measure package, never first-party code.
   test("theme/ imports no first-party code outside state/schema vocabulary and the canvas-style leaf", () => {
     expect(
       formatEdges(
@@ -188,13 +189,13 @@ describe("import boundaries", () => {
               "state/schema",
               "theme/canvas-style.ts",
               "theme/color-math.ts",
-              "theme/inter-metrics.generated.ts",
+              "theme/text-measure.ts",
             ]),
         ),
       ),
     ).toEqual([]);
     expect(
-      formatEdges(allImportEdges().filter((edge) => edge.importer === "theme/inter-metrics.generated.ts")),
+      formatEdges(firstPartyEdges().filter((edge) => edge.importer === "theme/text-measure.ts")),
     ).toEqual([]);
     // The leaf stays Node-safe (it is served to Node via ./style): the color
     // math is import-free and the leaf adds only the color vocabulary.
@@ -215,7 +216,6 @@ describe("import boundaries", () => {
       "theme/canvas-style-context.tsx -> ./canvas-style",
       "theme/canvas-style.ts -> ../state/schema/colors",
       "theme/canvas-style.ts -> ./color-math",
-      "theme/inter-metrics.ts -> ./inter-metrics.generated",
       "theme/palette.ts -> ../state/schema/colors",
       "theme/palette.ts -> ./color-math",
       "theme/tokens.ts -> ./canvas-style",

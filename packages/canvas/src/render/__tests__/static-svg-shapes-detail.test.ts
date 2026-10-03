@@ -1,6 +1,9 @@
 import { describe, expect, it } from "bun:test";
 import { ellipsizeDetailText, measureDetailTextPx, renderDocumentToSvg } from "../static-svg";
-import { measureMonoTextPx } from "../text-metrics";
+import { measureWidth } from "../../theme/text-measure";
+
+/** The schematic detail font: IBM Plex Mono 500 at 14px. */
+const monoWidth = (text: string) => measureWidth(text, { family: "IBM Plex Mono", size: 14, weight: 500 });
 import { canvasThemePreset, DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE, type CanvasThemeId } from "../../theme/canvas-style";
 import { CANVAS_MONO_FONT_STACK_SVG } from "../../theme/fonts";
 import { resolveIconPaint, resolveIconTilePaint, resolveShapePaint } from "../../theme/palette";
@@ -131,9 +134,9 @@ describe("static detail line — center slots", () => {
     const slotWidth = 240 - CENTER_TEXT_INSET_PX.x * 2;
     expect(cut!.body.endsWith("…")).toBe(true);
     expect(long.startsWith(cut!.body.slice(0, -1))).toBe(true);
-    expect(measureMonoTextPx(cut!.body, 14)).toBeLessThanOrEqual(slotWidth);
+    expect(monoWidth(cut!.body)).toBeLessThanOrEqual(slotWidth);
     // One more character would not have fit.
-    expect(measureMonoTextPx(`${long.slice(0, [...cut!.body].length)}…`, 14)).toBeGreaterThan(slotWidth);
+    expect(monoWidth(`${long.slice(0, [...cut!.body].length)}…`)).toBeGreaterThan(slotWidth);
   });
 
   it("the name loses lines before the detail disappears; a box too short for both keeps only the name", () => {
@@ -195,7 +198,7 @@ describe("static detail line — the icon's below band", () => {
     const long = "a detail that runs well past the band and ellipsizes";
     const [, detail] = texts(render([icon({ detail: long })], "schematic-light"));
     expect(detail!.body.endsWith("…")).toBe(true);
-    expect(measureMonoTextPx(detail!.body, 14)).toBeLessThanOrEqual(200);
+    expect(monoWidth(detail!.body)).toBeLessThanOrEqual(200);
   });
 });
 

@@ -12,6 +12,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 
 import { bootKernelDatabase, CANVASES_DIR } from "./service/kernel";
 import { LayoutSessionStore } from "./service/session";
@@ -78,6 +79,14 @@ const outDir = args.outDir
   ?? Bun.env.CLI_RENDER_DIR
   ?? join(process.cwd(), ".agent-kernel", "cli-renders");
 mkdirSync(outDir, { recursive: true });
+
+// The session lints and renders through text-measure: exact HarfBuzz shaping
+// first. A failure means a broken install (TTFs or WASM missing): stop
+// rather than run the session against approximate widths.
+await useHarfBuzz();
+if (!activeBackend().exact) {
+  throw new Error(`text-measure: HarfBuzz did not become the active backend (${activeBackend().name} is)`);
+}
 
 const boot = await bootKernelDatabase();
 const store = new LayoutSessionStore(boot.db);

@@ -3,26 +3,29 @@
  * (KERNEL-PROPOSAL §4, D3).
  *
  * The SVG comes from packages/canvas's deterministic renderDocumentToSvg; this
- * module only rasterizes. Fonts: assets/fonts/ bundles Inter 3.19 as static
- * Regular/Medium/SemiBold/Bold TTFs (OFL license alongside), so the canvas
- * font stack ("Inter, …") resolves to the bundled face at the weight the SVG
- * asks for; system fonts remain as fallback for anything outside Inter's
- * coverage. Bundled-font renders are stable across machines for the glyphs
- * Inter covers.
+ * module only rasterizes. Fonts: resvg gets every TTF in
+ * @codecaine-ai/text-measure's fonts/ directory, the static faces text-measure
+ * shapes with (Inter 3.19 Regular/Medium/SemiBold/Bold, IBM Plex Mono 2.5
+ * Regular/Medium/SemiBold; OFL licenses alongside). The camera therefore
+ * paints the advances the lints and the static renderer measured: the canvas
+ * font stacks ("Inter, …", "IBM Plex Mono, …") resolve to those faces at the
+ * weight the SVG asks for, and system fonts remain as fallback for anything
+ * outside their coverage. Bundled-font renders are stable across machines for
+ * the glyphs the faces cover.
  *
- * The Inter variable TTF beside them is NOT handed to resvg: resvg does not
- * instance variable fonts, so it would only add a second wght-400 face (every
- * weight painted regular before the static instances were vendored). It stays
- * as the source scripts/generate-inter-metrics.ts reads advances from.
+ * Every face is a static instance: resvg does not instance variable fonts, so
+ * a variable face would paint every weight as Regular.
  */
-import { existsSync, readdirSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { readdirSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { Resvg } from "@resvg/resvg-js";
 
-const FONTS_DIR = resolve(import.meta.dir, "..", "..", "assets", "fonts");
-/** The metrics-source variable font (see the header) — not a raster face. */
-const VARIABLE_FONT_FILE = /-Variable\.ttf$/i;
+/** text-measure's fonts/ directory, resolved through the package's "./fonts/*" export. */
+const FONTS_DIR = dirname(
+  fileURLToPath(import.meta.resolve("@codecaine-ai/text-measure/fonts/Inter-Regular.ttf")),
+);
 /** Keep native allocations bounded even if an SVG declares absurd dimensions. */
 const MAX_RASTER_DIMENSION = 4096;
 
@@ -33,12 +36,15 @@ interface SvgViewport {
   height: number;
 }
 
+let fontFiles: string[] | undefined;
+
+/** Every TTF text-measure ships, sorted: the seven static faces it measures with. */
 function bundledFontFiles(): string[] {
-  if (!existsSync(FONTS_DIR)) return [];
-  return readdirSync(FONTS_DIR)
-    .filter((file) => /\.(ttf|otf|ttc)$/i.test(file) && !VARIABLE_FONT_FILE.test(file))
+  fontFiles ??= readdirSync(FONTS_DIR)
+    .filter((file) => /\.ttf$/i.test(file))
     .sort()
     .map((file) => join(FONTS_DIR, file));
+  return fontFiles;
 }
 
 export interface RenderPngResult {
@@ -147,7 +153,7 @@ export function rasterizeSvgToPng(svg: string): RenderPngResult {
   const fontFiles = bundledFontFiles();
   const resvg = new Resvg(preparedSvg, {
     font: {
-      // Bundled Inter (if present) wins; system fonts cover the fallbacks.
+      // text-measure's faces win; system fonts cover the fallbacks.
       fontFiles,
       loadSystemFonts: true,
       defaultFontFamily: "Helvetica",

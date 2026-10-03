@@ -2,10 +2,11 @@ import { describe, expect, it } from "bun:test";
 import {
   layoutStickyText,
   STICKY_CODE_FONT_EM,
-  STICKY_CODE_MONO_ADVANCE_EM,
+  STICKY_CODE_PADDING_X_EM,
   STICKY_LINE_PITCH_PX,
+  stickyTextUncovered,
 } from "../sticky-text";
-import { measureInterTextPx } from "../text-metrics";
+import { measureWidth } from "../../theme/text-measure";
 import { renderDocumentToSvg } from "../static-svg";
 import { INSET_BODY_PADDING_PX } from "../../objects/text-slots";
 import type { InteractiveCanvasDocument } from "../../state/schema";
@@ -65,7 +66,7 @@ describe("layoutStickyText", () => {
     expect(rows[6]!.segments[0]!.text).toBe("paragraph");
   });
 
-  it("wraps long lines on real Inter advances within the indented width", () => {
+  it("wraps long lines on measured Inter advances within the indented width", () => {
     const text = "Some longer paragraph text that should wrap across the sticky width naturally";
     const rows = layoutStickyText(text, SLOT_WIDTH_PX, BODY_FONT_SIZE_PX);
     expect(rows.length).toBeGreaterThan(1);
@@ -77,10 +78,8 @@ describe("layoutStickyText", () => {
     expect(joined).toBe(text);
     for (const row of rows) {
       const last = row.segments[row.segments.length - 1]!;
-      // Content fits the box; only hanging trailing spaces may pass the edge.
-      const paintedEnd =
-        last.xPx + last.widthPx - measureInterTextPx(" ", 24, 400) * (last.text.length - last.text.trimEnd().length);
-      expect(paintedEnd).toBeLessThanOrEqual(SLOT_WIDTH_PX + 0.001);
+      // Content fits the box: hanging trailing spaces advance nothing.
+      expect(last.xPx + last.widthPx).toBeLessThanOrEqual(SLOT_WIDTH_PX);
     }
   });
 
@@ -91,22 +90,39 @@ describe("layoutStickyText", () => {
     expect(rows.flatMap((row) => row.segments.map((s) => s.text)).join("")).toBe(word);
   });
 
-  it("measures bold runs with the wght-700 instance and code runs with the mono approximation", () => {
+  it("measures bold runs in Inter Bold and inline code in IBM Plex Mono 400 with its padding", () => {
     const rows = layoutStickyText("**bold** and `code`", SLOT_WIDTH_PX, BODY_FONT_SIZE_PX);
     const [row] = rows;
     const strong = row!.segments.find((segment) => segment.style === "strong")!;
     expect(strong.text).toBe("bold");
     expect(strong.fontWeight).toBe(700);
-    expect(strong.widthPx).toBeCloseTo(measureInterTextPx("bold", 24, 700), 10);
+    expect(strong.widthPx).toBe(measureWidth("bold", { family: "Inter", size: 24, weight: 700 }));
 
     const code = row!.segments.find((segment) => segment.style === "code")!;
     const codeFontSize = 24 * STICKY_CODE_FONT_EM;
     expect(code.fontSizePx).toBeCloseTo(codeFontSize, 10);
-    // 4 chars at the flat mono advance plus 0.15em padding each side.
+    expect(code.fontWeight).toBe(400);
+    // Four Plex Mono cells plus 0.15em padding each side (each kept in 1/64px layout units).
+    const padding = Math.floor(codeFontSize * STICKY_CODE_PADDING_X_EM * 64) / 64;
+    expect(code.textOffsetPx).toBe(padding);
     expect(code.widthPx).toBeCloseTo(
-      4 * codeFontSize * STICKY_CODE_MONO_ADVANCE_EM + 2 * codeFontSize * 0.15,
-      10,
+      measureWidth("code", { family: "IBM Plex Mono", size: codeFontSize, weight: 400 }) + 2 * padding,
+      1,
     );
+    // The code chip starts where the plain run before it ends.
+    const plain = row!.segments.find((segment) => segment.style === "plain")!;
+    expect(code.xPx).toBeCloseTo(plain.xPx + plain.widthPx, 6);
+  });
+
+  it("breaks between runs only where the joined text breaks: a bold word glued to plain text stays whole", () => {
+    // "**pre**fix" is one word: the browser never breaks at the inline boundary.
+    const rows = layoutStickyText("**pre**fix word", measureWidth("prefix", { family: "Inter", size: 24, weight: 700 }) + 4, BODY_FONT_SIZE_PX);
+    expect(rows[0]!.segments.map((segment) => segment.text.trim())).toEqual(["pre", "fix"]);
+  });
+
+  it("lists characters the bundled faces lack, per run font", () => {
+    expect(stickyTextUncovered("ship 🚀 `春` **ok**")).toEqual(["🚀", "春"]);
+    expect(stickyTextUncovered("- plain text")).toEqual([]);
   });
 
   it("keeps heading indentation on the heading's own em grid", () => {
@@ -114,9 +130,27 @@ describe("layoutStickyText", () => {
     // Depth 1 heading: 1em of the 36px heading size.
     expect(rows[0]).toMatchObject({ fontSizePx: 36, indentPx: 36 });
   });
+  it("merges adjacent runs in the same face, so markup inside a run never splits its shaping", () => {
+    // A heading is Inter Bold already: **>** changes nothing, and "=>" stays one run (one ligature).
+    const plain = layoutStickyText("# =>", SLOT_WIDTH_PX, BODY_FONT_SIZE_PX);
+    const marked = layoutStickyText("# =**>**", SLOT_WIDTH_PX, BODY_FONT_SIZE_PX);
+    expect(marked[0]!.segments.map((segment) => segment.text)).toEqual(["=>"]);
+    expect(marked[0]!.segments).toEqual(plain[0]!.segments);
+  });
+
 });
 
 describe("sticky markdown static rendering", () => {
+  it("paints the same text for markup that does not change the face", () => {
+    const text = (source: string) => renderDocumentToSvg(stickyDocument(source)).svg.match(/<text [\s\S]*?<\/text>/g);
+    expect(text("# =**>**")).toEqual(text("# =>"));
+  });
+
+  it("keeps a literal leading space after the heading marker (xml:space)", () => {
+    const svg = renderDocumentToSvg(stickyDocument("#  a")).svg;
+    expect(svg).toMatch(/<text [^>]*xml:space="preserve"[^>]*><tspan [^>]*> a<\/tspan><\/text>/);
+  });
+
   it("emits the live line grid: 36px pitch from the inset-body slot top", () => {
     const { svg } = renderDocumentToSvg(stickyDocument("# Plan\n- alpha\n  - beta\ngamma"), {
       background: "transparent",
@@ -147,10 +181,12 @@ describe("sticky markdown static rendering", () => {
   it("clamps to whole line boxes in the slot height and ellipsizes the last row", () => {
     const source = Array.from({ length: 14 }, (_, i) => `line ${i}`).join("\n");
     const { svg } = renderDocumentToSvg(stickyDocument(source), { background: "transparent" });
-    const lines = [...svg.matchAll(/<tspan [^>]*>([^<]*)<\/tspan>/g)].map((m) => m[1]!);
+    const spans = [...svg.matchAll(/<tspan [^>]*?y="(-?[0-9.]+)"[^>]*>([^<]*)<\/tspan>/g)].map((m) => ({ y: Number(m[1]), text: m[2]! }));
     // Slot height 420 − 28 − 21 = 371px → 10 full 36px line boxes.
-    expect(lines.length).toBe(10);
-    expect(lines[lines.length - 1]!.endsWith("…")).toBe(true);
+    expect(new Set(spans.map((span) => span.y)).size).toBe(10);
+    // The last row ends in the ellipsis, painted in the line's font after its kept text.
+    const lastY = Math.max(...spans.map((span) => span.y));
+    expect(spans.filter((span) => span.y === lastY).map((span) => span.text).join("")).toBe("line 9…");
     expect(svg).not.toContain(">line 10</tspan>");
   });
 

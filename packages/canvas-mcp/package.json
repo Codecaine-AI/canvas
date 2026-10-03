@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@codecaine-ai/canvas-agent": "workspace:*",
+    "@codecaine-ai/text-measure": "workspace:*",
     "@modelcontextprotocol/sdk": "1.30.0"
   },
   "devDependencies": {

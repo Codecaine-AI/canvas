@@ -10,8 +10,6 @@ import {
   belowBandSize,
   belowTextSlot,
   belowExtendedBoundsPx,
-  estimateSlotLineCount,
-  estimateWrappedText,
   iconTileRectPx,
   resolveTextSlot,
   slotLineHeightPx,
@@ -19,13 +17,18 @@ import {
   type TextSlot,
 } from "../text-slots";
 import type { InteractiveCanvasObject } from "../../state/schema";
-import { measureInterTextPx } from "../../theme/inter-metrics";
-import { DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE, canvasThemePreset } from "../../theme/canvas-style";
+import { measureWidth, wrapText } from "../../theme/text-measure";
+import { DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE, canvasThemePreset, type CanvasStyle } from "../../theme/canvas-style";
 import { wrapTextLines } from "../../render/static-svg";
 
 /** The default style's name size and line box (17.5px × 1.2 = 21px); figjam's is 15 / 18. */
 const NAME_PX = DEFAULT_CANVAS_STYLE.textFontSizePx;
 const NAME_LINE_PX = NAME_PX * 1.2;
+
+/** The name font a style paints captions in: the stage's Inter stack at the style's size and weight. */
+function nameFont(style: CanvasStyle = DEFAULT_CANVAS_STYLE) {
+  return { family: "Inter", size: style.textFontSizePx, weight: style.textFontWeight };
+}
 
 function makeObject(
   partial: Partial<InteractiveCanvasObject> & Pick<InteractiveCanvasObject, "id" | "type">,
@@ -46,7 +49,7 @@ function textSlotFor(object: InteractiveCanvasObject): TextSlot {
 }
 
 describe("text slot below band sizing", () => {
-  it("resolves a one-line icon band outside the glyph box", () => {
+  it("resolves a one-line icon band outside the glyph box, exactly as wide as the measured name", () => {
     const object = makeObject({
       id: "person-one-line",
       type: "icon",
@@ -55,10 +58,13 @@ describe("text slot below band sizing", () => {
       style: { shape: "icon" },
     });
     const slot = textSlotFor(object);
-    const expectedWidth = "Hello text".length * NAME_PX * 0.62;
-    const figjamWidth = "Hello text".length * 15 * 0.62;
+    const expectedWidth = measureWidth("Hello text", nameFont());
+    const figjamWidth = measureWidth("Hello text", nameFont(FIGJAM_CANVAS_STYLE));
+    // Measured in Chromium layout units (1/64 px), Inter SemiBold 17.5 / Bold 15.
+    expect(expectedWidth * 64).toBe(Math.round(expectedWidth * 64));
+    expect(expectedWidth).toBe(80.734375);
+    expect(figjamWidth).toBe(70.015625);
 
-    expect(estimateSlotLineCount("Hello text", BELOW_BAND_MIN_WIDTH_PX, slot.typography)).toBe(1);
     expect(slotLineHeightPx(slot.typography)).toBe(18);
     expect(belowBandSize(object.text, object)).toEqual({
       lines: 1,
@@ -91,40 +97,69 @@ describe("text slot below band sizing", () => {
       geometry: { x: 10, y: 20, width: 120, height: 110 },
       style: { shape: "icon" },
     });
-    const estimate = estimateWrappedText(object.text, BELOW_BAND_MIN_WIDTH_PX, NAME_PX);
     const size = belowBandSize(object.text, object);
+    const wrapped = wrapText(object.text, nameFont(), {
+      maxWidth: BELOW_BAND_MIN_WIDTH_PX,
+      lineHeight: NAME_LINE_PX,
+      whiteSpace: "pre-wrap",
+    });
 
     expect(belowBandMaxWidthPx(object)).toBe(BELOW_BAND_MIN_WIDTH_PX);
-    // Two lines at figjam's 15px, three at the default 17.5px.
+    // Two lines at figjam's 15px and at the default 17.5px — what both
+    // painters draw; the old 0.62em estimate sized the default band for
+    // three, 21px taller than the text.
     expect(belowBandSize(object.text, object, FIGJAM_CANVAS_STYLE).lines).toBe(2);
-    expect(size.lines).toBe(3);
-    expect(size.widthPx).toBe(estimate.longestLineWidthPx);
+    expect(size.lines).toBe(2);
+    expect(wrapped.lines.map((line) => line.text.trimEnd())).toEqual(["Adapt Question Based", "on Interview History"]);
+    expect(size.widthPx).toBe(wrapped.maxLineWidth);
+    expect(size.heightPx).toBe(2 * NAME_LINE_PX);
     expect(size.widthPx).toBeGreaterThan(object.geometry.width);
     expect(size.widthPx).toBeLessThanOrEqual(BELOW_BAND_MIN_WIDTH_PX);
   });
 
-  it("widens the band to a caption line's real Inter width, so a short word of wide glyphs never breaks", () => {
-    // 0.62em per character runs narrow for these: 4 × 9.3 = 37.2px, but "Code"
-    // measures 38.98px in Inter Bold — the band used to split it "Cod / e".
+  it("sizes the band to the measured line, so a short word of wide glyphs never breaks", () => {
+    // 0.62em per character ran narrow for these: 4 × 9.3 = 37.2px, but "Code"
+    // measures ~39px in Inter Bold — the band used to split it "Cod / e".
     for (const style of [canvasThemePreset("figjam"), canvasThemePreset("schematic-light")]) {
       for (const text of ["Code", "Bun", "Web App"]) {
         const object = makeObject({ id: "short", type: "icon", icon: "code", text, geometry: { x: 0, y: 0, width: 64, height: 64 } });
-        const rect = resolveTextSlot(textSlotFor(object), object, 1, { canvasStyle: style }).rect;
-        expect(rect.width).toBeGreaterThan(measureInterTextPx(text, style.textFontSizePx, style.textFontWeight));
-        expect(rect.x).toBeCloseTo((64 - rect.width) / 2, 10);
+        const resolved = resolveTextSlot(textSlotFor(object), object, 1, { canvasStyle: style });
+        expect(resolved.rect.width).toBe(measureWidth(text, nameFont(style)));
+        expect(resolved.rect.x).toBeCloseTo((64 - resolved.rect.width) / 2, 10);
         // The static renderer wraps inside this width at the same advances.
-        expect(wrapTextLines(text, rect.width, style.textFontSizePx, style.textFontWeight)).toEqual([text]);
+        expect(wrapTextLines(text, resolved.rect.width, resolved.typography)).toEqual([text]);
         expect(belowBandSize(text, object, style).lines).toBe(1);
       }
     }
   });
 
-  it("keeps the estimated width when every line already fits it", () => {
-    const object = makeObject({ id: "fits", type: "icon", icon: "database", text: "Postgres", geometry: { x: 0, y: 0, width: 64, height: 64 } });
-    expect(measureInterTextPx("Postgres", NAME_PX, DEFAULT_CANVAS_STYLE.textFontWeight) + 1).toBeLessThan(
-      8 * NAME_PX * 0.62,
-    );
-    expect(belowBandSize(object.text, object).widthPx).toBe(8 * NAME_PX * 0.62);
+  it("re-wraps every caption into the same lines inside its own band (the stage wraps at the band width)", () => {
+    const texts = [
+      "Adapt Question Based on Interview History",
+      "Orders DB",
+      "Checkout service → payments",
+      "WWWWWWWWWWWWWWWWWW",
+      "Supercalifragilisticexpialidocious recovery",
+      "two\nexplicit lines",
+      "well-known long-running job-scheduler",
+    ];
+    for (const style of [canvasThemePreset("figjam"), canvasThemePreset("schematic-light")]) {
+      for (const text of texts) {
+        const object = makeObject({ id: "caption", type: "icon", icon: "code", text, geometry: { x: 0, y: 0, width: 64, height: 64 } });
+        const resolved = resolveTextSlot(textSlotFor(object), object, 1, { canvasStyle: style });
+        const atMax = wrapTextLines(text, belowBandMaxWidthPx(object), resolved.typography);
+        expect(wrapTextLines(text, resolved.rect.width, resolved.typography)).toEqual(atMax);
+        expect(belowBandSize(text, object, style).lines).toBe(atMax.length);
+        expect(resolved.rect.height).toBe(atMax.length * slotLineHeightPx(resolved.typography));
+      }
+    }
+  });
+
+  it("follows the stage's pre-wrap: a trailing newline adds no line, a blank line does", () => {
+    const object = (text: string) =>
+      makeObject({ id: "caption", type: "icon", icon: "code", text, geometry: { x: 0, y: 0, width: 64, height: 64 } });
+    expect(belowBandSize("Orders\n", object("Orders\n")).lines).toBe(1);
+    expect(belowBandSize("Orders\n\nDB", object("Orders\n\nDB")).lines).toBe(3);
   });
 
   it("caps below band width at the object width when the glyph is wider than 200px", () => {
@@ -138,7 +173,8 @@ describe("text slot below band sizing", () => {
     const size = belowBandSize(object.text, object);
 
     expect(belowBandMaxWidthPx(object)).toBe(260);
-    expect(size.widthPx).toBe(260);
+    expect(size.widthPx).toBeLessThanOrEqual(260);
+    expect(size.widthPx).toBeGreaterThan(200);
     expect(size.lines).toBeGreaterThan(1);
   });
 
@@ -163,7 +199,7 @@ describe("text slot below band sizing", () => {
     expect(belowBandSize(empty.text, empty)).toEqual({ lines: 0, widthPx: 0, heightPx: 0 });
     expect(belowBandSize(compact.text, compact)).toEqual({
       lines: 1,
-      widthPx: "Hello text".length * NAME_PX * 0.62,
+      widthPx: measureWidth("Hello text", nameFont()),
       heightPx: NAME_LINE_PX,
     });
     expect(resolveTextSlot(slot, compact).hidden).toBe(false);

@@ -52,6 +52,23 @@ import type { CanvasTool } from "../state/actions";
 const CANVAS_FONT_FAMILY = CANVAS_SANS_FONT_STACK;
 
 /**
+ * Text rendering the canvas measures for (theme/text-measure.ts): no
+ * tracking, default OpenType features and ligatures, kerning on, 8-space tab
+ * stops. Pinned on the stage root so a host's own settings (a reader's
+ * letter-spacing knob, Tailwind's 4-space tab-size, an editor that turns
+ * ligatures off) cannot make the stage paint text wider or narrower than the
+ * lints, caption bands and chips measured it.
+ */
+const CANVAS_TEXT_RENDERING = {
+  letterSpacing: "normal",
+  wordSpacing: "normal",
+  fontFeatureSettings: "normal",
+  fontVariantLigatures: "normal",
+  fontKerning: "auto",
+  tabSize: 8,
+} as const;
+
+/**
  * Arrowhead geometry as multiples of the connector's stroke width. We use 5x
  * for BOTH base width and length — a slightly long, visually "solid" head.
  */
@@ -322,6 +339,7 @@ function CanvasStageSurface({
         backgroundSize: grid.backgroundSize,
         backgroundColor: resolvedCanvasStyle.boardBackground,
         fontFamily: CANVAS_FONT_FAMILY,
+        ...CANVAS_TEXT_RENDERING,
         // Board text (labels, section titles, captions) is trim, not
         // document text — drags must never sweep a native DOM selection
         // across it. Text-editing surfaces opt back in with user-select:

@@ -1,0 +1,1268 @@
+[
+ {
+  "id": "canvas-0",
+  "source": "canvas",
+  "tag": "label",
+  "text": "…"
+ },
+ {
+  "id": "canvas-1",
+  "source": "canvas",
+  "tag": "label",
+  "text": "User"
+ },
+ {
+  "id": "canvas-2",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Action"
+ },
+ {
+  "id": "canvas-3",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Memory"
+ },
+ {
+  "id": "canvas-4",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Task B"
+ },
+ {
+  "id": "canvas-5",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Task E"
+ },
+ {
+  "id": "canvas-6",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Tool B"
+ },
+ {
+  "id": "canvas-7",
+  "source": "canvas",
+  "tag": "label",
+  "text": "General"
+ },
+ {
+  "id": "canvas-8",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Pending"
+ },
+ {
+  "id": "canvas-9",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Decision"
+ },
+ {
+  "id": "canvas-10",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Operator"
+ },
+ {
+  "id": "canvas-11",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Surfaces"
+ },
+ {
+  "id": "canvas-12",
+  "source": "canvas",
+  "tag": "label",
+  "text": "No Change"
+ },
+ {
+  "id": "canvas-13",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Agent Flow"
+ },
+ {
+  "id": "canvas-14",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Have Data?"
+ },
+ {
+  "id": "canvas-15",
+  "source": "canvas",
+  "tag": "label",
+  "text": "New Orders"
+ },
+ {
+  "id": "canvas-16",
+  "source": "canvas",
+  "tag": "label",
+  "text": "PR indexer"
+ },
+ {
+  "id": "canvas-17",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Question N"
+ },
+ {
+  "id": "canvas-18",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Sub Agents"
+ },
+ {
+  "id": "canvas-19",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Agent State"
+ },
+ {
+  "id": "canvas-20",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Layer 1 LLM"
+ },
+ {
+  "id": "canvas-21",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Memory Bank"
+ },
+ {
+  "id": "canvas-22",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Regression?"
+ },
+ {
+  "id": "canvas-23",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Task Needed"
+ },
+ {
+  "id": "canvas-24",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Exact match?"
+ },
+ {
+  "id": "canvas-25",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Task Manager"
+ },
+ {
+  "id": "canvas-26",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Call Function"
+ },
+ {
+  "id": "canvas-27",
+  "source": "canvas",
+  "tag": "label",
+  "text": "EDIFACT Agent"
+ },
+ {
+  "id": "canvas-28",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Format Prompt"
+ },
+ {
+  "id": "canvas-29",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Null Response"
+ },
+ {
+  "id": "canvas-30",
+  "source": "canvas",
+  "tag": "label",
+  "text": "QA lint gates"
+ },
+ {
+  "id": "canvas-31",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Subscriptions"
+ },
+ {
+  "id": "canvas-32",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Bun API server"
+ },
+ {
+  "id": "canvas-33",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Enough Context"
+ },
+ {
+  "id": "canvas-34",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Memory Actions"
+ },
+ {
+  "id": "canvas-35",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Refund Request"
+ },
+ {
+  "id": "canvas-36",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Classify Intent"
+ },
+ {
+  "id": "canvas-37",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Go To Next Case"
+ },
+ {
+  "id": "canvas-38",
+  "source": "canvas",
+  "tag": "label",
+  "text": "INK API Calls 2"
+ },
+ {
+  "id": "canvas-39",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Input Message 2"
+ },
+ {
+  "id": "canvas-40",
+  "source": "canvas",
+  "tag": "label",
+  "text": "React dashboard"
+ },
+ {
+  "id": "canvas-41",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Session N Tasks"
+ },
+ {
+  "id": "canvas-42",
+  "source": "canvas",
+  "tag": "label",
+  "text": "AI Asks Question"
+ },
+ {
+  "id": "canvas-43",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Function Runtime"
+ },
+ {
+  "id": "canvas-44",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Incoming Message"
+ },
+ {
+  "id": "canvas-45",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Long Term Memory"
+ },
+ {
+  "id": "canvas-46",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Make Adjustments"
+ },
+ {
+  "id": "canvas-47",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Process Complete"
+ },
+ {
+  "id": "canvas-48",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Reject candidate"
+ },
+ {
+  "id": "canvas-49",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Sub Agent States"
+ },
+ {
+  "id": "canvas-50",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Base Question Text"
+ },
+ {
+  "id": "canvas-51",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Guardian (babysit)"
+ },
+ {
+  "id": "canvas-52",
+  "source": "canvas",
+  "tag": "label",
+  "text": "INK API Response 3"
+ },
+ {
+  "id": "canvas-53",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Research Objective"
+ },
+ {
+  "id": "canvas-54",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Determine Next Task"
+ },
+ {
+  "id": "canvas-55",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Expected Response 3"
+ },
+ {
+  "id": "canvas-56",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Implicit Agent Flow"
+ },
+ {
+  "id": "canvas-57",
+  "source": "canvas",
+  "tag": "label",
+  "text": "User Safety Refusal"
+ },
+ {
+  "id": "canvas-58",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Conversation History"
+ },
+ {
+  "id": "canvas-59",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Interviewee Response"
+ },
+ {
+  "id": "canvas-60",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Build Data Collection"
+ },
+ {
+  "id": "canvas-61",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Convert Text to Audio"
+ },
+ {
+  "id": "canvas-62",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Send Response to User"
+ },
+ {
+  "id": "canvas-63",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Case: Data Not Labeled"
+ },
+ {
+  "id": "canvas-64",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Input Adapter Complete"
+ },
+ {
+  "id": "canvas-65",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Request Info From User"
+ },
+ {
+  "id": "canvas-66",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Restart Execution Loop"
+ },
+ {
+  "id": "canvas-67",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Format Execution Prompt"
+ },
+ {
+  "id": "canvas-68",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Output Adapter Creation"
+ },
+ {
+  "id": "canvas-69",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Worker pool (Pi agents)"
+ },
+ {
+  "id": "canvas-70",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Epochs / claims / events"
+ },
+ {
+  "id": "canvas-71",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Send Expected Response 1"
+ },
+ {
+  "id": "canvas-72",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Generate Probing Question"
+ },
+ {
+  "id": "canvas-73",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Merge conflicting outputs"
+ },
+ {
+  "id": "canvas-74",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Checkpoint + facts + patch"
+ },
+ {
+  "id": "canvas-75",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Completed Not Sent to User"
+ },
+ {
+  "id": "canvas-76",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Is Function Call Required?"
+ },
+ {
+  "id": "canvas-77",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Run goals (match % target)"
+ },
+ {
+  "id": "canvas-78",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Artifacts + prompts (audit)"
+ },
+ {
+  "id": "canvas-79",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Direct Intent Classification"
+ },
+ {
+  "id": "canvas-80",
+  "source": "canvas",
+  "tag": "label",
+  "text": "- Good For Small # of Intents"
+ },
+ {
+  "id": "canvas-81",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Initialize Directory Structure"
+ },
+ {
+  "id": "canvas-82",
+  "source": "canvas",
+  "tag": "label",
+  "text": "State substrate — SQLite board"
+ },
+ {
+  "id": "canvas-83",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Wait for Sub Agents to Complete"
+ },
+ {
+  "id": "canvas-84",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Overall Context / Interview Purpose"
+ },
+ {
+  "id": "canvas-85",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Determine Labels / Intent with Client"
+ },
+ {
+  "id": "canvas-86",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Human reviews what survives validation"
+ },
+ {
+  "id": "canvas-87",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Tell Agent Output Response is Incorrect"
+ },
+ {
+  "id": "canvas-88",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Compare Generated Intents to Labeled Intents"
+ },
+ {
+  "id": "canvas-89",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Past Messages in Chain (And Message Classifications)"
+ },
+ {
+  "id": "canvas-90",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Coordination via board + file locks + artifacts — no agent chat"
+ },
+ {
+  "id": "canvas-91",
+  "source": "canvas",
+  "tag": "label",
+  "text": "Bun/TS control plane for high-parallelism GameCube decompilation (Melee). Deterministic runner owns state/scheduling/validation; many Pi agents research, edit, validate in parallel — coordinating only through a shared SQLite board, never agent-to-agent chat."
+ },
+ {
+  "id": "docs-0",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Why"
+ },
+ {
+  "id": "docs-1",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Theme"
+ },
+ {
+  "id": "docs-2",
+  "source": "docs",
+  "tag": "heading",
+  "text": "canvas"
+ },
+ {
+  "id": "docs-3",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Reading"
+ },
+ {
+  "id": "docs-4",
+  "source": "docs",
+  "tag": "heading",
+  "text": "heading"
+ },
+ {
+  "id": "docs-5",
+  "source": "docs",
+  "tag": "heading",
+  "text": "The Rule"
+ },
+ {
+  "id": "docs-6",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Neighbors"
+ },
+ {
+  "id": "docs-7",
+  "source": "docs",
+  "tag": "heading",
+  "text": "framework"
+ },
+ {
+  "id": "docs-8",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Known Gaps"
+ },
+ {
+  "id": "docs-9",
+  "source": "docs",
+  "tag": "heading",
+  "text": "The Design"
+ },
+ {
+  "id": "docs-10",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Line Ranges"
+ },
+ {
+  "id": "docs-11",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Client Files"
+ },
+ {
+  "id": "docs-12",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Font Sources"
+ },
+ {
+  "id": "docs-13",
+  "source": "docs",
+  "tag": "heading",
+  "text": "State schema"
+ },
+ {
+  "id": "docs-14",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Agent Adapter"
+ },
+ {
+  "id": "docs-15",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Editor design"
+ },
+ {
+  "id": "docs-16",
+  "source": "docs",
+  "tag": "heading",
+  "text": "The Lifecycle"
+ },
+ {
+  "id": "docs-17",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Writing Rules"
+ },
+ {
+  "id": "docs-18",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Current Checks"
+ },
+ {
+  "id": "docs-19",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Page Structure"
+ },
+ {
+  "id": "docs-20",
+  "source": "docs",
+  "tag": "heading",
+  "text": "The Conviction"
+ },
+ {
+  "id": "docs-21",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Agent Authoring"
+ },
+ {
+  "id": "docs-22",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Find Tool Names"
+ },
+ {
+  "id": "docs-23",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Reading Targets"
+ },
+ {
+  "id": "docs-24",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Variable Groups"
+ },
+ {
+  "id": "docs-25",
+  "source": "docs",
+  "tag": "heading",
+  "text": "In-Place Editing"
+ },
+ {
+  "id": "docs-26",
+  "source": "docs",
+  "tag": "heading",
+  "text": "The Depth Ladder"
+ },
+ {
+  "id": "docs-27",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Design Principles"
+ },
+ {
+  "id": "docs-28",
+  "source": "docs",
+  "tag": "heading",
+  "text": "The Shape on Disk"
+ },
+ {
+  "id": "docs-29",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Authoring Coverage"
+ },
+ {
+  "id": "docs-30",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Rewrite Guardrails"
+ },
+ {
+  "id": "docs-31",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Adding a Block Type"
+ },
+ {
+  "id": "docs-32",
+  "source": "docs",
+  "tag": "heading",
+  "text": "One Sharpness Scale"
+ },
+ {
+  "id": "docs-33",
+  "source": "docs",
+  "tag": "heading",
+  "text": "interaction-surface"
+ },
+ {
+  "id": "docs-34",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Structured reference"
+ },
+ {
+  "id": "docs-35",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Export Selected Pages"
+ },
+ {
+  "id": "docs-36",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Theming and Embedding"
+ },
+ {
+  "id": "docs-37",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Image Grid Publication"
+ },
+ {
+  "id": "docs-38",
+  "source": "docs",
+  "tag": "heading",
+  "text": "7. Verify the Live Site"
+ },
+ {
+  "id": "docs-39",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Verification and Limits"
+ },
+ {
+  "id": "docs-40",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Local State and Evidence"
+ },
+ {
+  "id": "docs-41",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Keep Development Separate"
+ },
+ {
+  "id": "docs-42",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Reset by property removal"
+ },
+ {
+  "id": "docs-43",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Process and Task Ownership"
+ },
+ {
+  "id": "docs-44",
+  "source": "docs",
+  "tag": "heading",
+  "text": "The Vocabulary Stays Small"
+ },
+ {
+  "id": "docs-45",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Semantic Before Consumption"
+ },
+ {
+  "id": "docs-46",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Package and Release Boundary"
+ },
+ {
+  "id": "docs-47",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Built-in Agents and PromptKit"
+ },
+ {
+  "id": "docs-48",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Evidence From Existing Corpora"
+ },
+ {
+  "id": "docs-49",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Maintain Documentation with Code"
+ },
+ {
+  "id": "docs-50",
+  "source": "docs",
+  "tag": "heading",
+  "text": "1. Publish the Docs Source to Main"
+ },
+ {
+  "id": "docs-51",
+  "source": "docs",
+  "tag": "heading",
+  "text": "A docs root is the unit of authority"
+ },
+ {
+  "id": "docs-52",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Package lines are dependency firewalls"
+ },
+ {
+  "id": "docs-53",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Canvas and Sequence mount under external/"
+ },
+ {
+  "id": "docs-54",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Static export is read-only by construction"
+ },
+ {
+  "id": "docs-55",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Format contracts live in fixed authority modules"
+ },
+ {
+  "id": "docs-56",
+  "source": "docs",
+  "tag": "heading",
+  "text": "PDF Export Reuses the Viewer and an Offline Printer"
+ },
+ {
+  "id": "docs-57",
+  "source": "docs",
+  "tag": "heading",
+  "text": "Engines enter only through host slots, and injection grants no authority"
+ },
+ {
+  "id": "edge-0",
+  "source": "edge",
+  "tag": "long-word",
+  "text": "Supercalifragilisticexpialidocious"
+ },
+ {
+  "id": "edge-1",
+  "source": "edge",
+  "tag": "long-word",
+  "text": "pneumonoultramicroscopicsilicovolcanoconiosis"
+ },
+ {
+  "id": "edge-2",
+  "source": "edge",
+  "tag": "long-word",
+  "text": "aVeryLongCamelCaseIdentifierNameThatNeverBreaks"
+ },
+ {
+  "id": "edge-3",
+  "source": "edge",
+  "tag": "long-word",
+  "text": "snake_case_identifier_with_many_parts_and_no_spaces"
+ },
+ {
+  "id": "edge-4",
+  "source": "edge",
+  "tag": "long-word",
+  "text": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+ },
+ {
+  "id": "edge-5",
+  "source": "edge",
+  "tag": "long-word",
+  "text": "0x7fffffffffffffffffffffffffffffffffffff"
+ },
+ {
+  "id": "edge-6",
+  "source": "edge",
+  "tag": "long-word",
+  "text": "Donaudampfschifffahrtsgesellschaftskapitän"
+ },
+ {
+  "id": "edge-7",
+  "source": "edge",
+  "tag": "url",
+  "text": "https://github.com/chenglou/pretext/blob/main/src/measurement.ts"
+ },
+ {
+  "id": "edge-8",
+  "source": "edge",
+  "tag": "url",
+  "text": "See https://example.com/a/b/c?query=1&x=2#frag for details"
+ },
+ {
+  "id": "edge-9",
+  "source": "edge",
+  "tag": "url",
+  "text": "file:///Users/Ford/workspace/codecaine/core/canvas/packages/canvas-agent/assets/fonts/Inter-Variable.ttf"
+ },
+ {
+  "id": "edge-10",
+  "source": "edge",
+  "tag": "url",
+  "text": "packages/canvas/src/render/text-metrics.ts:42"
+ },
+ {
+  "id": "edge-11",
+  "source": "edge",
+  "tag": "url",
+  "text": "ford.lascari@example.com"
+ },
+ {
+  "id": "edge-12",
+  "source": "edge",
+  "tag": "url",
+  "text": "www.example.org/very/long/path/segment/that/keeps/going/index.html"
+ },
+ {
+  "id": "edge-13",
+  "source": "edge",
+  "tag": "punct",
+  "text": "Hello, world! (Really?) Yes; no: maybe…"
+ },
+ {
+  "id": "edge-14",
+  "source": "edge",
+  "tag": "punct",
+  "text": "“Smart quotes” and ‘single’ ones"
+ },
+ {
+  "id": "edge-15",
+  "source": "edge",
+  "tag": "punct",
+  "text": "«Guillemets» and „low quotes“"
+ },
+ {
+  "id": "edge-16",
+  "source": "edge",
+  "tag": "punct",
+  "text": "Wait... what?! Q&A / FAQ | Help"
+ },
+ {
+  "id": "edge-17",
+  "source": "edge",
+  "tag": "punct",
+  "text": "[bracketed] {braced} <angled> (parens)"
+ },
+ {
+  "id": "edge-18",
+  "source": "edge",
+  "tag": "punct",
+  "text": "semi;colon,comma.period:colon!bang?query"
+ },
+ {
+  "id": "edge-19",
+  "source": "edge",
+  "tag": "dash",
+  "text": "Agent—tool—agent loop"
+ },
+ {
+  "id": "edge-20",
+  "source": "edge",
+  "tag": "dash",
+  "text": "word—word—word—word—word—word—word—word—word"
+ },
+ {
+  "id": "edge-21",
+  "source": "edge",
+  "tag": "dash",
+  "text": "pre–post en dash range 10–20"
+ },
+ {
+  "id": "edge-22",
+  "source": "edge",
+  "tag": "dash",
+  "text": "well-known self-hosted state-of-the-art re-entry"
+ },
+ {
+  "id": "edge-23",
+  "source": "edge",
+  "tag": "dash",
+  "text": "non‑breaking‑hyphen‑joined‑words"
+ },
+ {
+  "id": "edge-24",
+  "source": "edge",
+  "tag": "arrow",
+  "text": "Input → Process → Output"
+ },
+ {
+  "id": "edge-25",
+  "source": "edge",
+  "tag": "arrow",
+  "text": "A ⇒ B ⇔ C ← D ↔ E"
+ },
+ {
+  "id": "edge-26",
+  "source": "edge",
+  "tag": "arrow",
+  "text": "ASCII arrows -> => <- <=> -->"
+ },
+ {
+  "id": "edge-27",
+  "source": "edge",
+  "tag": "arrow",
+  "text": "↑ up ↓ down ↗ diagonal"
+ },
+ {
+  "id": "edge-28",
+  "source": "edge",
+  "tag": "cjk",
+  "text": "春天到了"
+ },
+ {
+  "id": "edge-29",
+  "source": "edge",
+  "tag": "cjk",
+  "text": "日本語のテキストを測定する"
+ },
+ {
+  "id": "edge-30",
+  "source": "edge",
+  "tag": "cjk",
+  "text": "中文标点，测试。（括号）「引号」"
+ },
+ {
+  "id": "edge-31",
+  "source": "edge",
+  "tag": "cjk",
+  "text": "한국어 텍스트 측정"
+ },
+ {
+  "id": "edge-32",
+  "source": "edge",
+  "tag": "cjk",
+  "text": "Mixed 中文 and English 文字 together"
+ },
+ {
+  "id": "edge-33",
+  "source": "edge",
+  "tag": "cjk",
+  "text": "東京タワーは高いです。それは本当です。"
+ },
+ {
+  "id": "edge-34",
+  "source": "edge",
+  "tag": "emoji",
+  "text": "Ship it 🚀"
+ },
+ {
+  "id": "edge-35",
+  "source": "edge",
+  "tag": "emoji",
+  "text": "👍👍👍"
+ },
+ {
+  "id": "edge-36",
+  "source": "edge",
+  "tag": "emoji",
+  "text": "Family 👨‍👩‍👧‍👦 ZWJ"
+ },
+ {
+  "id": "edge-37",
+  "source": "edge",
+  "tag": "emoji",
+  "text": "Flags 🇺🇸 🇯🇵"
+ },
+ {
+  "id": "edge-38",
+  "source": "edge",
+  "tag": "emoji",
+  "text": "⚡ Fast ✅ Done ❌ Fail"
+ },
+ {
+  "id": "edge-39",
+  "source": "edge",
+  "tag": "emoji",
+  "text": "Keycaps 1️⃣ 2️⃣"
+ },
+ {
+  "id": "edge-40",
+  "source": "edge",
+  "tag": "number",
+  "text": "1,234,567.89"
+ },
+ {
+  "id": "edge-41",
+  "source": "edge",
+  "tag": "number",
+  "text": "3.14159265358979323846264338327950288"
+ },
+ {
+  "id": "edge-42",
+  "source": "edge",
+  "tag": "number",
+  "text": "v0.0.9 → v1.0.10"
+ },
+ {
+  "id": "edge-43",
+  "source": "edge",
+  "tag": "number",
+  "text": "2026-10-02T16:07:00Z"
+ },
+ {
+  "id": "edge-44",
+  "source": "edge",
+  "tag": "number",
+  "text": "$1,000,000 (USD) / 100% / 50%"
+ },
+ {
+  "id": "edge-45",
+  "source": "edge",
+  "tag": "number",
+  "text": "−42 ± 0.5 ½ ¾ 1/2"
+ },
+ {
+  "id": "edge-46",
+  "source": "edge",
+  "tag": "number",
+  "text": "#411 #407 #405 #403"
+ },
+ {
+  "id": "edge-47",
+  "source": "edge",
+  "tag": "ligature",
+  "text": "office affine ffi ffl fi fl"
+ },
+ {
+  "id": "edge-48",
+  "source": "edge",
+  "tag": "kerning",
+  "text": "AVATAR WAVY To Yo Te LT"
+ },
+ {
+  "id": "edge-49",
+  "source": "edge",
+  "tag": "kerning",
+  "text": "ALL CAPS HEADING WITH KERNING PAIRS"
+ },
+ {
+  "id": "edge-50",
+  "source": "edge",
+  "tag": "latin",
+  "text": "Ünïcödé àccénts naïve café résumé"
+ },
+ {
+  "id": "edge-51",
+  "source": "edge",
+  "tag": "greek",
+  "text": "Ελληνικά κείμενο για μέτρηση"
+ },
+ {
+  "id": "edge-52",
+  "source": "edge",
+  "tag": "cyrillic",
+  "text": "Кириллица текст для измерения"
+ },
+ {
+  "id": "edge-53",
+  "source": "edge",
+  "tag": "narrow",
+  "text": "I I I I I I I I I I I I I I I I I I I"
+ },
+ {
+  "id": "edge-54",
+  "source": "edge",
+  "tag": "wide",
+  "text": "W W W W W W W W W W W W W"
+ },
+ {
+  "id": "edge-55",
+  "source": "edge",
+  "tag": "nbsp",
+  "text": "Mr. Smith goes to 100 km away"
+ },
+ {
+  "id": "edge-56",
+  "source": "edge",
+  "tag": "zwsp",
+  "text": "zero​width​space​breaks​here"
+ },
+ {
+  "id": "edge-57",
+  "source": "edge",
+  "tag": "shy",
+  "text": "hyphen­ation of a re­ally long word"
+ },
+ {
+  "id": "edge-58",
+  "source": "edge",
+  "tag": "bidi",
+  "text": "Arabic مرحبا بالعالم mixed"
+ },
+ {
+  "id": "edge-59",
+  "source": "edge",
+  "tag": "bidi",
+  "text": "Hebrew שלום עולם mixed"
+ },
+ {
+  "id": "edge-60",
+  "source": "edge",
+  "tag": "thai",
+  "text": "ภาษาไทยไม่มีช่องว่างระหว่างคำ"
+ }
+]

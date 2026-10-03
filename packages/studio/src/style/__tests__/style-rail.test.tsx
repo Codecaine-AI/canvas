@@ -143,6 +143,19 @@ describe("StyleRail", () => {
     expect(props.onChange).toHaveBeenLastCalledWith("palette", "#123456", "blue");
   });
 
+  it("applies a typed name weight snapped to the nearest hundred, keeping the typed text while focused", () => {
+    const props = renderRail({ theme: "schematic-light", themes: {} });
+    expandGroup("text");
+    const weight = byLabel("Text name weight value")!;
+    act(() => weight.focus());
+    // Ties round up: the faces CSS font matching paints for 450, 550 and 650.
+    for (const [typed, applied] of [["450", 500], ["550", 600], ["650", 700], ["640", 600]] as const) {
+      act(() => typeInto(weight, typed));
+      expect(props.onChange).toHaveBeenLastCalledWith("textFontWeight", applied, undefined);
+      expect(weight.value).toBe(typed);
+    }
+  });
+
   it("the native color picker keeps the token's alpha", () => {
     const props = renderRail({ theme: "schematic-light", themes: {} });
     expandGroup("board");

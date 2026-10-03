@@ -5,6 +5,13 @@
  * textFitReport. Connections are deliberately skipped: edge-label chips grow
  * instead of ellipsizing, and unreadable-labels owns whether a chip crowds its
  * corridor.
+ *
+ * Only a definite `overflows` verdict is a warning: a reliable one, or one
+ * that holds even with every character the bundled fonts lack at zero width
+ * (forced rows, a margin no fallback glyph can close). A `borderline` verdict
+ * (the text is within 1px of its box edge, where the browser may wrap or clip
+ * where the measurement does not) and any other estimate are notes:
+ * reported, never blocking.
  */
 import { textFitReport, type TextFitReport } from "../../text-fit";
 import { rectOf } from "../geometry";
@@ -18,7 +25,9 @@ const GUIDANCE = `Object text must render whole inside the box that owns it:
 - clipped text is absent from the rendered pixels, so a reader physically cannot read the
   missing words;
 - grow the box to at least the measured needed size, or shorten the text until the whole
-  label, body, title, or detail renders.`;
+  label, body, title, or detail renders;
+- text within 1px of its box edge, or holding characters the bundled fonts lack, is a note
+  instead: it may wrap or clip in the browser, so it cannot be promised either way.`;
 
 /** The remedy, worded for what actually clipped: the name, the detail line, or both. */
 function suggestionFor(id: string, report: TextFitReport): string {
@@ -42,6 +51,14 @@ function suggestionFor(id: string, report: TextFitReport): string {
   return needed ? `shorten ${detailLimit} or widen ${id} to ≥${needed.width}` : `shorten ${detailLimit}`;
 }
 
+/** The remedy for a note: what would make the fit certain, when anything would. */
+function noteSuggestionFor(id: string, report: TextFitReport): string | undefined {
+  if (report.verdict !== "fits" && report.neededSize) {
+    return `grow ${id} to ≥${report.neededSize.width}×${report.neededSize.height} to be sure`;
+  }
+  return undefined;
+}
+
 export const rule: LayoutRule = {
   id: "clipped-text",
   title: "Clipped text",
@@ -54,15 +71,18 @@ export const rule: LayoutRule = {
       const text = object.text ?? "";
       if (text === "" && !object.detail?.trim()) continue;
       const report = textFitReport(object, object.geometry, text, context?.canvasStyle);
-      if (report.fits) continue;
+      if (report.verdict === "fits" && report.reliable) continue;
 
+      // Judged only when the overflow is clear of the edge and does not hang on an estimate.
+      const judged = report.verdict === "overflows" && report.definite;
+      const suggestion = judged ? suggestionFor(object.id, report) : noteSuggestionFor(object.id, report);
       findings.push({
         rule: "clipped-text",
-        severity: "warning",
+        severity: judged ? "warning" : "note",
         at: [object.id],
         where: rectOf(object),
         message: `${object.id}: ${report.detail}`,
-        suggestion: suggestionFor(object.id, report),
+        ...(suggestion ? { suggestion } : null),
       });
     }
 

@@ -304,7 +304,7 @@ function applySize(
     status: "applied",
     draft: document,
     summary: summary(landed),
-    ...(report.fits ? {} : { notes: [report.detail] }),
+    ...(report.fits && report.reliable ? {} : { notes: [report.detail] }),
   };
 }
 

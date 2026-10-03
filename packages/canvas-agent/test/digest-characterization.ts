@@ -94,9 +94,9 @@ export const DIAGNOSTICS_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
   "digest-frameless": CLEAN,
   "digest-solo-section": CLEAN,
   "digest-clipping": `DIAGNOSTICS · 0 errors · 1 warning
-  W1 clipped-text: wordy: label clips at 160×96: 16 wrapped line(s), the box holds 4 — needs 1750×96 (grow wordy to ≥1750×96 or shorten the text)`,
+  W1 clipped-text: wordy: label clips at 160×96: 16 wrapped line(s), the box holds 4 — needs 1751×96 (grow wordy to ≥1751×96 or shorten the text)`,
   "perception-labeled-gap": `DIAGNOSTICS · 0 errors · 1 warning
-  W1 unreadable-labels: label "go" chip on edge (43×30px) bleeds onto alpha and beta: 48px of corridor where the chip needs 76px (open the alpha↔beta corridor to ≥76px so the chip and its 16px margins fit)`,
+  W1 unreadable-labels: label "go" chip on edge (44×30px) bleeds onto alpha and beta: 48px of corridor where the chip needs 76px (open the alpha↔beta corridor to ≥76px so the chip and its 16px margins fit)`,
   "perception-single": CLEAN,
   "perception-object-delta": CLEAN,
   "perception-membership": CLEAN,

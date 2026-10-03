@@ -17,14 +17,20 @@ import {
   belowBandSize,
   belowExtendedBoundsPx,
   collapseDetailText,
+  detailFontSpec,
   detailTypography,
-  estimateDetailWidthPx,
   resolveSlotTypography,
   resolveTextSlot,
   slotDetailText,
   slotNameLineCapacity,
   textSlotClampLineCount,
 } from "../text-slots";
+import { measureWidth } from "../../theme/text-measure";
+
+/** The width a band budgets for a detail: its measured width in the detail font. */
+function detailWidthPx(text: string, style = LIGHT): number {
+  return measureWidth(text, detailFontSpec(detailTypography(style)));
+}
 
 const LIGHT = canvasThemePreset("schematic-light");
 const DARK = canvasThemePreset("schematic-dark");
@@ -81,9 +87,14 @@ describe("detail line typography", () => {
     expect(detailTypography(DARK).color).toBe("#8B93B5");
   });
 
-  it("budgets mono runs at the exact 0.6em cell and sans runs at the 0.62em heuristic", () => {
-    expect(estimateDetailWidthPx(":4820", detailTypography(LIGHT))).toBe(5 * 0.6 * 14);
-    expect(estimateDetailWidthPx(":4820", detailTypography(FIGJAM_CANVAS_STYLE))).toBeCloseTo(5 * 0.62 * 13, 10);
+  it("measures details in the font they paint: Plex Mono cells (layout units) and real Inter advances", () => {
+    expect(detailFontSpec(detailTypography(LIGHT))).toEqual({ family: CANVAS_MONO_FONT_STACK, size: 14, weight: 500 });
+    expect(detailFontSpec(detailTypography(FIGJAM_CANVAS_STYLE))).toEqual({ family: CANVAS_SANS_FONT_STACK, size: 13, weight: 400 });
+    // Five 8.4px Plex Mono cells, rounded up to Chromium's 1/64px layout unit.
+    expect(detailWidthPx(":4820")).toBe(Math.ceil(5 * 0.6 * 14 * 64) / 64);
+    // A wide sans detail is budgeted at its real width, not 0.62em per character
+    // (10 × "W" at 13px: 80.6px by the old heuristic, ~123px painted).
+    expect(detailWidthPx("WWWWWWWWWW", FIGJAM_CANVAS_STYLE)).toBeGreaterThan(120);
   });
 });
 
@@ -166,11 +177,12 @@ describe("resolveTextSlot — detail line in a center slot", () => {
 describe("resolveTextSlot — detail line in the below band", () => {
   it("grows the band by the gap and one detail line, widened to the detail", () => {
     const plain = icon();
-    // 19 mono cells at 14px = 159.6px: wider than the name, under the 200px max width.
+    // 19 mono cells at 14px ≈ 159.6px: wider than the name, under the 200px max width.
     const detailed = icon({ detail: "postgres 16 · db.t3" });
     const nameBand = belowBandSize(plain.text, plain, LIGHT);
     const band = belowBandSize(detailed.text, detailed, LIGHT);
-    const detailWidth = estimateDetailWidthPx("postgres 16 · db.t3", detailTypography(LIGHT));
+    const detailWidth = detailWidthPx("postgres 16 · db.t3");
+    expect(detailWidth).toBeCloseTo(159.6, 1);
     expect(detailWidth).toBeGreaterThan(nameBand.widthPx);
     expect(band).toEqual({
       lines: 1,
@@ -197,7 +209,7 @@ describe("resolveTextSlot — detail line in the below band", () => {
     const detailOnly = icon({ text: "", detail: "detail only" });
     expect(belowBandSize("", detailOnly, LIGHT)).toEqual({
       lines: 0,
-      widthPx: estimateDetailWidthPx("detail only", detailTypography(LIGHT)),
+      widthPx: detailWidthPx("detail only"),
       heightPx: 14 * 1.3,
     });
   });

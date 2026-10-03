@@ -3,6 +3,8 @@ import { describe, expect, test } from "bun:test";
 import { rule as coveredContent } from "../src/board/lints/rules/covered-content";
 import { box, connect, makeDocument } from "./synthetic";
 import { FIGJAM_CONTEXT } from "./helpers";
+import { chipFor, chipWidth } from "../src/board/lints/geometry";
+import { FIGJAM_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
 
 // Chip geometry here is figjam's (30px sans chip), so every check measures in
 // the figjam theme explicitly.
@@ -146,6 +148,25 @@ describe("covered-content lint", () => {
     expect(errors[0]!.message).toContain("covers t");
   });
 
+  test("an overlap inside the 1px measuring band is not an error, but the clearance it breaks still warns", () => {
+    // "go live" sizes its chip from the measured label: centered at x 480, its
+    // right edge is 480 + w/2. A box 0.25px inside that edge overlaps the
+    // measured chip only — the browser's chip may be a hair narrower — yet it
+    // sits well inside the 16px margin either way: a warning, not an error,
+    // and never a mere note.
+    const right = 480 + chipWidth("go live", FIGJAM_CANVAS_STYLE) / 2;
+    const findings = coveredContent.check(makeDocument(
+      [box("a", 0, 0), box("t", right - 0.25, 0), box("b", 800, 0)],
+      [{
+        ...connect("e", "a", "b"),
+        label: "go live",
+        waypoints: [[160, 48], [800, 48]],
+      }],
+    ), FIGJAM_CONTEXT);
+    expect(findings.map((finding) => finding.severity)).toEqual(["warning"]);
+    expect(findings[0]!.message).toContain("sits within 16px of t");
+  });
+
   test("clearance margin edge: contact inside 16px warns, past it is clean", () => {
     // The auto route detours around "t", but the chip (right edge 500.5,
     // inflated to 516.5) still reaches t's face at x 516 — warning.
@@ -281,5 +302,16 @@ describe("covered-content lint", () => {
     const errors = over.filter((finding) => finding.severity === "error");
     expect(errors).toHaveLength(1);
     expect(errors[0]!.message).toContain("lies on f's path for 9px");
+  });
+  test.each(["go", "🚀"])("a chip centered on a box is an error whatever its label's fallback width (%s)", (label) => {
+    // The label point (480,48) lies inside t: even the chip's guaranteed footprint covers it.
+    const document = makeDocument(
+      [box("a", 0, 0), box("t", 450, 20, 60, 60), box("b", 800, 0)],
+      [{ ...connect("e", "a", "b"), label, waypoints: [[160, 48], [800, 48]] }],
+    );
+    const chip = chipFor(document.connections[0]!, document, FIGJAM_CANVAS_STYLE)!;
+    expect(chip.rect.x + chip.rect.width / 2).toBe(480);
+    const findings = coveredContent.check(document, FIGJAM_CONTEXT);
+    expect(findings.some((finding) => finding.severity === "error" && finding.at.includes("t"))).toBe(true);
   });
 });

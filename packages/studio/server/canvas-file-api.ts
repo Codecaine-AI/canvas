@@ -1,7 +1,12 @@
 import { createHash } from "node:crypto";
 import { existsSync, promises as fs } from "node:fs";
+import { fileURLToPath } from "node:url";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { basename, resolve, sep } from "node:path";
+// By package name, as the renderer imports it: both then share one copy of
+// text-measure (externalized in Vite's config bundle, inlined in the Electron
+// bundle), so activeBackend() here is the backend the renderer measures with.
+import { activeBackend, type BundledFace } from "@codecaine-ai/text-measure";
 // Vite externalizes bare package imports while bundling its Node-side config.
 // A relative import keeps the workspace's raw public schema entry in both the
 // Vite config bundle and the Electron esbuild bundle.
@@ -10,6 +15,7 @@ import type { InteractiveCanvasDocument } from "../../canvas/src/state/schema.ts
 // Same relative-import rule as the schema import above: the Electron esbuild
 // bundle must resolve the renderer from source, not the package name.
 import { renderDocumentToSvg } from "../../canvas/src/render/static-svg.ts";
+import { embedSvgFonts } from "../../canvas/src/render/svg-fonts.ts";
 // Same relative-import rule: the workspace-wide style settings contract.
 import {
   CANVAS_STYLE_FILENAME,
@@ -27,6 +33,83 @@ const JSON_LIMIT_BYTES = 5 * 1024 * 1024;
 const PREVIEW_MIN_DIMENSION = 16;
 const PREVIEW_MAX_DIMENSION = 4000;
 const PREVIEW_DEFAULT_WIDTH = 640;
+
+/**
+ * text-measure's headless entry, imported by a name only known at run time.
+ * Keep it out of literal imports: bundlers would then inline it, and the
+ * Electron main's esbuild CJS bundle cannot hold it (harfbuzzjs uses
+ * top-level await, and the entry finds its TTFs through import.meta.url,
+ * which is empty in CJS).
+ */
+const TEXT_MEASURE_HEADLESS_ENTRY: string = "@codecaine-ai/text-measure/headless";
+
+let exactTextMeasure: Promise<void> | null = null;
+
+/**
+ * Switches text-measure to exact HarfBuzz shaping once, before the first
+ * preview renders, so previews wrap and fit text the way Studio paints it.
+ * Never rejects: when HarfBuzz cannot load, or loads into a copy of
+ * text-measure other than the renderer's (a bundle that inlined the
+ * renderer), it warns once and previews keep the approximate table backend.
+ */
+function ensureExactTextMeasure(): Promise<void> {
+  exactTextMeasure ??= (async () => {
+    let failure = "HarfBuzz loaded into a copy of text-measure that the renderer does not use";
+    try {
+      const headless = (await import(TEXT_MEASURE_HEADLESS_ENTRY)) as typeof import("@codecaine-ai/text-measure/headless");
+      await headless.useHarfBuzz();
+    } catch (error) {
+      failure = error instanceof Error ? error.message : String(error);
+    }
+    if (!activeBackend().exact) {
+      console.warn(
+        `[studio] Canvas previews measure text with the approximate ${activeBackend().name} backend: ${failure}`,
+      );
+    }
+  })();
+  return exactTextMeasure;
+}
+
+/**
+ * Where a text-measure font file lives on disk: through the package's
+ * "./fonts/*" export, by import.meta.resolve in ESM hosts (Vite) and
+ * require.resolve in the CommonJS Electron bundle. Null when neither resolves.
+ */
+function textMeasureFontPath(file: string): string | null {
+  const specifier = `@codecaine-ai/text-measure/fonts/${file}`;
+  try {
+    const resolveEsm = (import.meta as { resolve?: (specifier: string) => string }).resolve;
+    if (typeof resolveEsm === "function") return fileURLToPath(resolveEsm(specifier));
+  } catch {
+    // fall through to CommonJS resolution
+  }
+  try {
+    if (typeof require === "function") return require.resolve(specifier);
+  } catch {
+    // unresolvable
+  }
+  return null;
+}
+
+const fontFaceBytes = new Map<string, Promise<Uint8Array | null>>();
+
+/** A bundled face's woff2 bytes (read once), or null when the file cannot be found. */
+function loadFontFace(face: BundledFace): Promise<Uint8Array | null> {
+  let pending = fontFaceBytes.get(face.file);
+  if (!pending) {
+    pending = (async () => {
+      const path = textMeasureFontPath(`${face.file}.woff2`);
+      if (!path) return null;
+      try {
+        return new Uint8Array(await fs.readFile(path));
+      } catch {
+        return null;
+      }
+    })();
+    fontFaceBytes.set(face.file, pending);
+  }
+  return pending;
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
@@ -400,13 +483,15 @@ export function createCanvasFileApiHandler(options: {
             width = PREVIEW_DEFAULT_WIDTH;
           }
 
-          // The workspace style (the active theme, resolved) is part of the
-          // render, so it is part of the cache key: a theme switch or a token
-          // edit re-renders every preview.
+          // The workspace style (the active theme, resolved) and the text
+          // measuring backend are part of the render, so they are part of the
+          // cache key: a theme switch, a token edit, or a backend change
+          // re-renders every preview.
+          await ensureExactTextMeasure();
           const { style: canvasStyle } = await readCanvasStyleState(canvasesDir);
           const etag = `"${createHash("sha1")
             .update(
-              `${mtimeMs}|${sectionId ?? ""}|${width ?? ""}|${height ?? ""}|${fit ?? ""}|${padding ?? ""}|${JSON.stringify(canvasStyle)}`,
+              `${mtimeMs}|${sectionId ?? ""}|${width ?? ""}|${height ?? ""}|${fit ?? ""}|${padding ?? ""}|${activeBackend().name}|fonts|${JSON.stringify(canvasStyle)}`,
             )
             .digest("hex")}"`;
           res.setHeader("etag", etag);
@@ -437,6 +522,9 @@ export function createCanvasFileApiHandler(options: {
             return;
           }
 
+          // Shown through <img>, the SVG is its own document: it paints the
+          // bundled faces its text was measured with only if it carries them.
+          svg = await embedSvgFonts(svg, loadFontFace);
           res.statusCode = 200;
           res.setHeader("content-type", "image/svg+xml; charset=utf-8");
           res.end(svg);

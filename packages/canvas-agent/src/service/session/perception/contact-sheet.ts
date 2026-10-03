@@ -9,6 +9,9 @@ import type {
 import { preferredObjectColor } from "../../../../../canvas/src/objects/registry";
 import { ICON_GLYPH_IDS } from "../../../../../canvas/src/objects/shapes/icon/icon-glyphs";
 import { renderDocumentToSvg } from "../../../../../canvas/src/render/static-svg";
+import { CENTER_TEXT_INSET_PX } from "../../../../../canvas/src/objects/text-slots";
+import { CANVAS_SANS_FONT_STACK } from "../../../../../canvas/src/theme/fonts";
+import { measureWidth } from "../../../../../canvas/src/theme/text-measure";
 import {
   draftPlacedObject,
   OBJECT_TYPE_DEFAULTS,
@@ -57,11 +60,16 @@ const FAMILY_ORDER: readonly Family[] = [
 
 const VIEW_WIDTH = 1400;
 const COLUMNS = 4;
-const FAMILY_LABEL_WIDTH = 180;
+/** Narrowest family label; a longer one grows to its measured name. */
+const FAMILY_LABEL_MIN_WIDTH = 180;
 const FAMILY_LABEL_HEIGHT = 56;
 const CONTENT_X = 232;
 const CELL_GAP_X = 48;
-const SPECIMEN_LABEL_HEIGHT = 34;
+/** Narrowest and shortest specimen caption; captions grow to the style's measured name. */
+const SPECIMEN_LABEL_MIN_WIDTH = 132;
+const SPECIMEN_LABEL_MIN_HEIGHT = 34;
+/** Room past a caption's measured width: the 1px measuring band, and a pixel of air. */
+const CAPTION_SLACK_PX = 2;
 const SPECIMEN_LABEL_GAP_Y = 10;
 const ROW_GAP_Y = 52;
 const BAND_GAP_Y = 72;
@@ -114,7 +122,29 @@ function specimenTypes(): InteractiveCanvasObjectType[] {
   );
 }
 
-function buildVocabularyDocument(): InteractiveCanvasDocument {
+/**
+ * Caption box sizes for the workspace style: a process box (14px × 12px
+ * insets) wide enough for the name measured in the style's name font and
+ * tall enough for one name line.
+ */
+function captionSizer(canvasStyle: CanvasStyle) {
+  const font = { family: CANVAS_SANS_FONT_STACK, size: canvasStyle.textFontSizePx, weight: canvasStyle.textFontWeight };
+  return {
+    width: (text: string, minWidth: number) =>
+      Math.max(minWidth, Math.ceil(measureWidth(text, font) + CENTER_TEXT_INSET_PX.x * 2 + CAPTION_SLACK_PX)),
+    height: Math.max(SPECIMEN_LABEL_MIN_HEIGHT, Math.ceil(canvasStyle.textFontSizePx * 1.2 + CENTER_TEXT_INSET_PX.y * 2)),
+  };
+}
+
+/** The contact sheet's board for `canvasStyle`: captions sized by the style's measured name font. */
+export function buildVocabularyDocument(canvasStyle: CanvasStyle): InteractiveCanvasDocument {
+  const caption = captionSizer(canvasStyle);
+  const familyLabelWidth = Math.max(
+    ...[...FAMILY_ORDER.map((family) => family.toUpperCase()), "ICONS", "COLORS", "CONNECTIONS"].map((name) =>
+      caption.width(name, FAMILY_LABEL_MIN_WIDTH),
+    ),
+  );
+  const contentX = Math.max(CONTENT_X, familyLabelWidth + CONTENT_X - FAMILY_LABEL_MIN_WIDTH);
   const roster = specimenTypes();
   const grouped = new Map<Family, InteractiveCanvasObjectType[]>(
     FAMILY_ORDER.map((family) => [family, []]),
@@ -132,7 +162,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
     if (types.length === 0) continue;
 
     const sizes = types.map(positiveDefaultSize);
-    const labelWidths = types.map((type) => Math.max(132, type.length * 10 + 48));
+    const labelWidths = types.map((type) => caption.width(type, SPECIMEN_LABEL_MIN_WIDTH));
     const maxWidth = Math.max(...sizes.map(({ width }) => width));
     const maxHeight = Math.max(...sizes.map(({ height }) => height));
     const cellWidth = Math.max(
@@ -140,7 +170,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
       Math.max(...labelWidths) + 8,
     );
     const cellHeight =
-      maxHeight + SPECIMEN_LABEL_GAP_Y + SPECIMEN_LABEL_HEIGHT + ROW_GAP_Y;
+      maxHeight + SPECIMEN_LABEL_GAP_Y + caption.height + ROW_GAP_Y;
 
     objects.push(
       draftPlacedObject(
@@ -148,7 +178,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
         {
           x: 0,
           y: nextBandY,
-          width: FAMILY_LABEL_WIDTH,
+          width: familyLabelWidth,
           height: FAMILY_LABEL_HEIGHT,
         },
         {
@@ -165,7 +195,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
       const row = Math.floor(index / COLUMNS);
       const id = `vocabulary-${type}`;
       const geometry = {
-        x: CONTENT_X + column * cellWidth + (cellWidth - width) / 2,
+        x: contentX + column * cellWidth + (cellWidth - width) / 2,
         y: nextBandY + row * cellHeight,
         width,
         height,
@@ -185,7 +215,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
             x: geometry.x + (width - labelWidth) / 2,
             y: geometry.y + height + SPECIMEN_LABEL_GAP_Y,
             width: labelWidth,
-            height: SPECIMEN_LABEL_HEIGHT,
+            height: caption.height,
           },
           {
             id: `label-${type}`,
@@ -219,7 +249,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
     objects.push(
       draftPlacedObject(
         "process",
-        { x: 0, y: nextBandY, width: FAMILY_LABEL_WIDTH, height: FAMILY_LABEL_HEIGHT },
+        { x: 0, y: nextBandY, width: familyLabelWidth, height: FAMILY_LABEL_HEIGHT },
         { id, text, color: "blue" },
       ),
     );
@@ -229,13 +259,13 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
   bandLabel("band-icons", "ICONS");
   const iconSize = positiveDefaultSize("icon");
   const iconCellWidth = iconSize.width + CELL_GAP_X;
-  const iconCellHeight = iconSize.height + SPECIMEN_LABEL_HEIGHT + ROW_GAP_Y;
+  const iconCellHeight = iconSize.height + caption.height + ROW_GAP_Y;
   for (const [index, glyph] of ICON_GLYPH_IDS.entries()) {
     objects.push(
       draftPlacedObject(
         "icon",
         {
-          x: CONTENT_X + (index % ICON_COLUMNS) * iconCellWidth,
+          x: contentX + (index % ICON_COLUMNS) * iconCellWidth,
           y: nextBandY + Math.floor(index / ICON_COLUMNS) * iconCellHeight,
           width: iconSize.width,
           height: iconSize.height,
@@ -255,7 +285,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
       draftPlacedObject(
         "rectangle",
         {
-          x: CONTENT_X + (index % COLOR_COLUMNS) * colorCellWidth,
+          x: contentX + (index % COLOR_COLUMNS) * colorCellWidth,
           y: nextBandY + Math.floor(index / COLOR_COLUMNS) * colorCellHeight,
           ...COLOR_SWATCH,
         },
@@ -274,7 +304,7 @@ function buildVocabularyDocument(): InteractiveCanvasDocument {
     "to a section",
   ];
   for (const [index, label] of demoLabels.entries()) {
-    const x = CONTENT_X + (index % 2) * DEMO_COLUMN_WIDTH;
+    const x = contentX + (index % 2) * DEMO_COLUMN_WIDTH;
     const y = nextBandY + Math.floor(index / 2) * DEMO_ROW_HEIGHT;
     const fromId = `demo-from-${index}`;
     const toId = `demo-to-${index}`;
@@ -339,7 +369,7 @@ export function vocabularyContactSheet(canvasStyle: CanvasStyle = DEFAULT_CANVAS
   if (cached !== undefined) return cached;
   let sheet: Buffer | null;
   try {
-    const document = buildVocabularyDocument();
+    const document = buildVocabularyDocument(canvasStyle);
     const rendered = renderDocumentToSvg(document, {
       fit: "content",
       padding: 24,

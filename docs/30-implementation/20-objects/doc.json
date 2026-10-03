@@ -45,6 +45,13 @@
         "b-obj-vendor-decision-24",
         "b-obj-vendor-why-25",
         "b-obj-vendor-applies-26",
+        "b-obj-measure-heading",
+        "b-obj-measure-decision",
+        "b-obj-measure-why",
+        "b-obj-measure-applies",
+        "b-obj-measure-sites-lead",
+        "b-obj-measure-sites-table",
+        "b-obj-roster-heading",
         "b-obj-roster-16"
       ]
     },
@@ -1055,6 +1062,551 @@
         },
         {
           "insert": ", including every future icon set or version bump, which updates the pin and its integrity, re-vendors, and gets its regenerated diff reviewed."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-heading": {
+      "id": "b-obj-measure-heading",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Object Text Measures Through One Module"
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-decision": {
+      "id": "b-obj-measure-decision",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-obj-measure-decision-rule"
+      ]
+    },
+    "b-obj-measure-decision-rule": {
+      "id": "b-obj-measure-decision-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Every width, wrap, and ellipsis in the object system comes from "
+        },
+        {
+          "insert": "theme/text-measure.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/text-measure.ts",
+              "label": "theme/text-measure.ts"
+            }
+          }
+        },
+        {
+          "insert": ", measured in the font, size, and weight the painter uses."
+        }
+      ],
+      "children": [
+        "b-obj-measure-decision-wrapper",
+        "b-obj-measure-decision-pins",
+        "b-obj-measure-decision-strong",
+        "b-obj-measure-decision-export"
+      ]
+    },
+    "b-obj-measure-decision-wrapper": {
+      "id": "b-obj-measure-decision-wrapper",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The module wraps the shared package that "
+        },
+        {
+          "insert": "Text Measure",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/65-text-measure"
+            }
+          }
+        },
+        {
+          "insert": " records and adds the canvas helpers "
+        },
+        {
+          "insert": "layoutBoxWidth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "ellipsizeToWidth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "measuresExactly",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". No other module in "
+        },
+        {
+          "insert": "packages/canvas/src",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " keeps a per-character width estimate."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-decision-pins": {
+      "id": "b-obj-measure-decision-pins",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The stage root pins letter-spacing, word-spacing, font features, ligatures, kerning, and a tab size of 8 ("
+        },
+        {
+          "insert": "CanvasStage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/stage/CanvasStage.tsx",
+              "label": "CanvasStage.tsx"
+            }
+          }
+        },
+        {
+          "insert": "), and title chips set "
+        },
+        {
+          "insert": "box-sizing: border-box",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". Host page CSS therefore cannot move painted text away from its measurement."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-decision-strong": {
+      "id": "b-obj-measure-decision-strong",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A sticky's bold runs set "
+        },
+        {
+          "insert": "font-family: inherit",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " ("
+        },
+        {
+          "insert": "STICKY_STRONG_STYLE",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), so a host rule such as the docs reader's "
+        },
+        {
+          "insert": "strong",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " style cannot repaint them in another font."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-decision-export": {
+      "id": "b-obj-measure-decision-export",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "An exported image or a Studio preview embeds the bundled faces its SVG uses as "
+        },
+        {
+          "insert": "@font-face",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " data URLs ("
+        },
+        {
+          "insert": "render/svg-fonts.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render/svg-fonts.ts",
+              "label": "render/svg-fonts.ts"
+            }
+          }
+        },
+        {
+          "insert": "), so it paints in the faces it was measured in."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-why": {
+      "id": "b-obj-measure-why",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-obj-measure-why-clip",
+        "b-obj-measure-why-rejected",
+        "b-obj-measure-why-residue"
+      ]
+    },
+    "b-obj-measure-why-clip": {
+      "id": "b-obj-measure-why-clip",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Text measured one way and painted another clips on one surface and not the other, and anchors, routes, and hit bounds follow the measured box."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-why-rejected": {
+      "id": "b-obj-measure-why-rejected",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The rejected alternative was per-site measuring, such as 0.62em per character for figjam section titles and an Inter advance table without kerning. Against Studio's paint in Chromium on 32 boards in figjam and schematic-light (1,562 labels), it disagreed on 251 labels and the module disagrees on 1."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-why-residue": {
+      "id": "b-obj-measure-why-residue",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The one disagreement is an uncovered ① in an IBM Plex Mono label, which the agent's fit report marks unreliable."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-applies": {
+      "id": "b-obj-measure-applies",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-obj-measure-applies-scope"
+      ]
+    },
+    "b-obj-measure-applies-scope": {
+      "id": "b-obj-measure-applies-scope",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "text-slots.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "section/title-chip-layout.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and the static renderer in "
+        },
+        {
+          "insert": "packages/canvas/src/render",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render",
+              "label": "packages/canvas/src/render"
+            }
+          }
+        },
+        {
+          "insert": ", including every future text site, which measures through the wrapper."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-sites-lead": {
+      "id": "b-obj-measure-sites-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Each measured site builds its font from the style tokens its painter reads. "
+        },
+        {
+          "insert": "Connectors",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/40-connectors"
+            }
+          }
+        },
+        {
+          "insert": " records the edge label chip in the last row."
+        }
+      ],
+      "children": []
+    },
+    "b-obj-measure-sites-table": {
+      "id": "b-obj-measure-sites-table",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "Site",
+          "Module",
+          "Measures with",
+          "Rule"
+        ],
+        "rows": [
+          [
+            "Shape names",
+            [
+              {
+                "insert": "render/static-svg.ts",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "wrapText",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", pre-wrap"
+              }
+            ],
+            "Clamped to the slot's line capacity, last kept line cut to the longest grapheme prefix that fits with …"
+          ],
+          [
+            "Icon caption bands",
+            [
+              {
+                "insert": "objects/text-slots.ts",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "wrapText",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", pre-wrap"
+              }
+            ],
+            "As wide as the widest wrapped line, at most the larger of the object width and 200px"
+          ],
+          [
+            "Detail lines",
+            [
+              {
+                "insert": "text-slots.ts",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "static-svg.ts",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "measureWidth",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "One line, cut with … in the detail font"
+          ],
+          [
+            "Sticky bodies",
+            [
+              {
+                "insert": "render/sticky-text.ts",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "wrapRuns",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Each run in its own font, inline code in IBM Plex Mono 400 at 0.85em, adjacent same-font runs painted as one segment"
+          ],
+          [
+            "Section title chips",
+            [
+              {
+                "insert": "section/title-chip-layout.ts",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "measureWidth",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " per run"
+              }
+            ],
+            "Title and detail each in their own font, ellipsis in the title font"
+          ],
+          [
+            "Edge label chips",
+            [
+              {
+                "insert": "connectors/label-chip.ts",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "measureWidth",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Text width plus 0.75em a side for Inter or 0.5em for IBM Plex Mono"
+          ]
+        ],
+        "title": "Measured text sites"
+      },
+      "children": []
+    },
+    "b-obj-roster-heading": {
+      "id": "b-obj-roster-heading",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Source Tree"
         }
       ],
       "children": []

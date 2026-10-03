@@ -29,14 +29,11 @@
  *
  * Widths mirror the live chip's CSS auto width, and every consumer — the
  * static chip, hit-testing, painted extents, view framing, the title editor,
- * the agent's text-fit — reads them from this one layout: mono runs measure
- * exactly (IBM Plex Mono advances one MONO_ADVANCE_EM cell per codepoint —
- * render/text-metrics.ts measureMonoTextPx's rule); sans runs of a chip
- * carrying an icon or a detail measure on real Inter advances
- * (theme/inter-metrics.ts), with no floor, so the detail lands where the live
- * chip's flow puts it and the chip hits where it paints; a plain sans title
- * keeps the original 0.62em-per-character heuristic and 72px floor
- * (unchanged figjam output).
+ * the agent's text-fit — reads them from this one layout. Every run measures
+ * in the font it paints in through theme/text-measure.ts (the header font's
+ * family stack, size, weight, and tracking; the title as displayed — cased,
+ * whitespace collapsed the way the chip's `nowrap` paints it), so the detail
+ * lands where the live chip's flow puts it and the chip hits where it paints.
  *
  * Pure: no React, no DOM — safe for the Node-side static renderer.
  */
@@ -47,8 +44,15 @@ import {
   type CanvasStyle,
   type CanvasStyleFont,
 } from "../../theme/canvas-style";
-import { MONO_ADVANCE_EM } from "../../theme/fonts";
-import { measureInterTextPx } from "../../theme/inter-metrics";
+import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK } from "../../theme/fonts";
+import {
+  ELLIPSIS,
+  ellipsizeToWidth,
+  layoutBoxWidth,
+  measureWidth,
+  wrapRuns,
+  type FontSpec,
+} from "../../theme/text-measure";
 import type { InteractiveCanvasObject } from "../../state/schema";
 import { resolveIconGlyph, type IconGlyphElement } from "../shapes/icon/icon-glyphs";
 import type { LocalRect } from "../text-slots";
@@ -113,12 +117,6 @@ export const TITLE_CHIP_DETAIL = {
 
 /** Tracking for uppercase mono titles. */
 export const TITLE_CHIP_MONO_UPPERCASE_TRACKING_EM = 0.08;
-
-/** Average sans glyph advance, em — the chip's char-count width heuristic (live CSS auto width mirror). */
-export const TITLE_CHIP_SANS_CHAR_WIDTH_EM = 0.62;
-
-/** Narrowest estimated sans chip (the original floor). */
-const TITLE_CHIP_MIN_SANS_WIDTH_PX = 72;
 
 // ---------------------------------------------------------------------------
 // Scale + width budget
@@ -187,26 +185,24 @@ export function titleChipDetailFont(canvasStyle: CanvasStyle = DEFAULT_CANVAS_ST
   };
 }
 
-/**
- * Estimated px width of `text` (already cased for display) in `font`. Mono is
- * exact — render/text-metrics.ts measureMonoTextPx's rule, one cell per
- * codepoint plus tracking after each glyph; sans is the chip's char-count
- * heuristic (UTF-16 length, as it always was).
- */
-export function titleChipTextWidthPx(text: string, font: TitleChipFont): number {
-  if (font.font === "mono") {
-    let glyphs = 0;
-    for (const _char of text) glyphs += 1;
-    return glyphs * (MONO_ADVANCE_EM + font.letterSpacingEm) * font.fontSizePx;
-  }
-  return text.length * font.fontSizePx * TITLE_CHIP_SANS_CHAR_WIDTH_EM;
+/** `font` as a text-measure FontSpec: the family stack the chip paints, size, weight, and tracking in px. */
+export function titleChipFontSpec(font: TitleChipFont): FontSpec {
+  return {
+    family: font.font === "mono" ? CANVAS_MONO_FONT_STACK : CANVAS_SANS_FONT_STACK,
+    size: font.fontSizePx,
+    weight: font.fontWeight,
+    letterSpacing: font.letterSpacingEm * font.fontSizePx,
+  };
 }
 
-/** Width of one character in `font` — the ellipsis and the sans truncation step. */
-export function titleChipCharWidthPx(font: TitleChipFont): number {
-  return font.font === "mono"
-    ? (MONO_ADVANCE_EM + font.letterSpacingEm) * font.fontSizePx
-    : font.fontSizePx * TITLE_CHIP_SANS_CHAR_WIDTH_EM;
+/**
+ * Width of `text` (already cased for display) in `font`, as the chip's
+ * `white-space: nowrap` run paints it: whitespace runs collapsed, ends
+ * trimmed, tracking after every glyph (the last included), in Chromium
+ * layout units.
+ */
+export function titleChipTextWidthPx(text: string, font: TitleChipFont): number {
+  return measureWidth(text, titleChipFontSpec(font));
 }
 
 /** `text` as the chip displays it (uppercased when the font says so). */
@@ -279,8 +275,6 @@ export interface TitleChipRun {
 
 /** Everything a renderer needs to draw one section's title chip. */
 export interface TitleChipLayout {
-  /** Sans runs measure on real Inter advances (a chip with an icon or a detail); else the char-count heuristic. */
-  measuredSans: boolean;
   placement: TitleChipPlacement;
   /**
    * The painted chip box, section-local px at natural size: (x, y) is the
@@ -328,13 +322,6 @@ export function titleChipHasContent(
   return section.text !== "" || titleChipIconId(section, canvasStyle) !== null || titleChipDetailText(section) !== null;
 }
 
-/** Width of a run as the layout measures it: exact mono cells, real Inter advances for a measured sans chip, else the char-count heuristic. */
-function measureRun(run: string, font: TitleChipFont, measuredSans: boolean): number {
-  return font.font === "sans" && measuredSans
-    ? measureInterTextPx(run, font.fontSizePx, font.fontWeight)
-    : titleChipTextWidthPx(run, font);
-}
-
 /** The width-relevant content of a chip, independent of the section's geometry. */
 function chipContent(
   section: Pick<InteractiveCanvasObject, "text" | "style" | "icon" | "detail">,
@@ -347,10 +334,7 @@ function chipContent(
     ? { top: 0, right: chipBorder, bottom: chipBorder, left: 0 }
     : { top: chipBorder, right: chipBorder, bottom: chipBorder, left: chipBorder };
   const iconId = titleChipIconId(section, canvasStyle);
-  // A chip carrying an icon or a detail measures its Inter runs exactly; a
-  // plain title keeps the original char-count estimate.
-  const measuredSans = iconId !== null || titleChipDetailText(section) !== null;
-  const measure = (run: string, font: TitleChipFont) => measureRun(run, font, measuredSans);
+  const measure = titleChipTextWidthPx;
   const paddingLeftPx = iconId ? TITLE_CHIP_ICON.leadPaddingPx : TITLE_CHIP.paddingXPx;
   const paddingRightPx = TITLE_CHIP.paddingXPx;
   const titleFont = titleChipTitleFont(canvasStyle);
@@ -359,20 +343,31 @@ function chipContent(
   const detailText = titleChipDetailText(section);
   const detailFont = titleChipDetailFont(canvasStyle);
   const detailWidth = detailText === null ? 0 : measure(detailText, detailFont);
+  // Where the detail starts after the title. The chip's one line is
+  // `TITLE<span style="margin-left: 10px">detail</span>`: a space the title
+  // ends with sits inside that line, so it paints (collapsed to one) and pushes
+  // the detail right — measured as the browser lays the two runs out.
+  let titleAdvance = titleWidth;
+  if (detailText !== null) {
+    const line = wrapRuns(
+      [
+        { text: titleText, font: titleChipFontSpec(titleFont) },
+        { text: detailText, font: titleChipFontSpec(detailFont) },
+      ],
+      { maxWidth: Number.POSITIVE_INFINITY, lineHeight: TITLE_CHIP.heightPx, whiteSpace: "normal" },
+    ).lines[0];
+    const detailRun = line?.fragments.find((fragment) => fragment.run === 1);
+    if (detailRun) titleAdvance = Math.max(titleWidth, detailRun.x);
+  }
 
   const iconX = border.left + paddingLeftPx;
   const titleX = iconX + (iconId ? TITLE_CHIP_ICON.sizePx + TITLE_CHIP_ICON.gapPx : 0);
   const contentWidth =
     (iconId ? TITLE_CHIP_ICON.sizePx + TITLE_CHIP_ICON.gapPx : 0) +
-    titleWidth +
-    (detailText === null ? 0 : TITLE_CHIP_DETAIL.gapPx + detailWidth);
-  let naturalWidthPx = border.left + paddingLeftPx + contentWidth + paddingRightPx + border.right;
-  if (titleFont.font === "sans" && !measuredSans) {
-    naturalWidthPx = Math.max(TITLE_CHIP_MIN_SANS_WIDTH_PX, naturalWidthPx);
-  }
+    (detailText === null ? titleWidth : titleAdvance + TITLE_CHIP_DETAIL.gapPx + detailWidth);
+  const naturalWidthPx = border.left + paddingLeftPx + contentWidth + paddingRightPx + border.right;
 
   return {
-    measuredSans,
     pinned,
     border,
     paddingLeftPx,
@@ -384,7 +379,7 @@ function chipContent(
         ? null
         : {
             text: detailText,
-            x: titleX + titleWidth + TITLE_CHIP_DETAIL.gapPx,
+            x: titleX + titleAdvance + TITLE_CHIP_DETAIL.gapPx,
             widthPx: detailWidth,
             font: detailFont,
           },
@@ -420,7 +415,6 @@ export function titleChipLayout(
       }
     : { topLeft: chipRadius, topRight: chipRadius, bottomRight: chipRadius, bottomLeft: chipRadius };
   return {
-    measuredSans: content.measuredSans,
     placement: content.pinned ? "pinned" : "floating",
     box: { x: anchor, y: anchor, width, height },
     scale,
@@ -461,67 +455,35 @@ export interface TitleChipVisibleRuns {
   detail: string | null;
 }
 
-function codepointPrefix(text: string, count: number): string {
-  return [...text].slice(0, count).join("");
-}
-
-/** Longest codepoint prefix of `text` whose width (by `fits`) still fits. */
-function longestFittingPrefix(text: string, fits: (prefix: string) => boolean): string {
-  const chars = [...text];
-  let keep = chars.length;
-  while (keep > 0 && !fits(chars.slice(0, keep).join(""))) keep -= 1;
-  return chars.slice(0, keep).join("");
-}
-
 /**
  * What of the title + detail run is visible in the (possibly capped) box,
- * ellipsized the way CSS `text-overflow: ellipsis` cuts the run: characters
- * drop from the end — the detail first, then the title — until the rest plus
- * an ellipsis fits. Mono runs cut on their exact cells; a measured chip's
- * sans runs (`layout.measuredSans`) on real Inter advances; a plain sans
- * title on the chip's original char-count arithmetic. No character is
- * forced: when none fits, only the ellipsis shows, and when not even the
- * ellipsis fits the run paints nothing (`title: ""`) — the live chip's
- * overflow hides it the same way.
+ * cut the way the live chip's `text-overflow: ellipsis` cuts its one line:
+ * the title, the 10px gap, and the detail form one run; graphemes drop from
+ * its end until the rest plus an ellipsis fits — so the detail gives way
+ * first, then the title. The ellipsis paints in the chip's (title) font, as
+ * CSS paints it in the line's block font: after the detail's last kept
+ * grapheme, alone after the gap when no detail grapheme fits, or after the
+ * title when not even the gap fits. When not even the ellipsis fits, the run
+ * paints nothing (`title: ""`) — the live chip's overflow hides it the same
+ * way.
  */
 export function titleChipVisibleRuns(layout: TitleChipLayout): TitleChipVisibleRuns {
   const { title, detail } = layout;
   if (!layout.truncated) return { title: title.text, detail: detail?.text ?? null };
   const contentEnd = layout.box.width - layout.paddingRightPx - layout.border.right;
-  const available = contentEnd - title.x;
-  const measured = (run: string, font: TitleChipFont) => measureRun(run, font, layout.measuredSans);
-  const ellipsisWidth =
-    title.font.font === "sans" && layout.measuredSans ? measured("…", title.font) : titleChipCharWidthPx(title.font);
-  /** `kept` characters plus the ellipsis — the bare ellipsis, or nothing, when none fit. */
-  const cut = (kept: string, ellipsisFits: boolean) =>
-    kept !== "" ? `${kept}…` : ellipsisFits ? "…" : "";
+  const available = layoutBoxWidth(contentEnd - title.x);
+  const titleSpec = titleChipFontSpec(title.font);
+  const ellipsisWidth = measureWidth(ELLIPSIS, titleSpec);
 
   if (detail) {
-    const detailRoom = available - title.widthPx - TITLE_CHIP_DETAIL.gapPx - ellipsisWidth;
-    const kept = longestFittingPrefix(detail.text, (prefix) => measured(prefix, detail.font) <= detailRoom);
-    if (kept !== "") return { title: title.text, detail: `${kept}…` };
+    // The detail starts where the title ends plus the gap; the ellipsis follows its last kept grapheme.
+    const detailRoom = available - (detail.x - title.x);
+    if (detailRoom >= ellipsisWidth) {
+      return { title: title.text, detail: ellipsizeToWidth(detail.text, titleChipFontSpec(detail.font), detailRoom, titleSpec) };
+    }
+    if (title.widthPx + ellipsisWidth <= available) return { title: `${title.text}${ELLIPSIS}`, detail: null };
   }
-
-  if (title.font.font === "sans" && layout.measuredSans) {
-    const kept = longestFittingPrefix(title.text, (prefix) => measured(prefix, title.font) + ellipsisWidth <= available);
-    return { title: cut(kept, ellipsisWidth <= available), detail: null };
-  }
-  if (title.font.font === "sans") {
-    // The original sans chip arithmetic: (width − paddings − borders − one
-    // char) / char, floored — the run's room after the ellipsis' char.
-    const charWidth = titleChipCharWidthPx(title.font);
-    const iconWidth = layout.icon ? TITLE_CHIP_ICON.sizePx + TITLE_CHIP_ICON.gapPx : 0;
-    const room =
-      layout.box.width -
-      (layout.paddingLeftPx + layout.paddingRightPx) -
-      (layout.border.left + layout.border.right) -
-      iconWidth -
-      charWidth;
-    const maxChars = Math.max(0, Math.floor(room / charWidth));
-    return { title: cut(title.text.slice(0, maxChars), room >= 0), detail: null };
-  }
-  const keep = Math.max(0, Math.floor((available - ellipsisWidth) / titleChipCharWidthPx(title.font)));
-  return { title: cut(codepointPrefix(title.text, keep), ellipsisWidth <= available), detail: null };
+  return { title: ellipsizeToWidth(title.text, titleSpec, available), detail: null };
 }
 
 // ---------------------------------------------------------------------------

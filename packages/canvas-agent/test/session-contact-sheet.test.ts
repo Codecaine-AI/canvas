@@ -6,6 +6,10 @@ import {
   bootPerception,
   vocabularyContactSheet,
 } from "../src/service/session";
+import { DEFAULT_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
+
+import { buildVocabularyDocument } from "../src/service/session/perception/contact-sheet";
+import { textFitReport } from "../src/board/text-fit";
 import { makeTestSession } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 
@@ -39,5 +43,14 @@ describe("session vocabulary contact sheet", () => {
     const second = vocabularyContactSheet();
 
     expect(first).toBe(second);
+  });
+  test.each([DEFAULT_CANVAS_STYLE.textFontSizePx, 28])("every caption fits whole at a %spx name size", (size) => {
+    const style = { ...DEFAULT_CANVAS_STYLE, textFontSizePx: size };
+    const captions = buildVocabularyDocument(style).objects.filter((object) => /^(label|family)-/.test(object.id));
+    expect(captions.length).toBeGreaterThan(5);
+    const clipped = captions.filter(
+      (caption) => textFitReport(caption, caption.geometry, caption.text ?? "", style).verdict !== "fits",
+    );
+    expect(clipped.map((caption) => caption.id)).toEqual([]);
   });
 });

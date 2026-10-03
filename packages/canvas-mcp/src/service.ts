@@ -17,6 +17,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
 
+import { useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas-agent/authoring";
 import {
   boardStateSnapshot,
@@ -345,6 +346,11 @@ export function createCanvasService(options: CanvasServiceOptions) {
     async call(name: string, rawArgs: unknown): Promise<CanvasToolResult> {
       const args = record(rawArgs);
       try {
+        // Lints, text fit and renders measure through text-measure. startMcp
+        // loads HarfBuzz up front; a service built directly (tests, other
+        // hosts) loads it here. Idempotent: every call after the first load
+        // shares it.
+        await useHarfBuzz();
         switch (name) {
           case "canvas_list": return listCanvases();
           case "canvas_open": return openCanvas(args);

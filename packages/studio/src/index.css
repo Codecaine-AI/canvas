@@ -9,75 +9,13 @@
 @source "../../canvas/src";
 
 /*
- * IBM Plex Mono — the canvas metadata font (CANVAS_MONO_FONT_STACK in
- * packages/canvas/src/theme/fonts.ts: detail lines, schematic section headers,
- * connector labels). Vendored woff2 from IBM's @ibm/plex-mono 2.5.0 release
- * (OFL-1.1, src/fonts/OFL-IBMPlexMono.txt). Vite fingerprints these into
- * dist/assets/, which the Electron server serves as font/woff2.
+ * Canvas fonts: Inter 3.19 (400/500/600/700, the content font) and IBM Plex
+ * Mono 2.5 (400/500/600, the metadata font) come from
+ * @codecaine-ai/text-measure/fonts.css, imported in main.tsx: the faces
+ * text-measure measures with, so the stage paints what lints and layout
+ * measured. Vite fingerprints the woff2 files into dist/assets/, which the
+ * Electron server serves as font/woff2.
  */
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("./fonts/IBMPlexMono-Regular.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("./fonts/IBMPlexMono-Medium.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "IBM Plex Mono";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("./fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
-}
-
-/*
- * Inter — the canvas content font (CANVAS_SANS_FONT_STACK: object names,
- * sticky bodies, labels). Vendored static woff2 from the official rsms/inter
- * 3.19 release ("Inter Web/", OFL-1.1, src/fonts/OFL-Inter.txt) at the weights
- * the themes set (400 body/detail, 500, 600 schematic names, 700 figjam
- * names), so the stage never falls back to system-ui on machines without
- * Inter installed. Same family the agent camera bundles as TTF.
- */
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("./fonts/Inter-Regular.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("./fonts/Inter-Medium.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("./fonts/Inter-SemiBold.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Inter";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("./fonts/Inter-Bold.woff2") format("woff2");
-}
 
 /*
  * Studio v1 theme: a static light-mode-only snapshot of Spectre's resolved

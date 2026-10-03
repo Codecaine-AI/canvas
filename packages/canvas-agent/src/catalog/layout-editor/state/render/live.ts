@@ -43,8 +43,10 @@ export interface LivePicture {
   /** One line per open finding, ids assigned, split by severity. */
   errorLines: string[];
   warningLines: string[];
+  noteLines: string[];
   errors: number;
   warnings: number;
+  notes: number;
   requests: string;
   openRequests: number;
   diff: string;
@@ -70,7 +72,7 @@ export function tryLivePicture(session: LayoutSession): LivePicture | null {
 function livePicture(session: LayoutSession): LivePicture {
   const draft = session.draft;
   const diagnostics = sessionDiagnostics(session);
-  const bySeverity = (severity: "error" | "warning"): string[] =>
+  const bySeverity = (severity: "error" | "warning" | "note"): string[] =>
     diagnostics
       .filter((finding) => finding.severity === severity)
       .flatMap((finding) => diagnosticLines(finding));
@@ -82,8 +84,10 @@ function livePicture(session: LayoutSession): LivePicture {
     edges: draft.connections.length,
     errorLines: bySeverity("error"),
     warningLines: bySeverity("warning"),
+    noteLines: bySeverity("note"),
     errors: diagnostics.filter((finding) => finding.severity === "error").length,
     warnings: diagnostics.filter((finding) => finding.severity === "warning").length,
+    notes: diagnostics.filter((finding) => finding.severity === "note").length,
     requests: formatRequestQueue(session.requests),
     openRequests: session.requests.filter((entry) => entry.status === "open").length,
     diff: boardDiffBlock(session),

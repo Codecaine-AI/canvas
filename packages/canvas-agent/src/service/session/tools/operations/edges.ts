@@ -304,11 +304,13 @@ function routerAcceptsWaypoints(
 function autoAttachment(
   connection: InteractiveCanvasConnection,
   document: InteractiveCanvasDocument,
+  canvasStyle: OpContext["canvasStyle"],
 ): { start: WorldPoint; end: WorldPoint } | null {
   const from = objectOf(document, connection.from.objectId);
   const to = objectOf(document, connection.to.objectId);
   if (!from || !to) return null;
-  const routed = routeConnection(from, to, { ...connection, waypoints: undefined }, document.objects);
+  // The workspace style sizes icon captions, which set where edges attach.
+  const routed = routeConnection(from, to, { ...connection, waypoints: undefined }, document.objects, canvasStyle);
   return { start: routed.start, end: routed.end };
 }
 
@@ -353,7 +355,7 @@ export const reroute = defineOperationTool({
 
     if (routerAcceptsWaypoints(connection, ctx.draft, points, ctx.canvasStyle)) return [];
 
-    const attachment = autoAttachment(connection, ctx.draft);
+    const attachment = autoAttachment(connection, ctx.draft, ctx.canvasStyle);
     if (!attachment) {
       return [`connectionId "${p.id}" has no routable path — one of its endpoint objects is missing.`];
     }

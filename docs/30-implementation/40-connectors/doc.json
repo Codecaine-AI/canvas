@@ -31,9 +31,10 @@
         "b-conn-def-types-decision-9",
         "b-conn-def-types-why-10",
         "b-conn-def-types-applies-11",
-        "b-conn-chip-decision-13",
-        "b-conn-chip-why-14",
-        "b-conn-chip-applies-15"
+        "b-conn-chip-heading",
+        "b-conn-chip-decision",
+        "b-conn-chip-why",
+        "b-conn-chip-applies"
       ]
     },
     "b-conn-role-1": {
@@ -399,23 +400,48 @@
       ],
       "children": []
     },
-    "b-conn-chip-decision-13": {
-      "id": "b-conn-chip-decision-13",
-      "type": "paragraph",
-      "props": {},
+    "b-conn-chip-heading": {
+      "id": "b-conn-chip-heading",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Label Chips Size From the Measured Label"
+        }
+      ],
+      "children": []
+    },
+    "b-conn-chip-decision": {
+      "id": "b-conn-chip-decision",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
       "text": [
         {
           "insert": "Decision",
           "attributes": {
             "bold": true
           }
-        },
-        {
-          "insert": ": "
-        },
+        }
+      ],
+      "children": [
+        "b-conn-chip-decision-rule"
+      ]
+    },
+    "b-conn-chip-decision-rule": {
+      "id": "b-conn-chip-decision-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
           "insert": "connectors/label-chip.ts",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/connectors/label-chip.ts",
@@ -424,7 +450,86 @@
           }
         },
         {
-          "insert": " is the one source of a connection label chip's size and typography. The live connector, the static renderer's "
+          "insert": " is the one source of a connection label chip's size and typography, and the chip is as wide as its measured label plus padding."
+        }
+      ],
+      "children": [
+        "b-conn-chip-decision-measure",
+        "b-conn-chip-decision-padding",
+        "b-conn-chip-decision-callers"
+      ]
+    },
+    "b-conn-chip-decision-measure": {
+      "id": "b-conn-chip-decision-measure",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "connectionLabelChipMetrics",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " measures the label with "
+        },
+        {
+          "insert": "measureWidth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in the chip font, Inter 700 or IBM Plex Mono 500 at "
+        },
+        {
+          "insert": "connectorLabelFontSizePx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", through the canvas measuring module that "
+        },
+        {
+          "insert": "Objects",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/20-objects"
+            }
+          }
+        },
+        {
+          "insert": " records."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-chip-decision-padding": {
+      "id": "b-conn-chip-decision-padding",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Padding is 0.75em a side for Inter and 0.5em for IBM Plex Mono, and the width never drops below 41/30 of the chip height."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-chip-decision-callers": {
+      "id": "b-conn-chip-decision-callers",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The live connector, the static renderer's "
         },
         {
           "insert": "connectionLabelChipRect",
@@ -433,54 +538,85 @@
           }
         },
         {
-          "insert": ", and the agent's lint geometry all call "
-        },
-        {
-          "insert": "connectionLabelChipMetrics",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " with the workspace style. A sans chip keeps the original character-count width, and a mono chip measures exactly at IBM Plex Mono's 0.6em advance. Both take their height, font, and size from the style tokens."
+          "insert": ", and the agent's lint geometry all call it with the workspace style."
         }
       ],
       "children": []
     },
-    "b-conn-chip-why-14": {
-      "id": "b-conn-chip-why-14",
-      "type": "paragraph",
-      "props": {},
+    "b-conn-chip-why": {
+      "id": "b-conn-chip-why",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
       "text": [
         {
           "insert": "Why",
           "attributes": {
             "bold": true
           }
-        },
+        }
+      ],
+      "children": [
+        "b-conn-chip-why-parity",
+        "b-conn-chip-why-rejected"
+      ]
+    },
+    "b-conn-chip-why-parity": {
+      "id": "b-conn-chip-why-parity",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
-          "insert": ": a chip sized one way in the lints and painted another passes the crowding check while overlapping on screen, or fails it while reading fine. The rejected alternative was each consumer estimating the chip from its own constants, which held only while one theme existed."
+          "insert": "A chip sized one way in the lints and painted another passes the crowding check while overlapping on screen, or fails it while reading fine."
         }
       ],
       "children": []
     },
-    "b-conn-chip-applies-15": {
-      "id": "b-conn-chip-applies-15",
-      "type": "paragraph",
-      "props": {},
+    "b-conn-chip-why-rejected": {
+      "id": "b-conn-chip-why-rejected",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "One rejected alternative was each consumer estimating the chip from its own constants, which held only while one theme existed. Another was a character count at 0.6em per character, which misses Inter Bold by tens of pixels in both directions."
+        }
+      ],
+      "children": []
+    },
+    "b-conn-chip-applies": {
+      "id": "b-conn-chip-applies",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
       "text": [
         {
           "insert": "Applies to",
           "attributes": {
             "bold": true
           }
-        },
-        {
-          "insert": ": "
-        },
+        }
+      ],
+      "children": [
+        "b-conn-chip-applies-scope"
+      ]
+    },
+    "b-conn-chip-applies-scope": {
+      "id": "b-conn-chip-applies-scope",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
           "insert": "label-chip.ts",
           "attributes": {
+            "code": true,
             "reference": {
               "kind": "source",
               "path": "packages/canvas/src/connectors/label-chip.ts",

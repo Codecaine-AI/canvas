@@ -16,6 +16,8 @@
  * of whether the corresponding glyph currently occupies pixels.
  */
 
+import { CANVAS_MONO_FONT_STACK } from "../../theme/fonts";
+
 export type StickyMarkdownLineKind = "text" | "heading" | "bullet";
 export type StickyMarkdownInlineKind = "text" | "strong" | "code";
 export type StickyMarkdownLeafRole = "text" | "marker" | "placeholder";
@@ -109,8 +111,15 @@ const BULLET_PATTERN = /^- (.*)$/;
 const INDENT_UNIT = "  ";
 const NBSP = "\u00A0";
 
-export const STICKY_MARKDOWN_MONO_FONT =
-  'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace';
+/**
+ * Inline `code` paints in the canvas's bundled mono face — IBM Plex Mono at
+ * regular weight, whatever the row's weight (headings, bold runs) — so the
+ * live sticky, its editor, the static render, and the measurement that wraps
+ * it all use one face (theme/fonts.ts, theme/text-measure.ts).
+ */
+export const STICKY_MARKDOWN_MONO_FONT = CANVAS_MONO_FONT_STACK;
+/** Inline `code` weight: Plex Mono Regular at every row weight. */
+export const STICKY_MARKDOWN_MONO_FONT_WEIGHT = 400;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);

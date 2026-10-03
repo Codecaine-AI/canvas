@@ -1,33 +1,47 @@
 /**
- * Sticky markdown line-box layout for the static renderer.
+ * Sticky markdown line-box layout for the static renderer and the agent's
+ * text fit.
  *
  * The live sticky renders its text through StickyMarkdown
  * (objects/sticky/markdown.tsx over the pure D18 grammar in
  * objects/sticky/markdown-editing.ts): headings, bullets with depth
  * indentation, bold and inline code, one 36px-pitch line box per source line,
- * wrapped by the browser inside the inset-body slot. This module reproduces
- * those LINE BOXES — per-line font size/weight, indentation, bullet glyph
- * column and real-Inter-metrics word wrapping — so the static render's line
- * count and vertical fit match the live layout. The grammar itself is not
- * re-parsed here: lines come from the same parseStickyMarkdown the live
+ * wrapped by the browser inside the inset-body slot (`white-space: pre-wrap;
+ * overflow-wrap: break-word`, inherited from the slot text). This module
+ * reproduces those LINE BOXES — per-line font size/weight, indentation,
+ * bullet glyph column — and wraps each source line as the browser wraps an
+ * HTML block of mixed inline runs: text-measure's `wrapRuns` (break
+ * opportunities over the whole line's text, each run shaped in its own font,
+ * inline-code padding on its first and last fragment). The grammar itself is
+ * not re-parsed here: lines come from the same parseStickyMarkdown the live
  * renderer consumes.
+ *
+ * Fonts (all bundled, so all measurable exactly): body Inter 400, `**bold**`
+ * Inter 700 (CSS `bolder` — a bold run inside a 700 heading asks for 900 and
+ * paints Inter Bold, the heaviest face), headings Inter 700 at 1.5 / 1.25 /
+ * 1.1em, inline code IBM Plex Mono 400 at 0.85em with 0.15em padding a side.
  *
  * Visual constants are mirrored from the live implementation (markdown.tsx
  * HEADING_STYLE, the sticky def's line CSS in objects/sticky/def.tsx — those
  * modules are .tsx/React and cannot be imported here); each carries a pointer
  * to its source of truth.
- *
- * Documented approximations:
- * - Inline-code text measures with a flat monospace advance
- *   (STICKY_CODE_MONO_ADVANCE_EM per char at the 0.85em code size) — the
- *   mono stack (ui-monospace/SF Mono/Menlo) is not in the generated Inter
- *   table. Real SF Mono/Menlo advances are ≈0.60–0.62em.
- * - Bold text measures with the font's true wght-700 instance advances (see
- *   text-metrics.ts) — not an approximation, noted for completeness.
  */
 
-import { parseStickyMarkdown } from "../objects/sticky/markdown-editing";
-import { interCharWidthPx } from "./text-metrics";
+import {
+  parseStickyMarkdown,
+  STICKY_MARKDOWN_MONO_FONT_WEIGHT,
+  type StickyMarkdownInlineToken,
+} from "../objects/sticky/markdown-editing";
+import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK } from "../theme/fonts";
+import {
+  graphemeClusters,
+  measureLineWidth,
+  measureWidth,
+  uncoveredChars,
+  wrapRuns,
+  type FontSpec,
+  type TextRun,
+} from "../theme/text-measure";
 
 /**
  * Line pitch: every markdown row — headings included — uses the sticky
@@ -42,13 +56,13 @@ const HEADING_FONT_EM: Record<1 | 2 | 3, number> = { 1: 1.5, 2: 1.25, 3: 1.1 };
 /** Heading rows render bold (markdown.tsx renderLine: fontWeight 700). */
 const HEADING_FONT_WEIGHT = 700;
 const BODY_FONT_WEIGHT = 400;
+/** `<strong>` is `font-weight: bolder`: 700 on a 400 row, 900 (painted by the 700 face) on a heading. */
 const STRONG_FONT_WEIGHT = 700;
 
 /** Inline-code sizing (markdown.tsx renderInline `<code>` style). */
 export const STICKY_CODE_FONT_EM = 0.85;
-const STICKY_CODE_PADDING_X_EM = 0.15;
-/** Flat monospace advance per code character, in em of the code font size. */
-export const STICKY_CODE_MONO_ADVANCE_EM = 0.6;
+/** Inline-code horizontal padding a side, em of the code font size (`padding: 0 0.15em`). */
+export const STICKY_CODE_PADDING_X_EM = 0.15;
 
 /**
  * Indentation grid (the sticky def's line CSS in objects/sticky/def.tsx).
@@ -65,11 +79,15 @@ const BULLET_GLYPHS = ["•", "◦", "▪"] as const;
 export type StickySegmentStyle = "plain" | "strong" | "code";
 
 export interface StickyTextSegment {
+  /** The run's text on this row as laid out (hanging trailing spaces included). */
   text: string;
   style: StickySegmentStyle;
-  /** Offset from the slot rect's left edge (line indent included), px. */
+  /** Offset from the slot rect's left edge (line indent included), px — where the segment's box starts. */
   xPx: number;
+  /** Px the segment advances, its padding included (a code chip's box width). */
   widthPx: number;
+  /** Padding before the text inside the segment's box (a code chip's leading 0.15em), px. */
+  textOffsetPx: number;
   /** Effective font size (code runs at STICKY_CODE_FONT_EM of the row size). */
   fontSizePx: number;
   fontWeight: number;
@@ -86,162 +104,45 @@ export interface StickyTextRow {
   segments: StickyTextSegment[];
 }
 
-/** One measured character during wrapping. */
-interface MeasuredChar {
-  char: string;
-  widthPx: number;
-  style: StickySegmentStyle;
-  fontSizePx: number;
-  fontWeight: number;
-  isSpace: boolean;
-}
-
 function bulletGlyphForDepth(depth: number): string {
   return BULLET_GLYPHS[Math.min(depth, 2)]!;
 }
 
-/** Splits a measured char run into maximal same-style word/space groups. */
-function charGroups(chars: readonly MeasuredChar[]): MeasuredChar[][] {
-  const groups: MeasuredChar[][] = [];
-  let current: MeasuredChar[] = [];
-  for (const item of chars) {
-    if (current.length > 0 && current[0]!.isSpace !== item.isSpace) {
-      groups.push(current);
-      current = [];
-    }
-    current.push(item);
-  }
-  if (current.length > 0) groups.push(current);
-  return groups;
+/** The font a segment of `style` paints in on a row of this size and weight. */
+export function stickySegmentFont(style: StickySegmentStyle, fontSizePx: number, fontWeight: number): FontSpec {
+  return style === "code"
+    ? { family: CANVAS_MONO_FONT_STACK, size: fontSizePx, weight: STICKY_MARKDOWN_MONO_FONT_WEIGHT }
+    : { family: CANVAS_SANS_FONT_STACK, size: fontSizePx, weight: fontWeight };
 }
 
-function groupWidth(group: readonly MeasuredChar[]): number {
-  let total = 0;
-  for (const item of group) total += item.widthPx;
-  return total;
-}
-
-/**
- * Greedy word wrap over measured characters, mirroring the browser's
- * pre-wrap + overflow-wrap: break-word behavior: lines break at spaces
- * (trailing spaces stay — hang — on the broken line), and a single word
- * wider than the available width breaks intra-word at the overflow point.
- * Always returns at least one (possibly empty) visual row.
- */
-function wrapMeasuredChars(
-  chars: readonly MeasuredChar[],
-  availableWidthPx: number,
-): MeasuredChar[][] {
-  const available = Math.max(1, availableWidthPx);
-  const rows: MeasuredChar[][] = [];
-  let current: MeasuredChar[] = [];
-  let currentWidth = 0;
-
-  const flush = () => {
-    rows.push(current);
-    current = [];
-    currentWidth = 0;
-  };
-
-  for (const group of charGroups(chars)) {
-    if (group[0]!.isSpace) {
-      // Preserved spaces never force a break themselves (they hang).
-      current.push(...group);
-      currentWidth += groupWidth(group);
-      continue;
-    }
-    const width = groupWidth(group);
-    if (current.length > 0 && currentWidth + width > available) flush();
-    if (width > available) {
-      // Word wider than the box: break at the overflow point, min 1 char/row.
-      for (const item of group) {
-        if (current.length > 0 && currentWidth + item.widthPx > available) flush();
-        current.push(item);
-        currentWidth += item.widthPx;
-      }
-      continue;
-    }
-    current.push(...group);
-    currentWidth += width;
-  }
-
-  if (current.length > 0 || rows.length === 0) rows.push(current);
-  return rows;
-}
-
-/** Groups a wrapped row's chars into contiguous same-style segments with x offsets. */
-function rowSegments(
-  chars: readonly MeasuredChar[],
-  indentPx: number,
-): StickyTextSegment[] {
-  const segments: StickyTextSegment[] = [];
-  let cursor = indentPx;
-  for (const item of chars) {
-    const last = segments[segments.length - 1];
-    if (
-      last &&
-      last.style === item.style &&
-      last.fontSizePx === item.fontSizePx &&
-      last.fontWeight === item.fontWeight
-    ) {
-      last.text += item.char;
-      last.widthPx += item.widthPx;
-    } else {
-      segments.push({
-        text: item.char,
-        style: item.style,
-        xPx: cursor,
-        widthPx: item.widthPx,
-        fontSizePx: item.fontSizePx,
-        fontWeight: item.fontWeight,
-      });
-    }
-    cursor += item.widthPx;
-  }
-  // A row of only preserved spaces paints nothing.
-  return segments.filter((segment) => segment.text.trim() !== "");
-}
-
-function measureRun(
-  text: string,
-  style: StickySegmentStyle,
+/** One source line's inline tokens as text-measure runs, with their styles. */
+function lineRuns(
+  tokens: readonly StickyMarkdownInlineToken[],
   rowFontSizePx: number,
   rowFontWeight: number,
-): MeasuredChar[] {
-  const chars: MeasuredChar[] = [];
-  if (style === "code") {
-    const codeFontSize = rowFontSizePx * STICKY_CODE_FONT_EM;
-    const advance = codeFontSize * STICKY_CODE_MONO_ADVANCE_EM;
-    const padding = codeFontSize * STICKY_CODE_PADDING_X_EM;
-    const codePoints = [...text];
-    for (let index = 0; index < codePoints.length; index += 1) {
-      // The code chip's horizontal padding rides on the run's end characters.
-      const edgePadding =
-        (index === 0 ? padding : 0) + (index === codePoints.length - 1 ? padding : 0);
-      chars.push({
-        char: codePoints[index]!,
-        widthPx: advance + edgePadding,
-        style,
-        fontSizePx: codeFontSize,
-        fontWeight: rowFontWeight,
-        isSpace: false, // code chips wrap intra-chip only at overflow
+): { runs: TextRun[]; styles: StickySegmentStyle[] } {
+  const runs: TextRun[] = [];
+  const styles: StickySegmentStyle[] = [];
+  for (const token of tokens) {
+    if (token.kind === "text") {
+      runs.push({ text: token.leaf.text, font: stickySegmentFont("plain", rowFontSizePx, rowFontWeight) });
+      styles.push("plain");
+    } else if (token.kind === "strong") {
+      runs.push({ text: token.content.text, font: stickySegmentFont("strong", rowFontSizePx, STRONG_FONT_WEIGHT) });
+      styles.push("strong");
+    } else {
+      const codeFontSizePx = rowFontSizePx * STICKY_CODE_FONT_EM;
+      const padding = codeFontSizePx * STICKY_CODE_PADDING_X_EM;
+      runs.push({
+        text: token.content.text,
+        font: stickySegmentFont("code", codeFontSizePx, rowFontWeight),
+        padStart: padding,
+        padEnd: padding,
       });
+      styles.push("code");
     }
-    return chars;
   }
-
-  const fontWeight = style === "strong" ? STRONG_FONT_WEIGHT : rowFontWeight;
-  for (const char of text) {
-    chars.push({
-      char,
-      widthPx: interCharWidthPx(char.codePointAt(0)!, rowFontSizePx, fontWeight),
-      style,
-      fontSizePx: rowFontSizePx,
-      fontWeight,
-      isSpace: char === " " || char === "\t",
-    });
-  }
-  return chars;
+  return { runs, styles };
 }
 
 /**
@@ -279,34 +180,125 @@ export function layoutStickyText(
       indentPx = (visualDepth + PLAIN_TEXT_NEST_EM) * fontSizePx;
     }
 
+    const { runs, styles } = lineRuns(line.inline, fontSizePx, fontWeight);
     // Blank line: the placeholder keeps its line box but paints nothing.
-    if (line.placeholder) {
+    if (line.placeholder || runs.length === 0) {
       rows.push({ fontSizePx, fontWeight, indentPx, ...(bullet ? { bullet } : null), segments: [] });
       continue;
     }
 
-    const chars: MeasuredChar[] = [];
-    for (const token of line.inline) {
-      if (token.kind === "text") {
-        chars.push(...measureRun(token.leaf.text, "plain", fontSizePx, fontWeight));
-      } else if (token.kind === "strong") {
-        chars.push(...measureRun(token.content.text, "strong", fontSizePx, fontWeight));
-      } else {
-        chars.push(...measureRun(token.content.text, "code", fontSizePx, fontWeight));
+    const wrapped = wrapRuns(runs, {
+      maxWidth: Math.max(0, slotWidthPx - indentPx),
+      lineHeight: STICKY_LINE_PITCH_PX,
+      whiteSpace: "pre-wrap",
+    });
+    const visualRows = wrapped.lines.length > 0 ? wrapped.lines : [{ fragments: [] }];
+    visualRows.forEach((visual, index) => {
+      const segments: StickyTextSegment[] = [];
+      for (const fragment of visual.fragments) {
+        const run = runs[fragment.run]!;
+        const segment: StickyTextSegment = {
+          text: fragment.text,
+          style: styles[fragment.run]!,
+          xPx: indentPx + fragment.x,
+          widthPx: fragment.width,
+          // Padding is a CSS length: Chromium keeps it in layout units, rounded down (as wrapRuns does).
+          textOffsetPx: fragment.start === 0 ? Math.floor((run.padStart ?? 0) * 64 + 1e-6) / 64 : 0,
+          fontSizePx: run.font.size,
+          fontWeight: run.font.weight ?? BODY_FONT_WEIGHT,
+        };
+        // Adjacent runs in one font are one shaped run in the browser (a bold
+        // ">" after a heading's "=" still forms Inter's arrow): paint them as
+        // one segment so the SVG shapes them together too.
+        const last = segments[segments.length - 1];
+        if (last && sameFace(last, segment)) {
+          last.text += segment.text;
+          last.widthPx = segment.xPx + segment.widthPx - last.xPx;
+        } else {
+          segments.push(segment);
+        }
       }
-    }
-
-    const wrapped = wrapMeasuredChars(chars, slotWidthPx - indentPx);
-    wrapped.forEach((rowChars, index) => {
       rows.push({
         fontSizePx,
         fontWeight,
         indentPx,
         ...(index === 0 && bullet ? { bullet } : null),
-        segments: rowSegments(rowChars, indentPx),
+        // A segment of only preserved spaces paints nothing.
+        segments: segments.filter((segment) => segment.text.trim() !== ""),
       });
     });
   }
 
   return rows;
+}
+
+/** Two text (not code) segments painted in one face, the second right after the first. */
+function sameFace(a: StickyTextSegment, b: StickyTextSegment): boolean {
+  return (
+    a.style !== "code" &&
+    b.style !== "code" &&
+    a.fontSizePx === b.fontSizePx &&
+    a.fontWeight === b.fontWeight &&
+    Math.abs(a.xPx + a.widthPx - b.xPx) < 1e-6
+  );
+}
+
+/**
+ * Cuts a clamped row the way -webkit-line-clamp cuts its last visible line:
+ * graphemes drop from the end until the row plus an ellipsis — painted in
+ * the line's own font, as CSS paints it — fits the slot width, then the
+ * ellipsis follows as its own plain segment. Mutates `row`.
+ */
+export function ellipsizeStickyRow(row: StickyTextRow, slotWidthPx: number): void {
+  const ellipsisFont = stickySegmentFont("plain", row.fontSizePx, row.fontWeight);
+  const ellipsisWidth = measureWidth("…", ellipsisFont);
+  const rowEnd = () => {
+    const last = row.segments[row.segments.length - 1];
+    return last ? last.xPx + last.widthPx : row.indentPx;
+  };
+  while (row.segments.length > 0 && rowEnd() + ellipsisWidth > slotWidthPx) {
+    const last = row.segments[row.segments.length - 1]!;
+    const parts = graphemeClusters(last.text);
+    parts.pop();
+    // Only collapsible spaces go; a no-break space is text.
+    const text = parts.join("").replace(/[ \t\n\r\f]+$/, "");
+    if (text === "") {
+      row.segments.pop();
+      continue;
+    }
+    // The cut box keeps its leading padding (a code chip) and loses its end;
+    // its text keeps the line's preserved spaces (pre-wrap).
+    last.text = text;
+    last.widthPx =
+      last.textOffsetPx +
+      measureLineWidth(text, stickySegmentFont(last.style, last.fontSizePx, last.fontWeight), "pre-wrap");
+  }
+  row.segments.push({
+    text: "…",
+    style: "plain",
+    xPx: rowEnd(),
+    widthPx: ellipsisWidth,
+    textOffsetPx: 0,
+    fontSizePx: row.fontSizePx,
+    fontWeight: row.fontWeight,
+  });
+}
+
+/**
+ * Characters (grapheme clusters) of a sticky's markdown the bundled faces
+ * cannot paint — body and bold runs in Inter, inline code in IBM Plex Mono —
+ * in first-seen order. Their widths are estimates, so a fit over them is too.
+ */
+export function stickyTextUncovered(source: string): string[] {
+  const seen = new Set<string>();
+  for (const line of parseStickyMarkdown(source).lines) {
+    for (const token of line.inline) {
+      const [text, family] =
+        token.kind === "text"
+          ? [token.leaf.text, CANVAS_SANS_FONT_STACK]
+          : [token.content.text, token.kind === "code" ? CANVAS_MONO_FONT_STACK : CANVAS_SANS_FONT_STACK];
+      for (const grapheme of uncoveredChars(text, family)) seen.add(grapheme);
+    }
+  }
+  return [...seen];
 }

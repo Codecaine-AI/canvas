@@ -12,7 +12,12 @@ import {
 import type { AgentProposal } from "../../../../protocol";
 import { diffDocuments } from "../../../../board/doc-diff";
 import { FINISHING_RULES } from "../../../../board/lints";
-import { diagnosticLines, formatDiagnostics, sessionDiagnostics } from "../../../../board/lints/run";
+import {
+  blockingDiagnostics,
+  diagnosticLines,
+  formatDiagnostics,
+  sessionDiagnostics,
+} from "../../../../board/lints/run";
 import { describePatchOperation } from "../../apply-ops";
 import { scopedDiagnostics } from "../../snapshots/context";
 import type { SessionEventSink } from "../../perception/perception";
@@ -54,7 +59,9 @@ export function toolFinalize(
   // The finishing registry adds the polish rules that would only nag mid-build.
   const diagnostics = sessionDiagnostics(session, FINISHING_RULES);
   const scoped = scopedDiagnostics(session, diagnostics);
-  const blocking = scoped;
+  // Notes (text within a pixel of its box edge, text the bundled fonts cannot
+  // measure exactly) never block; they ride along in the proposal instead.
+  const blocking = blockingDiagnostics(scoped);
   // A thread the agent opened is a question left for the user, answered on
   // their own time — it never gates the commit. User-authored requests do.
   const openRequests = session.requests.filter(
@@ -73,9 +80,9 @@ export function toolFinalize(
     };
   }
 
-  const unresolvedWarnings = formatDiagnostics(
-    scoped.filter((diagnostic) => diagnostic.severity === "warning"),
-  );
+  // Whatever is still open in scope here is non-blocking (notes): the
+  // operator reads it with the proposal.
+  const unresolvedWarnings = formatDiagnostics(scoped);
   const operations = diffDocuments(session.baseline, session.draft);
   if (operations.length === 0 && session.proposal === null) {
     return { isError: true, text: "Nothing to commit — the draft matches the board." };
@@ -105,7 +112,7 @@ export const finalize = defineWorkflowTool({
   name: "finalize",
   label: "Finalize run",
   description:
-    "End the run. outcome \"committed\" proposes the current draft for operator review: it is blocked (and the run continues) while any lint finding (error or warning) remains in the edited scope, any user request is still open, or the draft does not differ from the board — fix or dispose those first. outcome \"none\" ends the run without a proposal, leaving the board untouched — the message tells the operator why; prefer partial fulfillment over an empty-handed exit. message is required for both outcomes: one plain-language line. A successful finalize ends your run.",
+    "End the run. outcome \"committed\" proposes the current draft for operator review: it is blocked (and the run continues) while any lint error or warning remains in the edited scope (notes never block), any user request is still open, or the draft does not differ from the board — fix or dispose those first. outcome \"none\" ends the run without a proposal, leaving the board untouched — the message tells the operator why; prefer partial fulfillment over an empty-handed exit. message is required for both outcomes: one plain-language line. A successful finalize ends your run.",
   fields: {
     outcome: Type.Union([Type.Literal("committed"), Type.Literal("none")], {
       description: "committed = propose the draft; none = end without a proposal.",

@@ -163,3 +163,24 @@ describe("sticky markdown", () => {
     expect(webkitLineClamp(label!)).toBe("");
   });
 });
+
+describe("sticky bold runs keep the sticky's font in a host page", () => {
+  it("a host strong rule (the docs reader's) does not repaint them in another family", () => {
+    // Chromium resolves `inherit` to the sticky line's Inter stack; happy-dom reports it as written.
+    const host = document.createElement("style");
+    host.textContent = ".docs-markdown :where(strong) { font-family: Georgia, serif; }";
+    document.head.appendChild(host);
+    try {
+      const { container } = render(
+        <article className="docs-markdown">
+          <StickyMarkdown text="body **bold**" />
+        </article>,
+      );
+      const strong = container.querySelector("strong")!;
+      expect(strong.style.fontFamily).toBe("inherit");
+      expect(getComputedStyle(strong).fontFamily).not.toContain("Georgia");
+    } finally {
+      host.remove();
+    }
+  });
+});

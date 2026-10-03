@@ -7,11 +7,14 @@
  * test/lints-chip-parity.test.ts. Inflate it by the 16px breathing margin
  * and fire when that rect bleeds onto an endpoint box of the chip's own
  * edge. Chips hitting OTHER boxes, chips, or wires are covered-content's
- * findings.
+ * findings. A bleed only the full-width chip has (within the measurement's
+ * 1px band), or one on a label whose width is an estimate, is a note.
  */
 import {
   CHIP_CLEARANCE,
+  chipFindingSeverity,
   chipFor,
+  chipNoteClause,
   inflate,
   intersects,
   rectOf,
@@ -26,7 +29,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "@codecaine-ai/canvas/schema";
-import type { LayoutRule, LintContext } from "../types";
+import type { LayoutRule, LintContext, Severity } from "../types";
 
 /** The axis the edge runs along: whichever separates the endpoints more. */
 function runAxis(from: InteractiveCanvasObject, to: InteractiveCanvasObject): Axis {
@@ -47,6 +50,8 @@ interface ChipFitFinding {
   available: number;
   /** Chip extent along the run axis plus a breathing margin on each side. */
   needed: number;
+  /** warning, or a note when the bleed hangs on the measurement's last pixel or an estimated width. */
+  severity: Severity;
 }
 
 function chipFitFinding(
@@ -60,11 +65,13 @@ function chipFitFinding(
   const from = byId.get(edge.from.objectId);
   const to = byId.get(edge.to.objectId);
   if (!from || !to) return undefined;
-  const inflated = inflate(chip.rect, CHIP_CLEARANCE);
-  const hits = [from, to].filter(
-    (endpoint) => kindOf(endpoint) !== "section" && intersects(inflated, rectOf(endpoint)),
-  );
+  const bleedsOn = (rect: Rect) =>
+    [from, to].filter(
+      (endpoint) => kindOf(endpoint) !== "section" && intersects(inflate(rect, CHIP_CLEARANCE), rectOf(endpoint)),
+    );
+  const hits = bleedsOn(chip.rect);
   if (hits.length === 0) return undefined;
+  const severity = chipFindingSeverity(chip, (rect) => bleedsOn(rect).length > 0, "warning");
   const axis = runAxis(from, to);
   const available = axisGap(rectOf(from), rectOf(to), axis);
   const extent = axis === "x" ? chip.rect.width : chip.rect.height;
@@ -72,6 +79,7 @@ function chipFitFinding(
     edge, chip, from, to, hits, axis,
     available: Math.max(0, available),
     needed: extent + CHIP_CLEARANCE * 2,
+    severity,
   };
 }
 
@@ -92,13 +100,14 @@ export const rule: LayoutRule = {
       .filter((finding): finding is ChipFitFinding => finding !== undefined)
       .map((finding) => ({
         rule: "unreadable-labels",
-        severity: "warning" as const,
+        severity: finding.severity,
         at: [finding.edge.id, ...finding.hits.map((endpoint) => endpoint.id)],
         where: finding.chip.rect,
         message: `label "${finding.chip.label}" chip on ${finding.edge.id} `
           + `(${Math.round(finding.chip.rect.width)}×${Math.round(finding.chip.rect.height)}px) `
           + `bleeds onto ${finding.hits.map((endpoint) => endpoint.id).join(" and ")}: `
-          + `${Math.round(finding.available)}px of corridor where the chip needs ${Math.ceil(finding.needed)}px`,
+          + `${Math.round(finding.available)}px of corridor where the chip needs ${Math.ceil(finding.needed)}px`
+          + chipNoteClause(finding.chip, finding.severity),
         suggestion: `open the ${finding.from.id}↔${finding.to.id} corridor to `
           + `≥${Math.ceil(finding.needed)}px so the chip and its ${CHIP_CLEARANCE}px margins fit`,
       }));

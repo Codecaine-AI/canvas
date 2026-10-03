@@ -85,6 +85,7 @@
         "b-kernel-docs-body-51",
         "b-kernel-review-heading-40",
         "b-kernel-review-invoke-41",
+        "b-kernel-review-crowding",
         "b-kernel-review-progress-42",
         "b-kernel-review-preview-43",
         "b-kernel-review-verdict-44"
@@ -1065,30 +1066,35 @@
       "props": {},
       "text": [
         {
-          "insert": "Text wrapping and ellipsis use generated Inter advance tables for the regular and true wght-700 instances. IBM Plex Mono runs need no table, because every glyph advances the same 0.6em ("
+          "insert": "Text wrapping, ellipsis, and every fit check measure through "
         },
         {
-          "insert": "measureMonoTextPx",
+          "insert": "@codecaine-ai/text-measure",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/text-metrics.ts",
-              "symbol": "measureMonoTextPx"
+              "path": "packages/text-measure/README.md",
+              "label": "@codecaine-ai/text-measure"
             }
           }
         },
         {
-          "insert": "). Sticky notes are laid out from the same markdown parser into matching heading, bullet, bold, code, indentation, and line-box structure. The harness rasterizes SVG with resvg and the fonts bundled in "
+          "insert": ", which the harness switches to HarfBuzz shaping of the bundled faces before its first measurement. Sticky notes are laid out from the same markdown parser into matching heading, bullet, bold, code, indentation, and line-box structure, with each run measured in its own font. The harness rasterizes SVG with resvg and the TTF faces in "
         },
         {
-          "insert": "assets/fonts",
+          "insert": "packages/text-measure/fonts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/fonts",
+              "label": "packages/text-measure/fonts"
+            }
           }
         },
         {
-          "insert": ": Inter beside IBM Plex Mono at weights 400, 500, and 600. Before entering native code it validates the root viewport, caps raster dimensions, and rejects degenerate or wholly off-viewport nested SVG and filtered elements. The SVG renderer also omits rasterizer-unsafe features from off-camera elements."
+          "insert": ": Inter at weights 400, 500, 600, and 700 beside IBM Plex Mono at 400, 500, and 600. Before entering native code it validates the root viewport, caps raster dimensions, and rejects degenerate or wholly off-viewport nested SVG and filtered elements. The SVG renderer also omits rasterizer-unsafe features from off-camera elements."
         }
       ],
       "children": []
@@ -1139,7 +1145,18 @@
           }
         },
         {
-          "insert": ", which asks whether a frame is far larger than its children need. Its findings are filtered to the baseline scope plus draft-created objects. Every finding surviving in that edited scope blocks finalization, warnings included: the call is refused, the run stays active, and the model fixes what it raised before calling again. Crowding is a warning-tier corridor floor for sibling nodes: 80px side by side and 48px stacked. Both are the clearance a routed wire and its chip physically need, not a preferred gap. Stacked peers sit closer because a wire between them usually runs along the gap rather than across it."
+          "insert": ", which asks whether a frame is far larger than its children need. Its findings are filtered to the baseline scope plus draft-created objects. Every error and warning surviving in that edited scope blocks finalization: the call is refused, the run stays active, and the model fixes what it raised before calling again. Notes never block. A note marks a measurement the harness cannot promise, such as text within 1 px of its box edge, and it travels with the proposal."
+        }
+      ],
+      "children": []
+    },
+    "b-kernel-review-crowding": {
+      "id": "b-kernel-review-crowding",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Crowding is a warning-tier corridor floor for sibling nodes: 80px side by side and 48px stacked. Both are the clearance a routed wire and its chip physically need, not a preferred gap. Stacked peers sit closer because a wire between them usually runs along the gap rather than across it."
         }
       ],
       "children": []

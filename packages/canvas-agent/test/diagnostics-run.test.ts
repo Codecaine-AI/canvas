@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
-import { formatDiagnostics, runDiagnostics as runAll } from "../src/board/lints/run";
+import { blockingDiagnostics, formatDiagnostics, runDiagnostics as runAll } from "../src/board/lints/run";
 import type { Diagnostic, LayoutRule } from "../src/board/lints/types";
 import { box, connect, makeDocument } from "./synthetic";
 import { FIGJAM_CONTEXT } from "./helpers";
@@ -133,6 +133,42 @@ describe("runDiagnostics", () => {
   test("a clean board produces no diagnostics", () => {
     const document = makeDocument([box("a", 0, 0), box("b", 224, 0)]);
     expect(runDiagnostics(document)).toEqual([]);
+  });
+});
+
+/** A fixture rule that reports one non-blocking note per object named "edgy". */
+const noteRule: LayoutRule = {
+  id: "edgy",
+  title: "Note fixture",
+  tier: "warning",
+  guidance: "Test fixture only.",
+  check(document) {
+    return document.objects
+      .filter((object) => object.id === "edgy")
+      .map((object) => ({
+        rule: "edgy",
+        severity: "note" as const,
+        at: [object.id],
+        message: `${object.id}: within 1px of its box edge — can't promise`,
+      }));
+  },
+};
+
+describe("notes", () => {
+  test("number after errors and warnings as N*, render in the count line, and never block", () => {
+    const document = makeDocument([...offLadderObjects(), ...escapedChildObjects(), box("edgy", 0, 900)]);
+    const diagnostics = runAll(document, [noteRule, spacingRule, containmentRule]);
+    expect(diagnostics.map((diagnostic) => diagnostic.id)).toEqual(["E1", "W1", "N1"]);
+    expect(blockingDiagnostics(diagnostics).map((diagnostic) => diagnostic.id)).toEqual(["E1", "W1"]);
+    const text = formatDiagnostics(diagnostics);
+    expect(text).toContain("DIAGNOSTICS · 1 error · 1 warning · 1 note");
+    expect(text).toContain("N1 edgy: edgy: within 1px of its box edge — can't promise");
+  });
+
+  test("a board with only notes is not clean, and nothing in it blocks", () => {
+    const diagnostics = runAll(makeDocument([box("edgy", 0, 0)]), [noteRule]);
+    expect(formatDiagnostics(diagnostics)).toStartWith("DIAGNOSTICS · 0 errors · 0 warnings · 1 note");
+    expect(blockingDiagnostics(diagnostics)).toEqual([]);
   });
 });
 

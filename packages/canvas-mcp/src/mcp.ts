@@ -7,6 +7,7 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { resolve } from "node:path";
 
 import { version } from "../package.json";
@@ -31,8 +32,17 @@ export function createCanvasMcpServer(workspace: string): Server {
   return server;
 }
 
-/** Serve the canvas tools over stdio until the client disconnects. */
+/**
+ * Serve the canvas tools over stdio until the client disconnects. Loads
+ * text-measure's exact HarfBuzz backend first (lints, text fit and renders
+ * measure through it); a failure means a broken install and rejects, so the
+ * server never answers with approximate widths.
+ */
 export async function startMcp(workspace: string): Promise<Server> {
+  await useHarfBuzz();
+  if (!activeBackend().exact) {
+    throw new Error(`text-measure: HarfBuzz did not become the active backend (${activeBackend().name} is)`);
+  }
   const server = createCanvasMcpServer(workspace);
   await server.connect(new StdioServerTransport());
   return server;

@@ -6,6 +6,7 @@ import { box, connect, makeDocument } from "./synthetic";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 import { canvasThemePreset, type CanvasStyle } from "@codecaine-ai/canvas/style";
 import { FIGJAM_CANVAS_STYLE } from "./helpers";
+import { measureWidth } from "../../canvas/src/theme/text-measure.ts";
 
 /**
  * Lint chips ARE the renderer's chips. The CONNECTION_LABEL_* constants are
@@ -91,9 +92,12 @@ describe("lint chip / static renderer parity", () => {
     expectRendererParity(document);
   });
 
-  test("figjam mid and long labels: 9.6px per character plus 12px padding a side", () => {
-    expect(chipWidth("go live", FIGJAM_CANVAS_STYLE)).toBeCloseTo(7 * 9.6 + 24, 10);
-    expect(chipWidth("connect-to-database", FIGJAM_CANVAS_STYLE)).toBeCloseTo(19 * 9.6 + 24, 10);
+  test("figjam mid and long labels: the label measured in Inter Bold 16 plus 12px padding a side", () => {
+    const bold16 = { family: "Inter", size: 16, weight: 700 };
+    expect(chipWidth("go live", FIGJAM_CANVAS_STYLE)).toBe(measureWidth("go live", bold16) + 24);
+    expect(chipWidth("connect-to-database", FIGJAM_CANVAS_STYLE)).toBe(measureWidth("connect-to-database", bold16) + 24);
+    // Real advances, not the old 0.6em-per-character estimate (19 × 9.6 = 182.4px).
+    expect(measureWidth("connect-to-database", bold16)).toBeLessThan(19 * 9.6 - 10);
     const document = makeDocument(
       [
         box("a", 0, 0), box("b", 600, 0),
@@ -138,7 +142,8 @@ describe("lint chip / static renderer parity", () => {
     );
     const chip = chipFor(document.connections[1]!, document, style)!;
     expect(chip.rect.height).toBe(26);
-    expect(chip.rect.width).toBeCloseTo(19 * 8.4 + 2 * 7, 10);
+    // 19 Plex Mono cells (159.6px, rounded up to the 1/64px layout unit) + 7px a side.
+    expect(chip.rect.width).toBe(Math.ceil(19 * 8.4 * 64) / 64 + 2 * 7);
     expectRendererParity(document, style);
   });
 

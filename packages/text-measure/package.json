@@ -1,0 +1,42 @@
+{
+  "name": "@codecaine-ai/text-measure",
+  "version": "0.0.1",
+  "private": true,
+  "license": "MIT",
+  "description": "Measures and wraps text the way the browser paints it (bundled Inter 3.19 and IBM Plex Mono 2.5), without rendering.",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./headless": "./src/headless.ts",
+    "./browser": "./src/browser.ts",
+    "./fonts.css": "./fonts.css",
+    "./fonts/*": "./fonts/*"
+  },
+  "files": [
+    "src",
+    "fonts",
+    "fonts.css",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "bunx --bun tsc -p tsconfig.json --noEmit",
+    "generate": "bun scripts/generate-tables.ts",
+    "truth": "bun scripts/truth-chromium.ts",
+    "verify:fonts": "bun scripts/verify-fonts.ts",
+    "bench": "bun scripts/bench.ts",
+    "check:browser": "bun scripts/check-browser.ts"
+  },
+  "dependencies": {
+    "@chenglou/pretext": "0.0.9",
+    "harfbuzzjs": "1.6.2"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^20.9.0",
+    "@types/bun": "latest",
+    "playwright": "^1.58.2",
+    "typescript": "^5"
+  }
+}

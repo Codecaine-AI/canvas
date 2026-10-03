@@ -15,9 +15,14 @@
  * ZZ_CANVASES_DIR overrides the repo-root canvases/ fixture directory (used
  * to capture in an older worktree against the CURRENT fixture documents so
  * only rendering-code differences show up).
+ *
+ * Captures measure text the way the hosts and the test preload do: the exact
+ * HarfBuzz backend of @codecaine-ai/text-measure is loaded before anything
+ * renders (caption bands and chips are measured widths).
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
+import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import {
   buildCorpus,
   buildThemedCorpus,
@@ -98,4 +103,6 @@ function main(): number {
   return runCapture(outPath);
 }
 
+await useHarfBuzz();
+if (!activeBackend().exact) throw new Error(`zz-dom-capture: text-measure is on the ${activeBackend().name} backend, not HarfBuzz`);
 process.exit(main());

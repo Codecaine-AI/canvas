@@ -20,6 +20,7 @@ import {
 import {
   STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX,
   stickyMarkdownLineAttrs,
+  STICKY_STRONG_STYLE,
 } from "../../../../objects/sticky/markdown";
 import {
   activeStickyMarkdownLineIndexes,
@@ -30,6 +31,7 @@ import {
   sourceOffsetToStickyMarkdownDomPosition,
   stickyMarkdownDomPositionToSourceOffset,
   STICKY_MARKDOWN_MONO_FONT,
+  STICKY_MARKDOWN_MONO_FONT_WEIGHT,
   type StickyMarkdownDocument,
   type StickyMarkdownEdit,
   type StickyMarkdownInlineToken,
@@ -300,7 +302,7 @@ function renderInlineToken(
   if (token.kind === "text") return renderLeaf(token.leaf, markerVisible);
   if (token.kind === "strong") {
     return (
-      <strong key={token.content.key}>
+      <strong key={token.content.key} style={STICKY_STRONG_STYLE}>
         {renderLeaf(token.openMarker, markerVisible)}
         {renderLeaf(token.content, markerVisible)}
         {renderLeaf(token.closeMarker, markerVisible)}
@@ -312,6 +314,7 @@ function renderInlineToken(
       key={token.content.key}
       style={{
         fontFamily: STICKY_MARKDOWN_MONO_FONT,
+        fontWeight: STICKY_MARKDOWN_MONO_FONT_WEIGHT,
         fontSize: "0.85em",
         background: "rgba(0, 0, 0, 0.08)",
         borderRadius: "3px",

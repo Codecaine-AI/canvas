@@ -636,8 +636,10 @@ describe("render", () => {
         "W1 crowding: a and b sit 40px apart",
         "W2 crowding: b and c sit 40px apart",
       ],
+      noteLines: [],
       errors: 1,
       warnings: 2,
+      notes: 0,
       requests: "",
       openRequests: 0,
       diff: "",
@@ -653,6 +655,32 @@ describe("render", () => {
       "            W1 crowding: a and b sit 40px apart",
       "            W2 crowding: b and c sit 40px apart",
       "        </warnings>",
+      "    </lints>",
+    ].join("\n"));
+  });
+
+  test("notes group under their own child tag and count only when present", () => {
+    const live = {
+      descriptionMarkdown: "",
+      objectsText: "",
+      edgesText: "",
+      objects: 0,
+      edges: 0,
+      errorLines: [],
+      warningLines: [],
+      noteLines: ["N1 clipped-text: a: label may not fit at 120×60 (within 1px of the box edge — it may wrap or clip, can't promise)"],
+      errors: 0,
+      warnings: 0,
+      notes: 1,
+      requests: "",
+      openRequests: 0,
+      diff: "",
+    };
+    expect(lintsBlock(seedBoardWork(spawnContext()), live).join("\n")).toBe([
+      '    <lints errors="0" warnings="0" notes="1">',
+      "        <notes>",
+      "            N1 clipped-text: a: label may not fit at 120×60 (within 1px of the box edge — it may wrap or clip, can't promise)",
+      "        </notes>",
       "    </lints>",
     ].join("\n"));
   });

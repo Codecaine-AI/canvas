@@ -43,7 +43,11 @@
         "b-theme-resolvers-applies-21",
         "b-theme-context-decision-22",
         "b-theme-context-why-23",
-        "b-theme-context-applies-24"
+        "b-theme-context-applies-24",
+        "b-theme-faces-heading",
+        "b-theme-faces-decision",
+        "b-theme-faces-why",
+        "b-theme-faces-applies"
       ]
     },
     "b-theme-role-1": {
@@ -928,6 +932,365 @@
         },
         {
           "insert": " export, including every future token, whose variable comes from the controls table with no extra code."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-faces-heading": {
+      "id": "b-theme-faces-heading",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Text Is Measured in the Faces the Stage Paints"
+        }
+      ],
+      "children": []
+    },
+    "b-theme-faces-decision": {
+      "id": "b-theme-faces-decision",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-theme-faces-decision-rule"
+      ]
+    },
+    "b-theme-faces-decision-rule": {
+      "id": "b-theme-faces-decision-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "theme/text-measure.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/text-measure.ts",
+              "label": "theme/text-measure.ts"
+            }
+          }
+        },
+        {
+          "insert": " is the canvas's one measuring module, and every stack in "
+        },
+        {
+          "insert": "fonts.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " starts with a face the shared measuring package ships."
+        }
+      ],
+      "children": [
+        "b-theme-faces-decision-files",
+        "b-theme-faces-decision-paint",
+        "b-theme-faces-decision-specs",
+        "b-theme-faces-decision-weights",
+        "b-theme-faces-decision-relayout"
+      ]
+    },
+    "b-theme-faces-decision-files": {
+      "id": "b-theme-faces-decision-files",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Inter 3.19 (400, 500, 600, 700) and IBM Plex Mono 2.5 (400, 500, 600) live only in "
+        },
+        {
+          "insert": "packages/text-measure/fonts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/fonts",
+              "label": "packages/text-measure/fonts"
+            }
+          }
+        },
+        {
+          "insert": ", the package "
+        },
+        {
+          "insert": "Text Measure",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/65-text-measure"
+            }
+          }
+        },
+        {
+          "insert": " records."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-faces-decision-paint": {
+      "id": "b-theme-faces-decision-paint",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Studio paints the woff2 files, and the agent camera and the eval runner rasterize the TTF files."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-faces-decision-specs": {
+      "id": "b-theme-faces-decision-specs",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Each theme's typography becomes font specs from the tokens the painters read. Names set in Inter at "
+        },
+        {
+          "insert": "textFontSizePx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "textFontWeight",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "detailFont",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "headerFont",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "connectorLabelFont",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " choose Inter or IBM Plex Mono for the metadata roles."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-faces-decision-weights": {
+      "id": "b-theme-faces-decision-weights",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Validation snaps "
+        },
+        {
+          "insert": "textFontWeight",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to a whole hundred with ties rounding up, so 450 becomes 500 and 650 becomes 700 ("
+        },
+        {
+          "insert": "snapToControlStep",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/canvas-style.ts",
+              "symbol": "snapToControlStep",
+              "label": "snapToControlStep"
+            }
+          }
+        },
+        {
+          "insert": "). A weight without its own face, such as 800, measures in the face CSS font matching paints and stays reliable."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-faces-decision-relayout": {
+      "id": "b-theme-faces-decision-relayout",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "useResolvedCanvasStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "canvas-style-context.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " hands every consumer a fresh copy of the style when the measuring backend switches. Every memo keyed on the style then measures again in the loaded fonts."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-faces-why": {
+      "id": "b-theme-faces-why",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-theme-faces-why-face",
+        "b-theme-faces-why-rejected"
+      ]
+    },
+    "b-theme-faces-why-face": {
+      "id": "b-theme-faces-why-face",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A label measured in one face and painted in another fits on one surface and clips on the other. The resvg rasterizer paints the regular face for any weight that is not a whole hundred, so whole hundreds are the weights Studio, the camera, and the measurement agree on."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-faces-why-rejected": {
+      "id": "b-theme-faces-why-rejected",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The rejected alternative was a copy of the faces in each consumer, which let the measuring tables come from a different build than the faces that paint."
+        }
+      ],
+      "children": []
+    },
+    "b-theme-faces-applies": {
+      "id": "b-theme-faces-applies",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-theme-faces-applies-scope"
+      ]
+    },
+    "b-theme-faces-applies-scope": {
+      "id": "b-theme-faces-applies-scope",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "fonts.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/theme/fonts.ts",
+              "label": "fonts.ts"
+            }
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "text-measure.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and the weight control in "
+        },
+        {
+          "insert": "canvas-style.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", including every future text token, which resolves to a bundled face and measures through "
+        },
+        {
+          "insert": "text-measure.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []

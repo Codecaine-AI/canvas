@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import {
   parseStickyMarkdown,
   STICKY_MARKDOWN_MONO_FONT,
+  STICKY_MARKDOWN_MONO_FONT_WEIGHT,
   type StickyMarkdownInlineToken,
   type StickyMarkdownLine,
 } from "./markdown-editing";
@@ -63,6 +64,13 @@ export function stickyMarkdownLineAttrs(line: StickyMarkdownLine): StickyMarkdow
   return attrs;
 }
 
+/**
+ * Bold runs keep the sticky's own family: a host stylesheet (the docs
+ * reader's `.docs-markdown strong` rule) must not repaint them in another
+ * font than the one they were measured in.
+ */
+export const STICKY_STRONG_STYLE = { fontFamily: "inherit" } as const;
+
 /** Inline `code` chip tint on a paper sticky (black at 8%). */
 export const STICKY_CODE_CHIP_BACKGROUND = "rgba(0, 0, 0, 0.08)";
 
@@ -74,13 +82,18 @@ function renderInline(
   return tokens.map((token) => {
     if (token.kind === "text") return token.leaf.text;
     if (token.kind === "strong") {
-      return <strong key={token.content.key}>{token.content.text}</strong>;
+      return (
+        <strong key={token.content.key} style={STICKY_STRONG_STYLE}>
+          {token.content.text}
+        </strong>
+      );
     }
     return (
       <code
         key={token.content.key}
         style={{
           fontFamily: STICKY_MARKDOWN_MONO_FONT,
+          fontWeight: STICKY_MARKDOWN_MONO_FONT_WEIGHT,
           fontSize: "0.85em",
           background: codeBackground,
           borderRadius: "3px",

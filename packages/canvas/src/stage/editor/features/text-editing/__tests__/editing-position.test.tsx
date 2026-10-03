@@ -24,6 +24,10 @@ import { ObjectShape } from "../../../../ObjectShape";
 import type { InteractiveCanvasObject } from "../../../../../state/schema";
 import { TextEditingOverlay } from "../TextEditingOverlay";
 import type { TextEditingApi } from "../use-text-editing";
+import { measureWidth } from "../../../../../theme/text-measure";
+
+/** The figjam caption font these fixtures render in: Inter Bold 15 (the measured band width). */
+const FIGJAM_NAME_FONT = { family: "Inter", size: 15, weight: 700 };
 
 function makeObject(partial: Partial<InteractiveCanvasObject> & Pick<InteractiveCanvasObject, "id" | "type">): InteractiveCanvasObject {
   return {
@@ -81,10 +85,12 @@ function expectEditorOnSlot(object: InteractiveCanvasObject, zoom = 1) {
   expect(def?.textSlot).toBeDefined();
   const resolved = resolveTextSlot(def!.textSlot!, object, zoom, { canvasStyle: FIGJAM_CANVAS_STYLE });
   const { editor } = renderEditor(object, zoom);
-  expect(editor.style.left).toBe(`${object.geometry.x + resolved.rect.x}px`);
-  expect(editor.style.top).toBe(`${object.geometry.y + resolved.rect.y}px`);
-  expect(editor.style.width).toBe(`${resolved.rect.width}px`);
-  expect(editor.style.height).toBe(`${resolved.rect.height}px`);
+  // Compared as numbers: CSS serializes lengths to 6 decimals, and measured
+  // widths centered under a glyph land on 1/128px.
+  expect(cssPx(editor.style.left)).toBeCloseTo(object.geometry.x + resolved.rect.x, 5);
+  expect(cssPx(editor.style.top)).toBeCloseTo(object.geometry.y + resolved.rect.y, 5);
+  expect(cssPx(editor.style.width)).toBeCloseTo(resolved.rect.width, 5);
+  expect(cssPx(editor.style.height)).toBeCloseTo(resolved.rect.height, 5);
   return { editor, resolved };
 }
 
@@ -389,7 +395,7 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
       style: { shape: "icon" },
     });
     const { editor, resolved } = expectEditorOnSlot(object);
-    const expectedWidth = "Hello text".length * 15 * 0.62;
+    const expectedWidth = measureWidth("Hello text", FIGJAM_NAME_FONT);
     expect(resolved.rect).toEqual({
       x: (120 - expectedWidth) / 2,
       y: 140 + BELOW_BAND_GAP_PX,
@@ -434,7 +440,7 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
       style: { shape: "icon" },
     });
     const { resolved } = expectEditorOnSlot(object);
-    const expectedWidth = "Hello text".length * 15 * 0.62;
+    const expectedWidth = measureWidth("Hello text", FIGJAM_NAME_FONT);
     expect(resolved.rect).toEqual({
       x: (180 - expectedWidth) / 2,
       y: 110 + BELOW_BAND_GAP_PX,
@@ -453,7 +459,7 @@ describe("editing position: editor rect === slot rect (per §1.2 kind)", () => {
       style: { shape: "icon" },
     });
     const { resolved } = expectEditorOnSlot(object);
-    const expectedWidth = "Hello text".length * 15 * 0.62;
+    const expectedWidth = measureWidth("Hello text", FIGJAM_NAME_FONT);
     expect(resolved.rect).toEqual({
       x: (120 - expectedWidth) / 2,
       y: 120 + BELOW_BAND_GAP_PX,

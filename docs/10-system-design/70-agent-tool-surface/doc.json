@@ -239,7 +239,7 @@
           }
         },
         {
-          "insert": " resolve_request marks one queue entry done or declined, records a note for the operator, and returns only the updated queue. finalize with outcome committed reruns diagnostics in the edited scope, requires every finding there to be cleared (warnings block exactly as errors do) and no user request left open, and proposes the cumulative baseline-to-draft patch. A blocked finalize leaves the run going, so the model fixes what it raised and calls again. outcome none ends without a proposal and explains why."
+          "insert": " resolve_request marks one queue entry done or declined, records a note for the operator, and returns only the updated queue. finalize with outcome committed reruns diagnostics in the edited scope, requires every error and warning there to be cleared (notes never block) and no user request left open, and proposes the cumulative baseline-to-draft patch. A blocked finalize leaves the run going, so the model fixes what it raised and calls again. outcome none ends without a proposal and explains why."
         }
       ],
       "children": []
@@ -369,9 +369,106 @@
           "attributes": {
             "bold": true
           }
-        },
+        }
+      ],
+      "children": [
+        "b-overview-fact-ownership-roster",
+        "b-overview-fact-ownership-convention",
+        "b-overview-fact-ownership-slack",
+        "b-overview-fact-ownership-clipped",
+        "b-overview-fact-ownership-crowding",
+        "b-overview-fact-ownership-gate"
+      ]
+    },
+    "b-overview-fact-ownership-roster": {
+      "id": "b-overview-fact-ownership-roster",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
-          "insert": " Eight always-on diagnostics run at spawn and on every edit. Six check covered content, containment, broken edges, unreadable labels, crowding, and clipped text against production geometry. The other two, label-is-prose and detail-too-long, hold object text to the name and detail convention. A shape, icon, or section name stays a few words on one line, its detail holds one short fact, and prose goes on a sticky. A committed finalize adds frame-slack, a polish check that would only nag while a region is still being built. Clipped text fires when a shape label, sticky body, or section title would drop words behind an ellipsis, or a detail line would be cut short or hidden. It names the measured box size that shows the text whole. Crowding is a warning-tier arrow-corridor floor: it flags sibling gaps under 80px side by side or 48px stacked, the clearance a routed wire and its chip physically need rather than a preferred distance. Every finding in the edited scope blocks a committed finalize, warnings included: the call is refused, the run continues, and the model fixes what it raised before calling again."
+          "insert": "Eight always-on diagnostics run at spawn and on every edit. Six check covered content, containment, broken edges, unreadable labels, crowding, and clipped text against production geometry."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-ownership-convention": {
+      "id": "b-overview-fact-ownership-convention",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The other two, label-is-prose and detail-too-long, hold object text to the name and detail convention. A shape, icon, or section name stays a few words on one line, its detail holds one short fact, and prose goes on a sticky."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-ownership-slack": {
+      "id": "b-overview-fact-ownership-slack",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A committed finalize adds frame-slack, a polish check that would only nag while a region is still being built."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-ownership-clipped": {
+      "id": "b-overview-fact-ownership-clipped",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Clipped text fires when a shape label, sticky body, or section title would drop words behind an ellipsis, or a detail line would be cut short or hidden. It names the measured box size that shows the text whole."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-ownership-crowding": {
+      "id": "b-overview-fact-ownership-crowding",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Crowding is a warning-tier arrow-corridor floor: it flags sibling gaps under 80px side by side or 48px stacked, the clearance a routed wire and its chip physically need rather than a preferred distance."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-ownership-gate": {
+      "id": "b-overview-fact-ownership-gate",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Every error and warning in the edited scope blocks a committed finalize: the call is refused, the run continues, and the model fixes what it raised before calling again."
+        }
+      ],
+      "children": [
+        "b-overview-fact-ownership-notes"
+      ]
+    },
+    "b-overview-fact-ownership-notes": {
+      "id": "b-overview-fact-ownership-notes",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Notes never block. A note marks what the harness cannot promise, such as text within 1 px of its box edge."
         }
       ],
       "children": []

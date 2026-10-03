@@ -163,7 +163,7 @@
           }
         },
         {
-          "insert": " warn when the name or the detail would clip. The "
+          "insert": " add a note when the name or the detail would clip, may clip within 1 px of the box edge, or cannot be measured exactly. The "
         },
         {
           "insert": "clipped-text",

@@ -21,24 +21,23 @@
  * `outlineSpecFor`/`outlinePolygonForSpec` for shape silhouettes,
  * `routeConnection` for elbow connector paths, the palette role tables for
  * every color, and the text-slot system for text placement — so a static
- * render matches the app. Body-text line breaks and ellipsis decisions use
- * real Inter advance widths (render/text-metrics.ts over the generated glyph
- * table), sticky text lays out as its markdown line boxes
- * (render/sticky-text.ts mirroring objects/sticky/markdown.tsx), and the
+ * render matches the app. Every width, line break and ellipsis comes from
+ * @codecaine-ai/text-measure (theme/text-measure.ts: Pretext line breaking
+ * over the active measuring backend, the faces the stage and resvg paint),
+ * names wrap the way the stage's pre-wrap / break-word slot does, sticky
+ * text lays out as its markdown line boxes (render/sticky-text.ts mirroring
+ * objects/sticky/markdown.tsx), and the
  * types whose live defs draw custom inline-SVG silhouettes
  * (predefined-process) draw the same silhouette geometry here. Icon objects
  * render their real glyph from the style's icon pack via the pure registry
  * (objects/shapes/icon/icon-glyphs.ts) — bare or on a tile
  * (objects/shapes/icon/icon-tile.ts) — falling back to a neutral rounded
  * rect only for unknown glyph ids. Detail lines (one muted line under a
- * shape's or icon's name) measure IBM Plex Mono at its fixed advance, or
- * Inter's table, for their ellipsis. Known approximations:
- * measurement ignores kerning/ligatures (marginally conservative), and the
- * section title chip and connection label chip size themselves through the
- * shared geometry the live stage uses (objects/section/title-chip-layout.ts,
- * connectors/label-chip.ts): exact cells for IBM Plex Mono, the char-count
- * heuristics for Inter — those ARE the live stage's own sizing rules (a
- * title chip carrying an icon or a detail measures its Inter runs exactly).
+ * shape's or icon's name) ellipsize the way the stage's text-overflow does.
+ * The section title chip and connection label chip size themselves through
+ * the shared geometry the live stage uses (objects/section/title-chip-layout
+ * .ts, connectors/label-chip.ts). Answers are exact only on an exact backend
+ * (hosts call useHarfBuzz() first) and for text the bundled faces cover.
  */
 
 import {
@@ -72,6 +71,7 @@ import {
   titleChipHasContent,
   titleChipIconDrawing,
   titleChipLayout,
+  titleChipTextWidthPx,
   titleChipVisibleRuns,
   type TitleChipFont,
   type TitleChipIconDrawing,
@@ -86,14 +86,17 @@ import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { resolveObjectStrokeWidth, resolveShapeCornerRadius } from "../theme/tokens";
 import { DEFAULT_CANVAS_STYLE, normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
 import { CANVAS_MONO_FONT_STACK_SVG, CANVAS_SANS_FONT_STACK_SVG } from "../theme/fonts";
+import { ELLIPSIS, ellipsizeToWidth, fitsOnOneLine, measureWidth, wrapText } from "../theme/text-measure";
 import {
   BELOW_TEXT_SLOT,
   CENTER_TEXT_SLOT,
   CENTER_TEXT_INSET_PX,
   INSET_BODY_TEXT_SLOT,
+  detailFontSpec,
   iconTileRectPx,
   rectTextSlot,
   resolveTextSlot,
+  slotFontSpec,
   slotLineHeightPx,
   slotNameLineCapacity,
   type DetailTypography,
@@ -119,15 +122,8 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../state/schema";
-import { STICKY_MARKDOWN_MONO_FONT } from "../objects/sticky/markdown-editing";
-import { interCharWidthPx, measureInterTextPx, measureMonoTextPx } from "./text-metrics";
-import {
-  layoutStickyText,
-  STICKY_CODE_MONO_ADVANCE_EM,
-  STICKY_LINE_PITCH_PX,
-  type StickyTextRow,
-  type StickyTextSegment,
-} from "./sticky-text";
+import { STICKY_MARKDOWN_MONO_FONT_WEIGHT } from "../objects/sticky/markdown-editing";
+import { ellipsizeStickyRow, layoutStickyText, STICKY_LINE_PITCH_PX } from "./sticky-text";
 import type { RenderDocumentToSvg, RenderStaticSvgOptions, RenderedSvg } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -244,155 +240,71 @@ function paintsInsideViewBox(
 }
 
 // ---------------------------------------------------------------------------
-// Text layout — greedy word wrap on REAL Inter advance widths
-// (render/text-metrics.ts), mirroring the browser's word-wrap-then-
-// break-word behavior for body text (objects/object-shell.tsx renders slot
-// text with white-space: pre-wrap + overflow-wrap: break-word): lines break
-// at spaces, and a single word wider than the box breaks intra-word at the
-// overflow point. Whitespace runs collapse to single spaces, matching the
-// wrapped-line model the text-slot estimators use.
+// Text layout — the stage's slot text is `white-space: pre-wrap;
+// overflow-wrap: break-word` (objects/object-shell.tsx), so names wrap with
+// text-measure's Pretext line breaking in pre-wrap mode at the slot width:
+// the browser's break opportunities (spaces, hyphens, dashes, soft hyphens,
+// zero-width spaces, CJK), preserved spaces, hanging trailing spaces, and
+// intra-word breaks only for a word wider than the line.
 //
-// `overflowBreakIndex` / `wrapTextLines` / `clampLines` are exported (they are
-// not on the package's public `./render` surface — deep-import them) so that
-// off-renderer consumers can ask "would this text clip in this box?" and get
-// the RENDERER's answer rather than a second implementation of it. The agent's
-// text-fit warnings (canvas-agent board/text-fit.ts) are built on exactly
-// these functions for that reason.
+// `wrapTextLines` / `clampLines` / `ellipsizeDetailText` are exported (they
+// are not on the package's public `./render` surface — deep-import them) so
+// that off-renderer consumers can ask "would this text clip in this box?" and
+// get the RENDERER's answer rather than a second implementation of it. The
+// agent's text-fit warnings (canvas-agent board/text-fit.ts) are built on
+// exactly these functions for that reason.
 // ---------------------------------------------------------------------------
 
-/** Longest prefix of `word` that fits `widthPx` (min 1 codepoint). */
-export function overflowBreakIndex(
-  word: string,
-  widthPx: number,
-  fontSizePx: number,
-  fontWeight: number,
-): number {
-  const codePoints = [...word];
-  let used = 0;
-  let taken = 0;
-  let endIndex = 0;
-  for (const char of codePoints) {
-    const charWidth = measureInterTextPx(char, fontSizePx, fontWeight);
-    if (taken > 0 && used + charWidth > widthPx) break;
-    used += charWidth;
-    taken += 1;
-    endIndex += char.length;
-  }
-  return endIndex;
-}
-
-/** Greedy word wrap of `text` into lines that fit `availableWidthPx`. */
-export function wrapTextLines(
-  text: string,
-  availableWidthPx: number,
-  fontSizePx: number,
-  fontWeight: number,
-): string[] {
+/**
+ * `text` as the lines the stage paints in a slot `widthPx` wide, in
+ * `typography`'s font: pre-wrap (a trailing newline adds no line, a blank
+ * line is an empty line), each line as laid out (its hanging trailing spaces
+ * included).
+ */
+export function wrapTextLines(text: string, widthPx: number, typography: SlotTypography): string[] {
   if (text === "") return [];
-  const width = Math.max(1, availableWidthPx);
-  const spaceWidth = measureInterTextPx(" ", fontSizePx, fontWeight);
-  const lines: string[] = [];
-
-  for (const hardLine of text.split("\n")) {
-    const words = hardLine.trim().split(/\s+/).filter(Boolean);
-    if (words.length === 0) {
-      lines.push("");
-      continue;
-    }
-    let current = "";
-    let currentWidth = 0;
-    for (let word of words) {
-      let wordWidth = measureInterTextPx(word, fontSizePx, fontWeight);
-      // Break words wider than the line at the overflow point.
-      while (wordWidth > width) {
-        if (current !== "") {
-          lines.push(current);
-          current = "";
-          currentWidth = 0;
-        }
-        const breakIndex = overflowBreakIndex(word, width, fontSizePx, fontWeight);
-        lines.push(word.slice(0, breakIndex));
-        word = word.slice(breakIndex);
-        wordWidth = measureInterTextPx(word, fontSizePx, fontWeight);
-      }
-      if (word === "") continue;
-      if (current === "") {
-        current = word;
-        currentWidth = wordWidth;
-      } else if (currentWidth + spaceWidth + wordWidth <= width) {
-        current = `${current} ${word}`;
-        currentWidth += spaceWidth + wordWidth;
-      } else {
-        lines.push(current);
-        current = word;
-        currentWidth = wordWidth;
-      }
-    }
-    if (current !== "") lines.push(current);
-  }
-
-  return lines;
+  return wrapText(text, slotFontSpec(typography), {
+    maxWidth: Math.max(0, widthPx),
+    lineHeight: slotLineHeightPx(typography),
+    whiteSpace: "pre-wrap",
+  }).lines.map((line) => line.text);
 }
 
 /**
- * Clamp wrapped lines to the slot rect, ellipsizing the last visible line
- * (mirrors the app's -webkit-line-clamp): trailing characters drop until the
- * line plus the ellipsis — measured at its real advance — fits the width.
+ * Clamp wrapped lines to `maxLines`, ellipsizing the last visible line the
+ * way the stage's -webkit-line-clamp does: its trailing graphemes drop until
+ * the line plus the ellipsis fits the width. An unchanged line count means
+ * nothing was clamped.
  */
 export function clampLines(
   lines: string[],
   maxLines: number,
   widthPx: number,
-  fontSizePx: number,
-  fontWeight: number,
+  typography: SlotTypography,
 ): string[] {
   if (lines.length <= maxLines) return lines;
   const clamped = lines.slice(0, maxLines);
   const lastIndex = clamped.length - 1;
-  let last = (clamped[lastIndex] ?? "").replace(/\s+$/, "");
-  while (last !== "" && measureInterTextPx(`${last}…`, fontSizePx, fontWeight) > widthPx) {
-    last = last.slice(0, -1).replace(/\s+$/, "");
-  }
-  clamped[lastIndex] = `${last}…`;
+  const font = slotFontSpec(typography);
+  clamped[lastIndex] = ellipsizeToWidth(clamped[lastIndex] ?? "", font, widthPx, font, "pre-wrap");
   return clamped;
 }
 
-/**
- * Width of a detail-line run at its font's real advances: IBM Plex Mono's
- * fixed cell (measureMonoTextPx) or Inter's per-glyph table.
- */
+/** Width of a detail-line run in its font (IBM Plex Mono or Inter, per the style). */
 export function measureDetailTextPx(text: string, typography: DetailTypography): number {
-  return typography.font === "mono"
-    ? measureMonoTextPx(text, typography.fontSizePx)
-    : measureInterTextPx(text, typography.fontSizePx, typography.fontWeight);
+  return measureWidth(text, detailFontSpec(typography));
 }
-
-/** Float slack for detail-line fit checks (far below any glyph advance). */
-const DETAIL_FIT_EPSILON_PX = 1e-6;
 
 /**
  * The detail line as painted at `widthPx` (mirrors the live line's
- * `text-overflow: ellipsis`): unchanged when it fits; otherwise the longest
- * prefix that fits WITH a trailing ellipsis, trailing whitespace dropped.
- * Exported (deep-import, like wrapTextLines / clampLines) so the agent's
- * text-fit asks the renderer whether a detail is cut.
+ * `white-space: nowrap; text-overflow: ellipsis`): unchanged when it fits;
+ * otherwise the longest prefix that fits WITH a trailing ellipsis, trailing
+ * whitespace dropped. Exported (deep-import, like wrapTextLines / clampLines)
+ * so the agent's text-fit asks the renderer whether a detail is cut.
  */
 export function ellipsizeDetailText(text: string, widthPx: number, typography: DetailTypography): string {
-  // Summed advances carry float error (ten 8.4px mono cells add up to
-  // 84.00000000000001), so a run that fits exactly must not lose a cell.
-  const fitWidthPx = widthPx + DETAIL_FIT_EPSILON_PX;
-  if (measureDetailTextPx(text, typography) <= fitWidthPx) return text;
-  const ellipsisWidth = measureDetailTextPx("…", typography);
-  const chars = [...text];
-  let used = 0;
-  let kept = 0;
-  for (const char of chars) {
-    const charWidth = measureDetailTextPx(char, typography);
-    if (used + charWidth + ellipsisWidth > fitWidthPx) break;
-    used += charWidth;
-    kept += 1;
-  }
-  return `${chars.slice(0, kept).join("").replace(/\s+$/, "")}…`;
+  const font = detailFontSpec(typography);
+  return fitsOnOneLine(text, font, widthPx) ? text : ellipsizeToWidth(text, font, widthPx);
 }
 
 /** One detail line as a `<text>`, centered vertically on `centerY` (world coordinates). */
@@ -439,13 +351,13 @@ function renderSlotTextBlock(
   const detail = options?.detail ?? null;
   if ((text === "" && !detail) || rect.width <= 0) return "";
   const lineHeight = slotLineHeightPx(typography);
-  let lines = text === "" ? [] : wrapTextLines(text, rect.width, typography.fontSizePx, typography.fontWeight);
+  let lines = wrapTextLines(text, rect.width, typography);
   if (lines.length === 0 && !detail) return "";
   if (options?.clampToRect !== false && rect.height > 0) {
     // slotNameLineCapacity: the detail line's reserve comes off the name's lines.
     const reserve = detail ? detail.gapPx + detail.typography.lineHeightPx : 0;
     const maxLines = Math.max(1, Math.floor((rect.height - reserve) / lineHeight));
-    lines = clampLines(lines, maxLines, rect.width, typography.fontSizePx, typography.fontWeight);
+    lines = clampLines(lines, maxLines, rect.width, typography);
   }
 
   const detailHeight = detail
@@ -465,7 +377,12 @@ function renderSlotTextBlock(
   const anchor = typography.textAlign === "center" ? "middle" : "start";
   const x = typography.textAlign === "center" ? rect.x + rect.width / 2 : rect.x;
 
-  const tspans = lines
+  // Pre-wrap: a line's trailing spaces hang (they paint nothing and do not
+  // move centered text); leading and repeated spaces paint, which SVG only
+  // keeps under xml:space="preserve" (set when some line needs it).
+  const painted = lines.map((line) => line.replace(/[ \t]+$/, ""));
+  const preserveSpaces = painted.some((line) => /^[ \t]|[ \t]{2}|\t/.test(line));
+  const tspans = painted
     .map((line, index) =>
       line === ""
         ? ""
@@ -485,6 +402,7 @@ function renderSlotTextBlock(
             "text-anchor": anchor,
             "dominant-baseline": "central",
             ...(typography.fontFamily ? { "font-family": typography.fontFamily } : null),
+            ...(preserveSpaces ? { "xml:space": "preserve" } : null),
           },
           tspans,
         );
@@ -657,56 +575,13 @@ const STICKY_CODE_CHIP_RADIUS_PX = 3;
 /** Chip height in em of the code font size (approximates the inline box's height). */
 const STICKY_CODE_CHIP_HEIGHT_EM = 1.3;
 
-/** Approximate advance of one already-laid-out sticky character, for tail trimming. */
-function stickySegmentCharWidthPx(segment: StickyTextSegment, char: string): number {
-  if (segment.style === "code") return segment.fontSizePx * STICKY_CODE_MONO_ADVANCE_EM;
-  return interCharWidthPx(char.codePointAt(0)!, segment.fontSizePx, segment.fontWeight);
-}
-
-/**
- * Ellipsizes a clamped sticky row in place (mirrors -webkit-line-clamp):
- * trailing characters drop until the row plus the ellipsis fits the slot
- * width, then the ellipsis is appended to the final segment.
- */
-function ellipsizeStickyRow(row: StickyTextRow, slotWidthPx: number): void {
-  const ellipsisWidth = measureInterTextPx("…", row.fontSizePx, row.fontWeight);
-  const rowEnd = () => {
-    const last = row.segments[row.segments.length - 1];
-    return last ? last.xPx + last.widthPx : row.indentPx;
-  };
-  while (row.segments.length > 0 && rowEnd() + ellipsisWidth > slotWidthPx) {
-    const last = row.segments[row.segments.length - 1]!;
-    const chars = [...last.text];
-    const removed = chars.pop();
-    if (removed === undefined || chars.length === 0) {
-      row.segments.pop();
-      continue;
-    }
-    last.text = chars.join("");
-    last.widthPx -= stickySegmentCharWidthPx(last, removed);
-  }
-  const last = row.segments[row.segments.length - 1];
-  if (last && last.style !== "code") {
-    last.text = `${last.text}…`;
-    last.widthPx += ellipsisWidth;
-  } else {
-    row.segments.push({
-      text: "…",
-      style: "plain",
-      xPx: rowEnd(),
-      widthPx: ellipsisWidth,
-      fontSizePx: row.fontSizePx,
-      fontWeight: row.fontWeight,
-    });
-  }
-}
-
 /**
  * Sticky body text as its markdown line stack: per-line font size/weight,
  * bullet glyph columns, depth indentation and 36px line pitch mirroring the
- * live StickyMarkdown layout, wrapped on real Inter advances. Rows beyond
- * the slot's height clamp are dropped and the last visible row ellipsized —
- * the same overflow the live -webkit-line-clamp shows.
+ * live StickyMarkdown layout, each line wrapped as its mixed inline runs
+ * (render/sticky-text.ts). Rows beyond the slot's height clamp are dropped
+ * and the last visible row ellipsized — the same overflow the live
+ * -webkit-line-clamp shows.
  */
 function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): string {
   // The slot typography carries the sticky paint's text color.
@@ -733,6 +608,8 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
 
   const chipRects: string[] = [];
   const tspans: string[] = [];
+  // Pre-wrap: repeated spaces paint, which SVG keeps only under xml:space="preserve".
+  let preserveSpaces = false;
   clamped.forEach((row, rowIndex) => {
     const centerY = rect.y + rowIndex * STICKY_LINE_PITCH_PX + STICKY_LINE_PITCH_PX / 2;
     if (row.bullet) {
@@ -748,8 +625,12 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
         ),
       );
     }
-    for (const segment of row.segments) {
-      if (segment.text === "") continue;
+    for (const [segmentIndex, segment] of row.segments.entries()) {
+      // Trailing spaces at a row's end hang: they paint nothing.
+      const text = segmentIndex === row.segments.length - 1 ? segment.text.replace(/[ \t]+$/, "") : segment.text;
+      if (text === "") continue;
+      // Leading spaces (a row's own, or one after a bold run) and repeated ones paint.
+      if (/^[ \t]|[ \t]{2}|\t/.test(text)) preserveSpaces = true;
       if (segment.style === "code") {
         const chipHeight = segment.fontSizePx * STICKY_CODE_CHIP_HEIGHT_EM;
         chipRects.push(
@@ -764,21 +645,22 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
           }),
         );
       }
+      const code = segment.style === "code";
+      const fontWeight = code ? STICKY_MARKDOWN_MONO_FONT_WEIGHT : segment.fontWeight;
       tspans.push(
         tag(
           "tspan",
           {
-            x: rect.x + segment.xPx,
+            // A code chip's text starts inside its leading padding.
+            x: rect.x + segment.xPx + segment.textOffsetPx,
             y: centerY,
             ...(segment.fontSizePx !== typography.fontSizePx
               ? { "font-size": segment.fontSizePx }
               : null),
-            ...(segment.fontWeight !== typography.fontWeight
-              ? { "font-weight": segment.fontWeight }
-              : null),
-            ...(segment.style === "code" ? { "font-family": STICKY_MARKDOWN_MONO_FONT } : null),
+            ...(fontWeight !== typography.fontWeight ? { "font-weight": fontWeight } : null),
+            ...(code ? { "font-family": CANVAS_MONO_FONT_STACK_SVG } : null),
           },
-          escapeXml(segment.text),
+          escapeXml(text),
         ),
       );
     }
@@ -793,6 +675,7 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
       "font-weight": typography.fontWeight,
       "text-anchor": "start",
       "dominant-baseline": "central",
+      ...(preserveSpaces ? { "xml:space": "preserve" } : null),
     },
     tspans.join(""),
   );
@@ -1281,9 +1164,8 @@ function renderSectionTitleChip(
   clipId: string,
   viewBox: CanvasBounds,
 ): string {
-  // The shared layout measures a chip carrying an icon or a detail on real
-  // Inter advances (the box hit-testing and text-fit use too); a plain title
-  // keeps the original char-count estimate (unchanged output).
+  // The shared layout measures every run in the font it paints in — the box
+  // hit-testing, painted extents and text-fit use too.
   if (!titleChipHasContent(section, canvasStyle)) return "";
   const layout = titleChipLayout(section, canvasStyle, zoom);
   const { box, scale } = layout;
@@ -1327,18 +1209,35 @@ function renderSectionTitleChip(
     );
   }
   if (layout.detail && runs.detail !== null) {
-    parts.push(
-      tag(
-        "text",
-        titleChipTextAttributes(
-          layout.detail.font,
-          chipX + layout.detail.x,
-          chipY + layout.centerY,
-          paint.headerDetail,
+    // A cut detail ends in the chip's ellipsis, which CSS paints in the line's
+    // block font — the title's — so it is its own <text> in that font, right
+    // after the detail graphemes kept.
+    const cut = runs.detail !== layout.detail.text && runs.detail.endsWith(ELLIPSIS);
+    const kept = cut ? runs.detail.slice(0, -ELLIPSIS.length) : runs.detail;
+    if (kept !== "") {
+      parts.push(
+        tag(
+          "text",
+          titleChipTextAttributes(layout.detail.font, chipX + layout.detail.x, chipY + layout.centerY, paint.headerDetail),
+          escapeXml(kept),
         ),
-        escapeXml(runs.detail),
-      ),
-    );
+      );
+    }
+    if (cut) {
+      const keptWidth = kept === "" ? 0 : titleChipTextWidthPx(kept, layout.detail.font);
+      parts.push(
+        tag(
+          "text",
+          titleChipTextAttributes(
+            layout.title.font,
+            chipX + layout.detail.x + keptWidth,
+            chipY + layout.centerY,
+            paint.headerText,
+          ),
+          ELLIPSIS,
+        ),
+      );
+    }
   }
   let contents = parts.join("");
   if (clipped && contents !== "") {

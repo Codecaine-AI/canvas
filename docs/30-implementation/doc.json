@@ -22,22 +22,10 @@
       "children": [
         "b-impl-opening-1",
         "b-impl-areas-2",
-        "b-impl-area-theme-3",
-        "b-impl-area-state-4",
-        "b-impl-area-objects-5",
-        "b-impl-area-interaction-6",
-        "b-impl-area-connectors-7",
-        "b-impl-area-stage-8",
-        "b-impl-area-ui-9",
-        "b-impl-area-studio-10",
-        "b-impl-area-agent-11",
-        "b-impl-area-canvas-mcp-37",
-        "b-impl-area-canvases-12",
-        "b-impl-area-navigation-13",
-        "b-impl-area-render-14",
-        "b-impl-area-themes-15",
-        "b-impl-area-reference-16",
-        "b-impl-area-eval-17",
+        "b-impl-group-engine",
+        "b-impl-group-presentation",
+        "b-impl-group-hosts",
+        "b-impl-group-shared",
         "b-impl-tier-18",
         "b-impl-tier-purpose-19",
         "b-impl-tier-inclusion-20",
@@ -83,6 +71,28 @@
       ],
       "children": []
     },
+    "b-impl-group-engine": {
+      "id": "b-impl-group-engine",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Engine logic in packages/canvas/src",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-impl-area-theme-3",
+        "b-impl-area-state-4",
+        "b-impl-area-objects-5",
+        "b-impl-area-interaction-6",
+        "b-impl-area-connectors-7"
+      ]
+    },
     "b-impl-area-theme-3": {
       "id": "b-impl-area-theme-3",
       "type": "list-item",
@@ -101,7 +111,7 @@
           }
         },
         {
-          "insert": " holds the workspace style model, the palette with its paint resolvers, the color math, and the font stacks. Decisions live under "
+          "insert": " holds the workspace style model, the palette with its paint resolvers, the color math, the font stacks, and the text-measuring module. Decisions live under "
         },
         {
           "insert": "Theme",
@@ -263,6 +273,27 @@
       ],
       "children": []
     },
+    "b-impl-group-presentation": {
+      "id": "b-impl-group-presentation",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Engine presentation in packages/canvas/src",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-impl-area-stage-8",
+        "b-impl-area-ui-9",
+        "b-impl-area-navigation-13",
+        "b-impl-area-render-14"
+      ]
+    },
     "b-impl-area-stage-8": {
       "id": "b-impl-area-stage-8",
       "type": "list-item",
@@ -334,6 +365,73 @@
         }
       ],
       "children": []
+    },
+    "b-impl-area-navigation-13": {
+      "id": "b-impl-area-navigation-13",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/navigation",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/navigation",
+              "label": "packages/canvas/src/navigation"
+            }
+          }
+        },
+        {
+          "insert": " holds the shared viewport-navigation hook both stage faces consume. It has no page yet, and decisions accrete here when the area earns them."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-area-render-14": {
+      "id": "b-impl-area-render-14",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/render",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/render",
+              "label": "packages/canvas/src/render"
+            }
+          }
+        },
+        {
+          "insert": " covers static rendering, with painted bounds, named views, the static SVG renderer, and sticky text layout. It has no page yet, and decisions accrete lazily."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-group-hosts": {
+      "id": "b-impl-group-hosts",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Apps and agent hosts",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-impl-area-studio-10",
+        "b-impl-area-agent-11",
+        "b-impl-area-canvas-mcp-37",
+        "b-impl-area-eval-17"
+      ]
     },
     "b-impl-area-studio-10": {
       "id": "b-impl-area-studio-10",
@@ -443,6 +541,85 @@
       ],
       "children": []
     },
+    "b-impl-area-eval-17": {
+      "id": "b-impl-area-eval-17",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/eval-suite",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/eval-suite",
+              "label": "packages/eval-suite"
+            }
+          }
+        },
+        {
+          "insert": " is the layout-agent eval harness: runner, scenario and axes systems, recorded runs."
+        }
+      ],
+      "children": []
+    },
+    "b-impl-group-shared": {
+      "id": "b-impl-group-shared",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Shared code and data",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-impl-area-text-measure-38",
+        "b-impl-area-canvases-12",
+        "b-impl-area-themes-15",
+        "b-impl-area-reference-16"
+      ]
+    },
+    "b-impl-area-text-measure-38": {
+      "id": "b-impl-area-text-measure-38",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/text-measure",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure",
+              "label": "packages/text-measure"
+            }
+          }
+        },
+        {
+          "insert": " is the shared package that measures, wraps, and fits text for canvas, sequence, and docs-system. Decisions live under "
+        },
+        {
+          "insert": "Text Measure",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/65-text-measure"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
     "b-impl-area-canvases-12": {
       "id": "b-impl-area-canvases-12",
       "type": "list-item",
@@ -475,52 +652,6 @@
         },
         {
           "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-impl-area-navigation-13": {
-      "id": "b-impl-area-navigation-13",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "packages/canvas/src/navigation",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/navigation",
-              "label": "packages/canvas/src/navigation"
-            }
-          }
-        },
-        {
-          "insert": " holds the shared viewport-navigation hook both stage faces consume. It has no page yet, and decisions accrete here when the area earns them."
-        }
-      ],
-      "children": []
-    },
-    "b-impl-area-render-14": {
-      "id": "b-impl-area-render-14",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "packages/canvas/src/render",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/render",
-              "label": "packages/canvas/src/render"
-            }
-          }
-        },
-        {
-          "insert": " covers static rendering: painted bounds, named views, static SVG, text metrics. It has no page yet, and decisions accrete lazily."
         }
       ],
       "children": []
@@ -598,29 +729,6 @@
         },
         {
           "insert": ")."
-        }
-      ],
-      "children": []
-    },
-    "b-impl-area-eval-17": {
-      "id": "b-impl-area-eval-17",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "packages/eval-suite",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/eval-suite",
-              "label": "packages/eval-suite"
-            }
-          }
-        },
-        {
-          "insert": " is the layout-agent eval harness: runner, scenario and axes systems, recorded runs."
         }
       ],
       "children": []

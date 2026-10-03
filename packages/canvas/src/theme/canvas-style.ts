@@ -18,9 +18,10 @@
  * only look) still reads, as figjam overrides.
  *
  * Validation is total: any parsed JSON is safe input. Numbers clamp to their
- * control range, colors must be `#RRGGBB` or `rgba(r, g, b, a)` (stored in
- * canonical spelling, theme/color-math.ts), enums and booleans must be one of
- * their values; anything else falls back to the preset value.
+ * control range (the font weight also snaps to a whole hundred), colors must
+ * be `#RRGGBB` or `rgba(r, g, b, a)` (stored in canonical spelling,
+ * theme/color-math.ts), enums and booleans must be one of their values;
+ * anything else falls back to the preset value.
  *
  * Pure data, no React and no DOM: safe to import from Node (Studio server,
  * Canvas MCP) via `@codecaine-ai/canvas/style`. Imports only the color-id
@@ -94,7 +95,7 @@ export interface CanvasStyle {
   // --- Text -----------------------------------------------------------------
   /** Object name color (shape text, icon labels, section titles). */
   textColor: string;
-  /** Object name font weight. */
+  /** Object name font weight: a whole hundred, 300..900 (validation snaps other values). */
   textFontWeight: number;
   /** Object name font size: shape text and icon labels (line box = 1.2×). */
   textFontSizePx: number;
@@ -422,6 +423,12 @@ export interface CanvasStyleControl {
   min?: number;
   max?: number;
   step?: number;
+  /**
+   * `number` controls: after clamping, the value snaps to the nearest
+   * multiple of `step` (`snapToControlStep`). `min` and `max` must be
+   * multiples of `step`, so a snapped value stays in range.
+   */
+  snap?: boolean;
   /** `select` controls: the allowed values, in display order. */
   options?: readonly { value: string; label: string }[];
   /** Show the control only while another token has this value (e.g. tint tokens under layer-cake fills). */
@@ -468,7 +475,9 @@ export const CANVAS_STYLE_CONTROLS: readonly CanvasStyleControl[] = [
   },
   // Text
   { key: "textColor", group: "text", label: "Name color", kind: "color" },
-  { key: "textFontWeight", group: "text", label: "Name weight", kind: "number", min: 300, max: 900, step: 100 },
+  // Whole hundreds only: resvg (the agent camera) paints the regular face for
+  // any other weight, while browsers paint a neighbouring face.
+  { key: "textFontWeight", group: "text", label: "Name weight", kind: "number", min: 300, max: 900, step: 100, snap: true },
   {
     key: "textFontSizePx",
     group: "text",
@@ -724,12 +733,23 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return !!value && typeof value === "object" && !Array.isArray(value);
 }
 
+/**
+ * `value` on the step grid of a `snap` control: the nearest multiple of
+ * `step`, ties rounding up (font weights 450 -> 500, 550 -> 600, 650 -> 700:
+ * the faces CSS font matching paints for those weights). Any other control
+ * returns `value` unchanged.
+ */
+export function snapToControlStep(control: CanvasStyleControl, value: number): number {
+  if (!control.snap || !control.step) return value;
+  return Math.round(value / control.step) * control.step;
+}
+
 /** `value` validated for `control`, or undefined when it is not a legal value. */
 function validTokenValue(control: CanvasStyleControl, value: unknown): string | number | boolean | undefined {
   switch (control.kind) {
     case "number":
       if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
-      return Math.min(control.max ?? value, Math.max(control.min ?? value, value));
+      return snapToControlStep(control, Math.min(control.max ?? value, Math.max(control.min ?? value, value)));
     case "color":
       return normalizeColor(value) ?? undefined;
     case "select":

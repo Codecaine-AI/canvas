@@ -1,0 +1,1972 @@
+{
+  "schemaVersion": 1,
+  "id": "doc-2d7ac9400eacec00c8e898f3d0bd2f8f",
+  "title": "Text Measure",
+  "root": "root",
+  "blocks": {
+    "root": {
+      "id": "root",
+      "type": "paragraph",
+      "props": {},
+      "children": [
+        "b-tm-role",
+        "b-tm-gov-heading",
+        "b-tm-gov-themes",
+        "b-tm-guarantee-heading",
+        "b-tm-guarantee-lead",
+        "b-tm-guarantee-face",
+        "b-tm-guarantee-edge",
+        "b-tm-guarantee-coverage",
+        "b-tm-guarantee-unreliable",
+        "b-tm-guarantee-reasons",
+        "b-tm-guarantee-weights",
+        "b-tm-backends-heading",
+        "b-tm-backends-lead",
+        "b-tm-backends-table",
+        "b-tm-backends-registry",
+        "b-tm-api-heading",
+        "b-tm-api-lead",
+        "b-tm-api-table",
+        "b-tm-rules-heading",
+        "b-tm-rules-lead",
+        "b-tm-rules-edge",
+        "b-tm-rules-spaces",
+        "b-tm-rules-breaks",
+        "b-tm-rules-huge",
+        "b-tm-hosts-heading",
+        "b-tm-hosts-lead",
+        "b-tm-hosts-node",
+        "b-tm-hosts-browser",
+        "b-tm-hosts-tests",
+        "b-tm-hosts-import",
+        "b-tm-accuracy-heading",
+        "b-tm-accuracy-lead",
+        "b-tm-accuracy-truth",
+        "b-tm-accuracy-result",
+        "b-tm-accuracy-regen",
+        "b-tm-decisions-heading",
+        "b-tm-pin-heading",
+        "b-tm-pin-decision",
+        "b-tm-pin-why",
+        "b-tm-pin-applies",
+        "b-tm-fonts-heading",
+        "b-tm-fonts-decision",
+        "b-tm-fonts-why",
+        "b-tm-fonts-applies"
+      ]
+    },
+    "b-tm-role": {
+      "id": "b-tm-role",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "@codecaine-ai/text-measure",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " measures, wraps, and fits text the way Chromium paints it, without rendering a page. Canvas, sequence, and docs-system lint, lay out, and render through it, so a label that a lint calls fitting fits on screen. Pretext 0.0.9 breaks the lines, and the active backend supplies the widths. The package lives in "
+        },
+        {
+          "insert": "packages/text-measure",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure",
+              "label": "packages/text-measure"
+            }
+          }
+        },
+        {
+          "insert": ", and its "
+        },
+        {
+          "insert": "README",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/README.md",
+              "label": "README"
+            }
+          }
+        },
+        {
+          "insert": " holds every signature and the accuracy commands."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-gov-heading": {
+      "id": "b-tm-gov-heading",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Governed By"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-gov-themes": {
+      "id": "b-tm-gov-themes",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Workspace themes",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "10-system-design/15-themes"
+            }
+          }
+        },
+        {
+          "insert": " owns the faces each theme paints and the size and weight of each text role."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-guarantee-heading": {
+      "id": "b-tm-guarantee-heading",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "The Guarantee"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-guarantee-lead": {
+      "id": "b-tm-guarantee-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Against headless Chromium 153 on macOS, the HarfBuzz backend gives the DOM's line count on every covered layout, widths within 1/64 px, and "
+        },
+        {
+          "insert": "fitText",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " verdicts that never contradict the DOM. The guarantee holds only under three conditions:"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-guarantee-face": {
+      "id": "b-tm-guarantee-face",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The surface paints with a bundled face, Inter 3.19 at 400 to 700 or IBM Plex Mono 2.5 at 400 to 600, and its CSS "
+        },
+        {
+          "insert": "font-family",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " starts with that family."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-guarantee-edge": {
+      "id": "b-tm-guarantee-edge",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "An answer within 1 px of the box edge reads as "
+        },
+        {
+          "insert": "borderline",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", never as "
+        },
+        {
+          "insert": "fits",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "overflows",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-guarantee-coverage": {
+      "id": "b-tm-guarantee-coverage",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "Every character is covered. Characters the faces lack, such as CJK, emoji, and Arabic, are listed in "
+        },
+        {
+          "insert": "uncovered",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " because each machine paints them in its own fallback font."
+        }
+      ],
+      "children": [
+        "b-tm-guarantee-coverage-estimate"
+      ]
+    },
+    "b-tm-guarantee-coverage-estimate": {
+      "id": "b-tm-guarantee-coverage-estimate",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Their widths are estimates: 1em for CJK, Chromium's macOS emoji advance for emoji, and the face's average letter otherwise."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-guarantee-unreliable": {
+      "id": "b-tm-guarantee-unreliable",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "fitText",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " returns "
+        },
+        {
+          "insert": "reliable: false",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " when a condition cannot hold, and its "
+        },
+        {
+          "insert": "reasons",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " array names each cause, most fundamental first. The array is empty when the answer is reliable."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-guarantee-reasons": {
+      "id": "b-tm-guarantee-reasons",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "Reason",
+          "When"
+        ],
+        "rows": [
+          [
+            [
+              {
+                "insert": "approximate-backend",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "The table backend is active, or "
+              },
+              {
+                "insert": "useBrowserFonts",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " did not load this face"
+              }
+            ]
+          ],
+          [
+            [
+              {
+                "insert": "unknown-family",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "The first family is not Inter or IBM Plex Mono, so it is measured as Inter"
+          ],
+          [
+            [
+              {
+                "insert": "unsupported-weight",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "A weight outside CSS's 1 to 1000"
+          ],
+          [
+            [
+              {
+                "insert": "oversized-input",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Over 16,384 UTF-16 units, or one unbreakable run over 4,096"
+          ],
+          [
+            [
+              {
+                "insert": "uncovered",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Characters the bundled face lacks"
+          ],
+          [
+            [
+              {
+                "insert": "control-characters",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "C0 or C1 controls, a form feed, a lone CR in pre-wrap, or ZWNJ"
+          ],
+          [
+            [
+              {
+                "insert": "bidi",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Right-to-left text or bidi controls, which the lines do not reorder"
+          ],
+          [
+            [
+              {
+                "insert": "tabs",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "A tab in pre-wrap"
+          ],
+          [
+            [
+              {
+                "insert": "soft-hyphen",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "A soft hyphen at or next to a line break near the box edge"
+          ]
+        ],
+        "title": "Unreliable reasons"
+      },
+      "children": []
+    },
+    "b-tm-guarantee-weights": {
+      "id": "b-tm-guarantee-weights",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every weight from 1 to 1000 snaps to the face that CSS font matching picks, such as 620 to Bold and Plex 700 to 600. Chromium paints that face as is, with no synthetic bold, so a snapped weight stays reliable."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-backends-heading": {
+      "id": "b-tm-backends-heading",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Backends"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-backends-lead": {
+      "id": "b-tm-backends-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Pretext measures every segment through the active backend. A switch clears Pretext's caches and calls each "
+        },
+        {
+          "insert": "onBackendChange",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " listener, so layouts measure again in the new widths. The newest of "
+        },
+        {
+          "insert": "useTableBackend()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "useHarfBuzz()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "useBrowserFonts()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " wins, and a request that fails withdraws itself."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-backends-table": {
+      "id": "b-tm-backends-table",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "Backend",
+          "Active in",
+          "Widths come from",
+          "Exact"
+        ],
+        "rows": [
+          [
+            [
+              {
+                "insert": "table",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Every host until it switches",
+            [
+              {
+                "insert": "Generated advances and ASCII kerning pairs in "
+              },
+              {
+                "insert": "src/generated/tables.ts",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "No"
+          ],
+          [
+            [
+              {
+                "insert": "harfbuzz",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "Bun and Node hosts after "
+              },
+              {
+                "insert": "useHarfBuzz()",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "harfbuzzjs 1.6.2 shaping the bundled TTF files",
+            "Yes"
+          ],
+          [
+            [
+              {
+                "insert": "canvas",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "Browsers after "
+              },
+              {
+                "insert": "useBrowserFonts()",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "Native "
+              },
+              {
+                "insert": "measureText",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " once the woff2 faces load"
+              }
+            ],
+            "Yes"
+          ]
+        ],
+        "title": "Measuring backends"
+      },
+      "children": []
+    },
+    "b-tm-backends-registry": {
+      "id": "b-tm-backends-registry",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The active backend, the pending requests, and the listeners live in one registry on "
+        },
+        {
+          "insert": "globalThis",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", keyed by "
+        },
+        {
+          "insert": "Symbol.for(\"@codecaine-ai/text-measure/registry@1\")",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "src/backend.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/src/backend.ts",
+              "label": "src/backend.ts"
+            }
+          }
+        },
+        {
+          "insert": ". Every copy of the package in a process therefore measures with the same backend, such as a bundled core entry next to the headless entry from node_modules. A listener that throws is logged with "
+        },
+        {
+          "insert": "console.error",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and never stops the switch."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-api-heading": {
+      "id": "b-tm-api-heading",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "API"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-api-lead": {
+      "id": "b-tm-api-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The core entry is synchronous and runs anywhere, with no WASM and no "
+        },
+        {
+          "insert": "node:*",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " imports. Two more entries switch the backend, and the README lists every signature."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-api-table": {
+      "id": "b-tm-api-table",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "Export",
+          "Entry",
+          "Answers"
+        ],
+        "rows": [
+          [
+            [
+              {
+                "insert": "measureWidth",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "core",
+            "One line's width with whole-string shaping, in 1/64 px units"
+          ],
+          [
+            [
+              {
+                "insert": "wrapText",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "core",
+            "Pretext line breaking at a width, normal or pre-wrap"
+          ],
+          [
+            [
+              {
+                "insert": "fitText",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "core",
+            [
+              {
+                "insert": "fits",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "overflows",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", or "
+              },
+              {
+                "insert": "borderline",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", with "
+              },
+              {
+                "insert": "reliable",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "reasons",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "uncovered",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", and "
+              },
+              {
+                "insert": "neededWidth",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ]
+          ],
+          [
+            [
+              {
+                "insert": "wrapRuns",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "core",
+            "Lines of mixed-font runs, each run shaped in its own font"
+          ],
+          [
+            [
+              {
+                "insert": "uncoveredChars",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "core",
+            "The characters a bundled face cannot paint"
+          ],
+          [
+            [
+              {
+                "insert": "activeBackend",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "onBackendChange",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "core",
+            "The backend in use, and a listener for every switch"
+          ],
+          [
+            [
+              {
+                "insert": "useHarfBuzz()",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "/headless",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Loads harfbuzzjs and the TTF files, then switches to HarfBuzz"
+          ],
+          [
+            [
+              {
+                "insert": "useBrowserFonts()",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "/browser",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "Loads the woff2 faces, or only the faces named in "
+              },
+              {
+                "insert": "faces",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", checks them, then switches to the canvas backend"
+              }
+            ]
+          ]
+        ],
+        "title": "Exports"
+      },
+      "children": []
+    },
+    "b-tm-rules-heading": {
+      "id": "b-tm-rules-heading",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Chromium Layout Rules"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-rules-lead": {
+      "id": "b-tm-rules-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Widths and line breaks follow Chromium's rules where Pretext's defaults differ. The README lists the rest, and "
+        },
+        {
+          "insert": "test/chromium-parity.test.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " records the known gaps."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-rules-edge": {
+      "id": "b-tm-rules-edge",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Box edge",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-rules-edge-rule"
+      ]
+    },
+    "b-tm-rules-edge-rule": {
+      "id": "b-tm-rules-edge-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A line fits while its width, rounded up to 1/64 px, is at most the box width rounded down to 1/64 px plus one unit."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-rules-spaces": {
+      "id": "b-tm-rules-spaces",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Trailing spaces",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-rules-spaces-rule"
+      ]
+    },
+    "b-tm-rules-spaces-rule": {
+      "id": "b-tm-rules-spaces-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A line that ends in spaces keeps the kerning between its last glyph and the first space, such as Inter Bold's "
+        },
+        {
+          "insert": ", ",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": ". ",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " pairs, in its width and when it breaks."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-rules-breaks": {
+      "id": "b-tm-rules-breaks",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Break opportunities",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-rules-breaks-super",
+        "b-tm-rules-breaks-dash"
+      ]
+    },
+    "b-tm-rules-breaks-super": {
+      "id": "b-tm-rules-breaks-super",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "No break falls inside a letter and number sequence that Intl.Segmenter splits, such as "
+        },
+        {
+          "insert": "x²+y²",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-rules-breaks-dash": {
+      "id": "b-tm-rules-breaks-dash",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A break falls after an en or em dash between digits, as in "
+        },
+        {
+          "insert": "10:30–11:45",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and after a "
+        },
+        {
+          "insert": "?",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " that a letter or digit follows."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-rules-huge": {
+      "id": "b-tm-rules-huge",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Huge inputs",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-rules-huge-rule"
+      ]
+    },
+    "b-tm-rules-huge-rule": {
+      "id": "b-tm-rules-huge-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The HarfBuzz backend shapes a run over 16,384 UTF-16 units in chunks and never caches a run over 4,096. One huge string cannot grow the WASM heap or the cache."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-hosts-heading": {
+      "id": "b-tm-hosts-heading",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Host Setup"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-hosts-lead": {
+      "id": "b-tm-hosts-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Each kind of host switches the backend once, before it lints or lays out text, and one import rule applies to all of them."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-hosts-node": {
+      "id": "b-tm-hosts-node",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Bun and Node hosts",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-hosts-node-call",
+        "b-tm-hosts-node-canvas"
+      ]
+    },
+    "b-tm-hosts-node-call": {
+      "id": "b-tm-hosts-node-call",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A Bun or Node host awaits "
+        },
+        {
+          "insert": "useHarfBuzz()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " before its first measurement."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-hosts-node-canvas": {
+      "id": "b-tm-hosts-node-canvas",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "In canvas, the agent harness server and CLI and the Canvas MCP stop when HarfBuzz does not load. Studio's preview server keeps the table backend and warns once."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-hosts-browser": {
+      "id": "b-tm-hosts-browser",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Browser hosts",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-hosts-browser-call",
+        "b-tm-hosts-browser-studio"
+      ]
+    },
+    "b-tm-hosts-browser-call": {
+      "id": "b-tm-hosts-browser-call",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A browser host imports "
+        },
+        {
+          "insert": "@codecaine-ai/text-measure/fonts.css",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", calls "
+        },
+        {
+          "insert": "useBrowserFonts()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and lays text out again on "
+        },
+        {
+          "insert": "onBackendChange",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-hosts-browser-studio": {
+      "id": "b-tm-hosts-browser-studio",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Studio does all three, starting in "
+        },
+        {
+          "insert": "packages/studio/src/main.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/main.tsx",
+              "label": "packages/studio/src/main.tsx"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-hosts-tests": {
+      "id": "b-tm-hosts-tests",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Test runs",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-hosts-tests-preload"
+      ]
+    },
+    "b-tm-hosts-tests-preload": {
+      "id": "b-tm-hosts-tests-preload",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Canvas test runs preload the repo-root "
+        },
+        {
+          "insert": "text-measure-preload.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "text-measure-preload.ts",
+              "label": "text-measure-preload.ts"
+            }
+          }
+        },
+        {
+          "insert": ", which awaits "
+        },
+        {
+          "insert": "useHarfBuzz()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and fails the run when the backend is not exact."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-hosts-import": {
+      "id": "b-tm-hosts-import",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Import order",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-hosts-import-rule"
+      ]
+    },
+    "b-tm-hosts-import-rule": {
+      "id": "b-tm-hosts-import-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Import this package before any other code calls Pretext. Pretext keeps the first measuring context it creates, and text-measure throws rather than measure through another one."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-accuracy-heading": {
+      "id": "b-tm-accuracy-heading",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Accuracy Test"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-accuracy-lead": {
+      "id": "b-tm-accuracy-lead",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Running "
+        },
+        {
+          "insert": "bun test",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in the package checks the guarantee in "
+        },
+        {
+          "insert": "test/accuracy.test.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/test/accuracy.test.ts",
+              "label": "test/accuracy.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " against committed Chromium truth, so no browser runs in the test."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-accuracy-truth": {
+      "id": "b-tm-accuracy-truth",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Truth",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-accuracy-truth-grid"
+      ]
+    },
+    "b-tm-accuracy-truth-grid": {
+      "id": "b-tm-accuracy-truth-grid",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "test/accuracy/chromium-truth.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/test/accuracy/chromium-truth.json",
+              "label": "test/accuracy/chromium-truth.json"
+            }
+          }
+        },
+        {
+          "insert": " holds DOM measurements of 211 strings from headless Chromium 153 on macOS. The grid covers Inter at 12, 13.5, 14, 16, 17.5, and 24 px in four weights, Inter 14 px with letter-spacing, and IBM Plex Mono at 13 and 14 px."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-accuracy-result": {
+      "id": "b-tm-accuracy-result",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Result",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-accuracy-result-numbers"
+      ]
+    },
+    "b-tm-accuracy-result-numbers": {
+      "id": "b-tm-accuracy-result-numbers",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The HarfBuzz backend mismatches 0 of 18,792 covered line counts and contradicts 0 of 79,319 "
+        },
+        {
+          "insert": "fitText",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " verdicts, and every covered width is within 1/64 px."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-accuracy-regen": {
+      "id": "b-tm-accuracy-regen",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Regeneration",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-accuracy-regen-command"
+      ]
+    },
+    "b-tm-accuracy-regen-command": {
+      "id": "b-tm-accuracy-regen-command",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "bun run truth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " runs "
+        },
+        {
+          "insert": "scripts/truth-chromium.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/scripts/truth-chromium.ts",
+              "label": "scripts/truth-chromium.ts"
+            }
+          }
+        },
+        {
+          "insert": ", which re-records the truth in Playwright's Chromium and checks that each TTF measures like its woff2."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-decisions-heading": {
+      "id": "b-tm-decisions-heading",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Decisions"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-pin-heading": {
+      "id": "b-tm-pin-heading",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Pretext and HarfBuzz Are Pinned Exactly"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-pin-decision": {
+      "id": "b-tm-pin-decision",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-pin-decision-rule"
+      ]
+    },
+    "b-tm-pin-decision-rule": {
+      "id": "b-tm-pin-decision-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/text-measure/package.json",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/package.json",
+              "label": "packages/text-measure/package.json"
+            }
+          }
+        },
+        {
+          "insert": " pins "
+        },
+        {
+          "insert": "@chenglou/pretext",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to 0.0.9 and "
+        },
+        {
+          "insert": "harfbuzzjs",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to 1.6.2 exactly."
+        }
+      ],
+      "children": [
+        "b-tm-pin-decision-bump"
+      ]
+    },
+    "b-tm-pin-decision-bump": {
+      "id": "b-tm-pin-decision-bump",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A bump lands only after "
+        },
+        {
+          "insert": "bun run truth",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " re-records the truth, "
+        },
+        {
+          "insert": "scripts/check-browser.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "scripts/check-runs.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " agree with Chromium, and "
+        },
+        {
+          "insert": "bun test",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " passes."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-pin-why": {
+      "id": "b-tm-pin-why",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-pin-why-internals",
+        "b-tm-pin-why-throw"
+      ]
+    },
+    "b-tm-pin-why-internals": {
+      "id": "b-tm-pin-why-internals",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Pretext is a 0.0.x release with one author, and "
+        },
+        {
+          "insert": "src/pretext-binding.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "src/pretext-context.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "src/pretext-runs.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " depend on its shared measuring context and its prepared arrays."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-pin-why-throw": {
+      "id": "b-tm-pin-why-throw",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "wrapRuns",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " throws rather than guess when those arrays change shape, so an unchecked bump fails at run time instead of at review."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-pin-applies": {
+      "id": "b-tm-pin-applies",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-pin-applies-scope"
+      ]
+    },
+    "b-tm-pin-applies-scope": {
+      "id": "b-tm-pin-applies-scope",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The package's dependencies, including every future bump of either one."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-fonts-heading": {
+      "id": "b-tm-fonts-heading",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "One Copy of the Faces"
+        }
+      ],
+      "children": []
+    },
+    "b-tm-fonts-decision": {
+      "id": "b-tm-fonts-decision",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-fonts-decision-rule"
+      ]
+    },
+    "b-tm-fonts-decision-rule": {
+      "id": "b-tm-fonts-decision-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/text-measure/fonts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/fonts",
+              "label": "packages/text-measure/fonts"
+            }
+          }
+        },
+        {
+          "insert": " is the only copy of the faces in the canvas repo, and consumers read it through "
+        },
+        {
+          "insert": "fonts.css",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or the package's "
+        },
+        {
+          "insert": "./fonts/*",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " export."
+        }
+      ],
+      "children": [
+        "b-tm-fonts-decision-users",
+        "b-tm-fonts-decision-change"
+      ]
+    },
+    "b-tm-fonts-decision-users": {
+      "id": "b-tm-fonts-decision-users",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Studio paints the woff2 files, and the agent camera and the eval runner rasterize the TTF files."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-fonts-decision-change": {
+      "id": "b-tm-fonts-decision-change",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "After a font file changes, "
+        },
+        {
+          "insert": "scripts/generate-tables.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " regenerates the tables and the truth is re-recorded. "
+        },
+        {
+          "insert": "test/fonts.test.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fails until both are done."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-fonts-why": {
+      "id": "b-tm-fonts-why",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-fonts-why-build"
+      ]
+    },
+    "b-tm-fonts-why-build": {
+      "id": "b-tm-fonts-why-build",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A measurement is exact only for the font build it measured. A second copy can drift to another build and paint widths the tables never saw."
+        }
+      ],
+      "children": []
+    },
+    "b-tm-fonts-applies": {
+      "id": "b-tm-fonts-applies",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-tm-fonts-applies-scope"
+      ]
+    },
+    "b-tm-fonts-applies-scope": {
+      "id": "b-tm-fonts-applies-scope",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/text-measure/fonts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", including every future host, which reads the faces through the package instead of copying them."
+        }
+      ],
+      "children": []
+    }
+  }
+}

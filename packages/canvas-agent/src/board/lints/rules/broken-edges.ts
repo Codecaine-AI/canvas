@@ -308,7 +308,7 @@ export const rule: LayoutRule = {
     // drift is no more than what its author asked for is placed, not
     // stranded; drift beyond it still reads as a broken route.
     for (const edge of document.connections) {
-      const chip = chipFor(edge, document);
+      const chip = chipFor(edge, document, context?.canvasStyle);
       const polyline = polylines.get(edge.id);
       if (!chip || !polyline) continue;
       const chipCenter = {

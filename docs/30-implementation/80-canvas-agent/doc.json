@@ -70,6 +70,15 @@
         "b-agent-glyphs-decision-44",
         "b-agent-glyphs-why-45",
         "b-agent-glyphs-applies-46",
+        "b-agent-fit-heading",
+        "b-agent-fit-decision",
+        "b-agent-fit-why",
+        "b-agent-fit-applies",
+        "b-agent-hosts-heading",
+        "b-agent-hosts-decision",
+        "b-agent-hosts-why",
+        "b-agent-hosts-applies",
+        "b-agent-roster-heading",
         "b-agent-roster-34"
       ]
     },
@@ -1684,6 +1693,675 @@
       ],
       "children": []
     },
+    "b-agent-fit-heading": {
+      "id": "b-agent-fit-heading",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Text Fit Answers in Three States"
+        }
+      ],
+      "children": []
+    },
+    "b-agent-fit-decision": {
+      "id": "b-agent-fit-decision",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-agent-fit-decision-rule"
+      ]
+    },
+    "b-agent-fit-decision-rule": {
+      "id": "b-agent-fit-decision-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Text fit answers in three states, and every answer the harness cannot promise becomes a note, which never blocks finalize. A definite overflow still blocks, even when the text holds uncovered characters."
+        }
+      ],
+      "children": [
+        "b-agent-fit-decision-verdict",
+        "b-agent-fit-decision-reliable",
+        "b-agent-fit-decision-severity",
+        "b-agent-fit-decision-gate",
+        "b-agent-fit-decision-tools"
+      ]
+    },
+    "b-agent-fit-decision-verdict": {
+      "id": "b-agent-fit-decision-verdict",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "textFitReport",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "board/text-fit.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/text-fit.ts",
+              "label": "board/text-fit.ts"
+            }
+          }
+        },
+        {
+          "insert": " asks each fit question at the box size and 1 px to either side ("
+        },
+        {
+          "insert": "TEXT_FIT_TOLERANCE_PX",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "). Matching answers give "
+        },
+        {
+          "insert": "fits",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "overflows",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and mixed answers give "
+        },
+        {
+          "insert": "borderline",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-fit-decision-reliable": {
+      "id": "b-agent-fit-decision-reliable",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Each report carries "
+        },
+        {
+          "insert": "reliable",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", true when "
+        },
+        {
+          "insert": "fitText",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " returns no "
+        },
+        {
+          "insert": "reasons",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for any part it measured, and the uncovered characters. A report is "
+        },
+        {
+          "insert": "definite",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " when it is reliable or still overflows with every uncovered character at zero width."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-fit-decision-severity": {
+      "id": "b-agent-fit-decision-severity",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Findings are errors, warnings, or notes, numbered E1, W1, and N1 onward. The clipped-text rule warns only on a definite overflow, and the unreadable-labels and covered-content rules warn only on a reliable chip with 1 px of slack."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-fit-decision-gate": {
+      "id": "b-agent-fit-decision-gate",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "blockingDiagnostics",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " in "
+        },
+        {
+          "insert": "board/lints/run.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints/run.ts",
+              "label": "board/lints/run.ts"
+            }
+          }
+        },
+        {
+          "insert": " drops notes, so finalize never waits on one. Notes still reach the agent's state under "
+        },
+        {
+          "insert": "<notes>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and travel in the proposal's lint report."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-fit-decision-tools": {
+      "id": "b-agent-fit-decision-tools",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "update_text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "resize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "match_size",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " measure the landed box and add the report's detail as a note whenever the text does not surely fit or is not measured reliably."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-fit-why": {
+      "id": "b-agent-fit-why",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-agent-fit-why-edge",
+        "b-agent-fit-why-gate",
+        "b-agent-fit-why-rejected"
+      ]
+    },
+    "b-agent-fit-why-edge": {
+      "id": "b-agent-fit-why-edge",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Within 1 px of a box edge the browser can wrap either way, and characters the bundled faces lack paint in per-machine fallback fonts."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-fit-why-gate": {
+      "id": "b-agent-fit-why-gate",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Finalize blocks on every error and warning in the edited scope, so a guess filed as a warning would refuse a commit over one pixel."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-fit-why-rejected": {
+      "id": "b-agent-fit-why-rejected",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The rejected alternative was dropping near-edge answers from the lints, which hides them from the agent and the operator alike."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-fit-applies": {
+      "id": "b-agent-fit-applies",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-agent-fit-applies-scope"
+      ]
+    },
+    "b-agent-fit-applies-scope": {
+      "id": "b-agent-fit-applies-scope",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "board/text-fit.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "board/lints/",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/board/lints",
+              "label": "board/lints/"
+            }
+          }
+        },
+        {
+          "insert": ", including every future rule or tool that measures text, which files an answer it cannot promise as a note."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-hosts-heading": {
+      "id": "b-agent-hosts-heading",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Hosts Switch to HarfBuzz First"
+        }
+      ],
+      "children": []
+    },
+    "b-agent-hosts-decision": {
+      "id": "b-agent-hosts-decision",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-agent-hosts-decision-rule"
+      ]
+    },
+    "b-agent-hosts-decision-rule": {
+      "id": "b-agent-hosts-decision-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Every process that runs the session tools switches the measuring backend to HarfBuzz before its first measurement, as "
+        },
+        {
+          "insert": "Text Measure",
+          "attributes": {
+            "reference": {
+              "kind": "doc",
+              "path": "30-implementation/65-text-measure"
+            }
+          }
+        },
+        {
+          "insert": " requires of Bun hosts."
+        }
+      ],
+      "children": [
+        "b-agent-hosts-decision-harness",
+        "b-agent-hosts-decision-mcp",
+        "b-agent-hosts-decision-tests"
+      ]
+    },
+    "b-agent-hosts-decision-harness": {
+      "id": "b-agent-hosts-decision-harness",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "service/server.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/server.ts",
+              "label": "service/server.ts"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "cli.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/cli.ts",
+              "label": "cli.ts"
+            }
+          }
+        },
+        {
+          "insert": " await "
+        },
+        {
+          "insert": "useHarfBuzz()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " before booting the kernel database and stop with an error when "
+        },
+        {
+          "insert": "activeBackend().exact",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is false."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-hosts-decision-mcp": {
+      "id": "b-agent-hosts-decision-mcp",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The Canvas MCP makes the same call and check in "
+        },
+        {
+          "insert": "startMcp",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp/src/mcp.ts",
+              "symbol": "startMcp",
+              "label": "startMcp"
+            }
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "service.call",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp/src/service.ts",
+              "label": "service.call"
+            }
+          }
+        },
+        {
+          "insert": " awaits it again for callers that build the service directly."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-hosts-decision-tests": {
+      "id": "b-agent-hosts-decision-tests",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Test runs preload the repo-root "
+        },
+        {
+          "insert": "text-measure-preload.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "text-measure-preload.ts",
+              "label": "text-measure-preload.ts"
+            }
+          }
+        },
+        {
+          "insert": " through each package's "
+        },
+        {
+          "insert": "bunfig.toml",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and the preload fails the run when HarfBuzz is not the active backend."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-hosts-why": {
+      "id": "b-agent-hosts-why",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-agent-hosts-why-sync"
+      ]
+    },
+    "b-agent-hosts-why-sync": {
+      "id": "b-agent-hosts-why-sync",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "textFitReport",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and every lint are synchronous and measure through whichever backend is active. A host that skipped the switch would lint with the approximate table backend and report nothing."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-hosts-applies": {
+      "id": "b-agent-hosts-applies",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-agent-hosts-applies-scope"
+      ]
+    },
+    "b-agent-hosts-applies-scope": {
+      "id": "b-agent-hosts-applies-scope",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "service/server.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "cli.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and every future host of the session tools, which awaits "
+        },
+        {
+          "insert": "useHarfBuzz()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " before it opens a session."
+        }
+      ],
+      "children": []
+    },
+    "b-agent-roster-heading": {
+      "id": "b-agent-roster-heading",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Source Tree"
+        }
+      ],
+      "children": []
+    },
     "b-agent-roster-34": {
       "id": "b-agent-roster-34",
       "type": "paragraph",
@@ -1789,16 +2467,35 @@
           }
         },
         {
-          "insert": ", and the package's "
+          "insert": ", and the rasterizer in "
         },
         {
-          "insert": "assets/fonts/",
+          "insert": "service/render.ts",
           "attributes": {
-            "code": true
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-agent/src/service/render.ts",
+              "label": "service/render.ts"
+            }
           }
         },
         {
-          "insert": " holds the Inter and IBM Plex Mono faces the rasterizer loads."
+          "insert": " loads its Inter and IBM Plex Mono faces from "
+        },
+        {
+          "insert": "packages/text-measure/fonts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/fonts",
+              "label": "packages/text-measure/fonts"
+            }
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []

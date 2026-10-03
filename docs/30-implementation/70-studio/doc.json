@@ -40,15 +40,20 @@
         "b-studio-style-decision-19",
         "b-studio-style-why-20",
         "b-studio-style-applies-21",
-        "b-studio-boards-decision-22",
-        "b-studio-boards-why-23",
-        "b-studio-boards-applies-24",
         "b-studio-settings-decision-25",
         "b-studio-settings-why-26",
         "b-studio-settings-applies-27",
         "b-studio-panels-decision-28",
         "b-studio-panels-why-29",
-        "b-studio-panels-applies-30"
+        "b-studio-panels-applies-30",
+        "b-studio-boards-heading",
+        "b-studio-boards-decision",
+        "b-studio-boards-why",
+        "b-studio-boards-applies",
+        "b-studio-fonts-heading",
+        "b-studio-fonts-decision",
+        "b-studio-fonts-why",
+        "b-studio-fonts-applies"
       ]
     },
     "b-studio-role-1": {
@@ -719,132 +724,6 @@
       ],
       "children": []
     },
-    "b-studio-boards-decision-22": {
-      "id": "b-studio-boards-decision-22",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Decision",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": ": every surface that renders a board receives the resolved style as "
-        },
-        {
-          "insert": "canvasStyle",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ": the editor, the view and embed routes, the gallery, and the server's SVG previews behind the board list's thumbnails. The view and embed pages and each board-list card paint the theme's "
-        },
-        {
-          "insert": "boardBackground",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " behind the board, so a dark board has no light frame, while the rest of Studio's chrome keeps its own look. Studio vendors IBM Plex Mono at weights 400, 500, and 600 as woff2 files in "
-        },
-        {
-          "insert": "src/fonts/",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/studio/src/fonts",
-              "label": "src/fonts/"
-            }
-          }
-        },
-        {
-          "insert": ", declared in "
-        },
-        {
-          "insert": "index.css",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
-    "b-studio-boards-why-23": {
-      "id": "b-studio-boards-why-23",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Why",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": ": a surface that missed the style would show one board in two themes inside one workspace. The mono metadata must render in the face the static renderer and the agent's text fit measure."
-        }
-      ],
-      "children": []
-    },
-    "b-studio-boards-applies-24": {
-      "id": "b-studio-boards-applies-24",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "Applies to",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": ": "
-        },
-        {
-          "insert": "App.tsx",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/studio/src/App.tsx",
-              "label": "App.tsx"
-            }
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "GalleryPage.tsx",
-          "attributes": {
-            "reference": {
-              "kind": "source",
-              "path": "packages/studio/src/GalleryPage.tsx",
-              "label": "GalleryPage.tsx"
-            }
-          }
-        },
-        {
-          "insert": ", including every future board surface, which takes the style from "
-        },
-        {
-          "insert": "useCanvasStyleSettings",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
     "b-studio-settings-decision-25": {
       "id": "b-studio-settings-decision-25",
       "type": "paragraph",
@@ -1023,6 +902,496 @@
         },
         {
           "insert": " slot, including every future settings panel, which mounts there and joins the one-open-at-a-time rule."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-boards-heading": {
+      "id": "b-studio-boards-heading",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Every Board Surface Receives the Resolved Style"
+        }
+      ],
+      "children": []
+    },
+    "b-studio-boards-decision": {
+      "id": "b-studio-boards-decision",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-studio-boards-decision-surfaces",
+        "b-studio-boards-decision-background"
+      ]
+    },
+    "b-studio-boards-decision-surfaces": {
+      "id": "b-studio-boards-decision-surfaces",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Every surface that renders a board receives the resolved style as "
+        },
+        {
+          "insert": "canvasStyle",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ": the editor, the view and embed routes, the gallery, and the server's SVG previews behind the board list's thumbnails."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-boards-decision-background": {
+      "id": "b-studio-boards-decision-background",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The view and embed pages and each board-list card paint the theme's "
+        },
+        {
+          "insert": "boardBackground",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " behind the board, so a dark board has no light frame, while the rest of Studio's chrome keeps its own look."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-boards-why": {
+      "id": "b-studio-boards-why",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-studio-boards-why-themes"
+      ]
+    },
+    "b-studio-boards-why-themes": {
+      "id": "b-studio-boards-why-themes",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A surface that missed the style would show one board in two themes inside one workspace."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-boards-applies": {
+      "id": "b-studio-boards-applies",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-studio-boards-applies-scope"
+      ]
+    },
+    "b-studio-boards-applies-scope": {
+      "id": "b-studio-boards-applies-scope",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "App.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/App.tsx",
+              "label": "App.tsx"
+            }
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "GalleryPage.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/GalleryPage.tsx",
+              "label": "GalleryPage.tsx"
+            }
+          }
+        },
+        {
+          "insert": ", including every future board surface, which takes the style from "
+        },
+        {
+          "insert": "useCanvasStyleSettings",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-fonts-heading": {
+      "id": "b-studio-fonts-heading",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Studio Paints and Measures in the Bundled Faces"
+        }
+      ],
+      "children": []
+    },
+    "b-studio-fonts-decision": {
+      "id": "b-studio-fonts-decision",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Decision",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-studio-fonts-decision-rule"
+      ]
+    },
+    "b-studio-fonts-decision-rule": {
+      "id": "b-studio-fonts-decision-rule",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Studio paints board text in the faces "
+        },
+        {
+          "insert": "@codecaine-ai/text-measure",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " bundles and lays text out again whenever the measuring backend switches."
+        }
+      ],
+      "children": [
+        "b-studio-fonts-decision-load",
+        "b-studio-fonts-decision-relayout",
+        "b-studio-fonts-decision-previews",
+        "b-studio-fonts-decision-electron",
+        "b-studio-fonts-decision-weights"
+      ]
+    },
+    "b-studio-fonts-decision-load": {
+      "id": "b-studio-fonts-decision-load",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "main.tsx",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/main.tsx",
+              "label": "main.tsx"
+            }
+          }
+        },
+        {
+          "insert": " imports the package's "
+        },
+        {
+          "insert": "fonts.css",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and calls "
+        },
+        {
+          "insert": "useBrowserFonts()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " after the first render. Until the faces load, the approximate table backend measures."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-fonts-decision-relayout": {
+      "id": "b-studio-fonts-decision-relayout",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The canvas stage re-renders on the switch through its style provider, and "
+        },
+        {
+          "insert": "GalleryPage.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " keys its layout on "
+        },
+        {
+          "insert": "useTextMeasureVersion()",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/src/use-text-measure-version.ts",
+              "symbol": "useTextMeasureVersion",
+              "label": "useTextMeasureVersion()"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-fonts-decision-previews": {
+      "id": "b-studio-fonts-decision-previews",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The preview server in "
+        },
+        {
+          "insert": "server/canvas-file-api.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/studio/server/canvas-file-api.ts",
+              "label": "server/canvas-file-api.ts"
+            }
+          }
+        },
+        {
+          "insert": " loads HarfBuzz once before the first preview and puts the backend name in each preview's ETag. When HarfBuzz cannot load, previews keep the table backend and the server warns once."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-fonts-decision-electron": {
+      "id": "b-studio-fonts-decision-electron",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The esbuild CJS bundle of "
+        },
+        {
+          "insert": "electron/main.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " inlines text-measure and loads HarfBuzz into the headless entry from node_modules, a second copy. Both copies share text-measure's process-wide backend registry, so Electron previews should measure with HarfBuzz, but no packaged build has verified it yet."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-fonts-decision-weights": {
+      "id": "b-studio-fonts-decision-weights",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The Style rail passes every typed or dragged number through "
+        },
+        {
+          "insert": "snapToControlStep",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", so a name weight lands on a whole hundred before it is saved."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-fonts-why": {
+      "id": "b-studio-fonts-why",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-studio-fonts-why-face",
+        "b-studio-fonts-why-native"
+      ]
+    },
+    "b-studio-fonts-why-face": {
+      "id": "b-studio-fonts-why-face",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Board text must paint in the face the static renderer and the agent's text fit measure, or a label that fits on one surface clips on another."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-fonts-why-native": {
+      "id": "b-studio-fonts-why-native",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Once the faces load, the browser's own canvas measures the widths Studio's DOM paints."
+        }
+      ],
+      "children": []
+    },
+    "b-studio-fonts-applies": {
+      "id": "b-studio-fonts-applies",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Applies to",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-studio-fonts-applies-scope"
+      ]
+    },
+    "b-studio-fonts-applies-scope": {
+      "id": "b-studio-fonts-applies-scope",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "main.tsx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "use-text-measure-version.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "server/canvas-file-api.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", including every future surface that lays out text outside the stage, which keys its layout on "
+        },
+        {
+          "insert": "useTextMeasureVersion()",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []

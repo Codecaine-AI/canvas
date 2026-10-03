@@ -126,7 +126,7 @@ function routedConnectionBounds(
   // The chip is measured where it is DRAWN — the `labelPosition` pin when the
   // connection carries one, otherwise the routed midpoint. A pinned chip that
   // sits off the wire still counts toward the painted extent — at the size
-  // the style draws it (connectors/label-chip.ts: a 22px mono chip in the
+  // the style draws it (connectors/label-chip.ts: a 26px mono chip in the
   // schematic themes, the 30px sans chip in figjam).
   if (label) {
     rect = unionRects(rect, connectionLabelChipRect(label, labelPointFor(routed, connection), canvasStyle));

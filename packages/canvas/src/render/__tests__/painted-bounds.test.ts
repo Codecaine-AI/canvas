@@ -12,6 +12,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../../state/schema";
+import { measureWidth } from "../../theme/text-measure";
 
 function box(
   id: string,
@@ -78,16 +79,19 @@ describe("paintedBounds", () => {
   it("includes the label chip at the route's halfway point", () => {
     const a = box("a", 0, 0, 100, 60);
     const b = box("b", 0, 300, 100, 60);
-    // 31 chars → chip width = 31 × 9.6 + 2 × 12 = 321.6px (Connector.tsx
-    // heuristic), centered on the straight vertical route at x = 50.
+    // The chip is the label measured in Inter Bold 16 plus 12px a side (the
+    // chip Connector.tsx draws), centered on the straight vertical route at
+    // x = 50 — wider than the boxes, so it sets the painted extent.
     const label = "extremely long connection label";
+    const chipWidth = measureWidth(label, { family: "Inter", size: 16, weight: 700 }) + 2 * 12;
+    expect(chipWidth).toBeGreaterThan(200);
     const document = makeDocument(
       [a, b],
       [{ id: "c", from: { objectId: "a" }, to: { objectId: "b" }, arrow: "forward", label }],
     );
     const painted = paintedBounds(document, undefined, FIGJAM_CANVAS_STYLE);
-    expect(painted.x).toBeCloseTo(50 - 321.6 / 2, 5);
-    expect(painted.x + painted.width).toBeCloseTo(50 + 321.6 / 2, 5);
+    expect(painted.x).toBeCloseTo(50 - chipWidth / 2, 5);
+    expect(painted.x + painted.width).toBeCloseTo(50 + chipWidth / 2, 5);
   });
 
   it("includes a section title chip poking below a shallow frame", () => {

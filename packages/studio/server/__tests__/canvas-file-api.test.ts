@@ -6,6 +6,7 @@ import { createServer, request, type Server } from "node:http";
 import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { canvasContentHash, createCanvasFileApiHandler } from "../canvas-file-api";
 import { createCanvasChangeNotifier, type CanvasFileChangedPayload } from "../canvas-file-watch";
@@ -170,5 +171,24 @@ describe("canvas change notifier", () => {
     expect(await notifier.handleFileEvent(tempPath)).toBeNull();
     expect(await notifier.handleFileEvent(join(tmpdir(), "board-a.canvas.json"))).toBeNull();
     expect(sent).toHaveLength(0);
+  });
+});
+
+describe("canvas previews", () => {
+  it("embed the bundled faces their text was measured with (an <img> SVG cannot use the page's fonts)", async () => {
+    const svg = await new Promise<string>((resolve, reject) => {
+      const req = request(`${base}/preview.svg`, { method: "GET" }, (res) => {
+        const chunks: Buffer[] = [];
+        res.on("data", (chunk: Buffer) => chunks.push(chunk));
+        res.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+      });
+      req.on("error", reject);
+      req.end();
+    });
+    const rule = /@font-face\{font-family:"Inter";font-style:normal;font-weight:(\d+);src:url\(data:font\/woff2;base64,([A-Za-z0-9+/=]+)\)/.exec(svg);
+    expect(rule).not.toBeNull();
+    const file = { "400": "Inter-Regular", "500": "Inter-Medium", "600": "Inter-SemiBold", "700": "Inter-Bold" }[rule![1]!]!;
+    const bytes = readFileSync(fileURLToPath(import.meta.resolve(`@codecaine-ai/text-measure/fonts/${file}.woff2`)));
+    expect(rule![2]).toBe(bytes.toString("base64"));
   });
 });

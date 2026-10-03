@@ -140,7 +140,7 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       {
         text: "one open finding per line:",
         children: [
-          "grouped under <errors> and <warnings>",
+          "grouped under <errors>, <warnings> and <notes>",
           "recomputed every request",
           "E1 rule: what is wrong and where (a suggested fix)",
         ],
@@ -154,6 +154,13 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       {
         text: "every open E* and W* in your edited scope blocks a committed finalize",
         children: ["the finding names the problem, the fix is yours to choose"],
+      },
+      {
+        text: "N* notes never block: what cannot be promised",
+        children: [
+          "text within 1px of its box edge may wrap or clip in the browser",
+          "characters the bundled fonts lack paint in fallback fonts, so their fit is an estimate",
+        ],
       },
     ],
   },
@@ -269,7 +276,7 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
           children: [
             "the flat digest (BOARD, then EDGES, same line grammar as <board>)",
             "BOARD DIFF",
-            "DIAGNOSTICS · n errors · m warnings (the full recount)",
+            "DIAGNOSTICS · n errors · m warnings [· k notes] (the full recount)",
             "ROUTES for every edge",
             "REQUESTS",
             "MEASURES for each framed region",

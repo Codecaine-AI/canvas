@@ -13,6 +13,7 @@
  *   /health
  */
 import { Elysia } from "elysia";
+import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 
 import { bootKernelDatabase, bootPromptEditTraceKernel } from "./kernel";
 import { LayoutSessionStore } from "./session";
@@ -23,6 +24,15 @@ import { createSessionRoutes } from "./routes/sessions";
 import { createTranscriptRoutes } from "./routes/transcript";
 
 const port = Number(Bun.env.CANVAS_AGENT_PORT ?? Bun.env.PORT ?? 4820);
+
+// Lints, text fit and the camera's SVGs measure text through text-measure:
+// switch it to exact HarfBuzz shaping before any session runs. A failure
+// means a broken install (TTFs or WASM missing): stop rather than lint every
+// session against approximate widths.
+await useHarfBuzz();
+if (!activeBackend().exact) {
+  throw new Error(`text-measure: HarfBuzz did not become the active backend (${activeBackend().name} is)`);
+}
 
 const boot = await bootKernelDatabase();
 const store = new LayoutSessionStore(boot.db);

@@ -31,8 +31,9 @@
  *
  * TEXT FIT. `update_text` runs the renderer's own wrap/clamp decision
  * (board/text-fit.ts) over the object's CURRENT box and the NEW text, and
- * attaches the verdict as an `OpOutcome.notes` line when the text would clip.
- * Report-only: the write still lands. Same philosophy as the unreadable-labels
+ * attaches the verdict as an `OpOutcome.notes` line when the text would clip,
+ * may clip (within 1px of the box edge), or cannot be measured exactly
+ * (characters the bundled fonts lack). Report-only: the write still lands. Same philosophy as the unreadable-labels
  * lint — say it, don't block it — and the same family of warning `resize` and
  * `match_size` fire from the other direction.
  *
@@ -134,7 +135,7 @@ export const updateText = defineOperationTool({
     // a detail added under a name that just fitted can push it into clipping.
     const next = "detail" in patch ? { ...target, detail: patch.detail } : target;
     const report = textFitReport(next, target.geometry, patch.text ?? target.text, ctx.canvasStyle);
-    if (!report.fits) notes.push(report.detail);
+    if (!report.fits || !report.reliable) notes.push(report.detail);
     return ctx.mergeObject(p.id, patch, `update_text ${p.id}`, notes);
   },
 });

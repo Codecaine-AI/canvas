@@ -1,5 +1,7 @@
 [test]
-preload = ["./happydom.ts"]
+# happy-dom first (browser globals), then text-measure's exact HarfBuzz backend,
+# so every test measures text the way the Bun/Node hosts do.
+preload = ["./happydom.ts", "./text-measure-preload.ts"]
 # Restrict discovery to this repo's own packages — tools/docs-framework is a
 # submodule carrying vendored package snapshots whose tests are not ours to run.
 root = "packages"

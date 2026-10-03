@@ -688,7 +688,7 @@
           }
         },
         {
-          "insert": ") rather than a bare minimum constant. Text that would clip attaches a warning naming the size the content needs. The check is report-only, so the size still lands. "
+          "insert": ") rather than a bare minimum constant. Text that would clip, may clip within 1 px of the box edge, or cannot be measured exactly attaches a note naming the size the content needs. The check is report-only, so the size still lands. "
         },
         {
           "insert": "update_text",
@@ -956,7 +956,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Text that does not fit its current box still applies, with a warning naming the size it would need. "
+          "insert": "Text that does not surely fit its current box, or that cannot be measured exactly, still applies, with a note naming the size it would need. "
         },
         {
           "insert": "update_text",
@@ -2065,7 +2065,7 @@
           }
         },
         {
-          "insert": " diagnostic remains in the edited scope, warnings included, while any user-authored request is still open, or while the draft does not differ from the board. The findings it runs are the finishing roster in "
+          "insert": " error or warning remains in the edited scope, while any user-authored request is still open, or while the draft does not differ from the board. Notes never block. The findings it runs are the finishing roster in "
         },
         {
           "insert": "board/lints/index.ts",

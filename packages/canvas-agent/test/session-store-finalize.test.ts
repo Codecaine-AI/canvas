@@ -67,13 +67,24 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     expectBlocked(result, session, "card extends 144px past the base section page");
   });
 
+  test.each(["five", "five 🚀"])("forced sticky rows block finalize whatever the last row holds (%s)", (last) => {
+    // 128px holds two 36px rows: five forced lines clip whatever the rocket's fallback width.
+    const note = { ...box("note", 0, 0, 176, 128, "sticky"), style: { shape: "note" as const }, text: "one" };
+    const session = makeTestSession(makeDocument([note]), ["note"], { canvasStyle: FIGJAM_CANVAS_STYLE });
+    session.draft = makeDocument([{ ...note, text: `one\ntwo\nthree\nfour\n${last}` }]);
+
+    const result = toolFinalize(session, "committed", "Added five rows", emitSessionEvent);
+
+    expectBlocked(result, session, "clipped-text");
+  });
+
   test("warning-tier findings block until fixed, then the same session commits", () => {
     const labeled = [{ ...connect("edge", "a", "b"), label: "go" }];
     const baseline = makeDocument([
       box("a", 0, 0, 192, 96, "process"),
       box("b", 416, 0, 192, 96, "process"),  // gap 224 — clean baseline
     ], labeled);
-    // Figjam chip geometry: the "go" chip is 43×30px.
+    // Figjam chip geometry: the "go" chip is 44×30px ("go" in Inter Bold 16 + 12px a side).
     const session = makeTestSession(baseline, ["a", "b"], { canvasStyle: FIGJAM_CANVAS_STYLE });
     session.draft = makeDocument([
       box("a", 0, 0, 192, 96, "process"),
@@ -85,7 +96,7 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     expectBlocked(
       blocked,
       session,
-      'W1 unreadable-labels: label "go" chip on edge (43×30px) bleeds onto a and b',
+      'W1 unreadable-labels: label "go" chip on edge (44×30px) bleeds onto a and b',
     );
 
     session.draft = makeDocument([
@@ -106,6 +117,21 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     expect(session.proposal).not.toBeNull();
     expect(session.proposal!.summary).toBe("Tightened the flow with a readable label");
     expect(session.proposal!.lint).toBe("DIAGNOSTICS · clean");
+  });
+
+  test("notes never block: a label the bundled fonts cannot measure commits, and the note rides along", () => {
+    const baseline = makeDocument([box("a", 0, 0, 192, 96, "process")]);
+    const session = makeTestSession(baseline, ["a"], { canvasStyle: FIGJAM_CANVAS_STYLE });
+    // An emoji name: Chromium paints 🚀 in a fallback font, so its fit is an estimate (a note).
+    session.draft = makeDocument([{ ...box("a", 0, 0, 192, 96, "process"), text: "Ship it 🚀" }]);
+
+    const committed = toolFinalize(session, "committed", "Named the launch step", emitSessionEvent);
+
+    expect(committed.isError).toBeUndefined();
+    expect(session.status).toBe("proposal-ready");
+    expect(session.proposal!.lint).toContain("DIAGNOSTICS · 0 errors · 0 warnings · 1 note");
+    expect(session.proposal!.lint).toContain('N1 clipped-text: a: label fits at 192×96');
+    expect(session.proposal!.lint).toContain('the bundled fonts lack "🚀"');
   });
 
   test("a person's own prose names never block; prose the agent writes into a name does until fixed", () => {
@@ -178,7 +204,7 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     expect(result.text).toContain("DELTA");
     // Actual label fit still fires even though the boxes have visible separation.
     expect(result.text).toContain("LINTS · +1 −0");
-    expect(result.text).toContain('label "go" chip on edge (43×30px) bleeds onto a and b');
+    expect(result.text).toContain('label "go" chip on edge (44×30px) bleeds onto a and b');
     expect(result.text).not.toContain("crowding:");
     expect(session.draft.objects.find((object) => object.id === "b")?.geometry.x).toBe(200);
     expect(session.status).toBe("running");

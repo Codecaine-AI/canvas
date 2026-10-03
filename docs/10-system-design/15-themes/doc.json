@@ -43,7 +43,8 @@
         "b-themes-type-lead",
         "b-themes-type-detail",
         "b-themes-type-mono",
-        "b-themes-type-faces"
+        "b-themes-type-faces",
+        "b-themes-type-weights"
       ]
     },
     "b-themes-intro": {
@@ -323,8 +324,8 @@
               }
             ],
             "#5C5C5C / sans / 13",
-            "#5B6578 / mono / 12.5",
-            "#8B93B5 / mono / 12.5"
+            "#5B6578 / mono / 14",
+            "#8B93B5 / mono / 14"
           ],
           [
             [
@@ -464,8 +465,8 @@
               }
             ],
             "false / 16 / 0.16",
-            "true / 11.5 / 0.16",
-            "true / 11.5 / 0.20"
+            "true / 14 / 0.16",
+            "true / 14 / 0.20"
           ],
           [
             [
@@ -548,8 +549,8 @@
               }
             ],
             "sans / 16 / 30",
-            "mono / 11.5 / 22",
-            "mono / 11.5 / 22"
+            "mono / 14 / 26",
+            "mono / 14 / 26"
           ],
           [
             [
@@ -1857,7 +1858,8 @@
       "children": [
         "b-themes-headers-contents-icon",
         "b-themes-headers-contents-title",
-        "b-themes-headers-contents-detail"
+        "b-themes-headers-contents-detail",
+        "b-themes-headers-contents-width"
       ]
     },
     "b-themes-headers-contents-icon": {
@@ -1939,7 +1941,20 @@
           }
         },
         {
-          "insert": " at regular weight, never uppercased. The chip's width estimate counts the icon and the detail, and both placements keep the zoom counter-scaling and the ellipsis at the chip's maximum width."
+          "insert": " at regular weight, never uppercased."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-headers-contents-width": {
+      "id": "b-themes-headers-contents-width",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The chip's measured width counts the icon and the detail, and both placements keep the zoom counter-scaling and the ellipsis at the chip's maximum width."
         }
       ],
       "children": []
@@ -1963,7 +1978,16 @@
       "props": {},
       "text": [
         {
-          "insert": "Shape and icon names set in Inter at 15px, in "
+          "insert": "Shape and icon names set in Inter at "
+        },
+        {
+          "insert": "textFontSizePx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (15px in figjam, 17.5px in the schematic themes), in "
         },
         {
           "insert": "textColor",
@@ -2040,7 +2064,7 @@
           }
         },
         {
-          "insert": "."
+          "insert": ", and detail lines, measurement, the bundled faces, and weights follow these rules:"
         }
       ],
       "children": []
@@ -2102,7 +2126,7 @@
       },
       "text": [
         {
-          "insert": "Mono measurement",
+          "insert": "Measurement",
           "attributes": {
             "bold": true
           }
@@ -2120,31 +2144,21 @@
       },
       "text": [
         {
-          "insert": "IBM Plex Mono advances every glyph 0.6em at every weight ("
+          "insert": "Static wrapping, caption bands, chip widths, and the agent's text fit all measure through "
         },
         {
-          "insert": "MONO_ADVANCE_EM",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "). Static wrapping, chip widths, and the agent's text fit measure mono runs with that one number, as "
-        },
-        {
-          "insert": "measureMonoTextPx",
+          "insert": "@codecaine-ai/text-measure",
           "attributes": {
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas/src/render/text-metrics.ts",
-              "symbol": "measureMonoTextPx",
-              "label": "measureMonoTextPx"
+              "path": "packages/text-measure/README.md",
+              "label": "@codecaine-ai/text-measure"
             }
           }
         },
         {
-          "insert": " applies it, while Inter keeps its generated advance tables."
+          "insert": " in the face, size, and weight the theme paints. The measured width of a label is therefore the width Studio and the agent's camera paint."
         }
       ],
       "children": []
@@ -2157,7 +2171,7 @@
       },
       "text": [
         {
-          "insert": "Vendored faces",
+          "insert": "Bundled faces",
           "attributes": {
             "bold": true
           }
@@ -2165,6 +2179,7 @@
       ],
       "children": [
         "b-themes-type-faces-weights",
+        "b-themes-type-faces-files",
         "b-themes-type-faces-sticky"
       ]
     },
@@ -2176,7 +2191,34 @@
       },
       "text": [
         {
-          "insert": "IBM Plex Mono ships at weights 400, 500, and 600 under the SIL Open Font License: TTF files for the agent's rasterizer and woff2 files for Studio."
+          "insert": "Inter 3.19 ships at weights 400, 500, 600, and 700 and IBM Plex Mono 2.5 at 400, 500, and 600 in "
+        },
+        {
+          "insert": "packages/text-measure/fonts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/text-measure/fonts",
+              "label": "packages/text-measure/fonts"
+            }
+          }
+        },
+        {
+          "insert": ", under the SIL Open Font License."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-type-faces-files": {
+      "id": "b-themes-type-faces-files",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Studio paints the woff2 files, and the agent's rasterizer reads the TTF files."
         }
       ],
       "children": []
@@ -2189,7 +2231,58 @@
       },
       "text": [
         {
-          "insert": "Sticky bodies stay in Inter. Sticky inline code keeps its own system mono stack."
+          "insert": "Sticky bodies set in Inter, and their inline code in IBM Plex Mono 400 at 0.85em of the body size, in every theme."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-type-weights": {
+      "id": "b-themes-type-weights",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Weights",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-themes-type-weights-snap",
+        "b-themes-type-weights-match"
+      ]
+    },
+    "b-themes-type-weights-snap": {
+      "id": "b-themes-type-weights-snap",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "textFontWeight",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " takes whole hundreds from 300 to 900. The Style rail and validation snap any other value to the nearest hundred, ties rounding up, so 650 becomes 700."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-type-weights-match": {
+      "id": "b-themes-type-weights-match",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Weights 300, 800, and 900 have no face of their own. CSS font matching paints 300 in Inter Regular and 800 and 900 in Inter Bold."
         }
       ],
       "children": []

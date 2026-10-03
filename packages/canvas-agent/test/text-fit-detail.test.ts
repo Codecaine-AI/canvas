@@ -8,6 +8,7 @@ import { rule as clippedText } from "../src/board/lints/rules/clipped-text";
 import { renderDocumentToSvg } from "../../canvas/src/render/static-svg.ts";
 import { makeDocument } from "./synthetic";
 import { FIGJAM_CANVAS_STYLE } from "./helpers";
+import { measureWidth } from "../../canvas/src/theme/text-measure.ts";
 
 /**
  * text-fit counts the one-line `detail` under a name (contract §4/§5): the
@@ -100,15 +101,26 @@ describe("text-fit — a truncated detail", () => {
     expect(report.detail.length).toBeLessThanOrEqual(100);
   });
 
-  test("the needed width is where the renderer stops cutting", () => {
+  test("the needed width surely fits; inside the 1px band the verdict is borderline, past it the renderer cuts", () => {
     const object = shape({ detail: LONG_DETAIL });
     const needed = textFitReport(object, object.geometry, object.text, LIGHT).neededSize!;
-    const grown = shape({ detail: LONG_DETAIL, geometry: { x: 0, y: 0, width: needed.width, height: needed.height } });
-    expect(textFitReport(grown, grown.geometry, grown.text, LIGHT).fits).toBe(true);
-    expect(paintedDetail(grown, LIGHT)).toBe(LONG_DETAIL);
-    const shy = shape({ detail: LONG_DETAIL, geometry: { x: 0, y: 0, width: needed.width - 1, height: needed.height } });
-    expect(textFitReport(shy, shy.geometry, shy.text, LIGHT).fits).toBe(false);
-    expect(paintedDetail(shy, LIGHT).endsWith("…")).toBe(true);
+    const at = (width: number) => shape({ detail: LONG_DETAIL, geometry: { x: 0, y: 0, width, height: needed.height } });
+    const verdict = (width: number) => {
+      const probe = at(width);
+      return textFitReport(probe, probe.geometry, probe.text, LIGHT).verdict;
+    };
+    // 50 Plex Mono cells = 420px: the slot (width − 28) holds it whole from 448 up.
+    expect(needed.width).toBe(449);
+    expect(verdict(449)).toBe("fits");
+    expect(paintedDetail(at(449), LIGHT)).toBe(LONG_DETAIL);
+    // One pixel narrower the renderer still paints it whole — with no margin, so it is borderline…
+    expect(verdict(448)).toBe("borderline");
+    expect(paintedDetail(at(448), LIGHT)).toBe(LONG_DETAIL);
+    // …one more and the renderer cuts it, still inside the band…
+    expect(verdict(447)).toBe("borderline");
+    expect(paintedDetail(at(447), LIGHT).endsWith("…")).toBe(true);
+    // …and past the band the verdict is a clear overflow.
+    expect(verdict(446)).toBe("overflows");
   });
 
   test("measures the active style: the figjam sans detail is narrower than the schematic mono one", () => {
@@ -123,7 +135,9 @@ describe("text-fit — a truncated detail", () => {
     expect(report.fits).toBe(false);
     expect(report.detailLine!.truncated).toBe(true);
     expect(report.detailLine!.painted).toBe(paintedDetail(object, LIGHT));
-    // The band widens with the icon past its 200px floor.
+    // The band widens with the icon past its 200px floor; it sizes itself to
+    // the detail, so the detail is judged against that cap (420px + 1).
+    expect(report.neededSize!.width).toBe(421);
     const grown = icon({ detail: LONG_DETAIL, geometry: { x: 0, y: 0, width: report.neededSize!.width, height: 64 } });
     expect(textFitReport(grown, grown.geometry, grown.text, LIGHT).fits).toBe(true);
     expect(paintedDetail(grown, LIGHT)).toBe(LONG_DETAIL);
@@ -208,11 +222,12 @@ describe("text-fit — edge-label chips at the style's size", () => {
     const roomy = { width: 10000, height: 10000 };
     const figjam = textFitReport(EDGE, { width: 40, height: 40 }, "read/write", FIGJAM);
     const light = textFitReport(EDGE, { width: 40, height: 40 }, "read/write", LIGHT);
-    // Needed = chip + 16px clearance a side.
-    expect(figjam.neededSize).toEqual({ width: Math.ceil(10 * 9.6 + 24) + 32, height: 30 + 32 });
-    expect(light.neededSize).toEqual({ width: Math.ceil(10 * 0.6 * 14 + 14) + 32, height: 26 + 32 });
+    // Needed = the measured chip + 16px clearance a side + the 1px measuring band.
+    const bold16 = measureWidth("read/write", { family: "Inter", size: 16, weight: 700 });
+    expect(figjam.neededSize).toEqual({ width: Math.ceil(bold16 + 24 + 32 + 1), height: 30 + 32 });
+    expect(light.neededSize).toEqual({ width: Math.ceil(10 * 0.6 * 14 + 14 + 32 + 1), height: 26 + 32 });
     expect(textFitReport(EDGE, roomy, "read/write", LIGHT).fits).toBe(true);
-    // A corridor that holds the smaller mono chip (130×58) but not the figjam one (152×62).
+    // A corridor that holds the smaller mono chip (~130×58) but not the figjam one (~30px taller chip, 62 high).
     const corridor = { width: 200, height: 60 };
     expect(textFitReport(EDGE, corridor, "read/write", LIGHT).fits).toBe(true);
     expect(textFitReport(EDGE, corridor, "read/write", FIGJAM).fits).toBe(false);

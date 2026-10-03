@@ -8,6 +8,7 @@ import {
   titleChipScale,
 } from "../../text-slots";
 import { FIGJAM_CANVAS_STYLE } from "../../../theme/canvas-style";
+import { measureWidth } from "../../../theme/text-measure";
 import type { InteractiveCanvasObject } from "../../../state/schema";
 import { sectionDef } from "../def";
 
@@ -67,9 +68,11 @@ describe("section title chip scale", () => {
     }
   });
 
-  it("estimates chip width with a floor for short titles", () => {
-    expect(estimateTitleChipWidthPx("", FIGJAM_CANVAS_STYLE)).toBe(72);
-    expect(estimateTitleChipWidthPx("Narrow section", FIGJAM_CANVAS_STYLE)).toBeGreaterThan(72);
+  it("measures the natural chip width with no floor: paddings and borders around the measured title", () => {
+    // Borders 1.5 + padding 10 a side around the title — an empty title is just the frame.
+    expect(estimateTitleChipWidthPx("", FIGJAM_CANVAS_STYLE)).toBe(23);
+    const narrow = estimateTitleChipWidthPx("Narrow section", FIGJAM_CANVAS_STYLE);
+    expect(narrow).toBe(23 + measureWidth("Narrow section", { family: "Inter", size: 16, weight: 700 }));
   });
 
   it("declares bold section title chips that truncate with an ellipsis", () => {

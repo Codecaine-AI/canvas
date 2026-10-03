@@ -1,0 +1,69 @@
+/*
+ * @codecaine-ai/text-measure: @font-face rules for every face the package
+ * measures with. Import this file (or declare the same faces) in any browser
+ * surface whose text layout must match the measurements:
+ *
+ *   import "@codecaine-ai/text-measure/fonts.css";
+ *
+ * Inter 3.19 static instances (rsms/inter "Inter Web/") at 400/500/600/700 and
+ * IBM Plex Mono 2.5 (@ibm/plex-mono 2.5.0) at 400/500/600. Both OFL-1.1, see
+ * fonts/OFL-Inter.txt and fonts/OFL-IBMPlexMono.txt. The TTFs next to these
+ * woff2 files are the same builds; the headless HarfBuzz backend shapes with
+ * them. Same rules as canvas Studio's index.css (font-display: swap).
+ */
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/Inter-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/Inter-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./fonts/Inter-SemiBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("./fonts/Inter-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/IBMPlexMono-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./fonts/IBMPlexMono-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "IBM Plex Mono";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./fonts/IBMPlexMono-SemiBold.woff2") format("woff2");
+}

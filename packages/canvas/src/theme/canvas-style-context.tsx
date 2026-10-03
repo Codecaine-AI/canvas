@@ -17,7 +17,8 @@
  * omits the prop.
  */
 
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, useMemo, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { activeBackend, onBackendChange } from "@codecaine-ai/text-measure";
 import {
   CANVAS_STYLE_CONTROLS,
   DEFAULT_CANVAS_STYLE,
@@ -54,19 +55,32 @@ function resolveAgainstParent(parent: CanvasStyle, value: CanvasStyleInput): Can
   });
 }
 
+/** The active text-measure backend's name — the snapshot measured layout depends on. */
+function measuringBackend(): string {
+  return activeBackend().name;
+}
+
 /**
  * `value` merged over the inherited style and normalized. The result is
  * memoized on the resolved tokens (all of them, palette included), not on
  * `value`'s identity, so a caller passing a fresh object literal every render
  * does not churn consumers.
+ *
+ * Measured geometry (caption bands, title and label chips, routes ending on
+ * them) depends on the text-measure backend too, which switches when the
+ * host's bundled fonts finish loading (useBrowserFonts). After a switch the
+ * provider hands out a fresh copy of the same style, so every consumer
+ * re-renders and every memo keyed on the style re-measures.
  */
 export function useResolvedCanvasStyle(value?: CanvasStyleInput): CanvasStyle {
   const parent = useCanvasStyle();
   const merged = value === undefined ? parent : resolveAgainstParent(parent, value);
   // Normalized styles share one key order, so the JSON is a stable identity.
   const key = JSON.stringify(merged);
+  const backend = useSyncExternalStore(onBackendChange, measuringBackend, measuringBackend);
+  const firstBackend = useRef(backend).current;
   // `merged` is intentionally captured from the render that changed `key`.
-  return useMemo(() => merged, [key]);
+  return useMemo(() => (backend === firstBackend ? merged : { ...merged }), [key, backend]);
 }
 
 export interface CanvasStyleProviderProps {

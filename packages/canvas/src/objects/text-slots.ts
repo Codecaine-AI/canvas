@@ -5,8 +5,8 @@ import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { inscribedTextRect } from "./inscribed-text-rects";
 import { CENTER_TEXT_INSET_PX } from "./text-slot-constants";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle, type CanvasStyleFont } from "../theme/canvas-style";
-import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK, MONO_ADVANCE_EM } from "../theme/fonts";
-import { measureInterTextPx } from "../theme/inter-metrics";
+import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK } from "../theme/fonts";
+import { measureWidth, wrapText, type FontSpec } from "../theme/text-measure";
 import { resolveIconPaint, resolveShapePaint, resolveStickyPaint } from "../theme/palette";
 import { TITLE_CHIP, titleChipLayout, titleChipScale } from "./section/title-chip-layout";
 
@@ -136,14 +136,6 @@ export const BELOW_BAND_GAP_PX = 6;
 export const BELOW_BAND_MIN_WIDTH_PX = 200;
 
 const BELOW_TEXT_TYPE_SET = new Set<InteractiveCanvasObjectType>(BELOW_TEXT_TYPES);
-/** The caption estimator's average advance, in em. */
-const BELOW_TEXT_CHAR_WIDTH_EM = 0.62;
-/**
- * Room added past a caption line's measured Inter width when that width sets
- * the band: browser layout snaps box and text widths to 1/64px, so a line
- * measured to fit exactly could still wrap live without it.
- */
-const BELOW_BAND_FIT_SLACK_PX = 1;
 
 export const SHAPE_TEXT_TYPOGRAPHY: SlotTypography = {
   fontSizePx: BELOW_TEXT_FONT_SIZE_PX,
@@ -152,6 +144,18 @@ export const SHAPE_TEXT_TYPOGRAPHY: SlotTypography = {
   textAlign: "center",
   color: OBJECT_TEXT_COLOR,
 };
+
+/**
+ * The font a slot's name paints in, for measuring: the slot's own family
+ * stack when it sets one, else the stage's Inter stack the name inherits.
+ */
+export function slotFontSpec(typography: SlotTypography): FontSpec {
+  return {
+    family: typography.fontFamily ?? CANVAS_SANS_FONT_STACK,
+    size: typography.fontSizePx,
+    weight: typography.fontWeight,
+  };
+}
 
 /** Minimum content height for an auto-sized textarea: one line box. */
 export function slotLineHeightPx(typography: SlotTypography): number {
@@ -166,15 +170,6 @@ export function textSlotClampLineCount(rectHeightPx: number, lineHeightPx: numbe
   const safeLineHeight =
     Number.isFinite(lineHeightPx) && lineHeightPx > 0 ? lineHeightPx : 1;
   return Math.max(1, Math.floor(safeHeight / safeLineHeight));
-}
-
-/** Pure wrapped-line estimator shared by rendering, editing, tests, and SSR. */
-export function estimateSlotLineCount(
-  text: string,
-  availableWidthPx: number,
-  typography: SlotTypography,
-): number {
-  return estimateWrappedLineCount(text, availableWidthPx, typography.fontSizePx);
 }
 
 export function isBelowTextType(type: InteractiveCanvasObjectType): type is BelowTextType {
@@ -214,95 +209,6 @@ export function belowTextCompactThresholdPx(
   return isBelowTextType(type) ? BELOW_TEXT_TYPE_CONFIG[type].compactBelowHeightPx : undefined;
 }
 
-export type WrappedTextEstimate = {
-  lines: number;
-  longestLineWidthPx: number;
-};
-
-/**
- * One estimated caption line: its text (null for a line holding a piece of a
- * word too wide to fit — the estimate splits those by width, not by
- * character) and its estimated width.
- */
-type EstimatedLine = { text: string | null; widthPx: number };
-
-/** The estimator's greedy wrap at 0.62em per character, line by line. */
-function estimateWrappedLines(
-  text: string,
-  availableWidthPx: number,
-  fontSizePx: number = BELOW_TEXT_FONT_SIZE_PX,
-): EstimatedLine[] {
-  if (text === "") return [];
-  const width = Math.max(1, availableWidthPx);
-  const charWidthPx = fontSizePx * BELOW_TEXT_CHAR_WIDTH_EM;
-  const lines: EstimatedLine[] = [];
-
-  for (const hardLine of text.split("\n")) {
-    const words = hardLine.trim().split(/\s+/).filter(Boolean);
-    if (words.length === 0) {
-      lines.push({ text: "", widthPx: 0 });
-      continue;
-    }
-
-    let currentText: string | null = "";
-    let currentWidth = 0;
-
-    for (const word of words) {
-      let wordWidth = word.length * charWidthPx;
-      if (wordWidth > width) {
-        if (currentWidth > 0) {
-          lines.push({ text: currentText, widthPx: currentWidth });
-          currentWidth = 0;
-        }
-        while (wordWidth > width) {
-          lines.push({ text: null, widthPx: width });
-          wordWidth -= width;
-        }
-        currentText = null;
-        currentWidth = wordWidth;
-        continue;
-      }
-
-      if (currentWidth === 0) {
-        currentText = word;
-        currentWidth = wordWidth;
-      } else if (currentWidth + charWidthPx + wordWidth <= width) {
-        currentText = currentText === null ? null : `${currentText} ${word}`;
-        currentWidth += charWidthPx + wordWidth;
-      } else {
-        lines.push({ text: currentText, widthPx: currentWidth });
-        currentText = word;
-        currentWidth = wordWidth;
-      }
-    }
-
-    if (currentWidth > 0) lines.push({ text: currentText, widthPx: currentWidth });
-  }
-
-  return lines;
-}
-
-/** Pure wrapped-line estimator shared by below-band sizing and tests (figjam name size by default). */
-export function estimateWrappedText(
-  text: string,
-  availableWidthPx: number,
-  fontSizePx: number = BELOW_TEXT_FONT_SIZE_PX,
-): WrappedTextEstimate {
-  const lines = estimateWrappedLines(text, availableWidthPx, fontSizePx);
-  return {
-    lines: lines.length,
-    longestLineWidthPx: lines.reduce((longest, line) => Math.max(longest, line.widthPx), 0),
-  };
-}
-
-export function estimateWrappedLineCount(
-  text: string,
-  availableWidthPx: number,
-  fontSizePx: number = BELOW_TEXT_FONT_SIZE_PX,
-): number {
-  return estimateWrappedText(text, availableWidthPx, fontSizePx).lines;
-}
-
 function belowTextHidden(object: InteractiveCanvasObject, slot: TextSlot): boolean {
   const compactThreshold = belowTextCompactThresholdPx(object.type) ?? slot.compactBelowHeightPx;
   return compactThreshold !== undefined && object.geometry.height < compactThreshold;
@@ -319,13 +225,15 @@ export function belowBandMaxWidthPx(object: Pick<InteractiveCanvasObject, "geome
 }
 
 /**
- * Content band size for below-glyph text: the wrapped name lines, then —
- * when the object has a detail — the gap and the one detail line (contract
- * §4: the band grows by the detail). `lines` counts name lines only. The
- * detail widens the band up to its max width (where it ellipsizes); name and
- * detail metrics come from `canvasStyle` (`textFontSizePx` / weight, the
- * detail font — callers without one size with the default style). The gap to
- * the glyph is owned by the slot rect.
+ * Content band size for below-glyph text: the name wrapped the way the stage
+ * paints it (pre-wrap, break-word) at the band's max width, then — when the
+ * object has a detail — the gap and the one detail line (contract §4: the
+ * band grows by the detail). `lines` counts name lines only. The band is as
+ * wide as its widest line (measured in Chromium layout units, so the same
+ * lines wrap identically inside it) and the detail widens it up to the max
+ * width (where it ellipsizes). Name and detail fonts come from `canvasStyle`
+ * (`textFontSizePx` / weight, the detail font — callers without one size
+ * with the default style). The gap to the glyph is owned by the slot rect.
  */
 export function belowBandSize(
   text: string,
@@ -341,30 +249,20 @@ export function belowBandSize(
     return { lines: 0, widthPx: 0, heightPx: 0 };
   }
   const maxWidth = belowBandMaxWidthPx(object);
-  const fontSizePx = canvasStyle.textFontSizePx;
-  const estimate = estimateWrappedLines(text, maxWidth, fontSizePx);
-  // The estimate decides the lines; the band is then at least as wide as
-  // each of them really measures in the name font (+ slack), so neither
-  // renderer — both wrap inside this width at real Inter advances — breaks a
-  // line the estimate kept whole. 0.62em runs narrow for short words of wide
-  // glyphs ("Code", "Bun"), which otherwise broke mid-word.
-  let widthPx = 0;
-  for (const line of estimate) {
-    widthPx = Math.max(widthPx, line.widthPx);
-    if (line.text === null || line.text === "") continue;
-    const measured = measureInterTextPx(line.text, fontSizePx, canvasStyle.textFontWeight);
-    if (measured + BELOW_BAND_FIT_SLACK_PX > line.widthPx) {
-      widthPx = Math.max(widthPx, measured + BELOW_BAND_FIT_SLACK_PX);
-    }
-  }
-  widthPx = Math.min(maxWidth, widthPx);
-  let heightPx = estimate.length * fontSizePx * BELOW_TEXT_LINE_HEIGHT;
+  const typography = resolveSlotTypography(slot, object, canvasStyle);
+  const lineHeightPx = slotLineHeightPx(typography);
+  const wrapped =
+    text === ""
+      ? { lineCount: 0, maxLineWidth: 0 }
+      : wrapText(text, slotFontSpec(typography), { maxWidth, lineHeight: lineHeightPx, whiteSpace: "pre-wrap" });
+  let widthPx = Math.min(maxWidth, wrapped.maxLineWidth);
+  let heightPx = wrapped.lineCount * lineHeightPx;
   if (detailText !== "") {
-    const typography = detailTypography(canvasStyle);
-    widthPx = Math.max(widthPx, Math.min(maxWidth, estimateDetailWidthPx(detailText, typography)));
-    heightPx += (estimate.length > 0 ? DETAIL_LINE_GAP_PX : 0) + typography.lineHeightPx;
+    const detail = detailTypography(canvasStyle);
+    widthPx = Math.max(widthPx, Math.min(maxWidth, measureWidth(detailText, detailFontSpec(detail))));
+    heightPx += (wrapped.lineCount > 0 ? DETAIL_LINE_GAP_PX : 0) + detail.lineHeightPx;
   }
-  return { lines: estimate.length, widthPx, heightPx };
+  return { lines: wrapped.lineCount, widthPx, heightPx };
 }
 
 function belowTextSlotForType(_type: BelowTextType): TextSlot {
@@ -427,12 +325,6 @@ export const DETAIL_LINE_HEIGHT = 1.3;
 export const DETAIL_MONO_FONT_WEIGHT = 500;
 /** Inter detail weight. */
 export const DETAIL_SANS_FONT_WEIGHT = 400;
-/**
- * Average Inter advance, in em, the below band sizes a sans detail with —
- * the same char-count heuristic the name band uses (errs wide, so the band
- * never ellipsizes a detail the renderers would show whole).
- */
-const DETAIL_SANS_ESTIMATE_CHAR_EM = 0.62;
 
 /** How a detail line paints under one canvas style. */
 export interface DetailTypography {
@@ -472,17 +364,9 @@ export function slotDetailText(object: Pick<InteractiveCanvasObject, "type" | "d
   return collapseDetailText(object.detail);
 }
 
-/**
- * Width a detail run is budgeted for when a band sizes itself to it: exact
- * for mono (one MONO_ADVANCE_EM cell per codepoint, as render/text-metrics.ts
- * measureMonoTextPx measures), the char-count heuristic for sans. Wrapping
- * and ellipsis decisions measure real advances in the renderers.
- */
-export function estimateDetailWidthPx(text: string, typography: DetailTypography): number {
-  let glyphs = 0;
-  for (const _char of text) glyphs += 1;
-  const em = typography.font === "mono" ? MONO_ADVANCE_EM : DETAIL_SANS_ESTIMATE_CHAR_EM;
-  return glyphs * em * typography.fontSizePx;
+/** The font a detail line paints in, for measuring (its family stack, size, and weight). */
+export function detailFontSpec(typography: DetailTypography): FontSpec {
+  return { family: typography.fontFamily, size: typography.fontSizePx, weight: typography.fontWeight };
 }
 
 /**

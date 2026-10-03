@@ -156,6 +156,7 @@ export const sectionDef: ObjectDef = {
         }
         .interactive-canvas-section-title-chip {
           position: absolute;
+          box-sizing: border-box;
           left: ${TITLE_CHIP.insetFromSectionCornerPx}px;
           top: ${TITLE_CHIP.insetFromSectionCornerPx}px;
           height: ${TITLE_CHIP.heightPx}px;

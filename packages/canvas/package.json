@@ -3,9 +3,6 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
-  "scripts": {
-    "generate:inter-metrics": "bun scripts/generate-inter-metrics.ts"
-  },
   "main": "src/index.ts",
   "types": "src/index.ts",
   "exports": {
@@ -28,6 +25,7 @@
     "react-dom": "^19"
   },
   "dependencies": {
+    "@codecaine-ai/text-measure": "workspace:*",
     "@sinclair/typebox": "^0.34",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

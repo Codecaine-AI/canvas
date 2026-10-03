@@ -21,6 +21,8 @@ import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
  *     `clampLines`), the functions renderSlotTextBlock itself calls;
  *  2. against a real `renderDocumentToSvg` render, where a clipped slot paints
  *     an ellipsis and a fitting one does not.
+ * A `fits` verdict always renders whole and an `overflows` verdict always
+ * clips; `borderline` (within 1px of the edge) promises neither.
  */
 
 const LONG_LABEL = "Normalize and deduplicate every inbound customer record before scoring";
@@ -65,20 +67,9 @@ function paintedLines(object: InteractiveCanvasObject): {
 } {
   const slot = textSlotForObject(object)!;
   const { rect, typography } = resolveTextSlot(slot, object);
-  const wrapped = wrapTextLines(
-    object.text,
-    rect.width,
-    typography.fontSizePx,
-    typography.fontWeight,
-  );
+  const wrapped = wrapTextLines(object.text, rect.width, typography);
   const maxLines = Math.max(1, Math.floor(rect.height / slotLineHeightPx(typography)));
-  const painted = clampLines(
-    wrapped,
-    maxLines,
-    rect.width,
-    typography.fontSizePx,
-    typography.fontWeight,
-  );
+  const painted = clampLines(wrapped, maxLines, rect.width, typography);
   return { wrapped, painted };
 }
 
@@ -91,6 +82,7 @@ describe("text-fit / renderer parity — shape labels", () => {
     const object = shape(LONG_LABEL, 160, 96);
     const report = textFitReport(object, object.geometry, object.text);
     expect(report.fits).toBe(false);
+    expect(report.verdict).toBe("overflows");
 
     const { wrapped, painted } = paintedLines(object);
     expect(painted.length).toBeLessThan(wrapped.length);
@@ -102,6 +94,7 @@ describe("text-fit / renderer parity — shape labels", () => {
     const object = shape(LONG_LABEL, 240, 120);
     const report = textFitReport(object, object.geometry, object.text);
     expect(report.fits).toBe(true);
+    expect(report.verdict).toBe("fits");
 
     const { wrapped, painted } = paintedLines(object);
     expect(painted).toEqual(wrapped);
@@ -109,18 +102,18 @@ describe("text-fit / renderer parity — shape labels", () => {
     expect(svgOf(object)).not.toContain("…");
   });
 
-  test("the reported neededSize is the box where the renderer stops clipping", () => {
+  test("the reported neededSize is the smallest box that surely renders whole", () => {
     const object = shape(LONG_LABEL, 160, 96);
     const needed = textFitReport(object, object.geometry, object.text).neededSize!;
 
     const grown = shape(LONG_LABEL, needed.width, needed.height);
+    expect(textFitReport(grown, grown.geometry, grown.text).verdict).toBe("fits");
     expect(paintedLines(grown).painted).toEqual(paintedLines(grown).wrapped);
     expect(svgOf(grown)).not.toContain("…");
 
-    // One pixel shorter still clips — "smallest" means smallest.
+    // One pixel shorter is no longer a sure fit — "smallest" means smallest.
     const shy = shape(LONG_LABEL, needed.width, needed.height - 1);
     expect(textFitReport(shy, shy.geometry, shy.text).fits).toBe(false);
-    expect(svgOf(shy)).toContain("…");
   });
 });
 
@@ -151,19 +144,22 @@ describe("text-fit / renderer parity — sticky bodies and section titles", () =
     const style = normalizeCanvasStyle({ titleChipBorderWidthPx: 4 });
     const styledSvg = (object: InteractiveCanvasObject) =>
       renderDocumentToSvg(makeDocument([object]), { canvasStyle: style }).svg;
+    const verdict = (width: number, canvasStyle?: typeof style) => {
+      const probe = section(LONG_TITLE, width, 360);
+      return textFitReport(probe, probe.geometry, probe.text, canvasStyle).verdict;
+    };
     const probe = section(LONG_TITLE, 200, 360);
     const needed = textFitReport(probe, probe.geometry, probe.text, style).neededSize!;
 
-    // One pixel narrower than the styled chip needs: clipped under the style, in the
-    // report and in the pixels — yet the thinner default border still fits it.
-    const shy = section(LONG_TITLE, needed.width - 1, 360);
-    expect(textFitReport(shy, shy.geometry, shy.text, style).fits).toBe(false);
+    // The sure fit under the style renders whole…
+    expect(verdict(needed.width, style)).toBe("fits");
+    expect(styledSvg(section(LONG_TITLE, needed.width, 360))).not.toContain("…");
+    // …three pixels narrower the styled chip clearly clips, in the report and in
+    // the pixels — yet the thinner default border (2.5px less chip) still holds it.
+    const shy = section(LONG_TITLE, needed.width - 3, 360);
+    expect(verdict(needed.width - 3, style)).toBe("overflows");
     expect(styledSvg(shy)).toContain("…");
-    expect(textFitReport(shy, shy.geometry, shy.text).fits).toBe(true);
-
-    const grown = section(LONG_TITLE, needed.width, 360);
-    expect(textFitReport(grown, grown.geometry, grown.text, style).fits).toBe(true);
-    expect(styledSvg(grown)).not.toContain("…");
+    expect(verdict(needed.width - 3)).not.toBe("overflows");
   });
 });
 
@@ -179,13 +175,13 @@ describe("text-fit / renderer parity — the schematic themes", () => {
     test(`${theme}: a clipping label renders an ellipsis; the reported needed size does not`, () => {
       const tight = shape(LONG_LABEL, 160, 96);
       const report = textFitReport(tight, tight.geometry, tight.text, style);
-      expect(report.fits).toBe(false);
+      expect(report.verdict).toBe("overflows");
       expect(styledSvg(tight)).toContain("…");
       const grown = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height);
-      expect(textFitReport(grown, grown.geometry, grown.text, style).fits).toBe(true);
+      expect(textFitReport(grown, grown.geometry, grown.text, style).verdict).toBe("fits");
       expect(styledSvg(grown)).not.toContain("…");
       const shy = shape(LONG_LABEL, report.neededSize!.width, report.neededSize!.height - 1);
-      expect(styledSvg(shy)).toContain("…");
+      expect(textFitReport(shy, shy.geometry, shy.text, style).fits).toBe(false);
     });
 
     test(`${theme}: with a detail line the needed size holds the name AND the detail whole`, () => {

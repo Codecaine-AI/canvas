@@ -114,3 +114,16 @@ describe("headers with an empty title but an icon or detail still count as paint
     }
   });
 });
+
+describe("a cut section detail paints its ellipsis in the title font", () => {
+  it("like CSS text-overflow on the chip: the title's weight and tracking, not the detail's", () => {
+    const zone = section({ text: "Bun services", detail: "127.0.0.1", icon: "brand-bun", geometry: { x: 0, y: 0, width: 200, height: 200 } } as Partial<InteractiveCanvasObject>);
+    const svg = renderDocumentToSvg(documentOf([zone]), { background: "transparent", canvasStyle: LIGHT }).svg;
+    const layout = titleChipLayout(zone, LIGHT);
+    const ellipsis = /<text ([^>]*)>…<\/text>/.exec(svg);
+    expect(ellipsis).not.toBeNull();
+    expect(ellipsis![1]).toContain('font-weight="600"');
+    expect(layout.truncated).toBe(true);
+    expect(Number(/letter-spacing="([^"]+)"/.exec(ellipsis![1])![1])).toBeCloseTo(1.12, 8);
+  });
+});

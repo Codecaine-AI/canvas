@@ -33,12 +33,20 @@ function paint(object: InteractiveCanvasObject, style = DEFAULT_CANVAS_STYLE): s
 }
 
 describe("section header text-fit", () => {
-  test("a figjam header the renderer paints whole fits (measured, not the char-count estimate)", () => {
+  test("a figjam header the renderer paints whole is measured, and within a pixel of the frame it is borderline", () => {
     const cli = section({ detail: "cli.ts" });
     expect(paint(cli, FIGJAM_CANVAS_STYLE)).toContain(">cli.ts</text>");
-    const report = textFitReport(cli, { width: 100, height: 300 }, "CLI", FIGJAM_CANVAS_STYLE);
-    expect(report.fits).toBe(true);
-    expect(report.detailLine).toMatchObject({ shown: true, truncated: false, painted: "cli.ts" });
+    // The chip wants 1.5 + 10 + "CLI" + 10 + "cli.ts" + 10 + 1.5 ≈ 93.6px of the 94px budget:
+    // it paints whole, but by less than a pixel — the browser may cut it, so no promise.
+    const tight = textFitReport(cli, { width: 100, height: 300 }, "CLI", FIGJAM_CANVAS_STYLE);
+    expect(tight.verdict).toBe("borderline");
+    expect(tight.fits).toBe(false);
+    expect(tight.detailLine).toMatchObject({ shown: true, truncated: false, painted: "cli.ts" });
+    expect(tight.detail).toContain("can't promise");
+    // Two pixels wider it surely fits.
+    const roomy = textFitReport(cli, { width: 102, height: 300 }, "CLI", FIGJAM_CANVAS_STYLE);
+    expect(roomy.verdict).toBe("fits");
+    expect(roomy.fits).toBe(true);
   });
 
   test("an empty title does not skip the detail's fit check", () => {

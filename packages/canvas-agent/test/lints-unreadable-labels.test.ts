@@ -5,6 +5,8 @@ import { rule as unreadableLabels } from "../src/board/lints/rules/unreadable-la
 import { box, connect, makeDocument } from "./synthetic";
 import { canvasThemePreset } from "@codecaine-ai/canvas/style";
 import { FIGJAM_CONTEXT } from "./helpers";
+import { chipFor, chipWidth } from "../src/board/lints/geometry";
+import { FIGJAM_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
 
 /**
  * The rule's claim is "the rendered chip does not fit where it renders" —
@@ -13,8 +15,9 @@ import { FIGJAM_CONTEXT } from "./helpers";
  * edge. No taste floor, no pair/window scan; chips hitting OTHER
  * boxes/chips/wires are covered-content's job.
  */
-// The chip numbers below are figjam's (30px sans chip, 9.6px per character,
-// 41px minimum), so every check measures in the figjam theme explicitly.
+// The chip numbers below are figjam's (30px sans chip, the label measured in
+// Inter Bold 16 + 12px a side, 41px minimum), so every check measures in the
+// figjam theme explicitly.
 describe("unreadable-labels lint", () => {
   test("declares its faces", () => {
     expect(unreadableLabels.id).toBe("unreadable-labels");
@@ -72,25 +75,65 @@ describe("unreadable-labels lint", () => {
   });
 
   test("the board's canvas style sizes the chip: the schematic mono chip fits a corridor the figjam chip cannot", () => {
-    // 27 chars in a 300px corridor: figjam 27×9.6 + 24 = 283.2px (+32 = 316 > 300);
-    // schematic 27×8.4 + 2×7 = 240.8px (+32 = 272.8 ≤ 300) on a 26px chip.
+    // 28 capitals in a 300px corridor: figjam Inter Bold 16 ≈ 299.7 + 24px
+    // (+32 ≈ 355.7 > 300); schematic 28 Plex Mono cells ≈ 235.2 + 2×7
+    // (+32 ≈ 281.2 ≤ 300) on a 26px chip.
     const document = makeDocument(
       [box("a", 0, 0), box("b", 460, 0)],
-      [{ ...connect("e", "a", "b"), label: "a-very-long-edge-label-here" }],
+      [{ ...connect("e", "a", "b"), label: "ORDER-PROCESSING-WORKFLOW-V2" }],
     );
     expect(unreadableLabels.check(document, FIGJAM_CONTEXT)).toHaveLength(1);
     expect(unreadableLabels.check(document, { canvasStyle: canvasThemePreset("schematic-light") })).toHaveLength(0);
   });
 
   test("no distance window: a long chip fires wherever it physically cannot fit", () => {
-    // A wide gap is no exemption: the 27-char chip is 27×9.6+24 = 283.2px
+    // A wide gap is no exemption: the 27-char chip measures ≈ 252.25 + 24px
     // wide — it physically cannot fit in 240px, so the rule fires.
     const findings = unreadableLabels.check(makeDocument(
       [box("a", 0, 0), box("b", 400, 0)],
       [{ ...connect("e", "a", "b"), label: "a-very-long-edge-label-here" }],
     ), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(1);
-    expect(findings[0]!.message).toContain("240px of corridor where the chip needs 316px");
+    expect(findings[0]!.severity).toBe("warning");
+    expect(findings[0]!.message).toContain("240px of corridor where the chip needs 285px");
+  });
+
+  test("a bleed only the full-width chip has — inside the 1px measuring band — is a note, not a warning", () => {
+    // Corridor 0.3px short of chip + margins: the measured chip just touches both
+    // boxes, the chip a pixel narrower clears them. Chromium may paint either.
+    const chip = chipWidth("go live", FIGJAM_CANVAS_STYLE);
+    const gap = chip + 32 - 0.3;
+    const findings = unreadableLabels.check(makeDocument(
+      [box("a", 0, 0), box("b", 160 + gap, 0)],
+      [{ ...connect("e", "a", "b"), label: "go live" }],
+    ), FIGJAM_CONTEXT);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]!.severity).toBe("note");
+    expect(findings[0]!.message).toContain("can't promise");
+    // Two pixels short, the narrow chip bleeds too: a real warning.
+    const tighter = unreadableLabels.check(makeDocument(
+      [box("a", 0, 0), box("b", 160 + chip + 32 - 2, 0)],
+      [{ ...connect("e", "a", "b"), label: "go live" }],
+    ), FIGJAM_CONTEXT);
+    expect(tighter.map((finding) => finding.severity)).toEqual(["warning"]);
+  });
+
+  test("a label with characters the chip font lacks is judged on its guaranteed footprint", () => {
+    const edge = { ...connect("e", "a", "b"), label: "ship it 🚀 now" };
+    // Gap 40: even with the rocket at zero width the chip bleeds — a warning.
+    const tight = unreadableLabels.check(makeDocument([box("a", 0, 0), box("b", 200, 0)], [edge]), FIGJAM_CONTEXT);
+    expect(tight.map((finding) => finding.severity)).toEqual(["warning"]);
+    // A corridor the guaranteed chip clears but the estimated one does not: a note.
+    const probe = makeDocument([box("a", 0, 0), box("b", 400, 0)], [edge]);
+    const chip = chipFor(probe.connections[0]!, probe, FIGJAM_CANVAS_STYLE)!;
+    expect(chip.rect.width - chip.narrowRect.width).toBeGreaterThan(4);
+    const gap = Math.ceil(chip.narrowRect.width) + 32 + 2;
+    const findings = unreadableLabels.check(
+      makeDocument([box("a", 0, 0), box("b", 160 + gap, 0)], [edge]),
+      FIGJAM_CONTEXT,
+    );
+    expect(findings.map((finding) => finding.severity)).toEqual(["note"]);
+    expect(findings[0]!.message).toContain('the chip font lacks "🚀"');
   });
 
   test("a chip rendering AWAY from the corridor is clean regardless of gap", () => {

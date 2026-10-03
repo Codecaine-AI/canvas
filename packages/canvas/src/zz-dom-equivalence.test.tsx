@@ -9,7 +9,11 @@
  *   - the style block is compared structurally (selectors + per-selector
  *     declaration-sequence; cross-selector reordering is a printed warning).
  *
- * The figjam baseline (rendered with an explicit figjam style) must not move. The
+ * The figjam baseline (rendered with an explicit figjam style) must not move
+ * unless figjam rendering changes on purpose — it was recaptured deliberately
+ * when text measurement moved to @codecaine-ai/text-measure (caption bands,
+ * label chips and the routes ending on them, the stage's pinned text
+ * rendering, the title chip's box-sizing). The
  * schematic themes have their own baseline, packages/canvas/
  * zz-dom-baseline-themes.json (`bun packages/canvas/zz-dom-capture.ts --themes
  * packages/canvas/zz-dom-baseline-themes.json`): the corpus under

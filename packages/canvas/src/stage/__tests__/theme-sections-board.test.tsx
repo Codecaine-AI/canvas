@@ -6,6 +6,7 @@ import type { TextEditingApi } from "../editor/features/text-editing/use-text-ed
 import { renderDocumentToSvg } from "../../render/static-svg";
 import type { CanvasThemeId } from "../../theme/canvas-style";
 import type { InteractiveCanvasDocument } from "../../state/schema";
+import { measureWidth } from "../../theme/text-measure";
 
 /**
  * Sections, board, connectors, and stickies under the schematic themes —
@@ -148,14 +149,17 @@ describe("pinned title chip with icon + detail", () => {
     // Title at box x + 28 (6 lead + 16 tile + 6 gap), centered in the 25.5px box less its bottom edge.
     expect(svg).toContain('x="129.5" y="93.5" fill="#0F1E36" font-size="14" font-weight="600"');
     expect(svg).toMatch(/>BUN SERVICES<\/text>/);
-    // Detail 10px after the 114.24px title.
-    expect(svg).toContain(`x="${Math.round((101.5 + 28 + 12 * 0.68 * 14 + 10) * 100) / 100}" y="93.5"`);
+    // Detail 10px after the title: 12 tracked Plex Mono cells, 114.24px → 114.25 in layout units.
+    const titleWidth = measureWidth("BUN SERVICES", { family: "IBM Plex Mono", size: 14, weight: 600, letterSpacing: 1.12 });
+    expect(titleWidth).toBe(114.25);
+    expect(svg).toContain(`x="${Math.round((101.5 + 28 + titleWidth + 10) * 100) / 100}" y="93.5"`);
     expect(svg).toMatch(/font-weight="400"[^>]*>127\.0\.0\.1<\/text>/);
     // The 16px tile sits 6px in, centered on the content line (93.5); the glyph is 11px inside it.
     expect(svg).toContain('<rect x="107.5" y="85.5" width="16" height="16" rx="2" fill="#0F8A7A"/>');
     expect(svg).toContain('transform="translate(110 88) scale(0.4583)"');
-    // Only the right and bottom edges are stroked, inside the box like a CSS border.
-    expect(svg).toMatch(/<path d="M340\.09 81\.5V105A1\.25 1\.25 0 0 1 338\.84 106\.25H101\.5" fill="none" stroke="rgba\(15, 138, 122, 0\.5\)" stroke-width="1\.5"/);
+    // Only the right and bottom edges are stroked, inside the box like a CSS border
+    // (box: 6 lead + 22 icon + 114.25 title + 10 + 75.61 detail + 10 + 1.5 edge).
+    expect(svg).toMatch(/<path d="M340\.11 81\.5V105A1\.25 1\.25 0 0 1 338\.86 106\.25H101\.5" fill="none" stroke="rgba\(15, 138, 122, 0\.5\)" stroke-width="1\.5"/);
   });
 
   it("figjam keeps the floating chip markup for a plain title (live and static)", () => {
@@ -172,8 +176,12 @@ describe("pinned title chip with icon + detail", () => {
     expect(chip.style.left).toBe("103px");
     expect(chip.getAttribute("style")).not.toContain("height");
     expect(chip.innerHTML).toBe("<span>Bun services</span>");
+    // The static chip is the measured title (Inter Bold 16) + 10px padding a
+    // side + the 1.5px borders, stroked on its centerline — no char-count estimate.
+    const title = measureWidth("Bun services", { family: "Inter", size: 16, weight: 700 });
+    const width = Math.round((title + 20 + 3 - 1.5) * 100) / 100;
     expect(renderDocumentToSvg(plain, { canvasStyle: { theme: "figjam" } }).svg).toContain(
-      'x="103.75" y="83.75" width="140.54" height="25.5" rx="2" fill="#C6FAF6" stroke="#369E94" stroke-width="1.5"',
+      `x="103.75" y="83.75" width="${width}" height="25.5" rx="2" fill="#C6FAF6" stroke="#369E94" stroke-width="1.5"`,
     );
   });
 });
@@ -238,11 +246,13 @@ describe("in-place section title editor", () => {
 });
 
 describe("connector label chip per theme", () => {
-  it("schematic: a 26px mono chip sized 0.6em per glyph + 0.5em padding a side, live == static", () => {
-    // "HTTP" at 14px: 4 × 8.4 + 2 × 7 = 47.6 wide.
+  it("schematic: a 26px mono chip sized to the measured label + 0.5em padding a side, live == static", () => {
+    // "HTTP" at 14px: 4 Plex Mono cells (33.6px → 33.609375 in layout units) + 2 × 7.
+    const width = measureWidth("HTTP", { family: "IBM Plex Mono", size: 14, weight: 500 }) + 2 * 7;
+    expect(width).toBe(47.609375);
     const container = renderLive("schematic-light");
     const rect = container.querySelector('[data-canvas-connection-label="edge"] rect')!;
-    expect(Number(rect.getAttribute("width"))).toBeCloseTo(47.6, 9);
+    expect(Number(rect.getAttribute("width"))).toBe(width);
     expect(rect.getAttribute("height")).toBe("26");
     expect(rect.getAttribute("fill")).toBe("#F6F8FA");
     expect(rect.getAttribute("stroke")).toBe("#D5DBE3");
@@ -254,14 +264,16 @@ describe("connector label chip per theme", () => {
 
     const svg = staticSvg("schematic-light");
     const chip = [...svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>HTTP<\/text>/g)][0]!;
-    expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.6", height: "26", fill: "#F6F8FA", stroke: "#D5DBE3" });
+    expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.61", height: "26", fill: "#F6F8FA", stroke: "#D5DBE3" });
     expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#3A4659", "font-size": "14", "font-weight": "500" });
   });
 
   it("figjam: the 30px sans chip with black text (live now matches static)", () => {
     const container = renderLive("figjam");
     const rect = container.querySelector('[data-canvas-connection-label="edge"] rect')!;
-    expect(rect.getAttribute("width")).toBe(String(4 * 9.6 + 24));
+    // "HTTP" measured in Inter Bold 16 + 12px a side (the old 0.6em estimate said 62.4).
+    expect(rect.getAttribute("width")).toBe(String(measureWidth("HTTP", { family: "Inter", size: 16, weight: 700 }) + 24));
+    expect(Number(rect.getAttribute("width"))).toBe(67.6875);
     expect(rect.getAttribute("height")).toBe("30");
     const text = container.querySelector('[data-canvas-connection-label="edge"] text')!;
     expect(text.getAttribute("fill")).toBe("#000000");

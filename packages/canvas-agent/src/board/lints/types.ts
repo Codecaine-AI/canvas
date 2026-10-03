@@ -7,7 +7,13 @@
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 
-export type Severity = "error" | "warning";
+/**
+ * `error` and `warning` findings block a committed finalize in the edited
+ * scope. A `note` never blocks: it says what cannot be promised — text
+ * within a pixel of its box edge (it may wrap or clip in the browser), or
+ * text the bundled fonts cannot measure exactly.
+ */
+export type Severity = "error" | "warning" | "note";
 
 export interface Diagnostic {
   id: string;            // assigned by the runner: E1.., W1.. — stable within a session turn set
@@ -39,7 +45,7 @@ export interface LintContext {
 }
 
 export interface LayoutRule {
-  id: string; title: string; tier: Severity;
+  id: string; title: string; tier: Exclude<Severity, "note">;
   guidance: string;      // the rule stated in prose: what fires, why, how to fix (multi-line GUIDANCE const)
   check(document: InteractiveCanvasDocument, context?: LintContext): Omit<Diagnostic, "id">[];
 }

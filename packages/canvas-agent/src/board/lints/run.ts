@@ -8,7 +8,8 @@
  * remedy — and the model chooses and encodes the fix.
  *
  * Id assignment is stable: errors first as E1..En, then warnings as W1..Wn,
- * in registry-rule order then the order the rule's positional scan emitted.
+ * then notes as N1..Nn, in registry-rule order then the order the rule's
+ * positional scan emitted. Notes never block a finalize (types.ts Severity).
  * Re-running on an unchanged board yields identical ids; ids reset whenever
  * the draft changes and the model tracks them turn to turn.
  */
@@ -34,7 +35,7 @@ export function runDiagnostics(
   }
   const assign = (
     entries: typeof collected,
-    prefix: "E" | "W",
+    prefix: "E" | "W" | "N",
   ): Diagnostic[] => entries.map((finding, index) => ({
     ...finding,
     id: `${prefix}${index + 1}`,
@@ -42,6 +43,7 @@ export function runDiagnostics(
   return [
     ...assign(collected.filter((finding) => finding.severity === "error"), "E"),
     ...assign(collected.filter((finding) => finding.severity === "warning"), "W"),
+    ...assign(collected.filter((finding) => finding.severity === "note"), "N"),
   ];
 }
 
@@ -88,12 +90,19 @@ export function diagnosticLines(diagnostic: Diagnostic): string[] {
   return [`${diagnostic.id} ${diagnostic.rule}: ${diagnostic.message}${suggestion}`];
 }
 
+/** Findings that block a committed finalize: everything but notes. */
+export function blockingDiagnostics(diags: readonly Diagnostic[]): Diagnostic[] {
+  return diags.filter((diagnostic) => diagnostic.severity !== "note");
+}
+
 export function formatDiagnostics(diags: Diagnostic[]): string {
   const errors = diags.filter((diagnostic) => diagnostic.severity === "error").length;
-  const warnings = diags.length - errors;
+  const notes = diags.filter((diagnostic) => diagnostic.severity === "note").length;
+  const warnings = diags.length - errors - notes;
   if (diags.length === 0) return "DIAGNOSTICS · clean";
   const lines = [
-    `DIAGNOSTICS · ${errors} error${errors === 1 ? "" : "s"} · ${warnings} warning${warnings === 1 ? "" : "s"}`,
+    `DIAGNOSTICS · ${errors} error${errors === 1 ? "" : "s"} · ${warnings} warning${warnings === 1 ? "" : "s"}`
+      + (notes > 0 ? ` · ${notes} note${notes === 1 ? "" : "s"}` : ""),
   ];
   for (const diagnostic of diags) {
     lines.push(...diagnosticLines(diagnostic).map((line) => `  ${line}`));

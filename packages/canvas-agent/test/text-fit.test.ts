@@ -147,6 +147,27 @@ describe("textFitReport — sticky bodies", () => {
   });
 });
 
+describe("textFitReport — sticky edge cases", () => {
+  test("a note too narrow to hold a row overflows; it is never borderline", () => {
+    // 43px wide → a 1px body slot: five bullets cannot fit one 36px row.
+    const report = textFitReport(sticky(43, 85), { width: 43, height: 85 }, "- one\n- two\n- three\n- four\n- five");
+    expect(report.verdict).toBe("overflows");
+    expect(report.neededSize!.height).toBeGreaterThan(85);
+  });
+
+  test("an approximate measuring backend makes the answer an estimate", async () => {
+    const { useTableBackend } = await import("@codecaine-ai/text-measure");
+    useTableBackend();
+    try {
+      expect(textFitReport(sticky(176, 128), { width: 176, height: 128 }, "Ship it").reliable).toBe(false);
+    } finally {
+      const { useHarfBuzz } = await import("@codecaine-ai/text-measure/headless");
+      await useHarfBuzz();
+    }
+    expect(textFitReport(sticky(176, 128), { width: 176, height: 128 }, "Ship it").reliable).toBe(true);
+  });
+});
+
 describe("textFitReport — section titles (chip, not body slot)", () => {
   test("a short title fits its frame's inner width", () => {
     const report = textFitReport(section(480, 360), { width: 480, height: 360 }, "Discovery");

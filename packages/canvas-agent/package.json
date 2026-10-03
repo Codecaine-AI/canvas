@@ -24,6 +24,7 @@
     "@agent-kernel/viewer-ui": "workspace:*",
     "@codecaine-ai/canvas": "workspace:*",
     "@codecaine-ai/prompt-kit": "workspace:*",
+    "@codecaine-ai/text-measure": "workspace:*",
     "@mariozechner/pi-ai": "^0.70.6",
     "@resvg/resvg-js": "^2.6.2",
     "elysia": "^1.2.0",

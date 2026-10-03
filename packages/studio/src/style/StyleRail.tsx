@@ -15,6 +15,7 @@ import {
   CANVAS_THEME_IDS,
   CANVAS_THEME_LABELS,
   resolveCanvasStyle,
+  snapToControlStep,
   type CanvasStyle,
   type CanvasStyleControl,
   type CanvasStyleGroup,
@@ -443,7 +444,9 @@ function RowLabel({
 function NumberRow({ control, value, overridden, onChange, onReset }: RowProps & { value: number }) {
   const sliderId = useId();
   // The exact input keeps its own text while focused, so "0." or an empty
-  // field can be typed through; every parseable value applies at once.
+  // field can be typed through; every parseable value applies at once,
+  // snapped to the step on snapping controls (a typed weight of 450 applies
+  // 500; the field shows the applied value once it loses focus).
   const [draft, setDraft] = useState<string | null>(null);
   const name = controlName(control);
   const unit = control.key.endsWith("Px") ? "px" : null;
@@ -465,7 +468,7 @@ function NumberRow({ control, value, overridden, onChange, onReset }: RowProps &
               const text = event.currentTarget.value;
               setDraft(text);
               const parsed = Number(text);
-              if (text.trim() !== "" && Number.isFinite(parsed)) onChange(parsed);
+              if (text.trim() !== "" && Number.isFinite(parsed)) onChange(snapToControlStep(control, parsed));
             }}
             onBlur={() => setDraft(null)}
             onKeyDown={(event) => {
@@ -484,7 +487,7 @@ function NumberRow({ control, value, overridden, onChange, onReset }: RowProps &
         step={control.step}
         value={value}
         aria-label={name}
-        onChange={(event) => onChange(Number(event.currentTarget.value))}
+        onChange={(event) => onChange(snapToControlStep(control, Number(event.currentTarget.value)))}
       />
     </div>
   );

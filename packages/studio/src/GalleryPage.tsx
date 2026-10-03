@@ -17,6 +17,7 @@ import { Button } from "@codecaine-ai/canvas/ui/button";
 import { ArrowLeftIcon, ShapesIcon } from "@codecaine-ai/canvas/ui/icons";
 import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 import { withRootPageFrame } from "./new-document";
+import { useTextMeasureVersion } from "./use-text-measure-version";
 
 type GalleryPageProps = {
   onBack: () => void;
@@ -55,7 +56,11 @@ const RETIRED_ICON_GALLERY_VARIANTS = [
 ] as const satisfies readonly { glyph: NonNullable<InteractiveCanvasObject["icon"]>; label: string }[];
 
 export function GalleryPage({ onBack, canvasStyle }: GalleryPageProps) {
-  const groups = useMemo(() => buildGalleryGroups(), []);
+  // Tile documents are sized around measured caption bands
+  // (belowExtendedBoundsPx): build them again when the measuring backend
+  // switches (the bundled fonts finished loading).
+  const measureVersion = useTextMeasureVersion();
+  const groups = useMemo(() => buildGalleryGroups(), [measureVersion]);
   const objectTypeCount = OBJECT_TYPES.length;
 
   return (

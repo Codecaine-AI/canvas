@@ -364,11 +364,12 @@ describe("getConnectionAnchors", () => {
     const bounds = connectionBoundsForObject(object);
     const anchors = getConnectionAnchors(object);
 
-    // Tile: min(120, 140, iconTileMaxPx 56) = 56, centered → local (32, 42). The three-line caption
-    // (3 × 21px at 17.5px names) hangs 6px under the tile: bottom = 42 + 56 + 6 + 63 = 167 local.
-    expect(bounds).toEqual({ x: 42, y: 62, width: 56, height: 125 });
+    // Tile: min(120, 140, iconTileMaxPx 56) = 56, centered → local (32, 42). The two-line caption
+    // (2 × 21px at 17.5px names — the lines the stage paints in its 200px band) hangs 6px under
+    // the tile: bottom = 42 + 56 + 6 + 42 = 146 local.
+    expect(bounds).toEqual({ x: 42, y: 62, width: 56, height: 104 });
     expect(anchors[0]!.point).toEqual({ x: 70, y: 62 });
-    expect(anchors[1]!.point).toEqual({ x: 70, y: 187 });
+    expect(anchors[1]!.point).toEqual({ x: 70, y: 166 });
     expect(anchors[2]!.point).toEqual({ x: 42, y: 90 });
     expect(anchors[3]!.point).toEqual({ x: 98, y: 90 });
   });
