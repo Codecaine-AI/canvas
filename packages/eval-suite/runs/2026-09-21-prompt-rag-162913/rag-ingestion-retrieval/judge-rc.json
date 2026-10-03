@@ -1,0 +1,809 @@
+{
+  "axis": "rc",
+  "scenario": "rag-ingestion-retrieval",
+  "run_id": "2026-09-21-prompt-rag-162913",
+  "judge": {
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "baml_fn": "JudgeRequirementCoverage",
+    "attempts": 1
+  },
+  "score": 9,
+  "verdict": {
+    "requirements": [
+      {
+        "id": "R1",
+        "requirement": "Source adapters pull knowledge from document stores, wikis, ticket systems, and code repositories.",
+        "brief_evidence": "“Source adapters pull from document stores, wikis, ticket systems, and code repositories”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, left-side source note and “Pull sources + access rules” node",
+            "observation": "The visible note lists “Docs, wikis, tickets, code,” adjacent to the source-pull component."
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-adapters], objects[s01-ingest-sources]",
+            "observation": "The adapter node says “Pull sources + access rules,” and the rendered note enumerates docs, wikis, tickets, and code."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R2",
+        "requirement": "Source adapters pull on schedules and change notifications.",
+        "brief_evidence": "“on schedules and change notifications”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, source note",
+            "observation": "The note visibly states “Scheduled + change-driven.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-sources].text",
+            "observation": "Rendered note text includes “Scheduled + change-driven.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R3",
+        "requirement": "An arriving source item may be a first import or an update.",
+        "brief_evidence": "“An arrival may be a first import or an update”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, source note",
+            "observation": "The note visibly says “Import or update + ACL.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-sources].text",
+            "observation": "Rendered note explicitly includes “Import or update.”"
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R4",
+        "requirement": "Each source's access rules travel with the arriving content.",
+        "brief_evidence": "“each source's access rules travel with it”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, source node through extraction and fragment note",
+            "observation": "The source node says “Pull sources + access rules,” its outgoing line is labeled “ACL,” and the fragment example retains “ACL: ops.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-adapters], connections[s01-ingest-pull-extract], objects[s01-ingest-fragment]",
+            "observation": "Visible node, edge label, and fragment note together show ACL carriage through ingestion."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R5",
+        "requirement": "Extraction normalizes source formats.",
+        "brief_evidence": "“Extraction normalizes formats”",
+        "importance": "system_defining",
+        "status": "partial",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, extraction node",
+            "observation": "The visible node says “Extract + strip boilerplate,” identifying extraction but not explicitly stating format normalization."
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-extract] and rendered objects search for “normaliz”",
+            "observation": "The extraction object is present, but no rendered object or edge contains an explicit normalization label."
+          }
+        ],
+        "note": "Extraction is recognizable, but the stated format-normalization behavior is not made explicit."
+      },
+      {
+        "id": "R6",
+        "requirement": "Extraction removes boilerplate.",
+        "brief_evidence": "“and removes boilerplate”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, extraction node",
+            "observation": "The node visibly reads “Extract + strip boilerplate.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-extract].text",
+            "observation": "Rendered process text explicitly represents boilerplate removal."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R7",
+        "requirement": "Unparseable documents enter quarantine with failure context.",
+        "brief_evidence": "“Unparseable documents enter quarantine with failure context”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, extraction failure branch",
+            "observation": "A red forward edge labeled “parse fail” leads from extraction to “Quarantine + failure context.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[s01-ingest-bad], objects[s01-ingest-quarantine]",
+            "observation": "The explicit parse-failure edge terminates at the quarantine process containing failure context."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R8",
+        "requirement": "A parse failure does not stop the rest of the batch.",
+        "brief_evidence": "“while the rest of the batch continues”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, source note and extraction branch",
+            "observation": "The note explicitly states “Parse fail: batch continues,” while the main extraction-to-hash path remains separate from the quarantine branch."
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-sources], connections[s01-ingest-normalized], connections[s01-ingest-bad]",
+            "observation": "Rendered note and separate outgoing paths represent non-blocking quarantine."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R9",
+        "requirement": "A content hash classifies every document as new, changed, or unchanged.",
+        "brief_evidence": "“A content hash classifies each document as new, changed, or unchanged.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, “Content hash?” decision",
+            "observation": "The decision has three visibly labeled outgoing branches: “new,” “changed,” and “unchanged.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-hash], connections[s01-ingest-new], connections[s01-ingest-changed], connections[s01-ingest-unchanged]",
+            "observation": "The hash decision and all three classification edges are explicitly encoded."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R10",
+        "requirement": "Unchanged content bypasses expensive processing.",
+        "brief_evidence": "“Unchanged content bypasses expensive processing.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, downward branch from “Content hash?”",
+            "observation": "The “unchanged” edge ends at “Unchanged: skip processing” rather than the chunk/embed route."
+          },
+          {
+            "source": "json",
+            "locator": "connections[s01-ingest-unchanged], objects[s01-ingest-skip]",
+            "observation": "The unchanged classification explicitly terminates at a skip-processing outcome."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R11",
+        "requirement": "A changed document supersedes its previous version.",
+        "brief_evidence": "“A changed document supersedes its previous version”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, changed branch",
+            "observation": "The edge labeled “changed” leads to “Supersede; delete stale records.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[s01-ingest-changed], objects[s01-ingest-supersede]",
+            "observation": "The changed classification is directly connected to the supersede operation."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R12",
+        "requirement": "Stale derived records from a superseded version are deleted.",
+        "brief_evidence": "“whose stale derived records are deleted”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, changed-document process",
+            "observation": "The visible process explicitly says “delete stale records.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-supersede].text",
+            "observation": "The supersede process contains the required stale-record deletion."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R13",
+        "requirement": "The chunker splits normalized content into overlapping fragments.",
+        "brief_evidence": "“The chunker splits normalized content with overlap”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, chunking process and fragment note",
+            "observation": "The process reads “Chunk with overlap + provenance,” and the example fragment includes “overlap: 80.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-chunk], objects[s01-ingest-fragment]",
+            "observation": "Both the chunking operation and an explicit overlap value are rendered."
+          }
+        ],
+        "note": "The normalization qualifier is only partial under R5, but the chunking-with-overlap behavior itself is explicit."
+      },
+      {
+        "id": "R14",
+        "requirement": "Every fragment preserves its heading, source identity, permissions, and version stamp.",
+        "brief_evidence": "“preserves headings, source identity, permissions, and a version stamp on every fragment”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, “Illustrative fragment” note",
+            "observation": "The rendered fragment lists source “wiki/42,” version “v7,” heading “Recovery,” and “ACL: ops.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-fragment].text",
+            "observation": "The visible example carries all four required metadata categories on one fragment."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R15",
+        "requirement": "The embedding service accepts rate-limited batches.",
+        "brief_evidence": "“The embedding service accepts rate-limited batches.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, embedding process",
+            "observation": "The process visibly says “Rate-limit batches + embed.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-embed].text",
+            "observation": "Rate limiting, batching, and embedding are jointly explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R16",
+        "requirement": "Workers retry transient embedding failures.",
+        "brief_evidence": "“Workers retry transient failures”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, embedding-to-worker connection",
+            "observation": "A dashed bidirectional line labeled “retry” connects embedding with “Workers retry transient failures.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-retry], connections[s01-ingest-failure]",
+            "observation": "The worker responsibility and retry relationship are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R17",
+        "requirement": "Persistently failing embedding batches go to a dead-letter store with their inputs and attempt history.",
+        "brief_evidence": "“then send persistently failing batches to a dead-letter store with inputs and attempt history”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, worker failure branch",
+            "observation": "A red edge labeled “exhausted” leads to “Dead-letter: inputs + attempts for replay.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[s01-ingest-exhausted], objects[s01-ingest-dead]",
+            "observation": "Retry exhaustion, dead-letter destination, retained inputs, and attempt information are all visible."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R18",
+        "requirement": "Dead-lettered batches can be reprocessed.",
+        "brief_evidence": "“for reprocessing”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Ingestion band, dead-letter node",
+            "observation": "The node ends with “for replay,” clearly representing later reprocessing."
+          },
+          {
+            "source": "json",
+            "locator": "objects[s01-ingest-dead].text",
+            "observation": "The rendered dead-letter label explicitly retains the failed material for replay."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R19",
+        "requirement": "Each completed version writes vectors to a vector index.",
+        "brief_evidence": "“Each completed version writes vectors to a vector index”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Completed-version line into Publish band and top fan-out branch",
+            "observation": "The “completed version” enters “Stage completed version,” which has a forward branch to “Vector index · vectors.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[s01-ingest-to-stage], connections[s02-publish-wv], objects[s02-publish-vector]",
+            "observation": "The completed-version flow explicitly reaches the vector index."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R20",
+        "requirement": "Each completed version writes fragment text and metadata to a document store.",
+        "brief_evidence": "“fragment text and metadata to a document store”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Publish band, middle fan-out branch",
+            "observation": "The staged version has a forward branch to “Document store · text + metadata.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[s02-publish-wd], objects[s02-publish-docs]",
+            "observation": "The document-store destination and its text-plus-metadata payload are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R21",
+        "requirement": "Each completed version writes terms to a keyword index.",
+        "brief_evidence": "“and terms to a keyword index”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Publish band, bottom fan-out branch",
+            "observation": "The staged version has a forward branch to “Keyword index · terms.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[s02-publish-wk], objects[s02-publish-keyword]",
+            "observation": "The terms-to-keyword-index write is explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R22",
+        "requirement": "Publication succeeds only when all three stores reflect the same version.",
+        "brief_evidence": "“Publication succeeds only when all three reflect the same version”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Publish band, convergence decision and green success branch",
+            "observation": "All three stores converge on “All three same version?”; only the “yes” branch reaches “Publish serving version.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[s02-publish-vcheck], connections[s02-publish-dcheck], connections[s02-publish-kcheck], connections[s02-publish-pass]",
+            "observation": "All stores feed the consistency gate, and publication is reachable only on its affirmative edge."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R23",
+        "requirement": "Partial or mismatched writes remain unavailable.",
+        "brief_evidence": "“partial writes remain unavailable”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Publish band, red “no” branch and illustrative publication note",
+            "observation": "The failed consistency branch reaches “Unavailable,” and the note says “Any mismatch: invisible to both searches.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[s02-publish-fail], objects[s02-publish-repair], objects[s02-publish-example]",
+            "observation": "The visible failure path and note explicitly prevent mismatched data from serving."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R24",
+        "requirement": "Partial writes are repaired or rolled back before serving.",
+        "brief_evidence": "“and are repaired or rolled back before serving”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Publish band, consistency failure outcome",
+            "observation": "The “no” branch terminates at “Unavailable: repair or roll back,” separate from the serving-version branch."
+          },
+          {
+            "source": "json",
+            "locator": "objects[s02-publish-repair], connections[s02-publish-fail]",
+            "observation": "Repair-or-rollback is explicitly associated with the unavailable failed-consistency path."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R25",
+        "requirement": "When a user asks a question, retrieval rewrites it into one or more searches.",
+        "brief_evidence": "“the retrieval service rewrites it into one or more searches”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Query band, first process",
+            "observation": "The process reads “Question → rewrite searches” and fans out into two search paths."
+          },
+          {
+            "source": "json",
+            "locator": "objects[s03-query-rewrite], connections[s03-query-vsearch], connections[s03-query-ksearch]",
+            "observation": "The question-rewrite process produces multiple searches."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R26",
+        "requirement": "Retrieval runs vector and keyword lookups in parallel.",
+        "brief_evidence": "“runs vector and keyword lookups in parallel”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Query band, parallel branches after rewrite",
+            "observation": "The rewrite node visibly forks to “Vector lookup · current generation” and “Keyword lookup,” which later reconverge."
+          },
+          {
+            "source": "json",
+            "locator": "connections[s03-query-vsearch], connections[s03-query-ksearch]",
+            "observation": "Two separate outgoing edges encode the parallel lookup branches."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R27",
+        "requirement": "Retrieval fuses and reranks the lookup candidates.",
+        "brief_evidence": "“fuses and reranks candidates”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Query band, convergence after vector and keyword lookups",
+            "observation": "Both lookup branches feed “Fuse + rerank candidates.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s03-query-rank], connections[s03-query-vrank], connections[s03-query-krank]",
+            "observation": "Candidate fusion and reranking are explicit after both retrieval modes."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R28",
+        "requirement": "The asking user's permissions are applied before context reaches generation.",
+        "brief_evidence": "“applies the asking user's permissions before context reaches the generation service”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Query band, path from reranking to generation",
+            "observation": "“Filter by asking user's permissions” occurs after reranking and before the evidence decision and generation node."
+          },
+          {
+            "source": "json",
+            "locator": "connections[s03-query-ranked], objects[s03-query-acl], connections[s03-query-permitted], connections[s03-query-yes]",
+            "observation": "Directed ordering places the permission filter before any route to generation."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R29",
+        "requirement": "Generation answers only from retrieved evidence and returns citations.",
+        "brief_evidence": "“Generation answers only from retrieved evidence and returns citations.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Query band, successful evidence branch",
+            "observation": "Only the “yes” branch from “Enough strong evidence?” reaches “Generate from evidence + cite.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s03-query-confidence], connections[s03-query-yes], objects[s03-query-generate]",
+            "observation": "The generation node explicitly constrains generation to evidence and includes citations."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R30",
+        "requirement": "If context is thin or every reranker score is low, the system says it does not know.",
+        "brief_evidence": "“If context is thin or every reranker score is low, it says it does not know.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Query band, negative evidence branch",
+            "observation": "The orange branch labeled “thin / all scores low” leads to “I don't know.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[s03-query-no], objects[s03-query-abstain]",
+            "observation": "Both stated low-confidence conditions and the abstention outcome appear on the branch."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R31",
+        "requirement": "Feedback records thumb signals.",
+        "brief_evidence": "“Feedback records thumb signals”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Query band, feedback process",
+            "observation": "The process visibly begins “Thumbs + citation usefulness → gaps.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s03-query-feedback].text",
+            "observation": "Thumb feedback is explicitly represented."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R32",
+        "requirement": "Feedback records the usefulness of cited fragments.",
+        "brief_evidence": "“the usefulness of cited fragments”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Query band, feedback process",
+            "observation": "The process explicitly includes “citation usefulness.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s03-query-feedback].text",
+            "observation": "The rendered text records usefulness associated with citations."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R33",
+        "requirement": "Feedback records unanswered questions.",
+        "brief_evidence": "“and unanswered questions”",
+        "importance": "supporting",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Query band, line from “I don't know” to feedback",
+            "observation": "A forward line labeled “unanswered questions” feeds the feedback process."
+          },
+          {
+            "source": "json",
+            "locator": "connections[s03-query-unanswered]",
+            "observation": "The abstention outcome is explicitly connected to feedback as unanswered questions."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R34",
+        "requirement": "Coverage gaps discovered through feedback return to ingestion priorities.",
+        "brief_evidence": "“the resulting coverage gaps return to ingestion priorities”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Dashed magenta loop from Query feedback around the board to Ingestion",
+            "observation": "The visible loop is labeled “coverage gaps → ingestion priorities” and points to the source-ingestion node."
+          },
+          {
+            "source": "json",
+            "locator": "connections[s03-query-priorities]",
+            "observation": "A dashed forward edge runs from query feedback to ingestion adapters with the required label."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R35",
+        "requirement": "When the embedding model changes, a rebuild coordinator re-embeds the corpus.",
+        "brief_evidence": "“When the embedding model changes, a rebuild coordinator re-embeds the corpus”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Model-change band, first process",
+            "observation": "The process visibly reads “Model change → coordinator re-embeds corpus.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s04-rebuild-build].text",
+            "observation": "The model-change trigger, coordinator, and corpus re-embedding are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R36",
+        "requirement": "The coordinator performs the rebuild in the background into a new index generation.",
+        "brief_evidence": "“in the background into a new index generation”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Model-change band, second process",
+            "observation": "The process says “Build new generation in background.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s04-rebuild-next].text",
+            "observation": "A new generation and background operation are both explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R37",
+        "requirement": "Live queries remain on the current generation until the rebuild is complete and consistent.",
+        "brief_evidence": "“Live queries remain on the current generation until the rebuild is complete and consistent.”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Model-change band and Query vector-lookup node",
+            "observation": "The rebuild has a “Complete + consistent?” gate with a “no · continue rebuild” loop; live queries are labeled as using the current generation, and query vector lookup also says “current generation.”"
+          },
+          {
+            "source": "json",
+            "locator": "objects[s04-rebuild-ready], connections[s04-rebuild-wait], connections[s04-rebuild-loop], objects[s04-rebuild-current], objects[s03-query-vector]",
+            "observation": "The board keeps incomplete rebuilds looping while query-serving labels identify the current generation."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R38",
+        "requirement": "Switchover atomically promotes the new generation.",
+        "brief_evidence": "“Switchover atomically promotes the new generation”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Model-change band, affirmative consistency branch",
+            "observation": "The “yes” branch reaches “Atomically promote new generation,” followed by a pointer “swap.”"
+          },
+          {
+            "source": "json",
+            "locator": "connections[s04-rebuild-promote], objects[s04-rebuild-switch], connections[s04-rebuild-pointer]",
+            "observation": "Atomic promotion and the generation pointer swap are explicit."
+          }
+        ],
+        "note": ""
+      },
+      {
+        "id": "R39",
+        "requirement": "The prior generation remains available for rollback after switchover.",
+        "brief_evidence": "“while the prior generation remains available for rollback”",
+        "importance": "system_defining",
+        "status": "represented",
+        "representation_evidence": [
+          {
+            "source": "png",
+            "locator": "Model-change band, prior-generation node and dashed rollback edge",
+            "observation": "“Prior generation · retained rollback” connects via a dashed “rollback pointer” to the current-generation position."
+          },
+          {
+            "source": "json",
+            "locator": "objects[s04-rebuild-prior], connections[s04-rebuild-rollback]",
+            "observation": "The prior generation is explicitly retained and has a directed rollback-pointer relationship."
+          }
+        ],
+        "note": ""
+      }
+    ],
+    "coverage_fraction": 0.9857,
+    "caps_applied": [],
+    "strongest_covered_cluster": "The version-consistent publication and permission-aware query contract is exceptionally complete: all three write targets, same-version publication gate, unavailable repair/rollback path, parallel hybrid retrieval, permission filtering, grounded citation generation, and low-confidence abstention are explicitly connected.",
+    "most_consequential_gap": "R5: extraction is shown, but the required normalization of heterogeneous source formats is not explicitly represented.",
+    "coverage_summary": "Thirty-eight of thirty-nine atomic requirements are fully represented. The sole partial requirement is explicit format normalization during extraction; no requirement is absent or contradicted, so no cap applies. Weighted coverage is 69/70 = 0.9857.",
+    "score": 9
+  },
+  "usage": {
+    "input_tokens": 18319,
+    "output_tokens": 8148
+  },
+  "flags": [
+    "SCORE-RECOMPUTED"
+  ]
+}

@@ -1,0 +1,1177 @@
+{
+  "schemaVersion": 1,
+  "id": "eval.2026-09-21-prompt-rag-162913.rag-ingestion-retrieval",
+  "title": "2026-09-21-prompt-rag-162913 · rag-ingestion-retrieval",
+  "description": "# RAG ingestion and retrieval\nRead the four bands top to bottom: ingestion, version-consistent publication, permission-aware query answering, and background model rebuilds.\n\nIngestion carries source ACLs through extraction, hash classification, overlapping chunks and rate-limited embeddings. Parse failures are quarantined without stopping the batch; transient embedding failures retry and exhausted batches retain inputs and attempt history for replay. Changed documents supersede old derived records; unchanged documents skip expensive work.\n\nPublication fans out to vector, document and keyword stores, then gates availability on matching versions in all three. Partial writes remain unavailable for repair or rollback. The wiki/42 example is illustrative, not an implementation schema.\n\nQueries fan out into vector and keyword searches, fuse and rerank, then filter by the asking user's permissions before generation. Only sufficient evidence permits a cited answer; thin context or uniformly low scores produces an abstention. Feedback and unanswered questions drive ingestion priorities.\n\nModel changes rebuild a new generation in the background. Live searches remain on the current generation until complete, consistent promotion; the prior generation is retained for rollback. This is a system-level design based on the supplied requirements, not a vendor-specific API diagram.",
+  "mode": "diagram",
+  "viewport": {
+    "x": 0,
+    "y": 0,
+    "zoom": 1
+  },
+  "size": {
+    "width": 2304,
+    "height": 1464
+  },
+  "objects": [
+    {
+      "id": "page-frame",
+      "type": "section",
+      "text": "RAG • ingest → publish consistent versions → retrieve permitted evidence → answer with citations",
+      "color": "white",
+      "parentId": null,
+      "geometry": {
+        "x": 32,
+        "y": 32,
+        "width": 3400,
+        "height": 3020
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "s01-ingest",
+      "type": "section",
+      "text": "1 · Ingestion — isolate failures, preserve provenance",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 80,
+        "y": 120,
+        "width": 3240,
+        "height": 640
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "s01-ingest-adapters",
+      "type": "process",
+      "text": "Pull sources + access rules",
+      "color": "teal",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 140,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s01-ingest-extract",
+      "type": "process",
+      "text": "Extract + strip boilerplate",
+      "color": "teal",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 560,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s01-ingest-hash",
+      "type": "decision",
+      "text": "Content hash?",
+      "color": "yellow",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 980,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "s01-ingest-chunk",
+      "type": "process",
+      "text": "Chunk with overlap + provenance",
+      "color": "teal",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 1820,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s01-ingest-supersede",
+      "type": "process",
+      "text": "Supersede; delete stale records",
+      "color": "teal",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 1400,
+        "y": 440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s01-ingest-embed",
+      "type": "process",
+      "text": "Rate-limit batches + embed",
+      "color": "teal",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 2240,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s01-ingest-retry",
+      "type": "process",
+      "text": "Workers retry transient failures",
+      "color": "teal",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 2660,
+        "y": 240,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s01-ingest-quarantine",
+      "type": "process",
+      "text": "Quarantine + failure context",
+      "color": "teal",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 560,
+        "y": 440,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s01-ingest-skip",
+      "type": "ellipse",
+      "text": "Unchanged: skip processing",
+      "color": "yellow",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 980,
+        "y": 620,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "s01-ingest-dead",
+      "type": "process",
+      "text": "Dead-letter: inputs + attempts for replay",
+      "color": "teal",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 2660,
+        "y": 480,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s02-publish",
+      "type": "section",
+      "text": "2 · Publish — all three stores agree before serving",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 80,
+        "y": 920,
+        "width": 3240,
+        "height": 500
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "s02-publish-write",
+      "type": "process",
+      "text": "Stage completed version",
+      "color": "teal",
+      "parentId": "s02-publish",
+      "geometry": {
+        "x": 140,
+        "y": 1140,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s02-publish-vector",
+      "type": "process",
+      "text": "Vector index · vectors",
+      "color": "teal",
+      "parentId": "s02-publish",
+      "geometry": {
+        "x": 560,
+        "y": 1000,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s02-publish-docs",
+      "type": "process",
+      "text": "Document store · text + metadata",
+      "color": "teal",
+      "parentId": "s02-publish",
+      "geometry": {
+        "x": 560,
+        "y": 1140,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s02-publish-keyword",
+      "type": "process",
+      "text": "Keyword index · terms",
+      "color": "teal",
+      "parentId": "s02-publish",
+      "geometry": {
+        "x": 560,
+        "y": 1280,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s02-publish-consistent",
+      "type": "decision",
+      "text": "All three same version?",
+      "color": "yellow",
+      "parentId": "s02-publish",
+      "geometry": {
+        "x": 1040,
+        "y": 1140,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "s02-publish-live",
+      "type": "process",
+      "text": "Publish serving version",
+      "color": "teal",
+      "parentId": "s02-publish",
+      "geometry": {
+        "x": 1820,
+        "y": 1000,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s02-publish-repair",
+      "type": "process",
+      "text": "Unavailable: repair or roll back",
+      "color": "teal",
+      "parentId": "s02-publish",
+      "geometry": {
+        "x": 1420,
+        "y": 1280,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s03-query",
+      "type": "section",
+      "text": "3 · Query — parallel search, permission gate, grounded answer",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 80,
+        "y": 1580,
+        "width": 3240,
+        "height": 620
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "s03-query-rewrite",
+      "type": "process",
+      "text": "Question → rewrite searches",
+      "color": "teal",
+      "parentId": "s03-query",
+      "geometry": {
+        "x": 140,
+        "y": 1800,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s03-query-vector",
+      "type": "process",
+      "text": "Vector lookup · current generation",
+      "color": "teal",
+      "parentId": "s03-query",
+      "geometry": {
+        "x": 560,
+        "y": 1700,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s03-query-keyword",
+      "type": "process",
+      "text": "Keyword lookup",
+      "color": "teal",
+      "parentId": "s03-query",
+      "geometry": {
+        "x": 560,
+        "y": 1940,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s03-query-rank",
+      "type": "process",
+      "text": "Fuse + rerank candidates",
+      "color": "teal",
+      "parentId": "s03-query",
+      "geometry": {
+        "x": 980,
+        "y": 1800,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s03-query-acl",
+      "type": "process",
+      "text": "Filter by asking user's permissions",
+      "color": "teal",
+      "parentId": "s03-query",
+      "geometry": {
+        "x": 1400,
+        "y": 1800,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s03-query-confidence",
+      "type": "decision",
+      "text": "Enough strong evidence?",
+      "color": "yellow",
+      "parentId": "s03-query",
+      "geometry": {
+        "x": 1820,
+        "y": 1800,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "s03-query-generate",
+      "type": "process",
+      "text": "Generate from evidence + cite",
+      "color": "teal",
+      "parentId": "s03-query",
+      "geometry": {
+        "x": 2240,
+        "y": 1800,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s03-query-abstain",
+      "type": "process",
+      "text": "I don't know",
+      "color": "teal",
+      "parentId": "s03-query",
+      "geometry": {
+        "x": 1820,
+        "y": 2060,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s01-ingest-sources",
+      "type": "sticky",
+      "text": "Docs, wikis, tickets, code.\nScheduled + change-driven.\nImport or update + ACL.\nParse fail: batch continues.",
+      "color": "yellow",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 140,
+        "y": 440,
+        "width": 360,
+        "height": 280
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s01-ingest-fragment",
+      "type": "sticky",
+      "text": "Illustrative fragment\nsource: wiki/42 • v7\nheading: Recovery\nACL: ops • overlap: 80",
+      "color": "yellow",
+      "parentId": "s01-ingest",
+      "geometry": {
+        "x": 1820,
+        "y": 520,
+        "width": 400,
+        "height": 200
+      },
+      "style": {
+        "shape": "note"
+      }
+    },
+    {
+      "id": "s03-query-feedback",
+      "type": "process",
+      "text": "Thumbs + citation usefulness → gaps",
+      "color": "teal",
+      "parentId": "s03-query",
+      "geometry": {
+        "x": 2660,
+        "y": 1800,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s04-rebuild",
+      "type": "section",
+      "text": "4 · Model change — build off-line, switch atomically, retain rollback",
+      "color": "gray",
+      "parentId": "page-frame",
+      "geometry": {
+        "x": 80,
+        "y": 2360,
+        "width": 3240,
+        "height": 560
+      },
+      "style": {
+        "shape": "section"
+      }
+    },
+    {
+      "id": "s04-rebuild-build",
+      "type": "process",
+      "text": "Model change → coordinator re-embeds corpus",
+      "color": "teal",
+      "parentId": "s04-rebuild",
+      "geometry": {
+        "x": 140,
+        "y": 2500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s04-rebuild-next",
+      "type": "process",
+      "text": "Build new generation in background",
+      "color": "teal",
+      "parentId": "s04-rebuild",
+      "geometry": {
+        "x": 560,
+        "y": 2500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s04-rebuild-ready",
+      "type": "decision",
+      "text": "Complete + consistent?",
+      "color": "yellow",
+      "parentId": "s04-rebuild",
+      "geometry": {
+        "x": 980,
+        "y": 2500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "diamond"
+      }
+    },
+    {
+      "id": "s04-rebuild-switch",
+      "type": "process",
+      "text": "Atomically promote new generation",
+      "color": "teal",
+      "parentId": "s04-rebuild",
+      "geometry": {
+        "x": 1400,
+        "y": 2500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s04-rebuild-current",
+      "type": "process",
+      "text": "Live queries use current generation",
+      "color": "teal",
+      "parentId": "s04-rebuild",
+      "geometry": {
+        "x": 1820,
+        "y": 2500,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s04-rebuild-prior",
+      "type": "process",
+      "text": "Prior generation · retained rollback",
+      "color": "teal",
+      "parentId": "s04-rebuild",
+      "geometry": {
+        "x": 2240,
+        "y": 2720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s04-rebuild-continue",
+      "type": "process",
+      "text": "Not ready: keep building",
+      "color": "teal",
+      "parentId": "s04-rebuild",
+      "geometry": {
+        "x": 980,
+        "y": 2720,
+        "width": 280,
+        "height": 100
+      },
+      "style": {
+        "shape": "rounded-rect"
+      }
+    },
+    {
+      "id": "s02-publish-example",
+      "type": "sticky",
+      "text": "**Illustrative publication**\n`wiki/42@v7`\nVectors = v7\nText + ACL = v7\nTerms = v7\nAny mismatch: invisible to both searches.",
+      "color": "yellow",
+      "parentId": "s02-publish",
+      "geometry": {
+        "x": 2440,
+        "y": 1000,
+        "width": 480,
+        "height": 360
+      },
+      "style": {
+        "shape": "note"
+      }
+    }
+  ],
+  "connections": [
+    {
+      "id": "s01-ingest-pull-extract",
+      "from": {
+        "objectId": "s01-ingest-adapters"
+      },
+      "to": {
+        "objectId": "s01-ingest-extract"
+      },
+      "label": "ACL",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s01-ingest-normalized",
+      "from": {
+        "objectId": "s01-ingest-extract"
+      },
+      "to": {
+        "objectId": "s01-ingest-hash"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s01-ingest-bad",
+      "from": {
+        "objectId": "s01-ingest-extract",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "s01-ingest-quarantine",
+        "anchor": "top"
+      },
+      "label": "parse fail",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "s01-ingest-new",
+      "from": {
+        "objectId": "s01-ingest-hash"
+      },
+      "to": {
+        "objectId": "s01-ingest-chunk"
+      },
+      "label": "new",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s01-ingest-changed",
+      "from": {
+        "objectId": "s01-ingest-hash",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "s01-ingest-supersede",
+        "anchor": "left"
+      },
+      "label": "changed",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.8,
+        "offset": 0
+      }
+    },
+    {
+      "id": "s01-ingest-unchanged",
+      "from": {
+        "objectId": "s01-ingest-hash",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "s01-ingest-skip",
+        "anchor": "top"
+      },
+      "label": "unchanged",
+      "style": "solid",
+      "arrow": "forward",
+      "labelPosition": {
+        "along": 0.85,
+        "offset": 0
+      }
+    },
+    {
+      "id": "s01-ingest-rechunk",
+      "from": {
+        "objectId": "s01-ingest-supersede",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "s01-ingest-chunk",
+        "anchor": "bottom"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s01-ingest-batches",
+      "from": {
+        "objectId": "s01-ingest-chunk"
+      },
+      "to": {
+        "objectId": "s01-ingest-embed"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s01-ingest-failure",
+      "from": {
+        "objectId": "s01-ingest-embed"
+      },
+      "to": {
+        "objectId": "s01-ingest-retry"
+      },
+      "label": "retry",
+      "style": "dashed",
+      "arrow": "both"
+    },
+    {
+      "id": "s01-ingest-exhausted",
+      "from": {
+        "objectId": "s01-ingest-retry",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "s01-ingest-dead",
+        "anchor": "top"
+      },
+      "label": "exhausted",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "s02-publish-wv",
+      "from": {
+        "objectId": "s02-publish-write"
+      },
+      "to": {
+        "objectId": "s02-publish-vector"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s02-publish-wd",
+      "from": {
+        "objectId": "s02-publish-write"
+      },
+      "to": {
+        "objectId": "s02-publish-docs"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s02-publish-wk",
+      "from": {
+        "objectId": "s02-publish-write"
+      },
+      "to": {
+        "objectId": "s02-publish-keyword"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s02-publish-vcheck",
+      "from": {
+        "objectId": "s02-publish-vector"
+      },
+      "to": {
+        "objectId": "s02-publish-consistent"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s02-publish-dcheck",
+      "from": {
+        "objectId": "s02-publish-docs"
+      },
+      "to": {
+        "objectId": "s02-publish-consistent"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s02-publish-kcheck",
+      "from": {
+        "objectId": "s02-publish-keyword"
+      },
+      "to": {
+        "objectId": "s02-publish-consistent"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s02-publish-pass",
+      "from": {
+        "objectId": "s02-publish-consistent",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "s02-publish-live",
+        "anchor": "left"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "s02-publish-fail",
+      "from": {
+        "objectId": "s02-publish-consistent",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "s02-publish-repair",
+        "anchor": "left"
+      },
+      "label": "no",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "red"
+    },
+    {
+      "id": "s01-ingest-to-stage",
+      "from": {
+        "objectId": "s01-ingest-embed",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "s02-publish-write",
+        "anchor": "top"
+      },
+      "label": "completed version",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "teal",
+      "labelPosition": {
+        "along": 0.2,
+        "offset": 20
+      }
+    },
+    {
+      "id": "s03-query-vsearch",
+      "from": {
+        "objectId": "s03-query-rewrite"
+      },
+      "to": {
+        "objectId": "s03-query-vector"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s03-query-ksearch",
+      "from": {
+        "objectId": "s03-query-rewrite"
+      },
+      "to": {
+        "objectId": "s03-query-keyword"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s03-query-vrank",
+      "from": {
+        "objectId": "s03-query-vector"
+      },
+      "to": {
+        "objectId": "s03-query-rank"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s03-query-krank",
+      "from": {
+        "objectId": "s03-query-keyword"
+      },
+      "to": {
+        "objectId": "s03-query-rank"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s03-query-ranked",
+      "from": {
+        "objectId": "s03-query-rank"
+      },
+      "to": {
+        "objectId": "s03-query-acl"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s03-query-permitted",
+      "from": {
+        "objectId": "s03-query-acl"
+      },
+      "to": {
+        "objectId": "s03-query-confidence"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s03-query-yes",
+      "from": {
+        "objectId": "s03-query-confidence"
+      },
+      "to": {
+        "objectId": "s03-query-generate"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "s03-query-no",
+      "from": {
+        "objectId": "s03-query-confidence",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "s03-query-abstain",
+        "anchor": "top"
+      },
+      "label": "thin / all scores low",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "s03-query-answer-feedback",
+      "from": {
+        "objectId": "s03-query-generate"
+      },
+      "to": {
+        "objectId": "s03-query-feedback"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s03-query-unanswered",
+      "from": {
+        "objectId": "s03-query-abstain",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "s03-query-feedback",
+        "anchor": "bottom"
+      },
+      "label": "unanswered questions",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s04-rebuild-start",
+      "from": {
+        "objectId": "s04-rebuild-build"
+      },
+      "to": {
+        "objectId": "s04-rebuild-next"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s04-rebuild-check",
+      "from": {
+        "objectId": "s04-rebuild-next"
+      },
+      "to": {
+        "objectId": "s04-rebuild-ready"
+      },
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s04-rebuild-promote",
+      "from": {
+        "objectId": "s04-rebuild-ready"
+      },
+      "to": {
+        "objectId": "s04-rebuild-switch"
+      },
+      "label": "yes",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "green"
+    },
+    {
+      "id": "s04-rebuild-pointer",
+      "from": {
+        "objectId": "s04-rebuild-switch"
+      },
+      "to": {
+        "objectId": "s04-rebuild-current"
+      },
+      "label": "swap",
+      "style": "solid",
+      "arrow": "forward"
+    },
+    {
+      "id": "s04-rebuild-rollback",
+      "from": {
+        "objectId": "s04-rebuild-prior",
+        "anchor": "top"
+      },
+      "to": {
+        "objectId": "s04-rebuild-current",
+        "anchor": "right"
+      },
+      "label": "rollback pointer",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "orange"
+    },
+    {
+      "id": "s04-rebuild-wait",
+      "from": {
+        "objectId": "s04-rebuild-ready",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "s04-rebuild-continue",
+        "anchor": "top"
+      },
+      "label": "no · continue rebuild",
+      "style": "dashed",
+      "arrow": "forward"
+    },
+    {
+      "id": "s04-rebuild-loop",
+      "from": {
+        "objectId": "s04-rebuild-continue",
+        "anchor": "left"
+      },
+      "to": {
+        "objectId": "s04-rebuild-next",
+        "anchor": "bottom"
+      },
+      "style": "dashed",
+      "arrow": "forward"
+    },
+    {
+      "id": "s02-publish-serving-query",
+      "from": {
+        "objectId": "s02-publish-live",
+        "anchor": "bottom"
+      },
+      "to": {
+        "objectId": "s03-query-vector",
+        "anchor": "top"
+      },
+      "label": "published versions only",
+      "style": "solid",
+      "arrow": "forward",
+      "color": "blue",
+      "waypoints": [
+        [
+          1960,
+          1500
+        ],
+        [
+          700,
+          1500
+        ]
+      ]
+    },
+    {
+      "id": "s03-query-priorities",
+      "from": {
+        "objectId": "s03-query-feedback",
+        "anchor": "right"
+      },
+      "to": {
+        "objectId": "s01-ingest-adapters",
+        "anchor": "top"
+      },
+      "label": "coverage gaps → ingestion priorities",
+      "style": "dashed",
+      "arrow": "forward",
+      "color": "pink"
+    }
+  ],
+  "annotations": []
+}

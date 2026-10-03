@@ -1,0 +1,23 @@
+{
+  "run_id": "2026-09-21-prompt-rag-162913",
+  "tier": "system",
+  "sut_thinking": "low",
+  "tool_call_cap": 1,
+  "tool_call_cap_source": "--tool-call-cap",
+  "status": "completed",
+  "started_at": "2026-09-21T21:29:15.046Z",
+  "finished_at": "2026-09-21T21:51:03.829Z",
+  "scenarios": {
+    "rag-ingestion-retrieval": {
+      "status": "graded",
+      "stages_done": [
+        "stage0"
+      ],
+      "pid": 23255,
+      "finished_at": "2026-09-21T21:51:03.808Z",
+      "outcomes": {
+        "stage0": "committed"
+      }
+    }
+  }
+}
