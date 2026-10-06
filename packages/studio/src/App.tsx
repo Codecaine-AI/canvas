@@ -11,12 +11,10 @@ import {
   AlertTriangleIcon,
   ArrowLeftIcon,
   BoxIcon,
-  CheckIcon,
   PanelRightIcon,
   PlusIcon,
-  ShapesIcon,
+  RotateCcwIcon,
   TrashIcon,
-  WorkflowIcon,
 } from "@codecaine-ai/canvas/ui/icons";
 import {
   createInteractiveCanvasState,
@@ -51,6 +49,7 @@ import type { ViteHotContext } from "vite/types/hot.d.ts";
 import type { CanvasFileChangedPayload } from "../server/canvas-file-watch";
 import { CanvasSaveConflictError, fetchCanvas, putCanvas } from "./canvas-file-client";
 import { GalleryPage } from "./GalleryPage";
+import { APP_NAME, RouterShell, SHELL_PATHS } from "./_components/RouterShell";
 import { DevRail } from "./dev/DevRail";
 import { EvalsPage } from "./dev/EvalsPage";
 import { devPagesEnabled } from "./dev-flag";
@@ -145,6 +144,18 @@ export function parseRoute(pathname: string, search = ""): Route {
     }
   }
   return { name: "list" };
+}
+
+/**
+ * The page title of a shell route (the topbar h1 and the document title,
+ * layout.md rule 10). The editor and /view keep their own chrome outside the
+ * shell and the app's document title.
+ */
+function shellPageTitle(route: Route): string | null {
+  if (route.name === "list") return "Boards";
+  if (route.name === "gallery") return "Object Gallery";
+  if (route.name === "evals") return "Evals";
+  return null;
 }
 
 function isDocumentRoute(route: Route): route is Extract<Route, { id: string }> {
@@ -279,6 +290,12 @@ export function App() {
   const [documentState, setDocumentState] =
     useState<"idle" | "loading" | "not-found" | "error">("idle");
   const [documentErrorDetail, setDocumentErrorDetail] = useState<string | null>(null);
+  // Bumped by the Evals page's Refresh button in the shell topbar.
+  const [evalsRefreshSignal, setEvalsRefreshSignal] = useState(0);
+  const pageTitle = shellPageTitle(route) ?? APP_NAME;
+  useEffect(() => {
+    document.title = pageTitle;
+  }, [pageTitle]);
   const [showAgent, setShowAgent] = useState(false);
   // The Style rail, the Inspector, and the Agent sidebar share the editor's
   // right-hand slot: opening one closes the others.
@@ -937,7 +954,7 @@ export function App() {
       return (
         <main className="fixed inset-0 overflow-hidden" style={boardSurface}>
           {viewer}
-          <header className="pointer-events-none absolute inset-x-0 top-0 z-raised flex items-start justify-between gap-3 p-4">
+          <header className="pointer-events-none absolute inset-x-0 top-0 z-panel flex items-start justify-between gap-3 p-4">
             <div className="pointer-events-auto flex min-w-0 items-center gap-2 rounded border border-border bg-background/95 p-1.5 shadow-glass backdrop-blur-glass">
               <Button
                 type="button"
@@ -1168,105 +1185,125 @@ export function App() {
     );
   }
 
+  // Boards, Object Gallery and Evals render inside one design-system app shell:
+  // one instance across these pages, so the sidebar and the theme toggle keep
+  // their state and focus. The editor and /view (above) stay full-bleed with
+  // their own floating chrome (guide/layout.md: a full-screen canvas does not
+  // use the shell); the editor's back button returns to the board list.
   if (route.name === "gallery") {
-    return <GalleryPage onBack={() => navigate("/")} canvasStyle={canvasStyleSettings.style} />;
+    return (
+      <RouterShell path={SHELL_PATHS.gallery} title={pageTitle}>
+        <GalleryPage canvasStyle={canvasStyleSettings.style} />
+      </RouterShell>
+    );
   }
 
   if (route.name === "evals") {
-    return devPagesEnabled() ? (
-      <EvalsPage
-        onBack={() => navigate("/")}
-        boardBackground={canvasStyleSettings.style.boardBackground}
-      />
-    ) : (
-      <StatusPage message="Evals are only available with dev pages enabled." />
+    const evalsAvailable = devPagesEnabled();
+    return (
+      <RouterShell
+        path={SHELL_PATHS.evals}
+        title={pageTitle}
+        lane={evalsAvailable ? "full" : undefined}
+        actions={
+          evalsAvailable ? (
+            <Button
+              key="refresh"
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setEvalsRefreshSignal((signal) => signal + 1)}
+            >
+              <RotateCcwIcon className="h-4 w-4" />
+              Refresh
+            </Button>
+          ) : null
+        }
+      >
+        {evalsAvailable ? (
+          <EvalsPage
+            refreshSignal={evalsRefreshSignal}
+            boardBackground={canvasStyleSettings.style.boardBackground}
+          />
+        ) : (
+          <p className="text-ui-lg text-muted-foreground">
+            Evals are only available with dev pages enabled.
+          </p>
+        )}
+      </RouterShell>
     );
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lane-wide flex-col gap-6 p-8">
-      <header className="flex items-center justify-between gap-3 border-b border-border pb-4">
-        <div className="flex items-center gap-2">
-          <WorkflowIcon className="h-5 w-5 text-muted-foreground" />
-          <h1 className="text-reading font-semibold tracking-title text-ink">
-            Canvas
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          {devPagesEnabled() ? (
-            <Button type="button" variant="outline" onClick={() => navigate("/evals")}>
-              <CheckIcon className="h-4 w-4" />
-              Evals
-            </Button>
-          ) : null}
-          <Button type="button" variant="outline" onClick={() => navigate("/gallery")}>
-            <ShapesIcon className="h-4 w-4" />
-            Object Gallery
-          </Button>
-          <Button type="button" onClick={() => void createBoard()}>
-            <PlusIcon className="h-4 w-4" />
-            New board
-          </Button>
-        </div>
-      </header>
-
-      <section>
-        <h2 className="mb-3 text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
-          Canvas files
-        </h2>
-        {listState === "loading" ? (
-          <p className="text-ui-lg text-muted-foreground">Loading canvas files...</p>
-        ) : listState === "error" ? (
-          <p className="text-ui-lg text-destructive">Could not load canvas files.</p>
-        ) : canvases.length === 0 ? (
-          <p className="text-ui-lg text-muted-foreground">
-            No canvas files yet. Create a board to add one.
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-            {canvases.map((canvas) => (
-              <button
-                key={canvas.id}
-                type="button"
-                onClick={() => navigate(`/canvas/${encodeURIComponent(canvas.id)}`)}
-                className="group relative overflow-hidden rounded border border-border bg-card text-left transition-colors hover:bg-muted/50"
-              >
-                <span
-                  className="block aspect-16/10 w-full overflow-hidden border-b border-border"
-                  style={{ background: canvasStyleSettings.style.boardBackground }}
+    <RouterShell
+      path={SHELL_PATHS.boards}
+      title={pageTitle}
+      actions={
+        <Button key="new-board" type="button" size="sm" onClick={() => void createBoard()}>
+          <PlusIcon className="h-4 w-4" />
+          New board
+        </Button>
+      }
+    >
+      <div className="flex flex-col gap-6">
+        <section>
+          <h2 className="mb-3 text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
+            Canvas files
+          </h2>
+          {listState === "loading" ? (
+            <p className="text-ui-lg text-muted-foreground">Loading canvas files...</p>
+          ) : listState === "error" ? (
+            <p className="text-ui-lg text-destructive">Could not load canvas files.</p>
+          ) : canvases.length === 0 ? (
+            <p className="text-ui-lg text-muted-foreground">
+              No canvas files yet. Create a board to add one.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              {canvases.map((canvas) => (
+                <button
+                  key={canvas.id}
+                  type="button"
+                  onClick={() => navigate(`/canvas/${encodeURIComponent(canvas.id)}`)}
+                  className="group relative overflow-hidden rounded border border-border bg-card text-left transition-colors hover:bg-muted/50"
                 >
-                  <img
-                    src={`/api/canvases/${encodeURIComponent(canvas.id)}/preview.svg?style=${previewStyleKey}`}
-                    loading="lazy"
-                    alt=""
-                    draggable={false}
-                    className="h-full w-full object-contain"
-                    onError={(event) => {
-                      event.currentTarget.style.display = "none";
-                    }}
-                  />
-                </span>
-                <span className="block px-4 py-3">
-                  <span className="block truncate pr-6 text-ui-lg font-medium text-ink">
-                    {canvas.title}
+                  <span
+                    className="block aspect-16/10 w-full overflow-hidden border-b border-border"
+                    style={{ background: canvasStyleSettings.style.boardBackground }}
+                  >
+                    <img
+                      src={`/api/canvases/${encodeURIComponent(canvas.id)}/preview.svg?style=${previewStyleKey}`}
+                      loading="lazy"
+                      alt=""
+                      draggable={false}
+                      className="h-full w-full object-contain"
+                      onError={(event) => {
+                        event.currentTarget.style.display = "none";
+                      }}
+                    />
                   </span>
-                </span>
-                <span
-                  role="button"
-                  aria-label={`Delete ${canvas.title}`}
-                  onClick={(event) => void deleteCanvas(canvas, event)}
-                  className="absolute right-3 top-3 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
-                >
-                  <TrashIcon className="h-3.5 w-3.5" />
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
+                  <span className="block px-4 py-3">
+                    <span className="block truncate pr-6 text-ui-lg font-medium text-ink">
+                      {canvas.title}
+                    </span>
+                  </span>
+                  <span
+                    role="button"
+                    aria-label={`Delete ${canvas.title}`}
+                    onClick={(event) => void deleteCanvas(canvas, event)}
+                    className="absolute right-3 top-3 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-danger-soft hover:text-danger group-hover:opacity-100"
+                  >
+                    <TrashIcon className="h-3.5 w-3.5" />
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </section>
 
-      <ProjectBoardsSection />
-    </div>
+        <ProjectBoardsSection />
+      </div>
+    </RouterShell>
   );
 }
 

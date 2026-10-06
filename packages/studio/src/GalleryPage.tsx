@@ -13,14 +13,11 @@ import {
   type InteractiveCanvasObjectType,
 } from "@codecaine-ai/canvas";
 import { Badge } from "@codecaine-ai/canvas/ui/badge";
-import { Button } from "@codecaine-ai/canvas/ui/button";
-import { ArrowLeftIcon, ShapesIcon } from "@codecaine-ai/canvas/ui/icons";
 import type { CanvasStyle } from "@codecaine-ai/canvas/style";
 import { withRootPageFrame } from "./new-document";
 import { useTextMeasureVersion } from "./use-text-measure-version";
 
 type GalleryPageProps = {
-  onBack: () => void;
   /** Workspace style settings (Style rail), so the gallery matches the boards. */
   canvasStyle?: Partial<CanvasStyle>;
 };
@@ -55,7 +52,8 @@ const RETIRED_ICON_GALLERY_VARIANTS = [
   { glyph: "model", label: "model" },
 ] as const satisfies readonly { glyph: NonNullable<InteractiveCanvasObject["icon"]>; label: string }[];
 
-export function GalleryPage({ onBack, canvasStyle }: GalleryPageProps) {
+/** The Object Gallery page's content; the app shell supplies its title and navigation. */
+export function GalleryPage({ canvasStyle }: GalleryPageProps) {
   // Tile documents are sized around measured caption bands
   // (belowExtendedBoundsPx): build them again when the measuring backend
   // switches (the bundled fonts finished loading).
@@ -64,28 +62,15 @@ export function GalleryPage({ onBack, canvasStyle }: GalleryPageProps) {
   const objectTypeCount = OBJECT_TYPES.length;
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-lane-wide flex-col gap-6 p-8">
-      <header className="flex items-center justify-between gap-3 border-b border-border pb-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <ShapesIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
-          <div className="min-w-0">
-            <h1 className="truncate text-reading font-semibold tracking-title text-ink">
-              Object Gallery
-            </h1>
-            <p className="mt-1 text-ui-lg text-muted-foreground">
-              {objectTypeCount} object types rendered through the real canvas viewer
-            </p>
-          </div>
-        </div>
-        <Button type="button" variant="outline" onClick={onBack}>
-          <ArrowLeftIcon className="h-4 w-4" />
-          Back to boards
-        </Button>
-      </header>
+    <div className="flex flex-col gap-6">
+      <p className="text-ui-lg text-muted-foreground">
+        {objectTypeCount} object types rendered through the real canvas viewer
+      </p>
 
       <div
         className="grid gap-4"
-        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))" }}
+        // A track never wider than the lane, so a narrow window does not scroll sideways.
+        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(min(320px, 100%), 1fr))" }}
       >
         {groups.map((group) => (
           <article
@@ -99,7 +84,8 @@ export function GalleryPage({ onBack, canvasStyle }: GalleryPageProps) {
                   {group.type}
                 </p>
               </div>
-              <Badge variant="outline">{group.placement}</Badge>
+              {/* Shrinks (and clips) only when the card is narrower than its title and badge. */}
+              <Badge variant="outline" className="min-w-0 shrink">{group.placement}</Badge>
             </div>
 
             <div className="grid gap-3">

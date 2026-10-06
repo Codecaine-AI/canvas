@@ -20,10 +20,12 @@
 
 /*
  * shadcn knob names: the studio's classes (bg-card, text-muted-foreground) and
- * @codecaine-ai/canvas (its ui/ primitives, var(--primary) selection outlines,
- * var(--border) for the board grid) read them. Each points at a design-system
- * token, with the same mapping as sequence studio (decision 44) and the host
- * contract unless a comment says otherwise.
+ * @codecaine-ai/canvas's editor chrome (its ui/ primitives, the TopBar,
+ * Inspector and context menu) read them, so they follow the app theme. Marks
+ * drawn over the board (selection, grid, guides) no longer read them: they take
+ * the board preset's colors (canvas-renderer pass 1, decision 56). Each knob
+ * points at a design-system token, with the same mapping as sequence studio
+ * (decision 44) and the host contract unless a comment says otherwise.
  */
 :root {
   --radius: var(--ds-radius-base);
@@ -48,13 +50,22 @@
   --accent: var(--ds-color-fill-accent);
   /* Text on that wash, and the rail's dark markers: ink (not on-solid, which is white on a solid). */
   --accent-foreground: var(--ds-color-text-ink);
+  /* Danger as text (errors, invalid borders) and as the fill of the package's destructive Button and
+     Badge, under its danger on-solid glyph. Kept on danger.text, as in the host contract: the glyph
+     reads 5.77:1 on it in light and 5.96:1 in dark, while the light danger.solid with its on-solid
+     is 4.26:1, "icons and large text only" (tokens.md), too low for the badges' 12px labels. */
   --destructive: var(--ds-color-status-danger-text);
   --border: var(--ds-color-border-default);
   --input: var(--ds-color-border-default);
   --ring: var(--ds-color-focus-ring);
 }
 
-/* Utilities over the knobs. Radius steps come from tailwind.css: every step is the one radius. */
+/*
+ * Utilities over the knobs. Radius steps come from tailwind.css: every step is the one radius.
+ * --color-accent deliberately shadows tailwind.css's (color.accent): the package's vendored shadcn
+ * primitives write `hover:bg-accent` and `aria-pressed:bg-accent` for a pale wash, so `bg-accent`
+ * means fill.accent here. Studio code that needs the strong accent writes var(--ds-color-accent).
+ */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -90,8 +101,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 1.75rem;
-  width: 1.75rem;
+  height: var(--ds-space-7);
+  width: var(--ds-space-7);
   flex-shrink: 0;
   border-radius: var(--radius);
   border: var(--ds-border-width-hairline) solid transparent;
@@ -104,7 +115,7 @@ body {
 }
 
 .canvas-style-rail-section-label {
-  padding: 0.875rem 1rem 0.375rem;
+  padding: 0.875rem var(--ds-space-4) var(--ds-space-1-5);
   color: var(--muted-foreground);
   font-size: var(--ds-font-size-ui-2xs);
   font-weight: var(--ds-font-weight-semibold);
@@ -127,8 +138,8 @@ body {
   width: 100%;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.625rem 1rem;
+  gap: var(--ds-space-2);
+  padding: 0.625rem var(--ds-space-4);
   border: 0;
   background: transparent;
   color: var(--muted-foreground);
@@ -152,8 +163,8 @@ body {
 
 .canvas-style-rail-group-count {
   display: inline-flex;
-  min-width: 1rem;
-  height: 1rem;
+  min-width: var(--ds-space-4);
+  height: var(--ds-space-4);
   align-items: center;
   justify-content: center;
   padding: 0 0.3rem;
@@ -166,8 +177,8 @@ body {
 
 .canvas-style-rail-group-body {
   display: grid;
-  gap: 0.75rem;
-  padding: 0.125rem 1rem 0.875rem;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-0-5) var(--ds-space-4) 0.875rem;
 }
 
 /* An overridden token whose visibleWhen does not hold: shown dimmed so it can be reset. */
@@ -176,7 +187,7 @@ body {
 }
 
 .canvas-style-rail-inactive-note {
-  margin-top: 0.25rem;
+  margin-top: var(--ds-space-1);
   color: var(--muted-foreground);
   font-size: var(--ds-font-size-ui-2xs);
   line-height: 0.875rem;
@@ -186,7 +197,7 @@ body {
   display: inline-flex;
   min-width: 0;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--ds-space-2);
 }
 
 .canvas-style-rail-row-override-dot {
@@ -205,7 +216,8 @@ button.canvas-style-rail-row-override-dot {
 }
 
 button.canvas-style-rail-row-override-dot:hover {
-  box-shadow: 0 0 0 2px var(--border);
+  /* A ring around a circle marker: border.width.ring (1.5px; was 2px). */
+  box-shadow: 0 0 0 var(--ds-border-width-ring) var(--border);
 }
 
 .canvas-style-rail-row-override-dot[data-overridden="false"] {
@@ -262,8 +274,8 @@ button.canvas-style-rail-row-override-dot:hover {
 /* Exact value beside a slider; native spinners hidden (arrow keys still step). */
 .canvas-style-number {
   width: 3.75rem;
-  height: 1.5rem;
-  padding: 0 0.375rem;
+  height: var(--ds-space-6);
+  padding: 0 var(--ds-space-1-5);
   border: var(--ds-border-width-hairline) solid var(--border);
   border-radius: var(--radius);
   background: var(--background);
@@ -291,8 +303,8 @@ button.canvas-style-rail-row-override-dot:hover {
 .canvas-style-swatch {
   position: relative;
   display: inline-flex;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: var(--ds-space-6);
+  height: var(--ds-space-6);
   flex: none;
   overflow: hidden;
   border: var(--ds-border-width-hairline) solid var(--border);
@@ -331,8 +343,8 @@ button.canvas-style-rail-row-override-dot:hover {
 
 .canvas-style-color-text {
   width: 8.75rem;
-  height: 1.5rem;
-  padding: 0 0.375rem;
+  height: var(--ds-space-6);
+  padding: 0 var(--ds-space-1-5);
   border: var(--ds-border-width-hairline) solid var(--border);
   border-radius: var(--radius);
   background: var(--background);
@@ -348,8 +360,8 @@ button.canvas-style-rail-row-override-dot:hover {
 /* Select token: a segmented control of native radios. */
 .canvas-style-segmented {
   display: flex;
-  gap: 2px;
-  padding: 2px;
+  gap: var(--ds-space-0-5);
+  padding: var(--ds-space-0-5);
   border-radius: var(--radius);
   background: var(--muted);
 }
@@ -362,7 +374,7 @@ button.canvas-style-rail-row-override-dot:hover {
   flex: 1 1 0;
   align-items: center;
   justify-content: center;
-  padding: 0.25rem 0.375rem;
+  padding: var(--ds-space-1) var(--ds-space-1-5);
   border-radius: var(--radius);
   color: var(--muted-foreground);
   font-size: var(--ds-font-size-ui-2xs);
@@ -403,8 +415,8 @@ button.canvas-style-rail-row-override-dot:hover {
 .canvas-style-toggle::after {
   content: "";
   position: absolute;
-  top: 2px;
-  left: 2px;
+  top: var(--ds-space-0-5);
+  left: var(--ds-space-0-5);
   width: 13px;
   height: 13px;
   border-radius: var(--ds-radius-pill);
@@ -435,8 +447,8 @@ button.canvas-style-rail-row-override-dot:hover {
 .canvas-style-theme-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
-  padding: 0 1rem 0.875rem;
+  gap: var(--ds-space-2);
+  padding: 0 var(--ds-space-4) 0.875rem;
 }
 
 .canvas-style-theme-card {
@@ -444,8 +456,8 @@ button.canvas-style-rail-row-override-dot:hover {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 0.375rem;
-  padding: 0.25rem 0.25rem 0.375rem;
+  gap: var(--ds-space-1-5);
+  padding: var(--ds-space-1) var(--ds-space-1) var(--ds-space-1-5);
   border: var(--ds-border-width-hairline) solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
@@ -526,8 +538,8 @@ button.canvas-style-rail-row-override-dot:hover {
   height: 17px;
   flex-direction: column;
   justify-content: center;
-  gap: 2px;
-  padding: 0 4px;
+  gap: var(--ds-space-0-5);
+  padding: 0 var(--ds-space-1);
   border: var(--ds-border-width-hairline) solid;
   border-radius: var(--ds-radius-base);
 }
@@ -581,10 +593,10 @@ button.canvas-style-rail-row-override-dot:hover {
 
 .canvas-style-theme-label {
   display: flex;
-  min-height: 1.75rem;
+  min-height: var(--ds-space-7);
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
+  gap: var(--ds-space-1);
   color: var(--muted-foreground);
   font-size: var(--ds-font-size-ui-2xs);
   line-height: 0.875rem;
@@ -602,4 +614,42 @@ button.canvas-style-rail-row-override-dot:hover {
   flex: none;
   border-radius: var(--ds-radius-pill);
   background: var(--accent-foreground);
+}
+
+/*
+ * App shell (guide/layout.md). Evals is a tool view on the full lane: its run
+ * list and run detail fill the space under the topbar edge to edge, as before
+ * the shell, and scroll on their own (rule 12). A shell-scoped layout override
+ * (decision 32) drops the content padding on that page only.
+ */
+.ds-shell:has(.studio-evals) {
+  --ds-layout-content-padding-top: var(--ds-space-0);
+  --ds-layout-content-padding-x: var(--ds-space-0);
+  --ds-layout-content-padding-bottom: var(--ds-space-0);
+}
+
+.studio-evals {
+  height: calc(100vh - var(--ds-layout-topbar-height));
+  height: calc(100dvh - var(--ds-layout-topbar-height));
+}
+
+/* The shell's narrow breakpoint (layout.css, 800px): the run list stacks over the run detail. */
+@media (max-width: 800px) {
+  .studio-evals-panes {
+    flex-direction: column;
+  }
+
+  .studio-evals-runs {
+    width: auto;
+    max-height: 40%;
+    border-right-width: 0;
+    border-bottom: var(--ds-border-width-hairline) solid var(--border);
+  }
+}
+
+/* Rule 8: under reduced motion the app's own hover transitions inside the shell are off too. */
+@media (prefers-reduced-motion: reduce) {
+  .ds-shell * {
+    transition: none;
+  }
 }

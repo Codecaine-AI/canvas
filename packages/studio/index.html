@@ -4,6 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Canvas</title>
+    <script>
+      // The theme before the first paint: the stored choice, else light (src/_components/ThemeToggle/useTheme.ts).
+      (function () {
+        var theme = "light";
+        try {
+          var stored = window.localStorage.getItem("canvas-studio.theme");
+          if (stored === "dark" || stored === "light") theme = stored;
+        } catch (error) {
+          // Blocked storage: light.
+        }
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
   </head>
   <body class="antialiased font-sans min-h-screen bg-background">
     <div id="root"></div>

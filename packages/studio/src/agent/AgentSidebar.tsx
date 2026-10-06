@@ -64,11 +64,9 @@ export function AgentSidebar({
       aria-label="Agent"
       className="absolute bottom-24 right-4 top-20 z-raised flex w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded border border-border/70 bg-background/95 shadow-glass backdrop-blur-glass"
     >
-      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border/70 px-3 py-2.5">
+      <header className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-border/70 px-3">
         <div className="flex min-w-0 items-center gap-2">
-          <h1 className="text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
-            Agent
-          </h1>
+          <h2 className="text-ui-md font-semibold leading-title text-ink">Agent</h2>
           <span
             className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT_CLASSES[status]}`}
             aria-hidden="true"

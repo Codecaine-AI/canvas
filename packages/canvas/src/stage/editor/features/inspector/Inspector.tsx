@@ -243,7 +243,7 @@ export function Inspector({
                 aria-pressed={selectedObject.color === color}
                 data-canvas-color-swatch={color}
                 data-selected={selectedObject.color === color ? "true" : undefined}
-                className="h-6 w-6 rounded-pill border-2 transition-transform hover:scale-110"
+                className="h-6 w-6 rounded-pill border-[length:var(--ds-border-width-focus)] transition-transform hover:scale-110"
                 style={{
                   background: resolveSwatchPreview(color),
                   borderColor:

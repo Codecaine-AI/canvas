@@ -70,7 +70,7 @@ export function ProjectBoardsSection() {
 
   return (
     <section>
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
           Project boards
         </h2>
@@ -104,17 +104,17 @@ export function ProjectBoardsSection() {
             type="button"
             onClick={() => setEditingOrigin(true)}
             title="Change the linked project server"
-            className="inline-flex items-center gap-1.5 rounded px-2 py-1 text-ui-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="inline-flex min-w-0 max-w-full items-center gap-1.5 rounded px-2 py-1 text-ui-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            <LinkIcon className="h-3.5 w-3.5" />
-            {origin}
+            <LinkIcon className="h-3.5 w-3.5 shrink-0" />
+            <span className="min-w-0 truncate">{origin}</span>
           </button>
         )}
       </div>
       {state === "loading" ? (
         <p className="text-ui-lg text-muted-foreground">Loading project boards...</p>
       ) : state === "offline" ? (
-        <p className="text-ui-lg text-muted-foreground">
+        <p className="text-ui-lg text-muted-foreground wrap-break-word">
           No linked project connected at {origin}.
         </p>
       ) : boards.length === 0 ? (

@@ -196,7 +196,7 @@ export function StyleRail({
       onKeyDown={(event) => event.stopPropagation()}
     >
       <div className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-border/70 px-3">
-        <div className="truncate text-ui-lg font-medium uppercase tracking-micro text-ink">Style</div>
+        <h2 className="truncate text-ui-md font-semibold leading-title text-ink">Style</h2>
         <button
           type="button"
           aria-label="Collapse style controls"
@@ -302,7 +302,7 @@ function ThemeCard({
   const card = resolveShapePaint("violet", style);
   const pinned = style.headerPlacement === "pinned";
   return (
-    <label className="canvas-style-theme-card" data-active={active ? "true" : "false"} data-theme={theme}>
+    <label className="canvas-style-theme-card" data-active={active ? "true" : "false"} data-board-theme={theme}>
       <input
         type="radio"
         className="canvas-style-visually-hidden"

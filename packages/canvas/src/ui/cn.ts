@@ -17,13 +17,6 @@ function tokenNames(tokens: Readonly<Record<string, unknown>>, group: string): s
     .map((path) => path.slice(prefix.length));
 }
 
-/**
- * tailwind-merge with the design-system theme keys. Plain twMerge reads an
- * unknown `text-*` or `shadow-*` suffix as a color, so it drops the size from
- * `text-ui-lg text-primary-foreground`. Each list below is the token family
- * whose utility suffix equals the token's last segment
- * (`font.size.ui-lg` -> `text-ui-lg`); the renamed ones are named.
- */
 /** Border-width token names whose utility is also a color or a style utility (see `border-w` below). */
 const BORDER_NAME_CLASHES = new Set(["none", "focus", "ring"]);
 
@@ -35,6 +28,13 @@ const LAYOUT_WIDTHS = [
     .map((name) => name.replace(/^width/, "sidebar")),
 ];
 
+/**
+ * tailwind-merge with the design-system theme keys. Plain twMerge reads an
+ * unknown `text-*` or `shadow-*` suffix as a color, so it drops the size from
+ * `text-ui-lg text-primary-foreground`. Each list below is the token family
+ * whose utility suffix equals the token's last segment
+ * (`font.size.ui-lg` -> `text-ui-lg`); the renamed ones are named.
+ */
 const twMerge = extendTailwindMerge({
   extend: {
     theme: {

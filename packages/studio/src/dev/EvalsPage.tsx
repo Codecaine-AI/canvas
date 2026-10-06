@@ -1,11 +1,5 @@
-import { useCallback, useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Badge } from "@codecaine-ai/canvas/ui/badge";
-import { Button } from "@codecaine-ai/canvas/ui/button";
-import {
-  ArrowLeftIcon,
-  CheckIcon,
-  RotateCcwIcon,
-} from "@codecaine-ai/canvas/ui/icons";
 
 /**
  * The Evals gallery (dev-pages flag only): browse the eval-suite's historical
@@ -132,10 +126,11 @@ function fingerprintSummary(detail: EvalRunDetail): string | null {
 }
 
 export function EvalsPage({
-  onBack,
+  refreshSignal = 0,
   boardBackground,
 }: {
-  onBack: () => void;
+  /** Bumped by the shell topbar's Refresh button: reload the runs and the selected run. */
+  refreshSignal?: number;
   /** The workspace theme's board color, painted behind (letterboxing) each render. */
   boardBackground?: string;
 }) {
@@ -177,6 +172,16 @@ export function EvalsPage({
     void loadRuns();
   }, [loadRuns]);
 
+  // Refresh from the topbar. The signal outlives this page (App holds it), so
+  // only a change after mount reloads; the mount load is the effect above.
+  const handledRefreshSignal = useRef(refreshSignal);
+  useEffect(() => {
+    if (refreshSignal === handledRefreshSignal.current) return;
+    handledRefreshSignal.current = refreshSignal;
+    void loadRuns();
+    if (selectedRunId) void loadDetail(selectedRunId);
+  }, [loadDetail, loadRuns, refreshSignal, selectedRunId]);
+
   useEffect(() => {
     if (!selectedRunId && runs.length > 0) setSelectedRunId(runs[0].run_id);
   }, [runs, selectedRunId]);
@@ -206,41 +211,18 @@ export function EvalsPage({
   }, [lightbox]);
 
   return (
+    // A tool view on the shell's full lane (index.css, .studio-evals): the run
+    // list and the run detail fill the space under the topbar and scroll on
+    // their own, as before the shell.
     <div
-      className="flex h-screen flex-col bg-background"
+      className="studio-evals flex flex-col"
       style={boardBackground ? ({ "--studio-board-background": boardBackground } as CSSProperties) : undefined}
     >
-      <header className="flex items-center justify-between gap-3 border-b border-border px-6 py-4">
-        <div className="flex min-w-0 items-center gap-3">
-          <CheckIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
-          <div className="min-w-0">
-            <h1 className="truncate text-reading font-semibold tracking-title text-ink">Evals</h1>
-            <p className="mt-1 text-ui-lg text-muted-foreground">
-              Historical eval-suite runs from packages/eval-suite/runs
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => {
-              void loadRuns();
-              if (selectedRunId) void loadDetail(selectedRunId);
-            }}
-          >
-            <RotateCcwIcon className="h-4 w-4" />
-            Refresh
-          </Button>
-          <Button type="button" variant="outline" onClick={onBack}>
-            <ArrowLeftIcon className="h-4 w-4" />
-            Back to boards
-          </Button>
-        </div>
-      </header>
-
-      <div className="flex min-h-0 flex-1">
-        <aside className="w-72 shrink-0 overflow-y-auto border-r border-border p-3">
+      <div className="studio-evals-panes flex min-h-0 flex-1">
+        <section
+          aria-label="Eval runs"
+          className="studio-evals-runs w-72 shrink-0 overflow-y-auto border-r border-border p-3"
+        >
           {runsState === "loading" && runs.length === 0 ? (
             <p className="p-2 text-ui-lg text-muted-foreground">Loading runs...</p>
           ) : runsState === "error" ? (
@@ -282,9 +264,12 @@ export function EvalsPage({
               ))}
             </ul>
           )}
-        </aside>
+        </section>
 
-        <main className="min-w-0 flex-1 overflow-y-auto p-6">
+        <div className="min-w-0 flex-1 overflow-y-auto p-6">
+          <p className="mb-5 text-ui-lg text-muted-foreground">
+            Historical eval-suite runs from packages/eval-suite/runs
+          </p>
           {!selectedRunId ? (
             <p className="text-ui-lg text-muted-foreground">Select a run.</p>
           ) : detailState === "loading" && !detail ? (
@@ -294,7 +279,7 @@ export function EvalsPage({
           ) : (
             <RunDetail detail={detail} onOpenLightbox={setLightbox} />
           )}
-        </main>
+        </div>
       </div>
 
       {lightbox ? (
@@ -401,7 +386,8 @@ function RunDetail({
 
       <div
         className="grid gap-4"
-        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))" }}
+        // A track never wider than the pane, so a narrow window does not scroll sideways.
+        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(min(340px, 100%), 1fr))" }}
       >
         {scenarioIds.map((scenarioId) => (
           <ScenarioCard

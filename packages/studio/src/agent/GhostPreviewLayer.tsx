@@ -2,33 +2,59 @@
 
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import {
+  useCanvasStyle,
   worldToScreen,
   type InteractiveCanvasDocument,
   type ViewportState,
 } from "@codecaine-ai/canvas";
+import { boardMarkTheme, stageMarkColors } from "@codecaine-ai/canvas/style";
+import { flat } from "@codecaine-ai/design-system";
 import type { AgentProposal, AgentRect } from "@codecaine-ai/canvas-agent/protocol";
 import { classifyChanges, type MovedChange, type ObjectRectChange } from "./classify-changes";
 
 /*
- * Change marks over the board, drawn as editor chrome from design-system
- * tokens, so they follow the app theme. The agent's own marks (its work frame,
- * moved and new objects) take the AI layer's violet; objects it pushes aside
- * are blue (categorical); removals are the diff's removed red. Each badge
- * color pairs with the glyph color that reads on it.
+ * Change marks over the board are board marks, like the canvas package's stage
+ * marks (decision 56): they take the colors of the design-system theme that
+ * matches the BOARD (boardMarkTheme), not the app theme, because the board
+ * keeps its preset when the app turns dark (decision 10). The agent's own marks
+ * (its work frame, moved and new objects) take the AI layer's violet; objects
+ * it pushes aside are blue (categorical); removals are the diff's removed red.
+ * Each badge color pairs with the glyph color that reads on it.
  */
-const AGENT_COLOR = "var(--ds-color-annotation-accent)";
-const AGENT_ON_COLOR = "var(--ds-color-text-on-solid)";
-const DISPLACED_COLOR = "var(--ds-color-blue-solid)";
-const REMOVED_COLOR = "var(--ds-color-diff-del)";
-const REMOVED_ON_COLOR = "var(--ds-color-text-on-solid)";
+export type MarkColors = {
+  agent: string;
+  /** Glyph on an agent badge. annotation.accent has no on-solid of its own (token gap): text.on-solid. */
+  agentOn: string;
+  displaced: string;
+  removed: string;
+  removedOn: string;
+  /** The board's own surface: the veil over a moved object's old place. */
+  surface: string;
+};
+
+/** The marks' colors for one board style. Exported for its test. */
+export function markColors(style: ReturnType<typeof useCanvasStyle>): MarkColors {
+  const tokens = flat[boardMarkTheme(style)];
+  return {
+    agent: tokens["color.annotation.accent"],
+    agentOn: tokens["color.text.on-solid"],
+    displaced: tokens["color.blue.solid"],
+    removed: tokens["color.diff.del"],
+    removedOn: tokens["color.text.on-solid"],
+    surface: stageMarkColors(style).surface,
+  };
+}
+
 /** Dims the board around the work frame: the dialog backdrop's black, at 14%. */
 const SCRIM_COLOR = "color-mix(in srgb, var(--ds-color-backdrop) 35%, transparent)";
 const BADGE_RADIUS = "var(--ds-radius-pill)";
 /** The marks' outline: 2px, the focus-outline width. */
 const MARK_WIDTH = "var(--ds-border-width-focus)";
-/** The work frame's halo spread, 5px. No token equals it: focus (2px) + rail (3px) widths. */
-const HALO_SPREAD = "calc(var(--ds-border-width-focus) + var(--ds-border-width-rail))";
+/** The work frame's halo spread: kept geometry (no token equals 5px; decision 43). */
+const HALO_SPREAD = "5px";
 const MARK_RADIUS = "var(--ds-radius-base)";
+/** Badge padding: space.0-5 by 7px (kept geometry, no token equals 7px). */
+const BADGE_PADDING = "var(--ds-space-0-5) 7px";
 
 type DraftPreview = {
   rect: AgentRect;
@@ -77,10 +103,13 @@ function rectStyle(rect: AgentRect): CSSProperties {
 function ChangeOutline({
   change,
   color,
+  surface,
   className,
 }: {
   change: MovedChange;
   color: string;
+  /** The board surface, for the veil over the old place. */
+  surface: string;
   className: string;
 }) {
   return (
@@ -93,7 +122,7 @@ function ChangeOutline({
           zIndex: 2,
           border: `${MARK_WIDTH} dashed ${color}`,
           borderRadius: MARK_RADIUS,
-          background: "color-mix(in srgb, var(--ds-color-surface-page) 16%, transparent)",
+          background: `color-mix(in srgb, ${surface} 16%, transparent)`,
         }}
       />
       <div
@@ -153,12 +182,11 @@ function ChangeChip({
           borderRadius: BADGE_RADIUS,
           background: color,
           color: onColor,
-          padding: "2px 7px",
+          padding: BADGE_PADDING,
           fontSize: "var(--ds-font-size-ui-2xs)",
           fontWeight: "var(--ds-font-weight-bold)",
           lineHeight: "var(--ds-line-height-tight)",
           letterSpacing: "var(--ds-letter-spacing-normal)",
-          boxShadow: "var(--ds-shadow-glass)",
           whiteSpace: "nowrap",
           pointerEvents: "none",
         }}
@@ -237,6 +265,8 @@ export function GhostPreviewLayer({
     [changes],
   );
   const frame = workFrame ?? draft?.rect ?? null;
+  const style = useCanvasStyle();
+  const colors = useMemo(() => markColors(style), [style]);
 
   if (!draft) return null;
 
@@ -255,9 +285,9 @@ export function GhostPreviewLayer({
           style={{
             ...rectStyle(frame),
             zIndex: 1,
-            border: `${MARK_WIDTH} solid ${AGENT_COLOR}`,
+            border: `${MARK_WIDTH} solid ${colors.agent}`,
             borderRadius: MARK_RADIUS,
-            boxShadow: `0 0 0 ${HALO_SPREAD} color-mix(in srgb, ${AGENT_COLOR} 10%, transparent)`,
+            boxShadow: `0 0 0 ${HALO_SPREAD} color-mix(in srgb, ${colors.agent} 10%, transparent)`,
           }}
         />
       ) : null}
@@ -268,7 +298,8 @@ export function GhostPreviewLayer({
           <ChangeOutline
             key={`moved-${change.id}`}
             change={change}
-            color={AGENT_COLOR}
+            color={colors.agent}
+            surface={colors.surface}
             className="moved"
           />
         ))}
@@ -276,7 +307,8 @@ export function GhostPreviewLayer({
         <ChangeOutline
           key={`displaced-${change.id}`}
           change={change}
-          color={DISPLACED_COLOR}
+          color={colors.displaced}
+          surface={colors.surface}
           className="displaced"
         />
       ))}
@@ -285,8 +317,8 @@ export function GhostPreviewLayer({
           key={`created-${change.id}`}
           change={change}
           label="new"
-          color={AGENT_COLOR}
-          onColor={AGENT_ON_COLOR}
+          color={colors.agent}
+          onColor={colors.agentOn}
         />
       ))}
       {changes?.removed.map((change) => (
@@ -294,8 +326,8 @@ export function GhostPreviewLayer({
           key={`removed-${change.id}`}
           change={change}
           label="removed"
-          color={REMOVED_COLOR}
-          onColor={REMOVED_ON_COLOR}
+          color={colors.removed}
+          onColor={colors.removedOn}
           dashed
         />
       ))}

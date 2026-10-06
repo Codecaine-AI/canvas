@@ -180,7 +180,7 @@ function GlyphCell({
       type="button"
       size="icon-sm"
       variant="ghost"
-      className="aria-pressed:bg-accent aria-pressed:ring-1 aria-pressed:ring-foreground/40"
+      className="aria-pressed:bg-accent aria-pressed:ring-[length:var(--ds-border-width-hairline)] aria-pressed:ring-foreground/40"
       aria-label={label}
       aria-pressed={pressed}
       title={label}

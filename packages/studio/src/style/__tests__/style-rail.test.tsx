@@ -80,19 +80,19 @@ describe("StyleRail", () => {
     const radios = [...container.querySelectorAll<HTMLInputElement>('[aria-label="Theme"] input[type="radio"]')];
     expect(radios.map((radio) => radio.value)).toEqual(["figjam", "schematic-light", "schematic-dark"]);
     expect(radios.map((radio) => radio.checked)).toEqual([false, true, false]);
-    expect($('[data-theme="schematic-light"]')!.getAttribute("data-active")).toBe("true");
+    expect($('[data-board-theme="schematic-light"]')!.getAttribute("data-active")).toBe("true");
     act(() => radios[2]!.click());
     expect(props.onSelectTheme).toHaveBeenCalledWith("schematic-dark");
   });
 
   it("paints each card from its own theme, edits included", () => {
     renderRail({ theme: "figjam", themes: { "schematic-dark": { boardBackground: "#000000" } } });
-    const preview = (theme: string) => $<HTMLElement>(`[data-theme="${theme}"] .canvas-style-theme-preview`)!;
+    const preview = (theme: string) => $<HTMLElement>(`[data-board-theme="${theme}"] .canvas-style-theme-preview`)!;
     expect(preview("figjam").style.backgroundColor).toBe("#F5F5F5");
     expect(preview("schematic-light").style.backgroundColor).toBe("#FDFDFD");
     expect(preview("schematic-dark").style.backgroundColor).toBe("#000000");
-    expect($('[data-theme="schematic-dark"] .canvas-style-theme-edited')).not.toBeNull();
-    expect($('[data-theme="figjam"] .canvas-style-theme-edited')).toBeNull();
+    expect($('[data-board-theme="schematic-dark"] .canvas-style-theme-edited')).not.toBeNull();
+    expect($('[data-board-theme="figjam"] .canvas-style-theme-edited')).toBeNull();
   });
 
   it("lists every token group, collapsed until opened, without a theme row", () => {
