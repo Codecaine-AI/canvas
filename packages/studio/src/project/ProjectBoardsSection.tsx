@@ -131,7 +131,7 @@ export function ProjectBoardsSection() {
               className="group overflow-hidden rounded border border-border bg-card text-left transition-colors hover:bg-muted/50"
             >
               <span className="block px-4 py-3">
-                <span className="block truncate text-ui-lg font-medium">
+                <span className="block truncate text-ui-lg font-medium text-ink">
                   {board.title ?? board.id ?? board.src}
                 </span>
                 <span className="mt-1 block truncate font-mono text-ui-2xs text-muted-foreground">

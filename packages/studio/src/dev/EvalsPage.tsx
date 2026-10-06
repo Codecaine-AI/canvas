@@ -303,7 +303,7 @@ export function EvalsPage({
           aria-label="Close full-size render"
           // A dark region in either app theme, like the agent's render viewer.
           data-theme="dark"
-          className="fixed inset-0 z-50 flex cursor-zoom-out flex-col items-center justify-center gap-3 bg-page/85 p-8"
+          className="fixed inset-0 z-popover flex cursor-zoom-out flex-col items-center justify-center gap-3 bg-page/85 p-8"
           onClick={() => setLightbox(null)}
         >
           <img
@@ -359,7 +359,7 @@ function RunDetail({
     <div className="flex flex-col gap-5">
       <section className="flex flex-col gap-2 rounded border border-border bg-card p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="font-mono text-ui-lg font-semibold">{detail.run_id}</h2>
+          <h2 className="font-mono text-ui-lg font-semibold text-ink">{detail.run_id}</h2>
           <Badge variant={statusBadgeVariant(detail.status)}>{detail.status}</Badge>
           {runFlags.map((flag) => (
             <Badge key={flag} variant="destructive">{flag}</Badge>
@@ -468,7 +468,7 @@ function ScenarioCard({
     <article className="flex flex-col overflow-hidden rounded border border-border bg-card">
       <div className="flex items-start justify-between gap-3 px-4 pt-3">
         <div className="min-w-0">
-          <h3 className="truncate text-ui-lg font-semibold">{label}</h3>
+          <h3 className="truncate text-ui-lg font-semibold text-ink">{label}</h3>
           {isLiveRun && progressScenario ? (
             <p className="mt-0.5 truncate font-mono text-ui-2xs text-muted-foreground">
               {progressScenario.status}

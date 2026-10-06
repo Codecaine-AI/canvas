@@ -85,7 +85,7 @@ export function AgentRenderViewer({
       // A dark region in either app theme: the render sits on a dimmed page,
       // so the overlay and its text take the dark tokens.
       data-theme="dark"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-page/85 p-4 sm:p-8"
+      className="fixed inset-0 z-popover flex items-center justify-center bg-page/85 p-4 sm:p-8"
       onClick={onClose}
     >
       <style>{VIEWER_ENTER_STYLES}</style>
@@ -116,7 +116,7 @@ export function AgentRenderViewer({
 
         <div className="relative flex min-h-0 flex-1 items-center justify-center">
           {loadState === "loading" ? (
-            <p className="absolute text-ui-xs text-muted">Loading render…</p>
+            <p className="absolute text-ui-xs text-secondary">Loading render…</p>
           ) : null}
           {loadState === "unavailable" ? (
             <div

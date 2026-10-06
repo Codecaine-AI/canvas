@@ -48,7 +48,7 @@ export function DeltaCard({ baselineDocument, proposal }: DeltaCardProps) {
 
   return (
     <section className="rounded border border-border/70 bg-card/70 p-3">
-      <h2 className="text-ui-xs font-semibold">Proposed changes</h2>
+      <h2 className="text-ui-xs font-semibold text-ink">Proposed changes</h2>
 
       <div className="mt-2 flex flex-wrap gap-1.5">
         {changeChip("Moved", changes.moved.length)}

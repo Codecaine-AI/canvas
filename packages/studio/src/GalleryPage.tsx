@@ -94,7 +94,7 @@ export function GalleryPage({ onBack, canvasStyle }: GalleryPageProps) {
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <h2 className="truncate text-ui-lg font-semibold">{group.label}</h2>
+                <h2 className="truncate text-ui-lg font-semibold text-ink">{group.label}</h2>
                 <p className="mt-1 truncate font-mono text-ui-2xs text-muted-foreground">
                   {group.type}
                 </p>

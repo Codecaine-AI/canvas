@@ -77,7 +77,7 @@ const COLOR_STRENGTH_KEYS: ReadonlySet<CanvasStyleKey> = new Set<CanvasStyleKey>
   "headerChipMix",
 ]);
 
-export function isColorControl(control: CanvasStyleControl): boolean {
+function isColorControl(control: CanvasStyleControl): boolean {
   return control.kind === "color" || COLOR_STRENGTH_KEYS.has(control.key);
 }
 
@@ -189,14 +189,14 @@ export function StyleRail({
   return (
     <aside
       aria-label="Style"
-      className="absolute bottom-24 right-4 top-20 z-20 flex w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded border border-border/70 bg-background/95 text-foreground shadow-glass backdrop-blur-glass"
+      className="absolute bottom-24 right-4 top-20 z-raised flex w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded border border-border/70 bg-background/95 text-foreground shadow-glass backdrop-blur-glass"
       // Keys pressed on the rail's own controls (arrows on a slider,
       // Backspace on a button) must not reach the canvas hotkeys, which
       // would nudge or delete the selection.
       onKeyDown={(event) => event.stopPropagation()}
     >
       <div className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-border/70 px-3">
-        <div className="truncate text-ui-lg font-medium uppercase tracking-micro">Style</div>
+        <div className="truncate text-ui-lg font-medium uppercase tracking-micro text-ink">Style</div>
         <button
           type="button"
           aria-label="Collapse style controls"

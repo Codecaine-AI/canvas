@@ -187,7 +187,7 @@ export function DevRail({ document, editorState, editorRef }: DevRailProps) {
         type="button"
         onClick={() => setOpen(true)}
         title="Open the dev rail"
-        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l border border-r-0 border-border bg-card px-1.5 py-3 text-micro font-medium uppercase tracking-micro text-muted-foreground shadow-glass transition-colors hover:text-foreground"
+        className="fixed right-0 top-1/2 z-overlay -translate-y-1/2 rounded-l border border-r-0 border-border bg-card px-1.5 py-3 text-micro font-medium uppercase tracking-micro text-muted-foreground shadow-glass transition-colors hover:text-foreground"
         style={{ writingMode: "vertical-rl" }}
       >
         Dev
@@ -196,9 +196,9 @@ export function DevRail({ document, editorState, editorRef }: DevRailProps) {
   }
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-40 flex w-80 flex-col border-l border-border bg-card shadow-glass">
+    <aside className="fixed inset-y-0 right-0 z-overlay flex w-80 flex-col border-l border-border bg-card shadow-glass">
       <header className="flex items-center justify-between border-b border-border px-3 py-2">
-        <h2 className="text-ui-xs font-semibold uppercase tracking-micro">Dev rail</h2>
+        <h2 className="text-ui-xs font-semibold uppercase tracking-micro text-ink">Dev rail</h2>
         <button
           type="button"
           onClick={() => setOpen(false)}

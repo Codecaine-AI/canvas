@@ -62,7 +62,7 @@ export function AgentSidebar({
   return (
     <aside
       aria-label="Agent"
-      className="absolute bottom-24 right-4 top-20 z-20 flex w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded border border-border/70 bg-background/95 shadow-glass backdrop-blur-glass"
+      className="absolute bottom-24 right-4 top-20 z-raised flex w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded border border-border/70 bg-background/95 shadow-glass backdrop-blur-glass"
     >
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border/70 px-3 py-2.5">
         <div className="flex min-w-0 items-center gap-2">

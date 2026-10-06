@@ -24,6 +24,10 @@ const REMOVED_ON_COLOR = "var(--ds-color-text-on-solid)";
 /** Dims the board around the work frame: the dialog backdrop's black, at 14%. */
 const SCRIM_COLOR = "color-mix(in srgb, var(--ds-color-backdrop) 35%, transparent)";
 const BADGE_RADIUS = "var(--ds-radius-pill)";
+/** The marks' outline: 2px, the focus-outline width. */
+const MARK_WIDTH = "var(--ds-border-width-focus)";
+/** The work frame's halo spread, 5px. No token equals it: focus (2px) + rail (3px) widths. */
+const HALO_SPREAD = "calc(var(--ds-border-width-focus) + var(--ds-border-width-rail))";
 const MARK_RADIUS = "var(--ds-radius-base)";
 
 type DraftPreview = {
@@ -87,7 +91,7 @@ function ChangeOutline({
         style={{
           ...rectStyle(change.from),
           zIndex: 2,
-          border: `2px dashed ${color}`,
+          border: `${MARK_WIDTH} dashed ${color}`,
           borderRadius: MARK_RADIUS,
           background: "color-mix(in srgb, var(--ds-color-surface-page) 16%, transparent)",
         }}
@@ -131,7 +135,7 @@ function ChangeChip({
           style={{
             ...rectStyle(rect),
             zIndex: 2,
-            border: `2px dashed ${color}`,
+            border: `${MARK_WIDTH} dashed ${color}`,
             borderRadius: MARK_RADIUS,
             background: `color-mix(in srgb, ${color} 7%, transparent)`,
           }}
@@ -251,9 +255,9 @@ export function GhostPreviewLayer({
           style={{
             ...rectStyle(frame),
             zIndex: 1,
-            border: `2px solid ${AGENT_COLOR}`,
+            border: `${MARK_WIDTH} solid ${AGENT_COLOR}`,
             borderRadius: MARK_RADIUS,
-            boxShadow: `0 0 0 5px color-mix(in srgb, ${AGENT_COLOR} 10%, transparent)`,
+            boxShadow: `0 0 0 ${HALO_SPREAD} color-mix(in srgb, ${AGENT_COLOR} 10%, transparent)`,
           }}
         />
       ) : null}

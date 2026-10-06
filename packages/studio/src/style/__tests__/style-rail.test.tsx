@@ -12,7 +12,7 @@ import {
   type CanvasStyleSettings,
 } from "@codecaine-ai/canvas/style";
 
-import { isColorControl, OPEN_GROUPS_STORAGE_KEY, StyleRail, type StyleRailProps } from "../StyleRail";
+import { OPEN_GROUPS_STORAGE_KEY, StyleRail, type StyleRailProps } from "../StyleRail";
 import { useCanvasStyleSettings } from "../use-canvas-style-settings";
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean })
@@ -258,29 +258,72 @@ describe("StyleRail", () => {
     expect($('section[data-group="board"] > button')!.getAttribute("aria-expanded")).toBe("false");
   });
 
-  it("hides the color controls by default and keeps the size, font and style controls", () => {
-    renderRail(
-      { theme: "schematic-dark", themes: { "schematic-dark": { palette: { red: "#FF0000" } } } },
-      { colorControls: false },
+  it("ships without the color controls: renders the kept size, font and style controls only", () => {
+    // No colorControls prop: the shipped default. The expected rows are listed
+    // here, not derived from the rail's own predicate. Schematic dark is
+    // layer-cake with tile icons, so every conditional row of a kept control applies.
+    const props = {
+      settings: normalizeCanvasStyleSettings({ theme: "schematic-dark", themes: { "schematic-dark": { palette: { red: "#FF0000" } } } }),
+      onSelectTheme: mock((_theme: string) => {}),
+      onChange: mock((_key: string, _value: unknown, _paletteColor?: string) => {}),
+      onResetKey: mock((_key: string, _paletteColor?: string) => {}),
+      onResetTheme: mock(() => {}),
+      onClose: mock(() => {}),
+    };
+    act(() =>
+      root.render(
+        <StyleRail
+          {...props}
+          style={resolveCanvasStyle(props.settings)}
+          overrides={props.settings.themes["schematic-dark"] ?? {}}
+        />,
+      ),
     );
     const headers = [...container.querySelectorAll<HTMLButtonElement>("section[data-group] > button")];
-    // Palette holds only color rows, so its group is gone.
-    expect($('section[data-group="palette"]')).toBeNull();
+    // Board and Palette hold only color rows, so their groups are gone.
+    expect(headers.map((header) => header.closest("section")!.getAttribute("data-group"))).toEqual([
+      "text",
+      "shapes",
+      "sections",
+      "icons",
+      "connectors",
+      "stickies",
+    ]);
     for (const header of headers) act(() => header.click());
-    // Schematic dark is layer-cake with tile icons, so every conditional row applies.
-    const dark = canvasThemePreset("schematic-dark");
-    const shown = CANVAS_STYLE_CONTROLS.filter(
-      (control) =>
-        control.key !== "theme" &&
-        !isColorControl(control) &&
-        (!control.visibleWhen || dark[control.visibleWhen.key] === control.visibleWhen.equals),
-    );
     const rows = [...container.querySelectorAll("[data-control]")].map((row) => row.getAttribute("data-control"));
-    expect(rows).toEqual(shown.map((control) => control.key));
-    expect(rows).toContain("shapeCornerRadiusPx");
-    expect(rows).toContain("headerFont");
-    expect(rows).toContain("headerUppercase");
-    for (const hidden of ["boardBackground", "textColor", "sectionTintBase", "sectionBorderOpacity", "headerChipMix"]) {
+    expect(rows).toEqual([
+      "textFontWeight",
+      "textFontSizePx",
+      "detailFont",
+      "detailFontSizePx",
+      "processCornerRadiusPx",
+      "shapeCornerRadiusPx",
+      "shapeBorderWidthPx",
+      "shapeFill",
+      "sectionCornerRadiusPx",
+      "sectionBorderWidthPx",
+      "titleChipCornerRadiusPx",
+      "titleChipBorderWidthPx",
+      "sectionFill",
+      "headerPlacement",
+      "headerFont",
+      "headerUppercase",
+      "headerFontSizePx",
+      "iconPack",
+      "iconStyle",
+      "iconTileMaxPx",
+      "iconTileFill",
+      "iconTileSolidMaxPx",
+      "connectorStrokeWidthPx",
+      "connectorCornerRadiusPx",
+      "labelChipCornerRadiusPx",
+      "connectorLabelFont",
+      "connectorLabelFontSizePx",
+      "connectorLabelHeightPx",
+      "stickyStyle",
+    ]);
+    // All five color-strength sliders are hidden, with every color row.
+    for (const hidden of ["sectionTintBase", "sectionTintStep", "sectionTintMax", "sectionBorderOpacity", "headerChipMix"]) {
       expect(rows).not.toContain(hidden);
     }
     expect(container.querySelector('input[type="color"]')).toBeNull();

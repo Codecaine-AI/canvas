@@ -937,7 +937,7 @@ export function App() {
       return (
         <main className="fixed inset-0 overflow-hidden" style={boardSurface}>
           {viewer}
-          <header className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 p-4">
+          <header className="pointer-events-none absolute inset-x-0 top-0 z-raised flex items-start justify-between gap-3 p-4">
             <div className="pointer-events-auto flex min-w-0 items-center gap-2 rounded border border-border bg-background/95 p-1.5 shadow-glass backdrop-blur-glass">
               <Button
                 type="button"
@@ -1247,7 +1247,7 @@ export function App() {
                   />
                 </span>
                 <span className="block px-4 py-3">
-                  <span className="block truncate pr-6 text-ui-lg font-medium">
+                  <span className="block truncate pr-6 text-ui-lg font-medium text-ink">
                     {canvas.title}
                   </span>
                 </span>
@@ -1273,7 +1273,7 @@ export function App() {
 /** Non-blocking amber notice pinned to the top of the editor's screen overlay. */
 function SaveIssueNotice({ message, children }: { message: string; children: ReactNode }) {
   return (
-    <div className="pointer-events-auto absolute left-1/2 top-4 z-30 flex -translate-x-1/2 items-center gap-3 rounded border border-warning-line bg-warning-soft px-4 py-2 text-ui-lg text-warning shadow-glass">
+    <div className="pointer-events-auto absolute left-1/2 top-4 z-panel flex -translate-x-1/2 items-center gap-3 rounded border border-warning-line bg-warning-soft px-4 py-2 text-ui-lg text-warning shadow-glass">
       <AlertTriangleIcon className="h-4 w-4 shrink-0" />
       <span>{message}</span>
       {children}
