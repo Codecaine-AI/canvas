@@ -1,9 +1,9 @@
 import type { MouseEvent, ReactNode } from "react";
 import { CheckIcon, ShapesIcon, WorkflowIcon } from "@codecaine-ai/canvas/ui/icons";
-import { devPagesEnabled } from "@/dev-flag";
-import { navigate } from "@/navigation";
+import { devPagesEnabled } from "@/shared/dev-flag";
+import { navigate } from "@/shared/navigation";
 import { AppShell, resolveNav, type Lane, type NavSection, type ShellLinkProps } from "../AppShell";
-import { ThemeToggle } from "../ThemeToggle";
+import { ThemeToggle } from "./_components/ThemeToggle";
 
 /** The app's name: the sidebar title and the document title outside the shell pages. */
 export const APP_NAME = "Canvas";

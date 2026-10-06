@@ -1,0 +1,30 @@
+/*
+ * App shell (guide/layout.md). Evals is a tool view on the full lane: its run
+ * list and run detail fill the space under the topbar edge to edge, as before
+ * the shell, and scroll on their own (rule 12). A shell-scoped layout override
+ * (decision 32) drops the content padding on that page only.
+ */
+.ds-shell:has(.studio-evals) {
+  --ds-layout-content-padding-top: var(--ds-space-0);
+  --ds-layout-content-padding-x: var(--ds-space-0);
+  --ds-layout-content-padding-bottom: var(--ds-space-0);
+}
+
+.studio-evals {
+  height: calc(100vh - var(--ds-layout-topbar-height));
+  height: calc(100dvh - var(--ds-layout-topbar-height));
+}
+
+/* The shell's narrow breakpoint (layout.css, 800px): the run list stacks over the run detail. */
+@media (max-width: 800px) {
+  .studio-evals-panes {
+    flex-direction: column;
+  }
+
+  .studio-evals-runs {
+    width: auto;
+    max-height: 40%;
+    border-right-width: 0;
+    border-bottom: var(--ds-border-width-hairline) solid var(--border);
+  }
+}

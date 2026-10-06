@@ -1,0 +1,31 @@
+.canvas-style-rail-row-label {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--ds-space-2);
+}
+
+.canvas-style-rail-row-override-dot {
+  box-sizing: border-box;
+  width: var(--ds-space-1-5);
+  height: var(--ds-space-1-5);
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ds-radius-pill);
+  background: var(--accent-foreground);
+}
+
+button.canvas-style-rail-row-override-dot {
+  cursor: pointer;
+}
+
+button.canvas-style-rail-row-override-dot:hover {
+  /* A ring around a circle marker: border.width.ring (1.5px; was 2px). */
+  box-shadow: 0 0 0 var(--ds-border-width-ring) var(--border);
+}
+
+.canvas-style-rail-row-override-dot[data-overridden="false"] {
+  border: var(--ds-border-width-hairline) solid var(--border);
+  background: transparent;
+}

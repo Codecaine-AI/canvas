@@ -1,0 +1,55 @@
+/*
+ * Style rail (StyleRail/ and its parts, one styles.css each) — native controls styled after the
+ * docs workbench's Style Rail (docs-workbench/web/src/theme/style-rail.css),
+ * on Studio's shadcn knobs and design-system tokens. No component library.
+ */
+.canvas-style-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ds-space-7);
+  width: var(--ds-space-7);
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  border: var(--ds-border-width-hairline) solid transparent;
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.canvas-style-icon-button:hover {
+  background: var(--muted);
+}
+
+.canvas-style-rail-section-label {
+  padding: 0.875rem var(--ds-space-4) var(--ds-space-1-5);
+  color: var(--muted-foreground);
+  font-size: var(--ds-font-size-ui-2xs);
+  font-weight: var(--ds-font-weight-semibold);
+  letter-spacing: var(--ds-letter-spacing-micro);
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+.canvas-style-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/*
+ * Theme picker: one radio card per theme with a miniature board — board +
+ * grid, a section with its header chip, a card, and four inks — painted
+ * inline from that theme's resolved style.
+ */
+.canvas-style-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--ds-space-2);
+  padding: 0 var(--ds-space-4) 0.875rem;
+}

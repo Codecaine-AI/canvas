@@ -1,306 +1,37 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEvent,
-  type ReactNode,
-} from "react";
-import {
-  AlertTriangleIcon,
-  ArrowLeftIcon,
-  BoxIcon,
-  PanelRightIcon,
-  PlusIcon,
-  RotateCcwIcon,
-  TrashIcon,
-} from "@codecaine-ai/canvas/ui/icons";
-import {
-  createInteractiveCanvasState,
-  InteractiveCanvasEditor,
-  InteractiveCanvasViewer,
-  reduceInteractiveCanvasState,
-  type InteractiveCanvasDocument,
-  type InteractiveCanvasEditorHandle,
-  type InteractiveCanvasEditorState,
-} from "@codecaine-ai/canvas";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PlusIcon, RotateCcwIcon } from "@codecaine-ai/canvas/ui/icons";
 import type {
-  AgentRect,
-  AgentSessionAnnotation,
-  AgentSessionViewport,
-} from "@codecaine-ai/canvas-agent/protocol";
+  InteractiveCanvasEditorHandle,
+  InteractiveCanvasEditorState,
+} from "@codecaine-ai/canvas";
 import { Button } from "@codecaine-ai/canvas/ui/button";
-import type { CanvasStyle } from "@codecaine-ai/canvas/style";
-import {
-  AgentSidebar,
-  CameraLockPill,
-  GhostPreviewLayer,
-  GhostPreviewScrim,
-  pendingNotes,
-  scopeForNotes,
-  scopeForWholeBoard,
-  targetLabelForSelection,
-  useAgentSession,
-  type BeforeAgentStartSnapshot,
-  type PendingNote,
-} from "./agent";
-import type { ViteHotContext } from "vite/types/hot.d.ts";
-import type { CanvasFileChangedPayload } from "../server/canvas-file-watch";
-import { CanvasSaveConflictError, fetchCanvas, putCanvas } from "./canvas-file-client";
-import { GalleryPage } from "./GalleryPage";
+import { parseRoute, shellPageTitle, isDocumentRoute, type Route } from "./_lib/route";
+import { useAgentRun } from "./_lib/useAgentRun";
+import { useBoardDocument } from "./_lib/useBoardDocument";
+import { useBoardList } from "./_lib/useBoardList";
+import { useEditorPanels } from "./_lib/useEditorPanels";
+import { styleCacheKey } from "./_lib/utils";
+import { BoardsPage } from "./_components/BoardsPage";
+import { EditorPage } from "./_components/EditorPage";
+import { EvalsPage } from "./_components/EvalsPage";
+import { GalleryPage } from "./_components/GalleryPage";
 import { APP_NAME, RouterShell, SHELL_PATHS } from "./_components/RouterShell";
-import { DevRail } from "./dev/DevRail";
-import { EvalsPage } from "./dev/EvalsPage";
-import { devPagesEnabled } from "./dev-flag";
-import { navigate } from "./navigation";
-import { withRootPageFrame } from "./new-document";
-import {
-  adaptProjectCanvasToStudio,
-  adaptStudioDocumentToProject,
-} from "./project/docs-board-adapter";
-import {
-  fetchProjectBoard,
-  getProjectServerOrigin,
-  normalizeProjectServerOrigin,
-  ProjectBoardLockedError,
-  ProjectSaveConflictError,
-  saveProjectBoard,
-} from "./project/docs-server";
-import { ProjectBoardsSection } from "./project/ProjectBoardsSection";
-import { StyleRail } from "./style/StyleRail";
-import { useCanvasStyleSettings } from "./style/use-canvas-style-settings";
-
-const STYLE_RAIL_OPEN_STORAGE_KEY = "canvas-studio-style-rail-open";
-const INSPECTOR_OPEN_STORAGE_KEY = "canvas-studio-inspector-open";
-
-function readPanelOpen(storageKey: string): boolean {
-  try {
-    return window.localStorage.getItem(storageKey) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function writePanelOpen(storageKey: string, open: boolean): void {
-  try {
-    window.localStorage.setItem(storageKey, open ? "1" : "0");
-  } catch {
-    // Session-only when storage is unavailable.
-  }
-}
-
-/** Short stable key (djb2 of the JSON) naming one resolved style. */
-function styleCacheKey(style: CanvasStyle): string {
-  const text = JSON.stringify(style);
-  let hash = 5381;
-  for (let index = 0; index < text.length; index += 1) {
-    hash = ((hash << 5) + hash + text.charCodeAt(index)) | 0;
-  }
-  return (hash >>> 0).toString(36);
-}
-
-type CanvasListItem = {
-  id: string;
-  title: string;
-  updated_at: string;
-};
-
-type Route =
-  | { name: "list" }
-  | { name: "gallery" }
-  /** The eval-suite run gallery (dev-pages flag only). */
-  | { name: "evals" }
-  | { name: "canvas"; id: string }
-  /** A linked docs project's board, addressed by docs-root-relative src. */
-  | { name: "project"; src: string; server?: string }
-  | { name: "view"; id: string; view?: string }
-  | { name: "embed"; id: string; view?: string };
-
-export function parseRoute(pathname: string, search = ""): Route {
-  if (pathname === "/gallery" || pathname === "/gallery/") {
-    return { name: "gallery" };
-  }
-  if (pathname === "/evals" || pathname === "/evals/") {
-    return { name: "evals" };
-  }
-  const match = pathname.match(/^\/(canvas|view|embed)\/([^/]+)\/?$/);
-  if (match) {
-    const name = match[1] as "canvas" | "view" | "embed";
-    const id = decodeURIComponent(match[2]);
-    if (name === "canvas") return { name, id };
-    const requestedView = new URLSearchParams(search).get("view")?.trim();
-    return { name, id, view: requestedView || undefined };
-  }
-  // Deep link into a linked project's board: /?src=<docs-root-relative path>
-  // (optional &server=<origin>) — the URL "Edit in Canvas" links in docs apps
-  // emit. Lands in the same full editor UI as opening from the board list.
-  if (pathname === "/" || pathname === "") {
-    const params = new URLSearchParams(search);
-    const src = params.get("src")?.trim();
-    if (src) {
-      const server = normalizeProjectServerOrigin(params.get("server") ?? "");
-      return { name: "project", src, server: server ?? undefined };
-    }
-  }
-  return { name: "list" };
-}
-
-/**
- * The page title of a shell route (the topbar h1 and the document title,
- * layout.md rule 10). The editor and /view keep their own chrome outside the
- * shell and the app's document title.
- */
-function shellPageTitle(route: Route): string | null {
-  if (route.name === "list") return "Boards";
-  if (route.name === "gallery") return "Object Gallery";
-  if (route.name === "evals") return "Evals";
-  return null;
-}
-
-function isDocumentRoute(route: Route): route is Extract<Route, { id: string }> {
-  return route.name === "canvas" || route.name === "view" || route.name === "embed";
-}
-
-async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> {
-  const response = await fetch(input, init);
-  if (!response.ok) {
-    throw new Error(`${response.status} ${response.statusText}`);
-  }
-  return (await response.json()) as T;
-}
-
-function clone(document: InteractiveCanvasDocument): InteractiveCanvasDocument {
-  return JSON.parse(JSON.stringify(document)) as InteractiveCanvasDocument;
-}
-
-function createStarterCanvasDocument(input: {
-  id: string;
-  title: string;
-}): InteractiveCanvasDocument {
-  // Every new board starts as one empty base section — the backdrop all
-  // content lives on. Rename and resize it like any section.
-  return withRootPageFrame({
-    schemaVersion: 1,
-    id: input.id,
-    title: input.title,
-    mode: "diagram",
-    size: { width: 960, height: 560 },
-    viewport: { x: 0, y: 0, zoom: 1 },
-    objects: [],
-    connections: [],
-    annotations: [],
-  });
-}
-
-type Rect = { x: number; y: number; width: number; height: number };
-
-function unionRects(rects: readonly Rect[]): Rect | null {
-  if (rects.length === 0) return null;
-  const left = Math.min(...rects.map(({ x }) => x));
-  const top = Math.min(...rects.map(({ y }) => y));
-  const right = Math.max(...rects.map(({ x, width }) => x + width));
-  const bottom = Math.max(...rects.map(({ y, height }) => y + height));
-  return { x: left, y: top, width: right - left, height: bottom - top };
-}
-
-function noteRect(note: Pick<PendingNote, "target">, document: InteractiveCanvasDocument): Rect | null {
-  const target = note.target;
-  if (target.kind === "region") return target.region;
-  if (target.kind === "object") {
-    const objectId = target.objectId;
-    return document.objects.find(({ id }) => id === objectId)?.geometry ?? null;
-  }
-
-  const connectionId = target.connectionId;
-  const connection = document.connections.find(({ id }) => id === connectionId);
-  if (!connection) return null;
-  return unionRects(
-    [connection.from.objectId, connection.to.objectId]
-      .map((objectId) => document.objects.find(({ id }) => id === objectId)?.geometry)
-      .filter((geometry) => geometry !== undefined),
-  );
-}
-
-function sessionAnnotations(
-  notes: readonly PendingNote[],
-  document: InteractiveCanvasDocument,
-): AgentSessionAnnotation[] {
-  return notes.flatMap((note) => {
-    const target: AgentSessionAnnotation["target"] | null =
-      note.target.kind === "connection"
-        ? (() => {
-            const region = noteRect(note, document);
-            return region ? { kind: "region", region } : null;
-          })()
-        : note.target;
-    if (!target) return [];
-    return [{
-      id: note.id,
-      intent: "agent-request",
-      body: note.body,
-      target,
-      status: note.status,
-      createdBy: note.createdBy,
-      replies: note.replies.map((reply) => ({
-        id: reply.id,
-        author: reply.author,
-        body: reply.body,
-        ...(reply.createdAt === undefined ? {} : { createdAt: reply.createdAt }),
-      })),
-    }];
-  });
-}
-
-function agentViewport(editor: InteractiveCanvasEditorHandle | null): AgentSessionViewport | undefined {
-  const viewport = editor?.getEditorSnapshot().viewport;
-  if (!viewport) return undefined;
-  return {
-    rect: {
-      x: viewport.x,
-      y: viewport.y,
-      width: window.innerWidth / viewport.zoom,
-      height: window.innerHeight / viewport.zoom,
-    },
-    zoom: viewport.zoom,
-  };
-}
-
-/** The open project board's save target — hash rotates on every 200 PUT. */
-type ProjectBoardHandle = {
-  origin: string;
-  src: string;
-  hash: string;
-  /** The exact docs-side wire document last loaded or saved (merge base). */
-  raw: unknown;
-};
-
-type SaveOptions = {
-  keepalive?: boolean;
-  /** Local boards only: skip the If-Match revision check ("Keep mine"). */
-  force?: boolean;
-};
+import { StatusPage } from "./_components/StatusPage";
+import { ViewerPage } from "./_components/ViewerPage";
+import { devPagesEnabled } from "./shared/dev-flag";
+import { navigate } from "./shared/navigation";
+import { useCanvasStyleSettings } from "./shared/useCanvasStyleSettings";
 
 export function App() {
   const [route, setRoute] = useState<Route>(() => parseRoute(window.location.pathname, window.location.search));
-  const [canvases, setCanvases] = useState<CanvasListItem[]>([]);
-  const [listState, setListState] = useState<"idle" | "loading" | "error">("idle");
-  const [activeDocument, setActiveDocument] =
-    useState<InteractiveCanvasDocument | null>(null);
-  const [documentState, setDocumentState] =
-    useState<"idle" | "loading" | "not-found" | "error">("idle");
-  const [documentErrorDetail, setDocumentErrorDetail] = useState<string | null>(null);
   // Bumped by the Evals page's Refresh button in the shell topbar.
   const [evalsRefreshSignal, setEvalsRefreshSignal] = useState(0);
   const pageTitle = shellPageTitle(route) ?? APP_NAME;
   useEffect(() => {
     document.title = pageTitle;
   }, [pageTitle]);
-  const [showAgent, setShowAgent] = useState(false);
-  // The Style rail, the Inspector, and the Agent sidebar share the editor's
-  // right-hand slot: opening one closes the others.
-  const [showStyle, setShowStyle] = useState(() => readPanelOpen(STYLE_RAIL_OPEN_STORAGE_KEY));
-  const [showInspector, setShowInspector] = useState(() => readPanelOpen(INSPECTOR_OPEN_STORAGE_KEY));
+  const panels = useEditorPanels();
+  const { setShowAgent } = panels;
   const canvasStyleSettings = useCanvasStyleSettings();
   // Board-list thumbnails are server renders: their URL carries the style the
   // server holds, so a theme switch or token edit fetches fresh ones once its
@@ -308,199 +39,33 @@ export function App() {
   // render made before the save under the new key).
   const thumbnailStyle = canvasStyleSettings.serverStyle ?? canvasStyleSettings.style;
   const previewStyleKey = useMemo(() => styleCacheKey(thumbnailStyle), [thumbnailStyle]);
-  const [agentPreviewRect, setAgentPreviewRect] = useState<AgentRect | null>(null);
-  const [agentBaselineDocument, setAgentBaselineDocument] =
-    useState<InteractiveCanvasDocument | null>(null);
-  const [, setSaveState] = useState<"idle" | "failed" | "saved">("idle");
-  const [projectSaveIssue, setProjectSaveIssue] =
-    useState<"conflict" | "locked" | null>(null);
-  const [projectReloadNonce, setProjectReloadNonce] = useState(0);
-  // Local board changed on disk under unsaved edits (or a PUT got 412).
-  // Autosave pauses until the user picks Reload or Keep mine.
-  const [diskConflict, setDiskConflictState] = useState(false);
-  const diskConflictRef = useRef(false);
-  /** sha256 of the local board file as last loaded or saved — sent as If-Match. */
-  const canvasHashRef = useRef<string | null>(null);
-  const activeCanvasIdRef = useRef<string | null>(null);
-  const projectBoardRef = useRef<ProjectBoardHandle | null>(null);
   // Dev rail plumbing (dev-pages flag only): the imperative editor handle
   // plus the live selection/viewport/lastChange stream.
   const editorRef = useRef<InteractiveCanvasEditorHandle | null>(null);
   const [editorState, setEditorState] = useState<InteractiveCanvasEditorState | null>(null);
   const [editorDocumentRevision, setEditorDocumentRevision] = useState(0);
   const previousEditorToolRef = useRef<InteractiveCanvasEditorState["tool"] | null>(null);
-  const lastAgentRunRef = useRef<{ instruction: string; wholeBoard: boolean } | null>(null);
-  const pendingSaveRef = useRef<InteractiveCanvasDocument | null>(null);
-  const saveInFlightRef = useRef<Promise<boolean> | null>(null);
-  const saveTimerRef = useRef<number | null>(null);
-  const savedSnapshotRef = useRef<string | null>(null);
-  const savedFadeTimerRef = useRef<number | null>(null);
 
-  const setDiskConflict = useCallback((value: boolean) => {
-    diskConflictRef.current = value;
-    setDiskConflictState(value);
-  }, []);
-
-  const clearSaveTimer = useCallback(() => {
-    if (!saveTimerRef.current) return;
-    window.clearTimeout(saveTimerRef.current);
-    saveTimerRef.current = null;
-  }, []);
-
-  const markSavedBriefly = useCallback(() => {
-    setSaveState("saved");
-    if (savedFadeTimerRef.current) window.clearTimeout(savedFadeTimerRef.current);
-    savedFadeTimerRef.current = window.setTimeout(() => {
-      setSaveState("idle");
-      savedFadeTimerRef.current = null;
-    }, 900);
-  }, []);
-
-  /**
-   * Route-aware save: local boards PUT to the studio's own file API with the
-   * last known file hash as If-Match; project boards adapt back to the
-   * docs-side wire shape and PUT to the linked docs-server with the tracked
-   * content hash. Both rotate their hash on success.
-   */
-  const saveDocument = useCallback(
-    async (document: InteractiveCanvasDocument, options?: SaveOptions) => {
-      const project = projectBoardRef.current;
-      if (project) {
-        const wire = adaptStudioDocumentToProject(document, project.raw);
-        const { contentHash } = await saveProjectBoard(
-          project.origin,
-          project.src,
-          project.hash,
-          wire,
-          options,
-        );
-        project.hash = contentHash;
-        project.raw = wire;
-        setProjectSaveIssue(null);
-        return;
-      }
-      const id = activeCanvasIdRef.current;
-      if (!id) return;
-      const contentHash = await putCanvas(id, document, {
-        ...options,
-        baseHash: canvasHashRef.current,
-      });
-      if (activeCanvasIdRef.current === id) canvasHashRef.current = contentHash;
+  const board = useBoardDocument(route, {
+    editorRef,
+    onLoadStart: () => {
+      setEditorState(null);
+      previousEditorToolRef.current = null;
     },
-    [],
-  );
-
-  const flushPendingSave = useCallback(
-    async (options?: SaveOptions) => {
-      clearSaveTimer();
-      while (true) {
-        const existingSave = saveInFlightRef.current;
-        if (existingSave) {
-          await existingSave;
-          if (saveInFlightRef.current === existingSave) saveInFlightRef.current = null;
-          continue;
-        }
-
-        const id = activeCanvasIdRef.current;
-        const project = projectBoardRef.current;
-        const document = pendingSaveRef.current;
-        if ((!id && !project) || !document) return true;
-        pendingSaveRef.current = null;
-
-        const save = (async () => {
-          try {
-            await saveDocument(document, options);
-            savedSnapshotRef.current = JSON.stringify(document);
-            if (options?.force) setDiskConflict(false);
-            setSaveState("idle");
-            if (!options?.keepalive) markSavedBriefly();
-            return true;
-          } catch (error) {
-            if (!pendingSaveRef.current) pendingSaveRef.current = document;
-            if (error instanceof CanvasSaveConflictError) {
-              setDiskConflict(true);
-            } else if (error instanceof ProjectSaveConflictError) {
-              setProjectSaveIssue("conflict");
-            } else if (error instanceof ProjectBoardLockedError) {
-              setProjectSaveIssue("locked");
-            }
-            setSaveState("failed");
-            return false;
-          }
-        })();
-        saveInFlightRef.current = save;
-        const saved = await save;
-        if (saveInFlightRef.current === save) saveInFlightRef.current = null;
-        if (!saved) return false;
-      }
-    },
-    [clearSaveTimer, markSavedBriefly, saveDocument, setDiskConflict],
-  );
-
-  const queueAutosave = useCallback(
-    (document: InteractiveCanvasDocument) => {
-      setActiveDocument(clone(document));
-      if (JSON.stringify(document) === savedSnapshotRef.current) {
-        clearSaveTimer();
-        if (!saveInFlightRef.current) {
-          pendingSaveRef.current = null;
-          setSaveState("idle");
-          return;
-        }
-      }
-      pendingSaveRef.current = clone(document);
-      setSaveState("idle");
-      clearSaveTimer();
-      // Every PUT would 412 while the disk conflict stands; hold the edits
-      // until Reload drops them or Keep mine force-saves them.
-      if (diskConflictRef.current) return;
-      saveTimerRef.current = window.setTimeout(() => {
-        void flushPendingSave();
-      }, 800);
-    },
-    [clearSaveTimer, flushPendingSave],
-  );
-
-  const captureAgentSnapshot = useCallback((): BeforeAgentStartSnapshot => {
-    const snapshot: BeforeAgentStartSnapshot = {
-      annotations: activeDocument
-        ? sessionAnnotations(pendingNotes(activeDocument), activeDocument)
-        : [],
-    };
-    const viewport = agentViewport(editorRef.current);
-    if (viewport) snapshot.viewport = viewport;
-    return snapshot;
-  }, [activeDocument]);
-
-  const beforeAgentStart = useCallback(async (): Promise<BeforeAgentStartSnapshot> => {
-    // An unresolved disk conflict means the board in memory is not the file the
-    // harness will read, so a run would scope against one and patch the other.
-    if (diskConflictRef.current) {
-      throw new Error("The canvas changed on disk. Choose Reload or Keep mine before starting the agent.");
-    }
-    if (!(await flushPendingSave())) {
-      throw new Error("Save the board before starting the agent.");
-    }
-    return captureAgentSnapshot();
-  }, [captureAgentSnapshot, flushPendingSave]);
-
-  const dispatchAgentPatch = useCallback(
-    (operations: Parameters<InteractiveCanvasEditorHandle["dispatchAgentPatch"]>[0], summary?: string) => {
-      editorRef.current?.dispatchAgentPatch(operations, summary);
-    },
-    [],
-  );
-
-  const agentSession = useAgentSession({
-    canvasId: route.name === "canvas" ? route.id : "",
-    beforeStart: beforeAgentStart,
-    dispatchAgentPatch,
   });
-  const hasLiveAgentSession =
-    agentSession.sessionId !== null &&
-    (agentSession.status === "running" ||
-      agentSession.status === "proposal-ready" ||
-      agentSession.status === "failed");
+  const { activeDocument, setActiveDocument, documentState, documentErrorDetail, flushPendingSave } = board;
+
+  const agent = useAgentRun({
+    route,
+    activeDocument,
+    editorRef,
+    diskConflictRef: board.diskConflictRef,
+    flushPendingSave,
+    queueAutosave: board.queueAutosave,
+    setShowAgent,
+    bumpEditorDocumentRevision: () => setEditorDocumentRevision((revision) => revision + 1),
+  });
+  const { agentSession, hasLiveAgentSession, setAgentPreviewRect, setAgentBaselineDocument } = agent;
 
   useEffect(() => {
     const handlePopState = async () => {
@@ -532,62 +97,6 @@ export function App() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [agentSession.reject, agentSession.reset, flushPendingSave, hasLiveAgentSession]);
 
-  useEffect(() => {
-    activeCanvasIdRef.current = route.name === "canvas" ? route.id : null;
-    if (route.name !== "project") {
-      projectBoardRef.current = null;
-      setProjectSaveIssue(null);
-    }
-    if (route.name !== "canvas") {
-      canvasHashRef.current = null;
-      setDiskConflict(false);
-    }
-    if (route.name !== "canvas" && route.name !== "project") {
-      clearSaveTimer();
-      pendingSaveRef.current = null;
-      savedSnapshotRef.current = null;
-      setSaveState("idle");
-    }
-  }, [clearSaveTimer, route, setDiskConflict]);
-
-  const toggleAgent = useCallback(() => {
-    const next = !showAgent;
-    setShowAgent(next);
-  }, [showAgent]);
-
-  const toggleStyle = useCallback(() => {
-    const next = !showStyle;
-    setShowStyle(next);
-    if (next) {
-      setShowAgent(false);
-      setShowInspector(false);
-    }
-  }, [showStyle]);
-
-  const toggleInspector = useCallback(() => {
-    const next = !showInspector;
-    setShowInspector(next);
-    if (next) {
-      setShowAgent(false);
-      setShowStyle(false);
-    }
-  }, [showInspector]);
-
-  // The agent sidebar also opens itself (annotation tool, agent runs).
-  useEffect(() => {
-    if (!showAgent) return;
-    setShowStyle(false);
-    setShowInspector(false);
-  }, [showAgent]);
-
-  useEffect(() => {
-    writePanelOpen(STYLE_RAIL_OPEN_STORAGE_KEY, showStyle);
-  }, [showStyle]);
-
-  useEffect(() => {
-    writePanelOpen(INSPECTOR_OPEN_STORAGE_KEY, showInspector);
-  }, [showInspector]);
-
   const handleEditorStateChange = useCallback((state: InteractiveCanvasEditorState) => {
     setEditorState(state);
     const previousTool = previousEditorToolRef.current;
@@ -597,16 +106,7 @@ export function App() {
     }
   }, []);
 
-  const loadCanvases = useCallback(async () => {
-    setListState("loading");
-    try {
-      const result = await fetchJson<{ canvases: CanvasListItem[] }>("/api/canvases");
-      setCanvases(result.canvases);
-      setListState("idle");
-    } catch {
-      setListState("error");
-    }
-  }, []);
+  const { canvases, listState, loadCanvases, createBoard, deleteCanvas } = useBoardList();
 
   useEffect(() => {
     if (route.name === "list") {
@@ -615,305 +115,11 @@ export function App() {
     }
   }, [loadCanvases, route.name]);
 
-  useEffect(() => {
-    if (!isDocumentRoute(route) && route.name !== "project") return;
-
-    let cancelled = false;
-    setEditorState(null);
-    previousEditorToolRef.current = null;
-    setDocumentState("loading");
-    setDocumentErrorDetail(null);
-    setActiveDocument(null);
-
-    const applyLoadedDocument = (document: InteractiveCanvasDocument) => {
-      setActiveDocument(document);
-      pendingSaveRef.current = null;
-      savedSnapshotRef.current = JSON.stringify(document);
-      setSaveState("idle");
-      setDocumentState("idle");
-    };
-
-    if (route.name === "project") {
-      const origin = route.server ?? getProjectServerOrigin();
-      projectBoardRef.current = null;
-      setProjectSaveIssue(null);
-      fetchProjectBoard(origin, route.src)
-        .then((payload) => {
-          if (cancelled) return;
-          const adapted = adaptProjectCanvasToStudio(payload.canvas);
-          if (!adapted.ok) {
-            setDocumentErrorDetail(adapted.detail);
-            setDocumentState("error");
-            return;
-          }
-          projectBoardRef.current = {
-            origin,
-            src: route.src,
-            hash: payload.contentHash,
-            raw: payload.canvas,
-          };
-          applyLoadedDocument(clone(adapted.document));
-        })
-        .catch((error) => {
-          if (cancelled) return;
-          setDocumentErrorDetail(
-            error instanceof Error ? error.message : "Could not reach the project server.",
-          );
-          setDocumentState("error");
-        });
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    canvasHashRef.current = null;
-    setDiskConflict(false);
-    fetchCanvas(route.id)
-      .then((result) => {
-        if (cancelled) return;
-        if (!result) {
-          setDocumentState("not-found");
-          return;
-        }
-        canvasHashRef.current = result.contentHash;
-        applyLoadedDocument(clone(result.canvas));
-      })
-      .catch(() => {
-        if (!cancelled) setDocumentState("error");
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [route, projectReloadNonce, setDiskConflict]);
-
-  const agentNotes = useMemo(
-    () => (activeDocument ? pendingNotes(activeDocument) : []),
-    [activeDocument],
-  );
-  const cameraLocked =
-    agentSession.status === "running" || agentSession.status === "proposal-ready";
-  const agentWorkFrame = useMemo(() => {
-    for (let index = agentSession.events.length - 1; index >= 0; index -= 1) {
-      const event = agentSession.events[index];
-      if (event?.type === "fitted") return event.frame;
-    }
-    return null;
-  }, [agentSession.events]);
-  const visibleAgentProposal =
-    agentSession.proposal ?? (agentSession.abandonment ? agentSession.lastGoodProposal : null);
-
-  const startAgentRun = useCallback(
-    async ({ instruction, wholeBoard }: { instruction: string; wholeBoard: boolean }) => {
-      if (route.name !== "canvas" || !activeDocument) return;
-      const baseline = clone(activeDocument);
-      const notes = pendingNotes(baseline);
-      const viewport = agentViewport(editorRef.current);
-      const annotations = sessionAnnotations(notes, baseline);
-      setAgentBaselineDocument(baseline);
-      setShowAgent(true);
-      setAgentPreviewRect(null);
-      lastAgentRunRef.current = { instruction, wholeBoard };
-
-      await agentSession.start({
-        ...(wholeBoard ? scopeForWholeBoard(baseline) : scopeForNotes(baseline, notes)),
-        instruction,
-        annotations,
-        ...(viewport ? { viewport } : {}),
-      });
-    },
-    [activeDocument, agentSession.start, route],
-  );
-
-  const handleRunAgent = useCallback(
-    async (globalComment: string) => {
-      const comment = globalComment.trim();
-      await startAgentRun({
-        instruction: comment || "Apply the pinned notes.",
-        wholeBoard: Boolean(comment),
-      });
-    },
-    [startAgentRun],
-  );
-
-  const restartAgentRun = useCallback(
-    async (instruction?: string) => {
-      const previous = lastAgentRunRef.current;
-      if (!previous) return;
-      await agentSession.reject();
-      await startAgentRun({
-        instruction: instruction?.trim() || previous.instruction,
-        wholeBoard: previous.wholeBoard,
-      });
-    },
-    [agentSession.reject, startAgentRun],
-  );
-
-  const handleRemoveAgentNote = useCallback((annotationId: string) => {
-    if (!activeDocument) return;
-    const state = createInteractiveCanvasState(activeDocument);
-    const next = reduceInteractiveCanvasState(state, {
-      type: "canvas.removeAnnotation",
-      annotationId,
-    });
-    if (next.document === state.document) return;
-
-    // The canvas editor is intentionally uncontrolled. Remount it with the
-    // human-action result so its internal reducer and the autosave snapshot
-    // cannot diverge after a sidebar-driven annotation removal.
-    setEditorDocumentRevision((revision) => revision + 1);
-    queueAutosave(next.document);
-  }, [activeDocument, queueAutosave]);
-
-  const handlePanToAgentNote = useCallback(
-    (note: PendingNote) => {
-      if (!activeDocument) return;
-      const rect = noteRect(note, activeDocument);
-      if (rect) editorRef.current?.revealRect(rect);
-    },
-    [activeDocument],
-  );
-
-  const handleAddAgentNote = useCallback(() => {
-    editorRef.current?.setTool("annotation");
-  }, []);
-
-  /**
-   * Conflict/lock recovery for project boards: drop local pending edits and
-   * refetch the board from the project server (the on-disk copy is newer).
-   */
-  const reloadProjectBoard = useCallback(() => {
-    clearSaveTimer();
-    pendingSaveRef.current = null;
-    setProjectSaveIssue(null);
-    setProjectReloadNonce((nonce) => nonce + 1);
-  }, [clearSaveTimer]);
-
-  /**
-   * Reload the open local board from disk in place: the editor keeps its
-   * camera, while undo history, selection, and tool reset exactly as on a
-   * fresh load (see InteractiveCanvasEditorHandle.loadDocument). Local
-   * pending edits are dropped — callers decide whether that is allowed;
-   * `onlyIfClean` re-checks after the fetch, since the user may have edited
-   * while it was in flight, and raises the conflict notice instead.
-   */
-  const reloadLocalCanvas = useCallback(
-    async (options?: { onlyIfClean?: boolean }) => {
-      const id = activeCanvasIdRef.current;
-      if (!id) return;
-      if (!options?.onlyIfClean) {
-        clearSaveTimer();
-        pendingSaveRef.current = null;
-        await saveInFlightRef.current;
-      }
-      let result: Awaited<ReturnType<typeof fetchCanvas>>;
-      try {
-        result = await fetchCanvas(id);
-      } catch {
-        return;
-      }
-      if (!result || activeCanvasIdRef.current !== id) return;
-      if (options?.onlyIfClean && (pendingSaveRef.current || saveInFlightRef.current)) {
-        setDiskConflict(true);
-        return;
-      }
-      clearSaveTimer();
-      pendingSaveRef.current = null;
-      canvasHashRef.current = result.contentHash;
-      const document = clone(result.canvas);
-      savedSnapshotRef.current = JSON.stringify(document);
-      setDiskConflict(false);
-      setSaveState("idle");
-      setActiveDocument(document);
-      editorRef.current?.loadDocument(clone(document));
-    },
-    [clearSaveTimer, setDiskConflict],
-  );
-
-  /** "Keep mine": overwrite the on-disk change with the local board. */
-  const keepLocalCanvas = useCallback(async () => {
-    if (!pendingSaveRef.current && !saveInFlightRef.current && activeDocument) {
-      pendingSaveRef.current = clone(activeDocument);
-    }
-    await flushPendingSave({ force: true });
-  }, [activeDocument, flushPendingSave]);
-
-  // External writers (the canvas MCP server, editors, git) announce changes
-  // through the dev server's file watcher (server/canvas-file-watch.ts).
-  // Studio's own PUTs are filtered server-side; the hash check here also
-  // drops anything this tab already has. A clean board reloads in place; a
-  // board with unsaved or in-flight edits gets the conflict notice instead —
-  // there is no auto-merge.
-  const handleCanvasFileChanged = useCallback(
-    (payload: CanvasFileChangedPayload) => {
-      if (payload.id !== activeCanvasIdRef.current) return;
-      if (payload.hash === canvasHashRef.current) return;
-      if (diskConflictRef.current || pendingSaveRef.current || saveInFlightRef.current) {
-        setDiskConflict(true);
-        return;
-      }
-      void reloadLocalCanvas({ onlyIfClean: true });
-    },
-    [reloadLocalCanvas, setDiskConflict],
-  );
-  const handleCanvasFileChangedRef = useRef(handleCanvasFileChanged);
-  handleCanvasFileChangedRef.current = handleCanvasFileChanged;
-
-  useEffect(() => {
-    // Dev server only: the Electron build has no HMR channel (its PUTs are
-    // still revision-checked, so a stale save surfaces as a 412 notice).
-    // Cast: @types/bun also declares import.meta.hot (Bun's HMR API) and its
-    // callback-less `on` signature wins the merge.
-    const hot = import.meta.hot as unknown as ViteHotContext | undefined;
-    if (!hot) return;
-    // Event name mirrors CANVAS_FILE_CHANGED_EVENT; importing the constant
-    // would pull the Node-side watcher module into the client bundle.
-    const listener = (payload: CanvasFileChangedPayload) => {
-      handleCanvasFileChangedRef.current(payload);
-    };
-    hot.on("canvas:file-changed", listener);
-    return () => hot.off("canvas:file-changed", listener);
-  }, []);
-
-  const usedBoardNumbers = useMemo(() => {
-    const numbers = new Set<number>();
-    for (const canvas of canvases) {
-      const match = canvas.id.match(/^board-(\d+)$/);
-      if (match) numbers.add(Number(match[1]));
-    }
-    return numbers;
-  }, [canvases]);
-
-  const createBoard = async () => {
-    let index = 1;
-    while (usedBoardNumbers.has(index)) index += 1;
-    const id = `board-${index}`;
-    const document = createStarterCanvasDocument({
-      id,
-      title: "Untitled board",
-    });
-    await fetchJson<{ id: string }>("/api/canvases", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id, canvas: document }),
-    });
-    navigate(`/canvas/${encodeURIComponent(id)}`);
-  };
-
-  const deleteCanvas = async (canvas: CanvasListItem, event: MouseEvent) => {
-    event.stopPropagation();
-    if (!window.confirm(`Delete "${canvas.title}"?`)) return;
-    await fetchJson<{ ok: true }>(`/api/canvases/${encodeURIComponent(canvas.id)}`, {
-      method: "DELETE",
-    });
-    await loadCanvases();
-  };
-
   const handleBackToBoards = async () => {
     const saved = await flushPendingSave();
     // A conflicted/locked board can never flush — the on-disk copy is the
     // source of truth there, so leaving must not be blocked by it.
-    if (saved || projectSaveIssue !== null || diskConflict) navigate("/");
+    if (saved || board.projectSaveIssue !== null || board.diskConflict) navigate("/");
   };
 
   if (isDocumentRoute(route) || route.name === "project") {
@@ -934,254 +140,23 @@ export function App() {
     }
 
     if (route.name === "view" || route.name === "embed") {
-      const viewer = (
-        <InteractiveCanvasViewer
-          document={activeDocument}
-          view={route.view}
-          interactive
-          bare
-          showNavigationControls
-          canvasStyle={canvasStyleSettings.style}
-        />
-      );
-      // The page behind the viewer is the board itself: a dark theme gets no light frame.
-      const boardSurface = { background: canvasStyleSettings.style.boardBackground };
-
-      if (route.name === "embed") {
-        return <main className="fixed inset-0 overflow-hidden" style={boardSurface}>{viewer}</main>;
-      }
-
-      return (
-        <main className="fixed inset-0 overflow-hidden" style={boardSurface}>
-          {viewer}
-          <header className="pointer-events-none absolute inset-x-0 top-0 z-panel flex items-start justify-between gap-3 p-4">
-            <div className="pointer-events-auto flex min-w-0 items-center gap-2 rounded border border-border bg-background/95 p-1.5 shadow-glass backdrop-blur-glass">
-              <Button
-                type="button"
-                size="icon-sm"
-                variant="ghost"
-                aria-label="Back to boards"
-                title="Back to boards"
-                onClick={() => navigate("/")}
-              >
-                <ArrowLeftIcon className="h-4 w-4" />
-              </Button>
-              <span className="max-w-[50vw] truncate px-1 text-ui-lg font-medium text-ink">
-                {activeDocument.title ?? activeDocument.id}
-              </span>
-            </div>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              className="pointer-events-auto bg-background/95 shadow-glass backdrop-blur-glass dark:bg-background/95"
-              onClick={() => navigate(`/canvas/${encodeURIComponent(route.id)}`)}
-            >
-              Edit board
-            </Button>
-          </header>
-        </main>
-      );
+      return <ViewerPage route={route} document={activeDocument} canvasStyle={canvasStyleSettings.style} />;
     }
 
-    const devRail = devPagesEnabled();
-    const isLocalBoard = route.name === "canvas";
-
     return (
-      <div className="min-h-screen bg-background p-4">
-        <InteractiveCanvasEditor
-          key={`${activeDocument.id}:${editorDocumentRevision}`}
-          document={activeDocument}
-          editableTitle
-          canvasStyle={canvasStyleSettings.style}
-          showInspector={showInspector && !showAgent && !showStyle}
-          // A side panel, not a screenOverlay: the overlay sits inside the
-          // stage, where a click would hit-test the board under the rail and
-          // the wheel would pan the board instead of scrolling the rail.
-          sidePanel={
-            showStyle && !showAgent ? (
-              <StyleRail
-                settings={canvasStyleSettings.settings}
-                style={canvasStyleSettings.style}
-                overrides={canvasStyleSettings.overrides}
-                onSelectTheme={canvasStyleSettings.setTheme}
-                onChange={canvasStyleSettings.setToken}
-                onResetKey={canvasStyleSettings.resetToken}
-                onResetTheme={canvasStyleSettings.resetTheme}
-                onClose={() => setShowStyle(false)}
-              />
-            ) : undefined
-          }
-          onDocumentChange={queueAutosave}
-          topBarLeading={
-            <Button
-              type="button"
-              size="icon-sm"
-              variant="ghost"
-              aria-label="Back to boards"
-              title="Back to boards"
-              onClick={() => void handleBackToBoards()}
-            >
-              <ArrowLeftIcon className="h-4 w-4" />
-            </Button>
-          }
-          ref={editorRef}
-          onEditorStateChange={handleEditorStateChange}
-          cameraOnly={cameraLocked}
-          worldOverlay={cameraLocked && isLocalBoard ? (
-            <GhostPreviewLayer
-              canvasId={route.id}
-              sessionId={agentSession.sessionId}
-              refreshSignal={agentSession.previewRefreshSignal}
-              baselineDocument={agentBaselineDocument ?? activeDocument}
-              proposal={visibleAgentProposal}
-              workFrame={agentWorkFrame}
-              onPreviewRectChange={setAgentPreviewRect}
-            />
-          ) : undefined}
-          screenOverlay={
-            <>
-              {!isLocalBoard && projectSaveIssue ? (
-                <SaveIssueNotice
-                  message={
-                    projectSaveIssue === "conflict"
-                      ? "Board changed on disk — reload to keep editing."
-                      : "Another session is editing this board — saving is blocked."
-                  }
-                >
-                  <Button type="button" size="sm" variant="outline" onClick={reloadProjectBoard}>
-                    Reload
-                  </Button>
-                </SaveIssueNotice>
-              ) : null}
-              {isLocalBoard && diskConflict ? (
-                <SaveIssueNotice message="Canvas changed on disk.">
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => void reloadLocalCanvas()}
-                  >
-                    Reload
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => void keepLocalCanvas()}
-                  >
-                    Keep mine
-                  </Button>
-                </SaveIssueNotice>
-              ) : null}
-              {cameraLocked && editorState ? (
-                <GhostPreviewScrim
-                  previewRect={agentPreviewRect}
-                  viewport={editorState.viewport}
-                />
-              ) : null}
-              {showAgent ? (
-                <div className="pointer-events-auto">
-                  <AgentSidebar
-                    status={agentSession.status}
-                    onClose={() => setShowAgent(false)}
-                    acceptedResult={agentSession.acceptedResult}
-                    description={activeDocument.description}
-                    pinningTargetLabel={
-                      editorState?.tool === "annotation"
-                        ? targetLabelForSelection(activeDocument, editorState.selection)
-                        : undefined
-                    }
-                    queue={{
-                      notes: agentNotes,
-                      onRemoveNote: handleRemoveAgentNote,
-                      onPanToNote: handlePanToAgentNote,
-                      onAddNote: handleAddAgentNote,
-                      onRun: handleRunAgent,
-                    }}
-                    session={{
-                      canvasId: route.name === "canvas" ? route.id : "",
-                      sessionId: agentSession.sessionId,
-                      attempts: agentSession.attempts,
-                      baselineDocument: agentBaselineDocument ?? activeDocument,
-                      proposal: agentSession.proposal,
-                      lastGoodProposal: agentSession.lastGoodProposal,
-                      abandoned: agentSession.abandonment,
-                      error: agentSession.error,
-                      harnessUnavailable: agentSession.harnessUnavailable,
-                      acceptConflict: agentSession.acceptConflict,
-                      onRefine: async (instruction) => {
-                        await agentSession.refine(instruction);
-                      },
-                      onAccept: agentSession.accept,
-                      onReject: agentSession.reject,
-                      onRetry: () => restartAgentRun(),
-                      onClose: () => setShowAgent(false),
-                      onDiscardConflict: agentSession.reject,
-                      onTryAgainOnCurrentBoard: () => restartAgentRun(),
-                      onStartOver: restartAgentRun,
-                    }}
-                  />
-                </div>
-              ) : null}
-              {cameraLocked ? (
-                <CameraLockPill onStop={() => void agentSession.stop()} />
-              ) : null}
-            </>
-          }
-          topBarActions={
-            <>
-              <Button
-                type="button"
-                size="sm"
-                variant={showInspector && !showAgent && !showStyle ? "default" : "outline"}
-                aria-pressed={showInspector && !showAgent && !showStyle}
-                title="Toggle the inspector (text, detail, icon, size, color)"
-                onClick={toggleInspector}
-              >
-                <BoxIcon className="h-4 w-4" />
-                Inspect
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant={showStyle && !showAgent ? "default" : "outline"}
-                aria-pressed={showStyle && !showAgent}
-                title="Toggle style settings"
-                onClick={toggleStyle}
-              >
-                <PanelRightIcon className="h-4 w-4" />
-                Style
-              </Button>
-              {isLocalBoard ? (
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={showAgent ? "default" : "outline"}
-                  aria-pressed={showAgent}
-                  title="Toggle AI"
-                  onClick={toggleAgent}
-                >
-                  <span aria-hidden="true">✦</span>
-                  AI
-                  {agentNotes.length > 0 ? (
-                    <span className="rounded-full bg-current/10 px-1.5 text-micro leading-ui">
-                      {agentNotes.length}
-                    </span>
-                  ) : null}
-                </Button>
-              ) : null}
-            </>
-          }
-        />
-        {devRail ? (
-          <DevRail
-            document={activeDocument}
-            editorState={editorState}
-            editorRef={editorRef}
-          />
-        ) : null}
-      </div>
+      <EditorPage
+        route={route}
+        document={activeDocument}
+        documentRevision={editorDocumentRevision}
+        canvasStyleSettings={canvasStyleSettings}
+        panels={panels}
+        board={board}
+        agent={agent}
+        editorRef={editorRef}
+        editorState={editorState}
+        onEditorStateChange={handleEditorStateChange}
+        onBack={() => void handleBackToBoards()}
+      />
     );
   }
 
@@ -1245,90 +220,13 @@ export function App() {
         </Button>
       }
     >
-      <div className="flex flex-col gap-6">
-        <section>
-          <h2 className="mb-3 text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
-            Canvas files
-          </h2>
-          {listState === "loading" ? (
-            <p className="text-ui-lg text-muted-foreground">Loading canvas files...</p>
-          ) : listState === "error" ? (
-            <p className="text-ui-lg text-destructive">Could not load canvas files.</p>
-          ) : canvases.length === 0 ? (
-            <p className="text-ui-lg text-muted-foreground">
-              No canvas files yet. Create a board to add one.
-            </p>
-          ) : (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {canvases.map((canvas) => (
-                <button
-                  key={canvas.id}
-                  type="button"
-                  onClick={() => navigate(`/canvas/${encodeURIComponent(canvas.id)}`)}
-                  className="group relative overflow-hidden rounded border border-border bg-card text-left transition-colors hover:bg-muted/50"
-                >
-                  <span
-                    className="block aspect-16/10 w-full overflow-hidden border-b border-border"
-                    style={{ background: canvasStyleSettings.style.boardBackground }}
-                  >
-                    <img
-                      src={`/api/canvases/${encodeURIComponent(canvas.id)}/preview.svg?style=${previewStyleKey}`}
-                      loading="lazy"
-                      alt=""
-                      draggable={false}
-                      className="h-full w-full object-contain"
-                      onError={(event) => {
-                        event.currentTarget.style.display = "none";
-                      }}
-                    />
-                  </span>
-                  <span className="block px-4 py-3">
-                    <span className="block truncate pr-6 text-ui-lg font-medium text-ink">
-                      {canvas.title}
-                    </span>
-                  </span>
-                  <span
-                    role="button"
-                    aria-label={`Delete ${canvas.title}`}
-                    onClick={(event) => void deleteCanvas(canvas, event)}
-                    className="absolute right-3 top-3 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-danger-soft hover:text-danger group-hover:opacity-100"
-                  >
-                    <TrashIcon className="h-3.5 w-3.5" />
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
-
-        <ProjectBoardsSection />
-      </div>
+      <BoardsPage
+        canvases={canvases}
+        listState={listState}
+        boardBackground={canvasStyleSettings.style.boardBackground}
+        previewStyleKey={previewStyleKey}
+        onDelete={(canvas, event) => void deleteCanvas(canvas, event)}
+      />
     </RouterShell>
-  );
-}
-
-/** Non-blocking amber notice pinned to the top of the editor's screen overlay. */
-function SaveIssueNotice({ message, children }: { message: string; children: ReactNode }) {
-  return (
-    <div className="pointer-events-auto absolute left-1/2 top-4 z-panel flex -translate-x-1/2 items-center gap-3 rounded border border-warning-line bg-warning-soft px-4 py-2 text-ui-lg text-warning shadow-glass">
-      <AlertTriangleIcon className="h-4 w-4 shrink-0" />
-      <span>{message}</span>
-      {children}
-    </div>
-  );
-}
-
-function StatusPage({ message, showBack = true }: { message: string; showBack?: boolean }) {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-8">
-      <div className="flex flex-col items-center gap-4 text-center">
-        <p className="text-ui-lg text-muted-foreground">{message}</p>
-        {showBack ? (
-          <Button type="button" variant="outline" onClick={() => navigate("/")}>
-            Back to boards
-          </Button>
-        ) : null}
-      </div>
-    </div>
   );
 }

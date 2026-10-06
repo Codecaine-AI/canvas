@@ -1,0 +1,55 @@
+.canvas-style-range {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: var(--ds-space-1);
+  border-radius: var(--ds-radius-pill);
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+
+.canvas-style-range:focus-visible {
+  outline: var(--ds-border-width-focus) solid var(--ring);
+  outline-offset: 3px;
+}
+
+.canvas-style-range::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  height: var(--ds-space-3);
+  width: var(--ds-space-3);
+  border: none;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-accent);
+}
+
+.canvas-style-range::-moz-range-thumb {
+  height: var(--ds-space-3);
+  width: var(--ds-space-3);
+  border: none;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-accent);
+}
+
+/* Exact value beside a slider; native spinners hidden (arrow keys still step). */
+.canvas-style-number {
+  width: 3.75rem;
+  height: var(--ds-space-6);
+  padding: 0 var(--ds-space-1-5);
+  border: var(--ds-border-width-hairline) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--foreground);
+  font-size: var(--ds-font-size-ui-2xs);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.canvas-style-number::-webkit-inner-spin-button,
+.canvas-style-number::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

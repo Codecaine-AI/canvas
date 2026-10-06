@@ -1,0 +1,164 @@
+.canvas-style-theme-card {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--ds-space-1-5);
+  padding: var(--ds-space-1) var(--ds-space-1) var(--ds-space-1-5);
+  border: var(--ds-border-width-hairline) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  cursor: pointer;
+}
+
+.canvas-style-theme-card:hover {
+  border-color: var(--ds-color-border-strong);
+}
+
+.canvas-style-theme-card[data-active="true"] {
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 var(--ds-border-width-hairline) var(--foreground);
+}
+
+.canvas-style-theme-card:has(input:focus-visible) {
+  outline: var(--ds-border-width-focus) solid var(--ring);
+  outline-offset: var(--ds-focus-ring-offset);
+}
+
+.canvas-style-theme-preview {
+  position: relative;
+  display: block;
+  height: 3.5rem;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background-size: 7px 7px;
+}
+
+.canvas-style-theme-preview-section {
+  position: absolute;
+  top: 7px;
+  bottom: 7px;
+  left: 6px;
+  width: 64%;
+  border: var(--ds-border-width-hairline) solid;
+  border-radius: var(--ds-radius-base);
+}
+
+.canvas-style-theme-preview-chip {
+  position: absolute;
+  display: flex;
+  width: 46%;
+  height: 8px;
+  align-items: center;
+  padding: 0 3px;
+  border: var(--ds-border-width-hairline) solid;
+  border-radius: var(--ds-radius-base);
+}
+
+.canvas-style-theme-preview-chip[data-placement="floating"] {
+  top: 3px;
+  left: 3px;
+}
+
+/* Pinned: flush in the section's corner — top/left edges on the frame, only right + bottom drawn. */
+.canvas-style-theme-preview-chip[data-placement="pinned"] {
+  top: -1px;
+  left: -1px;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  border-radius: var(--ds-radius-base) 0 var(--ds-radius-base) 0;
+}
+
+.canvas-style-theme-preview-chip > span {
+  display: block;
+  width: 70%;
+  height: 2px;
+  border-radius: var(--ds-radius-base);
+}
+
+.canvas-style-theme-preview-card {
+  position: absolute;
+  top: 16px;
+  left: 7px;
+  right: 9px;
+  display: flex;
+  height: 17px;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--ds-space-0-5);
+  padding: 0 var(--ds-space-1);
+  border: var(--ds-border-width-hairline) solid;
+  border-radius: var(--ds-radius-base);
+}
+
+.canvas-style-theme-preview-card > span {
+  display: block;
+  height: 2px;
+  border-radius: var(--ds-radius-base);
+}
+
+.canvas-style-theme-preview-card > span:first-child {
+  width: 62%;
+}
+
+.canvas-style-theme-preview-card > span:last-child {
+  width: 40%;
+  height: 1.5px;
+}
+
+.canvas-style-theme-preview-inks {
+  position: absolute;
+  top: 50%;
+  right: 7px;
+  display: grid;
+  grid-template-columns: repeat(2, 6px);
+  gap: 3px;
+  transform: translateY(-50%);
+}
+
+.canvas-style-theme-preview-inks > span {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--ds-radius-pill);
+}
+
+.canvas-style-theme-check {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: inline-flex;
+  width: 0.875rem;
+  height: 0.875rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--ds-radius-pill);
+  background: var(--foreground);
+  color: var(--background);
+  /* A light ring keeps the badge visible on the dark theme's board too. */
+  box-shadow: 0 0 0 var(--ds-border-width-ring) var(--card);
+}
+
+.canvas-style-theme-label {
+  display: flex;
+  min-height: var(--ds-space-7);
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-1);
+  color: var(--muted-foreground);
+  font-size: var(--ds-font-size-ui-2xs);
+  line-height: 0.875rem;
+  text-align: center;
+}
+
+.canvas-style-theme-card[data-active="true"] .canvas-style-theme-label {
+  color: var(--foreground);
+  font-weight: var(--ds-font-weight-semibold);
+}
+
+.canvas-style-theme-edited {
+  width: 5px;
+  height: 5px;
+  flex: none;
+  border-radius: var(--ds-radius-pill);
+  background: var(--accent-foreground);
+}

@@ -9,8 +9,9 @@ import "@codecaine-ai/design-system/fonts.css";
 import { useBrowserFonts } from "@codecaine-ai/text-measure/browser";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App";
+// The root stylesheet before App: the component sheets App imports load after the design-system layout.css.
 import "./index.css";
+import { App } from "./App";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

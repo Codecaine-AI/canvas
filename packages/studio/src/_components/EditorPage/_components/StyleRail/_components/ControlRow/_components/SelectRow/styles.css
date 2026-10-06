@@ -1,0 +1,40 @@
+/* Select token: a segmented control of native radios. */
+.canvas-style-segmented {
+  display: flex;
+  gap: var(--ds-space-0-5);
+  padding: var(--ds-space-0-5);
+  border-radius: var(--radius);
+  background: var(--muted);
+}
+
+/* position: relative keeps the visually hidden radio inside its row, so focusing it never scrolls the rail. */
+.canvas-style-segment {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ds-space-1) var(--ds-space-1-5);
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  font-size: var(--ds-font-size-ui-2xs);
+  line-height: 1rem;
+  cursor: pointer;
+}
+
+.canvas-style-segment:hover {
+  color: var(--foreground);
+}
+
+.canvas-style-segment[data-active="true"] {
+  background: var(--card);
+  color: var(--foreground);
+  font-weight: var(--ds-font-weight-medium);
+  box-shadow: 0 0 0 var(--ds-border-width-hairline) var(--border);
+}
+
+.canvas-style-segment:has(input:focus-visible) {
+  outline: var(--ds-border-width-focus) solid var(--ring);
+  outline-offset: 1px;
+}

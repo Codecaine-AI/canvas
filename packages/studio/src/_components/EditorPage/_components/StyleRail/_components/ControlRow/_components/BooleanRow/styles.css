@@ -1,0 +1,40 @@
+/* Boolean token: a switch. */
+.canvas-style-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  width: 30px;
+  height: 17px;
+  flex-shrink: 0;
+  border-radius: var(--ds-radius-pill);
+  background: var(--border);
+  cursor: pointer;
+  transition: background var(--ds-motion-duration-base) var(--ds-motion-easing-standard);
+}
+
+.canvas-style-toggle::after {
+  content: "";
+  position: absolute;
+  top: var(--ds-space-0-5);
+  left: var(--ds-space-0-5);
+  width: 13px;
+  height: 13px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--background);
+  box-shadow: 0 0 0 var(--ds-border-width-hairline) var(--border);
+  transition: transform var(--ds-motion-duration-base) var(--ds-motion-easing-standard);
+}
+
+.canvas-style-toggle:checked {
+  background: var(--ds-color-accent);
+}
+
+.canvas-style-toggle:checked::after {
+  transform: translateX(13px);
+  box-shadow: none;
+}
+
+.canvas-style-toggle:focus-visible {
+  outline: var(--ds-border-width-focus) solid var(--ring);
+  outline-offset: var(--ds-focus-ring-offset);
+}

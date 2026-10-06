@@ -1,0 +1,57 @@
+/* Color token: a swatch over a checkerboard (alpha shows) hiding the native picker, plus the text. */
+.canvas-style-swatch {
+  position: relative;
+  display: inline-flex;
+  width: var(--ds-space-6);
+  height: var(--ds-space-6);
+  flex: none;
+  overflow: hidden;
+  border: var(--ds-border-width-hairline) solid var(--border);
+  border-radius: var(--radius);
+  background-color: #ffffff;
+  background-image:
+    linear-gradient(45deg, #d4d4d4 25%, transparent 25%),
+    linear-gradient(-45deg, #d4d4d4 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #d4d4d4 75%),
+    linear-gradient(-45deg, transparent 75%, #d4d4d4 75%);
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+  background-size: 8px 8px;
+  cursor: pointer;
+}
+
+.canvas-style-swatch-fill {
+  position: absolute;
+  inset: 0;
+}
+
+.canvas-style-swatch input[type="color"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.canvas-style-swatch:has(input:focus-visible) {
+  outline: var(--ds-border-width-focus) solid var(--ring);
+  outline-offset: 1px;
+}
+
+.canvas-style-color-text {
+  width: 8.75rem;
+  height: var(--ds-space-6);
+  padding: 0 var(--ds-space-1-5);
+  border: var(--ds-border-width-hairline) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--ds-font-family-mono);
+  font-size: var(--ds-font-size-ui-2xs);
+}
+
+.canvas-style-color-text[aria-invalid="true"] {
+  border-color: var(--destructive);
+}

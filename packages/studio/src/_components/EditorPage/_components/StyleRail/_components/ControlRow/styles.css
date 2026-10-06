@@ -1,0 +1,17 @@
+/* An overridden token whose visibleWhen does not hold: shown dimmed so it can be reset. */
+.canvas-style-rail-inactive-row > :first-child {
+  opacity: 0.55;
+}
+
+.canvas-style-rail-inactive-note {
+  margin-top: var(--ds-space-1);
+  color: var(--muted-foreground);
+  font-size: var(--ds-font-size-ui-2xs);
+  line-height: 0.875rem;
+}
+
+.canvas-style-number:focus-visible,
+.canvas-style-color-text:focus-visible {
+  outline: var(--ds-border-width-focus) solid var(--ring);
+  outline-offset: 1px;
+}
