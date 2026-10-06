@@ -1,53 +1,31 @@
-import { createContext, useCallback, useContext, useEffect, useState, type CSSProperties } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import {
-  StyleOverlay,
-  StyleSettingsRail,
-  clampStyleRailWidth,
   defaultStyleSettings,
-  loadStyleRailCollapsed,
-  loadStyleRailWidth,
   loadStyleSettings,
   mergeStyleSettings,
-  saveStyleRailCollapsed,
-  saveStyleRailWidth,
   saveStyleSettings,
-  styleEffectClass,
-  styleVars,
   type StyleSettings,
   type StyleSettingsPatch,
-  type StyleSystemConfig,
 } from "@agent-kernel/viewer-shell";
 
-import { Sidebar, type View } from "./components/Sidebar";
-import { navigate } from "./lib/navigation";
+import { RouterShell, type View } from "./_components/RouterShell";
+import { CANVAS_STYLE_CONFIG } from "./lib/style-config";
 import { AgentConfigPage } from "./pages/AgentConfigPage";
 import { TracesPage } from "./pages/TracesPage";
 
 /**
- * The viewer shell: a persistent sidebar around two views over the harness's
- * kernel APIs, addressed by pathname (the simplest honest routing for a
- * two-page tool):
+ * The viewer: the design-system app shell (_components/RouterShell) around two views over the
+ * harness's kernel APIs, addressed by pathname (the simplest honest routing for a two-page tool):
  *
  *   /traces          session list + live trace viewer   (also "/")
  *   /config          agent manifest + prompt lab
  *
- * The whole app is the agent operator surface. Styling comes from the SHARED
- * viewer style system (@agent-kernel/viewer-shell): the right-edge style rail
- * (THEME / EFFECTS / TRACE tabs) keeps its theme, size, density and grain
- * controls; the colors come from the design-system tokens and host contract
- * (main.tsx), as RGB triplets. Canvas defaults to dark; the rail can flip it.
+ * The whole app is the agent operator surface. Styling comes from the SHARED viewer style system
+ * (@agent-kernel/viewer-shell), whose panel is the shell's Style inspector (THEME / EFFECTS /
+ * TRACE / LAYOUT tabs): it keeps its theme, size, density and grain controls; the colors come from
+ * the design-system tokens and host contract (main.tsx), as RGB triplets. Canvas defaults to dark;
+ * the topbar toggle and the inspector can flip it.
  */
-
-/** Canvas-scoped binding for the shared style system. */
-const CANVAS_STYLE_CONFIG: StyleSystemConfig = {
-  settingsStorageKey: "canvasAgentViewerStyle.v1",
-  railCollapsedStorageKey: "canvasAgentViewerStyleRailCollapsed",
-  railWidthStorageKey: "canvasAgentViewerStyleRailWidth",
-  defaultTheme: "dark",
-  neutralTokenFormat: "triplet",
-  // All four sections: adopting the shared KernelTraceWorkspace IS the
-  // opt-in for LAYOUT — its geometry vars are consumed by the workspace.
-};
 
 /** Style settings for pages that thread view options (trace icon side/style). */
 const StyleSettingsContext = createContext<StyleSettings>(
@@ -74,10 +52,6 @@ export function App() {
   const [styleSettings, setStyleSettingsState] = useState<StyleSettings>(() =>
     loadStyleSettings(CANVAS_STYLE_CONFIG),
   );
-  const [railCollapsed, setRailCollapsedState] = useState(() =>
-    loadStyleRailCollapsed(CANVAS_STYLE_CONFIG),
-  );
-  const [railWidth, setRailWidthState] = useState(() => loadStyleRailWidth(CANVAS_STYLE_CONFIG));
 
   useEffect(() => {
     const handlePopState = () => setUrl(currentUrl());
@@ -87,63 +61,24 @@ export function App() {
 
   useEffect(() => {
     saveStyleSettings(CANVAS_STYLE_CONFIG, styleSettings);
-    document.documentElement.dataset.theme = styleSettings.theme;
-    document.documentElement.style.colorScheme = styleSettings.theme;
   }, [styleSettings]);
 
   const handleStyleChange = useCallback((updates: StyleSettingsPatch) => {
     setStyleSettingsState((current) => mergeStyleSettings(CANVAS_STYLE_CONFIG, current, updates));
   }, []);
 
-  const setRailCollapsed = useCallback((collapsed: boolean) => {
-    setRailCollapsedState(collapsed);
-    saveStyleRailCollapsed(CANVAS_STYLE_CONFIG, collapsed);
-  }, []);
-
-  const setRailWidth = useCallback((width: number) => {
-    setRailWidthState(clampStyleRailWidth(width));
-  }, []);
-
-  const finishRailResize = useCallback(() => {
-    setRailWidthState((width) => {
-      saveStyleRailWidth(CANVAS_STYLE_CONFIG, width);
-      return width;
-    });
-  }, []);
-
   const view = parseView(url.split("?")[0] ?? "/");
   const ActivePage = view === "config" ? AgentConfigPage : TracesPage;
 
-  const shellStyle = {
-    ...styleVars(styleSettings, CANVAS_STYLE_CONFIG),
-    "--research-style-rail-track": railCollapsed ? "52px" : `${railWidth}px`,
-  } as CSSProperties;
-
   return (
     <StyleSettingsContext.Provider value={styleSettings}>
-      <div
-        className={`research-style-shell ${styleEffectClass(styleSettings)} flex h-screen bg-background text-foreground`}
-        style={shellStyle}
+      <RouterShell
+        view={view}
+        styleSettings={styleSettings}
+        onStyleSettingsChange={handleStyleChange}
       >
-        <Sidebar view={view} onNavigate={navigate} />
-        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4">
-          <ActivePage key={url} />
-        </main>
-        <div className="flex h-full shrink-0" style={{ width: railCollapsed ? 52 : railWidth }}>
-          <StyleSettingsRail
-            collapsed={railCollapsed}
-            onCollapsedChange={setRailCollapsed}
-            onResizeEnd={finishRailResize}
-            onResizeStart={() => {}}
-            onWidthChange={setRailWidth}
-            orientation="vertical"
-            sections={CANVAS_STYLE_CONFIG.sections}
-            settings={styleSettings}
-            onSettingsChange={handleStyleChange}
-          />
-        </div>
-        <StyleOverlay settings={styleSettings.grain} />
-      </div>
+        <ActivePage key={url} />
+      </RouterShell>
     </StyleSettingsContext.Provider>
   );
 }

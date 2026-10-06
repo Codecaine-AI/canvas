@@ -144,7 +144,7 @@ export function TracesPage() {
   }
 
   return (
-    <AgentSurface className="flex h-full min-h-0 flex-1 flex-col">
+    <AgentSurface className="canvas-trace-frame flex h-full min-h-0 flex-1 flex-col">
       <KernelTraceWorkspace
         rows={rows}
         selectedRowId={selectedSession?.id ?? activeId}

@@ -4,7 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="data:," />
-    <title>Canvas Agent — Traces</title>
+    <title>Canvas Agent</title>
+    <script>
+      // Before the bundle runs: the theme saved in the style engine's settings (the one source of
+      // truth, lib/style-config.ts; .v2 is the engine's key, .v1 the one it carries over), so a
+      // stored light theme never paints dark first. Nothing stored keeps the dark default above.
+      // RouterShell keeps data-theme in step afterwards.
+      try {
+        var saved =
+          localStorage.getItem("canvasAgentViewerStyle.v2") ||
+          localStorage.getItem("canvasAgentViewerStyle.v1");
+        var theme = saved && JSON.parse(saved).theme;
+        if (theme === "light" || theme === "dark") document.documentElement.setAttribute("data-theme", theme);
+      } catch (error) {
+        // Storage blocked or a malformed value: the dark default stays until the app mounts.
+      }
+    </script>
   </head>
   <body class="antialiased min-h-screen">
     <div id="root"></div>

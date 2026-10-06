@@ -9,7 +9,7 @@ import type { SessionTranscript } from "../hooks/use-transcript";
  */
 
 const CHROME_LABEL =
-  "font-mono text-micro font-bold uppercase tracking-micro-wide text-muted-foreground";
+  "font-mono text-micro font-semibold uppercase tracking-micro-wide text-muted-foreground";
 
 export function RunBrief({
   transcript,
@@ -52,7 +52,7 @@ export function RunBrief({
             type="button"
             onClick={() => setContextOpen((open) => !open)}
             aria-expanded={contextOpen}
-            className="rounded border border-border px-1.5 py-0.5 font-mono text-micro font-bold uppercase tracking-micro text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
+            className="rounded border border-border px-1.5 py-0.5 font-mono text-micro font-semibold uppercase tracking-micro text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
           >
             {contextOpen ? "▾" : "▸"} Agent context
           </button>

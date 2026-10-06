@@ -49,13 +49,74 @@
   --color-border: rgb(var(--border));
   --color-input: rgb(var(--input));
   --color-ring: rgb(var(--ring));
-  /* The one design-system radius (host-contract.css: --radius is radius.base). */
-  --radius-sm: var(--radius);
-  --radius-md: var(--radius);
-  --radius-lg: var(--radius);
-  --radius-xl: var(--radius);
 }
 
 body {
   font-family: var(--ds-font-family-sans);
+}
+
+/*
+ * The app shell (guide/layout.md, rendered by _components/RouterShell), sized by the style
+ * engine's Layout knobs as shell-scoped --ds-layout-* overrides (decision 32), as in
+ * simple-research-kernel:
+ *
+ *   Header  the topbar, the sidebar header and the inspector header, which replaces the style
+ *           rail's header, together with the trace workspace header that reads it directly
+ *           (72px by default, the token's value)
+ *   Frame   the content padding around the page on every route (16px by default, the old p-4)
+ *   width   the inspector, once the user drags its edge (the shell's 360px until then; capped
+ *           below)
+ *
+ * The engine root (.research-style-shell) wraps .ds-shell and writes the knobs inline; these are
+ * the defaults outside it. The tool pages fill the window under the topbar: the engine's own
+ * workspace height (100vh minus the frame padding) predates the topbar.
+ */
+:root {
+  --research-layout-padding: var(--ds-space-4);
+  --research-header-height: var(--ds-layout-topbar-height);
+  --research-style-rail-width: var(--ds-layout-inspector-width);
+}
+
+.ds-shell {
+  --ds-layout-topbar-height: var(--research-header-height);
+  --ds-layout-content-padding-top: var(--research-layout-padding);
+  --ds-layout-content-padding-x: var(--research-layout-padding);
+  --ds-layout-content-padding-bottom: var(--research-layout-padding);
+  --research-workspace-height: calc(
+    100vh - var(--ds-layout-topbar-height) - 2 * var(--research-layout-padding)
+  );
+}
+
+/*
+ * Above 800px the inspector pushes the workspace, so a dragged width is capped at half the window
+ * to keep the workspace usable in the 801-1023px band. At 800px and below (layout.css's narrow
+ * block, rule 13) the side padding is the shell's space.4 whatever the Frame knob says, and the
+ * inspector covers the workspace at min(width, 100%).
+ */
+.ds-shell {
+  --ds-layout-inspector-width: min(var(--research-style-rail-width), 50vw);
+}
+
+@media (max-width: 800px) {
+  .ds-shell {
+    --ds-layout-content-padding-x: var(--ds-space-4);
+    --ds-layout-inspector-width: var(--research-style-rail-width);
+  }
+}
+
+/*
+ * The trace page frames the shared trace workspace in its own bordered panel (AgentSurface), so the
+ * workspace inside is two hairlines shorter: the pair then fills the window under the topbar exactly
+ * and the document does not scroll (before the shell, main scrolled those 2px on its own).
+ */
+.canvas-trace-frame {
+  --research-workspace-height: calc(
+    100vh - var(--ds-layout-topbar-height) - 2 * var(--research-layout-padding) -
+      2 * var(--ds-border-width-hairline)
+  );
+}
+
+/* Dragging the inspector edge: the columns follow the pointer instead of easing after it. */
+.research-style-shell-resizing .ds-shell {
+  transition: none;
 }

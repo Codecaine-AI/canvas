@@ -5,8 +5,9 @@
  * host-contract.css (the agent-viewer contract the @agent-kernel viewer packages and prompt-kit
  * read: the shadcn names, status-*, trace-*, syntax-*, agentprism-* and editor-*), both loaded
  * from main.tsx. The contract writes its colors as RGB triplets, so this file and index.css map
- * them as rgb(var(--x)). The viewer stays dark by default: the App stamps data-theme on <html>
- * from the style settings (default dark), and index.html starts dark before React mounts.
+ * them as rgb(var(--x)). The viewer stays dark by default: RouterShell stamps data-theme on <html>
+ * from the style settings (default dark), and index.html applies the stored theme (else dark)
+ * before the bundle runs.
  *
  * What stays here: the Tailwind names for the viewer-only contract colors, the display face,
  * and the document-level body and scrollbar rules.

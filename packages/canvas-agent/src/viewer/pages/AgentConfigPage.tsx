@@ -156,7 +156,7 @@ export function AgentConfigPage() {
       : null;
 
   return (
-    <AgentSurface className="flex h-full min-h-140 flex-col">
+    <AgentSurface className="flex h-[var(--research-workspace-height)] min-h-140 flex-col">
       <header className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-2.5 font-mono">
         <h2 className="text-ui-sm font-bold text-ink">{LAYOUT_AGENT_NAME}</h2>
         {promptHash ? (
@@ -168,8 +168,9 @@ export function AgentConfigPage() {
           </span>
         ) : null}
         <button
+          aria-label="Prompt style"
           aria-pressed={styleSidebar.open}
-          className="ml-auto shrink-0 rounded border border-border px-1.5 py-0.5 text-ui-2xs font-bold uppercase tracking-micro text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
+          className="ml-auto shrink-0 rounded border border-border px-1.5 py-0.5 text-ui-2xs font-semibold uppercase tracking-micro text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
           onClick={() =>
             setStyleSidebar((current) => ({
               ...current,
