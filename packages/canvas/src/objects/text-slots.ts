@@ -4,7 +4,13 @@ import type { InteractiveCanvasObject, InteractiveCanvasObjectType } from "../st
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { inscribedTextRect } from "./inscribed-text-rects";
 import { CENTER_TEXT_INSET_PX } from "./text-slot-constants";
-import { DEFAULT_CANVAS_STYLE, type CanvasStyle, type CanvasStyleFont } from "../theme/canvas-style";
+import {
+  DEFAULT_CANVAS_STYLE,
+  FIGJAM_CANVAS_STYLE,
+  type CanvasStyle,
+  type CanvasStyleFont,
+} from "../theme/canvas-style";
+import { withAlpha } from "../theme/color-math";
 import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK } from "../theme/fonts";
 import { measureWidth, wrapText, type FontSpec } from "../theme/text-measure";
 import { resolveIconPaint, resolveShapePaint, resolveStickyPaint } from "../theme/palette";
@@ -111,11 +117,11 @@ export interface ResolvedSlotDetail {
 // ---------------------------------------------------------------------------
 
 /**
- * The figjam object-text color (D8), kept for back-compat: it equals
- * FIGJAM_CANVAS_STYLE.textColor, and live renders resolve the active style's
- * `textColor` through resolveSlotTypography.
+ * The figjam object-text color (D8), kept for back-compat: it is
+ * FIGJAM_CANVAS_STYLE.textColor (`#000000`), and live renders resolve the
+ * active style's `textColor` through resolveSlotTypography.
  */
-export const OBJECT_TEXT_COLOR = "#000000";
+export const OBJECT_TEXT_COLOR = FIGJAM_CANVAS_STYLE.textColor;
 
 export const BELOW_TEXT_TYPES = ["icon"] as const;
 export type BelowTextType = (typeof BELOW_TEXT_TYPES)[number];
@@ -491,6 +497,12 @@ export const BELOW_TEXT_SLOT: TextSlot = belowTextSlot();
 /** Sticky body inset (px) — FigJam-sampled (STICKY text inset left/top). */
 export const INSET_BODY_PADDING_PX = { left: 21, top: 28, right: 21, bottom: 21 } as const;
 
+/**
+ * Paper sticky body text: the text color at this opacity (mirrors
+ * theme/palette.ts PAPER_STICKY_TEXT_OPACITY, which resolves the live paint).
+ */
+const INSET_BODY_TEXT_OPACITY = 0.8;
+
 /** "inset-body" — padded multi-line body area (sticky). Renders simple markdown at rest (D18). */
 export const INSET_BODY_TEXT_SLOT: TextSlot = {
   placement: "inset-body",
@@ -499,7 +511,8 @@ export const INSET_BODY_TEXT_SLOT: TextSlot = {
     fontWeight: 400,
     lineHeight: "36px",
     textAlign: "left",
-    color: "rgba(0, 0, 0, 0.8)",
+    // The figjam text color at 80%: `rgba(0, 0, 0, 0.8)`.
+    color: withAlpha(FIGJAM_CANVAS_STYLE.textColor, INSET_BODY_TEXT_OPACITY),
   },
   zoom: "natural",
   verticalAlign: "top",

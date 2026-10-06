@@ -88,8 +88,8 @@ describe("renderDocumentToSvg canvasStyle", () => {
     expect(svg).toBe(schematic);
     // Layer-cake section frame (1.5px border at half opacity) and a card shape with a 2px ink border,
     // rounded at the process radius (rx = 12 − 1).
-    expect(svg).toContain('stroke="rgba(91, 101, 120, 0.5)" stroke-width="1.5"');
-    expect(svg).toContain('rx="11" fill="#FFFFFF" stroke="#5B6578" stroke-width="2"');
+    expect(svg).toContain('stroke="rgba(102, 101, 98, 0.5)" stroke-width="1.5"');
+    expect(svg).toContain('rx="11" fill="#F8F8F7" stroke="#666562" stroke-width="2"');
     expect(svg).not.toBe(
       renderDocumentToSvg(styleFixture(), { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE }).svg,
     );
@@ -237,7 +237,7 @@ describe("CanvasStyleProvider / CanvasStage canvasStyle", () => {
       node.getAttribute("data-probe"),
     );
     expect(probes).toEqual([
-      "schematic-dark|2|#14171F|#00AA88|#FD8A8A",
+      "schematic-dark|2|#0D1117|#00AA88|#F85B53",
       // Same theme as the parent: merged over the parent's tokens, inks one by one.
       "figjam|9|#000000|#00AA88|#D5322F",
     ]);
@@ -267,12 +267,12 @@ describe("canvasStyleCssVariables / canvasStyleCssVar", () => {
     const variables = canvasStyleCssVariables(canvasThemePreset("schematic-dark"));
     expect(variables["--canvas-section-radius"]).toBe("2px");
     expect(variables["--canvas-title-chip-border"]).toBe("1.5px");
-    expect(variables["--canvas-board-background"]).toBe("#14171F");
-    expect(variables["--canvas-grid-dot-color"]).toBe("rgba(255, 255, 255, 0.07)");
+    expect(variables["--canvas-board-background"]).toBe("#0D1117");
+    expect(variables["--canvas-grid-dot-color"]).toBe("#3D444D");
     expect(variables["--canvas-connector-stroke-width-px"]).toBe("2px");
     expect(variables["--canvas-section-border-opacity"]).toBe("0.5");
     expect(variables["--canvas-text-font-weight"]).toBe("600");
-    expect(variables["--canvas-ink-teal"]).toBe("#5DE4C7");
+    expect(variables["--canvas-ink-teal"]).toBe("#39C5CF");
     const jsOnlyKeys = new Set<string>(CANVAS_STYLE_JS_ONLY_KEYS);
     const tokenControls = CANVAS_STYLE_CONTROLS.filter(
       (control) =>

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cssVar } from "@codecaine-ai/design-system";
 import type { CanvasAction, CanvasSelection } from "../../../../../state/actions";
 import type { InteractiveCanvasDocument } from "../../../../../state/schema";
 import { worldToScreen } from "../../../../viewport";
@@ -211,9 +212,7 @@ describe("annotation mode authoring", () => {
       />,
     );
     const popup = window.document.querySelector("[data-annotation-popup]") as HTMLElement;
-    expect(popup.style.boxShadow).toContain("0 0 0 0.5px");
-    expect(popup.style.boxShadow).toContain("0 2px 5px");
-    expect(popup.style.boxShadow).toContain("0 6px 18px");
+    expect(popup.style.boxShadow).toBe(cssVar("shadow.glass"));
     expect(popup.style.animation).toContain("canvas-selection-toolbar-enter 140ms");
   });
 

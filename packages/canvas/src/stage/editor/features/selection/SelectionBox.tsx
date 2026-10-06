@@ -3,6 +3,7 @@
 /**
  * Screen-space selection outline and resize-handle trim.
  */
+import { flat } from "@codecaine-ai/design-system";
 import {
   RESIZE_HANDLES,
   type ResizeHandle,
@@ -10,10 +11,11 @@ import {
 import { worldToScreen, type ViewportState } from "../../../viewport";
 import type { InteractiveCanvasDocument } from "../../../../state/schema";
 import { objectDefForType } from "../../../../objects/object-def";
+import { stageMarkColors } from "../../../../theme/canvas-style";
+import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import { resizeCursorFor } from "./resize";
 
 const HANDLE_SIZE = 12;
-const SELECTION_BLUE = "#0D99FF";
 const SELECTION_BORDER_WIDTH = 2;
 /** Grab thickness of the invisible per-edge resize strips. */
 const EDGE_HIT_THICKNESS = 8;
@@ -49,6 +51,9 @@ export function SelectionBox({
   selectedObjectIds: string[];
   interactiveHandles?: boolean;
 }) {
+  // A stage mark in the board's colors (decision 56): the accent outline and
+  // handle rings, board-surface handle bodies.
+  const marks = stageMarkColors(useCanvasStyle());
   if (selectedObjectIds.length === 0) return null;
   const objects = document.objects.filter((object) => selectedObjectIds.includes(object.id));
   if (objects.length === 0) return null;
@@ -107,7 +112,7 @@ export function SelectionBox({
         top: `${screenBounds.top}px`,
         width: `${screenBounds.width}px`,
         height: `${screenBounds.height}px`,
-        border: `${SELECTION_BORDER_WIDTH}px solid ${SELECTION_BLUE}`,
+        border: `${SELECTION_BORDER_WIDTH}px solid ${marks.accent}`,
         boxSizing: "border-box",
         pointerEvents: "none",
       }}
@@ -152,9 +157,9 @@ export function SelectionBox({
                 width: `${HANDLE_SIZE}px`,
                 height: `${HANDLE_SIZE}px`,
                 transform: "translate(-50%, -50%)",
-                background: "var(--background)",
-                border: `2px solid ${SELECTION_BLUE}`,
-                borderRadius: "4px",
+                background: marks.surface,
+                border: `2px solid ${marks.accent}`,
+                borderRadius: flat.base["radius.base"],
                 cursor: resizeCursorFor(handle),
                 pointerEvents: interactiveHandles ? "auto" : "none",
                 touchAction: "none",

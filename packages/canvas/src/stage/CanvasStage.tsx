@@ -13,6 +13,7 @@ import {
   type ReactNode,
   type Ref,
 } from "react";
+import { flat } from "@codecaine-ai/design-system";
 import {
   documentBounds,
   objectById,
@@ -80,13 +81,23 @@ const CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO = 5;
 // on-canvas cursor are literally the same form. Inlined from the old
 // TRIM.selectCursor (stage core must not import stage/editor/components/editor-style).
 // Rendered with a soft drop shadow (padded viewBox so it is not clipped).
-/** FigJam selection blue — matches SelectionBox and the connector trim. */
-const SELECTION_BLUE = "#0D99FF";
-
-const SELECT_CURSOR_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="-3 -3 24 24"><filter id="cs" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1" stdDeviation="1.1" flood-color="#000" flood-opacity="0.35"/></filter><path filter="url(#cs)" d="M3.474,2.784L14.897,6.958c.481,.176,.467,.861-.021,1.018l-5.228,1.673-1.673,5.228c-.156,.488-.842,.502-1.018,.021L2.784,3.474c-.157-.43,.26-.847,.69-.69Z" fill="#111" stroke="#fff" stroke-width="1.1" stroke-linejoin="round"/></svg>';
+// A data URI cannot read CSS, so its colors are the design-system LIGHT
+// theme's resolved tokens on every board (a pointer must read on any board):
+// ink body (color.text.ink), page-white outline (color.surface.page), ink
+// drop shadow (color.text.ink at the flood opacity).
+const CURSOR_TOKENS = flat.light;
+const SELECT_CURSOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="-3 -3 24 24"><filter id="cs" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="1" stdDeviation="1.1" flood-color="${CURSOR_TOKENS["color.text.ink"]}" flood-opacity="0.35"/></filter><path filter="url(#cs)" d="M3.474,2.784L14.897,6.958c.481,.176,.467,.861-.021,1.018l-5.228,1.673-1.673,5.228c-.156,.488-.842,.502-1.018,.021L2.784,3.474c-.157-.43,.26-.847,.69-.69Z" fill="${CURSOR_TOKENS["color.text.ink"]}" stroke="${CURSOR_TOKENS["color.surface.page"]}" stroke-width="1.1" stroke-linejoin="round"/></svg>`;
 const SELECT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(SELECT_CURSOR_SVG)}") 8 8, default`;
 const CONNECTOR_CURSOR = "crosshair"; // Single sanctioned crosshair use: Connector Mode wiring cursor; pinned by the anchor-dots policy test.
+/**
+ * Marks in the static stage CSS below take the BOARD's colors (decision 56),
+ * read from the style variables this root sets (canvasStyleCssVariables):
+ * the changed ring and the drop target in the board's ink, the base object
+ * border in its hairline. The host's `--primary` / `--border` follow the app
+ * theme, which the board does not (decision 10).
+ */
+const BOARD_INK = canvasStyleCssVar("textColor");
+const BOARD_HAIRLINE = canvasStyleCssVar("hairlineColor");
 import { OBJECT_DEFS_CSS } from "../objects/object-def";
 import type {
   CanvasAnnotationTarget,
@@ -371,7 +382,7 @@ function CanvasStageSurface({
           justify-content: center;
           gap: 6px;
           overflow: hidden;
-          border: ${canvasStyleCssVar("shapeBorderWidthPx")} solid var(--border);
+          border: ${canvasStyleCssVar("shapeBorderWidthPx")} solid ${BOARD_HAIRLINE};
           border-radius: ${canvasStyleCssVar("shapeCornerRadiusPx")};
           padding: 12px 14px;
           text-align: left;
@@ -389,12 +400,12 @@ function CanvasStageSurface({
           cursor: default;
         }
         .interactive-canvas-object[data-changed="true"] {
-          box-shadow: 0 0 0 5px color-mix(in oklab, var(--primary) 18%, transparent);
+          box-shadow: 0 0 0 5px color-mix(in oklab, ${BOARD_INK} 18%, transparent);
         }
         .interactive-canvas-object[data-drop-target="true"] {
-          outline: 3px solid var(--primary);
+          outline: 3px solid ${BOARD_INK};
           outline-offset: 2px;
-          box-shadow: 0 0 0 6px color-mix(in oklab, var(--primary) 22%, transparent);
+          box-shadow: 0 0 0 6px color-mix(in oklab, ${BOARD_INK} 22%, transparent);
         }
         /* Shared z-plumbing for every def-rendered true-outline SVG silhouette
            (polygon shapes, junctions) — infrastructure, not per-shape CSS. */

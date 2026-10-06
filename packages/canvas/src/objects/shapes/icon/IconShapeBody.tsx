@@ -9,6 +9,7 @@ import {
   iconTileLayout,
 } from "./icon-tile";
 import type { InteractiveCanvasObject } from "../../../state/schema";
+import { DEFAULT_CANVAS_STYLE } from "../../../theme/canvas-style";
 
 /**
  * Minimal structural shape this component needs from an interactive canvas
@@ -23,7 +24,7 @@ export type IconShapeBodyObject = Pick<InteractiveCanvasObject, "icon"> & {
 };
 
 export type IconShapeBodyColors = {
-  /** Glyph color: the stroke of outline glyphs, the fill of fill-paint (brand) glyphs (falls back to a sensible neutral if omitted). */
+  /** Glyph color: the stroke of outline glyphs, the fill of fill-paint (brand) glyphs (falls back to the default style's text color if omitted). */
   stroke?: string;
   /** Optional fill painted into an outline glyph's own interiors (glyph style only). */
   fill?: string;
@@ -81,7 +82,9 @@ export function IconShapeBody({
   tileMaxPx?: number;
 }) {
   const glyph = resolveIconGlyph(object.icon, iconPack);
-  const stroke = colors?.stroke ?? "#1D1D1D";
+  // The icon def always passes the resolved glyph color; only a bare render
+  // (no `colors`) falls back, to the default style's text color.
+  const stroke = colors?.stroke ?? DEFAULT_CANVAS_STYLE.textColor;
   if (colors?.tileFill) {
     return (
       <IconTileBody

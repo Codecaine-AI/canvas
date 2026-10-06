@@ -4,19 +4,19 @@ import type { CSSProperties } from "react";
 import { FIRST_USE_COLORS, objectTypeDefaults } from "../../state/schema/object-defaults";
 import { withAlpha } from "../../theme/color-math";
 import { resolveStickyPaint, type StickyPaint } from "../../theme/palette";
-import { useCanvasStyle } from "../../theme/canvas-style-context";
+import { canvasStyleCssVar, useCanvasStyle } from "../../theme/canvas-style-context";
 import { BBOX_OUTLINE } from "../geometry";
 import { ObjectShell, ObjectSlotText } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { INSET_BODY_TEXT_SLOT } from "../text-slots";
-import { StickyMarkdown } from "./markdown";
+import { STICKY_CODE_CHIP_ALPHA, StickyMarkdown } from "./markdown";
 
 /** Sticky geometry/typography (per-kind constants co-locate with their def; the text inset/typography live on the inset-body slot preset in objects/text-slots.ts). */
 export const STICKY_GEOMETRY = {
   cornerRadiusPx: 0,
   foldedCorner: false,
   defaultSizePx: { width: 416, height: 420 },
-  /** Down-biased falloff shadow. */
+  /** Down-biased falloff shadow: FigJam paper-sticky art (paper stickies only; a card replaces it). */
   shadow: "0 3px 12px rgba(0, 0, 0, 0.15)",
 } as const;
 
@@ -24,16 +24,20 @@ export const STICKY_GEOMETRY = {
  * Card sticky trim (the schematic themes' `stickyStyle: "card"`): the card
  * fill (the shell's sticky role paint) edged by a hairline, a 2px rule in
  * the color pick's ink down the left side, no shadow. Inline `code` chips
- * tint with the text color.
+ * tint with the text color at the paper chip's alpha (./markdown.tsx).
  */
 export const CARD_STICKY_GEOMETRY = {
   ruleWidthPx: 2,
   borderWidthPx: 1,
-  codeChipAlpha: 0.08,
+  codeChipAlpha: STICKY_CODE_CHIP_ALPHA,
 } as const;
 
-/** The "changed" ring the note CSS pairs with its shadow — kept when a card replaces the box-shadow. */
-const CHANGED_RING_SHADOW = "0 0 0 5px color-mix(in oklab, var(--primary) 18%, transparent)";
+/**
+ * The "changed" ring the note CSS pairs with its shadow — kept when a card
+ * replaces the box-shadow. A stage mark: the board's ink (decision 56), never
+ * the app theme's `--primary`.
+ */
+const CHANGED_RING_SHADOW = `0 0 0 5px color-mix(in oklab, ${canvasStyleCssVar("textColor")} 18%, transparent)`;
 
 /**
  * A card sticky's edges as inset box-shadows — no CSS border, so the body
@@ -120,7 +124,7 @@ export const stickyDef: ObjectDef = {
         }
         .interactive-canvas-object-note[data-changed="true"] {
           box-shadow:
-            0 0 0 5px color-mix(in oklab, var(--primary) 18%, transparent),
+            ${CHANGED_RING_SHADOW},
             ${STICKY_GEOMETRY.shadow};
         }
         .interactive-canvas-sticky-line {

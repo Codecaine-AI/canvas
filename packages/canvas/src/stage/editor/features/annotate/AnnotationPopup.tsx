@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { cssVar } from "@codecaine-ai/design-system";
 import type { CanvasPoint } from "../../../../state/geometry";
 import type {
   CanvasAnnotationAuthor,
@@ -41,6 +42,14 @@ export interface AnnotationPopupProps {
   onReply?: (body: string) => void;
 }
 
+/** Body copy: the note, its replies and the composer. */
+const BODY_FONT = {
+  fontFamily: cssVar("font.family.sans"),
+  fontSize: cssVar("font.size.ui-sm"),
+  fontWeight: cssVar("font.weight.medium"),
+  lineHeight: cssVar("line-height.reading"),
+} as const;
+
 const AUTHOR_LABELS: Record<CanvasAnnotationAuthor, string> = {
   human: "You",
   agent: "Agent",
@@ -68,7 +77,8 @@ function threadTurns(thread: InteractiveCanvasAnnotation): Turn[] {
 /**
  * Dark screen-space annotation popup mounted at the annotate click point. With
  * no thread on the target it composes the opening post; with one it shows the
- * conversation and its box posts the next reply.
+ * conversation and its box posts the next reply. Dark in both app themes: the
+ * root sets `data-theme="dark"` and takes the annotation tokens.
  */
 export function AnnotationPopup({
   anchor,
@@ -117,13 +127,14 @@ export function AnnotationPopup({
       <style>{POPUP_ANIMATION_STYLES}</style>
       <div
         data-annotation-popup=""
-        className="pointer-events-auto absolute z-50"
+        data-theme="dark"
+        className="pointer-events-auto absolute z-popover"
         style={{
           left: anchor.x + 12,
           top: anchor.y + 12,
           width: 280,
-          borderRadius: EDITOR_STYLE.selectionToolbarRadiusPx,
-          background: EDITOR_STYLE.selectionToolbarBg,
+          borderRadius: EDITOR_STYLE.selectionToolbarRadius,
+          background: cssVar("color.annotation.surface"),
           padding: 10,
           boxSizing: "border-box",
           boxShadow: EDITOR_STYLE.selectionToolbarShadow,
@@ -137,8 +148,11 @@ export function AnnotationPopup({
           style={{
             marginBottom: 7,
             overflow: "hidden",
-            color: "rgba(255,255,255,0.72)",
-            font: "600 11px/1.25 ui-sans-serif, system-ui, sans-serif",
+            color: cssVar("color.annotation.muted"),
+            fontFamily: cssVar("font.family.sans"),
+            fontSize: cssVar("font.size.ui-2xs"),
+            fontWeight: cssVar("font.weight.semibold"),
+            lineHeight: 1.25,
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
           }}
@@ -150,7 +164,7 @@ export function AnnotationPopup({
             data-annotation-thread={thread.id}
             aria-label="Annotation thread"
             style={{
-              margin: "0 0 8px",
+              margin: `0 0 ${cssVar("space.2")}`,
               maxHeight: 168,
               overflowY: "auto",
               listStyle: "none",
@@ -161,8 +175,11 @@ export function AnnotationPopup({
               <li key={turn.id} data-annotation-turn={turn.id} style={{ marginBottom: 7 }}>
                 <div
                   style={{
-                    color: "rgba(255,255,255,0.56)",
-                    font: "600 10px/1.2 ui-sans-serif, system-ui, sans-serif",
+                    color: cssVar("color.annotation.muted"),
+                    fontFamily: cssVar("font.family.sans"),
+                    fontSize: cssVar("font.size.micro"),
+                    fontWeight: cssVar("font.weight.semibold"),
+                    lineHeight: 1.2,
                     letterSpacing: "0.04em",
                     textTransform: "uppercase",
                   }}
@@ -171,9 +188,9 @@ export function AnnotationPopup({
                 </div>
                 <div
                   style={{
-                    marginTop: 2,
-                    color: "#FFFFFF",
-                    font: "500 13px/1.45 ui-sans-serif, system-ui, sans-serif",
+                    marginTop: cssVar("space.0-5"),
+                    color: cssVar("color.annotation.text"),
+                    ...BODY_FONT,
                     overflowWrap: "anywhere",
                     whiteSpace: "pre-wrap",
                   }}
@@ -197,15 +214,15 @@ export function AnnotationPopup({
             width: "100%",
             minHeight: 72,
             resize: "none",
-            border: "1px solid rgba(255,255,255,0.18)",
-            borderRadius: 8,
+            border: `${cssVar("border.width.hairline")} solid ${cssVar("color.annotation.border")}`,
+            borderRadius: cssVar("radius.base"),
             outline: "none",
-            background: "rgba(255,255,255,0.08)",
-            color: "#FFFFFF",
-            caretColor: "#FFFFFF",
+            background: cssVar("color.fill.chip"),
+            color: cssVar("color.annotation.text"),
+            caretColor: cssVar("color.annotation.text"),
             padding: "9px 10px",
             boxSizing: "border-box",
-            font: "500 13px/1.45 ui-sans-serif, system-ui, sans-serif",
+            ...BODY_FONT,
           }}
         />
       </div>
@@ -218,7 +235,10 @@ export interface AnnotationHintProps {
   message?: string;
 }
 
-/** Quiet, non-interactive feedback for annotate clicks that miss every object. */
+/**
+ * Quiet, non-interactive feedback for annotate clicks that miss every object.
+ * Dark in both app themes, like the popup.
+ */
 export function AnnotationHint({
   anchor,
   message = "Click an object to pin a note",
@@ -226,16 +246,20 @@ export function AnnotationHint({
   return (
     <div
       role="status"
-      className="pointer-events-none absolute z-40"
+      data-theme="dark"
+      className="pointer-events-none absolute z-overlay"
       style={{
         left: anchor.x + 12,
         top: anchor.y + 12,
-        borderRadius: 8,
-        background: "rgba(29,29,29,0.86)",
-        color: "rgba(255,255,255,0.86)",
-        padding: "6px 9px",
+        borderRadius: cssVar("radius.base"),
+        background: cssVar("color.annotation.surface"),
+        color: cssVar("color.annotation.text"),
+        padding: `${cssVar("space.1-5")} 9px`,
         boxShadow: EDITOR_STYLE.selectionToolbarShadow,
-        font: "500 12px/1.25 ui-sans-serif, system-ui, sans-serif",
+        fontFamily: cssVar("font.family.sans"),
+        fontSize: cssVar("font.size.ui-xs"),
+        fontWeight: cssVar("font.weight.medium"),
+        lineHeight: 1.25,
         whiteSpace: "nowrap",
       }}
     >

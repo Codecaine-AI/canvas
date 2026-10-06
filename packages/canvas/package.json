@@ -25,6 +25,7 @@
     "react-dom": "^19"
   },
   "dependencies": {
+    "@codecaine-ai/design-system": "workspace:*",
     "@codecaine-ai/text-measure": "workspace:*",
     "@sinclair/typebox": "^0.34",
     "class-variance-authority": "^0.7.1",

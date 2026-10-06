@@ -1,12 +1,14 @@
 "use client";
 
 import { memo, useState } from "react";
+import { cssVar } from "@codecaine-ai/design-system";
 import { EDITOR_STYLE } from "./editor-style";
 import { Tooltip } from "../../../ui/Tooltip";
 import { MinusIcon, PlusIcon } from "../../../ui/icons";
 
 /**
- * ZoomControls — bottom-right zoom pill (matches the dock's white styling).
+ * ZoomControls — bottom-right zoom pill (matches the dock: light chrome that
+ * follows the app theme).
  *
  * Ground truth: figjam-trim-catalog.md section 8 / figjam-bottom-dock-spec
  * both describe a smaller light-gray pill at bottom-right containing ONLY
@@ -27,9 +29,9 @@ export type ZoomControlsProps = {
   className?: string;
 };
 
-const PILL_HEIGHT_PX = 32;
-const PILL_RADIUS_PX = EDITOR_STYLE.dockRadiusPx;
-const GLYPH_CHARCOAL = EDITOR_STYLE.dockGlyphColor;
+const PILL_HEIGHT = cssVar("space.8");
+const PILL_RADIUS = EDITOR_STYLE.dockRadius;
+const GLYPH_COLOR = EDITOR_STYLE.dockGlyphColor;
 const HOVER_BG = EDITOR_STYLE.dockHoverBg;
 
 function ZoomButton({
@@ -67,10 +69,10 @@ function ZoomButton({
           justifyContent: "center",
           width: 26,
           height: 26,
-          borderRadius: 8,
+          borderRadius: cssVar("radius.base"),
           border: "none",
           background: hovered ? HOVER_BG : "transparent",
-          color: GLYPH_CHARCOAL,
+          color: GLYPH_COLOR,
           cursor: disabled ? "default" : "pointer",
           opacity: disabled ? 0.4 : 1,
           padding: 0,
@@ -100,12 +102,12 @@ function ZoomControlsComponent({
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: 2,
-        height: PILL_HEIGHT_PX,
-        borderRadius: PILL_RADIUS_PX,
+        gap: cssVar("space.0-5"),
+        height: PILL_HEIGHT,
+        borderRadius: PILL_RADIUS,
         background: EDITOR_STYLE.bottomToolbarBg,
         boxShadow: EDITOR_STYLE.dockShadow,
-        padding: "0 6px",
+        padding: `0 ${cssVar("space.1-5")}`,
         boxSizing: "border-box",
       }}
     >
@@ -123,9 +125,9 @@ function ZoomControlsComponent({
           style={{
             border: "none",
             background: "transparent",
-            fontSize: 12,
-            color: GLYPH_CHARCOAL,
-            padding: "0 4px",
+            fontSize: cssVar("font.size.ui-xs"),
+            color: GLYPH_COLOR,
+            padding: `0 ${cssVar("space.1")}`,
             cursor: disabled ? "default" : "pointer",
             minWidth: 36,
           }}
@@ -143,5 +145,5 @@ function ZoomControlsComponent({
 
 export const ZoomControls = memo(ZoomControlsComponent);
 
-export const ZOOM_CONTROLS_HEIGHT_PX = PILL_HEIGHT_PX;
-export const ZOOM_CONTROLS_RADIUS_PX = PILL_RADIUS_PX;
+export const ZOOM_CONTROLS_HEIGHT_PX = PILL_HEIGHT;
+export const ZOOM_CONTROLS_RADIUS_PX = PILL_RADIUS;

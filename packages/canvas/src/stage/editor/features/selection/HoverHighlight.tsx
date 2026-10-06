@@ -6,10 +6,10 @@
 import { hitBoundsForObject } from "../../../../objects/geometry";
 import type { InteractiveCanvasDocument } from "../../../../state/schema";
 import { worldToScreen, type ViewportState } from "../../../viewport";
+import { stageMarkColors } from "../../../../theme/canvas-style";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import { resolveShapeCornerRadius } from "../../../../theme/tokens";
 
-const SELECTION_BLUE = "#0D99FF";
 const HIGHLIGHT_OUTSET_PX = 3;
 
 export function HoverHighlight({
@@ -43,7 +43,8 @@ export function HoverHighlight({
         top: `${topLeft.y - HIGHLIGHT_OUTSET_PX}px`,
         width: `${bottomRight.x - topLeft.x + HIGHLIGHT_OUTSET_PX * 2}px`,
         height: `${bottomRight.y - topLeft.y + HIGHLIGHT_OUTSET_PX * 2}px`,
-        border: `1.5px solid ${SELECTION_BLUE}`,
+        // A stage mark: the board's accent (decision 56), as the selection outline.
+        border: `1.5px solid ${stageMarkColors(canvasStyle).accent}`,
         // Concentric with the shape's (screen-scaled) corner, pushed out by the outset.
         borderRadius: `${resolveShapeCornerRadius(object.style?.shape, canvasStyle) * viewport.zoom + HIGHLIGHT_OUTSET_PX}px`,
         boxSizing: "border-box",

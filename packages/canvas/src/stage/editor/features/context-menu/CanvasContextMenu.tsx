@@ -70,7 +70,7 @@ function OpenCanvasContextMenu({ menu }: CanvasContextMenuProps) {
     <div
       role="menu"
       aria-label="Canvas context menu"
-      className="absolute z-40 w-56 overflow-hidden rounded-md border border-border/70 bg-background/95 p-1 text-sm shadow-xl backdrop-blur"
+      className="absolute z-overlay w-56 overflow-hidden rounded border border-border/70 bg-background/95 p-1 text-ui-lg shadow-glass backdrop-blur-glass"
       style={{
         left: `min(${contextMenu.x}px, calc(100vw - 15rem))`,
         top: `min(${contextMenu.y}px, calc(100vh - 18rem))`,
@@ -85,13 +85,13 @@ function OpenCanvasContextMenu({ menu }: CanvasContextMenuProps) {
               saveNote();
             }}
           >
-            <div className="border-b border-border/60 px-2 py-1.5 text-xs text-muted-foreground">
+            <div className="border-b border-border/60 px-2 py-1.5 text-ui-xs text-muted-foreground">
               Note to AI
             </div>
             <input
               autoFocus
               aria-label="Note to AI"
-              className="my-1 h-9 w-full rounded border border-border bg-background px-2 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/40"
+              className="my-1 h-9 w-full rounded border border-border bg-background px-2 text-ui-lg outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/40"
               placeholder="Note for the agent…"
               value={note}
               onChange={(event) => setNote(event.target.value)}
@@ -107,13 +107,13 @@ function OpenCanvasContextMenu({ menu }: CanvasContextMenuProps) {
                 }
               }}
             />
-            <div className="px-2 pb-1 pt-0.5 text-[11px] text-muted-foreground">
+            <div className="px-2 pb-1 pt-0.5 text-ui-2xs text-muted-foreground">
               Enter to add · Esc to cancel
             </div>
           </form>
         ) : menuPanel === "section-export" && contextObject.type === "section" ? (
           <>
-            <div className="border-b border-border/60 px-2 py-1.5 text-xs text-muted-foreground">
+            <div className="border-b border-border/60 px-2 py-1.5 text-ui-xs text-muted-foreground">
               Export section
             </div>
             <button
@@ -135,7 +135,7 @@ function OpenCanvasContextMenu({ menu }: CanvasContextMenuProps) {
           </>
         ) : (
           <>
-            <div className="truncate border-b border-border/60 px-2 py-1.5 text-xs text-muted-foreground">
+            <div className="truncate border-b border-border/60 px-2 py-1.5 text-ui-xs text-muted-foreground">
               {contextObject.text.trim() || objectTypeLabel(contextObject.type)}
             </div>
             <button
@@ -242,7 +242,7 @@ function OpenCanvasContextMenu({ menu }: CanvasContextMenuProps) {
         )
       ) : menuPanel === "board-export" ? (
         <>
-          <div className="border-b border-border/60 px-2 py-1.5 text-xs text-muted-foreground">
+          <div className="border-b border-border/60 px-2 py-1.5 text-ui-xs text-muted-foreground">
             Export board
           </div>
           <button
@@ -264,7 +264,7 @@ function OpenCanvasContextMenu({ menu }: CanvasContextMenuProps) {
         </>
       ) : (
         <>
-          <div className="border-b border-border/60 px-2 py-1.5 text-xs text-muted-foreground">
+          <div className="border-b border-border/60 px-2 py-1.5 text-ui-xs text-muted-foreground">
             Add to canvas
           </div>
           <button

@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useState } from "react";
+import { cssVar } from "@codecaine-ai/design-system";
 // Type-only import: trim must never import objects/ at runtime — the
 // dependency points the other way (object defs import trim components).
 import type { ToolbarControlSpec } from "../../../../objects/object-def";
@@ -25,10 +26,11 @@ import {
  * SelectionToolbar — the dark floating pill shown above a selection.
  *
  * Ground truth: board-design-reference/analysis/figjam-trim-catalog.md
- * section 2 (selection-specific control sets) + figjam-style-tokens.json
- * `trim` key (historically named "contextToolbarBg" there, #1D1D1D).
- * The host is FigJam-scale trim: a 48px dark rounded rectangle with 36px
- * controls and action-specific presentation supplied by the layer.
+ * section 2 (selection-specific control sets). The host is FigJam-scale
+ * trim: a 48px dark rounded rectangle with 36px controls and
+ * action-specific presentation supplied by the layer. It stays dark in both
+ * app themes: the root sets `data-theme="dark"` and takes the unpinned
+ * design-system tokens (panel surface, glass shadow).
  *
  * Since RESTRUCTURE.md step 5 this is a DUMB HOST: callers pass the icon-free
  * `controls` spec list resolved from the object registry (objects/ defs are
@@ -132,8 +134,8 @@ export type SelectionToolbarProps = {
   activeFlyout?: SelectionToolbarActionId | null;
 };
 
-const TOOLBAR_HEIGHT_PX = EDITOR_STYLE.selectionToolbarHeightPx;
-const TOOLBAR_BG = EDITOR_STYLE.selectionToolbarBg; // #1D1D1D
+const TOOLBAR_HEIGHT = EDITOR_STYLE.selectionToolbarHeight;
+const TOOLBAR_BG = EDITOR_STYLE.selectionToolbarBg;
 const TOOLBAR_ENTER_ANIMATION_NAME = "canvas-selection-toolbar-enter";
 const TOOLBAR_ENTER_ANIMATION = `${TOOLBAR_ENTER_ANIMATION_NAME} 140ms cubic-bezier(0.22, 1, 0.36, 1) both`;
 const TOOLBAR_ANIMATION_STYLES = `
@@ -177,11 +179,11 @@ function ToolbarButton({
   const EffectiveIcon = (state?.variant ? ACTION_ICON_VARIANTS[action]?.[state.variant] : undefined) ?? Icon;
   const expanded = activeFlyout !== undefined ? activeFlyout === action : open;
   const background = state?.active
-    ? EDITOR_STYLE.accentPurple
+    ? EDITOR_STYLE.activeBg
     : hasFlyout && expanded
-      ? "rgba(255,255,255,0.16)"
+      ? cssVar("color.fill.active")
       : hovered && !disabled
-        ? "rgba(255,255,255,0.12)"
+        ? cssVar("color.fill.hover")
         : "transparent";
   return (
     <div
@@ -212,13 +214,13 @@ function ToolbarButton({
         style={{
           display: "inline-flex",
           alignItems: "center",
-          gap: EDITOR_STYLE.selectionToolbarGapPx,
+          gap: EDITOR_STYLE.selectionToolbarGap,
           height: EDITOR_STYLE.selectionToolbarButtonHeightPx,
-          padding: "0 8px",
-          borderRadius: EDITOR_STYLE.selectionToolbarButtonRadiusPx,
+          padding: `0 ${cssVar("space.2")}`,
+          borderRadius: EDITOR_STYLE.selectionToolbarButtonRadius,
           border: "none",
           background,
-          color: "#FFFFFF",
+          color: cssVar("color.text.ink"),
           cursor: disabled ? "default" : "pointer",
         }}
       >
@@ -226,7 +228,7 @@ function ToolbarButton({
           style={{
             display: "inline-flex",
             alignItems: "center",
-            gap: EDITOR_STYLE.selectionToolbarGapPx,
+            gap: EDITOR_STYLE.selectionToolbarGap,
             opacity: disabled ? 0.4 : 1,
           }}
         >
@@ -234,8 +236,8 @@ function ToolbarButton({
             <span
               style={{
                 display: "inline-flex",
-                width: EDITOR_STYLE.selectionToolbarSwatchPx,
-                height: EDITOR_STYLE.selectionToolbarSwatchPx,
+                width: EDITOR_STYLE.selectionToolbarSwatch,
+                height: EDITOR_STYLE.selectionToolbarSwatch,
               }}
             >
               <ColorSwatchIcon color={state?.color} style={{ width: "100%", height: "100%" }} />
@@ -245,7 +247,9 @@ function ToolbarButton({
               <EffectiveIcon className="h-5 w-5" />
             </span>
           )}
-          {text ? <span style={{ fontSize: 13, whiteSpace: "nowrap" }}>{text}</span> : null}
+          {text ? (
+            <span style={{ fontSize: cssVar("font.size.ui-sm"), whiteSpace: "nowrap" }}>{text}</span>
+          ) : null}
         </span>
       </button>
       <Tooltip label={label} visible={hovered} placement="top" />
@@ -280,15 +284,16 @@ function SelectionToolbarComponent({
         aria-label={label ? `${label} selection toolbar` : "selection toolbar"}
         data-selection-toolbar=""
         data-variant={label}
+        data-theme="dark"
         className={className}
         style={{
           display: "inline-flex",
           alignItems: "center",
-          height: TOOLBAR_HEIGHT_PX,
-          borderRadius: EDITOR_STYLE.selectionToolbarRadiusPx,
+          height: TOOLBAR_HEIGHT,
+          borderRadius: EDITOR_STYLE.selectionToolbarRadius,
           background: TOOLBAR_BG,
           padding: `0 ${EDITOR_STYLE.selectionToolbarPaddingXPx}px`,
-          gap: EDITOR_STYLE.selectionToolbarGapPx,
+          gap: EDITOR_STYLE.selectionToolbarGap,
           boxSizing: "border-box",
           boxShadow: EDITOR_STYLE.selectionToolbarShadow,
           animation: TOOLBAR_ENTER_ANIMATION,
@@ -308,10 +313,10 @@ function SelectionToolbarComponent({
               <span
                 data-divider=""
                 style={{
-                  width: 1,
-                  height: 24,
-                  background: "rgba(255,255,255,0.2)",
-                  margin: "0 6px",
+                  width: cssVar("border.width.hairline"),
+                  height: cssVar("space.6"),
+                  background: cssVar("color.border.default"),
+                  margin: `0 ${cssVar("space.1-5")}`,
                 }}
               />
             ) : null}

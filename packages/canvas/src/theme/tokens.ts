@@ -14,8 +14,8 @@
  * theme-aware resolveShapePaint / resolveSectionPaint / … family). Board,
  * text, and per-kind colors are CanvasStyle tokens now (theme/canvas-style.ts);
  * what remains here is genuinely global, non-color-cascade UI theming: the
- * editor-chrome CSS variables, the universal stroke width, and the text size
- * hierarchy. Values were originally sampled from FigJam reference exports
+ * stage's interaction variables (in the board's colors, decision 56), the
+ * universal stroke width, and the text size hierarchy. Values were originally sampled from FigJam reference exports
  * (board-design-reference/); every `*Px` figure is LOGICAL px (independent
  * of canvas zoom).
  *
@@ -26,10 +26,19 @@
 import type { CanvasObjectStyle } from "../state/schema";
 import { DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE, type CanvasStyle } from "./canvas-style";
 
+/**
+ * The stage's interaction variables, set on `.interactive-canvas-stage`: the
+ * grid in the board's hairline, snap guides and spacing-chip fills in the
+ * board's ink. They read the host's `--border` and `--primary` before, which
+ * follow the app theme while the board keeps its preset (decision 56; see
+ * stageMarkColors in canvas-style.ts). `--canvas-hairline-color` and
+ * `--canvas-text-color` are the style variables CanvasStage sets on the same
+ * element (canvasStyleCssVariables).
+ */
 export const canvasSurfaceStyle = {
-  "--interactive-canvas-grid": "color-mix(in oklab, var(--border) 52%, transparent)",
-  "--interactive-canvas-guide": "color-mix(in oklab, var(--primary) 42%, transparent)",
-  "--interactive-canvas-highlight": "color-mix(in oklab, var(--primary) 18%, transparent)",
+  "--interactive-canvas-grid": "color-mix(in oklab, var(--canvas-hairline-color) 52%, transparent)",
+  "--interactive-canvas-guide": "color-mix(in oklab, var(--canvas-text-color) 42%, transparent)",
+  "--interactive-canvas-highlight": "color-mix(in oklab, var(--canvas-text-color) 18%, transparent)",
 } as const;
 
 /**

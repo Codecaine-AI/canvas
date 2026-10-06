@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { cssVar } from "@codecaine-ai/design-system";
 import { EDITOR_STYLE } from "./editor-style";
 import { SHAPE_SEARCH_ENTRIES } from "../../../objects/catalog";
 import { shapeCatalogPreview } from "./shape-previews";
@@ -17,6 +18,8 @@ import type { InteractiveCanvasObjectType } from "../../../state/schema";
  * 232px dark panel matching the color-popover family, with a 5-column,
  * scrollable 36px icon grid. Icons are monochrome technical/object glyphs
  * (chip, database, monitor, envelope, ...) — NOT basic geometric shapes.
+ * Dark in both app themes: the root sets `data-theme="dark"` and the panel
+ * takes the unpinned design-system tokens.
  */
 
 export type ShapeSearchPopoverProps = {
@@ -26,35 +29,34 @@ export type ShapeSearchPopoverProps = {
 };
 
 const POPOVER_WIDTH_PX = 232;
-const POPOVER_BG = "#1D1D1D";
+const POPOVER_BG = EDITOR_STYLE.selectionToolbarBg;
 
 /**
- * Scrollbar restyle for the shape grid: slim rounded translucent thumb on a
- * transparent track, matching the dark FigJam-style panel (replaces the
- * chunky default trim). The @supports block is the Firefox fallback —
- * it has no ::-webkit-scrollbar, so it gets the standard thin-scrollbar
- * properties instead.
+ * Scrollbar restyle for the shape grid: slim round thumb on a transparent
+ * track, matching the dark panel (replaces the chunky default trim). The
+ * @supports block is the Firefox fallback — it has no ::-webkit-scrollbar,
+ * so it gets the standard thin-scrollbar properties instead.
  */
 const GRID_SCROLLBAR_STYLES = `
 [data-shape-search-grid]::-webkit-scrollbar {
-  width: 8px;
+  width: ${cssVar("space.2")};
 }
 [data-shape-search-grid]::-webkit-scrollbar-track {
   background: transparent;
 }
 [data-shape-search-grid]::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.22);
-  border-radius: 4px;
-  border: 2px solid transparent;
+  background: ${cssVar("color.border.strong")};
+  border-radius: ${cssVar("radius.pill")};
+  border: ${cssVar("space.0-5")} solid transparent;
   background-clip: padding-box;
 }
 [data-shape-search-grid]::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.35);
+  background-color: ${cssVar("color.text.faint")};
 }
 @supports not selector(::-webkit-scrollbar) {
   [data-shape-search-grid] {
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+    scrollbar-color: ${cssVar("color.border.strong")} transparent;
   }
 }
 `;
@@ -79,16 +81,17 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
       role="dialog"
       aria-label="Search for a shape"
       data-shape-search-popover=""
+      data-theme="dark"
       className={className}
       style={{
         width: POPOVER_WIDTH_PX,
         background: POPOVER_BG,
-        borderRadius: EDITOR_STYLE.flyoutRadiusPx,
-        padding: EDITOR_STYLE.flyoutPaddingPx,
+        borderRadius: EDITOR_STYLE.flyoutRadius,
+        padding: EDITOR_STYLE.flyoutPadding,
         boxSizing: "border-box",
         display: "flex",
         flexDirection: "column",
-        gap: 8,
+        gap: cssVar("space.2"),
         ...style,
       }}
     >
@@ -97,15 +100,21 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
         style={{
           display: "flex",
           alignItems: "center",
-          gap: 6,
-          background: "rgba(255,255,255,0.08)",
-          borderRadius: 8,
-          padding: "6px 8px",
+          gap: cssVar("space.1-5"),
+          background: cssVar("color.fill.chip"),
+          borderRadius: cssVar("radius.base"),
+          padding: `${cssVar("space.1-5")} ${cssVar("space.2")}`,
         }}
       >
-        <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" aria-hidden="true">
-          <circle cx="7" cy="7" r="4.5" stroke="#9A9A9A" strokeWidth={1.4} />
-          <path d="M10.5 10.5 14 14" stroke="#9A9A9A" strokeWidth={1.4} strokeLinecap="round" />
+        <svg
+          viewBox="0 0 16 16"
+          className="h-3.5 w-3.5"
+          fill="none"
+          aria-hidden="true"
+          style={{ color: cssVar("color.text.muted") }}
+        >
+          <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth={1.4} />
+          <path d="M10.5 10.5 14 14" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" />
         </svg>
         <input
           aria-label="Search for a shape"
@@ -116,8 +125,8 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
             background: "transparent",
             border: "none",
             outline: "none",
-            color: "#FFFFFF",
-            fontSize: 13,
+            color: cssVar("color.text.body"),
+            fontSize: cssVar("font.size.ui-sm"),
             flex: 1,
             minWidth: 0,
           }}
@@ -129,7 +138,7 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(5, 1fr)",
-          gap: 4,
+          gap: cssVar("space.1"),
           maxHeight: 220,
           overflowY: "auto",
           overflowX: "hidden",
@@ -154,10 +163,10 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
                   display: "inline-flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  borderRadius: EDITOR_STYLE.flyoutItemRadiusPx,
+                  borderRadius: EDITOR_STYLE.flyoutItemRadius,
                   border: "none",
-                  background: hovered ? "rgba(255,255,255,0.14)" : "transparent",
-                  color: "#FFFFFF",
+                  background: hovered ? cssVar("color.fill.hover") : "transparent",
+                  color: cssVar("color.text.ink"),
                   cursor: "pointer",
                 }}
               >
@@ -168,7 +177,14 @@ export function ShapeSearchPopover({ onPick, className, style }: ShapeSearchPopo
           );
         })}
         {filtered.length === 0 ? (
-          <div style={{ gridColumn: "1 / -1", color: "rgba(255,255,255,0.5)", fontSize: 11, padding: "8px 2px" }}>
+          <div
+            style={{
+              gridColumn: "1 / -1",
+              color: cssVar("color.text.muted"),
+              fontSize: cssVar("font.size.ui-2xs"),
+              padding: `${cssVar("space.2")} ${cssVar("space.0-5")}`,
+            }}
+          >
             No shapes found
           </div>
         ) : null}

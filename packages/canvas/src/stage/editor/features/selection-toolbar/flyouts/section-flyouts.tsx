@@ -1,5 +1,6 @@
 "use client";
 
+import { cssVar } from "@codecaine-ai/design-system";
 import { ConnectorDashedLineIcon, ConnectorSolidLineIcon, LockIcon, UnlockIcon } from "../../../../../ui/icons";
 import { ColorPickerFlyout } from "./color-flyout";
 import { FlyoutMenuButton, FlyoutPanel } from "./FlyoutPanel";
@@ -20,7 +21,7 @@ function SectionBorderStyleFlyout({
   if (primaryObject?.type !== "section") return null;
   const currentStyle = primaryObject.style?.strokeStyle ?? "solid";
   return (
-    <FlyoutPanel data-toolbar-flyout="section-border" style={{ display: "flex", gap: 4 }}>
+    <FlyoutPanel data-toolbar-flyout="section-border" style={{ display: "flex", gap: cssVar("space.1") }}>
       {(
         [
           ["solid", "Solid", ConnectorSolidLineIcon],
@@ -49,7 +50,7 @@ function SectionBorderStyleFlyout({
 function SectionLockFlyout({ primaryObject, setLockForSelection, close }: ToolbarFlyoutProps) {
   const locked = primaryObject?.locked;
   return (
-    <FlyoutPanel style={{ display: "grid", gap: 4 }}>
+    <FlyoutPanel style={{ display: "grid", gap: cssVar("space.1") }}>
       {locked ? (
         <FlyoutMenuButton
           aria-label="Unlock"

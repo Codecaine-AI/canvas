@@ -175,7 +175,7 @@ export function SelectionToolbarLayer({
   return (
     <div
       ref={selectionToolbarRef}
-      className="pointer-events-auto absolute z-40"
+      className="pointer-events-auto absolute z-overlay"
       style={{ left: selectionToolbarPosition.x, top: selectionToolbarPosition.y }}
     >
       <SelectionToolbar
@@ -187,7 +187,7 @@ export function SelectionToolbarLayer({
         activeFlyout={openFlyout}
       />
       {FlyoutComponent ? (
-        <div ref={flyoutPositionerRef} className="absolute bottom-full z-50 mb-2" style={{ left: flyoutLeft }}>
+        <div ref={flyoutPositionerRef} className="absolute bottom-full z-popover mb-2" style={{ left: flyoutLeft }}>
           <FlyoutComponent
             primaryObject={primarySelectedObject}
             selectedConnection={selectedConnection}

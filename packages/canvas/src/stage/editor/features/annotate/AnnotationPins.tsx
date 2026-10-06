@@ -1,7 +1,10 @@
 "use client";
 
+import { flat } from "@codecaine-ai/design-system";
 import type { CanvasAction, CanvasSelection } from "../../../../state/actions";
 import type { InteractiveCanvasDocument } from "../../../../state/schema";
+import { boardMarkTheme } from "../../../../theme/canvas-style";
+import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 
 export interface AnnotationPinsProps {
   document: InteractiveCanvasDocument;
@@ -9,6 +12,9 @@ export interface AnnotationPinsProps {
   dispatch: (action: CanvasAction) => void;
   zoom?: number;
 }
+
+/** The pin glyph's type: bold UI type on a one-line box, from the resolved base tokens (the stage never reads host CSS). */
+const PIN_FONT = `${flat.base["font.weight.bold"]} ${flat.base["font.size.ui-sm"]}/1 ${flat.base["font.family.sans"]}`;
 
 /** How many turns a thread carries, opening post included. */
 function threadLength(replyCount: number): number {
@@ -20,9 +26,15 @@ function threadLength(replyCount: number): number {
  * overlay parent is pointer-events:none, so each chip explicitly opts back in.
  *
  * Both directions of the conversation get a pin in the same language — same
- * size, shape, and placement. A thread the user opened is the dark request
+ * size, shape, and placement. A thread the user opened is the ink request
  * chip; a thread the agent opened is a question back, so it reads amber with a
  * `?`, findable at a glance without a second visual vocabulary.
+ *
+ * Pins are marks over the board, so they take the board's colors (decision
+ * 56): the design-system theme matching the board (boardMarkTheme), resolved.
+ * Request chip: color.annotation.text body, color.annotation.surface glyph.
+ * Question chip: color.status.warning.solid body, its on-solid glyph. Ring:
+ * color.annotation.surface, color.accent when selected. Lift: shadow.glass.
  */
 export function AnnotationPins({
   document,
@@ -39,6 +51,7 @@ export function AnnotationPins({
       objectById.has(annotation.target.objectId),
   );
   const counterScale = 1 / Math.max(zoom, 0.01);
+  const tokens = flat[boardMarkTheme(useCanvasStyle())];
 
   return (
     <div
@@ -97,15 +110,15 @@ export function AnnotationPins({
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              border: selected ? "2px solid #0D99FF" : "2px solid #FFFFFF",
-              borderRadius: 999,
-              background: askedByAgent ? "#E8A33D" : "#1D1D1D",
-              color: askedByAgent ? "#1D1D1D" : "#FFFFFF",
-              boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
+              border: `2px solid ${selected ? tokens["color.accent"] : tokens["color.annotation.surface"]}`,
+              borderRadius: flat.base["radius.pill"],
+              background: askedByAgent ? tokens["color.status.warning.solid"] : tokens["color.annotation.text"],
+              color: askedByAgent ? tokens["color.status.warning.on-solid"] : tokens["color.annotation.surface"],
+              boxShadow: tokens["shadow.glass"],
               padding: 0,
               pointerEvents: "auto",
               cursor: "pointer",
-              font: "700 13px/1 ui-sans-serif, system-ui, sans-serif",
+              font: PIN_FONT,
               transform: `translate(-50%, -50%) scale(${counterScale})`,
               transformOrigin: "center",
               boxSizing: "border-box",

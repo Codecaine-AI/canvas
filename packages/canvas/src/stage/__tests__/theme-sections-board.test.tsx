@@ -97,9 +97,9 @@ function staticSectionFill(svg: string, x: number, y: number, inset: number): st
 describe("board surface", () => {
   it("live and static paint the theme's board color; the live grid dots take its dot color", () => {
     const stage = renderLive("schematic-dark").querySelector<HTMLElement>("[data-canvas-stage]")!;
-    expect(stage.style.backgroundColor).toBe("#14171F");
-    expect(stage.style.backgroundImage).toContain("rgba(255, 255, 255, 0.07)");
-    expect(staticSvg("schematic-dark")).toContain('fill="#14171F"/>');
+    expect(stage.style.backgroundColor).toBe("#0D1117");
+    expect(stage.style.backgroundImage).toContain("#3D444D");
+    expect(staticSvg("schematic-dark")).toContain('fill="#0D1117"/>');
   });
 });
 
@@ -147,7 +147,7 @@ describe("pinned title chip with icon + detail", () => {
     // Fill path from the frame's inner corner (0.5px radius) at (101.5, 81.5).
     expect(svg).toContain('<path d="M102 81.5H');
     // Title at box x + 28 (6 lead + 16 tile + 6 gap), centered in the 25.5px box less its bottom edge.
-    expect(svg).toContain('x="129.5" y="93.5" fill="#0F1E36" font-size="14" font-weight="600"');
+    expect(svg).toContain('x="129.5" y="93.5" fill="#1F1F1F" font-size="14" font-weight="600"');
     expect(svg).toMatch(/>BUN SERVICES<\/text>/);
     // Detail 10px after the title: 12 tracked Plex Mono cells, 114.24px → 114.25 in layout units.
     const titleWidth = measureWidth("BUN SERVICES", { family: "IBM Plex Mono", size: 14, weight: 600, letterSpacing: 1.12 });
@@ -155,11 +155,11 @@ describe("pinned title chip with icon + detail", () => {
     expect(svg).toContain(`x="${Math.round((101.5 + 28 + titleWidth + 10) * 100) / 100}" y="93.5"`);
     expect(svg).toMatch(/font-weight="400"[^>]*>127\.0\.0\.1<\/text>/);
     // The 16px tile sits 6px in, centered on the content line (93.5); the glyph is 11px inside it.
-    expect(svg).toContain('<rect x="107.5" y="85.5" width="16" height="16" rx="2" fill="#0F8A7A"/>');
+    expect(svg).toContain('<rect x="107.5" y="85.5" width="16" height="16" rx="2" fill="#0D7164"/>');
     expect(svg).toContain('transform="translate(110 88) scale(0.4583)"');
     // Only the right and bottom edges are stroked, inside the box like a CSS border
     // (box: 6 lead + 22 icon + 114.25 title + 10 + 75.61 detail + 10 + 1.5 edge).
-    expect(svg).toMatch(/<path d="M340\.11 81\.5V105A1\.25 1\.25 0 0 1 338\.86 106\.25H101\.5" fill="none" stroke="rgba\(15, 138, 122, 0\.5\)" stroke-width="1\.5"/);
+    expect(svg).toMatch(/<path d="M340\.11 81\.5V105A1\.25 1\.25 0 0 1 338\.86 106\.25H101\.5" fill="none" stroke="rgba\(13, 113, 100, 0\.5\)" stroke-width="1\.5"/);
   });
 
   it("figjam keeps the floating chip markup for a plain title (live and static)", () => {
@@ -231,8 +231,8 @@ describe("in-place section title editor", () => {
     expect(input.style.fontFamily).toContain("IBM Plex Mono");
     expect(input.style.textTransform).toBe("uppercase");
     // The chip fill at its depth — the same color the static chip paints.
-    expect(input.style.background).toBe("#CAE6E2");
-    expect(staticSvg("schematic-light")).toContain('fill="#CAE6E2"/>');
+    expect(input.style.background).toBe("#C8DEDB");
+    expect(staticSvg("schematic-light")).toContain('fill="#C8DEDB"/>');
   });
 
   it("floating (figjam): the original inset chip editor", () => {
@@ -254,18 +254,18 @@ describe("connector label chip per theme", () => {
     const rect = container.querySelector('[data-canvas-connection-label="edge"] rect')!;
     expect(Number(rect.getAttribute("width"))).toBe(width);
     expect(rect.getAttribute("height")).toBe("26");
-    expect(rect.getAttribute("fill")).toBe("#F6F8FA");
-    expect(rect.getAttribute("stroke")).toBe("#D5DBE3");
+    expect(rect.getAttribute("fill")).toBe("#FDFDFD");
+    expect(rect.getAttribute("stroke")).toBe("#E6E5E3");
     const text = container.querySelector('[data-canvas-connection-label="edge"] text')!;
     expect(text.getAttribute("font-family")).toContain("IBM Plex Mono");
-    expect(text.getAttribute("fill")).toBe("#3A4659");
+    expect(text.getAttribute("fill")).toBe("#2A2A2A");
     expect(text.getAttribute("font-size")).toBe("14");
     expect(text.getAttribute("font-weight")).toBe("500");
 
     const svg = staticSvg("schematic-light");
     const chip = [...svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>HTTP<\/text>/g)][0]!;
-    expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.61", height: "26", fill: "#F6F8FA", stroke: "#D5DBE3" });
-    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#3A4659", "font-size": "14", "font-weight": "500" });
+    expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.61", height: "26", fill: "#FDFDFD", stroke: "#E6E5E3" });
+    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#2A2A2A", "font-size": "14", "font-weight": "500" });
   });
 
   it("figjam: the 30px sans chip with black text (live now matches static)", () => {
@@ -284,16 +284,16 @@ describe("connector label chip per theme", () => {
 describe("card stickies", () => {
   it("live: card fill, hairline edge and 2px ink rule as inset shadows, no paper shadow", () => {
     const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
-    expect(note.style.background).toBe("#FFFFFF");
-    expect(note.style.boxShadow).toBe("inset 2px 0 0 0 #A87A00, inset 0 0 0 1px #D5DBE3");
+    expect(note.style.background).toBe("#F8F8F7");
+    expect(note.style.boxShadow).toBe("inset 2px 0 0 0 #805F01, inset 0 0 0 1px #E6E5E3");
   });
 
   it("static: the same card, edge, and rule — and no shadow filter", () => {
     const svg = staticSvg("schematic-light");
     expect(svg).not.toContain("feDropShadow");
-    expect(svg).toContain('<rect x="900" y="80" width="240" height="160" fill="#FFFFFF"/>');
-    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" fill="none" stroke="#D5DBE3" stroke-width="1"/>');
-    expect(svg).toContain('<rect x="900" y="80" width="2" height="160" fill="#A87A00"/>');
+    expect(svg).toContain('<rect x="900" y="80" width="240" height="160" fill="#F8F8F7"/>');
+    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
+    expect(svg).toContain('<rect x="900" y="80" width="2" height="160" fill="#805F01"/>');
   });
 
   it("paper stickies keep the shadow and the note CSS (no inline trim)", () => {

@@ -18,6 +18,8 @@ import {
   type TextSlot,
 } from "../../../../objects/text-slots";
 import {
+  STICKY_CODE_CHIP_BACKGROUND,
+  STICKY_CODE_CHIP_RADIUS,
   STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX,
   stickyMarkdownLineAttrs,
   STICKY_STRONG_STYLE,
@@ -265,6 +267,9 @@ function markerHidden(leaf: StickyMarkdownLeaf, markerVisible: boolean): boolean
 
 function markerStyle(leaf: StickyMarkdownLeaf, markerVisible: boolean): CSSProperties | undefined {
   if (leaf.role !== "marker") return undefined;
+  // A hidden marker stays in the DOM (its source offsets map carets back to
+  // the raw markdown) but collapses to no box: zero font size and line
+  // height (a collapse, not a type size).
   return markerHidden(leaf, markerVisible)
     ? {
         opacity: 0,
@@ -316,8 +321,9 @@ function renderInlineToken(
         fontFamily: STICKY_MARKDOWN_MONO_FONT,
         fontWeight: STICKY_MARKDOWN_MONO_FONT_WEIGHT,
         fontSize: "0.85em",
-        background: "rgba(0, 0, 0, 0.08)",
-        borderRadius: "3px",
+        // The at-rest paper chip's tint and radius (objects/sticky/markdown.tsx).
+        background: STICKY_CODE_CHIP_BACKGROUND,
+        borderRadius: STICKY_CODE_CHIP_RADIUS,
         padding: "0 0.15em",
       }}
     >

@@ -17,8 +17,10 @@ function box(x: number, y: number, width: number, height: number): SnapBounds {
 describe("vendored blocksuite snap-distribution constants", () => {
   it("matches upstream ALIGN_THRESHOLD and guide colors", () => {
     expect(ALIGN_THRESHOLD).toBe(8);
-    expect(ALIGNMENT_GUIDE_COLOR).toBe("#8B5CF6");
-    expect(DISTRIBUTION_GUIDE_COLOR).toBe("#CC4187");
+    // The guide colors are no longer upstream's: they are the light board's
+    // design-system tokens (color.violet.solid, color.pink.solid).
+    expect(ALIGNMENT_GUIDE_COLOR).toBe("#6940A5");
+    expect(DISTRIBUTION_GUIDE_COLOR).toBe("#AD1A72");
   });
 });
 

@@ -48,14 +48,14 @@ export function IconGlyphPicker({ label, value, onPick, allowNone = false }: Ico
   };
 
   return (
-    <div className="grid gap-1 text-xs">
+    <div className="grid gap-1 text-ui-xs">
       <span className="text-muted-foreground">{label}</span>
       <Button
         ref={toggleRef}
         type="button"
         size="sm"
         variant="outline"
-        className="justify-start font-normal"
+        className="justify-start font-regular"
         aria-label={`${label}: ${currentLabel}`}
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
@@ -106,7 +106,7 @@ function GlyphPanel({
   return (
     <div
       id={id}
-      className="grid gap-2 rounded-md border border-border/70 p-2"
+      className="grid gap-2 rounded border border-border/70 p-2"
       onKeyDown={(event) => {
         // Escape closes the picker; it must not reach the canvas hotkeys
         // (window listener), which would clear the selection.
@@ -121,23 +121,23 @@ function GlyphPanel({
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         autoFocus
-        className="h-8 text-xs md:text-xs"
+        className="h-8 text-ui-xs md:text-ui-xs"
       />
       {allowNone ? (
         <Button
           type="button"
           size="xs"
           variant="ghost"
-          className="justify-start font-normal aria-pressed:bg-accent"
+          className="justify-start font-regular aria-pressed:bg-accent"
           aria-pressed={value === undefined}
           onClick={() => onPick(undefined)}
         >
           None
         </Button>
       ) : null}
-      <div className="max-h-[260px] overflow-y-auto">
+      <div className="max-h-65 overflow-y-auto">
         {groups.length === 0 ? (
-          <div className="py-3 text-center text-xs text-muted-foreground">No icons found</div>
+          <div className="py-3 text-center text-ui-xs text-muted-foreground">No icons found</div>
         ) : (
           <div className="grid gap-2">
             {groups.map(({ category, items }) => (
@@ -147,7 +147,7 @@ function GlyphPanel({
                 aria-label={category.label}
                 data-icon-category={category.id}
               >
-                <div aria-hidden="true" className="mb-1 text-[11px] text-muted-foreground">
+                <div aria-hidden="true" className="mb-1 text-ui-2xs text-muted-foreground">
                   {category.label}
                 </div>
                 <div className="grid grid-cols-7 gap-1">

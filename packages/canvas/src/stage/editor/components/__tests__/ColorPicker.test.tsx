@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cssVar } from "@codecaine-ai/design-system";
 import { ColorPicker } from "../ColorPicker";
 import { EDITOR_STYLE } from "../editor-style";
 import { resolveSwatchPreview } from "../../../../theme/palette";
@@ -9,8 +10,8 @@ afterEach(() => {
   cleanup();
 });
 
-const SWATCH_INSET = "inset 0 0 0 1px rgba(255,255,255,0.14)";
-const NEAR_WHITE_SWATCH_INSET = "inset 0 0 0 1px rgba(255,255,255,0.3)";
+const SWATCH_INSET = `inset 0 0 0 ${cssVar("border.width.hairline")} ${cssVar("color.border.default")}`;
+const NEAR_WHITE_SWATCH_INSET = `inset 0 0 0 ${cssVar("border.width.hairline")} ${cssVar("color.border.strong")}`;
 
 function needsContrastRing(hex: string): boolean {
   return /^#F/i.test(hex);
@@ -60,8 +61,10 @@ describe("ColorPicker (the FigJam-style 10-pick row, D12)", () => {
     const currentSwatch = container.querySelector('[data-canvas-color="blue"]') as HTMLElement;
     const currentRing = currentSwatch.querySelector("[data-current-ring]") as HTMLElement | null;
     expect(currentRing).not.toBeNull();
-    expect(currentRing!.style.border).toBe(`2px solid ${EDITOR_STYLE.accentPurple}`);
-    expect(currentRing!.style.borderRadius).toBe("9px");
+    expect(currentRing!.style.borderWidth).toBe("2px");
+    expect(currentRing!.style.borderStyle).toBe("solid");
+    expect(currentRing!.style.borderColor).toBe(cssVar("color.accent"));
+    expect(currentRing!.style.borderRadius).toBe(cssVar("radius.base"));
     expect(currentRing!.style.pointerEvents).toBe("none");
 
     for (const color of CANVAS_COLORS.filter((color) => color !== "blue")) {

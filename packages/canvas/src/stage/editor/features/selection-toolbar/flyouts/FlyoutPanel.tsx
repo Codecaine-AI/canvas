@@ -1,22 +1,28 @@
 "use client";
 
 import { useState, type ButtonHTMLAttributes, type HTMLAttributes, type ReactNode } from "react";
+import { cssVar } from "@codecaine-ai/design-system";
 import { EDITOR_STYLE } from "../../../components/editor-style";
 
 export type FlyoutPanelProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
 };
 
+/**
+ * The selection toolbar's flyout panel: dark in both app themes, like the
+ * toolbar (`data-theme="dark"` on the root, unpinned design-system tokens).
+ */
 export function FlyoutPanel({ children, className, style, ...props }: FlyoutPanelProps) {
   return (
     <div
       {...props}
       data-toolbar-flyout-panel=""
+      data-theme="dark"
       className={className}
       style={{
         background: EDITOR_STYLE.selectionToolbarBg,
-        borderRadius: EDITOR_STYLE.flyoutRadiusPx,
-        padding: EDITOR_STYLE.flyoutPaddingPx,
+        borderRadius: EDITOR_STYLE.flyoutRadius,
+        padding: EDITOR_STYLE.flyoutPadding,
         boxShadow: EDITOR_STYLE.flyoutShadow,
         boxSizing: "border-box",
         ...style,
@@ -61,19 +67,19 @@ export function FlyoutMenuButton({
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: 8,
+        gap: cssVar("space.2"),
         height: EDITOR_STYLE.flyoutItemHeightPx,
-        padding: "0 12px",
-        borderRadius: EDITOR_STYLE.flyoutItemRadiusPx,
+        padding: `0 ${cssVar("space.3")}`,
+        borderRadius: EDITOR_STYLE.flyoutItemRadius,
         border: "none",
         background: active
-          ? EDITOR_STYLE.accentPurple
+          ? EDITOR_STYLE.activeBg
           : hovered
-            ? "rgba(255,255,255,0.10)"
+            ? cssVar("color.fill.hover")
             : "transparent",
-        color: "#FFFFFF",
+        color: cssVar("color.text.ink"),
         cursor: "pointer",
-        fontSize: 13,
+        fontSize: cssVar("font.size.ui-sm"),
         textAlign: "left",
         whiteSpace: "nowrap",
         ...style,

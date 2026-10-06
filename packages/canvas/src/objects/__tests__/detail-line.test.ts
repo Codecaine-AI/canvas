@@ -82,9 +82,9 @@ describe("detail line typography", () => {
       fontSizePx: 14,
       fontWeight: 500,
       lineHeightPx: 14 * 1.3,
-      color: "#5B6578",
+      color: "#666562",
     });
-    expect(detailTypography(DARK).color).toBe("#8B93B5");
+    expect(detailTypography(DARK).color).toBe("#9198A1");
   });
 
   it("measures details in the font they paint: Plex Mono cells (layout units) and real Inter advances", () => {
@@ -260,7 +260,7 @@ describe("resolveSlotTypography", () => {
       fontWeight: 600,
       fontSizePx: 17.5,
     });
-    expect(body.color).toBe("#E4E6F2");
+    expect(body.color).toBe("#F0F6FC");
     const caption = resolveSlotTypography(BELOW_TEXT_SLOT, icon({ color: "teal" }), LIGHT);
     expect(caption.color).toBe(resolveIconPaint("teal", LIGHT).label);
     expect(caption.fontWeight).toBe(600);
@@ -269,7 +269,7 @@ describe("resolveSlotTypography", () => {
 
   it("gives a card sticky the style's text color and leaves title chips alone", () => {
     expect(resolveSlotTypography(INSET_BODY_TEXT_SLOT, shape({ type: "sticky", color: "yellow" }), LIGHT).color).toBe(
-      "#0F1E36",
+      "#1F1F1F",
     );
     expect(resolveSlotTypography(TITLE_CHIP_TEXT_SLOT, shape({ type: "section" }), LIGHT)).toBe(
       TITLE_CHIP_TEXT_SLOT.typography,

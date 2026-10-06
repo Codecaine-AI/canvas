@@ -78,18 +78,18 @@ export function Inspector({
   return (
     <aside
       aria-label="Inspector"
-      className="absolute bottom-24 right-4 top-20 z-20 w-[320px] max-w-[calc(100vw-2rem)] overflow-auto rounded-md border border-border/70 bg-background/95 p-3 shadow-xl backdrop-blur"
+      className="absolute bottom-24 right-4 top-20 z-raised w-80 max-w-[calc(100vw-2rem)] overflow-auto rounded border border-border/70 bg-background/95 p-3 shadow-glass backdrop-blur-glass"
       // Keys pressed on the Inspector's own controls (Backspace or an arrow
       // on a just-used button) must not reach the window-level canvas
       // hotkeys, which would delete or nudge the selection being edited.
       onKeyDown={(event) => event.stopPropagation()}
     >
     <div className="mb-3 flex items-center justify-between gap-3">
-      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
         Inspector
       </div>
       {lastChange && (
-        <div className="truncate text-[11px] text-muted-foreground">
+        <div className="truncate text-ui-2xs text-muted-foreground">
           {lastChange.summary}
         </div>
       )}
@@ -97,7 +97,7 @@ export function Inspector({
 
     {selectedObject ? (
       <div className="grid gap-3">
-        <label className="grid gap-1 text-xs">
+        <label className="grid gap-1 text-ui-xs">
           <span className="text-muted-foreground">Text</span>
           <Textarea
             value={selectedObject.text}
@@ -112,7 +112,7 @@ export function Inspector({
         </label>
         {/* Stickies carry no detail line: their body is markdown. */}
         {selectedObject.type !== "sticky" && (
-          <div className="text-xs">
+          <div className="text-ui-xs">
             <label className="grid gap-1">
               <span className="text-muted-foreground">Detail</span>
               <Input
@@ -128,7 +128,7 @@ export function Inspector({
                 }
               />
             </label>
-            <div role="status" className="text-[11px] text-amber-600 dark:text-amber-400">
+            <div role="status" className="text-ui-2xs text-warning">
               {detailLength > DETAIL_SOFT_MAX_CHARS ? (
                 <p className="mt-1">
                   {detailLength} / {DETAIL_SOFT_MAX_CHARS} — keep it to one short fact
@@ -229,7 +229,7 @@ export function Inspector({
             }
           />
         </div>
-        <div className="grid gap-1.5 text-xs">
+        <div className="grid gap-1.5 text-ui-xs">
           <span className="text-muted-foreground">Color</span>
           {/* P1/D12 — the universal 10-hue roster; previews are the swatch
               hexes themselves, identical for every kind. */}
@@ -243,7 +243,7 @@ export function Inspector({
                 aria-pressed={selectedObject.color === color}
                 data-canvas-color-swatch={color}
                 data-selected={selectedObject.color === color ? "true" : undefined}
-                className="h-6 w-6 rounded-full border-2 transition-transform hover:scale-110"
+                className="h-6 w-6 rounded-pill border-2 transition-transform hover:scale-110"
                 style={{
                   background: resolveSwatchPreview(color),
                   borderColor:
@@ -274,8 +274,8 @@ export function Inspector({
             Fit children
           </Button>
         )}
-        <div className="rounded-md border border-border/70 p-2">
-          <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+        <div className="rounded border border-border/70 p-2">
+          <div className="mb-2 flex items-center gap-2 text-ui-xs font-medium text-muted-foreground">
             <MessageSquareIcon className="h-3.5 w-3.5" />
             Annotation
           </div>
@@ -308,11 +308,11 @@ export function Inspector({
       </div>
     ) : selectedConnection ? (
       <div className="grid gap-3">
-        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+        <div className="flex items-center gap-2 text-ui-xs font-medium text-muted-foreground">
           <GitBranchIcon className="h-3.5 w-3.5" />
           Connector
         </div>
-        <label className="grid gap-1 text-xs">
+        <label className="grid gap-1 text-ui-xs">
           <span className="text-muted-foreground">Label</span>
           <Input
             value={selectedConnection.label ?? ""}
@@ -325,11 +325,11 @@ export function Inspector({
             }
           />
         </label>
-        <label className="grid gap-1 text-xs">
+        <label className="grid gap-1 text-ui-xs">
           <span className="text-muted-foreground">Line style</span>
           <select
             aria-label="Connector style"
-            className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm"
+            className="h-9 w-full rounded border border-border bg-background px-2 text-ui-lg"
             value={selectedConnection.style ?? "solid"}
             onChange={(event) =>
               dispatch({
@@ -343,11 +343,11 @@ export function Inspector({
             <option value="dashed">Dashed</option>
           </select>
         </label>
-        <label className="grid gap-1 text-xs">
+        <label className="grid gap-1 text-ui-xs">
           <span className="text-muted-foreground">Arrow</span>
           <select
             aria-label="Connector arrow"
-            className="h-9 w-full rounded-md border border-border bg-background px-2 text-sm"
+            className="h-9 w-full rounded border border-border bg-background px-2 text-ui-lg"
             value={selectedConnection.arrow ?? "forward"}
             onChange={(event) =>
               dispatch({
@@ -374,12 +374,12 @@ export function Inspector({
         </Button>
       </div>
     ) : (
-      <div className="rounded-md border border-border/70 p-3 text-sm text-muted-foreground">
+      <div className="rounded border border-border/70 p-3 text-ui-lg text-muted-foreground">
         Select a canvas object to inspect geometry, annotations, and agent context.
       </div>
     )}
 
-    <div className="mt-4 rounded-md border border-border/70 p-3 text-xs text-muted-foreground">
+    <div className="mt-4 rounded border border-border/70 p-3 text-ui-xs text-muted-foreground">
       <div className="font-medium text-foreground">Selection context</div>
       <div>{selectionContext.objects.length} selected objects</div>
       <div>{selectionContext.connections.length} nearby connectors</div>

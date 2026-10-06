@@ -1,5 +1,6 @@
 "use client";
 
+import { cssVar } from "@codecaine-ai/design-system";
 import { ColorPickerFlyout } from "./color-flyout";
 import { FlyoutMenuButton, FlyoutPanel } from "./FlyoutPanel";
 import type { ToolbarFlyoutProps, ToolbarFlyoutTable } from "./types";
@@ -26,7 +27,7 @@ function ConnectorDashFlyout({ selectedConnection, dispatch, close }: ToolbarFly
   if (!selectedConnection) return null;
   const currentStyle = selectedConnection.style ?? "solid";
   return (
-    <FlyoutPanel data-toolbar-flyout="connector-dash" style={{ display: "flex", gap: 4 }}>
+    <FlyoutPanel data-toolbar-flyout="connector-dash" style={{ display: "flex", gap: cssVar("space.1") }}>
       {CONNECTOR_DASH_OPTIONS.map(({ value, label, Icon }) => (
         <FlyoutMenuButton
           key={value}
@@ -55,7 +56,7 @@ function ConnectorArrowheadFlyout({ selectedConnection, dispatch, close }: Toolb
   if (!selectedConnection) return null;
   const currentArrow = selectedConnection.arrow ?? "forward";
   return (
-    <FlyoutPanel data-toolbar-flyout="connector-arrowhead" style={{ display: "flex", gap: 4 }}>
+    <FlyoutPanel data-toolbar-flyout="connector-arrowhead" style={{ display: "flex", gap: cssVar("space.1") }}>
       {CONNECTOR_ARROWHEAD_OPTIONS.map(({ value, label, Icon }) => (
         <FlyoutMenuButton
           key={value}

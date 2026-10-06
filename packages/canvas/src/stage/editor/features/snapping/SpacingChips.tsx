@@ -1,13 +1,21 @@
 "use client";
 
+import { flat } from "@codecaine-ai/design-system";
 import type { SpacingHint } from "./snapping";
 import { worldToScreen, type ViewportState } from "../../../viewport";
+import { stageMarkColors } from "../../../../theme/canvas-style";
+import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 
 /**
  * Small pill chip showing the px gap value, centered on an equal-gap segment
- * (FigJam-style spacing hint). One chip per segment in the hint.
+ * (FigJam-style spacing hint). One chip per segment in the hint. A stage mark
+ * in the board's ink (decision 56): the fill and border are the stage's ink
+ * variables (theme/tokens.ts canvasSurfaceStyle), the text the ink itself;
+ * radius and type are resolved design-system base tokens (the stage never
+ * reads host CSS).
  */
 export function SpacingChips({ viewport, hint }: { viewport: ViewportState; hint: SpacingHint }) {
+  const { ink } = stageMarkColors(useCanvasStyle());
   return (
     <>
       {hint.segments.map((segment, index) => {
@@ -26,12 +34,12 @@ export function SpacingChips({ viewport, hint }: { viewport: ViewportState; hint
               top: `${center.y}px`,
               transform: "translate(-50%, -50%)",
               background: "var(--interactive-canvas-highlight)",
-              color: "var(--foreground)",
+              color: ink,
               border: "1px solid var(--interactive-canvas-guide)",
-              borderRadius: "999px",
+              borderRadius: flat.base["radius.pill"],
               padding: "1px 6px",
-              fontSize: "10px",
-              fontWeight: 600,
+              fontSize: flat.base["font.size.micro"],
+              fontWeight: flat.base["font.weight.semibold"],
               whiteSpace: "nowrap",
               pointerEvents: "none",
             }}

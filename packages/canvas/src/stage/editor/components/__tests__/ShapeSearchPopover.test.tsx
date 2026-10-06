@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cssVar } from "@codecaine-ai/design-system";
 import { ShapeSearchPopover } from "../ShapeSearchPopover";
 import { SHAPE_SEARCH_ENTRIES } from "../../../../objects/catalog";
 
@@ -13,7 +14,8 @@ describe("ShapeSearchPopover geometry", () => {
     const popover = container.querySelector("[data-shape-search-popover]") as HTMLElement;
     expect(popover).toBeTruthy();
     expect(popover.style.width).toBe("232px");
-    expect(popover.style.background).toBe("#1D1D1D");
+    expect(popover.getAttribute("data-theme")).toBe("dark");
+    expect(popover.style.background).toBe(cssVar("color.surface.panel"));
   });
 
   it("renders a 5-column icon grid", () => {

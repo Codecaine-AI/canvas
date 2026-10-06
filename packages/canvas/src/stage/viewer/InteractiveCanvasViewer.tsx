@@ -12,6 +12,7 @@ import {
   useState,
   type MouseEvent as ReactMouseEvent,
 } from "react";
+import { cssVar } from "@codecaine-ai/design-system";
 import { AlertTriangleIcon, MessageSquareIcon } from "../../ui/icons";
 import { annotationTargetLabel, CanvasStage } from "../CanvasStage";
 import { InteractionFeedbackScreen } from "../editor/pipeline/InteractionFeedback";
@@ -61,6 +62,9 @@ export interface InteractiveCanvasViewerProps {
 const MIN_STAGE_HEIGHT = 360;
 const COMPACT_MIN_HEIGHT = 320;
 
+/** A hairline border in a theme color (viewer chrome follows the app theme). */
+const hairline = (color: string) => `${cssVar("border.width.hairline")} solid ${color}`;
+
 function ViewerNavigationControls({
   zoom,
   controls,
@@ -70,14 +74,14 @@ function ViewerNavigationControls({
 }) {
   const buttonStyle = {
     border: 0,
-    borderRadius: 7,
+    borderRadius: cssVar("radius.base"),
     background: "transparent",
-    color: "#242424",
+    color: cssVar("color.text.body"),
     cursor: "pointer",
     height: 26,
     minWidth: 26,
     padding: "0 7px",
-    fontSize: 12,
+    fontSize: cssVar("font.size.ui-xs"),
   } as const;
 
   return (
@@ -87,17 +91,17 @@ function ViewerNavigationControls({
       data-canvas-viewer-controls="true"
       style={{
         position: "absolute",
-        right: 12,
-        bottom: 12,
+        right: cssVar("space.3"),
+        bottom: cssVar("space.3"),
         zIndex: 10,
         display: "inline-flex",
         alignItems: "center",
-        gap: 2,
+        gap: cssVar("space.0-5"),
         padding: "3px 5px",
-        border: "1px solid rgba(0, 0, 0, 0.12)",
-        borderRadius: 10,
-        background: "rgba(255, 255, 255, 0.94)",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.12)",
+        border: hairline(cssVar("color.border.default")),
+        borderRadius: cssVar("radius.base"),
+        background: cssVar("color.surface.panel"),
+        boxShadow: cssVar("shadow.glass"),
       }}
     >
       <button type="button" aria-label="Fit canvas" onClick={controls.fit} style={buttonStyle}>
@@ -198,8 +202,8 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
       style={{
         position: "relative",
         overflow: "hidden",
-        border: bare ? 0 : "1px solid var(--border)",
-        borderRadius: bare ? 0 : "8px",
+        border: bare ? 0 : hairline("var(--border)"),
+        borderRadius: bare ? 0 : cssVar("radius.base"),
         minHeight: bare ? 0 : `${minHeight}px`,
         width: "100%",
         height: bare ? "100%" : undefined,
@@ -253,16 +257,16 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
             role="status"
             style={{
               position: "absolute",
-              left: 12,
-              bottom: 12,
+              left: cssVar("space.3"),
+              bottom: cssVar("space.3"),
               zIndex: 10,
-              border: "1px solid rgba(159, 29, 29, 0.28)",
-              borderRadius: 999,
-              background: "rgba(255, 255, 255, 0.94)",
-              color: "#9f1d1d",
+              border: hairline(cssVar("color.status.danger.line")),
+              borderRadius: cssVar("radius.pill"),
+              background: cssVar("color.surface.panel"),
+              color: cssVar("color.status.danger.text"),
               padding: "5px 9px",
-              fontSize: 11,
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              fontSize: cssVar("font.size.ui-2xs"),
+              boxShadow: cssVar("shadow.glass"),
             }}
           >
             View not found: {view}
@@ -280,12 +284,12 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
       data-source-id={document.id}
       data-canvas-viewer-interactive={interactive ? "true" : undefined}
     >
-      <div className="not-prose my-4 overflow-hidden rounded-md border bg-background shadow-sm">
+      <div className="not-prose my-4 overflow-hidden rounded border bg-background">
         <div className="flex flex-wrap items-center gap-2 border-b bg-background px-3 py-2">
-          <span className="font-display text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <span className="font-display text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
             Interactive Canvas
           </span>
-          <span className="text-sm font-medium">{document.title ?? document.id}</span>
+          <span className="text-ui-lg font-medium">{document.title ?? document.id}</span>
           <span className="interactive-canvas-badge">{document.objects.length} objects</span>
           <span className="interactive-canvas-badge">{document.connections.length} connectors</span>
           {(document.annotations?.length ?? 0) > 0 && (
@@ -300,13 +304,13 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
               View not found: {view}
             </span>
           )}
-          <span className="font-mono text-[11px] text-muted-foreground">{document.id}</span>
+          <span className="font-mono text-ui-2xs text-muted-foreground">{document.id}</span>
         </div>
         <div className="p-3">{stage}</div>
         {(document.annotations?.length ?? 0) > 0 && (
-          <div className="grid gap-2 border-t bg-background p-3 text-xs text-muted-foreground sm:grid-cols-2">
+          <div className="grid gap-2 border-t bg-background p-3 text-ui-xs text-muted-foreground sm:grid-cols-2">
             {(document.annotations ?? []).map((annotation) => (
-              <div key={annotation.id} className="rounded-md border bg-background p-2">
+              <div key={annotation.id} className="rounded border bg-background p-2">
                 <span className="font-medium text-foreground">
                   {annotation.intent === "agent-request" ? "Agent request" : "Note"}
                 </span>
@@ -322,12 +326,12 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
           display: inline-flex;
           align-items: center;
           gap: 5px;
-          border: 1px solid var(--border);
-          border-radius: 999px;
+          border: ${hairline("var(--border)")};
+          border-radius: ${cssVar("radius.pill")};
           background: color-mix(in oklab, var(--background) 80%, transparent);
-          padding: 3px 8px;
+          padding: 3px ${cssVar("space.2")};
           color: var(--muted-foreground);
-          font-size: 11px;
+          font-size: ${cssVar("font.size.ui-2xs")};
         }
         .interactive-canvas-badge-warning {
           border-color: color-mix(in oklab, var(--destructive) 40%, var(--border));

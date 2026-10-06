@@ -24,11 +24,13 @@ import type {
   InteractiveCanvasObject,
 } from "../state/schema";
 import type { ConnectorDragOverlay } from "./types";
+import { flat } from "@codecaine-ai/design-system";
 import { useCanvasStyle } from "../theme/canvas-style-context";
 import { useArrowMarkerUrl } from "./arrow-markers";
-import type { CanvasStyle } from "../theme/canvas-style";
-/** Selection outline/handle color — inlined from the old TRIM.selectionBlue (stage must not import stage/editor/components/editor-style). */
-const SELECTION_BLUE = "#0D99FF";
+import { stageMarkColors, type CanvasStyle } from "../theme/canvas-style";
+// The bend preview path and the port dots are stage marks in the board's
+// colors (decision 56, stageMarkColors): accent strokes, rings and snapped
+// fills, board-surface dot bodies and outline-snap ring.
 // Preview stroke (the default pick's ink), width + bend radius: the canvas
 // style's connector settings, so the preview matches the connector it becomes.
 const CONNECTOR_PREVIEW_OPACITY = 0.6;
@@ -96,6 +98,7 @@ export function ConnectorDragPreview({
   drag: ConnectorDragOverlay;
 }) {
   const canvasStyle = useCanvasStyle();
+  const marks = stageMarkColors(canvasStyle);
   const forwardMarkerUrl = useArrowMarkerUrl(document.id, "forward");
   if (drag.connectionId && drag.points && drag.points.length >= 2) {
     const connection = document.connections.find((item) => item.id === drag.connectionId);
@@ -115,7 +118,7 @@ export function ConnectorDragPreview({
           <path
             d={previewPath}
             fill="none"
-            stroke={SELECTION_BLUE}
+            stroke={marks.accent}
             strokeWidth={canvasStyle.connectorStrokeWidthPx}
             strokeLinecap="butt"
             strokeDasharray={strokeDasharray}
@@ -211,9 +214,9 @@ export function ConnectorDragPreview({
           />
         </g>
       </svg>
-      {/* FigJam-style hover ports (W3b): 4 white-fill, selection-blue-ring
+      {/* FigJam-style hover ports (W3b): 4 board-surface-fill, accent-ring
           circles on the hovered object's true outline; the anchor the cascade
-          snapped to renders emphasized (bigger, filled blue). */}
+          snapped to renders emphasized (bigger, filled with the accent). */}
       {portAnchors.map((portAnchor, index) => {
         const screenPoint = worldToScreen(viewport, portAnchor.point);
         const isSnapped =
@@ -233,9 +236,9 @@ export function ConnectorDragPreview({
               width: isSnapped ? "12px" : "8px",
               height: isSnapped ? "12px" : "8px",
               transform: "translate(-50%, -50%)",
-              borderRadius: "999px",
-              background: isSnapped ? SELECTION_BLUE : "#FFFFFF",
-              border: `1.5px solid ${SELECTION_BLUE}`,
+              borderRadius: flat.base["radius.pill"],
+              background: isSnapped ? marks.accent : marks.surface,
+              border: `1.5px solid ${marks.accent}`,
               pointerEvents: "none",
             }}
           />
@@ -253,9 +256,9 @@ export function ConnectorDragPreview({
             width: "10px",
             height: "10px",
             transform: "translate(-50%, -50%)",
-            borderRadius: "999px",
-            background: SELECTION_BLUE,
-            border: "1.5px solid #FFFFFF",
+            borderRadius: flat.base["radius.pill"],
+            background: marks.accent,
+            border: `1.5px solid ${marks.surface}`,
             pointerEvents: "none",
           }}
         />

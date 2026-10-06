@@ -89,7 +89,7 @@ describe("StyleRail", () => {
     renderRail({ theme: "figjam", themes: { "schematic-dark": { boardBackground: "#000000" } } });
     const preview = (theme: string) => $<HTMLElement>(`[data-theme="${theme}"] .canvas-style-theme-preview`)!;
     expect(preview("figjam").style.backgroundColor).toBe("#F5F5F5");
-    expect(preview("schematic-light").style.backgroundColor).toBe("#F6F8FA");
+    expect(preview("schematic-light").style.backgroundColor).toBe("#FDFDFD");
     expect(preview("schematic-dark").style.backgroundColor).toBe("#000000");
     expect($('[data-theme="schematic-dark"] .canvas-style-theme-edited')).not.toBeNull();
     expect($('[data-theme="figjam"] .canvas-style-theme-edited')).toBeNull();

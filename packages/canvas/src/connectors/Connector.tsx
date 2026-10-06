@@ -16,15 +16,17 @@ import { CONNECTION_LABEL_CHIP, connectionLabelChipMetrics } from "./label-chip"
 import { resolveConnectorPaint } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { CANVAS_MONO_FONT_STACK } from "../theme/fonts";
+import { stageMarkColors } from "../theme/canvas-style";
 import { useCanvasStyle } from "../theme/canvas-style-context";
 import { useArrowMarkerUrl } from "./arrow-markers";
 
 // Connector stroke width, ink, label chip (size, font, colors, corner radius)
 // and elbow bend radius come from the workspace canvas style
 // (theme/canvas-style.ts) via useCanvasStyle; the chip's geometry is shared
-// with the static renderer and the agent lints (./label-chip.ts).
-/** Selection outline/handle color — inlined from the old TRIM.selectionBlue (stage must not import stage/editor/components/editor-style). */
-const SELECTION_BLUE = "#0D99FF";
+// with the static renderer and the agent lints (./label-chip.ts). The
+// selection trim is a stage mark in the board's colors (decision 56,
+// stageMarkColors, resolved hex): accent pills and rings, board-surface
+// endpoint bodies. The static renderer draws no selection trim.
 
 const CONNECTION_HIT_WIDTH = 14;
 const ENDPOINT_HANDLE_RADIUS_PX = 7.5;
@@ -167,6 +169,7 @@ export function ConnectorSelectionTrim({
   zoom: number;
 }) {
   const canvasStyle = useCanvasStyle();
+  const marks = stageMarkColors(canvasStyle);
   const routed = routeConnection(fromObject, toObject, connection, document.objects, canvasStyle);
   const safeZoom = Math.max(zoom, 0.001);
   const label = connection.label?.trim() ? connection.label : null;
@@ -196,7 +199,7 @@ export function ConnectorSelectionTrim({
           width={bendHandleLength}
           height={bendHandleThickness}
           rx={bendHandleRadius}
-          fill={SELECTION_BLUE}
+          fill={marks.accent}
           data-canvas-bend-segment={segment.index}
           data-canvas-connection-id={connection.id}
           transform={
@@ -214,8 +217,8 @@ export function ConnectorSelectionTrim({
         cx={routed.start.x}
         cy={routed.start.y}
         r={endpointRadius}
-        fill="#FFFFFF"
-        stroke={SELECTION_BLUE}
+        fill={marks.surface}
+        stroke={marks.accent}
         strokeWidth={endpointStrokeWidth}
         data-canvas-endpoint="from"
         data-canvas-connection-id={connection.id}
@@ -225,8 +228,8 @@ export function ConnectorSelectionTrim({
         cx={routed.end.x}
         cy={routed.end.y}
         r={endpointRadius}
-        fill="#FFFFFF"
-        stroke={SELECTION_BLUE}
+        fill={marks.surface}
+        stroke={marks.accent}
         strokeWidth={endpointStrokeWidth}
         data-canvas-endpoint="to"
         data-canvas-connection-id={connection.id}

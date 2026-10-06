@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cssVar } from "@codecaine-ai/design-system";
 import {
   CanvasDock,
   FIGJAM_DOCK_HEIGHT_PX,
@@ -16,15 +17,15 @@ describe("CanvasDock geometry", () => {
   it("renders at the professional rounded dock dimensions", () => {
     expect(FIGJAM_DOCK_WIDTH_PX).toBe("fit-content");
     expect(FIGJAM_DOCK_HEIGHT_PX).toBe(53);
-    expect(FIGJAM_DOCK_RADIUS_PX).toBe(15);
+    expect(FIGJAM_DOCK_RADIUS_PX).toBe(cssVar("radius.base"));
 
     const { container } = render(<CanvasDock />);
     const dock = container.querySelector("[data-figjam-dock]") as HTMLElement;
     expect(dock).toBeTruthy();
     expect(dock.style.width).toBe("fit-content");
     expect(dock.style.height).toBe("53px");
-    expect(dock.style.borderRadius).toBe("15px");
-    expect(dock.style.background).toBe("#FFFFFF");
+    expect(dock.style.borderRadius).toBe(cssVar("radius.base"));
+    expect(dock.style.background).toBe(cssVar("color.surface.panel"));
     expect(dock.style.padding).toBe("0px 10px");
   });
 
@@ -35,12 +36,12 @@ describe("CanvasDock geometry", () => {
       const buttonEl = button as HTMLElement;
       const icon = buttonEl.querySelector("svg") as SVGElement;
       const tool = buttonEl.getAttribute("data-dock-tool");
-      expect(buttonEl.style.width).toBe("40px");
-      expect(buttonEl.style.height).toBe("40px");
-      expect(buttonEl.style.borderRadius).toBe("11px");
+      expect(buttonEl.style.width).toBe(cssVar("space.10"));
+      expect(buttonEl.style.height).toBe(cssVar("space.10"));
+      expect(buttonEl.style.borderRadius).toBe(cssVar("radius.base"));
       const expectedIconPx = tool === "sticky"
         ? `${EDITOR_STYLE.dockStickyIconSizePx}px`
-        : `${EDITOR_STYLE.dockIconSizePx}px`;
+        : EDITOR_STYLE.dockIconSize;
       expect(icon.style.width).toBe(expectedIconPx);
       expect(icon.style.height).toBe(expectedIconPx);
       expect(icon.getAttribute("class")).toContain(`canvas-dock-icon--${tool}`);
@@ -62,7 +63,7 @@ describe("CanvasDock geometry", () => {
     const { container } = render(<CanvasDock />);
     const dock = container.querySelector("[data-figjam-dock]") as HTMLElement;
     expect(dock.style.boxShadow).not.toBe("");
-    expect(dock.style.boxShadow.toLowerCase()).toContain("rgba(0, 0, 0");
+    expect(dock.style.boxShadow).toBe(cssVar("shadow.glass"));
     expect(dock.style.boxShadow).toBe(EDITOR_STYLE.dockShadow);
   });
 });
@@ -102,9 +103,9 @@ describe("CanvasDock button inventory", () => {
     for (const divider of dividers) {
       const dividerEl = divider as HTMLElement;
       expect(dividerEl.style.width).toBe("1.5px");
-      expect(dividerEl.style.height).toBe("32px");
+      expect(dividerEl.style.height).toBe(cssVar("space.8"));
       expect(dividerEl.style.margin).toBe("0px 10px");
-      expect(dividerEl.style.background).toBe("rgba(0, 0, 0, 0.18)");
+      expect(dividerEl.style.background).toBe(cssVar("color.border.default"));
     }
     expect(container.textContent).not.toContain("|");
   });
@@ -118,40 +119,45 @@ describe("CanvasDock button inventory", () => {
 });
 
 describe("CanvasDock state rules", () => {
-  it("shows no active (violet) button when activeTool is null", () => {
+  it("shows no active button when activeTool is null", () => {
     const { container } = render(<CanvasDock activeTool={null} />);
     const activeButtons = container.querySelectorAll('[data-active="true"]');
     expect(activeButtons.length).toBe(0);
   });
 
-  it("highlights exactly the button matching activeTool with the violet active bg", () => {
+  it("highlights exactly the button matching activeTool with the accent active wash", () => {
     const { container } = render(<CanvasDock activeTool="hand" />);
     const active = container.querySelector('[data-dock-tool="hand"]') as HTMLElement;
     expect(active.getAttribute("data-active")).toBe("true");
-    expect(active.style.background).toBe("#8C2EF2"); // accentPurple
+    expect(active.style.background).toBe(cssVar("color.fill.accent"));
 
     const others = container.querySelectorAll('[data-active="true"]');
     expect(others.length).toBe(1);
+    for (const button of container.querySelectorAll<HTMLElement>('[data-dock-tool]:not([data-dock-tool="hand"])')) {
+      expect(button.style.background).not.toBe(cssVar("color.fill.accent"));
+    }
   });
 
   it("highlights the connector button when activeTool is connector", () => {
     const { container } = render(<CanvasDock activeTool="connector" />);
     const active = container.querySelector('[data-dock-tool="connector"]') as HTMLElement;
     expect(active.getAttribute("data-active")).toBe("true");
-    expect(active.style.background).toBe("#8C2EF2");
+    expect(active.style.background).toBe(cssVar("color.fill.accent"));
 
     const others = container.querySelectorAll('[data-active="true"]');
     expect(others.length).toBe(1);
   });
 
-  it("shows a light-gray hover background distinct from the active violet", () => {
+  it("shows a hover fill distinct from the active accent wash", () => {
     const { container } = render(<CanvasDock activeTool="select" />);
     const connectorButton = container.querySelector('[data-dock-tool="connector"]') as HTMLElement;
     fireEvent.pointerEnter(connectorButton);
     expect(connectorButton.style.background).toBe(EDITOR_STYLE.dockHoverBg);
-    // The active button remains violet, independent of the hovered one.
+    expect(connectorButton.style.background).toBe(cssVar("color.fill.hover"));
+    // The active button keeps the accent wash, independent of the hovered one.
     const selectButton = container.querySelector('[data-dock-tool="select"]') as HTMLElement;
-    expect(selectButton.style.background).toBe("#8C2EF2");
+    expect(selectButton.style.background).toBe(cssVar("color.fill.accent"));
+    expect(selectButton.style.background).not.toBe(connectorButton.style.background);
   });
 
   it("shows a tooltip only while hovering, using the button's shortcut hint", () => {

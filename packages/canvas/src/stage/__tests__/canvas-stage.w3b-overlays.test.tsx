@@ -12,12 +12,12 @@ afterEach(() => {
 
 /**
  * W3b render smokes: hover ports + snapped-anchor highlight during connector
- * drags, hollow FigJam-blue endpoint circles on selected connectors,
+ * drags, hollow accent-blue endpoint circles on selected connectors,
  * distribution (equal-spacing) guides, the segment bend pills, and the
  * per-connection color field (stroke + context-stroke arrowheads).
  */
 
-const SELECTION_BLUE = "#0D99FF";
+const SELECTION_BLUE = "#0078DF";
 
 function makeDocument(overrides: Partial<InteractiveCanvasDocument> = {}): InteractiveCanvasDocument {
   return {
@@ -86,9 +86,9 @@ describe("CanvasStage: connector drag hover ports (W3b)", () => {
     const snapped = container.querySelectorAll("[data-canvas-anchor-snapped]");
     expect(snapped.length).toBe(1);
     expect(snapped[0]!.getAttribute("data-canvas-anchor-dot")).toBe("left");
-    // FigJam port style: white fill, selection-blue ring on the un-snapped dots.
+    // FigJam port style: board-surface fill, selection-blue ring on the un-snapped dots.
     const plain = Array.from(dots).find((dot) => !dot.hasAttribute("data-canvas-anchor-snapped")) as HTMLElement;
-    expect(plain.style.background.toLowerCase()).toBe("#ffffff");
+    expect(plain.style.background.toLowerCase()).toBe("#fdfdfd");
     expect(plain.style.border).toContain("1.5px");
   });
 
@@ -239,7 +239,7 @@ describe("CanvasStage: selected-connector trim (W3b)", () => {
     const to = container.querySelector('[data-canvas-endpoint="to"]');
     expect(from).toBeTruthy();
     expect(to).toBeTruthy();
-    expect(from!.getAttribute("fill")).toBe("#FFFFFF");
+    expect(from!.getAttribute("fill")).toBe("#FDFDFD");
     expect(from!.getAttribute("stroke")).toBe(SELECTION_BLUE);
     expect(from!.getAttribute("r")).toBe("7.5");
     expect(from!.getAttribute("stroke-width")).toBe("2.5");

@@ -1,15 +1,14 @@
 "use client";
 
-import {
-  DISTRIBUTION_GUIDE_COLOR,
-  DISTRIBUTION_TICK_BAR,
-  type DistributionGuideSegment,
-} from "./snapping";
+import { DISTRIBUTION_TICK_BAR, type DistributionGuideSegment } from "./snapping";
 import { worldToScreen, type ViewportState } from "../../../viewport";
+import { stageMarkColors } from "../../../../theme/canvas-style";
+import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 
 /**
  * Equal-spacing ("distribution") guide segment from the ported AFFiNE
- * snap-overlay algorithm (W3b): a magenta line spanning one equalized gap,
+ * snap-overlay algorithm (W3b): a pink line (the board's design-system
+ * color.pink.solid, stageMarkColors; decision 56) spanning one equalized gap,
  * with short perpendicular tick bars at both ends (upstream's end-tick style,
  * DISTRIBUTION_TICK_BAR view px). Segments arrive in world space on
  * InteractionOverlay.distributionGuides; rendered here as one small SVG per
@@ -22,6 +21,7 @@ export function DistributionGuideLine({
   viewport: ViewportState;
   segment: DistributionGuideSegment;
 }) {
+  const { distribution } = stageMarkColors(useCanvasStyle());
   const a = worldToScreen(viewport, { x: segment.x1, y: segment.y1 });
   const b = worldToScreen(viewport, { x: segment.x2, y: segment.y2 });
   const horizontal = Math.abs(a.y - b.y) <= Math.abs(a.x - b.x);
@@ -41,7 +41,7 @@ export function DistributionGuideLine({
       <path
         d={`M ${a.x} ${a.y} L ${b.x} ${b.y} ${tickA} ${tickB}`}
         fill="none"
-        stroke={DISTRIBUTION_GUIDE_COLOR}
+        stroke={distribution}
         strokeWidth={2}
       />
     </svg>

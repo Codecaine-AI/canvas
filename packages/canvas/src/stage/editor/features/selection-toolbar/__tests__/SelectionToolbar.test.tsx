@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { act, cleanup, fireEvent, render, renderHook } from "@testing-library/react";
+import { cssVar } from "@codecaine-ai/design-system";
 import { createRef } from "react";
 import { SelectionToolbar } from "../SelectionToolbar";
 import { SelectionToolbarLayer } from "../SelectionToolbarLayer";
@@ -136,22 +137,21 @@ function connectorToolbarApi(overrides: Partial<SelectionToolbarApi> = {}): Sele
 }
 
 describe("SelectionToolbar geometry / styling", () => {
-  it("renders the dark #1D1D1D bar at the 48px height with rounded-rect radius", () => {
+  it("renders the dark-theme panel bar at the 48px height with the base radius", () => {
     const { container } = render(<SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" />);
     const bar = container.querySelector("[data-selection-toolbar]") as HTMLElement;
     expect(bar).toBeTruthy();
-    expect(bar.style.background).toBe("#1D1D1D");
-    expect(bar.style.height).toBe("48px");
-    expect(bar.style.borderRadius).toBe("14px");
+    expect(bar.getAttribute("data-theme")).toBe("dark");
+    expect(bar.style.background).toBe(cssVar("color.surface.panel"));
+    expect(bar.style.height).toBe(cssVar("space.12"));
+    expect(bar.style.borderRadius).toBe(cssVar("radius.base"));
   });
 
-  it("applies the FigJam elevation and entrance animation to the toolbar pill", () => {
+  it("applies the glass elevation and entrance animation to the toolbar pill", () => {
     const { container } = render(<SelectionToolbar controls={SHAPE_CONTROLS} variantLabel="shape" />);
     const bar = container.querySelector("[data-selection-toolbar]") as HTMLElement;
     expect(bar).toBeTruthy();
-    expect(bar.style.boxShadow).toContain("0 0 0 0.5px");
-    expect(bar.style.boxShadow).toContain("0 2px 5px");
-    expect(bar.style.boxShadow).toContain("0 6px 18px");
+    expect(bar.style.boxShadow).toBe(cssVar("shadow.glass"));
     expect(bar.style.animation).toContain("canvas-selection-toolbar-enter");
   });
 });
@@ -313,13 +313,13 @@ describe("SelectionToolbar interaction", () => {
     const { container } = render(<SelectionToolbar controls={SECTION_CONTROLS} variantLabel="section" />);
     const renameButton = container.querySelector('[data-toolbar-action="rename"]') as HTMLElement;
     expect(renameButton.getAttribute("aria-expanded")).toBeNull();
-    expect(renameButton.style.background.replace(/\s/g, "")).not.toBe("rgba(255,255,255,0.16)");
+    expect(renameButton.style.background).not.toBe(cssVar("color.fill.active"));
 
     const colorButton = container.querySelector('[data-toolbar-action="color"]') as HTMLElement;
     expect(colorButton.getAttribute("aria-expanded")).toBe("false");
     fireEvent.click(colorButton);
     expect(colorButton.getAttribute("aria-expanded")).toBe("true");
-    expect(colorButton.style.background.replace(/\s/g, "")).toBe("rgba(255,255,255,0.16)");
+    expect(colorButton.style.background).toBe(cssVar("color.fill.active"));
   });
 
   it("shows a tooltip with the control's label on hover", () => {

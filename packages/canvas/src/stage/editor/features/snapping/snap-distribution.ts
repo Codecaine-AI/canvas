@@ -26,8 +26,10 @@
  *
  * `almostEqual` is reused from `../connectors/pathfinding/gfx-types` (same
  * upstream package). `ALIGN_THRESHOLD` / `DISTRIBUTION_LINE_OFFSET` / `STROKE_WIDTH`
- * and the two guide colors (`#8B5CF6` alignment / `#CC4187` distribution) are
- * copied verbatim from `snap-overlay.ts` lines 35-37 and 700/723.
+ * are copied verbatim from `snap-overlay.ts` lines 35-37. The two guide
+ * colors upstream hard-codes (`snap-overlay.ts` 700/723) were replaced by
+ * design-system tokens in the design-system rollout: guides are stage marks
+ * in the board's colors (decision 56, theme/canvas-style.ts stageMarkColors).
  *
  * ONE INTENTIONAL DEVIATION: `alignDistributeVertically` fixes two axis bugs
  * present in upstream's `_alignDistributeVertically` (sorting `hBoxes` by
@@ -39,6 +41,7 @@
  */
 
 import { almostEqual } from "../../../../connectors/pathfinding/gfx-types";
+import { DEFAULT_CANVAS_STYLE, stageMarkColors } from "../../../../theme/canvas-style";
 
 /** Plain axis-aligned bounds — this repo's `CanvasBounds` shape (`{x, y, width, height}`). */
 export type SnapBounds = {
@@ -57,10 +60,19 @@ export const DISTRIBUTION_LINE_OFFSET = 1;
 /** Guide stroke width, world px = this / zoom. Upstream `STROKE_WIDTH`. */
 export const STROKE_WIDTH = 2;
 
-/** Alignment-guide stroke color (purple). Upstream `snap-overlay.ts:700`. */
-export const ALIGNMENT_GUIDE_COLOR = "#8B5CF6";
-/** Distribution (equal-gap) guide stroke color (magenta). Upstream `snap-overlay.ts:723`. */
-export const DISTRIBUTION_GUIDE_COLOR = "#CC4187";
+/**
+ * Alignment-guide stroke color on a light board: color.violet.solid
+ * (stageMarkColors). Replaces upstream's vendored `snap-overlay.ts:700`
+ * purple; a live guide resolves the color for its own board.
+ */
+export const ALIGNMENT_GUIDE_COLOR = stageMarkColors(DEFAULT_CANVAS_STYLE).alignment;
+/**
+ * Distribution (equal-gap) guide stroke color on a light board:
+ * color.pink.solid (stageMarkColors). Replaces upstream's vendored
+ * `snap-overlay.ts:723` magenta; DistributionGuideLine resolves the color for
+ * its own board.
+ */
+export const DISTRIBUTION_GUIDE_COLOR = stageMarkColors(DEFAULT_CANVAS_STYLE).distribution;
 /** Half-length of the perpendicular end-tick bar drawn on distribution guides, world px = this / zoom. Upstream `snap-overlay.ts:725`. */
 export const DISTRIBUTION_TICK_BAR = 10;
 

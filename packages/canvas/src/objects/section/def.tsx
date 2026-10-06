@@ -148,11 +148,13 @@ export const sectionDef: ObjectDef = {
         }
         /* Drop-target state while a drag hovers this section: keep the section's
            2px outline weight (softer than the generic shape drop glow) with a
-           faint primary wash so the capture area reads without shouting. */
+           faint wash of the board's ink (a stage mark takes the board's
+           colors, not the app theme's) so the capture area reads without
+           shouting. */
         .interactive-canvas-object-section[data-drop-target="true"] {
-          outline: 2px solid var(--primary);
+          outline: 2px solid ${canvasStyleCssVar("textColor")};
           outline-offset: 2px;
-          box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 16%, transparent);
+          box-shadow: 0 0 0 4px color-mix(in oklab, ${canvasStyleCssVar("textColor")} 16%, transparent);
         }
         .interactive-canvas-section-title-chip {
           position: absolute;

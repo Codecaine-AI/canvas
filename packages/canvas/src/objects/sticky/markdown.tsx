@@ -1,6 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
+import { withAlpha } from "../../theme/color-math";
 import {
   parseStickyMarkdown,
   STICKY_MARKDOWN_MONO_FONT,
@@ -71,8 +73,22 @@ export function stickyMarkdownLineAttrs(line: StickyMarkdownLine): StickyMarkdow
  */
 export const STICKY_STRONG_STYLE = { fontFamily: "inherit" } as const;
 
-/** Inline `code` chip tint on a paper sticky (black at 8%). */
-export const STICKY_CODE_CHIP_BACKGROUND = "rgba(0, 0, 0, 0.08)";
+/**
+ * Inline `code` chip tint: the sticky's text color at this alpha. Card
+ * stickies tint with their own text color (def.tsx CARD_STICKY_GEOMETRY.
+ * codeChipAlpha reads it here: def.tsx imports this module, not the reverse).
+ */
+export const STICKY_CODE_CHIP_ALPHA = 0.08;
+
+/** Inline `code` chip tint on a paper sticky: the figjam text color at STICKY_CODE_CHIP_ALPHA (`rgba(0, 0, 0, 0.08)`). */
+export const STICKY_CODE_CHIP_BACKGROUND = withAlpha(FIGJAM_CANVAS_STYLE.textColor, STICKY_CODE_CHIP_ALPHA);
+
+/**
+ * Inline `code` chip corner radius: FigJam board art, shared by the at-rest
+ * chip here and the live editor's chip (MarkdownSlotTextEditor) so both
+ * draw the same box.
+ */
+export const STICKY_CODE_CHIP_RADIUS = "3px";
 
 /** Inline pass: `**bold**` and `` `code` `` (no nesting), from the shared D18 tokens. */
 function renderInline(
@@ -96,7 +112,7 @@ function renderInline(
           fontWeight: STICKY_MARKDOWN_MONO_FONT_WEIGHT,
           fontSize: "0.85em",
           background: codeBackground,
-          borderRadius: "3px",
+          borderRadius: STICKY_CODE_CHIP_RADIUS,
           padding: "0 0.15em",
         }}
       >

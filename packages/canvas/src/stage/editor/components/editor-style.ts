@@ -1,8 +1,17 @@
+import { cssVar } from "@codecaine-ai/design-system";
+
 /**
  * EDITOR_STYLE — the editor interface style constants (renamed from
  * theme/tokens.ts's TRIM in the theme dispersal: editor trim styling
- * co-locates with the editor components that consume it). Values sampled
- * from FigJam reference exports; `*Px` values are LOGICAL px.
+ * co-locates with the editor components that consume it).
+ *
+ * Geometry sampled from FigJam reference exports: `*Px` values are LOGICAL px
+ * numbers (sizes and offsets with no equal design-system step). Everything
+ * else is a `@codecaine-ai/design-system` token (`var(--ds-*)`): colors,
+ * radii, shadows and the spacing that has an exactly equal step. The light
+ * pieces (dock, zoom pill) follow the app theme; the dark pieces (selection
+ * toolbar, its flyouts, the color picker, the shape search popover) put
+ * `data-theme="dark"` on their root, so the same tokens resolve dark there.
  *
  * Two former TRIM values now live in stage/ instead (stage core must not
  * import stage/editor/): the select-tool cursor (CanvasStage) and the selection
@@ -11,47 +20,49 @@
  */
 
 export const EDITOR_STYLE = {
-  topBarBg: "#E6E6E6",
-  topBarBorderBottom: "#DFDFDF",
-  bottomToolbarBg: "#FFFFFF",
+  bottomToolbarBg: cssVar("color.surface.panel"),
   dockHeightPx: 53,
-  dockRadiusPx: 15,
+  dockRadius: cssVar("radius.base"),
   dockPaddingXPx: 10,
-  dockButtonSizePx: 40,
-  dockButtonRadiusPx: 11,
-  dockIconSizePx: 24,
+  dockButtonSize: cssVar("space.10"),
+  dockButtonRadius: cssVar("radius.base"),
+  dockIconSize: cssVar("space.6"),
   dockStickyIconSizePx: 30,
   dockNucleoIconStrokeWidthPx: 1.1,
   dockStickyIconStrokeWidthPx: 0.8,
   dockSectionIconStrokeWidthPx: 7,
   dockGroupGapPx: 5,
   dockDividerWidthPx: 1.5,
-  dockDividerHeightPx: 32,
+  dockDividerHeight: cssVar("space.8"),
   dockDividerMarginXPx: 10,
-  dockDividerColor: "rgba(0, 0, 0, 0.18)",
-  dockGlyphColor: "#333333",
-  dockHoverBg: "#F0F0F0",
-  dockShadow: "0 2px 10px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.06)",
-  selectionToolbarBg: "#1D1D1D",
-  selectionToolbarHeightPx: 48,
-  selectionToolbarRadiusPx: 14,
+  dockDividerColor: cssVar("color.border.default"),
+  dockGlyphColor: cssVar("color.text.body"),
+  dockHoverBg: cssVar("color.fill.hover"),
+  dockShadow: cssVar("shadow.glass"),
+  selectionToolbarBg: cssVar("color.surface.panel"),
+  selectionToolbarHeight: cssVar("space.12"),
+  selectionToolbarRadius: cssVar("radius.base"),
   selectionToolbarPaddingXPx: 10,
-  selectionToolbarGapPx: 6,
+  selectionToolbarGap: cssVar("space.1-5"),
   selectionToolbarButtonHeightPx: 36,
-  selectionToolbarButtonRadiusPx: 8,
-  selectionToolbarSwatchPx: 28,
-  // FigJam-measured recipe (ring / key / ambient) from board-design-reference/analysis/figjam-popup-animation.html.
-  selectionToolbarShadow:
-    "0 0 0 0.5px rgba(0, 0, 0, 0.22), 0 2px 5px rgba(0, 0, 0, 0.14), 0 6px 18px rgba(0, 0, 0, 0.12)",
-  flyoutRadiusPx: 16,
-  flyoutPaddingPx: 12,
-  flyoutShadow:
-    "0 0 0 0.5px rgba(0, 0, 0, 0.22), 0 4px 10px rgba(0, 0, 0, 0.18), 0 8px 24px rgba(0, 0, 0, 0.16)",
+  selectionToolbarButtonRadius: cssVar("radius.base"),
+  selectionToolbarSwatch: cssVar("space.7"),
+  selectionToolbarShadow: cssVar("shadow.glass"),
+  flyoutRadius: cssVar("radius.base"),
+  flyoutPadding: cssVar("space.3"),
+  flyoutShadow: cssVar("shadow.glass"),
   flyoutItemHeightPx: 36,
-  flyoutItemRadiusPx: 8,
+  flyoutItemRadius: cssVar("radius.base"),
   colorPopoverSwatchPx: 30,
-  colorPopoverGapPx: 12,
+  colorPopoverGap: cssVar("space.3"),
   colorPopoverPaddingPx: 14,
-  colorPopoverRadiusPx: 16,
-  accentPurple: "#8C2EF2",
+  colorPopoverRadius: cssVar("radius.base"),
+  /**
+   * Armed / active / selected control fill: the dock's active tool, a locked
+   * toolbar control, a flyout's current option. The accent wash, so it stays
+   * distinct from the hover fill.
+   */
+  activeBg: cssVar("color.fill.accent"),
+  /** Selected outline (the color picker's current-pick ring). */
+  selectedOutline: cssVar("color.accent"),
 } as const;

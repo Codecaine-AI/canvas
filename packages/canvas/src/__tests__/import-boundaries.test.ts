@@ -198,10 +198,15 @@ describe("import boundaries", () => {
       formatEdges(firstPartyEdges().filter((edge) => edge.importer === "theme/text-measure.ts")),
     ).toEqual([]);
     // The leaf stays Node-safe (it is served to Node via ./style): the color
-    // math is import-free and the leaf adds only the color vocabulary.
+    // math is import-free and the leaf adds only the color vocabulary and the
+    // design-system JS tokens (Node-safe data: the schematic presets' colors).
     expect(
       formatEdges(allImportEdges().filter((edge) => edge.importer === "theme/canvas-style.ts")),
-    ).toEqual(["theme/canvas-style.ts -> ../state/schema/colors", "theme/canvas-style.ts -> ./color-math"]);
+    ).toEqual([
+      "theme/canvas-style.ts -> ../state/schema/colors",
+      "theme/canvas-style.ts -> ./color-math",
+      "theme/canvas-style.ts -> @codecaine-ai/design-system",
+    ]);
     expect(
       formatEdges(allImportEdges().filter((edge) => edge.importer === "theme/color-math.ts")),
     ).toEqual([]);

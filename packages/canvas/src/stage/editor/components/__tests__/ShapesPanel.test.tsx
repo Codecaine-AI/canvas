@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cssVar } from "@codecaine-ai/design-system";
 import { ShapesPanel, SHAPES_PANEL_WIDTH_PX } from "../ShapesPanel";
 import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../../../../objects/catalog";
 import {
@@ -28,17 +29,17 @@ function glyphsIn(category: string) {
 }
 
 describe("ShapesPanel geometry", () => {
-  it("renders a full-height white panel at the expanded picker width", () => {
+  it("renders a full-height panel at the expanded picker width", () => {
     const { container } = render(<ShapesPanel />);
     const panel = container.querySelector("[data-shapes-panel]") as HTMLElement;
     expect(panel).toBeTruthy();
     expect(SHAPES_PANEL_WIDTH_PX).toBe(252);
     expect(panel.style.width).toBe(`${SHAPES_PANEL_WIDTH_PX}px`);
     expect(panel.style.height).toBe("100%");
-    expect(panel.style.background).toBe("#FFFFFF");
-    expect(panel.style.borderRadius).toBe("12px");
-    expect(panel.style.border).toBe("1px solid rgba(0, 0, 0, 0.08)");
-    expect(panel.style.boxShadow).toContain("rgba(0,0,0,0.16)");
+    expect(panel.style.background).toBe(cssVar("color.surface.panel"));
+    expect(panel.style.borderRadius).toBe(cssVar("radius.base"));
+    expect(panel.style.borderColor).toBe(cssVar("color.border.default"));
+    expect(panel.style.boxShadow).toBe(cssVar("shadow.glass"));
   });
 
   it("animates in from the left when mounted", () => {
@@ -71,14 +72,17 @@ describe("ShapesPanel geometry", () => {
     expect(getByLabelText("Close shapes panel")).toBeTruthy();
   });
 
-  it("renders the search-shapes input with a purple focus ring on focus", () => {
+  it("renders the search-shapes input with a focus-ring border on focus", () => {
     const { getByLabelText } = render(<ShapesPanel />);
     const input = getByLabelText("Search shapes") as HTMLInputElement;
-    expect(input.style.border).not.toContain("8C2EF2");
+    expect(input.style.borderColor).toBe(cssVar("color.border.default"));
+    expect(input.style.borderWidth).toBe(cssVar("border.width.hairline"));
     fireEvent.focus(input);
-    expect(input.style.border).toContain("#8C2EF2");
+    expect(input.style.borderColor).toBe(cssVar("color.focus-ring"));
+    expect(input.style.borderWidth).toBe(cssVar("border.width.ring"));
     fireEvent.blur(input);
-    expect(input.style.border).not.toContain("8C2EF2");
+    expect(input.style.borderColor).toBe(cssVar("color.border.default"));
+    expect(input.style.borderWidth).toBe(cssVar("border.width.hairline"));
   });
 });
 
@@ -124,7 +128,7 @@ describe("ShapesPanel sections", () => {
       for (const grid of grids) {
         expect(grid.style.gridTemplateColumns).toBe("repeat(4, 46px)");
         expect(grid.style.justifyContent).toBe("space-between");
-        expect(grid.style.rowGap).toBe("6px");
+        expect(grid.style.rowGap).toBe(cssVar("space.1-5"));
       }
     }
     const shapes = SHAPE_CATALOG.find((c) => c.id === "shapes")!;
@@ -208,7 +212,7 @@ describe("ShapesPanel interaction", () => {
 
     fireEvent.pointerEnter(button);
 
-    expect(button.style.background).toBe("rgba(0, 0, 0, 0.08)");
+    expect(button.style.background).toBe(cssVar("color.fill.hover"));
     expect(iconWrap.style.transform).toBe("scale(1.14)");
   });
 
@@ -301,25 +305,26 @@ describe("ShapesPanel interaction", () => {
 });
 
 describe("ShapesPanel selected-entry highlight", () => {
-  it("renders the violet selected state on the entry matching selectedEntryId only", () => {
+  it("renders the accent selected state on the entry matching selectedEntryId only", () => {
     const { container } = render(<ShapesPanel selectedEntryId="shape-square" />);
     const selected = container.querySelector('[data-shape-entry="shape-square"]') as HTMLElement;
     const other = container.querySelector('[data-shape-entry="shape-ellipse"]') as HTMLElement;
 
     expect(selected.getAttribute("data-selected")).toBe("true");
     expect(selected.getAttribute("aria-pressed")).toBe("true");
-    expect(selected.style.background).toBe("rgba(140, 46, 242, 0.12)");
+    expect(selected.style.background).toBe(cssVar("color.fill.accent"));
 
     expect(other.getAttribute("data-selected")).toBeNull();
     expect(other.getAttribute("aria-pressed")).toBe("false");
     expect(other.style.background).toBe("transparent");
   });
 
-  it("selected state beats the hover wash so the armed shape stays visibly violet", () => {
+  it("selected state beats the hover wash so the armed shape keeps the accent wash", () => {
     const { container } = render(<ShapesPanel selectedEntryId="shape-square" />);
     const selected = container.querySelector('[data-shape-entry="shape-square"]') as HTMLElement;
     fireEvent.pointerEnter(selected);
-    expect(selected.style.background).toBe("rgba(140, 46, 242, 0.12)");
+    expect(selected.style.background).toBe(cssVar("color.fill.accent"));
+    expect(selected.style.background).not.toBe(cssVar("color.fill.hover"));
   });
 
   it("renders no selected state when selectedEntryId is null", () => {

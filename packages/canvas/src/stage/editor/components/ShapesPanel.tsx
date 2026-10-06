@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useMemo, useState } from "react";
+import { cssVar } from "@codecaine-ai/design-system";
 import { SHAPE_CATALOG, type ShapeCatalogEntry } from "../../../objects/catalog";
 import {
   ICON_GLYPHS,
@@ -12,9 +13,9 @@ import { Tooltip, type TooltipAlign } from "../../../ui/Tooltip";
 import type { InteractiveCanvasObjectType } from "../../../state/schema";
 
 /**
- * ShapesPanel — the full-height, left-docked white "Shapes" sidebar opened by
- * the dock's shape-tool button (bottom-dock-spec: "Clicking button 5-> full-
- * height LEFT-docked white panel").
+ * ShapesPanel — the full-height, left-docked "Shapes" sidebar opened by the
+ * dock's shape-tool button (bottom-dock-spec: "Clicking button 5-> full-
+ * height LEFT-docked white panel"). Light chrome: it follows the app theme.
  *
  * Two sections mirroring the catalog's arrangement: Icons (the default face
  * — the semantic glyph vocabulary, one small sub-grid per icon category in
@@ -23,8 +24,8 @@ import type { InteractiveCanvasObjectType } from "../../../state/schema";
  * dock's separate "connector" tool, not a Shapes-panel entry — see
  * CanvasDock.tsx's ToolId union.
  *
- * Origin reference (fj-053-072): full-height left panel, white bg, "Shapes"
- * header + close (x), "Search shapes" input with purple focus ring,
+ * Origin reference (fj-053-072): full-height left panel, "Shapes"
+ * header + close (x), "Search shapes" input with a focus ring,
  * collapsible sections. The bottom dock remains visible/unaffected while
  * this panel is open (no layout conflict modeled here — this component
  * doesn't touch dock state; the editor is responsible for coexistence).
@@ -47,7 +48,7 @@ export type ShapesPanelProps = {
   onPickEntry?: (entry: ShapeCatalogEntry) => void;
   /**
    * Catalog entry id of the currently armed shape (Shapes creation flow):
-   * that grid button renders the violet selected state so the user can see
+   * that grid button renders the accent-wash selected state so the user can see
    * which shape a canvas click will place. Null/undefined for no highlight.
    */
   selectedEntryId?: string | null;
@@ -61,21 +62,22 @@ export type ShapesPanelProps = {
 const PANEL_WIDTH_PX = 252;
 const SHAPE_GRID_COLUMNS = 4;
 const SHAPE_BUTTON_SIZE_PX = 46;
-const PURPLE_FOCUS_RING = "#8C2EF2"; // TRIM.accentPurple
-/** Violet wash behind the armed shape's grid button (accentPurple at low alpha). */
-const SELECTED_SHAPE_BG = "rgba(140, 46, 242, 0.12)";
-/** Icon-category sub-heading ink: muted against the #333333 section headers, still AA on white. */
-const ICON_GROUP_HEADING_COLOR = "#767676";
+/** The search input's focus border. */
+const FOCUS_RING = cssVar("color.focus-ring");
+/** Accent wash behind the armed shape's grid button. */
+const SELECTED_SHAPE_BG = cssVar("color.fill.accent");
+/** Icon-category sub-heading ink: muted against the ink section headers, still AA on the panel. */
+const ICON_GROUP_HEADING_COLOR = cssVar("color.text.muted");
 const SHAPE_GRID_STYLE: React.CSSProperties = {
   display: "grid",
   gridTemplateColumns: `repeat(${SHAPE_GRID_COLUMNS}, ${SHAPE_BUTTON_SIZE_PX}px)`,
   justifyContent: "space-between",
-  rowGap: 6,
+  rowGap: cssVar("space.1-5"),
 };
 const PANEL_ENTER_ANIMATION_NAME = "canvas-shapes-panel-enter";
 const PANEL_EXIT_ANIMATION_NAME = "canvas-shapes-panel-exit";
 const PANEL_ENTER_ANIMATION = `${PANEL_ENTER_ANIMATION_NAME} 180ms cubic-bezier(0.16, 1, 0.3, 1) both`;
-const PANEL_EXIT_ANIMATION = `${PANEL_EXIT_ANIMATION_NAME} 150ms cubic-bezier(0.7, 0, 0.84, 0) both`;
+const PANEL_EXIT_ANIMATION = `${PANEL_EXIT_ANIMATION_NAME} ${cssVar("motion.duration.base")} cubic-bezier(0.7, 0, 0.84, 0) both`;
 const PANEL_ANIMATION_STYLES = `
 @keyframes ${PANEL_ENTER_ANIMATION_NAME} {
   from {
@@ -130,11 +132,11 @@ function SectionHeader({
         width: "100%",
         background: "transparent",
         border: "none",
-        padding: "6px 4px",
+        padding: `${cssVar("space.1-5")} ${cssVar("space.1")}`,
         cursor: "pointer",
-        fontSize: 12,
-        fontWeight: 600,
-        color: "#333333",
+        fontSize: cssVar("font.size.ui-xs"),
+        fontWeight: cssVar("font.weight.semibold"),
+        color: cssVar("color.text.ink"),
         textTransform: "none",
       }}
     >
@@ -142,11 +144,15 @@ function SectionHeader({
       <svg
         viewBox="0 0 10 6"
         className="h-2 w-2.5"
-        style={{ transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)", transition: "transform 100ms" }}
+        style={{
+          transform: collapsed ? "rotate(-90deg)" : "rotate(0deg)",
+          transition: `transform ${cssVar("motion.duration.fast")}`,
+          color: cssVar("color.text.muted"),
+        }}
         fill="none"
         aria-hidden="true"
       >
-        <path d="M1 1 5 5 9 1" stroke="#666666" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M1 1 5 5 9 1" stroke="currentColor" strokeWidth={1.4} strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     </button>
   );
@@ -196,16 +202,16 @@ function ShapeGridButton({
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          borderRadius: 7,
+          borderRadius: cssVar("radius.base"),
           border: "none",
           background: selected
             ? SELECTED_SHAPE_BG
             : hovered
-              ? "rgba(0,0,0,0.08)"
+              ? cssVar("color.fill.hover")
               : "transparent",
-          color: "#333333",
+          color: cssVar("color.text.body"),
           cursor: "pointer",
-          transition: "background-color 100ms ease-out",
+          transition: `background-color ${cssVar("motion.duration.fast")} ${cssVar("motion.easing.decelerate")}`,
         }}
       >
         <span
@@ -345,14 +351,14 @@ function ShapesPanelComponent({
         style={{
           width: PANEL_WIDTH_PX,
           height: "100%",
-          background: "#FFFFFF",
-          border: "1px solid rgba(0,0,0,0.08)",
-          borderRadius: 12,
-          boxShadow: "0 18px 48px rgba(0,0,0,0.16), 0 4px 14px rgba(0,0,0,0.10)",
+          background: cssVar("color.surface.panel"),
+          border: `${cssVar("border.width.hairline")} solid ${cssVar("color.border.default")}`,
+          borderRadius: cssVar("radius.base"),
+          boxShadow: cssVar("shadow.glass"),
           display: "flex",
           flexDirection: "column",
           boxSizing: "border-box",
-          padding: "12px 10px",
+          padding: `${cssVar("space.3")} 10px`,
           gap: 10,
           overflowY: "auto",
           animation: exiting ? PANEL_EXIT_ANIMATION : PANEL_ENTER_ANIMATION,
@@ -361,7 +367,15 @@ function ShapesPanelComponent({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 14, fontWeight: 700, color: "#111111" }}>Shapes</span>
+          <span
+            style={{
+              fontSize: cssVar("font.size.ui-lg"),
+              fontWeight: cssVar("font.weight.bold"),
+              color: cssVar("color.text.ink"),
+            }}
+          >
+            Shapes
+          </span>
           <button
             type="button"
             aria-label="Close shapes panel"
@@ -370,12 +384,12 @@ function ShapesPanelComponent({
               border: "none",
               background: "transparent",
               cursor: "pointer",
-              width: 20,
-              height: 20,
+              width: cssVar("space.5"),
+              height: cssVar("space.5"),
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#666666",
+              color: cssVar("color.text.muted"),
             }}
           >
             <svg viewBox="0 0 12 12" className="h-3 w-3" fill="none" aria-hidden="true">
@@ -392,12 +406,14 @@ function ShapesPanelComponent({
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
           style={{
-            border: focused ? `1.5px solid ${PURPLE_FOCUS_RING}` : "1px solid #E0E0E0",
-            borderRadius: 6,
-            padding: "6px 8px",
-            fontSize: 12,
+            borderWidth: focused ? cssVar("border.width.ring") : cssVar("border.width.hairline"),
+            borderStyle: "solid",
+            borderColor: focused ? FOCUS_RING : cssVar("color.border.default"),
+            borderRadius: cssVar("radius.base"),
+            padding: `${cssVar("space.1-5")} ${cssVar("space.2")}`,
+            fontSize: cssVar("font.size.ui-xs"),
             outline: "none",
-            color: "#111111",
+            color: cssVar("color.text.body"),
             boxSizing: "border-box",
           }}
         />
@@ -414,7 +430,7 @@ function ShapesPanelComponent({
               {collapsed ? null : category.id === "icons" ? (
                 // One sub-grid per icon category under a muted sub-heading;
                 // the Icons header above stays the section's one collapsible.
-                <div data-shape-grid={category.id} style={{ display: "grid", rowGap: 8 }}>
+                <div data-shape-grid={category.id} style={{ display: "grid", rowGap: cssVar("space.2") }}>
                   {groupByIconCategory(category.entries, (entry) => entry.icon).map(
                     ({ category: group, items }) => (
                       <div
@@ -426,9 +442,9 @@ function ShapesPanelComponent({
                         <div
                           aria-hidden="true"
                           style={{
-                            padding: "2px 4px 4px",
-                            fontSize: 11,
-                            fontWeight: 500,
+                            padding: `${cssVar("space.0-5")} ${cssVar("space.1")} ${cssVar("space.1")}`,
+                            fontSize: cssVar("font.size.ui-2xs"),
+                            fontWeight: cssVar("font.weight.medium"),
                             color: ICON_GROUP_HEADING_COLOR,
                           }}
                         >

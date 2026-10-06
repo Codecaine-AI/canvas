@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useState } from "react";
+import { cssVar } from "@codecaine-ai/design-system";
 import { EDITOR_STYLE } from "./editor-style";
 import { Tooltip } from "../../../ui/Tooltip";
 import {
@@ -13,14 +14,15 @@ import {
 } from "../../../ui/icons";
 
 /**
- * CanvasDock — the white rounded bottom dock.
+ * CanvasDock — the rounded bottom dock (light chrome: follows the app theme).
  *
  * Geometry/behavior source: board-design-reference/analysis/figjam-bottom-dock-spec.md
- *   - Content-fit width, 48px logical height, 13px radius.
- *   - bg #FFFFFF, soft shadow.
+ *   - Content-fit width, EDITOR_STYLE.dockHeightPx logical height, the
+ *     design-system radius.
+ *   - Panel surface, glass shadow.
  *   - 6 buttons in 2 groups with faint vertical dividers.
- *   - Rest: charcoal glyphs. Hover: light-gray rounded square (~RGB235).
- *     Active: violet rounded square (EDITOR_STYLE.accentPurple family).
+ *   - Rest: body-text glyphs. Hover: the hover fill. Active: the accent
+ *     wash (EDITOR_STYLE.activeBg) under ink glyphs.
  *   - `activeTool` is nullable — null means no button is highlighted. The
  *     dock does NOT track "last selected tool" internally; the consumer
  *     (W3 editor) is the single source of truth for which tool (if any) is
@@ -42,7 +44,7 @@ export type ToolId =
   | "sticky";
 
 export type CanvasDockProps = {
-  /** Currently active tool, or null when no dock button should show the violet active state. */
+  /** Currently active tool, or null when no dock button should show the active state. */
   activeTool?: ToolId | null;
   onSelectTool?: (tool: ToolId) => void;
   /** Fired specifically for the shape-tool button, which opens the left-docked Shapes panel rather than just becoming "the active tool" in the simple sense. */
@@ -53,7 +55,7 @@ export type CanvasDockProps = {
 
 const DOCK_WIDTH_PX = "fit-content";
 const DOCK_HEIGHT_PX = EDITOR_STYLE.dockHeightPx;
-const DOCK_RADIUS_PX = EDITOR_STYLE.dockRadiusPx;
+const DOCK_RADIUS = EDITOR_STYLE.dockRadius;
 
 type DockButtonSpec = {
   tool: ToolId;
@@ -75,8 +77,9 @@ const GROUP_B: DockButtonSpec[] = [
 ];
 
 const HOVER_BG = EDITOR_STYLE.dockHoverBg;
-const ACTIVE_BG = EDITOR_STYLE.accentPurple;
-const GLYPH_CHARCOAL = EDITOR_STYLE.dockGlyphColor;
+const ACTIVE_BG = EDITOR_STYLE.activeBg;
+const GLYPH_COLOR = EDITOR_STYLE.dockGlyphColor;
+const ACTIVE_GLYPH_COLOR = cssVar("color.text.ink");
 const DOCK_ICON_STYLES = `
 .canvas-dock-icon:not(.canvas-dock-icon--section) :is(path, line, polyline, rect, circle) {
   stroke-width: ${EDITOR_STYLE.dockNucleoIconStrokeWidthPx} !important;
@@ -106,10 +109,10 @@ function DockButton({
   const { Icon, label, tool, tooltip } = spec;
   const buttonDisabled = disabled;
   const tooltipLabel = tooltip;
-  const iconSize = tool === "sticky" ? EDITOR_STYLE.dockStickyIconSizePx : EDITOR_STYLE.dockIconSizePx;
+  const iconSize = tool === "sticky" ? EDITOR_STYLE.dockStickyIconSizePx : EDITOR_STYLE.dockIconSize;
 
   const bg = isActive ? ACTIVE_BG : hovered && !buttonDisabled ? HOVER_BG : "transparent";
-  const glyphColor = isActive ? "#FFFFFF" : GLYPH_CHARCOAL;
+  const glyphColor = isActive ? ACTIVE_GLYPH_COLOR : GLYPH_COLOR;
   const clearHover = () => setHovered(false);
 
   return (
@@ -136,16 +139,16 @@ function DockButton({
           display: "inline-flex",
           alignItems: "center",
           justifyContent: "center",
-          width: EDITOR_STYLE.dockButtonSizePx,
-          height: EDITOR_STYLE.dockButtonSizePx,
-          borderRadius: EDITOR_STYLE.dockButtonRadiusPx,
+          width: EDITOR_STYLE.dockButtonSize,
+          height: EDITOR_STYLE.dockButtonSize,
+          borderRadius: EDITOR_STYLE.dockButtonRadius,
           border: "none",
           background: bg,
           color: glyphColor,
           cursor: buttonDisabled ? "default" : "pointer",
           opacity: buttonDisabled ? 0.4 : 1,
           padding: 0,
-          transition: "background-color 80ms ease-out",
+          transition: `background-color 80ms ${cssVar("motion.easing.decelerate")}`,
         }}
       >
         <Icon
@@ -201,7 +204,7 @@ function DockDivider() {
       data-divider=""
       style={{
         width: EDITOR_STYLE.dockDividerWidthPx,
-        height: EDITOR_STYLE.dockDividerHeightPx,
+        height: EDITOR_STYLE.dockDividerHeight,
         margin: `0 ${EDITOR_STYLE.dockDividerMarginXPx}px`,
         background: EDITOR_STYLE.dockDividerColor,
         flex: "0 0 auto",
@@ -228,7 +231,7 @@ function CanvasDockComponent({
         style={{
           width: DOCK_WIDTH_PX,
           height: DOCK_HEIGHT_PX,
-          borderRadius: DOCK_RADIUS_PX,
+          borderRadius: DOCK_RADIUS,
           background: EDITOR_STYLE.bottomToolbarBg,
           boxShadow: EDITOR_STYLE.dockShadow,
           display: "flex",
@@ -263,4 +266,4 @@ export const CanvasDock = memo(CanvasDockComponent);
 
 export const FIGJAM_DOCK_WIDTH_PX = DOCK_WIDTH_PX;
 export const FIGJAM_DOCK_HEIGHT_PX = DOCK_HEIGHT_PX;
-export const FIGJAM_DOCK_RADIUS_PX = DOCK_RADIUS_PX;
+export const FIGJAM_DOCK_RADIUS_PX = DOCK_RADIUS;

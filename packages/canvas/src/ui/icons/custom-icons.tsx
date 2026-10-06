@@ -16,7 +16,8 @@ import type { IconProps } from "./icon-props";
  *   at dock size).
  */
 
-export function ColorSwatchIcon({ color = "#F24822", className, style }: IconProps & { color?: string }) {
+/** `color` is the swatch's data; without one the dot takes the surrounding text color. */
+export function ColorSwatchIcon({ color = "currentColor", className, style }: IconProps & { color?: string }) {
   return (
     <svg viewBox="0 0 16 16" className={className} style={style} fill="none" aria-hidden="true">
       <circle cx="8" cy="8" r="5.5" fill={color} />

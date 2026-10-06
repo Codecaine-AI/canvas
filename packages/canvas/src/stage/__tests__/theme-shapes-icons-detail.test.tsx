@@ -78,7 +78,7 @@ describe("live detail line", () => {
     expect(detail.style.fontWeight).toBe("500");
     expect(detail.style.lineHeight).toBe("18.2px");
     expect(detail.style.marginTop).toBe("3px");
-    expect(detail.style.color).toBe("#5B6578");
+    expect(detail.style.color).toBe("#666562");
     // Name block + detail sit in one centered flex column; the name's clamp
     // gave up lines to the detail's 3 + 18.2px reserve (56px slot of 21px name
     // lines — 17.5px × 1.2: 2 lines → 1).
@@ -88,7 +88,7 @@ describe("live detail line", () => {
     expect(label.nextElementSibling).toBe(detail);
     expect(label.style.maxHeight).toBe("21px");
     expect(label.style.fontSize).toBe("17.5px");
-    expect(label.style.color).toBe("#0F1E36");
+    expect(label.style.color).toBe("#1F1F1F");
     expect(label.style.fontWeight).toBe("600");
   });
 
@@ -130,7 +130,7 @@ describe("live detail line", () => {
     const detail = slot.querySelector("[data-canvas-text-detail]") as HTMLElement;
     expect(caption.nextElementSibling).toBe(detail);
     expect(detail.textContent).toBe("postgres 16");
-    expect(detail.style.color).toBe("#8B93B5");
+    expect(detail.style.color).toBe("#9198A1");
   });
 
   it("figjam paints a sans detail at 13px", () => {
@@ -172,7 +172,7 @@ describe("live shape paint", () => {
     const node = objectNode(stage([shape()], FRACTIONAL_BORDER), "s1");
     expect(node.style.borderWidth).toBe("0px");
     const border = node.querySelector('[data-canvas-shape-silhouette="border"] rect') as SVGRectElement;
-    expect(border.getAttribute("stroke")).toBe("#2F5BD3");
+    expect(border.getAttribute("stroke")).toBe("#0B6E99");
     expect(border.getAttribute("stroke-width")).toBe("1.5");
     expect(border.getAttribute("x")).toBe("0.75");
     expect(border.getAttribute("width")).toBe("238.5");
@@ -200,8 +200,8 @@ describe("live shape paint", () => {
     const outlined = objectNode(stage([decision], "schematic-light"), "s1");
     const polygon = outlined.querySelector('[data-canvas-shape-silhouette="diamond"] polygon') as SVGPolygonElement;
     expect(polygon.getAttribute("points")).toBe("100,0 200,70 100,140 0,70");
-    expect(polygon.getAttribute("fill")).toBe("#FFFFFF");
-    expect(polygon.getAttribute("stroke")).toBe("#2F5BD3");
+    expect(polygon.getAttribute("fill")).toBe("#F8F8F7");
+    expect(polygon.getAttribute("stroke")).toBe("#0B6E99");
     expect(outlined.style.clipPath).toBe("none");
     expect(outlined.style.borderWidth).toBe("0px");
     cleanup();
@@ -226,7 +226,7 @@ describe("live icons", () => {
     const body = node.querySelector("[data-canvas-icon-shape-body]") as HTMLElement;
     expect(body.getAttribute("data-canvas-icon-style")).toBe("tile");
     const tile = node.querySelector("[data-canvas-icon-tile]") as SVGRectElement;
-    expect(tile.getAttribute("fill")).toBe("#6B4FC4");
+    expect(tile.getAttribute("fill")).toBe("#6940A5");
     // The 64px box carries the 56px (iconTileMaxPx) tile, centered: 4px in on every side.
     expect(tile.getAttribute("width")).toBe("56");
     expect(tile.getAttribute("height")).toBe("56");
@@ -266,8 +266,8 @@ describe("live icons", () => {
   it("outlines a white tile on a light board and fills brand glyphs", () => {
     const container = stage([icon({ color: "white" }), icon({ id: "i2", icon: "brand-docker", geometry: { x: 200, y: 0, width: 64, height: 64 } })], "schematic-light");
     const white = objectNode(container, "i1").querySelector("[data-canvas-icon-tile]") as SVGRectElement;
-    expect(white.getAttribute("fill")).toBe("#FFFFFF");
-    expect(white.getAttribute("stroke")).toBe("#0F1E36");
+    expect(white.getAttribute("fill")).toBe("#F8F8F7");
+    expect(white.getAttribute("stroke")).toBe("#1F1F1F");
     expect(white.getAttribute("stroke-width")).toBe("1");
     const brand = objectNode(container, "i2").querySelector('[data-canvas-icon-glyph="brand-docker"]') as SVGSVGElement;
     expect(brand.getAttribute("fill")).toBe("#FFFFFF");

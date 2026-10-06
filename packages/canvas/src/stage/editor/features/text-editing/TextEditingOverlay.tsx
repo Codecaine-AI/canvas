@@ -1,6 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useRef, type CSSProperties } from "react";
+import { flat } from "@codecaine-ai/design-system";
 import { objectDefFor } from "../../../../objects/object-def";
 import { SlotDetailLine } from "../../../../objects/object-shell";
 import {
@@ -18,6 +19,7 @@ import { titleChipLayout } from "../../../../objects/section/title-chip-layout";
 import { useSectionDepth } from "../../../../objects/section/section-depth-context";
 import type { InteractiveCanvasObject } from "../../../../state/schema";
 import { MarkdownSlotTextEditor } from "./MarkdownSlotTextEditor";
+import { stageMarkColors } from "../../../../theme/canvas-style";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import type { TextEditingApi } from "./use-text-editing";
 
@@ -63,18 +65,20 @@ function SectionTitleEditor({ target, slot, value, setValue, commit, cancel, zoo
   const font = layout.title.font;
   const paint = resolveSectionPaint(target.color ?? FIRST_USE_COLORS.section, depth, canvasStyle);
   // The chip paints its title past its left edge + padding (+ icon); the
-  // input's own left border takes the place of the chip's.
+  // input's own left border takes the place of the chip's. The edit frame is
+  // a stage mark in the board's ink (decision 56).
   const paddingLeft = layout.title.x - border.left;
+  const { ink } = stageMarkColors(canvasStyle);
   const edges =
     layout.placement === "pinned"
       ? {
           borderStyle: "solid",
-          borderColor: "var(--primary)",
+          borderColor: ink,
           borderWidth: `${border.top}px ${border.right}px ${border.bottom}px ${border.left}px`,
           borderRadius: `${radius.topLeft}px ${radius.topRight}px ${radius.bottomRight}px ${radius.bottomLeft}px`,
         }
       : {
-          border: `${border.top}px solid var(--primary)`,
+          border: `${border.top}px solid ${ink}`,
           borderRadius: `${radius.topLeft}px`,
         };
 
@@ -275,6 +279,9 @@ export function TextEditingOverlay({ textEditing, zoom }: TextEditingOverlayProp
   } = textEditing;
   const targetDef = objectTextEditTarget ? objectDefFor(objectTextEditTarget) : undefined;
   const targetSlot = targetDef?.textSlot;
+  // The connector label input is a stage mark in the board's colors
+  // (decision 56): ink frame and text on the board surface.
+  const marks = stageMarkColors(useCanvasStyle());
   return (
     <>
       {objectTextEditTarget && targetSlot ? (
@@ -335,14 +342,14 @@ export function TextEditingOverlay({ textEditing, zoom }: TextEditingOverlayProp
             pointerEvents: "auto",
             minWidth: "80px",
             maxWidth: "220px",
-            border: "1.5px solid var(--primary)",
-            borderRadius: "999px",
+            border: `1.5px solid ${marks.ink}`,
+            borderRadius: flat.base["radius.pill"],
             padding: "2px 8px",
-            fontSize: "11px",
-            fontWeight: 600,
+            fontSize: flat.base["font.size.ui-2xs"],
+            fontWeight: flat.base["font.weight.semibold"],
             textAlign: "center",
-            background: "var(--background)",
-            color: "var(--foreground)",
+            background: marks.surface,
+            color: marks.ink,
             outline: "none",
             // The stage root is user-select: none — the active editor is the
             // one place in-text selection must work.

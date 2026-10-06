@@ -1,5 +1,6 @@
 "use client";
 
+import { cssVar } from "@codecaine-ai/design-system";
 import { resolveSwatchPreview, type CanvasColor } from "../../../theme/palette";
 import { CANVAS_COLORS } from "../../../state/schema";
 import { EDITOR_STYLE } from "./editor-style";
@@ -10,16 +11,17 @@ import { EDITOR_STYLE } from "./editor-style";
  * sections, connectors). Every swatch renders its `swatch` preview hex
  * regardless of the kind it will color; the kind's role table decides how the
  * pick maps to ink/fill/wash. The current pick wears a floating 2px
- * accent-purple rounded-square outline, FigJam-style, and there is no custom
+ * accent rounded-square outline, FigJam-style, and there is no custom
  * color, ever.
  *
  * Replaces ColorPalettePopover + the section-tint flyout + the connector
- * swatch flyout. Panel styling (dark pill, swatch metrics) carries over from
- * the sampled FigJam popover trim (editor-style.ts).
+ * swatch flyout. Panel styling (dark popover, swatch metrics) comes from
+ * editor-style.ts; the popover is dark in both app themes (its root sets
+ * `data-theme="dark"`). The swatch fills are board colors, not chrome.
  */
 
 export type ColorPickerProps = {
-  /** The current pick — rendered with a floating 2px accent-purple outline. */
+  /** The current pick — rendered with a floating 2px accent outline. */
   current?: CanvasColor;
   onPick?: (color: CanvasColor) => void;
   className?: string;
@@ -27,10 +29,12 @@ export type ColorPickerProps = {
 };
 
 const SWATCH_DIAMETER_PX = EDITOR_STYLE.colorPopoverSwatchPx;
-const SWATCH_GAP_PX = EDITOR_STYLE.colorPopoverGapPx;
-const POPOVER_BG = "#1D1D1D";
+const SWATCH_GAP = EDITOR_STYLE.colorPopoverGap;
+const POPOVER_BG = EDITOR_STYLE.selectionToolbarBg;
+const SWATCH_RING = `inset 0 0 0 ${cssVar("border.width.hairline")} ${cssVar("color.border.default")}`;
+const SWATCH_CONTRAST_RING = `inset 0 0 0 ${cssVar("border.width.hairline")} ${cssVar("color.border.strong")}`;
 
-/** Near-white swatches get a faint ring so they read against the dark panel. */
+/** Near-white swatches get a stronger ring so they read against the dark panel. */
 function needsContrastRing(hex: string): boolean {
   return /^#F/i.test(hex);
 }
@@ -57,15 +61,12 @@ function Swatch({
       style={{
         width: SWATCH_DIAMETER_PX,
         height: SWATCH_DIAMETER_PX,
-        borderRadius: "50%",
+        borderRadius: cssVar("radius.pill"),
         border: "none",
         background: hex,
         padding: 0,
         cursor: "pointer",
-        boxShadow:
-          needsContrastRing(hex)
-            ? "inset 0 0 0 1px rgba(255,255,255,0.3)"
-            : "inset 0 0 0 1px rgba(255,255,255,0.14)",
+        boxShadow: needsContrastRing(hex) ? SWATCH_CONTRAST_RING : SWATCH_RING,
         boxSizing: "border-box",
         position: "relative",
       }}
@@ -76,8 +77,10 @@ function Swatch({
           style={{
             position: "absolute",
             inset: -5,
-            border: `2px solid ${EDITOR_STYLE.accentPurple}`,
-            borderRadius: 9,
+            borderWidth: "2px",
+            borderStyle: "solid",
+            borderColor: EDITOR_STYLE.selectedOutline,
+            borderRadius: cssVar("radius.base"),
             pointerEvents: "none",
           }}
         />
@@ -92,19 +95,20 @@ export function ColorPicker({ current, onPick, className, style }: ColorPickerPr
       role="dialog"
       aria-label="Color picker"
       data-canvas-color-picker=""
+      data-theme="dark"
       className={className}
       style={{
         display: "inline-flex",
         flexDirection: "column",
-        gap: SWATCH_GAP_PX,
+        gap: SWATCH_GAP,
         background: POPOVER_BG,
-        borderRadius: EDITOR_STYLE.colorPopoverRadiusPx,
+        borderRadius: EDITOR_STYLE.colorPopoverRadius,
         padding: EDITOR_STYLE.colorPopoverPaddingPx,
         boxSizing: "border-box",
         ...style,
       }}
     >
-      <div style={{ display: "flex", gap: SWATCH_GAP_PX }} data-swatch-row={1}>
+      <div style={{ display: "flex", gap: SWATCH_GAP }} data-swatch-row={1}>
         {CANVAS_COLORS.map((color) => (
           <Swatch key={color} color={color} isCurrent={color === current} onPick={onPick} />
         ))}

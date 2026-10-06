@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useId, useSyncExternalStore, type CSSProperties } from "react";
+import { cssVar } from "@codecaine-ai/design-system";
 
 /**
  * Tooltip — shared dark hover-label used by all FigJam trim
- * components (dock buttons, selection-toolbar controls, etc.).
+ * components (dock buttons, selection-toolbar controls, etc.). Dark in both
+ * app themes: the root sets `data-theme="dark"` and takes the unpinned
+ * design-system tokens, so the caret matches the label body.
  *
  * Ground truth: the shape picker uses a small caret to visually connect the
  * hover label to the active icon, matching FigJam's anchored tooltip feel.
@@ -30,8 +33,8 @@ export type TooltipProps = {
   id?: string;
 };
 
-const TOOLTIP_BG = "#1D1D1D";
-const TOOLTIP_TEXT = "#FFFFFF";
+const TOOLTIP_BG = cssVar("color.surface.panel");
+const TOOLTIP_TEXT = cssVar("color.text.ink");
 const TOOLTIP_EVENT = "trim-tooltip-change";
 
 let activeTooltipId: string | null = null;
@@ -136,6 +139,7 @@ export function Tooltip({
       data-trim-tooltip=""
       data-placement={placement}
       data-align={align}
+      data-theme="dark"
       style={{
         position: "absolute",
         ...tooltipHorizontalStyle(align),
@@ -147,11 +151,11 @@ export function Tooltip({
         overflow: "visible",
         background: TOOLTIP_BG,
         color: TOOLTIP_TEXT,
-        fontSize: 12,
+        fontSize: cssVar("font.size.ui-xs"),
         lineHeight: "16px",
-        fontWeight: 500,
-        padding: "4px 8px",
-        borderRadius: 6,
+        fontWeight: cssVar("font.weight.medium"),
+        padding: `${cssVar("space.1")} ${cssVar("space.2")}`,
+        borderRadius: cssVar("radius.base"),
         pointerEvents: "none",
         zIndex: 60,
       }}

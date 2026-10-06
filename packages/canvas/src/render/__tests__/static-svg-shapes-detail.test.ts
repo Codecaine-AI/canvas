@@ -104,7 +104,7 @@ describe("static detail line — center slots", () => {
     const [name, detail] = texts(svg);
     expect(detail!.body).toBe("Function Calling LLM");
     expect(detail!.attrs).toMatchObject({
-      fill: "#5B6578",
+      fill: "#666562",
       "font-family": CANVAS_MONO_FONT_STACK_SVG,
       "font-size": "14",
       "font-weight": "500",

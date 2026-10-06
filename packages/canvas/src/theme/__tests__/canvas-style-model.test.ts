@@ -118,8 +118,8 @@ describe("theme presets", () => {
     const copy = canvasThemePreset("schematic-dark");
     copy.palette.teal = "#000000";
     copy.boardBackground = "#000000";
-    expect(CANVAS_THEME_PRESETS["schematic-dark"].palette.teal).toBe("#5DE4C7");
-    expect(CANVAS_THEME_PRESETS["schematic-dark"].boardBackground).toBe("#14171F");
+    expect(CANVAS_THEME_PRESETS["schematic-dark"].palette.teal).toBe("#39C5CF");
+    expect(CANVAS_THEME_PRESETS["schematic-dark"].boardBackground).toBe("#0D1117");
   });
 });
 
@@ -215,7 +215,7 @@ describe("settings: normalize, resolve, and diff", () => {
         "schematic-light": {
           headerPlacement: "floating",
           connectorStrokeWidthPx: 2, // equals the preset → dropped
-          palette: { teal: "#0F8A7A", red: "#aa0000" }, // teal equals the preset → dropped
+          palette: { teal: "#0D7164", red: "#aa0000" }, // teal equals the preset → dropped
           theme: "schematic-dark", // not an override
         },
         "schematic-dark": "nope",
@@ -240,7 +240,7 @@ describe("settings: normalize, resolve, and diff", () => {
     const style = resolveCanvasStyle(settings);
     expect(style.theme).toBe("schematic-dark");
     expect(style.palette.violet).toBe("#AA88FF");
-    expect(style.palette.teal).toBe("#5DE4C7");
+    expect(style.palette.teal).toBe("#39C5CF");
     expect(canvasStyleOverrides(style)).toEqual(overrides);
     // The inactive theme's overrides don't leak into the active style …
     expect(style.shapeBorderWidthPx).toBe(2);

@@ -25,14 +25,17 @@
  *
  * Pure data, no React and no DOM: safe to import from Node (Studio server,
  * Canvas MCP) via `@codecaine-ai/canvas/style`. Imports only the color-id
- * vocabulary and the pure color math.
+ * vocabulary, the pure color math and `@codecaine-ai/design-system`'s JS
+ * tokens (Node-safe data: the schematic presets' colors).
  *
  * Every `*Px` value is LOGICAL px (independent of canvas zoom). A per-object
  * `style.strokeWidth` still overrides `shapeBorderWidthPx` /
  * `sectionBorderWidthPx` for that object.
  */
+import { flat, type ThemeName, type ThemeTokenPath } from "@codecaine-ai/design-system";
+
 import { CANVAS_COLORS, type CanvasColor } from "../state/schema/colors";
-import { normalizeColor } from "./color-math";
+import { normalizeColor, oklabLightness } from "./color-math";
 
 export const CANVAS_THEME_IDS = ["figjam", "schematic-light", "schematic-dark"] as const;
 
@@ -277,8 +280,86 @@ const FIGJAM_PRESET: CanvasStyle = {
   },
 };
 
-/** Thin lines, mono metadata, card shapes and stacked section tints on a cool light board. */
-const SCHEMATIC_LIGHT_PRESET: CanvasStyle = {
+/**
+ * The design-system token behind each schematic color (decision 10: the board
+ * is board data, so it does not follow the app theme). The light preset takes
+ * the light theme's resolved values and the dark preset the dark theme's, read
+ * from `@codecaine-ai/design-system`'s JS tokens (`flat`), never `var()`:
+ * normalizeColor accepts only `#RRGGBB` and `rgba()`, and the static SVG
+ * renderer runs in Node and resvg. Every token named here resolves to a plain
+ * hex in both themes (a test pins that).
+ *
+ * Roles: the board is the page surface; cards (card shapes, card stickies,
+ * outlined tiles) are panels (the dark preset keeps its own raised card fill,
+ * SCHEMATIC_DARK_CARD_FILL); hairlines and the dot grid are the default rule;
+ * names are ink, connector labels body text and detail lines muted text; a
+ * glyph on a solid ink tile is the on-solid glyph. Layer-cake fills mix the
+ * ink into the board surface in both themes.
+ */
+export const SCHEMATIC_THEME_TOKENS = {
+  boardBackground: "color.surface.page",
+  gridDotColor: "color.border.default",
+  hairlineColor: "color.border.default",
+  textColor: "color.text.ink",
+  detailColor: "color.text.muted",
+  cardFill: "color.surface.panel",
+  sectionTintMixBase: "color.surface.page",
+  iconTileGlyphColor: "color.text.on-solid",
+  connectorLabelBackground: "color.surface.page",
+  connectorLabelTextColor: "color.text.body",
+} as const satisfies Partial<Record<CanvasStyleColorKey, ThemeTokenPath>>;
+
+/**
+ * The palette inks of the schematic presets: the design-system hue roster, a
+ * categorical set (tokens.md rule 3). The ink strokes 2px card borders and
+ * connectors, fills solid icon tiles under the one iconTileGlyphColor, and is
+ * the fallback the section header detail is pushed toward, so it takes each
+ * hue's text-safe step: it reads at >= 4.5:1 on the page and panel, and so
+ * does the on-solid glyph on it (the `.solid` light gray, yellow and orange
+ * need an ink glyph instead). `white` objects stroke in ink.
+ */
+export const SCHEMATIC_PALETTE_TOKENS = {
+  gray: "color.gray.text",
+  red: "color.red.text",
+  orange: "color.orange.text",
+  yellow: "color.yellow.text",
+  green: "color.green.text",
+  teal: "color.teal.text",
+  blue: "color.blue.text",
+  violet: "color.violet.text",
+  pink: "color.pink.text",
+  white: "color.text.ink",
+} as const satisfies Record<CanvasColor, ThemeTokenPath>;
+
+/** A design-system color resolved for one theme, in the canonical spelling the style tokens store. */
+function tokenColor(theme: ThemeName, path: ThemeTokenPath): string {
+  const value = normalizeColor(flat[theme][path]);
+  if (!value) throw new Error(`canvas-style: ${path} (${theme}) is ${flat[theme][path]}, not #RRGGBB or rgba()`);
+  return value;
+}
+
+type SchematicColors = Pick<CanvasStyle, keyof typeof SCHEMATIC_THEME_TOKENS | "palette">;
+
+/** The schematic preset colors resolved from one design-system theme. */
+function schematicColors(theme: ThemeName): SchematicColors {
+  const colors = {} as Record<keyof typeof SCHEMATIC_THEME_TOKENS, string>;
+  for (const key of Object.keys(SCHEMATIC_THEME_TOKENS) as (keyof typeof SCHEMATIC_THEME_TOKENS)[]) {
+    colors[key] = tokenColor(theme, SCHEMATIC_THEME_TOKENS[key]);
+  }
+  const palette = {} as CanvasStylePalette;
+  for (const color of CANVAS_COLORS) palette[color] = tokenColor(theme, SCHEMATIC_PALETTE_TOKENS[color]);
+  return { ...colors, palette };
+}
+
+/** `style` with its keys in the CanvasStyle declaration order (the figjam preset's), so every preset serializes alike. */
+function inPresetKeyOrder(style: CanvasStyle): CanvasStyle {
+  const ordered = {} as Record<string, unknown>;
+  for (const key of Object.keys(FIGJAM_PRESET)) ordered[key] = style[key as CanvasStyleKey];
+  return ordered as unknown as CanvasStyle;
+}
+
+/** Thin lines, mono metadata, card shapes and stacked section tints on the light page surface. */
+const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   theme: "schematic-light",
   shapeCornerRadiusPx: 2,
   processCornerRadiusPx: 12,
@@ -290,22 +371,15 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = {
   labelChipCornerRadiusPx: 2,
   connectorStrokeWidthPx: 2,
   connectorCornerRadiusPx: 8,
-  boardBackground: "#F6F8FA",
-  gridDotColor: "rgba(15, 30, 54, 0.13)",
-  hairlineColor: "#D5DBE3",
-  textColor: "#0F1E36",
   textFontWeight: 600,
   textFontSizePx: 17.5,
-  detailColor: "#5B6578",
   detailFont: "mono",
   detailFontSizePx: 14,
   shapeFill: "card",
-  cardFill: "#FFFFFF",
   sectionFill: "layer-cake",
   sectionTintBase: 0.07,
   sectionTintStep: 0.035,
   sectionTintMax: 0.16,
-  sectionTintMixBase: "#FFFFFF",
   sectionBorderOpacity: 0.5,
   headerPlacement: "pinned",
   headerFont: "mono",
@@ -314,65 +388,87 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = {
   headerChipMix: 0.16,
   iconPack: "tabler",
   iconStyle: "tile",
-  iconTileGlyphColor: "#FFFFFF",
   iconTileFill: "auto",
   iconTileSolidMaxPx: 152,
   iconTileMaxPx: 56,
   connectorLabelFont: "mono",
   connectorLabelFontSizePx: 14,
   connectorLabelHeightPx: 26,
-  connectorLabelBackground: "#F6F8FA",
-  connectorLabelTextColor: "#3A4659",
   stickyStyle: "card",
-  palette: {
-    gray: "#5B6578",
-    red: "#C8402F",
-    orange: "#C2620A",
-    yellow: "#A87A00",
-    green: "#2F8A3E",
-    teal: "#0F8A7A",
-    blue: "#2F5BD3",
-    violet: "#6B4FC4",
-    pink: "#B8407F",
-    white: "#0F1E36",
-  },
-};
+  ...schematicColors("light"),
+});
 
-/** The same schematic look on a dark board: raised cards, pastel inks, dark tile glyphs. */
-const SCHEMATIC_DARK_PRESET: CanvasStyle = {
+/**
+ * Card fill of the dark preset: a canvas-owned value, not a token (decision
+ * 64). The preset's cards are RAISED clear of every section tint: the gray
+ * chain (and white, which takes the gray rule on dark boards) tops out near
+ * OKLab L 0.30 at the tint cap, so cards sit at L ≈ 0.33 — and low-chroma, so
+ * the blue / violet tints that do reach that lightness differ in hue
+ * (theme/palette.ts guard). No dark surface token sits above the tints (panel
+ * is L 0.22), so this one value stays.
+ */
+const SCHEMATIC_DARK_CARD_FILL = "#32363E";
+
+/**
+ * The same schematic look on the dark page surface: raised cards, the dark
+ * hue roster, on-solid (near-black) tile glyphs. The section tints are
+ * stronger than in light so the layers read on a dark board.
+ */
+const SCHEMATIC_DARK_PRESET: CanvasStyle = inPresetKeyOrder({
   ...SCHEMATIC_LIGHT_PRESET,
   theme: "schematic-dark",
-  boardBackground: "#14171F",
-  gridDotColor: "rgba(255, 255, 255, 0.07)",
-  hairlineColor: "#2E3342",
-  textColor: "#E4E6F2",
-  detailColor: "#8B93B5",
-  // Raised clear of every section tint: the gray chain (and white, which
-  // takes the gray rule on dark boards) tops out near OKLab L 0.29 at the
-  // tint cap, so cards sit at L ≈ 0.33 — and low-chroma, so the blue / violet
-  // tints that do reach that lightness differ in hue (theme/palette.ts guard).
-  cardFill: "#32363E",
   sectionTintBase: 0.1,
   sectionTintStep: 0.05,
   sectionTintMax: 0.22,
-  sectionTintMixBase: "#14171F",
   headerChipMix: 0.2,
-  iconTileGlyphColor: "#14171F",
-  connectorLabelBackground: "#14171F",
-  connectorLabelTextColor: "#A6ACCD",
-  palette: {
-    gray: "#6B7394",
-    red: "#FD8A8A",
-    orange: "#FFAB70",
-    yellow: "#FFD580",
-    green: "#85E89D",
-    teal: "#5DE4C7",
-    blue: "#82AAFF",
-    violet: "#C3A6FF",
-    pink: "#F5A3D0",
-    white: "#E4E6F2",
-  },
-};
+  ...schematicColors("dark"),
+  cardFill: SCHEMATIC_DARK_CARD_FILL,
+});
+
+// ---------------------------------------------------------------------------
+// Stage marks (decision 56)
+// ---------------------------------------------------------------------------
+//
+// Marks drawn over the board (selection, hover, marquee, snap guides, spacing
+// chips, place preview, text-edit frame, changed ring, drop target, anchor
+// dots, handles) take the BOARD's colors, never the host app's theme: the
+// board keeps its preset when the app turns dark (decision 10), so a mark that
+// followed the app's `--primary` vanished on a light board under a dark app.
+
+/** The design-system theme a board's marks resolve from: a light board takes the light tokens, a dark board the dark ones. */
+export function boardMarkTheme(style: Pick<CanvasStyle, "boardBackground">): ThemeName {
+  return oklabLightness(style.boardBackground) >= 0.5 ? "light" : "dark";
+}
+
+export interface StageMarkColors {
+  /** Ink marks: marquee, snap guides, spacing chips, place preview, text-edit frame, changed ring, drop target. */
+  ink: string;
+  /** The board surface under a mark: handle bodies, anchor dots, the text-edit size chip. */
+  surface: string;
+  /** Selection and hover outlines, anchor dots, connector handles: color.accent. */
+  accent: string;
+  /** Distribution (equal-gap) snap guides: color.pink.solid. */
+  distribution: string;
+  /** Alignment snap guides: color.violet.solid. */
+  alignment: string;
+}
+
+/**
+ * A board's stage-mark colors, resolved (hex), so SVG attributes and inline
+ * styles take them as they are. Ink and surface are the board's own text
+ * color and background; the accent and the two guide hues come from the
+ * design-system theme matching the board (boardMarkTheme).
+ */
+export function stageMarkColors(style: Pick<CanvasStyle, "boardBackground" | "textColor">): StageMarkColors {
+  const theme = boardMarkTheme(style);
+  return {
+    ink: style.textColor,
+    surface: style.boardBackground,
+    accent: tokenColor(theme, "color.accent"),
+    distribution: tokenColor(theme, "color.pink.solid"),
+    alignment: tokenColor(theme, "color.violet.solid"),
+  };
+}
 
 /** Complete, frozen presets — the defaults each theme's overrides apply over. */
 export const CANVAS_THEME_PRESETS: Readonly<Record<CanvasThemeId, Readonly<CanvasStyle>>> = {

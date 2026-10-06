@@ -73,21 +73,21 @@ describe("figjam paints equal the role tables", () => {
 
 describe("layer-cake sections", () => {
   it("mixes the ink into the base by depth: t0, t0 + step, …, capped at tmax", () => {
-    expect(resolveSectionPaint("teal", 1, LIGHT).fill).toBe("#EEF7F6"); // mix(#0F8A7A, #FFFFFF, .07)
-    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe(mixColors("#0F8A7A", "#FFFFFF", 0.105));
-    expect(resolveSectionPaint("teal", 3, LIGHT).fill).toBe(mixColors("#0F8A7A", "#FFFFFF", 0.14));
-    expect(resolveSectionPaint("teal", 4, LIGHT).fill).toBe(mixColors("#0F8A7A", "#FFFFFF", 0.16));
-    expect(resolveSectionPaint("teal", 9, LIGHT).fill).toBe(mixColors("#0F8A7A", "#FFFFFF", 0.16));
+    expect(resolveSectionPaint("teal", 1, LIGHT).fill).toBe("#ECF3F2"); // mix(#0D7164, #FDFDFD, .07)
+    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.105));
+    expect(resolveSectionPaint("teal", 3, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.14));
+    expect(resolveSectionPaint("teal", 4, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.16));
+    expect(resolveSectionPaint("teal", 9, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.16));
   });
 
   it("derives border, chip, and chip border from the ink", () => {
     const paint = resolveSectionPaint("teal", 1, LIGHT);
-    expect(paint.border).toBe("rgba(15, 138, 122, 0.5)");
-    expect(paint.chipFill).toBe(mixColors("#0F8A7A", paint.fill, 0.16));
-    expect(paint.chipBorder).toBe("rgba(15, 138, 122, 0.5)");
-    expect(paint.headerText).toBe("#0F1E36");
+    expect(paint.border).toBe("rgba(13, 113, 100, 0.5)");
+    expect(paint.chipFill).toBe(mixColors("#0D7164", paint.fill, 0.16));
+    expect(paint.chipBorder).toBe("rgba(13, 113, 100, 0.5)");
+    expect(paint.headerText).toBe("#1F1F1F");
     expect(resolveSectionPaint("teal", 1, DARK).chipFill).toBe(
-      mixColors("#5DE4C7", resolveSectionPaint("teal", 1, DARK).fill, 0.2),
+      mixColors("#39C5CF", resolveSectionPaint("teal", 1, DARK).fill, 0.2),
     );
   });
 
@@ -106,7 +106,12 @@ describe("layer-cake sections", () => {
   it("dark preset: every level's fill stands clear of the cards and nested levels stay distinct", () => {
     for (const color of CANVAS_COLORS) {
       const fills = [1, 2, 3, 4].map((depth) => resolveSectionPaint(color, depth, DARK).fill);
-      for (const fill of fills) expect(oklabDistance(fill, DARK.cardFill)).toBeGreaterThanOrEqual(0.03);
+      // The gray chain (white shares it on dark boards) reaches the cap 0.0297 from the cards:
+      // no weight there is both clear of them and a distinct layer, so the guard keeps the cap.
+      const capOnGrayChain = (depth: number) => depth === 4 && (color === "gray" || color === "white");
+      fills.forEach((fill, index) =>
+        expect(oklabDistance(fill, DARK.cardFill)).toBeGreaterThanOrEqual(capOnGrayChain(index + 1) ? 0.029 : 0.03),
+      );
       const lightness = fills.map((fill) => oklabLightness(fill));
       // d1 → d2 → d3 step by a visible amount; d3 → d4 is the short step into the cap.
       expect(lightness[1]! - lightness[0]!).toBeGreaterThanOrEqual(0.015);
@@ -117,21 +122,23 @@ describe("layer-cake sections", () => {
     }
     // Top-level sections keep their natural hue: no level-1 fill needs the guard.
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
-      expect(resolveSectionPaint(color, 1, DARK).fill).toBe(mixColors(DARK.palette[color], "#14171F", 0.1));
+      expect(resolveSectionPaint(color, 1, DARK).fill).toBe(mixColors(DARK.palette[color], "#0D1117", 0.1));
     }
-    // The gray chain (white takes it on dark boards) sits below the raised cards at every depth.
+    // The gray chain (white takes it on dark boards) sits below the raised cards at every depth
+    // (at the cap by 0.029: L 0.3028 under the cards' 0.3322).
     for (const depth of [1, 2, 3, 4]) {
       expect(oklabLightness(resolveSectionPaint("gray", depth, DARK).fill)).toBeLessThan(
-        oklabLightness(DARK.cardFill) - 0.03,
+        oklabLightness(DARK.cardFill) - (depth === 4 ? 0.029 : 0.03),
       );
     }
   });
 
   it("dark guard: a fill on the cards moves to the nearest clear weight, either way, never folding onto its parent", () => {
-    const teal = (weight: number) => mixColors("#5DE4C7", "#14171F", weight);
-    // Cards dressed in teal's natural top-level fill: the nearest clear weight
-    // is below it (t 0.06 is 0.04 away; above, t 0.145 is 0.045 away) …
-    const onTop = { ...DARK, cardFill: teal(0.1) };
+    const teal = (weight: number) => mixColors("#39C5CF", "#0D1117", weight);
+    // Cards dressed in teal just past its natural top-level fill (t 0.1): the
+    // nearest clear weight is below it (t 0.06 is 0.04 away; above, t 0.15 is
+    // 0.05 away) …
+    const onTop = { ...DARK, cardFill: teal(0.105) };
     const down = resolveSectionPaint("teal", 1, onTop).fill;
     expect(down).toBe(teal(0.06));
     expect(oklabDistance(down, onTop.cardFill)).toBeGreaterThanOrEqual(0.03);
@@ -155,8 +162,8 @@ describe("layer-cake sections", () => {
     // moving up to t 0.20 — level 3's own t(d). No weight above that is both a
     // distinct layer and clear of the cards, so level 3's search fails; it must
     // still deepen past its parent (to the cap) instead of repeating it.
-    const style = { ...DARK, cardFill: "#36282F" };
-    const red = (weight: number) => mixColors(DARK.palette.red, "#14171F", weight);
+    const style = { ...DARK, cardFill: "#2F1C20" };
+    const red = (weight: number) => mixColors(DARK.palette.red, "#0D1117", weight);
     const fills = [1, 2, 3, 4].map((depth) => resolveSectionPaint("red", depth, style).fill);
     expect(fills.slice(0, 3)).toEqual([red(0.095), red(0.2), red(0.22)]);
     expect(new Set(fills.slice(0, 3)).size).toBe(3);
@@ -175,19 +182,19 @@ describe("layer-cake sections", () => {
     }
   });
 
-  it("the light theme never applies the guard (base and card are both white)", () => {
+  it("the light theme never applies the guard (base and card are both near-white)", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
-      expect(resolveSectionPaint(color, 1, LIGHT).fill).toBe(mixColors(LIGHT.palette[color], "#FFFFFF", 0.07));
+      expect(resolveSectionPaint(color, 1, LIGHT).fill).toBe(mixColors(LIGHT.palette[color], "#FDFDFD", 0.07));
     }
   });
 
   it("white: a card-colored section on light boards, the gray rule on dark ones", () => {
     expect(resolveSectionPaint("white", 2, LIGHT)).toMatchObject({
-      fill: "#FFFFFF",
-      border: "#D5DBE3",
-      chipFill: "#EAEDF1", // mix(hairline, card, .5)
-      chipBorder: "#D5DBE3",
-      headerText: "#0F1E36",
+      fill: "#F8F8F7",
+      border: "#E6E5E3",
+      chipFill: "#EFEFED", // mix(hairline, card, .5)
+      chipBorder: "#E6E5E3",
+      headerText: "#1F1F1F",
     });
     for (const depth of [1, 2, 3]) {
       expect(resolveSectionPaint("white", depth, DARK)).toEqual(resolveSectionPaint("gray", depth, DARK));
@@ -196,60 +203,60 @@ describe("layer-cake sections", () => {
 
   it("header icon: tile = ink with the tile glyph color; the white tile is outlined on light boards", () => {
     expect(resolveSectionPaint("teal", 1, LIGHT)).toMatchObject({
-      iconTile: "#0F8A7A",
+      iconTile: "#0D7164",
       iconTileBorder: null,
       iconGlyph: "#FFFFFF",
     });
     expect(resolveSectionPaint("white", 1, LIGHT)).toMatchObject({
-      iconTile: "#FFFFFF",
-      iconTileBorder: "#0F1E36",
-      iconGlyph: "#0F1E36",
+      iconTile: "#F8F8F7",
+      iconTileBorder: "#1F1F1F",
+      iconGlyph: "#1F1F1F",
     });
     // Glyph mode has no tile: the "tile" is the chip itself.
     const glyphMode = { ...LIGHT, iconStyle: "glyph" as const };
     const paint = resolveSectionPaint("teal", 1, glyphMode);
-    expect(paint).toMatchObject({ iconTile: paint.chipFill, iconTileBorder: null, iconGlyph: "#0F8A7A" });
+    expect(paint).toMatchObject({ iconTile: paint.chipFill, iconTileBorder: null, iconGlyph: "#0D7164" });
   });
 });
 
 describe("schematic shapes, icons, stickies, connectors", () => {
   it("card shapes: card fill, ink border, theme text", () => {
-    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#FFFFFF", border: "#2F5BD3", text: "#0F1E36" });
-    expect(resolveShapePaint("blue", DARK)).toEqual({ fill: "#32363E", border: "#82AAFF", text: "#E4E6F2" });
+    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#F8F8F7", border: "#0B6E99", text: "#1F1F1F" });
+    expect(resolveShapePaint("blue", DARK)).toEqual({ fill: "#32363E", border: "#4493F8", text: "#F0F6FC" });
   });
 
   it("tile icons: ink tile and the theme's tile glyph color", () => {
     expect(resolveIconPaint("green", LIGHT)).toEqual({
-      tileFill: "#2F8A3E",
+      tileFill: "#26744F",
       tileBorder: null,
       glyph: "#FFFFFF",
       glyphFill: null,
-      label: "#0F1E36",
+      label: "#1F1F1F",
     });
-    expect(resolveIconPaint("green", DARK)).toMatchObject({ tileFill: "#85E89D", glyph: "#14171F" });
+    expect(resolveIconPaint("green", DARK)).toMatchObject({ tileFill: "#3FB950", glyph: "#0D1117" });
     // White: outlined on light boards, a solid light tile on dark ones.
     expect(resolveIconPaint("white", LIGHT)).toMatchObject({
-      tileFill: "#FFFFFF",
-      tileBorder: "#0F1E36",
-      glyph: "#0F1E36",
+      tileFill: "#F8F8F7",
+      tileBorder: "#1F1F1F",
+      glyph: "#1F1F1F",
     });
-    expect(resolveIconPaint("white", DARK)).toMatchObject({ tileFill: "#E4E6F2", tileBorder: null, glyph: "#14171F" });
+    expect(resolveIconPaint("white", DARK)).toMatchObject({ tileFill: "#F0F6FC", tileBorder: null, glyph: "#0D1117" });
   });
 
   it("card stickies: card + hairline border + ink left rule, no shadow", () => {
     expect(resolveStickyPaint("yellow", LIGHT)).toEqual({
-      fill: "#FFFFFF",
-      border: "#D5DBE3",
-      rule: "#A87A00",
-      text: "#0F1E36",
+      fill: "#F8F8F7",
+      border: "#E6E5E3",
+      rule: "#805F01",
+      text: "#1F1F1F",
       shadow: false,
     });
-    expect(resolveStickyPaint("yellow", DARK)).toMatchObject({ fill: "#32363E", border: "#2E3342", rule: "#FFD580" });
+    expect(resolveStickyPaint("yellow", DARK)).toMatchObject({ fill: "#32363E", border: "#3D444D", rule: "#D29922" });
   });
 
   it("connectors stroke with the ink", () => {
-    expect(resolveConnectorPaint("gray", LIGHT)).toEqual({ stroke: "#5B6578" });
-    expect(resolveConnectorPaint("gray", DARK)).toEqual({ stroke: "#6B7394" });
+    expect(resolveConnectorPaint("gray", LIGHT)).toEqual({ stroke: "#666562" });
+    expect(resolveConnectorPaint("gray", DARK)).toEqual({ stroke: "#9198A1" });
   });
 
   it("figjam-mode text stays readable when a dark theme borrows tint shapes or paper stickies", () => {
@@ -269,7 +276,7 @@ describe("paint cache", () => {
     expect(Object.isFrozen(first)).toBe(true);
     expect(resolveShapePaint("teal", FIGJAM_CANVAS_STYLE)).toBe(resolveShapePaint("teal", FIGJAM_CANVAS_STYLE));
     // A different style object (an edited setting) resolves afresh.
-    const edited = { ...DARK, cardFill: "#36282F" };
+    const edited = { ...DARK, cardFill: "#2F1C20" };
     expect(resolveSectionPaint("red", 3, edited)).not.toEqual(resolveSectionPaint("red", 3, style));
     // Flat (figjam) section paints ignore depth: one entry serves every level.
     expect(resolveSectionPaint("blue", 5, FIGJAM_CANVAS_STYLE)).toBe(resolveSectionPaint("blue", 1, FIGJAM_CANVAS_STYLE));

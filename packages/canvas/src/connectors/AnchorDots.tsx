@@ -5,15 +5,18 @@
  * hit targets to the interaction pipeline.
  */
 import { useEffect, useState } from "react";
+import { flat } from "@codecaine-ai/design-system";
 import type { Anchor } from "./routing";
 import type { InteractiveCanvasDocument } from "../state/schema";
 import { connectionBoundsForObject } from "../objects/geometry";
 import { worldToScreen, type ViewportState } from "../stage/viewport";
-import type { CanvasStyle } from "../theme/canvas-style";
+import { stageMarkColors, type CanvasStyle } from "../theme/canvas-style";
 import { useCanvasStyle } from "../theme/canvas-style-context";
 
-/** Selection outline/handle color — matches SelectionBox and the connector trim (stage must not import stage/editor/components/editor-style). */
-const SELECTION_BLUE = "#0D99FF";
+// Dot colors are stage marks in the board's colors (decision 56,
+// stageMarkColors): the ring and the pressed fill in the accent (the same
+// accent as SelectionBox and the connector trim), the dot body and the
+// pressed dot's arrow in the board surface.
 
 /**
  * Zoom threshold below which select-mode anchor dots become hidden and inert
@@ -108,6 +111,7 @@ export function AnchorDots({
   onHoveredAnchorChange?: (port: ActivePort | null) => void;
 }) {
   const canvasStyle = useCanvasStyle();
+  const marks = stageMarkColors(canvasStyle);
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
   const [pressedKey, setPressedKey] = useState<string | null>(null);
   useEffect(() => {
@@ -176,9 +180,9 @@ export function AnchorDots({
                   style={{
                     width: `${isHovered ? HIT_TARGET_PX : DOT_DIAMETER_PX}px`,
                     height: `${isHovered ? HIT_TARGET_PX : DOT_DIAMETER_PX}px`,
-                    borderRadius: "999px",
-                    background: isPressed ? SELECTION_BLUE : "#FFFFFF",
-                    border: isHovered ? `2px solid ${SELECTION_BLUE}` : `1.5px solid ${SELECTION_BLUE}`,
+                    borderRadius: flat.base["radius.pill"],
+                    background: isPressed ? marks.accent : marks.surface,
+                    border: isHovered ? `2px solid ${marks.accent}` : `1.5px solid ${marks.accent}`,
                     boxSizing: "border-box",
                     display: "flex",
                     alignItems: "center",
@@ -192,8 +196,8 @@ export function AnchorDots({
                       style={{
                         width: "8px",
                         height: "8px",
-                        borderTop: `2px solid ${isPressed ? "#FFFFFF" : SELECTION_BLUE}`,
-                        borderRight: `2px solid ${isPressed ? "#FFFFFF" : SELECTION_BLUE}`,
+                        borderTop: `2px solid ${isPressed ? marks.surface : marks.accent}`,
+                        borderRight: `2px solid ${isPressed ? marks.surface : marks.accent}`,
                         transform: arrowTransform(name),
                       }}
                     />

@@ -8,13 +8,14 @@ afterEach(() => {
 });
 
 describe("ZoomControls geometry", () => {
-  it("renders a pill matching the dock's white styling", () => {
+  it("renders a pill matching the dock's panel styling", () => {
     const { container } = render(<ZoomControls />);
     const pill = container.querySelector("[data-zoom-controls]") as HTMLElement;
     expect(pill).toBeTruthy();
-    expect(pill.style.background).toBe("#FFFFFF");
-    expect(pill.style.height).toBe(`${ZOOM_CONTROLS_HEIGHT_PX}px`);
-    expect(parseFloat(pill.style.borderRadius)).toBe(ZOOM_CONTROLS_RADIUS_PX);
+    expect(pill.style.background).toBe(EDITOR_STYLE.bottomToolbarBg);
+    expect(pill.style.height).toBe(ZOOM_CONTROLS_HEIGHT_PX);
+    expect(pill.style.borderRadius).toBe(ZOOM_CONTROLS_RADIUS_PX);
+    expect(pill.style.borderRadius).toBe(EDITOR_STYLE.dockRadius);
     expect(pill.style.boxShadow).toBe(EDITOR_STYLE.dockShadow);
   });
 
