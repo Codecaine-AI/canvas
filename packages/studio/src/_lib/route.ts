@@ -11,9 +11,6 @@ export type Route =
   | { name: "view"; id: string; view?: string }
   | { name: "embed"; id: string; view?: string };
 
-/** The routes that open one board: the editor (local or linked project board), /view and /embed. */
-export type BoardRoute = Extract<Route, { name: "canvas" | "project" | "view" | "embed" }>;
-
 export function parseRoute(pathname: string, search = ""): Route {
   if (pathname === "/gallery" || pathname === "/gallery/") {
     return { name: "gallery" };

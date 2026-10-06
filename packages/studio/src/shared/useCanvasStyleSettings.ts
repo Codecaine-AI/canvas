@@ -278,7 +278,7 @@ export function useCanvasStyleSettings(
   // changes through the dev server's file watcher; Studio's own PUTs are
   // filtered server-side. The Electron build has no HMR channel.
   useEffect(() => {
-    // Cast: @types/bun also declares import.meta.hot — see App.tsx.
+    // Cast: @types/bun also declares import.meta.hot — see _lib/useBoardDocument.ts.
     const hot = import.meta.hot as unknown as ViteHotContext | undefined;
     if (!hot) return;
     const listener = () => sync.reload();

@@ -83,7 +83,8 @@ export function StyleRail({
   return (
     <aside
       aria-label="Style"
-      className="absolute bottom-24 right-4 top-20 z-raised flex w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded border border-border/70 bg-background/95 text-foreground shadow-glass backdrop-blur-glass"
+      style={{ maxWidth: "calc(100vw - var(--ds-space-8))" }}
+      className="absolute bottom-24 right-4 top-20 z-raised flex w-80 flex-col overflow-hidden rounded border border-border/70 bg-background/95 text-foreground shadow-glass backdrop-blur-glass"
       // Keys pressed on the rail's own controls (arrows on a slider,
       // Backspace on a button) must not reach the canvas hotkeys, which
       // would nudge or delete the selection.

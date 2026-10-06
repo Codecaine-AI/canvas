@@ -18,9 +18,9 @@ import { GalleryPage } from "./_components/GalleryPage";
 import { APP_NAME, RouterShell, SHELL_PATHS } from "./_components/RouterShell";
 import { StatusPage } from "./_components/StatusPage";
 import { ViewerPage } from "./_components/ViewerPage";
-import { devPagesEnabled } from "./shared/dev-flag";
-import { navigate } from "./shared/navigation";
-import { useCanvasStyleSettings } from "./shared/useCanvasStyleSettings";
+import { devPagesEnabled } from "@/shared/dev-flag";
+import { navigate } from "@/shared/navigation";
+import { useCanvasStyleSettings } from "@/shared/useCanvasStyleSettings";
 
 export function App() {
   const [route, setRoute] = useState<Route>(() => parseRoute(window.location.pathname, window.location.search));

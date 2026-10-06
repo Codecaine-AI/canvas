@@ -38,7 +38,7 @@
   position: absolute;
   top: 7px;
   bottom: 7px;
-  left: 6px;
+  left: var(--ds-space-1-5);
   width: 64%;
   border: var(--ds-border-width-hairline) solid;
   border-radius: var(--ds-radius-base);
@@ -48,7 +48,7 @@
   position: absolute;
   display: flex;
   width: 46%;
-  height: 8px;
+  height: var(--ds-space-2);
   align-items: center;
   padding: 0 3px;
   border: var(--ds-border-width-hairline) solid;
@@ -72,13 +72,13 @@
 .canvas-style-theme-preview-chip > span {
   display: block;
   width: 70%;
-  height: 2px;
+  height: var(--ds-space-0-5);
   border-radius: var(--ds-radius-base);
 }
 
 .canvas-style-theme-preview-card {
   position: absolute;
-  top: 16px;
+  top: var(--ds-space-4);
   left: 7px;
   right: 9px;
   display: flex;
@@ -93,7 +93,7 @@
 
 .canvas-style-theme-preview-card > span {
   display: block;
-  height: 2px;
+  height: var(--ds-space-0-5);
   border-radius: var(--ds-radius-base);
 }
 
@@ -103,7 +103,7 @@
 
 .canvas-style-theme-preview-card > span:last-child {
   width: 40%;
-  height: 1.5px;
+  height: var(--ds-border-width-ring);
 }
 
 .canvas-style-theme-preview-inks {
@@ -111,14 +111,14 @@
   top: 50%;
   right: 7px;
   display: grid;
-  grid-template-columns: repeat(2, 6px);
+  grid-template-columns: repeat(2, var(--ds-space-1-5));
   gap: 3px;
   transform: translateY(-50%);
 }
 
 .canvas-style-theme-preview-inks > span {
-  width: 6px;
-  height: 6px;
+  width: var(--ds-space-1-5);
+  height: var(--ds-space-1-5);
   border-radius: var(--ds-radius-pill);
 }
 

@@ -98,7 +98,7 @@ export function EvalsPage({ refreshSignal = 0, boardBackground }: EvalsPageProps
   }, [lightbox]);
 
   return (
-    // A tool view on the shell's full lane (index.css, .studio-evals): the run
+    // A tool view on the shell's full lane (styles.css, .studio-evals): the run
     // list and the run detail fill the space under the topbar and scroll on
     // their own, as before the shell.
     <div
