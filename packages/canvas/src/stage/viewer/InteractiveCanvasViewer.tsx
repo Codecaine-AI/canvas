@@ -284,8 +284,8 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
       data-source-id={document.id}
       data-canvas-viewer-interactive={interactive ? "true" : undefined}
     >
-      <div className="not-prose my-4 overflow-hidden rounded border bg-background">
-        <div className="flex flex-wrap items-center gap-2 border-b bg-background px-3 py-2">
+      <div className="not-prose my-4 overflow-hidden rounded border border-border bg-background">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border bg-background px-3 py-2">
           <span className="font-display text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
             Interactive Canvas
           </span>
@@ -308,9 +308,9 @@ export const InteractiveCanvasViewer = memo(function InteractiveCanvasViewer({
         </div>
         <div className="p-3">{stage}</div>
         {(document.annotations?.length ?? 0) > 0 && (
-          <div className="grid gap-2 border-t bg-background p-3 text-ui-xs text-muted-foreground sm:grid-cols-2">
+          <div className="grid gap-2 border-t border-border bg-background p-3 text-ui-xs text-muted-foreground sm:grid-cols-2">
             {(document.annotations ?? []).map((annotation) => (
-              <div key={annotation.id} className="rounded border bg-background p-2">
+              <div key={annotation.id} className="rounded border border-border bg-background p-2">
                 <span className="font-medium text-foreground">
                   {annotation.intent === "agent-request" ? "Agent request" : "Note"}
                 </span>
