@@ -13,6 +13,9 @@ export interface AnnotationPinsProps {
   zoom?: number;
 }
 
+/** The pin's small lift: kept FigJam value (no small-lift token; shadow.glass is a panel lift). */
+const PIN_SHADOW = "0 1px 4px rgba(0,0,0,0.3)";
+
 /** The pin glyph's type: bold UI type on a one-line box, from the resolved base tokens (the stage never reads host CSS). */
 const PIN_FONT = `${flat.base["font.weight.bold"]} ${flat.base["font.size.ui-sm"]}/1 ${flat.base["font.family.sans"]}`;
 
@@ -34,7 +37,8 @@ function threadLength(replyCount: number): number {
  * 56): the design-system theme matching the board (boardMarkTheme), resolved.
  * Request chip: color.annotation.text body, color.annotation.surface glyph.
  * Question chip: color.status.warning.solid body, its on-solid glyph. Ring:
- * color.annotation.surface, color.accent when selected. Lift: shadow.glass.
+ * color.annotation.surface, color.accent when selected. Lift: the original
+ * small shadow (no small-lift token).
  */
 export function AnnotationPins({
   document,
@@ -114,7 +118,9 @@ export function AnnotationPins({
               borderRadius: flat.base["radius.pill"],
               background: askedByAgent ? tokens["color.status.warning.solid"] : tokens["color.annotation.text"],
               color: askedByAgent ? tokens["color.status.warning.on-solid"] : tokens["color.annotation.surface"],
-              boxShadow: tokens["shadow.glass"],
+              // A small lift for a 24px chip: no design-system token fits (shadow.glass
+              // is a panel lift), so the original value stays (allowlisted, token gap).
+              boxShadow: PIN_SHADOW,
               padding: 0,
               pointerEvents: "auto",
               cursor: "pointer",

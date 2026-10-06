@@ -26,6 +26,11 @@
 import type { CanvasObjectStyle } from "../state/schema";
 import { DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE, type CanvasStyle } from "./canvas-style";
 
+/** `var(--canvas-hairline-color, <figjam hairline>)`, as canvasStyleCssVar("hairlineColor") writes it. */
+const BOARD_HAIRLINE = `var(--canvas-hairline-color, ${FIGJAM_CANVAS_STYLE.hairlineColor})`;
+/** `var(--canvas-text-color, <figjam text color>)`, as canvasStyleCssVar("textColor") writes it. */
+const BOARD_INK = `var(--canvas-text-color, ${FIGJAM_CANVAS_STYLE.textColor})`;
+
 /**
  * The stage's interaction variables, set on `.interactive-canvas-stage`: the
  * grid in the board's hairline, snap guides and spacing-chip fills in the
@@ -33,12 +38,14 @@ import { DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE, type CanvasStyle } from "./c
  * follow the app theme while the board keeps its preset (decision 56; see
  * stageMarkColors in canvas-style.ts). `--canvas-hairline-color` and
  * `--canvas-text-color` are the style variables CanvasStage sets on the same
- * element (canvasStyleCssVariables).
+ * element (canvasStyleCssVariables). Written in the same form as
+ * canvasStyleCssVar (the figjam value as the fallback), which theme/ cannot
+ * import here (theme-layer boundary).
  */
 export const canvasSurfaceStyle = {
-  "--interactive-canvas-grid": "color-mix(in oklab, var(--canvas-hairline-color) 52%, transparent)",
-  "--interactive-canvas-guide": "color-mix(in oklab, var(--canvas-text-color) 42%, transparent)",
-  "--interactive-canvas-highlight": "color-mix(in oklab, var(--canvas-text-color) 18%, transparent)",
+  "--interactive-canvas-grid": `color-mix(in oklab, ${BOARD_HAIRLINE} 52%, transparent)`,
+  "--interactive-canvas-guide": `color-mix(in oklab, ${BOARD_INK} 42%, transparent)`,
+  "--interactive-canvas-highlight": `color-mix(in oklab, ${BOARD_INK} 18%, transparent)`,
 } as const;
 
 /**

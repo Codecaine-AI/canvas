@@ -220,7 +220,7 @@ function ToolbarButton({
           borderRadius: EDITOR_STYLE.selectionToolbarButtonRadius,
           border: "none",
           background,
-          color: cssVar("color.text.ink"),
+          color: state?.active ? EDITOR_STYLE.activeGlyph : cssVar("color.text.ink"),
           cursor: disabled ? "default" : "pointer",
         }}
       >

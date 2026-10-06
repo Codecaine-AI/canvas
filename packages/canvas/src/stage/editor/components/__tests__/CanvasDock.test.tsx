@@ -125,16 +125,18 @@ describe("CanvasDock state rules", () => {
     expect(activeButtons.length).toBe(0);
   });
 
-  it("highlights exactly the button matching activeTool with the accent active wash", () => {
+  it("highlights exactly the button matching activeTool with the solid accent tile", () => {
     const { container } = render(<CanvasDock activeTool="hand" />);
     const active = container.querySelector('[data-dock-tool="hand"]') as HTMLElement;
     expect(active.getAttribute("data-active")).toBe("true");
-    expect(active.style.background).toBe(cssVar("color.fill.accent"));
+    expect(active.style.background).toBe(cssVar("color.accent"));
+    // The glyph on the accent tile is the on-solid glyph; resting glyphs stay body text.
+    expect(active.style.color).toBe(cssVar("color.text.on-solid"));
 
     const others = container.querySelectorAll('[data-active="true"]');
     expect(others.length).toBe(1);
     for (const button of container.querySelectorAll<HTMLElement>('[data-dock-tool]:not([data-dock-tool="hand"])')) {
-      expect(button.style.background).not.toBe(cssVar("color.fill.accent"));
+      expect(button.style.background).not.toBe(cssVar("color.accent"));
     }
   });
 
@@ -142,21 +144,21 @@ describe("CanvasDock state rules", () => {
     const { container } = render(<CanvasDock activeTool="connector" />);
     const active = container.querySelector('[data-dock-tool="connector"]') as HTMLElement;
     expect(active.getAttribute("data-active")).toBe("true");
-    expect(active.style.background).toBe(cssVar("color.fill.accent"));
+    expect(active.style.background).toBe(cssVar("color.accent"));
 
     const others = container.querySelectorAll('[data-active="true"]');
     expect(others.length).toBe(1);
   });
 
-  it("shows a hover fill distinct from the active accent wash", () => {
+  it("shows a hover fill distinct from the solid accent tile", () => {
     const { container } = render(<CanvasDock activeTool="select" />);
     const connectorButton = container.querySelector('[data-dock-tool="connector"]') as HTMLElement;
     fireEvent.pointerEnter(connectorButton);
     expect(connectorButton.style.background).toBe(EDITOR_STYLE.dockHoverBg);
     expect(connectorButton.style.background).toBe(cssVar("color.fill.hover"));
-    // The active button keeps the accent wash, independent of the hovered one.
+    // The active button keeps the accent tile, independent of the hovered one.
     const selectButton = container.querySelector('[data-dock-tool="select"]') as HTMLElement;
-    expect(selectButton.style.background).toBe(cssVar("color.fill.accent"));
+    expect(selectButton.style.background).toBe(cssVar("color.accent"));
     expect(selectButton.style.background).not.toBe(connectorButton.style.background);
   });
 

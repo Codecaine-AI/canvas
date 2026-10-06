@@ -24,6 +24,17 @@ function tokenNames(tokens: Readonly<Record<string, unknown>>, group: string): s
  * whose utility suffix equals the token's last segment
  * (`font.size.ui-lg` -> `text-ui-lg`); the renamed ones are named.
  */
+/** Border-width token names whose utility is also a color or a style utility (see `border-w` below). */
+const BORDER_NAME_CLASHES = new Set(["none", "focus", "ring"]);
+
+/** The layout width utilities: `--container-inspector`, `--container-sidebar`, `--container-sidebar-collapsed`. */
+const LAYOUT_WIDTHS = [
+  "inspector",
+  ...tokenNames(flat.base, "layout.sidebar")
+    .filter((name) => name.startsWith("width"))
+    .map((name) => name.replace(/^width/, "sidebar")),
+];
+
 const twMerge = extendTailwindMerge({
   extend: {
     theme: {
@@ -43,6 +54,22 @@ const twMerge = extendTailwindMerge({
       radius: tokenNames(flat.base, "radius").filter((name) => name !== "base"),
       // shadow-glass, shadow-dialog (theme tokens: both themes hold the same paths)
       shadow: tokenNames(flat.light, "shadow"),
+    },
+    classGroups: {
+      // z-raised, z-panel, z-overlay, z-popover, z-top
+      z: [{ z: tokenNames(flat.base, "z") }],
+      // border-hairline, border-rail. border.width.focus and .ring are left out:
+      // `border-focus` and `border-ring` are also border COLORS (color.focus-ring and
+      // the hosts' --ring knob), and `border-none` is Tailwind's border-style.
+      "border-w": [{ border: tokenNames(flat.base, "border.width").filter((name) => !BORDER_NAME_CLASHES.has(name)) }],
+      // ease-standard, ease-emphasized, ease-decelerate
+      ease: [{ ease: tokenNames(flat.base, "motion.easing") }],
+      // outline-offset-focus (focus.ring.offset)
+      "outline-offset": [{ "outline-offset": ["focus"] }],
+      // w-inspector, w-sidebar, w-sidebar-collapsed (layout.*.width)
+      w: [{ w: LAYOUT_WIDTHS }],
+      // max-w-inspector, max-w-sidebar, max-w-sidebar-collapsed, max-w-lane-text/-code/-wide
+      "max-w": [{ "max-w": [...LAYOUT_WIDTHS, ...tokenNames(flat.base, "layout.lane").map((name) => `lane-${name}`)] }],
     },
   },
 });

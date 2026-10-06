@@ -91,7 +91,7 @@ function OpenCanvasContextMenu({ menu }: CanvasContextMenuProps) {
             <input
               autoFocus
               aria-label="Note to AI"
-              className="my-1 h-9 w-full rounded border border-border bg-background px-2 text-ui-lg outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/40"
+              className="my-1 h-9 w-full rounded border border-border bg-background px-2 text-ui-lg outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-[length:var(--ds-border-width-focus)] focus:ring-ring/40"
               placeholder="Note for the agent…"
               value={note}
               onChange={(event) => setNote(event.target.value)}

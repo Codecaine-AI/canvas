@@ -58,11 +58,14 @@ export const EDITOR_STYLE = {
   colorPopoverPaddingPx: 14,
   colorPopoverRadius: cssVar("radius.base"),
   /**
-   * Armed / active / selected control fill: the dock's active tool, a locked
-   * toolbar control, a flyout's current option. The accent wash, so it stays
-   * distinct from the hover fill.
+   * Armed / active / selected control: the dock's armed tool, a locked toolbar
+   * control, a flyout's current option. A solid accent tile under the on-solid
+   * glyph (FigJam's solid purple tile, in tokens), so the armed state reads at
+   * >= 3:1 against the panel (WCAG 1.4.11): accent on panel 4.16:1 light,
+   * 5.59:1 dark; the glyph on the accent 4.42:1 light, 6.11:1 dark.
    */
-  activeBg: cssVar("color.fill.accent"),
+  activeBg: cssVar("color.accent"),
+  activeGlyph: cssVar("color.text.on-solid"),
   /** Selected outline (the color picker's current-pick ring). */
   selectedOutline: cssVar("color.accent"),
 } as const;

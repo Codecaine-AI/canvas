@@ -80,7 +80,7 @@ export function TopBar({
             ) : (
               <button
                 type="button"
-                className="block h-7 max-w-[45vw] truncate rounded px-2 text-left font-display text-ui-lg font-semibold hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="block h-7 max-w-[45vw] truncate rounded px-2 text-left font-display text-ui-lg font-semibold hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-[length:var(--ds-border-width-focus)] focus-visible:ring-ring"
                 onClick={beginBoardTitleEdit}
                 disabled={!editableTitle}
                 title={boardTitle}

@@ -77,7 +77,7 @@ export function FlyoutMenuButton({
           : hovered
             ? cssVar("color.fill.hover")
             : "transparent",
-        color: cssVar("color.text.ink"),
+        color: active ? EDITOR_STYLE.activeGlyph : cssVar("color.text.ink"),
         cursor: "pointer",
         fontSize: cssVar("font.size.ui-sm"),
         textAlign: "left",

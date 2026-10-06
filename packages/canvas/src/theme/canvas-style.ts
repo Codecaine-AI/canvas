@@ -314,9 +314,12 @@ export const SCHEMATIC_THEME_TOKENS = {
  * categorical set (tokens.md rule 3). The ink strokes 2px card borders and
  * connectors, fills solid icon tiles under the one iconTileGlyphColor, and is
  * the fallback the section header detail is pushed toward, so it takes each
- * hue's text-safe step: it reads at >= 4.5:1 on the page and panel, and so
- * does the on-solid glyph on it (the `.solid` light gray, yellow and orange
- * need an ink glyph instead). `white` objects stroke in ink.
+ * hue's text-safe step. Guarantees: the ink reads at >= 4.5:1 on the board
+ * (the page) and on the light card (the panel), and the on-solid tile glyph
+ * reads at >= 4.5:1 on the ink (the `.solid` light gray, yellow and orange
+ * would need an ink glyph instead). On the dark preset's raised card
+ * (SCHEMATIC_DARK_CARD_FILL) the inks read 3.8-5.8:1: enough for the 2px card
+ * strokes (>= 3:1, non-text), not for text. `white` objects stroke in ink.
  */
 export const SCHEMATIC_PALETTE_TOKENS = {
   gray: "color.gray.text",
@@ -449,7 +452,12 @@ export interface StageMarkColors {
   accent: string;
   /** Distribution (equal-gap) snap guides: color.pink.solid. */
   distribution: string;
-  /** Alignment snap guides: color.violet.solid. */
+  /**
+   * Alignment guide hue: color.violet.solid. Reserved: no renderer reads it
+   * today (live alignment guides draw in the board's ink through
+   * `--interactive-canvas-guide`); it backs the exported vendored constant
+   * ALIGNMENT_GUIDE_COLOR (snap-distribution.ts).
+   */
   alignment: string;
 }
 

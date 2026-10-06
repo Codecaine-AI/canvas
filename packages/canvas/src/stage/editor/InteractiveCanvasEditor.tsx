@@ -580,8 +580,11 @@ function InteractiveCanvasEditorBody({
     controls,
   });
 
+  // The editor covers the host page like a modal layer. No z token names that
+  // role, so it takes z.popover, the equal value of the old z-50 (canvas
+  // studio's lightboxes do the same).
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden bg-background">
+    <div className="fixed inset-0 z-popover overflow-hidden bg-background">
       <CanvasStage
         stageRef={stageRef}
         document={state.document}
@@ -750,7 +753,7 @@ function InteractiveCanvasEditorBody({
       />
 
       {!cameraOnly && shapesPanelVisible && (
-        <div className={`${shapesPanelClosing ? "pointer-events-none" : "pointer-events-auto"} absolute bottom-4 left-4 top-20 z-30`}>
+        <div className={`${shapesPanelClosing ? "pointer-events-none" : "pointer-events-auto"} absolute bottom-4 left-4 top-20 z-panel`}>
           <ShapesPanel
             className="h-full"
             exiting={shapesPanelClosing}
@@ -763,7 +766,7 @@ function InteractiveCanvasEditorBody({
         </div>
       )}
 
-      <div className="pointer-events-none absolute inset-x-0 bottom-4 z-30 flex justify-center px-4">
+      <div className="pointer-events-none absolute inset-x-0 bottom-4 z-panel flex justify-center px-4">
         <CanvasDock
           className="pointer-events-auto"
           activeTool={shapesPanelOpen ? "shapes" : dockToolForCanvasTool(activeTool)}
@@ -773,7 +776,7 @@ function InteractiveCanvasEditorBody({
         />
       </div>
 
-      <div className="pointer-events-none absolute bottom-4 right-4 z-30 flex items-center justify-end gap-2">
+      <div className="pointer-events-none absolute bottom-4 right-4 z-panel flex items-center justify-end gap-2">
         <ZoomControls
           className="pointer-events-auto"
           zoomPercent={viewport.zoom}

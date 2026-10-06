@@ -21,8 +21,8 @@ import {
  *     design-system radius.
  *   - Panel surface, glass shadow.
  *   - 6 buttons in 2 groups with faint vertical dividers.
- *   - Rest: body-text glyphs. Hover: the hover fill. Active: the accent
- *     wash (EDITOR_STYLE.activeBg) under ink glyphs.
+ *   - Rest: body-text glyphs. Hover: the hover fill. Active: a solid accent
+ *     tile (EDITOR_STYLE.activeBg) under the on-solid glyph (activeGlyph).
  *   - `activeTool` is nullable — null means no button is highlighted. The
  *     dock does NOT track "last selected tool" internally; the consumer
  *     (W3 editor) is the single source of truth for which tool (if any) is
@@ -79,7 +79,7 @@ const GROUP_B: DockButtonSpec[] = [
 const HOVER_BG = EDITOR_STYLE.dockHoverBg;
 const ACTIVE_BG = EDITOR_STYLE.activeBg;
 const GLYPH_COLOR = EDITOR_STYLE.dockGlyphColor;
-const ACTIVE_GLYPH_COLOR = cssVar("color.text.ink");
+const ACTIVE_GLYPH_COLOR = EDITOR_STYLE.activeGlyph;
 const DOCK_ICON_STYLES = `
 .canvas-dock-icon:not(.canvas-dock-icon--section) :is(path, line, polyline, rect, circle) {
   stroke-width: ${EDITOR_STYLE.dockNucleoIconStrokeWidthPx} !important;
