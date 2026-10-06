@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+export type AgentSurfaceProps = { children: ReactNode; className?: string };
+
 /**
  * Panel wrapper for the viewer pages. Inside studio this carried the
  * `.agent-surface` token scope; now the whole app is the agent surface (the
@@ -7,13 +9,7 @@ import type { ReactNode } from "react";
  * main.tsx), so this is purely the shared framed-panel layout the pages
  * compose into.
  */
-export function AgentSurface({
-  children,
-  className,
-}: {
-  children: ReactNode;
-  className?: string;
-}) {
+export function AgentSurface({ children, className }: AgentSurfaceProps) {
   return (
     <div
       className={`overflow-hidden rounded border border-border bg-background ${className ?? ""}`}

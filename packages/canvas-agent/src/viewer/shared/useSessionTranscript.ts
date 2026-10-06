@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { transcriptUrl } from "../../viewer-extension/paths";
-import { isRecord, useAgentJson } from "./use-agent-json";
+import { useAgentJson } from "./useAgentJson";
+import { isRecord } from "./utils";
 
 /**
  * Session transcript hook — the sibling of useAgentJson for the harness's

@@ -11,9 +11,9 @@ import canvasViewerExtension, {
   canvasViewerExtension as namedCanvasViewerExtension,
   createDetailBlockProvider,
 } from "../src/viewer-extension";
-import { TranscriptRenderStrip } from "../src/viewer-extension/TranscriptMedia";
+import { TranscriptRenderStrip } from "../src/viewer-extension/_components/TranscriptRenderStrip";
 import { transcriptImageUrl } from "../src/viewer-extension/paths";
-import type { TranscriptToolCallEntry } from "../src/viewer/hooks/use-transcript";
+import type { TranscriptToolCallEntry } from "../src/viewer/shared/useSessionTranscript";
 
 type TraceSpan = Parameters<DetailBlockProvider>[0];
 

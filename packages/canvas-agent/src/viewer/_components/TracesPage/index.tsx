@@ -1,29 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
-import type {
-  KernelTraceSessionDetail,
-  KernelTraceSessionListResponse,
-  KernelTraceSessionSummary,
-} from "@agent-kernel/viewer-core";
+import type { KernelTraceSessionDetail } from "@agent-kernel/viewer-core";
 import { buildTraceSpans } from "@agent-kernel/viewer-core";
 import {
   KernelTraceWorkspace,
   type TraceWorkspaceRow,
 } from "@agent-kernel/viewer-shell";
 import { createDetailBlockProvider } from "@codecaine-ai/canvas-agent/viewer-extension";
-import { AgentSurface } from "../components/AgentSurface";
-import { useCanvasTraceExtensions } from "../components/TraceDetailView";
-import { useViewerStyleSettings } from "../App";
+import { AgentSurface } from "../../shared/_components/AgentSurface";
+import { AgentServiceDownNotice } from "../../shared/_components/AgentServiceDownNotice";
+import { AgentFetchErrorNotice } from "../../shared/_components/AgentFetchErrorNotice";
+import { useAgentJson } from "../../shared/useAgentJson";
 import {
   AGENT_API_BASE,
   traceSessionDetailPath,
   traceSessionListPath,
-} from "../lib/kernel-api";
-import {
-  AgentFetchErrorNotice,
-  AgentServiceDownNotice,
-  isRecord,
-  useAgentJson,
-} from "../hooks/use-agent-json";
+} from "../../shared/kernel-api";
+import { useViewerStyleSettings } from "../../shared/useViewerStyleSettings";
+import { useCanvasTraceExtensions } from "./useCanvasTraceExtensions";
+import { isTraceDetail, extractSessions } from "./utils";
 
 /**
  * Traces — the STANDARD trace workspace (@agent-kernel/viewer-shell's
@@ -161,19 +155,4 @@ export function TracesPage() {
       />
     </AgentSurface>
   );
-}
-
-export function isTraceDetail(value: unknown): value is KernelTraceSessionDetail {
-  return (
-    isRecord(value) &&
-    isRecord(value.session) &&
-    Array.isArray(value.events) &&
-    Array.isArray(value.pi_sessions) &&
-    Array.isArray(value.agent_runs)
-  );
-}
-
-function extractSessions(data: unknown): KernelTraceSessionSummary[] | null {
-  if (!isRecord(data) || !Array.isArray(data.trace_sessions)) return null;
-  return (data as unknown as KernelTraceSessionListResponse).trace_sessions;
 }

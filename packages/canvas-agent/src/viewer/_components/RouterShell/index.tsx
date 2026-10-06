@@ -1,22 +1,6 @@
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  type CSSProperties,
-  type KeyboardEvent,
-  type PointerEvent as ReactPointerEvent,
-  type ReactNode,
-} from "react";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 import {
   StyleOverlay,
-  StyleSettingsPanel,
-  clampStyleRailWidth,
-  loadStyleRailCollapsed,
-  saveStyleRailCollapsed,
-  saveStyleRailWidth,
   styleEffectClass,
   styleVars,
   type StyleSettings,
@@ -24,22 +8,17 @@ import {
 } from "@agent-kernel/viewer-shell";
 
 import { AppShell, resolveNav, type NavSection, type ShellLinkProps } from "../AppShell";
-import { Icon } from "../../shared/_components/Icon";
-import { navigate } from "../../lib/navigation";
-import { CANVAS_STYLE_CONFIG, loadStoredStyleRailWidth } from "../../lib/style-config";
+import { Icon } from "./_components/Icon";
+import { StyleInspectorPanel } from "./_components/StyleInspectorPanel";
+import { ThemeToggle } from "./_components/ThemeToggle";
+import { PAGE_TITLES, VIEW_PATHS } from "./constants";
+import { navigate } from "./navigation";
+import type { View } from "./types";
+import { useStyleInspector } from "./useStyleInspector";
+import { useTheme } from "./useTheme";
+import { CANVAS_STYLE_CONFIG } from "../../shared/style-config";
 
-export type View = "traces" | "config";
-
-/** The topbar h1 and the document title: the page's nav label. */
-const PAGE_TITLES: Record<View, string> = {
-  traces: "Traces",
-  config: "Config",
-};
-
-const VIEW_PATHS: Record<View, string> = {
-  traces: "/traces",
-  config: "/config",
-};
+export type { View } from "./types";
 
 const NAV_SECTIONS: NavSection[] = [
   {
@@ -81,23 +60,7 @@ function ViewerLink({ href, onClick, ...rest }: ShellLinkProps) {
   );
 }
 
-/** The inspector closes on Escape from inside it; an Escape that ends IME composition must not. */
-function keepOpenWhileComposing(event: KeyboardEvent<HTMLDivElement>) {
-  if (event.key === "Escape" && (event.nativeEvent.isComposing || event.keyCode === 229)) {
-    event.stopPropagation();
-  }
-}
-
-/** html[data-theme], the theme the page shows: tokens.css and the host contract read it. */
-function subscribeHtmlTheme(onChange: () => void) {
-  const observer = new MutationObserver(onChange);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  return () => observer.disconnect();
-}
-const readHtmlTheme = () => document.documentElement.getAttribute("data-theme");
-const readNoTheme = () => null;
-
-type RouterShellProps = {
+export type RouterShellProps = {
   view: View;
   styleSettings: StyleSettings;
   onStyleSettingsChange: (updates: StyleSettingsPatch) => void;
@@ -118,67 +81,13 @@ type RouterShellProps = {
  *   inspector's Theme tab both write it. The toggle shows html[data-theme].
  */
 export function RouterShell({ view, styleSettings, onStyleSettingsChange, children }: RouterShellProps) {
-  const [styleOpen, setStyleOpen] = useState(() => !loadStyleRailCollapsed(CANVAS_STYLE_CONFIG));
-  const [styleRailWidth, setStyleRailWidth] = useState(loadStoredStyleRailWidth);
-  const [styleRailResizing, setStyleRailResizing] = useState(false);
-  const styleButtonRef = useRef<HTMLButtonElement>(null);
-  const htmlTheme = useSyncExternalStore(subscribeHtmlTheme, readHtmlTheme, readNoTheme);
+  const { styleOpen, styleRailWidth, styleRailResizing, styleButtonRef, openStyle, closeStyle, startStyleRailResize } = useStyleInspector();
+  const { dark, toggleTheme } = useTheme(styleSettings.theme, onStyleSettingsChange);
   const title = PAGE_TITLES[view];
-  const dark = htmlTheme === "dark";
-
-  // data-theme on <html> switches the design-system tokens and the host contract. It is stamped
-  // before the browser paints (index.html already applied the stored theme before the bundle ran).
-  useLayoutEffect(() => {
-    document.documentElement.dataset.theme = styleSettings.theme;
-    document.documentElement.style.colorScheme = styleSettings.theme;
-  }, [styleSettings.theme]);
 
   useEffect(() => {
     document.title = title;
   }, [title]);
-
-  const toggleTheme = useCallback(() => {
-    const next = dark ? "light" : "dark";
-    // Stamp first: a theme switched from outside (html[data-theme]) may already differ from the
-    // engine's, and then writing the engine alone would change nothing on screen.
-    document.documentElement.dataset.theme = next;
-    document.documentElement.style.colorScheme = next;
-    onStyleSettingsChange({ theme: next });
-  }, [dark, onStyleSettingsChange]);
-
-  const openStyle = useCallback(() => {
-    setStyleOpen(true);
-    saveStyleRailCollapsed(CANVAS_STYLE_CONFIG, false);
-  }, []);
-
-  // Every close path (the inspector's close button, Escape inside it, the Style button) returns
-  // focus to Style, also when the inspector mounted open and the shell saw no opener.
-  const closeStyle = useCallback(() => {
-    setStyleOpen(false);
-    saveStyleRailCollapsed(CANVAS_STYLE_CONFIG, true);
-    styleButtonRef.current?.focus({ preventScroll: true });
-  }, []);
-
-  const startStyleRailResize = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setStyleRailResizing(true);
-    let width: number | null = null;
-    const onMove = (moveEvent: PointerEvent) => {
-      // The inspector ends at the root's client edge, left of a classic vertical scrollbar.
-      width = clampStyleRailWidth(document.documentElement.clientWidth - moveEvent.clientX);
-      setStyleRailWidth(width);
-    };
-    const onUp = () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onUp);
-      setStyleRailResizing(false);
-      if (width !== null) saveStyleRailWidth(CANVAS_STYLE_CONFIG, width);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
-    window.addEventListener("pointercancel", onUp);
-  }, []);
 
   const engineStyle = {
     ...styleVars(styleSettings, CANVAS_STYLE_CONFIG),
@@ -218,17 +127,7 @@ export function RouterShell({ view, styleSettings, onStyleSettingsChange, childr
             >
               Style
             </button>
-            <button
-              key="theme"
-              type="button"
-              className="ds-shell-icon-button"
-              aria-label="Dark theme"
-              aria-pressed={dark}
-              title="Dark theme"
-              onClick={toggleTheme}
-            >
-              <Icon name="moon" />
-            </button>
+            <ThemeToggle key="theme" dark={dark} onToggle={toggleTheme} />
           </>
         }
         inspector={{
@@ -236,19 +135,12 @@ export function RouterShell({ view, styleSettings, onStyleSettingsChange, childr
           open: styleOpen,
           onClose: closeStyle,
           content: (
-            <div onKeyDown={keepOpenWhileComposing}>
-              <div
-                aria-hidden
-                className="style-settings-rail-resize-handle"
-                onPointerDown={startStyleRailResize}
-                title="Drag to resize"
-              />
-              <StyleSettingsPanel
-                settings={styleSettings}
-                onChange={onStyleSettingsChange}
-                sections={CANVAS_STYLE_CONFIG.sections}
-              />
-            </div>
+            <StyleInspectorPanel
+              settings={styleSettings}
+              onChange={onStyleSettingsChange}
+              sections={CANVAS_STYLE_CONFIG.sections}
+              onResizeStart={startStyleRailResize}
+            />
           ),
         }}
       >

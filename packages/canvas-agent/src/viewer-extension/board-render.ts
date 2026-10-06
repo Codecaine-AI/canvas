@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import { KERNEL_TRACE_READ_PATHS } from "@agent-kernel/viewer-core";
 import {
   DetailImageTrigger,
@@ -6,6 +7,7 @@ import {
   type DetailBlockSpec,
   type DetailBlockProvider,
 } from "@agent-kernel/viewer-ui";
+import { BoardFacts } from "./_components/BoardFacts";
 
 type TraceSpan = Parameters<DetailBlockProvider>[0];
 
@@ -38,18 +40,7 @@ export function boardRenderBlocks(
       slot: "content",
       order: -90,
       caption: "Board facts",
-      node: (
-        <ul
-          data-canvas-board-facts=""
-          className="space-y-1 text-[length:var(--ds-font-size-ui-lg)] leading-[var(--ds-line-height-reading)] text-foreground"
-        >
-          {facts.map((fact, index) => (
-            <li key={`${index}:${fact}`} className="break-words">
-              {fact}
-            </li>
-          ))}
-        </ul>
-      ),
+      node: createElement(BoardFacts, { facts }),
       expandable: false,
     },
   ];
@@ -60,18 +51,16 @@ export function boardRenderBlocks(
       id: "canvas:board-image",
       slot: "media",
       caption: "Board",
-      node: (
-        <DetailImageTrigger
-          image={{
-            src,
-            alt: mimeType ? `${mimeType} board render` : "Board render",
-          }}
-          title="Open image"
-          className="block max-w-full cursor-zoom-in rounded-[var(--ds-radius-base)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-info-border"
-          imageProps={{ loading: "lazy" }}
-          imageClassName="max-h-80 max-w-full rounded-[var(--ds-radius-base)] border border-border/60 object-contain"
-        />
-      ),
+      node: createElement(DetailImageTrigger, {
+        image: {
+          src,
+          alt: mimeType ? `${mimeType} board render` : "Board render",
+        },
+        title: "Open image",
+        className: "block max-w-full cursor-zoom-in rounded-[var(--ds-radius-base)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-info-border",
+        imageProps: { loading: "lazy" },
+        imageClassName: "max-h-80 max-w-full rounded-[var(--ds-radius-base)] border border-border/60 object-contain",
+      }),
       expandable: false,
     });
   }

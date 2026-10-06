@@ -1,24 +1,20 @@
 import { DetailImageTrigger } from "@agent-kernel/viewer-ui";
-import type { TranscriptImageRef } from "../viewer/hooks/use-transcript";
-import { transcriptImageUrl } from "./paths";
+import type { TranscriptImageRef } from "../../types";
+import { transcriptImageUrl } from "../../paths";
 
-/**
- * Compact transcript render thumbnails for standard detail blocks. The API
- * prefix belongs to the host so this module also works inside Observatory.
- */
-export function TranscriptRenderStrip({
-  apiBase,
-  images,
-  toolName,
-  turnIndex,
-  containerId,
-}: {
+export type TranscriptRenderStripProps = {
   apiBase: string;
   images: TranscriptImageRef[];
   toolName: string;
   turnIndex: number;
   containerId: string;
-}) {
+};
+
+/**
+ * Compact transcript render thumbnails for standard detail blocks. The API
+ * prefix belongs to the host so this module also works inside Observatory.
+ */
+export function TranscriptRenderStrip({ apiBase, images, toolName, turnIndex, containerId }: TranscriptRenderStripProps) {
   const alt = `${toolName} render, turn ${turnIndex}`;
   return (
     <div className="flex flex-wrap gap-2">

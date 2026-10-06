@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import type { KernelTraceSessionDetail } from "@agent-kernel/viewer-core";
 import type { DetailBlockProvider } from "@agent-kernel/viewer-ui";
-import type { CanvasViewerExtensionContext } from "../../viewer-extension";
+import type { CanvasViewerExtensionContext } from "@codecaine-ai/canvas-agent/viewer-extension";
 import {
   indexTranscriptToolCalls,
   useSessionTranscript,
   type TranscriptToolCallEntry,
-} from "../hooks/use-transcript";
+} from "../../shared/useSessionTranscript";
 
 /**
  * useCanvasTraceExtensions — the canvas-specific layers over the SHARED
@@ -15,7 +15,7 @@ import {
  *   - detailBlockProvider: thinking, propose_program source, and render
  *     thumbnails added to the standard tool detail without taking it over
  *
- * All joined from the session transcript (use-transcript.ts) by tool_use_id;
+ * All joined from the session transcript (useSessionTranscript.ts) by tool_use_id;
  * while the transcript route 404s everything quietly disappears and the
  * workspace is exactly the standard viewer.
  */

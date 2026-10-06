@@ -1,6 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
-  defaultStyleSettings,
   loadStyleSettings,
   mergeStyleSettings,
   saveStyleSettings,
@@ -9,9 +8,10 @@ import {
 } from "@agent-kernel/viewer-shell";
 
 import { RouterShell, type View } from "./_components/RouterShell";
-import { CANVAS_STYLE_CONFIG } from "./lib/style-config";
-import { AgentConfigPage } from "./pages/AgentConfigPage";
-import { TracesPage } from "./pages/TracesPage";
+import { StyleSettingsContext } from "./shared/useViewerStyleSettings";
+import { CANVAS_STYLE_CONFIG } from "./shared/style-config";
+import { AgentConfigPage } from "./_components/AgentConfigPage";
+import { TracesPage } from "./_components/TracesPage";
 
 /**
  * The viewer: the design-system app shell (_components/RouterShell) around two views over the
@@ -26,15 +26,6 @@ import { TracesPage } from "./pages/TracesPage";
  * the design-system tokens and host contract (main.tsx), as RGB triplets. Canvas defaults to dark;
  * the topbar toggle and the inspector can flip it.
  */
-
-/** Style settings for pages that thread view options (trace icon side/style). */
-const StyleSettingsContext = createContext<StyleSettings>(
-  defaultStyleSettings(CANVAS_STYLE_CONFIG),
-);
-
-export function useViewerStyleSettings(): StyleSettings {
-  return useContext(StyleSettingsContext);
-}
 
 function parseView(pathname: string): View {
   if (pathname === "/config" || pathname.startsWith("/config/")) return "config";

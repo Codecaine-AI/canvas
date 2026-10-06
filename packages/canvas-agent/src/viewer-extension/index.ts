@@ -5,9 +5,9 @@ import {
   type DetailBlockProvider,
   type DetailBlockSpec,
 } from "@agent-kernel/viewer-ui";
-import type { TranscriptToolCallEntry } from "../viewer/hooks/use-transcript";
-import { boardRenderBlocks } from "./BoardRenderBody";
-import { TranscriptRenderStrip } from "./TranscriptMedia";
+import type { TranscriptToolCallEntry } from "./types";
+import { boardRenderBlocks } from "./board-render";
+import { TranscriptRenderStrip } from "./_components/TranscriptRenderStrip";
 
 export interface ObservatoryViewerExtension {
   appId: string;
