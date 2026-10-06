@@ -165,11 +165,11 @@ describe("StyleRail", () => {
   });
 
   it("the native color picker keeps the token's alpha", () => {
-    const props = renderRail({ theme: "schematic-light", themes: {} });
+    const props = renderRail({ theme: "figjam", themes: {} });
     expandGroup("board");
-    // Grid dots are rgba(15, 30, 54, 0.13) in schematic light.
+    // Grid dots are rgba(0, 0, 0, 0.25) in figjam.
     act(() => typeInto(byLabel("Board grid dots picker")!, "#ff0000"));
-    expect(props.onChange).toHaveBeenLastCalledWith("gridDotColor", "rgba(255, 0, 0, 0.13)", undefined);
+    expect(props.onChange).toHaveBeenLastCalledWith("gridDotColor", "rgba(255, 0, 0, 0.25)", undefined);
   });
 
   it("shows the tint rows only under layer-cake section fills", () => {
