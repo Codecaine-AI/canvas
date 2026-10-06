@@ -82,7 +82,10 @@ export function AgentRenderViewer({
       role="dialog"
       aria-modal="true"
       aria-label={target.caption}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 sm:p-8"
+      // A dark region in either app theme: the render sits on a dimmed page,
+      // so the overlay and its text take the dark tokens.
+      data-theme="dark"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-page/85 p-4 sm:p-8"
       onClick={onClose}
     >
       <style>{VIEWER_ENTER_STYLES}</style>
@@ -91,18 +94,18 @@ export function AgentRenderViewer({
         className="flex h-full w-full flex-col"
         style={{
           animation:
-            "studio-agent-render-enter 140ms cubic-bezier(0.22, 1, 0.36, 1) both",
+            "studio-agent-render-enter var(--ds-motion-duration-base) var(--ds-motion-easing-emphasized) both",
           willChange: "transform, opacity",
         }}
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="mb-3 flex shrink-0 items-center justify-between gap-3 text-white">
-          <span className="truncate text-xs font-medium">{target.caption}</span>
+        <div className="mb-3 flex shrink-0 items-center justify-between gap-3 text-ink">
+          <span className="truncate text-ui-xs font-medium">{target.caption}</span>
           <Button
             type="button"
             size="icon-sm"
             variant="ghost"
-            className="text-white hover:bg-white/15 hover:text-white"
+            className="text-ink hover:bg-hover hover:text-ink dark:hover:bg-hover"
             aria-label="Close render"
             title="Close render"
             onClick={onClose}
@@ -113,12 +116,12 @@ export function AgentRenderViewer({
 
         <div className="relative flex min-h-0 flex-1 items-center justify-center">
           {loadState === "loading" ? (
-            <p className="absolute text-xs text-white/60">Loading render…</p>
+            <p className="absolute text-ui-xs text-muted">Loading render…</p>
           ) : null}
           {loadState === "unavailable" ? (
             <div
               data-agent-render-unavailable=""
-              className="rounded-md bg-white/10 px-4 py-3 text-xs text-white/70"
+              className="rounded bg-panel px-4 py-3 text-ui-xs text-secondary"
             >
               Render no longer available
             </div>

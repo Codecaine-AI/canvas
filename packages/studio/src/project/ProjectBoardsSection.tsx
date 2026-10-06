@@ -71,7 +71,7 @@ export function ProjectBoardsSection() {
   return (
     <section>
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <h2 className="text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
           Project boards
         </h2>
         {editingOrigin ? (
@@ -82,7 +82,7 @@ export function ProjectBoardsSection() {
               placeholder="http://localhost:4803"
               aria-label="Linked project server origin"
               autoFocus
-              className="h-8 w-56 text-xs"
+              className="h-8 w-56 text-ui-xs"
             />
             <Button type="submit" size="sm" variant="outline">
               Save
@@ -104,7 +104,7 @@ export function ProjectBoardsSection() {
             type="button"
             onClick={() => setEditingOrigin(true)}
             title="Change the linked project server"
-            className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="inline-flex items-center gap-1.5 rounded px-2 py-1 text-ui-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <LinkIcon className="h-3.5 w-3.5" />
             {origin}
@@ -112,13 +112,13 @@ export function ProjectBoardsSection() {
         )}
       </div>
       {state === "loading" ? (
-        <p className="text-sm text-muted-foreground">Loading project boards...</p>
+        <p className="text-ui-lg text-muted-foreground">Loading project boards...</p>
       ) : state === "offline" ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-ui-lg text-muted-foreground">
           No linked project connected at {origin}.
         </p>
       ) : boards.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
+        <p className="text-ui-lg text-muted-foreground">
           The linked project has no canvas boards yet.
         </p>
       ) : (
@@ -128,16 +128,16 @@ export function ProjectBoardsSection() {
               key={board.src}
               type="button"
               onClick={() => navigate(`/?src=${encodeURIComponent(board.src)}`)}
-              className="group overflow-hidden rounded-md border border-border bg-card text-left transition-colors hover:bg-muted/50"
+              className="group overflow-hidden rounded border border-border bg-card text-left transition-colors hover:bg-muted/50"
             >
               <span className="block px-4 py-3">
-                <span className="block truncate text-sm font-medium">
+                <span className="block truncate text-ui-lg font-medium">
                   {board.title ?? board.id ?? board.src}
                 </span>
-                <span className="mt-1 block truncate font-mono text-[11px] text-muted-foreground">
+                <span className="mt-1 block truncate font-mono text-ui-2xs text-muted-foreground">
                   {board.src}
                 </span>
-                <span className="mt-1 block text-[11px] text-muted-foreground">
+                <span className="mt-1 block text-ui-2xs text-muted-foreground">
                   Updated {formatUpdatedAt(board.updated_at)}
                 </span>
               </span>

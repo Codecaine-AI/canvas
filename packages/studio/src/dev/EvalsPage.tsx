@@ -214,8 +214,8 @@ export function EvalsPage({
         <div className="flex min-w-0 items-center gap-3">
           <CheckIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-semibold tracking-tight">Evals</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <h1 className="truncate text-reading font-semibold tracking-title text-ink">Evals</h1>
+            <p className="mt-1 text-ui-lg text-muted-foreground">
               Historical eval-suite runs from packages/eval-suite/runs
             </p>
           </div>
@@ -242,13 +242,13 @@ export function EvalsPage({
       <div className="flex min-h-0 flex-1">
         <aside className="w-72 shrink-0 overflow-y-auto border-r border-border p-3">
           {runsState === "loading" && runs.length === 0 ? (
-            <p className="p-2 text-sm text-muted-foreground">Loading runs...</p>
+            <p className="p-2 text-ui-lg text-muted-foreground">Loading runs...</p>
           ) : runsState === "error" ? (
-            <p className="p-2 text-sm text-destructive">
+            <p className="p-2 text-ui-lg text-destructive">
               Could not load eval runs. Is the studio server running with dev pages?
             </p>
           ) : runs.length === 0 ? (
-            <p className="p-2 text-sm text-muted-foreground">No eval runs yet.</p>
+            <p className="p-2 text-ui-lg text-muted-foreground">No eval runs yet.</p>
           ) : (
             <ul className="flex flex-col gap-1">
               {runs.map((run) => (
@@ -257,13 +257,13 @@ export function EvalsPage({
                     type="button"
                     onClick={() => setSelectedRunId(run.run_id)}
                     aria-pressed={run.run_id === selectedRunId}
-                    className={`w-full rounded-md border px-3 py-2 text-left transition-colors ${
+                    className={`w-full rounded border px-3 py-2 text-left transition-colors ${
                       run.run_id === selectedRunId
                         ? "border-border bg-muted"
                         : "border-transparent hover:bg-muted/50"
                     }`}
                   >
-                    <span className="block truncate font-mono text-xs font-medium">
+                    <span className="block truncate font-mono text-ui-xs font-medium">
                       {run.run_id}
                     </span>
                     <span className="mt-1.5 flex items-center gap-1.5">
@@ -272,7 +272,7 @@ export function EvalsPage({
                         <Badge variant="secondary">mean {formatScore(run.mean_score)}</Badge>
                       ) : null}
                     </span>
-                    <span className="mt-1 block text-[11px] text-muted-foreground">
+                    <span className="mt-1 block text-ui-2xs text-muted-foreground">
                       {formatDate(run.started_at)} · {run.scenario_count} scenario
                       {run.scenario_count === 1 ? "" : "s"}
                       {run.has_scorecard ? "" : " · no scorecard"}
@@ -286,11 +286,11 @@ export function EvalsPage({
 
         <main className="min-w-0 flex-1 overflow-y-auto p-6">
           {!selectedRunId ? (
-            <p className="text-sm text-muted-foreground">Select a run.</p>
+            <p className="text-ui-lg text-muted-foreground">Select a run.</p>
           ) : detailState === "loading" && !detail ? (
-            <p className="text-sm text-muted-foreground">Loading run...</p>
+            <p className="text-ui-lg text-muted-foreground">Loading run...</p>
           ) : detailState === "error" || !detail ? (
-            <p className="text-sm text-destructive">Could not load this run.</p>
+            <p className="text-ui-lg text-destructive">Could not load this run.</p>
           ) : (
             <RunDetail detail={detail} onOpenLightbox={setLightbox} />
           )}
@@ -301,7 +301,9 @@ export function EvalsPage({
         <div
           role="button"
           aria-label="Close full-size render"
-          className="fixed inset-0 z-50 flex cursor-zoom-out flex-col items-center justify-center gap-3 bg-black/85 p-8"
+          // A dark region in either app theme, like the agent's render viewer.
+          data-theme="dark"
+          className="fixed inset-0 z-50 flex cursor-zoom-out flex-col items-center justify-center gap-3 bg-page/85 p-8"
           onClick={() => setLightbox(null)}
         >
           <img
@@ -309,7 +311,7 @@ export function EvalsPage({
             alt={lightbox.caption}
             className="min-h-0 max-w-full flex-1 object-contain"
           />
-          <span className="font-mono text-xs text-white/80">{lightbox.caption}</span>
+          <span className="font-mono text-ui-xs text-secondary">{lightbox.caption}</span>
         </div>
       ) : null}
     </div>
@@ -355,9 +357,9 @@ function RunDetail({
 
   return (
     <div className="flex flex-col gap-5">
-      <section className="flex flex-col gap-2 rounded-md border border-border bg-card p-4">
+      <section className="flex flex-col gap-2 rounded border border-border bg-card p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <h2 className="font-mono text-sm font-semibold">{detail.run_id}</h2>
+          <h2 className="font-mono text-ui-lg font-semibold">{detail.run_id}</h2>
           <Badge variant={statusBadgeVariant(detail.status)}>{detail.status}</Badge>
           {runFlags.map((flag) => (
             <Badge key={flag} variant="destructive">{flag}</Badge>
@@ -369,9 +371,9 @@ function RunDetail({
           ) : null}
         </div>
         {fingerprint ? (
-          <p className="font-mono text-xs text-muted-foreground">{fingerprint}</p>
+          <p className="font-mono text-ui-xs text-muted-foreground">{fingerprint}</p>
         ) : null}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-ui-xs text-muted-foreground">
           {sessions ? (
             <span>
               sessions: {sessions.ok ?? 0} ok / {sessions.rejected ?? 0} rejected /{" "}
@@ -463,12 +465,12 @@ function ScenarioCard({
     : null;
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-md border border-border bg-card">
+    <article className="flex flex-col overflow-hidden rounded border border-border bg-card">
       <div className="flex items-start justify-between gap-3 px-4 pt-3">
         <div className="min-w-0">
-          <h3 className="truncate text-sm font-semibold">{label}</h3>
+          <h3 className="truncate text-ui-lg font-semibold">{label}</h3>
           {isLiveRun && progressScenario ? (
-            <p className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground">
+            <p className="mt-0.5 truncate font-mono text-ui-2xs text-muted-foreground">
               {progressScenario.status}
               {progressScenario.stages_done?.length
                 ? ` · done: ${progressScenario.stages_done.join(", ")}`
@@ -479,7 +481,7 @@ function ScenarioCard({
         <Badge variant={statusBadgeVariant(status)}>{status}</Badge>
       </div>
 
-      <div className="mt-3 aspect-[16/10] w-full border-y border-border bg-[color:var(--studio-board-background,#F5F5F5)]">
+      <div className="mt-3 aspect-16/10 w-full border-y border-border bg-[color:var(--studio-board-background,var(--ds-color-surface-sunken))]">
         {imageSrc && shownStage ? (
           <img
             src={imageSrc}
@@ -495,7 +497,7 @@ function ScenarioCard({
             }
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xs text-muted-foreground">
+          <div className="flex h-full items-center justify-center text-ui-xs text-muted-foreground">
             No renders yet
           </div>
         )}
@@ -512,7 +514,7 @@ function ScenarioCard({
                 aria-pressed={stage.name === shownStage}
                 title={stage.png ? `Show ${stage.name}` : `${stage.name}: no render`}
                 onClick={() => setPickedStage(stage.name)}
-                className={`rounded-md border px-2 py-0.5 font-mono text-[11px] transition-colors ${
+                className={`rounded border px-2 py-0.5 font-mono text-ui-2xs transition-colors ${
                   stage.name === shownStage
                     ? "border-transparent bg-primary text-primary-foreground"
                     : "border-border text-muted-foreground hover:bg-muted"
@@ -546,7 +548,7 @@ function ScenarioCard({
 
         {livePreviewUrl ? (
           <a
-            className="text-xs underline underline-offset-2 hover:text-foreground"
+            className="text-ui-xs underline underline-offset-2 hover:text-foreground"
             href={livePreviewUrl}
             target="_blank"
             rel="noreferrer"

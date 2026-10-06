@@ -1,8 +1,9 @@
 import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
-import { defineConfig, type Plugin } from "vite";
+import { defineConfig, searchForWorkspaceRoot, type Plugin } from "vite";
 import { createAgentProxyHandler } from "./server/agent-proxy";
 import { createCanvasFileApiHandler } from "./server/canvas-file-api";
 import {
@@ -13,6 +14,13 @@ import {
 import { createEvalsApiHandler } from "./server/evals-api";
 
 const STUDIO_DIR = dirname(fileURLToPath(import.meta.url));
+
+// @codecaine-ai/design-system resolves (workspace:*) to its real folder, outside
+// the Core workspace root Vite allows by default: allow it, or the dev server
+// answers 403 for its font files (guide/consume.md, "Vite").
+const DESIGN_SYSTEM_DIR = dirname(
+  createRequire(import.meta.url).resolve("@codecaine-ai/design-system/package.json"),
+);
 
 function canvasFileApiPlugin(): Plugin {
   // CANVAS_DIR points the dev server at another canvases directory (a scratch
@@ -82,6 +90,7 @@ export default defineConfig({
   server: {
     host: "0.0.0.0",
     port: 3999,
+    fs: { allow: [searchForWorkspaceRoot(STUDIO_DIR), DESIGN_SYSTEM_DIR] },
   },
   preview: {
     host: "0.0.0.0",

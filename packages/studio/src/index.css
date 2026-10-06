@@ -1,4 +1,14 @@
 @import "tailwindcss";
+/*
+ * @codecaine-ai/design-system, in its load order (guide/consume.md): fonts (imported first, from
+ * main.tsx), tokens, the strict reset (drops Tailwind's own palette and scales), the design-system
+ * utilities, the shell layout. tailwind.css also sets `@custom-variant dark` to data-theme="dark"
+ * (or .dark) on the element or an ancestor, so `dark:` follows the theme the page sets, not the OS.
+ */
+@import "@codecaine-ai/design-system/tokens.css";
+@import "@codecaine-ai/design-system/tailwind-strict.css";
+@import "@codecaine-ai/design-system/tailwind.css";
+@import "@codecaine-ai/design-system/layout.css";
 
 /*
  * Tailwind v4 auto-detection does not reliably scan the engine package's
@@ -9,49 +19,42 @@
 @source "../../canvas/src";
 
 /*
- * Canvas fonts: Inter 3.19 (400/500/600/700, the content font) and IBM Plex
- * Mono 2.5 (400/500/600, the metadata font) come from
- * @codecaine-ai/text-measure/fonts.css, imported in main.tsx: the faces
- * text-measure measures with, so the stage paints what lints and layout
- * measured. Vite fingerprints the woff2 files into dist/assets/, which the
- * Electron server serves as font/woff2.
- */
-
-/*
- * Studio v1 theme: a static light-mode-only snapshot of Spectre's resolved
- * "spectre-light" design tokens (apps/frontend/src/theme/themes/spectre-light.json,
- * resolved via apps/frontend/src/theme/css-vars.ts at extraction time). Spectre
- * itself resolves these at runtime from a small theme engine
- * (apps/frontend/src/theme/**) with multiple themes + dark mode; the studio
- * app intentionally does not vendor that engine — it just needs *some*
- * sane, self-contained values for the `--color-*` Tailwind theme mapping
- * below so `@codecaine-ai/canvas`'s `var(--primary)`-style CSS and the
- * vendored shadcn-style UI primitives render correctly standalone.
+ * shadcn knob names: the studio's classes (bg-card, text-muted-foreground) and
+ * @codecaine-ai/canvas (its ui/ primitives, var(--primary) selection outlines,
+ * var(--border) for the board grid) read them. Each points at a design-system
+ * token, with the same mapping as sequence studio (decision 44) and the host
+ * contract unless a comment says otherwise.
  */
 :root {
-  --radius: 0.5rem;
-  color-scheme: light;
+  --radius: var(--ds-radius-base);
 
-  --background: #f5f3ef;
-  --foreground: #111111;
-  --card: #fffefa;
-  --card-foreground: #111111;
-  --popover: #fffefa;
-  --popover-foreground: #111111;
-  --primary: #111111;
-  --primary-foreground: #fffefa;
-  --secondary: #eceae6;
-  --secondary-foreground: #403d38;
-  --muted: #eceae6;
-  --muted-foreground: #62666d;
-  --accent: #e8eef8;
-  --accent-foreground: #111111;
-  --destructive: #9f1d1d;
-  --border: #d8d5ce;
-  --input: #c4c0b9;
-  --ring: #aeb8c6;
+  --background: var(--ds-color-surface-page);
+  --foreground: var(--ds-color-text-body);
+  --card: var(--ds-color-surface-panel);
+  --card-foreground: var(--ds-color-text-body);
+  --popover: var(--ds-color-surface-panel);
+  --popover-foreground: var(--ds-color-text-body);
+  /* Ink read as a fill (primary buttons, selection outlines), as in the host contract. */
+  --primary: var(--ds-color-text-ink);
+  /* Text on the ink fill: on-solid, as in sequence studio (the contract says surface.page). */
+  --primary-foreground: var(--ds-color-text-on-solid);
+  --secondary: var(--ds-color-fill-chip);
+  --secondary-foreground: var(--ds-color-text-ink);
+  /* A resting neutral fill (segmented track, code well, cards) and row hovers: fill.chip, as in the
+     host contract. Sequence studio uses fill.hover, because it reads --muted for hovers only. */
+  --muted: var(--ds-color-fill-chip);
+  --muted-foreground: var(--ds-color-text-muted);
+  /* A pale wash behind ghost and outline hovers and count chips, so fill.accent, not color.accent. */
+  --accent: var(--ds-color-fill-accent);
+  /* Text on that wash, and the rail's dark markers: ink (not on-solid, which is white on a solid). */
+  --accent-foreground: var(--ds-color-text-ink);
+  --destructive: var(--ds-color-status-danger-text);
+  --border: var(--ds-color-border-default);
+  --input: var(--ds-color-border-default);
+  --ring: var(--ds-color-focus-ring);
 }
 
+/* Utilities over the knobs. Radius steps come from tailwind.css: every step is the one radius. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -71,20 +74,41 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/*
+ * Host bridge for @codecaine-ai/canvas until canvas-renderer pass 1; delete then (decision 52).
+ * tailwind-strict.css stops Tailwind's own scales from generating, but this app compiles the canvas
+ * package's classes (@source above: ui/ primitives, TopBar, Inspector, context menu, viewer), which
+ * still use them. Each key reads the token with the same value or the same role. The studio's own
+ * files use none of these classes. --text-base and --shadow-sm stay unbridged (no 16px size token;
+ * shadow.glass is a panel lift, not a small card's). --color-white is the pinned light on-solid,
+ * #ffffff in both themes like Tailwind's white: its readers put it on dark:bg-destructive/60, a
+ * translucent red that the dark on-solid glyph would not read on.
+ */
+@theme inline {
+  --text-xs: var(--ds-font-size-ui-xs);
+  --text-sm: var(--ds-font-size-ui-lg);
+  --font-weight-normal: var(--ds-font-weight-regular);
+  --tracking-wide: var(--ds-letter-spacing-micro);
+  --tracking-wider: var(--ds-letter-spacing-micro);
+  --shadow-lg: var(--ds-shadow-glass);
+  --shadow-xl: var(--ds-shadow-glass);
+  --blur: var(--ds-blur-glass);
+  --color-white: var(--ds-light-color-text-on-solid);
+  --color-amber-400: var(--ds-color-status-warning-text);
+  --color-amber-600: var(--ds-color-status-warning-text);
 }
 
 body {
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--ds-font-family-sans);
+  color: var(--foreground);
 }
 
 /*
  * Style rail (src/style/StyleRail.tsx) — native controls styled after the
  * docs workbench's Style Rail (docs-workbench/web/src/theme/style-rail.css),
- * on Studio's shadcn tokens. No component library.
+ * on Studio's shadcn knobs and design-system tokens. No component library.
  */
 .canvas-style-icon-button {
   display: inline-flex;
@@ -94,7 +118,7 @@ body {
   width: 1.75rem;
   flex-shrink: 0;
   border-radius: var(--radius);
-  border: 1px solid transparent;
+  border: var(--ds-border-width-hairline) solid transparent;
   color: var(--foreground);
   cursor: pointer;
 }
@@ -106,20 +130,20 @@ body {
 .canvas-style-rail-section-label {
   padding: 0.875rem 1rem 0.375rem;
   color: var(--muted-foreground);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.09em;
+  font-size: var(--ds-font-size-ui-2xs);
+  font-weight: var(--ds-font-weight-semibold);
+  letter-spacing: var(--ds-letter-spacing-micro);
   line-height: 1rem;
   text-transform: uppercase;
 }
 
 /* Token groups: a collapsible header per CANVAS_STYLE_GROUP, divided by rules. */
 .canvas-style-rail-group {
-  border-top: 1px solid var(--border);
+  border-top: var(--ds-border-width-hairline) solid var(--border);
 }
 
 .canvas-style-rail-group:last-child {
-  border-bottom: 1px solid var(--border);
+  border-bottom: var(--ds-border-width-hairline) solid var(--border);
 }
 
 .canvas-style-rail-group-header {
@@ -132,9 +156,9 @@ body {
   border: 0;
   background: transparent;
   color: var(--muted-foreground);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.09em;
+  font-size: var(--ds-font-size-ui-2xs);
+  font-weight: var(--ds-font-weight-semibold);
+  letter-spacing: var(--ds-letter-spacing-micro);
   line-height: 1rem;
   text-transform: uppercase;
   cursor: pointer;
@@ -146,7 +170,7 @@ body {
 }
 
 .canvas-style-rail-group-header:focus-visible {
-  outline: 2px solid var(--ring);
+  outline: var(--ds-border-width-focus) solid var(--ring);
   outline-offset: -2px;
 }
 
@@ -157,11 +181,11 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0 0.3rem;
-  border-radius: 9999px;
+  border-radius: var(--ds-radius-pill);
   background: var(--accent);
   color: var(--accent-foreground);
-  font-size: 10px;
-  letter-spacing: 0;
+  font-size: var(--ds-font-size-micro);
+  letter-spacing: var(--ds-letter-spacing-normal);
 }
 
 .canvas-style-rail-group-body {
@@ -178,7 +202,7 @@ body {
 .canvas-style-rail-inactive-note {
   margin-top: 0.25rem;
   color: var(--muted-foreground);
-  font-size: 10.5px;
+  font-size: var(--ds-font-size-ui-2xs);
   line-height: 0.875rem;
 }
 
@@ -196,7 +220,7 @@ body {
   flex: none;
   padding: 0;
   border: 0;
-  border-radius: 9999px;
+  border-radius: var(--ds-radius-pill);
   background: var(--accent-foreground);
 }
 
@@ -209,7 +233,7 @@ button.canvas-style-rail-row-override-dot:hover {
 }
 
 .canvas-style-rail-row-override-dot[data-overridden="false"] {
-  border: 1px solid var(--border);
+  border: var(--ds-border-width-hairline) solid var(--border);
   background: transparent;
 }
 
@@ -218,14 +242,14 @@ button.canvas-style-rail-row-override-dot:hover {
   -webkit-appearance: none;
   width: 100%;
   height: 4px;
-  border-radius: 9999px;
+  border-radius: var(--ds-radius-pill);
   background: var(--border);
   outline: none;
   cursor: pointer;
 }
 
 .canvas-style-range:focus-visible {
-  outline: 2px solid var(--ring);
+  outline: var(--ds-border-width-focus) solid var(--ring);
   outline-offset: 3px;
 }
 
@@ -235,16 +259,16 @@ button.canvas-style-rail-row-override-dot:hover {
   height: 12px;
   width: 12px;
   border: none;
-  border-radius: 9999px;
-  background: var(--accent-foreground);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-accent);
 }
 
 .canvas-style-range::-moz-range-thumb {
   height: 12px;
   width: 12px;
   border: none;
-  border-radius: 9999px;
-  background: var(--accent-foreground);
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-accent);
 }
 
 .canvas-style-visually-hidden {
@@ -264,11 +288,11 @@ button.canvas-style-rail-row-override-dot:hover {
   width: 3.75rem;
   height: 1.5rem;
   padding: 0 0.375rem;
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) - 2px);
+  border: var(--ds-border-width-hairline) solid var(--border);
+  border-radius: var(--radius);
   background: var(--background);
   color: var(--foreground);
-  font-size: 11px;
+  font-size: var(--ds-font-size-ui-2xs);
   font-variant-numeric: tabular-nums;
   text-align: right;
   appearance: textfield;
@@ -283,7 +307,7 @@ button.canvas-style-rail-row-override-dot:hover {
 
 .canvas-style-number:focus-visible,
 .canvas-style-color-text:focus-visible {
-  outline: 2px solid var(--ring);
+  outline: var(--ds-border-width-focus) solid var(--ring);
   outline-offset: 1px;
 }
 
@@ -295,8 +319,8 @@ button.canvas-style-rail-row-override-dot:hover {
   height: 1.5rem;
   flex: none;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) - 2px);
+  border: var(--ds-border-width-hairline) solid var(--border);
+  border-radius: var(--radius);
   background-color: #ffffff;
   background-image:
     linear-gradient(45deg, #d4d4d4 25%, transparent 25%),
@@ -325,7 +349,7 @@ button.canvas-style-rail-row-override-dot:hover {
 }
 
 .canvas-style-swatch:has(input:focus-visible) {
-  outline: 2px solid var(--ring);
+  outline: var(--ds-border-width-focus) solid var(--ring);
   outline-offset: 1px;
 }
 
@@ -333,12 +357,12 @@ button.canvas-style-rail-row-override-dot:hover {
   width: 8.75rem;
   height: 1.5rem;
   padding: 0 0.375rem;
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) - 2px);
+  border: var(--ds-border-width-hairline) solid var(--border);
+  border-radius: var(--radius);
   background: var(--background);
   color: var(--foreground);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10.5px;
+  font-family: var(--ds-font-family-mono);
+  font-size: var(--ds-font-size-ui-2xs);
 }
 
 .canvas-style-color-text[aria-invalid="true"] {
@@ -363,9 +387,9 @@ button.canvas-style-rail-row-override-dot:hover {
   align-items: center;
   justify-content: center;
   padding: 0.25rem 0.375rem;
-  border-radius: calc(var(--radius) - 2px);
+  border-radius: var(--radius);
   color: var(--muted-foreground);
-  font-size: 11px;
+  font-size: var(--ds-font-size-ui-2xs);
   line-height: 1rem;
   cursor: pointer;
 }
@@ -377,12 +401,12 @@ button.canvas-style-rail-row-override-dot:hover {
 .canvas-style-segment[data-active="true"] {
   background: var(--card);
   color: var(--foreground);
-  font-weight: 500;
-  box-shadow: 0 0 0 1px var(--border), 0 1px 2px rgba(0, 0, 0, 0.06);
+  font-weight: var(--ds-font-weight-medium);
+  box-shadow: 0 0 0 var(--ds-border-width-hairline) var(--border);
 }
 
 .canvas-style-segment:has(input:focus-visible) {
-  outline: 2px solid var(--ring);
+  outline: var(--ds-border-width-focus) solid var(--ring);
   outline-offset: 1px;
 }
 
@@ -394,10 +418,10 @@ button.canvas-style-rail-row-override-dot:hover {
   width: 30px;
   height: 17px;
   flex-shrink: 0;
-  border-radius: 9999px;
+  border-radius: var(--ds-radius-pill);
   background: var(--border);
   cursor: pointer;
-  transition: background 150ms ease;
+  transition: background var(--ds-motion-duration-base) var(--ds-motion-easing-standard);
 }
 
 .canvas-style-toggle::after {
@@ -407,14 +431,14 @@ button.canvas-style-rail-row-override-dot:hover {
   left: 2px;
   width: 13px;
   height: 13px;
-  border-radius: 9999px;
+  border-radius: var(--ds-radius-pill);
   background: var(--background);
-  box-shadow: 0 0 0 1px var(--border);
-  transition: transform 150ms ease;
+  box-shadow: 0 0 0 var(--ds-border-width-hairline) var(--border);
+  transition: transform var(--ds-motion-duration-base) var(--ds-motion-easing-standard);
 }
 
 .canvas-style-toggle:checked {
-  background: var(--accent-foreground);
+  background: var(--ds-color-accent);
 }
 
 .canvas-style-toggle:checked::after {
@@ -423,8 +447,8 @@ button.canvas-style-rail-row-override-dot:hover {
 }
 
 .canvas-style-toggle:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline: var(--ds-border-width-focus) solid var(--ring);
+  outline-offset: var(--ds-focus-ring-offset);
 }
 
 /*
@@ -446,24 +470,24 @@ button.canvas-style-rail-row-override-dot:hover {
   flex-direction: column;
   gap: 0.375rem;
   padding: 0.25rem 0.25rem 0.375rem;
-  border: 1px solid var(--border);
+  border: var(--ds-border-width-hairline) solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
   cursor: pointer;
 }
 
 .canvas-style-theme-card:hover {
-  border-color: var(--input);
+  border-color: var(--ds-color-border-strong);
 }
 
 .canvas-style-theme-card[data-active="true"] {
   border-color: var(--foreground);
-  box-shadow: 0 0 0 1px var(--foreground);
+  box-shadow: 0 0 0 var(--ds-border-width-hairline) var(--foreground);
 }
 
 .canvas-style-theme-card:has(input:focus-visible) {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
+  outline: var(--ds-border-width-focus) solid var(--ring);
+  outline-offset: var(--ds-focus-ring-offset);
 }
 
 .canvas-style-theme-preview {
@@ -471,7 +495,7 @@ button.canvas-style-rail-row-override-dot:hover {
   display: block;
   height: 3.5rem;
   overflow: hidden;
-  border-radius: calc(var(--radius) - 3px);
+  border-radius: var(--radius);
   background-size: 7px 7px;
 }
 
@@ -481,8 +505,8 @@ button.canvas-style-rail-row-override-dot:hover {
   bottom: 7px;
   left: 6px;
   width: 64%;
-  border: 1px solid;
-  border-radius: 2px;
+  border: var(--ds-border-width-hairline) solid;
+  border-radius: var(--ds-radius-base);
 }
 
 .canvas-style-theme-preview-chip {
@@ -492,8 +516,8 @@ button.canvas-style-rail-row-override-dot:hover {
   height: 8px;
   align-items: center;
   padding: 0 3px;
-  border: 1px solid;
-  border-radius: 2px;
+  border: var(--ds-border-width-hairline) solid;
+  border-radius: var(--ds-radius-base);
 }
 
 .canvas-style-theme-preview-chip[data-placement="floating"] {
@@ -507,14 +531,14 @@ button.canvas-style-rail-row-override-dot:hover {
   left: -1px;
   border-top-color: transparent;
   border-left-color: transparent;
-  border-radius: 2px 0 2px 0;
+  border-radius: var(--ds-radius-base) 0 var(--ds-radius-base) 0;
 }
 
 .canvas-style-theme-preview-chip > span {
   display: block;
   width: 70%;
   height: 2px;
-  border-radius: 1px;
+  border-radius: var(--ds-radius-base);
 }
 
 .canvas-style-theme-preview-card {
@@ -528,14 +552,14 @@ button.canvas-style-rail-row-override-dot:hover {
   justify-content: center;
   gap: 2px;
   padding: 0 4px;
-  border: 1px solid;
-  border-radius: 2px;
+  border: var(--ds-border-width-hairline) solid;
+  border-radius: var(--ds-radius-base);
 }
 
 .canvas-style-theme-preview-card > span {
   display: block;
   height: 2px;
-  border-radius: 1px;
+  border-radius: var(--ds-radius-base);
 }
 
 .canvas-style-theme-preview-card > span:first-child {
@@ -560,7 +584,7 @@ button.canvas-style-rail-row-override-dot:hover {
 .canvas-style-theme-preview-inks > span {
   width: 6px;
   height: 6px;
-  border-radius: 9999px;
+  border-radius: var(--ds-radius-pill);
 }
 
 .canvas-style-theme-check {
@@ -572,11 +596,11 @@ button.canvas-style-rail-row-override-dot:hover {
   height: 0.875rem;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;
+  border-radius: var(--ds-radius-pill);
   background: var(--foreground);
   color: var(--background);
   /* A light ring keeps the badge visible on the dark theme's board too. */
-  box-shadow: 0 0 0 1.5px var(--card);
+  box-shadow: 0 0 0 var(--ds-border-width-ring) var(--card);
 }
 
 .canvas-style-theme-label {
@@ -586,20 +610,20 @@ button.canvas-style-rail-row-override-dot:hover {
   justify-content: center;
   gap: 0.25rem;
   color: var(--muted-foreground);
-  font-size: 11px;
+  font-size: var(--ds-font-size-ui-2xs);
   line-height: 0.875rem;
   text-align: center;
 }
 
 .canvas-style-theme-card[data-active="true"] .canvas-style-theme-label {
   color: var(--foreground);
-  font-weight: 600;
+  font-weight: var(--ds-font-weight-semibold);
 }
 
 .canvas-style-theme-edited {
   width: 5px;
   height: 5px;
   flex: none;
-  border-radius: 9999px;
+  border-radius: var(--ds-radius-pill);
   background: var(--accent-foreground);
 }

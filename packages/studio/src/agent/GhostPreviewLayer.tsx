@@ -9,10 +9,22 @@ import {
 import type { AgentProposal, AgentRect } from "@codecaine-ai/canvas-agent/protocol";
 import { classifyChanges, type MovedChange, type ObjectRectChange } from "./classify-changes";
 
-const AGENT_COLOR = "#8C2EF2";
-const DISPLACED_COLOR = "#2563EB";
-const REMOVED_COLOR = "#B42318";
-const SCRIM_COLOR = "rgba(17, 24, 39, 0.14)";
+/*
+ * Change marks over the board, drawn as editor chrome from design-system
+ * tokens, so they follow the app theme. The agent's own marks (its work frame,
+ * moved and new objects) take the AI layer's violet; objects it pushes aside
+ * are blue (categorical); removals are the diff's removed red. Each badge
+ * color pairs with the glyph color that reads on it.
+ */
+const AGENT_COLOR = "var(--ds-color-annotation-accent)";
+const AGENT_ON_COLOR = "var(--ds-color-text-on-solid)";
+const DISPLACED_COLOR = "var(--ds-color-blue-solid)";
+const REMOVED_COLOR = "var(--ds-color-diff-del)";
+const REMOVED_ON_COLOR = "var(--ds-color-text-on-solid)";
+/** Dims the board around the work frame: the dialog backdrop's black, at 14%. */
+const SCRIM_COLOR = "color-mix(in srgb, var(--ds-color-backdrop) 35%, transparent)";
+const BADGE_RADIUS = "var(--ds-radius-pill)";
+const MARK_RADIUS = "var(--ds-radius-base)";
 
 type DraftPreview = {
   rect: AgentRect;
@@ -76,8 +88,8 @@ function ChangeOutline({
           ...rectStyle(change.from),
           zIndex: 2,
           border: `2px dashed ${color}`,
-          borderRadius: "10px",
-          background: "rgba(255, 255, 255, 0.16)",
+          borderRadius: MARK_RADIUS,
+          background: "color-mix(in srgb, var(--ds-color-surface-page) 16%, transparent)",
         }}
       />
       <div
@@ -86,8 +98,8 @@ function ChangeOutline({
         style={{
           ...rectStyle(change.to),
           zIndex: 2,
-          border: `1px solid ${color}`,
-          borderRadius: "10px",
+          border: `var(--ds-border-width-hairline) solid ${color}`,
+          borderRadius: MARK_RADIUS,
           background: `color-mix(in srgb, ${color} 13%, transparent)`,
         }}
       />
@@ -99,11 +111,14 @@ function ChangeChip({
   change,
   label,
   color,
+  onColor,
   dashed = false,
 }: {
   change: ObjectRectChange;
   label: "new" | "removed";
   color: string;
+  /** The badge text color, readable on `color`. */
+  onColor: string;
   dashed?: boolean;
 }) {
   const { rect } = change;
@@ -117,7 +132,7 @@ function ChangeChip({
             ...rectStyle(rect),
             zIndex: 2,
             border: `2px dashed ${color}`,
-            borderRadius: "10px",
+            borderRadius: MARK_RADIUS,
             background: `color-mix(in srgb, ${color} 7%, transparent)`,
           }}
         />
@@ -131,15 +146,15 @@ function ChangeChip({
           top: `${rect.y}px`,
           zIndex: 3,
           transform: "translate(-100%, -50%)",
-          borderRadius: "999px",
+          borderRadius: BADGE_RADIUS,
           background: color,
-          color: "white",
+          color: onColor,
           padding: "2px 7px",
-          fontSize: "11px",
-          fontWeight: 700,
-          lineHeight: 1.2,
-          letterSpacing: "0.01em",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.2)",
+          fontSize: "var(--ds-font-size-ui-2xs)",
+          fontWeight: "var(--ds-font-weight-bold)",
+          lineHeight: "var(--ds-line-height-tight)",
+          letterSpacing: "var(--ds-letter-spacing-normal)",
+          boxShadow: "var(--ds-shadow-glass)",
           whiteSpace: "nowrap",
           pointerEvents: "none",
         }}
@@ -237,7 +252,7 @@ export function GhostPreviewLayer({
             ...rectStyle(frame),
             zIndex: 1,
             border: `2px solid ${AGENT_COLOR}`,
-            borderRadius: "18px",
+            borderRadius: MARK_RADIUS,
             boxShadow: `0 0 0 5px color-mix(in srgb, ${AGENT_COLOR} 10%, transparent)`,
           }}
         />
@@ -262,7 +277,13 @@ export function GhostPreviewLayer({
         />
       ))}
       {changes?.created.map((change) => (
-        <ChangeChip key={`created-${change.id}`} change={change} label="new" color={AGENT_COLOR} />
+        <ChangeChip
+          key={`created-${change.id}`}
+          change={change}
+          label="new"
+          color={AGENT_COLOR}
+          onColor={AGENT_ON_COLOR}
+        />
       ))}
       {changes?.removed.map((change) => (
         <ChangeChip
@@ -270,6 +291,7 @@ export function GhostPreviewLayer({
           change={change}
           label="removed"
           color={REMOVED_COLOR}
+          onColor={REMOVED_ON_COLOR}
           dashed
         />
       ))}

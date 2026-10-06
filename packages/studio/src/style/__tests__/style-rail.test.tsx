@@ -12,7 +12,7 @@ import {
   type CanvasStyleSettings,
 } from "@codecaine-ai/canvas/style";
 
-import { StyleRail, type StyleRailProps } from "../StyleRail";
+import { isColorControl, OPEN_GROUPS_STORAGE_KEY, StyleRail, type StyleRailProps } from "../StyleRail";
 import { useCanvasStyleSettings } from "../use-canvas-style-settings";
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean })
@@ -50,7 +50,14 @@ function expandGroup(group: string) {
   if (header.getAttribute("aria-expanded") !== "true") act(() => header.click());
 }
 
-function renderRail(settings: CanvasStyleSettings = { theme: "figjam", themes: {} }) {
+/**
+ * Renders the rail. The color controls ship hidden; most tests below exercise
+ * their kept code, so they render with `colorControls` unless told otherwise.
+ */
+function renderRail(
+  settings: CanvasStyleSettings = { theme: "figjam", themes: {} },
+  { colorControls = true }: { colorControls?: boolean } = {},
+) {
   const normalized = normalizeCanvasStyleSettings(settings);
   const props = {
     settings: normalized,
@@ -61,6 +68,7 @@ function renderRail(settings: CanvasStyleSettings = { theme: "figjam", themes: {
     onResetKey: mock((_key: string, _paletteColor?: string) => {}),
     onResetTheme: mock(() => {}),
     onClose: mock(() => {}),
+    colorControls,
   } satisfies StyleRailProps;
   act(() => root.render(<StyleRail {...props} />));
   return props;
@@ -242,11 +250,43 @@ describe("StyleRail", () => {
   it("remembers which groups are open", () => {
     renderRail();
     expandGroup("icons");
+    expect(JSON.parse(window.localStorage.getItem(OPEN_GROUPS_STORAGE_KEY)!)).toEqual(["icons"]);
     act(() => root.unmount());
     root = createRoot(container);
     renderRail();
     expect($('section[data-group="icons"] > button')!.getAttribute("aria-expanded")).toBe("true");
     expect($('section[data-group="board"] > button')!.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("hides the color controls by default and keeps the size, font and style controls", () => {
+    renderRail(
+      { theme: "schematic-dark", themes: { "schematic-dark": { palette: { red: "#FF0000" } } } },
+      { colorControls: false },
+    );
+    const headers = [...container.querySelectorAll<HTMLButtonElement>("section[data-group] > button")];
+    // Palette holds only color rows, so its group is gone.
+    expect($('section[data-group="palette"]')).toBeNull();
+    for (const header of headers) act(() => header.click());
+    // Schematic dark is layer-cake with tile icons, so every conditional row applies.
+    const dark = canvasThemePreset("schematic-dark");
+    const shown = CANVAS_STYLE_CONTROLS.filter(
+      (control) =>
+        control.key !== "theme" &&
+        !isColorControl(control) &&
+        (!control.visibleWhen || dark[control.visibleWhen.key] === control.visibleWhen.equals),
+    );
+    const rows = [...container.querySelectorAll("[data-control]")].map((row) => row.getAttribute("data-control"));
+    expect(rows).toEqual(shown.map((control) => control.key));
+    expect(rows).toContain("shapeCornerRadiusPx");
+    expect(rows).toContain("headerFont");
+    expect(rows).toContain("headerUppercase");
+    for (const hidden of ["boardBackground", "textColor", "sectionTintBase", "sectionBorderOpacity", "headerChipMix"]) {
+      expect(rows).not.toContain(hidden);
+    }
+    expect(container.querySelector('input[type="color"]')).toBeNull();
+    // The theme cards and the override total stay.
+    expect(container.querySelectorAll('[aria-label="Theme"] input[type="radio"]')).toHaveLength(3);
+    expect(container.textContent).toContain("Schematic dark: 1 override");
   });
 });
 
@@ -278,6 +318,7 @@ describe("StyleRail wired to useCanvasStyleSettings", () => {
           onResetKey={controller.resetToken}
           onResetTheme={controller.resetTheme}
           onClose={() => {}}
+          colorControls
         />
       );
     }

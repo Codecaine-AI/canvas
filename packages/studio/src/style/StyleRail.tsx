@@ -39,6 +39,12 @@ import type { CanvasStyleTokenValue } from "./use-canvas-style-settings";
  * that resets the token, and a reset footer. Each theme keeps its own edits,
  * so the footer resets only the active one.
  * CSS: `.canvas-style-*` in index.css.
+ *
+ * Color controls are hidden (owner decision for style engines: keep size,
+ * density and font controls, hide color controls, keep their code): the color
+ * rows (palette inks included) and the sliders that only set color strength
+ * (section tints, border opacity, header strength). `colorControls` brings
+ * them back; SHOW_COLOR_CONTROLS is the default.
  */
 
 export type StyleRailProps = {
@@ -55,15 +61,37 @@ export type StyleRailProps = {
   /** Drop every override of the active theme. */
   onResetTheme(): void;
   onClose(): void;
+  /** Show the color controls. Default: SHOW_COLOR_CONTROLS. */
+  colorControls?: boolean;
 };
+
+/** The rail ships without its color controls; their code stays behind this flag. */
+export const SHOW_COLOR_CONTROLS = false;
+
+/** Number controls that only set how strong a color is, hidden with the color rows. */
+const COLOR_STRENGTH_KEYS: ReadonlySet<CanvasStyleKey> = new Set<CanvasStyleKey>([
+  "sectionTintBase",
+  "sectionTintStep",
+  "sectionTintMax",
+  "sectionBorderOpacity",
+  "headerChipMix",
+]);
+
+export function isColorControl(control: CanvasStyleControl): boolean {
+  return control.kind === "color" || COLOR_STRENGTH_KEYS.has(control.key);
+}
 
 /** Every token control; the theme itself is picked with the cards above the groups. */
 const TOKEN_CONTROLS = CANVAS_STYLE_CONTROLS.filter((control) => control.key !== "theme");
 
 const GROUP_ORDER = Array.from(new Set(TOKEN_CONTROLS.map((control) => control.group)));
 
-/** Which groups are expanded — remembered across rail opens. */
-const OPEN_GROUPS_STORAGE_KEY = "canvas-studio-style-rail-groups";
+/**
+ * Which groups are expanded — remembered across rail opens. v2 since the color
+ * controls were hidden (decision 42: the rail's own UI keys move; the settings
+ * cache and canvas-style.json, which hold the board's colors, stay).
+ */
+export const OPEN_GROUPS_STORAGE_KEY = "canvas-studio-style-rail-groups.v2";
 
 /** The inks shown as swatches on each theme card. */
 const PREVIEW_INKS: readonly CanvasColor[] = ["blue", "green", "orange", "violet"];
@@ -129,8 +157,14 @@ export function StyleRail({
   onResetKey,
   onResetTheme,
   onClose,
+  colorControls = SHOW_COLOR_CONTROLS,
 }: StyleRailProps) {
   const [openGroups, setOpenGroups] = useState(readOpenGroups);
+  const shownControls = colorControls
+    ? TOKEN_CONTROLS
+    : TOKEN_CONTROLS.filter((control) => !isColorControl(control));
+  // A group whose every control is hidden (Palette) is not rendered.
+  const shownGroups = GROUP_ORDER.filter((group) => shownControls.some((control) => control.group === group));
   const themeInputName = useId();
   const activeOverrideCount = overrideCount(overrides);
   const themeLabel = CANVAS_THEME_LABELS[settings.theme];
@@ -155,14 +189,14 @@ export function StyleRail({
   return (
     <aside
       aria-label="Style"
-      className="absolute bottom-24 right-4 top-20 z-20 flex w-[20rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-md border border-border/70 bg-background/95 text-foreground shadow-xl backdrop-blur"
+      className="absolute bottom-24 right-4 top-20 z-20 flex w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded border border-border/70 bg-background/95 text-foreground shadow-glass backdrop-blur-glass"
       // Keys pressed on the rail's own controls (arrows on a slider,
       // Backspace on a button) must not reach the canvas hotkeys, which
       // would nudge or delete the selection.
       onKeyDown={(event) => event.stopPropagation()}
     >
       <div className="flex h-11 shrink-0 items-center justify-between gap-2 border-b border-border/70 px-3">
-        <div className="truncate text-sm font-medium uppercase tracking-wider">Style</div>
+        <div className="truncate text-ui-lg font-medium uppercase tracking-micro">Style</div>
         <button
           type="button"
           aria-label="Collapse style controls"
@@ -175,7 +209,7 @@ export function StyleRail({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden pb-4">
-        <p className="px-4 pt-3 text-xs leading-4 text-muted-foreground">
+        <p className="px-4 pt-3 text-ui-xs leading-ui text-muted-foreground">
           Applies to every board. {themeLabel}:{" "}
           {activeOverrideCount === 0
             ? "no overrides"
@@ -197,8 +231,8 @@ export function StyleRail({
           ))}
         </div>
 
-        {GROUP_ORDER.map((group) => {
-          const controls = TOKEN_CONTROLS.filter((control) => control.group === group);
+        {shownGroups.map((group) => {
+          const controls = shownControls.filter((control) => control.group === group);
           return (
             <GroupSection
               key={group}
@@ -230,7 +264,7 @@ export function StyleRail({
       <div className="shrink-0 border-t border-border/70 p-2">
         <button
           type="button"
-          className="w-full rounded-md border border-border px-2 py-1.5 text-xs text-foreground hover:bg-muted disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent"
+          className="w-full rounded border border-border px-2 py-1.5 text-ui-xs text-foreground hover:bg-muted disabled:cursor-default disabled:opacity-50 disabled:hover:bg-transparent"
           title={`Clear every edit to the ${themeLabel} theme`}
           disabled={activeOverrideCount === 0}
           onClick={onResetTheme}
@@ -451,10 +485,10 @@ function NumberRow({ control, value, overridden, onChange, onReset }: RowProps &
   const name = controlName(control);
   const unit = control.key.endsWith("Px") ? "px" : null;
   return (
-    <div className="grid gap-1.5 text-xs" data-control={controlId(control)}>
+    <div className="grid gap-1.5 text-ui-xs" data-control={controlId(control)}>
       <span className="flex items-center justify-between gap-3">
         <RowLabel control={control} htmlFor={sliderId} overridden={overridden} onReset={onReset} />
-        <span className="flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground">
+        <span className="flex shrink-0 items-center gap-1 text-ui-2xs text-muted-foreground">
           <input
             type="number"
             className="canvas-style-number"
@@ -503,7 +537,7 @@ function ColorRow({ control, value, overridden, onChange, onReset }: RowProps & 
   const invalid = draft !== null && normalizeColor(draft) === null;
   const name = controlName(control);
   return (
-    <div className="flex min-h-7 items-center justify-between gap-2 text-xs" data-control={controlId(control)}>
+    <div className="flex min-h-7 items-center justify-between gap-2 text-ui-xs" data-control={controlId(control)}>
       <RowLabel control={control} htmlFor={textId} overridden={overridden} onReset={onReset} />
       <span className="flex shrink-0 items-center gap-1.5">
         <span className="canvas-style-swatch" title="Pick a color">
@@ -548,7 +582,7 @@ function ColorRow({ control, value, overridden, onChange, onReset }: RowProps & 
 function SelectRow({ control, value, overridden, onChange, onReset }: RowProps & { value: string }) {
   const radioName = useId();
   return (
-    <div className="grid gap-1.5 text-xs" data-control={controlId(control)}>
+    <div className="grid gap-1.5 text-ui-xs" data-control={controlId(control)}>
       <RowLabel control={control} overridden={overridden} onReset={onReset} />
       <div role="radiogroup" aria-label={controlName(control)} className="canvas-style-segmented">
         {(control.options ?? []).map((option) => (
@@ -577,7 +611,7 @@ function SelectRow({ control, value, overridden, onChange, onReset }: RowProps &
 function BooleanRow({ control, value, overridden, onChange, onReset }: RowProps & { value: boolean }) {
   const switchId = useId();
   return (
-    <div className="flex min-h-7 items-center justify-between gap-3 text-xs" data-control={controlId(control)}>
+    <div className="flex min-h-7 items-center justify-between gap-3 text-ui-xs" data-control={controlId(control)}>
       <RowLabel control={control} htmlFor={switchId} overridden={overridden} onReset={onReset} />
       <input
         id={switchId}

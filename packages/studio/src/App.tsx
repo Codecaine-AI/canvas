@@ -938,7 +938,7 @@ export function App() {
         <main className="fixed inset-0 overflow-hidden" style={boardSurface}>
           {viewer}
           <header className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-3 p-4">
-            <div className="pointer-events-auto flex min-w-0 items-center gap-2 rounded-xl border border-black/10 bg-white/95 p-1.5 shadow-md backdrop-blur">
+            <div className="pointer-events-auto flex min-w-0 items-center gap-2 rounded border border-border bg-background/95 p-1.5 shadow-glass backdrop-blur-glass">
               <Button
                 type="button"
                 size="icon-sm"
@@ -949,7 +949,7 @@ export function App() {
               >
                 <ArrowLeftIcon className="h-4 w-4" />
               </Button>
-              <span className="max-w-[50vw] truncate px-1 text-sm font-medium text-neutral-900">
+              <span className="max-w-[50vw] truncate px-1 text-ui-lg font-medium text-ink">
                 {activeDocument.title ?? activeDocument.id}
               </span>
             </div>
@@ -957,7 +957,7 @@ export function App() {
               type="button"
               size="sm"
               variant="outline"
-              className="pointer-events-auto bg-white/95 shadow-md backdrop-blur"
+              className="pointer-events-auto bg-background/95 shadow-glass backdrop-blur-glass dark:bg-background/95"
               onClick={() => navigate(`/canvas/${encodeURIComponent(route.id)}`)}
             >
               Edit board
@@ -1148,7 +1148,7 @@ export function App() {
                   <span aria-hidden="true">✦</span>
                   AI
                   {agentNotes.length > 0 ? (
-                    <span className="rounded-full bg-current/10 px-1.5 text-[10px] leading-4">
+                    <span className="rounded-full bg-current/10 px-1.5 text-micro leading-ui">
                       {agentNotes.length}
                     </span>
                   ) : null}
@@ -1184,11 +1184,11 @@ export function App() {
   }
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-5xl flex-col gap-6 p-8">
+    <div className="mx-auto flex min-h-screen max-w-lane-wide flex-col gap-6 p-8">
       <header className="flex items-center justify-between gap-3 border-b border-border pb-4">
         <div className="flex items-center gap-2">
           <WorkflowIcon className="h-5 w-5 text-muted-foreground" />
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="text-reading font-semibold tracking-title text-ink">
             Canvas
           </h1>
         </div>
@@ -1211,15 +1211,15 @@ export function App() {
       </header>
 
       <section>
-        <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+        <h2 className="mb-3 text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
           Canvas files
         </h2>
         {listState === "loading" ? (
-          <p className="text-sm text-muted-foreground">Loading canvas files...</p>
+          <p className="text-ui-lg text-muted-foreground">Loading canvas files...</p>
         ) : listState === "error" ? (
-          <p className="text-sm text-destructive">Could not load canvas files.</p>
+          <p className="text-ui-lg text-destructive">Could not load canvas files.</p>
         ) : canvases.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
+          <p className="text-ui-lg text-muted-foreground">
             No canvas files yet. Create a board to add one.
           </p>
         ) : (
@@ -1229,10 +1229,10 @@ export function App() {
                 key={canvas.id}
                 type="button"
                 onClick={() => navigate(`/canvas/${encodeURIComponent(canvas.id)}`)}
-                className="group relative overflow-hidden rounded-md border border-border bg-card text-left transition-colors hover:bg-muted/50"
+                className="group relative overflow-hidden rounded border border-border bg-card text-left transition-colors hover:bg-muted/50"
               >
                 <span
-                  className="block aspect-[16/10] w-full overflow-hidden border-b border-border"
+                  className="block aspect-16/10 w-full overflow-hidden border-b border-border"
                   style={{ background: canvasStyleSettings.style.boardBackground }}
                 >
                   <img
@@ -1247,7 +1247,7 @@ export function App() {
                   />
                 </span>
                 <span className="block px-4 py-3">
-                  <span className="block truncate pr-6 text-sm font-medium">
+                  <span className="block truncate pr-6 text-ui-lg font-medium">
                     {canvas.title}
                   </span>
                 </span>
@@ -1255,7 +1255,7 @@ export function App() {
                   role="button"
                   aria-label={`Delete ${canvas.title}`}
                   onClick={(event) => void deleteCanvas(canvas, event)}
-                  className="absolute right-3 top-3 rounded-md p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+                  className="absolute right-3 top-3 rounded p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
                 >
                   <TrashIcon className="h-3.5 w-3.5" />
                 </span>
@@ -1273,7 +1273,7 @@ export function App() {
 /** Non-blocking amber notice pinned to the top of the editor's screen overlay. */
 function SaveIssueNotice({ message, children }: { message: string; children: ReactNode }) {
   return (
-    <div className="pointer-events-auto absolute left-1/2 top-4 z-30 flex -translate-x-1/2 items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-50 px-4 py-2 text-sm text-amber-900 shadow-md">
+    <div className="pointer-events-auto absolute left-1/2 top-4 z-30 flex -translate-x-1/2 items-center gap-3 rounded border border-warning-line bg-warning-soft px-4 py-2 text-ui-lg text-warning shadow-glass">
       <AlertTriangleIcon className="h-4 w-4 shrink-0" />
       <span>{message}</span>
       {children}
@@ -1285,7 +1285,7 @@ function StatusPage({ message, showBack = true }: { message: string; showBack?: 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-8">
       <div className="flex flex-col items-center gap-4 text-center">
-        <p className="text-sm text-muted-foreground">{message}</p>
+        <p className="text-ui-lg text-muted-foreground">{message}</p>
         {showBack ? (
           <Button type="button" variant="outline" onClick={() => navigate("/")}>
             Back to boards

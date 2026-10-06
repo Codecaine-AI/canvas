@@ -34,9 +34,9 @@ const STATUS_LABELS: Record<AgentSessionViewStatus, string> = {
 
 const STATUS_DOT_CLASSES: Record<AgentSessionViewStatus, string> = {
   idle: "bg-muted-foreground/50",
-  running: "animate-pulse bg-amber-500",
-  "proposal-ready": "bg-emerald-500",
-  accepted: "bg-emerald-500",
+  running: "animate-pulse bg-warning-solid",
+  "proposal-ready": "bg-success-solid",
+  accepted: "bg-success-solid",
   rejected: "bg-muted-foreground/50",
   failed: "bg-destructive",
 };
@@ -62,18 +62,18 @@ export function AgentSidebar({
   return (
     <aside
       aria-label="Agent"
-      className="absolute bottom-24 right-4 top-20 z-20 flex w-[320px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-md border border-border/70 bg-background/95 shadow-xl backdrop-blur"
+      className="absolute bottom-24 right-4 top-20 z-20 flex w-80 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded border border-border/70 bg-background/95 shadow-glass backdrop-blur-glass"
     >
       <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border/70 px-3 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
-          <h1 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <h1 className="text-ui-xs font-medium uppercase tracking-micro text-muted-foreground">
             Agent
           </h1>
           <span
             className={`h-2 w-2 shrink-0 rounded-full ${STATUS_DOT_CLASSES[status]}`}
             aria-hidden="true"
           />
-          <span className="truncate text-[11px] text-muted-foreground">
+          <span className="truncate text-ui-2xs text-muted-foreground">
             {STATUS_LABELS[status]}
           </span>
         </div>
@@ -113,7 +113,7 @@ export function AgentSidebar({
       {showQueue ? (
         <div className="flex min-h-0 flex-1 flex-col">
           {status === "accepted" && acceptedResult ? (
-            <div className="mx-3 mt-3 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs leading-relaxed">
+            <div className="mx-3 mt-3 rounded border border-success-line bg-success-soft p-3 text-ui-xs leading-ui">
               <p>
                 Applied: {sentence(acceptedResult.summary)} ⌘Z undoes.
               </p>

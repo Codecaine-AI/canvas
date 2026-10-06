@@ -64,15 +64,15 @@ export function GalleryPage({ onBack, canvasStyle }: GalleryPageProps) {
   const objectTypeCount = OBJECT_TYPES.length;
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-7xl flex-col gap-6 p-8">
+    <div className="mx-auto flex min-h-screen max-w-lane-wide flex-col gap-6 p-8">
       <header className="flex items-center justify-between gap-3 border-b border-border pb-4">
         <div className="flex min-w-0 items-center gap-3">
           <ShapesIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
           <div className="min-w-0">
-            <h1 className="truncate text-2xl font-semibold tracking-tight">
+            <h1 className="truncate text-reading font-semibold tracking-title text-ink">
               Object Gallery
             </h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-ui-lg text-muted-foreground">
               {objectTypeCount} object types rendered through the real canvas viewer
             </p>
           </div>
@@ -90,12 +90,12 @@ export function GalleryPage({ onBack, canvasStyle }: GalleryPageProps) {
         {groups.map((group) => (
           <article
             key={group.id}
-            className="flex flex-col gap-3 rounded-md border border-border bg-card p-3"
+            className="flex flex-col gap-3 rounded border border-border bg-card p-3"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <h2 className="truncate text-sm font-semibold">{group.label}</h2>
-                <p className="mt-1 truncate font-mono text-[11px] text-muted-foreground">
+                <h2 className="truncate text-ui-lg font-semibold">{group.label}</h2>
+                <p className="mt-1 truncate font-mono text-ui-2xs text-muted-foreground">
                   {group.type}
                 </p>
               </div>
@@ -106,7 +106,7 @@ export function GalleryPage({ onBack, canvasStyle }: GalleryPageProps) {
               {group.tiles.map((tile) => (
                 <section key={tile.id} className="min-w-0">
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <span className="min-w-0 truncate font-mono text-[11px] text-muted-foreground">
+                    <span className="min-w-0 truncate font-mono text-ui-2xs text-muted-foreground">
                       {tile.caption}
                     </span>
                     <Badge variant="ghost">{tile.label}</Badge>

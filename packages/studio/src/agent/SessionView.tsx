@@ -60,7 +60,7 @@ export interface SessionViewProps {
 
 function Banner({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-md border border-border/70 bg-muted/50 p-3 text-xs leading-relaxed">
+    <div className="rounded border border-border/70 bg-muted/50 p-3 text-ui-xs leading-ui">
       {children}
     </div>
   );
@@ -119,7 +119,7 @@ function DeltaEventLine({
   if (lines.length <= 1) {
     return (
       <div className="flex items-start gap-1.5">
-        <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
+        <p className="min-w-0 flex-1 text-ui-xs leading-ui text-muted-foreground">
           {firstLine}
         </p>
         <ViewOperationRenderButton
@@ -133,12 +133,12 @@ function DeltaEventLine({
 
   return (
     <div className="flex items-start gap-1.5">
-      <details className="group min-w-0 flex-1 text-xs text-muted-foreground">
-        <summary className="flex cursor-pointer list-none items-start gap-1.5 leading-relaxed hover:text-foreground [&::-webkit-details-marker]:hidden">
+      <details className="group min-w-0 flex-1 text-ui-xs text-muted-foreground">
+        <summary className="flex cursor-pointer list-none items-start gap-1.5 leading-ui hover:text-foreground [&::-webkit-details-marker]:hidden">
           <ChevronDownIcon className="mt-0.5 h-3 w-3 shrink-0 transition-transform group-open:rotate-180" />
           <span>{firstLine}</span>
         </summary>
-        <div className="mt-1 whitespace-pre-wrap pl-[18px] text-[11px] leading-relaxed">
+        <div className="mt-1 whitespace-pre-wrap pl-4.5 text-ui-2xs leading-ui">
           {lines.slice(1).join("\n")}
         </div>
       </details>
@@ -171,7 +171,7 @@ function EventLine({
   }
   const description = describeEvent(event);
   return description ? (
-    <p className="text-xs leading-relaxed text-muted-foreground">{description}</p>
+    <p className="text-ui-xs leading-ui text-muted-foreground">{description}</p>
   ) : null;
 }
 
@@ -186,7 +186,7 @@ function AttemptGroup({
 }) {
   return (
     <section className="space-y-2.5">
-      <div className="ml-8 rounded-xl rounded-tr-sm bg-primary px-3 py-2 text-xs leading-relaxed text-primary-foreground">
+      <div className="ml-8 rounded bg-primary px-3 py-2 text-ui-xs leading-ui text-primary-foreground">
         <span className="sr-only">You asked: </span>
         {attempt.instruction}
       </div>
@@ -200,7 +200,7 @@ function AttemptGroup({
           />
         ))}
         {attempt.events.length === 0 ? (
-          <p className="text-xs leading-relaxed text-muted-foreground">Getting started…</p>
+          <p className="text-ui-xs leading-ui text-muted-foreground">Getting started…</p>
         ) : null}
       </div>
     </section>

@@ -47,8 +47,8 @@ export function DeltaCard({ baselineDocument, proposal }: DeltaCardProps) {
   const removed = changes.removed.length + changes.removedConnections.length;
 
   return (
-    <section className="rounded-md border border-border/70 bg-card/70 p-3 shadow-sm">
-      <h2 className="text-xs font-semibold">Proposed changes</h2>
+    <section className="rounded border border-border/70 bg-card/70 p-3">
+      <h2 className="text-ui-xs font-semibold">Proposed changes</h2>
 
       <div className="mt-2 flex flex-wrap gap-1.5">
         {changeChip("Moved", changes.moved.length)}
@@ -64,17 +64,17 @@ export function DeltaCard({ baselineDocument, proposal }: DeltaCardProps) {
         ) : null}
       </div>
 
-      <p className="mt-3 whitespace-pre-wrap text-xs leading-relaxed text-foreground/90">
+      <p className="mt-3 whitespace-pre-wrap text-ui-xs leading-ui text-foreground/90">
         {proposal.delta.trim() || "No changes."}
       </p>
 
       {warnings.length > 0 ? (
         <details className="group mt-3 border-t border-border/70 pt-2">
-          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-ui-xs text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
             <ChevronDownIcon className="h-3 w-3 transition-transform group-open:rotate-180" />
             {warnings.length} layout {warnings.length === 1 ? "warning" : "warnings"}
           </summary>
-          <ul className="mt-2 space-y-1 pl-4 text-[11px] leading-relaxed text-muted-foreground">
+          <ul className="mt-2 space-y-1 pl-4 text-ui-2xs leading-ui text-muted-foreground">
             {warnings.map((warning, index) => (
               <li key={`${index}-${warning}`} className="list-disc break-words">
                 {warning}

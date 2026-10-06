@@ -100,7 +100,7 @@ function formatNumber(value: number): string {
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-1.5">
-      <h3 className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+      <h3 className="text-micro font-medium uppercase tracking-micro text-muted-foreground">
         {title}
       </h3>
       {children}
@@ -109,11 +109,11 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function Empty({ children }: { children: ReactNode }) {
-  return <p className="text-xs text-muted-foreground">{children}</p>;
+  return <p className="text-ui-xs text-muted-foreground">{children}</p>;
 }
 
 function MonoLine({ children }: { children: ReactNode }) {
-  return <p className="break-all font-mono text-[11px] leading-relaxed">{children}</p>;
+  return <p className="break-all font-mono text-ui-2xs leading-ui">{children}</p>;
 }
 
 export function DevRail({ document, editorState, editorRef }: DevRailProps) {
@@ -187,7 +187,7 @@ export function DevRail({ document, editorState, editorRef }: DevRailProps) {
         type="button"
         onClick={() => setOpen(true)}
         title="Open the dev rail"
-        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-border bg-card px-1.5 py-3 text-[10px] font-medium uppercase tracking-wider text-muted-foreground shadow-md transition-colors hover:text-foreground"
+        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l border border-r-0 border-border bg-card px-1.5 py-3 text-micro font-medium uppercase tracking-micro text-muted-foreground shadow-glass transition-colors hover:text-foreground"
         style={{ writingMode: "vertical-rl" }}
       >
         Dev
@@ -196,13 +196,13 @@ export function DevRail({ document, editorState, editorRef }: DevRailProps) {
   }
 
   return (
-    <aside className="fixed inset-y-0 right-0 z-40 flex w-80 flex-col border-l border-border bg-card shadow-xl">
+    <aside className="fixed inset-y-0 right-0 z-40 flex w-80 flex-col border-l border-border bg-card shadow-glass">
       <header className="flex items-center justify-between border-b border-border px-3 py-2">
-        <h2 className="text-xs font-semibold uppercase tracking-wider">Dev rail</h2>
+        <h2 className="text-ui-xs font-semibold uppercase tracking-micro">Dev rail</h2>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-md px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="rounded px-2 py-1 text-ui-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           Close
         </button>
@@ -284,7 +284,7 @@ export function DevRail({ document, editorState, editorRef }: DevRailProps) {
                       : annotation.body || "(empty)"}
                   </MonoLine>
                   {annotation.intent === "agent-request" ? (
-                    <span className="shrink-0 rounded bg-accent px-1 py-0.5 text-[9px] font-medium uppercase tracking-wide text-accent-foreground">
+                    <span className="shrink-0 rounded bg-accent px-1 py-0.5 text-micro font-medium uppercase tracking-micro text-accent-foreground">
                       agent request
                     </span>
                   ) : null}
@@ -297,7 +297,7 @@ export function DevRail({ document, editorState, editorRef }: DevRailProps) {
         </Section>
 
         <Section title="Agent snapshot">
-          <pre className="overflow-x-auto rounded-md border border-border bg-muted p-2 font-mono text-[10px] leading-relaxed">
+          <pre className="overflow-x-auto rounded border border-border bg-muted p-2 font-mono text-micro leading-ui">
             {JSON.stringify(agentSnapshot, null, 2)}
           </pre>
         </Section>
