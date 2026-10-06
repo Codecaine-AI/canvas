@@ -38,7 +38,12 @@ const LINKED_AGENT_KERNEL_PACKAGES = [
   "@codecaine-ai/annotations",
 ];
 
-const HARNESS_TARGET = "http://127.0.0.1:4820";
+/**
+ * The harness the /api proxy forwards to. Dev-only override: CANVAS_AGENT_HARNESS_URL points the
+ * proxy elsewhere (the design-system run points it at a dead port in its own block, so a check never
+ * reaches the harness); unset, it is the harness on :4820 as before.
+ */
+const HARNESS_TARGET = process.env.CANVAS_AGENT_HARNESS_URL ?? "http://127.0.0.1:4820";
 
 export default defineConfig({
   root: VIEWER_DIR,
