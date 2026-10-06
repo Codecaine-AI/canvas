@@ -1,4 +1,12 @@
 @import "tailwindcss";
+/*
+ * @codecaine-ai/design-system (guide/consume.md): fonts, tokens, the host contract and the shell
+ * layout load first, from main.tsx. Here: the strict reset (drops Tailwind's own palette and
+ * scales), then the design-system utilities. tailwind.css also sets `@custom-variant dark` to
+ * data-theme="dark" on the element or an ancestor, so `dark:` follows the viewer's theme.
+ */
+@import "@codecaine-ai/design-system/tailwind-strict.css";
+@import "@codecaine-ai/design-system/tailwind.css";
 @import "./agent-theme.css";
 
 /* The viewer app's own sources (this directory). */
@@ -17,39 +25,37 @@
 @source "../../../../../annotations/src";
 
 /*
- * Shared-name token → Tailwind color mapping (the same mapping studio's
- * index.css carries for its light theme). The values themselves are the dark
- * instrument set declared at :root in agent-theme.css.
+ * Shared-name token -> Tailwind color mapping. host-contract.css (loaded from main.tsx) declares
+ * the names as RGB triplets mapped to design-system tokens, in both themes; Tailwind v4 reads them
+ * as rgb(var(--x)) (guide/consume.md, agent-viewer hosts). --color-accent deliberately shadows
+ * tailwind.css's: the viewer packages write `bg-accent` for the contract's accent.
  */
-:root {
-  --radius: 0.5rem;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --color-background: rgb(var(--background));
+  --color-foreground: rgb(var(--foreground));
+  --color-card: rgb(var(--card));
+  --color-card-foreground: rgb(var(--card-foreground));
+  --color-popover: rgb(var(--popover));
+  --color-popover-foreground: rgb(var(--popover-foreground));
+  --color-primary: rgb(var(--primary));
+  --color-primary-foreground: rgb(var(--primary-foreground));
+  --color-secondary: rgb(var(--secondary));
+  --color-secondary-foreground: rgb(var(--secondary-foreground));
+  --color-muted: rgb(var(--muted));
+  --color-muted-foreground: rgb(var(--muted-foreground));
+  --color-accent: rgb(var(--accent));
+  --color-accent-foreground: rgb(var(--accent-foreground));
+  --color-destructive: rgb(var(--destructive));
+  --color-border: rgb(var(--border));
+  --color-input: rgb(var(--input));
+  --color-ring: rgb(var(--ring));
+  /* The one design-system radius (host-contract.css: --radius is radius.base). */
+  --radius-sm: var(--radius);
+  --radius-md: var(--radius);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: var(--radius);
 }
 
 body {
-  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--ds-font-family-sans);
 }

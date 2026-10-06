@@ -141,7 +141,7 @@ export function AgentConfigPage() {
   }, []);
 
   if (state.status === "loading") {
-    return <p className="text-sm text-muted-foreground">Loading agent config...</p>;
+    return <p className="text-ui-lg text-muted-foreground">Loading agent config...</p>;
   }
   if (state.status === "unavailable") {
     return <AgentServiceDownNotice subject="The layout agent's manifest and prompt" />;
@@ -156,20 +156,20 @@ export function AgentConfigPage() {
       : null;
 
   return (
-    <AgentSurface className="flex h-full min-h-[560px] flex-col">
+    <AgentSurface className="flex h-full min-h-140 flex-col">
       <header className="flex shrink-0 items-center gap-3 border-b border-border px-4 py-2.5 font-mono">
-        <h2 className="text-[13px] font-bold">{LAYOUT_AGENT_NAME}</h2>
+        <h2 className="text-ui-sm font-bold text-ink">{LAYOUT_AGENT_NAME}</h2>
         {promptHash ? (
           <span
             title={`Saved prompt revision ${promptHash}`}
-            className="truncate rounded-[2px] border border-status-success-border bg-status-success-fill/30 px-1.5 py-0.5 text-[10px] text-status-success"
+            className="truncate rounded border border-status-success-border bg-status-success-fill/30 px-1.5 py-0.5 text-micro text-status-success"
           >
             {promptHash}
           </span>
         ) : null}
         <button
           aria-pressed={styleSidebar.open}
-          className="ml-auto shrink-0 rounded-[2px] border border-border px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
+          className="ml-auto shrink-0 rounded border border-border px-1.5 py-0.5 text-ui-2xs font-bold uppercase tracking-micro text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
           onClick={() =>
             setStyleSidebar((current) => ({
               ...current,

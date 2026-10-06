@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/postcss";
@@ -30,6 +31,11 @@ const PROMPT_KIT_DIR = resolve(REPO_ROOT, "../prompt-kit");
 // needs the same treatment — a prebundled linked dep is served from a stale
 // cache and never hot-reloads.
 const ANNOTATIONS_DIR = resolve(REPO_ROOT, "../annotations");
+// @codecaine-ai/design-system resolves (workspace:*) to a folder outside this repo: the dev server
+// must be allowed to serve its font files (guide/consume.md §8), or they answer 403.
+const DESIGN_SYSTEM_DIR = dirname(
+  createRequire(import.meta.url).resolve("@codecaine-ai/design-system/package.json"),
+);
 const LINKED_AGENT_KERNEL_PACKAGES = [
   "@agent-kernel/viewer-core",
   "@agent-kernel/viewer-ui",
@@ -63,7 +69,7 @@ export default defineConfig({
     port: 4830,
     strictPort: true,
     fs: {
-      allow: [REPO_ROOT, AGENT_KERNEL_DIR, PROMPT_KIT_DIR, ANNOTATIONS_DIR],
+      allow: [REPO_ROOT, AGENT_KERNEL_DIR, PROMPT_KIT_DIR, ANNOTATIONS_DIR, DESIGN_SYSTEM_DIR],
     },
     proxy: {
       "/api": {

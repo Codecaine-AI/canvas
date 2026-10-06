@@ -33,9 +33,9 @@ import { TracesPage } from "./pages/TracesPage";
  *
  * The whole app is the agent operator surface. Styling comes from the SHARED
  * viewer style system (@agent-kernel/viewer-shell): the right-edge style rail
- * (COLORS / EFFECTS / TRACE tabs) drives the same tokens the example app uses,
- * emitted here in hex format for this app's Tailwind v4 @theme mapping.
- * Canvas defaults to the DARK instrument look; the rail can flip it.
+ * (THEME / EFFECTS / TRACE tabs) keeps its theme, size, density and grain
+ * controls; the colors come from the design-system tokens and host contract
+ * (main.tsx), as RGB triplets. Canvas defaults to dark; the rail can flip it.
  */
 
 /** Canvas-scoped binding for the shared style system. */
@@ -44,7 +44,7 @@ const CANVAS_STYLE_CONFIG: StyleSystemConfig = {
   railCollapsedStorageKey: "canvasAgentViewerStyleRailCollapsed",
   railWidthStorageKey: "canvasAgentViewerStyleRailWidth",
   defaultTheme: "dark",
-  neutralTokenFormat: "hex",
+  neutralTokenFormat: "triplet",
   // All four sections: adopting the shared KernelTraceWorkspace IS the
   // opt-in for LAYOUT — its geometry vars are consumed by the workspace.
 };

@@ -30,9 +30,9 @@ export function TranscriptRenderStrip({
             alt,
           }}
           title="Open image"
-          className="shrink-0 cursor-zoom-in rounded-[2px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-info-border"
+          className="shrink-0 cursor-zoom-in rounded-[var(--ds-radius-base)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-info-border"
           imageProps={{ loading: "lazy" }}
-          imageClassName="h-20 w-auto max-w-[200px] rounded-[2px] border border-border bg-black/20 object-contain transition-colors hover:border-status-info-border"
+          imageClassName="h-20 w-auto max-w-50 rounded-[var(--ds-radius-base)] border border-border bg-[color:var(--ds-color-surface-sunken)] object-contain transition-colors hover:border-status-info-border"
         />
       ))}
     </div>

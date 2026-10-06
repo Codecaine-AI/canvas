@@ -23,6 +23,7 @@
     "@agent-kernel/viewer-shell": "workspace:*",
     "@agent-kernel/viewer-ui": "workspace:*",
     "@codecaine-ai/canvas": "workspace:*",
+    "@codecaine-ai/design-system": "workspace:*",
     "@codecaine-ai/prompt-kit": "workspace:*",
     "@codecaine-ai/text-measure": "workspace:*",
     "@mariozechner/pi-ai": "^0.70.6",

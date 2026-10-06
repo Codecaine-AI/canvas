@@ -41,7 +41,7 @@ export function boardRenderBlocks(
       node: (
         <ul
           data-canvas-board-facts=""
-          className="space-y-1 text-sm leading-relaxed text-foreground"
+          className="space-y-1 text-[length:var(--ds-font-size-ui-lg)] leading-[var(--ds-line-height-reading)] text-foreground"
         >
           {facts.map((fact, index) => (
             <li key={`${index}:${fact}`} className="break-words">
@@ -67,9 +67,9 @@ export function boardRenderBlocks(
             alt: mimeType ? `${mimeType} board render` : "Board render",
           }}
           title="Open image"
-          className="block max-w-full cursor-zoom-in rounded-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-info-border"
+          className="block max-w-full cursor-zoom-in rounded-[var(--ds-radius-base)] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-status-info-border"
           imageProps={{ loading: "lazy" }}
-          imageClassName="max-h-[320px] max-w-full rounded-md border border-border/60 object-contain"
+          imageClassName="max-h-80 max-w-full rounded-[var(--ds-radius-base)] border border-border/60 object-contain"
         />
       ),
       expandable: false,

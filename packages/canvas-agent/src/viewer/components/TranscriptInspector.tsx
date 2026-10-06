@@ -9,7 +9,7 @@ import type { SessionTranscript } from "../hooks/use-transcript";
  */
 
 const CHROME_LABEL =
-  "font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground";
+  "font-mono text-micro font-bold uppercase tracking-micro-wide text-muted-foreground";
 
 export function RunBrief({
   transcript,
@@ -36,11 +36,11 @@ export function RunBrief({
       {firstMessage && (
         <div className="flex items-start gap-2">
           <span className={`${CHROME_LABEL} mt-0.5 shrink-0`}>User</span>
-          <p className="max-h-24 min-w-0 flex-1 overflow-y-auto whitespace-pre-wrap font-mono text-[12px] leading-5">
+          <p className="max-h-24 min-w-0 flex-1 overflow-y-auto whitespace-pre-wrap font-mono text-ui-xs leading-[var(--ds-space-5)]">
             {firstMessage.text}
           </p>
           {followUps > 0 && (
-            <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+            <span className="shrink-0 font-mono text-micro text-muted-foreground">
               +{followUps} follow-up{followUps === 1 ? "" : "s"}
             </span>
           )}
@@ -52,7 +52,7 @@ export function RunBrief({
             type="button"
             onClick={() => setContextOpen((open) => !open)}
             aria-expanded={contextOpen}
-            className="rounded-[2px] border border-border px-1.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
+            className="rounded border border-border px-1.5 py-0.5 font-mono text-micro font-bold uppercase tracking-micro text-muted-foreground transition-colors hover:border-status-info-border hover:text-foreground"
           >
             {contextOpen ? "▾" : "▸"} Agent context
           </button>

@@ -63,9 +63,9 @@ export function isRecord(value: unknown): value is Record<string, unknown> {
 /** Shared calm empty state for when the harness process is not up. */
 export function AgentServiceDownNotice({ subject }: { subject: string }) {
   return (
-    <div className="rounded-md border border-border bg-card p-6">
-      <p className="text-sm font-medium">The agent service is not running.</p>
-      <p className="mt-1 text-sm text-muted-foreground">
+    <div className="rounded border border-border bg-card p-6">
+      <p className="text-ui-lg font-medium">The agent service is not running.</p>
+      <p className="mt-1 text-ui-lg text-muted-foreground">
         {subject} will appear here once the agent service is up on port 4820.
         Nothing is broken — the viewer just could not reach it.
       </p>
@@ -75,9 +75,9 @@ export function AgentServiceDownNotice({ subject }: { subject: string }) {
 
 export function AgentFetchErrorNotice({ message }: { message: string }) {
   return (
-    <div className="rounded-md border border-border bg-card p-6">
-      <p className="text-sm font-medium">Something went wrong.</p>
-      <p className="mt-1 text-sm text-muted-foreground">
+    <div className="rounded border border-border bg-card p-6">
+      <p className="text-ui-lg font-medium">Something went wrong.</p>
+      <p className="mt-1 text-ui-lg text-muted-foreground">
         The agent service answered with “{message}”. Try reloading this page.
       </p>
     </div>
@@ -86,7 +86,7 @@ export function AgentFetchErrorNotice({ message }: { message: string }) {
 
 export function PrettyJson({ value }: { value: unknown }) {
   return (
-    <pre className="overflow-x-auto rounded-md border border-border bg-muted p-3 font-mono text-xs leading-relaxed">
+    <pre className="overflow-x-auto rounded border border-border bg-muted p-3 font-mono text-ui-xs leading-reading">
       {JSON.stringify(value, null, 2)}
     </pre>
   );

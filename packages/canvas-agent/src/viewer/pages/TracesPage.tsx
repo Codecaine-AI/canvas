@@ -119,7 +119,7 @@ export function TracesPage() {
   );
 
   if (state.status === "loading") {
-    return <p className="text-sm text-muted-foreground">Loading sessions...</p>;
+    return <p className="text-ui-lg text-muted-foreground">Loading sessions...</p>;
   }
   if (state.status === "unavailable") {
     return <AgentServiceDownNotice subject="Agent sessions" />;
@@ -129,7 +129,7 @@ export function TracesPage() {
   }
   if (!sessions) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-ui-lg text-muted-foreground">
         The agent service answered, but not with the kernel trace-session list
         shape this page expects.
       </p>
@@ -137,7 +137,7 @@ export function TracesPage() {
   }
   if (sessions.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-ui-lg text-muted-foreground">
         No agent sessions yet. Sessions show up here after the agent runs.
       </p>
     );
