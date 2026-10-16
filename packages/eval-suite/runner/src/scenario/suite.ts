@@ -80,7 +80,7 @@ export function parseSuiteArgs(argv: string[]): SuiteCommandOptions {
   let dryRun = false;
   const judgeClient: JudgeClientOptions = {
     model: "gpt-5.6-sol",
-    baseUrl: "http://127.0.0.1:2455/v1",
+    baseUrl: "http://100.104.171.122:8793/v1",
     effort: "low",
   };
 
