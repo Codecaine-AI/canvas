@@ -12,8 +12,8 @@ client<llm> JudgeClient {
   provider "openai-generic"
   retry_policy Exponential
   options {
-    base_url "http://127.0.0.1:2455/v1"
-    api_key env.CODEX_LB_API_KEY
+    base_url "http://100.104.171.122:8793/v1"
+    api_key env.TOKEN_BURNER_API_KEY
     model "gpt-5.6-sol"
     reasoning_effort "low"
     response_format {

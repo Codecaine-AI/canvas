@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { readFile, rename, writeFile } from "node:fs/promises";
-import { dirname, resolve } from "node:path";
+import { homedir } from "node:os";
+import { dirname, join, resolve } from "node:path";
 import {
   ClientRegistry,
   Collector,
@@ -48,7 +49,10 @@ import {
 } from "./render_md.ts";
 
 const DEFAULT_MODEL = "gpt-5.6-sol";
-const DEFAULT_BASE_URL = "http://127.0.0.1:2455/v1";
+/** The Token Burner gateway's OpenAI-compatible base (it replaced the codex-lb proxy). */
+const DEFAULT_BASE_URL = "http://100.104.171.122:8793/v1";
+/** Gateway key files under the home directory, first existing wins: the MacBook's, then services-01's. */
+const TOKEN_BURNER_KEY_FILES = [".config/token-burner/mini-macbook-key", ".config/token-burner/mini-key"];
 const DEFAULT_EFFORT: ReasoningEffort = "low";
 const RUNTIME_CLIENT_NAME = "RuntimeJudgeClient";
 const MAX_VALIDATION_RETRIES = 2;
@@ -96,8 +100,26 @@ export function resolveJudgeClient(config: JudgeClientConfig = {}): ResolvedJudg
     model: config.model ?? DEFAULT_MODEL,
     baseUrl: config.baseUrl ?? DEFAULT_BASE_URL,
     effort: config.effort ?? DEFAULT_EFFORT,
-    apiKey: config.apiKey ?? process.env.CODEX_LB_API_KEY ?? "sk-clb-local",
+    apiKey: config.apiKey ?? tokenBurnerKey() ?? "",
   };
+}
+
+/**
+ * The gateway key: TOKEN_BURNER_API_KEY, else the legacy CODEX_LB_API_KEY, else the first
+ * existing key file under the home directory. Undefined when none is set.
+ */
+export function tokenBurnerKey(): string | undefined {
+  const fromEnv = (process.env.TOKEN_BURNER_API_KEY ?? process.env.CODEX_LB_API_KEY)?.trim();
+  if (fromEnv) return fromEnv;
+  for (const file of TOKEN_BURNER_KEY_FILES) {
+    try {
+      const key = readFileSync(join(homedir(), file), "utf8").trim();
+      if (key) return key;
+    } catch {
+      // Missing or unreadable: try the next file.
+    }
+  }
+  return undefined;
 }
 
 export function runtimeClientRegistry(config: ResolvedJudgeClient): ClientRegistry {
@@ -120,7 +142,7 @@ export function runtimeClientRegistry(config: ResolvedJudgeClient): ClientRegist
 
 function runtimeEnv(config: ResolvedJudgeClient): Record<string, string> {
   return {
-    CODEX_LB_API_KEY: config.apiKey,
+    TOKEN_BURNER_API_KEY: config.apiKey,
     OPENAI_API_KEY: config.apiKey,
   };
 }
