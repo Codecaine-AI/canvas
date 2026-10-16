@@ -1,0 +1,9 @@
+{
+  "id": "ent_01M4F6XQRAPMCV7EQ39CYA37J6",
+  "name": "Canvas",
+  "kind": "core",
+  "docsRoot": "docs",
+  "products": [
+    "docs"
+  ]
+}
