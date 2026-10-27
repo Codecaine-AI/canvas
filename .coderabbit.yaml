@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit review config. Shared settings from Codecaine-AI/docs-system; path filters tuned for this repo.
+language: en-US
+
+reviews:
+  profile: chill # balanced feedback; "assertive" adds nitpicks
+  auto_approvals:
+    enabled: false # current key for the deprecated request_changes_workflow: comment only, never approve or block
+  high_level_summary: true
+  poem: false
+  review_status: true # say when a review is skipped, so babysit-pr can tell skipped from clean
+  collapse_walkthrough: true
+  sequence_diagrams: false
+  auto_review:
+    enabled: true
+    drafts: false
+  # Each reviewed file beyond the plan is billed, so skip files nobody writes by hand.
+  path_filters:
+    - "!**/dist/**"
+    - "!**/dist-static/**"
+    - "!**/build/**"
+    - "!**/coverage/**"
+    - "!bun.lock"
+    - "!**/package-lock.json"
+    - "!**/__snapshots__/**"
+    - "!**/*.snap"
+    - "!**/__fixtures__/**"
+    - "!**/fixtures/**"
+    - "!**/*.log"
+    # BAML codegen output (edit baml_src/, then run baml-cli generate)
+    - "!packages/eval-suite/runner/baml_client/**"
+    # Docs pages (doc.json), component sidecars and changesets are written by the docs tools
+    - "!docs/**/*.json"
+    # Prompt Kit documents and change logs are written by the prompt tools
+    - "!packages/canvas-agent/src/catalog/*/prompt/**"
+    # Generated code: Nucleo icon components and SVGs, text-measure tables
+    - "!packages/canvas/src/ui/icons/nucleo/**"
+    - "!packages/text-measure/src/generated/**"
+    # Eval run outputs (scorecards, judge results, screenshots)
+    - "!packages/eval-suite/runs/**"
+    # Saved canvas documents written by the canvas app
+    - "!canvases/**/*.canvas.json"
+    # Vendored icons, fonts and reference material
+    - "!tools/dev-icons/vendor/**"
+    - "!packages/text-measure/fonts/**"
+    - "!reference/**"
+  path_instructions:
+    - path: "{packages,tools}/**/*.{ts,tsx}"
+      instructions: >-
+        Flag correctness bugs, unsafe or loose types, unhandled errors, and changed
+        behavior without a matching test. Skip style and formatting nits.
+    - path: "**/*.test.{ts,tsx}"
+      instructions: >-
+        Flag tests that assert implementation details instead of behavior, or that
+        cannot fail. Skip naming and formatting nits.
+
+chat:
+  auto_reply: true
