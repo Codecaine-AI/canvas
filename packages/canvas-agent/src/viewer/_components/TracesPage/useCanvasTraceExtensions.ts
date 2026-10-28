@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import type { KernelTraceSessionDetail } from "@agent-kernel/viewer-core";
-import type { DetailBlockProvider } from "@agent-kernel/viewer-ui";
+import type { KernelTraceSessionDetail } from "@codecaine-ai/agent-kernel-viewer-core";
+import type { DetailBlockProvider } from "@codecaine-ai/agent-kernel-viewer-ui";
 import type { CanvasViewerExtensionContext } from "@codecaine-ai/canvas-agent/viewer-extension";
 import {
   indexTranscriptToolCalls,

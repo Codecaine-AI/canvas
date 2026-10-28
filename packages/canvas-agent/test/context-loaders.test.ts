@@ -8,7 +8,7 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import type { LoadedMap, SpawnContext } from "@agent-kernel/kernel/context";
+import type { LoadedMap, SpawnContext } from "@codecaine-ai/agent-kernel/context";
 
 import {
   CRAFT_TARGETS,

@@ -10,7 +10,7 @@
  */
 import { join, relative, resolve } from "node:path";
 
-import { refreshCatalogPromptSnapshots } from "@agent-kernel/kernel";
+import { refreshCatalogPromptSnapshots } from "@codecaine-ai/agent-kernel";
 
 const packageRoot = resolve(import.meta.dir, "..");
 const catalogRoot = join(packageRoot, "src", "catalog");

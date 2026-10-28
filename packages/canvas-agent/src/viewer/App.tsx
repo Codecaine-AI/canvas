@@ -5,7 +5,7 @@ import {
   saveStyleSettings,
   type StyleSettings,
   type StyleSettingsPatch,
-} from "@agent-kernel/viewer-shell";
+} from "@codecaine-ai/agent-kernel-viewer-shell";
 
 import { RouterShell, type View } from "./_components/RouterShell";
 import { StyleSettingsContext } from "./shared/useViewerStyleSettings";
@@ -21,7 +21,7 @@ import { TracesPage } from "./_components/TracesPage";
  *   /config          agent manifest + prompt lab
  *
  * The whole app is the agent operator surface. Styling comes from the SHARED viewer style system
- * (@agent-kernel/viewer-shell), whose panel is the shell's Style inspector (THEME / EFFECTS /
+ * (@codecaine-ai/agent-kernel-viewer-shell), whose panel is the shell's Style inspector (THEME / EFFECTS /
  * TRACE / LAYOUT tabs): it keeps its theme, size, density and grain controls; the colors come from
  * the design-system tokens and host contract (main.tsx), as RGB triplets. Canvas defaults to dark;
  * the topbar toggle and the inspector can flip it.

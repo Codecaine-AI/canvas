@@ -1,12 +1,12 @@
 import { createElement } from "react";
-import { KERNEL_TRACE_READ_PATHS } from "@agent-kernel/viewer-core";
+import { KERNEL_TRACE_READ_PATHS } from "@codecaine-ai/agent-kernel-viewer-core";
 import {
   DetailImageTrigger,
   readNumberAttr,
   readStringAttr,
   type DetailBlockSpec,
   type DetailBlockProvider,
-} from "@agent-kernel/viewer-ui";
+} from "@codecaine-ai/agent-kernel-viewer-ui";
 import { BoardFacts } from "./_components/BoardFacts";
 
 type TraceSpan = Parameters<DetailBlockProvider>[0];

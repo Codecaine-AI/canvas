@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   PROMPT_STYLE_SIDEBAR_DEFAULT_WIDTH,
   clampPromptStyleSidebarWidth,
-} from "@agent-kernel/viewer-ui";
+} from "@codecaine-ai/agent-kernel-viewer-ui";
 
 const PROMPT_STYLE_SIDEBAR_STORAGE_KEY =
   "canvasAgent.promptStyleSidebar.v1";

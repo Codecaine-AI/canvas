@@ -14,13 +14,13 @@
  */
 import { Elysia } from "elysia";
 
-import { listSessionContainersWithStats, type KernelDatabase } from "@agent-kernel/db";
-import type { KernelInstance } from "@agent-kernel/kernel";
+import { listSessionContainersWithStats, type KernelDatabase } from "@codecaine-ai/agent-kernel-db";
+import type { KernelInstance } from "@codecaine-ai/agent-kernel";
 import {
   createKernelTraceReadApi,
   parseKernelTraceLimit,
   type KernelTraceReadQuery,
-} from "@agent-kernel/kernel/read-api";
+} from "@codecaine-ai/agent-kernel/read-api";
 
 import { KERNEL_ID } from "../kernel";
 

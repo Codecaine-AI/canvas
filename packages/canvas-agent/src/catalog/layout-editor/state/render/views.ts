@@ -10,7 +10,7 @@
  * LONE text block, which is what the per-turn viewer keys its state
  * pretty-printer on.
  */
-import type { AgentMessage } from "@agent-kernel/kernel/state";
+import type { AgentMessage } from "@codecaine-ai/agent-kernel/state";
 
 import type { LiveDraftView } from "../../../../service/session/perception/live-draft-view";
 import type { ChangeRender } from "../../../../service/session/store";

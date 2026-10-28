@@ -20,7 +20,7 @@
  * pairs and cross-bind tools — acceptable for this dev harness (single
  * operator, maxBackgroundAgents: 1); revisit if the harness goes multi-user.
  */
-import { updateContainerStatus } from "@agent-kernel/db";
+import { updateContainerStatus } from "@codecaine-ai/agent-kernel-db";
 
 import { REPO_ROOT } from "./kernel";
 import {
@@ -30,7 +30,7 @@ import {
   type KernelInstance,
   type LaunchedPromptEditSession,
   type PromptEditSessionService,
-} from "@agent-kernel/kernel";
+} from "@codecaine-ai/agent-kernel";
 
 /** Launches whose tools binder awaits the matching prompt-editor spawn. */
 const pendingLaunches: LaunchedPromptEditSession[] = [];

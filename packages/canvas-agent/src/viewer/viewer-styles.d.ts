@@ -1,9 +1,9 @@
 /**
- * "@agent-kernel/viewer-ui/styles" maps to a plain .css file via the package
+ * "@codecaine-ai/agent-kernel-viewer-ui/styles" maps to a plain .css file via the package
  * exports; the `*.css` declaration below matches specifiers, not resolved
  * files, so the subpath needs its own declaration for tsc.
  */
-declare module "@agent-kernel/viewer-ui/styles";
+declare module "@codecaine-ai/agent-kernel-viewer-ui/styles";
 
 /**
  * Plain css imports (index.css, agent-theme.css). The harness package's

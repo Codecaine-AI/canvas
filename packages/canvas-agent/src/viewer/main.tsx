@@ -6,8 +6,8 @@ import "@codecaine-ai/design-system/fonts.css";
 import "@codecaine-ai/design-system/tokens.css";
 import "@codecaine-ai/design-system/host-contract.css";
 import "@codecaine-ai/design-system/layout.css";
-import "@agent-kernel/viewer-ui/styles";
-import "@agent-kernel/viewer-shell/styles";
+import "@codecaine-ai/agent-kernel-viewer-ui/styles";
+import "@codecaine-ai/agent-kernel-viewer-shell/styles";
 import "./index.css";
 import { App } from "./App";
 

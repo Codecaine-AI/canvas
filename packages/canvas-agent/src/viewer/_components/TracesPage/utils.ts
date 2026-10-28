@@ -2,7 +2,7 @@ import type {
   KernelTraceSessionDetail,
   KernelTraceSessionListResponse,
   KernelTraceSessionSummary,
-} from "@agent-kernel/viewer-core";
+} from "@codecaine-ai/agent-kernel-viewer-core";
 import { isRecord } from "../../shared/utils";
 
 export function isTraceDetail(value: unknown): value is KernelTraceSessionDetail {

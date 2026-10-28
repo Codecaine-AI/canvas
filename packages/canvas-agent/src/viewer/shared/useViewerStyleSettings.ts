@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import { defaultStyleSettings, type StyleSettings } from "@agent-kernel/viewer-shell";
+import { defaultStyleSettings, type StyleSettings } from "@codecaine-ai/agent-kernel-viewer-shell";
 import { CANVAS_STYLE_CONFIG } from "./style-config";
 
 /** Style settings for pages that thread view options (trace icon side/style). */

@@ -4,7 +4,7 @@ import {
   loadStyleRailCollapsed,
   saveStyleRailCollapsed,
   saveStyleRailWidth,
-} from "@agent-kernel/viewer-shell";
+} from "@codecaine-ai/agent-kernel-viewer-shell";
 
 import { CANVAS_STYLE_CONFIG, loadStoredStyleRailWidth } from "../../shared/style-config";
 

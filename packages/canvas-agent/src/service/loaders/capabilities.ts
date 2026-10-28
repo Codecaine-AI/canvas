@@ -11,7 +11,7 @@
  */
 import { createHash } from "node:crypto";
 
-import type { Loader, LoaderResult } from "@agent-kernel/kernel/context";
+import type { Loader, LoaderResult } from "@codecaine-ai/agent-kernel/context";
 
 import { formatCapabilities } from "../../catalog/layout-editor/context/capabilities";
 

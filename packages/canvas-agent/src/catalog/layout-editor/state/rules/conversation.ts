@@ -8,7 +8,7 @@
  * `turn_end` advances the turn number every op line and view ref is stamped
  * with.
  */
-import type { SessionEvent } from "@agent-kernel/kernel/state";
+import type { SessionEvent } from "@codecaine-ai/agent-kernel/state";
 
 import { INSTRUCTIONS_KEPT } from "../policy";
 import { capped, type BoardWorkState } from "../shape";

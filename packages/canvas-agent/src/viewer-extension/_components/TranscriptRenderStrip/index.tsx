@@ -1,4 +1,4 @@
-import { DetailImageTrigger } from "@agent-kernel/viewer-ui";
+import { DetailImageTrigger } from "@codecaine-ai/agent-kernel-viewer-ui";
 import type { TranscriptImageRef } from "../../types";
 import { transcriptImageUrl } from "../../paths";
 

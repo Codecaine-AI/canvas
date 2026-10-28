@@ -7,7 +7,7 @@
  * tool-result tail. State attachments come separately from the session's eager
  * current board and change history.
  */
-import type { SessionEvent } from "@agent-kernel/kernel/state";
+import type { SessionEvent } from "@codecaine-ai/agent-kernel/state";
 
 import { VIEW_REFS_LIMIT } from "../policy";
 import { capped, type BoardWorkState, type ViewRef } from "../shape";

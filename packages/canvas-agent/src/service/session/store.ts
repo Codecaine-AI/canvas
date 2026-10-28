@@ -12,8 +12,8 @@ import { createHash, randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-import { updateContainerStatus, type KernelDatabase } from "@agent-kernel/db";
-import { getRunContext, type KernelInstance } from "@agent-kernel/kernel";
+import { updateContainerStatus, type KernelDatabase } from "@codecaine-ai/agent-kernel-db";
+import { getRunContext, type KernelInstance } from "@codecaine-ai/agent-kernel";
 
 import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";

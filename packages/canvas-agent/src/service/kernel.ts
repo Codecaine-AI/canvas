@@ -17,12 +17,12 @@ import {
   openKernelDatabase,
   writeKernelManifest,
   type KernelDatabase,
-} from "@agent-kernel/db";
+} from "@codecaine-ai/agent-kernel-db";
 import {
   createKernel,
   type CatalogRootSpec,
   type KernelInstance,
-} from "@agent-kernel/kernel";
+} from "@codecaine-ai/agent-kernel";
 
 import { stateGrammarLoader } from "./loaders/state-grammar";
 import { styleGuideLoader } from "./loaders/style-guide";

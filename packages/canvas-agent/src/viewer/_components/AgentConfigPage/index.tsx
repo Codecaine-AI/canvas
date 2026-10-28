@@ -1,4 +1,4 @@
-import { AgentPromptLabContainer, PromptStyleSidebar, usePromptStyleSettings } from "@agent-kernel/viewer-ui";
+import { AgentPromptLabContainer, PromptStyleSidebar, usePromptStyleSettings } from "@codecaine-ai/agent-kernel-viewer-ui";
 import { AgentSurface } from "../../shared/_components/AgentSurface";
 import { AgentServiceDownNotice } from "../../shared/_components/AgentServiceDownNotice";
 import { AgentFetchErrorNotice } from "../../shared/_components/AgentFetchErrorNotice";

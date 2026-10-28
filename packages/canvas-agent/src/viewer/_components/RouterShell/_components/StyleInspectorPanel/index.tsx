@@ -1,5 +1,5 @@
 import type { ComponentProps, KeyboardEvent, PointerEvent as ReactPointerEvent } from "react";
-import { StyleSettingsPanel, type StyleSettings, type StyleSettingsPatch } from "@agent-kernel/viewer-shell";
+import { StyleSettingsPanel, type StyleSettings, type StyleSettingsPatch } from "@codecaine-ai/agent-kernel-viewer-shell";
 
 /** The inspector closes on Escape from inside it; an Escape that ends IME composition must not. */
 function keepOpenWhileComposing(event: KeyboardEvent<HTMLDivElement>) {
