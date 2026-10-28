@@ -18,7 +18,7 @@
  * `update` is pure: it copies the state and returns the copy, never mutating
  * its input.
  */
-import type { SessionEvent } from "@agent-kernel/kernel/state";
+import type { SessionEvent } from "@codecaine-ai/agent-kernel/state";
 
 import type { BoardWorkState } from "../shape";
 import { advanceTurn, recordSteering } from "./conversation";

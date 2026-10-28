@@ -16,7 +16,7 @@
  * defines an action, ./rules/operations.ts defines what that action makes
  * true, ./render/ops.ts defines how that truth is shown.
  */
-import { defineState } from "@agent-kernel/kernel/agent-definition";
+import { defineState } from "@codecaine-ai/agent-kernel/agent-definition";
 
 export {
   INSTRUCTIONS_KEPT,

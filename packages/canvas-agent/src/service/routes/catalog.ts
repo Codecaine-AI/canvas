@@ -8,7 +8,7 @@
  *
  * Plus the kernel's STANDARD catalog API mounted under the reserved prefix —
  * /api/agent/kernel/catalog/agents[...] — because studio's agent-config page
- * embeds @agent-kernel/viewer-ui's AgentPromptLabContainer, which speaks
+ * embeds @codecaine-ai/agent-kernel-viewer-ui's AgentPromptLabContainer, which speaks
  * KERNEL_CATALOG_PATHS (detail, prompt PUT, manifest PUT, revisions,
  * revision stats) against a baseUrl of /api/agent.
  *
@@ -20,8 +20,8 @@ import { Elysia } from "elysia";
 import type {
   KernelInstance,
   PromptEditSessionService,
-} from "@agent-kernel/kernel";
-import { createKernelCatalogApi } from "@agent-kernel/kernel/catalog-api";
+} from "@codecaine-ai/agent-kernel";
+import { createKernelCatalogApi } from "@codecaine-ai/agent-kernel/catalog-api";
 
 export function createCatalogRoutes(
   kernel: KernelInstance<unknown>,

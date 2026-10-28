@@ -7,7 +7,7 @@
  * the outcome null — the run continues, and the refusal is on the op ledger
  * like any other.
  */
-import type { SessionEvent } from "@agent-kernel/kernel/state";
+import type { SessionEvent } from "@codecaine-ai/agent-kernel/state";
 
 import { str, type BoardWorkState } from "../shape";
 import { firstLine } from "./operations";

@@ -1092,7 +1092,7 @@
           "insert": ", and it loads without the kernel. The module and everything it reaches stay free of "
         },
         {
-          "insert": "@agent-kernel/*",
+          "insert": "@codecaine-ai/agent-kernel*",
           "attributes": {
             "code": true
           }

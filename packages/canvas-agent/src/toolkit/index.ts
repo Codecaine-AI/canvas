@@ -28,7 +28,7 @@
  * - **finalize** is not on the surface: there is no proposal to commit.
  *
  * Import discipline: this module and everything it reaches must load without
- * `@agent-kernel/*`, `service/kernel.ts`, `service/session/store.ts`, or React.
+ * `@codecaine-ai/agent-kernel*`, `service/kernel.ts`, `service/session/store.ts`, or React.
  * Session internals are therefore imported by deep path, never through the
  * `service/session` barrel (which re-exports the kernel-backed store), and
  * `LayoutSession` is a type-only import.

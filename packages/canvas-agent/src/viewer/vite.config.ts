@@ -16,7 +16,7 @@ const VIEWER_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(VIEWER_DIR, "../../../..");
 
 /**
- * The viewer packages (@agent-kernel/viewer-{core,ui,shell}) are machine-local
+ * The viewer packages (@codecaine-ai/agent-kernel-viewer-{core,ui,shell}) are machine-local
  * `link:` deps. The prompt-authoring UI (@codecaine-ai/prompt-kit) is a
  * `workspace:*` dependency resolved through the Core meta-workspace. Their
  * exports point at TS source, so Vite compiles them through node_modules. That
@@ -37,9 +37,9 @@ const DESIGN_SYSTEM_DIR = dirname(
   createRequire(import.meta.url).resolve("@codecaine-ai/design-system/package.json"),
 );
 const LINKED_AGENT_KERNEL_PACKAGES = [
-  "@agent-kernel/viewer-core",
-  "@agent-kernel/viewer-ui",
-  "@agent-kernel/viewer-shell",
+  "@codecaine-ai/agent-kernel-viewer-core",
+  "@codecaine-ai/agent-kernel-viewer-ui",
+  "@codecaine-ai/agent-kernel-viewer-shell",
   "@codecaine-ai/prompt-kit",
   "@codecaine-ai/annotations",
 ];

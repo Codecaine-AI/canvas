@@ -4,7 +4,7 @@ import {
   readStringAttr,
   type DetailBlockProvider,
   type DetailBlockSpec,
-} from "@agent-kernel/viewer-ui";
+} from "@codecaine-ai/agent-kernel-viewer-ui";
 import type { TranscriptToolCallEntry } from "./types";
 import { boardRenderBlocks } from "./board-render";
 import { TranscriptRenderStrip } from "./_components/TranscriptRenderStrip";

@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect, useSyncExternalStore } from "react";
-import type { StyleSettings, StyleSettingsPatch } from "@agent-kernel/viewer-shell";
+import type { StyleSettings, StyleSettingsPatch } from "@codecaine-ai/agent-kernel-viewer-shell";
 
 /** html[data-theme], the theme the page shows: tokens.css and the host contract read it. */
 function subscribeHtmlTheme(onChange: () => void) {

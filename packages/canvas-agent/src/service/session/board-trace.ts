@@ -11,9 +11,9 @@ import {
   hashTraceBlobBytes,
   upsertTraceBlobs,
   type KernelDatabase,
-} from "@agent-kernel/db";
-import { currentTraceIds, getRunContext } from "@agent-kernel/kernel";
-import { createAppEvent } from "@agent-kernel/protocol";
+} from "@codecaine-ai/agent-kernel-db";
+import { currentTraceIds, getRunContext } from "@codecaine-ai/agent-kernel";
+import { createAppEvent } from "@codecaine-ai/agent-kernel-protocol";
 
 export const BOARD_RENDER_EVENT_TYPE = "app:board-render";
 

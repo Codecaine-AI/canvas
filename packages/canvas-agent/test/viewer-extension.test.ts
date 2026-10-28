@@ -5,7 +5,7 @@ import {
   DetailImageTrigger,
   type DetailBlockProvider,
   type DetailBlockSpec,
-} from "@agent-kernel/viewer-ui";
+} from "@codecaine-ai/agent-kernel-viewer-ui";
 
 import canvasViewerExtension, {
   canvasViewerExtension as namedCanvasViewerExtension,

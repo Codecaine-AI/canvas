@@ -11,7 +11,7 @@
  * is impossible (a unit test, a replay of a persisted state.json, any process
  * that is not the harness). Degraded, never wrong.
  */
-import type { SpawnContext } from "@agent-kernel/kernel/context";
+import type { SpawnContext } from "@codecaine-ai/agent-kernel/context";
 
 import { formatRequestQueue } from "../../../service/session/snapshots/user-requests";
 import { OPS_LOG_LIMIT } from "./policy";

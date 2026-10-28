@@ -14,14 +14,14 @@
  */
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 
-import type { SpawnContext } from "@agent-kernel/kernel/context";
+import type { SpawnContext } from "@codecaine-ai/agent-kernel/context";
 import {
   normalizeRenderOutput,
   resolveWindowPolicy,
   type AgentMessage,
   type RenderContext,
   type SessionEvent,
-} from "@agent-kernel/kernel/state";
+} from "@codecaine-ai/agent-kernel/state";
 
 import boardState, {
   BOARD_TOOLS,

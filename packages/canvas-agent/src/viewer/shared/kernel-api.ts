@@ -1,7 +1,7 @@
 import {
   KERNEL_CATALOG_PATHS,
   KERNEL_TRACE_READ_PATHS,
-} from "@agent-kernel/viewer-core";
+} from "@codecaine-ai/agent-kernel-viewer-core";
 
 /**
  * The viewer's vite dev proxy pipes /api/* to the harness (:4820), which

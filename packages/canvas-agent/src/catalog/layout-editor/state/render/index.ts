@@ -23,7 +23,7 @@ import type {
   AgentMessage,
   RenderContext,
   RenderResult,
-} from "@agent-kernel/kernel/state";
+} from "@codecaine-ai/agent-kernel/state";
 
 import { liveDraftView } from "../../../../service/session/perception/live-draft-view";
 import { layoutSessionForContainer } from "../../../../service/session/registry";

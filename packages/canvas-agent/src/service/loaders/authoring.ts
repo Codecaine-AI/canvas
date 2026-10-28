@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { Loader } from "@agent-kernel/kernel/context";
+import type { Loader } from "@codecaine-ai/agent-kernel/context";
 import { canvasAuthoringTopics } from "../../authoring";
 
 /** Each shared topic is a separately named, inspectable standing-context block. */

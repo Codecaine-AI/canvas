@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import type { KernelTraceSessionDetail } from "@agent-kernel/viewer-core";
-import { buildTraceSpans } from "@agent-kernel/viewer-core";
+import type { KernelTraceSessionDetail } from "@codecaine-ai/agent-kernel-viewer-core";
+import { buildTraceSpans } from "@codecaine-ai/agent-kernel-viewer-core";
 import {
   KernelTraceWorkspace,
   type TraceWorkspaceRow,
-} from "@agent-kernel/viewer-shell";
+} from "@codecaine-ai/agent-kernel-viewer-shell";
 import { createDetailBlockProvider } from "@codecaine-ai/canvas-agent/viewer-extension";
 import { AgentSurface } from "../../shared/_components/AgentSurface";
 import { AgentServiceDownNotice } from "../../shared/_components/AgentServiceDownNotice";
@@ -20,7 +20,7 @@ import { useCanvasTraceExtensions } from "./useCanvasTraceExtensions";
 import { isTraceDetail, extractSessions } from "./utils";
 
 /**
- * Traces — the STANDARD trace workspace (@agent-kernel/viewer-shell's
+ * Traces — the STANDARD trace workspace (@codecaine-ai/agent-kernel-viewer-shell's
  * KernelTraceWorkspace: list mode + drill-in + 40/60 split + divider), wired
  * to the harness's kernel read API through the dev proxy, with the canvas
  * transcript layers (run brief, additive tool-call blocks, and render

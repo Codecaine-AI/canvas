@@ -10,7 +10,7 @@
  */
 import { createHash } from "node:crypto";
 
-import type { Loader, LoaderResult } from "@agent-kernel/kernel/context";
+import type { Loader, LoaderResult } from "@codecaine-ai/agent-kernel/context";
 
 import { CRAFT_TARGETS, STYLE_TOPICS } from "../../catalog/layout-editor/context/style-guide";
 import type { CraftTargets } from "../../catalog/layout-editor/context/style-guide";

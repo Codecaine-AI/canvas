@@ -18,9 +18,9 @@ import {
   kernelDatabasePath,
   openKernelDatabase,
   type KernelDatabaseHandle,
-} from "@agent-kernel/db";
-import { runWithContext, type RunContext } from "@agent-kernel/kernel";
-import type { TraceEvent } from "@agent-kernel/protocol";
+} from "@codecaine-ai/agent-kernel-db";
+import { runWithContext, type RunContext } from "@codecaine-ai/agent-kernel";
+import type { TraceEvent } from "@codecaine-ai/agent-kernel-protocol";
 
 import {
   BOARD_RENDER_EVENT_TYPE,

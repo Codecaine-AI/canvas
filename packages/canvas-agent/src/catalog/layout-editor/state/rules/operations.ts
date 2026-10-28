@@ -11,7 +11,7 @@
  * every request, so a line here is the history of the work, never a copy of
  * its result.
  */
-import type { SessionEvent } from "@agent-kernel/kernel/state";
+import type { SessionEvent } from "@codecaine-ai/agent-kernel/state";
 
 import { operationTools } from "../../../../service/session/tools/operations";
 import { OPS_LOG_LIMIT, OP_SUMMARY_CHARS } from "../policy";

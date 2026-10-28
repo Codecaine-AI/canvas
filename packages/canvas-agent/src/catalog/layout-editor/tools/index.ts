@@ -14,7 +14,7 @@
  * runtime, because the kernel dry-runs this module at boot to harvest the
  * tool allowlist.
  */
-import { defineTools } from "@agent-kernel/kernel/agent-definition";
+import { defineTools } from "@codecaine-ai/agent-kernel/agent-definition";
 
 import { TOOL_CALL_CAP_OVERRIDE } from "../../../service/kernel";
 import { operationTools } from "../../../service/session/tools/operations";

@@ -12,7 +12,7 @@
  * images and, in steering-heavy sessions, cuts at user-turn boundaries — and
  * the message cap is applied to what survives it.
  */
-import { applyWindow, type AgentMessage, type RenderContext } from "@agent-kernel/kernel/state";
+import { applyWindow, type AgentMessage, type RenderContext } from "@codecaine-ai/agent-kernel/state";
 
 import { TAIL_MESSAGES } from "../policy";
 import { block } from "./block";

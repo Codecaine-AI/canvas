@@ -5,7 +5,7 @@ import {
   styleVars,
   type StyleSettings,
   type StyleSettingsPatch,
-} from "@agent-kernel/viewer-shell";
+} from "@codecaine-ai/agent-kernel-viewer-shell";
 
 import { AppShell, resolveNav, type NavSection, type ShellLinkProps } from "../AppShell";
 import { Icon } from "./_components/Icon";

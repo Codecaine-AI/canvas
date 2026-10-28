@@ -8,7 +8,7 @@
  * `toToolResult` turns a runtime result into the kernel's content-block shape,
  * lifting any PNGs the call produced into image blocks.
  */
-import type { AgentPrivateTools } from "@agent-kernel/kernel/agent-definition";
+import type { AgentPrivateTools } from "@codecaine-ai/agent-kernel/agent-definition";
 
 import type {
   LayoutToolRenderResult,

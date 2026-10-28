@@ -28,7 +28,7 @@ import {
   kernelDatabasePath,
   openKernelDatabase,
   type KernelDatabaseHandle,
-} from "@agent-kernel/db";
+} from "@codecaine-ai/agent-kernel-db";
 import {
   buildRegistry,
   createKernelCatalogService,
@@ -39,8 +39,8 @@ import {
   type KernelInstance,
   type LaunchedPromptEditSession,
   type PromptEditSessionService,
-} from "@agent-kernel/kernel";
-import { createPromptEditSessionService } from "@agent-kernel/kernel";
+} from "@codecaine-ai/agent-kernel";
+import { createPromptEditSessionService } from "@codecaine-ai/agent-kernel";
 import {
   canonicalizePrompt,
   PROMPT_KIT_SCHEMA_VERSION,
