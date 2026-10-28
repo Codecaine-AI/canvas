@@ -39,12 +39,12 @@
       "name": "@codecaine-ai/canvas-agent",
       "version": "0.0.1",
       "dependencies": {
-        "@agent-kernel/db": "link:@agent-kernel/db",
-        "@agent-kernel/kernel": "link:@agent-kernel/kernel",
-        "@agent-kernel/protocol": "link:@agent-kernel/protocol",
-        "@agent-kernel/viewer-core": "link:@agent-kernel/viewer-core",
-        "@agent-kernel/viewer-shell": "link:@agent-kernel/viewer-shell",
-        "@agent-kernel/viewer-ui": "link:@agent-kernel/viewer-ui",
+        "@codecaine-ai/agent-kernel-db": "link:@codecaine-ai/agent-kernel-db",
+        "@codecaine-ai/agent-kernel": "link:@codecaine-ai/agent-kernel",
+        "@codecaine-ai/agent-kernel-protocol": "link:@codecaine-ai/agent-kernel-protocol",
+        "@codecaine-ai/agent-kernel-viewer-core": "link:@codecaine-ai/agent-kernel-viewer-core",
+        "@codecaine-ai/agent-kernel-viewer-shell": "link:@codecaine-ai/agent-kernel-viewer-shell",
+        "@codecaine-ai/agent-kernel-viewer-ui": "link:@codecaine-ai/agent-kernel-viewer-ui",
         "@codecaine-ai/canvas": "workspace:*",
         "@codecaine-ai/prompt-kit": "link:@codecaine-ai/prompt-kit",
         "@mariozechner/pi-ai": "^0.70.6",
@@ -98,17 +98,17 @@
     "esbuild",
   ],
   "packages": {
-    "@agent-kernel/db": ["@agent-kernel/db@link:@agent-kernel/db", {}],
+    "@codecaine-ai/agent-kernel-db": ["@codecaine-ai/agent-kernel-db@link:@codecaine-ai/agent-kernel-db", {}],
 
-    "@agent-kernel/kernel": ["@agent-kernel/kernel@link:@agent-kernel/kernel", { "bin": { "agent-kernel-doctor": "./src/doctor-cli.ts", "agent-kernel-backfill": "./src/transcript-recovery/backfill-cli.ts" } }],
+    "@codecaine-ai/agent-kernel": ["@codecaine-ai/agent-kernel@link:@codecaine-ai/agent-kernel", { "bin": { "agent-kernel-doctor": "./src/doctor-cli.ts", "agent-kernel-backfill": "./src/transcript-recovery/backfill-cli.ts" } }],
 
-    "@agent-kernel/protocol": ["@agent-kernel/protocol@link:@agent-kernel/protocol", {}],
+    "@codecaine-ai/agent-kernel-protocol": ["@codecaine-ai/agent-kernel-protocol@link:@codecaine-ai/agent-kernel-protocol", {}],
 
-    "@agent-kernel/viewer-core": ["@agent-kernel/viewer-core@link:@agent-kernel/viewer-core", {}],
+    "@codecaine-ai/agent-kernel-viewer-core": ["@codecaine-ai/agent-kernel-viewer-core@link:@codecaine-ai/agent-kernel-viewer-core", {}],
 
-    "@agent-kernel/viewer-shell": ["@agent-kernel/viewer-shell@link:@agent-kernel/viewer-shell", {}],
+    "@codecaine-ai/agent-kernel-viewer-shell": ["@codecaine-ai/agent-kernel-viewer-shell@link:@codecaine-ai/agent-kernel-viewer-shell", {}],
 
-    "@agent-kernel/viewer-ui": ["@agent-kernel/viewer-ui@link:@agent-kernel/viewer-ui", {}],
+    "@codecaine-ai/agent-kernel-viewer-ui": ["@codecaine-ai/agent-kernel-viewer-ui@link:@codecaine-ai/agent-kernel-viewer-ui", {}],
 
     "@alloc/quick-lru": ["@alloc/quick-lru@5.2.0", "", {}, "sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw=="],
 
