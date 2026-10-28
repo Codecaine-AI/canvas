@@ -1,8 +1,12 @@
 {
   "name": "@codecaine-ai/text-measure",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.0",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Codecaine-AI/canvas.git",
+    "directory": "packages/text-measure"
+  },
   "description": "Measures and wraps text the way the browser paints it (bundled Inter 3.19 and IBM Plex Mono 2.5), without rendering.",
   "type": "module",
   "main": "src/index.ts",
@@ -18,7 +22,12 @@
     "src",
     "fonts",
     "fonts.css",
-    "README.md"
+    "README.md",
+    "!src/**/*.test.ts",
+    "!src/**/*.test.tsx",
+    "!src/**/__tests__",
+    "!src/**/__fixtures__",
+    "!src/**/__snapshots__"
   ],
   "scripts": {
     "test": "bun test",
@@ -38,5 +47,8 @@
     "@types/bun": "latest",
     "playwright": "^1.58.2",
     "typescript": "^5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
