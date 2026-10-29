@@ -22,16 +22,19 @@ export function ColorRow({ control, value, overridden, onChange, onReset }: Colo
       <span className="flex shrink-0 items-center gap-1.5">
         <span className="canvas-style-swatch" title="Pick a color">
           <span className="canvas-style-swatch-fill" style={{ background: value }} />
-          <input
-            type="color"
-            aria-label={`${name} picker`}
-            value={parsed ? formatHex(parsed).toLowerCase() : "#000000"}
-            onChange={(event) => {
-              const picked = parseColor(event.currentTarget.value);
-              // The native picker has no alpha: keep the token's own.
-              if (picked) onChange(formatColor({ ...picked, a: parsed?.a ?? 1 }));
-            }}
-          />
+          {/* A color the picker cannot read gets no picker: the text field fixes it. */}
+          {parsed ? (
+            <input
+              type="color"
+              aria-label={`${name} picker`}
+              value={formatHex(parsed).toLowerCase()}
+              onChange={(event) => {
+                const picked = parseColor(event.currentTarget.value);
+                // The native picker has no alpha: keep the token's own.
+                if (picked) onChange(formatColor({ ...picked, a: parsed.a }));
+              }}
+            />
+          ) : null}
         </span>
         <input
           id={textId}
