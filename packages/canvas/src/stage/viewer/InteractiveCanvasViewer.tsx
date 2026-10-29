@@ -114,7 +114,7 @@ function ViewerNavigationControls({
         type="button"
         aria-label={`Zoom level ${Math.round(zoom * 100)}%`}
         onClick={controls.zoomTo100}
-        style={{ ...buttonStyle, minWidth: 46 }}
+        style={{ ...buttonStyle, minWidth: 46, fontVariantNumeric: "tabular-nums" }}
       >
         {Math.round(zoom * 100)}%
       </button>

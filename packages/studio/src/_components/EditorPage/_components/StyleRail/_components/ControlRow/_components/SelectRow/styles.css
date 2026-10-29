@@ -23,8 +23,10 @@
   cursor: pointer;
 }
 
-.canvas-style-segment:hover {
-  color: var(--foreground);
+@media (hover: hover) {
+  .canvas-style-segment:hover {
+    color: var(--foreground);
+  }
 }
 
 .canvas-style-segment[data-active="true"] {

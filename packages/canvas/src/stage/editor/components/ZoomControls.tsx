@@ -126,6 +126,7 @@ function ZoomControlsComponent({
             border: "none",
             background: "transparent",
             fontSize: cssVar("font.size.ui-xs"),
+            fontVariantNumeric: "tabular-nums",
             color: GLYPH_COLOR,
             padding: `0 ${cssVar("space.1")}`,
             cursor: disabled ? "default" : "pointer",
