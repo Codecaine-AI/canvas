@@ -60,6 +60,7 @@ export function AnnotationPins({
   return (
     <div
       data-annotation-pins=""
+      role="group"
       aria-label="Annotation threads"
       style={{ position: "absolute", left: 0, top: 0, pointerEvents: "none" }}
     >
