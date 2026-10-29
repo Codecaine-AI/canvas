@@ -20,9 +20,11 @@ button.canvas-style-rail-row-override-dot {
   cursor: pointer;
 }
 
-button.canvas-style-rail-row-override-dot:hover {
-  /* A ring around a circle marker: border.width.ring (1.5px; was 2px). */
-  box-shadow: 0 0 0 var(--ds-border-width-ring) var(--border);
+@media (hover: hover) {
+  button.canvas-style-rail-row-override-dot:hover {
+    /* A ring around a circle marker: border.width.ring (1.5px; was 2px). */
+    box-shadow: 0 0 0 var(--ds-border-width-ring) var(--border);
+  }
 }
 
 .canvas-style-rail-row-override-dot[data-overridden="false"] {

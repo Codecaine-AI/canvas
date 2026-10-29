@@ -11,8 +11,10 @@
   cursor: pointer;
 }
 
-.canvas-style-theme-card:hover {
-  border-color: var(--ds-color-border-strong);
+@media (hover: hover) {
+  .canvas-style-theme-card:hover {
+    border-color: var(--ds-color-border-strong);
+  }
 }
 
 .canvas-style-theme-card[data-active="true"] {
