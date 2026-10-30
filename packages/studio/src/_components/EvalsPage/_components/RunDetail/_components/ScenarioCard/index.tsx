@@ -127,8 +127,12 @@ export function ScenarioCard({
 
         {scenarioFlags.length > 0 ? (
           <div className="flex flex-wrap items-center gap-1">
+            {/* A flag is free text (a judge's skip reason runs a sentence long):
+                let it wrap inside the card, where a nowrap badge would clip. */}
             {scenarioFlags.map((flag) => (
-              <Badge key={flag} variant="destructive">{flag}</Badge>
+              <Badge key={flag} variant="destructive" className="max-w-full whitespace-normal">
+                {flag}
+              </Badge>
             ))}
           </div>
         ) : null}
