@@ -13,7 +13,7 @@ client<llm> JudgeClient {
   retry_policy Exponential
   options {
     base_url "http://100.104.171.122:8793/v1"
-    api_key env.TOKEN_BURNER_API_KEY
+    api_key env.TOKEN_GATEWAY_API_KEY
     model "gpt-5.6-sol"
     reasoning_effort "low"
     response_format {
