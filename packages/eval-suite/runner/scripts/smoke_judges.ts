@@ -161,7 +161,7 @@ async function main(): Promise<void> {
   const requestOptions = {
     clientRegistry,
     env: {
-      TOKEN_BURNER_API_KEY: client.apiKey,
+      TOKEN_GATEWAY_API_KEY: client.apiKey,
       OPENAI_API_KEY: client.apiKey,
     },
   };
