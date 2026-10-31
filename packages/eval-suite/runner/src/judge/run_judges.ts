@@ -49,7 +49,7 @@ import {
 } from "./render_md.ts";
 
 const DEFAULT_MODEL = "gpt-5.6-sol";
-/** The Token Gateway gateway's OpenAI-compatible base (it replaced the codex-lb proxy). */
+/** Token Gateway's OpenAI-compatible base (it replaced the codex-lb proxy). */
 const DEFAULT_BASE_URL = "http://100.104.171.122:8793/v1";
 /** Gateway key files under the home directory, first existing wins: the MacBook's, then services-01's. */
 const TOKEN_GATEWAY_KEY_FILES = [".config/token-gateway/mini-macbook-key", ".config/token-gateway/mini-key"];
