@@ -30,19 +30,19 @@
  * character the font lacks at zero width, never under the minimum chip);
  * what only the measured full-width chip shows is a note, never a blocker.
  */
-import { labelPointFor, routeConnection } from "../../../../canvas/src/connectors/routing.ts";
-import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../../../../canvas/src/connectors/label-chip.ts";
-import { iconGlyphBoxPx } from "../../../../canvas/src/objects/text-slots.ts";
+import { labelPointFor, routeConnection } from "../../connectors/routing.ts";
+import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../../connectors/label-chip.ts";
+import { iconGlyphBoxPx } from "../../objects/text-slots.ts";
 import {
   graphemeClusters,
   fitText,
   measureWidth,
-} from "../../../../canvas/src/theme/text-measure.ts";
+} from "../../theme/text-measure.ts";
 
 import type {
   InteractiveCanvasConnection, InteractiveCanvasDocument, InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
-import type { CanvasStyle } from "@codecaine-ai/canvas/style";
+} from "../../state/schema";
+import type { CanvasStyle } from "../../theme/canvas-style";
 import type { Severity } from "./types";
 
 export interface Rect { x: number; y: number; width: number; height: number }

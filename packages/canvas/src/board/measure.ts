@@ -16,8 +16,8 @@
  * unreadable-labels rules both need: a corridor width has exactly one
  * definition on this board, and every consumer reads it from here.
  */
-import { objectPaintedBounds } from "../../../canvas/src/render/painted-bounds";
-import { sectionFitGeometry } from "../../../canvas/src/state/geometry";
+import { objectPaintedBounds } from "../render/painted-bounds";
+import { sectionFitGeometry } from "../state/geometry";
 
 import { kindOf } from "./helpers";
 import type { Rect } from "./types";
@@ -25,8 +25,8 @@ import type { Rect } from "./types";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
-import type { CanvasStyle } from "@codecaine-ai/canvas/style";
+} from "../state/schema";
+import type { CanvasStyle } from "../theme/canvas-style";
 
 export type Axis = "x" | "y";
 

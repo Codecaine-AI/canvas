@@ -34,7 +34,7 @@ import {
   DIGEST_GRAMMAR,
   DIGEST_ROUTE_LEGEND,
 } from "../src/board/digest";
-import { FINISHING_RULES, LAYOUT_RULES } from "../src/board/lints";
+import { FINISHING_RULES, LAYOUT_RULES } from "../../canvas/src/board/lints";
 import { context as layoutEditorContext } from "../src/catalog/layout-editor/context";
 import { canvasAuthoringTopics, formatAuthoringTopic } from "../src/authoring";
 import { authoringLoaders } from "../src/service/loaders/authoring";

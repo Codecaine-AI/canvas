@@ -5,7 +5,7 @@ import {
   formatRegionMeasures,
   measureRegion,
   rectIntersectionArea,
-} from "../src/board/measure";
+} from "../../canvas/src/board/measure";
 import tools from "../src/catalog/layout-editor/tools";
 import type { ToolRegistrar } from "../src/catalog/layout-editor/tools";
 import { box, makeDocument } from "./synthetic";

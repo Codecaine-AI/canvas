@@ -15,7 +15,7 @@ import {
   numberedRouteSegments,
   numberedSegmentsForPolyline,
 } from "../src/board/edge-route";
-import { routedPolyline } from "../src/board/lints/geometry";
+import { routedPolyline } from "../../canvas/src/board/lints/geometry";
 import { box, connect, makeDocument } from "./synthetic";
 
 const waypointsOf = (points: Array<[number, number]>): Array<[number, number]> => points;

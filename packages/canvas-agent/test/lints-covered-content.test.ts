@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { rule as coveredContent } from "../src/board/lints/rules/covered-content";
+import { rule as coveredContent } from "../../canvas/src/board/lints/rules/covered-content";
 import { box, connect, makeDocument } from "./synthetic";
 import { FIGJAM_CONTEXT } from "./helpers";
-import { chipFor, chipWidth } from "../src/board/lints/geometry";
+import { chipFor, chipWidth } from "../../canvas/src/board/lints/geometry";
 import { FIGJAM_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
 
 // Chip geometry here is figjam's (30px sans chip), so every check measures in

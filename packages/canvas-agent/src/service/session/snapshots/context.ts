@@ -12,11 +12,11 @@ import type {
   InteractiveCanvasDocument,
 } from "@codecaine-ai/canvas/schema";
 
-import type { Rect } from "../../../board/types";
+import type { Rect } from "../../../../../canvas/src/board/types";
 import { formatBoardDigest } from "../../../board/digest";
-import { formatDiagnostics, sessionDiagnostics } from "../../../board/lints/run";
-import type { Diagnostic } from "../../../board/lints";
-import { rectIntersectionArea } from "../../../board/measure";
+import { formatDiagnostics, sessionDiagnostics } from "../../../../../canvas/src/board/lints/run";
+import type { Diagnostic } from "../../../../../canvas/src/board/lints";
+import { rectIntersectionArea } from "../../../../../canvas/src/board/measure";
 
 import { formatBoardDescription } from "./board-state";
 import type { EditorStateSnapshot } from "./editor-state";
@@ -239,7 +239,7 @@ export function documentWithinCrop(
 // Page-frame injection is a pure board transformation, so it lives in the
 // board layer (where the lint authorship baseline also needs it); the session
 // surface keeps exporting it from here.
-export { draftWithPageFrame, injectedPageFrame } from "../../../board/page-frame";
+export { draftWithPageFrame, injectedPageFrame } from "../../../../../canvas/src/board/page-frame";
 
 /**
  * The spawn-time <board_state> payload: description + full (untruncated)

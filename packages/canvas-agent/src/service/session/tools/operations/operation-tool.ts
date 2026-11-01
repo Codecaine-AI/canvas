@@ -9,7 +9,7 @@ import { reconcileConnectionWaypoints } from "../../../../../../canvas/src/state
 import { reconcileSectionMembership } from "../../../../../../canvas/src/state/section-membership";
 
 import { formatNumberedRoute } from "../../../../board/edge-route";
-import { formatDiagnostics } from "../../../../board/lints/run";
+import { formatDiagnostics } from "../../../../../../canvas/src/board/lints/run";
 import type { LayoutToolRenderResult } from "../runtime";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { OpContext, OpOutcome } from "./op-context";

@@ -59,7 +59,7 @@
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
+} from "../state/schema";
 
 import {
   clampLines,
@@ -67,12 +67,12 @@ import {
   ellipsizeDetailText,
   textSlotForObject,
   wrapTextLines,
-} from "../../../canvas/src/render/static-svg.ts";
+} from "../render/static-svg.ts";
 import {
   layoutStickyText,
   STICKY_LINE_PITCH_PX,
   stickyTextUncovered,
-} from "../../../canvas/src/render/sticky-text.ts";
+} from "../render/sticky-text.ts";
 import {
   belowBandMaxWidthPx,
   detailFontSpec,
@@ -87,14 +87,14 @@ import {
   titleChipMaxWidthPx,
   type DetailTypography,
   type ResolvedTextSlot,
-} from "../../../canvas/src/objects/text-slots.ts";
+} from "../objects/text-slots.ts";
 import {
   titleChipFontSpec,
   titleChipHasContent,
   titleChipLayout,
   titleChipVisibleRuns,
-} from "../../../canvas/src/objects/section/title-chip-layout.ts";
-import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../../../canvas/src/connectors/label-chip.ts";
+} from "../objects/section/title-chip-layout.ts";
+import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../connectors/label-chip.ts";
 import {
   activeBackend,
   fitText,
@@ -102,9 +102,9 @@ import {
   measureWidth,
   type FitVerdict,
   type FontSpec,
-} from "../../../canvas/src/theme/text-measure.ts";
+} from "../theme/text-measure.ts";
 
-import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "@codecaine-ai/canvas/style";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 
 import { CHIP_CLEARANCE } from "./lints/geometry";
 

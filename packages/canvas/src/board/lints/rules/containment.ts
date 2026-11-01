@@ -9,7 +9,7 @@
  */
 import { childrenOf, kindOf, pageFrameOf } from "../../helpers";
 
-import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../../state/schema";
 import type { LayoutRule } from "../types";
 
 /** Allowed bleed past the base section, in px. */

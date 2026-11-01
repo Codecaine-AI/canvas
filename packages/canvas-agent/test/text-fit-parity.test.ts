@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { textFitReport } from "../src/board/text-fit";
+import { textFitReport } from "../../canvas/src/board/text-fit";
 import {
   clampLines,
   renderDocumentToSvg,

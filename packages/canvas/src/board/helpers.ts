@@ -9,7 +9,7 @@
  * can never disagree about frame/containment/sibling semantics. Helpers
  * return the REAL schema objects — never copies or reshapes.
  */
-import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../state/schema";
 
 export type CanvasObjectKind = "section" | "sticky" | "node";
 

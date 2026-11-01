@@ -87,7 +87,7 @@ import {
   formatNumberedSegments,
   numberedSegmentsForPolyline,
 } from "../../../../board/edge-route";
-import { routedPolyline } from "../../../../board/lints/geometry";
+import { routedPolyline } from "../../../../../../canvas/src/board/lints/geometry";
 import { snapCoordinate, snapPoint } from "../grid";
 import { defineOperationTool } from "./operation-tool";
 import type { OpContext } from "./op-context";

@@ -6,9 +6,9 @@ import type {
   InteractiveCanvasObjectType,
 } from "@codecaine-ai/canvas/schema";
 
-import { runDiagnostics } from "../src/board/lints/run";
-import type { LintContext } from "../src/board/lints/types";
-import { rule as detailTooLong } from "../src/board/lints/rules/detail-too-long";
+import { runDiagnostics } from "../../canvas/src/board/lints/run";
+import type { LintContext } from "../../canvas/src/board/lints/types";
+import { rule as detailTooLong } from "../../canvas/src/board/lints/rules/detail-too-long";
 import { box, makeDocument } from "./synthetic";
 
 /**

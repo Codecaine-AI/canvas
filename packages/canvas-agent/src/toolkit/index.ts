@@ -49,7 +49,7 @@ import {
 } from "@codecaine-ai/canvas/schema";
 
 import { diffDocuments } from "../board/doc-diff";
-import { sessionDiagnostics } from "../board/lints/run";
+import { sessionDiagnostics } from "../../../canvas/src/board/lints/run";
 import { resolveScope } from "../board/scope";
 import { canvasStyleOverrides } from "@codecaine-ai/canvas/style";
 import { loadCanvasStyle, type CanvasStyle } from "../service/session/canvas-style";

@@ -34,7 +34,7 @@ import {
 } from "../geometry";
 import { kindOf } from "../../helpers";
 
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasObject } from "../../../state/schema";
 import type { LayoutRule, Severity } from "../types";
 
 /** The note clause for a chip pair: whichever chip is the unreliable one, else the tolerance. */

@@ -4,8 +4,8 @@
  * the model; `guidance` is the rule's own plain statement of what it enforces
  * and how to fix it (documentation — not injected into the model's context).
  */
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
-import type { CanvasStyle } from "@codecaine-ai/canvas/style";
+import type { InteractiveCanvasDocument } from "../../state/schema";
+import type { CanvasStyle } from "../../theme/canvas-style";
 
 /**
  * `error` and `warning` findings block a committed finalize in the edited

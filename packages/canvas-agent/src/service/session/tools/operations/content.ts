@@ -51,7 +51,7 @@
 import { Type } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
 
-import { textFitReport } from "../../../../board/text-fit";
+import { textFitReport } from "../../../../../../canvas/src/board/text-fit";
 import { entityKindOf } from "../../perception/op-surface";
 import { detailDroppedNote, storedDetail } from "../detail-line";
 import { NO_GLYPH, isGlyphName, unknownGlyphMessage } from "../glyph-names";

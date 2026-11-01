@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
-import { runDiagnostics } from "../src/board/lints/run";
-import { rule as unreadableLabels } from "../src/board/lints/rules/unreadable-labels";
+import { runDiagnostics } from "../../canvas/src/board/lints/run";
+import { rule as unreadableLabels } from "../../canvas/src/board/lints/rules/unreadable-labels";
 import { box, connect, makeDocument } from "./synthetic";
 import { canvasThemePreset } from "@codecaine-ai/canvas/style";
 import { FIGJAM_CONTEXT } from "./helpers";
-import { chipFor, chipWidth } from "../src/board/lints/geometry";
+import { chipFor, chipWidth } from "../../canvas/src/board/lints/geometry";
 import { FIGJAM_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
 
 /**

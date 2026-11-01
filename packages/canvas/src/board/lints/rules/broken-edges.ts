@@ -34,7 +34,7 @@ import { kindOf } from "../../helpers";
 
 import type {
   InteractiveCanvasConnection, InteractiveCanvasDocument,
-} from "@codecaine-ai/canvas/schema";
+} from "../../../state/schema";
 import type { LayoutRule } from "../types";
 
 /** Board-wide crossing-pair count above which the tangle warning fires. */

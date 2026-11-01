@@ -30,7 +30,7 @@ import type { Static } from "@mariozechner/pi-ai";
 
 import { CANVAS_COLORS, CANVAS_ICON_GLYPHS } from "@codecaine-ai/canvas/schema";
 
-import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../../board/text-rules";
+import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../../../../canvas/src/board/text-rules";
 import { SHAPE_OBJECT_TYPES } from "../perception/op-surface";
 import { BRAND_GLYPH_PREFIX } from "./glyph-names";
 import { PlaceableType } from "./placeable-types";
