@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   applyOperationToDraft,
   describePatchOperation,
-} from "../src/service/session/apply-ops";
+} from "../apply-ops";
 import { box, makeDocument } from "./synthetic";
 
 describe("description patch operations", () => {

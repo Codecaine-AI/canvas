@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { draftPlacedObject } from "@codecaine-ai/canvas/actions";
-import { renderDocumentToSvg } from "@codecaine-ai/canvas/render";
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import { draftPlacedObject } from "../../state/actions";
+import { renderDocumentToSvg } from "../../render/index";
+import type { InteractiveCanvasObject } from "../../state/schema";
 
-import { renderShapeFor } from "../../canvas/src/objects/object-def";
-import { effectiveRenderShape } from "../../canvas/src/render/static-svg";
-import { creationDefaultFor } from "../src/service/session/tools/creation-defaults";
+import { renderShapeFor } from "../../objects/object-def";
+import { effectiveRenderShape } from "../../render/static-svg";
+import { creationDefaultFor } from "../tools/creation-defaults";
 import { FIGJAM_CANVAS_STYLE, makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 

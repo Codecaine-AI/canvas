@@ -11,11 +11,11 @@ import { describe, expect, test } from "bun:test";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
-import type { CanvasConnectionEndpoint } from "../../canvas/src/state/schema/connections";
+} from "../../state/schema";
+import type { CanvasConnectionEndpoint } from "../../state/schema/connections";
 
-import { DIGEST_DEFAULTS_LEGEND, formatBoardDigest } from "../src/board/digest";
-import { formatStateGrammar } from "../src/catalog/layout-editor/context/state-grammar";
+import { DIGEST_DEFAULTS_LEGEND, formatBoardDigest } from "../../board/digest";
+import { formatStateGrammar } from "../../authoring/state-grammar";
 import { box, connect, makeDocument } from "./synthetic";
 
 type Coverage = "rendered" | "legend" | "structural";

@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
-import { CANVAS_COLORS, CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "@codecaine-ai/canvas/schema";
-import { CANVAS_THEME_IDS } from "@codecaine-ai/canvas/style";
-import { getCanvasAuthoringGuidance } from "../src/authoring";
-import { DETAIL_MAX_CHARS, NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../../canvas/src/board/text-rules";
-import { OBJECT_PREFERENCES } from "../../canvas/src/objects/registry";
-import { ICON_GLYPH_CATEGORIES, resolveIconGlyph } from "../../canvas/src/objects/shapes/icon/icon-glyphs";
+import { CANVAS_COLORS, CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "../../state/schema";
+import { CANVAS_THEME_IDS } from "../../theme/canvas-style";
+import { getCanvasAuthoringGuidance } from "../../authoring";
+import { DETAIL_MAX_CHARS, NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../../board/text-rules";
+import { OBJECT_PREFERENCES } from "../../objects/registry";
+import { ICON_GLYPH_CATEGORIES, resolveIconGlyph } from "../../objects/shapes/icon/icon-glyphs";
 
 function topicText(id: string): string {
   const topic = getCanvasAuthoringGuidance().topics.find(entry => entry.id === id);

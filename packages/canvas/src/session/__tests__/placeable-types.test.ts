@@ -8,10 +8,10 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { CANVAS_ICON_GLYPHS } from "@codecaine-ai/canvas/schema";
+import { CANVAS_ICON_GLYPHS } from "../../state/schema";
 
-import { OBJECT_PREFERENCES } from "../../canvas/src/objects/registry";
-import { SHAPE_OBJECT_TYPES } from "../src/service/session/perception/op-surface";
+import { OBJECT_PREFERENCES } from "../../objects/registry";
+import { SHAPE_OBJECT_TYPES } from "../perception/op-surface";
 import {
   PLACEABLE_GLYPH_TYPES,
   PLACEABLE_SHAPE_TYPES,
@@ -21,7 +21,7 @@ import {
   glyphForPlaceableType,
   isPlaceableType,
   toDocumentFields,
-} from "../src/service/session/tools/placeable-types";
+} from "../tools/placeable-types";
 
 const GLYPHS: readonly string[] = CANVAS_ICON_GLYPHS;
 

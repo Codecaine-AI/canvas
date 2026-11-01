@@ -25,7 +25,7 @@ import type {
   AgentRect,
   AgentSessionAnnotation,
   AgentSessionAnnotationReply,
-} from "../../../protocol";
+} from "../protocol";
 
 export const USER_REQUESTS_EMPTY = "(none — no user comments or requests on this board)";
 

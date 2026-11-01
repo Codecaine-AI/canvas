@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
-import { blockingDiagnostics, formatDiagnostics, runDiagnostics as runAll } from "../../canvas/src/board/lints/run";
-import type { Diagnostic, LayoutRule } from "../../canvas/src/board/lints/types";
+import { blockingDiagnostics, formatDiagnostics, runDiagnostics as runAll } from "../../board/lints/run";
+import type { Diagnostic, LayoutRule } from "../../board/lints/types";
 import { box, connect, makeDocument } from "./synthetic";
 import { FIGJAM_CONTEXT } from "./helpers";
 

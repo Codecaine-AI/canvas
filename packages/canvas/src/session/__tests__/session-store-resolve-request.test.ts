@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasAnnotation } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasAnnotation } from "../../state/schema";
 
 import {
   emitSessionEvent,
@@ -10,9 +10,9 @@ import {
   toolResolveRequest,
   userRequestsSnapshot,
   type LayoutSession,
-} from "../src/service/session";
-import { USER_REQUESTS_EMPTY } from "../src/service/session/snapshots/user-requests";
-import type { AgentSessionAnnotation } from "../src/protocol";
+} from "..";
+import { USER_REQUESTS_EMPTY } from "../snapshots/user-requests";
+import type { AgentSessionAnnotation } from "../protocol";
 import { makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 

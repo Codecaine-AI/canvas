@@ -15,11 +15,11 @@ import { sectionDescendantIds } from "../../state/geometry";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 // The production rasterizer (resvg): the views' safety contract is "no SVG a
 // view emits can abort it", so the tests drive the real thing.
-import { rasterizeSvgToPng } from "../../../../canvas-agent/src/service/render";
+import { rasterizeSvgToPng } from "../rasterize";
 
 const FIXTURE_PATH = join(
   import.meta.dir,
-  "../../../../canvas-agent/test/fixtures/gc-decomp-harness.canvas.json",
+  "../../session/__tests__/fixtures/gc-decomp-harness.canvas.json",
 );
 
 function fixtureDocument(): InteractiveCanvasDocument {

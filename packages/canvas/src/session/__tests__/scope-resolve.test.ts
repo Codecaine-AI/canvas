@@ -3,12 +3,12 @@ import { join } from "node:path";
 
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
 import {
   resolveScope,
   type ScopeResolution,
-} from "../src/board/scope";
+} from "../../board/scope";
 import { FIXTURES_DIR } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 

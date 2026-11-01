@@ -9,11 +9,11 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasObject } from "../../state/schema";
 
-import { formatBoardDigest } from "../src/board/digest";
-import { findOperationTool } from "../src/service/session/tools/operations";
-import { documentDelta } from "../src/service/session/perception/perception";
+import { formatBoardDigest } from "../../board/digest";
+import { findOperationTool } from "../tools/operations";
+import { documentDelta } from "../perception/perception";
 import { makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 

@@ -1,18 +1,18 @@
 import { describe, expect, test } from "bun:test";
 
-import { createInteractiveCanvasState } from "@codecaine-ai/canvas/actions";
-import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
+import { createInteractiveCanvasState } from "../../state/actions";
+import type { CanvasAgentPatchOperation } from "../../state/actions";
 
-import { handleApplyAgentPatch } from "../../canvas/src/state/actions/agent-patch";
+import { handleApplyAgentPatch } from "../../state/actions/agent-patch";
 import {
   draftWithPageFrame,
   emitSessionEvent,
   syncSessionRequests,
   toolFinalize,
   type LayoutSession,
-} from "../src/service/session";
-import type { LayoutToolTextResult } from "../src/service/session/tools";
-import type { AgentSessionAnnotation } from "../src/protocol";
+} from "..";
+import type { LayoutToolTextResult } from "../tools";
+import type { AgentSessionAnnotation } from "../protocol";
 import { FIGJAM_CANVAS_STYLE, makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 

@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { FINISHING_RULES, LAYOUT_RULES } from "../../canvas/src/board/lints";
+import { FINISHING_RULES, LAYOUT_RULES } from "../../board/lints";
 
-const promptDir = join(import.meta.dir, "../src/catalog/layout-editor/prompt");
+const promptDir = join(import.meta.dir, "../../authoring/prompt");
 const prompt = JSON.parse(readFileSync(join(promptDir, "prompt.json"), "utf8"));
 const rendered = readFileSync(join(promptDir, "system.md"), "utf8");
 const nodes: any[] = [];

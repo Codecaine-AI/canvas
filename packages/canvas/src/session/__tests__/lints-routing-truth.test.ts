@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
-import { rule as brokenEdges } from "../../canvas/src/board/lints/rules/broken-edges";
-import { routeConnection } from "../../canvas/src/connectors/routing.ts";
+import { rule as brokenEdges } from "../../board/lints/rules/broken-edges";
+import { routeConnection } from "../../connectors/routing.ts";
 import { box, connect, makeDocument } from "./synthetic";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
+} from "../../state/schema";
 
 type Point = { x: number; y: number };
 type Rect = Point & { width: number; height: number };

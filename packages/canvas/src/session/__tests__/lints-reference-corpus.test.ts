@@ -10,11 +10,11 @@ import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
-import { LAYOUT_RULES } from "../../canvas/src/board/lints";
+import { LAYOUT_RULES } from "../../board/lints";
 
-const CORPUS_DIR = join(import.meta.dir, "..", "..", "..", "canvases");
+const CORPUS_DIR = join(import.meta.dir, "..", "..", "..", "..", "..", "canvases");
 
 /**
  * Measured ceilings; inspect individual findings before changing these.

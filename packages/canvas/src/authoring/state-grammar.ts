@@ -20,8 +20,8 @@ import {
   DIGEST_DEFAULTS_LEGEND,
   DIGEST_GRAMMAR,
   DIGEST_ROUTE_LEGEND,
-} from "../../../../board/digest";
-import { FINISHING_RULES, LAYOUT_RULES } from "../../../../../../canvas/src/board/lints";
+} from "../board/digest";
+import { FINISHING_RULES, LAYOUT_RULES } from "../board/lints";
 
 const INDENT = "    ";
 

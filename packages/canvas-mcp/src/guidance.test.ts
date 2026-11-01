@@ -7,7 +7,7 @@ import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "n
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { canvasGuidanceSources, guidanceSnapshot } from "@codecaine-ai/canvas-agent/authoring";
+import { canvasGuidanceSources, guidanceSnapshot } from "@codecaine-ai/canvas/authoring";
 
 import { SKILL_DIR, guidanceCommand } from "./guidance";
 import { createCanvasService } from "./service";

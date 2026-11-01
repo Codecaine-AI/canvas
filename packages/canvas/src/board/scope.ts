@@ -4,20 +4,20 @@
  * descendants; the result is the padded-to-1px bounding frame, the full
  * in-scope id set, and a count of connections crossing the scope edge.
  *
- * One consumer: `createSession` in service/session/store.ts, which feeds the
- * frame/ids into <editor_state> and the edit gate. These three values are
+ * One consumer: `openCanvasFile` in toolkit/index.ts, which feeds the
+ * frame/ids into the session and the edit gate. These three values are
  * the session's entire scope model (characterized in
- * test/scope-resolve.test.ts).
+ * session/__tests__/scope-resolve.test.ts).
  */
 import type {
   CanvasGeometry,
   InteractiveCanvasDocument,
-} from "@codecaine-ai/canvas/schema";
+} from "../state/schema";
 
 import {
   boundsForGeometries,
   sectionDescendantIds,
-} from "../../../canvas/src/state/geometry";
+} from "../state/geometry";
 
 export interface ScopeResolution {
   frame: CanvasGeometry;

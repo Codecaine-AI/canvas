@@ -1,7 +1,7 @@
 /**
  * The document differ: baseline vs draft → the ordered internal
  * CanvasAgentPatchOperation list that becomes the committed proposal
- * (`toolFinalize` in service/session/tools/workflow/finalize.ts is the
+ * (`toolFinalize` in session/tools/workflow/finalize.ts is the
  * consumer; the BOARD DIFF block renders the same ops per apply, and studio
  * replays them through `canvas.applyAgentPatch` on accept).
  *
@@ -33,14 +33,14 @@
 import type {
   CanvasAgentPatchOperation,
   CanvasClearablePatch,
-} from "@codecaine-ai/canvas/actions";
-import { reconcileConnectionWaypoints } from "../../../canvas/src/state/actions/waypoints";
+} from "../state/actions";
+import { reconcileConnectionWaypoints } from "../state/actions/waypoints";
 import type {
   InteractiveCanvasAnnotation,
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
+} from "../state/schema";
 
 /**
  * Compare two JSON-shaped canvas values without depending on insertion order

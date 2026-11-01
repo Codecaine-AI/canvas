@@ -15,7 +15,7 @@
  * says so rather than writing a reply the next queue sync would erase.
  */
 import { Type } from "@mariozechner/pi-ai";
-import { nextId } from "../../../../../../canvas/src/state/actions/helpers";
+import { nextId } from "../../../state/actions/helpers";
 
 import {
   formatRequestsBlock,
@@ -24,7 +24,7 @@ import {
 import { syncSessionRequests } from "../../snapshots/context";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { SessionEventSink } from "../../perception/perception";
-import type { LayoutSession } from "../../store";
+import type { LayoutSession } from "../../session";
 import type { LayoutToolTextResult } from "../runtime";
 import { emitAnnotations } from "./add-annotation";
 import { defineWorkflowTool } from "./workflow-tool";

@@ -9,11 +9,11 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { createInteractiveCanvasState } from "@codecaine-ai/canvas/actions";
+import { createInteractiveCanvasState } from "../../state/actions";
 
-import { handleApplyAgentPatch } from "../../canvas/src/state/actions/agent-patch";
-import { CREATION_DEFAULTS } from "../src/service/session/tools/creation-defaults";
-import { diffDocuments } from "../src/board/doc-diff";
+import { handleApplyAgentPatch } from "../../state/actions/agent-patch";
+import { CREATION_DEFAULTS } from "../tools/creation-defaults";
+import { diffDocuments } from "../../board/doc-diff";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 

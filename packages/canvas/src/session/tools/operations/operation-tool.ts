@@ -4,12 +4,12 @@
  * mutation; perception and run-UX reporting stay consistent here.
  */
 import { Type, type Static, type TSchema } from "@mariozechner/pi-ai";
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
-import { reconcileConnectionWaypoints } from "../../../../../../canvas/src/state/actions/waypoints";
-import { reconcileSectionMembership } from "../../../../../../canvas/src/state/section-membership";
+import type { InteractiveCanvasDocument } from "../../../state/schema";
+import { reconcileConnectionWaypoints } from "../../../state/actions/waypoints";
+import { reconcileSectionMembership } from "../../../state/section-membership";
 
-import { formatNumberedRoute } from "../../../../board/edge-route";
-import { formatDiagnostics } from "../../../../../../canvas/src/board/lints/run";
+import { formatNumberedRoute } from "../../../board/edge-route";
+import { formatDiagnostics } from "../../../board/lints/run";
 import type { LayoutToolRenderResult } from "../runtime";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { OpContext, OpOutcome } from "./op-context";
@@ -17,7 +17,7 @@ import {
   operationPerception,
   type SessionEventSink,
 } from "../../perception/perception";
-import type { LayoutSession } from "../../store";
+import type { LayoutSession } from "../../session";
 
 export type { OpOutcome } from "./op-context";
 

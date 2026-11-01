@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { chipFor, CHIP_HEIGHT, chipWidth } from "../../canvas/src/board/lints/geometry";
-import { renderDocumentToSvg } from "../../canvas/src/render/static-svg.ts";
+import { chipFor, CHIP_HEIGHT, chipWidth } from "../../board/lints/geometry";
+import { renderDocumentToSvg } from "../../render/static-svg.ts";
 import { box, connect, makeDocument } from "./synthetic";
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
-import { canvasThemePreset, type CanvasStyle } from "@codecaine-ai/canvas/style";
+import type { InteractiveCanvasDocument } from "../../state/schema";
+import { canvasThemePreset, type CanvasStyle } from "../../theme/canvas-style";
 import { FIGJAM_CANVAS_STYLE } from "./helpers";
-import { measureWidth } from "../../canvas/src/theme/text-measure.ts";
+import { measureWidth } from "../../theme/text-measure.ts";
 
 /**
  * Lint chips ARE the renderer's chips. The CONNECTION_LABEL_* constants are

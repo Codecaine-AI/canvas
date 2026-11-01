@@ -10,12 +10,12 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { createInteractiveCanvasState } from "@codecaine-ai/canvas/actions";
-import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
-import type { InteractiveCanvasAnnotation } from "@codecaine-ai/canvas/schema";
+import { createInteractiveCanvasState } from "../../state/actions";
+import type { CanvasAgentPatchOperation } from "../../state/actions";
+import type { InteractiveCanvasAnnotation } from "../../state/schema";
 
-import { handleApplyAgentPatch } from "../../canvas/src/state/actions/agent-patch";
-import { diffDocuments } from "../src/board/doc-diff";
+import { handleApplyAgentPatch } from "../../state/actions/agent-patch";
+import { diffDocuments } from "../../board/doc-diff";
 import {
   boardDiffBlock,
   describePatchOperation,
@@ -26,7 +26,7 @@ import {
   toolResolveRequest,
   toolSetBoardTitle,
   type LayoutSession,
-} from "../src/service/session";
+} from "..";
 import { makeTestSession } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 

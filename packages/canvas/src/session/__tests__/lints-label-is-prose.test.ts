@@ -4,11 +4,11 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
-} from "@codecaine-ai/canvas/schema";
+} from "../../state/schema";
 
-import { runDiagnostics } from "../../canvas/src/board/lints/run";
-import type { LintContext } from "../../canvas/src/board/lints/types";
-import { rule as labelIsProse } from "../../canvas/src/board/lints/rules/label-is-prose";
+import { runDiagnostics } from "../../board/lints/run";
+import type { LintContext } from "../../board/lints/types";
+import { rule as labelIsProse } from "../../board/lints/rules/label-is-prose";
 import { box, connect, makeDocument } from "./synthetic";
 
 /**
@@ -72,7 +72,7 @@ describe("label-is-prose lint", () => {
       named("spawn", "Spawn Sub Agent to Research Each Query"),
       named("i18n", "Internationalization configuration service"),
       named("auth", "Auth service. Retries twice."),
-      named("agent", "canvas-agent\nport 4820"),
+      named("agent", "layout-agent\nport 4820"),
       named("db", "Postgres database that stores user sessions.\nIt is the source of truth."),
     ]));
 

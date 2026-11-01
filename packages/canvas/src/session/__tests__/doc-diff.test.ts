@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasConnection } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasConnection } from "../../state/schema";
 
-import { diffDocuments } from "../src/board/doc-diff";
+import { diffDocuments } from "../../board/doc-diff";
 import { box, connect, makeDocument } from "./synthetic";
 
 describe("diffDocuments", () => {

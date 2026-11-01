@@ -9,19 +9,19 @@ import { Type } from "@mariozechner/pi-ai";
 import {
   formatRequestLine,
 } from "../../snapshots/user-requests";
-import type { AgentProposal } from "../../../../protocol";
-import { diffDocuments } from "../../../../board/doc-diff";
-import { FINISHING_RULES } from "../../../../../../canvas/src/board/lints";
+import type { AgentProposal } from "../../protocol";
+import { diffDocuments } from "../../../board/doc-diff";
+import { FINISHING_RULES } from "../../../board/lints";
 import {
   blockingDiagnostics,
   diagnosticLines,
   formatDiagnostics,
   sessionDiagnostics,
-} from "../../../../../../canvas/src/board/lints/run";
+} from "../../../board/lints/run";
 import { describePatchOperation } from "../../apply-ops";
 import { scopedDiagnostics } from "../../snapshots/context";
 import type { SessionEventSink } from "../../perception/perception";
-import type { LayoutSession } from "../../store";
+import type { LayoutSession } from "../../session";
 import type { LayoutToolTextResult } from "../runtime";
 import { defineWorkflowTool } from "./workflow-tool";
 

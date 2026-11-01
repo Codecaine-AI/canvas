@@ -1,25 +1,25 @@
-import { CANVAS_COLORS } from "@codecaine-ai/canvas/schema";
+import { CANVAS_COLORS } from "../../state/schema";
 import type {
   CanvasArrowDirection,
   InteractiveCanvasDocument,
   InteractiveCanvasObjectType,
-} from "@codecaine-ai/canvas/schema";
+} from "../../state/schema";
 
 // Relative imports keep the session harness away from the canvas React surface.
-import { preferredObjectColor } from "../../../../../canvas/src/objects/registry";
-import { ICON_GLYPH_IDS } from "../../../../../canvas/src/objects/shapes/icon/icon-glyphs";
-import { renderDocumentToSvg } from "../../../../../canvas/src/render/static-svg";
-import { CENTER_TEXT_INSET_PX } from "../../../../../canvas/src/objects/text-slots";
-import { CANVAS_SANS_FONT_STACK } from "../../../../../canvas/src/theme/fonts";
-import { measureWidth } from "../../../../../canvas/src/theme/text-measure";
+import { preferredObjectColor } from "../../objects/registry";
+import { ICON_GLYPH_IDS } from "../../objects/shapes/icon/icon-glyphs";
+import { renderDocumentToSvg } from "../../render/static-svg";
+import { CENTER_TEXT_INSET_PX } from "../../objects/text-slots";
+import { CANVAS_SANS_FONT_STACK } from "../../theme/fonts";
+import { measureWidth } from "../../theme/text-measure";
 import {
   draftPlacedObject,
   OBJECT_TYPE_DEFAULTS,
-} from "../../../../../canvas/src/state/schema/object-defaults";
+} from "../../state/schema/object-defaults";
 
-import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "@codecaine-ai/canvas/style";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../theme/canvas-style";
 
-import { rasterizeSvgToPng } from "../../render";
+import { rasterizeSvgToPng } from "../../render/rasterize";
 import { PLACEABLE_SHAPE_TYPES } from "../tools/placeable-types";
 
 type Family =

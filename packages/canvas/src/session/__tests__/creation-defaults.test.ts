@@ -1,13 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
-import { FIRST_USE_COLORS } from "@codecaine-ai/canvas/actions";
+import { FIRST_USE_COLORS } from "../../state/actions";
 
 import {
   CREATION_DEFAULTS,
   creationDefaultFor,
   creationKindFor,
-} from "../src/service/session/tools/creation-defaults";
-import { AGENT_GRID } from "../src/service/session/tools/grid";
+} from "../tools/creation-defaults";
+import { AGENT_GRID } from "../tools/grid";
 
 describe("creation defaults (D5)", () => {
   test("every size in the table is a multiple of the agent grid", () => {

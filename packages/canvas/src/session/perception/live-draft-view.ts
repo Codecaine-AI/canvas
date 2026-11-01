@@ -7,11 +7,11 @@
  * lazily whenever the retained pixels do not match the exact current draft,
  * so the state attachments always carry the board as it stands.
  */
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
-import { rasterizeSvgToPng } from "../../render";
+import { rasterizeSvgToPng } from "../../render/rasterize";
 import { sessionCanvasStyle } from "../canvas-style";
-import type { CurrentBoardRender, LayoutSession } from "../store";
+import type { CurrentBoardRender, LayoutSession } from "../session";
 import { BOARD_VIEW_WIDTH, renderBoardView } from "./views";
 
 /** Post-change rasters retained per session. Older entries drop off the front. */

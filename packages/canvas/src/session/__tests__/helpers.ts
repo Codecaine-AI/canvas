@@ -1,18 +1,18 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
-import { FIGJAM_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
+import type { InteractiveCanvasDocument } from "../../state/schema";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 
-import { resolveScope } from "../src/board/scope";
-import { createOpContext } from "../src/service/session/tools/operations/op-context";
-import { findOperationTool } from "../src/service/session/tools/operations";
+import { resolveScope } from "../../board/scope";
+import { createOpContext } from "../tools/operations/op-context";
+import { findOperationTool } from "../tools/operations";
 import {
   emitSessionEvent,
   toolLook,
   type LayoutSession,
-} from "../src/service/session";
-import type { LookRequest } from "../src/service/session/tools";
+} from "..";
+import type { LookRequest } from "../tools";
 
 export const FIXTURES_DIR = join(import.meta.dir, "fixtures");
 

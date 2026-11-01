@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
-import { normalizeCanvasStyle } from "@codecaine-ai/canvas/style";
+import type { InteractiveCanvasObject } from "../../state/schema";
+import { normalizeCanvasStyle } from "../../theme/canvas-style";
 
-import { runDiagnostics } from "../../canvas/src/board/lints/run";
-import { rule as clippedText } from "../../canvas/src/board/lints/rules/clipped-text";
-import { textFitReport } from "../../canvas/src/board/text-fit";
+import { runDiagnostics } from "../../board/lints/run";
+import { rule as clippedText } from "../../board/lints/rules/clipped-text";
+import { textFitReport } from "../../board/text-fit";
 import { box, connect, makeDocument } from "./synthetic";
 import { FIGJAM_CONTEXT } from "./helpers";
 

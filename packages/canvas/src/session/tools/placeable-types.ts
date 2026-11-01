@@ -33,11 +33,11 @@
  * reached by their own names instead. (`section` and `sticky` are already out
  * of `SHAPE_OBJECT_TYPES`; they have their own place gestures.)
  */
-import { CANVAS_ICON_GLYPHS } from "@codecaine-ai/canvas/schema";
-import type { CanvasIconGlyph, InteractiveCanvasObjectType } from "@codecaine-ai/canvas/schema";
+import { CANVAS_ICON_GLYPHS } from "../../state/schema";
+import type { CanvasIconGlyph, InteractiveCanvasObjectType } from "../../state/schema";
 import { StringEnum } from "@mariozechner/pi-ai";
 
-import { OBJECT_PREFERENCES } from "../../../../../canvas/src/objects/registry";
+import { OBJECT_PREFERENCES } from "../../objects/registry";
 import { SHAPE_OBJECT_TYPES } from "../perception/op-surface";
 
 /** The document type that carries a glyph — never a placeable name. */

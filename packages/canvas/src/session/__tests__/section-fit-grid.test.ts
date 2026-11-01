@@ -6,10 +6,10 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import type { CanvasGeometry, InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { CanvasGeometry, InteractiveCanvasObject } from "../../state/schema";
 
-import { resolveFitSection, resolveSizeLike } from "../src/service/session/apply-ops";
-import { AGENT_GRID, snapRectOutward } from "../src/service/session/tools/grid";
+import { resolveFitSection, resolveSizeLike } from "../apply-ops";
+import { AGENT_GRID, snapRectOutward } from "../tools/grid";
 import { box, makeDocument } from "./synthetic";
 
 function frame(id: string, x: number, y: number, width: number, height: number) {

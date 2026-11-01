@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import type { InteractiveCanvasAnnotation } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasAnnotation } from "../../state/schema";
 
-import { formatBoardDigest } from "../src/board/digest";
+import { formatBoardDigest } from "../../board/digest";
 import {
   childrenOf,
   kindOf,
   pageFrameOf,
   siblingsOf,
-} from "../../canvas/src/board/helpers";
-import { formatDiagnostics, runDiagnostics } from "../../canvas/src/board/lints/run";
+} from "../../board/helpers";
+import { formatDiagnostics, runDiagnostics } from "../../board/lints/run";
 import { FIGJAM_CONTEXT } from "./helpers";
 import {
   DIAGNOSTICS_TEXT_SNAPSHOTS,

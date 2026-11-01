@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { textFitReport } from "../../canvas/src/board/text-fit";
-import { renderDocumentToSvg } from "../../canvas/src/render/static-svg.ts";
-import { canvasThemePreset, DEFAULT_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import { textFitReport } from "../../board/text-fit";
+import { renderDocumentToSvg } from "../../render/static-svg.ts";
+import { canvasThemePreset, DEFAULT_CANVAS_STYLE } from "../../theme/canvas-style";
+import type { InteractiveCanvasObject } from "../../state/schema";
 import { FIGJAM_CANVAS_STYLE } from "./helpers";
 
 /**

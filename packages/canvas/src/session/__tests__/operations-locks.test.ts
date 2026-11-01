@@ -13,7 +13,7 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";

@@ -11,19 +11,18 @@
  * this file says — added / changed / removed, per entity kind, plus the one
  * section-fit shape the resolver produces — and that is the whole vocabulary.
  *
- * The ledger (catalog/layout-editor/state/rules/operations.ts) carries
- * the gesture verbs, this file carries the delta verbs, and the two disagreeing
+ * The gesture tools carry the gesture verbs, this file carries the delta verbs, and the two disagreeing
  * is the signal, not a bug: `<ops>` says what was attempted, `<diff>` says what
  * actually changed.
  */
-import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
+import type { CanvasAgentPatchOperation } from "../../state/actions";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
-import { OBJECT_TYPE_DEFAULTS } from "../../../../../canvas/src/state/schema/object-defaults";
+} from "../../state/schema";
+import { OBJECT_TYPE_DEFAULTS } from "../../state/schema/object-defaults";
 
-import type { AgentPatchOperation } from "../../../protocol";
+import type { AgentPatchOperation } from "../protocol";
 
 /**
  * The thirteen delta verbs, in reference order: add / change / remove for each

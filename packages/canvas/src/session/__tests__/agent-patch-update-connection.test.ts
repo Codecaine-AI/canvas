@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
-import { createInteractiveCanvasState } from "@codecaine-ai/canvas/actions";
+import { createInteractiveCanvasState } from "../../state/actions";
 
-import { handleApplyAgentPatch } from "../../canvas/src/state/actions/agent-patch";
+import { handleApplyAgentPatch } from "../../state/actions/agent-patch";
 import { box, connect, makeDocument } from "./synthetic";
 
 describe("handleApplyAgentPatch updateConnection", () => {

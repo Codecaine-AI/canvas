@@ -53,16 +53,16 @@ import { StringEnum, Type } from "@mariozechner/pi-ai";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
+} from "../../../state/schema";
 import {
   alignWithDescendants,
   moveRootIds,
   spaceOutObjects,
   translateWithDescendants,
   type CanvasAlignEdge,
-} from "../../../../../../canvas/src/state/geometry";
+} from "../../../state/geometry";
 
-import { textFitReport } from "../../../../../../canvas/src/board/text-fit";
+import { textFitReport } from "../../../board/text-fit";
 import { applyOperationToDraft, resolveSizeLike } from "../../apply-ops";
 import { snapCoordinate, snapGap, snapPoint, snapSize } from "../grid";
 import type { OpContext, OpOutcome } from "./op-context";

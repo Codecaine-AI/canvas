@@ -10,7 +10,7 @@
  * state/ sidecar and rendered inside section ③'s <scope> block instead. The type
  * and formatter stay here as the shape of that sessionData slot.
  */
-import type { AgentSessionViewport, AgentRect } from "../../../protocol";
+import type { AgentSessionViewport, AgentRect } from "../protocol";
 
 export interface EditorStateSnapshot {
   canvasId: string;

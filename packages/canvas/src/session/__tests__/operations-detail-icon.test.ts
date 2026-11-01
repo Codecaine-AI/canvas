@@ -15,12 +15,12 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasObject } from "../../state/schema";
 
-import { diffDocuments } from "../src/board/doc-diff";
-import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../canvas/src/board/text-rules";
-import { findOperationTool } from "../src/service/session/tools/operations";
-import { boardDiffBlock, documentDelta } from "../src/service/session/perception/perception";
+import { diffDocuments } from "../../board/doc-diff";
+import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../board/text-rules";
+import { findOperationTool } from "../tools/operations";
+import { boardDiffBlock, documentDelta } from "../perception/perception";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 

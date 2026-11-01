@@ -3,10 +3,10 @@ import { describe, expect, test } from "bun:test";
 import {
   pathBoxViolationIds,
   routedPolyline,
-} from "../../canvas/src/board/lints/geometry";
-import { rule as brokenEdges } from "../../canvas/src/board/lints/rules/broken-edges";
+} from "../../board/lints/geometry";
+import { rule as brokenEdges } from "../../board/lints/rules/broken-edges";
 import { box, connect, makeDocument } from "./synthetic";
-import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../../state/schema";
 
 /**
  * A grid of straight runs that cross in empty space: `verticals` columns

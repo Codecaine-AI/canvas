@@ -12,7 +12,7 @@ import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { operationTools, workflowTools } from "@codecaine-ai/canvas-agent/toolkit";
+import { operationTools, workflowTools } from "@codecaine-ai/canvas/toolkit";
 
 import { openActionLog } from "@codecaine-ai/action-log";
 import { createCanvasMcpServer,MCP_INSTRUCTIONS } from "./mcp";

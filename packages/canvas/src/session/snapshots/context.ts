@@ -10,13 +10,13 @@
 import type {
   CanvasGeometry,
   InteractiveCanvasDocument,
-} from "@codecaine-ai/canvas/schema";
+} from "../../state/schema";
 
-import type { Rect } from "../../../../../canvas/src/board/types";
-import { formatBoardDigest } from "../../../board/digest";
-import { formatDiagnostics, sessionDiagnostics } from "../../../../../canvas/src/board/lints/run";
-import type { Diagnostic } from "../../../../../canvas/src/board/lints";
-import { rectIntersectionArea } from "../../../../../canvas/src/board/measure";
+import type { Rect } from "../../board/types";
+import { formatBoardDigest } from "../../board/digest";
+import { formatDiagnostics, sessionDiagnostics } from "../../board/lints/run";
+import type { Diagnostic } from "../../board/lints";
+import { rectIntersectionArea } from "../../board/measure";
 
 import { formatBoardDescription } from "./board-state";
 import type { EditorStateSnapshot } from "./editor-state";
@@ -25,9 +25,9 @@ import {
   type RequestAuthor,
   type RequestQueueEntry,
 } from "./user-requests";
-import type { AgentSessionAnnotation } from "../../../protocol";
+import type { AgentSessionAnnotation } from "../protocol";
 import { fromDocumentFields } from "../tools/placeable-types";
-import type { LayoutSession } from "../store";
+import type { LayoutSession } from "../session";
 
 /** A generous world-space bound that rejects overflow/memory-bomb crops. */
 const MAX_RENDER_CROP_DIMENSION = 1_000_000;
@@ -239,7 +239,7 @@ export function documentWithinCrop(
 // Page-frame injection is a pure board transformation, so it lives in the
 // board layer (where the lint authorship baseline also needs it); the session
 // surface keeps exporting it from here.
-export { draftWithPageFrame, injectedPageFrame } from "../../../../../canvas/src/board/page-frame";
+export { draftWithPageFrame, injectedPageFrame } from "../../board/page-frame";
 
 /**
  * The spawn-time <board_state> payload: description + full (untruncated)

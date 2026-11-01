@@ -1,5 +1,5 @@
 /**
- * Draft mutation primitives for canvas-agent operations.
+ * Draft mutation primitives for layout-session operations.
  *
  * Lower-level document edits apply the internal patch grammar directly to a
  * draft. No section is resized implicitly: a frame keeps exactly the geometry
@@ -8,21 +8,21 @@
  * the canvas package, so this draft applier and studio's accept-time reducer
  * produce identical documents.
  */
-import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
+import type { CanvasAgentPatchOperation } from "../state/actions";
 import {
   type CanvasAnnotationReply,
   type InteractiveCanvasAnnotation,
   type InteractiveCanvasConnection,
   type InteractiveCanvasDocument,
   type InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
-import { sectionDescendantIds, sectionFitGeometry } from "../../../../canvas/src/state/geometry";
-import { reconcileSectionMembership } from "../../../../canvas/src/state/section-membership";
-import { clearsAsUndefined } from "../../../../canvas/src/state/actions/agent-patch";
-import { nextId } from "../../../../canvas/src/state/actions/helpers";
-import { mergeObjectPatch, withNormalizedDetail } from "../../../../canvas/src/state/actions/objects";
+} from "../state/schema";
+import { sectionDescendantIds, sectionFitGeometry } from "../state/geometry";
+import { reconcileSectionMembership } from "../state/section-membership";
+import { clearsAsUndefined } from "../state/actions/agent-patch";
+import { nextId } from "../state/actions/helpers";
+import { mergeObjectPatch, withNormalizedDetail } from "../state/actions/objects";
 
-import type { AgentPatchOperation } from "../../protocol";
+import type { AgentPatchOperation } from "./protocol";
 import { snapRectOutward } from "./tools/grid";
 
 /** Describe an internal patch operation for human-readable summaries. */

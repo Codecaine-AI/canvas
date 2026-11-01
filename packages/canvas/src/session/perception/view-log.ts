@@ -12,8 +12,8 @@
  * tool result carries those images in the recent conversation tail; state
  * attachments instead come from `currentBoard` and `changeRenders`.
  */
-import type { Rect } from "../../../../../canvas/src/board/types";
-import type { LayoutSession } from "../store";
+import type { Rect } from "../../board/types";
+import type { LayoutSession } from "../session";
 
 /** One rendered raster the model was shown, with what it depicts. */
 export interface SessionView {

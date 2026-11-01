@@ -15,9 +15,9 @@ import {
   DEFAULT_CANVAS_STYLE,
   FIGJAM_CANVAS_STYLE,
   canvasThemePreset,
-} from "@codecaine-ai/canvas/style";
+} from "../../theme/canvas-style";
 
-import { canvasStylePath, loadCanvasStyle } from "../src/service/session/canvas-style";
+import { canvasStylePath, loadCanvasStyle } from "../canvas-style";
 
 const dirs: string[] = [];
 afterEach(() => {

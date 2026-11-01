@@ -23,10 +23,10 @@
  * and the model has to decide whether the request really requires editing
  * there — see `requireUnlocked` for the full rule.
  */
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
-import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "@codecaine-ai/canvas/style";
+import type { InteractiveCanvasDocument } from "../../../state/schema";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../../theme/canvas-style";
 
-import type { AgentPatchOperation } from "../../../../protocol";
+import type { AgentPatchOperation } from "../../protocol";
 
 import {
   applyOperationToDraft,

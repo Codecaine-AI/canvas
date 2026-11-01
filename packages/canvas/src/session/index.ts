@@ -1,10 +1,10 @@
-/** Public import surface for layout-session lifecycle, helpers, and directly tested tools. */
+/** Public import surface for the layout session, its helpers, and directly tested tools. */
 export {
   emitSessionEvent,
-  HttpError,
-  LayoutSessionStore,
+  type ChangeRender,
+  type CurrentBoardRender,
   type LayoutSession,
-} from "./store";
+} from "./session";
 
 export {
   boardStateSnapshot,
@@ -29,12 +29,6 @@ export {
   operationPerception,
   type DocumentDelta,
 } from "./perception/perception";
-
-export {
-  forgetLayoutSession,
-  layoutSessionForContainer,
-  registerLayoutSession,
-} from "./registry";
 
 export {
   describeSessionView,
@@ -78,13 +72,6 @@ export {
   type LayoutToolHost,
   type LayoutToolState,
 } from "./tools";
-
-export {
-  bootPerception,
-  houseStyleExemplar,
-  type BootImages,
-  type BootPerception,
-} from "./perception/boot";
 
 export { vocabularyContactSheet } from "./perception/contact-sheet";
 

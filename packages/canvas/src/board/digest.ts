@@ -7,7 +7,7 @@
  * gate). User annotations are NOT
  * part of the digest; they travel in the separate <user_requests> block.
  *
- * The type column speaks the FOLDED vocabulary (service/session/
+ * The type column speaks the FOLDED vocabulary (session/
  * placeable-types.ts): the same names `place_shape` and `change_shape` accept,
  * so a row can be edited by reading it. The document's `{type:"icon", icon}`
  * split never appears — the glyph name is the type. A SECTION's header glyph is
@@ -18,12 +18,12 @@ import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
-import { OBJECT_TYPE_DEFAULTS } from "../../../canvas/src/state/schema/object-defaults";
+} from "../state/schema";
+import { OBJECT_TYPE_DEFAULTS } from "../state/schema/object-defaults";
 
-import { fromDocumentFields } from "../service/session/tools/placeable-types";
+import { fromDocumentFields } from "../session/tools/placeable-types";
 import { formatNumberedRoute } from "./edge-route";
-import { kindOf, pageFrameOf } from "../../../canvas/src/board/helpers";
+import { kindOf, pageFrameOf } from "./helpers";
 
 /**
  * The digest itself carries bare values — no legend lines. Its grammar is

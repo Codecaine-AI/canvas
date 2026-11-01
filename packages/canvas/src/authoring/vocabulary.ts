@@ -1,8 +1,8 @@
-import { OBJECT_PREFERENCES, type ObjectPreference } from "../../../canvas/src/objects/registry";
-import { ICON_GLYPH_CATEGORIES, resolveIconGlyph } from "../../../canvas/src/objects/shapes/icon/icon-glyphs";
-import { CANVAS_COLORS } from "../../../canvas/src/state/schema/colors";
-import { CANVAS_STYLE_FILENAME, CANVAS_THEME_IDS } from "../../../canvas/src/theme/canvas-style";
-import { BRAND_GLYPH_PREFIX, isBrandGlyph, isGlyphName } from "../service/session/tools/glyph-names";
+import { OBJECT_PREFERENCES, type ObjectPreference } from "../objects/registry";
+import { ICON_GLYPH_CATEGORIES, resolveIconGlyph } from "../objects/shapes/icon/icon-glyphs";
+import { CANVAS_COLORS } from "../state/schema/colors";
+import { CANVAS_STYLE_FILENAME, CANVAS_THEME_IDS } from "../theme/canvas-style";
+import { BRAND_GLYPH_PREFIX, isBrandGlyph, isGlyphName } from "../session/tools/glyph-names";
 import type { AuthoringTopic } from "./design";
 
 const xml = (value: string) => value.replaceAll("&", "&amp;")

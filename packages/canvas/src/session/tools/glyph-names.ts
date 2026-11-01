@@ -9,7 +9,7 @@
  * The roster is the schema's own CANVAS_ICON_GLYPHS, so a glyph added there is
  * accepted and suggested here with no second list to keep in sync.
  */
-import { CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "@codecaine-ai/canvas/schema";
+import { CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "../../state/schema";
 
 /** Brand logos share one prefix: `brand-postgres` draws the PostgreSQL logo. */
 export const BRAND_GLYPH_PREFIX = "brand-";

@@ -3,18 +3,18 @@
  * Also home of the annotations event emitter the thread tools share.
  */
 import { Type } from "@mariozechner/pi-ai";
-import type { InteractiveCanvasAnnotation } from "@codecaine-ai/canvas/schema";
-import { nextId } from "../../../../../../canvas/src/state/actions/helpers";
+import type { InteractiveCanvasAnnotation } from "../../../state/schema";
+import { nextId } from "../../../state/actions/helpers";
 
 import {
   formatRequestsBlock,
   targetText,
 } from "../../snapshots/user-requests";
-import type { AgentSessionAnnotation } from "../../../../protocol";
+import type { AgentSessionAnnotation } from "../../protocol";
 import { syncSessionRequests } from "../../snapshots/context";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { SessionEventSink } from "../../perception/perception";
-import type { LayoutSession } from "../../store";
+import type { LayoutSession } from "../../session";
 import type { LayoutToolTextResult } from "../runtime";
 import { defineWorkflowTool } from "./workflow-tool";
 

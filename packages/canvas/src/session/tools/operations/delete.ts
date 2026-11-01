@@ -20,7 +20,7 @@
  * only the `name` field carries the real name, and that is the one the model
  * and the roster see.
  */
-import { sectionDescendantIds } from "../../../../../../canvas/src/state/geometry";
+import { sectionDescendantIds } from "../../../state/geometry";
 
 import { defineOperationTool } from "./operation-tool";
 import { entityKindOf } from "../../perception/op-surface";

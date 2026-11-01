@@ -6,14 +6,14 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { CRAFT_TARGETS, STYLE_TOPICS } from "../src/catalog/layout-editor/context/style-guide";
-import { AGENT_GRID } from "../src/service/session/tools/grid";
+import { CRAFT_TARGETS, STYLE_TOPICS } from "../../authoring/style-guide";
+import { AGENT_GRID } from "../tools/grid";
 
 const EXPECTED_TOPIC_IDS = [
   "aesthetic",
 ];
 
-describe("style registry (catalog/layout-editor/context/style-guide)", () => {
+describe("style registry (authoring/style-guide)", () => {
   test("every topic is exported, in registry order", () => {
     expect(STYLE_TOPICS.map((topic) => topic.id)).toEqual(EXPECTED_TOPIC_IDS);
   });

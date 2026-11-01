@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
-import { runDiagnostics } from "../../canvas/src/board/lints/run";
-import { rule as sectionChildColor } from "../src/board/lints/rules/section-child-color";
+import { runDiagnostics } from "../../board/lints/run";
+import { rule as sectionChildColor } from "../../board/lints/rules/section-child-color";
 import { box, makeDocument } from "./synthetic";
 
 /**

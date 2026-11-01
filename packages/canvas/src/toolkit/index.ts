@@ -1,37 +1,33 @@
 /**
- * The layout editor's toolkit, bound to a canvas file instead of a kernel run.
+ * The layout editor's toolkit, bound to a canvas file.
  *
- * The layout-editor agent edits a board through one surface: the 25 gesture
- * tools (`operationTools`) and the workflow tools (`workflowTools`), dispatched
- * through a `LayoutToolRuntime` bound to a `LayoutSession`. That binding is the
- * only thing the kernel contributes — `createToolRuntime(host)` asks its host
- * for "the current session" and every tool body works from there. This module
- * supplies a second host: a session opened straight from a
- * `canvases/<id>.canvas.json` file, whose edits are written back to that file
- * after every applied change. External agents (the canvas MCP, anything else
- * that wants the agent's hands without the agent's harness) get the exact
- * tool declarations, validation, and code paths the in-app agent runs.
+ * A board is edited through one surface: the 25 gesture tools
+ * (`operationTools`) and the workflow tools (`workflowTools`), dispatched
+ * through a `LayoutToolRuntime` bound to a `LayoutSession`.
+ * `createToolRuntime(host)` asks its host for "the current session" and every
+ * tool body works from there. This module is that host: a session opened
+ * straight from a `canvases/<id>.canvas.json` file, whose edits are written
+ * back to that file after every applied change. External agents (the canvas
+ * MCP, anything else that edits boards) get the exact tool declarations,
+ * validation, and code paths.
  *
- * What differs from a kernel session is only the lifecycle around the tools:
+ * The lifecycle around the tools:
  *
  * - **Open** reads the file, hashes its bytes, resolves the whole board as the
- *   scope (there is no operator selection), and builds the draft the same way
- *   `LayoutSessionStore.createSession` does — page-frame injection, lint
- *   baseline, request-queue sync. No container, session directory, or
- *   registry entry is created: nothing on this path reads them.
- * - **Persist** replaces the propose/accept round trip. Edits save
- *   immediately, through the same patch path Studio's Accept uses: the diff
- *   since the last write replays onto the on-disk document through the canvas
- *   reducer's `canvas.applyAgentPatch`, so the file lands exactly as an
- *   accepted proposal would leave it. A file that changed underneath the
- *   session is never clobbered — the caller must re-open it.
+ *   scope (there is no operator selection), and builds the draft:
+ *   page-frame injection, lint baseline, request-queue sync. No container,
+ *   session directory, or registry entry is created: nothing on this path
+ *   reads them.
+ * - **Persist** saves every edit immediately, through the same patch path
+ *   Studio's save uses: the diff since the last write replays onto the
+ *   on-disk document through the canvas reducer's `canvas.applyAgentPatch`.
+ *   A file that changed underneath the session is never clobbered — the
+ *   caller must re-open it.
  * - **finalize** is not on the surface: there is no proposal to commit.
  *
  * Import discipline: this module and everything it reaches must load without
- * `@codecaine-ai/agent-kernel*`, `service/kernel.ts`, `service/session/store.ts`, or React.
- * Session internals are therefore imported by deep path, never through the
- * `service/session` barrel (which re-exports the kernel-backed store), and
- * `LayoutSession` is a type-only import.
+ * React, so the canvas package's object definitions are reached only through
+ * type-only imports.
  */
 import { createHash, randomUUID } from "node:crypto";
 import { readFileSync, renameSync, unlinkSync, writeFileSync } from "node:fs";
@@ -42,11 +38,11 @@ import {
   createInteractiveCanvasState,
   reduceInteractiveCanvasState,
   type CanvasAgentPatchOperation,
-} from "@codecaine-ai/canvas/actions";
+} from "../state/actions";
 import {
   validateInteractiveCanvasDocument,
   type InteractiveCanvasDocument,
-} from "@codecaine-ai/canvas/schema";
+} from "../state/schema";
 
 import { diffDocuments } from "../board/doc-diff";
 import {
@@ -54,35 +50,35 @@ import {
   diagnosticLines,
   sessionDiagnostics,
   type Diagnostic,
-} from "@codecaine-ai/canvas/lints";
-import { rasterizeSvgToPng } from "../service/render";
-import { BOARD_VIEW_WIDTH, renderBoardView } from "../service/session/perception/views";
+} from "../lints";
+import { rasterizeSvgToPng } from "../render/rasterize";
+import { BOARD_VIEW_WIDTH, renderBoardView } from "../session/perception/views";
 import { resolveScope } from "../board/scope";
-import { canvasStyleOverrides } from "@codecaine-ai/canvas/style";
-import { loadCanvasStyle, type CanvasStyle } from "../service/session/canvas-style";
+import { canvasStyleOverrides } from "../theme/canvas-style";
+import { loadCanvasStyle, type CanvasStyle } from "../session/canvas-style";
 import {
   boardStateSnapshot,
   draftWithPageFrame,
   injectedPageFrame,
   syncSessionRequests,
-} from "../service/session/snapshots/context";
-import type { LayoutSession } from "../service/session/store";
-import { createToolRuntime } from "../service/session/tools/create-runtime";
-import { closeNames } from "../service/session/tools/glyph-names";
-import { operationTools, type OperationTool } from "../service/session/tools/operations";
+} from "../session/snapshots/context";
+import type { LayoutSession } from "../session/session";
+import { createToolRuntime } from "../session/tools/create-runtime";
+import { closeNames } from "../session/tools/glyph-names";
+import { operationTools, type OperationTool } from "../session/tools/operations";
 import type {
   LayoutToolRenderResult,
   LayoutToolRuntime,
-} from "../service/session/tools/runtime";
-import { workflowTools } from "../service/session/tools/workflow";
-import type { WorkflowTool } from "../service/session/tools/workflow/workflow-tool";
+} from "../session/tools/runtime";
+import { workflowTools } from "../session/tools/workflow";
+import type { WorkflowTool } from "../session/tools/workflow/workflow-tool";
 
 export { boardStateSnapshot, operationTools, workflowTools };
 export { canvasStyleOverrides, loadCanvasStyle };
 export type { CanvasStyle, LayoutSession, LayoutToolRenderResult, LayoutToolRuntime, OperationTool, WorkflowTool };
 
 /**
- * Workflow tools with no meaning outside a kernel run. `finalize` ends a run
+ * Workflow tools with no meaning outside an agent run. `finalize` ends a run
  * and turns the draft into a proposal for operator review; a file session has
  * neither a run nor a proposal, because every applied change is already on
  * disk.
@@ -185,14 +181,13 @@ function canvasIdOf(canvasPath: string): string {
 /**
  * Open a canvas file as a layout session bound to a fresh tool runtime.
  *
- * The session mirrors `LayoutSessionStore.createSession`: the file is the
+ * The session is built from the file: the file is the
  * baseline, the draft carries an injected page frame when the board has no
  * root section, the lint baseline is seeded so the first edit reports a delta,
  * and the request queue is synced from the document's annotation threads.
  * Scope is the whole board — every object in the draft, the injected frame
  * included — since an external caller edits the board rather than a selection.
- * `containerId` and `sessionDir` are inert labels: nothing outside the kernel
- * store reads them.
+ * `containerId` and `sessionDir` are inert labels: nothing reads them.
  *
  * The workspace canvas style is read here too, from `canvas-style.json` beside
  * the canvas file (defaults when it is missing or malformed), so every render

@@ -28,9 +28,9 @@
 import { StringEnum, Type } from "@mariozechner/pi-ai";
 import type { Static } from "@mariozechner/pi-ai";
 
-import { CANVAS_COLORS, CANVAS_ICON_GLYPHS } from "@codecaine-ai/canvas/schema";
+import { CANVAS_COLORS, CANVAS_ICON_GLYPHS } from "../../state/schema";
 
-import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../../../../canvas/src/board/text-rules";
+import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../board/text-rules";
 import { SHAPE_OBJECT_TYPES } from "../perception/op-surface";
 import { BRAND_GLYPH_PREFIX } from "./glyph-names";
 import { PlaceableType } from "./placeable-types";
@@ -322,13 +322,13 @@ export type ConnectionPatch = Static<typeof ConnectionPatch>;
 // The place payloads carry ONLY what the UI's creation gesture carries: the
 // pick, the click, and the typing that is part of the same motion. Everything
 // else about a new object comes from the creation defaults
-// (service/session/tools/creation-defaults.ts), and every
+// (session/tools/creation-defaults.ts), and every
 // property beyond the default is its own subsequent gesture — resize, then
 // recolor, then relabel. That is why there is no `color` and no `geometry`
 // here: they are not omissions, they are the point.
 //
 // `at` is the TOP-LEFT of the box, in world units, snapped to the agent grid
-// (service/session/tools/grid.ts, AGENT_GRID = 20) before it is lowered onto a
+// (session/tools/grid.ts, AGENT_GRID = 20) before it is lowered onto a
 // document patch. Section membership is reconciled from geometry afterwards.
 //
 // The payload/patch shapes above are not a second tool surface: they are the

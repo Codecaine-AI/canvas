@@ -10,7 +10,7 @@
 import { Type } from "@mariozechner/pi-ai";
 
 import { lookPerception } from "../../perception/perception";
-import type { LayoutSession } from "../../store";
+import type { LayoutSession } from "../../session";
 import type { LayoutToolRenderResult, LookRequest } from "../runtime";
 import { defineWorkflowTool } from "./workflow-tool";
 

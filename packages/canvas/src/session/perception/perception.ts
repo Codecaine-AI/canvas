@@ -10,48 +10,48 @@
  * asks for. State assembly reads the eager full-board render captured after
  * each applied gesture.
  */
-import type { CanvasAgentPatchOperation } from "@codecaine-ai/canvas/actions";
+import type { CanvasAgentPatchOperation } from "../../state/actions";
 import {
   type CanvasGeometry,
   type InteractiveCanvasConnection,
   type InteractiveCanvasDocument,
   type InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
-import { routeConnection } from "../../../../../canvas/src/connectors/routing";
+} from "../../state/schema";
+import { routeConnection } from "../../connectors/routing";
 // Relative imports so the harness never loads the package's React surface.
 import {
   connectionPaintedBounds,
   paintedBounds,
   unionRects,
-} from "../../../../../canvas/src/render/painted-bounds";
-import { renderDocumentToSvg } from "../../../../../canvas/src/render/static-svg";
-import { sectionDescendantIds } from "../../../../../canvas/src/state/geometry";
+} from "../../render/painted-bounds";
+import { renderDocumentToSvg } from "../../render/static-svg";
+import { sectionDescendantIds } from "../../state/geometry";
 
 import { formatRequestsBlock, targetText } from "../snapshots/user-requests";
-import { formatBoardDigest } from "../../../board/digest";
-import { diffDocuments } from "../../../board/doc-diff";
-import { formatNumberedSegments, numberedSegmentsForPolyline } from "../../../board/edge-route";
-import { kindOf } from "../../../../../canvas/src/board/helpers";
-import type { Diagnostic } from "../../../../../canvas/src/board/lints";
-import { pathBoxViolationIds } from "../../../../../canvas/src/board/lints/geometry";
+import { formatBoardDigest } from "../../board/digest";
+import { diffDocuments } from "../../board/doc-diff";
+import { formatNumberedSegments, numberedSegmentsForPolyline } from "../../board/edge-route";
+import { kindOf } from "../../board/helpers";
+import type { Diagnostic } from "../../board/lints";
+import { pathBoxViolationIds } from "../../board/lints/geometry";
 import {
   diagnosticLines,
   formatDiagnostics,
   runDiagnostics,
   sessionDiagnostics,
   sessionLintContext,
-} from "../../../../../canvas/src/board/lints/run";
-import { formatRegionMeasures, measureRegion } from "../../../../../canvas/src/board/measure";
-import type { Rect } from "../../../../../canvas/src/board/types";
-import type { AgentSessionEvent } from "../../../protocol";
-import { rasterizeSvgToPng } from "../../render";
+} from "../../board/lints/run";
+import { formatRegionMeasures, measureRegion } from "../../board/measure";
+import type { Rect } from "../../board/types";
+import type { AgentSessionEvent } from "../protocol";
+import { rasterizeSvgToPng } from "../../render/rasterize";
 import type { LayoutToolRenderResult } from "../tools/runtime";
 import { documentWithinCrop, expandRect, renderCropError, round2 } from "../snapshots/context";
 import { classifyDelta, deltaTargetId } from "./op-surface";
 import { fromDocumentFields } from "../tools/placeable-types";
 import { sessionCanvasStyle } from "../canvas-style";
-import type { CanvasStyle } from "@codecaine-ai/canvas/style";
-import type { LayoutSession } from "../store";
+import type { CanvasStyle } from "../../theme/canvas-style";
+import type { LayoutSession } from "../session";
 import { recordSessionView } from "./view-log";
 import {
   CROP_VIEW_WIDTH,

@@ -4,7 +4,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
-} from "@codecaine-ai/canvas/schema";
+} from "../../state/schema";
 
 /** Hand-built synthetic documents for the scope/diff/lint unit cases. */
 

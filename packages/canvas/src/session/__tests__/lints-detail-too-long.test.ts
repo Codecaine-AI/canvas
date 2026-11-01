@@ -4,11 +4,11 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
-} from "@codecaine-ai/canvas/schema";
+} from "../../state/schema";
 
-import { runDiagnostics } from "../../canvas/src/board/lints/run";
-import type { LintContext } from "../../canvas/src/board/lints/types";
-import { rule as detailTooLong } from "../../canvas/src/board/lints/rules/detail-too-long";
+import { runDiagnostics } from "../../board/lints/run";
+import type { LintContext } from "../../board/lints/types";
+import { rule as detailTooLong } from "../../board/lints/rules/detail-too-long";
 import { box, makeDocument } from "./synthetic";
 
 /**

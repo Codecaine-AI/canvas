@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
 
-import { canvasThemePreset, normalizeCanvasStyle, type CanvasStyle } from "@codecaine-ai/canvas/style";
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import { canvasThemePreset, normalizeCanvasStyle, type CanvasStyle } from "../../theme/canvas-style";
+import type { InteractiveCanvasObject } from "../../state/schema";
 
-import { textFitReport } from "../../canvas/src/board/text-fit";
-import { rule as clippedText } from "../../canvas/src/board/lints/rules/clipped-text";
-import { renderDocumentToSvg } from "../../canvas/src/render/static-svg.ts";
+import { textFitReport } from "../../board/text-fit";
+import { rule as clippedText } from "../../board/lints/rules/clipped-text";
+import { renderDocumentToSvg } from "../../render/static-svg.ts";
 import { makeDocument } from "./synthetic";
 import { FIGJAM_CANVAS_STYLE } from "./helpers";
-import { measureWidth } from "../../canvas/src/theme/text-measure.ts";
+import { measureWidth } from "../../theme/text-measure.ts";
 
 /**
  * text-fit counts the one-line `detail` under a name (contract §4/§5): the

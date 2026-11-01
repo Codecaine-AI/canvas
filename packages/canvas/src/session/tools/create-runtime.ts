@@ -5,10 +5,10 @@
  * dispatch that resolves a gesture name back to its descriptor and runs the
  * operation pipeline.
  */
-import type { AgentSessionEvent } from "../../../protocol";
+import type { AgentSessionEvent } from "../protocol";
 import { sessionCanvasStyle } from "../canvas-style";
 import type { SessionEventSink } from "../perception/perception";
-import type { LayoutSession } from "../store";
+import type { LayoutSession } from "../session";
 import { findOperationTool } from "./operations";
 import { createOpContext } from "./operations/op-context";
 import type { OperationHost } from "./operations/operation-tool";

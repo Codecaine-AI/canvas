@@ -38,9 +38,9 @@
  * membership reconciliation, diffing, linting, routed truth, rendering, and
  * event emission — so a spec here is validation plus one lowered patch.
  */
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
-import { sectionDescendantIds } from "../../../../../../canvas/src/state/geometry";
-import { draftPlacedObject } from "../../../../../../canvas/src/state/schema/object-defaults";
+import type { InteractiveCanvasObject } from "../../../state/schema";
+import { sectionDescendantIds } from "../../../state/geometry";
+import { draftPlacedObject } from "../../../state/schema/object-defaults";
 
 import { creationDefaultFor } from "../creation-defaults";
 import { detailDroppedNote, storedDetail } from "../detail-line";

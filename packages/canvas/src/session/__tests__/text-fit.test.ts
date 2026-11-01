@@ -1,11 +1,11 @@
 import { describe, expect, test } from "bun:test";
 
-import { textFitReport } from "../../canvas/src/board/text-fit";
+import { textFitReport } from "../../board/text-fit";
 
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
+} from "../../state/schema";
 
 /**
  * Unit cases for the resize/update_text readability warning (S0.5): one

@@ -5,7 +5,7 @@ import { canvasAuthoringTopics, canvasGuidanceSources, guidanceSnapshot } from "
 export type { AuthoringTopic } from "./design";
 export { VISUAL_PATTERNS, renderVisualPatterns, type VisualPattern } from "./visual-patterns";
 export { canvasAuthoringTopics, canvasGuidanceSources, guidanceSnapshot, type GuidanceSource } from "./sources";
-export { vocabularyContactSheet } from "../service/session/perception/contact-sheet";
+export { vocabularyContactSheet } from "../session/perception/contact-sheet";
 
 export function formatAuthoringTopic(topic: AuthoringTopic): string {
   const body = topic.text.split("\n").map(line => line ? `    ${line}` : "").join("\n");

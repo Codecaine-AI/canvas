@@ -5,9 +5,8 @@ import {
   formatRegionMeasures,
   measureRegion,
   rectIntersectionArea,
-} from "../../canvas/src/board/measure";
-import tools from "../src/catalog/layout-editor/tools";
-import type { ToolRegistrar } from "../src/catalog/layout-editor/tools";
+} from "../../board/measure";
+import { workflowTools } from "../tools/workflow";
 import { box, makeDocument } from "./synthetic";
 
 /** A 2×2 grid of 160×96 boxes inside a 640×480 frame. Every number below is
@@ -230,13 +229,7 @@ describe("MEASURES grammar", () => {
 
 describe("the look tool declaration", () => {
   function lookTool() {
-    const registered: Array<Record<string, unknown>> = [];
-    const pi = {
-      on: () => {},
-      registerTool: (definition: Record<string, unknown>) => registered.push(definition),
-    } as unknown as ToolRegistrar;
-    tools(pi, undefined);
-    return registered.find((definition) => definition.name === "look")!;
+    return workflowTools.find((tool) => tool.name === "look")!;
   }
 
   test("declares the framing knob the runtime honours", () => {

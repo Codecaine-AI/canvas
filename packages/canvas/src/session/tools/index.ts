@@ -1,8 +1,7 @@
 /**
  * Public import surface for the layout tool surface: the runtime contract and
  * its binding, the workflow roster, and the directly tested tool functions.
- * The path `src/service/session/tools` resolves here, so deep imports keep
- * working unchanged.
+ * The path `session/tools` resolves here.
  */
 export type {
   LayoutToolRenderResult,

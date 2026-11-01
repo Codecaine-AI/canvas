@@ -16,10 +16,10 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
-import { FINISHING_RULES } from "../../canvas/src/board/lints";
-import { operationTools } from "../src/service/session/tools/operations";
+import { FINISHING_RULES } from "../../board/lints";
+import { operationTools } from "../tools/operations";
 import { box, connect, makeDocument } from "./synthetic";
 
 /** The retired CRUD roster, as it would read if it leaked back into prose. */

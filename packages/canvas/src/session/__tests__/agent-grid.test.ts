@@ -3,7 +3,7 @@ import { describe, expect, test } from "bun:test";
 import {
   createInteractiveCanvasState,
   reduceInteractiveCanvasState,
-} from "@codecaine-ai/canvas/actions";
+} from "../../state/actions";
 
 import {
   AGENT_GRID,
@@ -11,7 +11,7 @@ import {
   snapGap,
   snapPoint,
   snapSize,
-} from "../src/service/session/tools/grid";
+} from "../tools/grid";
 import { makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 

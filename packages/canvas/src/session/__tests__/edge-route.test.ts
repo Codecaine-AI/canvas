@@ -9,13 +9,13 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import { connectorBendSegments } from "../../canvas/src/connectors/bend-editing";
+import { connectorBendSegments } from "../../connectors/bend-editing";
 import {
   formatNumberedRoute,
   numberedRouteSegments,
   numberedSegmentsForPolyline,
-} from "../src/board/edge-route";
-import { routedPolyline } from "../../canvas/src/board/lints/geometry";
+} from "../../board/edge-route";
+import { routedPolyline } from "../../board/lints/geometry";
 import { box, connect, makeDocument } from "./synthetic";
 
 const waypointsOf = (points: Array<[number, number]>): Array<[number, number]> => points;

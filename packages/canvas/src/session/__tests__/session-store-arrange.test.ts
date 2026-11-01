@@ -3,11 +3,11 @@ import { describe, expect, test } from "bun:test";
 import {
   createInteractiveCanvasState,
   reduceInteractiveCanvasState,
-} from "@codecaine-ai/canvas/actions";
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+} from "../../state/actions";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
-import { diffDocuments } from "../src/board/doc-diff";
-import { findOperationTool } from "../src/service/session/tools/operations";
+import { diffDocuments } from "../../board/doc-diff";
+import { findOperationTool } from "../tools/operations";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 

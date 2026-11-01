@@ -17,7 +17,7 @@
  *     `process` is under `nodeMinWidth` 240), so a board built from UI
  *     defaults starts out failing the targets the agent is graded on.
  *  2. Round to a multiple of the agent's 20 grid
- *     (service/session/tools/grid.ts), so a placed object is already on-grid
+ *     (session/tools/grid.ts), so a placed object is already on-grid
  *     and every later `move_by`/`resize`/`match_size` keeps it there.
  *
  * Neither source table is edited: `CRAFT_TARGETS` is prompt guidance and
@@ -31,19 +31,19 @@
  * keep the canvas package's per-kind first-use fallbacks (`FIRST_USE_COLORS`).
  * Recoloring afterward is its own gesture (`change_color`).
  */
-import { FIRST_USE_COLORS } from "@codecaine-ai/canvas/actions";
-import type { CanvasColor } from "@codecaine-ai/canvas/schema";
+import { FIRST_USE_COLORS } from "../../state/actions";
+import type { CanvasColor } from "../../state/schema";
 
-import { preferredObjectColor } from "../../../../../canvas/src/objects/registry";
+import { preferredObjectColor } from "../../objects/registry";
 
-import { OBJECT_TYPE_DEFAULTS } from "../../../../../canvas/src/state/schema/object-defaults";
+import { OBJECT_TYPE_DEFAULTS } from "../../state/schema/object-defaults";
 import { AGENT_GRID } from "./grid";
 import {
   glyphForPlaceableType,
   isPlaceableType,
   type FoldedTypeName,
 } from "./placeable-types";
-import { CRAFT_TARGETS } from "../../../catalog/layout-editor/context/style-guide/craft-targets";
+import { CRAFT_TARGETS } from "../../authoring/style-guide/craft-targets";
 
 /**
  * The four things a place gesture can create. Not the document's type union:

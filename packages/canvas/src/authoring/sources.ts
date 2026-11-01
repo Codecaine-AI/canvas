@@ -7,12 +7,12 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-import { DEFAULT_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
+import { DEFAULT_CANVAS_STYLE } from "../theme/canvas-style";
 import { renderXmlMarkdown, type PromptDocument } from "@codecaine-ai/prompt-kit";
 
-import { formatStateGrammar } from "../catalog/layout-editor/context/state-grammar";
-import { formatStyleGuide } from "../service/loaders/style-guide";
-import { buildVocabularyDocument } from "../service/session/perception/contact-sheet";
+import { formatStateGrammar } from "./state-grammar";
+import { formatStyleGuide } from "./style-guide/format";
+import { buildVocabularyDocument } from "../session/perception/contact-sheet";
 import { canvasConventions } from "./conventions";
 import { DESIGN_TOPICS, type AuthoringTopic } from "./design";
 import { renderVisualPatterns } from "./visual-patterns";
@@ -31,20 +31,20 @@ export interface GuidanceSource {
   readonly title?: string;
 }
 
-const AGENT = "packages/canvas-agent/src";
-const PROMPT_PATH = `${AGENT}/catalog/layout-editor/prompt/prompt.json`;
+const CANVAS = "packages/canvas/src";
+const PROMPT_PATH = `${CANVAS}/authoring/prompt/prompt.json`;
 
 /** The file that owns each `canvas_guidance` topic. */
 const TOPIC_PATHS: Record<string, string> = {
-  diagram_design: `${AGENT}/authoring/design.ts`,
-  visual_vocabulary: `${AGENT}/authoring/vocabulary.ts`,
-  color_palette: `${AGENT}/authoring/vocabulary.ts`,
-  canvas_conventions: `${AGENT}/authoring/conventions.ts`,
+  diagram_design: `${CANVAS}/authoring/design.ts`,
+  visual_vocabulary: `${CANVAS}/authoring/vocabulary.ts`,
+  color_palette: `${CANVAS}/authoring/vocabulary.ts`,
+  canvas_conventions: `${CANVAS}/authoring/conventions.ts`,
 };
 
-/** The layout-editor system prompt, rendered from prompt.json as the kernel renders system.md. */
+/** The layout-editor system prompt, rendered from prompt.json as Prompt Kit renders system.md. */
 function layoutEditorPrompt(): string {
-  const raw = readFileSync(new URL("../catalog/layout-editor/prompt/prompt.json", import.meta.url), "utf8");
+  const raw = readFileSync(new URL("./prompt/prompt.json", import.meta.url), "utf8");
   return renderXmlMarkdown(JSON.parse(raw) as PromptDocument);
 }
 
@@ -55,18 +55,18 @@ function layoutEditorPrompt(): string {
 export function canvasGuidanceSources(topics: readonly AuthoringTopic[] = canvasAuthoringTopics()): GuidanceSource[] {
   return [
     { id: "prompt", path: PROMPT_PATH, text: layoutEditorPrompt() },
-    { id: "state_grammar", path: `${AGENT}/catalog/layout-editor/context/state-grammar/index.ts`, text: formatStateGrammar() },
-    { id: "aesthetic", path: `${AGENT}/catalog/layout-editor/context/style-guide/aesthetic.ts`, text: formatStyleGuide() },
-    { id: "visual_patterns", path: `${AGENT}/authoring/visual-patterns.ts`, text: renderVisualPatterns() },
+    { id: "state_grammar", path: `${CANVAS}/authoring/state-grammar.ts`, text: formatStateGrammar() },
+    { id: "aesthetic", path: `${CANVAS}/authoring/style-guide/aesthetic.ts`, text: formatStyleGuide() },
+    { id: "visual_patterns", path: `${CANVAS}/authoring/visual-patterns.ts`, text: renderVisualPatterns() },
     ...topics.map(topic => ({
       id: topic.id,
-      path: TOPIC_PATHS[topic.id] ?? `${AGENT}/authoring`,
+      path: TOPIC_PATHS[topic.id] ?? `${CANVAS}/authoring`,
       text: topic.text,
       title: topic.title,
     })),
     {
       id: "contact_sheet",
-      path: `${AGENT}/service/session/perception/contact-sheet.ts`,
+      path: `${CANVAS}/session/perception/contact-sheet.ts`,
       text: JSON.stringify(buildVocabularyDocument(DEFAULT_CANVAS_STYLE)),
     },
   ];

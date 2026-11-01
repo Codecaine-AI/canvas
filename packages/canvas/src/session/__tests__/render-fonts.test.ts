@@ -15,7 +15,7 @@ import { describe, expect, test } from "bun:test";
 import { Resvg } from "@resvg/resvg-js";
 import { BUNDLED_FACES, measureWidth } from "@codecaine-ai/text-measure";
 
-import { rasterizeSvgToPng } from "../src/service/render";
+import { rasterizeSvgToPng } from "../../render/rasterize";
 
 const FONTS_DIR = dirname(fileURLToPath(import.meta.resolve("@codecaine-ai/text-measure/fonts/Inter-Regular.ttf")));
 const TTF_FILES = readdirSync(FONTS_DIR).filter((file) => /\.ttf$/i.test(file));

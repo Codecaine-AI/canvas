@@ -3,13 +3,12 @@ import { describe, expect, test } from "bun:test";
 import {
   boardDiffBlock,
   boardStateSnapshot,
-  bootPerception,
   describeSessionView,
   emitSessionEvent,
   toolFinalize,
-} from "../src/service/session";
-import { diffDocuments } from "../src/board/doc-diff";
-import { formatDiagnostics, runDiagnostics } from "../../canvas/src/board/lints/run";
+} from "..";
+import { diffDocuments } from "../../board/doc-diff";
+import { formatDiagnostics, runDiagnostics } from "../../board/lints/run";
 import { look, makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 
@@ -44,59 +43,6 @@ describe("spawn board-state snapshot", () => {
 
     expect(first).not.toBe(second);
     expect(second).toContain("renamed alpha");
-  });
-});
-
-describe("spawn boot perception", () => {
-  const PNG_SIGNATURE = "89504e470d0a1a0a";
-
-  test("seeds the eager current-board render, not the boot images", () => {
-    const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
-    const session = makeTestSession(baseline, ["alpha", "beta"]);
-
-    const boot = bootPerception(session);
-
-    expect(boot.boardState).toContain("BOARD ·");
-    expect(boot.boardState).not.toContain("board render unavailable");
-    // The board is working picture: it rides section ③, so it never becomes a
-    // reference image pinned into the context message.
-    expect(boot.boardView).toBe(true);
-    expect(Object.keys(boot.images)).not.toContain("board");
-    expect(session.views).toHaveLength(0);
-    expect(session.currentBoard?.n).toBe(0);
-    expect(session.currentBoard?.summary).toBe("session start");
-    expect(session.currentBoard?.forDraft).toBe(session.draft);
-    expect(session.currentBoard?.png.subarray(0, 8).toString("hex")).toBe(PNG_SIGNATURE);
-    expect(session.changeRenders).toHaveLength(0);
-  });
-
-  test("attaches the house-style exemplar as a PNG when the exemplar canvas exists", () => {
-    const baseline = makeDocument([box("alpha", 0, 0)]);
-    const session = makeTestSession(baseline, ["alpha"]);
-
-    const boot = bootPerception(session);
-
-    expect(typeof boot.images.exemplar).toBe("string");
-    const png = Buffer.from(boot.images.exemplar!, "base64");
-    expect(png.subarray(0, 8).toString("hex")).toBe(PNG_SIGNATURE);
-  });
-
-  test("a failed board render degrades to text-only and notes it in board_state", () => {
-    const baseline = makeDocument([box("alpha", 0, 0)]);
-    const session = makeTestSession(baseline, ["alpha"]);
-    // Non-finite geometry defeats the renderer/rasterizer without crashing boot.
-    session.draft = makeDocument([{
-      ...box("alpha", 0, 0),
-      geometry: { x: Number.NaN, y: 0, width: 160, height: 96 },
-    }]);
-
-    const boot = bootPerception(session);
-
-    expect(boot.boardView).toBe(false);
-    expect(session.views).toHaveLength(0);
-    expect(session.currentBoard).toBeUndefined();
-    expect(boot.boardState).toContain("board render unavailable at spawn");
-    expect(boot.boardState).toContain("the render is retried on every state assembly");
   });
 });
 

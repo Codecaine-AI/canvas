@@ -1,12 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { runDiagnostics } from "../../canvas/src/board/lints/run";
-import { rule as unreadableLabels } from "../../canvas/src/board/lints/rules/unreadable-labels";
+import { runDiagnostics } from "../../board/lints/run";
+import { rule as unreadableLabels } from "../../board/lints/rules/unreadable-labels";
 import { box, connect, makeDocument } from "./synthetic";
-import { canvasThemePreset } from "@codecaine-ai/canvas/style";
+import { canvasThemePreset } from "../../theme/canvas-style";
 import { FIGJAM_CONTEXT } from "./helpers";
-import { chipFor, chipWidth } from "../../canvas/src/board/lints/geometry";
-import { FIGJAM_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
+import { chipFor, chipWidth } from "../../board/lints/geometry";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 
 /**
  * The rule's claim is "the rendered chip does not fit where it renders" —

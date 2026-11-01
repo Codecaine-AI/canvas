@@ -1,17 +1,17 @@
 import { describe, expect, test } from "bun:test";
 
-import { textFitReport } from "../../canvas/src/board/text-fit";
+import { textFitReport } from "../../board/text-fit";
 import {
   clampLines,
   renderDocumentToSvg,
   textSlotForObject,
   wrapTextLines,
-} from "../../canvas/src/render/static-svg.ts";
-import { resolveTextSlot, slotLineHeightPx } from "../../canvas/src/objects/text-slots.ts";
+} from "../../render/static-svg.ts";
+import { resolveTextSlot, slotLineHeightPx } from "../../objects/text-slots.ts";
 import { makeDocument } from "./synthetic";
-import { canvasThemePreset, normalizeCanvasStyle } from "@codecaine-ai/canvas/style";
+import { canvasThemePreset, normalizeCanvasStyle } from "../../theme/canvas-style";
 
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasObject } from "../../state/schema";
 
 /**
  * The fit warning IS the renderer's clipping decision. Same philosophy as

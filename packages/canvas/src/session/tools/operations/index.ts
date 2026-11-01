@@ -17,9 +17,8 @@
  * module exposes the structural runtime contract every descriptor satisfies.
  *
  * `operationTools` is the roster, ordered group by group in the order above —
- * roughly the order a board gets built. It is the single source the agent
- * catalog registers from (`catalog/layout-editor/tools/index.ts`) and
- * the `<capabilities>` block derives from, so a tool added to a group module
+ * roughly the order a board gets built. It is the single source the toolkit
+ * (`toolkit/index.ts`) exposes, so a tool added to a group module
  * is not on the surface until it is listed here. The name index provides
  * direct lookup.
  */

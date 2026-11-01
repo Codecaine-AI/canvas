@@ -1,5 +1,5 @@
 /**
- * The DELTA VOCABULARY gate (src/service/session/op-surface.ts).
+ * The DELTA VOCABULARY gate (session/perception/op-surface.ts).
  *
  * A document diff cannot name the gesture that caused it — `move_to`,
  * `move_by`, `align`, and `space_out` all land as the same geometry change —
@@ -14,9 +14,9 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 
-import { diffDocuments } from "../src/board/doc-diff";
+import { diffDocuments } from "../../board/doc-diff";
 import {
   DELTA_KINDS,
   SHAPE_OBJECT_TYPES,
@@ -24,7 +24,7 @@ import {
   deltaTargetId,
   entityKindOf,
   type BoardDelta,
-} from "../src/service/session/perception/op-surface";
+} from "../perception/op-surface";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 

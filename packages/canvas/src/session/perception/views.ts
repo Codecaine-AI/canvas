@@ -14,7 +14,7 @@ export {
   renderSectionView,
   type RenderedView,
   type RenderViewOptions,
-} from "@codecaine-ai/canvas/render";
+} from "../../render/index";
 
 /** Raster width in px of the full-board view. */
 export const BOARD_VIEW_WIDTH = 1600;

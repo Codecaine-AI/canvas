@@ -11,7 +11,7 @@
  */
 import { describe, expect, test } from "bun:test";
 
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasObject } from "../../state/schema";
 
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";

@@ -6,7 +6,7 @@
  * board file inside the workspace such as a docs page's sidecar), `canvas_check` lints and renders
  * the whole board, and `canvas_guidance` serves the authoring standards.
  * Everything else is the layout-editor agent's own toolkit, re-exposed
- * verbatim from `@codecaine-ai/canvas-agent/toolkit`: the same names, the same
+ * verbatim from `@codecaine-ai/canvas/toolkit`: the same names, the same
  * descriptions, the same parameter schemas, and the same code behind them. A
  * toolkit call runs against the one active canvas and is saved to its file as
  * soon as it applies (see `callToolkitTool`), so there is no commit step.
@@ -20,7 +20,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSyn
 import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { useHarfBuzz } from "@codecaine-ai/text-measure/headless";
-import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas-agent/authoring";
+import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
 import {
   boardStateSnapshot,
   callToolkitTool,
@@ -31,7 +31,7 @@ import {
   toolkitTools,
   type CanvasFileSession,
   type CanvasStyle,
-} from "@codecaine-ai/canvas-agent/toolkit";
+} from "@codecaine-ai/canvas/toolkit";
 
 export type CanvasToolContent =
   | { type: "text"; text: string }

@@ -70,24 +70,24 @@ import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
+} from "../../../state/schema";
 
 import {
   commitBendPolyline,
   connectorBendSegments,
   dragOrthogonalSegment,
-} from "../../../../../../canvas/src/connectors/bend-editing";
+} from "../../../connectors/bend-editing";
 import {
   pointForObjectAnchor,
   routeConnection,
-} from "../../../../../../canvas/src/connectors/routing";
-import { connectionBoundsForObject } from "../../../../../../canvas/src/objects/geometry";
+} from "../../../connectors/routing";
+import { connectionBoundsForObject } from "../../../objects/geometry";
 
 import {
   formatNumberedSegments,
   numberedSegmentsForPolyline,
-} from "../../../../board/edge-route";
-import { routedPolyline } from "../../../../../../canvas/src/board/lints/geometry";
+} from "../../../board/edge-route";
+import { routedPolyline } from "../../../board/lints/geometry";
 import { snapCoordinate, snapPoint } from "../grid";
 import { defineOperationTool } from "./operation-tool";
 import type { OpContext } from "./op-context";

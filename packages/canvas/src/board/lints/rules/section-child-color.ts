@@ -2,14 +2,14 @@
  * Excluded from LAYOUT_RULES and FINISHING_RULES: matching hue is not a
  * contrast measurement. Judge text, borders, and tinted fills in the render.
  */
-import { objectPreferenceFor } from "../../../../../canvas/src/objects/registry";
+import { objectPreferenceFor } from "../../../objects/registry";
 
-import { fromDocumentFields } from "../../../service/session/tools/placeable-types";
-import { childrenOf, kindOf } from "../../../../../canvas/src/board/helpers";
-import { rectOf } from "../../../../../canvas/src/board/lints/geometry";
+import { fromDocumentFields } from "../../../session/tools/placeable-types";
+import { childrenOf, kindOf } from "../../helpers";
+import { rectOf } from "../geometry";
 
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
-import type { LayoutRule } from "../../../../../canvas/src/board/lints/types";
+import type { InteractiveCanvasObject } from "../../../state/schema";
+import type { LayoutRule } from "../types";
 
 /** The neutral hues — the board's default dress, never a wash collision. */
 const NEUTRAL_COLORS: ReadonlySet<string> = new Set(["gray", "white"]);

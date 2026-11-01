@@ -29,7 +29,7 @@ import {
   DEFAULT_CANVAS_STYLE,
   resolveCanvasStyle,
   type CanvasStyle,
-} from "@codecaine-ai/canvas/style";
+} from "../theme/canvas-style";
 
 export { DEFAULT_CANVAS_STYLE, type CanvasStyle };
 
