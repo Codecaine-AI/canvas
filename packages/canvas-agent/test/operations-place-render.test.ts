@@ -65,7 +65,7 @@ function placementFixture() {
     ),
     draftPlacedObject(
       "icon",
-      { x: 800, y: 0, width: 120, height: 120 },
+      { x: 800, y: 0, width: 300, height: 120 },
       {
         id: "memory",
         text: "",
