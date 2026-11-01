@@ -21,8 +21,8 @@ export const MCP_INSTRUCTIONS =
   + "Call canvas_guidance for the diagram design standards, one topic at a time, before laying out or restructuring a board.";
 
 /** Build the MCP server for one workspace without connecting a transport (tests connect their own). */
-export function createCanvasMcpServer(workspace: string): Server {
-  const service = createCanvasService({ workspace: resolve(workspace) });
+export function createCanvasMcpServer(workspace: string, canvasesDir?: string): Server {
+  const service = createCanvasService({ workspace: resolve(workspace), canvasesDir });
   const server = new Server(
     { name: "codecaine-canvas", version },
     { capabilities: { tools: {} }, instructions: MCP_INSTRUCTIONS },
@@ -39,12 +39,12 @@ export function createCanvasMcpServer(workspace: string): Server {
  * measure through it); a failure means a broken install and rejects, so the
  * server never answers with approximate widths.
  */
-export async function startMcp(workspace: string): Promise<Server> {
+export async function startMcp(workspace: string, canvasesDir?: string): Promise<Server> {
   await useHarfBuzz();
   if (!activeBackend().exact) {
     throw new Error(`text-measure: HarfBuzz did not become the active backend (${activeBackend().name} is)`);
   }
-  const server = createCanvasMcpServer(workspace);
+  const server = createCanvasMcpServer(workspace, canvasesDir);
   await server.connect(new StdioServerTransport());
   return server;
 }

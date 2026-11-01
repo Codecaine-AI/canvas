@@ -133,6 +133,46 @@ describe("canvas MCP server", () => {
     expect(saved.objects.some((object: { id: string }) => object.id === "stdio-note")).toBe(true);
   }, 30_000);
 
+  test("stdio: --workspace without canvases/ contains sidecars, and --canvases holds the ids", async () => {
+    const root = mkdtempSync(join(tmpdir(), "canvas-mcp-roots-"));
+    cleanups.push(() => rmSync(root, { recursive: true, force: true }));
+    const board = join(REPO_CANVASES, "v2-flow.canvas.json");
+    const [workspace, boards, elsewhere] = ["w", "boards", "elsewhere"].map((name) => join(root, name));
+    const sidecar = join(workspace, "pages", "x", "assets", "canvases", "a.canvas.json");
+    const stray = join(elsewhere, "a.canvas.json");
+    mkdirSync(join(sidecar, ".."), { recursive: true });
+    mkdirSync(boards);
+    mkdirSync(elsewhere);
+    copyFileSync(board, sidecar);
+    copyFileSync(board, join(boards, "standalone.canvas.json"));
+    copyFileSync(board, stray);
+
+    const client = new Client({ name: "canvas-mcp-stdio-test", version: "1.0.0" });
+    await client.connect(new StdioClientTransport({
+      command: process.execPath,
+      args: [CLI, "mcp", "--workspace", workspace, "--canvases", boards],
+      stderr: "pipe",
+    }));
+    cleanups.push(() => client.close());
+    const open = async (canvas: string) => {
+      const result = await client.callTool({ name: "canvas_open", arguments: { canvas } });
+      return { isError: Boolean(result.isError), text: (result.content as Array<{ text: string }>)[0]!.text };
+    };
+
+    const byId = await open("standalone");
+    expect(byId.isError).toBe(false);
+    expect(byId.text).toContain(`OPENED · standalone "`);
+    expect(byId.text).toContain(` · ${join(boards, "standalone.canvas.json")} · sha256:`);
+
+    const page = await open(sidecar);
+    expect(page.isError).toBe(false);
+    expect(page.text).toContain(" · pages/x/assets/canvases/a.canvas.json · sha256:");
+
+    const refused = await open(stray);
+    expect(refused.isError).toBe(true);
+    expect(refused.text).toContain("is outside the workspace");
+  }, 30_000);
+
   test("stdio: an edit's APPLIED line, lint delta, and fix guidance reach what Claude Code and Codex show", async () => {
     const client = new Client({ name: "canvas-mcp-stdio-test", version: "1.0.0" });
     await client.connect(new StdioClientTransport({

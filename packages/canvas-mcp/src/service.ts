@@ -53,8 +53,10 @@ export interface CanvasToolDeclaration {
 }
 
 export interface CanvasServiceOptions {
-  /** Project root; canvases live in `<workspace>/canvases`. */
+  /** Containment root: canvas_open's path form opens a board file only inside it. */
   workspace: string;
+  /** The standalone boards folder that ids, canvas_list, and canvas_create use. Default `<workspace>/canvases`. */
+  canvasesDir?: string;
 }
 
 /** The id grammar the layout session store accepts for a canvas file. */
@@ -242,7 +244,7 @@ const TOOLKIT_NAMES = new Set(toolkitTools.map((tool) => tool.name));
 
 /** Workspace-bound canvas service: tool declarations plus one active canvas session. */
 export function createCanvasService(options: CanvasServiceOptions) {
-  const canvasesDir = join(options.workspace, "canvases");
+  const canvasesDir = resolve(options.canvasesDir ?? join(options.workspace, "canvases"));
   let active: CanvasFileSession | null = null;
 
   function canvasPath(id: string): string {
@@ -255,9 +257,13 @@ export function createCanvasService(options: CanvasServiceOptions) {
     return rel.startsWith("..") || isAbsolute(rel) ? path : rel;
   }
 
-  /** The workspace root in canonical form, so a symlink cannot reach past it. */
+  /** A root folder in canonical form, so a symlink cannot reach past it. */
+  function realRoot(root: string): string {
+    return existsSync(root) ? realpathSync(root) : resolve(root);
+  }
+
   function workspaceRoot(): string {
-    return existsSync(options.workspace) ? realpathSync(options.workspace) : resolve(options.workspace);
+    return realRoot(options.workspace);
   }
 
   /**
@@ -291,11 +297,13 @@ export function createCanvasService(options: CanvasServiceOptions) {
 
   /**
    * Refuse an existing board file unless its real path, every symlink
-   * followed, is a .canvas.json file inside the real workspace root.
+   * followed, is a .canvas.json file inside the real workspace root, or, for
+   * an id, inside the real boards folder.
    */
-  function realBoard(tool: string, raw: string, path: string): string | null {
+  function realBoard(tool: string, raw: string, path: string, byId: boolean): string | null {
     const real = realpathSync(path);
-    if (!isInside(workspaceRoot(), real)) return outsideWorkspace(tool, raw);
+    const roots = byId ? [workspaceRoot(), realRoot(canvasesDir)] : [workspaceRoot()];
+    if (!roots.some((root) => isInside(root, real))) return outsideWorkspace(tool, raw);
     if (!real.endsWith(CANVAS_SUFFIX)) {
       return `${tool} rejected: ${JSON.stringify(raw)} is not a ${CANVAS_SUFFIX} file.`;
     }
@@ -343,7 +351,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
     return text(
       canvases.length === 0
         ? `No canvases in ${canvasesDir}.`
-        : [`CANVASES · ${canvases.length} in ${relative(options.workspace, canvasesDir) || canvasesDir}`, ...lines].join("\n"),
+        : [`CANVASES · ${canvases.length} in ${shownPath(canvasesDir)}`, ...lines].join("\n"),
     );
   }
 
@@ -359,7 +367,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
         true,
       );
     }
-    const refused = realBoard("canvas_open", raw, target.path);
+    const refused = realBoard("canvas_open", raw, target.path, target.path === canvasPath(target.id));
     if (refused) return text(refused, true);
     let file: CanvasFileSession;
     try {
