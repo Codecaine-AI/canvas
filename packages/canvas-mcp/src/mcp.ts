@@ -67,8 +67,9 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
     try {
       log ??= openActionLog();
       const threadId = (args as { thread_id?: unknown }).thread_id;
-      if (name === "canvas_open" && typeof threadId === "string" && threadId) log.bindThread(runId, threadId);
-      const snapshotId = name === "canvas_guidance" && !result.isError ? getCanvasAuthoringGuidance().snapshotId : null;
+      if (name === "canvas_open" && !result.isError && typeof threadId === "string" && threadId) log.bindThread(runId, threadId);
+      // One guidance snapshot serves every call of this process, so every record carries it.
+      const snapshotId = getCanvasAuthoringGuidance().snapshotId;
       log.record({
         runId,
         threadId: identity.threadId,

@@ -292,7 +292,9 @@ describe("canvas MCP action log", () => {
       ["canvas_create", "v2-flow", "refused"],
       ["canvas_open", "v2-flow", "ok"],
     ]);
-    expect(records[2]!.snapshotId).toMatch(/\S/);
+    expect(records.every((record) => record.snapshotId === records[2]!.snapshotId && record.snapshotId)).toBe(true);
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "no-such-board", thread_id: "thread-refused" } });
+    expect(log.query({ threadId: "thread-refused" })).toHaveLength(0);
   });
 
   test("two opens in flight at once each log the board they opened", async () => {
