@@ -15,8 +15,9 @@ import { createCanvasService } from "./service";
 
 /** Sent once at initialize; kept short because clients inline it into every session. */
 export const MCP_INSTRUCTIONS =
-  "Call canvas_open with a canvas id (canvas_list shows them) before any other canvas tool; it returns the board digest and lint findings the edit tools work against. "
-  + "Every edit is saved to canvases/<id>.canvas.json the moment it applies, and an edit is refused if the file changed elsewhere until you call canvas_open again. "
+  "Call canvas_open with a canvas id (canvas_list shows them) or a page's .canvas.json sidecar path, or canvas_create for a new board, before any other canvas tool; it returns the board digest and lint findings the edit tools work against. "
+  + "Every edit is saved to the opened file the moment it applies, and an edit is refused if the file changed elsewhere until you call canvas_open again. "
+  + "Call canvas_check before you call a board done: it runs every lint and returns a PNG of the whole board. "
   + "Call canvas_guidance for the diagram design standards, one topic at a time, before laying out or restructuring a board.";
 
 /** Build the MCP server for one workspace without connecting a transport (tests connect their own). */
