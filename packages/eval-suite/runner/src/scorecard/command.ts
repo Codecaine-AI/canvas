@@ -2,8 +2,23 @@ import {
   assembleScorecard,
   type ScorecardResult,
 } from "./assemble.ts";
-import { EVAL_SUITE_DIR, canonicalizeRunId } from "../scenario/scenario.ts";
-import { resolve } from "node:path";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const EVAL_SUITE_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+const RUN_ID_PATTERN = /^(\d{4}-\d{2}-\d{2})-([A-Za-z0-9][A-Za-z0-9._-]*)$/;
+
+function canonicalizeRunId(raw: string): string {
+  const match = raw.match(RUN_ID_PATTERN);
+  if (!match) {
+    throw new Error("Run id must match <YYYY-MM-DD>-<label> using letters, numbers, ., _, or -.");
+  }
+  const timestamp = Date.parse(`${match[1]}T00:00:00Z`);
+  if (!Number.isFinite(timestamp) || new Date(timestamp).toISOString().slice(0, 10) !== match[1]) {
+    throw new Error(`Run id has an invalid date: ${match[1]}.`);
+  }
+  return `${match[1]}-${match[2].toLowerCase()}`;
+}
 
 export async function runScorecardCommand(
   argv: string[],

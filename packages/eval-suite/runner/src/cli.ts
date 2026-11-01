@@ -30,10 +30,8 @@ interface JudgeArgs {
 function usage(): string {
   return [
     "Usage:",
-    "  bun run src/cli.ts suite --run-id <id> [--sut-thinking low] [--tool-call-cap <1|2|3>] [--scenarios <names>] [--parallel 8] [--judge-concurrency 30] [--previous <run-id>]",
     "  bun run src/cli.ts judge --run-id <id> [--scenario <name>] [--judge-concurrency 30] [--judge-model <id>] [--judge-base-url <url>] [--judge-effort low]",
     "  bun run src/cli.ts scorecard --run-id <id> [--previous <run-id>]",
-    "  bun run src/cli.ts clean --run-id <id> | --all",
   ].join("\n");
 }
 
@@ -147,27 +145,15 @@ async function runJudgeCommand(argv: string[]): Promise<void> {
   }
 }
 
-async function runSuiteStub(argv: string[]): Promise<void> {
-  const module = await import("./scenario/suite.ts");
-  await module.runSuiteSubcommand(argv);
-}
-
 async function runScorecardStub(argv: string[]): Promise<void> {
   const module = await import("./scorecard/command.ts");
   await module.runScorecardSubcommand(argv);
 }
 
-async function runCleanStub(argv: string[]): Promise<void> {
-  const module = await import("./scenario/suite.ts");
-  await module.runCleanSubcommand(argv);
-}
-
 export async function main(argv = process.argv.slice(2)): Promise<void> {
   const [subcommand, ...rest] = argv;
   if (subcommand === "judge") await runJudgeCommand(rest);
-  else if (subcommand === "suite") await runSuiteStub(rest);
   else if (subcommand === "scorecard") await runScorecardStub(rest);
-  else if (subcommand === "clean") await runCleanStub(rest);
   else if (subcommand === "--help" || subcommand === "-h") process.stdout.write(`${usage()}\n`);
   else throw new Error(usage());
 }
