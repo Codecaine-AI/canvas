@@ -240,8 +240,8 @@ describe("canvas MCP action log", () => {
     }
   });
 
-  async function connect() {
-    const server = createCanvasMcpServer({ workspace: tempWorkspace() });
+  async function connect(workspace = tempWorkspace()) {
+    const server = createCanvasMcpServer({ workspace });
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -293,6 +293,22 @@ describe("canvas MCP action log", () => {
       ["canvas_open", "v2-flow", "ok"],
     ]);
     expect(records[2]!.snapshotId).toMatch(/\S/);
+  });
+
+  test("two opens in flight at once each log the board they opened", async () => {
+    const path = logPath();
+    delete process.env.T3CODE_THREAD_ID;
+    const workspace = tempWorkspace();
+    copyFileSync(join(workspace, "canvases", "v2-flow.canvas.json"), join(workspace, "canvases", "board-b.canvas.json"));
+    const client = await connect(workspace);
+    await Promise.all([
+      client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-race" } }),
+      client.callTool({ name: "canvas_open", arguments: { canvas: "board-b" } }),
+    ]);
+    const log = openActionLog({ path });
+    cleanups.push(() => log.close());
+    const opens = log.query({ threadId: "thread-race" }).map((record) => record.target).sort();
+    expect(opens).toEqual(["board-b", "v2-flow"]);
   });
 
   test("a failed log write never fails the tool call", async () => {

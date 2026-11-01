@@ -23,16 +23,23 @@ export const MCP_INSTRUCTIONS =
   + "Call canvas_guidance for the diagram design standards, one topic at a time, before laying out or restructuring a board.";
 
 /**
- * The target a call acted on: the open board's resolved id, the requested id or path when an
- * open or create was refused, or "-" when the call has no board.
+ * The target a call acted on: the board a successful open or create names in its first line, the
+ * requested id or path when the open or create was refused, the board that was active when an
+ * edit started, or "-" when the call has no board. Calls can interleave, so nothing here reads
+ * the active board after the call.
  */
-function targetOf(name: string, args: unknown, isError: boolean, openCanvasId: string | undefined): string {
+function targetOf(name: string, args: unknown, result: { isError?: boolean; content: Array<{ type: string; text?: string }> }, activeBefore: string | undefined): string {
   if (name === "canvas_list" || name === "canvas_guidance") return "-";
-  if ((name === "canvas_open" || name === "canvas_create") && isError) {
+  if (name === "canvas_open" || name === "canvas_create") {
+    if (!result.isError) {
+      const first = result.content.find((part) => part.type === "text")?.text ?? "";
+      const named = /^(?:OPENED|CREATED) · (\S+) /.exec(first);
+      if (named) return named[1]!;
+    }
     const raw = (args as { canvas?: unknown })?.canvas;
     return typeof raw === "string" && raw.trim() ? raw.trim() : "-";
   }
-  return openCanvasId ?? "-";
+  return activeBefore ?? "-";
 }
 
 /** "refused", or "ok" plus the LINTS line when the text has one. Refusal text stays out, because it can echo the call's payload. */
@@ -59,6 +66,7 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name } = request.params;
     const args = request.params.arguments ?? {};
+    const activeBefore = service.activeCanvas()?.canvasId;
     const result = await service.call(name, args);
     try {
       log ??= openActionLog();
@@ -70,7 +78,7 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
         threadId: identity.threadId,
         agent: identity.agent ?? "canvas-mcp",
         tool: name,
-        target: targetOf(name, args, result.isError === true, service.activeCanvas()?.canvasId),
+        target: targetOf(name, args, result, activeBefore),
         result: summarize(result),
         snapshotId,
         at: new Date(),
