@@ -187,6 +187,10 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
             + "(absolute, or relative to the project root). The file must lie inside the project root. "
             + "Edits save back to that file.",
         },
+        thread_id: {
+          type: "string",
+          description: "Your T3 thread id, when the harness does not pass T3CODE_THREAD_ID. Binds this server run to that thread in the action log.",
+        },
       },
       required: ["canvas"],
       additionalProperties: false,

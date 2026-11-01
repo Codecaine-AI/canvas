@@ -8,6 +8,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
+import { identityFromEnv, newRunId, openActionLog, type ActionLog } from "@codecaine-ai/action-log";
 import { resolve } from "node:path";
 
 import { version } from "../package.json";
@@ -20,6 +21,26 @@ export const MCP_INSTRUCTIONS =
   + "Call canvas_check before you call a board done: it runs every lint and returns a PNG of the whole board. "
   + "Call canvas_guidance for the diagram design standards, one topic at a time, before laying out or restructuring a board.";
 
+/** The target a call acted on: the board id, or "-" when the call has no board. */
+function targetOf(name: string, args: unknown, openCanvasId: string | undefined): string {
+  if (name === "canvas_list" || name === "canvas_guidance") return "-";
+  if (name === "canvas_open") {
+    const raw = typeof (args as { canvas?: unknown })?.canvas === "string" ? (args as { canvas: string }).canvas.trim() : "";
+    return raw.replace(/\.canvas\.json$/, "") || "-";
+  }
+  return openCanvasId ?? "-";
+}
+
+/** A short summary of a result. Never a payload. */
+function summarize(result: { isError?: boolean; content: Array<{ type: string; text?: string }>; structuredContent?: Record<string, unknown> }): string {
+  if (result.isError) {
+    const first = result.content.find((part) => part.type === "text")?.text?.split("\n")[0] ?? "";
+    return `refused: ${first}`;
+  }
+  const findings = result.structuredContent?.findings;
+  return Array.isArray(findings) ? `${findings.length} findings` : "ok";
+}
+
 /** Build the MCP server for one workspace without connecting a transport (tests connect their own). */
 export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
   const service = createCanvasService({ ...options, workspace: resolve(options.workspace) });
@@ -28,8 +49,35 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
     { capabilities: { tools: {} }, instructions: MCP_INSTRUCTIONS },
   );
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: service.listTools() }));
-  server.setRequestHandler(CallToolRequestSchema, async (request) =>
-    service.call(request.params.name, request.params.arguments ?? {}));
+  const runId = newRunId();
+  const identity = identityFromEnv();
+  let log: ActionLog | undefined;
+  const warn = (error: unknown) =>
+    console.error(`canvas-mcp: action log write failed: ${error instanceof Error ? error.message : String(error)}`);
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const { name } = request.params;
+    const args = request.params.arguments ?? {};
+    const result = await service.call(name, args);
+    try {
+      log ??= openActionLog();
+      const threadId = (args as { thread_id?: unknown }).thread_id;
+      if (name === "canvas_open" && typeof threadId === "string" && threadId) log.bindThread(runId, threadId);
+      const snapshotId = result.structuredContent?.snapshotId;
+      log.record({
+        runId,
+        threadId: identity.threadId,
+        agent: identity.agent ?? "canvas-mcp",
+        tool: name,
+        target: targetOf(name, args, service.activeCanvas()?.canvasId),
+        result: summarize(result),
+        snapshotId: typeof snapshotId === "string" ? snapshotId : null,
+        at: new Date(),
+      });
+    } catch (error) {
+      warn(error);
+    }
+    return result;
+  });
   return server;
 }
 

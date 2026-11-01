@@ -11,6 +11,7 @@
     "mcp": "bun src/cli.ts mcp"
   },
   "dependencies": {
+    "@codecaine-ai/action-log": "workspace:*",
     "@codecaine-ai/canvas-agent": "workspace:*",
     "@codecaine-ai/text-measure": "workspace:*",
     "@modelcontextprotocol/sdk": "1.30.0"

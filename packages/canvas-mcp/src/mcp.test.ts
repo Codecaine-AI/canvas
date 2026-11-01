@@ -14,7 +14,8 @@ import { join } from "node:path";
 
 import { operationTools, workflowTools } from "@codecaine-ai/canvas-agent/toolkit";
 
-import { createCanvasMcpServer, MCP_INSTRUCTIONS } from "./mcp";
+import { openActionLog } from "@codecaine-ai/action-log";
+import { createCanvasMcpServer,MCP_INSTRUCTIONS } from "./mcp";
 import { jsonSchema } from "./service";
 
 const REPO_CANVASES = join(import.meta.dir, "..", "..", "..", "canvases");
@@ -229,4 +230,66 @@ describe("canvas MCP server", () => {
     expect(shown(cleared)).toContain("− W");
     expect(shown(cleared)).toMatch(/detail-too-long.*\(resolved\)/);
   }, 30_000);
+});
+
+describe("canvas MCP action log", () => {
+  const savedEnv = { log: process.env.CODECAINE_ACTION_LOG, thread: process.env.T3CODE_THREAD_ID };
+  afterEach(() => {
+    for (const [key, value] of [["CODECAINE_ACTION_LOG", savedEnv.log], ["T3CODE_THREAD_ID", savedEnv.thread]] as const) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  });
+
+  async function connect() {
+    const server = createCanvasMcpServer(tempWorkspace());
+    const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+    cleanups.push(() => client.close());
+    return client;
+  }
+
+  function logPath(): string {
+    const dir = mkdtempSync(join(tmpdir(), "canvas-mcp-log-"));
+    cleanups.push(() => rmSync(dir, { recursive: true, force: true }));
+    const path = join(dir, "log.sqlite");
+    process.env.CODECAINE_ACTION_LOG = path;
+    return path;
+  }
+
+  test("a call with T3CODE_THREAD_ID writes one record with that thread and tool", async () => {
+    const path = logPath();
+    process.env.T3CODE_THREAD_ID = "thread-env";
+    const client = await connect();
+    await client.callTool({ name: "canvas_list", arguments: {} });
+
+    const log = openActionLog({ path });
+    cleanups.push(() => log.close());
+    const records = log.query({ threadId: "thread-env" });
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({ tool: "canvas_list", target: "-", result: "ok" });
+  });
+
+  test("canvas_open with thread_id joins the whole run to that thread without the env variable", async () => {
+    const path = logPath();
+    delete process.env.T3CODE_THREAD_ID;
+    const client = await connect();
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-arg" } });
+    await client.callTool({ name: "place_sticky", arguments: { id: "log-note", text: "Logged", at: [960, 1600] } });
+
+    const log = openActionLog({ path });
+    cleanups.push(() => log.close());
+    const records = log.query({ threadId: "thread-arg" });
+    expect(records.map((record) => [record.tool, record.target])).toEqual([
+      ["canvas_open", "v2-flow"],
+      ["place_sticky", "v2-flow"],
+    ]);
+  });
+
+  test("a failed log write never fails the tool call", async () => {
+    process.env.CODECAINE_ACTION_LOG = "/dev/null/blocked/log.sqlite";
+    const client = await connect();
+    const result = await client.callTool({ name: "canvas_list", arguments: {} });
+    expect(result.isError).toBeFalsy();
+  });
 });
