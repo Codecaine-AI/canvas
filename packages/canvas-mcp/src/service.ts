@@ -3,7 +3,7 @@
  *
  * Five tools belong to this server: `canvas_list`, `canvas_open`, and
  * `canvas_create` choose the board (an id under canvases/, or for open, any
- * board file such as a docs page's sidecar), `canvas_check` lints and renders
+ * board file inside the workspace such as a docs page's sidecar), `canvas_check` lints and renders
  * the whole board, and `canvas_guidance` serves the authoring standards.
  * Everything else is the layout-editor agent's own toolkit, re-exposed
  * verbatim from `@codecaine-ai/canvas-agent/toolkit`: the same names, the same
@@ -16,8 +16,8 @@
  * which is also how a caller recovers after an external save made the session
  * stale.
  */
-import { existsSync, mkdirSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { basename, isAbsolute, join, relative, resolve } from "node:path";
+import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
+import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas-agent/authoring";
@@ -63,6 +63,12 @@ const CANVAS_SUFFIX = ".canvas.json";
 
 const NO_ACTIVE_CANVAS =
   "No canvas is open. Call canvas_open { \"canvas\": \"<id>\" } first — canvas_list shows the ids — or canvas_create for a new board.";
+
+/** True when `path` lies strictly inside the folder `root` (both absolute). */
+function isInside(root: string, path: string): boolean {
+  const rel = relative(root, path);
+  return rel !== "" && rel !== ".." && !rel.startsWith(`..${sep}`) && !isAbsolute(rel);
+}
 
 /**
  * Rewrite draft-07 tuples into a form every MCP client accepts.
@@ -174,7 +180,8 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
           description:
             "The canvas id from canvas_list, e.g. \"v2-flow\" (the file name without .canvas.json), "
             + "or the path of a page's embedded board, e.g. \"<page>/assets/canvases/flow.canvas.json\" "
-            + "(absolute, or relative to the project root). Edits save back to that file.",
+            + "(absolute, or relative to the project root). The file must lie inside the project root. "
+            + "Edits save back to that file.",
         },
       },
       required: ["canvas"],
@@ -248,17 +255,26 @@ export function createCanvasService(options: CanvasServiceOptions) {
     return rel.startsWith("..") || isAbsolute(rel) ? path : rel;
   }
 
+  /** The workspace root in canonical form, so a symlink cannot reach past it. */
+  function workspaceRoot(): string {
+    return existsSync(options.workspace) ? realpathSync(options.workspace) : resolve(options.workspace);
+  }
+
   /**
    * The file a `canvas` argument names: a bare id is canvases/<id>.canvas.json;
-   * anything with a path separator is a board file anywhere, such as a docs
-   * page's sidecar, resolved against the workspace when relative.
+   * anything with a path separator is a .canvas.json file in any folder of the
+   * workspace, such as a docs page's sidecar, resolved against the workspace
+   * when relative. `openCanvas` then checks the real path (`realBoard`).
    */
   function canvasTarget(tool: string, raw: string): { id: string; path: string } | { error: string } {
     if (/[\\/]/.test(raw)) {
-      if (!raw.endsWith(CANVAS_SUFFIX)) {
+      const path = resolve(options.workspace, raw);
+      if (!isInside(resolve(options.workspace), path) && !isInside(workspaceRoot(), path)) {
+        return { error: outsideWorkspace(tool, raw) };
+      }
+      if (!path.endsWith(CANVAS_SUFFIX)) {
         return { error: `${tool} rejected: ${JSON.stringify(raw)} is not a ${CANVAS_SUFFIX} file.` };
       }
-      const path = resolve(options.workspace, raw);
       return { id: basename(path, CANVAS_SUFFIX), path };
     }
     const id = raw.endsWith(CANVAS_SUFFIX) ? raw.slice(0, -CANVAS_SUFFIX.length) : raw;
@@ -266,6 +282,24 @@ export function createCanvasService(options: CanvasServiceOptions) {
       return { error: `${tool} rejected: ${JSON.stringify(raw)} is not a canvas id. Call canvas_list for the ids.` };
     }
     return { id, path: canvasPath(id) };
+  }
+
+  function outsideWorkspace(tool: string, raw: string): string {
+    return `${tool} rejected: ${JSON.stringify(raw)} is outside the workspace ${workspaceRoot()}. `
+      + `Open a ${CANVAS_SUFFIX} file inside it, or a canvas id from canvas_list.`;
+  }
+
+  /**
+   * Refuse an existing board file unless its real path, every symlink
+   * followed, is a .canvas.json file inside the real workspace root.
+   */
+  function realBoard(tool: string, raw: string, path: string): string | null {
+    const real = realpathSync(path);
+    if (!isInside(workspaceRoot(), real)) return outsideWorkspace(tool, raw);
+    if (!real.endsWith(CANVAS_SUFFIX)) {
+      return `${tool} rejected: ${JSON.stringify(raw)} is not a ${CANVAS_SUFFIX} file.`;
+    }
+    return null;
   }
 
   /** The OPENED digest: header line, style, then the board state with its lints. */
@@ -325,6 +359,8 @@ export function createCanvasService(options: CanvasServiceOptions) {
         true,
       );
     }
+    const refused = realBoard("canvas_open", raw, target.path);
+    if (refused) return text(refused, true);
     let file: CanvasFileSession;
     try {
       file = openCanvasFile(target.path);
@@ -363,7 +399,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
       { type: "text", text: result.text },
       ...(result.pngs ?? []).map((png) =>
         ({ type: "image" as const, data: png.toString("base64"), mimeType: "image/png" })),
-    ]);
+    ], result.isError);
   }
 
   function guidance(args: Record<string, unknown>): CanvasToolResult {

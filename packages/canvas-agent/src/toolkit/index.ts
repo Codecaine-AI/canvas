@@ -309,8 +309,13 @@ function plural(count: number, one: string, many = `${one}s`): string {
  * painted bounds. `look` frames one region; this is the one view of all of it.
  * Counts and the render read the board as saved, so a page frame injected at
  * open is not counted. The lints read the draft, as every edit's LINTS line does.
+ * A conflicted session is refused as every gesture is: its draft holds an
+ * edit the file never received.
  */
 export function checkCanvasFile(file: CanvasFileSession, label: string): LayoutToolRenderResult {
+  if (file.conflicted) {
+    return { isError: true, text: new CanvasFileConflictError(file.canvasPath).message };
+  }
   const diagnostics = sessionDiagnostics(file.session, FINISHING_RULES);
   const board = draftForDisk(file);
   const sections = board.objects.filter((object) => object.type === "section").length;

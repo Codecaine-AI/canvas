@@ -3,7 +3,7 @@
  * through the service's tool calls, as an agent drives them.
  */
 import { afterEach, describe, expect, test } from "bun:test";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -176,20 +176,21 @@ describe("canvas_create and canvas_check", () => {
   test("canvas_open on a page sidecar edits that file, and canvas_check renders its full bounds", async () => {
     const workspace = tempDir();
     mkdirSync(join(workspace, "canvases"));
-    const page = join(tempDir(), "docs", "20-flows", "assets", "canvases");
+    const page = join(workspace, "docs", "20-flows", "assets", "canvases");
     mkdirSync(page, { recursive: true });
     const sidecar = join(page, "v2-flow.canvas.json");
     writeFileSync(sidecar, readFileSync(join(REPO_CANVASES, "v2-flow.canvas.json")));
+    const shown = "docs/20-flows/assets/canvases/v2-flow.canvas.json";
     const service = createCanvasService({ workspace });
 
     const opened = await call(service, "canvas_open", { canvas: sidecar });
     expect(textOf(opened).split("\n")[0]).toStartWith(`OPENED · v2-flow "`);
-    expect(textOf(opened).split("\n")[0]).toContain(` · ${sidecar} · sha256:`);
+    expect(textOf(opened).split("\n")[0]).toContain(` · ${shown} · sha256:`);
 
     const before = JSON.parse(readFileSync(sidecar, "utf8"));
     const target = before.objects.find((object: { type: string }) => object.type !== "section");
     const moved = await call(service, "move_by", { id: target.id, dx: 40, dy: 0 });
-    expect(textOf(moved)).toContain(`SAVED · ${sidecar}`);
+    expect(textOf(moved)).toContain(`SAVED · ${shown}`);
     const after = JSON.parse(readFileSync(sidecar, "utf8"));
     // The gesture snaps to the grid, so the saved x moved right and matches the draft.
     const savedX = after.objects.find((object: { id: string }) => object.id === target.id).geometry.x;
@@ -223,6 +224,59 @@ describe("canvas_create and canvas_check", () => {
     expect(textOf(relative)).toContain(`no board file at ${join(workspace, "nowhere", "x.canvas.json")}`);
     const notBoard = await service.call("canvas_open", { canvas: "docs/page/doc.json" });
     expect(notBoard.isError).toBe(true);
+  });
+
+  test("canvas_open refuses a board file outside the workspace root", async () => {
+    const parent = tempDir();
+    const workspace = join(parent, "ws");
+    mkdirSync(join(workspace, "canvases"), { recursive: true });
+    const outside = join(parent, "outside.canvas.json");
+    const board = readFileSync(join(REPO_CANVASES, "v2-flow.canvas.json"));
+    writeFileSync(outside, board);
+    symlinkSync(outside, join(workspace, "canvases", "link.canvas.json"));
+    const service = createCanvasService({ workspace });
+
+    for (const canvas of ["../outside.canvas.json", outside, "canvases/link.canvas.json", "link"]) {
+      const refused = await service.call("canvas_open", { canvas });
+      expect(refused.isError).toBe(true);
+      expect(textOf(refused)).toContain("is outside the workspace");
+    }
+    // Nothing opened, so no edit can reach the outside file.
+    expect(service.activeCanvas()).toBeNull();
+    expect((await service.call("set_board_title", { title: "Hijacked" })).isError).toBe(true);
+    expect(readFileSync(outside)).toEqual(board);
+
+    // A sidecar in any folder under the root opens.
+    const sidecar = join(workspace, "some", "page", "assets", "canvases", "x.canvas.json");
+    mkdirSync(join(sidecar, ".."), { recursive: true });
+    writeFileSync(sidecar, board);
+    const opened = await call(service, "canvas_open", { canvas: "some/page/assets/canvases/x.canvas.json" });
+    expect(textOf(opened)).toContain(" · some/page/assets/canvases/x.canvas.json · sha256:");
+  });
+
+  test("canvas_check refuses a conflicted board until canvas_open reloads it", async () => {
+    const service = createCanvasService({ workspace: tempDir() });
+    await call(service, "canvas_create", { canvas: "conflict", title: "Conflict" });
+    const path = service.activeCanvas()!.canvasPath;
+    await call(service, "place_shape", { id: "a", type: "process", at: [80, 140] });
+
+    // Someone else saves the board, so the next edit is rejected.
+    writeFileSync(path, `${JSON.stringify({ ...JSON.parse(readFileSync(path, "utf8")), title: "Saved elsewhere" }, null, 2)}\n`);
+    const rejected = await service.call("place_shape", { id: "b", type: "process", at: [520, 140] });
+    expect(rejected.isError).toBe(true);
+
+    // canvas_check refuses with the message every gesture now gives.
+    const gesture = await service.call("move_by", { id: "a", dx: 16, dy: 0 });
+    expect(gesture.isError).toBe(true);
+    const refused = await service.call("canvas_check", {});
+    expect(refused.isError).toBe(true);
+    expect(textOf(refused)).toBe(textOf(gesture));
+    expect(textOf(refused)).toContain("Call canvas_open again");
+    expect(refused.content.some((item) => item.type === "image")).toBe(false);
+
+    await call(service, "canvas_open", { canvas: "conflict" });
+    const check = checked(await call(service, "canvas_check", {}));
+    expect(check.nodes).toBe(1);
   });
 
   test("canvas_check needs an open board", async () => {
