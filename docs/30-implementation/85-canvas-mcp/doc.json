@@ -45,6 +45,7 @@
         "b-cmcp-workspace-fallback-34",
         "b-cmcp-boards-lede-60",
         "b-cmcp-boards-project-61",
+        "b-cmcp-boards-workspace-66",
         "b-cmcp-boards-flag-62",
         "b-cmcp-boards-repo-63",
         "b-cmcp-boards-id-64",
@@ -1463,7 +1464,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The workspace is the containment root. "
+          "insert": "The server resolves three roots at startup, and each root has one role. The first is the containment root, called the workspace. "
         },
         {
           "insert": "canvas_open",
@@ -1472,7 +1473,7 @@
           }
         },
         {
-          "insert": " opens a board by file path only inside it. "
+          "insert": " opens no board outside it. "
         },
         {
           "insert": "cli.ts",
@@ -1549,16 +1550,16 @@
       "props": {},
       "text": [
         {
-          "insert": "The server keeps the workspace even when it has no "
+          "insert": "The second is the project root. It is "
         },
         {
-          "insert": "canvases/",
+          "insert": "CLAUDE_PROJECT_DIR",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " folder. A session in a parent folder can then open a board file anywhere under it, such as a knowledge-base page sidecar."
+          "insert": ", else the current working directory. A relative board path resolves against the project root first. If that file does not exist, the path resolves against the workspace, and either result must lie inside the workspace."
         }
       ],
       "children": []
@@ -1569,7 +1570,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The boards folder holds the standalone boards that canvas ids, "
+          "insert": "The third is the boards folder. It holds the standalone boards that canvas ids, "
         },
         {
           "insert": "canvas_list",
@@ -1596,13 +1597,35 @@
           }
         },
         {
-          "insert": " takes the first of these that exists:"
+          "insert": " takes the first match in this order, and the first two folders count only if they exist:"
         }
       ],
       "children": []
     },
     "b-cmcp-boards-project-61": {
       "id": "b-cmcp-boards-project-61",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "<project>/canvases",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " folder."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-boards-workspace-66": {
+      "id": "b-cmcp-boards-workspace-66",
       "type": "list-item",
       "props": {
         "ordered": true
@@ -1720,7 +1743,25 @@
           }
         },
         {
-          "insert": ". A T3 session anywhere under "
+          "insert": " for every session. A session in the canvas project opens "
+        },
+        {
+          "insert": "canvases/v2-flow.canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and the id "
+        },
+        {
+          "insert": "v2-flow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from the project. A session elsewhere under "
         },
         {
           "insert": "~/workspace",
@@ -1729,7 +1770,7 @@
           }
         },
         {
-          "insert": " then opens knowledge-base page sidecars and the standalone boards."
+          "insert": " opens knowledge-base page sidecars and the canvas repository boards."
         }
       ],
       "children": []
