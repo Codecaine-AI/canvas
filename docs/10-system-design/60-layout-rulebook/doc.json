@@ -92,7 +92,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/covered-content.ts"
+              "path": "packages/canvas/src/board/lints/rules/covered-content.ts"
             }
           }
         },
@@ -105,7 +105,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/containment.ts"
+              "path": "packages/canvas/src/board/lints/rules/containment.ts"
             }
           }
         },
@@ -118,7 +118,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/broken-edges.ts"
+              "path": "packages/canvas/src/board/lints/rules/broken-edges.ts"
             }
           }
         },
@@ -131,7 +131,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/crowding.ts"
+              "path": "packages/canvas/src/board/lints/rules/crowding.ts"
             }
           }
         },
@@ -144,7 +144,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/unreadable-labels.ts"
+              "path": "packages/canvas/src/board/lints/rules/unreadable-labels.ts"
             }
           }
         },
@@ -157,7 +157,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/clipped-text.ts"
+              "path": "packages/canvas/src/board/lints/rules/clipped-text.ts"
             }
           }
         },
@@ -170,7 +170,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/label-is-prose.ts"
+              "path": "packages/canvas/src/board/lints/rules/label-is-prose.ts"
             }
           }
         },
@@ -183,7 +183,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/detail-too-long.ts"
+              "path": "packages/canvas/src/board/lints/rules/detail-too-long.ts"
             }
           }
         },

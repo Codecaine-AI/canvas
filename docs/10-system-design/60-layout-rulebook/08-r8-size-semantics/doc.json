@@ -93,7 +93,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/label-is-prose.ts"
+              "path": "packages/canvas/src/board/lints/rules/label-is-prose.ts"
             }
           }
         },
@@ -106,7 +106,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/detail-too-long.ts"
+              "path": "packages/canvas/src/board/lints/rules/detail-too-long.ts"
             }
           }
         },
@@ -130,7 +130,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/text-fit.ts",
+              "path": "packages/canvas/src/board/text-fit.ts",
               "label": "text-fit.ts"
             }
           }
