@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas-agent/src/authoring/vocabulary.ts (sha256 943deac9d2f88e9e624640248340e98284266a1f2157ba90e400e0708195013b). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/vocabulary.ts (sha256 943deac9d2f88e9e624640248340e98284266a1f2157ba90e400e0708195013b). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Color Palette
 

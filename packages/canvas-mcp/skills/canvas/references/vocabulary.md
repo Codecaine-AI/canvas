@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas-agent/src/authoring/vocabulary.ts (sha256 a1fb49385006dd5575e6c1336b6ff9d111e91138bab6fa02700bbc55f5f34b8c). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/vocabulary.ts (sha256 a1fb49385006dd5575e6c1336b6ff9d111e91138bab6fa02700bbc55f5f34b8c). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Visual Vocabulary
 

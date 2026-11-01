@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas-agent/src/authoring/conventions.ts (sha256 7512963793f4dc173bdaf245b42bba4841aa1e48ec9cab3b5313e609c438f474). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/conventions.ts (sha256 7512963793f4dc173bdaf245b42bba4841aa1e48ec9cab3b5313e609c438f474). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Canvas Conventions
 

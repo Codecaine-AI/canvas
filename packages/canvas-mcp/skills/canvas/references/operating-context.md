@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas-agent/src/catalog/layout-editor/prompt/prompt.json (sha256 9c91daf8919ba6bc6d15e2886a360c696a9908c435f1ebbdc98983102a0e5294), packages/canvas-agent/src/catalog/layout-editor/context/state-grammar/index.ts (sha256 0c69f2e5ec417815ee00ab7db5c330c2fa87a4320168a66743ee011bdef2db7f), packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts (sha256 5c61496f5ac71b29c7ca95a01bd44de5979f774fe11d3c25f0046623f520d50b). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/prompt/prompt.json (sha256 9c91daf8919ba6bc6d15e2886a360c696a9908c435f1ebbdc98983102a0e5294), packages/canvas/src/authoring/state-grammar.ts (sha256 0c69f2e5ec417815ee00ab7db5c330c2fa87a4320168a66743ee011bdef2db7f), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 5c61496f5ac71b29c7ca95a01bd44de5979f774fe11d3c25f0046623f520d50b). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Operating Context
 
