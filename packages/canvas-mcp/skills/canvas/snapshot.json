@@ -47,5 +47,9 @@
       "path": "packages/canvas-agent/src/service/session/perception/contact-sheet.ts",
       "sha256": "8b9875aa369c956e1c3675b970ebf5477e95934354fb561b0594ac10d171b7e8"
     }
-  ]
+  ],
+  "skill": {
+    "path": "packages/canvas-mcp/src/skill/SKILL.md",
+    "sha256": "9a7c1f31269c7a6c48e8bc00f1170218c2ff66e76eb935429a3c816e0e084a16"
+  }
 }

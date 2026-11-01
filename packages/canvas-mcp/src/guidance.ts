@@ -1,10 +1,14 @@
 /**
- * The canvas skill generator: renders the source manifest into
- * `skills/canvas` beside the hand-written SKILL.md. Every reference is the
- * same text `canvas_guidance` serves or the kernel injected, and snapshot.json
- * carries the same snapshot id `canvas_guidance` returns, so the skill's
- * compare step can tell a stale install from a current one.
+ * The canvas skill generator: owns the whole `skills/canvas` folder. It copies
+ * the hand-written `src/skill/SKILL.md` and renders the source manifest into
+ * the references. Every reference is the same text `canvas_guidance` serves or
+ * the kernel injected, and snapshot.json carries the same snapshot id
+ * `canvas_guidance` returns, so the skill's compare step can tell a stale
+ * install from a current one. snapshot.json also hashes SKILL.md, which is not
+ * a `canvas_guidance` source and so stays out of the snapshot id.
  */
+import { readFileSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
@@ -18,8 +22,9 @@ import {
 } from "@codecaine-ai/canvas-agent/authoring";
 
 export const SKILL_DIR = resolve(import.meta.dir, "../skills/canvas");
-/** The one hand-written file; the generator never writes or compares it. */
-const HAND_WRITTEN = "SKILL.md";
+/** The hand-written SKILL.md. The generator copies it into the folder unchanged. */
+const SKILL_SOURCE = resolve(import.meta.dir, "skill/SKILL.md");
+const SKILL_SOURCE_PATH = "packages/canvas-mcp/src/skill/SKILL.md";
 const REGENERATE = "bun packages/canvas-mcp/src/cli.ts guidance --write";
 
 /** `canvas_guidance` topic id → reference file. */
@@ -98,8 +103,12 @@ export function renderCanvasSkill(sources: readonly GuidanceSource[] = canvasGui
   const sheet = vocabularyContactSheet();
   if (!sheet) throw new Error("vocabularyContactSheet could not render the default-style contact sheet");
 
+  const skill = readFileSync(SKILL_SOURCE, "utf8");
+  const skillHash = { path: SKILL_SOURCE_PATH, sha256: createHash("sha256").update(skill, "utf8").digest("hex") };
+
   const files = new Map<string, string | Uint8Array>();
-  files.set("snapshot.json", `${JSON.stringify({ schemaVersion: 1, snapshotId: snapshot.snapshotId, sources: snapshot.sources }, null, 2)}\n`);
+  files.set("SKILL.md", skill);
+  files.set("snapshot.json", `${JSON.stringify({ schemaVersion: 1, snapshotId: snapshot.snapshotId, sources: snapshot.sources, skill: skillHash }, null, 2)}\n`);
   files.set("references/operating-context.md", stamp(hashOf("prompt", "state_grammar", "aesthetic")) + operatingContext(source));
   files.set("references/visual-patterns.md", stamp(hashOf("visual_patterns")) + visualPatterns());
   for (const [id, file] of Object.entries(TOPIC_FILES)) {
@@ -111,9 +120,9 @@ export function renderCanvasSkill(sources: readonly GuidanceSource[] = canvasGui
   return files;
 }
 
-/** Replace the generated part of `dir`; SKILL.md stays as written. */
+/** Replace every generated entry of `dir`, SKILL.md included. */
 export async function writeCanvasSkill(dir: string, files: Map<string, string | Uint8Array>): Promise<void> {
-  await Promise.all(["references", "assets", "snapshot.json"].map(entry => rm(join(dir, entry), { recursive: true, force: true })));
+  await Promise.all(["SKILL.md", "references", "assets", "snapshot.json"].map(entry => rm(join(dir, entry), { recursive: true, force: true })));
   for (const [path, content] of files) {
     await mkdir(dirname(join(dir, path)), { recursive: true });
     await writeFile(join(dir, path), content);
@@ -125,11 +134,10 @@ async function listFiles(dir: string): Promise<string[]> {
   return entries
     .filter(entry => entry.isFile())
     .map(entry => relative(dir, join(entry.parentPath, entry.name)))
-    .filter(path => path !== HAND_WRITTEN)
     .sort();
 }
 
-/** The generated paths that differ between two skill folders, SKILL.md excluded. */
+/** The paths that differ between two skill folders. */
 export async function diffSkillFolders(expected: string, actual: string): Promise<string[]> {
   const [left, right] = await Promise.all([listFiles(expected), listFiles(actual)]);
   const paths = [...new Set([...left, ...right])].sort();

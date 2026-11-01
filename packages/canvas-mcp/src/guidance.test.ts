@@ -3,7 +3,7 @@
  * the `canvas_guidance` tool: one manifest feeds both snapshot ids.
  */
 import { afterEach, describe, expect, test } from "bun:test";
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -59,6 +59,7 @@ describe("canvas skill generator", () => {
       "references/operating-context.md",
       "references/visual-patterns.md",
       "references/vocabulary.md",
+      "SKILL.md",
       "snapshot.json",
     ]);
     expect(await guidanceCommand(["--write", "--skill-dir", dir], quiet)).toBe(0);
@@ -79,6 +80,28 @@ describe("canvas skill generator", () => {
     expect(await guidanceCommand(["--check"], { sources: withEditedPrompt(), log: line => lines.push(line) })).toBe(1);
     expect(lines.join("\n")).toContain("references/operating-context.md");
     expect(lines.join("\n")).toContain("snapshot.json");
+  });
+
+  test("a deleted SKILL.md makes --check exit 1", async () => {
+    const dir = tempDir();
+    expect(await guidanceCommand(["--write", "--skill-dir", dir], quiet)).toBe(0);
+    rmSync(join(dir, "SKILL.md"));
+
+    const lines: string[] = [];
+    expect(await guidanceCommand(["--check", "--skill-dir", dir], { log: line => lines.push(line) })).toBe(1);
+    expect(lines.join("\n")).toContain("SKILL.md");
+  });
+
+  test("a one-character edit to the generated SKILL.md makes --check exit 1", async () => {
+    const dir = tempDir();
+    expect(await guidanceCommand(["--write", "--skill-dir", dir], quiet)).toBe(0);
+    const path = join(dir, "SKILL.md");
+    const text = readFileSync(path, "utf8");
+    writeFileSync(path, `${text.slice(0, -1)}${text.endsWith("x") ? "y" : "x"}`);
+
+    const lines: string[] = [];
+    expect(await guidanceCommand(["--check", "--skill-dir", dir], { log: line => lines.push(line) })).toBe(1);
+    expect(lines.join("\n")).toContain("SKILL.md");
   });
 
   test("snapshot.json carries the snapshot id canvas_guidance returns from the same sources", async () => {
