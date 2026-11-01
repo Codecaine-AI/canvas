@@ -51,7 +51,7 @@ describe("canvas service", () => {
     const opened = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(opened.isError).toBeUndefined();
     expect(textOf(opened)).toContain("BOARD");
-    expect(opened.structuredContent?.hash).toMatch(/^sha256:[0-9a-f]{64}$/);
+    expect(textOf(opened)).toMatch(new RegExp(`^OPENED · ${SOURCE_ID} .* · canvases/${SOURCE_ID}\\.canvas\\.json · sha256:[0-9a-f]{64}\n`));
 
     const placed = await service.call("place_sticky", { id: "mcp-note", text: "Hello from MCP", at: [960, 1600] });
     expect(placed.isError).toBeUndefined();
@@ -202,7 +202,6 @@ describe("canvas service", () => {
     const plain = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(textOf(plain)).toContain("STYLE · theme schematic-light");
     expect(textOf(plain)).not.toContain("workspace overrides");
-    expect(plain.structuredContent?.theme).toBe("schematic-light");
     const defaultPng = await lookPng();
 
     // A style saved in Studio is picked up by the next canvas_open and changes the render.
@@ -214,12 +213,6 @@ describe("canvas service", () => {
     expect(textOf(styled)).toContain(
       "STYLE · theme figjam · workspace overrides: shapeCornerRadiusPx=16, shapeBorderWidthPx=6, sectionCornerRadiusPx=16",
     );
-    expect(styled.structuredContent?.canvasStyle).toMatchObject({
-      theme: "figjam",
-      shapeCornerRadiusPx: 16,
-      shapeBorderWidthPx: 6,
-      sectionCornerRadiusPx: 16,
-    });
     expect(await lookPng()).not.toBe(defaultPng);
 
     // The settings format Studio writes now: another active theme is reported by
@@ -231,8 +224,6 @@ describe("canvas service", () => {
     const dark = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(dark.isError).toBeUndefined();
     expect(textOf(dark)).toContain("STYLE · theme schematic-dark · workspace overrides: shapeCornerRadiusPx=4, palette.red=#FF0000");
-    expect(dark.structuredContent?.theme).toBe("schematic-dark");
-    expect(dark.structuredContent?.canvasStyle).toMatchObject({ theme: "schematic-dark", shapeCornerRadiusPx: 4 });
 
     // A malformed file never blocks the open: it reads as the defaults.
     writeFileSync(stylePath, "{ not json");
@@ -240,7 +231,6 @@ describe("canvas service", () => {
     expect(malformed.isError).toBeUndefined();
     expect(textOf(malformed)).toContain("STYLE · theme schematic-light");
     expect(textOf(malformed)).not.toContain("workspace overrides");
-    expect(malformed.structuredContent?.theme).toBe("schematic-light");
     expect(await lookPng()).toBe(defaultPng);
   });
 
@@ -322,14 +312,10 @@ describe("canvas service", () => {
     const service = createCanvasService({ workspace });
 
     const listed = await service.call("canvas_list", {});
-    expect(listed.structuredContent?.canvases).toEqual([
-      expect.objectContaining({ id: SOURCE_ID, open: false }),
-    ]);
+    expect(textOf(listed)).toBe(`CANVASES · 1 in canvases\n  ${SOURCE_ID}  ${JSON.stringify(realCanvas().title)}  ${realCanvas().objects.length} objects`);
 
     const topics = await service.call("canvas_guidance", {});
-    const topicIds = (topics.structuredContent?.topics as Array<{ id: string }>).map((topic) => topic.id);
-    expect(topicIds).toContain("diagram_design");
-    expect(textOf(topics)).toContain("tokens");
+    expect(textOf(topics)).toMatch(/^  diagram_design  ".+"  ~\d+ tokens$/m);
 
     const topic = await service.call("canvas_guidance", { topic: "diagram_design" });
     expect(topic.isError).toBeUndefined();

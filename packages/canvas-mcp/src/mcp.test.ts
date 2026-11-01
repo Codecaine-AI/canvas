@@ -141,9 +141,15 @@ describe("canvas MCP server", () => {
       stderr: "pipe",
     }));
     cleanups.push(() => client.close());
-    // Both harnesses show the model only structuredContent when a result has it.
-    const shown = (result: Awaited<ReturnType<typeof client.callTool>>) =>
-      String((result.structuredContent as { text?: unknown } | undefined)?.text ?? "");
+    // Both harnesses show structuredContent instead of the text blocks when a
+    // result has it, so a result must carry text blocks only.
+    const shown = (result: Awaited<ReturnType<typeof client.callTool>>) => {
+      expect(result.structuredContent).toBeUndefined();
+      return (result.content as Array<{ type: string; text?: string }>)
+        .filter((item) => item.type === "text")
+        .map((item) => item.text)
+        .join("\n");
+    };
 
     const opened = await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow" } });
     expect(shown(opened)).toContain("OPENED · v2-flow");
@@ -154,8 +160,6 @@ describe("canvas MCP server", () => {
       arguments: { id: "fb-shape", type: "process", at: [960, 1600], detail: "A detail written as a whole sentence that runs far past one fact" },
     });
     expect(raised.isError).toBeFalsy();
-    expect(raised.structuredContent).toMatchObject({ operation: "place_shape" });
-    expect(shown(raised)).toBe((raised.content as Array<{ text: string }>)[0]!.text);
     expect(shown(raised)).toContain("APPLIED · place_shape fb-shape");
     expect(shown(raised)).toMatch(/LINTS · \+\d+ −0/);
     expect(shown(raised)).toContain("detail-too-long: fb-shape's detail has");
