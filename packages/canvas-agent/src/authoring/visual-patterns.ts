@@ -98,6 +98,16 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
                          +----------read--> [Reader B]`,
     useCase: "One ingestion process updates an index that multiple query services read.",
   },
+  {
+    id: "state-machine",
+    name: "State Machine",
+    description: "A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board's node and edge counts equal the chart's. Keep about 20 arrows or fewer. Labels are the reader's words from the chart, never variable or action names. Each node wears its group's color; a state that breaks a rule wears red instead and names the rule in its detail. The start state comes first in reading order.",
+    ascii: `[Cart open] --you press pay--> [Paying] --the card clears--> [Paid]
+   teal                           yellow    |                 yellow
+                                            +--the card is declined--> [Payment failed]
+                                                                        red: breaks PaidOnce`,
+    useCase: "Redraw a checkout flow's statechart, its failing state marked red.",
+  },
 ];
 
 function escapeXml(value: string): string {
