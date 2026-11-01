@@ -106,12 +106,31 @@ export function jsonSchema(schema: unknown): CanvasToolDeclaration["inputSchema"
   return normalizeTuples(JSON.parse(JSON.stringify(schema))) as CanvasToolDeclaration["inputSchema"];
 }
 
-function text(value: string, isError = false, structuredContent?: Record<string, unknown>): CanvasToolResult {
+/**
+ * Shape one `tools/call` result.
+ *
+ * Claude Code and Codex show the model only `structuredContent` when a result
+ * carries it, and drop the text blocks — so an edit would read as
+ * `{"operation":"place_shape"}`, without its APPLIED line, lint delta, or fix
+ * guidance. The readable text therefore also rides inside `structuredContent`
+ * as its first key, `text`; the other keys stay for machine readers. A result
+ * without structured content is left as text blocks only.
+ */
+function toolResult(
+  content: CanvasToolContent[],
+  structuredContent?: Record<string, unknown>,
+  isError = false,
+): CanvasToolResult {
+  const readable = content.flatMap((item) => item.type === "text" ? [item.text] : []).join("\n");
   return {
-    content: [{ type: "text", text: value }],
-    ...(structuredContent ? { structuredContent } : {}),
+    content,
+    ...(structuredContent ? { structuredContent: { text: readable, ...structuredContent } } : {}),
     ...(isError ? { isError: true } : {}),
   };
+}
+
+function text(value: string, isError = false, structuredContent?: Record<string, unknown>): CanvasToolResult {
+  return toolResult([{ type: "text", text: value }], structuredContent, isError);
 }
 
 function record(value: unknown): Record<string, unknown> {
@@ -327,11 +346,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
     for (const png of result.pngs ?? []) {
       content.push({ type: "image", data: png.toString("base64"), mimeType: "image/png" });
     }
-    return {
-      content,
-      ...(result.details ? { structuredContent: { ...result.details } } : {}),
-      ...(result.isError ? { isError: true } : {}),
-    };
+    return toolResult(content, result.details ? { ...result.details } : undefined, result.isError);
   }
 
   return {
