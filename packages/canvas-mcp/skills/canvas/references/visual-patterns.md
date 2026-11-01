@@ -1,8 +1,8 @@
-<!-- Generated from packages/canvas-agent/src/authoring/visual-patterns.ts (sha256 9721d8290813fac6ef87954f423edb9232461e6a0c5228a3d17117054556f783). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas-agent/src/authoring/visual-patterns.ts (sha256 236da37729039e37a11663f4dfde5426818d9bc3b412535674b081da4b686049). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Visual Patterns
 
-The 9 patterns a diagram composes. Each sketch is conceptual, not literal coordinates.
+The 10 patterns a diagram composes. Each sketch is conceptual, not literal coordinates.
 
 ## Fan-Out (`fan-out`)
 
@@ -119,3 +119,16 @@ Several participants use one shared store placed near its consumers. Label read/
 ```
 
 Use case: One ingestion process updates an index that multiple query services read.
+
+## State Machine (`state-machine`)
+
+A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board's node and edge counts equal the chart's. Keep about 20 arrows or fewer. Labels are the reader's words from the chart, never variable or action names. Each node wears its group's color; a state that breaks a rule wears red instead and names the rule in its detail. The start state comes first in reading order.
+
+```text
+[Cart open] --you press pay--> [Paying] --the card clears--> [Paid]
+   teal                           yellow    |                 yellow
+                                            +--the card is declined--> [Payment failed]
+                                                                        red: breaks PaidOnce
+```
+
+Use case: Redraw a checkout flow's statechart, its failing state marked red.

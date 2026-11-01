@@ -6,7 +6,9 @@ description: "Draw and edit Codecaine Canvas boards through the
   routes a diagram to canvas, when Ford says canvas or board, or before
   any place_*, connect or look call."
 compatibility: "Needs the codecaine-canvas MCP server."
-metadata: { version: "0.1.0", product: canvas }
+metadata:
+  version: "0.1.0"
+  product: canvas
 ---
 
 # Canvas
@@ -56,7 +58,7 @@ Understand here.
 - `references/operating-context.md` holds the full layout-editor
   prompt, the state grammar and the aesthetic topic.
 - `references/diagram-design.md` says how a diagram reads.
-- `references/visual-patterns.md` lists the nine patterns.
+- `references/visual-patterns.md` lists the ten patterns.
 - `references/vocabulary.md` lists 103 object kinds in 10 groups with
   their preferred colors.
 - `references/colors.md` lists the 10 colors and what each one means.

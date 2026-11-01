@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas-agent/src/authoring/conventions.ts (sha256 407fa610806f8fbd031656278fb870cf29908947d11a2dbe663f6bd4682cc24e). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas-agent/src/authoring/conventions.ts (sha256 7512963793f4dc173bdaf245b42bba4841aa1e48ec9cab3b5313e609c438f474). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Canvas Conventions
 
@@ -66,7 +66,7 @@
 
     <creation_defaults>
         - shape: 280×100; the object's preferred color from the catalog.
-        - icon: 120×120; the object's preferred color from the catalog.
+        - icon: 300×120; the object's preferred color from the catalog.
         - sticky: 180×120; yellow.
         - section: 480×360; gray.
     </creation_defaults>

@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas-agent/src/authoring/design.ts (sha256 3d95ca39b79f20c0377072e4ce8a0f0a400986c7de269e864aff31d8207a1bc2). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas-agent/src/authoring/design.ts (sha256 d9c69385bed0db82a4433280fa4da459bdbb1b54aeac2534d0caa54b52185fcc). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -143,6 +143,16 @@
                              |
                              +----------read--> [Reader B]]]></ascii>
         <use_case>One ingestion process updates an index that multiple query services read.</use_case>
+      </pattern>
+      <pattern id="state-machine">
+        <name>State Machine</name>
+        <description>A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board&apos;s node and edge counts equal the chart&apos;s. Keep about 20 arrows or fewer. Labels are the reader&apos;s words from the chart, never variable or action names. Each node wears its group&apos;s color; a state that breaks a rule wears red instead and names the rule in its detail. The start state comes first in reading order.</description>
+        <ascii xml:space="preserve"><![CDATA[
+    [Cart open] --you press pay--> [Paying] --the card clears--> [Paid]
+       teal                           yellow    |                 yellow
+                                                +--the card is declined--> [Payment failed]
+                                                                            red: breaks PaidOnce]]></ascii>
+        <use_case>Redraw a checkout flow&apos;s statechart, its failing state marked red.</use_case>
       </pattern>
     </patterns>
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:14a5c226a456705077a1f21e20c6b18297c02f9ab1d182db0684a4d4ae81b217",
+  "snapshotId": "sha256:704aca97195f9df4c9bfd8ecbbf473b2b41c500aa8f0119eb176bc4cbc61af60",
   "sources": [
     {
       "id": "prompt",
@@ -20,12 +20,12 @@
     {
       "id": "visual_patterns",
       "path": "packages/canvas-agent/src/authoring/visual-patterns.ts",
-      "sha256": "9721d8290813fac6ef87954f423edb9232461e6a0c5228a3d17117054556f783"
+      "sha256": "236da37729039e37a11663f4dfde5426818d9bc3b412535674b081da4b686049"
     },
     {
       "id": "diagram_design",
       "path": "packages/canvas-agent/src/authoring/design.ts",
-      "sha256": "3d95ca39b79f20c0377072e4ce8a0f0a400986c7de269e864aff31d8207a1bc2"
+      "sha256": "d9c69385bed0db82a4433280fa4da459bdbb1b54aeac2534d0caa54b52185fcc"
     },
     {
       "id": "visual_vocabulary",
@@ -40,7 +40,7 @@
     {
       "id": "canvas_conventions",
       "path": "packages/canvas-agent/src/authoring/conventions.ts",
-      "sha256": "407fa610806f8fbd031656278fb870cf29908947d11a2dbe663f6bd4682cc24e"
+      "sha256": "7512963793f4dc173bdaf245b42bba4841aa1e48ec9cab3b5313e609c438f474"
     },
     {
       "id": "contact_sheet",
@@ -50,6 +50,6 @@
   ],
   "skill": {
     "path": "packages/canvas-mcp/src/skill/SKILL.md",
-    "sha256": "9a7c1f31269c7a6c48e8bc00f1170218c2ff66e76eb935429a3c816e0e084a16"
+    "sha256": "4a9127926a7b3d9c0861ac6432f63e575caa119db4c7c95d991b4694b22a797a"
   }
 }
