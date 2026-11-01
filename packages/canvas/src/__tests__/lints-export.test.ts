@@ -1,17 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-
 import { FINISHING_RULES, LAYOUT_RULES, formatDiagnostics, runDiagnostics } from "@codecaine-ai/canvas/lints";
 import * as entry from "@codecaine-ai/canvas";
 import type { InteractiveCanvasDocument } from "../state/schema";
-
-const SRC = join(import.meta.dir, "..");
-
-function sources(dir: string): string[] {
-  return readdirSync(dir, { withFileTypes: true }).flatMap((item) =>
-    item.isDirectory() ? sources(join(dir, item.name)) : item.name.endsWith(".ts") ? [join(dir, item.name)] : []);
-}
 
 describe("board lints export", () => {
   test("another host runs every board lint from the canvas package alone", () => {
@@ -33,11 +23,5 @@ describe("board lints export", () => {
     expect(formatDiagnostics(findings)).toMatch(/^DIAGNOSTICS · \d+ errors?/);
     expect(FINISHING_RULES.length).toBe(LAYOUT_RULES.length + 1);
     expect(entry.runDiagnostics).toBe(runDiagnostics);
-  });
-
-  test("the lint sources import nothing from canvas-agent", () => {
-    const offenders = sources(join(SRC, "board"))
-      .filter((file) => /from\s+["'][^"']*canvas-agent/.test(readFileSync(file, "utf8")));
-    expect(offenders).toEqual([]);
   });
 });

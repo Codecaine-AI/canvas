@@ -14,6 +14,9 @@
       "name": "@codecaine-ai/canvas",
       "version": "0.0.1",
       "dependencies": {
+        "@codecaine-ai/prompt-kit": "link:@codecaine-ai/prompt-kit",
+        "@mariozechner/pi-ai": "^0.70.6",
+        "@resvg/resvg-js": "^2.6.2",
         "@sinclair/typebox": "^0.34",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
@@ -35,42 +38,11 @@
         "react-dom": "^19",
       },
     },
-    "packages/canvas-agent": {
-      "name": "@codecaine-ai/canvas-agent",
-      "version": "0.0.1",
-      "dependencies": {
-        "@codecaine-ai/agent-kernel-db": "link:@codecaine-ai/agent-kernel-db",
-        "@codecaine-ai/agent-kernel": "link:@codecaine-ai/agent-kernel",
-        "@codecaine-ai/agent-kernel-protocol": "link:@codecaine-ai/agent-kernel-protocol",
-        "@codecaine-ai/agent-kernel-viewer-core": "link:@codecaine-ai/agent-kernel-viewer-core",
-        "@codecaine-ai/agent-kernel-viewer-shell": "link:@codecaine-ai/agent-kernel-viewer-shell",
-        "@codecaine-ai/agent-kernel-viewer-ui": "link:@codecaine-ai/agent-kernel-viewer-ui",
-        "@codecaine-ai/canvas": "workspace:*",
-        "@codecaine-ai/prompt-kit": "link:@codecaine-ai/prompt-kit",
-        "@mariozechner/pi-ai": "^0.70.6",
-        "@resvg/resvg-js": "^2.6.2",
-        "elysia": "^1.2.0",
-        "react": "^19",
-        "react-dom": "^19",
-      },
-      "devDependencies": {
-        "@tailwindcss/postcss": "^4",
-        "@types/bun": "latest",
-        "@types/node": "^24",
-        "@types/react": "^19",
-        "@types/react-dom": "^19",
-        "@vitejs/plugin-react": "^5.1.2",
-        "tailwindcss": "^4",
-        "typescript": "^5",
-        "vite": "^7.3.0",
-      },
-    },
     "packages/studio": {
       "name": "@codecaine-ai/studio",
       "version": "0.0.1",
       "dependencies": {
         "@codecaine-ai/canvas": "workspace:*",
-        "@codecaine-ai/canvas-agent": "workspace:*",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "radix-ui": "^1.4.3",
@@ -195,8 +167,6 @@
     "@borewit/text-codec": ["@borewit/text-codec@0.2.2", "", {}, "sha512-DDaRehssg1aNrH4+2hnj1B7vnUGEjU6OIlyRdkMd0aUdIUvKXrJfXsy8LVtXAy7DRvYVluWbMspsRhz2lcW0mQ=="],
 
     "@codecaine-ai/canvas": ["@codecaine-ai/canvas@workspace:packages/canvas"],
-
-    "@codecaine-ai/canvas-agent": ["@codecaine-ai/canvas-agent@workspace:packages/canvas-agent"],
 
     "@codecaine-ai/prompt-kit": ["@codecaine-ai/prompt-kit@link:@codecaine-ai/prompt-kit", {}],
 

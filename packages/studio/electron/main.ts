@@ -10,7 +10,6 @@ import {
   shell,
   type MenuItemConstructorOptions,
 } from "electron";
-import { createAgentProxyHandler } from "../server/agent-proxy";
 import { createCanvasFileApiHandler } from "../server/canvas-file-api";
 import { createEvalsApiHandler } from "../server/evals-api";
 
@@ -143,30 +142,24 @@ async function serveStaticFile(
 
 async function startStudioServer(canvasesDir: string): Promise<string> {
   const distDir = resolve(__dirname, "../dist");
-  // Same chain order as the Vite dev server: the agent proxy runs before the
-  // canvas file API so /api/canvases/:id/agent/* reaches the harness, not the
-  // file API's catch-all /api/canvases branch.
-  const agentProxyHandler = createAgentProxyHandler({});
   const canvasFileApiHandler = createCanvasFileApiHandler({ canvasesDir });
   const evalsApiHandler = devPagesEnabled()
     ? createEvalsApiHandler({ runsDir: resolveEvalRunsDir() })
     : null;
 
   studioServer = createServer((req, res) => {
-    agentProxyHandler(req, res, () => {
-      canvasFileApiHandler(req, res, () => {
-        const serveStatic = () => {
-          void serveStaticFile(req, res, distDir).catch(() => {
-            if (!res.headersSent) {
-              sendPlainText(res, 500, "Internal server error.");
-            } else {
-              res.destroy();
-            }
-          });
-        };
-        if (evalsApiHandler) evalsApiHandler(req, res, serveStatic);
-        else serveStatic();
-      });
+    canvasFileApiHandler(req, res, () => {
+      const serveStatic = () => {
+        void serveStaticFile(req, res, distDir).catch(() => {
+          if (!res.headersSent) {
+            sendPlainText(res, 500, "Internal server error.");
+          } else {
+            res.destroy();
+          }
+        });
+      };
+      if (evalsApiHandler) evalsApiHandler(req, res, serveStatic);
+      else serveStatic();
     });
   });
 

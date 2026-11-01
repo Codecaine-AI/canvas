@@ -2,7 +2,7 @@
  * Connection label chip geometry + typography — the ONE source for the chip
  * the live connector draws (connectors/Connector.tsx), the static renderer
  * draws (render/static-svg.ts connectionLabelChipRect), and the agent's lints
- * reason about (canvas-agent board/lints/geometry.ts), so a chip is the same
+ * reason about (board/lints/geometry.ts), so a chip is the same
  * size everywhere under every theme.
  *
  * The chip is a fixed-height rounded rect centered on the connection's label

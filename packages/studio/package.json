@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "@codecaine-ai/canvas": "workspace:*",
-    "@codecaine-ai/canvas-agent": "workspace:*",
     "@codecaine-ai/design-system": "workspace:*",
     "@codecaine-ai/text-measure": "workspace:*",
     "class-variance-authority": "^0.7.1",

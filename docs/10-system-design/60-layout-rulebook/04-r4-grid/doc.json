@@ -21,26 +21,12 @@
         "type": "design"
       },
       "children": [
-        "b-r4-title-1",
         "b-r4-grid-opening",
         "b-r4-card-2",
         "b-r4-detect-3",
         "b-r4-expand-4",
         "b-r4-evidence-5"
       ]
-    },
-    "b-r4-title-1": {
-      "id": "b-r4-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "R4 — grid: repeated-cell tables"
-        }
-      ],
-      "children": []
     },
     "b-r4-grid-opening": {
       "id": "b-r4-grid-opening",
@@ -86,7 +72,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+              "path": "packages/canvas/src/authoring/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }

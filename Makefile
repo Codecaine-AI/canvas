@@ -1,22 +1,10 @@
-.PHONY: studio studio-evals studio-web docs harness traces eval eval-clean
+.PHONY: studio studio-evals studio-web docs eval eval-clean
 
-# Build and launch the native Mac studio app WITH the agent running:
-# the canvas-agent harness boots on :4820 alongside (skipped if one is
-# already running there), and VITE_STUDIO_DEV_PAGES=1 bakes the dev rail
-# into the packaged build. (The agent trace/operator pages are no longer
-# in-app — they're the standalone viewer, `make traces`.) The harness we
-# started is stopped when the app exits.
+# Build and launch the native Mac studio app. VITE_STUDIO_DEV_PAGES=1 bakes
+# the dev rail into the packaged build.
 studio:
 	cd .. && bun install
-	@if curl -sf http://127.0.0.1:4820/health >/dev/null 2>&1; then \
-		echo "agent harness: already running on :4820 — leaving it"; \
-		VITE_STUDIO_DEV_PAGES=1 bun run --cwd packages/studio studio; \
-	else \
-		echo "agent harness: starting on :4820"; \
-		bun run --cwd packages/canvas-agent harness & HARNESS_PID=$$!; \
-		trap 'kill $$HARNESS_PID 2>/dev/null' EXIT INT TERM; \
-		VITE_STUDIO_DEV_PAGES=1 bun run --cwd packages/studio studio; \
-	fi
+	VITE_STUDIO_DEV_PAGES=1 bun run --cwd packages/studio studio
 
 # viewer for eval-suite boards (canvases/evals/); read-only by convention while a run is active.
 studio-evals: export CANVAS_DIR = $(CURDIR)/canvases/evals
@@ -24,50 +12,10 @@ studio-evals:
 	mkdir -p "$(CANVAS_DIR)"
 	CANVAS_DIR="$(CANVAS_DIR)" $(MAKE) studio
 
-# Run the canvas-agent layout harness alone (sibling Bun service on :4820;
-# studio's agent proxy fronts it, so the browser only ever talks to the
-# studio origin). Kernel runtime state lives in .agent-kernel/ (gitignored).
-harness:
-	cd .. && bun install
-	bun run dev:harness
-
-# Run the browser-based development server, harness alongside (dev mode
-# already enables the agent pages/dev rail via import.meta.env.DEV).
+# Run the browser-based development server (dev mode already enables the dev
+# rail via import.meta.env.DEV).
 studio-web:
-	@if curl -sf http://127.0.0.1:4820/health >/dev/null 2>&1; then \
-		echo "agent harness: already running on :4820 — leaving it"; \
-		bun run dev:studio; \
-	else \
-		echo "agent harness: starting on :4820"; \
-		bun run --cwd packages/canvas-agent harness & HARNESS_PID=$$!; \
-		trap 'kill $$HARNESS_PID 2>/dev/null' EXIT INT TERM; \
-		bun run dev:studio; \
-	fi
-
-# The standalone agent trace viewer (packages/canvas-agent/src/viewer) in
-# its own browser window on :4830, side-by-side with studio. Boots the
-# harness on :4820 first if one isn't already answering /health (same
-# pattern as the studio targets; a harness we started is stopped when the
-# viewer exits). On macOS the browser window opens itself once vite is up.
-traces:
-	# Deps install at the Core meta-workspace root (workspace:* deps do not
-	# resolve from this repo alone — see Core/DEVELOPMENT.md).
-	cd .. && bun install
-	@if [ "$$(uname)" = "Darwin" ]; then \
-		( for i in $$(seq 1 30); do \
-			curl -sf http://localhost:4830/ >/dev/null 2>&1 && { open http://localhost:4830; exit 0; }; \
-			sleep 0.5; \
-		done ) & \
-	fi; \
-	if curl -sf http://127.0.0.1:4820/health >/dev/null 2>&1; then \
-		echo "agent harness: already running on :4820 — leaving it"; \
-		bun run dev:agent-viewer; \
-	else \
-		echo "agent harness: starting on :4820"; \
-		bun run --cwd packages/canvas-agent harness & HARNESS_PID=$$!; \
-		trap 'kill $$HARNESS_PID 2>/dev/null' EXIT INT TERM; \
-		bun run dev:agent-viewer; \
-	fi
+	bun run dev:studio
 
 # Serve this repo's docs/ on port 4810 — off the usual docs ports
 # (4800–4804) so it never collides with a running docs-system app.

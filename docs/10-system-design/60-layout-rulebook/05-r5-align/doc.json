@@ -19,7 +19,6 @@
         "type": "design"
       },
       "children": [
-        "b-r5-title-1",
         "b-r5-align-opening",
         "b-r5-card-2",
         "b-r5-detect-3",
@@ -29,19 +28,6 @@
         "b-r5-order-excluded-7",
         "b-r5-evidence-8"
       ]
-    },
-    "b-r5-title-1": {
-      "id": "b-r5-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "R5 — align: cross-branch registers"
-        }
-      ],
-      "children": []
     },
     "b-r5-align-opening": {
       "id": "b-r5-align-opening",
@@ -87,7 +73,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+              "path": "packages/canvas/src/authoring/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }

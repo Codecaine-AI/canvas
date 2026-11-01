@@ -331,7 +331,7 @@ function parsePreviewPadding(raw: string | null): number | undefined {
 
 /**
  * Content hash of a canvas file's raw bytes — sha256 hex, the same digest the
- * agent harness uses for its accept-time rebase check, so one hash names one
+ * canvas toolkit uses for its file-conflict check, so one hash names one
  * on-disk revision everywhere.
  */
 export function canvasContentHash(contents: string | Buffer): string {

@@ -20,44 +20,25 @@ function writePanelOpen(storageKey: string, open: boolean): void {
 }
 
 /**
- * The editor's right-hand panels. The Style rail, the Inspector, and the Agent
- * sidebar share the editor's right-hand slot: opening one closes the others.
- * The Style rail and the Inspector remember whether they were open.
+ * The editor's right-hand panels. The Style rail and the Inspector share the
+ * editor's right-hand slot: opening one closes the other. Both remember
+ * whether they were open.
  */
 export function useEditorPanels() {
-  const [showAgent, setShowAgent] = useState(false);
   const [showStyle, setShowStyle] = useState(() => readPanelOpen(STYLE_RAIL_OPEN_STORAGE_KEY));
   const [showInspector, setShowInspector] = useState(() => readPanelOpen(INSPECTOR_OPEN_STORAGE_KEY));
-
-  const toggleAgent = useCallback(() => {
-    const next = !showAgent;
-    setShowAgent(next);
-  }, [showAgent]);
 
   const toggleStyle = useCallback(() => {
     const next = !showStyle;
     setShowStyle(next);
-    if (next) {
-      setShowAgent(false);
-      setShowInspector(false);
-    }
+    if (next) setShowInspector(false);
   }, [showStyle]);
 
   const toggleInspector = useCallback(() => {
     const next = !showInspector;
     setShowInspector(next);
-    if (next) {
-      setShowAgent(false);
-      setShowStyle(false);
-    }
+    if (next) setShowStyle(false);
   }, [showInspector]);
-
-  // The agent sidebar also opens itself (annotation tool, agent runs).
-  useEffect(() => {
-    if (!showAgent) return;
-    setShowStyle(false);
-    setShowInspector(false);
-  }, [showAgent]);
 
   useEffect(() => {
     writePanelOpen(STYLE_RAIL_OPEN_STORAGE_KEY, showStyle);
@@ -68,12 +49,9 @@ export function useEditorPanels() {
   }, [showInspector]);
 
   return {
-    showAgent,
-    setShowAgent,
     showStyle,
     setShowStyle,
     showInspector,
-    toggleAgent,
     toggleStyle,
     toggleInspector,
   };

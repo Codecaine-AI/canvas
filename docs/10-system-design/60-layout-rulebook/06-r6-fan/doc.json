@@ -22,7 +22,6 @@
         "type": "design"
       },
       "children": [
-        "b-r6-title-1",
         "b-r6-fan-opening",
         "b-r6-card-2",
         "b-r6-detect-3",
@@ -32,19 +31,6 @@
         "b-r6-centering-7",
         "b-r6-evidence-8"
       ]
-    },
-    "b-r6-title-1": {
-      "id": "b-r6-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "R6 — fan: hub over children"
-        }
-      ],
-      "children": []
     },
     "b-r6-fan-opening": {
       "id": "b-r6-fan-opening",
@@ -90,7 +76,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+              "path": "packages/canvas/src/authoring/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }
