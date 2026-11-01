@@ -278,19 +278,21 @@ describe("canvas MCP action log", () => {
     await client.callTool({ name: "place_sticky", arguments: { id: "log-note", text: "Logged", at: [960, 1600] } });
     await client.callTool({ name: "canvas_guidance", arguments: {} });
     await client.callTool({ name: "canvas_open", arguments: { canvas: "no-such-board" } });
+    await client.callTool({ name: "canvas_create", arguments: { canvas: "v2-flow", title: "Taken" } });
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "canvases/v2-flow.canvas.json" } });
 
     const log = openActionLog({ path });
     cleanups.push(() => log.close());
     const records = log.query({ threadId: "thread-arg" });
-    expect(records.map((record) => [record.tool, record.target])).toEqual([
-      ["canvas_open", "v2-flow"],
-      ["place_sticky", "v2-flow"],
-      ["canvas_guidance", "-"],
-      ["canvas_open", "no-such-board"],
+    expect(records.map((record) => [record.tool, record.target, record.result])).toEqual([
+      ["canvas_open", "v2-flow", "ok"],
+      ["place_sticky", "v2-flow", expect.stringMatching(/^ok/)],
+      ["canvas_guidance", "-", "ok"],
+      ["canvas_open", "no-such-board", "refused"],
+      ["canvas_create", "v2-flow", "refused"],
+      ["canvas_open", "v2-flow", "ok"],
     ]);
-    expect(records[1]!.result).toMatch(/^ok/);
     expect(records[2]!.snapshotId).toMatch(/\S/);
-    expect(records[3]!.result).toMatch(/^refused: /);
   });
 
   test("a failed log write never fails the tool call", async () => {

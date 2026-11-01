@@ -22,20 +22,23 @@ export const MCP_INSTRUCTIONS =
   + "Call canvas_check before you call a board done: it runs every lint and returns a PNG of the whole board. "
   + "Call canvas_guidance for the diagram design standards, one topic at a time, before laying out or restructuring a board.";
 
-/** The target a call acted on: the board id, or "-" when the call has no board. */
-function targetOf(name: string, args: unknown, openCanvasId: string | undefined): string {
+/**
+ * The target a call acted on: the open board's resolved id, the requested id or path when an
+ * open or create was refused, or "-" when the call has no board.
+ */
+function targetOf(name: string, args: unknown, isError: boolean, openCanvasId: string | undefined): string {
   if (name === "canvas_list" || name === "canvas_guidance") return "-";
-  if (name === "canvas_open") {
-    const raw = typeof (args as { canvas?: unknown })?.canvas === "string" ? (args as { canvas: string }).canvas.trim() : "";
-    return raw.replace(/\.canvas\.json$/, "") || "-";
+  if ((name === "canvas_open" || name === "canvas_create") && isError) {
+    const raw = (args as { canvas?: unknown })?.canvas;
+    return typeof raw === "string" && raw.trim() ? raw.trim() : "-";
   }
   return openCanvasId ?? "-";
 }
 
-/** A short summary of a result: the refusal's first line, or "ok" plus the LINTS line when the text has one. Never a payload. */
+/** "refused", or "ok" plus the LINTS line when the text has one. Refusal text stays out, because it can echo the call's payload. */
 function summarize(result: { isError?: boolean; content: Array<{ type: string; text?: string }> }): string {
+  if (result.isError) return "refused";
   const lines = result.content.filter((part) => part.type === "text").flatMap((part) => (part.text ?? "").split("\n"));
-  if (result.isError) return `refused: ${lines[0] ?? ""}`;
   const lints = lines.find((line) => line.startsWith("LINTS · "));
   return lints && !lints.startsWith("LINTS · clean") ? `ok · ${lints}` : "ok";
 }
@@ -67,7 +70,7 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
         threadId: identity.threadId,
         agent: identity.agent ?? "canvas-mcp",
         tool: name,
-        target: targetOf(name, args, service.activeCanvas()?.canvasId),
+        target: targetOf(name, args, result.isError === true, service.activeCanvas()?.canvasId),
         result: summarize(result),
         snapshotId,
         at: new Date(),
