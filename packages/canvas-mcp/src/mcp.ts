@@ -9,6 +9,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { identityFromEnv, newRunId, openActionLog, type ActionLog } from "@codecaine-ai/action-log";
+import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas-agent/authoring";
 import { resolve } from "node:path";
 
 import { version } from "../package.json";
@@ -31,14 +32,12 @@ function targetOf(name: string, args: unknown, openCanvasId: string | undefined)
   return openCanvasId ?? "-";
 }
 
-/** A short summary of a result. Never a payload. */
-function summarize(result: { isError?: boolean; content: Array<{ type: string; text?: string }>; structuredContent?: Record<string, unknown> }): string {
-  if (result.isError) {
-    const first = result.content.find((part) => part.type === "text")?.text?.split("\n")[0] ?? "";
-    return `refused: ${first}`;
-  }
-  const findings = result.structuredContent?.findings;
-  return Array.isArray(findings) ? `${findings.length} findings` : "ok";
+/** A short summary of a result: the refusal's first line, or "ok" plus the LINTS line when the text has one. Never a payload. */
+function summarize(result: { isError?: boolean; content: Array<{ type: string; text?: string }> }): string {
+  const lines = result.content.filter((part) => part.type === "text").flatMap((part) => (part.text ?? "").split("\n"));
+  if (result.isError) return `refused: ${lines[0] ?? ""}`;
+  const lints = lines.find((line) => line.startsWith("LINTS · "));
+  return lints && !lints.startsWith("LINTS · clean") ? `ok · ${lints}` : "ok";
 }
 
 /** Build the MCP server for one workspace without connecting a transport (tests connect their own). */
@@ -62,7 +61,7 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
       log ??= openActionLog();
       const threadId = (args as { thread_id?: unknown }).thread_id;
       if (name === "canvas_open" && typeof threadId === "string" && threadId) log.bindThread(runId, threadId);
-      const snapshotId = result.structuredContent?.snapshotId;
+      const snapshotId = name === "canvas_guidance" && !result.isError ? getCanvasAuthoringGuidance().snapshotId : null;
       log.record({
         runId,
         threadId: identity.threadId,
@@ -70,7 +69,7 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
         tool: name,
         target: targetOf(name, args, service.activeCanvas()?.canvasId),
         result: summarize(result),
-        snapshotId: typeof snapshotId === "string" ? snapshotId : null,
+        snapshotId,
         at: new Date(),
       });
     } catch (error) {
