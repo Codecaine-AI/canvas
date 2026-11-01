@@ -13,7 +13,7 @@ import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas-agent/authoring
 import { resolve } from "node:path";
 
 import { version } from "../package.json";
-import { type CanvasServiceOptions, createCanvasService } from "./service";
+import { type CanvasServiceOptions, type CanvasToolResult, createCanvasService } from "./service";
 
 /** Sent once at initialize; kept short because clients inline it into every session. */
 export const MCP_INSTRUCTIONS =
@@ -23,19 +23,15 @@ export const MCP_INSTRUCTIONS =
   + "Call canvas_guidance for the diagram design standards, one topic at a time, before laying out or restructuring a board.";
 
 /**
- * The target a call acted on: the board a successful open or create names in its first line, the
- * requested id or path when the open or create was refused, the board that was active when an
- * edit started, or "-" when the call has no board. Calls can interleave, so nothing here reads
+ * The target a call acted on: the board a successful open or create names in `_meta.canvasId`,
+ * the requested id or path when the open or create was refused, the board that was active when
+ * an edit started, or "-" when the call has no board. Calls can interleave, so nothing here reads
  * the active board after the call.
  */
-function targetOf(name: string, args: unknown, result: { isError?: boolean; content: Array<{ type: string; text?: string }> }, activeBefore: string | undefined): string {
+function targetOf(name: string, args: unknown, result: CanvasToolResult, activeBefore: string | undefined): string {
   if (name === "canvas_list" || name === "canvas_guidance") return "-";
   if (name === "canvas_open" || name === "canvas_create") {
-    if (!result.isError) {
-      const first = result.content.find((part) => part.type === "text")?.text ?? "";
-      const named = /^(?:OPENED|CREATED) · (\S+) /.exec(first);
-      if (named) return named[1]!;
-    }
+    if (result._meta?.canvasId) return result._meta.canvasId;
     const raw = (args as { canvas?: unknown })?.canvas;
     return typeof raw === "string" && raw.trim() ? raw.trim() : "-";
   }

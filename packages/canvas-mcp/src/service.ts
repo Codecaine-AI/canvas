@@ -37,11 +37,12 @@ export type CanvasToolContent =
   | { type: "text"; text: string }
   | { type: "image"; data: string; mimeType: string };
 
-/** One MCP tool result, shaped for `tools/call`. */
+/** One MCP tool result, shaped for `tools/call`. `_meta.canvasId` names the board a successful open or create landed on. */
 export interface CanvasToolResult {
   [key: string]: unknown;
   content: CanvasToolContent[];
   isError?: boolean;
+  _meta?: { canvasId: string };
 }
 
 /** One MCP tool declaration, shaped for `tools/list`. */
@@ -386,7 +387,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
       return text(`canvas_open failed: ${error instanceof Error ? error.message : String(error)}`, true);
     }
     active = file;
-    return text(openedText("OPENED", file));
+    return { ...text(openedText("OPENED", file)), _meta: { canvasId: file.canvasId } };
   }
 
   function createCanvas(args: Record<string, unknown>): CanvasToolResult {
@@ -407,7 +408,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
     mkdirSync(canvasesDir, { recursive: true });
     const file = createCanvasFile(target.path, title);
     active = file;
-    return text(`${openedText("CREATED", file)}\nSAVED · ${shownPath(file.canvasPath)}`);
+    return { ...text(`${openedText("CREATED", file)}\nSAVED · ${shownPath(file.canvasPath)}`), _meta: { canvasId: file.canvasId } };
   }
 
   function checkCanvas(): CanvasToolResult {

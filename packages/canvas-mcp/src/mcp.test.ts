@@ -300,15 +300,17 @@ describe("canvas MCP action log", () => {
     delete process.env.T3CODE_THREAD_ID;
     const workspace = tempWorkspace();
     copyFileSync(join(workspace, "canvases", "v2-flow.canvas.json"), join(workspace, "canvases", "board-b.canvas.json"));
+    copyFileSync(join(workspace, "canvases", "v2-flow.canvas.json"), join(workspace, "canvases", "Flow Diagram.canvas.json"));
     const client = await connect(workspace);
     await Promise.all([
       client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-race" } }),
       client.callTool({ name: "canvas_open", arguments: { canvas: "board-b" } }),
+      client.callTool({ name: "canvas_open", arguments: { canvas: "canvases/Flow Diagram.canvas.json" } }),
     ]);
     const log = openActionLog({ path });
     cleanups.push(() => log.close());
     const opens = log.query({ threadId: "thread-race" }).map((record) => record.target).sort();
-    expect(opens).toEqual(["board-b", "v2-flow"]);
+    expect(opens).toEqual(["Flow Diagram", "board-b", "v2-flow"]);
   });
 
   test("a failed log write never fails the tool call", async () => {
