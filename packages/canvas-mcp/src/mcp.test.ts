@@ -35,7 +35,7 @@ function tempWorkspace(): string {
 
 describe("canvas MCP server", () => {
   test("tools/list exposes all 25 operation tools with their exact names, descriptions, and schemas", async () => {
-    const server = createCanvasMcpServer(tempWorkspace());
+    const server = createCanvasMcpServer({ workspace: tempWorkspace() });
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -61,7 +61,7 @@ describe("canvas MCP server", () => {
   });
 
   test("tools/list carries the name + detail fields and the section header glyph", async () => {
-    const server = createCanvasMcpServer(tempWorkspace());
+    const server = createCanvasMcpServer({ workspace: tempWorkspace() });
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -84,7 +84,7 @@ describe("canvas MCP server", () => {
   });
 
   test("no listed schema carries a draft-07 tuple, which the Anthropic API rejects", async () => {
-    const server = createCanvasMcpServer(tempWorkspace());
+    const server = createCanvasMcpServer({ workspace: tempWorkspace() });
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -112,6 +112,7 @@ describe("canvas MCP server", () => {
     await client.connect(new StdioClientTransport({
       command: process.execPath,
       args: [CLI, "mcp", "--workspace", workspace],
+      cwd: workspace,
       stderr: "pipe",
     }));
     cleanups.push(() => client.close());
@@ -133,51 +134,68 @@ describe("canvas MCP server", () => {
     expect(saved.objects.some((object: { id: string }) => object.id === "stdio-note")).toBe(true);
   }, 30_000);
 
-  test("stdio: --workspace without canvases/ contains sidecars, and --canvases holds the ids", async () => {
+  test("stdio: --workspace contains every path, the project resolves first, and --canvases holds the ids", async () => {
     const root = mkdtempSync(join(tmpdir(), "canvas-mcp-roots-"));
     cleanups.push(() => rmSync(root, { recursive: true, force: true }));
     const board = join(REPO_CANVASES, "v2-flow.canvas.json");
+    // Workspace w has no canvases/. Project w/proj has its own; w/bare does not.
     const [workspace, boards, elsewhere] = ["w", "boards", "elsewhere"].map((name) => join(root, name));
+    const [project, bare] = ["proj", "bare"].map((name) => join(workspace, name));
     const sidecar = join(workspace, "pages", "x", "assets", "canvases", "a.canvas.json");
+    const projectBoard = join(project, "canvases", "v2.canvas.json");
     const stray = join(elsewhere, "a.canvas.json");
-    mkdirSync(join(sidecar, ".."), { recursive: true });
-    mkdirSync(boards);
-    mkdirSync(elsewhere);
-    copyFileSync(board, sidecar);
-    copyFileSync(board, join(boards, "standalone.canvas.json"));
-    copyFileSync(board, stray);
+    for (const dir of [join(sidecar, ".."), join(projectBoard, ".."), bare, boards, elsewhere]) {
+      mkdirSync(dir, { recursive: true });
+    }
+    for (const path of [sidecar, projectBoard, join(boards, "standalone.canvas.json"), stray]) copyFileSync(board, path);
 
-    const client = new Client({ name: "canvas-mcp-stdio-test", version: "1.0.0" });
-    await client.connect(new StdioClientTransport({
-      command: process.execPath,
-      args: [CLI, "mcp", "--workspace", workspace, "--canvases", boards],
-      stderr: "pipe",
-    }));
-    cleanups.push(() => client.close());
-    const open = async (canvas: string) => {
-      const result = await client.callTool({ name: "canvas_open", arguments: { canvas } });
-      return { isError: Boolean(result.isError), text: (result.content as Array<{ text: string }>)[0]!.text };
+    const session = async (cwd: string) => {
+      const client = new Client({ name: "canvas-mcp-stdio-test", version: "1.0.0" });
+      await client.connect(new StdioClientTransport({
+        command: process.execPath,
+        args: [CLI, "mcp", "--workspace", workspace, "--canvases", boards],
+        cwd,
+        stderr: "pipe",
+      }));
+      cleanups.push(() => client.close());
+      return async (canvas: string) => {
+        const result = await client.callTool({ name: "canvas_open", arguments: { canvas } });
+        return { isError: Boolean(result.isError), text: (result.content as Array<{ text: string }>)[0]!.text };
+      };
     };
 
-    const byId = await open("standalone");
-    expect(byId.isError).toBe(false);
-    expect(byId.text).toContain(`OPENED · standalone "`);
-    expect(byId.text).toContain(` · ${join(boards, "standalone.canvas.json")} · sha256:`);
+    const inProject = await session(project);
+    const relative = await inProject("canvases/v2.canvas.json");
+    expect(relative.isError).toBe(false);
+    expect(relative.text).toContain(" · proj/canvases/v2.canvas.json · sha256:");
 
-    const page = await open(sidecar);
+    const projectId = await inProject("v2");
+    expect(projectId.isError).toBe(false);
+    expect(projectId.text).toContain(" · proj/canvases/v2.canvas.json · sha256:");
+
+    // Not in the project, so the path resolves against the workspace.
+    const page = await inProject("pages/x/assets/canvases/a.canvas.json");
     expect(page.isError).toBe(false);
     expect(page.text).toContain(" · pages/x/assets/canvases/a.canvas.json · sha256:");
 
-    const refused = await open(stray);
-    expect(refused.isError).toBe(true);
-    expect(refused.text).toContain("is outside the workspace");
+    for (const outside of ["../../elsewhere/a.canvas.json", stray]) {
+      const refused = await inProject(outside);
+      expect(refused.isError).toBe(true);
+      expect(refused.text).toContain("is outside the workspace");
+    }
+
+    const byId = await (await session(bare))("standalone");
+    expect(byId.isError).toBe(false);
+    expect(byId.text).toContain(` · ${join(boards, "standalone.canvas.json")} · sha256:`);
   }, 30_000);
 
   test("stdio: an edit's APPLIED line, lint delta, and fix guidance reach what Claude Code and Codex show", async () => {
+    const workspace = tempWorkspace();
     const client = new Client({ name: "canvas-mcp-stdio-test", version: "1.0.0" });
     await client.connect(new StdioClientTransport({
       command: process.execPath,
-      args: [CLI, "mcp", "--workspace", tempWorkspace()],
+      args: [CLI, "mcp", "--workspace", workspace],
+      cwd: workspace,
       stderr: "pipe",
     }));
     cleanups.push(() => client.close());

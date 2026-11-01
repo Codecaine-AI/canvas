@@ -53,9 +53,11 @@ export interface CanvasToolDeclaration {
 }
 
 export interface CanvasServiceOptions {
-  /** Containment root: canvas_open's path form opens a board file only inside it. */
+  /** Containment root: canvas_open opens a board file only inside it. */
   workspace: string;
-  /** The standalone boards folder that ids, canvas_list, and canvas_create use. Default `<workspace>/canvases`. */
+  /** Project root: a relative board path resolves against it first, then against the workspace. Default the workspace. */
+  project?: string;
+  /** The standalone boards folder that ids, canvas_list, and canvas_create use. Default `<project>/canvases`. */
   canvasesDir?: string;
 }
 
@@ -244,7 +246,8 @@ const TOOLKIT_NAMES = new Set(toolkitTools.map((tool) => tool.name));
 
 /** Workspace-bound canvas service: tool declarations plus one active canvas session. */
 export function createCanvasService(options: CanvasServiceOptions) {
-  const canvasesDir = resolve(options.canvasesDir ?? join(options.workspace, "canvases"));
+  const project = resolve(options.project ?? options.workspace);
+  const canvasesDir = resolve(options.canvasesDir ?? join(project, "canvases"));
   let active: CanvasFileSession | null = null;
 
   function canvasPath(id: string): string {
@@ -269,12 +272,15 @@ export function createCanvasService(options: CanvasServiceOptions) {
   /**
    * The file a `canvas` argument names: a bare id is canvases/<id>.canvas.json;
    * anything with a path separator is a .canvas.json file in any folder of the
-   * workspace, such as a docs page's sidecar, resolved against the workspace
-   * when relative. `openCanvas` then checks the real path (`realBoard`).
+   * workspace, such as a docs page's sidecar. A relative path resolves against
+   * the project root when that file exists, else against the workspace; either
+   * way it must lie inside the workspace. `openCanvas` then checks the real
+   * path (`realBoard`).
    */
   function canvasTarget(tool: string, raw: string): { id: string; path: string } | { error: string } {
     if (/[\\/]/.test(raw)) {
-      const path = resolve(options.workspace, raw);
+      const inProject = resolve(project, raw);
+      const path = existsSync(inProject) ? inProject : resolve(options.workspace, raw);
       if (!isInside(resolve(options.workspace), path) && !isInside(workspaceRoot(), path)) {
         return { error: outsideWorkspace(tool, raw) };
       }

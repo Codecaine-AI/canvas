@@ -4,14 +4,16 @@
  *
  *   codecaine-canvas mcp [--workspace <dir>] [--canvases <dir>]   serve the canvas tools over stdio
  *
- * The workspace is the containment root: canvas_open opens a board file by
- * path only inside it. It is `--workspace`, else `CLAUDE_PROJECT_DIR` (set by
- * Claude Code for project MCP servers), else the current directory, and it
- * holds even when it has no `canvases/`. The boards folder holds the
- * standalone boards that ids, canvas_list and canvas_create use. stdout
- * carries the MCP protocol, so diagnostics go to stderr only.
+ * Three roots, one role each:
+ * - Containment root: `--workspace`, else the project root. canvas_open opens
+ *   nothing outside it.
+ * - Project root: `CLAUDE_PROJECT_DIR` (set by Claude Code), else the current
+ *   directory. A relative board path resolves against it first.
+ * - Boards folder: the standalone boards that ids, canvas_list and
+ *   canvas_create use.
+ * stdout carries the MCP protocol, so diagnostics go to stderr only.
  */
-import { existsSync } from "node:fs";
+import { existsSync, realpathSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 import { startMcp } from "./mcp";
@@ -22,30 +24,34 @@ loadCodecaineEnv();
 const args = process.argv.slice(2);
 const command = args.shift() ?? "help";
 
-function option(name: string, fallback?: string): string | undefined {
+function option(name: string): string | undefined {
   const index = args.indexOf(name);
-  return index >= 0 ? args[index + 1] : fallback;
+  return index >= 0 ? args[index + 1] : undefined;
 }
 
-const workspace = resolve(option("--workspace", process.env.CLAUDE_PROJECT_DIR || process.cwd())!);
+/** A root in canonical form, so the cwd (always real) and a symlinked `--workspace` compare. */
+function root(path: string): string {
+  return existsSync(path) ? realpathSync(path) : resolve(path);
+}
+
+const project = root(process.env.CLAUDE_PROJECT_DIR || process.cwd());
+const workspace = root(option("--workspace") ?? project);
 
 /**
- * The boards folder: `<workspace>/canvases` when it exists, else `--canvases`,
- * else the canvas repo this package lives in, so a user-scoped install always
- * has a board set to edit.
+ * The boards folder: `<project>/canvases`, else `<workspace>/canvases`, the
+ * first that exists. Else `--canvases`, else the canvas repo this package
+ * lives in, so a user-scoped install always has a board set to edit.
  */
-const projectCanvases = join(workspace, "canvases");
-const canvasesDir = existsSync(projectCanvases)
-  ? projectCanvases
-  : resolve(option("--canvases", resolve(import.meta.dir, "../../../canvases"))!);
+const canvasesDir = [join(project, "canvases"), join(workspace, "canvases")].find((dir) => existsSync(dir))
+  ?? resolve(option("--canvases") ?? resolve(import.meta.dir, "../../../canvases"));
 
 try {
   switch (command) {
     case "mcp":
-      await startMcp(workspace, canvasesDir);
+      await startMcp({ workspace, project, canvasesDir });
       break;
     default:
-      console.error("Codecaine Canvas\n\n  mcp [--workspace PATH] [--canvases DIR]   Serve the canvas editing tools over stdio (boards in PATH/canvases, else DIR)");
+      console.error("Codecaine Canvas\n\n  mcp [--workspace PATH] [--canvases DIR]   Serve the canvas editing tools over stdio (boards in the project's canvases/, else PATH/canvases, else DIR)");
       if (command !== "help") process.exitCode = 1;
   }
 } catch (error) {

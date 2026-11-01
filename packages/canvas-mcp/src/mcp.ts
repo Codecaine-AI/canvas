@@ -11,7 +11,7 @@ import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless"
 import { resolve } from "node:path";
 
 import { version } from "../package.json";
-import { createCanvasService } from "./service";
+import { type CanvasServiceOptions, createCanvasService } from "./service";
 
 /** Sent once at initialize; kept short because clients inline it into every session. */
 export const MCP_INSTRUCTIONS =
@@ -21,8 +21,8 @@ export const MCP_INSTRUCTIONS =
   + "Call canvas_guidance for the diagram design standards, one topic at a time, before laying out or restructuring a board.";
 
 /** Build the MCP server for one workspace without connecting a transport (tests connect their own). */
-export function createCanvasMcpServer(workspace: string, canvasesDir?: string): Server {
-  const service = createCanvasService({ workspace: resolve(workspace), canvasesDir });
+export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
+  const service = createCanvasService({ ...options, workspace: resolve(options.workspace) });
   const server = new Server(
     { name: "codecaine-canvas", version },
     { capabilities: { tools: {} }, instructions: MCP_INSTRUCTIONS },
@@ -39,12 +39,12 @@ export function createCanvasMcpServer(workspace: string, canvasesDir?: string): 
  * measure through it); a failure means a broken install and rejects, so the
  * server never answers with approximate widths.
  */
-export async function startMcp(workspace: string, canvasesDir?: string): Promise<Server> {
+export async function startMcp(options: CanvasServiceOptions): Promise<Server> {
   await useHarfBuzz();
   if (!activeBackend().exact) {
     throw new Error(`text-measure: HarfBuzz did not become the active backend (${activeBackend().name} is)`);
   }
-  const server = createCanvasMcpServer(workspace, canvasesDir);
+  const server = createCanvasMcpServer(options);
   await server.connect(new StdioServerTransport());
   return server;
 }
