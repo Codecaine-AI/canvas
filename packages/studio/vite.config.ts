@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig, searchForWorkspaceRoot, type Plugin } from "vite";
 import { createAgentProxyHandler } from "./server/agent-proxy";
+import { createCanvasAnnotationEvents } from "./server/canvas-annotation-events";
 import { createCanvasFileApiHandler } from "./server/canvas-file-api";
 import {
   CANVAS_FILE_CHANGED_EVENT,
@@ -43,8 +44,13 @@ function canvasFileApiPlugin(): Plugin {
       // files under an open Studio. The canvases dir sits outside the Vite
       // root, so add it to the watcher explicitly; nothing imports these
       // files, so a change never triggers Vite's own HMR/full reload.
+      // One annotation event hub for Studio's saves and outside writes alike.
+      const annotationEvents = createCanvasAnnotationEvents({ canvasesDir });
       const changeNotifier = createCanvasChangeNotifier({
         canvasesDir,
+        onCanvasContents: (id, contents) => {
+          void annotationEvents.publish(id, contents);
+        },
         send: (payload) => {
           server.ws.send({ type: "custom", event: CANVAS_FILE_CHANGED_EVENT, data: payload });
         },
@@ -70,6 +76,7 @@ function canvasFileApiPlugin(): Plugin {
           canvasesDir,
           onCanvasWrite: changeNotifier.recordWrite,
           onCanvasStyleWrite: changeNotifier.recordStyleWrite,
+          annotationEvents,
         }),
       );
       // The dev server always has dev pages (import.meta.env.DEV), so the

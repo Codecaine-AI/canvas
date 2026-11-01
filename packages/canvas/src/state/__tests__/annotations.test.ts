@@ -57,6 +57,48 @@ describe("annotation schema normalization", () => {
     }
   });
 
+  it("keeps a thread binding without changing the status, and loads a board without one unchanged", () => {
+    const base = {
+      id: "note-1",
+      target: { kind: "region", region: { x: 0, y: 0, width: 96, height: 64 } },
+      intent: "agent-request",
+      body: "Opening post",
+      status: "open",
+      createdBy: "human",
+      replies: [],
+    };
+    const bound = validateInteractiveCanvasDocument(
+      annotationDocument({ ...base, thread: { id: "thread-7", title: "Board A" } }),
+    );
+    expect(bound.ok).toBe(true);
+    if (bound.ok) {
+      const annotation = bound.document.annotations?.[0];
+      expect(annotation?.thread).toEqual({ id: "thread-7", title: "Board A" });
+      expect(annotation?.status).toBe("open");
+    }
+
+    const unbound = validateInteractiveCanvasDocument(annotationDocument(base));
+    expect(unbound.ok).toBe(true);
+    if (unbound.ok) {
+      expect(JSON.parse(JSON.stringify(unbound.document.annotations?.[0]))).toEqual(base);
+    }
+  });
+
+  it("rejects a thread binding with a bad id or title", () => {
+    for (const thread of [{ id: "" }, { id: "  " }, { id: 7 }, "thread-7", { id: "t", title: 3 }]) {
+      const validation = validateInteractiveCanvasDocument(
+        annotationDocument({
+          id: "note-1",
+          target: { kind: "region", region: { x: 0, y: 0, width: 96, height: 64 } },
+          body: "Opening post",
+          thread,
+        }),
+      );
+      expect(validation.ok).toBe(false);
+      if (!validation.ok) expect(validation.issues[0]?.path).toStartWith("$.annotations[0].thread");
+    }
+  });
+
   it("normalizes reply authors and drops malformed or duplicate replies", () => {
     const validation = validateInteractiveCanvasDocument(
       annotationDocument({

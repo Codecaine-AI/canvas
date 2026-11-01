@@ -33,4 +33,9 @@ export type InteractiveCanvasAnnotation = {
   createdBy: CanvasAnnotationAuthor;
   createdAt?: string;
   replies: CanvasAnnotationReply[];
+  /** The T3 Code thread the request was dispatched to. Binding a thread never changes `status`. */
+  thread?: CanvasAnnotationThread;
 };
+
+/** The T3 Code thread bound to an annotation. */
+export type CanvasAnnotationThread = { id: string; title?: string };

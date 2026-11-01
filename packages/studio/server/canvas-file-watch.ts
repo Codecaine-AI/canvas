@@ -50,6 +50,8 @@ export function createCanvasChangeNotifier(options: {
   canvasesDir: string;
   send: (payload: CanvasFileChangedPayload) => void;
   sendStyleChanged?: (payload: CanvasStyleChangedPayload) => void;
+  /** Gets the bytes of every outside canvas write it sends, for the annotation events. */
+  onCanvasContents?: (id: string, contents: Buffer) => void;
 }) {
   const canvasesDir = resolve(options.canvasesDir);
   const knownHashes = new Map<string, string>();
@@ -95,17 +97,19 @@ export function createCanvasChangeNotifier(options: {
       const id = name.slice(0, -CANVAS_SUFFIX.length);
       if (!CANVAS_ID_PATTERN.test(id)) return null;
 
-      let hash: string;
+      let contents: Buffer;
       try {
-        hash = canvasContentHash(await fs.readFile(absolute));
+        contents = await fs.readFile(absolute);
       } catch {
         // Deleted or replaced again before we could read it — the next event wins.
         return null;
       }
+      const hash = canvasContentHash(contents);
       if (knownHashes.get(id) === hash) return null;
       knownHashes.set(id, hash);
       const payload = { id, hash };
       options.send(payload);
+      options.onCanvasContents?.(id, contents);
       return payload;
     },
   };
