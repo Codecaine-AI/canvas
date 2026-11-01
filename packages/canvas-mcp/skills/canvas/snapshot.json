@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "snapshotId": "sha256:14a5c226a456705077a1f21e20c6b18297c02f9ab1d182db0684a4d4ae81b217",
+  "sources": [
+    {
+      "id": "prompt",
+      "path": "packages/canvas-agent/src/catalog/layout-editor/prompt/prompt.json",
+      "sha256": "9c91daf8919ba6bc6d15e2886a360c696a9908c435f1ebbdc98983102a0e5294"
+    },
+    {
+      "id": "state_grammar",
+      "path": "packages/canvas-agent/src/catalog/layout-editor/context/state-grammar/index.ts",
+      "sha256": "0c69f2e5ec417815ee00ab7db5c330c2fa87a4320168a66743ee011bdef2db7f"
+    },
+    {
+      "id": "aesthetic",
+      "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+      "sha256": "5c61496f5ac71b29c7ca95a01bd44de5979f774fe11d3c25f0046623f520d50b"
+    },
+    {
+      "id": "visual_patterns",
+      "path": "packages/canvas-agent/src/authoring/visual-patterns.ts",
+      "sha256": "9721d8290813fac6ef87954f423edb9232461e6a0c5228a3d17117054556f783"
+    },
+    {
+      "id": "diagram_design",
+      "path": "packages/canvas-agent/src/authoring/design.ts",
+      "sha256": "3d95ca39b79f20c0377072e4ce8a0f0a400986c7de269e864aff31d8207a1bc2"
+    },
+    {
+      "id": "visual_vocabulary",
+      "path": "packages/canvas-agent/src/authoring/vocabulary.ts",
+      "sha256": "a1fb49385006dd5575e6c1336b6ff9d111e91138bab6fa02700bbc55f5f34b8c"
+    },
+    {
+      "id": "color_palette",
+      "path": "packages/canvas-agent/src/authoring/vocabulary.ts",
+      "sha256": "943deac9d2f88e9e624640248340e98284266a1f2157ba90e400e0708195013b"
+    },
+    {
+      "id": "canvas_conventions",
+      "path": "packages/canvas-agent/src/authoring/conventions.ts",
+      "sha256": "407fa610806f8fbd031656278fb870cf29908947d11a2dbe663f6bd4682cc24e"
+    },
+    {
+      "id": "contact_sheet",
+      "path": "packages/canvas-agent/src/service/session/perception/contact-sheet.ts",
+      "sha256": "8b9875aa369c956e1c3675b970ebf5477e95934354fb561b0594ac10d171b7e8"
+    }
+  ]
+}
