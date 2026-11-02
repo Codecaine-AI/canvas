@@ -1,29 +1,27 @@
 /** Shared authoring reference for internal context and future external adapters. */
-import { createHash } from "node:crypto";
-import { DESIGN_TOPICS, type AuthoringTopic } from "./design";
-import { visualVocabulary, colorPalette } from "./vocabulary";
-import { canvasConventions } from "./conventions";
+import type { AuthoringTopic } from "./design";
+import { canvasAuthoringTopics, canvasGuidanceSources, guidanceSnapshot } from "./sources";
 
 export type { AuthoringTopic } from "./design";
 export { VISUAL_PATTERNS, renderVisualPatterns, type VisualPattern } from "./visual-patterns";
-
-export function canvasAuthoringTopics(): readonly AuthoringTopic[] {
-  return [...DESIGN_TOPICS, visualVocabulary(), colorPalette(), canvasConventions()];
-}
+export { canvasAuthoringTopics, canvasGuidanceSources, guidanceSnapshot, type GuidanceSource } from "./sources";
+export { vocabularyContactSheet } from "../service/session/perception/contact-sheet";
 
 export function formatAuthoringTopic(topic: AuthoringTopic): string {
   const body = topic.text.split("\n").map(line => line ? `    ${line}` : "").join("\n");
   return `<${topic.id}>\n${body}\n</${topic.id}>`;
 }
 
-/** No kernel boot, session creation, or agent spawn is needed to read guidance. */
+/**
+ * No kernel boot, session creation, or agent spawn is needed to read guidance.
+ * The snapshot id covers every source the canvas skill is generated from.
+ */
 export function getCanvasAuthoringGuidance() {
   const topics = canvasAuthoringTopics();
-  const text = topics.map(formatAuthoringTopic).join("\n\n");
   return {
     schemaVersion: 1 as const,
-    snapshotId: `sha256:${createHash("sha256").update(text).digest("hex")}`,
+    snapshotId: guidanceSnapshot(canvasGuidanceSources(topics)).snapshotId,
     topics,
-    text,
+    text: topics.map(formatAuthoringTopic).join("\n\n"),
   };
 }
