@@ -37,7 +37,6 @@ export type CanvasToolContent =
 export interface CanvasToolResult {
   [key: string]: unknown;
   content: CanvasToolContent[];
-  structuredContent?: Record<string, unknown>;
   isError?: boolean;
 }
 
@@ -106,12 +105,16 @@ export function jsonSchema(schema: unknown): CanvasToolDeclaration["inputSchema"
   return normalizeTuples(JSON.parse(JSON.stringify(schema))) as CanvasToolDeclaration["inputSchema"];
 }
 
-function text(value: string, isError = false, structuredContent?: Record<string, unknown>): CanvasToolResult {
-  return {
-    content: [{ type: "text", text: value }],
-    ...(structuredContent ? { structuredContent } : {}),
-    ...(isError ? { isError: true } : {}),
-  };
+/**
+ * Shape one `tools/call` result as content blocks only. Claude Code and Codex
+ * show `structuredContent` instead of the text blocks when a result has both.
+ */
+function toolResult(content: CanvasToolContent[], isError = false): CanvasToolResult {
+  return { content, ...(isError ? { isError: true } : {}) };
+}
+
+function text(value: string, isError = false): CanvasToolResult {
+  return toolResult([{ type: "text", text: value }], isError);
 }
 
 function record(value: unknown): Record<string, unknown> {
@@ -238,8 +241,6 @@ export function createCanvasService(options: CanvasServiceOptions) {
       canvases.length === 0
         ? `No canvases in ${canvasesDir}.`
         : [`CANVASES · ${canvases.length} in ${relative(options.workspace, canvasesDir) || canvasesDir}`, ...lines].join("\n"),
-      false,
-      { canvases },
     );
   }
 
@@ -264,18 +265,10 @@ export function createCanvasService(options: CanvasServiceOptions) {
     const canvasStyle = file.session.canvasStyle;
     return text(
       [
-        `OPENED · ${id} ${JSON.stringify(title)} · sha256:${file.diskHash}`,
+        `OPENED · ${id} ${JSON.stringify(title)} · ${relative(options.workspace, path)} · sha256:${file.diskHash}`,
         ...(canvasStyle ? [styleLine(canvasStyle)] : []),
         boardStateSnapshot(file.session),
       ].join("\n\n"),
-      false,
-      {
-        canvas: id,
-        title,
-        hash: `sha256:${file.diskHash}`,
-        path,
-        ...(canvasStyle ? { theme: canvasStyle.theme, canvasStyle } : {}),
-      },
     );
   }
 
@@ -294,8 +287,6 @@ export function createCanvasService(options: CanvasServiceOptions) {
           ...topics.map((entry) => `  ${entry.id}  ${JSON.stringify(entry.title)}  ~${entry.approxTokens} tokens`),
           "Call canvas_guidance { \"topic\": \"<id>\" } to read one.",
         ].join("\n"),
-        false,
-        { snapshotId: snapshot.snapshotId, topics },
       );
     }
     const found = snapshot.topics.find((entry) => entry.id === topic);
@@ -305,10 +296,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
         true,
       );
     }
-    return text(`# ${found.title}\n\n${found.text}`, false, {
-      snapshotId: snapshot.snapshotId,
-      topic: found.id,
-    });
+    return text(`# ${found.title}\n\n${found.text}`);
   }
 
   async function toolkit(name: string, args: Record<string, unknown>): Promise<CanvasToolResult> {
@@ -327,11 +315,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
     for (const png of result.pngs ?? []) {
       content.push({ type: "image", data: png.toString("base64"), mimeType: "image/png" });
     }
-    return {
-      content,
-      ...(result.details ? { structuredContent: { ...result.details } } : {}),
-      ...(result.isError ? { isError: true } : {}),
-    };
+    return toolResult(content, result.isError);
   }
 
   return {

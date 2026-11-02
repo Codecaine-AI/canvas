@@ -132,4 +132,43 @@ describe("canvas MCP server", () => {
     const saved = JSON.parse(readFileSync(path, "utf8"));
     expect(saved.objects.some((object: { id: string }) => object.id === "stdio-note")).toBe(true);
   }, 30_000);
+
+  test("stdio: an edit's APPLIED line, lint delta, and fix guidance reach what Claude Code and Codex show", async () => {
+    const client = new Client({ name: "canvas-mcp-stdio-test", version: "1.0.0" });
+    await client.connect(new StdioClientTransport({
+      command: process.execPath,
+      args: [CLI, "mcp", "--workspace", tempWorkspace()],
+      stderr: "pipe",
+    }));
+    cleanups.push(() => client.close());
+    // Both harnesses show structuredContent instead of the text blocks when a
+    // result has it, so a result must carry text blocks only.
+    const shown = (result: Awaited<ReturnType<typeof client.callTool>>) => {
+      expect(result.structuredContent).toBeUndefined();
+      return (result.content as Array<{ type: string; text?: string }>)
+        .filter((item) => item.type === "text")
+        .map((item) => item.text)
+        .join("\n");
+    };
+
+    const opened = await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow" } });
+    expect(shown(opened)).toContain("OPENED · v2-flow");
+    expect(shown(opened)).toContain("BOARD");
+
+    const raised = await client.callTool({
+      name: "place_shape",
+      arguments: { id: "fb-shape", type: "process", at: [960, 1600], detail: "A detail written as a whole sentence that runs far past one fact" },
+    });
+    expect(raised.isError).toBeFalsy();
+    expect(shown(raised)).toContain("APPLIED · place_shape fb-shape");
+    expect(shown(raised)).toMatch(/LINTS · \+\d+ −0/);
+    expect(shown(raised)).toContain("detail-too-long: fb-shape's detail has");
+    expect(shown(raised)).toContain("cut the detail to one fact with update_text fb-shape");
+
+    const cleared = await client.callTool({ name: "update_text", arguments: { id: "fb-shape", detail: "One fact" } });
+    expect(shown(cleared)).toContain("APPLIED · update_text fb-shape");
+    expect(shown(cleared)).toMatch(/LINTS · \+0 −\d+/);
+    expect(shown(cleared)).toContain("− W");
+    expect(shown(cleared)).toMatch(/detail-too-long.*\(resolved\)/);
+  }, 30_000);
 });
