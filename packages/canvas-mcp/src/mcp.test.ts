@@ -14,7 +14,8 @@ import { join } from "node:path";
 
 import { operationTools, workflowTools } from "@codecaine-ai/canvas-agent/toolkit";
 
-import { createCanvasMcpServer, MCP_INSTRUCTIONS } from "./mcp";
+import { openActionLog } from "@codecaine-ai/action-log";
+import { createCanvasMcpServer,MCP_INSTRUCTIONS } from "./mcp";
 import { jsonSchema } from "./service";
 
 const REPO_CANVASES = join(import.meta.dir, "..", "..", "..", "canvases");
@@ -229,4 +230,115 @@ describe("canvas MCP server", () => {
     expect(shown(cleared)).toContain("− W");
     expect(shown(cleared)).toMatch(/detail-too-long.*\(resolved\)/);
   }, 30_000);
+});
+
+describe("canvas MCP action log", () => {
+  const savedEnv = { log: process.env.CODECAINE_ACTION_LOG, thread: process.env.T3CODE_THREAD_ID };
+  afterEach(() => {
+    for (const [key, value] of [["CODECAINE_ACTION_LOG", savedEnv.log], ["T3CODE_THREAD_ID", savedEnv.thread]] as const) {
+      if (value === undefined) delete process.env[key]; else process.env[key] = value;
+    }
+  });
+
+  async function connect(workspace = tempWorkspace()) {
+    const server = createCanvasMcpServer({ workspace });
+    const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+    cleanups.push(() => client.close());
+    return client;
+  }
+
+  function logPath(): string {
+    const dir = mkdtempSync(join(tmpdir(), "canvas-mcp-log-"));
+    cleanups.push(() => rmSync(dir, { recursive: true, force: true }));
+    const path = join(dir, "log.sqlite");
+    process.env.CODECAINE_ACTION_LOG = path;
+    return path;
+  }
+
+  test("a call with T3CODE_THREAD_ID writes one record with that thread and tool", async () => {
+    const path = logPath();
+    process.env.T3CODE_THREAD_ID = "thread-env";
+    const client = await connect();
+    await client.callTool({ name: "canvas_list", arguments: {} });
+
+    const log = openActionLog({ path });
+    cleanups.push(() => log.close());
+    const records = log.query({ threadId: "thread-env" });
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({ tool: "canvas_list", target: "-", result: "ok" });
+  });
+
+  test("canvas_open with thread_id joins the whole run to that thread without the env variable", async () => {
+    const path = logPath();
+    delete process.env.T3CODE_THREAD_ID;
+    const client = await connect();
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-arg" } });
+    await client.callTool({ name: "place_sticky", arguments: { id: "log-note", text: "Logged", at: [960, 1600] } });
+    await client.callTool({ name: "canvas_guidance", arguments: {} });
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "no-such-board" } });
+    await client.callTool({ name: "canvas_create", arguments: { canvas: "v2-flow", title: "Taken" } });
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "canvases/v2-flow.canvas.json" } });
+
+    const log = openActionLog({ path });
+    cleanups.push(() => log.close());
+    const records = log.query({ threadId: "thread-arg" });
+    expect(records.map((record) => [record.tool, record.target, record.result])).toEqual([
+      ["canvas_open", "v2-flow", "ok"],
+      ["place_sticky", "v2-flow", expect.stringMatching(/^ok/)],
+      ["canvas_guidance", "-", "ok"],
+      ["canvas_open", "no-such-board", "refused"],
+      ["canvas_create", "v2-flow", "refused"],
+      ["canvas_open", "v2-flow", "ok"],
+    ]);
+    expect(records.every((record) => record.snapshotId === records[2]!.snapshotId && record.snapshotId)).toBe(true);
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "no-such-board", thread_id: "thread-refused" } });
+    expect(log.query({ threadId: "thread-refused" })).toHaveLength(0);
+  });
+
+  test("two opens in flight at once each log the board they opened", async () => {
+    const path = logPath();
+    delete process.env.T3CODE_THREAD_ID;
+    const workspace = tempWorkspace();
+    copyFileSync(join(workspace, "canvases", "v2-flow.canvas.json"), join(workspace, "canvases", "board-b.canvas.json"));
+    copyFileSync(join(workspace, "canvases", "v2-flow.canvas.json"), join(workspace, "canvases", "Flow Diagram.canvas.json"));
+    const client = await connect(workspace);
+    await Promise.all([
+      client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-race" } }),
+      client.callTool({ name: "canvas_open", arguments: { canvas: "board-b" } }),
+      client.callTool({ name: "canvas_open", arguments: { canvas: "canvases/Flow Diagram.canvas.json" } }),
+    ]);
+    const log = openActionLog({ path });
+    cleanups.push(() => log.close());
+    const opens = log.query({ threadId: "thread-race" }).map((record) => record.target).sort();
+    expect(opens).toEqual(["Flow Diagram", "board-b", "v2-flow"]);
+  });
+
+  test("an edit in flight with an open logs the board it edited", async () => {
+    const path = logPath();
+    delete process.env.T3CODE_THREAD_ID;
+    const workspace = tempWorkspace();
+    copyFileSync(join(workspace, "canvases", "v2-flow.canvas.json"), join(workspace, "canvases", "board-b.canvas.json"));
+    const client = await connect(workspace);
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-edit-race" } });
+    await Promise.all([
+      client.callTool({ name: "canvas_open", arguments: { canvas: "board-b" } }),
+      client.callTool({ name: "place_sticky", arguments: { id: "race-note", text: "Raced", at: [960, 1600] } }),
+    ]);
+    const edited = ["v2-flow", "board-b"]
+      .filter((id) => readFileSync(join(workspace, "canvases", `${id}.canvas.json`), "utf8").includes("race-note"));
+    expect(edited).toHaveLength(1);
+    const log = openActionLog({ path });
+    cleanups.push(() => log.close());
+    const edit = log.query({ threadId: "thread-edit-race" }).find((record) => record.tool === "place_sticky");
+    expect(edit?.target).toBe(edited[0]);
+  });
+
+  test("a failed log write never fails the tool call", async () => {
+    process.env.CODECAINE_ACTION_LOG = "/dev/null/blocked/log.sqlite";
+    const client = await connect();
+    const result = await client.callTool({ name: "canvas_list", arguments: {} });
+    expect(result.isError).toBeFalsy();
+  });
 });

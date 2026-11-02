@@ -37,11 +37,15 @@ export type CanvasToolContent =
   | { type: "text"; text: string }
   | { type: "image"; data: string; mimeType: string };
 
-/** One MCP tool result, shaped for `tools/call`. */
+/**
+ * One MCP tool result, shaped for `tools/call`. `_meta.canvasId` names the board the call acted on:
+ * the one a successful open or create landed on, or the open board an edit or check ran against.
+ */
 export interface CanvasToolResult {
   [key: string]: unknown;
   content: CanvasToolContent[];
   isError?: boolean;
+  _meta?: { canvasId: string };
 }
 
 /** One MCP tool declaration, shaped for `tools/list`. */
@@ -186,6 +190,10 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
             + "or the path of a page's embedded board, e.g. \"<page>/assets/canvases/flow.canvas.json\" "
             + "(absolute, or relative to the project root). The file must lie inside the project root. "
             + "Edits save back to that file.",
+        },
+        thread_id: {
+          type: "string",
+          description: "Your T3 thread id, when the harness does not pass T3CODE_THREAD_ID. Binds this server run to that thread in the action log.",
         },
       },
       required: ["canvas"],
@@ -382,7 +390,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
       return text(`canvas_open failed: ${error instanceof Error ? error.message : String(error)}`, true);
     }
     active = file;
-    return text(openedText("OPENED", file));
+    return { ...text(openedText("OPENED", file)), _meta: { canvasId: file.canvasId } };
   }
 
   function createCanvas(args: Record<string, unknown>): CanvasToolResult {
@@ -403,17 +411,20 @@ export function createCanvasService(options: CanvasServiceOptions) {
     mkdirSync(canvasesDir, { recursive: true });
     const file = createCanvasFile(target.path, title);
     active = file;
-    return text(`${openedText("CREATED", file)}\nSAVED · ${shownPath(file.canvasPath)}`);
+    return { ...text(`${openedText("CREATED", file)}\nSAVED · ${shownPath(file.canvasPath)}`), _meta: { canvasId: file.canvasId } };
   }
 
   function checkCanvas(): CanvasToolResult {
     if (!active) return text(NO_ACTIVE_CANVAS, true);
     const result = checkCanvasFile(active, `${active.canvasId} · ${shownPath(active.canvasPath)}`);
-    return toolResult([
-      { type: "text", text: result.text },
-      ...(result.pngs ?? []).map((png) =>
-        ({ type: "image" as const, data: png.toString("base64"), mimeType: "image/png" })),
-    ], result.isError);
+    return {
+      ...toolResult([
+        { type: "text", text: result.text },
+        ...(result.pngs ?? []).map((png) =>
+          ({ type: "image" as const, data: png.toString("base64"), mimeType: "image/png" })),
+      ], result.isError),
+      _meta: { canvasId: active.canvasId },
+    };
   }
 
   function guidance(args: Record<string, unknown>): CanvasToolResult {
@@ -444,11 +455,13 @@ export function createCanvasService(options: CanvasServiceOptions) {
   }
 
   async function toolkit(name: string, args: Record<string, unknown>): Promise<CanvasToolResult> {
-    if (!active) return text(NO_ACTIVE_CANVAS, true);
-    const result = await callToolkitTool(active, name, args);
+    // The board this edit runs on: a canvas_open in flight can replace `active` during the await.
+    const file = active;
+    if (!file) return text(NO_ACTIVE_CANVAS, true);
+    const result = await callToolkitTool(file, name, args);
     const lines = [result.text];
     if (result.persisted?.written) {
-      lines.push(`SAVED · ${shownPath(active.canvasPath)}`);
+      lines.push(`SAVED · ${shownPath(file.canvasPath)}`);
       if (result.persisted.residual > 0) {
         lines.push(
           `NOTE · the saved file differs from the draft by ${result.persisted.residual} patch op(s) the canvas reducer derived; call canvas_open to re-read the board as saved.`,
@@ -459,7 +472,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
     for (const png of result.pngs ?? []) {
       content.push({ type: "image", data: png.toString("base64"), mimeType: "image/png" });
     }
-    return toolResult(content, result.isError);
+    return { ...toolResult(content, result.isError), _meta: { canvasId: file.canvasId } };
   }
 
   return {

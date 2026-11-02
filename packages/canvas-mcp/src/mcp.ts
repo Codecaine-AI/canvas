@@ -8,10 +8,12 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
+import { identityFromEnv, newRunId, openActionLog, type ActionLog } from "@codecaine-ai/action-log";
+import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas-agent/authoring";
 import { resolve } from "node:path";
 
 import { version } from "../package.json";
-import { type CanvasServiceOptions, createCanvasService } from "./service";
+import { type CanvasServiceOptions, type CanvasToolResult, createCanvasService } from "./service";
 
 /** Sent once at initialize; kept short because clients inline it into every session. */
 export const MCP_INSTRUCTIONS =
@@ -19,6 +21,30 @@ export const MCP_INSTRUCTIONS =
   + "Every edit is saved to the opened file the moment it applies, and an edit is refused if the file changed elsewhere until you call canvas_open again. "
   + "Call canvas_check before you call a board done: it runs every lint and returns a PNG of the whole board. "
   + "Call canvas_guidance for the diagram design standards, one topic at a time, before laying out or restructuring a board.";
+
+/**
+ * The target a call acted on: the board the result names in `_meta.canvasId` (a successful open
+ * or create, or an edit or check), the requested id or path when the open or create was refused,
+ * the board that was active when a failed edit started, or "-" when the call has no board. Calls
+ * can interleave, so nothing here reads the active board after the call.
+ */
+function targetOf(name: string, args: unknown, result: CanvasToolResult, activeBefore: string | undefined): string {
+  if (name === "canvas_list" || name === "canvas_guidance") return "-";
+  if (result._meta?.canvasId) return result._meta.canvasId;
+  if (name === "canvas_open" || name === "canvas_create") {
+    const raw = (args as { canvas?: unknown })?.canvas;
+    return typeof raw === "string" && raw.trim() ? raw.trim() : "-";
+  }
+  return activeBefore ?? "-";
+}
+
+/** "refused", or "ok" plus the LINTS line when the text has one. Refusal text stays out, because it can echo the call's payload. */
+function summarize(result: { isError?: boolean; content: Array<{ type: string; text?: string }> }): string {
+  if (result.isError) return "refused";
+  const lines = result.content.filter((part) => part.type === "text").flatMap((part) => (part.text ?? "").split("\n"));
+  const lints = lines.find((line) => line.startsWith("LINTS · "));
+  return lints && !lints.startsWith("LINTS · clean") ? `ok · ${lints}` : "ok";
+}
 
 /** Build the MCP server for one workspace without connecting a transport (tests connect their own). */
 export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
@@ -28,8 +54,37 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
     { capabilities: { tools: {} }, instructions: MCP_INSTRUCTIONS },
   );
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: service.listTools() }));
-  server.setRequestHandler(CallToolRequestSchema, async (request) =>
-    service.call(request.params.name, request.params.arguments ?? {}));
+  const runId = newRunId();
+  const identity = identityFromEnv();
+  let log: ActionLog | undefined;
+  const warn = (error: unknown) =>
+    console.error(`canvas-mcp: action log write failed: ${error instanceof Error ? error.message : String(error)}`);
+  server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    const { name } = request.params;
+    const args = request.params.arguments ?? {};
+    const activeBefore = service.activeCanvas()?.canvasId;
+    const result = await service.call(name, args);
+    try {
+      log ??= openActionLog();
+      const threadId = (args as { thread_id?: unknown }).thread_id;
+      if (name === "canvas_open" && !result.isError && typeof threadId === "string" && threadId) log.bindThread(runId, threadId);
+      // One guidance snapshot serves every call of this process, so every record carries it.
+      const snapshotId = getCanvasAuthoringGuidance().snapshotId;
+      log.record({
+        runId,
+        threadId: identity.threadId,
+        agent: identity.agent ?? "canvas-mcp",
+        tool: name,
+        target: targetOf(name, args, result, activeBefore),
+        result: summarize(result),
+        snapshotId,
+        at: new Date(),
+      });
+    } catch (error) {
+      warn(error);
+    }
+    return result;
+  });
   return server;
 }
 
