@@ -21,13 +21,15 @@ describe("update_description", () => {
       emitSessionEvent,
     );
 
-    expect(result).toEqual({
-      text: [
-        "APPLIED · update_description",
-        `DELTA · description none → ${description.length} chars`,
-      ].join("\n"),
-      details: { operation: "update_description" },
-    });
+    const [applied, delta, lints, ...rest] = result.text.split("\n");
+    expect([applied, delta, rest]).toEqual([
+      "APPLIED · update_description",
+      `DELTA · description none → ${description.length} chars`,
+      [],
+    ]);
+    // Every edit result carries its lint delta. A description moves no lint.
+    expect(lints).toMatch(/^LINTS · (clean|\+0 −0 \(\d+ open\))$/);
+    expect(result.details).toEqual({ operation: "update_description" });
     expect(session.draft.description).toBe(description);
     expect(session.events.map((event) => event.type)).toEqual(["proposal", "delta"]);
     expect(session.events[0]).toEqual({

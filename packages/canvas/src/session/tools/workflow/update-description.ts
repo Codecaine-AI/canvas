@@ -7,7 +7,7 @@ import { Type } from "@mariozechner/pi-ai";
 
 import { formatDiagnostics, sessionDiagnostics } from "../../../board/lints/run";
 import { commitDraft } from "../../perception/live-draft-view";
-import type { SessionEventSink } from "../../perception/perception";
+import { lintDeltaBlock, type SessionEventSink } from "../../perception/perception";
 import type { LayoutSession } from "../../session";
 import type { LayoutToolTextResult } from "../runtime";
 import { defineWorkflowTool } from "./workflow-tool";
@@ -31,7 +31,8 @@ export function toolUpdateDescription(
     };
   }
 
-  const previous = session.draft.description;
+  const before = session.draft;
+  const previous = before.description;
   const label = "update_description";
   commitDraft(session, { ...session.draft, description }, label);
   const diagnostics = sessionDiagnostics(session);
@@ -51,6 +52,7 @@ export function toolUpdateDescription(
     text: [
       `APPLIED · ${label}`,
       `DELTA · description ${previous === undefined ? "none" : previous.length} → ${description.length} chars`,
+      lintDeltaBlock(session, diagnostics, before),
     ].join("\n"),
     details,
   };

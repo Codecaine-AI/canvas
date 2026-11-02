@@ -138,6 +138,8 @@ describe("set_board_title", () => {
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain("APPLIED · set_board_title");
     expect(result.text).toContain('DELTA · title "Synthetic" → "Onboarding flow"');
+    // Every edit result carries its lint delta. A rename moves no lint.
+    expect(result.text.split("\n").at(-1)).toMatch(/^LINTS · (clean|\+0 −0 \(\d+ open\))$/);
     // Trimmed, matching the human reducer.
     expect(session.draft.title).toBe("Onboarding flow");
     expect(session.events.map((event) => event.type)).toEqual(["proposal", "delta"]);
