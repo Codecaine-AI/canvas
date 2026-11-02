@@ -4,6 +4,7 @@ import type {
   CanvasAnnotationAuthor,
   CanvasAnnotationReply,
   CanvasAnnotationTarget,
+  CanvasAnnotationThread,
   InteractiveCanvasAnnotation,
 } from "./annotations";
 import type {
@@ -52,6 +53,32 @@ function isId(value: unknown): value is string {
 
 function normalizeAnnotationAuthor(value: unknown): CanvasAnnotationAuthor {
   return value === "agent" || value === "system" ? value : "human";
+}
+
+/**
+ * The optional T3 Code thread binding. Absent stays absent, so a board saved
+ * before the field existed loads unchanged. A malformed value is an issue,
+ * not a silent drop, so a bad write never loses a binding without a trace.
+ */
+function parseAnnotationThread(
+  raw: unknown,
+  path: string,
+  issues: CanvasValidationIssue[],
+): CanvasAnnotationThread | undefined {
+  if (raw === undefined) return undefined;
+  if (!isRecord(raw)) {
+    issues.push({ path, message: "Annotation thread must be an object." });
+    return undefined;
+  }
+  if (typeof raw.id !== "string" || raw.id.trim().length === 0) {
+    issues.push({ path: `${path}.id`, message: "Annotation thread id must be a non-empty string." });
+    return undefined;
+  }
+  if (raw.title !== undefined && typeof raw.title !== "string") {
+    issues.push({ path: `${path}.title`, message: "Annotation thread title must be a string when present." });
+    return undefined;
+  }
+  return { id: raw.id, ...(raw.title !== undefined ? { title: raw.title } : {}) };
 }
 
 function isCanvasObjectType(value: unknown): value is InteractiveCanvasObjectType {
@@ -642,6 +669,7 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
         createdAt:
           typeof rawAnnotation.createdAt === "string" ? rawAnnotation.createdAt : undefined,
         replies,
+        thread: parseAnnotationThread(rawAnnotation.thread, `${path}.thread`, issues),
       });
     }
   }

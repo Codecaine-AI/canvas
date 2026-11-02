@@ -42,6 +42,7 @@ export type {
   CanvasAnnotationReply,
   CanvasAnnotationStatus,
   CanvasAnnotationTarget,
+  CanvasAnnotationThread,
   InteractiveCanvasAnnotation,
 } from "./schema/annotations";
 export type {

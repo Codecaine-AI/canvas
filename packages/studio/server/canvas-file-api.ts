@@ -27,6 +27,11 @@ import {
   type CanvasStyleOverrides,
   type CanvasStyleSettings,
 } from "../../canvas/src/theme/canvas-style.ts";
+import {
+  CANVAS_ANNOTATION_EVENTS_ROUTE,
+  createCanvasAnnotationEvents,
+  type CanvasAnnotationEvents,
+} from "./canvas-annotation-events";
 
 const CANVAS_ID_PATTERN = /^[a-z0-9][a-z0-9._-]{0,63}$/;
 const JSON_LIMIT_BYTES = 5 * 1024 * 1024;
@@ -341,6 +346,79 @@ function etagMatches(header: string | undefined, etag: string): boolean {
     .some((candidate) => candidate === etag || candidate === `W/${etag}`);
 }
 
+/**
+ * PUT /api/canvases/:id/annotations/:annotationId/thread { thread: { id, title? } | null }
+ *   -> { id, annotation, contentHash } | 400/404/412/422
+ *
+ * Binds the annotation to a T3 Code thread, or clears the binding with null.
+ * It never changes the annotation's status. If-Match guards it the same way
+ * as PUT /api/canvases/:id: the write lands only on the revision it names.
+ */
+async function handleThreadRequest(
+  req: IncomingMessage,
+  res: ServerResponse,
+  target: {
+    id: string;
+    filePath: string;
+    annotationId: string;
+    saveCanvas: (id: string, filePath: string, document: InteractiveCanvasDocument, outside: boolean) => Promise<string>;
+  },
+): Promise<void> {
+  if (req.method !== "PUT") {
+    sendJson(res, 405, { error: "Method not allowed." });
+    return;
+  }
+  const body = await readJsonBody(req);
+  if (!isRecord(body) || !("thread" in body)) {
+    sendJson(res, 400, { error: "Expected body { thread }, where thread is { id, title? } or null." });
+    return;
+  }
+  let raw: Buffer;
+  try {
+    raw = await fs.readFile(target.filePath);
+  } catch {
+    sendJson(res, 404, { error: "Canvas not found." });
+    return;
+  }
+  const currentHash = canvasContentHash(raw);
+  const ifMatch = req.headers["if-match"];
+  if (ifMatch && ifMatch.trim() !== "*" && !etagMatches(ifMatch, `"${currentHash}"`)) {
+    res.setHeader("etag", `"${currentHash}"`);
+    sendJson(res, 412, { error: "Canvas changed on disk since it was loaded.", currentHash });
+    return;
+  }
+  const current = validateInteractiveCanvasDocument(JSON.parse(raw.toString("utf8")) as unknown);
+  if (!current.ok) {
+    sendJson(res, 422, { error: "Invalid canvas document.", issues: current.issues });
+    return;
+  }
+  const annotations = current.document.annotations ?? [];
+  if (!annotations.some((annotation) => annotation.id === target.annotationId)) {
+    sendJson(res, 404, { error: "Annotation not found." });
+    return;
+  }
+  const validation = validateInteractiveCanvasDocument({
+    ...current.document,
+    annotations: annotations.map((annotation) =>
+      annotation.id === target.annotationId
+        ? { ...annotation, thread: body.thread === null ? undefined : body.thread }
+        : annotation,
+    ),
+  });
+  if (!validation.ok) {
+    sendJson(res, 422, { error: "Invalid annotation thread.", issues: validation.issues });
+    return;
+  }
+  // An outside caller binds threads, so the watcher must tell open Studio tabs.
+  const contentHash = await target.saveCanvas(target.id, target.filePath, validation.document, true);
+  res.setHeader("etag", `"${contentHash}"`);
+  sendJson(res, 200, {
+    id: target.id,
+    annotation: validation.document.annotations?.find((annotation) => annotation.id === target.annotationId),
+    contentHash,
+  });
+}
+
 export function createCanvasFileApiHandler(options: {
   canvasesDir: string;
   /**
@@ -354,14 +432,43 @@ export function createCanvasFileApiHandler(options: {
    * about to be written, or null when the write deletes the file.
    */
   onCanvasStyleWrite?: (contentHash: string | null) => void;
+  /**
+   * Receives every board this handler saves and serves its SSE stream. Pass
+   * the one the file watcher also feeds, so outside writes emit too.
+   */
+  annotationEvents?: CanvasAnnotationEvents;
 }): (
   req: IncomingMessage,
   res: ServerResponse,
   next: () => void,
 ) => void {
   const { canvasesDir, onCanvasWrite, onCanvasStyleWrite } = options;
+  const annotationEvents = options.annotationEvents ?? createCanvasAnnotationEvents({ canvasesDir });
+
+  /**
+   * Writes a validated board in Studio's format and publishes its annotation changes.
+   * An `outside` write is not recorded as Studio's own, so the watcher notifies open tabs.
+   */
+  async function saveCanvas(
+    id: string,
+    filePath: string,
+    document: InteractiveCanvasDocument,
+    outside = false,
+  ): Promise<string> {
+    const contents = `${JSON.stringify(document, null, 2)}\n`;
+    const contentHash = canvasContentHash(contents);
+    if (!outside) onCanvasWrite?.(id, contentHash);
+    await writeFileAtomic(filePath, contents);
+    await annotationEvents.publish(id, contents);
+    return contentHash;
+  }
 
   return (req, res, next) => {
+    if (req.method === "GET" && req.url?.split("?")[0] === CANVAS_ANNOTATION_EVENTS_ROUTE) {
+      annotationEvents.handleStream(req, res);
+      return;
+    }
+
     if (req.url?.split("?")[0] === CANVAS_STYLE_ROUTE) {
       void handleCanvasStyleRequest(req, res, { canvasesDir, onCanvasStyleWrite }).catch((error) => {
         sendJson(res, 400, {
@@ -381,14 +488,14 @@ export function createCanvasFileApiHandler(options: {
         const url = new URL(req.url!, "http://studio.local");
         const parts = url.pathname.split("/").filter(Boolean);
         const isPreview = parts.length === 4 && parts[3] === "preview.svg";
-        const id = parts.length === 3 || isPreview ? decodeURIComponent(parts[2]) : null;
+        const isThread = parts.length === 6 && parts[3] === "annotations" && parts[5] === "thread";
+        const id = parts.length === 3 || isPreview || isThread ? decodeURIComponent(parts[2]) : null;
 
         if (
           parts.length < 2 ||
-          parts.length > 4 ||
           parts[0] !== "api" ||
           parts[1] !== "canvases" ||
-          (parts.length === 4 && !isPreview)
+          (parts.length > 3 && !isPreview && !isThread)
         ) {
           sendJson(res, 404, { error: "Not found." });
           return;
@@ -444,9 +551,7 @@ export function createCanvasFileApiHandler(options: {
               sendJson(res, 422, { error: "Invalid canvas document.", issues: validation.issues });
               return;
             }
-            const contents = `${JSON.stringify(validation.document, null, 2)}\n`;
-            onCanvasWrite?.(body.id, canvasContentHash(contents));
-            await writeFileAtomic(filePath, contents);
+            await saveCanvas(body.id, filePath, validation.document);
             sendJson(res, 201, { id: body.id });
             return;
           }
@@ -457,6 +562,16 @@ export function createCanvasFileApiHandler(options: {
         const filePath = filePathForId(canvasesDir, id);
         if (!filePath || basename(filePath) !== `${id}.canvas.json`) {
           sendJson(res, 400, { error: "Invalid canvas id." });
+          return;
+        }
+
+        if (isThread) {
+          await handleThreadRequest(req, res, {
+            id,
+            filePath,
+            annotationId: decodeURIComponent(parts[4]),
+            saveCanvas,
+          });
           return;
         }
 
@@ -583,10 +698,7 @@ export function createCanvasFileApiHandler(options: {
               return;
             }
           }
-          const contents = `${JSON.stringify(validation.document, null, 2)}\n`;
-          const contentHash = canvasContentHash(contents);
-          onCanvasWrite?.(id, contentHash);
-          await writeFileAtomic(filePath, contents);
+          const contentHash = await saveCanvas(id, filePath, validation.document);
           res.setHeader("etag", `"${contentHash}"`);
           sendJson(res, 200, { id, contentHash });
           return;
