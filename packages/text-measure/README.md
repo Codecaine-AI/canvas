@@ -342,7 +342,7 @@ regenerate the tables and the truth; `test/fonts.test.ts` fails until you do.
 ## Fonts and licenses
 
 `fonts/` is the only copy of the faces. canvas Studio paints with the woff2
-files through `@codecaine-ai/text-measure/fonts.css`; the canvas-agent camera
+files through `@codecaine-ai/text-measure/fonts.css`; the canvas toolkit's rasterizer
 (resvg) and the eval runner read `fonts/*.ttf` through the package's
 `./fonts/*` export. Inter is OFL-1.1 (`fonts/OFL-Inter.txt`), IBM Plex Mono is
 OFL-1.1 (`fonts/OFL-IBMPlexMono.txt`).

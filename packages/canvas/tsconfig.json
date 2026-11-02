@@ -3,6 +3,10 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "noEmit": true,
+    // Nothing is emitted, and the toolkit's tool descriptors infer types from
+    // pi-ai's own TypeBox copy, which declaration portability checks reject.
+    "declaration": false,
+    "declarationMap": false,
     "allowImportingTsExtensions": true,
     "rootDir": "src",
     "types": ["bun"]

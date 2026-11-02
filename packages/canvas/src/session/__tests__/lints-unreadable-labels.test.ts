@@ -1,0 +1,221 @@
+import { describe, expect, test } from "bun:test";
+
+import { runDiagnostics } from "../../board/lints/run";
+import { rule as unreadableLabels } from "../../board/lints/rules/unreadable-labels";
+import { box, connect, makeDocument } from "./synthetic";
+import { canvasThemePreset } from "../../theme/canvas-style";
+import { FIGJAM_CONTEXT } from "./helpers";
+import { chipFor, chipWidth } from "../../board/lints/geometry";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
+
+/**
+ * The rule's claim is "the rendered chip does not fit where it renders" —
+ * the true chip rect (renderer metrics, router labelPoint), inflated by the
+ * 16px breathing margin, must not intersect either ENDPOINT box of its own
+ * edge. No taste floor, no pair/window scan; chips hitting OTHER
+ * boxes/chips/wires are covered-content's job.
+ */
+// The chip numbers below are figjam's (30px sans chip, the label measured in
+// Inter Bold 16 + 12px a side, 41px minimum), so every check measures in the
+// figjam theme explicitly.
+describe("unreadable-labels lint", () => {
+  test("declares its faces", () => {
+    expect(unreadableLabels.id).toBe("unreadable-labels");
+    expect(unreadableLabels.tier).toBe("warning");
+    expect(unreadableLabels.guidance).toContain("breathing margin");
+  });
+
+  test("a chip that fits with its margins is clean — no generosity floor", () => {
+    // Gap 120: the "X" chip is 41px wide and needs 41+32 = 73px, so it fits
+    // with room to spare. Clean — generosity beyond the fit is style, not lint.
+    const findings = unreadableLabels.check(makeDocument(
+      [box("a", 0, 0), box("b", 280, 0)],
+      [{ ...connect("e", "a", "b"), label: "X" }],
+    ), FIGJAM_CONTEXT);
+    expect(findings).toHaveLength(0);
+  });
+
+  test("a chip bleeding onto its endpoint boxes warns with the true numbers", () => {
+    // Gap 44: the 41×30 chip sits centered at the route midpoint (x 161.5..
+    // 202.5) and its 16px margin reaches into both alpha (..160) and beta
+    // (204..). Needed = 41 + 2×16 = 73.
+    const findings = unreadableLabels.check(makeDocument(
+      [box("alpha", 0, 0), box("beta", 204, 0)],
+      [{ ...connect("edge", "alpha", "beta"), label: "X" }],
+    ), FIGJAM_CONTEXT);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      rule: "unreadable-labels",
+      severity: "warning",
+      at: ["edge", "alpha", "beta"],
+      where: { x: 161.5, y: 33, width: 41, height: 30 },
+    });
+    expect(findings[0]!.message).toContain('label "X" chip on edge (41×30px)');
+    expect(findings[0]!.message).toContain("bleeds onto alpha and beta");
+    expect(findings[0]!.message).toContain("44px of corridor where the chip needs 73px");
+    expect(findings[0]!.suggestion).toContain("≥73px");
+    expect(findings[0]!.suggestion).toContain("16px margins");
+  });
+
+  test("fit threshold is physical: 74px gap fits the 41px chip, 72px does not", () => {
+    // Needed = 73. Chip centered: at gap 74 each side clears the margin by
+    // 0.5px; at gap 72 it falls 0.5px short on each side.
+    const fits = unreadableLabels.check(makeDocument(
+      [box("a", 0, 0), box("b", 234, 0)],
+      [{ ...connect("e", "a", "b"), label: "X" }],
+    ), FIGJAM_CONTEXT);
+    expect(fits).toHaveLength(0);
+
+    const tight = unreadableLabels.check(makeDocument(
+      [box("a", 0, 0), box("b", 232, 0)],
+      [{ ...connect("e", "a", "b"), label: "X" }],
+    ), FIGJAM_CONTEXT);
+    expect(tight).toHaveLength(1);
+    expect(tight[0]!.message).toContain("72px of corridor where the chip needs 73px");
+  });
+
+  test("the board's canvas style sizes the chip: the schematic mono chip fits a corridor the figjam chip cannot", () => {
+    // 28 capitals in a 300px corridor: figjam Inter Bold 16 ≈ 299.7 + 24px
+    // (+32 ≈ 355.7 > 300); schematic 28 Plex Mono cells ≈ 235.2 + 2×7
+    // (+32 ≈ 281.2 ≤ 300) on a 26px chip.
+    const document = makeDocument(
+      [box("a", 0, 0), box("b", 460, 0)],
+      [{ ...connect("e", "a", "b"), label: "ORDER-PROCESSING-WORKFLOW-V2" }],
+    );
+    expect(unreadableLabels.check(document, FIGJAM_CONTEXT)).toHaveLength(1);
+    expect(unreadableLabels.check(document, { canvasStyle: canvasThemePreset("schematic-light") })).toHaveLength(0);
+  });
+
+  test("no distance window: a long chip fires wherever it physically cannot fit", () => {
+    // A wide gap is no exemption: the 27-char chip measures ≈ 252.25 + 24px
+    // wide — it physically cannot fit in 240px, so the rule fires.
+    const findings = unreadableLabels.check(makeDocument(
+      [box("a", 0, 0), box("b", 400, 0)],
+      [{ ...connect("e", "a", "b"), label: "a-very-long-edge-label-here" }],
+    ), FIGJAM_CONTEXT);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]!.severity).toBe("warning");
+    expect(findings[0]!.message).toContain("240px of corridor where the chip needs 285px");
+  });
+
+  test("a bleed only the full-width chip has — inside the 1px measuring band — is a note, not a warning", () => {
+    // Corridor 0.3px short of chip + margins: the measured chip just touches both
+    // boxes, the chip a pixel narrower clears them. Chromium may paint either.
+    const chip = chipWidth("go live", FIGJAM_CANVAS_STYLE);
+    const gap = chip + 32 - 0.3;
+    const findings = unreadableLabels.check(makeDocument(
+      [box("a", 0, 0), box("b", 160 + gap, 0)],
+      [{ ...connect("e", "a", "b"), label: "go live" }],
+    ), FIGJAM_CONTEXT);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]!.severity).toBe("note");
+    expect(findings[0]!.message).toContain("can't promise");
+    // Two pixels short, the narrow chip bleeds too: a real warning.
+    const tighter = unreadableLabels.check(makeDocument(
+      [box("a", 0, 0), box("b", 160 + chip + 32 - 2, 0)],
+      [{ ...connect("e", "a", "b"), label: "go live" }],
+    ), FIGJAM_CONTEXT);
+    expect(tighter.map((finding) => finding.severity)).toEqual(["warning"]);
+  });
+
+  test("a label with characters the chip font lacks is judged on its guaranteed footprint", () => {
+    const edge = { ...connect("e", "a", "b"), label: "ship it 🚀 now" };
+    // Gap 40: even with the rocket at zero width the chip bleeds — a warning.
+    const tight = unreadableLabels.check(makeDocument([box("a", 0, 0), box("b", 200, 0)], [edge]), FIGJAM_CONTEXT);
+    expect(tight.map((finding) => finding.severity)).toEqual(["warning"]);
+    // A corridor the guaranteed chip clears but the estimated one does not: a note.
+    const probe = makeDocument([box("a", 0, 0), box("b", 400, 0)], [edge]);
+    const chip = chipFor(probe.connections[0]!, probe, FIGJAM_CANVAS_STYLE)!;
+    expect(chip.rect.width - chip.narrowRect.width).toBeGreaterThan(4);
+    const gap = Math.ceil(chip.narrowRect.width) + 32 + 2;
+    const findings = unreadableLabels.check(
+      makeDocument([box("a", 0, 0), box("b", 160 + gap, 0)], [edge]),
+      FIGJAM_CONTEXT,
+    );
+    expect(findings.map((finding) => finding.severity)).toEqual(["note"]);
+    expect(findings[0]!.message).toContain('the chip font lacks "🚀"');
+  });
+
+  test("a chip rendering AWAY from the corridor is clean regardless of gap", () => {
+    // Waypoints route the wire down and across: the chip renders on the far
+    // horizontal leg at y=300, nowhere near either endpoint box, so the 44px
+    // corridor between them carries no finding — the chip fits where it
+    // actually renders.
+    const findings = unreadableLabels.check(makeDocument(
+      [box("a", 0, 0), box("b", 204, 0)],
+      [{
+        ...connect("e", "a", "b"),
+        from: { objectId: "a", anchor: "bottom" },
+        to: { objectId: "b", anchor: "bottom" },
+        label: "X",
+        waypoints: [[80, 300], [284, 300]],
+      }],
+    ), FIGJAM_CONTEXT);
+    expect(findings).toHaveLength(0);
+  });
+
+  test("unlabeled and whitespace-labeled edges never fire (no chip renders)", () => {
+    const findings = unreadableLabels.check(makeDocument(
+      [box("a", 0, 0), box("b", 204, 0), box("c", 0, 300), box("d", 204, 300)],
+      [
+        connect("bare", "a", "b"),
+        { ...connect("blank", "c", "d"), label: "   " },
+      ],
+    ), FIGJAM_CONTEXT);
+    expect(findings).toHaveLength(0);
+  });
+
+  test("section endpoints are exempt; node endpoints on the same edge still count", () => {
+    // Two section frames 20px apart: the chip bleeds onto both, but section
+    // frames are background — no finding.
+    const sectionPair = unreadableLabels.check(makeDocument(
+      [
+        box("wrap1", 0, 0, 480, 320, "section"),
+        box("wrap2", 500, 0, 480, 320, "section"),
+      ],
+      [{ ...connect("e", "wrap1", "wrap2"), label: "X" }],
+    ), FIGJAM_CONTEXT);
+    expect(sectionPair).toHaveLength(0);
+
+    // Section → node, 44px apart: the chip bleeds onto both endpoints but
+    // only the node side is a finding.
+    const mixed = unreadableLabels.check(makeDocument(
+      [box("wrap", 0, 0, 480, 320, "section"), box("b", 524, 112)],
+      [{ ...connect("e", "wrap", "b"), label: "X" }],
+    ), FIGJAM_CONTEXT);
+    expect(mixed).toHaveLength(1);
+    expect(mixed[0]!.at).toEqual(["e", "b"]);
+    expect(mixed[0]!.message).toContain("bleeds onto b");
+  });
+
+  test("opening the corridor to the true deficit clears the finding", () => {
+    // Gap 44 where the 41px chip needs 73: the finding stands. Widened to the
+    // next 16px stop that clears it (beta 204 → 240, gap 80), it is clean.
+    const tight = makeDocument(
+      [box("alpha", 0, 0), box("beta", 204, 0)],
+      [{ ...connect("edge", "alpha", "beta"), label: "X" }],
+    );
+    expect(unreadableLabels.check(tight, FIGJAM_CONTEXT)).toHaveLength(1);
+
+    const opened = makeDocument(
+      [box("alpha", 0, 0), box("beta", 240, 0)],
+      [{ ...connect("edge", "alpha", "beta"), label: "X" }],
+    );
+    expect(unreadableLabels.check(opened, FIGJAM_CONTEXT)).toHaveLength(0);
+  });
+
+  test("opening a vertical run along y clears the finding", () => {
+    // Stacked pair, gap 44 along y where the 30px chip needs 62; opened to 64.
+    const tight = makeDocument(
+      [box("top", 0, 0), box("bottom", 0, 140)],
+      [{ ...connect("edge", "top", "bottom"), label: "X" }],
+    );
+    expect(unreadableLabels.check(tight, FIGJAM_CONTEXT)).toHaveLength(1);
+
+    const opened = makeDocument(
+      [box("top", 0, 0), box("bottom", 0, 160)],
+      [{ ...connect("edge", "top", "bottom"), label: "X" }],
+    );
+    expect(unreadableLabels.check(opened, FIGJAM_CONTEXT)).toHaveLength(0);
+  });
+});

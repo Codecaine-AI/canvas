@@ -19,7 +19,7 @@ import {
   guidanceSnapshot,
   vocabularyContactSheet,
   type GuidanceSource,
-} from "@codecaine-ai/canvas-agent/authoring";
+} from "@codecaine-ai/canvas/authoring";
 
 export const SKILL_DIR = resolve(import.meta.dir, "../skills/canvas");
 /** The hand-written SKILL.md. The generator copies it into the folder unchanged. */

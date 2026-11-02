@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { PlusIcon, RotateCcwIcon } from "@codecaine-ai/canvas/ui/icons";
 import type {
   InteractiveCanvasEditorHandle,
@@ -6,7 +6,6 @@ import type {
 } from "@codecaine-ai/canvas";
 import { Button } from "@codecaine-ai/canvas/ui/button";
 import { parseRoute, shellPageTitle, isDocumentRoute, type Route } from "./_lib/route";
-import { useAgentRun } from "./_lib/useAgentRun";
 import { useBoardDocument } from "./_lib/useBoardDocument";
 import { useBoardList } from "./_lib/useBoardList";
 import { useEditorPanels } from "./_lib/useEditorPanels";
@@ -31,7 +30,6 @@ export function App() {
     document.title = pageTitle;
   }, [pageTitle]);
   const panels = useEditorPanels();
-  const { setShowAgent } = panels;
   const canvasStyleSettings = useCanvasStyleSettings();
   // Board-list thumbnails are server renders: their URL carries the style the
   // server holds, so a theme switch or token edit fetches fresh ones once its
@@ -43,68 +41,30 @@ export function App() {
   // plus the live selection/viewport/lastChange stream.
   const editorRef = useRef<InteractiveCanvasEditorHandle | null>(null);
   const [editorState, setEditorState] = useState<InteractiveCanvasEditorState | null>(null);
-  const [editorDocumentRevision, setEditorDocumentRevision] = useState(0);
-  const previousEditorToolRef = useRef<InteractiveCanvasEditorState["tool"] | null>(null);
 
   const board = useBoardDocument(route, {
     editorRef,
-    onLoadStart: () => {
-      setEditorState(null);
-      previousEditorToolRef.current = null;
-    },
+    onLoadStart: () => setEditorState(null),
   });
   const { activeDocument, setActiveDocument, documentState, documentErrorDetail, flushPendingSave } = board;
-
-  const agent = useAgentRun({
-    route,
-    activeDocument,
-    editorRef,
-    diskConflictRef: board.diskConflictRef,
-    flushPendingSave,
-    queueAutosave: board.queueAutosave,
-    setShowAgent,
-    bumpEditorDocumentRevision: () => setEditorDocumentRevision((revision) => revision + 1),
-  });
-  const { agentSession, hasLiveAgentSession, setAgentPreviewRect, setAgentBaselineDocument } = agent;
 
   useEffect(() => {
     const handlePopState = async () => {
       const nextRoute = parseRoute(window.location.pathname, window.location.search);
-      const leavingCanvas =
-        route.name === "canvas" &&
-        (nextRoute.name !== "canvas" || nextRoute.id !== route.id);
-      if (leavingCanvas) {
-        if (hasLiveAgentSession) void agentSession.reject();
-        agentSession.reset();
-        setShowAgent(false);
-        setAgentPreviewRect(null);
-        setAgentBaselineDocument(null);
-      }
       await flushPendingSave();
       setRoute(nextRoute);
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [agentSession.reject, agentSession.reset, flushPendingSave, hasLiveAgentSession, route]);
+  }, [flushPendingSave]);
 
   useEffect(() => {
     const handleBeforeUnload = () => {
-      if (hasLiveAgentSession) void agentSession.reject();
-      agentSession.reset();
       void flushPendingSave({ keepalive: true });
     };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [agentSession.reject, agentSession.reset, flushPendingSave, hasLiveAgentSession]);
-
-  const handleEditorStateChange = useCallback((state: InteractiveCanvasEditorState) => {
-    setEditorState(state);
-    const previousTool = previousEditorToolRef.current;
-    previousEditorToolRef.current = state.tool;
-    if (state.tool === "annotation" && previousTool !== "annotation") {
-      setShowAgent(true);
-    }
-  }, []);
+  }, [flushPendingSave]);
 
   const { canvases, listState, loadCanvases, createBoard, deleteCanvas } = useBoardList();
 
@@ -147,14 +107,12 @@ export function App() {
       <EditorPage
         route={route}
         document={activeDocument}
-        documentRevision={editorDocumentRevision}
         canvasStyleSettings={canvasStyleSettings}
         panels={panels}
         board={board}
-        agent={agent}
         editorRef={editorRef}
         editorState={editorState}
-        onEditorStateChange={handleEditorStateChange}
+        onEditorStateChange={setEditorState}
         onBack={() => void handleBackToBoards()}
       />
     );

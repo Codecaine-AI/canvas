@@ -4,7 +4,6 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig, searchForWorkspaceRoot, type Plugin } from "vite";
-import { createAgentProxyHandler } from "./server/agent-proxy";
 import { createCanvasAnnotationEvents } from "./server/canvas-annotation-events";
 import { createCanvasFileApiHandler } from "./server/canvas-file-api";
 import {
@@ -68,9 +67,6 @@ function canvasFileApiPlugin(): Plugin {
       // Only canvas-style.json acts on deletes; canvas unlinks are ignored.
       server.watcher.on("unlink", onCanvasFileEvent);
 
-      // The agent proxy mounts first: /api/canvases/:id/agent/* must reach
-      // the harness, not the canvas file API's catch-all /api/canvases branch.
-      server.middlewares.use(createAgentProxyHandler({}));
       server.middlewares.use(
         createCanvasFileApiHandler({
           canvasesDir,

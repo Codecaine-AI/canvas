@@ -251,7 +251,7 @@ function paintsInsideViewBox(
 // are not on the package's public `./render` surface — deep-import them) so
 // that off-renderer consumers can ask "would this text clip in this box?" and
 // get the RENDERER's answer rather than a second implementation of it. The
-// agent's text-fit warnings (canvas-agent board/text-fit.ts) are built on
+// agent's text-fit warnings (board/text-fit.ts) are built on
 // exactly these functions for that reason.
 // ---------------------------------------------------------------------------
 

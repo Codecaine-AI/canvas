@@ -20,7 +20,6 @@
         "type": "design"
       },
       "children": [
-        "b-r7-title-1",
         "b-r7-hug-opening",
         "b-r7-card-2",
         "b-r7-detect-3",
@@ -28,19 +27,6 @@
         "b-r7-corpus-5",
         "b-r7-intrinsic-6"
       ]
-    },
-    "b-r7-title-1": {
-      "id": "b-r7-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "R7 — hug: margin rails that never stretch"
-        }
-      ],
-      "children": []
     },
     "b-r7-hug-opening": {
       "id": "b-r7-hug-opening",
@@ -86,7 +72,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+              "path": "packages/canvas/src/authoring/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }

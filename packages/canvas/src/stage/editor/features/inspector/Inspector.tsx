@@ -33,7 +33,7 @@ import { IconGlyphPicker } from "./IconGlyphPicker";
 
 /**
  * Past this many characters (trimmed) a detail reads as more than one fact —
- * the agent's detail-too-long lint threshold (canvas-agent text-rules
+ * the agent's detail-too-long lint threshold (board/text-rules.ts
  * DETAIL_MAX_CHARS). The Inspector only warns; it never blocks typing.
  */
 const DETAIL_SOFT_MAX_CHARS = 48;

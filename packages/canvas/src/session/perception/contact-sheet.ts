@@ -1,0 +1,385 @@
+import { CANVAS_COLORS } from "../../state/schema";
+import type {
+  CanvasArrowDirection,
+  InteractiveCanvasDocument,
+  InteractiveCanvasObjectType,
+} from "../../state/schema";
+
+// Relative imports keep the session harness away from the canvas React surface.
+import { preferredObjectColor } from "../../objects/registry";
+import { ICON_GLYPH_IDS } from "../../objects/shapes/icon/icon-glyphs";
+import { renderDocumentToSvg } from "../../render/static-svg";
+import { CENTER_TEXT_INSET_PX } from "../../objects/text-slots";
+import { CANVAS_SANS_FONT_STACK } from "../../theme/fonts";
+import { measureWidth } from "../../theme/text-measure";
+import {
+  draftPlacedObject,
+  OBJECT_TYPE_DEFAULTS,
+} from "../../state/schema/object-defaults";
+
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../theme/canvas-style";
+
+import { rasterizeSvgToPng } from "../../render/rasterize";
+import { PLACEABLE_SHAPE_TYPES } from "../tools/placeable-types";
+
+type Family =
+  | "containers"
+  | "flowchart"
+  | "geometric"
+  | "notes"
+  | "special"
+  | "other";
+
+/**
+ * Known families are intentionally a partial map. New schema types land in
+ * "other" automatically, while the roster itself always comes from the live
+ * defaults table.
+ */
+const FAMILY: Partial<Record<InteractiveCanvasObjectType, Family>> = {
+  section: "containers",
+  process: "flowchart",
+  decision: "flowchart",
+  "predefined-process": "flowchart",
+  rectangle: "geometric",
+  ellipse: "geometric",
+  triangle: "geometric",
+  octagon: "geometric",
+  "arrow-shape": "geometric",
+  sticky: "notes",
+  icon: "special",
+};
+
+const FAMILY_ORDER: readonly Family[] = [
+  "containers",
+  "flowchart",
+  "geometric",
+  "notes",
+  "special",
+  "other",
+];
+
+const VIEW_WIDTH = 1400;
+const COLUMNS = 4;
+/** Narrowest family label; a longer one grows to its measured name. */
+const FAMILY_LABEL_MIN_WIDTH = 180;
+const FAMILY_LABEL_HEIGHT = 56;
+const CONTENT_X = 232;
+const CELL_GAP_X = 48;
+/** Narrowest and shortest specimen caption; captions grow to the style's measured name. */
+const SPECIMEN_LABEL_MIN_WIDTH = 132;
+const SPECIMEN_LABEL_MIN_HEIGHT = 34;
+/** Room past a caption's measured width: the 1px measuring band, and a pixel of air. */
+const CAPTION_SLACK_PX = 2;
+const SPECIMEN_LABEL_GAP_Y = 10;
+const ROW_GAP_Y = 52;
+const BAND_GAP_Y = 72;
+
+const ICON_COLUMNS = 8;
+const COLOR_COLUMNS = 5;
+const COLOR_SWATCH = { width: 150, height: 72 } as const;
+const DEMO_NODE = { width: 130, height: 48 } as const;
+const DEMO_SPAN = 320;
+const DEMO_COLUMN_WIDTH = 560;
+const DEMO_ROW_HEIGHT = 110;
+
+/**
+ * Every arrow kind gets a demo wire; the Record is keyed by the schema union
+ * so a new arrow kind cannot ship without a specimen.
+ */
+const ARROW_DEMOS: Record<CanvasArrowDirection, true> = {
+  forward: true, back: true, both: true, none: true,
+};
+
+/**
+ * Per canvas style (JSON key): absent = not yet attempted; null = unrenderable;
+ * Buffer = cached. A workspace has one style at a time, so this holds one or
+ * two entries in practice.
+ */
+const sheetCache = new Map<string, Buffer | null>();
+
+function positiveDefaultSize(type: InteractiveCanvasObjectType): {
+  width: number;
+  height: number;
+} {
+  const { width, height } = OBJECT_TYPE_DEFAULTS[type].geometry;
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    throw new Error(`Invalid default geometry for object type ${type}.`);
+  }
+  return { width, height };
+}
+
+/**
+ * The type bands show exactly the names a gesture accepts, so the sheet and the
+ * `type` enum can never disagree. One kind of name is therefore absent: the
+ * `icon` carrier — glyphs are types of their own and get their own band below.
+ * `section` and `sticky` stay: they are placed by their own gestures, not by a
+ * `type` pick.
+ */
+function specimenTypes(): InteractiveCanvasObjectType[] {
+  const placeableShapes = new Set<string>(PLACEABLE_SHAPE_TYPES);
+  return (Object.keys(OBJECT_TYPE_DEFAULTS) as InteractiveCanvasObjectType[]).filter(
+    (type) => type === "section" || type === "sticky" || placeableShapes.has(type),
+  );
+}
+
+/**
+ * Caption box sizes for the workspace style: a process box (14px × 12px
+ * insets) wide enough for the name measured in the style's name font and
+ * tall enough for one name line.
+ */
+function captionSizer(canvasStyle: CanvasStyle) {
+  const font = { family: CANVAS_SANS_FONT_STACK, size: canvasStyle.textFontSizePx, weight: canvasStyle.textFontWeight };
+  return {
+    width: (text: string, minWidth: number) =>
+      Math.max(minWidth, Math.ceil(measureWidth(text, font) + CENTER_TEXT_INSET_PX.x * 2 + CAPTION_SLACK_PX)),
+    height: Math.max(SPECIMEN_LABEL_MIN_HEIGHT, Math.ceil(canvasStyle.textFontSizePx * 1.2 + CENTER_TEXT_INSET_PX.y * 2)),
+  };
+}
+
+/** The contact sheet's board for `canvasStyle`: captions sized by the style's measured name font. */
+export function buildVocabularyDocument(canvasStyle: CanvasStyle): InteractiveCanvasDocument {
+  const caption = captionSizer(canvasStyle);
+  const familyLabelWidth = Math.max(
+    ...[...FAMILY_ORDER.map((family) => family.toUpperCase()), "ICONS", "COLORS", "CONNECTIONS"].map((name) =>
+      caption.width(name, FAMILY_LABEL_MIN_WIDTH),
+    ),
+  );
+  const contentX = Math.max(CONTENT_X, familyLabelWidth + CONTENT_X - FAMILY_LABEL_MIN_WIDTH);
+  const roster = specimenTypes();
+  const grouped = new Map<Family, InteractiveCanvasObjectType[]>(
+    FAMILY_ORDER.map((family) => [family, []]),
+  );
+  for (const type of roster) {
+    grouped.get(FAMILY[type] ?? "other")!.push(type);
+  }
+
+  const objects: InteractiveCanvasDocument["objects"] = [];
+  const flowchartSpecimenIds: string[] = [];
+  let nextBandY = 0;
+
+  for (const family of FAMILY_ORDER) {
+    const types = grouped.get(family)!;
+    if (types.length === 0) continue;
+
+    const sizes = types.map(positiveDefaultSize);
+    const labelWidths = types.map((type) => caption.width(type, SPECIMEN_LABEL_MIN_WIDTH));
+    const maxWidth = Math.max(...sizes.map(({ width }) => width));
+    const maxHeight = Math.max(...sizes.map(({ height }) => height));
+    const cellWidth = Math.max(
+      maxWidth + CELL_GAP_X,
+      Math.max(...labelWidths) + 8,
+    );
+    const cellHeight =
+      maxHeight + SPECIMEN_LABEL_GAP_Y + caption.height + ROW_GAP_Y;
+
+    objects.push(
+      draftPlacedObject(
+        "process",
+        {
+          x: 0,
+          y: nextBandY,
+          width: familyLabelWidth,
+          height: FAMILY_LABEL_HEIGHT,
+        },
+        {
+          id: `family-${family}`,
+          text: family.toUpperCase(),
+          color: "blue",
+        },
+      ),
+    );
+
+    for (const [index, type] of types.entries()) {
+      const { width, height } = sizes[index]!;
+      const column = index % COLUMNS;
+      const row = Math.floor(index / COLUMNS);
+      const id = `vocabulary-${type}`;
+      const geometry = {
+        x: contentX + column * cellWidth + (cellWidth - width) / 2,
+        y: nextBandY + row * cellHeight,
+        width,
+        height,
+      };
+      const text = type === "sticky"
+        ? `**${type}**\n- markdown\n- supported`
+        : type;
+
+      objects.push(draftPlacedObject(type, geometry, { id, text, color: preferredObjectColor(type) }));
+      // A separate, label-styled rounded chip keeps glyph-only and very small shapes
+      // identifiable without maintaining another list of renderer exceptions.
+      const labelWidth = labelWidths[index]!;
+      objects.push(
+        draftPlacedObject(
+          "process",
+          {
+            x: geometry.x + (width - labelWidth) / 2,
+            y: geometry.y + height + SPECIMEN_LABEL_GAP_Y,
+            width: labelWidth,
+            height: caption.height,
+          },
+          {
+            id: `label-${type}`,
+            text: type,
+            color: "white",
+          },
+        ),
+      );
+      if (family === "flowchart" && flowchartSpecimenIds.length < 2) {
+        flowchartSpecimenIds.push(id);
+      }
+    }
+
+    nextBandY += Math.ceil(types.length / COLUMNS) * cellHeight + BAND_GAP_Y;
+  }
+
+  const connections: InteractiveCanvasDocument["connections"] =
+    flowchartSpecimenIds.length === 2
+      ? [
+          {
+            id: "vocabulary-connection",
+            from: { objectId: flowchartSpecimenIds[0]!, anchor: "right" },
+            to: { objectId: flowchartSpecimenIds[1]!, anchor: "left" },
+            arrow: "forward",
+            label: "connects",
+          },
+        ]
+      : [];
+
+  const bandLabel = (id: string, text: string): void => {
+    objects.push(
+      draftPlacedObject(
+        "process",
+        { x: 0, y: nextBandY, width: familyLabelWidth, height: FAMILY_LABEL_HEIGHT },
+        { id, text, color: "blue" },
+      ),
+    );
+  };
+
+  // ICONS — every glyph in the roster, its id rendered as the built-in caption.
+  bandLabel("band-icons", "ICONS");
+  const iconSize = positiveDefaultSize("icon");
+  const iconCellWidth = iconSize.width + CELL_GAP_X;
+  const iconCellHeight = iconSize.height + caption.height + ROW_GAP_Y;
+  for (const [index, glyph] of ICON_GLYPH_IDS.entries()) {
+    objects.push(
+      draftPlacedObject(
+        "icon",
+        {
+          x: contentX + (index % ICON_COLUMNS) * iconCellWidth,
+          y: nextBandY + Math.floor(index / ICON_COLUMNS) * iconCellHeight,
+          width: iconSize.width,
+          height: iconSize.height,
+        },
+        { id: `glyph-${glyph}`, text: glyph, icon: glyph, color: preferredObjectColor(glyph) },
+      ),
+    );
+  }
+  nextBandY += Math.ceil(ICON_GLYPH_IDS.length / ICON_COLUMNS) * iconCellHeight + BAND_GAP_Y;
+
+  // COLORS — every roster color as a labeled swatch.
+  bandLabel("band-colors", "COLORS");
+  const colorCellWidth = COLOR_SWATCH.width + CELL_GAP_X;
+  const colorCellHeight = COLOR_SWATCH.height + ROW_GAP_Y;
+  for (const [index, color] of CANVAS_COLORS.entries()) {
+    objects.push(
+      draftPlacedObject(
+        "rectangle",
+        {
+          x: contentX + (index % COLOR_COLUMNS) * colorCellWidth,
+          y: nextBandY + Math.floor(index / COLOR_COLUMNS) * colorCellHeight,
+          ...COLOR_SWATCH,
+        },
+        { id: `color-${color}`, text: color, color },
+      ),
+    );
+  }
+  nextBandY += Math.ceil(CANVAS_COLORS.length / COLOR_COLUMNS) * colorCellHeight + BAND_GAP_Y;
+
+  // CONNECTIONS — a labeled demo wire per arrow kind, one dashed, one to a
+  // section: everything a wire can look like and attach to.
+  bandLabel("band-connections", "CONNECTIONS");
+  const demoLabels: string[] = [
+    ...(Object.keys(ARROW_DEMOS) as CanvasArrowDirection[]).map((arrow) => `arrow ${arrow}`),
+    "dashed",
+    "to a section",
+  ];
+  for (const [index, label] of demoLabels.entries()) {
+    const x = contentX + (index % 2) * DEMO_COLUMN_WIDTH;
+    const y = nextBandY + Math.floor(index / 2) * DEMO_ROW_HEIGHT;
+    const fromId = `demo-from-${index}`;
+    const toId = `demo-to-${index}`;
+    objects.push(
+      draftPlacedObject(
+        "process",
+        { x, y, ...DEMO_NODE },
+        { id: fromId, text: "", color: "white" },
+      ),
+    );
+    if (label === "to a section") {
+      objects.push(
+        draftPlacedObject(
+          "section",
+          { x: x + DEMO_SPAN, y: y - 24, width: 200, height: DEMO_NODE.height + 48 },
+          { id: toId, text: "section" },
+        ),
+      );
+    } else {
+      objects.push(
+        draftPlacedObject(
+          "process",
+          { x: x + DEMO_SPAN, y, ...DEMO_NODE },
+          { id: toId, text: "", color: "white" },
+        ),
+      );
+    }
+    connections.push({
+      id: `demo-wire-${index}`,
+      from: { objectId: fromId, anchor: "right" },
+      to: { objectId: toId, anchor: "left" },
+      arrow: label.startsWith("arrow ")
+        ? (label.slice("arrow ".length) as CanvasArrowDirection)
+        : "forward",
+      ...(label === "dashed" ? { style: "dashed" as const } : {}),
+      label,
+    });
+  }
+
+  return {
+    schemaVersion: 1,
+    id: "object-vocabulary-contact-sheet",
+    title: "Object vocabulary",
+    mode: "diagram",
+    objects,
+    connections,
+  };
+}
+
+/**
+ * The full board vocabulary rendered as labeled specimens: every object type
+ * grouped by family, every icon glyph, every roster color, and a demo wire
+ * per connection arrow kind plus dashed style and a section endpoint.
+ * Drawn in the workspace `canvasStyle`, so the specimens carry the radii and
+ * borders the board does. Returns null — never throws — when construction or
+ * rendering fails, and caches that result per style for the life of the
+ * process.
+ */
+export function vocabularyContactSheet(canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE): Buffer | null {
+  const key = JSON.stringify(canvasStyle);
+  const cached = sheetCache.get(key);
+  if (cached !== undefined) return cached;
+  let sheet: Buffer | null;
+  try {
+    const document = buildVocabularyDocument(canvasStyle);
+    const rendered = renderDocumentToSvg(document, {
+      fit: "content",
+      padding: 24,
+      width: VIEW_WIDTH,
+      canvasStyle,
+    });
+    sheet = rasterizeSvgToPng(rendered.svg).png;
+  } catch {
+    sheet = null;
+  }
+  sheetCache.set(key, sheet);
+  return sheet;
+}

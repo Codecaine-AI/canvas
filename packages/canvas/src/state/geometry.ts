@@ -24,7 +24,7 @@ export const CANVAS_GRID_SIZE = 16;
  * re-rounded to 96/112 on update or on commit replay through the reducer.
  *
  * (Gesture-surface plan D1. The agent's own quantizer, AGENT_GRID = 20, lives
- * in canvas-agent and runs before values reach this layer; whether UI drags
+ * in session/tools/grid.ts and runs before values reach this layer; whether UI drags
  * move to 20 as well is a separate product call.)
  */
 export const GEOMETRY_NORMALIZATION_GRID = 4;

@@ -20,24 +20,10 @@
         "type": "design"
       },
       "children": [
-        "b-r10-title-1",
         "b-r10-what-the-language-refuses-to-say-opening",
         "b-r10-card-2",
         "b-r10-body-3"
       ]
-    },
-    "b-r10-title-1": {
-      "id": "b-r10-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "R10 — What the language refuses to say"
-        }
-      ],
-      "children": []
     },
     "b-r10-what-the-language-refuses-to-say-opening": {
       "id": "b-r10-what-the-language-refuses-to-say-opening",
@@ -77,7 +63,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/catalog/layout-editor/context/style-guide/aesthetic.ts",
+              "path": "packages/canvas/src/authoring/style-guide/aesthetic.ts",
               "symbol": "style"
             }
           }
@@ -91,7 +77,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/service/session/perception/perception.ts",
+              "path": "packages/canvas/src/session/perception/perception.ts",
               "symbol": "operationPerception"
             }
           }

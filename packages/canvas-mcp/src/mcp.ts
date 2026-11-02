@@ -9,7 +9,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { identityFromEnv, newRunId, openActionLog, type ActionLog } from "@codecaine-ai/action-log";
-import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas-agent/authoring";
+import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
 import { resolve } from "node:path";
 
 import { version } from "../package.json";

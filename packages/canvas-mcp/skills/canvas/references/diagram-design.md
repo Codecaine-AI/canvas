@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas-agent/src/authoring/design.ts (sha256 d9c69385bed0db82a4433280fa4da459bdbb1b54aeac2534d0caa54b52185fcc). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 d9c69385bed0db82a4433280fa4da459bdbb1b54aeac2534d0caa54b52185fcc). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 

@@ -8,7 +8,7 @@ import { sectionTitleChipWorldRect } from "../../objects/section/title-chip-geom
 import { titleChipLayout } from "../../objects/section/title-chip-layout";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 // The production rasterizer: every emitted header must stay rasterizer-safe.
-import { rasterizeSvgToPng } from "../../../../canvas-agent/src/service/render";
+import { rasterizeSvgToPng } from "../rasterize";
 
 /**
  * Section headers in the static renderer against the shared chip layout

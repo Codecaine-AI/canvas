@@ -17,6 +17,8 @@ packages/
               docs/00-overview.md for the architecture map.
   studio/     @codecaine-ai/studio — a minimal standalone Vite+React app
               for creating/editing boards without a host app.
+  canvas-mcp/ @codecaine-ai/canvas-mcp — the MCP server agents edit boards
+              through, and the generator for its canvas skill.
 canvases/     Studio-backed `.canvas.json` boards and sample documents.
 docs/         00-overview.md — engine architecture, one page.
 board-design-reference/
@@ -38,25 +40,16 @@ bun run dev:studio             # standalone board editor, http://localhost:3999
 make studio                    # build and open the Mac Electron app
 ```
 
-## Running the layout agent
+## Editing boards from an agent
 
-The canvas-agent harness is a sibling Bun service on `127.0.0.1:4820`; the
-operator viewer (traces + prompt config) runs on `:4830`. Kernel runtime
-state lives in the gitignored `.agent-kernel/` directory.
+Agents edit boards through the canvas MCP server (`packages/canvas-mcp`),
+which serves the layout toolkit from `@codecaine-ai/canvas/toolkit` and the
+canvas skill generated from `@codecaine-ai/canvas/authoring`.
 
 ```bash
-make harness                   # agent service alone, foreground (:4820)
-make traces                    # harness (if needed) + operator viewer (:4830)
-bun run dev:harness            # the script under make harness
-bun run dev:agent-viewer       # the viewer alone
-
-# headless session against a saved board, no studio needed
-bun run --cwd packages/canvas-agent cli --list-scopes <canvas-id>
-bun run --cwd packages/canvas-agent cli --canvas <id> --scope <id,id,…> \
-  --instruction "…" [--out-dir <dir>]
+bun packages/canvas-mcp/src/cli.ts mcp               # stdio MCP server
+bun packages/canvas-mcp/src/cli.ts guidance --check  # the canvas skill is current
 ```
-
-`make studio` starts the harness alongside the Mac app automatically.
 
 See `PROVENANCE.md` for what was extracted from Spectre and the BlockSuite
 (MPL-2.0) vendoring/licensing notes.

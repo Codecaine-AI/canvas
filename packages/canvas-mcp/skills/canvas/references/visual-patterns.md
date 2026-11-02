@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas-agent/src/authoring/visual-patterns.ts (sha256 236da37729039e37a11663f4dfde5426818d9bc3b412535674b081da4b686049). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/visual-patterns.ts (sha256 236da37729039e37a11663f4dfde5426818d9bc3b412535674b081da4b686049). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Visual Patterns
 

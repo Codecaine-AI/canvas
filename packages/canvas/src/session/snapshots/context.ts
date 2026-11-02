@@ -1,0 +1,387 @@
+/**
+ * Session-context building blocks: crop/geometry guards, the wrecked-document
+ * gate, draft-only page-frame injection (every frameless board gets a
+ * base root section at session start), and the spawn snapshots —
+ * <board_state> (description + digest + lint report), <editor_state> (scope frame,
+ * selection, viewport), and <user_requests> (document + invoke annotations
+ * merged into the session's status-bearing request queue; document wins on
+ * id collision).
+ */
+import type {
+  CanvasGeometry,
+  InteractiveCanvasDocument,
+} from "../../state/schema";
+
+import type { Rect } from "../../board/types";
+import { formatBoardDigest } from "../../board/digest";
+import { formatDiagnostics, sessionDiagnostics } from "../../board/lints/run";
+import type { Diagnostic } from "../../board/lints";
+import { rectIntersectionArea } from "../../board/measure";
+
+import { formatBoardDescription } from "./board-state";
+import type { EditorStateSnapshot } from "./editor-state";
+import {
+  formatRequestQueue,
+  type RequestAuthor,
+  type RequestQueueEntry,
+} from "./user-requests";
+import type { AgentSessionAnnotation } from "../protocol";
+import { fromDocumentFields } from "../tools/placeable-types";
+import type { LayoutSession } from "../session";
+
+/** A generous world-space bound that rejects overflow/memory-bomb crops. */
+const MAX_RENDER_CROP_DIMENSION = 1_000_000;
+const MAX_RENDER_WORLD_COORDINATE = 1_000_000_000;
+const DOCUMENT_ITEM_MINIMUM = { width: 32, height: 24 } as const;
+/** Smallest useful empty section: a 16px placeholder cell plus corpus-mined trim (48px side padding, 64px header band). */
+export const MINIMUM_SECTION_DIMENSIONS = { width: 112, height: 176 } as const;
+
+export function round2(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+export function expandRect(rect: Rect, margin: number): Rect {
+  return {
+    x: rect.x - margin,
+    y: rect.y - margin,
+    width: rect.width + margin * 2,
+    height: rect.height + margin * 2,
+  };
+}
+
+export function renderCropError(crop: Rect): string | null {
+  if (![crop.x, crop.y, crop.width, crop.height].every(Number.isFinite)) {
+    return "Render crop x, y, width, and height must all be finite numbers.";
+  }
+  if (!(crop.width > 0) || !(crop.height > 0)) {
+    return "Render crop must have positive width and height.";
+  }
+  if (crop.width > MAX_RENDER_CROP_DIMENSION || crop.height > MAX_RENDER_CROP_DIMENSION) {
+    return `Render crop width and height must not exceed ${MAX_RENDER_CROP_DIMENSION}px.`;
+  }
+  if (Math.abs(crop.x) > MAX_RENDER_WORLD_COORDINATE
+    || Math.abs(crop.y) > MAX_RENDER_WORLD_COORDINATE) {
+    return "Render crop x and y are outside the supported world range.";
+  }
+  if (!Number.isFinite(crop.x + crop.width) || !Number.isFinite(crop.y + crop.height)) {
+    return "Render crop bounds must remain finite.";
+  }
+  return null;
+}
+
+export function rectsOverlap(a: Rect, b: Rect): boolean {
+  if (![a.x, a.y, a.width, a.height].every(Number.isFinite)) return false;
+  if (!(a.width > 0) || !(a.height > 0)) return false;
+  return a.x < b.x + b.width
+    && a.x + a.width > b.x
+    && a.y < b.y + b.height
+    && a.y + a.height > b.y;
+}
+
+/** Overlap area between two rects. One definition, in board/measure.ts. */
+export function intersectionArea(a: Rect, b: Rect): number {
+  return rectIntersectionArea(a, b);
+}
+
+export function finiteGeometry(value: unknown): value is CanvasGeometry {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const geometry = value as Record<string, unknown>;
+  return [geometry.x, geometry.y, geometry.width, geometry.height].every(
+    (entry) => typeof entry === "number" && Number.isFinite(entry),
+  );
+}
+
+function gateRelevant(
+  restrictToIds: ReadonlySet<string> | undefined,
+  ...ids: string[]
+): boolean {
+  return !restrictToIds || ids.some((id) => restrictToIds.has(id));
+}
+
+export interface WreckedDocumentOptions {
+  restrictToIds?: ReadonlySet<string>;
+  mode?: "error" | "warning";
+}
+
+/**
+ * Document gate for drafts authored through id-addressed operations.
+ */
+export function wreckedDocumentError(
+  draft: InteractiveCanvasDocument,
+  options: WreckedDocumentOptions = {},
+): string | null {
+  const { restrictToIds } = options;
+  const problems: string[] = [];
+  const sections = draft.objects.filter((object) => object.type === "section");
+
+  for (const section of sections) {
+    const { geometry } = section;
+    if (gateRelevant(restrictToIds, section.id)
+      && (!finiteGeometry(geometry)
+        || geometry.width < MINIMUM_SECTION_DIMENSIONS.width
+        || geometry.height < MINIMUM_SECTION_DIMENSIONS.height)) {
+      problems.push(
+        `section "${section.id}" is ${round2(geometry.width)}×${round2(geometry.height)}, `
+        + `below its minimum ${MINIMUM_SECTION_DIMENSIONS.width}×${MINIMUM_SECTION_DIMENSIONS.height}.`,
+      );
+    }
+
+    const children = draft.objects.filter((object) => object.parentId === section.id);
+    if (children.length === 0
+      || !gateRelevant(restrictToIds, section.id, ...children.map((child) => child.id))) {
+      continue;
+    }
+    const childLeft = Math.min(...children.map((child) => child.geometry.x));
+    const childTop = Math.min(...children.map((child) => child.geometry.y));
+    const childRight = Math.max(...children.map(
+      (child) => child.geometry.x + child.geometry.width,
+    ));
+    const childBottom = Math.max(...children.map(
+      (child) => child.geometry.y + child.geometry.height,
+    ));
+    if (!finiteGeometry(geometry)
+      || geometry.x > childLeft
+      || geometry.y > childTop
+      || geometry.x + geometry.width < childRight
+      || geometry.y + geometry.height < childBottom) {
+      problems.push(
+        `section "${section.id}" does not contain its parentId children `
+        + `(child bounds ${round2(childRight - childLeft)}×${round2(childBottom - childTop)}).`,
+      );
+    }
+  }
+
+  for (const object of draft.objects) {
+    if (object.type === "section") continue;
+    if (!gateRelevant(restrictToIds, object.id)) continue;
+    const { geometry } = object;
+    if (!finiteGeometry(geometry)
+      || geometry.width < DOCUMENT_ITEM_MINIMUM.width
+      || geometry.height < DOCUMENT_ITEM_MINIMUM.height) {
+      problems.push(
+        `object "${object.id}" is ${round2(geometry.width)}×${round2(geometry.height)}, `
+        + `below its minimum ${DOCUMENT_ITEM_MINIMUM.width}×${DOCUMENT_ITEM_MINIMUM.height}.`,
+      );
+    }
+  }
+
+  const overlapCandidates = draft.objects.filter((object) => (
+    object.type !== "section"
+    && object.type !== "sticky"
+  ));
+  for (let index = 0; index < overlapCandidates.length; index += 1) {
+    for (let otherIndex = index + 1; otherIndex < overlapCandidates.length; otherIndex += 1) {
+      const a = overlapCandidates[index]!;
+      const b = overlapCandidates[otherIndex]!;
+      if ((a.parentId ?? null) !== (b.parentId ?? null)) continue;
+      if (!gateRelevant(restrictToIds, a.id, b.id)) continue;
+      const smallerArea = Math.min(
+        a.geometry.width * a.geometry.height,
+        b.geometry.width * b.geometry.height,
+      );
+      if (!(smallerArea > 0)) continue;
+      const overlapPct = intersectionArea(a.geometry, b.geometry) / smallerArea * 100;
+      if (overlapPct > 25) {
+        problems.push(
+          `siblings "${a.id}" and "${b.id}" overlap across ${round2(overlapPct)}% `
+          + "of the smaller object (maximum 25%).",
+        );
+      }
+    }
+  }
+
+  const rootSections = sections.filter((section) => section.parentId == null);
+  const pageFrame = rootSections.length === 1 ? rootSections[0] : undefined;
+  if (pageFrame) {
+    const frame = pageFrame.geometry;
+    for (const object of draft.objects) {
+      if (object.id === pageFrame.id
+        || !gateRelevant(restrictToIds, pageFrame.id, object.id)) continue;
+      const overflow = Math.max(
+        frame.x - object.geometry.x,
+        frame.y - object.geometry.y,
+        object.geometry.x + object.geometry.width - (frame.x + frame.width),
+        object.geometry.y + object.geometry.height - (frame.y + frame.height),
+      );
+      if (overflow > 16) {
+        problems.push(
+          `object "${object.id}" extends ${round2(overflow)}px past base section `
+          + `"${pageFrame.id}" (maximum 16px).`,
+        );
+      }
+    }
+  }
+
+  if (problems.length === 0) return null;
+  return [
+    options.mode === "warning" ? "Document gate warnings:" : "Wrecked document rejected:",
+    ...problems.map((problem) => `- ${problem}`),
+  ].join("\n");
+}
+
+/**
+ * resvg 2.6 aborts when a filtered or nested-SVG object is wholly outside
+ * the viewport and its clip intersection is empty. Static crop rendering
+ * deliberately retains the whole document, so select visible content here
+ * before the SVG ever reaches the native rasterizer.
+ */
+export function documentWithinCrop(
+  document: InteractiveCanvasDocument,
+  crop: Rect,
+): InteractiveCanvasDocument {
+  const objects = document.objects.filter((object) => rectsOverlap(object.geometry, crop));
+  const objectIds = new Set(objects.map((object) => object.id));
+  const connections = document.connections.filter((connection) =>
+    objectIds.has(connection.from.objectId) && objectIds.has(connection.to.objectId));
+  return { ...document, objects, connections };
+}
+
+// Page-frame injection is a pure board transformation, so it lives in the
+// board layer (where the lint authorship baseline also needs it); the session
+// surface keeps exporting it from here.
+export { draftWithPageFrame, injectedPageFrame } from "../../board/page-frame";
+
+/**
+ * The spawn-time <board_state> payload: description + full (untruncated)
+ * digest + the full lint report over the current draft, recomputed per run so
+ * refinements get a fresh snapshot.
+ *
+ * The snapshot also seeds the session's diagnostic baseline, so the first
+ * operation reports a delta against what the model was shown at spawn rather
+ * than restating the whole report it already has.
+ */
+export function boardStateSnapshot(session: LayoutSession): string {
+  const diagnostics = sessionDiagnostics(session);
+  session.lastDiagnostics = diagnostics;
+  return [
+    formatBoardDescription(session.draft.description),
+    formatBoardDigest(session.draft),
+    formatDiagnostics(diagnostics),
+  ].join("\n\n");
+}
+
+export function editorSnapshot(session: LayoutSession): EditorStateSnapshot {
+  const byId = new Map(session.baseline.objects.map((object) => [object.id, object]));
+  return {
+    canvasId: session.canvasId,
+    instruction: session.instruction,
+    baselineHash: session.baselineHash,
+    frame: session.scopeResolution.frame,
+    selection: session.scopeResolution.scopeObjectIds.map((id) => {
+      const object = byId.get(id);
+      // The FOLDED name (./placeable-types.ts): the selection list names the
+      // same types the gestures accept, so a glyph reads `memory` rather than
+      // the document's `icon` carrier.
+      return {
+        id,
+        type: object ? fromDocumentFields(object) : "unknown",
+        text: object?.text ?? "",
+      };
+    }),
+    boundaryArrowCount: session.scopeResolution.boundaryArrowCount,
+    viewport: session.viewport,
+  };
+}
+
+function requestAuthor(value: unknown): RequestAuthor {
+  return value === "agent" || value === "system" ? value : "human";
+}
+
+/**
+ * Sync the session's request queue from the draft document's annotation
+ * threads merged with the invoke-time session annotations (document wins on id
+ * collision — it is the stored truth; invoke-only entries follow). Existing
+ * entries keep their alias, status, and note while their thread content is
+ * re-read; new threads join the queue as `open` with the next R-number.
+ * Entries never leave the queue: a request stays the operator's request even
+ * if its annotation vanishes from the draft, and the agent must still dispose
+ * it.
+ */
+export function syncSessionRequests(session: LayoutSession): void {
+  const documentAnnotations = (session.draft.annotations
+    ?? []) as unknown as AgentSessionAnnotation[];
+  const documentIds = new Set(documentAnnotations.map((annotation) => annotation.id));
+  const invokeOnly = (session.annotations ?? []).filter(
+    (annotation) => !documentIds.has(annotation.id),
+  );
+  const byId = new Map(session.requests.map((entry) => [entry.annotationId, entry]));
+  for (const annotation of [...documentAnnotations, ...invokeOnly]) {
+    const existing = byId.get(annotation.id);
+    if (existing) {
+      existing.target = annotation.target;
+      existing.intent = annotation.intent;
+      existing.body = annotation.body;
+      existing.createdBy = requestAuthor(annotation.createdBy);
+      existing.replies = annotation.replies ?? [];
+      continue;
+    }
+    const entry: RequestQueueEntry = {
+      alias: `R${session.requests.length + 1}`,
+      annotationId: annotation.id,
+      target: annotation.target,
+      intent: annotation.intent,
+      body: annotation.body,
+      createdBy: requestAuthor(annotation.createdBy),
+      replies: annotation.replies ?? [],
+      status: "open",
+    };
+    session.requests.push(entry);
+    byId.set(annotation.id, entry);
+  }
+}
+
+/** The <user_requests> boot block: the status-bearing request queue. */
+export function userRequestsSnapshot(session: LayoutSession): string {
+  return formatRequestQueue(session.requests);
+}
+
+/** Digest + diagnostics over the current draft. */
+export function boardReport(session: LayoutSession): {
+  digest: string;
+  diagnostics: Diagnostic[];
+  diagnosticsText: string;
+} {
+  const diagnostics = sessionDiagnostics(session);
+  return {
+    digest: formatBoardDigest(session.draft),
+    diagnostics,
+    diagnosticsText: formatDiagnostics(diagnostics),
+  };
+}
+
+/** Scope ids for lint filtering: baseline scope + draft-created objects. */
+export function lintScopeIds(
+  session: LayoutSession,
+  draft: InteractiveCanvasDocument,
+): string[] {
+  const created = draft.objects
+    .filter((object) => !session.baseline.objects.some((baseline) => baseline.id === object.id))
+    .map((object) => object.id);
+  return [...session.scopeIds, ...created];
+}
+
+/** The current scope frame, unioned over baseline-scoped and newly created objects. */
+export function solvedFrame(session: LayoutSession): Rect {
+  const ids = new Set(lintScopeIds(session, session.draft));
+  const scoped = session.draft.objects.filter((object) => ids.has(object.id));
+  if (scoped.length === 0) return session.scopeResolution.frame;
+  const x = Math.min(...scoped.map((object) => object.geometry.x));
+  const y = Math.min(...scoped.map((object) => object.geometry.y));
+  const right = Math.max(...scoped.map((object) => object.geometry.x + object.geometry.width));
+  const bottom = Math.max(...scoped.map((object) => object.geometry.y + object.geometry.height));
+  return { x, y, width: Math.max(1, right - x), height: Math.max(1, bottom - y) };
+}
+
+/**
+ * Scope-filtered diagnostics: findings whose `at` list touches the baseline
+ * scope or a draft-created object.
+ */
+export function scopedDiagnostics(
+  session: LayoutSession,
+  diagnostics: Diagnostic[],
+): Diagnostic[] {
+  const restrictToIds = new Set(lintScopeIds(session, session.draft));
+  return diagnostics.filter((diagnostic) =>
+    diagnostic.at.length === 0
+    || diagnostic.at.some((id) => restrictToIds.has(id)));
+}
