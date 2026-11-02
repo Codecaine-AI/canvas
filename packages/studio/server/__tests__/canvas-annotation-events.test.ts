@@ -169,6 +169,8 @@ describe("canvas studio annotation events", () => {
     );
     expect(bound.status).toBe(200);
     expect(bound.json.annotation).toMatchObject({ id: "request-1", status: "open", thread: { id: "thread-42", title: "Board A" } });
+    // The binding comes from outside Studio, so the watcher tells open tabs to reload.
+    expect(await notifier.handleFileEvent(boardPath)).toEqual({ id: "board-a", hash: bound.json.contentHash });
 
     const reloaded = await send("GET", "/api/canvases/board-a");
     expect(reloaded.json.contentHash).toBe(bound.json.contentHash);
@@ -186,6 +188,7 @@ describe("canvas studio annotation events", () => {
 
     const thread = { path: boardPath, canvasId: "board-a", annotation: { id: "request-1", intent: "agent-request", change: "thread" } };
     expect(await sse.next(2)).toEqual([thread, thread]);
+    expect(sse.events).toHaveLength(2);
   });
 
   it("refuses a stale hash, a bad thread id, and an unknown annotation without writing", async () => {

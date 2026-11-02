@@ -361,7 +361,7 @@ async function handleThreadRequest(
     id: string;
     filePath: string;
     annotationId: string;
-    saveCanvas: (id: string, filePath: string, document: InteractiveCanvasDocument) => Promise<string>;
+    saveCanvas: (id: string, filePath: string, document: InteractiveCanvasDocument, outside: boolean) => Promise<string>;
   },
 ): Promise<void> {
   if (req.method !== "PUT") {
@@ -409,7 +409,8 @@ async function handleThreadRequest(
     sendJson(res, 422, { error: "Invalid annotation thread.", issues: validation.issues });
     return;
   }
-  const contentHash = await target.saveCanvas(target.id, target.filePath, validation.document);
+  // An outside caller binds threads, so the watcher must tell open Studio tabs.
+  const contentHash = await target.saveCanvas(target.id, target.filePath, validation.document, true);
   res.setHeader("etag", `"${contentHash}"`);
   sendJson(res, 200, {
     id: target.id,
@@ -444,11 +445,19 @@ export function createCanvasFileApiHandler(options: {
   const { canvasesDir, onCanvasWrite, onCanvasStyleWrite } = options;
   const annotationEvents = options.annotationEvents ?? createCanvasAnnotationEvents({ canvasesDir });
 
-  /** Writes a validated board in Studio's format and publishes its annotation changes. */
-  async function saveCanvas(id: string, filePath: string, document: InteractiveCanvasDocument): Promise<string> {
+  /**
+   * Writes a validated board in Studio's format and publishes its annotation changes.
+   * An `outside` write is not recorded as Studio's own, so the watcher notifies open tabs.
+   */
+  async function saveCanvas(
+    id: string,
+    filePath: string,
+    document: InteractiveCanvasDocument,
+    outside = false,
+  ): Promise<string> {
     const contents = `${JSON.stringify(document, null, 2)}\n`;
     const contentHash = canvasContentHash(contents);
-    onCanvasWrite?.(id, contentHash);
+    if (!outside) onCanvasWrite?.(id, contentHash);
     await writeFileAtomic(filePath, contents);
     await annotationEvents.publish(id, contents);
     return contentHash;
