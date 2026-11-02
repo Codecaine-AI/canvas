@@ -11,7 +11,7 @@ import { readFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 
 import {
   VISUAL_PATTERNS,
@@ -120,9 +120,12 @@ export function renderCanvasSkill(sources: readonly GuidanceSource[] = canvasGui
   return files;
 }
 
+/** The top-level entries of the skill folder the generator owns: `--write` replaces them, `--check` compares only them. */
+const OWNED_ENTRIES = ["SKILL.md", "references", "assets", "snapshot.json"];
+
 /** Replace every generated entry of `dir`, SKILL.md included. */
 export async function writeCanvasSkill(dir: string, files: Map<string, string | Uint8Array>): Promise<void> {
-  await Promise.all(["SKILL.md", "references", "assets", "snapshot.json"].map(entry => rm(join(dir, entry), { recursive: true, force: true })));
+  await Promise.all(OWNED_ENTRIES.map(entry => rm(join(dir, entry), { recursive: true, force: true })));
   for (const [path, content] of files) {
     await mkdir(dirname(join(dir, path)), { recursive: true });
     await writeFile(join(dir, path), content);
@@ -134,6 +137,7 @@ async function listFiles(dir: string): Promise<string[]> {
   return entries
     .filter(entry => entry.isFile())
     .map(entry => relative(dir, join(entry.parentPath, entry.name)))
+    .filter(path => OWNED_ENTRIES.includes(path.split(sep)[0]!))
     .sort();
 }
 

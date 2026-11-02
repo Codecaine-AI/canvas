@@ -92,6 +92,22 @@ describe("canvas skill generator", () => {
     expect(lines.join("\n")).toContain("SKILL.md");
   });
 
+  test("--write clears every file --check reports, and --check ignores files outside the generated entries", async () => {
+    const dir = tempDir();
+    expect(await guidanceCommand(["--write", "--skill-dir", dir], quiet)).toBe(0);
+    writeFileSync(join(dir, "notes.md"), "Kept by hand.\n");
+    writeFileSync(join(dir, ".DS_Store"), "");
+    expect(await guidanceCommand(["--check", "--skill-dir", dir], quiet)).toBe(0);
+
+    writeFileSync(join(dir, "references", "stray.md"), "Not generated.\n");
+    const lines: string[] = [];
+    expect(await guidanceCommand(["--check", "--skill-dir", dir], { log: line => lines.push(line) })).toBe(1);
+    expect(lines.join("\n")).toContain("references/stray.md");
+    expect(await guidanceCommand(["--write", "--skill-dir", dir], quiet)).toBe(0);
+    expect(await guidanceCommand(["--check", "--skill-dir", dir], quiet)).toBe(0);
+    expect(readFileSync(join(dir, "notes.md"), "utf8")).toBe("Kept by hand.\n");
+  });
+
   test("a one-character edit to the generated SKILL.md makes --check exit 1", async () => {
     const dir = tempDir();
     expect(await guidanceCommand(["--write", "--skill-dir", dir], quiet)).toBe(0);
