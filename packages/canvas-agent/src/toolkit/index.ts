@@ -310,9 +310,12 @@ function plural(count: number, one: string, many = `${one}s`): string {
  * Counts and the render read the board as saved, so a page frame injected at
  * open is not counted. The lints read the draft, as every edit's LINTS line does.
  * A conflicted session is refused as every gesture is: its draft holds an
- * edit the file never received.
+ * edit the file never received. A file saved elsewhere since the session
+ * last read or wrote it conflicts the session here too, so the check never
+ * approves a board the file no longer holds.
  */
 export function checkCanvasFile(file: CanvasFileSession, label: string): LayoutToolRenderResult {
+  if (!file.conflicted && sha256(readFileSync(file.canvasPath)) !== file.diskHash) file.conflicted = true;
   if (file.conflicted) {
     return { isError: true, text: new CanvasFileConflictError(file.canvasPath).message };
   }

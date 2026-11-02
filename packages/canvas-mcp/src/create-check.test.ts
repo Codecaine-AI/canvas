@@ -260,19 +260,17 @@ describe("canvas_create and canvas_check", () => {
     const path = service.activeCanvas()!.canvasPath;
     await call(service, "place_shape", { id: "a", type: "process", at: [80, 140] });
 
-    // Someone else saves the board, so the next edit is rejected.
+    // Someone else saves the board: canvas_check refuses it before any edit tries to save.
     writeFileSync(path, `${JSON.stringify({ ...JSON.parse(readFileSync(path, "utf8")), title: "Saved elsewhere" }, null, 2)}\n`);
-    const rejected = await service.call("place_shape", { id: "b", type: "process", at: [520, 140] });
-    expect(rejected.isError).toBe(true);
-
-    // canvas_check refuses with the message every gesture now gives.
-    const gesture = await service.call("move_by", { id: "a", dx: 16, dy: 0 });
-    expect(gesture.isError).toBe(true);
     const refused = await service.call("canvas_check", {});
     expect(refused.isError).toBe(true);
-    expect(textOf(refused)).toBe(textOf(gesture));
     expect(textOf(refused)).toContain("Call canvas_open again");
     expect(refused.content.some((item) => item.type === "image")).toBe(false);
+
+    // Every gesture now gives the same refusal.
+    const gesture = await service.call("move_by", { id: "a", dx: 16, dy: 0 });
+    expect(gesture.isError).toBe(true);
+    expect(textOf(gesture)).toBe(textOf(refused));
 
     await call(service, "canvas_open", { canvas: "conflict" });
     const check = checked(await call(service, "canvas_check", {}));
