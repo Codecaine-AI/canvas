@@ -315,6 +315,26 @@ describe("canvas MCP action log", () => {
     expect(opens).toEqual(["Flow Diagram", "board-b", "v2-flow"]);
   });
 
+  test("an edit in flight with an open logs the board it edited", async () => {
+    const path = logPath();
+    delete process.env.T3CODE_THREAD_ID;
+    const workspace = tempWorkspace();
+    copyFileSync(join(workspace, "canvases", "v2-flow.canvas.json"), join(workspace, "canvases", "board-b.canvas.json"));
+    const client = await connect(workspace);
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-edit-race" } });
+    await Promise.all([
+      client.callTool({ name: "canvas_open", arguments: { canvas: "board-b" } }),
+      client.callTool({ name: "place_sticky", arguments: { id: "race-note", text: "Raced", at: [960, 1600] } }),
+    ]);
+    const edited = ["v2-flow", "board-b"]
+      .filter((id) => readFileSync(join(workspace, "canvases", `${id}.canvas.json`), "utf8").includes("race-note"));
+    expect(edited).toHaveLength(1);
+    const log = openActionLog({ path });
+    cleanups.push(() => log.close());
+    const edit = log.query({ threadId: "thread-edit-race" }).find((record) => record.tool === "place_sticky");
+    expect(edit?.target).toBe(edited[0]);
+  });
+
   test("a failed log write never fails the tool call", async () => {
     process.env.CODECAINE_ACTION_LOG = "/dev/null/blocked/log.sqlite";
     const client = await connect();

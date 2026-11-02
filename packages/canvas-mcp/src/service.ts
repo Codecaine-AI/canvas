@@ -37,7 +37,10 @@ export type CanvasToolContent =
   | { type: "text"; text: string }
   | { type: "image"; data: string; mimeType: string };
 
-/** One MCP tool result, shaped for `tools/call`. `_meta.canvasId` names the board a successful open or create landed on. */
+/**
+ * One MCP tool result, shaped for `tools/call`. `_meta.canvasId` names the board the call acted on:
+ * the one a successful open or create landed on, or the open board an edit or check ran against.
+ */
 export interface CanvasToolResult {
   [key: string]: unknown;
   content: CanvasToolContent[];
@@ -414,11 +417,14 @@ export function createCanvasService(options: CanvasServiceOptions) {
   function checkCanvas(): CanvasToolResult {
     if (!active) return text(NO_ACTIVE_CANVAS, true);
     const result = checkCanvasFile(active, `${active.canvasId} · ${shownPath(active.canvasPath)}`);
-    return toolResult([
-      { type: "text", text: result.text },
-      ...(result.pngs ?? []).map((png) =>
-        ({ type: "image" as const, data: png.toString("base64"), mimeType: "image/png" })),
-    ], result.isError);
+    return {
+      ...toolResult([
+        { type: "text", text: result.text },
+        ...(result.pngs ?? []).map((png) =>
+          ({ type: "image" as const, data: png.toString("base64"), mimeType: "image/png" })),
+      ], result.isError),
+      _meta: { canvasId: active.canvasId },
+    };
   }
 
   function guidance(args: Record<string, unknown>): CanvasToolResult {
@@ -449,11 +455,13 @@ export function createCanvasService(options: CanvasServiceOptions) {
   }
 
   async function toolkit(name: string, args: Record<string, unknown>): Promise<CanvasToolResult> {
-    if (!active) return text(NO_ACTIVE_CANVAS, true);
-    const result = await callToolkitTool(active, name, args);
+    // The board this edit runs on: a canvas_open in flight can replace `active` during the await.
+    const file = active;
+    if (!file) return text(NO_ACTIVE_CANVAS, true);
+    const result = await callToolkitTool(file, name, args);
     const lines = [result.text];
     if (result.persisted?.written) {
-      lines.push(`SAVED · ${shownPath(active.canvasPath)}`);
+      lines.push(`SAVED · ${shownPath(file.canvasPath)}`);
       if (result.persisted.residual > 0) {
         lines.push(
           `NOTE · the saved file differs from the draft by ${result.persisted.residual} patch op(s) the canvas reducer derived; call canvas_open to re-read the board as saved.`,
@@ -464,7 +472,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
     for (const png of result.pngs ?? []) {
       content.push({ type: "image", data: png.toString("base64"), mimeType: "image/png" });
     }
-    return toolResult(content, result.isError);
+    return { ...toolResult(content, result.isError), _meta: { canvasId: file.canvasId } };
   }
 
   return {

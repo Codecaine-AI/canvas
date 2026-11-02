@@ -23,15 +23,15 @@ export const MCP_INSTRUCTIONS =
   + "Call canvas_guidance for the diagram design standards, one topic at a time, before laying out or restructuring a board.";
 
 /**
- * The target a call acted on: the board a successful open or create names in `_meta.canvasId`,
- * the requested id or path when the open or create was refused, the board that was active when
- * an edit started, or "-" when the call has no board. Calls can interleave, so nothing here reads
- * the active board after the call.
+ * The target a call acted on: the board the result names in `_meta.canvasId` (a successful open
+ * or create, or an edit or check), the requested id or path when the open or create was refused,
+ * the board that was active when a failed edit started, or "-" when the call has no board. Calls
+ * can interleave, so nothing here reads the active board after the call.
  */
 function targetOf(name: string, args: unknown, result: CanvasToolResult, activeBefore: string | undefined): string {
   if (name === "canvas_list" || name === "canvas_guidance") return "-";
+  if (result._meta?.canvasId) return result._meta.canvasId;
   if (name === "canvas_open" || name === "canvas_create") {
-    if (result._meta?.canvasId) return result._meta.canvasId;
     const raw = (args as { canvas?: unknown })?.canvas;
     return typeof raw === "string" && raw.trim() ? raw.trim() : "-";
   }
