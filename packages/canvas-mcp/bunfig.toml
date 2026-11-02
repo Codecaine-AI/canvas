@@ -1,5 +1,6 @@
 [test]
 # Bun reads only $cwd/bunfig.toml: mirror the canvas root's preload so
-# `bun test` from this package measures text like the root run (happy-dom
+# `bun test` from this package isolates the action log and measures text like
+# the root run (action-log temp path, happy-dom
 # globals, then text-measure's exact HarfBuzz backend).
-preload = ["../../happydom.ts", "../../text-measure-preload.ts"]
+preload = ["../../action-log-preload.ts", "../../happydom.ts", "../../text-measure-preload.ts"]
