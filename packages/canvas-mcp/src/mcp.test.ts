@@ -6,7 +6,7 @@
  */
 import { afterEach, describe, expect, test } from "bun:test";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import { getDefaultEnvironment, StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -20,6 +20,8 @@ import { jsonSchema } from "./service";
 
 const REPO_CANVASES = join(import.meta.dir, "..", "..", "..", "canvases");
 const CLI = join(import.meta.dir, "cli.ts");
+// A stdio server gets only the SDK's default env, so hand it the preload's temp action log.
+const STDIO_ENV = { ...getDefaultEnvironment(), CODECAINE_ACTION_LOG: process.env.CODECAINE_ACTION_LOG! };
 
 const cleanups: Array<() => Promise<void> | void> = [];
 afterEach(async () => {
@@ -115,6 +117,7 @@ describe("canvas MCP server", () => {
       args: [CLI, "mcp", "--workspace", workspace],
       cwd: workspace,
       stderr: "pipe",
+      env: STDIO_ENV,
     }));
     cleanups.push(() => client.close());
 
@@ -157,6 +160,7 @@ describe("canvas MCP server", () => {
         args: [CLI, "mcp", "--workspace", workspace, "--canvases", boards],
         cwd,
         stderr: "pipe",
+        env: STDIO_ENV,
       }));
       cleanups.push(() => client.close());
       return async (canvas: string) => {
@@ -198,6 +202,7 @@ describe("canvas MCP server", () => {
       args: [CLI, "mcp", "--workspace", workspace],
       cwd: workspace,
       stderr: "pipe",
+      env: STDIO_ENV,
     }));
     cleanups.push(() => client.close());
     // Both harnesses show structuredContent instead of the text blocks when a
