@@ -29,7 +29,7 @@ import {
   formatBoardEdgesDigest,
   formatBoardObjectsDigest,
 } from "../../../../board/digest";
-import { diagnosticLines, sessionDiagnostics } from "../../../../board/lints/run";
+import { diagnosticLines, sessionDiagnostics } from "../../../../../../canvas/src/board/lints/run";
 import { boardDiffBlock } from "../../../../service/session/perception/perception";
 import type { LayoutSession } from "../../../../service/session/store";
 

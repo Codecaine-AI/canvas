@@ -62,7 +62,7 @@ import {
   type CanvasAlignEdge,
 } from "../../../../../../canvas/src/state/geometry";
 
-import { textFitReport } from "../../../../board/text-fit";
+import { textFitReport } from "../../../../../../canvas/src/board/text-fit";
 import { applyOperationToDraft, resolveSizeLike } from "../../apply-ops";
 import { snapCoordinate, snapGap, snapPoint, snapSize } from "../grid";
 import type { OpContext, OpOutcome } from "./op-context";

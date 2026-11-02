@@ -20,25 +20,11 @@
         "type": "design"
       },
       "children": [
-        "b-r3-title-1",
         "b-r3-section-trim-opening",
         "b-r3-card-2",
         "b-r3-body-3",
         "b-r3-evidence-4"
       ]
-    },
-    "b-r3-title-1": {
-      "id": "b-r3-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "R3 — Section trim"
-        }
-      ],
-      "children": []
     },
     "b-r3-section-trim-opening": {
       "id": "b-r3-section-trim-opening",
@@ -106,7 +92,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/containment.ts"
+              "path": "packages/canvas/src/board/lints/rules/containment.ts"
             }
           }
         },

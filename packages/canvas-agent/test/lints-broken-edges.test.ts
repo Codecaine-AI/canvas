@@ -3,8 +3,8 @@ import { describe, expect, test } from "bun:test";
 import {
   pathBoxViolationIds,
   routedPolyline,
-} from "../src/board/lints/geometry";
-import { rule as brokenEdges } from "../src/board/lints/rules/broken-edges";
+} from "../../canvas/src/board/lints/geometry";
+import { rule as brokenEdges } from "../../canvas/src/board/lints/rules/broken-edges";
 import { box, connect, makeDocument } from "./synthetic";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
 

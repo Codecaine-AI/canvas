@@ -12,7 +12,7 @@ import { join } from "node:path";
 
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 
-import { LAYOUT_RULES } from "../src/board/lints";
+import { LAYOUT_RULES } from "../../canvas/src/board/lints";
 
 const CORPUS_DIR = join(import.meta.dir, "..", "..", "..", "canvases");
 

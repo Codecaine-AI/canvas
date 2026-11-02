@@ -7,8 +7,8 @@ import {
   kindOf,
   pageFrameOf,
   siblingsOf,
-} from "../src/board/helpers";
-import { formatDiagnostics, runDiagnostics } from "../src/board/lints/run";
+} from "../../canvas/src/board/helpers";
+import { formatDiagnostics, runDiagnostics } from "../../canvas/src/board/lints/run";
 import { FIGJAM_CONTEXT } from "./helpers";
 import {
   DIAGNOSTICS_TEXT_SNAPSHOTS,

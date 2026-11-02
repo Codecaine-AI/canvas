@@ -10,7 +10,7 @@
  */
 import { Type } from "@mariozechner/pi-ai";
 
-import { formatDiagnostics, sessionDiagnostics } from "../../../../board/lints/run";
+import { formatDiagnostics, sessionDiagnostics } from "../../../../../../canvas/src/board/lints/run";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { SessionEventSink } from "../../perception/perception";
 import type { LayoutSession } from "../../store";

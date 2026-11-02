@@ -56,7 +56,7 @@ import type {
 
 import { connectorBendSegments } from "../../../canvas/src/connectors/bend-editing.ts";
 
-import { routedPolyline, type Point } from "./lints/geometry.ts";
+import { routedPolyline, type Point } from "../../../canvas/src/board/lints/geometry.ts";
 
 /** Same tolerance `bend-editing.ts` uses to call a segment axis-aligned. */
 const AXIS_EPSILON = 0.01;

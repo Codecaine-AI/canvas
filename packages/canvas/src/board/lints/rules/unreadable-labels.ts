@@ -28,7 +28,7 @@ import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
+} from "../../../state/schema";
 import type { LayoutRule, LintContext, Severity } from "../types";
 
 /** The axis the edge runs along: whichever separates the endpoints more. */

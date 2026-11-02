@@ -112,13 +112,13 @@ describe("place gestures", () => {
     expect(result.isError).toBeUndefined();
     // The model never sees {type:"icon", icon}; the folded name is what the
     // summary reports, both directions of the mapping agreeing.
-    expect(result.text).toContain("APPLIED · place_shape store memory 400,400 120×120");
+    expect(result.text).toContain("APPLIED · place_shape store memory 400,400 300×120");
     expect(session.draft.objects.find((object) => object.id === "store")).toMatchObject({
       type: "icon",
       icon: "memory",
       // The registry's preferred color for memory lands with the placement.
       color: "blue",
-      geometry: { x: 400, y: 400, width: 120, height: 120 },
+      geometry: { x: 400, y: 400, width: 300, height: 120 },
     });
   });
 

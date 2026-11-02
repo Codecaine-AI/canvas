@@ -5,11 +5,11 @@
 import { objectPreferenceFor } from "../../../../../canvas/src/objects/registry";
 
 import { fromDocumentFields } from "../../../service/session/tools/placeable-types";
-import { childrenOf, kindOf } from "../../helpers";
-import { rectOf } from "../geometry";
+import { childrenOf, kindOf } from "../../../../../canvas/src/board/helpers";
+import { rectOf } from "../../../../../canvas/src/board/lints/geometry";
 
 import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
-import type { LayoutRule } from "../types";
+import type { LayoutRule } from "../../../../../canvas/src/board/lints/types";
 
 /** The neutral hues — the board's default dress, never a wash collision. */
 const NEUTRAL_COLORS: ReadonlySet<string> = new Set(["gray", "white"]);

@@ -683,7 +683,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/text-fit.ts"
+              "path": "packages/canvas/src/board/text-fit.ts"
             }
           }
         },
@@ -2073,7 +2073,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/index.ts"
+              "path": "packages/canvas/src/board/lints/index.ts"
             }
           }
         },

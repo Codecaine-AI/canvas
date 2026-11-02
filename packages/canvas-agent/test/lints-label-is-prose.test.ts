@@ -6,9 +6,9 @@ import type {
   InteractiveCanvasObjectType,
 } from "@codecaine-ai/canvas/schema";
 
-import { runDiagnostics } from "../src/board/lints/run";
-import type { LintContext } from "../src/board/lints/types";
-import { rule as labelIsProse } from "../src/board/lints/rules/label-is-prose";
+import { runDiagnostics } from "../../canvas/src/board/lints/run";
+import type { LintContext } from "../../canvas/src/board/lints/types";
+import { rule as labelIsProse } from "../../canvas/src/board/lints/rules/label-is-prose";
 import { box, connect, makeDocument } from "./synthetic";
 
 /**

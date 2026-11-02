@@ -64,6 +64,9 @@ function toGrid(value: number): number {
   return Math.max(AGENT_GRID, Math.round(value / AGENT_GRID) * AGENT_GRID);
 }
 
+/** A placed icon's width: room for a one-fact detail under the glyph. */
+const ICON_WIDTH = 300;
+
 /**
  * One row per kind. Each comment names its source and any grid rounding.
  */
@@ -99,12 +102,14 @@ export const CREATION_DEFAULTS: Readonly<Record<CreationKind, CreationDefault>> 
     color: FIRST_USE_COLORS.section,
   },
 
-  // Icons — OBJECT_TYPE_DEFAULTS.icon 120×120, already ×20, unchanged. An
-  // icon is a glyph with its text captioned beneath, not a labelled box, so
-  // the node target does not apply: it stays square and small.
+  // Icons — 300 wide, OBJECT_TYPE_DEFAULTS.icon's 120 tall. An icon is a
+  // glyph with its text captioned beneath, and the caption band is as wide as
+  // the box (at least 200px), so the UI's 120×120 cut any detail past about 23
+  // characters. 300 holds about 35, the width the research board's icons were
+  // resized to before they linted clean. The glyph keeps its own size, centered.
   icon: {
     size: {
-      width: toGrid(OBJECT_TYPE_DEFAULTS.icon.geometry.width),
+      width: ICON_WIDTH,
       height: toGrid(OBJECT_TYPE_DEFAULTS.icon.geometry.height),
     },
     // Icons read the "shape" color bucket in the canvas package

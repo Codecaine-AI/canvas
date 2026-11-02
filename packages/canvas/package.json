@@ -17,6 +17,7 @@
     "./schema": "./src/state/schema.ts",
     "./actions": "./src/state/actions.ts",
     "./agent-schema": "./src/agent-schema.ts",
+    "./lints": "./src/lints.ts",
     "./geometry": "./src/state/geometry.ts",
     "./ui/cn": "./src/ui/cn.ts",
     "./ui/icons": "./src/ui/icons/index.ts",

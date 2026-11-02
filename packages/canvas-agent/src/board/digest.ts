@@ -23,7 +23,7 @@ import { OBJECT_TYPE_DEFAULTS } from "../../../canvas/src/state/schema/object-de
 
 import { fromDocumentFields } from "../service/session/tools/placeable-types";
 import { formatNumberedRoute } from "./edge-route";
-import { kindOf, pageFrameOf } from "./helpers";
+import { kindOf, pageFrameOf } from "../../../canvas/src/board/helpers";
 
 /**
  * The digest itself carries bare values — no legend lines. Its grammar is

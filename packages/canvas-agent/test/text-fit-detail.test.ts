@@ -3,8 +3,8 @@ import { describe, expect, test } from "bun:test";
 import { canvasThemePreset, normalizeCanvasStyle, type CanvasStyle } from "@codecaine-ai/canvas/style";
 import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
 
-import { textFitReport } from "../src/board/text-fit";
-import { rule as clippedText } from "../src/board/lints/rules/clipped-text";
+import { textFitReport } from "../../canvas/src/board/text-fit";
+import { rule as clippedText } from "../../canvas/src/board/lints/rules/clipped-text";
 import { renderDocumentToSvg } from "../../canvas/src/render/static-svg.ts";
 import { makeDocument } from "./synthetic";
 import { FIGJAM_CANVAS_STYLE } from "./helpers";

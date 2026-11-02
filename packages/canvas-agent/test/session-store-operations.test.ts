@@ -16,7 +16,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { formatBoardDigest } from "../src/board/digest";
-import { pageFrameOf } from "../src/board/helpers";
+import { pageFrameOf } from "../../canvas/src/board/helpers";
 import { draftWithPageFrame, wreckedDocumentError } from "../src/service/session";
 import { look, makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";

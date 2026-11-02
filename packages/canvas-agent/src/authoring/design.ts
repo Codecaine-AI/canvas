@@ -1,4 +1,4 @@
-import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../board/text-rules";
+import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../../canvas/src/board/text-rules";
 import { renderVisualPatterns } from "./visual-patterns";
 
 /** Shared diagram-design knowledge. No agent state, tools, or model runtime. */

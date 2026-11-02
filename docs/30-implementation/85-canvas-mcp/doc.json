@@ -43,6 +43,13 @@
         "b-cmcp-workspace-env-32",
         "b-cmcp-workspace-cwd-33",
         "b-cmcp-workspace-fallback-34",
+        "b-cmcp-boards-lede-60",
+        "b-cmcp-boards-project-61",
+        "b-cmcp-boards-workspace-66",
+        "b-cmcp-boards-flag-62",
+        "b-cmcp-boards-repo-63",
+        "b-cmcp-boards-id-64",
+        "b-cmcp-boards-toml-65",
         "b-cmcp-install-heading-35",
         "b-cmcp-install-lede-36",
         "b-cmcp-install-claude-37",
@@ -207,7 +214,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The server lists 34 tools: three of its own, then the 31 toolkit tools in the agent's registration order. The toolkit is the agent's 25 operation tools plus six of its seven workflow tools. "
+          "insert": "The server lists 36 tools: five of its own, then the 31 toolkit tools in the agent's registration order. The toolkit is the agent's 25 operation tools plus six of its seven workflow tools. "
         },
         {
           "insert": "finalize",
@@ -241,7 +248,19 @@
               }
             ],
             "Server",
-            "Lists the workspace canvases with id, title, and object count, and marks the open one."
+            "Lists the boards folder canvases with id, title, and object count, and marks the open one."
+          ],
+          [
+            [
+              {
+                "insert": "canvas_create",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Server",
+            "Creates a new board file in the boards folder and opens it as the active board."
           ],
           [
             [
@@ -255,7 +274,16 @@
             "Server",
             [
               {
-                "insert": "Opens one canvas as the active board and re-reads the workspace style. Returns the file hash, a "
+                "insert": "Opens one canvas as the active board by id or by "
+              },
+              {
+                "insert": ".canvas.json",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " file path, and re-reads the workspace style. Returns the file hash, a "
               },
               {
                 "insert": "STYLE",
@@ -279,6 +307,18 @@
             ],
             "Server",
             "Lists the authoring topics, or returns one topic in full."
+          ],
+          [
+            [
+              {
+                "insert": "canvas_check",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Server",
+            "Runs every lint on the active board and returns a PNG of the whole board. Call it before you call a board done."
           ],
           [
             [
@@ -1424,16 +1464,16 @@
       "props": {},
       "text": [
         {
-          "insert": "The workspace is the project whose "
+          "insert": "The server resolves three roots at startup, and each root has one role. The first is the containment root, called the workspace. "
         },
         {
-          "insert": "canvases/",
+          "insert": "canvas_open",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " directory the tools edit. "
+          "insert": " opens no board outside it. "
         },
         {
           "insert": "cli.ts",
@@ -1510,7 +1550,133 @@
       "props": {},
       "text": [
         {
-          "insert": "If the resolved directory has no "
+          "insert": "The second is the project root. It is "
+        },
+        {
+          "insert": "CLAUDE_PROJECT_DIR",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", else the current working directory. A relative board path resolves against the project root first. If that file does not exist, the path resolves against the workspace, and either result must lie inside the workspace."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-boards-lede-60": {
+      "id": "b-cmcp-boards-lede-60",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The third is the boards folder. It holds the standalone boards that canvas ids, "
+        },
+        {
+          "insert": "canvas_list",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "canvas_create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " use. "
+        },
+        {
+          "insert": "cli.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " takes the first match in this order, and the first two folders count only if they exist:"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-boards-project-61": {
+      "id": "b-cmcp-boards-project-61",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "<project>/canvases",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " folder."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-boards-workspace-66": {
+      "id": "b-cmcp-boards-workspace-66",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "<workspace>/canvases",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " folder."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-boards-flag-62": {
+      "id": "b-cmcp-boards-flag-62",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The "
+        },
+        {
+          "insert": "--canvases <dir>",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " argument."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-boards-repo-63": {
+      "id": "b-cmcp-boards-repo-63",
+      "type": "list-item",
+      "props": {
+        "ordered": true
+      },
+      "text": [
+        {
+          "insert": "The "
         },
         {
           "insert": "canvases/",
@@ -1519,7 +1685,18 @@
           }
         },
         {
-          "insert": " folder, the server falls back to the canvas repository that contains the package. A user-scoped install therefore always has boards to edit, and those boards are this repository's own when the open project has none. A canvas id is the file name without "
+          "insert": " folder of the canvas repository that contains the package."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-boards-id-64": {
+      "id": "b-cmcp-boards-id-64",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A canvas id is the file name without "
         },
         {
           "insert": ".canvas.json",
@@ -1537,7 +1714,63 @@
           }
         },
         {
-          "insert": "."
+          "insert": ". An id opens if its real path is inside the boards folder or the workspace."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-boards-toml-65": {
+      "id": "b-cmcp-boards-toml-65",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The agent-config "
+        },
+        {
+          "insert": "servers.toml",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " starts the server with "
+        },
+        {
+          "insert": "--workspace ~/workspace --canvases ~/workspace/codebases/codecaine/core/canvas/canvases",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " for every session. A session in the canvas project opens "
+        },
+        {
+          "insert": "canvases/v2-flow.canvas.json",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and the id "
+        },
+        {
+          "insert": "v2-flow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " from the project. A session elsewhere under "
+        },
+        {
+          "insert": "~/workspace",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " opens knowledge-base page sidecars and the canvas repository boards."
         }
       ],
       "children": []
@@ -1717,7 +1950,7 @@
           [
             "Tools",
             "32: the 25 gestures and 7 workflow tools.",
-            "34: 3 server tools, the 25 gestures, and 6 workflow tools.",
+            "36: 5 server tools, the 25 gestures, and 6 workflow tools.",
             [
               {
                 "insert": "The "
@@ -2147,7 +2380,7 @@
           }
         },
         {
-          "insert": " is the command entry and resolves the workspace."
+          "insert": " is the command entry and resolves the workspace and the boards folder."
         }
       ],
       "children": []

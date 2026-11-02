@@ -9,7 +9,7 @@ import {
 import { DEFAULT_CANVAS_STYLE } from "@codecaine-ai/canvas/style";
 
 import { buildVocabularyDocument } from "../src/service/session/perception/contact-sheet";
-import { textFitReport } from "../src/board/text-fit";
+import { textFitReport } from "../../canvas/src/board/text-fit";
 import { makeTestSession } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 

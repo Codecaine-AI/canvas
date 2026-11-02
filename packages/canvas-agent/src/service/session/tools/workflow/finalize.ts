@@ -11,13 +11,13 @@ import {
 } from "../../snapshots/user-requests";
 import type { AgentProposal } from "../../../../protocol";
 import { diffDocuments } from "../../../../board/doc-diff";
-import { FINISHING_RULES } from "../../../../board/lints";
+import { FINISHING_RULES } from "../../../../../../canvas/src/board/lints";
 import {
   blockingDiagnostics,
   diagnosticLines,
   formatDiagnostics,
   sessionDiagnostics,
-} from "../../../../board/lints/run";
+} from "../../../../../../canvas/src/board/lints/run";
 import { describePatchOperation } from "../../apply-ops";
 import { scopedDiagnostics } from "../../snapshots/context";
 import type { SessionEventSink } from "../../perception/perception";

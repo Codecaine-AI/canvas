@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { chipFor, CHIP_HEIGHT, chipWidth } from "../src/board/lints/geometry";
+import { chipFor, CHIP_HEIGHT, chipWidth } from "../../canvas/src/board/lints/geometry";
 import { renderDocumentToSvg } from "../../canvas/src/render/static-svg.ts";
 import { box, connect, makeDocument } from "./synthetic";
 import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";

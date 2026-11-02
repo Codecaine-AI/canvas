@@ -12,14 +12,14 @@ import type {
   CanvasGeometry,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
-} from "@codecaine-ai/canvas/schema";
+} from "../state/schema";
 
 import {
   CANVAS_GRID_SIZE,
   GEOMETRY_NORMALIZATION_GRID,
   boundsForGeometries,
-} from "../../../canvas/src/state/geometry";
-import { nextId } from "../../../canvas/src/state/actions/helpers";
+} from "../state/geometry";
+import { nextId } from "../state/actions/helpers";
 
 const PAGE_FRAME_ID = "page-frame";
 const PAGE_FRAME_INSET = 32;

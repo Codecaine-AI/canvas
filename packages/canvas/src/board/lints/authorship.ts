@@ -12,7 +12,7 @@
  * when that field differs from the starting board's value; an unchanged field
  * on a pre-existing object is the person's and is never judged.
  */
-import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasObject } from "../../state/schema";
 
 import type { LintContext } from "./types";
 

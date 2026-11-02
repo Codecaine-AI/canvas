@@ -49,7 +49,14 @@ import {
 } from "@codecaine-ai/canvas/schema";
 
 import { diffDocuments } from "../board/doc-diff";
-import { sessionDiagnostics } from "../board/lints/run";
+import {
+  FINISHING_RULES,
+  diagnosticLines,
+  sessionDiagnostics,
+  type Diagnostic,
+} from "@codecaine-ai/canvas/lints";
+import { rasterizeSvgToPng } from "../service/render";
+import { BOARD_VIEW_WIDTH, renderBoardView } from "../service/session/perception/views";
 import { resolveScope } from "../board/scope";
 import { canvasStyleOverrides } from "@codecaine-ai/canvas/style";
 import { loadCanvasStyle, type CanvasStyle } from "../service/session/canvas-style";
@@ -260,6 +267,93 @@ export function openCanvasFile(
     injectedFrameId: frame?.id ?? null,
     conflicted: false,
   };
+}
+
+/**
+ * Write a new board to `canvasPath` and open it. The board holds only its page
+ * frame, titled like the board, as a board Studio creates does. The write
+ * refuses a file that already exists, so a create never replaces a board.
+ */
+export function createCanvasFile(canvasPath: string, title: string): CanvasFileSession {
+  const validation = validateInteractiveCanvasDocument(draftWithPageFrame({
+    schemaVersion: 1,
+    id: canvasIdOf(canvasPath),
+    title,
+    mode: "diagram",
+    viewport: { x: 0, y: 0, zoom: 1 },
+    objects: [],
+    connections: [],
+    annotations: [],
+  }));
+  if (!validation.ok) {
+    const issues = validation.issues.slice(0, 5).map((issue) => `${issue.path}: ${issue.message}`);
+    throw new Error(`The new board failed canvas validation: ${issues.join("; ")}`);
+  }
+  writeFileSync(canvasPath, `${JSON.stringify(validation.document, null, 2)}\n`, { flag: "wx" });
+  return openCanvasFile(canvasPath);
+}
+
+const SEVERITY_GROUPS: ReadonlyArray<[Diagnostic["severity"], string]> = [
+  ["error", "ERRORS"],
+  ["warning", "WARNINGS"],
+  ["note", "NOTES"],
+];
+
+function plural(count: number, one: string, many = `${one}s`): string {
+  return `${count} ${count === 1 ? one : many}`;
+}
+
+/**
+ * The whole-board check: every lint, the finishing rules included, grouped
+ * by severity, the node and edge counts, and one render of the board's full
+ * painted bounds. `look` frames one region; this is the one view of all of it.
+ * Counts and the render read the board as saved, so a page frame injected at
+ * open is not counted. The lints read the draft, as every edit's LINTS line does.
+ * A conflicted session is refused as every gesture is: its draft holds an
+ * edit the file never received. A file saved elsewhere since the session
+ * last read or wrote it conflicts the session here too, so the check never
+ * approves a board the file no longer holds.
+ */
+export function checkCanvasFile(file: CanvasFileSession, label: string): LayoutToolRenderResult {
+  if (!file.conflicted && sha256(readFileSync(file.canvasPath)) !== file.diskHash) file.conflicted = true;
+  if (file.conflicted) {
+    return { isError: true, text: new CanvasFileConflictError(file.canvasPath).message };
+  }
+  const diagnostics = sessionDiagnostics(file.session, FINISHING_RULES);
+  const board = draftForDisk(file);
+  const sections = board.objects.filter((object) => object.type === "section").length;
+  const stickies = board.objects.filter((object) => object.type === "sticky").length;
+  const nodes = board.objects.length - sections - stickies;
+  const groups = SEVERITY_GROUPS.map(([severity, name]) =>
+    ({ severity, name, found: diagnostics.filter((diagnostic) => diagnostic.severity === severity) }));
+
+  const lines = [
+    `CHECKED · ${label} · ${plural(nodes, "node")} · ${plural(board.connections.length, "edge")}`
+    + ` · ${plural(sections, "section")} · ${plural(stickies, "sticky", "stickies")}`,
+  ];
+  const pngs: Buffer[] = [];
+  try {
+    const view = renderBoardView(board, { width: BOARD_VIEW_WIDTH, canvasStyle: file.session.canvasStyle });
+    const png = rasterizeSvgToPng(view.svg);
+    pngs.push(png.png);
+    const { x, y, width, height } = view.camera;
+    lines.push(
+      `RENDER · whole board · ${png.width}×${png.height} px`
+      + ` · bounds x ${Math.floor(x)}..${Math.ceil(x + width)} · y ${Math.floor(y)}..${Math.ceil(y + height)}`,
+    );
+  } catch (error) {
+    lines.push(`RENDER · failed · ${error instanceof Error ? error.message : String(error)}`);
+  }
+  lines.push(
+    `LINTS · ${diagnostics.length === 0 ? "clean · " : ""}`
+    + groups.map(({ severity, found }) => plural(found.length, severity)).join(" · "),
+  );
+  for (const { name, found } of groups) {
+    if (found.length === 0) continue;
+    lines.push(`  ${name} (${found.length})`);
+    for (const diagnostic of found) lines.push(...diagnosticLines(diagnostic).map((line) => `    ${line}`));
+  }
+  return { text: lines.join("\n"), pngs };
 }
 
 /**

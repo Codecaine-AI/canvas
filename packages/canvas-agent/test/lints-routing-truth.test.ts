@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { rule as brokenEdges } from "../src/board/lints/rules/broken-edges";
+import { rule as brokenEdges } from "../../canvas/src/board/lints/rules/broken-edges";
 import { routeConnection } from "../../canvas/src/connectors/routing.ts";
 import { box, connect, makeDocument } from "./synthetic";
 import type {

@@ -113,3 +113,4 @@ export type {
   RenderedSvg,
   RenderStaticSvgOptions,
 } from "./render/types";
+export * from "./lints";

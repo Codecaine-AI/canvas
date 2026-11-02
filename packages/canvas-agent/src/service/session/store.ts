@@ -21,8 +21,8 @@ import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
 import { renderDocumentToSvg } from "../../../../canvas/src/render/static-svg";
 
 import { resolveScope, type ScopeResolution } from "../../board/scope";
-import type { Diagnostic } from "../../board/lints";
-import { sessionDiagnostics } from "../../board/lints/run";
+import type { Diagnostic } from "../../../../canvas/src/board/lints";
+import { sessionDiagnostics } from "../../../../canvas/src/board/lints/run";
 import type {
   AcceptAgentSessionResponse,
   AgentProposal,

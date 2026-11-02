@@ -4,7 +4,7 @@
 import { kindOf } from "../../helpers";
 import { axisGap } from "../../measure";
 
-import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../../state/schema";
 import type { LayoutRule } from "../types";
 
 /** Minimum visible separation between sibling node boxes, on either axis.

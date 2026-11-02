@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { rule as crowding } from "../src/board/lints/rules/crowding";
+import { rule as crowding } from "../../canvas/src/board/lints/rules/crowding";
 import { box, makeDocument } from "./synthetic";
 
 describe("crowding lint", () => {

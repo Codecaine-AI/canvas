@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { rule as containment } from "../src/board/lints/rules/containment";
+import { rule as containment } from "../../canvas/src/board/lints/rules/containment";
 import { box, makeDocument } from "./synthetic";
 
 describe("containment lint (moved from rules/ unchanged)", () => {

@@ -18,7 +18,7 @@ import { describe, expect, test } from "bun:test";
 import type { InteractiveCanvasObject } from "@codecaine-ai/canvas/schema";
 
 import { diffDocuments } from "../src/board/doc-diff";
-import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../src/board/text-rules";
+import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../canvas/src/board/text-rules";
 import { findOperationTool } from "../src/service/session/tools/operations";
 import { boardDiffBlock, documentDelta } from "../src/service/session/perception/perception";
 import { makeTestSession, runOp } from "./helpers";

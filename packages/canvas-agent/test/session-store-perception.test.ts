@@ -9,7 +9,7 @@ import {
   toolFinalize,
 } from "../src/service/session";
 import { diffDocuments } from "../src/board/doc-diff";
-import { formatDiagnostics, runDiagnostics } from "../src/board/lints/run";
+import { formatDiagnostics, runDiagnostics } from "../../canvas/src/board/lints/run";
 import { look, makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 

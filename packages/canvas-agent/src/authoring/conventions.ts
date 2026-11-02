@@ -1,4 +1,4 @@
-import { DETAIL_MAX_CHARS, NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../board/text-rules";
+import { DETAIL_MAX_CHARS, NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../../../canvas/src/board/text-rules";
 import { formatCraftTargets } from "../catalog/layout-editor/context/style-guide/craft-targets";
 import { creationDefaultFor } from "../service/session/tools/creation-defaults";
 import { AGENT_GRID } from "../service/session/tools/grid";

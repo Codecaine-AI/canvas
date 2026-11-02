@@ -31,18 +31,18 @@ import { formatRequestsBlock, targetText } from "../snapshots/user-requests";
 import { formatBoardDigest } from "../../../board/digest";
 import { diffDocuments } from "../../../board/doc-diff";
 import { formatNumberedSegments, numberedSegmentsForPolyline } from "../../../board/edge-route";
-import { kindOf } from "../../../board/helpers";
-import type { Diagnostic } from "../../../board/lints";
-import { pathBoxViolationIds } from "../../../board/lints/geometry";
+import { kindOf } from "../../../../../canvas/src/board/helpers";
+import type { Diagnostic } from "../../../../../canvas/src/board/lints";
+import { pathBoxViolationIds } from "../../../../../canvas/src/board/lints/geometry";
 import {
   diagnosticLines,
   formatDiagnostics,
   runDiagnostics,
   sessionDiagnostics,
   sessionLintContext,
-} from "../../../board/lints/run";
-import { formatRegionMeasures, measureRegion } from "../../../board/measure";
-import type { Rect } from "../../../board/types";
+} from "../../../../../canvas/src/board/lints/run";
+import { formatRegionMeasures, measureRegion } from "../../../../../canvas/src/board/measure";
+import type { Rect } from "../../../../../canvas/src/board/types";
 import type { AgentSessionEvent } from "../../../protocol";
 import { rasterizeSvgToPng } from "../../render";
 import type { LayoutToolRenderResult } from "../tools/runtime";

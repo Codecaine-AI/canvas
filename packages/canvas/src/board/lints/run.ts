@@ -13,8 +13,8 @@
  * Re-running on an unchanged board yields identical ids; ids reset whenever
  * the draft changes and the model tracks them turn to turn.
  */
-import { LAYOUT_RULES } from "./index";
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import { LAYOUT_RULES } from ".";
+import type { InteractiveCanvasDocument } from "../../state/schema";
 import { draftWithPageFrame } from "../page-frame";
 import type { Diagnostic, LayoutRule, LintContext } from "./types";
 

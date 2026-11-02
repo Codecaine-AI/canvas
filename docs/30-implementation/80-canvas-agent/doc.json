@@ -1300,7 +1300,7 @@
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/text-rules.ts",
+              "path": "packages/canvas/src/board/text-rules.ts",
               "label": "board/text-rules.ts"
             }
           }
@@ -1765,7 +1765,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/text-fit.ts",
+              "path": "packages/canvas/src/board/text-fit.ts",
               "label": "board/text-fit.ts"
             }
           }
@@ -1896,7 +1896,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/run.ts",
+              "path": "packages/canvas/src/board/lints/run.ts",
               "label": "board/lints/run.ts"
             }
           }
@@ -2052,7 +2052,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints",
+              "path": "packages/canvas/src/board/lints",
               "label": "board/lints/"
             }
           }

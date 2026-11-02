@@ -5,7 +5,7 @@
  * boot-time contact sheet is the visual reference for what each type looks
  * like.
  */
-import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../../../../board/text-rules";
+import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../../../../../../canvas/src/board/text-rules";
 import type { KindSpec } from "./spec";
 
 export const OBJECTS_SPEC: KindSpec = {

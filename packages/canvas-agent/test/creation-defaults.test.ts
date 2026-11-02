@@ -31,8 +31,8 @@ describe("creation defaults (D5)", () => {
       sticky: { size: { width: 180, height: 120 }, color: "yellow" },
       // UI default 480×360, already on the grid
       section: { size: { width: 480, height: 360 }, color: "gray" },
-      // UI default 120×120, already on the grid
-      icon: { size: { width: 120, height: 120 }, color: "gray" },
+      // 300 wide so a one-fact detail fits its caption, the UI's 120 tall
+      icon: { size: { width: 300, height: 120 }, color: "gray" },
     });
   });
 

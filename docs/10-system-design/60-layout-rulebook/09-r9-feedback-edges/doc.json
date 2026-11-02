@@ -21,25 +21,11 @@
         "type": "design"
       },
       "children": [
-        "b-r9-title-1",
         "b-r9-feedback-edges-opening",
         "b-r9-card-2",
         "b-r9-body-3",
         "b-r9-evidence-4"
       ]
-    },
-    "b-r9-title-1": {
-      "id": "b-r9-title-1",
-      "type": "heading",
-      "props": {
-        "level": 1
-      },
-      "text": [
-        {
-          "insert": "R9 — Feedback edges and detours"
-        }
-      ],
-      "children": []
     },
     "b-r9-feedback-edges-opening": {
       "id": "b-r9-feedback-edges-opening",
@@ -106,7 +92,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/broken-edges.ts",
+              "path": "packages/canvas/src/board/lints/rules/broken-edges.ts",
               "symbol": "rule"
             }
           }
@@ -120,7 +106,7 @@
             "code": true,
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/board/lints/rules/covered-content.ts",
+              "path": "packages/canvas/src/board/lints/rules/covered-content.ts",
               "symbol": "rule"
             }
           }

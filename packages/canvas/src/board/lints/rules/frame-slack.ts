@@ -7,10 +7,10 @@
  * side are unused. The page frame, empty frames, and overflow are deliberately
  * out of scope.
  */
-import { sectionFitGeometry } from "../../../../../canvas/src/state/geometry";
+import { sectionFitGeometry } from "../../../state/geometry";
 import { kindOf, pageFrameOf } from "../../helpers";
 
-import type { InteractiveCanvasDocument } from "@codecaine-ai/canvas/schema";
+import type { InteractiveCanvasDocument } from "../../../state/schema";
 import type { LayoutRule } from "../types";
 
 /** Minimum area a fit must reclaim — two thirds makes the slack unmistakable. */
