@@ -140,7 +140,7 @@ export const rule: LayoutRule = {
               at: [chip.edge.id, node.id],
               where: chip.rect,
               message: `label "${chip.label}" chip on ${chip.edge.id} covers ${node.id}${chipNoteClause(chip, severity)}`,
-              suggestion: `route ${chip.edge.id} around ${node.id} or move the label with a waypoint`,
+              suggestion: `move_label ${chip.edge.id} along its wire to a stretch clear of ${node.id}, or move_to ${node.id} clear of the wire`,
             }
             : {
               rule: "covered-content",
@@ -174,7 +174,7 @@ export const rule: LayoutRule = {
               at: [a.edge.id, b.edge.id],
               where: a.rect,
               message: `label "${a.label}" chip on ${a.edge.id} overlaps label "${b.label}" chip on ${b.edge.id}${pairNoteClause(a, b, severity)}`,
-              suggestion: "separate the two edges (spacing or waypoints) so both labels read",
+              suggestion: "move_label one chip along its wire so the two do not meet, or move_to a node so the two edges part",
             }
             : {
               rule: "covered-content",
@@ -212,7 +212,7 @@ export const rule: LayoutRule = {
               at: [chip.edge.id, edge.id],
               where: chip.rect,
               message: `label "${chip.label}" chip on ${chip.edge.id} lies on ${edge.id}'s path for ${Math.round(rawRun)}px${chipNoteClause(chip, severity)}`,
-              suggestion: `move the label with a waypoint or reroute ${edge.id} so the chip owns its wire`,
+              suggestion: `move_label ${chip.edge.id} along its wire to a stretch ${edge.id} does not share, or move_to a node so the two wires part`,
             }
             : {
               rule: "covered-content",
