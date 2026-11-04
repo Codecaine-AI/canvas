@@ -443,6 +443,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
           `GUIDANCE · ${topics.length} topics · ${snapshot.snapshotId}`,
           ...topics.map((entry) => `  ${entry.id}  ${JSON.stringify(entry.title)}  ~${entry.approxTokens} tokens`),
           "Call canvas_guidance { \"topic\": \"<id>\" } to read one.",
+          "Read diagram_design before the first place_section: it holds the layout rules canvas_check enforces (wire-detour, unreadable-labels, board-too-large).",
         ].join("\n"),
       );
     }

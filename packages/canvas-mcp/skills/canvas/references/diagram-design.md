@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 ce0aa8363ff9a4c2fafda19cde2e96cc7bec3ca0a4356abd6a345c7c2d9939c4). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 c1d2914638c64c20d82c9064ef92572ce0b1e69b7eea7ba22edc5b2cfab29622). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -324,6 +324,8 @@
         - Place the target of a return or retry next to its source, in the same section when it belongs there. The wire then runs a short way along the near side of the flow.
         - Put failure ends (a reject, a dead letter, a flag) directly beside or below the step that fails, not across the board.
         - When a return wire must leave its section, place the two sections next to each other. Never route it around a third section.
+        - Before you place the first section, count the wires between each pair of sections. Put the pair with the most wires side by side or one directly above the other, then the next pair, so no wire has a third section between its ends. Five full-width bands stacked down the page put two bands between the top and the bottom one, and every wire between them runs around the board.
+        - wire-detour errors on a wire that runs around or through a section holding neither of its ends, on the drawn route, so a waypoint cannot clear it. Only a move clears it: move_to the node that receives the wire beside the node that sends it, or move_to a section so the two sections touch.
         - If a wire runs more than half the board or crosses a section it does not belong to, move a node. Do not add waypoints.
         - Give every decision and retry all its exits. A retry that can succeed needs its wire back to the main path, and a queue that waits needs its wire out when capacity frees.
         - Draw each failure path to its end, with every step the source requires. A cancel that must stop a stream, abandon tool calls and release a runner needs a wire to each of the three, not one bare node. A failure that the system records and then continues past needs its wire back to the next step.
