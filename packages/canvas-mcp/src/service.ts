@@ -223,7 +223,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     description:
       "Create a new board at canvases/<id>.canvas.json holding only its page frame, and open it as canvas_open does. Refuses an id that already exists. Place, connect, and check it with the other canvas tools. "
       + `Plan the board to be read whole on one screen of about ${FIT_VIEW_PX}px on a side: keep its longer edge at or under ${boardEdgeCapPx()}px, near square, so details and wire labels stay readable. Lay a long run of sections out in rows that grow down, not as one wide band. `
-      + "Build order: place_section for each section, place_shape with text, detail and color for each node, connect every wire, then canvas_check.",
+      + "Build order: place_section for each section, place_shape with text, detail and color for each node, connect every wire, tighten_wires once, then canvas_check.",
     inputSchema: {
       type: "object",
       properties: {

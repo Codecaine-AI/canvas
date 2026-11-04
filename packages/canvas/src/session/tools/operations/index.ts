@@ -3,7 +3,8 @@
  * roster (docs/10-system-design/70-agent-tool-surface), in six groups:
  *
  *   Place     place_section, place_sticky, place_shape, clone, connect
- *   Arrange   move_to, move_by, resize, match_size, align, space_out
+ *   Arrange   move_to, move_by, resize, match_size, align, space_out,
+ *             tighten_wires
  *   Content   update_text, change_color, change_shape
  *   Sections  fit_section, change_section_border, lock, unlock
  *   Edges     style_edge, change_connection, reroute, shift_segment,
@@ -34,6 +35,7 @@ import {
   resize,
   spaceOut,
 } from "./arrange";
+import { tightenWiresTool } from "./tighten-wires";
 import {
   changeColor,
   changeShape,
@@ -98,6 +100,7 @@ export {
   shiftSegment,
   spaceOut,
   styleEdge,
+  tightenWiresTool,
   unlock,
   updateText,
 };
@@ -119,6 +122,9 @@ export const operationTools: readonly OperationTool[] = [
   matchSize,
   align,
   spaceOut,
+  // The seventh Arrange gesture (./tighten-wires.ts): every box slid toward
+  // what it is wired to, kept only where the drawn wires get shorter.
+  tightenWiresTool,
   // Content & appearance (./content.ts). Kind-agnostic: one home for text, one
   // for color, and the folded-type shape swap.
   updateText,

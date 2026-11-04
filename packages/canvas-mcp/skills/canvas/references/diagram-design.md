@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 5d67cd57e71bfe398062c1cc2bc1fc2d71145b631089c9387405d973de349431). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 cab01a59dd401cecc1b88e44da480b5cc528358c2a59a9bcf420717e16c0cc9f). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -286,7 +286,7 @@
         - Keep each node at its default size: 280×100 for a shape, 300×120 for an icon. Do not resize nodes one by one to make a row match. Resize only a node whose text clips, or the board's one visual anchor.
         - Label a wire only when it names a condition, a branch, or a payload the source names. A plain next-step wire needs no label.
         - When two or more nodes share a type and a role, such as three graders or two providers, finish one with its name, detail, and color. Then clone it for each peer with its own text and detail.
-        - Place every section, place every node, then connect. Call canvas_check when every wire is drawn, and fix all its findings in one pass.
+        - Place every section, place every node, then connect. When every wire is drawn, call tighten_wires once: it slides each box toward the boxes it is wired to and keeps only the moves that shorten the wires, so it does the move_to work. Then call canvas_check, and fix all its findings in one pass.
     </build_it_once>
 
     <hierarchy_through_scale>
@@ -328,6 +328,7 @@
         - Before you place the first section, count the wires between each pair of sections. Put the pair with the most wires side by side or one directly above the other, then the next pair, so no wire has a third section between its ends. Five full-width bands stacked down the page put two bands between the top and the bottom one, and every wire between them runs around the board.
         - wire-detour errors on a wire that runs around or through a section holding neither of its ends, on the drawn route, so a waypoint cannot clear it. Only a move clears it: move_to the node that receives the wire beside the node that sends it, or move_to a section so the two sections touch.
         - If a wire runs more than half the board or crosses a section it does not belong to, move a node. Do not add waypoints.
+        - Total wire length is what a viewer reads as layout: the shorter the wires on the whole board, the clearer the flow. tighten_wires reports the length before and after; a board whose wires sum to under ten times its longer edge reads as tidy.
         - Give every decision and retry all its exits. A retry that can succeed needs its wire back to the main path, and a queue that waits needs its wire out when capacity frees.
         - Draw each failure path to its end, with every step the source requires. A cancel that must stop a stream, abandon tool calls and release a runner needs a wire to each of the three, not one bare node. A failure that the system records and then continues past needs its wire back to the next step.
         - Lay out sections in the order the main flow visits them, so the main path runs one way. A row that runs backward against the others reads as a return.
