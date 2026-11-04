@@ -14,3 +14,4 @@ canvases/evals/
 
 # Quality climb rounds: boards, renders, transcripts and scores (machine-local)
 packages/eval-suite/runs/climb/
+packages/eval-suite/runs/climb-high/
