@@ -26,7 +26,9 @@ const CEILING: Record<string, number> = {
   "agent-flows-2": 2,
   // 1 → 2 with the schematic 17.5px names: rect-prompt-code's 34-line XML
   // prompt no longer fits its 800×640 box (29 lines of 21px) — a real clip.
-  "bubba-voice": 2,
+  // 2 → 3 with wire-detour: conn-mark-communicated-to-task-d runs 1575px through
+  // section-task-manager, which holds neither of its ends — a real detour.
+  "bubba-voice": 3,
   "claude-code-researcher": 0,
   "gc-decomp-harness": 13,
   "ink-diagrams": 17,

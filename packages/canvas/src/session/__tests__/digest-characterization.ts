@@ -107,7 +107,7 @@ export const DIAGNOSTICS_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
   E2 covered-content: b1 and b2 overlap by 75% of the smaller box; covers the text center of b1 and b2 (move b2 clear of b1)`,
   "perception-quickfix": `DIAGNOSTICS · 0 errors · 1 warning
   W1 unreadable-labels: label "X" chip on edge (41×30px) bleeds onto alpha and beta: 44px of corridor where the chip needs 73px (open the alpha↔beta corridor to ≥73px so the chip and its 16px margins fit; move one end, and keep every fact the label names)`,
-  "comprehensive-all-blocks": `DIAGNOSTICS · 12 errors · 4 warnings
+  "comprehensive-all-blocks": `DIAGNOSTICS · 16 errors · 4 warnings
   E1 covered-content: label "forward label" chip on edge-forward overlaps label "none label" chip on edge-none (separate the two edges (spacing or waypoints) so both labels read)
   E2 covered-content: label "forward label" chip on edge-forward overlaps label "back label" chip on edge-back (separate the two edges (spacing or waypoints) so both labels read)
   E3 covered-content: label "none label" chip on edge-none overlaps label "back label" chip on edge-back (separate the two edges (spacing or waypoints) so both labels read)
@@ -120,6 +120,10 @@ export const DIAGNOSTICS_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
   E10 covered-content: label "back label" chip on edge-back lies on edge-forward's path for 30px (move the label with a waypoint or reroute edge-forward so the chip owns its wire)
   E11 covered-content: label "back label" chip on edge-back lies on edge-none's path for 30px (move the label with a waypoint or reroute edge-none so the chip owns its wire)
   E12 covered-content: label "back label" chip on edge-back lies on edge-both's path for 30px (move the label with a waypoint or reroute edge-both so the chip owns its wire)
+  E13 wire-detour: edge-forward runs 76px through nested-frame, which holds neither node-a nor node-b (move node-b beside node-a, or move nested-frame out from between section-all and section-all; a waypoint cannot clear this)
+  E14 wire-detour: edge-none runs 76px through nested-frame, which holds neither node-a nor node-b (move node-b beside node-a, or move nested-frame out from between section-all and section-all; a waypoint cannot clear this)
+  E15 wire-detour: edge-back runs 76px through nested-frame, which holds neither node-b nor node-a (move node-a beside node-b, or move nested-frame out from between section-all and section-all; a waypoint cannot clear this)
+  E16 wire-detour: edge-both runs 76px through nested-frame, which holds neither node-b nor node-a (move node-a beside node-b, or move nested-frame out from between section-all and section-all; a waypoint cannot clear this)
   W1 broken-edges: edge-forward and edge-back run anti-parallel between node-a and node-b (use one edge with a both-ends arrow, or offset the two routes)
   W2 broken-edges: edge-forward and edge-both run anti-parallel between node-a and node-b (use one edge with a both-ends arrow, or offset the two routes)
   W3 broken-edges: edge-none and edge-back run anti-parallel between node-a and node-b (use one edge with a both-ends arrow, or offset the two routes)

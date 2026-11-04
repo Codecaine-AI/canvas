@@ -79,6 +79,22 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ),
     },
     {
+      // wire-detour: a wire between the top and bottom bands must run around
+      // the full-width band stacked between them.
+      name: "wire-detour",
+      document: makeDocument(
+        [
+          box("page", 0, 0, 1400, 1300, "section"),
+          { ...box("top", 40, 40, 1320, 360, "section"), parentId: "page" },
+          { ...box("middle", 40, 460, 1320, 360, "section"), parentId: "page" },
+          { ...box("bottom", 40, 880, 1320, 360, "section"), parentId: "page" },
+          { ...box("sender", 600, 160, 184, 96, "process"), parentId: "top" },
+          { ...box("receiver", 600, 1000, 184, 96, "process"), parentId: "bottom" },
+        ],
+        [connect("skips-a-band", "sender", "receiver")],
+      ),
+    },
+    {
       // unreadable-labels: a long chip in a corridor too narrow to draw it.
       name: "unreadable-labels",
       document: makeDocument(
