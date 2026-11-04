@@ -32,6 +32,8 @@ function usage(): string {
     "Usage:",
     "  bun run src/cli.ts judge --run-id <id> [--scenario <name>] [--judge-concurrency 30] [--judge-model <id>] [--judge-base-url <url>] [--judge-effort low]",
     "  bun run src/cli.ts scorecard --run-id <id> [--previous <run-id>]",
+    "  bun run src/cli.ts climb draw --round <n> [--set climb|heldOut|all] [--briefs a,b] [--timeout-min 45] [--settings <claude settings.json>]",
+    "  bun run src/cli.ts climb render --round <n> [--lint-root <canvas checkout>]",
   ].join("\n");
 }
 
@@ -154,6 +156,7 @@ export async function main(argv = process.argv.slice(2)): Promise<void> {
   const [subcommand, ...rest] = argv;
   if (subcommand === "judge") await runJudgeCommand(rest);
   else if (subcommand === "scorecard") await runScorecardStub(rest);
+  else if (subcommand === "climb") await (await import("./climb/command.ts")).runClimb(rest);
   else if (subcommand === "--help" || subcommand === "-h") process.stdout.write(`${usage()}\n`);
   else throw new Error(usage());
 }

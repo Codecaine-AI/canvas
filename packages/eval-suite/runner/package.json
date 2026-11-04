@@ -8,7 +8,8 @@
     "judge": "bun src/cli.ts judge",
     "smoke:judge": "bun scripts/smoke_judges.ts",
     "test": "bun test src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "climb": "bun src/cli.ts climb"
   },
   "dependencies": {
     "@boundaryml/baml": "0.222.0"
