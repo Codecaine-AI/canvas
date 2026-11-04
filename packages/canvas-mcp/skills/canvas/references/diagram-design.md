@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 04f679c1620b8750841ec75965160561e3ba320358c0bef9662b730cb7513406). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 ce0aa8363ff9a4c2fafda19cde2e96cc7bec3ca0a4356abd6a345c7c2d9939c4). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -199,6 +199,16 @@
         - A note never outweighs the diagram. Two or three short notes at the side of the flow is the most a board needs.
     </draw_rules_not_prose>
 
+    <cover_every_requirement>
+        A judge reads the source line by line and looks for each requirement on a node or a wire. A fact only in a note, the board description, or a section subtitle counts as missing.
+
+        - Before you place anything, list every requirement in the source: each component, each field or measure it names, and each behavior with its trigger.
+        - Give each component a node. Put each named field or measure in that node's detail, or on the wire that carries it.
+        - Draw each behavior as a wire from the node that acts to the node it changes, labeled with its trigger. A behavior in a detail line is not drawn.
+        - Every node has a wire in and a wire out, except a start, an end, or a store. A node with no wire states nothing about the flow.
+        - Before canvas_check, read the list again and tick each item against a node or a wire.
+    </cover_every_requirement>
+
     <stickies>
         Use Markdown stickies for explanations, rationale, and sample data that need more than a short label. Draw constraints and rules instead (see draw_rules_not_prose).
 
@@ -316,5 +326,8 @@
         - When a return wire must leave its section, place the two sections next to each other. Never route it around a third section.
         - If a wire runs more than half the board or crosses a section it does not belong to, move a node. Do not add waypoints.
         - Give every decision and retry all its exits. A retry that can succeed needs its wire back to the main path, and a queue that waits needs its wire out when capacity frees.
+        - Draw each failure path to its end, with every step the source requires. A cancel that must stop a stream, abandon tool calls and release a runner needs a wire to each of the three, not one bare node. A failure that the system records and then continues past needs its wire back to the next step.
+        - Lay out sections in the order the main flow visits them, so the main path runs one way. A row that runs backward against the others reads as a return.
+        - Size each section to its content. When one section holds three nodes and another holds ten, the small one is narrow or short, not a full-width band. fit_section closes it.
     </returns_retries_and_failures>
 </layout_and_connections>
