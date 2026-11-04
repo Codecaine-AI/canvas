@@ -28,6 +28,12 @@ export const NAME_MAX_CHARS = 40;
 export const DETAIL_MAX_CHARS = 48;
 
 /**
+ * A sticky note with more words than this is a wall of prose (dense-note):
+ * the rules it states belong on the board as wires, branches and nodes.
+ */
+export const NOTE_MAX_WORDS = 40;
+
+/**
  * Where one sentence ends and the next begins: terminal punctuation
  * (optionally closed by a quote or bracket), whitespace, then a capital.
  * Requiring the capital keeps abbreviations ("e.g. ports", "approx. 5 ms")

@@ -28,6 +28,7 @@ import { rule as crowding } from "./rules/crowding";
 import { rule as clippedText } from "./rules/clipped-text";
 import { rule as labelIsProse } from "./rules/label-is-prose";
 import { rule as detailTooLong } from "./rules/detail-too-long";
+import { rule as denseNote } from "./rules/dense-note";
 import { rule as frameSlack } from "./rules/frame-slack";
 import { rule as boardTooLarge } from "./rules/board-too-large";
 
@@ -40,6 +41,7 @@ export const LAYOUT_RULES: readonly LayoutRule[] = [
   clippedText,
   labelIsProse,
   detailTooLong,
+  denseNote,
 ];
 
 export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES, frameSlack, boardTooLarge];

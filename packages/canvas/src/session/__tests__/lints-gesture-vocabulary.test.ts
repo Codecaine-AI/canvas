@@ -120,6 +120,15 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       }]),
     },
     {
+      // dense-note: a note that states the system's rules as a wall of prose.
+      name: "dense-note",
+      document: makeDocument([{
+        ...box("rules", 0, 0, 600, 600, "sticky"),
+        text: Array.from({ length: 45 }, (_, index) => `word${index}`).join(" "),
+        style: { shape: "note" },
+      }]),
+    },
+    {
       // detail-too-long: an explanation crammed into the one-fact detail line.
       name: "detail-too-long",
       document: makeDocument([{
