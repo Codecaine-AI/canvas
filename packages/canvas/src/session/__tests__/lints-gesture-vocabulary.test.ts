@@ -95,6 +95,19 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ),
     },
     {
+      // wire-to-section: a wire that ends on a section's frame instead of a node.
+      name: "wire-to-section",
+      document: makeDocument(
+        [
+          box("page", 0, 0, 2000, 1200, "section"),
+          { ...box("review", 600, 100, 800, 500, "section"), parentId: "page" },
+          { ...box("verifier", 700, 200, 280, 100, "process"), parentId: "review" },
+          { ...box("monitor", 100, 300, 280, 100, "process"), parentId: "page" },
+        ],
+        [connect("cancel", "monitor", "review")],
+      ),
+    },
+    {
       // caption-crossed: a port slid into the caption band under an icon's tile.
       name: "caption-crossed",
       document: makeDocument(

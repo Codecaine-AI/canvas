@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 93240ca3f082e2d1d67413d0d5a4a1fbc62bd8f8ae557ed863a15fac0f269de7). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 44e8aad4c8ae44d62218846c82c278e4f0f32cdc945e3bc6197b240458dd228c). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -314,7 +314,7 @@
 
         Fix unnecessary elbows and long detours by moving objects or regions and clearing obstructions before adding route steering.
 
-        Start each wire at the node that sends and end it at the node that acts on it. A wire from the wrong participant states a wrong fact, even when the label is right.
+        Start each wire at the node that sends and end it at the node that acts on it. A wire from the wrong participant states a wrong fact, even when the label is right. A wire to a section's frame names no actor and stops at a border; wire-to-section warns. When several nodes inside act, connect one wire per node.
 
         A wire meets an icon at its tile, never through the caption under it. A side port reached from below runs through the name and detail; caption-crossed warns, and the fix is the port (anchor top, or the side level with the other end) or a move, not a waypoint.
     </connections>

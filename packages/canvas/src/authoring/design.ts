@@ -256,7 +256,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 
         Fix unnecessary elbows and long detours by moving objects or regions and clearing obstructions before adding route steering.
 
-        Start each wire at the node that sends and end it at the node that acts on it. A wire from the wrong participant states a wrong fact, even when the label is right.
+        Start each wire at the node that sends and end it at the node that acts on it. A wire from the wrong participant states a wrong fact, even when the label is right. A wire to a section's frame names no actor and stops at a border; wire-to-section warns. When several nodes inside act, connect one wire per node.
 
         A wire meets an icon at its tile, never through the caption under it. A side port reached from below runs through the name and detail; caption-crossed warns, and the fix is the port (anchor top, or the side level with the other end) or a move, not a waypoint.
     </connections>
