@@ -1,10 +1,12 @@
-/** `climb <draw | render>`: the quality climb's round tools. */
+/** `climb <draw | render | score>`: the quality climb's round tools. */
 import { runDraw } from "./draw.ts";
 import { runRender } from "./render.ts";
+import { runScore } from "./score.ts";
 
 export async function runClimb(argv: string[]): Promise<void> {
   const [command, ...rest] = argv;
   if (command === "draw") await runDraw(rest);
   else if (command === "render") await runRender(rest);
-  else throw new Error("Usage: climb draw --round <n> [--set climb|heldOut|all] [--briefs a,b] | climb render --round <n> [--lint-root <path>]");
+  else if (command === "score") await runScore(rest);
+  else throw new Error("Usage: climb draw --round <n> [--set climb|heldOut|all] [--briefs a,b] | climb render --round <n> [--lint-root <path>] | climb score --round <n> --stage 1|2|3");
 }
