@@ -138,11 +138,12 @@ export const placeSticky = defineOperationTool({
 export const placeShape = defineOperationTool({
   name: "place_shape",
   description:
-    "Place a shape — the pick and the click, plus an optional one-fact detail "
-    + "line. It arrives untitled, at the default size and color for its kind; "
-    + "naming, resizing, recoloring, and turning it are each their own gesture "
-    + "afterward. Containment follows geometry: a shape outside every frame "
-    + "belongs to no section.",
+    "Place a shape with its name, its one-fact detail line and its color in one "
+    + "call, at the default size for its kind. Omit text or color and it arrives "
+    + "untitled or in its type's preferred color, for update_text and "
+    + "change_color afterward; resizing and turning it are their own gestures. "
+    + "Containment follows geometry: a shape outside every frame belongs to no "
+    + "section.",
   fields: PlaceShapeParams.properties,
   validate: (ctx, p) => ctx.requireFreeId(p.id),
   apply: (ctx, p) => {
@@ -163,16 +164,17 @@ export const placeShape = defineOperationTool({
         type: "addObject",
         object: draftPlacedObject(fields.type, geometry, {
           id: p.id,
-          // This gesture does not carry text: the explicit empty string keeps
-          // a placed shape blank instead of taking draftPlacedObject's
-          // per-type label. `update_text` fills it later.
-          text: "",
+          // The explicit empty string keeps an unnamed shape blank instead of
+          // taking draftPlacedObject's per-type label. Carrying the name here
+          // saves the drawer one call per node (climb round 4: naming and
+          // coloring after placement were two of every seven calls).
+          text: p.text ?? "",
           detail: storedDetail(p.detail),
-          color: defaults.color,
+          color: p.color ?? defaults.color,
           ...(fields.icon ? { icon: fields.icon } : {}),
         }),
       },
-      `place_shape ${p.id} ${p.type} ${placement(geometry)}`,
+      `place_shape ${p.id} ${p.type} ${placement(geometry)}${p.text ? ` "${p.text}"` : ""}${p.color ? ` ${p.color}` : ""}`,
     );
   },
 });

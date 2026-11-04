@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 c1d2914638c64c20d82c9064ef92572ce0b1e69b7eea7ba22edc5b2cfab29622). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 5d67cd57e71bfe398062c1cc2bc1fc2d71145b631089c9387405d973de349431). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -282,10 +282,11 @@
         Every move, resize, and relabel after the board is wired is rework, and rework costs more calls than the first draw. Settle the plan first, then place each thing once.
 
         - Before the first place_shape, write the plan: the sections and their rows, the nodes in each row, the color key, and every wire with its label.
+        - place_shape carries the name, the detail and the color in one call. Never place a node and then name or color it in a second call.
         - Keep each node at its default size: 280×100 for a shape, 300×120 for an icon. Do not resize nodes one by one to make a row match. Resize only a node whose text clips, or the board's one visual anchor.
         - Label a wire only when it names a condition, a branch, or a payload the source names. A plain next-step wire needs no label.
         - When two or more nodes share a type and a role, such as three graders or two providers, finish one with its name, detail, and color. Then clone it for each peer with its own text and detail.
-        - Place, name, and color every node, then connect. Call canvas_check when every wire is drawn, and fix all its findings in one pass.
+        - Place every section, place every node, then connect. Call canvas_check when every wire is drawn, and fix all its findings in one pass.
     </build_it_once>
 
     <hierarchy_through_scale>

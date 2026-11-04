@@ -319,13 +319,14 @@ export type ConnectionPatch = Static<typeof ConnectionPatch>;
 // Gesture payloads — Place
 // ---------------------------------------------------------------------------
 //
-// The place payloads carry ONLY what the UI's creation gesture carries: the
-// pick, the click, and the typing that is part of the same motion. Everything
-// else about a new object comes from the creation defaults
-// (session/tools/creation-defaults.ts), and every
-// property beyond the default is its own subsequent gesture — resize, then
-// recolor, then relabel. That is why there is no `color` and no `geometry`
-// here: they are not omissions, they are the point.
+// The place payloads carry what the UI's creation gesture carries: the pick,
+// the click, and the typing that is part of the same motion. Everything else
+// about a new object comes from the creation defaults
+// (session/tools/creation-defaults.ts), and every property beyond the default
+// is its own subsequent gesture — resize, then relabel. There is no
+// `geometry` here on purpose. `place_shape` is the one exception on color and
+// name: climb round 4 measured naming and coloring after placement at two of
+// every seven drawer calls, so the shape's name and color ride along with it.
 //
 // `at` is the TOP-LEFT of the box, in world units, snapped to the agent grid
 // (session/tools/grid.ts, AGENT_GRID = 20) before it is lowered onto a
@@ -376,25 +377,28 @@ export const PlaceStickyParams = Type.Object(
 export type PlaceStickyParams = Static<typeof PlaceStickyParams>;
 
 /**
- * `place_shape` — the pick and the click, plus the optional one-line detail.
- * No name, no color, no direction: those are `update_text` / `change_color` /
- * `change_shape` afterward. `type` is the FOLDED vocabulary — shape types with
- * the icon glyphs folded in as types of their own — so placing "decision" and
- * placing "memory" are the same gesture with a different pick (see
- * ./placeable-types).
+ * `place_shape` — the pick and the click, plus the name, the one-line detail
+ * and the color, each optional. No direction: that is `change_shape`
+ * afterward. `type` is the FOLDED vocabulary — shape types with the icon
+ * glyphs folded in as types of their own — so placing "decision" and placing
+ * "memory" are the same gesture with a different pick (see ./placeable-types).
  */
 export const PlaceShapeParams = Type.Object(
   {
     id: Id,
     type: PlaceableType,
     at: Point,
+    text: Type.Optional(Type.String({
+      description: `The name, ${NAME_RULE}. Omit it to place the shape untitled and name it with update_text.`,
+    })),
     detail: Type.Optional(Type.String({
       description:
         `Optional: ONE short fact shown under the name — a port, path, version, model, or host; ${DETAIL_LIMITS}.`
-        + " The name is written afterwards with update_text; explanations go on a sticky.",
+        + " Explanations go on a sticky.",
     })),
+    color: Type.Optional(Color),
   },
-  { ...Seal, description: "Place a shape at `at` (its top-left corner)." },
+  { ...Seal, description: "Place a shape at `at` (its top-left corner), named and colored in the same call." },
 );
 export type PlaceShapeParams = Static<typeof PlaceShapeParams>;
 

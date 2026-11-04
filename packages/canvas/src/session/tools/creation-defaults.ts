@@ -1,14 +1,16 @@
 /**
  * Creation defaults — the size and color a PLACED object lands at.
  *
- * `place_shape` and `place_sticky` carry no size and no color parameters at
- * all (docs/10-system-design/70-agent-tool-surface/20-gestures §Place: "only the pick
+ * `place_shape` and `place_sticky` carry no size parameter at all
+ * (docs/10-system-design/70-agent-tool-surface/20-gestures §Place: "only the pick
  * and the click"; the numbers themselves are
  * docs/10-system-design/70-agent-tool-surface/30-grid-and-defaults), so
  * these numbers are load-bearing, not a convenience: they are the entire
  * answer to "how big is a new node". The agent never reasons about size at
  * placement; sizing afterward is `resize` / `match_size`, and spacing is
- * `space_out` — deliberate steps like everything else.
+ * `space_out` — deliberate steps like everything else. `place_shape` may
+ * carry a color since climb round 4 (one call per node instead of three);
+ * the color here is what it lands in when the call names none.
  *
  * WHERE THE NUMBERS COME FROM (plan D5). Two rules, applied in order:
  *
