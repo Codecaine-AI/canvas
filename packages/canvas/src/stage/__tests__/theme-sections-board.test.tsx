@@ -248,7 +248,7 @@ describe("in-place section title editor", () => {
 describe("connector label chip per theme", () => {
   it("schematic: a 26px mono chip sized to the measured label + 0.5em padding a side, live == static", () => {
     // "HTTP" at 14px: 4 Plex Mono cells (33.6px → 33.609375 in layout units) + 2 × 7.
-    const width = measureWidth("HTTP", { family: "IBM Plex Mono", size: 14, weight: 500 }) + 2 * 7;
+    const width = measureWidth("HTTP", { family: "IBM Plex Mono", size: 14, weight: 600 }) + 2 * 7;
     expect(width).toBe(47.609375);
     const container = renderLive("schematic-light");
     const rect = container.querySelector('[data-canvas-connection-label="edge"] rect')!;
@@ -260,12 +260,12 @@ describe("connector label chip per theme", () => {
     expect(text.getAttribute("font-family")).toContain("IBM Plex Mono");
     expect(text.getAttribute("fill")).toBe("#2A2A2A");
     expect(text.getAttribute("font-size")).toBe("14");
-    expect(text.getAttribute("font-weight")).toBe("500");
+    expect(text.getAttribute("font-weight")).toBe("600");
 
     const svg = staticSvg("schematic-light");
     const chip = [...svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>HTTP<\/text>/g)][0]!;
     expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.61", height: "26", fill: "#FDFDFD", stroke: "#E6E5E3" });
-    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#2A2A2A", "font-size": "14", "font-weight": "500" });
+    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#2A2A2A", "font-size": "14", "font-weight": "600" });
   });
 
   it("figjam: the 30px sans chip with black text (live now matches static)", () => {

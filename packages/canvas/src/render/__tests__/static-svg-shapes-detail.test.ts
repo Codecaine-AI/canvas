@@ -99,12 +99,12 @@ describe("static shapes: card vs tint paint", () => {
 });
 
 describe("static detail line — center slots", () => {
-  it("paints the detail as its own muted mono <text> under the name, the pair centered as one block", () => {
+  it("paints the detail as its own body-text mono <text> under the name, the pair centered as one block", () => {
     const svg = render([shape({ detail: "Function Calling LLM" })], "schematic-light");
     const [name, detail] = texts(svg);
     expect(detail!.body).toBe("Function Calling LLM");
     expect(detail!.attrs).toMatchObject({
-      fill: "#666562",
+      fill: "#2A2A2A",
       "font-family": CANVAS_MONO_FONT_STACK_SVG,
       "font-size": "14",
       "font-weight": "500",

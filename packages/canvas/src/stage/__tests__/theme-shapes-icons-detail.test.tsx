@@ -65,7 +65,7 @@ function objectNode(container: HTMLElement, id: string): HTMLElement {
 }
 
 describe("live detail line", () => {
-  it("renders under the name in a center slot: collapsed, one line, ellipsized, muted mono", () => {
+  it("renders under the name in a center slot: collapsed, one line, ellipsized, body-text mono", () => {
     const container = stage([shape({ detail: "Function\nCalling LLM" })], "schematic-light");
     const node = objectNode(container, "s1");
     const detail = node.querySelector("[data-canvas-text-detail]") as HTMLElement;
@@ -78,7 +78,7 @@ describe("live detail line", () => {
     expect(detail.style.fontWeight).toBe("500");
     expect(detail.style.lineHeight).toBe("18.2px");
     expect(detail.style.marginTop).toBe("3px");
-    expect(detail.style.color).toBe("#666562");
+    expect(detail.style.color).toBe("#2A2A2A");
     // Name block + detail sit in one centered flex column; the name's clamp
     // gave up lines to the detail's 3 + 18.2px reserve (56px slot of 21px name
     // lines — 17.5px × 1.2: 2 lines → 1).
@@ -130,7 +130,7 @@ describe("live detail line", () => {
     const detail = slot.querySelector("[data-canvas-text-detail]") as HTMLElement;
     expect(caption.nextElementSibling).toBe(detail);
     expect(detail.textContent).toBe("postgres 16");
-    expect(detail.style.color).toBe("#9198A1");
+    expect(detail.style.color).toBe("#D1D9E0");
   });
 
   it("figjam paints a sans detail at 13px", () => {

@@ -292,7 +292,7 @@ const FIGJAM_PRESET: CanvasStyle = {
  * Roles: the board is the page surface; cards (card shapes, card stickies,
  * outlined tiles) are panels (the dark preset keeps its own raised card fill,
  * SCHEMATIC_DARK_CARD_FILL); hairlines and the dot grid are the default rule;
- * names are ink, connector labels body text and detail lines muted text; a
+ * names are ink, connector labels and detail lines body text; a
  * glyph on a solid ink tile is the on-solid glyph. Layer-cake fills mix the
  * ink into the board surface in both themes.
  */
@@ -301,7 +301,11 @@ export const SCHEMATIC_THEME_TOKENS = {
   gridDotColor: "color.border.default",
   hairlineColor: "color.border.default",
   textColor: "color.text.ink",
-  detailColor: "color.text.muted",
+  // Body text, not muted: climb round 1 judges named "small gray subtitles"
+  // on every board. At a 2400px board the 14px mono detail prints at about
+  // 9px, where muted gray (5.6:1) reads as texture; the mono face and the
+  // smaller size already set it apart from the name.
+  detailColor: "color.text.body",
   cardFill: "color.surface.panel",
   sectionTintMixBase: "color.surface.page",
   iconTileGlyphColor: "color.text.on-solid",

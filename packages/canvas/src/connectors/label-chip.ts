@@ -30,7 +30,10 @@ export const CONNECTION_LABEL_CHIP = {
   /** Narrowest chip = height × 41 / 30 (41px on the 30px figjam chip). */
   minWidthPerHeight: { numerator: 41, denominator: 30 },
   sansFontWeight: 700,
-  monoFontWeight: 500,
+  // SemiBold: a 14px chip prints near 9px on a board fit to one view, where
+  // Medium strokes thin out. Plex Mono's advance is the same at every weight,
+  // so chip widths (and unreadable-labels) do not change.
+  monoFontWeight: 600,
   /** Hairline border (`hairlineColor`). */
   borderWidthPx: 1,
 } as const;
