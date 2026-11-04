@@ -1,6 +1,6 @@
 /**
  * `climb draw`: the fixed drawer. One headless Claude Code process per brief
- * (Opus 5.5, medium effort, the canvas MCP and nothing else) draws the brief
+ * (Opus 5.5, high effort, the canvas MCP and nothing else) draws the brief
  * on a new board in `round-<n>/<brief>/`.
  *
  * The drawer must be the same in every round, so it runs in bare mode: no
@@ -25,7 +25,7 @@ import {
 } from "./paths.ts";
 
 export const DRAWER_MODEL = "claude-opus-5-5";
-export const DRAWER_EFFORT = "medium";
+export const DRAWER_EFFORT = "high";
 const MCP_SERVER = "canvas";
 const MAX_PARALLEL = 5;
 const DEFAULT_TIMEOUT_MINUTES = 45;
