@@ -95,6 +95,22 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ),
     },
     {
+      // caption-crossed: a port slid into the caption band under an icon's tile.
+      name: "caption-crossed",
+      document: makeDocument(
+        [
+          box("page", 0, 0, 2600, 1400, "section"),
+          { ...box("integrations", 2000, 680, 300, 120, "icon"), text: "Action integrations", detail: "stores no credentials" },
+          { ...box("account", 1520, 1000, 300, 120, "icon"), text: "Account system", detail: "subscriptions" },
+        ],
+        [{
+          ...connect("subscription", "integrations", "account"),
+          from: { objectId: "integrations", anchor: "left", position: [0, 0.85] },
+          to: { objectId: "account", anchor: "top" },
+        }],
+      ),
+    },
+    {
       // unreadable-labels: a long chip in a corridor too narrow to draw it.
       name: "unreadable-labels",
       document: makeDocument(

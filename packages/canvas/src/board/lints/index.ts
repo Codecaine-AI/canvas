@@ -23,6 +23,7 @@ import { rule as coveredContent } from "./rules/covered-content";
 import { rule as containment } from "./rules/containment";
 import { rule as brokenEdges } from "./rules/broken-edges";
 import { rule as wireDetour } from "./rules/wire-detour";
+import { rule as captionCrossed } from "./rules/caption-crossed";
 import { rule as unreadableLabels } from "./rules/unreadable-labels";
 import { rule as crowding } from "./rules/crowding";
 import { rule as clippedText } from "./rules/clipped-text";
@@ -36,6 +37,7 @@ export const LAYOUT_RULES: readonly LayoutRule[] = [
   containment,
   brokenEdges,
   wireDetour,
+  captionCrossed,
   unreadableLabels,
   crowding,
   clippedText,
