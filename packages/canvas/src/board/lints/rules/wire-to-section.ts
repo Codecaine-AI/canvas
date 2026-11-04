@@ -23,10 +23,11 @@
  * has no owner to name, and containment and broken-edges judge it.
  */
 import { kindOf, pageFrameOf } from "../../helpers";
+import { agentWired } from "../authorship";
 import { rectOf } from "../geometry";
 
-import type { InteractiveCanvasConnection, InteractiveCanvasDocument } from "../../../state/schema";
-import type { LayoutRule, LintContext } from "../types";
+import type { InteractiveCanvasDocument } from "../../../state/schema";
+import type { LayoutRule } from "../types";
 
 const GUIDANCE = `A wire starts at the node that sends and ends at the node that acts on it, never on a section's frame:
 - this warning fires for each end of a wire the agent drew this session that sits on a section
@@ -34,19 +35,6 @@ const GUIDANCE = `A wire starts at the node that sends and ends at the node that
 - a wire to a frame names no actor, and it stops at a border where it reads as part of the frame;
 - change_connection the end to the node inside the section that sends or acts; when several
   nodes do, connect one wire per node, or route the one wire to the node that fans it out.`;
-
-/** Did the agent draw this wire, or move one of its ends, since the session's starting board? */
-function agentWired(context: LintContext | undefined): (edge: InteractiveCanvasConnection) => boolean {
-  const baseline = context?.baseline;
-  if (baseline === undefined) return () => false;
-  const before = new Map(baseline.connections.map((edge) => [edge.id, edge]));
-  return (edge) => {
-    const previous = before.get(edge.id);
-    return previous === undefined
-      || previous.from.objectId !== edge.from.objectId
-      || previous.to.objectId !== edge.to.objectId;
-  };
-}
 
 export const rule: LayoutRule = {
   id: "wire-to-section",

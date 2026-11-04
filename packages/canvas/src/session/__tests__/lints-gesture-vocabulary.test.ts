@@ -95,6 +95,18 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ),
     },
     {
+      // long-wire: a return drawn across the whole board.
+      name: "long-wire",
+      document: makeDocument(
+        [
+          box("page", 0, 0, 3000, 1400, "section"),
+          box("a", 100, 100, 280, 100, "process"),
+          box("b", 1500, 800, 280, 100, "process"),
+        ],
+        [connect("return", "b", "a")],
+      ),
+    },
+    {
       // wire-to-section: a wire that ends on a section's frame instead of a node.
       name: "wire-to-section",
       document: makeDocument(

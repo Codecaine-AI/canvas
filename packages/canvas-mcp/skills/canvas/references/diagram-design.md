@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 44e8aad4c8ae44d62218846c82c278e4f0f32cdc945e3bc6197b240458dd228c). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 f428e6ec86e54cd622fdd91b29ccf31d6c4fd48c79714aabcfd3f6db9db45167). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -328,7 +328,7 @@
         - Before you place the first section, count the wires between each pair of sections. Put the pair with the most wires side by side or one directly above the other, then the next pair, so no wire has a third section between its ends. Five full-width bands stacked down the page put two bands between the top and the bottom one, and every wire between them runs around the board.
         - wire-detour errors on a wire that runs around or through a section holding neither of its ends, on the drawn route, so a waypoint cannot clear it. Only a move clears it: move_to the node that receives the wire beside the node that sends it, or move_to a section so the two sections touch.
         - If a wire runs more than half the board or crosses a section it does not belong to, move a node. Do not add waypoints.
-        - Total wire length is what a viewer reads as layout: the shorter the wires on the whole board, the clearer the flow. tighten_wires reports the length before and after; a board whose wires sum to under ten times its longer edge reads as tidy.
+        - Total wire length is what a viewer reads as layout: the shorter the wires on the whole board, the clearer the flow. tighten_wires reports the length before and after. long-wire warns on a wire that runs more than half the board's longer edge; the judges name the longest wire on every board.
         - Give every decision and retry all its exits. A retry that can succeed needs its wire back to the main path, and a queue that waits needs its wire out when capacity frees.
         - Draw each failure path to its end, with every step the source requires. A cancel that must stop a stream, abandon tool calls and release a runner needs a wire to each of the three, not one bare node. A failure that the system records and then continues past needs its wire back to the next step.
         - Lay out sections in the order the main flow visits them, so the main path runs one way. A row that runs backward against the others reads as a return.
