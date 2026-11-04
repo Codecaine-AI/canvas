@@ -197,7 +197,7 @@ describe("formatDiagnostics", () => {
 
     expect(text).toContain("W1 unreadable-labels:");
     expect(text).toContain(
-      "(open the alpha↔beta corridor to ≥73px so the chip and its 16px margins fit)",
+      "(open the alpha↔beta corridor to ≥73px so the chip and its 16px margins fit; move one end, and keep every fact the label names)",
     );
     expect(text).not.toContain('"operations"');
     expect(text).not.toContain("suggested op:");

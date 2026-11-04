@@ -87,7 +87,9 @@ const GUIDANCE = `A labeled edge renders a fixed-size chip at its route's midpoi
 - when the chip plus its ${CHIP_CLEARANCE}px breathing margin bleeds onto one of its own endpoint
   boxes, the label is physically unreadable;
 - open the corridor by moving one endpoint box along the run axis until the gap clears
-  the chip and both margins, reroute, or shorten the label until the rendered chip fits.`;
+  the chip and both margins, or reroute the wire down a column, where the chip needs only its height;
+- shorten a label only by words that carry no fact: a condition, a field, or a payload the
+  source names stays in the label, or the board loses a requirement to fix a lint.`;
 
 export const rule: LayoutRule = {
   id: "unreadable-labels",
@@ -109,7 +111,8 @@ export const rule: LayoutRule = {
           + `${Math.round(finding.available)}px of corridor where the chip needs ${Math.ceil(finding.needed)}px`
           + chipNoteClause(finding.chip, finding.severity),
         suggestion: `open the ${finding.from.id}↔${finding.to.id} corridor to `
-          + `≥${Math.ceil(finding.needed)}px so the chip and its ${CHIP_CLEARANCE}px margins fit`,
+          + `≥${Math.ceil(finding.needed)}px so the chip and its ${CHIP_CLEARANCE}px margins fit; `
+          + "move one end, and keep every fact the label names",
       }));
   },
 };
