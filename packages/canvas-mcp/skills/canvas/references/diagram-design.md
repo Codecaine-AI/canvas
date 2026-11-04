@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 d9c69385bed0db82a4433280fa4da459bdbb1b54aeac2534d0caa54b52185fcc). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 8677b9a8b8a123a968dfa3899b2e7688a6c84b33b8a8ef42f03ccd2124d5a264). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -190,8 +190,17 @@
         </section_icons>
     </labels>
 
+    <draw_rules_not_prose>
+        A rule that names a trigger and an effect is structure, so draw it. "On timeout, retry the next backend", "a failure after streaming starts is not retried", "a regressing variant is pulled from traffic": each is a labeled wire, a decision with labeled exits, or a node, never a sentence in a note.
+
+        - Before you write a note, list the rules in the source material. Draw every one you can as a wire or branch.
+        - A note keeps only what wires cannot show: a payload's shape, a sample record, a short rationale.
+        - Keep each note to 40 words or fewer, beside the one subject it explains. dense-note warns past that.
+        - A note never outweighs the diagram. Two or three short notes at the side of the flow is the most a board needs.
+    </draw_rules_not_prose>
+
     <stickies>
-        Use Markdown stickies for explanations, rationale, constraints, and other text that needs more than a short label.
+        Use Markdown stickies for explanations, rationale, and sample data that need more than a short label. Draw constraints and rules instead (see draw_rules_not_prose).
 
         - Use headings to organize the content.
         - Use bullets for distinct points.
@@ -233,6 +242,8 @@
         </transformation_pipeline_example>
 
         The key principle: show what things actually look like, not just what they're called.
+
+        Every concrete fact comes from the source material. Never invent an example value, file path, line number, score, endpoint, status code, or protocol to fill an artifact. When the source gives no concrete example, show the real names it does give and leave the artifact out.
     </evidence_artifacts>
 
     <purposeful_containers>
@@ -247,6 +258,15 @@
 </text_and_evidence>
 
 <layout_and_connections>
+    <fit_to_one_view>
+        A board is read whole, fit to one 1600px view, and canvas_check's PNG is that view. The board's longer edge sets the size of every label: at a 4500px edge, 14px wire labels print at 5px.
+
+        - Keep the board's longer edge at or under 2488px, so the smallest text prints at 9px or more. board-too-large warns past it.
+        - Aim for a near-square board. Lay four or more sections out in two rows that grow down, not as one wide band.
+        - Keep neighbors about one node width apart, and close every section around its children with fit_section.
+        - Plan the size before you place anything: count the nodes per row and the rows, then check the total against the cap.
+    </fit_to_one_view>
+
     <hierarchy_through_scale>
         Use size to distinguish the visual anchor, primary elements, and supporting detail.
 
@@ -271,5 +291,17 @@
         Place closely related regions near each other. Align directly connected endpoints where useful.
 
         Fix unnecessary elbows and long detours by moving objects or regions and clearing obstructions before adding route steering.
+
+        Start each wire at the node that sends and end it at the node that acts on it. A wire from the wrong participant states a wrong fact, even when the label is right.
     </connections>
+
+    <returns_retries_and_failures>
+        Return, retry, fallback, and failure wires run against the main flow, so they make the long detours viewers notice first.
+
+        - Place the target of a return or retry next to its source, in the same section when it belongs there. The wire then runs a short way along the near side of the flow.
+        - Put failure ends (a reject, a dead letter, a flag) directly beside or below the step that fails, not across the board.
+        - When a return wire must leave its section, place the two sections next to each other. Never route it around a third section.
+        - If a wire runs more than half the board or crosses a section it does not belong to, move a node. Do not add waypoints.
+        - Give every decision and retry all its exits. A retry that can succeed needs its wire back to the main path, and a queue that waits needs its wire out when capacity frees.
+    </returns_retries_and_failures>
 </layout_and_connections>
