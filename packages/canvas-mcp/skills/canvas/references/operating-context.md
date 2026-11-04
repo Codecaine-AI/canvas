@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/prompt/prompt.json (sha256 9c91daf8919ba6bc6d15e2886a360c696a9908c435f1ebbdc98983102a0e5294), packages/canvas/src/authoring/state-grammar.ts (sha256 63217e84c12d7c4186f4d0cf023c84cafb34d144780781e94e0255ce4b59c01d), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 5c61496f5ac71b29c7ca95a01bd44de5979f774fe11d3c25f0046623f520d50b). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/prompt/prompt.json (sha256 9c91daf8919ba6bc6d15e2886a360c696a9908c435f1ebbdc98983102a0e5294), packages/canvas/src/authoring/state-grammar.ts (sha256 63217e84c12d7c4186f4d0cf023c84cafb34d144780781e94e0255ce4b59c01d), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Operating Context
 
@@ -737,9 +737,9 @@ The standing context the internal layout editor received on every request, kept 
         Starting dimensions for local peer groups, not composition mandates. Adjust them for content and actual routes; section sizes and counts follow meaning.
 
         - flow node: 280×100, never narrower than 240
-        - node gaps: 140 across a row, 100 down a column
+        - node gaps: 200 across a row, 100 down a column
         - arrow corridor: 100 of clear channel wherever a wire and its label pass between siblings
-        - section gutters: 140 side by side, 160 between stacked rows
+        - section gutters: 200 side by side, 220 between stacked rows
         - frame padding: 40 inside every frame before its first child
     </craft_targets>
 </style_guide>

@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/conventions.ts (sha256 7512963793f4dc173bdaf245b42bba4841aa1e48ec9cab3b5313e609c438f474). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/conventions.ts (sha256 09a8db0dd48dd01f7668fa187293e41b786eb0e4edfae7e371aa6b331aa10df1). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Canvas Conventions
 
@@ -75,9 +75,9 @@
         Starting dimensions for local peer groups, not composition mandates. Adjust them for content and actual routes; section sizes and counts follow meaning.
 
         - flow node: 280×100, never narrower than 240
-        - node gaps: 140 across a row, 100 down a column
+        - node gaps: 200 across a row, 100 down a column
         - arrow corridor: 100 of clear channel wherever a wire and its label pass between siblings
-        - section gutters: 140 side by side, 160 between stacked rows
+        - section gutters: 200 side by side, 220 between stacked rows
         - frame padding: 40 inside every frame before its first child
     </spacing_targets>
 

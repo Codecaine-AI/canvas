@@ -1,6 +1,31 @@
 import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS, NOTE_MAX_WORDS } from "../board/text-rules";
 import { FIT_VIEW_PX, MIN_FIT_TEXT_PX, boardEdgeCapPx } from "../board/lints/rules/board-too-large";
+import { CHIP_CLEARANCE } from "../board/lints/geometry";
+import { CONNECTION_LABEL_CHIP } from "../connectors/label-chip";
+import { DEFAULT_CANVAS_STYLE } from "../theme/canvas-style";
+import { CRAFT_TARGETS } from "./style-guide/craft-targets";
 import { renderVisualPatterns } from "./visual-patterns";
+
+/** Advance of one mono label character, in em (the mono stack is fixed-pitch at 0.6em). */
+const MONO_ADVANCE_EM = 0.6;
+
+/**
+ * The wire-label budget unreadable-labels enforces on a horizontal run, as
+ * plain numbers the drawer can plan with: px per character, the fixed px
+ * (chip padding and both clearance margins), and how many characters a gap holds.
+ */
+function labelBudget(gapPx: number) {
+  const size = DEFAULT_CANVAS_STYLE.connectorLabelFontSizePx;
+  const perChar = MONO_ADVANCE_EM * size;
+  const fixed = Math.ceil(2 * size * CONNECTION_LABEL_CHIP.monoPaddingXEm + 2 * CHIP_CLEARANCE);
+  return {
+    perChar: Math.round(perChar * 10) / 10,
+    fixed,
+    fits: Math.floor((gapPx - fixed) / perChar),
+  };
+}
+
+const LABEL = labelBudget(CRAFT_TARGETS.nodeGapRow);
 
 /** Shared diagram-design knowledge. No agent state, tools, or model runtime. */
 export interface AuthoringTopic {
@@ -174,8 +199,9 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 
         - Keep the board's longer edge at or under ${boardEdgeCapPx()}px, so the smallest text prints at ${MIN_FIT_TEXT_PX}px or more. board-too-large warns past it.
         - Aim for a near-square board. Lay four or more sections out in two rows that grow down, not as one wide band.
-        - Keep neighbors about one node width apart, and close every section around its children with fit_section.
+        - Space nodes ${CRAFT_TARGETS.nodeGapRow}px apart across a row and ${CRAFT_TARGETS.nodeGapColumn}px apart down a column, and close every section around its children with fit_section.
         - Plan the size before you place anything: count the nodes per row and the rows, then check the total against the cap.
+        - A label on a wire that runs across a row needs ${LABEL.perChar}px per character plus ${LABEL.fixed}px of gap, so the ${CRAFT_TARGETS.nodeGapRow}px row gap holds ${LABEL.fits} characters. Before you connect, widen the gap for a longer label, or run that wire down a column, where any label fits. unreadable-labels warns when a chip does not fit.
     </fit_to_one_view>
 
     <hierarchy_through_scale>

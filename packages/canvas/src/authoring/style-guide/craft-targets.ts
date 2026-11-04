@@ -13,13 +13,17 @@ export const CRAFT_TARGETS: CraftTargets = {
   nodeWidth: 280,
   nodeHeight: 100,
   nodeMinWidth: 240,
-  nodeGapRow: 140,
+  // A row gap carries the wire labels that run across it: at 200 a label of
+  // 18 mono characters clears unreadable-labels (chip + 16px each side). At
+  // 140 only 11 fit, and climb round 1 drawers spent their rework moving
+  // nodes apart after connect.
+  nodeGapRow: 200,
   // A stacked pair gives a wire and its label a lane, so the column gap runs
   // a node's height of air rather than riding the crowding clearance.
   nodeGapColumn: 100,
   arrowCorridor: 100,
-  sectionGutterSideBySide: 140,
-  sectionGutterStacked: 160,
+  sectionGutterSideBySide: 200,
+  sectionGutterStacked: 220,
   framePadding: 40,
 };
 

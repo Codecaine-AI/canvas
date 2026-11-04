@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 70b34ac59aa5b902cc6e662c5676f81b3b56fe76108bcf23ceb6a2cdef602557). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 69d897a5bca60f7a56f8720318a61c7fe07d515eb351a6821480ac9c7b7b3c80). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -263,8 +263,9 @@
 
         - Keep the board's longer edge at or under 2488px, so the smallest text prints at 9px or more. board-too-large warns past it.
         - Aim for a near-square board. Lay four or more sections out in two rows that grow down, not as one wide band.
-        - Keep neighbors about one node width apart, and close every section around its children with fit_section.
+        - Space nodes 200px apart across a row and 100px apart down a column, and close every section around its children with fit_section.
         - Plan the size before you place anything: count the nodes per row and the rows, then check the total against the cap.
+        - A label on a wire that runs across a row needs 8.4px per character plus 46px of gap, so the 200px row gap holds 18 characters. Before you connect, widen the gap for a longer label, or run that wire down a column, where any label fits. unreadable-labels warns when a chip does not fit.
     </fit_to_one_view>
 
     <hierarchy_through_scale>
