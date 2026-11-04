@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 d62856d324b39089c0f0417cb8bc1b132b308a1e5347b93c26415e516910eaee). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 70b34ac59aa5b902cc6e662c5676f81b3b56fe76108bcf23ceb6a2cdef602557). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -271,6 +271,8 @@
         Use size to distinguish the visual anchor, primary elements, and supporting detail.
 
         Size objects to their content and role. Nodes with the same role read best at the same size.
+
+        Color follows the board's color key: one hue per role, red only for failures, and gray wires. Read the color_palette topic before you color anything.
     </hierarchy_through_scale>
 
     <whitespace>

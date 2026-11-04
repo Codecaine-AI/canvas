@@ -182,6 +182,8 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         Use size to distinguish the visual anchor, primary elements, and supporting detail.
 
         Size objects to their content and role. Nodes with the same role read best at the same size.
+
+        Color follows the board's color key: one hue per role, red only for failures, and gray wires. Read the color_palette topic before you color anything.
     </hierarchy_through_scale>
 
     <whitespace>

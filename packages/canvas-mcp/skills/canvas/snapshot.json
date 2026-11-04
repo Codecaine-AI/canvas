@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:42c5f0a6438ee2ca9225900b5fbd992929d8c7d94b078cd336edcb5d76e24422",
+  "snapshotId": "sha256:a7c3aea620fb11ecfb9a5ec9f7f32083e24c35d3de432e061020f97abc90e434",
   "sources": [
     {
       "id": "prompt",
@@ -25,7 +25,7 @@
     {
       "id": "diagram_design",
       "path": "packages/canvas/src/authoring/design.ts",
-      "sha256": "d62856d324b39089c0f0417cb8bc1b132b308a1e5347b93c26415e516910eaee"
+      "sha256": "70b34ac59aa5b902cc6e662c5676f81b3b56fe76108bcf23ceb6a2cdef602557"
     },
     {
       "id": "visual_vocabulary",
@@ -35,7 +35,7 @@
     {
       "id": "color_palette",
       "path": "packages/canvas/src/authoring/vocabulary.ts",
-      "sha256": "943deac9d2f88e9e624640248340e98284266a1f2157ba90e400e0708195013b"
+      "sha256": "0cf10e6760ac83daae870018554e6f5649610c86931d60abe5b7276ad1b8be33"
     },
     {
       "id": "canvas_conventions",
