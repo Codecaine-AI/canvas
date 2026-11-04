@@ -1,5 +1,4 @@
 import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS, NOTE_MAX_WORDS } from "../board/text-rules";
-import { FIT_VIEW_PX, MIN_FIT_TEXT_PX, boardEdgeCapPx } from "../board/lints/rules/board-too-large";
 import { CHIP_CLEARANCE } from "../board/lints/geometry";
 import { CONNECTION_LABEL_CHIP } from "../connectors/label-chip";
 import { DEFAULT_CANVAS_STYLE } from "../theme/canvas-style";
@@ -211,15 +210,13 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 </text_and_evidence>
 
 <layout_and_connections>
-    <fit_to_one_view>
-        A board is read whole, fit to one screen of about ${FIT_VIEW_PX}px on a side. The board's longer edge sets the size of every label: at a 4500px edge, 14px wire labels print at 5px. canvas_check's PNG is ${FIT_VIEW_PX}px wide, so a wide board looks as small there as it will on a screen. A tall board looks larger in the PNG than on a screen.
+    <air_for_labels>
+        The board takes the size its content needs. There is no size cap: a packed board loses more than a large one, because every wire label then fights its neighbors for room.
 
-        - Keep the board's longer edge at or under ${boardEdgeCapPx()}px, so the smallest text prints at ${MIN_FIT_TEXT_PX}px or more. board-too-large warns past it.
-        - Aim for a near-square board. Lay four or more sections out in two rows that grow down, not as one wide band.
         - Space nodes ${CRAFT_TARGETS.nodeGapRow}px apart across a row and ${CRAFT_TARGETS.nodeGapColumn}px apart down a column, and close every section around its children with fit_section.
-        - Plan the size before you place anything: count the nodes per row and the rows, then check the total against the cap.
         - A label on a wire that runs across a row needs ${LABEL.perChar}px per character plus ${LABEL.fixed}px of gap, so the ${CRAFT_TARGETS.nodeGapRow}px row gap holds ${LABEL.fits} characters. Before you connect, widen the gap for a longer label, or run that wire down a column, where any label fits. unreadable-labels warns when a chip does not fit.
-    </fit_to_one_view>
+        - Never shrink a node, cut a label, or stretch a side section to make the board square or to hit a size. Size each section to its content.
+    </air_for_labels>
 
     <build_it_once>
         Every move, resize, and relabel after the board is wired is rework, and rework costs more calls than the first draw. Settle the plan first, then place each thing once.

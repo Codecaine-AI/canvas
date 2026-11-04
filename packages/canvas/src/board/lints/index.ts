@@ -3,8 +3,7 @@
  *
  * LAYOUT_RULES runs on every edit and at spawn. FINISHING_RULES is what the
  * finalize gate runs; it adds polish-tier checks that would only nag while a
- * region is still being built, or that a board only meets once it is whole
- * (board-too-large: the full board fit to one view).
+ * region is still being built.
  *
  * Always-on lints check geometry defects and near-touching node boundaries,
  * plus the name + detail text convention (../text-rules): a name that reads
@@ -31,7 +30,6 @@ import { rule as labelIsProse } from "./rules/label-is-prose";
 import { rule as detailTooLong } from "./rules/detail-too-long";
 import { rule as denseNote } from "./rules/dense-note";
 import { rule as frameSlack } from "./rules/frame-slack";
-import { rule as boardTooLarge } from "./rules/board-too-large";
 
 export const LAYOUT_RULES: readonly LayoutRule[] = [
   coveredContent,
@@ -46,6 +44,6 @@ export const LAYOUT_RULES: readonly LayoutRule[] = [
   denseNote,
 ];
 
-export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES, frameSlack, boardTooLarge];
+export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES, frameSlack];
 
 export type { Diagnostic, LayoutRule, LintContext, Severity } from "./types";

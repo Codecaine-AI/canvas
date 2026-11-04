@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 cab01a59dd401cecc1b88e44da480b5cc528358c2a59a9bcf420717e16c0cc9f). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 d058dff4543b8a591b01aa54506f4493db7885eeae2e52cc5e387b2dde837034). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -268,15 +268,13 @@
 </text_and_evidence>
 
 <layout_and_connections>
-    <fit_to_one_view>
-        A board is read whole, fit to one screen of about 1600px on a side. The board's longer edge sets the size of every label: at a 4500px edge, 14px wire labels print at 5px. canvas_check's PNG is 1600px wide, so a wide board looks as small there as it will on a screen. A tall board looks larger in the PNG than on a screen.
+    <air_for_labels>
+        The board takes the size its content needs. There is no size cap: a packed board loses more than a large one, because every wire label then fights its neighbors for room.
 
-        - Keep the board's longer edge at or under 2488px, so the smallest text prints at 9px or more. board-too-large warns past it.
-        - Aim for a near-square board. Lay four or more sections out in two rows that grow down, not as one wide band.
         - Space nodes 200px apart across a row and 100px apart down a column, and close every section around its children with fit_section.
-        - Plan the size before you place anything: count the nodes per row and the rows, then check the total against the cap.
         - A label on a wire that runs across a row needs 8.4px per character plus 46px of gap, so the 200px row gap holds 18 characters. Before you connect, widen the gap for a longer label, or run that wire down a column, where any label fits. unreadable-labels warns when a chip does not fit.
-    </fit_to_one_view>
+        - Never shrink a node, cut a label, or stretch a side section to make the board square or to hit a size. Size each section to its content.
+    </air_for_labels>
 
     <build_it_once>
         Every move, resize, and relabel after the board is wired is rework, and rework costs more calls than the first draw. Settle the plan first, then place each thing once.
