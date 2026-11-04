@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/prompt/prompt.json (sha256 9c91daf8919ba6bc6d15e2886a360c696a9908c435f1ebbdc98983102a0e5294), packages/canvas/src/authoring/state-grammar.ts (sha256 0c69f2e5ec417815ee00ab7db5c330c2fa87a4320168a66743ee011bdef2db7f), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 5c61496f5ac71b29c7ca95a01bd44de5979f774fe11d3c25f0046623f520d50b). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/prompt/prompt.json (sha256 9c91daf8919ba6bc6d15e2886a360c696a9908c435f1ebbdc98983102a0e5294), packages/canvas/src/authoring/state-grammar.ts (sha256 3c6b4530021a540ba0d6fe778512d81cc1c54d95734fc8d4ec7ab63f284254d8), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 5c61496f5ac71b29c7ca95a01bd44de5979f774fe11d3c25f0046623f520d50b). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Operating Context
 
@@ -617,8 +617,9 @@ The standing context the internal layout editor received on every request, kept 
             - E1 rule: what is wrong and where (a suggested fix)
         - ids are stable only until the draft changes, then they reassign from E1/W1
         - always-on rules: covered-content, containment, broken-edges, unreadable-labels, crowding, clipped-text, label-is-prose, detail-too-long
-        - a committed finalize adds frame-slack
-            - is a frame far larger than its children need
+        - a committed finalize adds frame-slack, board-too-large
+            - frame-slack: a frame far larger than its children need
+            - board-too-large: the whole board fit to one view prints its smallest text too small
         - every open E* and W* in your edited scope blocks a committed finalize
             - the finding names the problem, the fix is yours to choose
         - N* notes never block: what cannot be promised

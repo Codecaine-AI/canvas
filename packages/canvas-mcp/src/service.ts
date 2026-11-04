@@ -21,6 +21,7 @@ import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
+import { FIT_VIEW_PX, boardEdgeCapPx } from "@codecaine-ai/canvas/lints";
 import {
   boardStateSnapshot,
   callToolkitTool,
@@ -220,7 +221,8 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_create",
     title: "Create canvas",
     description:
-      "Create a new board at canvases/<id>.canvas.json holding only its page frame, and open it as canvas_open does. Refuses an id that already exists. Place, connect, and check it with the other canvas tools.",
+      "Create a new board at canvases/<id>.canvas.json holding only its page frame, and open it as canvas_open does. Refuses an id that already exists. Place, connect, and check it with the other canvas tools. "
+      + `Plan the board to be read whole in one ${FIT_VIEW_PX}px view: keep its longer edge at or under ${boardEdgeCapPx()}px, near square, so details and wire labels stay readable. Lay a long run of sections out in rows that grow down, not as one wide band.`,
     inputSchema: {
       type: "object",
       properties: {
@@ -238,7 +240,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_check",
     title: "Check canvas",
     description:
-      "Check the open board before you call it done: runs every lint (the finishing rules included) and returns the findings grouped by severity with counts, the node and edge counts, and a PNG of the whole board at its full bounds. look frames one region; canvas_check shows all of it. Changes nothing.",
+      `Check the open board before you call it done: runs every lint (the finishing rules included) and returns the findings grouped by severity with counts, the node and edge counts, and a PNG of the whole board at its full bounds. The PNG is ${FIT_VIEW_PX}px wide, the size a viewer reads the board at: text you cannot read in it is too small, and board-too-large says how much to shrink the board. look frames one region; canvas_check shows all of it. Changes nothing.`,
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
 ];

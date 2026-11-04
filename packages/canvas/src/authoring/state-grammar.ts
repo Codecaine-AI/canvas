@@ -149,7 +149,10 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       `always-on rules: ${ALWAYS_ON_RULES}`,
       {
         text: `a committed finalize adds ${FINISHING_ONLY_RULES}`,
-        children: ["is a frame far larger than its children need"],
+        children: [
+          "frame-slack: a frame far larger than its children need",
+          "board-too-large: the whole board fit to one view prints its smallest text too small",
+        ],
       },
       {
         text: "every open E* and W* in your edited scope blocks a committed finalize",
