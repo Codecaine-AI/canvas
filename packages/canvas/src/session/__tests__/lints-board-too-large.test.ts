@@ -6,7 +6,7 @@ import { DEFAULT_CANVAS_STYLE } from "../../theme/canvas-style";
 import { box, makeDocument } from "./synthetic";
 
 /**
- * A board is read whole, fit to one 1600px view. With the default 14px
+ * A board is read whole, fit to one 1600px square view. With the default 14px
  * detail and wire-label text, a board whose longer edge passes 2488px prints
  * that text under 9px, and the finishing pass warns with the measured scale.
  */
@@ -31,7 +31,7 @@ describe("board-too-large lint", () => {
     expect(finding?.severity).toBe("warning");
     expect(finding?.at).toEqual(["page"]);
     expect(finding?.message).toBe(
-      "board is 4500×1600px; fit to a 1600px view it renders at 0.36×, "
+      "board is 4500×1600px; fit to a 1600px square view it renders at 0.36×, "
       + "so 14px details and wire labels print at 5px — keep the longer edge ≤ 2488px",
     );
     expect(finding?.suggestion).toStartWith("cut 2012px from the width: stack sections in rows");

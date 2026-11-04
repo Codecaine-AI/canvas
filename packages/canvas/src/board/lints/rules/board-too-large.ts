@@ -2,9 +2,9 @@
  * board-too-large — a board fit to one view must keep its smallest text
  * readable (warning tier, finishing pass).
  *
- * A board is read whole, fit to one view: canvas_check's full-board render
- * is FIT_VIEW_PX wide, and a screen or a pinned print is about the same. The
- * board's longer edge sets the scale, so a board drawn 4500px wide prints
+ * A board is read whole, fit to one square view about FIT_VIEW_PX on a side:
+ * a screen, a pinned print, or canvas_check's FIT_VIEW_PX-wide PNG shown on
+ * one. The board's longer edge sets the scale, so a board drawn 4500px wide prints
  * its 14px details and wire labels at 5px. This rule takes the smallest
  * painted text size from the canvas style (the detail line and the wire
  * label chip) and fires when, at that scale, it falls below
@@ -22,7 +22,7 @@ import { pageFrameOf } from "../../helpers";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import type { LayoutRule } from "../types";
 
-/** Width in px of the whole-board view a board is read at (canvas_check's render). */
+/** Side in px of the square whole-board view a board is read at (canvas_check's PNG width). */
 export const FIT_VIEW_PX = 1600;
 /** Smallest text size, in rendered px at that view, that reads at arm's length. */
 export const MIN_FIT_TEXT_PX = 9;
@@ -43,7 +43,7 @@ function longEdge(document: InteractiveCanvasDocument): { width: number; height:
   return { width: bounds.width, height: bounds.height, edge: Math.max(bounds.width, bounds.height) };
 }
 
-const GUIDANCE = `A board is read whole, fit to one ${FIT_VIEW_PX}px view, so its longer edge sets every text size:
+const GUIDANCE = `A board is read whole, fit to one ${FIT_VIEW_PX}px square view, so its longer edge sets every text size:
 - this finishing-pass warning fires when the smallest painted text (the detail line or a wire
   label, from the canvas style) renders under ${MIN_FIT_TEXT_PX}px at that view; with 14px text
   that is a longer edge past about ${Math.floor((FIT_VIEW_PX * 14) / MIN_FIT_TEXT_PX)}px;
@@ -78,7 +78,7 @@ export const rule: LayoutRule = {
       at: frame ? [frame.id] : [],
       where: bounds,
       message:
-        `board is ${Math.round(now.width)}×${Math.round(now.height)}px; fit to a ${FIT_VIEW_PX}px view it `
+        `board is ${Math.round(now.width)}×${Math.round(now.height)}px; fit to a ${FIT_VIEW_PX}px square view it `
         + `renders at ${scale.toFixed(2)}×, so ${textPx}px details and wire labels print at ${printed}px `
         + `— keep the longer edge ≤ ${maxEdge}px`,
       suggestion:

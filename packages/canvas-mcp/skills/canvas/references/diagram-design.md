@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 8677b9a8b8a123a968dfa3899b2e7688a6c84b33b8a8ef42f03ccd2124d5a264). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 d62856d324b39089c0f0417cb8bc1b132b308a1e5347b93c26415e516910eaee). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -259,7 +259,7 @@
 
 <layout_and_connections>
     <fit_to_one_view>
-        A board is read whole, fit to one 1600px view, and canvas_check's PNG is that view. The board's longer edge sets the size of every label: at a 4500px edge, 14px wire labels print at 5px.
+        A board is read whole, fit to one screen of about 1600px on a side. The board's longer edge sets the size of every label: at a 4500px edge, 14px wire labels print at 5px. canvas_check's PNG is 1600px wide, so a wide board looks as small there as it will on a screen. A tall board looks larger in the PNG than on a screen.
 
         - Keep the board's longer edge at or under 2488px, so the smallest text prints at 9px or more. board-too-large warns past it.
         - Aim for a near-square board. Lay four or more sections out in two rows that grow down, not as one wide band.

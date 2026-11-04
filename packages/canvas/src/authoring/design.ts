@@ -170,7 +170,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 
 <layout_and_connections>
     <fit_to_one_view>
-        A board is read whole, fit to one ${FIT_VIEW_PX}px view, and canvas_check's PNG is that view. The board's longer edge sets the size of every label: at a 4500px edge, 14px wire labels print at 5px.
+        A board is read whole, fit to one screen of about ${FIT_VIEW_PX}px on a side. The board's longer edge sets the size of every label: at a 4500px edge, 14px wire labels print at 5px. canvas_check's PNG is ${FIT_VIEW_PX}px wide, so a wide board looks as small there as it will on a screen. A tall board looks larger in the PNG than on a screen.
 
         - Keep the board's longer edge at or under ${boardEdgeCapPx()}px, so the smallest text prints at ${MIN_FIT_TEXT_PX}px or more. board-too-large warns past it.
         - Aim for a near-square board. Lay four or more sections out in two rows that grow down, not as one wide band.
