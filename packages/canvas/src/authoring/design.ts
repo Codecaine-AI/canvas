@@ -3,6 +3,7 @@ import { FIT_VIEW_PX, MIN_FIT_TEXT_PX, boardEdgeCapPx } from "../board/lints/rul
 import { CHIP_CLEARANCE } from "../board/lints/geometry";
 import { CONNECTION_LABEL_CHIP } from "../connectors/label-chip";
 import { DEFAULT_CANVAS_STYLE } from "../theme/canvas-style";
+import { creationDefaultFor } from "../session/tools/creation-defaults";
 import { CRAFT_TARGETS } from "./style-guide/craft-targets";
 import { renderVisualPatterns } from "./visual-patterns";
 
@@ -26,6 +27,12 @@ function labelBudget(gapPx: number) {
 }
 
 const LABEL = labelBudget(CRAFT_TARGETS.nodeGapRow);
+
+/** A creation default's size as `W×H`. */
+function defaultSize(kind: "shape" | "icon"): string {
+  const { width, height } = creationDefaultFor(kind).size;
+  return `${width}×${height}`;
+}
 
 /** Shared diagram-design knowledge. No agent state, tools, or model runtime. */
 export interface AuthoringTopic {
@@ -203,6 +210,16 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         - Plan the size before you place anything: count the nodes per row and the rows, then check the total against the cap.
         - A label on a wire that runs across a row needs ${LABEL.perChar}px per character plus ${LABEL.fixed}px of gap, so the ${CRAFT_TARGETS.nodeGapRow}px row gap holds ${LABEL.fits} characters. Before you connect, widen the gap for a longer label, or run that wire down a column, where any label fits. unreadable-labels warns when a chip does not fit.
     </fit_to_one_view>
+
+    <build_it_once>
+        Every move, resize, and relabel after the board is wired is rework, and rework costs more calls than the first draw. Settle the plan first, then place each thing once.
+
+        - Before the first place_shape, write the plan: the sections and their rows, the nodes in each row, the color key, and every wire with its label.
+        - Keep each node at its default size: ${defaultSize("shape")} for a shape, ${defaultSize("icon")} for an icon. Do not resize nodes one by one to make a row match. Resize only a node whose text clips, or the board's one visual anchor.
+        - Label a wire only when it names a condition, a branch, or a payload the source names. A plain next-step wire needs no label.
+        - When two or more nodes share a type and a role, such as three graders or two providers, finish one with its name, detail, and color. Then clone it for each peer with its own text and detail.
+        - Place, name, and color every node, then connect. Call canvas_check when every wire is drawn, and fix all its findings in one pass.
+    </build_it_once>
 
     <hierarchy_through_scale>
         Use size to distinguish the visual anchor, primary elements, and supporting detail.

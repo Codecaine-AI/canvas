@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 69d897a5bca60f7a56f8720318a61c7fe07d515eb351a6821480ac9c7b7b3c80). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 04f679c1620b8750841ec75965160561e3ba320358c0bef9662b730cb7513406). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -267,6 +267,16 @@
         - Plan the size before you place anything: count the nodes per row and the rows, then check the total against the cap.
         - A label on a wire that runs across a row needs 8.4px per character plus 46px of gap, so the 200px row gap holds 18 characters. Before you connect, widen the gap for a longer label, or run that wire down a column, where any label fits. unreadable-labels warns when a chip does not fit.
     </fit_to_one_view>
+
+    <build_it_once>
+        Every move, resize, and relabel after the board is wired is rework, and rework costs more calls than the first draw. Settle the plan first, then place each thing once.
+
+        - Before the first place_shape, write the plan: the sections and their rows, the nodes in each row, the color key, and every wire with its label.
+        - Keep each node at its default size: 280×100 for a shape, 300×120 for an icon. Do not resize nodes one by one to make a row match. Resize only a node whose text clips, or the board's one visual anchor.
+        - Label a wire only when it names a condition, a branch, or a payload the source names. A plain next-step wire needs no label.
+        - When two or more nodes share a type and a role, such as three graders or two providers, finish one with its name, detail, and color. Then clone it for each peer with its own text and detail.
+        - Place, name, and color every node, then connect. Call canvas_check when every wire is drawn, and fix all its findings in one pass.
+    </build_it_once>
 
     <hierarchy_through_scale>
         Use size to distinguish the visual anchor, primary elements, and supporting detail.
