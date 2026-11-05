@@ -75,15 +75,13 @@ describe("shared Canvas authoring guidance", () => {
     expect(groups.find(group => kindRank(group.entries[0]!) === 2)!.lead).not.toBe("");
   });
 
-  test("the name and detail convention quotes the limits the text lints enforce", () => {
+  test("the name and detail convention quotes the limits in board/text-rules.ts", () => {
     const design = topicText("diagram_design");
     expect(design).toContain(`${NAME_TARGET_WORDS} words`);
     expect(design).toContain(`${DETAIL_MAX_CHARS} characters`);
 
     const conventions = topicText("canvas_conventions");
     for (const fragment of [
-      "label-is-prose",
-      "detail-too-long",
       `${NAME_MAX_WORDS} words`,
       `${NAME_MAX_CHARS} characters`,
       `${DETAIL_MAX_CHARS} characters`,

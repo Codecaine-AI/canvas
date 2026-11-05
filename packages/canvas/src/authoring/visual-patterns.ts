@@ -12,7 +12,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "fan-out",
     name: "Fan-Out",
-    description: "One source produces or delegates to many recipients. Spread recipients across the reading direction and label the dispatched work. Conditional choices belong to a decision; parallel delegation shows the recipients that actually work.",
+    description: "One source produces or delegates to many recipients. Spread recipients across the reading direction. Conditional choices belong to a decision; parallel delegation shows the recipients that actually work.",
     ascii: `[Source] --+--> [Recipient A]
           +--> [Recipient B]
           +--> [Recipient C]`,
@@ -47,7 +47,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "sequence",
     name: "Sequence",
-    description: "Ordered stages or events form a readable chain with labeled transitions. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects. The line under each stage is its detail: one fact, not a description.",
+    description: "Ordered stages or events form a readable chain. Label a transition only for its condition. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects. The line under each stage is its detail: one fact, not a description.",
     ascii: `[Request] --> [Validate] --> [Process] --> [Respond]
  POST /runs    JSON schema    worker pool   201 Created`,
     useCase: "A request passes through validation, processing, and response delivery.",

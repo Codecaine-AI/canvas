@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/visual-patterns.ts (sha256 236da37729039e37a11663f4dfde5426818d9bc3b412535674b081da4b686049). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/visual-patterns.ts (sha256 1447260e87065ef7acb5fadbb75b5aa3d85741b1a9fa7c5877acf55b6089f5a9). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Visual Patterns
 
@@ -6,7 +6,7 @@ The 10 patterns a diagram composes. Each sketch is conceptual, not literal coord
 
 ## Fan-Out (`fan-out`)
 
-One source produces or delegates to many recipients. Spread recipients across the reading direction and label the dispatched work. Conditional choices belong to a decision; parallel delegation shows the recipients that actually work.
+One source produces or delegates to many recipients. Spread recipients across the reading direction. Conditional choices belong to a decision; parallel delegation shows the recipients that actually work.
 
 ```text
 [Source] --+--> [Recipient A]
@@ -50,7 +50,7 @@ Use case: A service owns two subsystems, one of which owns a smaller component.
 
 ## Sequence (`sequence`)
 
-Ordered stages or events form a readable chain with labeled transitions. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects. The line under each stage is its detail: one fact, not a description.
+Ordered stages or events form a readable chain. Label a transition only for its condition. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects. The line under each stage is its detail: one fact, not a description.
 
 ```text
 [Request] --> [Validate] --> [Process] --> [Respond]

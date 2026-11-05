@@ -565,7 +565,7 @@ function snapRun(
 export const spaceOut = defineOperationTool({
   name: "space_out",
   description:
-    "Re-pitch boxes in place so the clear gap between neighbours is exactly what you ask for. In positional order along the flow the first box holds and every later one slides; the run grows or shrinks to suit, and the cross axis is untouched. This is the corridor-opening fix for crowding. Sections re-pitch by their own frame and carry their contents; edges are not targets, they re-route themselves.",
+    "Re-pitch boxes in place so the clear gap between neighbours is exactly what you ask for. In positional order along the flow the first box holds and every later one slides; the run grows or shrinks to suit, and the cross axis is untouched. It opens a corridor between boxes in one call. Sections re-pitch by their own frame and carry their contents; edges are not targets, they re-route themselves.",
   fields: {
     ids: ArrangeIds,
     axis: SpaceAxis,
