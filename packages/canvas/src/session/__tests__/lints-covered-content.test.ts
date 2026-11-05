@@ -106,6 +106,17 @@ describe("covered-content lint", () => {
     expect(findings[0]!.message).toContain('label "connect()" chip on labeled covers its endpoint a');
   });
 
+  test("a chip over the empty side of an icon's box is clean: only its tile and caption paint", () => {
+    // The icon paints a 56px tile at x 172..228 and its caption under it; the
+    // "call" chip at x 300..348 sits inside the 400px box but on neither.
+    const icon = { ...box("svc", 0, 0, 400, 120, "icon"), text: "Service", detail: "one fact" };
+    const findings = coveredContent.check(makeDocument(
+      [icon, box("b", 420, 12)],
+      [{ ...connect("e", "svc", "b"), label: "call" }],
+    ));
+    expect(findings).toEqual([]);
+  });
+
   test("a chip with room between its own endpoints is clean", () => {
     const findings = coveredContent.check(makeDocument(
       [box("a", 0, 0), box("b", 600, 0)],

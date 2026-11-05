@@ -38,6 +38,7 @@ import {
   chipFor,
   inflate,
   intersects,
+  paintedRects,
   pathBoxViolationIds,
   polylineLengthInRect,
   rectOf,
@@ -214,8 +215,8 @@ const CHIP_ON_EDGE_RUN = 8;
 
 /**
  * The covered-content faults on these edges' label chips, counted the way
- * the rule counts them: a chip overlapping a box (its own ends included,
- * sections exempt), lying on another wire's path, or overlapping another
+ * the rule counts them: a chip overlapping what a box paints (its own ends
+ * included, sections exempt), lying on another wire's path, or overlapping another
  * chip. A move may not add one.
  */
 function chipFaults(
@@ -232,7 +233,7 @@ function chipFaults(
     if (!chip) continue;
     for (const object of document.objects) {
       if (kindOf(object) !== "node") continue;
-      if (intersects(chip.rect, rectOf(object))) { faults += 1; break; }
+      if (paintedRects(object, canvasStyle).some((face) => intersects(chip.rect, face))) { faults += 1; break; }
     }
     for (const [otherId, points] of routes) {
       if (otherId === edge.id) continue;

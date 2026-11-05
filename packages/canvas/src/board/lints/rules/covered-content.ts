@@ -7,8 +7,8 @@
  * - box-on-box: sibling boxes (same parent; sections and stickies exempt)
  *   whose intersection exceeds 25% of the smaller box or covers a box's text
  *   center;
- * - chip-on-box: a label chip over a box's face, its own endpoint boxes
- *   included;
+ * - chip-on-box: a label chip over what a box paints (an icon's tile and
+ *   caption, any other box's face), its own endpoint boxes included;
  * - chip-on-chip: two label chips overlapping;
  * - chip-on-edge: a chip lying along ANOTHER edge's routed wire for more
  *   than 8px.
@@ -21,8 +21,8 @@ import {
   chipFor,
   chipNoteClause,
   intersects,
+  paintedRects,
   polylineLengthInRect,
-  rectOf,
   routedPolyline,
   type Chip,
   type Rect,
@@ -112,15 +112,17 @@ export const rule: LayoutRule = {
       .map((edge) => chipFor(edge, document, context?.canvasStyle))
       .filter((chip): chip is Chip => chip !== undefined);
 
-    // 2 — chip vs box: a chip over any box's face. Its own endpoints count
-    // too: a chip on its own endpoint hides that box's text just the same.
+    // 2 — chip vs box: a chip over what any box paints (an icon's tile and
+    // caption, not the empty sides of its box). Its own endpoints count too:
+    // a chip on its own endpoint hides that box's text just the same.
     for (const chip of chips) {
       for (const node of boxes) {
-        const boxRect = rectOf(node);
-        if (!intersects(chip.rect, boxRect)) continue;
+        const painted = paintedRects(node, context?.canvasStyle);
+        const covers = (rect: Rect) => painted.some((face) => intersects(rect, face));
+        if (!covers(chip.rect)) continue;
         const own = node.id === chip.edge.from.objectId || node.id === chip.edge.to.objectId;
         if (own && chip.edge.from.objectId === chip.edge.to.objectId) continue; // a self-loop is broken-edges'
-        const severity = chipFindingSeverity(chip, (rect) => intersects(rect, boxRect), "error");
+        const severity = chipFindingSeverity(chip, covers, "error");
         findings.push({
           rule: "covered-content",
           severity,

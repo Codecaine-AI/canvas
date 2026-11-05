@@ -156,6 +156,16 @@ export function captionBand(object: InteractiveCanvasObject, canvasStyle?: Canva
   };
 }
 
+/**
+ * Where a box paints content a chip can cover: its drawn rect (a tile-style
+ * icon's tile, else the whole box) and, under an icon, its caption band.
+ * The empty sides of an icon's box paint nothing.
+ */
+export function paintedRects(object: InteractiveCanvasObject, canvasStyle?: CanvasStyle): Rect[] {
+  const band = captionBand(object, canvasStyle);
+  return band ? [drawnRectOf(object, canvasStyle), band] : [drawnRectOf(object, canvasStyle)];
+}
+
 export function inflate(rect: Rect, margin: number): Rect {
   return {
     x: rect.x - margin,
