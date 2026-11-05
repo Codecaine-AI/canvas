@@ -108,8 +108,11 @@ export interface CanvasStyle {
   detailFontSizePx: number;
 
   // --- Shapes ---------------------------------------------------------------
-  /** `tint` = the pastel fill per color (FigJam); `card` = `cardFill` with an ink border. */
-  shapeFill: "tint" | "card";
+  /**
+   * `tint` = the pastel fill per color (FigJam); `card` = `cardFill` with an ink border;
+   * `ink-card` = the ink mixed into `cardFill` with an ink border (gray and white stay `cardFill`).
+   */
+  shapeFill: "tint" | "card" | "ink-card";
   /** Card surface: card shapes, card stickies, outlined white tiles; layer-cake fills keep clear of it. */
   cardFill: string;
 
@@ -382,11 +385,11 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   textFontSizePx: 17.5,
   detailFont: "mono",
   detailFontSizePx: 14,
-  shapeFill: "card",
+  shapeFill: "ink-card",
   sectionFill: "layer-cake",
-  sectionTintBase: 0.07,
+  sectionTintBase: 0.14,
   sectionTintStep: 0.035,
-  sectionTintMax: 0.16,
+  sectionTintMax: 0.21,
   sectionBorderOpacity: 0.5,
   headerPlacement: "pinned",
   headerFont: "mono",
@@ -424,6 +427,7 @@ const SCHEMATIC_DARK_CARD_FILL = "#32363E";
 const SCHEMATIC_DARK_PRESET: CanvasStyle = inPresetKeyOrder({
   ...SCHEMATIC_LIGHT_PRESET,
   theme: "schematic-dark",
+  shapeFill: "card",
   sectionTintBase: 0.1,
   sectionTintStep: 0.05,
   sectionTintMax: 0.22,
@@ -629,6 +633,7 @@ export const CANVAS_STYLE_CONTROLS: readonly CanvasStyleControl[] = [
     options: [
       { value: "tint", label: "Tint" },
       { value: "card", label: "Card" },
+      { value: "ink-card", label: "Ink card" },
     ],
   },
   {
@@ -808,6 +813,7 @@ export const CANVAS_STYLE_CONTROLS: readonly CanvasStyleControl[] = [
     options: [
       { value: "paper", label: "Paper note" },
       { value: "card", label: "Card" },
+      { value: "ink-card", label: "Ink card" },
     ],
   },
   // Palette
