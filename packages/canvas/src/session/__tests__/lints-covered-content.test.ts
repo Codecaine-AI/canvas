@@ -70,6 +70,17 @@ describe("covered-content lint", () => {
     expect(pastThreshold[0]!.message).toContain("25%");
   });
 
+  test("icon boxes are judged by what they paint: apart tiles and captions are clean, touching tiles are not", () => {
+    // Default (tile) style: a 300x120 icon paints a centered tile and its
+    // caption (56px tile at x 122 and 272 here), not the empty sides of its box.
+    const icon = (id: string, x: number) => ({ ...box(id, x, 0, 300, 120, "icon"), text: id, icon: "database" });
+    expect(coveredContent.check(makeDocument([icon("db", 0), icon("api", 150)]))).toEqual([]);
+
+    const findings = coveredContent.check(makeDocument([icon("db", 0), icon("api", 20)]));
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({ severity: "error", at: ["db", "api"] });
+  });
+
   // --- chip vs box (ported from rules-label-clearance, + clearance margin) ---
 
   test("a label chip landing on a third box is an error", () => {

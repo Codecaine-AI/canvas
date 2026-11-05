@@ -813,7 +813,6 @@ export const CANVAS_STYLE_CONTROLS: readonly CanvasStyleControl[] = [
     options: [
       { value: "paper", label: "Paper note" },
       { value: "card", label: "Card" },
-      { value: "ink-card", label: "Ink card" },
     ],
   },
   // Palette

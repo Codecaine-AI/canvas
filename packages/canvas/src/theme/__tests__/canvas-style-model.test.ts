@@ -161,6 +161,13 @@ describe("normalizeCanvasStyle", () => {
     expect("bogusKey" in style).toBe(false);
   });
 
+  it("keeps a sticky to the styles a sticky paints (ink-card is a shape fill only)", () => {
+    const sticky = CANVAS_STYLE_CONTROLS.find((control) => control.key === "stickyStyle");
+    expect(sticky?.options?.map((option) => option.value)).toEqual(["paper", "card"]);
+    expect(normalizeCanvasStyle({ theme: "schematic-light", stickyStyle: "ink-card" }).stickyStyle)
+      .toBe(canvasThemePreset("schematic-light").stickyStyle);
+  });
+
   it("clamps numbers to their control range", () => {
     const style = normalizeCanvasStyle({ sectionBorderOpacity: 4, headerChipMix: -1, connectorLabelHeightPx: 999 });
     expect(style.sectionBorderOpacity).toBe(1);

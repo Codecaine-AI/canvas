@@ -84,5 +84,7 @@ describe("climb score gate", () => {
     expect(tenthsOf(9.35)).toBeNull();
     expect(tenthsOf(0.9)).toBeNull();
     expect(tenthsOf(10.1)).toBeNull();
+    expect(tenthsOf(10.00000001)).toBeNull();
+    expect(tenthsOf(8.99999999)).toBeNull();
   });
 });

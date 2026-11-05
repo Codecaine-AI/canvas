@@ -5,8 +5,9 @@
  * router's own label point), and only real overlaps — contact is not a
  * finding:
  * - box-on-box: sibling boxes (same parent; sections and stickies exempt)
- *   whose intersection exceeds 25% of the smaller box or covers a box's text
- *   center;
+ *   whose painted faces (paintedRects: an icon's tile and caption, any other
+ *   box's face — never the empty sides of an icon's box) intersect by more
+ *   than 25% of the smaller painted area or cover a box's text center;
  * - chip-on-box: a label chip over what a box paints (an icon's tile and
  *   caption, any other box's face), its own endpoint boxes included;
  * - chip-on-chip: two label chips overlapping;
@@ -29,7 +30,6 @@ import {
 } from "../geometry";
 import { kindOf } from "../../helpers";
 
-import type { InteractiveCanvasObject } from "../../../state/schema";
 import type { LayoutRule, Severity } from "../types";
 
 /** The note clause for a chip pair: whichever chip is the unreliable one, else the tolerance. */
@@ -43,9 +43,7 @@ const OVERLAP_FRACTION = 0.25;
 /** A chip lying on another edge's path for more than this run is a finding. */
 const EDGE_RUN_TOLERANCE = 8;
 
-function intersection(a: InteractiveCanvasObject, b: InteractiveCanvasObject): Rect | undefined {
-  const aRect = a.geometry;
-  const bRect = b.geometry;
+function intersection(aRect: Rect, bRect: Rect): Rect | undefined {
   const x = Math.max(aRect.x, bRect.x);
   const y = Math.max(aRect.y, bRect.y);
   const width = Math.min(aRect.x + aRect.width, bRect.x + bRect.width) - x;
@@ -54,15 +52,32 @@ function intersection(a: InteractiveCanvasObject, b: InteractiveCanvasObject): R
   return { x, y, width, height };
 }
 
-/** Is the node's text center (its geometric center) strictly inside `rect`? */
-function coversTextCenter(node: InteractiveCanvasObject, rect: Rect): boolean {
-  const cx = node.geometry.x + node.geometry.width / 2;
-  const cy = node.geometry.y + node.geometry.height / 2;
-  return cx > rect.x && cx < rect.x + rect.width && cy > rect.y && cy < rect.y + rect.height;
+const area = (rect: Rect) => rect.width * rect.height;
+
+/** The bounding rect of `rects` (at least one). */
+function bounds(rects: readonly Rect[]): Rect {
+  const x = Math.min(...rects.map((rect) => rect.x));
+  const y = Math.min(...rects.map((rect) => rect.y));
+  const right = Math.max(...rects.map((rect) => rect.x + rect.width));
+  const bottom = Math.max(...rects.map((rect) => rect.y + rect.height));
+  return { x, y, width: right - x, height: bottom - y };
+}
+
+/**
+ * Is the node's text center strictly inside one of `rects`? The text center
+ * is the center of the last face it paints: an icon's caption band (its
+ * tile when it has no caption), any other box's face.
+ */
+function coversTextCenter(painted: readonly Rect[], rects: readonly Rect[]): boolean {
+  const face = painted[painted.length - 1]!;
+  const cx = face.x + face.width / 2;
+  const cy = face.y + face.height / 2;
+  return rects.some((rect) => cx > rect.x && cx < rect.x + rect.width && cy > rect.y && cy < rect.y + rect.height);
 }
 
 const GUIDANCE = `Nothing sits on content. Blocking (error tier):
-- a box overlap that swallows more than a quarter of the smaller box, or lands on its text;
+- a box overlap that swallows more than a quarter of what the smaller box paints (an icon's
+  tile and caption, a shape's face), or lands on its text;
 - a label chip on a box face (its own endpoints included), on another chip, or lying along
   another edge's wire.
 Fix it by moving the label along its wire with move_label, routing around the crowd, or
@@ -77,21 +92,27 @@ export const rule: LayoutRule = {
     const findings: ReturnType<LayoutRule["check"]> = [];
     const boxes = document.objects.filter((object) => kindOf(object) === "node");
 
-    // 1 — box-on-box.
+    // 1 — box-on-box, on what each box paints.
+    const faces = new Map(boxes.map((node) => [node.id, paintedRects(node, context?.canvasStyle)]));
     for (let i = 0; i < boxes.length; i += 1) {
       for (let j = i + 1; j < boxes.length; j += 1) {
         const a = boxes[i]!;
         const b = boxes[j]!;
         if ((a.parentId ?? null) !== (b.parentId ?? null)) continue;
-        const rect = intersection(a, b);
-        if (!rect) continue;
+        const aFaces = faces.get(a.id)!;
+        const bFaces = faces.get(b.id)!;
+        const pieces = aFaces.flatMap((aFace) => bFaces
+          .map((bFace) => intersection(aFace, bFace))
+          .filter((piece): piece is Rect => piece !== undefined));
+        if (pieces.length === 0) continue;
         const smallerArea = Math.min(
-          a.geometry.width * a.geometry.height,
-          b.geometry.width * b.geometry.height,
+          aFaces.reduce((sum, face) => sum + area(face), 0),
+          bFaces.reduce((sum, face) => sum + area(face), 0),
         );
         if (smallerArea <= 0) continue;
-        const fraction = (rect.width * rect.height) / smallerArea;
-        const covered = [a, b].filter((node) => coversTextCenter(node, rect));
+        const fraction = pieces.reduce((sum, piece) => sum + area(piece), 0) / smallerArea;
+        const covered = [a, b].filter((node) => coversTextCenter(faces.get(node.id)!, pieces));
+        const rect = bounds(pieces);
         if (fraction <= OVERLAP_FRACTION && covered.length === 0) continue;
         const pct = Math.round(fraction * 100);
         const centerNote = covered.length > 0

@@ -11,7 +11,9 @@
  * - degenerate edge (error): a self-loop, dangling endpoint, or zero-length
  *   route says nothing;
  * - anti-parallel pair (warning): two edges sharing both endpoints in
- *   opposite directions — visually one ambiguous double line;
+ *   opposite directions whose drawn wires lie on one another for SHARED_RUN
+ *   px or more — visually one ambiguous double-headed line. A reply routed
+ *   apart from its request reads as two wires and is not a finding;
  * - stranded chip (warning): a labeled edge whose chip hangs >160px from the
  *   wire actually drawn (diagonal waypoint legs park labels in empty space).
  *
@@ -41,6 +43,27 @@ import type { LayoutRule } from "../types";
 const CAPTION_RUN = 8;
 /** A chip farther than this from its own wire is stranded. */
 const STRANDED_DISTANCE = 160;
+/** Two drawn wires closer than this (center to center) paint as one line. */
+const SHARED_TOLERANCE = 4;
+/** Shortest stretch two opposite wires must share to read as one line. */
+const SHARED_RUN = 16;
+
+/** How far along `a` its wire lies within SHARED_TOLERANCE of `b`, sampled every 2px or less. */
+function sharedRun(a: readonly Point[], b: readonly Point[]): number {
+  let run = 0;
+  for (let i = 1; i < a.length; i += 1) {
+    const start = a[i - 1]!;
+    const end = a[i]!;
+    const length = Math.hypot(end.x - start.x, end.y - start.y);
+    const steps = Math.ceil(length / 2);
+    for (let k = 0; k < steps; k += 1) {
+      const t = (k + 0.5) / steps;
+      const sample = { x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t };
+      if (distanceToPolyline(sample, b) <= SHARED_TOLERANCE) run += length / steps;
+    }
+  }
+  return run;
+}
 
 function pathBounds(points: readonly Point[]): { x: number; y: number; width: number; height: number } {
   const xs = points.map((point) => point.x);
@@ -82,8 +105,8 @@ const GUIDANCE = `Connectors must read. Blocking (error tier — blocks commit):
 - zero-length, dangling, and self-loop edges — delete or reconnect them; a self-loop's
   meaning belongs in the node's own text, or on a sticky beside it.
 Warnings:
-- two opposite edges between the same pair read as one ambiguous line; prefer a single
-  edge with a both-ends arrow;
+- two opposite edges between the same pair drawn on one line read as one ambiguous line;
+  prefer a single edge with a both-ends arrow, or route the reply apart;
 - a label stranded far from its wire reads as something it is not.`;
 
 export const rule: LayoutRule = {
@@ -183,7 +206,7 @@ export const rule: LayoutRule = {
       }
     }
 
-    // Anti-parallel pair sharing both endpoints (warning).
+    // Anti-parallel pair sharing both endpoints and drawn on one line (warning).
     for (let i = 0; i < document.connections.length; i += 1) {
       for (let j = i + 1; j < document.connections.length; j += 1) {
         const a = document.connections[i]!;
@@ -192,10 +215,16 @@ export const rule: LayoutRule = {
         const aTo = a.to.objectId;
         if (aFrom === aTo) continue;
         if (aFrom !== b.to.objectId || aTo !== b.from.objectId) continue;
+        const aPath = routed.get(a.id);
+        const bPath = routed.get(b.id);
+        if (!aPath || !bPath) continue;
+        const run = sharedRun(elbowize(aPath), elbowize(bPath));
+        if (run < SHARED_RUN) continue;
         findings.push({
           rule: "broken-edges",
           severity: "warning",
           at: [a.id, b.id, aFrom, aTo],
+          where: pathBounds(aPath),
           message: `${a.id} and ${b.id} run anti-parallel between ${aFrom} and ${aTo}`,
           suggestion: "use one edge with a both-ends arrow, or offset the two routes",
         });
