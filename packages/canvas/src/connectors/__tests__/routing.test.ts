@@ -5,6 +5,7 @@ import { dragOrthogonalSegment, polylineInteriorWaypoints } from "../bend-editin
 import { autoPickAnchors, routeConnection, routeConnectionToPoint, type Anchor } from "../routing";
 import { CONNECTOR_END_GAP_PX } from "../routing";
 import { belowExtendedBoundsPx, iconGlyphBoxPx } from "../../objects/text-slots";
+import { connectionBoundsForObject, hitBoundsForObject } from "../../objects/geometry";
 import { CANVAS_THEME_PRESETS, DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 
 const EPSILON = 1e-6;
@@ -557,4 +558,42 @@ describe("routeConnection: captions wider than the glyph", () => {
       expectClose(routed.end.x, icon.geometry.x + glyph.x);
     });
   }
+});
+
+describe("routeConnection: other nodes' caption bands are obstacles", () => {
+  it("routes around a caption that overhangs its glyph, and keeps the endpoint anchors", () => {
+    const icon: InteractiveCanvasObject = {
+      id: "mid",
+      type: "icon",
+      icon: "database",
+      text: "Orders",
+      detail: "claude-sonnet-4 · 200k ctx",
+      geometry: { x: 400, y: 200, width: 64, height: 64 },
+    };
+    const caption = hitBoundsForObject(icon);
+    const glyph = connectionBoundsForObject(icon);
+    // The caption overhangs the glyph column on the left; a wire down that overhang
+    // misses the glyph but runs through the caption text.
+    expect(caption.x).toBeLessThan(glyph.x - 20);
+    const column = caption.x + 10;
+    const from = { ...object("from", column - 50, 0) };
+    const to = { ...object("to", column - 50, 500) };
+    expect(column).toBeLessThan(glyph.x);
+
+    const routed = routeConnection(from, to, connection("solid", { from: "bottom", to: "top" }), [from, icon, to]);
+
+    expectPointClose(routed.start, { x: column, y: from.geometry.y + from.geometry.height });
+    expectPointClose(routed.end, { x: column, y: to.geometry.y });
+    const points = routed.points ?? [];
+    for (let index = 1; index < points.length; index += 1) {
+      const a = points[index - 1]!;
+      const b = points[index]!;
+      const crosses =
+        Math.max(a.x, b.x) > caption.x &&
+        Math.min(a.x, b.x) < caption.x + caption.width &&
+        Math.max(a.y, b.y) > caption.y &&
+        Math.min(a.y, b.y) < caption.y + caption.height;
+      expect(crosses).toBe(false);
+    }
+  });
 });

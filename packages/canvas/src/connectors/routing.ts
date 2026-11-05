@@ -7,7 +7,7 @@
 import { centerOf, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../state/schema";
 import type { Anchor } from "../state/schema/connections";
-import { connectionBoundsForObject, getConnectionAnchors, outlinePolygon } from "../objects/geometry";
+import { connectionBoundsForObject, getConnectionAnchors, hitBoundsForObject, outlinePolygon } from "../objects/geometry";
 import { PathGenerator, type OrthogonalObstacle } from "./pathfinding/path-generator";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 // Connector routing figures (moved from theme/tokens.ts in the theme
@@ -481,6 +481,14 @@ function routeOrthogonalAStar(
   return routedConnectionFromPoints(routedPoints, routedStart, routedEnd, startAnchor, endAnchor);
 }
 
+/**
+ * What a route must keep out of: every node but the two endpoints and their
+ * ancestor sections, each as its hit footprint (hitBoundsForObject: the box,
+ * the glyph and the whole caption band, band width included), so a wire never
+ * runs through another node's caption. The endpoints keep their connection
+ * bounds (the A* start and end bounds), so anchors do not move. A node whose
+ * footprint holds an endpoint is skipped: the route could not leave it.
+ */
 function routingObstacleBounds(
   fromObject: InteractiveCanvasObject,
   toObject: InteractiveCanvasObject,
@@ -494,13 +502,9 @@ function routingObstacleBounds(
   collectAncestorIds(toObject.id, excludedIds, obstacles);
 
   return obstacles
-    .filter(
-      (object) =>
-        !excludedIds.has(object.id) &&
-        !boundsStrictlyContain(connectionBoundsForObject(object, canvasStyle), start) &&
-        !boundsStrictlyContain(connectionBoundsForObject(object, canvasStyle), end),
-    )
-    .map((object) => connectionBoundsForObject(object, canvasStyle));
+    .filter((object) => !excludedIds.has(object.id))
+    .map((object) => hitBoundsForObject(object, canvasStyle))
+    .filter((bounds) => !boundsStrictlyContain(bounds, start) && !boundsStrictlyContain(bounds, end));
 }
 
 function routeStraightIfAligned(
