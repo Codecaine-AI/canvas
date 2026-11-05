@@ -45,6 +45,7 @@ import {
 } from "../state/schema";
 
 import { diffDocuments } from "../board/doc-diff";
+import { layoutBlock, layoutNumbers } from "../board/layout-numbers";
 import {
   FINISHING_RULES,
   diagnosticLines,
@@ -300,8 +301,9 @@ function plural(count: number, one: string, many = `${one}s`): string {
 
 /**
  * The whole-board check: every lint, the finishing rules included, grouped
- * by severity, the node and edge counts, and one render of the board's full
- * painted bounds. `look` frames one region; this is the one view of all of it.
+ * by severity, the node and edge counts, one render of the board's full
+ * painted bounds, and the LAYOUT numbers (wire length, crossings, section
+ * traversals, longest wires — board/layout-numbers.ts). `look` frames one region; this is the one view of all of it.
  * Counts and the render read the board as saved, so a page frame injected at
  * open is not counted. The lints read the draft, as every edit's LINTS line does.
  * A conflicted session is refused as every gesture is: its draft holds an
@@ -348,6 +350,7 @@ export function checkCanvasFile(file: CanvasFileSession, label: string): LayoutT
     lines.push(`  ${name} (${found.length})`);
     for (const diagnostic of found) lines.push(...diagnosticLines(diagnostic).map((line) => `    ${line}`));
   }
+  lines.push(layoutBlock(layoutNumbers(board, file.session.canvasStyle)));
   return { text: lines.join("\n"), pngs };
 }
 
