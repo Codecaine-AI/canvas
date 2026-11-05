@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { resolve } from "node:path";
 
 import { readSets } from "./paths.ts";
-import { gateVerdict, prTable, readRoundScores, type Stage } from "./score.ts";
+import { CATEGORIES, gateVerdict, prTable, readRoundScores, tenthsOf, type ScoreFile, type Stage } from "./score.ts";
 
 const FIXTURES = resolve(import.meta.dir, "fixtures", "score");
 const sets = readSets(resolve(FIXTURES, "sets.json"));
@@ -17,7 +17,7 @@ describe("climb score gate", () => {
     const verdict = verdictFor("pass", 1);
     expect(verdict.failures).toEqual([]);
     expect(verdict.pass).toBe(true);
-    expect(verdict.sets.climb.judges.sol.categories.craft).toEqual({ mean: 9.5, min: 9, pass: true });
+    expect(verdict.sets.climb.judges.sol.categories.craft).toEqual({ mean: 9.5, min: 9, meanPass: true, floorPass: true, pass: true });
   });
 
   test("fails a category whose climb mean is below the gate", () => {
@@ -29,7 +29,7 @@ describe("climb score gate", () => {
   test("fails a category where one board scores below 9 even when the mean passes", () => {
     const verdict = verdictFor("board-below-9", 1);
     expect(verdict.pass).toBe(false);
-    expect(verdict.sets.climb.judges.sol.categories.craft).toEqual({ mean: 9.5, min: 8, pass: false });
+    expect(verdict.sets.climb.judges.sol.categories.craft).toEqual({ mean: 9.5, min: 8, meanPass: true, floorPass: false, pass: false });
     expect(verdict.failures).toEqual(["sol climb craft: a board scored 8, below 9"]);
   });
 
@@ -55,5 +55,34 @@ describe("climb score gate", () => {
     const verdict = verdictFor("pass", 2);
     expect(verdict.pass).toBe(false);
     expect(verdict.failures).toContain("muse climb: not scored: climb-a, climb-b, climb-c, climb-d");
+  });
+
+  test("decimal scores: a mean of exactly 9.5 passes at every verdict level despite float error", () => {
+    // (9 + 9 + 9.3 + 10 + 9.8 + 9.9) / 6 is 9.499999999999998 in floats.
+    const values = [9, 9, 9.3, 10, 9.8, 9.9];
+    const six = { climb: values.map((_, i) => `c${i}`), heldOut: ["h0"] };
+    const file = (judge: string): ScoreFile => ({
+      judge,
+      round: 1,
+      boards: [...six.climb.map((brief, i) => ({ brief, v: values[i] })), { brief: "h0", v: 9.5 }].map(({ brief, v }) => ({
+        brief,
+        scores: Object.fromEntries(CATEGORIES.map(([key]) => [key, v])) as ScoreFile["boards"][number]["scores"],
+        findings: [],
+      })),
+    });
+    const verdict = gateVerdict([file("sol"), file("opus")], six, 1, 1);
+    expect(verdict.sets.climb.judges.sol.categories.craft?.pass).toBe(true);
+    expect(verdict.sets.climb.pass).toBe(true);
+    expect(verdict.failures).toEqual([]);
+    expect(verdict.pass).toBe(true);
+  });
+
+  test("decimal scores: 9.3 is on the scale; two decimals, 0.9 and 10.1 are not", () => {
+    expect(tenthsOf(9.3)).toBe(93);
+    expect(tenthsOf(10)).toBe(100);
+    expect(tenthsOf(1)).toBe(10);
+    expect(tenthsOf(9.35)).toBeNull();
+    expect(tenthsOf(0.9)).toBeNull();
+    expect(tenthsOf(10.1)).toBeNull();
   });
 });

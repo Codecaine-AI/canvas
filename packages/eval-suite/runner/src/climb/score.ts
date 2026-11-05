@@ -45,6 +45,19 @@ const JUDGES: readonly string[] = [...STAGE_JUDGES[3], JESTER];
 const GATE_MEAN = 9.5;
 const GATE_FLOOR = 9;
 
+/**
+ * A score in whole tenths (9.3 -> 93), or null when it is off the scale:
+ * below 1.0, above 10.0, or with more than one decimal. Every gate sum and
+ * comparison runs in tenths, so float error never splits a verdict.
+ */
+export function tenthsOf(score: number): number | null {
+  if (!Number.isFinite(score)) return null;
+  const tenths = Math.round(score * 10);
+  if (Math.abs(score * 10 - tenths) > 1e-6 || tenths < 10 || tenths > 100) return null;
+  return tenths;
+}
+const tenths = (score: number) => tenthsOf(score) ?? Number.NaN;
+
 export interface BoardScore {
   brief: string;
   scores: Record<Category, number>;
@@ -75,8 +88,8 @@ export function parseScoreFile(path: string, round: number, sets: BriefSets): Sc
     if (extra) throw where(`${brief}: unknown category "${extra}"`);
     for (const key of CATEGORY_KEYS) {
       const score = scores[key];
-      if (typeof score !== "number" || !Number.isInteger(score) || score < 1 || score > 10) {
-        throw where(`${brief}: ${key} must be a whole number from 1 to 10, got ${JSON.stringify(score)}`);
+      if (typeof score !== "number" || tenthsOf(score) === null) {
+        throw where(`${brief}: ${key} must be a number from 1.0 to 10.0 with at most one decimal, got ${JSON.stringify(score)}`);
       }
     }
     const findings = board.findings ?? [];
@@ -95,7 +108,7 @@ export function readRoundScores(climbRoot: string, round: number, sets: BriefSet
     .map((name) => parseScoreFile(resolve(dir, name), round, sets));
 }
 
-export interface CategoryResult { mean: number; min: number; pass: boolean }
+export interface CategoryResult { mean: number; min: number; meanPass: boolean; floorPass: boolean; pass: boolean }
 export interface JudgeSetResult {
   pass: boolean;
   /** Set briefs this judge did not score. A judge with any missing brief fails the set. */
@@ -120,10 +133,12 @@ function judgeSetResult(file: ScoreFile | undefined, briefs: string[]): JudgeSet
   const categories: JudgeSetResult["categories"] = {};
   if (missing.length > 0) return { pass: false, missing, categories };
   for (const key of CATEGORY_KEYS as Category[]) {
-    const values = boards.map((board) => board.scores[key]);
-    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
-    const min = Math.min(...values);
-    categories[key] = { mean: round2(mean), min, pass: mean >= GATE_MEAN && min >= GATE_FLOOR };
+    const values = boards.map((board) => tenths(board.scores[key]));
+    const sum = values.reduce((total, value) => total + value, 0);
+    const minTenths = Math.min(...values);
+    const meanPass = sum >= tenths(GATE_MEAN) * values.length;
+    const floorPass = minTenths >= tenths(GATE_FLOOR);
+    categories[key] = { mean: round2(sum / values.length / 10), min: minTenths / 10, meanPass, floorPass, pass: meanPass && floorPass };
   }
   return { pass: Object.values(categories).every((result) => result.pass), missing, categories };
 }
@@ -140,8 +155,8 @@ export function gateVerdict(files: ScoreFile[], sets: BriefSets, round: number, 
       judges[judge] = judged;
       if (judged.missing.length > 0) failures.push(`${judge} ${setName}: not scored: ${judged.missing.join(", ")}`);
       for (const [key, category] of Object.entries(judged.categories)) {
-        if (category.mean < GATE_MEAN) failures.push(`${judge} ${setName} ${key}: mean ${category.mean} is below ${GATE_MEAN}`);
-        if (category.min < GATE_FLOOR) failures.push(`${judge} ${setName} ${key}: a board scored ${category.min}, below ${GATE_FLOOR}`);
+        if (!category.meanPass) failures.push(`${judge} ${setName} ${key}: mean ${category.mean} is below ${GATE_MEAN}`);
+        if (!category.floorPass) failures.push(`${judge} ${setName} ${key}: a board scored ${category.min}, below ${GATE_FLOOR}`);
       }
     }
     result[setName] = { pass: Object.values(judges).every((judged) => judged.pass), judges };
