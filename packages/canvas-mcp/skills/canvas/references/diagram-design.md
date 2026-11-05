@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 f428e6ec86e54cd622fdd91b29ccf31d6c4fd48c79714aabcfd3f6db9db45167). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 b03280b2ab27c2fb2321c03574fb8c16935a2aaa8441cf7675fa11429643b3cc). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -269,11 +269,14 @@
 
 <layout_and_connections>
     <air_for_labels>
-        The board takes the size its content needs. There is no size cap: a packed board loses more than a large one, because every wire label then fights its neighbors for room.
+        The board is judged as one image of its whole extent, padding included. Up to 2576 × 2576px, that image is the board at real size. Past it, the image shrinks and every label prints smaller than drawn. board-too-large is an error when the board's long edge is over 2576px.
 
+        - Plan the size before you place anything. Count the rows of sections and the nodes in each row, then add the node widths and the gaps against 2576px.
+        - A 280px node and its 200px row gap take 480px, so about 5 nodes fit across the whole board, sections included.
+        - With about 25 to 35 nodes, lay the sections out in 2 or 3 rows that grow down. Never put them in one long row.
         - Space nodes 200px apart across a row and 100px apart down a column, and close every section around its children with fit_section.
         - A label on a wire that runs across a row needs 8.4px per character plus 46px of gap, so the 200px row gap holds 18 characters. Before you connect, widen the gap for a longer label, or run that wire down a column, where any label fits. unreadable-labels warns when a chip does not fit.
-        - Never shrink a node, cut a label, or stretch a side section to make the board square or to hit a size. Size each section to its content.
+        - Never shrink a node, cut a label, or stretch a side section to make the board square or to hit the cap. To fit, move sections closer, stack a long row into 2 rows, or cut empty space. Size each section to its content.
     </air_for_labels>
 
     <build_it_once>

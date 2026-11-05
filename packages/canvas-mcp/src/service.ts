@@ -21,6 +21,7 @@ import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
+import { BOARD_MAX_EDGE_PX } from "@codecaine-ai/canvas/lints";
 import {
   boardStateSnapshot,
   callToolkitTool,
@@ -221,7 +222,8 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     title: "Create canvas",
     description:
       "Create a new board at canvases/<id>.canvas.json holding only its page frame, and open it as canvas_open does. Refuses an id that already exists. Place, connect, and check it with the other canvas tools. "
-      + "The board takes the size its content needs; there is no size cap. Build order: place_section for each section, place_shape with text, detail and color for each node, connect every wire, tighten_wires once, then canvas_check.",
+      + `The whole board, padding included, must fit within ${BOARD_MAX_EDGE_PX} × ${BOARD_MAX_EDGE_PX}px, so lay 4 or more sections out in 2 or 3 rows that grow down, not in one long row. `
+      + "Build order: place_section for each section, place_shape with text, detail and color for each node, connect every wire, tighten_wires once, then canvas_check.",
     inputSchema: {
       type: "object",
       properties: {
@@ -442,7 +444,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
           `GUIDANCE · ${topics.length} topics · ${snapshot.snapshotId}`,
           ...topics.map((entry) => `  ${entry.id}  ${JSON.stringify(entry.title)}  ~${entry.approxTokens} tokens`),
           "Call canvas_guidance { \"topic\": \"<id>\" } to read one.",
-          "Read diagram_design before the first place_section: it holds the layout rules canvas_check enforces (wire-detour, unreadable-labels).",
+          "Read diagram_design before the first place_section: it holds the layout rules canvas_check enforces (wire-detour, unreadable-labels, board-too-large).",
         ].join("\n"),
       );
     }

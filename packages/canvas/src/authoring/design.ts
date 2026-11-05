@@ -1,5 +1,6 @@
 import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS, NOTE_MAX_WORDS } from "../board/text-rules";
 import { CHIP_CLEARANCE } from "../board/lints/geometry";
+import { BOARD_MAX_EDGE_PX } from "../board/lints/rules/board-too-large";
 import { CONNECTION_LABEL_CHIP } from "../connectors/label-chip";
 import { DEFAULT_CANVAS_STYLE } from "../theme/canvas-style";
 import { creationDefaultFor } from "../session/tools/creation-defaults";
@@ -32,6 +33,16 @@ function defaultSize(kind: "shape" | "icon"): string {
   const { width, height } = creationDefaultFor(kind).size;
   return `${width}×${height}`;
 }
+
+/**
+ * Nodes that fit in one row across a board within BOARD_MAX_EDGE_PX: each
+ * node and its row gap, less the gap after the last node, inside the view
+ * padding (24 a side), the page frame and one section frame (padding each).
+ */
+const NODES_ACROSS_BOARD = Math.floor(
+  (BOARD_MAX_EDGE_PX - 2 * 24 - 4 * CRAFT_TARGETS.framePadding + CRAFT_TARGETS.nodeGapRow)
+  / (CRAFT_TARGETS.nodeWidth + CRAFT_TARGETS.nodeGapRow),
+);
 
 /** Shared diagram-design knowledge. No agent state, tools, or model runtime. */
 export interface AuthoringTopic {
@@ -211,11 +222,14 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 
 <layout_and_connections>
     <air_for_labels>
-        The board takes the size its content needs. There is no size cap: a packed board loses more than a large one, because every wire label then fights its neighbors for room.
+        The board is judged as one image of its whole extent, padding included. Up to ${BOARD_MAX_EDGE_PX} × ${BOARD_MAX_EDGE_PX}px, that image is the board at real size. Past it, the image shrinks and every label prints smaller than drawn. board-too-large is an error when the board's long edge is over ${BOARD_MAX_EDGE_PX}px.
 
+        - Plan the size before you place anything. Count the rows of sections and the nodes in each row, then add the node widths and the gaps against ${BOARD_MAX_EDGE_PX}px.
+        - A ${CRAFT_TARGETS.nodeWidth}px node and its ${CRAFT_TARGETS.nodeGapRow}px row gap take ${CRAFT_TARGETS.nodeWidth + CRAFT_TARGETS.nodeGapRow}px, so about ${NODES_ACROSS_BOARD} nodes fit across the whole board, sections included.
+        - With about 25 to 35 nodes, lay the sections out in 2 or 3 rows that grow down. Never put them in one long row.
         - Space nodes ${CRAFT_TARGETS.nodeGapRow}px apart across a row and ${CRAFT_TARGETS.nodeGapColumn}px apart down a column, and close every section around its children with fit_section.
         - A label on a wire that runs across a row needs ${LABEL.perChar}px per character plus ${LABEL.fixed}px of gap, so the ${CRAFT_TARGETS.nodeGapRow}px row gap holds ${LABEL.fits} characters. Before you connect, widen the gap for a longer label, or run that wire down a column, where any label fits. unreadable-labels warns when a chip does not fit.
-        - Never shrink a node, cut a label, or stretch a side section to make the board square or to hit a size. Size each section to its content.
+        - Never shrink a node, cut a label, or stretch a side section to make the board square or to hit the cap. To fit, move sections closer, stack a long row into 2 rows, or cut empty space. Size each section to its content.
     </air_for_labels>
 
     <build_it_once>
