@@ -138,6 +138,22 @@ describe("broken-edges lint", () => {
     expect(findings[0]!.message).toContain("anti-parallel");
   });
 
+  test("a reply routed apart from its request is two wires, not an anti-parallel pair", () => {
+    const findings = brokenEdges.check(makeDocument(
+      [box("a", 0, 0, 184, 96), box("b", 600, 0, 184, 96)],
+      [
+        { id: "request", from: { objectId: "a", anchor: "right" }, to: { objectId: "b", anchor: "left" } },
+        {
+          id: "reply",
+          from: { objectId: "b", anchor: "top" },
+          to: { objectId: "a", anchor: "top" },
+          waypoints: [[692, -120], [92, -120]],
+        },
+      ],
+    ));
+    expect(findings).toEqual([]);
+  });
+
   test("degenerate edges are errors: self-loop, dangling, zero-length", () => {
     const findings = brokenEdges.check(makeDocument(
       [box("a", 0, 0), box("b", 0, 0), box("c", 400, 0)],
