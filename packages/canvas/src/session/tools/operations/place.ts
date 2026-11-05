@@ -10,9 +10,9 @@
  *    the click, and the typing that happens in the same motion — nothing more.
  *    Size and color come from the creation defaults
  *    (../creation-defaults.ts), and every
- *    property beyond the default is its own later gesture. There is no `color`
- *    on `place_shape` because recoloring is `change_color`, not because it was
- *    forgotten.
+ *    property beyond the default is its own later gesture. `place_shape` and
+ *    `place_section` carry an optional `color`, because coloring right after
+ *    placing cost the drawer one call per node and left most frames gray.
  *
  * 2. THE GEOMETRY THAT LANDS IS ON THE AGENT GRID, and the summary reports what
  *    LANDED, not what was asked for (../grid.ts: snap, not reject). A model
@@ -69,11 +69,11 @@ function placement(geometry: {
 export const placeSection = defineOperationTool({
   name: "place_section",
   description:
-    "Draw a titled frame. Membership is reconciled from geometry, so the frame "
-    + "adopts whatever its edges already cover, and it keeps the footprint it "
-    + "lands with until something fits or resizes it. Undrawn size takes the "
-    + "default section footprint. The header shows the optional icon, the "
-    + "title, and the optional one-fact detail.",
+    "Draw a titled frame, colored in the same call. Membership is reconciled "
+    + "from geometry, so the frame adopts whatever its edges already cover, and "
+    + "it keeps the footprint it lands with until something fits, arranges or "
+    + "resizes it. Undrawn size takes the default section footprint. The header "
+    + "shows the optional icon, the title, and the optional one-fact detail.",
   fields: PlaceSectionParams.properties,
   validate: (ctx, p) => [
     ...ctx.requireFreeId(p.id),
@@ -96,11 +96,11 @@ export const placeSection = defineOperationTool({
           id: p.id,
           text: p.text,
           detail: storedDetail(p.detail),
-          color: defaults.color,
+          color: p.color ?? defaults.color,
           ...(p.icon !== undefined && isGlyphName(p.icon) ? { icon: p.icon } : {}),
         }),
       },
-      `place_section ${p.id} ${placement(geometry)}`,
+      `place_section ${p.id} ${placement(geometry)}${p.color ? ` ${p.color}` : ""}`,
     );
   },
 });

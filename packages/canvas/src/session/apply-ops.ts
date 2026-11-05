@@ -316,7 +316,7 @@ export function applyOperationToDraft(
  * both numbers here are >= the UI's, so an agent fit is never tighter than the
  * interactive one.
  */
-const SECTION_FIT_PADDING = { padding: 40, titleClearance: 40 } as const;
+export const SECTION_FIT_PADDING = { padding: 40, titleClearance: 40 } as const;
 
 /**
  * Resolve fit_section against the draft: membership is derived from geometry,

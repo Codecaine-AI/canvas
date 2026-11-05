@@ -41,6 +41,7 @@ export type OperationToolName =
   | "match_size"
   | "align"
   | "space_out"
+  | "arrange_section"
   | "tighten_wires"
   // Content & appearance
   | "update_text"

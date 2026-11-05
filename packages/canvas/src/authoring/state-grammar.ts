@@ -151,7 +151,6 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       {
         text: `a committed finalize adds ${FINISHING_ONLY_RULES}`,
         children: [
-          "frame-slack: a frame far larger than its children need",
           `board-too-large: the whole board's long edge, padding included, is over ${BOARD_MAX_EDGE_PX}px`,
         ],
       },

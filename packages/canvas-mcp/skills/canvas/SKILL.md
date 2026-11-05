@@ -20,43 +20,40 @@ subject is a canvas at all. This skill says how to draw one.
 
 ## Workflow
 
-The phases come from the layout editor's prompt, preserved in
-`references/operating-context.md`. Its phases 1 and 2 merge into
-Understand here.
-
 1. Understand. Compare `snapshot.json` with the snapshot id that
    `canvas_guidance` returns, and regenerate the skill if they differ.
    Read the request and the board digest. Research the subject until
    you can name every actor, store and boundary. Map each concept to a
-   visual pattern, plan the visual flow, and write the drawing plan as
-   sections before you place anything.
-2. Build. Place one section at a time: frame, objects, names, edges.
-   Call `look` on the section, audit it against the plan, check
-   visual defects and lints, fix, and look again. Adapt the plan when
-   the board teaches you something.
-3. Finish. `look` at each section in turn, because `look` frames one
-   region and not the whole board. Apply the quality checklist:
-   depth and evidence, conceptual clarity, container discipline,
-   structure, technical accuracy, visual validation. Call
-   `canvas_check`, read its whole-board PNG, and fix every error
+   visual pattern, and write the plan before you place anything: the
+   sections in rows, each section's nodes as rows, the color key, and
+   every wire.
+2. Build. Place everything, then connect. `place_section` for every
+   section with its title, icon and color. `place_shape` for every
+   node inside its section with its name, detail and color.
+   `arrange_section` for every section with its node rows, then
+   `space_out` the sections. Then `connect` every wire and call
+   `tighten_wires` once.
+3. Finish. Call `canvas_check`, read its whole-board PNG, and `look` at
+   any section whose text you cannot read in it. Fix every error
    before you call it done.
 
 ## Rules
 
-- Color encodes kind, never decoration. Never change the workspace theme.
+- Color encodes kind, never decoration. Give each section and node its
+  role's hue. Never change the workspace theme.
 - A name is 5 words or fewer. A detail is one fact of 48 characters or
   fewer. Explanations go on a sticky.
-- Geometry lands on a 20 unit grid. A flow node is 280 by 100. Gaps are
-  140 across a row and 100 down a column.
+- Label a wire only for a condition, a branch or a payload.
+- Geometry lands on a 20 unit grid. A flow node is 280 by 100.
+  `arrange_section` sets the gaps: 200 across a row and 100 down a
+  column.
 - A dashed edge means planned or optional. A solid edge exists.
-- Apply the prompt's two tests. Isomorphism: every box and wire maps to
-  one real thing. Education: a newcomer learns the system from the
-  board alone.
+- Every box and wire maps to one real thing in the source.
 
 ## References
 
-- `references/operating-context.md` holds the full layout-editor
-  prompt, the state grammar and the aesthetic topic.
+- `references/operating-context.md` holds the state grammar that
+  reads tool results, and the aesthetic topic.
 - `references/diagram-design.md` says how a diagram reads.
 - `references/visual-patterns.md` lists the ten patterns.
 - `references/vocabulary.md` lists 103 object kinds in 10 groups with

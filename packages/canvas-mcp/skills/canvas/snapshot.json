@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:74bef5596b0c3bdd389c5f4d3cdf1a15e111c0e213c6fec35e6e711b59551f21",
+  "snapshotId": "sha256:86c0da37c657e079945dd6112819e3f50608b55119befaecb9dba6a3c84a5b76",
   "sources": [
     {
       "id": "prompt",
@@ -10,7 +10,7 @@
     {
       "id": "state_grammar",
       "path": "packages/canvas/src/authoring/state-grammar.ts",
-      "sha256": "508de89c6579cdd185ec974fa22dc51bf94c4d76aee908cdfaab5764b9ae8eed"
+      "sha256": "abfaa652ce42572ecb8279503acc90f0095c4d4ed49135439b626226aad86c70"
     },
     {
       "id": "aesthetic",
@@ -20,12 +20,12 @@
     {
       "id": "visual_patterns",
       "path": "packages/canvas/src/authoring/visual-patterns.ts",
-      "sha256": "236da37729039e37a11663f4dfde5426818d9bc3b412535674b081da4b686049"
+      "sha256": "3b4c3e43c20012092bb8b5654e9b4ba6eb18c46178ffbfacc883d30e72b9fc6b"
     },
     {
       "id": "diagram_design",
       "path": "packages/canvas/src/authoring/design.ts",
-      "sha256": "b03280b2ab27c2fb2321c03574fb8c16935a2aaa8441cf7675fa11429643b3cc"
+      "sha256": "e7594a8b38f473ae93eb3d008891a1ca32cd754a80b8d1ed3f5ec06dce19506a"
     },
     {
       "id": "visual_vocabulary",
@@ -35,12 +35,12 @@
     {
       "id": "color_palette",
       "path": "packages/canvas/src/authoring/vocabulary.ts",
-      "sha256": "0cf10e6760ac83daae870018554e6f5649610c86931d60abe5b7276ad1b8be33"
+      "sha256": "9b6c31e985490791b9ac91f66ecd559a1636513a9b81ed3ddf9c96a38ef65f88"
     },
     {
       "id": "canvas_conventions",
       "path": "packages/canvas/src/authoring/conventions.ts",
-      "sha256": "09a8db0dd48dd01f7668fa187293e41b786eb0e4edfae7e371aa6b331aa10df1"
+      "sha256": "bbfe0914cfad5a29fbffb32248d0c077ab909aea1d8ce67b590cc994cf01b553"
     },
     {
       "id": "contact_sheet",
@@ -50,6 +50,6 @@
   ],
   "skill": {
     "path": "packages/canvas-mcp/src/skill/SKILL.md",
-    "sha256": "4a9127926a7b3d9c0861ac6432f63e575caa119db4c7c95d991b4694b22a797a"
+    "sha256": "99ae75121efa271bde1f603f21b7a8d44050c13fdf4f0d474e115aa701bedb57"
   }
 }
