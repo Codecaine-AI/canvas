@@ -1,6 +1,6 @@
 # Judge brief: score Canvas diagram boards
 
-You score diagram boards that an agent drew from written briefs. Each board is one PNG. Score each board on its own, in 9 categories, from 1 to 10. Then list the findings that cost the board the most points.
+You score diagram boards that an agent drew from written briefs. Each board is one PNG. Score each board on its own, in 9 categories, from 1.0 to 10.0 with one decimal. Then list the findings that cost the board the most points.
 
 ## What you see
 
@@ -13,8 +13,12 @@ Do not open any other file in the round folder. Do not read the board JSON, the 
 
 ## How to score
 
-- Give every category a whole number from 1 to 10.
-- Use the anchors. A score between two anchors means the board sits between them.
+- Give every category a number from 1.0 to 10.0 with one decimal, such as 9.3. A whole number such as 8 is also fine.
+- Use the anchors. Each anchor covers a band, such as 7-8. Use the decimal to place the board inside its band:
+  - The low end of a band (7.0) means the board just meets that anchor.
+  - The middle (7.5) means it meets the anchor fully, with the faults the anchor allows.
+  - The top end (8.0, or 9.9 in the top band) means only a trace of those faults is left.
+- 10.0 means nothing in the category can improve. 9.0 means the board meets the top anchor with one small fault you can name; 9.5 means a fault you must look for.
 - Score each category on its own evidence. A fault that hurts two categories can lower both.
 - Judge only what a viewer of the PNG can see. A fact that is in the brief but not readable on the board is missing.
 - Do not round up for effort, size or ambition. A small board that is right beats a large board that is wrong.
@@ -116,9 +120,9 @@ Write one JSON file for the round: `packages/eval-suite/runs/climb/round-<n>/sco
         "system_fidelity": 7,
         "requirement_coverage": 6,
         "scope_discipline": 8,
-        "readability": 7,
+        "readability": 7.6,
         "hierarchy_grouping": 6,
-        "layout_flow": 5,
+        "layout_flow": 5.4,
         "color_contrast": 7,
         "typography_labels": 8,
         "craft": 6
@@ -135,5 +139,5 @@ Write one JSON file for the round: `packages/eval-suite/runs/climb/round-<n>/sco
 - `round`: the round number, the same as the folder `round-<n>`.
 - `boards`: one entry per board you scored, each brief once.
 - `brief`: the brief id, the folder name under `round-<n>/`.
-- `scores`: all 9 keys, each a whole number from 1 to 10.
+- `scores`: all 9 keys, each a number from 1.0 to 10.0 with at most one decimal.
 - `findings`: up to 5 entries, worst first. `category` is one of the 9 score keys.
