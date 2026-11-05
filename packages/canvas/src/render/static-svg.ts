@@ -56,6 +56,7 @@ import {
 } from "../objects/geometry";
 import { labelPointFor, routeConnection, CONNECTOR_END_GAP_PX } from "../connectors/routing";
 import { connectorDashArray } from "../connectors/def";
+import { ARROWHEAD_TIP_OVERSHOOT_RATIO, arrowheadStrokeRatio } from "../connectors/arrowhead";
 import {
   resolveConnectorPaint,
   resolveIconPaint,
@@ -146,12 +147,6 @@ const CANVAS_FONT_FAMILY = CANVAS_SANS_FONT_STACK_SVG;
 // same settings object the live stage resolves through useCanvasStyle — and
 // the shared pure geometry modules (objects/section/title-chip-layout.ts,
 // connectors/label-chip.ts) the live renderers read too.
-
-/** Arrowhead geometry in stroke-width units — mirrors the marker `<defs>` in stage/CanvasStage.tsx. */
-const ARROW_LENGTH_RATIO = 5;
-const ARROW_WIDTH_RATIO = 5;
-/** The marker's refX is (length - 0.5): the tip overshoots the path end by half a stroke width. */
-const ARROW_TIP_OVERSHOOT_RATIO = 0.5;
 
 /** Sticky shadow — mirrors STICKY_GEOMETRY.shadow ("0 3px 12px rgba(0,0,0,0.15)") in objects/sticky/def.tsx. */
 const STICKY_SHADOW = { dx: 0, dy: 3, stdDeviation: 6, opacity: 0.15 } as const;
@@ -1289,8 +1284,9 @@ function renderedEndpoint(endpoint: CanvasPoint, neighbor: CanvasPoint): CanvasP
 
 /**
  * Arrowhead triangle matching the stage's SVG marker geometry
- * (stage/CanvasStage.tsx `<defs>`): a solid triangle 5 stroke-widths long and
- * 5 wide, whose tip overshoots the rendered path end by 0.5 stroke widths
+ * (stage/CanvasStage.tsx `<defs>`, both from connectors/arrowhead.ts): a solid
+ * triangle arrowheadStrokeRatio stroke widths long and wide (5, floored at 14
+ * world px), whose tip overshoots the rendered path end by 0.5 stroke widths
  * (marker refX = length − 0.5), oriented along the end segment's tangent.
  */
 function arrowheadPolygon(
@@ -1303,15 +1299,16 @@ function arrowheadPolygon(
   if (segment === 0) return "";
   const dirX = (pathEnd.x - neighbor.x) / segment;
   const dirY = (pathEnd.y - neighbor.y) / segment;
+  const ratio = arrowheadStrokeRatio(strokeWidth);
   const tip = {
-    x: pathEnd.x + dirX * ARROW_TIP_OVERSHOOT_RATIO * strokeWidth,
-    y: pathEnd.y + dirY * ARROW_TIP_OVERSHOOT_RATIO * strokeWidth,
+    x: pathEnd.x + dirX * ARROWHEAD_TIP_OVERSHOOT_RATIO * strokeWidth,
+    y: pathEnd.y + dirY * ARROWHEAD_TIP_OVERSHOOT_RATIO * strokeWidth,
   };
   const base = {
-    x: tip.x - dirX * ARROW_LENGTH_RATIO * strokeWidth,
-    y: tip.y - dirY * ARROW_LENGTH_RATIO * strokeWidth,
+    x: tip.x - dirX * ratio * strokeWidth,
+    y: tip.y - dirY * ratio * strokeWidth,
   };
-  const halfWidth = (ARROW_WIDTH_RATIO / 2) * strokeWidth;
+  const halfWidth = (ratio / 2) * strokeWidth;
   const perpX = -dirY;
   const perpY = dirX;
   const points: CanvasPoint[] = [
