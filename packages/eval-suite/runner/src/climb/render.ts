@@ -1,7 +1,12 @@
 /**
  * `climb render`: for each drawn board in a round, `board.png` (the whole
- * board as `canvas_check` renders it) and `metrics.json` (lint findings by
- * rule id, tool calls, tokens).
+ * board, framed as `canvas_check` frames it) and `metrics.json` (lint
+ * findings by rule id, tool calls, tokens, PNG size).
+ *
+ * Judges score `board.png` at 1:1 world scale, capped so its long edge is at
+ * most 2576 px, the largest image Opus reads without scaling it down
+ * (`judgePngSize`). `--view-width <px>` renders at a fixed width instead;
+ * `--view-width 1600` gives the `canvas_check` render.
  *
  * The PNG always comes from this checkout, because the board look is what the
  * climb changes. The lints come from `--lint-root`, a canvas checkout whose
@@ -16,7 +21,7 @@ import type { DrawRecord } from "./draw.ts";
 import { CANVAS_REPO_ROOT, DEFAULT_CLIMB_ROOT, parseFlags, roundDir, roundNumber } from "./paths.ts";
 
 /** The slice of `@codecaine-ai/canvas` this command calls. */
-interface CanvasFile { session: unknown }
+interface CanvasFile { session: { canvasStyle: unknown }; persisted: unknown }
 interface Toolkit {
   openCanvasFile(path: string): CanvasFile;
   checkCanvasFile(file: CanvasFile, label: string): { isError?: boolean; text: string; pngs?: Buffer[] };
@@ -26,8 +31,14 @@ interface Lints {
   sessionDiagnostics(session: unknown, rules: readonly unknown[]): Array<{ rule: string; severity: string }>;
 }
 interface Headless { useHarfBuzz(): Promise<void> }
+interface WorldRect { x: number; y: number; width: number; height: number }
+interface Render {
+  renderBoardView(board: unknown, opts: { width: number; canvasStyle?: unknown }): { svg: string; camera: WorldRect };
+}
+interface Rasterize { rasterizeSvgToPng(svg: string): { png: Buffer; width: number; height: number } }
+interface Views { BOARD_VIEW_WIDTH: number }
 
-interface CanvasModules { toolkit: Toolkit; lints: Lints }
+interface CanvasModules { toolkit: Toolkit; lints: Lints; render: Render; rasterize: Rasterize; views: Views }
 
 async function loadCanvas(root: string): Promise<CanvasModules> {
   const packages = resolve(root, "packages");
@@ -37,7 +48,48 @@ async function loadCanvas(root: string): Promise<CanvasModules> {
   return {
     toolkit: (await import(resolve(packages, "canvas/src/toolkit/index.ts"))) as Toolkit,
     lints: (await import(resolve(packages, "canvas/src/lints.ts"))) as Lints,
+    render: (await import(resolve(packages, "canvas/src/render/index.ts"))) as Render,
+    rasterize: (await import(resolve(packages, "canvas/src/render/rasterize.ts"))) as Rasterize,
+    views: (await import(resolve(packages, "canvas/src/session/perception/views.ts"))) as Views,
   };
+}
+
+/** The largest image edge, in px, that Opus reads without scaling it down. */
+export const JUDGE_PNG_MAX_EDGE = 2576;
+
+export interface PngSize { width: number; height: number; scale: number }
+
+/**
+ * The judged PNG size for a board camera of `world` size: 1:1 world scale,
+ * scaled down only so the long edge is at most `JUDGE_PNG_MAX_EDGE` px.
+ */
+export function judgePngSize(world: { width: number; height: number }): PngSize {
+  const scale = Math.min(1, JUDGE_PNG_MAX_EDGE / Math.max(world.width, world.height));
+  return { width: Math.round(world.width * scale), height: Math.round(world.height * scale), scale };
+}
+
+/** Passes that settle the camera, whose title chips grow as the zoom drops. */
+const CAMERA_SETTLE_PASSES = 4;
+
+/**
+ * The whole board as saved, rendered at `viewWidth` px, or at the judged size
+ * when `viewWidth` is undefined. The judged size starts from the camera of the
+ * `canvas_check` render, then re-renders until the width stops changing: the
+ * camera fits zoom-scaled title chips, so its world size moves with the width.
+ */
+function renderBoardPng(canvas: CanvasModules, file: CanvasFile, viewWidth: number | undefined): { png: Buffer; size: PngSize } {
+  const view = (width: number) =>
+    canvas.render.renderBoardView(file.persisted, { width, canvasStyle: file.session.canvasStyle });
+  let width = viewWidth ?? canvas.views.BOARD_VIEW_WIDTH;
+  let rendered = view(width);
+  for (let pass = 0; viewWidth === undefined && pass < CAMERA_SETTLE_PASSES; pass += 1) {
+    const next = judgePngSize(rendered.camera).width;
+    if (next === width) break;
+    width = next;
+    rendered = view(width);
+  }
+  const png = canvas.rasterize.rasterizeSvgToPng(rendered.svg);
+  return { png: png.png, size: { width: png.width, height: png.height, scale: png.width / rendered.camera.width } };
 }
 
 export interface TranscriptMetrics {
@@ -97,7 +149,12 @@ function countBy<T>(items: T[], key: (item: T) => string): Record<string, number
 }
 
 export async function runRender(argv: string[]): Promise<void> {
-  const flags = parseFlags(argv, ["--round", "--lint-root", "--climb-root"]);
+  const flags = parseFlags(argv, ["--round", "--lint-root", "--climb-root", "--view-width"]);
+  const viewWidthFlag = flags.get("--view-width");
+  const viewWidth = viewWidthFlag === undefined ? undefined : Number(viewWidthFlag);
+  if (viewWidth !== undefined && (!Number.isInteger(viewWidth) || viewWidth <= 0)) {
+    throw new Error("--view-width must be a width in px (1600, ...)");
+  }
   const round = roundNumber(flags.get("--round"));
   const dir = roundDir(resolve(flags.get("--climb-root") ?? DEFAULT_CLIMB_ROOT), round);
   if (!existsSync(dir)) throw new Error(`No round folder: ${dir}`);
@@ -124,14 +181,18 @@ export async function runRender(argv: string[]): Promise<void> {
       continue;
     }
     const boardPath = resolve(briefDir, draw.board);
-    const check = look.toolkit.checkCanvasFile(look.toolkit.openCanvasFile(boardPath), brief);
-    const png = check.pngs?.[0];
-    if (check.isError || !png) {
-      process.stdout.write(`${brief}: render failed\n${check.text}\n`);
+    const file = look.toolkit.openCanvasFile(boardPath);
+    const check = look.toolkit.checkCanvasFile(file, brief);
+    let board: { png: Buffer; size: PngSize };
+    try {
+      if (check.isError) throw new Error(check.text);
+      board = renderBoardPng(look, file, viewWidth);
+    } catch (error) {
+      process.stdout.write(`${brief}: render failed\n${error instanceof Error ? error.message : String(error)}\n`);
       failures += 1;
       continue;
     }
-    writeFileSync(resolve(briefDir, "board.png"), png);
+    writeFileSync(resolve(briefDir, "board.png"), board.png);
 
     const diagnostics = judge.lints.sessionDiagnostics(judge.toolkit.openCanvasFile(boardPath).session, judge.lints.FINISHING_RULES);
     const bySeverity = (severity: string) => countBy(diagnostics.filter((d) => d.severity === severity), (d) => d.rule);
@@ -142,6 +203,7 @@ export async function runRender(argv: string[]): Promise<void> {
       round,
       lintRoot,
       summary: check.text.split("\n")[0],
+      png: board.size,
       lints: {
         errors: diagnostics.filter((d) => d.severity === "error").length,
         warnings: diagnostics.filter((d) => d.severity === "warning").length,
@@ -157,7 +219,8 @@ export async function runRender(argv: string[]): Promise<void> {
     };
     writeFileSync(resolve(briefDir, "metrics.json"), `${JSON.stringify(metrics, null, 2)}\n`);
     process.stdout.write(
-      `${brief}: board.png · ${metrics.lints.errors} errors · ${metrics.lints.warnings} warnings`
+      `${brief}: board.png ${board.size.width}×${board.size.height} at ${board.size.scale.toFixed(3)}`
+      + ` · ${metrics.lints.errors} errors · ${metrics.lints.warnings} warnings`
       + ` · ${transcript.toolCalls.total} tool calls · ${transcript.tokens.input} in / ${transcript.tokens.output} out tokens\n`,
     );
   }
