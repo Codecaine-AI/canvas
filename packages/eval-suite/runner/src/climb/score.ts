@@ -51,10 +51,11 @@ const GATE_FLOOR = 9;
  * comparison runs in tenths, so float error never splits a verdict.
  */
 export function tenthsOf(score: number): number | null {
-  if (!Number.isFinite(score)) return null;
+  if (!Number.isFinite(score) || score < 1 || score > 10) return null;
   const tenths = Math.round(score * 10);
-  if (Math.abs(score * 10 - tenths) > 1e-6 || tenths < 10 || tenths > 100) return null;
-  return tenths;
+  // Exact round trip: 9.3 parses to the same double as 93 / 10, while
+  // 8.99999999 or 9.35 do not.
+  return tenths / 10 === score ? tenths : null;
 }
 const tenths = (score: number) => tenthsOf(score) ?? Number.NaN;
 
