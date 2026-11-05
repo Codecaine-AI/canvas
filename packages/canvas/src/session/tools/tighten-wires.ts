@@ -15,8 +15,8 @@
  * - A node's candidates are the places that make its wires short: the median
  *   of its neighbours' centres, each neighbour's x or y (a straight wire), and
  *   small nudges from where it stands. A candidate is legal when the box stays
- *   inside its frame, clears every sibling box by the crowding gap, and lands
- *   on no other wire's path.
+ *   inside its frame, clears every sibling box by SIBLING_GAP, lands on no
+ *   other wire's path, and adds no covered-content or broken-edges fault.
  * - A top-level section's candidates are nudges and the offset that brings
  *   the inside ends of its outside wires toward their outside ends; two
  *   sections also try trading corners. A section moves as one body.
@@ -46,6 +46,7 @@ import {
   type Point,
   type Rect,
 } from "../../board/lints/geometry";
+import { ownCaptionRuns } from "../../board/lints/rules/broken-edges";
 import { sectionDescendantIds, translateWithDescendants } from "../../state/geometry";
 import { reconcileConnectionWaypoints } from "../../state/actions/waypoints";
 import { CRAFT_TARGETS } from "../../authoring/style-guide/craft-targets";
@@ -68,12 +69,12 @@ export interface TightenResult {
   crossingsAfter: number;
 }
 
-/** Air a sibling box keeps: more than crowding's 16px floor, so boxes read apart. */
+/** Air a sibling box keeps, so boxes read apart. */
 const SIBLING_GAP = 40;
 /** Air a box keeps from a box it is wired to: the craft column gap, room for a label. */
 const WIRED_GAP = CRAFT_TARGETS.nodeGapColumn;
-/** Chip clearance the lints use (board/lints/geometry CHIP_CLEARANCE). */
-const CHIP_CLEARANCE = 16;
+/** Air a moved box keeps from a wire it is not on, so the wire need not bend round it. */
+const WIRE_CLEARANCE = 16;
 /** Air inside a frame: the craft padding, and the title band on top. */
 const FRAME_PADDING = CRAFT_TARGETS.framePadding;
 const FRAME_TOP_PADDING = FRAME_PADDING + 40;
@@ -212,10 +213,10 @@ function withGeometry(
 const CHIP_ON_EDGE_RUN = 8;
 
 /**
- * The faults the lints would raise on these edges' label chips, counted the
- * way covered-content and unreadable-labels count them: a chip on or within
- * the clearance of a box (its own ends included), on another wire's path, or
- * on another chip. A move may not add one.
+ * The covered-content faults on these edges' label chips, counted the way
+ * the rule counts them: a chip overlapping a box (its own ends included,
+ * sections exempt), lying on another wire's path, or overlapping another
+ * chip. A move may not add one.
  */
 function chipFaults(
   edges: readonly InteractiveCanvasConnection[],
@@ -229,67 +230,40 @@ function chipFaults(
   for (const edge of edges) {
     const chip = chipFor(edge, document, canvasStyle);
     if (!chip) continue;
-    const margin = inflate(chip.rect, CHIP_CLEARANCE);
     for (const object of document.objects) {
-      if (kindOf(object) === "section") continue;
-      if (intersects(margin, rectOf(object))) { faults += 1; break; }
+      if (kindOf(object) !== "node") continue;
+      if (intersects(chip.rect, rectOf(object))) { faults += 1; break; }
     }
     for (const [otherId, points] of routes) {
       if (otherId === edge.id) continue;
       if (polylineLengthInRect(points, chip.rect) > CHIP_ON_EDGE_RUN) { faults += 1; break; }
     }
     for (const other of otherChips) {
-      if (!own.has(other.edge.id) && intersects(margin, other.rect)) { faults += 1; break; }
+      if (!own.has(other.edge.id) && intersects(chip.rect, other.rect)) { faults += 1; break; }
     }
   }
   return faults;
 }
 
-/** Two parallel segments this close for this long read as one wire (broken-edges' co-linear check). */
-const COLINEAR_SEPARATION = 8;
-const COLINEAR_RUN = 100;
-
-function colinearRun(a: readonly Point[], b: readonly Point[]): number {
-  let longest = 0;
-  for (let i = 0; i < a.length - 1; i += 1) {
-    const p = a[i]!; const q = a[i + 1]!;
-    const horizontal = Math.abs(p.y - q.y) < 0.01;
-    const vertical = Math.abs(p.x - q.x) < 0.01;
-    if (!horizontal && !vertical) continue;
-    for (let j = 0; j < b.length - 1; j += 1) {
-      const r = b[j]!; const t = b[j + 1]!;
-      if (horizontal && Math.abs(r.y - t.y) < 0.01 && Math.abs(p.y - r.y) <= COLINEAR_SEPARATION) {
-        longest = Math.max(longest, Math.min(Math.max(p.x, q.x), Math.max(r.x, t.x)) - Math.max(Math.min(p.x, q.x), Math.min(r.x, t.x)));
-      } else if (vertical && Math.abs(r.x - t.x) < 0.01 && Math.abs(p.x - r.x) <= COLINEAR_SEPARATION) {
-        longest = Math.max(longest, Math.min(Math.max(p.y, q.y), Math.max(r.y, t.y)) - Math.max(Math.min(p.y, q.y), Math.min(r.y, t.y)));
-      }
-    }
-  }
-  return longest;
-}
-
-function sharesEnd(a: InteractiveCanvasConnection, b: InteractiveCanvasConnection): boolean {
-  const ends = new Set([a.from.objectId, a.to.objectId]);
-  return ends.has(b.from.objectId) || ends.has(b.to.objectId);
-}
-
-/** Wires among these that cut through a box that is not one of their ends (broken-edges). */
+/**
+ * The broken-edges faults among these wires: a route through a box that is
+ * not one of its ends, or through its own endpoint's caption.
+ */
 function brokenEdges(
   edges: readonly InteractiveCanvasConnection[],
   document: InteractiveCanvasDocument,
   routes: Routes,
   canvasStyle: CanvasStyle,
 ): number {
+  const byId = new Map(document.objects.map((object) => [object.id, object]));
   let broken = 0;
   for (const edge of edges) {
     const points = routes.get(edge.id);
-    if (!points) continue;
-    if (pathBoxViolationIds(points, edge.from.objectId, edge.to.objectId, document.objects, canvasStyle).length > 0) { broken += 1; continue; }
-    for (const other of document.connections) {
-      if (other.id === edge.id || sharesEnd(edge, other)) continue;
-      const otherPoints = routes.get(other.id);
-      if (otherPoints && colinearRun(points, otherPoints) >= COLINEAR_RUN) { broken += 1; break; }
-    }
+    if (!points || points.length < 2) continue;
+    if (
+      pathBoxViolationIds(points, edge.from.objectId, edge.to.objectId, document.objects, canvasStyle).length > 0
+      || ownCaptionRuns(edge, points, byId, canvasStyle).length > 0
+    ) broken += 1;
   }
   return broken;
 }
@@ -395,7 +369,7 @@ function tightenNode(board: Board, node: InteractiveCanvasObject): Board | null 
     let onWire = false;
     for (const [edgeId, points] of routes) {
       if (incidentIds.has(edgeId)) continue;
-      if (polylineLengthInRect(points, inflate(rect, CHIP_CLEARANCE)) > 0) { onWire = true; break; }
+      if (polylineLengthInRect(points, inflate(rect, WIRE_CLEARANCE)) > 0) { onWire = true; break; }
     }
     if (onWire) continue;
     const moved = withGeometry(document, node.id, rect);
