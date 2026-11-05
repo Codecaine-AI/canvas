@@ -324,9 +324,10 @@ export type ConnectionPatch = Static<typeof ConnectionPatch>;
 // about a new object comes from the creation defaults
 // (session/tools/creation-defaults.ts), and every property beyond the default
 // is its own subsequent gesture — resize, then relabel. There is no
-// `geometry` here on purpose. `place_shape` is the one exception on color and
-// name: climb round 4 measured naming and coloring after placement at two of
-// every seven drawer calls, so the shape's name and color ride along with it.
+// `geometry` here on purpose. `place_shape` and `place_section` are the
+// exceptions on color: climb round 4 measured naming and coloring after
+// placement at two of every seven drawer calls, so the color rides along with
+// the placement. A section with no color stays the default gray.
 //
 // `at` is the TOP-LEFT of the box, in world units, snapped to the agent grid
 // (session/tools/grid.ts, AGENT_GRID = 20) before it is lowered onto a
@@ -344,7 +345,8 @@ export type ConnectionPatch = Static<typeof ConnectionPatch>;
  * `place_section` — drawing a frame. Titling it is part of the gesture, so
  * `text` is required; the drawn size is optional because a frame dropped
  * without a drag takes the default section footprint. The header's detail and
- * glyph are part of the same chip as the title, so they ride along too.
+ * glyph are part of the same chip as the title, so they ride along too, and so
+ * does the frame's color.
  */
 export const PlaceSectionParams = Type.Object(
   {
@@ -357,8 +359,9 @@ export const PlaceSectionParams = Type.Object(
         `Optional: ONE short fact shown after the title in the frame's header — a host, version, or path; ${DETAIL_LIMITS}.`,
     })),
     icon: Type.Optional(SectionIcon),
+    color: Type.Optional(Color),
   },
-  { ...Seal, description: "Draw a section frame at `at` (its top-left corner)." },
+  { ...Seal, description: "Draw a section frame at `at` (its top-left corner), colored in the same call." },
 );
 export type PlaceSectionParams = Static<typeof PlaceSectionParams>;
 

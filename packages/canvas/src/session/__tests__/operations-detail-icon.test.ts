@@ -68,6 +68,25 @@ describe("place_section — title, detail, and header glyph in one gesture", () 
     expect(result.text).toContain('icon=agent detail="127.0.0.1"');
   });
 
+  test("takes a color in the same call, and stays the default gray without one", () => {
+    const session = makeTestSession(board(), ["frame"]);
+
+    const colored = runOp(session, "place_section", { id: "data", text: "Data", at: [1000, 0], color: "teal" });
+    runOp(session, "place_section", { id: "plain", text: "Plain", at: [1000, 400] });
+
+    expect(colored.isError).toBeUndefined();
+    expect(colored.text).toContain("APPLIED · place_section data 1000,0");
+    expect(colored.text).toContain(" teal");
+    expect(objectOf(session, "data").color).toBe("teal");
+    expect(objectOf(session, "plain").color).toBe("gray");
+  });
+
+  test("the color field is the board's closed roster", () => {
+    const color = findOperationTool("place_section")!.parameters.properties.color;
+    expect(color.enum).toContain("teal");
+    expect(color.enum).not.toContain("magenta");
+  });
+
   test("an empty detail, and an empty or \"none\" icon, mean none", () => {
     const session = makeTestSession(board(), ["frame"]);
 

@@ -76,7 +76,7 @@ describe("canvas MCP server", () => {
       required?: string[];
     };
 
-    expect(Object.keys(schema("place_section").properties)).toEqual(["id", "text", "at", "size", "detail", "icon"]);
+    expect(Object.keys(schema("place_section").properties)).toEqual(["id", "text", "at", "size", "detail", "icon", "color"]);
     expect(schema("place_section").required).toEqual(["id", "text", "at"]);
     expect(Object.keys(schema("place_shape").properties)).toEqual(["id", "type", "at", "text", "detail", "color"]);
     expect(schema("place_shape").required).toEqual(["id", "type", "at"]);
