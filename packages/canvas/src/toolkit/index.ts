@@ -52,6 +52,7 @@ import {
   type Diagnostic,
 } from "../lints";
 import { rasterizeSvgToPng } from "../render/rasterize";
+import { renderAtJudgeSize } from "../render/judge-size";
 import { BOARD_VIEW_WIDTH, renderBoardView } from "../session/perception/views";
 import { resolveScope } from "../board/scope";
 import { canvasStyleOverrides } from "../theme/canvas-style";
@@ -301,7 +302,8 @@ function plural(count: number, one: string, many = `${one}s`): string {
 /**
  * The whole-board check: every lint, the finishing rules included, grouped
  * by severity, the node and edge counts, and one render of the board's full
- * painted bounds. `look` frames one region; this is the one view of all of it.
+ * painted bounds at the judged size (render/judge-size.ts: 1:1 world scale,
+ * the long edge capped at 2576px). `look` frames one region; this is the one view of all of it.
  * Counts and the render read the board as saved, so a page frame injected at
  * open is not counted. The lints read the draft, as every edit's LINTS line does.
  * A conflicted session is refused as every gesture is: its draft holds an
@@ -328,7 +330,10 @@ export function checkCanvasFile(file: CanvasFileSession, label: string): LayoutT
   ];
   const pngs: Buffer[] = [];
   try {
-    const view = renderBoardView(board, { width: BOARD_VIEW_WIDTH, canvasStyle: file.session.canvasStyle });
+    const { rendered: view } = renderAtJudgeSize(
+      (width) => renderBoardView(board, { width, canvasStyle: file.session.canvasStyle }),
+      BOARD_VIEW_WIDTH,
+    );
     const png = rasterizeSvgToPng(view.svg);
     pngs.push(png.png);
     const { x, y, width, height } = view.camera;

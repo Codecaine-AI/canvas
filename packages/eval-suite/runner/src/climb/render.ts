@@ -5,8 +5,9 @@
  *
  * Judges score `board.png` at 1:1 world scale, capped so its long edge is at
  * most 2576 px, the largest image Opus reads without scaling it down
- * (`judgePngSize`). `--view-width <px>` renders at a fixed width instead;
- * `--view-width 1600` gives the `canvas_check` render.
+ * (`judgePngSize`, packages/canvas/src/render/judge-size.ts). `canvas_check`
+ * renders at the same size. `--view-width <px>` renders at a fixed width
+ * instead.
  *
  * The PNG always comes from this checkout, because the board look is what the
  * climb changes. The lints come from `--lint-root`, a canvas checkout whose
@@ -17,6 +18,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { renderAtJudgeSize, type PngSize } from "../../../../canvas/src/render/judge-size.ts";
 import type { DrawRecord } from "./draw.ts";
 import { CANVAS_REPO_ROOT, DEFAULT_CLIMB_ROOT, parseFlags, roundDir, roundNumber } from "./paths.ts";
 
@@ -54,40 +56,15 @@ async function loadCanvas(root: string): Promise<CanvasModules> {
   };
 }
 
-/** The largest image edge, in px, that Opus reads without scaling it down. */
-export const JUDGE_PNG_MAX_EDGE = 2576;
-
-export interface PngSize { width: number; height: number; scale: number }
-
-/**
- * The judged PNG size for a board camera of `world` size: 1:1 world scale,
- * scaled down only so the long edge is at most `JUDGE_PNG_MAX_EDGE` px.
- */
-export function judgePngSize(world: { width: number; height: number }): PngSize {
-  const scale = Math.min(1, JUDGE_PNG_MAX_EDGE / Math.max(world.width, world.height));
-  return { width: Math.round(world.width * scale), height: Math.round(world.height * scale), scale };
-}
-
-/** Passes that settle the camera, whose title chips grow as the zoom drops. */
-const CAMERA_SETTLE_PASSES = 4;
-
 /**
  * The whole board as saved, rendered at `viewWidth` px, or at the judged size
- * when `viewWidth` is undefined. The judged size starts from the camera of the
- * `canvas_check` render, then re-renders until the width stops changing: the
- * camera fits zoom-scaled title chips, so its world size moves with the width.
+ * (renderAtJudgeSize, the same render `canvas_check` returns) when
+ * `viewWidth` is undefined.
  */
 function renderBoardPng(canvas: CanvasModules, file: CanvasFile, viewWidth: number | undefined): { png: Buffer; size: PngSize } {
   const view = (width: number) =>
     canvas.render.renderBoardView(file.persisted, { width, canvasStyle: file.session.canvasStyle });
-  let width = viewWidth ?? canvas.views.BOARD_VIEW_WIDTH;
-  let rendered = view(width);
-  for (let pass = 0; viewWidth === undefined && pass < CAMERA_SETTLE_PASSES; pass += 1) {
-    const next = judgePngSize(rendered.camera).width;
-    if (next === width) break;
-    width = next;
-    rendered = view(width);
-  }
+  const rendered = viewWidth === undefined ? renderAtJudgeSize(view, canvas.views.BOARD_VIEW_WIDTH).rendered : view(viewWidth);
   const png = canvas.rasterize.rasterizeSvgToPng(rendered.svg);
   return { png: png.png, size: { width: png.width, height: png.height, scale: png.width / rendered.camera.width } };
 }

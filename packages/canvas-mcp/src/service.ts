@@ -241,7 +241,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_check",
     title: "Check canvas",
     description:
-      "Check the open board before you call it done: runs every lint (the finishing rules included) and returns the findings grouped by severity with counts, the node and edge counts, and a PNG of the whole board at its full bounds. The PNG is 1600px wide: read the flow and the grouping in it, and use look to read one section's text up close. look frames one region; canvas_check shows all of it. Changes nothing.",
+      "Check the open board before you call it done: runs every lint (the finishing rules included) and returns the findings grouped by severity with counts, the node and edge counts, and a PNG of the whole board at its full bounds. The PNG shows the board at 1:1 world scale, scaled down only so its long edge is at most 2576px: the size the judges see. Read the flow, the grouping and the text in it, and use look to read one section up close. look frames one region; canvas_check shows all of it. Changes nothing.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
 ];
