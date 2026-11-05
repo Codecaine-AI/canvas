@@ -13,7 +13,7 @@ import { FIGJAM_CONTEXT } from "./helpers";
  * Clipped text is a rendered fact: a shape label or sticky body loses lines
  * behind an ellipsis, or a section title chip ellipsizes at the frame width.
  * Connections are absent from the scan because their label chips grow and
- * unreadable-labels owns the space around them.
+ * covered-content owns whether a chip lands on a box.
  */
 
 const LONG_SHAPE_LABEL =

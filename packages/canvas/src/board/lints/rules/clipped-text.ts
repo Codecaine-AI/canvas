@@ -3,8 +3,8 @@
  *
  * Checks every object's name and one-line detail with the renderer-parity
  * textFitReport. Connections are deliberately skipped: edge-label chips grow
- * instead of ellipsizing, and unreadable-labels owns whether a chip crowds its
- * corridor.
+ * instead of ellipsizing, and covered-content owns whether a chip lands on a
+ * box.
  *
  * Only a definite `overflows` verdict is a warning: a reliable one, or one
  * that holds even with every character the bundled fonts lack at zero width

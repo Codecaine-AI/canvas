@@ -100,10 +100,10 @@ describe("layout-editor prompt contract", () => {
   test("physical diagnostics block both stages; categorical hue does not", () => {
     for (const rules of [LAYOUT_RULES, FINISHING_RULES]) {
       const ids = rules.map(rule => rule.id);
-      for (const physical of ["covered-content", "containment", "broken-edges", "unreadable-labels", "clipped-text", "crowding"]) expect(ids).toContain(physical);
+      for (const physical of ["covered-content", "containment", "broken-edges", "clipped-text"]) expect(ids).toContain(physical);
       expect(ids).not.toContain("section-child-color");
     }
-    expect(FINISHING_RULES.map(rule => rule.id)).toContain("frame-slack");
+    expect(FINISHING_RULES.map(rule => rule.id)).toContain("board-too-large");
     expect(content("node-section-success-criteria")).toContain("edited scope");
   });
 });

@@ -33,8 +33,7 @@
  * (board/text-fit.ts) over the object's CURRENT box and the NEW text, and
  * attaches the verdict as an `OpOutcome.notes` line when the text would clip,
  * may clip (within 1px of the box edge), or cannot be measured exactly
- * (characters the bundled fonts lack). Report-only: the write still lands. Same philosophy as the unreadable-labels
- * lint — say it, don't block it — and the same family of warning `resize` and
+ * (characters the bundled fonts lack). Report-only: the write still lands — say it, don't block it — the same family of warning `resize` and
  * `match_size` fire from the other direction.
  *
  * WHY EDGE LABELS ARE NOT FIT-CHECKED HERE. `textFitReport`'s `edge-label`
@@ -42,7 +41,7 @@
  * corridor as its `size`, and a label chip never truncates, it grows. So the
  * verdict is a CROWDING one, not a legibility one, and computing an honest
  * corridor means routing the edge and measuring against both endpoint rects —
- * which is exactly what the `unreadable-labels` rule already does, with the
+ * which is exactly what covered-content's chip-on-endpoint check already does, with the
  * routed truth, and which already fires in the lint delta of this very same
  * APPLIED result. A second, cruder corridor estimate here could only duplicate
  * that finding or contradict it, so `update_text` on a connection writes the

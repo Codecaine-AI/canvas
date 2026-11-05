@@ -52,6 +52,22 @@ describe("containment lint (moved from rules/ unchanged)", () => {
     expect(bleeding).toHaveLength(0);
   });
 
+  test("the page-frame canvas_create writes is grown past freely; a person's base section is not", () => {
+    const stray = box("far", 1400, 100);
+    const written = containment.check(makeDocument([box("page-frame", 32, 32, 1136, 656, "section"), stray]));
+    expect(written).toEqual([]);
+
+    const theirs = containment.check(makeDocument([box("page", 32, 32, 1136, 656, "section"), stray]));
+    expect(theirs.map((finding) => finding.at)).toEqual([["far", "page"]]);
+  });
+
+  test("a child escaping the page-frame is still an error", () => {
+    const frame = box("page-frame", 0, 0, 600, 400, "section");
+    const child = { ...box("child", 520, 100, 184, 96), parentId: "page-frame" };
+    const findings = containment.check(makeDocument([frame, child]));
+    expect(findings.map((finding) => finding.message)).toEqual(["child extends 104px outside its section page-frame"]);
+  });
+
   test("with several root sections there is no unambiguous page, so strays are clean", () => {
     const findings = containment.check(makeDocument([
       box("section", 0, 0, 480, 320, "section"),

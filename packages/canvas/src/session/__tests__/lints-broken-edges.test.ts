@@ -31,6 +31,12 @@ function crossingGrid(verticals: number, horizontals: number): {
   return { objects, connections };
 }
 
+function icon(id: string, x: number, y: number, text: string, detail: string) {
+  return { ...box(id, x, y, 300, 120, "icon"), text, detail };
+}
+
+const page = box("page", 0, 0, 2600, 1400, "section");
+
 describe("production routed-path primitives", () => {
   test("routes around a non-endpoint box with orthogonal segments", () => {
     const objects = [
@@ -156,25 +162,13 @@ describe("broken-edges lint", () => {
     expect(findings).toHaveLength(0);
   });
 
-  test("crossing tangle fires past 6 crossings with the count in the message", () => {
-    const six = crossingGrid(3, 2);  // 6 crossing pairs — at the threshold
-    expect(brokenEdges.check(makeDocument(six.objects, six.connections)))
-      .toHaveLength(0);
-
-    const nine = crossingGrid(3, 3);  // 9 crossing pairs — past it
-    const findings = brokenEdges.check(makeDocument(nine.objects, nine.connections));
-    expect(findings).toHaveLength(1);
-    expect(findings[0]!.severity).toBe("warning");
-    expect(findings[0]!.message).toContain("9 connector crossings");
-    expect(findings[0]!.at).toEqual(["v-0", "h-0", "h-1", "h-2", "v-1", "v-2"]);
+  test("crossings are layout numbers, not findings", () => {
+    const nine = crossingGrid(3, 3);  // 9 crossing pairs
+    expect(brokenEdges.check(makeDocument(nine.objects, nine.connections))).toEqual([]);
   });
 
-  // --- co-linear shared runs (NEW — swimlane R1 routing debt) ---
-
-  test("two edges sharing a ≤8px-separated run for ≥100px warn", () => {
-    // e1 routes border-to-border at y=48 (x 160..1000). e2 is waypoint-pinned
-    // with a valid orthogonal route onto a parallel leg at y=56 spanning the
-    // same corridor: separation 8, shared run 840px.
+  test("two wires sharing a lane are not a finding", () => {
+    // e2 is pinned onto a leg 8px from e1's route for 840px.
     const findings = brokenEdges.check(makeDocument(
       [box("a1", 0, 0), box("b1", 1000, 0), box("c", 110, -300, 100, 100), box("d", 950, -300, 100, 100)],
       [
@@ -187,123 +181,49 @@ describe("broken-edges lint", () => {
         },
       ],
     ));
+    expect(findings).toEqual([]);
+  });
+
+  // --- a wire through its own endpoint's caption ---
+
+  test("a port slid into its own endpoint's caption band is an error naming the port fix", () => {
+    const document = makeDocument(
+      [page, icon("integrations", 2000, 680, "Action integrations", "stores no credentials"), icon("account", 1520, 1000, "Account system", "subscriptions")],
+      [{
+        ...connect("subscription", "integrations", "account"),
+        from: { objectId: "integrations", anchor: "left", position: [0, 0.85] },
+        to: { objectId: "account", anchor: "top" },
+      }],
+    );
+    const findings = brokenEdges.check(document);
     expect(findings).toHaveLength(1);
-    expect(findings[0]).toMatchObject({ severity: "warning", at: ["e1", "e2"] });
-    expect(findings[0]!.message).toContain("run co-linear for 840px (8px apart)");
+    expect(findings[0]).toMatchObject({ severity: "error", at: ["subscription", "integrations"] });
+    expect(findings[0]!.message).toBe("connector subscription runs 60px through its endpoint integrations's caption");
+    expect(findings[0]!.suggestion).toStartWith("change_connection subscription to meet integrations on the side away from the caption");
   });
 
-  test("co-linear thresholds: 9px separation or a 99px run stay clean", () => {
-    const separated = brokenEdges.check(makeDocument(
-      [box("a1", 0, 0), box("b1", 1000, 0), box("c", 110, -300, 100, 100), box("d", 950, -300, 100, 100)],
+  test("a side port reached from below runs through its own caption and is an error", () => {
+    const document = makeDocument(
       [
-        connect("e1", "a1", "b1"),
-        {
-          ...connect("e2", "c", "d"),
-          from: { objectId: "c", anchor: "bottom" },
-          to: { objectId: "d", anchor: "bottom" },
-          waypoints: [[160, 57], [1000, 57]],
-        },
+        page,
+        icon("pool", 1140, 200, "Bounded worker pool", "capped concurrency"),
+        icon("worker", 1620, 200, "Scenario worker", "performs steps in order"),
+        { ...box("record", 1140, 420, 280, 100, "process"), text: "Record product failure" },
+        { ...box("outcome", 1620, 420, 300, 120, "decision"), text: "Step outcome?" },
       ],
-    ));
-    expect(separated).toHaveLength(0);
-
-    const shortRun = brokenEdges.check(makeDocument(
-      [box("a1", 0, 0), box("b1", 1000, 0), box("c", 110, -300, 100, 100), box("d", 950, -300, 100, 100)],
-      [
-        connect("e1", "a1", "b1"),
-        {
-          ...connect("e2", "c", "d"),
-          from: { objectId: "c", anchor: "bottom" },
-          to: { objectId: "d", anchor: "bottom" },
-          waypoints: [[160, -100], [200, -100], [200, 56], [299, 56], [299, -100], [1000, -100]],
-        },
-      ],
-    ));
-    expect(shortRun).toHaveLength(0);
-
-    const exactRun = brokenEdges.check(makeDocument(
-      [box("a1", 0, 0), box("b1", 1000, 0), box("c", 110, -300, 100, 100), box("d", 950, -300, 100, 100)],
-      [
-        connect("e1", "a1", "b1"),
-        {
-          ...connect("e2", "c", "d"),
-          from: { objectId: "c", anchor: "bottom" },
-          to: { objectId: "d", anchor: "bottom" },
-          waypoints: [[160, -100], [200, -100], [200, 56], [300, 56], [300, -100], [1000, -100]],
-        },
-      ],
-    ));
-    expect(exactRun).toHaveLength(1);
-    expect(exactRun[0]!.message).toContain("100px");
+      [{ ...connect("continue", "record", "worker"), from: { objectId: "record", anchor: "top" } }],
+    );
+    const findings = brokenEdges.check(document).filter((finding) => finding.message.includes("caption"));
+    expect(findings.map((finding) => finding.at)).toEqual([["continue", "worker"]]);
+    expect(findings[0]!.message).toBe("connector continue runs 48px through its endpoint worker's caption");
   });
 
-  test("fan edges sharing their trunk out of a common node are exempt", () => {
-    // Both true routes leave a through the same pinned trunk leg
-    // (y=48, x 160..300): a 140px sep-0 co-run, but they share endpoint a.
-    const findings = brokenEdges.check(makeDocument(
-      [box("a", 0, 0), box("b", 600, -300), box("c", 600, 300)],
-      [
-        { ...connect("e1", "a", "b"), waypoints: [[300, 48], [300, -252]] },
-        { ...connect("e2", "a", "c"), waypoints: [[300, 48], [300, 348]] },
-      ],
-    ));
-    expect(findings.filter((finding) => finding.message.includes("co-linear"))).toHaveLength(0);
-  });
-
-  // --- border-hugging (NEW — swimlane R1 routing debt) ---
-
-  test("an edge tracking a section border within 12px for ≥200px warns", () => {
-    // Route runs straight at y=8, 8px above lane's top border (y=0),
-    // overlapping its full 800px span.
-    const findings = brokenEdges.check(makeDocument(
-      [
-        box("lane", 0, 0, 800, 400, "section"),
-        box("m", -360, -40), box("n", 1000, -40),
-      ],
-      [{ ...connect("status", "m", "n"), waypoints: [[-200, 8], [1000, 8]] }],
-    ));
-    expect(findings).toHaveLength(1);
-    expect(findings[0]).toMatchObject({ severity: "warning", at: ["status", "lane"] });
-    expect(findings[0]!.message).toContain("hugs the top border of lane for 800px");
-  });
-
-  test("border-hugging thresholds: 13px away or a 199px overlap stay clean", () => {
-    const farEnough = brokenEdges.check(makeDocument(
-      [
-        box("lane", 0, 0, 800, 400, "section"),
-        box("m", -360, -61), box("n", 1000, -61),  // centers y=-13
-      ],
-      [{ ...connect("status", "m", "n"), waypoints: [[-200, -13], [1000, -13]] }],
-    ));
-    expect(farEnough).toHaveLength(0);
-
-    const atDistance = brokenEdges.check(makeDocument(
-      [
-        box("lane", 0, 0, 800, 400, "section"),
-        box("m", -360, -60), box("n", 1000, -60),  // centers y=-12 — at the line
-      ],
-      [{ ...connect("status", "m", "n"), waypoints: [[-200, -12], [1000, -12]] }],
-    ));
-    expect(atDistance).toHaveLength(1);
-
-    const shortLane = brokenEdges.check(makeDocument(
-      [
-        box("lane", 0, 0, 199, 400, "section"),
-        box("m", -360, -40), box("n", 1000, -40),
-      ],
-      [{ ...connect("status", "m", "n"), waypoints: [[-200, 8], [1000, 8]] }],
-    ));
-    expect(shortLane).toHaveLength(0);
-
-    const exactLane = brokenEdges.check(makeDocument(
-      [
-        box("lane", 0, 0, 200, 400, "section"),
-        box("m", -360, -40), box("n", 1000, -40),
-      ],
-      [{ ...connect("status", "m", "n"), waypoints: [[-200, 8], [1000, 8]] }],
-    ));
-    expect(exactLane).toHaveLength(1);
-    expect(exactLane[0]!.message).toContain("200px");
+  test("a wire into the bottom port, under the caption, is quiet", () => {
+    const document = makeDocument(
+      [page, icon("worker", 1620, 200, "Scenario worker", "performs steps in order"), { ...box("record", 1630, 600, 280, 100, "process"), text: "Record" }],
+      [{ ...connect("up", "record", "worker"), to: { objectId: "worker", anchor: "bottom" } }],
+    );
+    expect(brokenEdges.check(document)).toEqual([]);
   });
 
   // --- stranded chips (NEW — swimlane R1 margin-stranded labels) ---

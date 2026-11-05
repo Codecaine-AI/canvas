@@ -1,6 +1,6 @@
 /** Reference boards calibrate lint changes; they are not exempt from real defects.
- * Same-hue regions are judged visually. Crowding checks visible box separation;
- * rendered wire and label obstructions retain their dedicated checks.
+ * Same-hue regions are judged visually; rendered wire and label obstructions
+ * are covered-content's and broken-edges' checks.
  * Count ceilings catch unexpected expansion, not correctness of each finding.
  * They count the findings that block a finalize; notes (text within a pixel of
  * its box edge, characters the bundled fonts lack) never block and are pinned
@@ -18,30 +18,26 @@ const CORPUS_DIR = join(import.meta.dir, "..", "..", "..", "..", "..", "canvases
 
 /**
  * Measured ceilings; inspect individual findings before changing these.
- * The text-convention rules (label-is-prose, detail-too-long) judge only text
- * an agent wrote in its session, and these boards are people's own work read
- * with no session, so those rules never contribute here.
+ * Re-measured when the lints were cut to visible defects only (covered-content
+ * overlaps, broken-edges, clipped-text, containment): every count left is a
+ * real clip or a chip lying on another wire.
  */
 const CEILING: Record<string, number> = {
-  "agent-flows-2": 2,
-  // 1 → 2 with the schematic 17.5px names: rect-prompt-code's 34-line XML
-  // prompt no longer fits its 800×640 box (29 lines of 21px) — a real clip.
-  // 2 → 3 with wire-detour: conn-mark-communicated-to-task-d runs 1575px through
-  // section-task-manager, which holds neither of its ends — a real detour.
-  "bubba-voice": 3,
+  "agent-flows-2": 0,
+  // rect-prompt-code's 34-line XML prompt does not fit its 800×640 box, and
+  // sticky-alert-mechanism holds one row more than its note paints.
+  "bubba-voice": 2,
   "claude-code-researcher": 0,
-  "gc-decomp-harness": 13,
-  "ink-diagrams": 17,
+  // Three label chips lie on conn-epochs-to-scheduler or conn-scheduler-to-board.
+  "gc-decomp-harness": 3,
+  "ink-diagrams": 0,
   "intent-classification-1": 1,
   "intent-classification-2": 0,
-  // 1 → 2 with the schematic 56px icon-tile cap: chip-generate-transition-response's
-  // left anchor moved onto its (now centered, smaller) tile, which pulls the router's
-  // mid-elbow leg to 3.7px from `section`'s left border for 447px — a real
-  // border-hugging route, not a measurement artifact.
-  "v2-flow": 2,
+  // sticky-overall-context's body holds 28 rows where the note paints 10.
+  "v2-flow": 1,
 };
 
-const TOTAL_CEILING = 35;
+const TOTAL_CEILING = 7;
 
 function corpus(): { name: string; document: InteractiveCanvasDocument }[] {
   return readdirSync(CORPUS_DIR)
@@ -85,16 +81,5 @@ describe("lint calibration against the reference corpus", () => {
   test("the corpus total stays within its ceiling", () => {
     const total = corpus().reduce((sum, entry) => sum + findingCount(entry.document), 0);
     expect(total).toBeLessThanOrEqual(TOTAL_CEILING);
-  });
-
-  test("crowding findings describe near-touching boxes on either axis", () => {
-    for (const { document } of corpus()) {
-      for (const rule of LAYOUT_RULES.filter(rule => rule.id === "crowding")) {
-        for (const finding of rule.check(document)) {
-          const gap = Number(/(\d+)px apart/.exec(finding.message)?.[1]);
-          expect(gap).toBeLessThan(16);
-        }
-      }
-    }
   });
 });

@@ -79,35 +79,29 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
   });
 
   test("warning-tier findings block until fixed, then the same session commits", () => {
-    const labeled = [{ ...connect("edge", "a", "b"), label: "go" }];
+    const there = connect("there", "a", "b");
     const baseline = makeDocument([
       box("a", 0, 0, 192, 96, "process"),
-      box("b", 416, 0, 192, 96, "process"),  // gap 224 — clean baseline
-    ], labeled);
-    // Figjam chip geometry: the "go" chip is 44×30px ("go" in Inter Bold 16 + 12px a side).
-    const session = makeTestSession(baseline, ["a", "b"], { canvasStyle: FIGJAM_CANVAS_STYLE });
-    session.draft = makeDocument([
-      box("a", 0, 0, 192, 96, "process"),
-      box("b", 240, 0, 192, 96, "process"),  // gap 48 — under the "go" chip's 76px need
-    ], labeled);
+      box("b", 416, 0, 192, 96, "process"),
+    ], [there]);
+    const session = makeTestSession(baseline, ["a", "b"]);
+    // A return wire between the same pair reads as one ambiguous double line.
+    session.draft = makeDocument(baseline.objects, [there, connect("back", "b", "a")]);
 
-    const blocked = toolFinalize(session, "committed", "Tightened the flow", emitSessionEvent);
+    const blocked = toolFinalize(session, "committed", "Added the return", emitSessionEvent);
 
     expectBlocked(
       blocked,
       session,
-      'W1 unreadable-labels: label "go" chip on edge (44×30px) bleeds onto a and b',
+      "W1 broken-edges: there and back run anti-parallel between a and b",
     );
 
-    session.draft = makeDocument([
-      box("a", 0, 0, 192, 96, "process"),
-      box("b", 400, 0, 192, 96, "process"),
-    ], labeled);
+    session.draft = makeDocument(baseline.objects, [{ ...there, label: "go" }]);
 
     const committed = toolFinalize(
       session,
       "committed",
-      "Tightened the flow with a readable label",
+      "Labeled the flow",
       emitSessionEvent,
     );
 
@@ -115,7 +109,7 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     expect(committed.text).toContain("Committed:");
     expect(session.status).toBe("proposal-ready");
     expect(session.proposal).not.toBeNull();
-    expect(session.proposal!.summary).toBe("Tightened the flow with a readable label");
+    expect(session.proposal!.summary).toBe("Labeled the flow");
     expect(session.proposal!.lint).toBe("DIAGNOSTICS · clean");
   });
 
@@ -134,34 +128,19 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     expect(session.proposal!.lint).toContain('the bundled fonts lack "🚀"');
   });
 
-  test("a person's own prose names never block; prose the agent writes into a name does until fixed", () => {
+  test("names are not linted for wording: a prose name that fits commits", () => {
     const prose = "Compare Generated Intents to Labeled Intents";
     const theirs = { ...box("theirs", 0, 0, 400, 200, "process"), text: prose };
-    // Tall enough that the prose name wraps without clipping: only the prose rule speaks.
+    // Tall enough that the prose name wraps without clipping.
     const task = box("task", 600, 0, 184, 120, "process");
     // Frameless with a long board title: the session's first draft carries an
-    // injected page frame titled with it, which is scaffolding, not the agent's.
+    // injected page frame titled with it, which never blocks either.
     const baseline = { ...makeDocument([theirs, task]), title: "Intent Classifier Example: Support Ticket Classification" };
     const session = makeTestSession(baseline, ["theirs", "task"], { draft: draftWithPageFrame(baseline) });
-
-    // The agent rewrites its neighbour's name into prose: that one is the agent's.
     session.draft = {
       ...session.draft,
       objects: session.draft.objects.map((object) =>
-        object.id === "task" ? { ...object, text: `${prose} twice over` } : object),
-    };
-    expectBlocked(
-      toolFinalize(session, "committed", "Renamed the task", emitSessionEvent),
-      session,
-      "W1 label-is-prose: task's name has",
-    );
-
-    // A short name with its fact in the detail commits — with the person's own
-    // long name and the board-titled page frame both still in scope.
-    session.draft = {
-      ...session.draft,
-      objects: session.draft.objects.map((object) =>
-        object.id === "task" ? { ...object, text: "Compare intents", detail: "labeled set" } : object),
+        object.id === "task" ? { ...object, text: prose } : object),
     };
     const committed = toolFinalize(session, "committed", "Renamed the task", emitSessionEvent);
     expect(committed.isError).toBeUndefined();
@@ -202,10 +181,9 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     expect(result.isError).not.toBe(true);
     expect(result.text).toContain("APPLIED · move_to b");
     expect(result.text).toContain("DELTA");
-    // Actual label fit still fires even though the boxes have visible separation.
-    expect(result.text).toContain("LINTS · +1 −0");
-    expect(result.text).toContain('label "go" chip on edge (44×30px) bleeds onto a and b');
-    expect(result.text).not.toContain("crowding:");
+    // The 44px "go" chip in a 40px gap lands on both of its own endpoints.
+    expect(result.text).toContain("LINTS · +2 errors (2 open)");
+    expect(result.text).toContain('label "go" chip on edge covers its endpoint a');
     expect(session.draft.objects.find((object) => object.id === "b")?.geometry.x).toBe(200);
     expect(session.status).toBe("running");
     expect(session.proposal).toBeNull();

@@ -6,8 +6,13 @@
  * object more than 16px past the board's base section. Each
  * offending child/object is reported individually so every diagnostic is
  * croppable and addressable on its own.
+ *
+ * The page frame canvas_create writes (id PAGE_FRAME_ID) is scaffolding the
+ * board grows past, not a page the agent chose: the past-the-base check skips
+ * it. A base section a person drew keeps every check.
  */
 import { childrenOf, kindOf, pageFrameOf } from "../../helpers";
+import { PAGE_FRAME_ID } from "../../page-frame";
 
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../../state/schema";
 import type { LayoutRule } from "../types";
@@ -67,7 +72,7 @@ export const rule: LayoutRule = {
     }
 
     const frameNode = pageFrameOf(document);
-    if (frameNode) {
+    if (frameNode && frameNode.id !== PAGE_FRAME_ID) {
       for (const object of document.objects) {
         if (object.id === frameNode.id) continue;
         const overflow = overflowPast(object, frameNode);

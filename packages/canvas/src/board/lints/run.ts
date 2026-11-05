@@ -15,7 +15,6 @@
  */
 import { LAYOUT_RULES } from ".";
 import type { InteractiveCanvasDocument } from "../../state/schema";
-import { draftWithPageFrame } from "../page-frame";
 import type { Diagnostic, LayoutRule, LintContext } from "./types";
 
 /**
@@ -51,28 +50,17 @@ export function runDiagnostics(
 export interface LintSession {
   readonly draft: InteractiveCanvasDocument;
   readonly canvasStyle?: LintContext["canvasStyle"];
-  /** The board as the session opened it; the authorship baseline derives from it. */
-  readonly baseline?: InteractiveCanvasDocument;
 }
 
-/**
- * The lint context of a layout session: its workspace canvas style, and the
- * draft it STARTED from as the authorship baseline — the opened board plus
- * the page frame injected at open (`draftWithPageFrame`, the same call both
- * session kinds build their first draft with), so harness scaffolding never
- * reads as text the agent wrote.
- */
+/** The lint context of a layout session: its workspace canvas style. */
 export function sessionLintContext(session: LintSession): LintContext {
-  return {
-    canvasStyle: session.canvasStyle,
-    ...(session.baseline ? { baseline: draftWithPageFrame(session.baseline) } : {}),
-  };
+  return { canvasStyle: session.canvasStyle };
 }
 
 /**
  * `runDiagnostics` over a layout session's draft, in the session's lint
  * context (`sessionLintContext`). Every session-side caller goes through here
- * so no lint pass forgets the style or the authorship baseline.
+ * so no lint pass forgets the style.
  */
 export function sessionDiagnostics(
   session: LintSession,

@@ -220,21 +220,26 @@ describe("canvas MCP server", () => {
     expect(shown(opened)).toContain("OPENED · v2-flow");
     expect(shown(opened)).toContain("BOARD");
 
-    const raised = await client.callTool({
+    const placed = await client.callTool({
       name: "place_shape",
-      arguments: { id: "fb-shape", type: "process", at: [960, 1600], detail: "A detail written as a whole sentence that runs far past one fact" },
+      arguments: { id: "fb-shape", type: "process", at: [960, 1600] },
     });
-    expect(raised.isError).toBeFalsy();
-    expect(shown(raised)).toContain("APPLIED · place_shape fb-shape");
-    expect(shown(raised)).toMatch(/LINTS · \+\d+ −0/);
-    expect(shown(raised)).toContain("detail-too-long: fb-shape's detail has");
-    expect(shown(raised)).toContain("cut the detail to one fact with update_text fb-shape");
+    expect(placed.isError).toBeFalsy();
+    expect(shown(placed)).toContain("APPLIED · place_shape fb-shape");
 
-    const cleared = await client.callTool({ name: "update_text", arguments: { id: "fb-shape", detail: "One fact" } });
-    expect(shown(cleared)).toContain("APPLIED · update_text fb-shape");
-    expect(shown(cleared)).toMatch(/LINTS · \+0 −\d+/);
-    expect(shown(cleared)).toContain("− W");
-    expect(shown(cleared)).toMatch(/detail-too-long.*\(resolved\)/);
+    // Dropped onto predefined-get-next-question: the overlap is the edit's one new error.
+    const raised = await client.callTool({ name: "move_to", arguments: { id: "fb-shape", x: 1917, y: 1988 } });
+    expect(raised.isError).toBeFalsy();
+    expect(shown(raised)).toContain("APPLIED · move_to fb-shape");
+    expect(shown(raised)).toMatch(/LINTS · \+1 error \(\d+ open\)/);
+    expect(shown(raised)).toMatch(/\+ E\d+ covered-content: .*fb-shape.*predefined-get-next-question|\+ E\d+ covered-content: .*predefined-get-next-question.*fb-shape/);
+    expect(shown(raised)).toContain("clear of");
+
+    // Moved clear, nothing new: the resolved finding is not printed.
+    const cleared = await client.callTool({ name: "move_to", arguments: { id: "fb-shape", x: 960, y: 1600 } });
+    expect(shown(cleared)).toContain("APPLIED · move_to fb-shape");
+    expect(shown(cleared)).toMatch(/LINTS · (clean|no new errors)/);
+    expect(shown(cleared)).not.toContain("covered-content");
   }, 30_000);
 });
 

@@ -14,9 +14,9 @@ import { box, connect, makeDocument } from "./synthetic";
 
 describe("spawn board-state snapshot", () => {
   test("carries the full digest plus the full lint report as one string", () => {
-    // 48px gap under a "go" chip → unreadable-labels warning in the report.
+    // A 4px gap under a "go" chip → covered-content errors in the report.
     const baseline = makeDocument(
-      [box("alpha", 0, 0), box("beta", 208, 0)],
+      [box("alpha", 0, 0), box("beta", 164, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "go" }],
     );
     const session = makeTestSession(baseline, ["alpha", "beta"]);
@@ -26,10 +26,10 @@ describe("spawn board-state snapshot", () => {
     expect(snapshot).toContain("BOARD ·");
     expect(snapshot).toContain('"alpha"');
     expect(snapshot).toContain("\n\nDIAGNOSTICS ·");
-    // 48px gap under a "go" chip — the full lint report rides along.
-    expect(snapshot).toContain("unreadable-labels");
-    // Findings carry a measured prose remedy, leaving the operation choice to the model.
-    expect(snapshot).toContain("open the alpha↔beta corridor");
+    // The chip sits on its own endpoints — the full lint report rides along.
+    expect(snapshot).toContain("covered-content");
+    // Findings carry a prose remedy, leaving the operation choice to the model.
+    expect(snapshot).toContain("move_label edge to a stretch of its wire clear of alpha");
     expect(snapshot).not.toContain("suggested op:");
   });
 
@@ -282,7 +282,7 @@ describe("BOARD DIFF block", () => {
 });
 
 describe("LINTS delta", () => {
-  test("operations report +new/−resolved while the state block carries the complete list", () => {
+  test("operations report the errors they added while the state block carries the complete list", () => {
     const baseline = makeDocument([
       // This covered pair is already present before the operation.
       box("existing-a", 0, 0),
@@ -298,7 +298,7 @@ describe("LINTS delta", () => {
     // Introduce a second covered-content error (beta 75% onto alpha).
     const introduced = runOp(session, "move_to", { id: "beta", x: 1040, y: 0 });
     expect(introduced.isError).toBeUndefined();
-    expect(introduced.text).toContain("LINTS · +1 −0");
+    expect(introduced.text).toContain("LINTS · +1 error (2 open)");
     expect(introduced.text).toContain("+ E2 covered-content");
     expect(introduced.text).not.toContain("E1 covered-content");
     expect(introduced.text).not.toContain("DIAGNOSTICS ·");
@@ -315,19 +315,18 @@ describe("LINTS delta", () => {
     expect(stepBack).toContain(wholeBoard);
     expect(stepBack).not.toContain("LINTS ·");
 
-    // Fix it: the finding resolves and is reported as −.
+    // Fix it: a resolved finding is not printed, only the open count drops.
     const resolved = runOp(session, "move_to", { id: "beta", x: 1480, y: 0 });
     expect(resolved.isError).toBeUndefined();
-    expect(resolved.text).toContain("LINTS · +0 −1");
-    expect(resolved.text).toContain("− E2 covered-content");
-    expect(resolved.text).toContain("(resolved)");
+    expect(resolved.text).toContain("LINTS · no new errors (1 open)");
+    expect(resolved.text).not.toContain("covered-content");
     expect(resolved.text).not.toContain("DIAGNOSTICS ·");
     expect(session.lastDiagnostics).toHaveLength(1);
 
-    // An edit that changes no lints reports the delta while one finding remains open.
+    // An edit that changes no lints says so while one finding remains open.
     const clean = runOp(session, "update_text", { id: "alpha", text: "renamed" });
     expect(clean.isError).toBeUndefined();
-    expect(clean.text).toContain("LINTS · +0 −0 (1 open)");
+    expect(clean.text).toContain("LINTS · no new errors (1 open)");
     expect(clean.text).not.toContain("E1 covered-content");
   });
 
@@ -339,7 +338,7 @@ describe("LINTS delta", () => {
     runOp(session, "change_color", { id: "alpha", color: "teal" });
 
     const introduced = runOp(session, "move_to", { id: "beta", x: 40, y: 0 });
-    expect(introduced.text).toContain("LINTS · +1 −0");
+    expect(introduced.text).toContain("LINTS · +1 error (1 open)");
     expect(introduced.text).toContain("  + E1 covered-content:");
   });
 
@@ -353,16 +352,31 @@ describe("LINTS delta", () => {
     // A deliberate look establishes the clean diagnostic state.
     look(session, "alpha");
 
-    // Close the corridor to 40px: actual label fit explains the remedy in prose.
-    const introduced = runOp(session, "move_to", { id: "beta", x: 200, y: 0 });
-    // The label-fit finding lands without a speculative box-spacing warning.
-    expect(introduced.text).toContain("LINTS · +1 −0");
-    expect(introduced.text).toContain("+ W1 unreadable-labels:");
-    expect(introduced.text).not.toContain("crowding:");
-    expect(introduced.text).toContain("open the alpha↔beta corridor to ≥");
+    // Close the corridor to 8px: the chip lands on its own endpoints, and the
+    // remedy is prose.
+    const introduced = runOp(session, "move_to", { id: "beta", x: 168, y: 0 });
+    expect(introduced.text).toContain("LINTS · +2 errors (2 open)");
+    expect(introduced.text).toContain('+ E1 covered-content: label "X" chip on edge covers its endpoint alpha');
+    expect(introduced.text).toContain("(move_label edge to a stretch of its wire clear of alpha");
     expect(introduced.text).not.toContain("suggested op:");
     expect(introduced.text).not.toContain('"type":"updateObject"');
     expect(introduced.text).not.toContain("[quickfix]");
+  });
+
+  test("an added warning is not printed; the session still records it", () => {
+    const baseline = makeDocument(
+      [box("alpha", 0, 0), box("beta", 480, 0)],
+      [connect("there", "alpha", "beta")],
+    );
+    const session = makeTestSession(baseline, ["alpha", "beta"]);
+    look(session, "alpha");
+
+    // A return wire between the same pair is an anti-parallel warning.
+    const added = runOp(session, "connect", { id: "back", from: { objectId: "beta" }, to: { objectId: "alpha" } });
+    expect(added.isError).toBeUndefined();
+    expect(added.text).toContain("LINTS · no new errors");
+    expect(added.text).not.toContain("anti-parallel");
+    expect(session.lastDiagnostics!.map((diagnostic) => diagnostic.severity)).toEqual(["warning"]);
   });
 
   test("fingerprint matching survives id renumbering", () => {
@@ -383,8 +397,7 @@ describe("LINTS delta", () => {
     // Fix pair a. The surviving b-pair finding renumbers E2 → E1,
     // but it is the same finding: not new, not resolved.
     const resolved = runOp(session, "move_to", { id: "a2", x: 480, y: 0 });
-    expect(resolved.text).toContain("LINTS · +0 −1");
-    expect(resolved.text).toContain("− E1 covered-content");
+    expect(resolved.text).toContain("LINTS · no new errors (1 open)");
     expect(resolved.text).not.toContain("+ E1 covered-content");
     expect(session.lastDiagnostics!.map((diagnostic) => diagnostic.id)).toEqual(["E1"]);
   });
@@ -483,7 +496,7 @@ function gridSession() {
   return makeTestSession(baseline, ["home"]);
 }
 
-/** alpha and beta 44px apart — a crowding warning with a region to frame. */
+/** alpha and beta 44px apart — a region to frame. */
 function crowdedSession() {
   const baseline = makeDocument([box("alpha", 0, 0), box("beta", 204, 0)]);
   return makeTestSession(baseline, ["alpha", "beta"]);
