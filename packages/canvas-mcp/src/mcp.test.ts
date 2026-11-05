@@ -37,7 +37,7 @@ function tempWorkspace(): string {
 }
 
 describe("canvas MCP server", () => {
-  test("tools/list exposes all 26 operation tools with their exact names, descriptions, and schemas", async () => {
+  test("tools/list exposes all 27 operation tools with their exact names, descriptions, and schemas", async () => {
     const server = createCanvasMcpServer({ workspace: tempWorkspace() });
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -48,7 +48,7 @@ describe("canvas MCP server", () => {
     const { tools } = await client.listTools();
     const byName = new Map(tools.map((tool) => [tool.name, tool]));
 
-    expect(operationTools).toHaveLength(26);
+    expect(operationTools).toHaveLength(27);
     for (const operation of operationTools) {
       const listed = byName.get(operation.name);
       expect(listed, operation.name).toBeDefined();
@@ -60,7 +60,7 @@ describe("canvas MCP server", () => {
     }
     expect(byName.has("finalize")).toBe(false);
     expect(tools.slice(0, 3).map((tool) => tool.name)).toEqual(["canvas_list", "canvas_open", "canvas_guidance"]);
-    expect(tools).toHaveLength(5 + 26 + 6);
+    expect(tools).toHaveLength(5 + 27 + 6);
   });
 
   test("tools/list carries the name + detail fields and the section header glyph", async () => {

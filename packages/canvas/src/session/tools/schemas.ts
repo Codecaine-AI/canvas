@@ -459,6 +459,36 @@ export const ConnectParams = Type.Object(
 export type ConnectParams = Static<typeof ConnectParams>;
 
 // ---------------------------------------------------------------------------
+// Gesture payloads — Arrange
+// ---------------------------------------------------------------------------
+
+/**
+ * `arrange_section` — lay one frame's nodes out in rows the model names, then
+ * close the frame around them. The rows are the only layout input: the pitch
+ * comes from each node's painted footprint and the craft-target gaps, so the
+ * call carries no coordinates.
+ */
+export const ArrangeSectionParams = Type.Object(
+  {
+    section: Id,
+    rows: Type.Array(
+      Type.Array(Id, { minItems: 1, description: "One row of node ids, left to right." }),
+      {
+        minItems: 1,
+        description:
+          "The section's nodes as rows, top to bottom. Each id appears once. Shapes and icons only:"
+          + " no sections, stickies or nodes of another section.",
+      },
+    ),
+  },
+  {
+    ...Seal,
+    description: "Lay a section's nodes out in the given rows and fit the frame around them.",
+  },
+);
+export type ArrangeSectionParams = Static<typeof ArrangeSectionParams>;
+
+// ---------------------------------------------------------------------------
 // Gesture payloads — Sections
 // ---------------------------------------------------------------------------
 
