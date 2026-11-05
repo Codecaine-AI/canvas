@@ -73,11 +73,11 @@ describe("figjam paints equal the role tables", () => {
 
 describe("layer-cake sections", () => {
   it("mixes the ink into the base by depth: t0, t0 + step, …, capped at tmax", () => {
-    expect(resolveSectionPaint("teal", 1, LIGHT).fill).toBe("#ECF3F2"); // mix(#0D7164, #FDFDFD, .07)
-    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.105));
-    expect(resolveSectionPaint("teal", 3, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.14));
-    expect(resolveSectionPaint("teal", 4, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.16));
-    expect(resolveSectionPaint("teal", 9, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.16));
+    expect(resolveSectionPaint("teal", 1, LIGHT).fill).toBe("#DBE9E8"); // mix(#0D7164, #FDFDFD, .14)
+    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.175));
+    expect(resolveSectionPaint("teal", 3, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.21));
+    expect(resolveSectionPaint("teal", 4, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.21));
+    expect(resolveSectionPaint("teal", 9, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.21));
   });
 
   it("derives border, chip, and chip border from the ink", () => {
@@ -101,6 +101,26 @@ describe("layer-cake sections", () => {
         expect(contrastRatio(paint.headerDetail, paint.chipFill)).toBeGreaterThanOrEqual(3);
       }
     }
+  });
+
+  it.each([
+    ["schematic-light", LIGHT],
+    ["schematic-dark", DARK],
+  ] as const)("keeps the header title at ≥ 4.5:1 on its chip for every color (%s)", (_id, style) => {
+    for (const color of CANVAS_COLORS) {
+      for (const depth of [1, 2, 3, 4]) {
+        const paint = resolveSectionPaint(color, depth, style);
+        expect(contrastRatio(paint.headerText, paint.chipFill)).toBeGreaterThanOrEqual(4.5);
+      }
+    }
+  });
+
+  it("light preset: a top-level section shows its hue, and the dark preset keeps its own tint", () => {
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
+      expect(oklabDistance(resolveSectionPaint(color, 1, LIGHT).fill, LIGHT.boardBackground)).toBeGreaterThanOrEqual(0.04);
+    }
+    expect(LIGHT.sectionTintBase).toBe(0.14);
+    expect(DARK.sectionTintBase).toBe(0.1);
   });
 
   it("dark preset: every level's fill stands clear of the cards and nested levels stay distinct", () => {
@@ -184,7 +204,7 @@ describe("layer-cake sections", () => {
 
   it("the light theme never applies the guard (base and card are both near-white)", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
-      expect(resolveSectionPaint(color, 1, LIGHT).fill).toBe(mixColors(LIGHT.palette[color], "#FDFDFD", 0.07));
+      expect(resolveSectionPaint(color, 1, LIGHT).fill).toBe(mixColors(LIGHT.palette[color], "#FDFDFD", 0.14));
     }
   });
 
@@ -220,8 +240,37 @@ describe("layer-cake sections", () => {
 });
 
 describe("schematic shapes, icons, stickies, connectors", () => {
-  it("card shapes: card fill, ink border, theme text", () => {
-    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#F8F8F7", border: "#0B6E99", text: "#1F1F1F" });
+  it("light ink-card shapes: the ink mixed into the card fill, ink border, theme text", () => {
+    expect(LIGHT.shapeFill).toBe("ink-card");
+    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#C9DCE4", border: "#0B6E99", text: "#1F1F1F" });
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
+      const paint = resolveShapePaint(color, LIGHT);
+      expect(paint.fill).toBe(mixColors(LIGHT.palette[color], LIGHT.cardFill, 0.2));
+      expect(paint.border).toBe(LIGHT.palette[color]);
+      expect(oklabDistance(paint.fill, LIGHT.cardFill)).toBeGreaterThanOrEqual(0.04);
+    }
+  });
+
+  it("light ink-card shapes: gray and white stay the plain card", () => {
+    expect(resolveShapePaint("gray", LIGHT)).toEqual({ fill: "#F8F8F7", border: "#666562", text: "#1F1F1F" });
+    expect(resolveShapePaint("white", LIGHT)).toEqual({ fill: "#F8F8F7", border: "#1F1F1F", text: "#1F1F1F" });
+  });
+
+  it.each([
+    ["schematic-light", LIGHT],
+    ["schematic-dark", DARK],
+  ] as const)("shape name and detail text read at ≥ 4.5:1 on every shape fill (%s)", (_id, style) => {
+    for (const color of CANVAS_COLORS) {
+      const paint = resolveShapePaint(color, style);
+      expect(contrastRatio(paint.text, paint.fill)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(style.detailColor, paint.fill)).toBeGreaterThanOrEqual(4.5);
+      // The ink border is a non-text mark: 3:1 against its own fill.
+      expect(contrastRatio(paint.border, paint.fill)).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it("dark card shapes: card fill, ink border, theme text", () => {
+    expect(DARK.shapeFill).toBe("card");
     expect(resolveShapePaint("blue", DARK)).toEqual({ fill: "#32363E", border: "#4493F8", text: "#F0F6FC" });
   });
 
