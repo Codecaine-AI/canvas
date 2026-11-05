@@ -14,7 +14,7 @@ export {
   unionRects,
 } from "./painted-bounds";
 export type { Rect } from "./painted-bounds";
-export { renderBoardView, renderSectionView } from "./views";
+export { boardCameraAtWorldScale, renderBoardView, renderSectionView } from "./views";
 export type { RenderedView, RenderViewOptions } from "./views";
 export type {
   RenderDocumentToSvg,

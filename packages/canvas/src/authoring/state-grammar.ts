@@ -22,6 +22,7 @@ import {
   DIGEST_ROUTE_LEGEND,
 } from "../board/digest";
 import { FINISHING_RULES, LAYOUT_RULES } from "../board/lints";
+import { BOARD_MAX_EDGE_PX } from "../board/lints/rules/board-too-large";
 
 const INDENT = "    ";
 
@@ -149,7 +150,10 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       `always-on rules: ${ALWAYS_ON_RULES}`,
       {
         text: `a committed finalize adds ${FINISHING_ONLY_RULES}`,
-        children: ["frame-slack: a frame far larger than its children need"],
+        children: [
+          "frame-slack: a frame far larger than its children need",
+          `board-too-large: the whole board's long edge, padding included, is over ${BOARD_MAX_EDGE_PX}px`,
+        ],
       },
       {
         text: "every open E* and W* in your edited scope blocks a committed finalize",
