@@ -337,19 +337,18 @@ describe("session operations", () => {
     ], [{ ...connect("edge", "alpha", "beta"), label: "go" }]);
     const session = makeTestSession(baseline, ["alpha", "beta"]);
 
-    const result = runOp(session, "move_to", { id: "beta", x: 200, y: 0 });
+    const result = runOp(session, "move_to", { id: "beta", x: 180, y: 0 });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · move_to beta → (200, 0)");
+    expect(result.text).toContain("APPLIED · move_to beta → (180, 0)");
     expect(result.text).toContain("DELTA");
-    expect(result.text).toContain("beta  320,0 → 200,0");
-    expect(result.text).toContain("LINTS · +1 −0");
-    expect(result.text).toContain('W1 unreadable-labels: label "go" chip on edge');
-    expect(result.text).not.toContain("crowding: alpha and beta");
+    expect(result.text).toContain("beta  320,0 → 180,0");
+    expect(result.text).toContain("LINTS · +2 errors (2 open)");
+    expect(result.text).toContain('E1 covered-content: label "go" chip on edge covers its endpoint alpha');
     expect(result.text).not.toContain("[quickfix]");
-    expect(session.lastDiagnostics).toHaveLength(1);
+    expect(session.lastDiagnostics).toHaveLength(2);
     expect(session.draft.objects.find((object) => object.id === "beta")?.geometry)
-      .toEqual({ x: 200, y: 0, width: 160, height: 96 });
+      .toEqual({ x: 180, y: 0, width: 160, height: 96 });
     expect(session.events.map((event) => event.type)).toEqual(["proposal", "delta"]);
   });
 });

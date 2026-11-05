@@ -47,18 +47,8 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ]),
     },
     {
-      // frame-slack: a frame far larger than the one child inside it.
-      name: "frame-slack",
-      document: makeDocument([
-        box("page", 0, 0, 4000, 3000, "section"),
-        { ...box("roomy", 100, 100, 2400, 2000, "section"), parentId: "page" },
-        { ...box("lonely", 200, 200, 184, 96, "process"), parentId: "roomy" },
-      ]),
-    },
-    {
-      // covered-content and crowding: boxes on top of each other, and boxes
-      // with nearly touching boundaries.
-      name: "covered-and-crowded",
+      // covered-content: boxes on top of each other.
+      name: "covered-content",
       document: makeDocument([
         box("page", 0, 0, 1200, 800, "section"),
         box("under", 80, 80, 200, 120, "process"),
@@ -79,24 +69,8 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ),
     },
     {
-      // wire-detour: a wire between the top and bottom bands must run around
-      // the full-width band stacked between them.
-      name: "wire-detour",
-      document: makeDocument(
-        [
-          box("page", 0, 0, 1400, 1300, "section"),
-          { ...box("top", 40, 40, 1320, 360, "section"), parentId: "page" },
-          { ...box("middle", 40, 460, 1320, 360, "section"), parentId: "page" },
-          { ...box("bottom", 40, 880, 1320, 360, "section"), parentId: "page" },
-          { ...box("sender", 600, 160, 184, 96, "process"), parentId: "top" },
-          { ...box("receiver", 600, 1000, 184, 96, "process"), parentId: "bottom" },
-        ],
-        [connect("skips-a-band", "sender", "receiver")],
-      ),
-    },
-    {
-      // long-wire: a return drawn across the whole board.
-      name: "long-wire",
+      // board-too-large: a page past the judge view's cap.
+      name: "board-too-large",
       document: makeDocument(
         [
           box("page", 0, 0, 3000, 1400, "section"),
@@ -107,21 +81,8 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ),
     },
     {
-      // wire-to-section: a wire that ends on a section's frame instead of a node.
-      name: "wire-to-section",
-      document: makeDocument(
-        [
-          box("page", 0, 0, 2000, 1200, "section"),
-          { ...box("review", 600, 100, 800, 500, "section"), parentId: "page" },
-          { ...box("verifier", 700, 200, 280, 100, "process"), parentId: "review" },
-          { ...box("monitor", 100, 300, 280, 100, "process"), parentId: "page" },
-        ],
-        [connect("cancel", "monitor", "review")],
-      ),
-    },
-    {
-      // caption-crossed: a port slid into the caption band under an icon's tile.
-      name: "caption-crossed",
+      // broken-edges: a port slid into its own endpoint's caption band.
+      name: "own-caption",
       document: makeDocument(
         [
           box("page", 0, 0, 2600, 1400, "section"),
@@ -136,8 +97,8 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ),
     },
     {
-      // unreadable-labels: a long chip in a corridor too narrow to draw it.
-      name: "unreadable-labels",
+      // covered-content: a long chip on its own endpoints in a narrow corridor.
+      name: "chip-on-endpoint",
       document: makeDocument(
         [
           box("page", 0, 0, 1200, 800, "section"),
@@ -159,52 +120,14 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
         style: { shape: "note" },
       }]),
     },
-    {
-      // section-child-color: a red section directly holding a red child.
-      name: "section-child-color",
-      document: makeDocument([
-        box("page", 0, 0, 1200, 800, "section"),
-        { ...box("hot", 40, 40, 480, 320, "section"), color: "red", parentId: "page" },
-        { ...box("ember", 80, 120, 184, 96, "process"), color: "red", parentId: "hot" },
-      ]),
-    },
-    {
-      // label-is-prose: two sentences written where a name belongs.
-      name: "label-is-prose",
-      document: makeDocument([{
-        ...box("session-db", 0, 0, 400, 200, "process"),
-        text: "Postgres database that stores user sessions. It is the source of truth.",
-      }]),
-    },
-    {
-      // dense-note: a note that states the system's rules as a wall of prose.
-      name: "dense-note",
-      document: makeDocument([{
-        ...box("rules", 0, 0, 600, 600, "sticky"),
-        text: Array.from({ length: 45 }, (_, index) => `word${index}`).join(" "),
-        style: { shape: "note" },
-      }]),
-    },
-    {
-      // detail-too-long: an explanation crammed into the one-fact detail line.
-      name: "detail-too-long",
-      document: makeDocument([{
-        ...box("auth", 0, 0, 400, 200, "process"),
-        detail: "Handles auth. Retries 3 times on failure, then gives up.",
-      }]),
-    },
   ];
 }
 
 function everyDiagnostic(): { rule: string; text: string; source: string }[] {
   const collected: { rule: string; text: string; source: string }[] = [];
-  // Every fixture is read as the agent's own work — a session that started
-  // from an empty board — so the authorship rules (label-is-prose,
-  // detail-too-long) judge it like every other rule does.
-  const context = { baseline: makeDocument([]) };
   for (const { name, document } of fixtures()) {
     for (const rule of FINISHING_RULES) {
-      for (const finding of rule.check(document, context)) {
+      for (const finding of rule.check(document)) {
         collected.push({ rule: finding.rule, text: finding.message, source: `${name}/message` });
         if (finding.suggestion !== undefined) {
           collected.push({

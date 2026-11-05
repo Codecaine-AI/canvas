@@ -40,8 +40,8 @@ describe("style registry (authoring/style-guide)", () => {
 });
 
 describe("craft targets", () => {
-  // Hard clearance floors live in src/board/lints/rules/crowding.ts
-  // and src/board/lints/rules/containment.ts.
+  // The 16px clearance floors the craft targets must clear (containment
+  // tolerates 16px of bleed past the page).
   const LINT_FLOORS = {
     nodeGapRow: 16,
     nodeGapColumn: 16,

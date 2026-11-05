@@ -18,9 +18,8 @@
  * the static renderer's actual SVG output by test/lints-chip-parity.test.ts
  * — drift fails that test.
  *
- * CHIP_CLEARANCE: chips physically kissing boxes or wires read as merged
- * even without true overlap, so contact within 16px of a chip is a finding
- * too (warning tier; true overlap stays error tier).
+ * CHIP_CLEARANCE: the air a chip wants on each side (authoring's label
+ * budget and text-fit's corridor advice). Lints judge only true overlap.
  *
  * A measured width is only as good as the measurement: within
  * TEXT_FIT_TOLERANCE_PX of the chip's edge the browser's chip may be a hair
@@ -32,7 +31,8 @@
  */
 import { labelPointFor, routeConnection } from "../../connectors/routing.ts";
 import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../../connectors/label-chip.ts";
-import { iconGlyphBoxPx } from "../../objects/text-slots.ts";
+import { belowExtendedBoundsPx, iconGlyphBoxPx } from "../../objects/text-slots.ts";
+import { kindOf } from "../helpers";
 import {
   graphemeClusters,
   fitText,
@@ -54,7 +54,7 @@ export const CHIP_HEIGHT = 30;
 export const CHIP_PADDING_X = 12;
 /** Figjam-style minimum chip width. */
 export const CHIP_MIN_WIDTH = 41;
-/** Clearance margin around a chip (nested-arch R1: kissing chips read merged). */
+/** Air a chip wants on each side, for authoring and text-fit advice; no lint fires on it. */
 export const CHIP_CLEARANCE = 16;
 /**
  * How much narrower the browser's chip may be than the measured one: the
@@ -95,31 +95,6 @@ export function chipFindingSeverity(
   return holds(chip.narrowRect) ? base : "note";
 }
 
-/** What a chip test found: overlap (`on`) and contact inside the clearance margin (`near`). */
-export interface ChipContact {
-  on: boolean;
-  near: boolean;
-}
-
-/**
- * The finding a chip earns on the overlap → clearance ladder and its
- * severity: judged on the guaranteed footprint (overlap is an error, contact
- * inside the margin a warning); what only the measured full-width chip shows
- * is a note. Null when the full chip shows neither. A chip overlapping a box
- * by a fraction of a pixel is therefore a note about the overlap AND, since
- * the narrow chip still sits inside the margin, a warning about the margin —
- * the warning is what it reports.
- */
-export function chipContactFinding(
-  full: ChipContact,
-  narrow: ChipContact,
-): { kind: "on" | "near"; severity: Severity } | null {
-  if (!full.on && !full.near) return null;
-  if (narrow.on) return { kind: "on", severity: "error" };
-  if (narrow.near) return { kind: "near", severity: "warning" };
-  return { kind: full.on ? "on" : "near", severity: "note" };
-}
-
 /** The message tail a chip note carries ("" for a judged finding). */
 export function chipNoteClause(chip: Chip, severity: Severity): string {
   if (severity !== "note") return "";
@@ -158,6 +133,26 @@ export function drawnRectOf(object: InteractiveCanvasObject, canvasStyle?: Canva
     y: object.geometry.y + local.y,
     width: local.width,
     height: local.height,
+  };
+}
+
+/**
+ * The world rect of `object`'s caption band — the name and detail an icon
+ * paints under its tile (the below-extended bounds minus the glyph box) — or
+ * null when nothing paints under its glyph. Default style when omitted.
+ */
+export function captionBand(object: InteractiveCanvasObject, canvasStyle?: CanvasStyle): Rect | null {
+  if (kindOf(object) !== "node") return null;
+  const glyph = iconGlyphBoxPx(object, canvasStyle);
+  const extended = belowExtendedBoundsPx(object, canvasStyle);
+  const top = glyph.y + glyph.height;
+  const height = extended.y + extended.height - top;
+  if (height <= 0) return null;
+  return {
+    x: object.geometry.x + extended.x,
+    y: object.geometry.y + top,
+    width: extended.width,
+    height,
   };
 }
 
@@ -393,4 +388,40 @@ export function distanceToPolyline(p: Point, points: readonly Point[]): number {
     best = Math.min(best, distancePointToSegment(p, points[i - 1]!, points[i]!));
   }
   return best;
+}
+
+/** The drawn length of a polyline. */
+export function polylineLength(points: readonly Point[]): number {
+  let total = 0;
+  for (let i = 1; i < points.length; i += 1) {
+    total += Math.hypot(points[i]!.x - points[i - 1]!.x, points[i]!.y - points[i - 1]!.y);
+  }
+  return total;
+}
+
+function orientation(a: Point, b: Point, c: Point): number {
+  const value = (b.y - a.y) * (c.x - b.x) - (b.x - a.x) * (c.y - b.y);
+  if (value > 1e-9) return 1;
+  if (value < -1e-9) return -1;
+  return 0;
+}
+
+/** Proper (interior) crossing of segments ab and cd. */
+function segmentsCross(a: Point, b: Point, c: Point, d: Point): boolean {
+  const o1 = orientation(a, b, c);
+  const o2 = orientation(a, b, d);
+  const o3 = orientation(c, d, a);
+  const o4 = orientation(c, d, b);
+  return o1 !== 0 && o2 !== 0 && o3 !== 0 && o4 !== 0 && o1 !== o2 && o3 !== o4;
+}
+
+/** How many times two polylines properly cross each other. */
+export function crossingCount(a: readonly Point[], b: readonly Point[]): number {
+  let count = 0;
+  for (let i = 1; i < a.length; i += 1) {
+    for (let j = 1; j < b.length; j += 1) {
+      if (segmentsCross(a[i - 1]!, a[i]!, b[j - 1]!, b[j]!)) count += 1;
+    }
+  }
+  return count;
 }

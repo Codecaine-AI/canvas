@@ -74,10 +74,9 @@ export const Glyph = StringEnum([...CANVAS_ICON_GLYPHS], {
 // A shape, icon, or section carries a NAME (`text`) and at most ONE short fact
 // (`detail`), rendered muted on one line under the name — inline after a
 // section's title. Prose goes on a sticky. The numbers come from
-// board/text-rules.ts, the module the label-is-prose and detail-too-long lints
-// measure with, so a description can never quote a limit the lints disagree
-// with. The descriptions are the steering: the lints, not the schema, are the
-// enforcement, because an overlong name is legal and only reads badly.
+// board/text-rules.ts, so every surface quotes one limit. The descriptions
+// are the steering; nothing enforces them, because an overlong name is legal
+// and only reads badly.
 
 /** What a name is, said once for every field that writes one. */
 export const NAME_RULE =
@@ -88,8 +87,7 @@ const DETAIL_LIMITS = `≤ ${DETAIL_MAX_CHARS} chars, one line, no sentences`;
 
 /**
  * What a detail is, said once for every field that writes one. A free string
- * with no length cap everywhere it appears: an overlong detail applies and the
- * detail-too-long lint says so.
+ * with no length cap everywhere it appears: an overlong detail applies.
  */
 export const DETAIL_RULE =
   `ONE short fact shown under the name (beside a section's title): a port, path, version, model, or host — `

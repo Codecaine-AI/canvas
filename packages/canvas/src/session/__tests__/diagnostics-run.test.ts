@@ -189,15 +189,15 @@ describe("formatDiagnostics", () => {
 
   test("renders a finding's prose suggestion without structured operations", () => {
     const document = makeDocument(
-      [box("alpha", 0, 0), box("beta", 204, 0)],
+      [box("alpha", 0, 0), box("beta", 180, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "X" }],
     );
-    // Figjam chip geometry: the 41px "X" chip needs a 73px corridor.
+    // Figjam chip geometry: the 41px "X" chip does not fit a 20px corridor.
     const text = formatDiagnostics(runAll(document, undefined, FIGJAM_CONTEXT));
 
-    expect(text).toContain("W1 unreadable-labels:");
+    expect(text).toContain('E1 covered-content: label "X" chip on edge covers its endpoint alpha');
     expect(text).toContain(
-      "(open the alpha↔beta corridor to ≥73px so the chip and its 16px margins fit; move one end, and keep every fact the label names)",
+      "(move_label edge to a stretch of its wire clear of alpha, or move one end so the wire is long enough to hold the chip)",
     );
     expect(text).not.toContain('"operations"');
     expect(text).not.toContain("suggested op:");

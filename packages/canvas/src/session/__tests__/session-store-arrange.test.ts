@@ -170,7 +170,7 @@ describe("arrange · resize", () => {
 
     const result = runOp(session, "resize", { id: "alpha", width: 80, height: 40 });
 
-    // Report-only, the same philosophy as the unreadable-labels lint.
+    // Report-only: say it, don't block it.
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain("APPLIED · resize alpha → 80×40");
     expect(objectOf(session.draft, "alpha").geometry).toMatchObject({ width: 80, height: 40 });

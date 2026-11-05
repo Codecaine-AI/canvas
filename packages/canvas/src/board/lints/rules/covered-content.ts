@@ -1,30 +1,25 @@
 /**
- * covered-content — nothing may sit on content (error tier, with
- * warning-tier near-miss findings).
+ * covered-content — nothing may sit on content (error tier).
  *
  * Checks, all on real geometry (chips are the renderer's own chips at the
- * router's own label point):
- * - box-on-box (error): sibling boxes (same parent; sections and stickies
- *   exempt) whose intersection exceeds 25% of the smaller box or covers a
- *   box's text center;
- * - chip-on-box (error) / chip-near-box (warning): a label chip over a third
- *   box's face; contact inside the 16px clearance margin is the warning;
- * - chip-on-chip (error) / chip-near-chip (warning): same margin logic;
- * - chip-on-edge (error) / chip-near-edge (warning): a chip lying along
- *   ANOTHER edge's routed wire for more than 8px.
- *
- * A chip's own edge and its endpoint boxes are not counted here — a chip
- * nosing into its endpoints is a fit matter (unreadable-labels).
+ * router's own label point), and only real overlaps — contact is not a
+ * finding:
+ * - box-on-box: sibling boxes (same parent; sections and stickies exempt)
+ *   whose intersection exceeds 25% of the smaller box or covers a box's text
+ *   center;
+ * - chip-on-box: a label chip over a box's face, its own endpoint boxes
+ *   included;
+ * - chip-on-chip: two label chips overlapping;
+ * - chip-on-edge: a chip lying along ANOTHER edge's routed wire for more
+ *   than 8px.
  *
  * Chip findings that hang on the chip's last measured pixel, or on a label
  * whose width is an estimate, are notes (geometry.ts chipFindingSeverity).
  */
 import {
-  CHIP_CLEARANCE,
-  chipContactFinding,
+  chipFindingSeverity,
   chipFor,
   chipNoteClause,
-  inflate,
   intersects,
   polylineLengthInRect,
   rectOf,
@@ -68,10 +63,10 @@ function coversTextCenter(node: InteractiveCanvasObject, rect: Rect): boolean {
 
 const GUIDANCE = `Nothing sits on content. Blocking (error tier):
 - a box overlap that swallows more than a quarter of the smaller box, or lands on its text;
-- a label chip on a box face, on another chip, or lying along another edge's wire.
-Even ${CHIP_CLEARANCE}px of kissing contact reads as merged (warning tier).
-Fix it by routing around the crowd, moving the label with a waypoint, or giving the region air.
-Stickies float above the diagram and are exempt.`;
+- a label chip on a box face (its own endpoints included), on another chip, or lying along
+  another edge's wire.
+Fix it by moving the label along its wire with move_label, routing around the crowd, or
+moving a box so the chip has room. Stickies float above the diagram and are exempt.`;
 
 export const rule: LayoutRule = {
   id: "covered-content",
@@ -117,112 +112,67 @@ export const rule: LayoutRule = {
       .map((edge) => chipFor(edge, document, context?.canvasStyle))
       .filter((chip): chip is Chip => chip !== undefined);
 
-    // 2 — chip vs box (own endpoints exempt): overlap E, 16px contact W.
+    // 2 — chip vs box: a chip over any box's face. Its own endpoints count
+    // too: a chip on its own endpoint hides that box's text just the same.
     for (const chip of chips) {
       for (const node of boxes) {
-        if (
-          node.id === chip.edge.from.objectId
-          || node.id === chip.edge.to.objectId
-        ) continue;
         const boxRect = rectOf(node);
-        const contact = (rect: Rect) => ({
-          on: intersects(rect, boxRect),
-          near: intersects(inflate(rect, CHIP_CLEARANCE), boxRect),
+        if (!intersects(chip.rect, boxRect)) continue;
+        const own = node.id === chip.edge.from.objectId || node.id === chip.edge.to.objectId;
+        if (own && chip.edge.from.objectId === chip.edge.to.objectId) continue; // a self-loop is broken-edges'
+        const severity = chipFindingSeverity(chip, (rect) => intersects(rect, boxRect), "error");
+        findings.push({
+          rule: "covered-content",
+          severity,
+          at: [chip.edge.id, node.id],
+          where: chip.rect,
+          message: `label "${chip.label}" chip on ${chip.edge.id} covers ${own ? "its endpoint " : ""}${node.id}`
+            + chipNoteClause(chip, severity),
+          suggestion: own
+            ? `move_label ${chip.edge.id} to a stretch of its wire clear of ${node.id}, or move one end so the wire is long enough to hold the chip`
+            : `move_label ${chip.edge.id} along its wire to a stretch clear of ${node.id}, or move_to ${node.id} clear of the wire`,
         });
-        const finding = chipContactFinding(contact(chip.rect), contact(chip.narrowRect));
-        if (!finding) continue;
-        const { severity } = finding;
-        findings.push(
-          finding.kind === "on"
-            ? {
-              rule: "covered-content",
-              severity,
-              at: [chip.edge.id, node.id],
-              where: chip.rect,
-              message: `label "${chip.label}" chip on ${chip.edge.id} covers ${node.id}${chipNoteClause(chip, severity)}`,
-              suggestion: `move_label ${chip.edge.id} along its wire to a stretch clear of ${node.id}, or move_to ${node.id} clear of the wire`,
-            }
-            : {
-              rule: "covered-content",
-              severity,
-              at: [chip.edge.id, node.id],
-              where: chip.rect,
-              message: `label "${chip.label}" chip on ${chip.edge.id} sits within ${CHIP_CLEARANCE}px of ${node.id}${chipNoteClause(chip, severity)}`,
-              suggestion: `give the chip clear air — nudge ${node.id} or reroute ${chip.edge.id}`,
-            },
-        );
       }
     }
 
-    // 3 — chip vs chip: overlap E, 16px contact W.
+    // 3 — chip vs chip.
     for (let i = 0; i < chips.length; i += 1) {
       for (let j = i + 1; j < chips.length; j += 1) {
         const a = chips[i]!;
         const b = chips[j]!;
-        const contact = (ra: Rect, rb: Rect) => ({
-          on: intersects(ra, rb),
-          near: intersects(inflate(ra, CHIP_CLEARANCE), rb),
+        if (!intersects(a.rect, b.rect)) continue;
+        const severity: Severity = intersects(a.narrowRect, b.narrowRect) ? "error" : "note";
+        findings.push({
+          rule: "covered-content",
+          severity,
+          at: [a.edge.id, b.edge.id],
+          where: a.rect,
+          message: `label "${a.label}" chip on ${a.edge.id} overlaps label "${b.label}" chip on ${b.edge.id}${pairNoteClause(a, b, severity)}`,
+          suggestion: "move_label one chip along its wire so the two do not meet, or move_to a node so the two edges part",
         });
-        const finding = chipContactFinding(contact(a.rect, b.rect), contact(a.narrowRect, b.narrowRect));
-        if (!finding) continue;
-        const { severity } = finding;
-        findings.push(
-          finding.kind === "on"
-            ? {
-              rule: "covered-content",
-              severity,
-              at: [a.edge.id, b.edge.id],
-              where: a.rect,
-              message: `label "${a.label}" chip on ${a.edge.id} overlaps label "${b.label}" chip on ${b.edge.id}${pairNoteClause(a, b, severity)}`,
-              suggestion: "move_label one chip along its wire so the two do not meet, or move_to a node so the two edges part",
-            }
-            : {
-              rule: "covered-content",
-              severity,
-              at: [a.edge.id, b.edge.id],
-              where: a.rect,
-              message: `label "${a.label}" chip on ${a.edge.id} sits within ${CHIP_CLEARANCE}px of label "${b.label}" chip on ${b.edge.id}${pairNoteClause(a, b, severity)}`,
-              suggestion: "separate the two edges so the chips read as two labels",
-            },
-        );
       }
     }
 
-    // 4 — chip vs another edge's routed polyline (flowchart R1 blind spot):
-    // a run of more than EDGE_RUN_TOLERANCE px through the chip is an error;
-    // the same run through the 16px-inflated chip is the margin warning.
+    // 4 — chip vs another edge's routed polyline: a run of more than
+    // EDGE_RUN_TOLERANCE px through the chip.
     for (const chip of chips) {
       for (const edge of document.connections) {
         if (edge.id === chip.edge.id) continue;
         const polyline = routedPolyline(edge, document, context?.canvasStyle);
         if (polyline.length < 2) continue;
-        const rawRun = polylineLengthInRect(polyline, chip.rect);
-        const contact = (rect: Rect) => ({
-          on: polylineLengthInRect(polyline, rect) > EDGE_RUN_TOLERANCE,
-          near: polylineLengthInRect(polyline, inflate(rect, CHIP_CLEARANCE)) > EDGE_RUN_TOLERANCE,
-        });
-        const finding = chipContactFinding(contact(chip.rect), contact(chip.narrowRect));
-        if (!finding) continue;
-        const { severity } = finding;
-        findings.push(
-          finding.kind === "on"
-            ? {
-              rule: "covered-content",
-              severity,
-              at: [chip.edge.id, edge.id],
-              where: chip.rect,
-              message: `label "${chip.label}" chip on ${chip.edge.id} lies on ${edge.id}'s path for ${Math.round(rawRun)}px${chipNoteClause(chip, severity)}`,
-              suggestion: `move_label ${chip.edge.id} along its wire to a stretch ${edge.id} does not share, or move_to a node so the two wires part`,
-            }
-            : {
-              rule: "covered-content",
-              severity,
-              at: [chip.edge.id, edge.id],
-              where: chip.rect,
-              message: `label "${chip.label}" chip on ${chip.edge.id} sits within ${CHIP_CLEARANCE}px of ${edge.id}'s path${chipNoteClause(chip, severity)}`,
-              suggestion: `offset ${edge.id} or move the label so it cannot read as ${edge.id}'s label`,
-            },
+        const run = polylineLengthInRect(polyline, chip.rect);
+        if (run <= EDGE_RUN_TOLERANCE) continue;
+        const severity = chipFindingSeverity(
+          chip, (rect) => polylineLengthInRect(polyline, rect) > EDGE_RUN_TOLERANCE, "error",
         );
+        findings.push({
+          rule: "covered-content",
+          severity,
+          at: [chip.edge.id, edge.id],
+          where: chip.rect,
+          message: `label "${chip.label}" chip on ${chip.edge.id} lies on ${edge.id}'s path for ${Math.round(run)}px${chipNoteClause(chip, severity)}`,
+          suggestion: `move_label ${chip.edge.id} along its wire to a stretch ${edge.id} does not share, or move_to a node so the two wires part`,
+        });
       }
     }
 

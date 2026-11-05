@@ -537,7 +537,7 @@ export function distributeObjects(
 
 /**
  * Gap-based re-pitch along one axis (gesture-surface S2.2) — the corridor
- * opener the crowding lint's suggestions describe, as one operation instead of
+ * opener, as one operation instead of
  * N hand-computed moves.
  *
  * Deliberately NOT distributeObjects. That one is span-based: it equalizes
