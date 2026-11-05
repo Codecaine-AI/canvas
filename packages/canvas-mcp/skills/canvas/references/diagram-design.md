@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 fb9398e631745892bf506524b7245596a954b034fca7a687ebf2d7b0e7548f25). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 e7594a8b38f473ae93eb3d008891a1ca32cd754a80b8d1ed3f5ec06dce19506a). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -65,7 +65,7 @@
       </pattern>
       <pattern id="feedback-cycle">
         <name>Feedback Cycle</name>
-        <description>A result affects later work through a return connection between distinct stages or participants. Label the return trigger and destination. Canvas rejects a self-loop on one object.</description>
+        <description>A result affects later work through a return connection between distinct stages or participants. Label the return with its trigger. Canvas rejects a self-loop on one object.</description>
         <ascii xml:space="preserve"><![CDATA[
     [Act] -----> [Observe]
       ^              |
@@ -102,7 +102,7 @@
       </pattern>
       <pattern id="shared-resource">
         <name>Shared Resource</name>
-        <description>Several participants use one shared store placed near its consumers. Label read/write relationships and retain one store instead of drawing misleading duplicates.</description>
+        <description>Several participants use one shared store placed near its consumers. Retain one store instead of drawing misleading duplicates.</description>
         <ascii xml:space="preserve"><![CDATA[
     [Writer] --write--> [Shared Store] --read--> [Reader A]
                              |

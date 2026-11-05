@@ -55,7 +55,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "feedback-cycle",
     name: "Feedback Cycle",
-    description: "A result affects later work through a return connection between distinct stages or participants. Label the return trigger and destination. Canvas rejects a self-loop on one object.",
+    description: "A result affects later work through a return connection between distinct stages or participants. Label the return with its trigger. Canvas rejects a self-loop on one object.",
     ascii: `[Act] -----> [Observe]
   ^              |
   |              v
@@ -92,7 +92,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "shared-resource",
     name: "Shared Resource",
-    description: "Several participants use one shared store placed near its consumers. Label read/write relationships and retain one store instead of drawing misleading duplicates.",
+    description: "Several participants use one shared store placed near its consumers. Retain one store instead of drawing misleading duplicates.",
     ascii: `[Writer] --write--> [Shared Store] --read--> [Reader A]
                          |
                          +----------read--> [Reader B]`,

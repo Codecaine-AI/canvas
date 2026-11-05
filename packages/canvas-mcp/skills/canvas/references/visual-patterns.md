@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/visual-patterns.ts (sha256 1447260e87065ef7acb5fadbb75b5aa3d85741b1a9fa7c5877acf55b6089f5a9). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/visual-patterns.ts (sha256 3b4c3e43c20012092bb8b5654e9b4ba6eb18c46178ffbfacc883d30e72b9fc6b). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Visual Patterns
 
@@ -61,7 +61,7 @@ Use case: A request passes through validation, processing, and response delivery
 
 ## Feedback Cycle (`feedback-cycle`)
 
-A result affects later work through a return connection between distinct stages or participants. Label the return trigger and destination. Canvas rejects a self-loop on one object.
+A result affects later work through a return connection between distinct stages or participants. Label the return with its trigger. Canvas rejects a self-loop on one object.
 
 ```text
 [Act] -----> [Observe]
@@ -110,7 +110,7 @@ Use case: A producer hands a completed work item to a separately owned processin
 
 ## Shared Resource (`shared-resource`)
 
-Several participants use one shared store placed near its consumers. Label read/write relationships and retain one store instead of drawing misleading duplicates.
+Several participants use one shared store placed near its consumers. Retain one store instead of drawing misleading duplicates.
 
 ```text
 [Writer] --write--> [Shared Store] --read--> [Reader A]
