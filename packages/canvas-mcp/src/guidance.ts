@@ -47,17 +47,11 @@ function operatingContext(source: (id: string) => GuidanceSource): string {
   return [
     "# Operating Context",
     "",
-    "The standing context the internal layout editor received on every request, kept whole.",
+    "The reading key for MCP results, and the house style.",
     "",
-    "- The system prompt was written for the kernel agent. Its `<state>` block maps to MCP results:",
-    "  `canvas_open` returns the board digest and lints, every edit returns its delta and lint changes,",
-    "  and `look` renders one region.",
-    "- The state grammar is the reading key for those results.",
-    "- The aesthetic topic is the house style. It was registered but never injected.",
-    "",
-    "## System Prompt",
-    "",
-    source("prompt").text.trimEnd(),
+    "- `canvas_open` returns the board digest and lints, every edit returns its delta and lint changes,",
+    "  and `look` renders one region. The state grammar says how to read them.",
+    "- The aesthetic topic is the house style.",
     "",
     "## State Grammar",
     "",
@@ -109,7 +103,7 @@ export function renderCanvasSkill(sources: readonly GuidanceSource[] = canvasGui
   const files = new Map<string, string | Uint8Array>();
   files.set("SKILL.md", skill);
   files.set("snapshot.json", `${JSON.stringify({ schemaVersion: 1, snapshotId: snapshot.snapshotId, sources: snapshot.sources, skill: skillHash }, null, 2)}\n`);
-  files.set("references/operating-context.md", stamp(hashOf("prompt", "state_grammar", "aesthetic")) + operatingContext(source));
+  files.set("references/operating-context.md", stamp(hashOf("state_grammar", "aesthetic")) + operatingContext(source));
   files.set("references/visual-patterns.md", stamp(hashOf("visual_patterns")) + visualPatterns());
   for (const [id, file] of Object.entries(TOPIC_FILES)) {
     const topic = source(id);

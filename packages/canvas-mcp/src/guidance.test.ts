@@ -9,7 +9,7 @@ import { join } from "node:path";
 
 import { canvasGuidanceSources, guidanceSnapshot } from "@codecaine-ai/canvas/authoring";
 
-import { SKILL_DIR, guidanceCommand } from "./guidance";
+import { SKILL_DIR, guidanceCommand, renderCanvasSkill } from "./guidance";
 import { createCanvasService } from "./service";
 
 const temps: string[] = [];
@@ -68,7 +68,7 @@ describe("canvas skill generator", () => {
     expect(await guidanceCommand(["--check"], quiet)).toBe(0);
   });
 
-  test("a one-line prompt edit changes the prompt hash and the snapshot id, and --check exits 1", async () => {
+  test("a one-line prompt edit changes the prompt hash and the snapshot id, and --check exits 1 on snapshot.json alone", async () => {
     const before = guidanceSnapshot(canvasGuidanceSources());
     const after = guidanceSnapshot(withEditedPrompt());
 
@@ -78,8 +78,16 @@ describe("canvas skill generator", () => {
 
     const lines: string[] = [];
     expect(await guidanceCommand(["--check"], { sources: withEditedPrompt(), log: line => lines.push(line) })).toBe(1);
-    expect(lines.join("\n")).toContain("references/operating-context.md");
+    // The prompt is Studio's: it is hashed into the snapshot but is not part of the skill's operating context.
     expect(lines.join("\n")).toContain("snapshot.json");
+    expect(lines.join("\n")).not.toContain("references/operating-context.md");
+  });
+
+  test("the operating context carries the state grammar and the aesthetic, and no system prompt", () => {
+    const context = renderCanvasSkill().get("references/operating-context.md") as string;
+    expect(context).toContain("## State Grammar");
+    expect(context).toContain("## Aesthetic");
+    expect(context).not.toContain("System Prompt");
   });
 
   test("a deleted SKILL.md makes --check exit 1", async () => {
