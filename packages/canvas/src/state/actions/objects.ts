@@ -57,13 +57,20 @@ export function mergeObjectPatch(
   const was = object.geometry;
   const asked = patch.geometry;
   const snapped = asked && snapGeometry(asked, GEOMETRY_NORMALIZATION_GRID);
+  // Per axis: an unchanged start keeps its value; an unchanged size keeps its
+  // value; a changed size whose far edge (start + size) is unchanged keeps
+  // that edge, so a grow on the near side never rounds the far edge inward.
+  const axis = (start: "x" | "y", size: "width" | "height") => {
+    if (!asked || !snapped) return { s: was[start], z: was[size] };
+    const s = asked[start] === was[start] ? was[start] : snapped[start];
+    const farKept = asked[start] + asked[size] === was[start] + was[size];
+    const z = asked[size] === was[size] ? was[size] : farKept ? was[start] + was[size] - s : snapped[size];
+    return { s, z };
+  };
+  const horizontal = axis("x", "width");
+  const vertical = axis("y", "height");
   const geometry = asked && snapped
-    ? {
-        x: asked.x === was.x ? was.x : snapped.x,
-        y: asked.y === was.y ? was.y : snapped.y,
-        width: asked.width === was.width ? was.width : snapped.width,
-        height: asked.height === was.height ? was.height : snapped.height,
-      }
+    ? { x: horizontal.s, y: vertical.s, width: horizontal.z, height: vertical.z }
     : was;
   const merged: InteractiveCanvasObject = {
     ...object,
