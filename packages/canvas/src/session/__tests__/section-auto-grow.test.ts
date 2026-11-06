@@ -1,15 +1,19 @@
 /**
- * Section auto-grow: after any edit, a section a child overflows grows
- * outward to hold it plus the fit_section air, through its ancestors, with no
- * fit_section call. It never shrinks, never changes membership, and never
- * touches a locked section.
+ * Section auto-grow: after any edit, a section whose child crosses its edge or
+ * intrudes on its padding or title band grows outward to the fit_section air,
+ * through its ancestors, with no fit_section call. It runs on both commit
+ * paths (the agent's operations and Studio's reducer). It never shrinks, never
+ * changes membership, and never touches a locked section; an agent edit whose
+ * grow would capture a neighbor is refused.
  */
 import { describe, expect, test } from "bun:test";
 
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 import { rule as containment } from "../../board/lints/rules/containment";
 
-import { growSectionsToChildren } from "../apply-ops";
+import { growSectionsToChildren } from "../../state/section-grow";
+import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../../state/actions";
+import { diffDocuments } from "../../board/doc-diff";
 import { makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 
@@ -105,7 +109,7 @@ describe("section auto-grow", () => {
     expect(geometryOf(grown, "held")).toEqual({ x: 0, y: 0, width: 400, height: 300 });
   });
 
-  test("a grow that would capture a neighbor is skipped, so membership never changes", () => {
+  test("a grow that would capture a neighbor is not made, and names the neighbor", () => {
     const document = makeDocument([
       section("a", 0, 0, 400, 300),
       child("kid", 300, 100, "a"),
@@ -113,9 +117,138 @@ describe("section auto-grow", () => {
       box("neighbor", 410, 100, 100, 100),
     ]);
 
-    const { document: grown, grown: ids } = growSectionsToChildren(document);
+    const { document: grown, grown: ids, blocked } = growSectionsToChildren(document);
 
     expect(ids).toEqual([]);
+    expect(blocked).toEqual([{ section: "a", captures: ["neighbor"] }]);
     expect(grown).toBe(document);
+  });
+
+  test("an agent edit whose grow would capture a neighbor is refused and names it", () => {
+    const baseline = makeDocument([
+      section("page", -200, -200, 1600, 1000),
+      section("a", 0, 0, 400, 300, "page"),
+      child("kid", 200, 100, "a"),
+      child("neighbor", 420, 220, "page", 100, 60),
+    ]);
+    const session = makeTestSession(baseline, ["a"]);
+    const before = session.draft;
+
+    // kid would end 60px past a's right edge; a cannot grow without taking neighbor.
+    const result = runOp(session, "move_by", { id: "kid", dx: 100, dy: 0 });
+
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("growing would pull neighbor into it");
+    expect(session.draft).toBe(before);
+    expect(containment.check(session.draft)).toHaveLength(0);
+  });
+
+  test("a grow already stuck before the edit does not refuse an unrelated edit", () => {
+    const baseline = makeDocument([
+      section("page", -200, -200, 2000, 1200),
+      section("a", 0, 0, 400, 300, "page"),
+      child("kid", 300, 100, "a"),
+      child("neighbor", 410, 100, "page", 100, 100),
+      child("other", 1000, 400, "page"),
+    ]);
+    const session = makeTestSession(baseline, ["a"]);
+
+    const result = runOp(session, "move_by", { id: "other", dx: 40, dy: 0 });
+
+    expect(result.isError).toBeUndefined();
+    expect(geometryOf(session.draft, "other").x).toBe(1040);
+  });
+
+  test("a child moved into the title band grows the top edge outward", () => {
+    const baseline = makeDocument([
+      section("page", -200, -200, 1600, 1000),
+      { ...section("a", 0, 0, 400, 300, "page"), text: "Section heading" },
+      child("kid", 40, 100, "a"),
+    ]);
+    const session = makeTestSession(baseline, ["a"]);
+
+    // kid lands at y=20, inside the 27px title chip's band and still inside the frame.
+    runOp(session, "move_by", { id: "kid", dx: 0, dy: -80 });
+
+    // Top = kid top - (40 padding + 40 title band); the other sides keep their air.
+    expect(geometryOf(session.draft, "a")).toEqual({ x: 0, y: -60, width: 400, height: 360 });
+  });
+
+  test("a grow stops at a locked parent's edge instead of crossing it", () => {
+    const document = makeDocument([
+      { ...section("held", 0, 0, 1000, 701.5), locked: "background" },
+      section("lane", 100, 100, 400, 590, "held"),
+      // 10px above lane's bottom: under the trigger, so lane wants to grow to 720.
+      child("kid", 140, 480, "lane", 160, 200),
+    ]);
+
+    const { document: grown, grown: ids } = growSectionsToChildren(document);
+
+    expect(ids).toEqual(["lane"]);
+    expect(geometryOf(grown, "lane")).toEqual({ x: 100, y: 100, width: 400, height: 600 });
+    expect(containment.check(grown)).toHaveLength(0);
+  });
+
+  test("a grow on an off-grid frame replays through the reducer to the same document", () => {
+    const baseline = makeDocument([
+      section("page", 0, 0, 2000, 1400),
+      section("hand", 101.3, 97.7, 401.9, 303.2, "page"),
+      child("kid", 140, 160, "hand"),
+    ]);
+    const session = makeTestSession(baseline, ["hand"]);
+
+    runOp(session, "move_by", { id: "kid", dx: 220, dy: 0 });
+    const replayed = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
+      type: "canvas.applyAgentPatch",
+      operations: diffDocuments(baseline, session.draft),
+      summary: "accept",
+    }).document;
+
+    expect(geometryOf(session.draft, "hand")).not.toEqual(geometryOf(baseline, "hand"));
+    expect(diffDocuments(replayed, session.draft)).toEqual([]);
+  });
+
+  test("a child close to a side but past the 20px trigger leaves the frame alone", () => {
+    const document = makeDocument([
+      section("a", 0, 0, 400, 300),
+      child("kid", 20, 80, "a"),
+    ]);
+
+    expect(growSectionsToChildren(document).grown).toEqual([]);
+  });
+});
+
+describe("section auto-grow in Studio", () => {
+  const baseline = () => makeDocument([
+    section("page", 0, 0, 1200, 900),
+    section("outer", 40, 40, 800, 600, "page"),
+    child("kid", 100, 120, "outer"),
+  ]);
+
+  test("a keyboard move across the edge grows the section like the move_by tool", () => {
+    let state = createInteractiveCanvasState(baseline());
+    state = reduceInteractiveCanvasState(state, { type: "canvas.select", selection: { kind: "objects", objectIds: ["kid"] } });
+    state = reduceInteractiveCanvasState(state, { type: "canvas.moveSelection", dx: 600, dy: 0, snap: false });
+
+    const session = makeTestSession(baseline(), ["outer"]);
+    runOp(session, "move_by", { id: "kid", dx: 600, dy: 0 });
+
+    expect(geometryOf(state.document, "outer")).toEqual({ x: 40, y: 40, width: 860, height: 600 });
+    expect(geometryOf(state.document, "outer")).toEqual(geometryOf(session.draft, "outer"));
+    expect(containment.check(state.document)).toHaveLength(0);
+  });
+
+  test("the end of a drag grows the section the child was dropped in", () => {
+    let state = createInteractiveCanvasState(baseline());
+    state = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObjectGeometries",
+      geometries: { kid: { x: 700, y: 120, width: 160, height: 100 } },
+      recordHistory: true,
+      snap: false,
+    });
+    state = reduceInteractiveCanvasState(state, { type: "canvas.reconcileSectionMembership", recordHistory: false });
+
+    expect(geometryOf(state.document, "outer")).toEqual({ x: 40, y: 40, width: 860, height: 600 });
+    expect(containment.check(state.document)).toHaveLength(0);
   });
 });

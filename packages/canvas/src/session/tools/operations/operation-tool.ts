@@ -7,7 +7,7 @@ import { Type, type Static, type TSchema } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { reconcileConnectionWaypoints } from "../../../state/actions/waypoints";
 import { reconcileSectionMembership } from "../../../state/section-membership";
-import { growSectionsToChildren } from "../../apply-ops";
+import { growSectionsToChildren } from "../../../state/section-grow";
 
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
@@ -153,7 +153,22 @@ export function runOperation<TFields extends OperationFields>(
   // Section auto-grow runs on the reconciled tree and before the waypoint
   // pass, so a grown frame is an ordinary resize that pass judges like any
   // other. It never changes membership, so the last reconcile agrees with it.
+  // A grow this edit needs but cannot make (it would capture a neighbor)
+  // refuses the edit: a child never stays outside its frame, and nothing the
+  // drawer did not touch changes parent. A grow already stuck before the edit
+  // does not block an unrelated one.
   const grow = growSectionsToChildren(reconcileSectionMembership(outcome.draft));
+  const stuck = new Set(growSectionsToChildren(reconcileSectionMembership(before)).blocked.map((entry) => entry.section));
+  const newlyBlocked = grow.blocked.filter((entry) => !stuck.has(entry.section));
+  if (newlyBlocked.length > 0) {
+    const reasons = newlyBlocked.map(({ section, captures }) =>
+      `${section} must grow to hold its children, and growing would pull ${captures.join(", ")} into it`);
+    return {
+      isError: true,
+      text: `ERROR · ${spec.name} — ${reasons.join("; ")}. Nothing changed. Move ${newlyBlocked.flatMap((entry) => entry.captures).join(", ")} clear first, or place the child where ${newlyBlocked.map((entry) => entry.section).join(", ")} has room.`,
+      details,
+    };
+  }
   const next = reconcileSectionMembership(
     reconcileConnectionWaypoints(before, grow.document),
   );

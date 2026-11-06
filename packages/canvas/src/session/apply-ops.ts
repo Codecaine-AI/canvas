@@ -2,10 +2,10 @@
  * Draft mutation primitives for layout-session operations.
  *
  * Lower-level document edits apply the internal patch grammar directly to a
- * draft. The one implicit resize is growSectionsToChildren, which the
- * operation pipeline runs after each edit: a frame a child overflows grows
- * outward to hold it. A tighter fit is still fit_section's job, and either
- * lands as an ordinary geometry update. Membership reconciliation and fit geometry both come from
+ * draft. The one implicit resize is section auto-grow (state/section-grow.ts),
+ * which the operation pipeline runs after each edit. A tighter fit is still
+ * fit_section's job, and either lands as an ordinary geometry update.
+ * Membership reconciliation and fit geometry both come from
  * the canvas package, so this draft applier and studio's accept-time reducer
  * produce identical documents.
  */
@@ -19,6 +19,7 @@ import {
 } from "../state/schema";
 import { sectionDescendantIds, sectionFitGeometry } from "../state/geometry";
 import { reconcileSectionMembership } from "../state/section-membership";
+import { SECTION_AUTO_GROW_FIT } from "../state/section-grow";
 import { clearsAsUndefined } from "../state/actions/agent-patch";
 import { nextId } from "../state/actions/helpers";
 import { mergeObjectPatch, withNormalizedDetail } from "../state/actions/objects";
@@ -317,7 +318,7 @@ export function applyOperationToDraft(
  * both numbers here are >= the UI's, so an agent fit is never tighter than the
  * interactive one.
  */
-export const SECTION_FIT_PADDING = { padding: 40, titleClearance: 40 } as const;
+export const SECTION_FIT_PADDING = SECTION_AUTO_GROW_FIT;
 
 /**
  * Resolve fit_section against the draft: membership is derived from geometry,
@@ -348,82 +349,6 @@ export function resolveFitSection(
     return { note: "skipped — the section is empty, and a frame with no children has nothing to fit around; size it with resize instead" };
   }
   return { internal: { type: "updateObject", objectId: sectionId, patch: { geometry } } };
-}
-
-/** Depth of an object in the section tree: 0 for a root. */
-function sectionDepth(document: InteractiveCanvasDocument, id: string): number {
-  const byId = new Map(document.objects.map((object) => [object.id, object]));
-  let depth = 0;
-  for (let parent = byId.get(id)?.parentId; parent != null; parent = byId.get(parent)?.parentId) {
-    depth += 1;
-    if (depth > byId.size) break; // a parent cycle is not a tree; stop rather than spin
-  }
-  return depth;
-}
-
-function sameMembership(a: InteractiveCanvasDocument, b: InteractiveCanvasDocument): boolean {
-  const parents = new Map(a.objects.map((object) => [object.id, object.parentId ?? null]));
-  return b.objects.every((object) => parents.get(object.id) === (object.parentId ?? null));
-}
-
-/**
- * Section auto-grow: every unlocked section a child overflows grows outward to
- * hold its children plus the fit_section air (SECTION_FIT_PADDING, snapped
- * outward). Only a side a child crosses moves, and only outward, so a section
- * never shrinks on its own and never reaches toward a neighbor on a side that
- * did not overflow. Deepest sections go first, so a nested
- * section's growth reaches its ancestors in the same pass.
- *
- * Membership is derived from geometry, so a grow that would make the section
- * capture a neighbor (or lose a child) is skipped: the draft and an accepted
- * replay must derive the same tree. That collision stays on the board for
- * containment and covered-content to name. `document` must already have
- * reconciled membership.
- */
-export function growSectionsToChildren(
-  document: InteractiveCanvasDocument,
-): { document: InteractiveCanvasDocument; grown: string[] } {
-  const sections = document.objects
-    .filter((object) => object.type === "section")
-    .map((section) => ({ id: section.id, depth: sectionDepth(document, section.id) }))
-    .sort((a, b) => b.depth - a.depth);
-  let current = document;
-  const grown: string[] = [];
-  for (const { id } of sections) {
-    const section = current.objects.find((object) => object.id === id)!;
-    if (section.locked) continue;
-    const rect = section.geometry;
-    const children = current.objects.filter((child) => child.parentId === id);
-    const right = rect.x + rect.width;
-    const bottom = rect.y + rect.height;
-    const past = {
-      left: children.some((child) => child.geometry.x < rect.x),
-      top: children.some((child) => child.geometry.y < rect.y),
-      right: children.some((child) => child.geometry.x + child.geometry.width > right),
-      bottom: children.some((child) => child.geometry.y + child.geometry.height > bottom),
-    };
-    if (!past.left && !past.top && !past.right && !past.bottom) continue;
-    const fitted = sectionFitGeometry(current, id, SECTION_FIT_PADDING);
-    if (!fitted) continue;
-    const fit = snapRectOutward(fitted);
-    // Only a side a child crosses moves, and only outward.
-    const x = past.left ? Math.min(rect.x, fit.x) : rect.x;
-    const y = past.top ? Math.min(rect.y, fit.y) : rect.y;
-    const geometry = {
-      x,
-      y,
-      width: (past.right ? Math.max(right, fit.x + fit.width) : right) - x,
-      height: (past.bottom ? Math.max(bottom, fit.y + fit.height) : bottom) - y,
-    };
-    const candidate = {
-      ...current,
-      objects: current.objects.map((object) => object.id === id ? { ...object, geometry } : object),
-    };
-    if (!sameMembership(current, reconcileSectionMembership(candidate))) continue;
-    current = candidate;
-    grown.push(id);
-  }
-  return { document: current, grown };
 }
 
 /**
