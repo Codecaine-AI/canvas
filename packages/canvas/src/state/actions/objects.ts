@@ -44,15 +44,27 @@ export function withNormalizedDetail(object: InteractiveCanvasObject): Interacti
  * D1 — this is the write path, not an interaction path, so it rounds on 4 and
  * not on CANVAS_GRID_SIZE. Both a UI drag's 16-grid result and an agent's
  * 20-grid box are multiples of 4 and therefore pass through untouched; only
- * genuinely off-grid values (hand-authored imports, legacy docs) move.
+ * genuinely off-grid values (hand-authored imports, legacy docs) move, and
+ * only the ones the patch changes.
  */
 export function mergeObjectPatch(
   object: InteractiveCanvasObject,
   patch: Partial<Omit<InteractiveCanvasObject, "id">>,
 ): InteractiveCanvasObject {
-  const geometry = patch.geometry
-    ? snapGeometry(patch.geometry, GEOMETRY_NORMALIZATION_GRID)
-      : object.geometry;
+  // A value the patch leaves as it was keeps its exact number, so an off-grid
+  // edge a section grow held in place (a locked parent's edge) survives the
+  // accept-time replay instead of rounding inward past a child.
+  const was = object.geometry;
+  const asked = patch.geometry;
+  const snapped = asked && snapGeometry(asked, GEOMETRY_NORMALIZATION_GRID);
+  const geometry = asked && snapped
+    ? {
+        x: asked.x === was.x ? was.x : snapped.x,
+        y: asked.y === was.y ? was.y : snapped.y,
+        width: asked.width === was.width ? was.width : snapped.width,
+        height: asked.height === was.height ? was.height : snapped.height,
+      }
+    : was;
   const merged: InteractiveCanvasObject = {
     ...object,
     ...patch,

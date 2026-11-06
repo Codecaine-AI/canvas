@@ -243,6 +243,29 @@ describe("section auto-grow", () => {
     expect(containment.check(grown)).toHaveLength(0);
   });
 
+  test("a grow that keeps an off-grid edge at a locked parent's edge keeps it after accept", () => {
+    // lane's bottom sits on held's off-grid bottom (701.5) and tall ends 1px
+    // above it. Moving the other child grows lane's right side only.
+    const baseline = makeDocument([
+      { ...section("held", 0, 0, 1000, 701.5), locked: "background" },
+      section("lane", 100, 100, 400, 601.5, "held"),
+      child("tall", 140, 200, "lane", 160, 501),
+      child("moving", 300, 160, "lane", 160, 60),
+    ]);
+    const session = makeTestSession(baseline, ["lane"]);
+
+    runOp(session, "move_by", { id: "moving", dx: 60, dy: 0 });
+    const replayed = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
+      type: "canvas.applyAgentPatch",
+      operations: diffDocuments(baseline, session.draft),
+      summary: "accept",
+    }).document;
+
+    expect(geometryOf(replayed, "lane")).toEqual({ x: 100, y: 100, width: 460, height: 601.5 });
+    expect(containment.check(replayed)).toHaveLength(0);
+    expect(diffDocuments(replayed, session.draft)).toEqual([]);
+  });
+
   test("a grow on an off-grid frame replays through the reducer to the same document", () => {
     const baseline = makeDocument([
       section("page", 0, 0, 2000, 1400),
