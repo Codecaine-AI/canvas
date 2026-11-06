@@ -97,10 +97,10 @@ describe("layout-editor prompt contract", () => {
     }
   });
 
-  test("overlap is the one diagnostic, in both stages; categorical hue is not one", () => {
+  test("overlap and integrity are the diagnostics, in both stages; categorical hue is not one", () => {
     for (const rules of [LAYOUT_RULES, FINISHING_RULES]) {
       const ids = rules.map(rule => rule.id);
-      expect(ids).toEqual(["covered-content"]);
+      expect(ids).toEqual(["covered-content", "integrity"]);
     }
     expect(content("node-section-success-criteria")).toContain("edited scope");
   });

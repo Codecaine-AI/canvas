@@ -20,7 +20,7 @@ import type { InteractiveCanvasDocument } from "../../state/schema";
 
 import { FINISHING_RULES } from "../../board/lints";
 import { operationTools } from "../tools/operations";
-import { box, makeDocument } from "./synthetic";
+import { box, connect, makeDocument } from "./synthetic";
 
 /** The retired CRUD roster, as it would read if it leaked back into prose. */
 const RETIRED_OP = /\b(add|update|remove|fit)(Section|Object|Sticky|Connection)\b/;
@@ -54,6 +54,28 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
         box("page", 0, 0, 1200, 800, "section"),
         { ...box("left", 40, 40, 520, 400, "section"), parentId: "page" },
         { ...box("right", 540, 40, 400, 400, "section"), parentId: "page" },
+      ]),
+    },
+    {
+      // integrity: clipped text, a child outside its section, broken wires,
+      // and a wire walled in by touching boxes.
+      name: "integrity",
+      document: makeDocument([
+        { ...box("wordy", 0, 0, 160, 80, "process"), text: "a label far too long for the box it was given to hold whole" },
+        box("group", 0, 200, 300, 200, "section"),
+        { ...box("stray", 220, 240, 160, 96, "process"), parentId: "group" },
+        box("note", 0, 0, 160, 80, "sticky"),
+        { ...box("inside", 100, 600, 160, 80, "process"), text: "" },
+        { ...box("outside", 600, 600, 160, 80, "process"), text: "" },
+        { ...box("top", 0, 500, 400, 40, "process"), text: "" },
+        { ...box("bottom", 0, 800, 400, 40, "process"), text: "" },
+        { ...box("left", 0, 540, 40, 260, "process"), text: "" },
+        { ...box("right", 360, 540, 40, 260, "process"), text: "" },
+      ], [
+        connect("loop", "stray", "stray"),
+        connect("lost", "stray", "gone"),
+        connect("flat", "wordy", "note"),
+        connect("escape", "inside", "outside"),
       ]),
     },
   ];

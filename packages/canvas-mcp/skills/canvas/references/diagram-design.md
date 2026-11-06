@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 05028f3ef39c5425b6b475e857a582003e766f81341eaead64d1ff6d02b8e97e). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 a4a84bfccbf57ab9bcb5bc29250a5baa6bc1fefd8343375ce5a7af2f54677ebd). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -178,7 +178,7 @@
         3. arrange_section for each section, with its node ids as rows. It sets the gaps (200 across a row, 100 down a column) and fits the frame, so you write no coordinates.
         4. space_out each row of sections with gap 200, then align their tops.
         5. connect every wire, then call tighten_wires once.
-        6. canvas_check, then fix its errors. Overlap is the only check: a box on a box, or a section on a section. Wire routes, label chips, text fit, and section fit are automatic.
+        6. canvas_check, then fix its errors. Overlap and integrity are the only checks: overlap is a box on a box, or a section on a section, and integrity fires only when something bypassed the automatic fixes. Wire routes, label chips, text fit, and section fit are automatic.
     </build_order>
 
     <connections>

@@ -72,8 +72,8 @@ const GUIDANCE = `Nothing sits on content. Blocking (error tier):
   tile and caption, a shape's face), or lands on its text;
 - two section frames overlapping when neither holds the other.
 Fix it by moving a box, or a section and its children, clear. Stickies float above the
-diagram and are exempt. Overlap is the only check: wire routes, label chips, text fit and
-section fit are automatic.`
+diagram and are exempt. Overlap and integrity are the only checks: wire routes, label chips,
+text fit and section fit are automatic, and integrity fires only when something bypassed them.`
 
 export const rule: LayoutRule = {
   id: "covered-content",

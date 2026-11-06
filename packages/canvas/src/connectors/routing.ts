@@ -181,13 +181,13 @@ export function routeConnection(
   );
 }
 
-function routeConnectionPolyline(
+/** Where `connection` leaves and enters before any detour: its sides (explicit, else picked) and points. */
+function routeEnds(
   fromObject: InteractiveCanvasObject,
   toObject: InteractiveCanvasObject,
   connection: InteractiveCanvasConnection,
-  obstacles: ReadonlyArray<InteractiveCanvasObject> | undefined,
   canvasStyle: CanvasStyle,
-): RoutedConnection {
+): { startAnchor: Anchor; endAnchor: Anchor; start: CanvasPoint; end: CanvasPoint } {
   const fromBounds = connectionBoundsForObject(fromObject, canvasStyle);
   const toBounds = connectionBoundsForObject(toObject, canvasStyle);
   const pickedAnchors = autoPickAnchors(fromBounds, toBounds);
@@ -199,6 +199,17 @@ function routeConnectionPolyline(
   const end =
     pointForObjectPosition(toObject, connection.to.position, endAnchor, canvasStyle) ??
     pointForObjectAnchor(toObject, endAnchor, canvasStyle);
+  return { startAnchor, endAnchor, start, end };
+}
+
+function routeConnectionPolyline(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  connection: InteractiveCanvasConnection,
+  obstacles: ReadonlyArray<InteractiveCanvasObject> | undefined,
+  canvasStyle: CanvasStyle,
+): RoutedConnection {
+  const { startAnchor, endAnchor, start, end } = routeEnds(fromObject, toObject, connection, canvasStyle);
 
   const withSelves = routeKeepOut(fromObject, toObject, start, end, obstacles ?? [], canvasStyle);
   const keepOut = { ...withSelves, selves: [] };
@@ -517,6 +528,25 @@ function leastBlocked(
 }
 
 /**
+ * The boxes other than its ends that `connection`'s drawn route runs through,
+ * judged as the router judges every route it tries (routeBlockers on the
+ * drawn path, unrelated sections left out). Empty unless no clear route
+ * exists and the router fell back to the least-blocked one.
+ */
+export function routeThroughBoxIds(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  connection: InteractiveCanvasConnection,
+  obstacles: ReadonlyArray<InteractiveCanvasObject>,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): string[] {
+  const { start, end } = routeEnds(fromObject, toObject, connection, canvasStyle);
+  const keepOut = { ...withoutSections(routeKeepOut(fromObject, toObject, start, end, obstacles, canvasStyle)), selves: [] };
+  const route = routeConnectionPolyline(fromObject, toObject, connection, obstacles, canvasStyle);
+  return routeBlockers(route.points ?? [], keepOut).filter((blocker) => blocker.kind === "box").map((blocker) => blocker.objectId);
+}
+
+/**
  * What the router would refuse to draw through for `connection` routed along
  * `waypoints`: the boxes and own captions the waypoint route crosses, or
  * `null` when no orthogonal route joins the corners to the ends. `reroute`
@@ -530,17 +560,7 @@ export function waypointRouteBlockers(
   obstacles: ReadonlyArray<InteractiveCanvasObject>,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): RouteBlocker[] | null {
-  const fromBounds = connectionBoundsForObject(fromObject, canvasStyle);
-  const toBounds = connectionBoundsForObject(toObject, canvasStyle);
-  const picked = autoPickAnchors(fromBounds, toBounds);
-  const startAnchor = explicitAnchor(connection.from.anchor) ?? picked.startAnchor;
-  const endAnchor = explicitAnchor(connection.to.anchor) ?? picked.endAnchor;
-  const start =
-    pointForObjectPosition(fromObject, connection.from.position, startAnchor, canvasStyle) ??
-    pointForObjectAnchor(fromObject, startAnchor, canvasStyle);
-  const end =
-    pointForObjectPosition(toObject, connection.to.position, endAnchor, canvasStyle) ??
-    pointForObjectAnchor(toObject, endAnchor, canvasStyle);
+  const { startAnchor, endAnchor, start, end } = routeEnds(fromObject, toObject, connection, canvasStyle);
   const keepOut = { ...withoutSections(routeKeepOut(fromObject, toObject, start, end, obstacles, canvasStyle)), selves: [] };
   let fewest: RouteBlocker[] | null = null;
   routeWaypoints(start, end, waypoints.map(([x, y]) => ({ x, y })), startAnchor, endAnchor, {

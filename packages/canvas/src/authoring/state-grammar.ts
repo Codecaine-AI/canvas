@@ -148,9 +148,9 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       },
       "W* warnings and N* notes never block: they ride along in the proposal",
       {
-        text: "overlap is the only check: a box on a box, or a section on a section",
+        text: "overlap and integrity are the only checks: overlap is a box on a box, or a section on a section",
         children: [
-          "wire routes, label chips, text fit, and section fit are automatic",
+          "wire routes, label chips, text fit, and section fit are automatic; integrity fires only when something bypassed them",
           "canvas_check counts label chips that found no clear spot under LAYOUT, never as a finding",
         ],
       },

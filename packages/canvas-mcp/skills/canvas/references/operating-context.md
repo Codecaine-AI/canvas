@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/state-grammar.ts (sha256 44eab1222c133465561eda9f840a29a4a3cdb3a1c17dc934b8d37189828a4d42), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/state-grammar.ts (sha256 b014ad49b61d2c8f36aabb635ca8debf410c53bc790ab535d6b37d988d3f1f04), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Operating Context
 
@@ -71,12 +71,12 @@ The reading key for MCP results, and the house style.
             - recomputed every request
             - E1 rule: what is wrong and where (a suggested fix)
         - ids are stable only until the draft changes, then they reassign from E1/W1
-        - always-on rules: covered-content
+        - always-on rules: covered-content, integrity
         - every open E* in your edited scope blocks a committed finalize
             - the finding names the problem, the fix is yours to choose
         - W* warnings and N* notes never block: they ride along in the proposal
-        - overlap is the only check: a box on a box, or a section on a section
-            - wire routes, label chips, text fit, and section fit are automatic
+        - overlap and integrity are the only checks: overlap is a box on a box, or a section on a section
+            - wire routes, label chips, text fit, and section fit are automatic; integrity fires only when something bypassed them
             - canvas_check counts label chips that found no clear spot under LAYOUT, never as a finding
     </lints>
 

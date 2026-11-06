@@ -5,10 +5,13 @@
  * finalize gate runs; today it is the same set.
  *
  * A lint reports only a defect the system cannot prevent: content covering
- * content (box on box, section on section). Everything else is structural:
- * the router keeps wires out of boxes and their own captions, the renderer
- * places label chips clear, nodes grow to fit their text, sections grow to
- * hold their children, and edits refuse broken wires. Wire length,
+ * content (covered-content: box on box, section on section). Everything else
+ * is structural: the router keeps wires out of boxes and their own captions,
+ * the renderer places label chips clear, nodes grow to fit their text,
+ * sections grow to hold their children, and edits refuse broken wires.
+ * integrity reports what those fixes would have prevented, only where
+ * something bypassed them (a Studio edit, an older file, a route with no
+ * clear path). Wire length,
  * crossings and label chips that found no clear spot are layout numbers
  * (canvas_check prints them), not findings; the eval harness (`climb
  * render`) reports the board's long edge.
@@ -20,8 +23,9 @@
 import type { LayoutRule } from "./types";
 
 import { rule as coveredContent } from "./rules/covered-content";
+import { rule as integrity } from "./rules/integrity";
 
-export const LAYOUT_RULES: readonly LayoutRule[] = [coveredContent];
+export const LAYOUT_RULES: readonly LayoutRule[] = [coveredContent, integrity];
 
 export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES];
 

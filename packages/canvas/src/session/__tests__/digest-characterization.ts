@@ -93,7 +93,8 @@ export const DIAGNOSTICS_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
   "digest-annotations": CLEAN,
   "digest-frameless": CLEAN,
   "digest-solo-section": CLEAN,
-  "digest-clipping": CLEAN,
+  "digest-clipping": `DIAGNOSTICS · 1 error · 0 warnings
+  E1 integrity: wordy's text overflows its box: label clips at 160×96: 16 wrapped line(s), the box holds 4 — needs 1751×96 (resize wordy to ≥1751×96)`,
   "perception-labeled-gap": CLEAN,
   "perception-single": CLEAN,
   "perception-object-delta": CLEAN,

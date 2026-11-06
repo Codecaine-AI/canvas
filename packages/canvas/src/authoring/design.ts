@@ -97,7 +97,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         3. arrange_section for each section, with its node ids as rows. It sets the gaps (${CRAFT_TARGETS.nodeGapRow} across a row, ${CRAFT_TARGETS.nodeGapColumn} down a column) and fits the frame, so you write no coordinates.
         4. space_out each row of sections with gap ${CRAFT_TARGETS.sectionGutterSideBySide}, then align their tops.
         5. connect every wire, then call tighten_wires once.
-        6. canvas_check, then fix its errors. Overlap is the only check: a box on a box, or a section on a section. Wire routes, label chips, text fit, and section fit are automatic.
+        6. canvas_check, then fix its errors. Overlap and integrity are the only checks: overlap is a box on a box, or a section on a section, and integrity fires only when something bypassed the automatic fixes. Wire routes, label chips, text fit, and section fit are automatic.
     </build_order>
 
     <connections>

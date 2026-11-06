@@ -1,5 +1,6 @@
 /** Reference boards calibrate lint changes; they are not exempt from real defects.
- * The one lint left is covered-content (box on box, section on section).
+ * The lints are covered-content (box on box, section on section) and
+ * integrity (what bypassed the automatic fixes).
  * Count ceilings catch unexpected expansion, not correctness of each finding.
  */
 import { describe, expect, test } from "bun:test";
@@ -15,11 +16,13 @@ const CORPUS_DIR = join(import.meta.dir, "..", "..", "..", "..", "..", "canvases
 /**
  * Measured ceilings; inspect individual findings before changing these.
  * Re-measured when the lints were cut to overlap only (covered-content):
- * no reference board has a box on a box or a section on a section.
+ * no reference board has a box on a box or a section on a section. Then
+ * integrity was added: bubba-voice's rect-prompt-code holds 34 wrapped
+ * lines in a box with room for 29, saved before nodes auto-sized.
  */
 const CEILING: Record<string, number> = {
   "agent-flows-2": 0,
-  "bubba-voice": 0,
+  "bubba-voice": 1,
   "claude-code-researcher": 0,
   "gc-decomp-harness": 0,
   "ink-diagrams": 0,
@@ -28,7 +31,7 @@ const CEILING: Record<string, number> = {
   "v2-flow": 0,
 };
 
-const TOTAL_CEILING = 0;
+const TOTAL_CEILING = 1;
 
 function corpus(): { name: string; document: InteractiveCanvasDocument }[] {
   return readdirSync(CORPUS_DIR)
