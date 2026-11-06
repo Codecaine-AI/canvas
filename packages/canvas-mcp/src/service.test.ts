@@ -43,6 +43,32 @@ function textOf(result: { content: Array<{ type: string; text?: string }> }): st
 }
 
 describe("canvas service", () => {
+  test("canvas_open reports the broken wires an older file holds", async () => {
+    const original = realCanvas();
+    const node = original.objects.find((object: any) => object.type !== "section" && object.type !== "sticky");
+    const twin = { ...node, id: "twin" };
+    const broken = {
+      ...original,
+      objects: [...original.objects, twin],
+      connections: [
+        ...original.connections,
+        { id: "loop-wire", from: { objectId: node.id }, to: { objectId: node.id } },
+        { id: "flat-wire", from: { objectId: node.id }, to: { objectId: "twin" } },
+      ],
+    };
+    const { workspace } = workspaceWith(SOURCE_ID, broken);
+    const service = createCanvasService({ workspace });
+
+    const opened = textOf(await service.call("canvas_open", { canvas: SOURCE_ID }));
+
+    expect(opened).toContain("BROKEN WIRES · 2 in this file");
+    expect(opened).toContain(`loop-wire connects ${node.id} to itself`);
+    expect(opened).toContain(`flat-wire has zero length: ${node.id} and twin share one center`);
+    const clean = workspaceWith(SOURCE_ID, original);
+    const cleanText = textOf(await createCanvasService({ workspace: clean.workspace }).call("canvas_open", { canvas: SOURCE_ID }));
+    expect(cleanText).not.toContain("BROKEN WIRES");
+  });
+
   test("place_sticky then move_by save each edit to the canvas file", async () => {
     const original = realCanvas();
     const { workspace, path } = workspaceWith(SOURCE_ID, original);
