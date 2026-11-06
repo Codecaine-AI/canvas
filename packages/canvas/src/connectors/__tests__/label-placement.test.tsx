@@ -139,6 +139,25 @@ describe("placeConnectionLabels", () => {
     expect(chipFindings(document)).toEqual([]);
   });
 
+  it("finds a gap between two wires the chip may overlap by up to 8px", () => {
+    // Two wires end under the chip from the left and the right. A chip may
+    // run over each by 8px, which leaves clear centers x 214..218 only.
+    const { width } = connectionLabelChipMetrics("request");
+    const lx = 214 - width / 2 + 7;
+    const rx = 218 + width / 2 - 7;
+    const objects = [A, B, box("l0", -200, -200), box("l1", lx - 50, 200), box("r0", rx - 50, 200), box("r1", 650, -200)];
+    const connections: InteractiveCanvasConnection[] = [
+      wire("ab", "a", "b", "request"),
+      { id: "left", from: { objectId: "l0", anchor: "bottom" }, to: { objectId: "l1", anchor: "top" }, waypoints: [[-150, 42], [lx, 42]] },
+      { id: "right", from: { objectId: "r0", anchor: "top" }, to: { objectId: "r1", anchor: "bottom" }, waypoints: [[rx, 42], [700, 42]] },
+    ];
+    const document = doc(objects, connections);
+    const point = placeConnectionLabels(document).get("ab")!;
+    expect(point.x).toBeGreaterThanOrEqual(214);
+    expect(point.x).toBeLessThanOrEqual(218);
+    expect(chipFindings(document)).toEqual([]);
+  });
+
   it("places again when the measuring backend changes the chip's width", async () => {
     // The table backend measures this figjam chip about 10px wider than
     // HarfBuzz, so a box 1px right of the narrow chip's edge blocks only the

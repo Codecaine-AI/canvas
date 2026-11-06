@@ -182,7 +182,10 @@ const BOUNDARY_EPSILON_PX = 0.01;
  * the chip's path along a segment meets, the two centers where the chip's
  * edge just clears it — so a gap narrower than the step is still found.
  */
-function candidatesAlong(points: readonly CanvasPoint[], width: number, height: number, obstacles: readonly Rect[]): Candidate[] {
+/** An obstacle and how far along the wire the chip may still overlap it and stay clear (a wire's EDGE_RUN_TOLERANCE_PX). */
+interface Obstacle { rect: Rect; slack: number }
+
+function candidatesAlong(points: readonly CanvasPoint[], width: number, height: number, obstacles: readonly Obstacle[]): Candidate[] {
   const out: Candidate[] = [];
   for (let i = 1; i < points.length; i += 1) {
     const a = points[i - 1]!;
@@ -206,12 +209,21 @@ function candidatesAlong(points: readonly CanvasPoint[], width: number, height: 
       width: Math.abs(b.x - a.x) + width,
       height: Math.abs(b.y - a.y) + height,
     };
-    for (const rect of obstacles) {
+    for (const { rect, slack } of obstacles) {
       if (!intersectsInclusive(swept, rect)) continue;
       // The obstacle's extent along the segment.
       const along = [rect.x, rect.x + rect.width].flatMap((x) =>
         [rect.y, rect.y + rect.height].map((y) => (x - a.x) * ux + (y - a.y) * uy));
-      for (const d of [Math.min(...along) - half - BOUNDARY_EPSILON_PX, Math.max(...along) + half + BOUNDARY_EPSILON_PX]) {
+      const lo = Math.min(...along) - half;
+      const hi = Math.max(...along) + half;
+      const edges = [lo - BOUNDARY_EPSILON_PX, hi + BOUNDARY_EPSILON_PX];
+      // A wire stays clear while the chip overlaps its run by up to `slack`.
+      // The run sums every segment of that wire inside the chip, so a bend
+      // can use part of the slack: also try half of it.
+      for (const take of slack > 0 ? [slack, slack / 2] : []) {
+        edges.push(lo + take - BOUNDARY_EPSILON_PX, hi - take + BOUNDARY_EPSILON_PX);
+      }
+      for (const d of edges) {
         if (d >= 0 && d <= length) out.push(at(d));
       }
     }
@@ -408,11 +420,14 @@ function computePlacements(entry: BoardCache, document: Board, canvasStyle: Canv
     let best = preferred;
     if (!(pinned && preferredScore[0] === 0)) {
       let bestScore = preferredScore;
-      const obstacles: Rect[] = [
+      const obstacles: Obstacle[] = [
         ...faces.flatMap((face) => (selfLoop && face.id === connection.from.objectId ? [] : face.rects)),
         ...chips,
-        ...wires.flatMap((other) => (other.id === connection.id ? [] : segmentBoxes(other.points))),
-      ];
+      ].map((rect) => ({ rect, slack: 0 }));
+      for (const other of wires) {
+        if (other.id === connection.id) continue;
+        for (const rect of segmentBoxes(other.points)) obstacles.push({ rect, slack: EDGE_RUN_TOLERANCE_PX });
+      }
       for (const candidate of candidatesAlong(points, width, height, obstacles)) {
         const score = scoreAt(candidate.point, candidate.bend);
         if (lexLess(score, bestScore)) {
