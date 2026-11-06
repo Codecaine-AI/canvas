@@ -545,9 +545,10 @@ function pointForPosition(bounds: CanvasBounds, position?: [number, number]): Ca
 /**
  * The world point of an end pinned at `position`. A pin in the rows of an
  * icon's own caption would start the wire in its text, because the band is
- * wider than the glyph column the pin is relative to: a pin leaving sideways
- * moves up onto the glyph's side, and a pin inside the band moves down to its
- * bottom edge, where the bottom anchor sits.
+ * wider than the glyph column the pin is relative to: a pin on the column's
+ * side that leaves sideways moves up onto the glyph's side, a pin on the
+ * band's bottom edge stays, and any other pin inside the band moves down to
+ * that edge, where the bottom anchor sits.
  */
 function pointForObjectPosition(
   object: InteractiveCanvasObject,
@@ -559,7 +560,10 @@ function pointForObjectPosition(
   const point = pointForPosition(bounds, position);
   const band = point && captionBandBounds(object, canvasStyle);
   if (!point || !band || point.y <= band.y + ROUTE_EPSILON) return point;
-  if (isHorizontalAnchor(anchor)) {
+  const onSide =
+    Math.abs(point.x - bounds.x) <= ROUTE_EPSILON ||
+    Math.abs(point.x - (bounds.x + bounds.width)) <= ROUTE_EPSILON;
+  if (onSide && isHorizontalAnchor(anchor)) {
     const glyphHeight = band.y - bounds.y;
     return { x: point.x, y: band.y - Math.min(STRAIGHT_EDGE_MARGIN_PX, glyphHeight / 2) };
   }
