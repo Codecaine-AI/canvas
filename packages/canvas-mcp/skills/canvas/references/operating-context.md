@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/state-grammar.ts (sha256 8b510c75f7317cbbeab0d0cc2a3e85fa61b1652ff06feeea62f90a411b530593), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/state-grammar.ts (sha256 44eab1222c133465561eda9f840a29a4a3cdb3a1c17dc934b8d37189828a4d42), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Operating Context
 
@@ -71,13 +71,13 @@ The reading key for MCP results, and the house style.
             - recomputed every request
             - E1 rule: what is wrong and where (a suggested fix)
         - ids are stable only until the draft changes, then they reassign from E1/W1
-        - always-on rules: covered-content, containment, broken-edges, clipped-text
+        - always-on rules: covered-content
         - every open E* in your edited scope blocks a committed finalize
             - the finding names the problem, the fix is yours to choose
-        - W* warnings never block: they ride along in the proposal
-        - N* notes never block: what cannot be promised
-            - text within 1px of its box edge may wrap or clip in the browser
-            - characters the bundled fonts lack paint in fallback fonts, so their fit is an estimate
+        - W* warnings and N* notes never block: they ride along in the proposal
+        - overlap is the only check: a box on a box, or a section on a section
+            - wire routes, label chips, text fit, and section fit are automatic
+            - canvas_check counts label chips that found no clear spot under LAYOUT, never as a finding
     </lints>
 
     <requests>

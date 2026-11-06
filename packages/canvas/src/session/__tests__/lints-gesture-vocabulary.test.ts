@@ -20,7 +20,7 @@ import type { InteractiveCanvasDocument } from "../../state/schema";
 
 import { FINISHING_RULES } from "../../board/lints";
 import { operationTools } from "../tools/operations";
-import { box, connect, makeDocument } from "./synthetic";
+import { box, makeDocument } from "./synthetic";
 
 /** The retired CRUD roster, as it would read if it leaked back into prose. */
 const RETIRED_OP = /\b(add|update|remove|fit)(Section|Object|Sticky|Connection)\b/;
@@ -37,16 +37,6 @@ const NON_TOOL_TERMS = new Set<string>([]);
 function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
   return [
     {
-      // containment: a child hanging out of its frame, and a stray past the page.
-      name: "containment",
-      document: makeDocument([
-        box("page", 0, 0, 1200, 800, "section"),
-        { ...box("frame", 40, 40, 480, 320, "section"), parentId: "page" },
-        { ...box("child", 440, 96, 184, 96, "process"), parentId: "frame" },
-        box("stray", 1300, 96, 184, 96, "process"),
-      ]),
-    },
-    {
       // covered-content: boxes on top of each other.
       name: "covered-content",
       document: makeDocument([
@@ -58,55 +48,13 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ]),
     },
     {
-      // broken-edges: a self-loop and a dangling endpoint.
-      name: "broken-edges",
-      document: makeDocument(
-        [
-          box("page", 0, 0, 1200, 800, "section"),
-          box("alpha", 80, 80, 160, 96, "process"),
-        ],
-        [connect("loop", "alpha", "alpha"), connect("dangle", "alpha", "ghost")],
-      ),
-    },
-    {
-      // broken-edges: a port slid into its own endpoint's caption band.
-      name: "own-caption",
-      document: makeDocument(
-        [
-          box("page", 0, 0, 2600, 1400, "section"),
-          { ...box("integrations", 2000, 680, 300, 120, "icon"), text: "Action integrations", detail: "stores no credentials" },
-          { ...box("account", 1520, 1000, 300, 120, "icon"), text: "Account system", detail: "subscriptions" },
-        ],
-        [{
-          ...connect("subscription", "integrations", "account"),
-          from: { objectId: "integrations", anchor: "left", position: [0, 0.85] },
-          to: { objectId: "account", anchor: "top" },
-        }],
-      ),
-    },
-    {
-      // covered-content: a long chip on its own endpoints in a narrow corridor.
-      name: "chip-on-endpoint",
-      document: makeDocument(
-        [
-          box("page", 0, 0, 1200, 800, "section"),
-          box("left", 80, 80, 160, 96, "process"),
-          box("right", 280, 80, 160, 96, "process"),
-        ],
-        [{
-          ...connect("labeled", "left", "right"),
-          label: "a label far too long for this corridor",
-        }],
-      ),
-    },
-    {
-      // clipped-text: a sticky body with more rows than its note can paint.
-      name: "clipped-text",
-      document: makeDocument([{
-        ...box("clipped-note", 0, 0, 176, 128, "sticky"),
-        text: "- one\n- two\n- three\n- four\n- five",
-        style: { shape: "note" },
-      }]),
+      // covered-content: two section frames pushed into each other.
+      name: "section-on-section",
+      document: makeDocument([
+        box("page", 0, 0, 1200, 800, "section"),
+        { ...box("left", 40, 40, 520, 400, "section"), parentId: "page" },
+        { ...box("right", 540, 40, 400, 400, "section"), parentId: "page" },
+      ]),
     },
   ];
 }

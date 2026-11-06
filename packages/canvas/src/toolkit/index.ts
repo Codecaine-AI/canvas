@@ -46,6 +46,7 @@ import {
 
 import { diffDocuments } from "../board/doc-diff";
 import { layoutBlock, layoutNumbers } from "../board/layout-numbers";
+import { textFitReport } from "../board/text-fit";
 import {
   FINISHING_RULES,
   diagnosticLines,
@@ -306,7 +307,9 @@ function plural(count: number, one: string, many = `${one}s`): string {
  * by severity, the node and edge counts, one render of the board's full
  * painted bounds at the judged size (render/judge-size.ts: 1:1 world scale,
  * the long edge capped at 2576px), and the LAYOUT numbers (wire length,
- * crossings, section traversals, longest wires — board/layout-numbers.ts).
+ * crossings, section traversals, longest wires, label chips with no clear
+ * spot — board/layout-numbers.ts), then a TEXT note for each sticky or
+ * section whose text clips (nodes grow to fit; these do not).
  * `look` frames one region; this is the one view of all of it.
  * Counts and the render read the board as saved, so a page frame injected at
  * open is not counted. The lints read the draft, as every edit's LINTS line does.
@@ -358,7 +361,24 @@ export function checkCanvasFile(file: CanvasFileSession, label: string): LayoutT
     for (const diagnostic of found) lines.push(...diagnosticLines(diagnostic).map((line) => `    ${line}`));
   }
   lines.push(layoutBlock(layoutNumbers(board, file.session.canvasStyle)));
+  lines.push(...clippedFrameNotes(board, file.session.canvasStyle));
   return { text: lines.join("\n"), pngs };
+}
+
+/**
+ * Nodes grow to fit their text; stickies and section titles do not. One
+ * note line for each that definitely clips (textFitReport), never blocking.
+ */
+function clippedFrameNotes(board: InteractiveCanvasDocument, canvasStyle?: CanvasStyle): string[] {
+  const notes: string[] = [];
+  for (const object of board.objects) {
+    if (object.type !== "sticky" && object.type !== "section") continue;
+    const report = textFitReport(object, object.geometry, object.text ?? "", canvasStyle);
+    if (report.verdict !== "overflows" || !report.definite) continue;
+    const grow = report.neededSize ? `grow it to ≥${report.neededSize.width}×${report.neededSize.height} or ` : "";
+    notes.push(`  ${object.type} ${object.id} clips its text: ${report.detail} (${grow}shorten the text)`);
+  }
+  return notes.length > 0 ? [`TEXT · ${plural(notes.length, "note")} (never blocks)`, ...notes] : [];
 }
 
 /**

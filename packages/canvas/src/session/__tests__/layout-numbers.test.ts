@@ -33,7 +33,7 @@ describe("layout numbers", () => {
     );
 
     const block = layoutBlock(numbers);
-    expect(block.split("\n")[0]).toMatch(/^LAYOUT · wire length \d+px · 1 crossing \(1 wire pair\)$/);
+    expect(block.split("\n")[0]).toMatch(/^LAYOUT · wire length \d+px · 1 crossing \(1 wire pair\) · 0 labels without a clear spot$/);
     expect(block).toContain("crossing pairs: v × h 1");
     expect(block).toContain("through a section holding neither end: h through band");
     expect(block).toContain("longest wires: h ");
@@ -73,5 +73,22 @@ describe("layout numbers", () => {
 
     expect(numbers.crossings).toBe(1);
     expect(numbers.topCrossingPairs).toEqual([{ a: "hp", b: "hq", crossings: 1 }]);
+  });
+
+  test("count the label chips that found no clear spot, by wire", () => {
+    // a and b sit 64px apart: no spot on e's wire holds its chip clear of both
+    // ends. f has room, so its chip is clear.
+    const document = makeDocument(
+      [box("a", 0, 0), box("b", 224, 0), box("c", 0, 400), box("d", 800, 400)],
+      [
+        { ...connect("e", "a", "b"), label: "connect()" },
+        { ...connect("f", "c", "d"), label: "go" },
+      ],
+    );
+    const numbers = layoutNumbers(document);
+    expect(numbers.blockedLabels).toEqual(["e"]);
+    const block = layoutBlock(numbers);
+    expect(block.split("\n")[0]).toEndWith("· 1 label without a clear spot");
+    expect(block).toContain("labels without a clear spot: e");
   });
 });

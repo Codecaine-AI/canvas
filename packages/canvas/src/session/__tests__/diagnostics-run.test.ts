@@ -188,17 +188,12 @@ describe("formatDiagnostics", () => {
   });
 
   test("renders a finding's prose suggestion without structured operations", () => {
-    const document = makeDocument(
-      [box("alpha", 0, 0), box("beta", 180, 0)],
-      [{ ...connect("edge", "alpha", "beta"), label: "X" }],
-    );
-    // Figjam chip geometry: the 41px "X" chip does not fit a 20px corridor.
+    // Same-size boxes offset 80px: half of each is covered.
+    const document = makeDocument([box("alpha", 0, 0), box("beta", 80, 0)]);
     const text = formatDiagnostics(runAll(document, undefined, FIGJAM_CONTEXT));
 
-    expect(text).toContain('E1 covered-content: label "X" chip on edge covers its endpoint alpha');
-    expect(text).toContain(
-      "(move_label edge to a stretch of its wire clear of alpha, or move one end so the wire is long enough to hold the chip)",
-    );
+    expect(text).toContain("E1 covered-content: alpha and beta overlap by 50% of the smaller box");
+    expect(text).toContain("(move beta clear of alpha)");
     expect(text).not.toContain('"operations"');
     expect(text).not.toContain("suggested op:");
     expect(text).not.toContain("[quickfix]");

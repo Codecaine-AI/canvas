@@ -15,6 +15,7 @@ export {
 } from "./painted-bounds";
 export type { Rect } from "./painted-bounds";
 export { boardCameraAtWorldScale, renderBoardView, renderSectionView } from "./views";
+export { JUDGE_PNG_MAX_EDGE } from "./judge-size";
 export type { RenderedView, RenderViewOptions } from "./views";
 export type {
   RenderDocumentToSvg,

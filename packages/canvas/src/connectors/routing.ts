@@ -1499,8 +1499,8 @@ function pointToward(from: CanvasPoint, to: CanvasPoint, length: number): Canvas
 /**
  * The EFFECTIVE label-chip center for a connection — the single reader every
  * chip consumer goes through (stage SVG chip, HTML overlay chip, static-SVG
- * export, the inline label editor's anchor, painted bounds, and the agent's
- * chip lints), so the drawn chip and every judgement about it can never
+ * export, the inline label editor's anchor, painted bounds, and label
+ * placement), so the drawn chip and every judgement about it can never
  * disagree.
  *
  * Without `connection.labelPosition` this is exactly `routed.labelPoint`,

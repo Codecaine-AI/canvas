@@ -21,7 +21,7 @@ import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
-import { BOARD_MAX_EDGE_PX } from "@codecaine-ai/canvas/lints";
+import { JUDGE_PNG_MAX_EDGE } from "@codecaine-ai/canvas/render";
 import {
   boardStateSnapshot,
   brokenWiresLine,
@@ -223,7 +223,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     title: "Create canvas",
     description:
       "Create a new board at canvases/<id>.canvas.json holding only its page frame, and open it as canvas_open does. Refuses an id that already exists. Place, connect, and check it with the other canvas tools. "
-      + `The whole board, padding included, reads at real size up to ${BOARD_MAX_EDGE_PX} × ${BOARD_MAX_EDGE_PX}px, so lay 4 or more sections out in 2 or 3 rows that grow down, not in one long row. `
+      + `The whole board, padding included, reads at real size up to ${JUDGE_PNG_MAX_EDGE} × ${JUDGE_PNG_MAX_EDGE}px, so lay 4 or more sections out in 2 or 3 rows that grow down, not in one long row. `
       + "Build order: place_section with title and color for each section, place_shape with text, detail and color for each node, arrange_section for each section, space_out the sections, connect every wire, tighten_wires once, then canvas_check and fix its errors.",
     inputSchema: {
       type: "object",
@@ -242,7 +242,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_check",
     title: "Check canvas",
     description:
-      "Check the open board before you call it done: runs every lint (the finishing rules included) and returns the findings grouped by severity with counts, the node and edge counts, and a PNG of the whole board at its full bounds. The PNG shows the board at 1:1 world scale, scaled down only so its long edge is at most 2576px: the size the judges see. Read the flow, the grouping and the text in it, and use look to read one section up close. look frames one region; canvas_check shows all of it. Changes nothing.",
+      "Check the open board before you call it done: runs every lint and returns the findings grouped by severity with counts, the node and edge counts, and a PNG of the whole board at its full bounds. Overlap is the only lint: a box on a box, or a section on a section. Wire routes, label chips, text fit, and section fit are automatic: the LAYOUT block counts wire length, crossings, and label chips that found no clear spot, and a TEXT note names a sticky or section whose text clips. None of those block. The PNG shows the board at 1:1 world scale, scaled down only so its long edge is at most 2576px: the size the judges see. Read the flow, the grouping and the text in it, and use look to read one section up close. look frames one region; canvas_check shows all of it. Changes nothing.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
 ];

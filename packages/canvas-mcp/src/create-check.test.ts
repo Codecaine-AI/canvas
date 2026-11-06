@@ -144,6 +144,18 @@ describe("canvas_create and canvas_check", () => {
     expect(saved.connections).toHaveLength(2);
   });
 
+  test("a sticky whose text clips is a TEXT note, never a finding", async () => {
+    const service = createCanvasService({ workspace: tempDir() });
+    await call(service, "canvas_create", { canvas: "sticky-clip", title: "Sticky clip" });
+    const rows = Array.from({ length: 30 }, (_, index) => `row ${index + 1}`).join("\n");
+    await call(service, "place_sticky", { id: "payload", text: rows, at: [80, 120] });
+
+    const check = checked(await call(service, "canvas_check", {}));
+    expect(check.text).toContain("LINTS · clean");
+    expect(check.text).toContain("TEXT · 1 note (never blocks)");
+    expect(check.text).toMatch(/^ {2}sticky payload clips its text: .*shorten the text\)$/m);
+  });
+
   test("a chart.mmd redraws on a board with equal node and edge counts", async () => {
     const service = createCanvasService({ workspace: tempDir() });
     const chart = parseChart(CHECKOUT_CHART);

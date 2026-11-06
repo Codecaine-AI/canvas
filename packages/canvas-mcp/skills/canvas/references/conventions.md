@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/conventions.ts (sha256 330be79b85dd959a5d807cbe075785e5845c2a05db4a58fa9a1ce5a11a3b9734). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/conventions.ts (sha256 0bf8b29e931d8796ff8570ca0d5b46ddab1cb925436aad2de406284a630b0fa0). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Canvas Conventions
 
@@ -42,7 +42,7 @@
 
     Position is the membership signal. You do not supply a parent ID.
 
-    The base section is the page; grow it when the diagram needs room. Only sections contain other entities.
+    The base section is the page. It grows by itself like any section. Only sections contain other entities.
 
     A section grows by itself to hold a child that crosses its edge, and never shrinks by itself. arrange_section lays out a section's nodes in rows and fits the frame. fit_section fits a frame around its current children. Neither fits the ancestors.
 </containment>

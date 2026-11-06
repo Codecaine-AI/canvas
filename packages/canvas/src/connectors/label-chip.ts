@@ -32,7 +32,7 @@ export const CONNECTION_LABEL_CHIP = {
   sansFontWeight: 700,
   // SemiBold: a 14px chip prints near 9px on a board fit to one view, where
   // Medium strokes thin out. Plex Mono's advance is the same at every weight,
-  // so chip widths (and the chip lints) do not change.
+  // so chip widths (and label placement) do not change.
   monoFontWeight: 600,
   /** Hairline border (`hairlineColor`). */
   borderWidthPx: 1,

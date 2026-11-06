@@ -14,9 +14,9 @@ import { box, connect, makeDocument } from "./synthetic";
 
 describe("spawn board-state snapshot", () => {
   test("carries the full digest plus the full lint report as one string", () => {
-    // A 4px gap under a "go" chip → covered-content errors in the report.
+    // beta laid half over alpha → a covered-content error in the report.
     const baseline = makeDocument(
-      [box("alpha", 0, 0), box("beta", 164, 0)],
+      [box("alpha", 0, 0), box("beta", 80, 0)],
       [{ ...connect("edge", "alpha", "beta"), label: "go" }],
     );
     const session = makeTestSession(baseline, ["alpha", "beta"]);
@@ -26,10 +26,10 @@ describe("spawn board-state snapshot", () => {
     expect(snapshot).toContain("BOARD ·");
     expect(snapshot).toContain('"alpha"');
     expect(snapshot).toContain("\n\nDIAGNOSTICS ·");
-    // The chip sits on its own endpoints — the full lint report rides along.
+    // The boxes overlap — the full lint report rides along.
     expect(snapshot).toContain("covered-content");
     // Findings carry a prose remedy, leaving the operation choice to the model.
-    expect(snapshot).toContain("move_label edge to a stretch of its wire clear of alpha");
+    expect(snapshot).toContain("move beta clear of alpha");
     expect(snapshot).not.toContain("suggested op:");
   });
 
@@ -347,40 +347,20 @@ describe("LINTS delta", () => {
   });
 
   test("added findings carry prose suggestions without structured fixes", () => {
-    const baseline = makeDocument(
-      [box("alpha", 0, 0), box("beta", 480, 0)],
-      [{ ...connect("edge", "alpha", "beta"), label: "X" }],
-    );
+    const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
     const session = makeTestSession(baseline, ["alpha", "beta"]);
 
     // A deliberate look establishes the clean diagnostic state.
     look(session, "alpha");
 
-    // Close the corridor to 8px: the chip lands on its own endpoints, and the
-    // remedy is prose.
-    const introduced = runOp(session, "move_to", { id: "beta", x: 168, y: 0 });
-    expect(introduced.text).toContain("LINTS · +2 errors (2 open)");
-    expect(introduced.text).toContain('+ E1 covered-content: label "X" chip on edge covers its endpoint alpha');
-    expect(introduced.text).toContain("(move_label edge to a stretch of its wire clear of alpha");
+    // Lay beta half over alpha: the remedy is prose.
+    const introduced = runOp(session, "move_to", { id: "beta", x: 80, y: 0 });
+    expect(introduced.text).toContain("LINTS · +1 error (1 open)");
+    expect(introduced.text).toContain("+ E1 covered-content: alpha and beta overlap by 50% of the smaller box");
+    expect(introduced.text).toContain("(move beta clear of alpha)");
     expect(introduced.text).not.toContain("suggested op:");
     expect(introduced.text).not.toContain('"type":"updateObject"');
     expect(introduced.text).not.toContain("[quickfix]");
-  });
-
-  test("an added warning is not printed; the session still records it", () => {
-    const baseline = makeDocument(
-      [box("alpha", 0, 0), box("beta", 480, 0)],
-      [connect("there", "alpha", "beta")],
-    );
-    const session = makeTestSession(baseline, ["alpha", "beta"]);
-    look(session, "alpha");
-
-    // A return wire between the same pair is an anti-parallel warning.
-    const added = runOp(session, "connect", { id: "back", from: { objectId: "beta" }, to: { objectId: "alpha" } });
-    expect(added.isError).toBeUndefined();
-    expect(added.text).toContain("LINTS · no new errors");
-    expect(added.text).not.toContain("anti-parallel");
-    expect(session.lastDiagnostics!.map((diagnostic) => diagnostic.severity)).toEqual(["warning"]);
   });
 
   test("fingerprint matching survives id renumbering", () => {

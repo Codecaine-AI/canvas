@@ -1,7 +1,7 @@
 /**
  * Label placement: the renderer keeps a wire's chip off boxes, chips and
  * other wires when its own wire has a clear stretch, and every chip consumer
- * (stage Connector, static SVG, painted bounds, the lints' chipFor) draws or
+ * (stage Connector, static SVG, painted bounds, chipFor) draws or
  * judges the chip at that one placed point.
  */
 import { describe, expect, it } from "bun:test";
@@ -15,12 +15,11 @@ import type {
   InteractiveCanvasObject,
 } from "../../state/schema";
 import { chipFor } from "../../board/lints/geometry";
-import { rule as coveredContent } from "../../board/lints/rules/covered-content";
 import { connectionPaintedBounds } from "../../render/painted-bounds";
 import { renderDocumentToSvg } from "../../render/static-svg";
 import { Connector } from "../Connector";
 import { connectionLabelChipMetrics } from "../label-chip";
-import { placeConnectionLabels } from "../label-placement";
+import { blockedLabelIds, placeConnectionLabels } from "../label-placement";
 import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 
 function box(id: string, x: number, y: number, width = 100, height = 60): InteractiveCanvasObject {
@@ -51,12 +50,6 @@ const B = box("b", 500, 0);
 /** A box just under the midpoint: the mid chip (26px high) dips 3px into its top. */
 const UNDER_MIDDLE = box("c", 260, 40, 80, 40);
 
-function chipFindings(document: InteractiveCanvasDocument): string[] {
-  return coveredContent.check(document, undefined)
-    .filter((finding) => finding.message.startsWith("label "))
-    .map((finding) => finding.message);
-}
-
 describe("placeConnectionLabels", () => {
   it("moves a chip off a box onto a clear stretch of its own wire", () => {
     const document = doc([A, B, UNDER_MIDDLE], [wire("ab", "a", "b", "request")]);
@@ -67,7 +60,7 @@ describe("placeConnectionLabels", () => {
     expect(point.x - width / 2 >= 340 || point.x + width / 2 <= 260).toBe(true);
     expect(point.x - width / 2).toBeGreaterThan(100);
     expect(point.x + width / 2).toBeLessThan(500);
-    expect(chipFindings(document)).toEqual([]);
+    expect(blockedLabelIds(document)).toEqual([]);
   });
 
   it("moves a chip off another wire that crosses its midpoint", () => {
@@ -78,7 +71,7 @@ describe("placeConnectionLabels", () => {
     );
     const point = placeConnectionLabels(document).get("ab")!;
     expect(point.x).not.toBe(300);
-    expect(chipFindings(document)).toEqual([]);
+    expect(blockedLabelIds(document)).toEqual([]);
   });
 
   it("places chips in document order so a later chip never lands on an earlier one", () => {
@@ -95,7 +88,7 @@ describe("placeConnectionLabels", () => {
     expect(placed.get("ab")).toEqual({ x: 300, y: 10 });
     expect(placed.get("cd")!.y).toBe(30);
     expect(placed.get("cd")!.x).not.toBe(300);
-    expect(chipFindings(document)).toEqual([]);
+    expect(blockedLabelIds(document)).toEqual([]);
   });
 
   it("keeps a clear chip at its midpoint", () => {
@@ -116,7 +109,7 @@ describe("placeConnectionLabels", () => {
     const point = placeConnectionLabels(document).get("ab")!;
     const { width } = connectionLabelChipMetrics("request");
     expect(point.x - width / 2 >= 340 || point.x + width / 2 <= 260).toBe(true);
-    expect(chipFindings(document)).toEqual([]);
+    expect(blockedLabelIds(document)).toEqual([]);
   });
 
   it("keeps the least-bad point when the wire has no clear stretch", () => {
@@ -124,7 +117,7 @@ describe("placeConnectionLabels", () => {
     // midpoint covers a sliver of each, less than sliding onto either one.
     const document = doc([A, box("b", 140, 0)], [wire("ab", "a", "b", "request")]);
     expect(placeConnectionLabels(document).get("ab")).toEqual({ x: 120, y: 30 });
-    expect(chipFindings(document)).toHaveLength(2);
+    expect(blockedLabelIds(document)).toEqual(["ab"]);
   });
 
   it("finds a clear gap narrower than the sampling step", () => {
@@ -136,7 +129,7 @@ describe("placeConnectionLabels", () => {
     const point = placeConnectionLabels(document).get("ab")!;
     expect(point.x - width / 2).toBeGreaterThanOrEqual(left.geometry.x + left.geometry.width);
     expect(point.x + width / 2).toBeLessThanOrEqual(right.geometry.x);
-    expect(chipFindings(document)).toEqual([]);
+    expect(blockedLabelIds(document)).toEqual([]);
   });
 
   it("finds a gap between two wires the chip may overlap by up to 8px", () => {
@@ -157,7 +150,7 @@ describe("placeConnectionLabels", () => {
     const point = placeConnectionLabels(document).get("ab")!;
     expect(point.x).toBeGreaterThanOrEqual(214);
     expect(point.x).toBeLessThanOrEqual(218);
-    expect(chipFindings(document)).toEqual([]);
+    expect(blockedLabelIds(document)).toEqual([]);
   });
 
   it("places again when the measuring backend changes the chip's width", async () => {
@@ -190,7 +183,7 @@ describe("placeConnectionLabels", () => {
 });
 
 describe("placed label parity", () => {
-  it("stage chip, static SVG chip, painted bounds and the lint chip share one center", () => {
+  it("stage chip, static SVG chip, painted bounds and chipFor share one center", () => {
     const document = doc([A, B, UNDER_MIDDLE], [wire("ab", "a", "b", "request")]);
     const connection = document.connections[0]!;
     const placed = placeConnectionLabels(document).get("ab")!;

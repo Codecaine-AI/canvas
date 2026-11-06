@@ -203,7 +203,7 @@ export const LabelPosition = Type.Object(
       description: "Perpendicular nudge in px; positive is left of the from→to direction.",
     })),
   },
-  { ...Seal, description: "Where the label chip sits on the edge. Omit it for the midpoint." },
+  { ...Seal, description: "Where the label chip sits on the edge. Omit it to let the renderer place the chip clear along its wire." },
 );
 export type LabelPosition = Static<typeof LabelPosition>;
 
@@ -661,9 +661,9 @@ export const LabelAlong = Type.Union(
       description: "How far along the routed path the chip sits: 0 is the start, 1 the end.",
     }),
     StringEnum(["auto"], {
-      description: "Clear the pin and let the chip sit at the routed midpoint.",
+      description: "Clear the pin and let the renderer place the chip clear along its wire.",
     }),
   ],
-  { description: "A 0..1 fraction of the routed path, or \"auto\" for the midpoint." },
+  { description: "A 0..1 fraction of the routed path, or \"auto\" for automatic placement." },
 );
 export type LabelAlong = Static<typeof LabelAlong>;

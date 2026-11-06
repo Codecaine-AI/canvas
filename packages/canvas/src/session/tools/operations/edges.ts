@@ -642,7 +642,7 @@ export const resetRoute = defineOperationTool({
 export const moveLabel = defineOperationTool({
   name: "move_label",
   description:
-    "Pin an edge's label chip somewhere other than the middle of its route: `along` is a 0..1 fraction of the routed path and `offset` nudges it perpendicular, in px on the board grid. `along: \"auto\"` drops the pin and returns the chip to the midpoint.",
+    "Pin an edge's label chip at one spot on its route: `along` is a 0..1 fraction of the routed path and `offset` nudges it perpendicular, in px on the board grid. You rarely need it: the renderer already places every chip clear of boxes, chips and wires, and moves a pin that collides to a clear spot when its wire has one. `along: \"auto\"` drops the pin and returns the chip to automatic placement.",
   fields: {
     id: Id,
     along: LabelAlong,

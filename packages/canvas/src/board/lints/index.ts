@@ -2,14 +2,16 @@
  * The always-on and finishing layout-lint registries.
  *
  * LAYOUT_RULES runs on every edit and at spawn. FINISHING_RULES is what the
- * finalize gate runs; today it is the same set. The board's size is not a
- * finding: the eval harness (`climb render`) reports its long edge.
+ * finalize gate runs; today it is the same set.
  *
- * Every rule reports a visible defect on rendered geometry: content covering
- * content, a broken or box-crossing wire, text its box clips, a child outside
- * its section. Spacing, wording, wire
- * length and crossings are layout numbers (canvas_check prints them), not
- * findings.
+ * A lint reports only a defect the system cannot prevent: content covering
+ * content (box on box, section on section). Everything else is structural:
+ * the router keeps wires out of boxes and their own captions, the renderer
+ * places label chips clear, nodes grow to fit their text, sections grow to
+ * hold their children, and edits refuse broken wires. Wire length,
+ * crossings and label chips that found no clear spot are layout numbers
+ * (canvas_check prints them), not findings; the eval harness (`climb
+ * render`) reports the board's long edge.
  *
  * The diagnostics runner calls each registry's lints in order and then floats
  * error-severity findings ahead of warnings when assigning ids, so registry
@@ -18,16 +20,8 @@
 import type { LayoutRule } from "./types";
 
 import { rule as coveredContent } from "./rules/covered-content";
-import { rule as containment } from "./rules/containment";
-import { rule as brokenEdges } from "./rules/broken-edges";
-import { rule as clippedText } from "./rules/clipped-text";
 
-export const LAYOUT_RULES: readonly LayoutRule[] = [
-  coveredContent,
-  containment,
-  brokenEdges,
-  clippedText,
-];
+export const LAYOUT_RULES: readonly LayoutRule[] = [coveredContent];
 
 export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES];
 

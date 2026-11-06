@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 5150127277eae86bbf9041cb02a221d45f58403038d3840ab77f3ec176495686). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 05028f3ef39c5425b6b475e857a582003e766f81341eaead64d1ff6d02b8e97e). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -178,11 +178,11 @@
         3. arrange_section for each section, with its node ids as rows. It sets the gaps (200 across a row, 100 down a column) and fits the frame, so you write no coordinates.
         4. space_out each row of sections with gap 200, then align their tops.
         5. connect every wire, then call tighten_wires once.
-        6. canvas_check, then fix its errors.
+        6. canvas_check, then fix its errors. Overlap is the only check: a box on a box, or a section on a section. Wire routes, label chips, text fit, and section fit are automatic.
     </build_order>
 
     <connections>
-        Start each wire at the node that sends and end it at the node that acts. A wire from the wrong participant states a wrong fact. When several nodes in a section act, connect one wire per node, not one to the frame. A wire meets an icon at its tile, never through its caption.
+        Start each wire at the node that sends and end it at the node that acts. A wire from the wrong participant states a wrong fact. When several nodes in a section act, connect one wire per node, not one to the frame.
 
         Color follows the board's color key: one hue per role, and red only for failures. Read color_palette before you color anything.
     </connections>

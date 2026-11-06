@@ -1,7 +1,8 @@
 /**
  * Layout numbers — what a viewer reads as layout, measured on the renderer's
  * routed wires: total wire length, crossings, wires that run through a
- * section holding neither of their ends, and the longest wires.
+ * section holding neither of their ends, the longest wires, and the label
+ * chips that found no clear spot along their wire.
  *
  * These are numbers, not findings: nothing here blocks, and canvas_check
  * prints them under the lints (LAYOUT block) so the drawer sees which wires
@@ -11,6 +12,7 @@ import type { InteractiveCanvasConnection, InteractiveCanvasDocument } from "../
 import type { CanvasStyle } from "../theme/canvas-style";
 import { sectionDescendantIds } from "../state/geometry";
 import { kindOf } from "./helpers";
+import { blockedLabelIds } from "../connectors/label-placement";
 import {
   crossingPoints,
   inflate,
@@ -47,6 +49,8 @@ export interface LayoutNumbers {
   topTraversals: { wire: string; section: string; run: number }[];
   /** The longest wires, longest first. */
   longestWires: { wire: string; length: number }[];
+  /** Labeled wires whose chip found no clear spot (it still sits on a box, a chip or a wire). */
+  blockedLabels: readonly string[];
 }
 
 /** The nodes two wires both end on. */
@@ -113,6 +117,7 @@ export function layoutNumbers(document: InteractiveCanvasDocument, canvasStyle?:
       .map(({ edge, length }) => ({ wire: edge.id, length }))
       .sort((x, y) => y.length - x.length || x.wire.localeCompare(y.wire))
       .slice(0, TOP_LONGEST),
+    blockedLabels: blockedLabelIds(document, canvasStyle),
   };
 }
 
@@ -121,8 +126,12 @@ export function layoutBlock(numbers: LayoutNumbers): string {
   const px = (value: number) => `${Math.round(value)}px`;
   const lines = [
     `LAYOUT · wire length ${px(numbers.wireLength)} · ${numbers.crossings} crossing${numbers.crossings === 1 ? "" : "s"}`
-    + ` (${numbers.crossingPairs} wire pair${numbers.crossingPairs === 1 ? "" : "s"})`,
+    + ` (${numbers.crossingPairs} wire pair${numbers.crossingPairs === 1 ? "" : "s"})`
+    + ` · ${numbers.blockedLabels.length} label${numbers.blockedLabels.length === 1 ? "" : "s"} without a clear spot`,
   ];
+  if (numbers.blockedLabels.length > 0) {
+    lines.push(`  labels without a clear spot: ${numbers.blockedLabels.join(" · ")}`);
+  }
   if (numbers.topCrossingPairs.length > 0) {
     lines.push(`  crossing pairs: ${numbers.topCrossingPairs.map((pair) => `${pair.a} × ${pair.b} ${pair.crossings}`).join(" · ")}`);
   }

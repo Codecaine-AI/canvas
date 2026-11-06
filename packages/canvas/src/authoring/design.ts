@@ -1,5 +1,5 @@
 import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS, NOTE_MAX_WORDS } from "../board/text-rules";
-import { BOARD_MAX_EDGE_PX } from "../board/lints/rules/board-too-large";
+import { JUDGE_PNG_MAX_EDGE } from "../render/judge-size";
 import { creationDefaultFor } from "../session/tools/creation-defaults";
 import { CRAFT_TARGETS } from "./style-guide/craft-targets";
 import { renderVisualPatterns } from "./visual-patterns";
@@ -82,7 +82,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 
 <layout_and_connections>
     <board_size>
-        The board is judged as one image of its whole extent. Up to ${BOARD_MAX_EDGE_PX} × ${BOARD_MAX_EDGE_PX}px that image is real size. Past it the image scales down and every label prints smaller.
+        The board is judged as one image of its whole extent. Up to ${JUDGE_PNG_MAX_EDGE} × ${JUDGE_PNG_MAX_EDGE}px that image is real size. Past it the image scales down and every label prints smaller.
 
         - Lay 4 or more sections out in 2 or 3 rows that grow down, never in one long row.
         - Size each section to its content. A section with three nodes is small, not a full-width band.
@@ -97,11 +97,11 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         3. arrange_section for each section, with its node ids as rows. It sets the gaps (${CRAFT_TARGETS.nodeGapRow} across a row, ${CRAFT_TARGETS.nodeGapColumn} down a column) and fits the frame, so you write no coordinates.
         4. space_out each row of sections with gap ${CRAFT_TARGETS.sectionGutterSideBySide}, then align their tops.
         5. connect every wire, then call tighten_wires once.
-        6. canvas_check, then fix its errors.
+        6. canvas_check, then fix its errors. Overlap is the only check: a box on a box, or a section on a section. Wire routes, label chips, text fit, and section fit are automatic.
     </build_order>
 
     <connections>
-        Start each wire at the node that sends and end it at the node that acts. A wire from the wrong participant states a wrong fact. When several nodes in a section act, connect one wire per node, not one to the frame. A wire meets an icon at its tile, never through its caption.
+        Start each wire at the node that sends and end it at the node that acts. A wire from the wrong participant states a wrong fact. When several nodes in a section act, connect one wire per node, not one to the frame.
 
         Color follows the board's color key: one hue per role, and red only for failures. Read color_palette before you color anything.
     </connections>

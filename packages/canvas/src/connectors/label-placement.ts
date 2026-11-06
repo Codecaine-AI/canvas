@@ -1,8 +1,8 @@
 /**
  * Where each connection's label chip is DRAWN — the one placement every chip
  * consumer reads (stage chip in Connector.tsx, the static-SVG export, painted
- * bounds, the inline label editor, and the agent's chip lints through
- * board/lints/geometry.ts chipFor), so the app, the PNG and the lints agree.
+ * bounds, the inline label editor, and tighten_wires through
+ * board/lints/geometry.ts chipFor), so the app and the PNG agree.
  *
  * The renderer, not the drawer, keeps chips clear. For each labeled
  * connection, in document order (so two chips never both claim one spot: a
@@ -13,8 +13,7 @@
  * 1. blocked: 1 when it hits anything — a box's painted face (an icon's tile
  *    and caption, else the box; its own endpoints too, except on a
  *    self-loop), a chip already placed, or another wire running through it
- *    for more than EDGE_RUN_TOLERANCE_PX: the same tests covered-content
- *    judges;
+ *    for more than EDGE_RUN_TOLERANCE_PX;
  * 2. covered: how much it covers (overlap area, a wire run as an 8px band),
  *    so with no clear spot the least-bad one wins — a chip squeezed between
  *    its endpoints keeps bridging both rather than sliding onto one;
@@ -32,7 +31,8 @@
  * one nearest the pin; with no clear spot it keeps its pin.
  *
  * When no candidate is clear (dense boards), an unpinned chip takes the
- * least-bad one; the lint still reports what is left.
+ * least-bad one; `blockedLabelIds` counts what is left (canvas_check's
+ * LAYOUT block). No lint judges chips.
  *
  * Results are cached per (objects array, connections array, style value,
  * measuring-backend switch): documents are immutable, so one board version is
@@ -61,7 +61,7 @@ const SAMPLE_STEP_PX = 8;
 const WIRE_BAND_PX = 8;
 /** The air a chip prefers around it: a tie-break, never a reason to leave a clear spot for a hit. */
 const NEAR_MISS_PX = 4;
-/** Another wire may cross a chip for this long before it counts (covered-content's tolerance). */
+/** Another wire may cross a chip for this long before it counts. */
 export const EDGE_RUN_TOLERANCE_PX = 8;
 
 /**
@@ -247,7 +247,7 @@ interface BoardCache {
   byId: ReadonlyMap<string, InteractiveCanvasObject>;
   connections: ReadonlySet<InteractiveCanvasConnection>;
   routes: Map<string, RoutedConnection>;
-  placements?: Placements;
+  placements?: { points: Placements; blocked: readonly string[] };
 }
 
 const cache = new WeakMap<
@@ -324,12 +324,25 @@ export function routedConnectionIn(
 /** Every labeled connection's drawn chip center, by connection id. */
 export function placeConnectionLabels(document: Board, canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE): Placements {
   const entry = boardCache(document, canvasStyle);
-  return (entry.placements ??= computePlacements(entry, document, canvasStyle));
+  return (entry.placements ??= computePlacements(entry, document, canvasStyle)).points;
 }
 
-function computePlacements(entry: BoardCache, document: Board, canvasStyle: CanvasStyle): Placements {
+/**
+ * The labeled connections whose chip found no clear spot: drawn where it
+ * still hits a box, a chip or another wire (dense boards). A number for
+ * canvas_check's LAYOUT block, never a finding.
+ */
+export function blockedLabelIds(document: Board, canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE): readonly string[] {
+  const entry = boardCache(document, canvasStyle);
+  return (entry.placements ??= computePlacements(entry, document, canvasStyle)).blocked;
+}
+
+function computePlacements(
+  entry: BoardCache, document: Board, canvasStyle: CanvasStyle,
+): { points: Placements; blocked: string[] } {
   const result = new Map<string, CanvasPoint>();
-  if (!document.connections.some((connection) => connection.label?.trim())) return result;
+  const blocked: string[] = [];
+  if (!document.connections.some((connection) => connection.label?.trim())) return { points: result, blocked };
   const routes = new Map<string, RoutedConnection>();
   const wires: Wire[] = [];
   for (const connection of document.connections) {
@@ -408,8 +421,8 @@ function computePlacements(entry: BoardCache, document: Board, canvasStyle: Canv
     const pinned = connection.labelPosition !== undefined;
     const preferredScore = scoreAt(preferred, bendAt(preferred, points, width, height));
     let best = preferred;
+    let bestScore = preferredScore;
     if (!(pinned && preferredScore[0] === 0)) {
-      let bestScore = preferredScore;
       const obstacles: Obstacle[] = [
         ...faces.flatMap((face) => (selfLoop && face.id === connection.from.objectId ? [] : face.rects)),
         ...chips,
@@ -427,12 +440,16 @@ function computePlacements(entry: BoardCache, document: Board, canvasStyle: Canv
       }
       // A pin moves only to a clear spot: never to leave a bend, never to a
       // spot that is merely less bad.
-      if (pinned && bestScore[0] !== 0) best = preferred;
+      if (pinned && bestScore[0] !== 0) {
+        best = preferred;
+        bestScore = preferredScore;
+      }
     }
+    if (bestScore[0] !== 0) blocked.push(connection.id);
     result.set(connection.id, best);
     chips.push(rectAt(best, 0));
   }
-  return result;
+  return { points: result, blocked };
 }
 
 /** Each segment's bounding box. */

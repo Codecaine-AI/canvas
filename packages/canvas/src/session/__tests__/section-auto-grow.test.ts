@@ -9,7 +9,6 @@
 import { describe, expect, test } from "bun:test";
 
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
-import { rule as containment } from "../../board/lints/rules/containment";
 
 import { growSectionsToChildren } from "../../state/section-grow";
 import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../../state/actions";
@@ -23,6 +22,18 @@ function section(id: string, x: number, y: number, width: number, height: number
 
 function child(id: string, x: number, y: number, parentId: string, width = 160, height = 100) {
   return { ...box(id, x, y, width, height), parentId };
+}
+
+/** Children whose box crosses their section's edge (what the containment lint used to report). */
+function escapes(document: InteractiveCanvasDocument): string[] {
+  const byId = new Map(document.objects.map((object) => [object.id, object]));
+  return document.objects.filter((object) => {
+    const parent = object.parentId ? byId.get(object.parentId) : undefined;
+    if (!parent) return false;
+    const a = object.geometry;
+    const b = parent.geometry;
+    return a.x < b.x || a.y < b.y || a.x + a.width > b.x + b.width || a.y + a.height > b.y + b.height;
+  }).map((object) => object.id);
 }
 
 function geometryOf(document: InteractiveCanvasDocument, id: string) {
@@ -46,7 +57,7 @@ describe("section auto-grow", () => {
     // Right edge = child right + 40 of fit air; left, top and bottom stay put.
     expect(geometryOf(session.draft, "outer")).toEqual({ x: 40, y: 40, width: 860, height: 600 });
     expect(geometryOf(session.draft, "page")).toEqual(baseline.objects[0]!.geometry);
-    expect(containment.check(session.draft)).toHaveLength(0);
+    expect(escapes(session.draft)).toEqual([]);
   });
 
   test("a nested section's growth carries out through its parent in the same edit", () => {
@@ -65,10 +76,10 @@ describe("section auto-grow", () => {
     expect(geometryOf(session.draft, "outer")).toEqual({ x: 40, y: 40, width: 960, height: 700 });
     expect(session.draft.objects.find((object) => object.id === "kid")!.parentId).toBe("inner");
     expect(session.draft.objects.find((object) => object.id === "inner")!.parentId).toBe("outer");
-    expect(containment.check(session.draft)).toHaveLength(0);
+    expect(escapes(session.draft)).toEqual([]);
   });
 
-  test("the page frame grows like any section, so no containment finding names it", () => {
+  test("the page frame grows like any section, so no child crosses its edge", () => {
     const baseline = makeDocument([
       section("page-frame", 0, 0, 1000, 700),
       section("lane", 40, 80, 600, 400, "page-frame"),
@@ -80,8 +91,7 @@ describe("section auto-grow", () => {
     runOp(session, "move_by", { id: "lane", dx: 400, dy: 0 });
 
     expect(geometryOf(session.draft, "page-frame")).toEqual({ x: 0, y: 0, width: 1080, height: 700 });
-    expect(containment.check(session.draft).filter((finding) => finding.at.includes("page-frame")))
-      .toHaveLength(0);
+    expect(escapes(session.draft)).toEqual([]);
   });
 
   test("a section never shrinks on its own", () => {
@@ -140,7 +150,7 @@ describe("section auto-grow", () => {
     expect(result.isError).toBe(true);
     expect(result.text).toContain("growing would pull neighbor into it");
     expect(session.draft).toBe(before);
-    expect(containment.check(session.draft)).toHaveLength(0);
+    expect(escapes(session.draft)).toEqual([]);
   });
 
   test("a grow already stuck before the edit does not refuse an unrelated edit", () => {
@@ -176,7 +186,7 @@ describe("section auto-grow", () => {
     expect(result.isError).toBe(true);
     expect(result.text).toContain("growing would pull neighbor into it");
     expect(session.draft).toBe(before);
-    expect(containment.check(session.draft)).toHaveLength(0);
+    expect(escapes(session.draft)).toEqual([]);
   });
 
   test("a child's own overflow past a stuck frame cannot grow behind another child's larger overflow", () => {
@@ -226,7 +236,7 @@ describe("section auto-grow", () => {
 
     expect(ids).toEqual(["lane"]);
     expect(geometryOf(grown, "lane")).toEqual({ x: 100, y: 100, width: 400, height: 600 });
-    expect(containment.check(grown)).toHaveLength(0);
+    expect(escapes(grown)).toEqual([]);
   });
 
   test("a grow against an off-grid locked parent edge never pulls that edge in", () => {
@@ -240,7 +250,7 @@ describe("section auto-grow", () => {
     const { document: grown } = growSectionsToChildren(document);
 
     expect(geometryOf(grown, "lane")).toEqual({ x: 100, y: 100, width: 400, height: 601.5 });
-    expect(containment.check(grown)).toHaveLength(0);
+    expect(escapes(grown)).toEqual([]);
   });
 
   test("a grow that keeps an off-grid edge at a locked parent's edge keeps it after accept", () => {
@@ -262,7 +272,7 @@ describe("section auto-grow", () => {
     }).document;
 
     expect(geometryOf(replayed, "lane")).toEqual({ x: 100, y: 100, width: 460, height: 601.5 });
-    expect(containment.check(replayed)).toHaveLength(0);
+    expect(escapes(replayed)).toEqual([]);
     expect(diffDocuments(replayed, session.draft)).toEqual([]);
   });
 
@@ -286,7 +296,7 @@ describe("section auto-grow", () => {
     }).document;
 
     expect(geometryOf(replayed, "lane")).toEqual({ x: 40, y: 100, width: 961.5, height: 600 });
-    expect(containment.check(replayed)).toHaveLength(0);
+    expect(escapes(replayed)).toEqual([]);
     expect(diffDocuments(replayed, session.draft)).toEqual([]);
   });
 
@@ -336,7 +346,7 @@ describe("section auto-grow in Studio", () => {
 
     expect(geometryOf(state.document, "outer")).toEqual({ x: 40, y: 40, width: 860, height: 600 });
     expect(geometryOf(state.document, "outer")).toEqual(geometryOf(session.draft, "outer"));
-    expect(containment.check(state.document)).toHaveLength(0);
+    expect(escapes(state.document)).toEqual([]);
   });
 
   test("the end of a drag grows the section the child was dropped in", () => {
@@ -350,6 +360,6 @@ describe("section auto-grow in Studio", () => {
     state = reduceInteractiveCanvasState(state, { type: "canvas.reconcileSectionMembership", recordHistory: false });
 
     expect(geometryOf(state.document, "outer")).toEqual({ x: 40, y: 40, width: 860, height: 600 });
-    expect(containment.check(state.document)).toHaveLength(0);
+    expect(escapes(state.document)).toEqual([]);
   });
 });

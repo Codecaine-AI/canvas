@@ -744,8 +744,8 @@ function sectionDetailFit(layout: ReturnType<typeof titleChipLayout>): DetailLin
 // ---------------------------------------------------------------------------
 // Edge labels — the fixed-height chip from connectors/label-chip.ts, at the
 // size the workspace style draws it. The chip never truncates; it grows, and
-// an oversized chip stops fitting where it renders (covered-content's
-// chip-on-endpoint finding). `size` is therefore the room available to the
+// an oversized chip stops fitting where it renders (label placement then
+// finds it no clear spot). `size` is therefore the room available to the
 // chip — the corridor between the endpoint boxes.
 // ---------------------------------------------------------------------------
 

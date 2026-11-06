@@ -4,7 +4,6 @@
  * with `runDiagnostics(document, FINISHING_RULES)` and no agent package.
  */
 export { FINISHING_RULES, LAYOUT_RULES } from "./board/lints/index";
-export { BOARD_MAX_EDGE_PX } from "./board/lints/rules/board-too-large";
 export {
   blockingDiagnostics,
   diagnosticLines,

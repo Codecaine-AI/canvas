@@ -16,7 +16,7 @@
  *   of its neighbours' centres, each neighbour's x or y (a straight wire), and
  *   small nudges from where it stands. A candidate is legal when the box stays
  *   inside its frame, clears every sibling box by SIBLING_GAP, lands on no
- *   other wire's path, and adds no covered-content or broken-edges fault.
+ *   other wire's path, and adds no wire or label fault (below).
  * - A top-level section's candidates are nudges and the offset that brings
  *   the inside ends of its outside wires toward their outside ends; two
  *   sections also try trading corners. A section moves as one body.
@@ -35,6 +35,7 @@ import type {
 import type { CanvasStyle } from "../../theme/canvas-style";
 import { kindOf, pageFrameOf } from "../../board/helpers";
 import {
+  captionBand,
   chipFor,
   inflate,
   intersects,
@@ -47,7 +48,6 @@ import {
   type Point,
   type Rect,
 } from "../../board/lints/geometry";
-import { ownCaptionRuns } from "../../board/lints/rules/broken-edges";
 import { sectionDescendantIds, translateWithDescendants } from "../../state/geometry";
 import { reconcileConnectionWaypoints } from "../../state/actions/waypoints";
 import { CRAFT_TARGETS } from "../../authoring/style-guide/craft-targets";
@@ -210,14 +210,15 @@ function withGeometry(
   return reconcileConnectionWaypoints(document, moved);
 }
 
-/** A chip lying along another wire for more than this reads as that wire's label (covered-content). */
+/** A chip lying along another wire for more than this reads as that wire's label. */
 const CHIP_ON_EDGE_RUN = 8;
+/** Shortest run inside an endpoint's caption band that reads as a line through its text. */
+const CAPTION_RUN = 8;
 
 /**
- * The covered-content faults on these edges' label chips, counted the way
- * the rule counts them: a chip overlapping what a box paints (its own ends
- * included, sections exempt), lying on another wire's path, or overlapping another
- * chip. A move may not add one.
+ * The faults on these edges' label chips: a chip overlapping what a box
+ * paints (its own ends included, sections exempt), lying on another wire's
+ * path, or overlapping another chip. A move may not add one.
  */
 function chipFaults(
   edges: readonly InteractiveCanvasConnection[],
@@ -246,9 +247,25 @@ function chipFaults(
   return faults;
 }
 
+/** Whether `path` runs CAPTION_RUN px or more through either end's own caption band. */
+function crossesOwnCaption(
+  edge: InteractiveCanvasConnection,
+  path: readonly Point[],
+  byId: ReadonlyMap<string, InteractiveCanvasObject>,
+  canvasStyle: CanvasStyle,
+): boolean {
+  if (edge.from.objectId === edge.to.objectId) return false;
+  return [edge.from.objectId, edge.to.objectId].some((id) => {
+    const object = byId.get(id);
+    const band = object ? captionBand(object, canvasStyle) : null;
+    return band !== null && polylineLengthInRect(path, band) >= CAPTION_RUN;
+  });
+}
+
 /**
- * The broken-edges faults among these wires: a route through a box that is
- * not one of its ends, or through its own endpoint's caption.
+ * The wire faults among these wires: a route through a box that is not one
+ * of its ends, or through its own endpoint's caption. The router avoids
+ * both; its last-resort route can still make one, and a move may not add one.
  */
 function brokenEdges(
   edges: readonly InteractiveCanvasConnection[],
@@ -263,7 +280,7 @@ function brokenEdges(
     if (!points || points.length < 2) continue;
     if (
       pathBoxViolationIds(points, edge.from.objectId, edge.to.objectId, document.objects, canvasStyle).length > 0
-      || ownCaptionRuns(edge, points, byId, canvasStyle).length > 0
+      || crossesOwnCaption(edge, points, byId, canvasStyle)
     ) broken += 1;
   }
   return broken;
@@ -279,7 +296,7 @@ function runsForward(edge: InteractiveCanvasConnection, byId: ReadonlyMap<string
   return (b.y - a.y) + (b.x - a.x) >= 0;
 }
 
-/** Every fault the lints would raise on the whole board's wires. */
+/** Every wire and label fault on the whole board. */
 function boardFaults(document: InteractiveCanvasDocument, routes: Routes, canvasStyle: CanvasStyle): number {
   let faults = brokenEdges(document.connections, document, routes, canvasStyle);
   const chips = allChips(document, canvasStyle);
@@ -295,7 +312,7 @@ function allChips(document: InteractiveCanvasDocument, canvasStyle: CanvasStyle)
     .filter((chip): chip is Chip => chip !== undefined);
 }
 
-/** Score the wires named, on the document given, re-routing them; `faults` is what the lints would raise. */
+/** Score the wires named, on the document given, re-routing them; `faults` counts wire and label faults. */
 function scoreEdges(
   edges: readonly InteractiveCanvasConnection[],
   document: InteractiveCanvasDocument,

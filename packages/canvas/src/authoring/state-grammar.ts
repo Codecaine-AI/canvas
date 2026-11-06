@@ -146,12 +146,12 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
         text: "every open E* in your edited scope blocks a committed finalize",
         children: ["the finding names the problem, the fix is yours to choose"],
       },
-      "W* warnings never block: they ride along in the proposal",
+      "W* warnings and N* notes never block: they ride along in the proposal",
       {
-        text: "N* notes never block: what cannot be promised",
+        text: "overlap is the only check: a box on a box, or a section on a section",
         children: [
-          "text within 1px of its box edge may wrap or clip in the browser",
-          "characters the bundled fonts lack paint in fallback fonts, so their fit is an estimate",
+          "wire routes, label chips, text fit, and section fit are automatic",
+          "canvas_check counts label chips that found no clear spot under LAYOUT, never as a finding",
         ],
       },
     ],

@@ -1,5 +1,5 @@
 /**
- * Shared chip/polyline geometry for the graph lints. All path geometry comes
+ * Shared chip/polyline geometry for the lints, layout numbers and tighten_wires. All path geometry comes
  * from the production `routeConnection` router — anchors, waypoints, and
  * obstacles honored — so lint verdicts and renders can never disagree
  * (pinned by test/lints-routing-truth.test.ts).
@@ -19,29 +19,18 @@
  * — drift fails that test.
  *
  * CHIP_CLEARANCE: the air a chip wants on each side (authoring's label
- * budget and text-fit's corridor advice). Lints judge only true overlap.
+ * budget and text-fit's corridor advice).
  *
- * A measured width is only as good as the measurement: within
- * TEXT_FIT_TOLERANCE_PX of the chip's edge the browser's chip may be a hair
- * narrower or wider, and a label holding characters the chip font lacks is
- * an estimate. Every chip finding is therefore judged on the chip's
- * guaranteed footprint (`narrowRect`: the label a tolerance narrower, any
- * character the font lacks at zero width, never under the minimum chip);
- * what only the measured full-width chip shows is a note, never a blocker.
+ * No lint judges chips any more (label placement keeps them clear);
+ * tighten_wires scores chips through chipFor.
  */
 import { routeConnection } from "../../connectors/routing.ts";
-import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../../connectors/label-chip.ts";
-import {
-  graphemeClusters,
-  fitText,
-  measureWidth,
-} from "../../theme/text-measure.ts";
+import { connectionLabelChipMetrics } from "../../connectors/label-chip.ts";
 
 import type {
   InteractiveCanvasConnection, InteractiveCanvasDocument, InteractiveCanvasObject,
 } from "../../state/schema";
 import type { CanvasStyle } from "../../theme/canvas-style";
-import type { Severity } from "./types";
 
 export interface Rect { x: number; y: number; width: number; height: number }
 export interface Point { x: number; y: number }
@@ -54,54 +43,11 @@ export const CHIP_PADDING_X = 12;
 export const CHIP_MIN_WIDTH = 41;
 /** Air a chip wants on each side, for authoring and text-fit advice; no lint fires on it. */
 export const CHIP_CLEARANCE = 16;
-/**
- * How much narrower the browser's chip may be than the measured one: the
- * label's measured width is trusted to TEXT_FIT_TOLERANCE_PX
- * (board/text-fit.ts — the same 1px band), the chip centered on it.
- */
-export const CHIP_WIDTH_TOLERANCE = 1;
 
 export interface Chip {
   edge: InteractiveCanvasConnection;
   label: string;
   rect: Rect;
-  /**
-   * The chip's guaranteed footprint, centered like `rect`: the measured label
-   * CHIP_WIDTH_TOLERANCE narrower, every character the chip font lacks at
-   * zero width, never narrower than the minimum chip — and just the minimum
-   * chip when the font itself cannot be measured exactly. Findings that hold
-   * for it hold for any chip the browser can paint.
-   */
-  narrowRect: Rect;
-  /** The label measures exactly: an exact backend, the bundled chip font, every character covered. */
-  reliable: boolean;
-  /** Characters (grapheme clusters) the chip font lacks — their widths are estimates. */
-  uncovered: string[];
-}
-
-/**
- * The severity of a chip finding whose test is `holds` (and holds for the
- * full chip): `base` when it holds for the chip's guaranteed footprint too;
- * otherwise a note — the finding hangs on a pixel the measurement cannot
- * promise, or on an estimated width.
- */
-export function chipFindingSeverity(
-  chip: Chip,
-  holds: (rect: Rect) => boolean,
-  base: "error" | "warning",
-): Severity {
-  return holds(chip.narrowRect) ? base : "note";
-}
-
-/** The message tail a chip note carries ("" for a judged finding). */
-export function chipNoteClause(chip: Chip, severity: Severity): string {
-  if (severity !== "note") return "";
-  if (!chip.reliable) {
-    return chip.uncovered.length > 0
-      ? ` (estimated: the chip font lacks ${chip.uncovered.map((g) => JSON.stringify(g)).join(" ")}, so the label's width is not exact)`
-      : " (estimated: the label's width is not measured exactly here)";
-  }
-  return ` (within ${CHIP_WIDTH_TOLERANCE}px of the chip's measured width — can't promise)`;
 }
 
 /** The renderer's chip width for `label` under `canvasStyle` (default style when omitted), exactly. */
@@ -225,9 +171,8 @@ export function pathBoxViolationIds(
  * a clear spot exists) — exactly where Connector.tsx and static-svg.ts hang
  * the chip.
  *
- * Every chip judgement in the lints goes through here, so the placement is
- * the single label-point implementation in the tree and there is nothing
- * for a lint to drift against.
+ * Every chip reading outside the renderer (tighten_wires) goes through
+ * here, so the placement is the single label-point implementation in the tree.
  */
 export function chipFor(
   edge: InteractiveCanvasConnection, document: InteractiveCanvasDocument,
@@ -241,25 +186,7 @@ export function chipFor(
   if (!from || !to) return undefined;
   const routed = routedConnectionIn(document, edge, from, to, canvasStyle);
   const labelPoint = placedLabelPoint(routed, edge, document, canvasStyle);
-  const metrics = connectionLabelChipMetrics(label, canvasStyle);
-  const { width, height } = metrics;
-  const font = connectionLabelFontSpec(canvasStyle);
-  // text-measure's own verdict on the label: exact unless a reason says otherwise.
-  const fit = fitText(label, font, { width: Number.POSITIVE_INFINITY, lineHeight: 1 });
-  const uncovered = fit.uncovered;
-  // The least the label can measure: nothing when anything but missing glyphs
-  // makes the measurement inexact, else its covered text with every missing glyph at zero width.
-  const exact = fit.reasons.every((reason) => reason === "uncovered");
-  const missing = new Set(uncovered);
-  const leastText = !exact
-    ? 0
-    : missing.size === 0
-      ? metrics.textWidthPx
-      : measureWidth(graphemeClusters(label).filter((grapheme) => !missing.has(grapheme)).join(""), font);
-  const narrowWidth = Math.max(
-    metrics.minWidthPx,
-    Math.min(width, Math.max(0, leastText - CHIP_WIDTH_TOLERANCE) + metrics.paddingXPx * 2),
-  );
+  const { width, height } = connectionLabelChipMetrics(label, canvasStyle);
   return {
     edge,
     label,
@@ -269,14 +196,6 @@ export function chipFor(
       width,
       height,
     },
-    narrowRect: {
-      x: labelPoint.x - narrowWidth / 2,
-      y: labelPoint.y - height / 2,
-      width: narrowWidth,
-      height,
-    },
-    reliable: fit.reliable,
-    uncovered,
   };
 }
 
@@ -319,44 +238,6 @@ export function polylineLengthInRect(points: readonly Point[], rect: Rect): numb
   return total;
 }
 
-/**
- * Axis-aligned rendering of a polyline: diagonal legs become
- * horizontal-then-vertical elbows (connectors render elbow-only); already
- * axis-aligned legs pass through untouched.
- */
-export function elbowize(points: readonly Point[]): Point[] {
-  if (points.length === 0) return [];
-  const out: Point[] = [points[0]!];
-  for (let i = 1; i < points.length; i += 1) {
-    const prev = out[out.length - 1]!;
-    const next = points[i]!;
-    if (prev.x !== next.x && prev.y !== next.y) {
-      out.push({ x: next.x, y: prev.y });
-    }
-    out.push(next);
-  }
-  return out;
-}
-
-export function distancePointToSegment(p: Point, a: Point, b: Point): number {
-  const dx = b.x - a.x;
-  const dy = b.y - a.y;
-  const lengthSq = dx * dx + dy * dy;
-  if (lengthSq === 0) return Math.hypot(p.x - a.x, p.y - a.y);
-  const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / lengthSq));
-  return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
-}
-
-export function distanceToPolyline(p: Point, points: readonly Point[]): number {
-  if (points.length === 0) return Number.POSITIVE_INFINITY;
-  if (points.length === 1) return Math.hypot(p.x - points[0]!.x, p.y - points[0]!.y);
-  let best = Number.POSITIVE_INFINITY;
-  for (let i = 1; i < points.length; i += 1) {
-    best = Math.min(best, distancePointToSegment(p, points[i - 1]!, points[i]!));
-  }
-  return best;
-}
-
 /** The drawn length of a polyline. */
 export function polylineLength(points: readonly Point[]): number {
   let total = 0;
@@ -395,9 +276,4 @@ export function crossingPoints(a: readonly Point[], b: readonly Point[]): Point[
     }
   }
   return points;
-}
-
-/** How many times two polylines properly cross each other. */
-export function crossingCount(a: readonly Point[], b: readonly Point[]): number {
-  return crossingPoints(a, b).length;
 }

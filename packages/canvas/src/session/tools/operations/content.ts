@@ -42,11 +42,11 @@
  * corridor as its `size`, and a label chip never truncates, it grows. So the
  * verdict is a CROWDING one, not a legibility one, and computing an honest
  * corridor means routing the edge and measuring against both endpoint rects —
- * which is exactly what covered-content's chip-on-endpoint check already does, with the
- * routed truth, and which already fires in the lint delta of this very same
- * APPLIED result. A second, cruder corridor estimate here could only duplicate
- * that finding or contradict it, so `update_text` on a connection writes the
- * label and leaves the verdict to the lint that owns it.
+ * which is exactly what label placement (connectors/label-placement.ts) does
+ * with the routed truth: it slides the chip to a clear spot, and canvas_check
+ * counts a chip that found none. A second, cruder corridor estimate here
+ * could only contradict it, so `update_text` on a connection writes the label
+ * and leaves the chip to the placement.
  */
 import { Type } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasObject } from "../../../state/schema";
