@@ -78,9 +78,12 @@ export function diagnosticLines(diagnostic: Diagnostic): string[] {
   return [`${diagnostic.id} ${diagnostic.rule}: ${diagnostic.message}${suggestion}`];
 }
 
-/** Findings that block a committed finalize: everything but notes. */
+/**
+ * Findings that block a committed finalize: errors only. Warnings and notes
+ * ride along in the proposal for the operator to read.
+ */
 export function blockingDiagnostics(diags: readonly Diagnostic[]): Diagnostic[] {
-  return diags.filter((diagnostic) => diagnostic.severity !== "note");
+  return diags.filter((diagnostic) => diagnostic.severity === "error");
 }
 
 export function formatDiagnostics(diags: Diagnostic[]): string {
