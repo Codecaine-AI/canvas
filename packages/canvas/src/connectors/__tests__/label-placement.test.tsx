@@ -124,6 +124,18 @@ describe("placeConnectionLabels", () => {
     expect(chipFindings(document)).toHaveLength(2);
   });
 
+  it("finds a clear gap narrower than the sampling step", () => {
+    // Two boxes under the wire leave a 4px window of clear centers, x 214..218.
+    const { width } = connectionLabelChipMetrics("request");
+    const left = box("left", 100, 40, 216 - width / 2 - 2 - 100, 40);
+    const right = box("right", 216 + width / 2 + 2, 40, 500 - (216 + width / 2 + 2), 40);
+    const document = doc([A, B, left, right], [wire("ab", "a", "b", "request")]);
+    const point = placeConnectionLabels(document).get("ab")!;
+    expect(point.x - width / 2).toBeGreaterThanOrEqual(left.geometry.x + left.geometry.width);
+    expect(point.x + width / 2).toBeLessThanOrEqual(right.geometry.x);
+    expect(chipFindings(document)).toEqual([]);
+  });
+
   it("keeps a colliding pin when its wire has no clear spot", () => {
     const document = doc(
       [A, box("b", 140, 0)],

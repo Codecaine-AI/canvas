@@ -168,8 +168,16 @@ function boundsOf(points: readonly CanvasPoint[]): Rect {
 
 interface Candidate { point: CanvasPoint; bend: 0 | 1 }
 
-/** Points along the wire, SAMPLE_STEP_PX apart plus each segment's middle, with whether the chip fits there on one straight run. */
-function candidatesAlong(points: readonly CanvasPoint[], width: number, height: number): Candidate[] {
+/** How far past an obstacle's edge a boundary candidate sits, so float error never reads as overlap. */
+const BOUNDARY_EPSILON_PX = 0.01;
+
+/**
+ * Points along the wire, with whether the chip fits there on one straight
+ * run: SAMPLE_STEP_PX apart, each segment's middle, and, for each obstacle
+ * the chip's path along a segment meets, the two centers where the chip's
+ * edge just clears it — so a gap narrower than the step is still found.
+ */
+function candidatesAlong(points: readonly CanvasPoint[], width: number, height: number, obstacles: readonly Rect[]): Candidate[] {
   const out: Candidate[] = [];
   for (let i = 1; i < points.length; i += 1) {
     const a = points[i - 1]!;
@@ -186,6 +194,22 @@ function candidatesAlong(points: readonly CanvasPoint[], width: number, height: 
     });
     for (let d = 0; d <= length; d += SAMPLE_STEP_PX) out.push(at(d));
     out.push(at(length / 2));
+    // Everything the chip sweeps over moving from a to b.
+    const swept: Rect = {
+      x: Math.min(a.x, b.x) - width / 2,
+      y: Math.min(a.y, b.y) - height / 2,
+      width: Math.abs(b.x - a.x) + width,
+      height: Math.abs(b.y - a.y) + height,
+    };
+    for (const rect of obstacles) {
+      if (!intersectsInclusive(swept, rect)) continue;
+      // The obstacle's extent along the segment.
+      const along = [rect.x, rect.x + rect.width].flatMap((x) =>
+        [rect.y, rect.y + rect.height].map((y) => (x - a.x) * ux + (y - a.y) * uy));
+      for (const d of [Math.min(...along) - half - BOUNDARY_EPSILON_PX, Math.max(...along) + half + BOUNDARY_EPSILON_PX]) {
+        if (d >= 0 && d <= length) out.push(at(d));
+      }
+    }
   }
   return out;
 }
@@ -325,7 +349,12 @@ function computePlacements(
     let best = preferred;
     if (!(pinned && preferredScore[0] === 0)) {
       let bestScore = preferredScore;
-      for (const candidate of candidatesAlong(points, width, height)) {
+      const obstacles: Rect[] = [
+        ...faces.flatMap((face) => (selfLoop && face.id === connection.from.objectId ? [] : face.rects)),
+        ...chips,
+        ...wires.flatMap((other) => (other.id === connection.id ? [] : segmentBoxes(other.points))),
+      ];
+      for (const candidate of candidatesAlong(points, width, height, obstacles)) {
         const score = scoreAt(candidate.point, candidate.bend);
         if (lexLess(score, bestScore)) {
           bestScore = score;
@@ -340,6 +369,13 @@ function computePlacements(
     chips.push(rectAt(best, 0));
   }
   return result;
+}
+
+/** Each segment's bounding box. */
+function segmentBoxes(points: readonly CanvasPoint[]): Rect[] {
+  const out: Rect[] = [];
+  for (let i = 1; i < points.length; i += 1) out.push(boundsOf([points[i - 1]!, points[i]!]));
+  return out;
 }
 
 function overlapArea(a: Rect, b: Rect): number {
