@@ -425,13 +425,22 @@ function segmentsCross(a: Point, b: Point, c: Point, d: Point): boolean {
   return o1 !== 0 && o2 !== 0 && o3 !== 0 && o4 !== 0 && o1 !== o2 && o3 !== o4;
 }
 
-/** How many times two polylines properly cross each other. */
-export function crossingCount(a: readonly Point[], b: readonly Point[]): number {
-  let count = 0;
+/** Where two polylines properly cross each other, one point per crossing. */
+export function crossingPoints(a: readonly Point[], b: readonly Point[]): Point[] {
+  const points: Point[] = [];
   for (let i = 1; i < a.length; i += 1) {
     for (let j = 1; j < b.length; j += 1) {
-      if (segmentsCross(a[i - 1]!, a[i]!, b[j - 1]!, b[j]!)) count += 1;
+      const [p, q, r, s] = [a[i - 1]!, a[i]!, b[j - 1]!, b[j]!];
+      if (!segmentsCross(p, q, r, s)) continue;
+      const denominator = (q.x - p.x) * (s.y - r.y) - (q.y - p.y) * (s.x - r.x);
+      const t = ((r.x - p.x) * (s.y - r.y) - (r.y - p.y) * (s.x - r.x)) / denominator;
+      points.push({ x: p.x + t * (q.x - p.x), y: p.y + t * (q.y - p.y) });
     }
   }
-  return count;
+  return points;
+}
+
+/** How many times two polylines properly cross each other. */
+export function crossingCount(a: readonly Point[], b: readonly Point[]): number {
+  return crossingPoints(a, b).length;
 }

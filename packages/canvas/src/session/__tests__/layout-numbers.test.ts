@@ -39,7 +39,7 @@ describe("layout numbers", () => {
     expect(block).toContain("longest wires: h ");
   });
 
-  test("a section that holds an end is not a traversal, and wires sharing an end never count as crossing", () => {
+  test("a section that holds an end is not a traversal, and wires that only meet at their shared end do not cross", () => {
     const document = makeDocument(
       [
         box("frame", 0, 0, 1200, 600, "section"),
@@ -55,5 +55,23 @@ describe("layout numbers", () => {
     expect(numbers.crossings).toBe(0);
     expect(numbers.topTraversals).toEqual([]);
     expect(layoutBlock(numbers)).not.toContain("crossing pairs:");
+  });
+
+  test("two wires from one node that cross away from it count as a crossing", () => {
+    // hp leaves hub's right side and drops down x=480 into p's top; hq leaves
+    // hub's bottom and runs along y=348 into q's left: they cross at
+    // (480, 348), far from hub.
+    const document = makeDocument(
+      [box("hub", 0, 0), box("p", 400, 400), box("q", 600, 300)],
+      [
+        { id: "hp", from: { objectId: "hub", anchor: "right" }, to: { objectId: "p", anchor: "top" } },
+        { id: "hq", from: { objectId: "hub", anchor: "bottom" }, to: { objectId: "q", anchor: "left" } },
+      ],
+    );
+
+    const numbers = layoutNumbers(document);
+
+    expect(numbers.crossings).toBe(1);
+    expect(numbers.topCrossingPairs).toEqual([{ a: "hp", b: "hq", crossings: 1 }]);
   });
 });

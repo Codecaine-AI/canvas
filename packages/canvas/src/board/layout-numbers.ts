@@ -12,18 +12,25 @@ import type { CanvasStyle } from "../theme/canvas-style";
 import { sectionDescendantIds } from "../state/geometry";
 import { kindOf } from "./helpers";
 import {
-  crossingCount,
+  crossingPoints,
+  inflate,
   polylineLength,
   polylineLengthInRect,
   rectOf,
   routedPolyline,
   type Point,
+  type Rect,
 } from "./lints/geometry";
 
 /** How many entries each ranked list keeps. */
 const TOP_PAIRS = 5;
 const TOP_TRAVERSALS = 5;
 const TOP_LONGEST = 3;
+/**
+ * A crossing of two wires that share a node counts only outside that node's
+ * box grown by this margin: the router's 24px stub, where both wires leave it.
+ */
+const SHARED_END_MARGIN = 24;
 /** A run shorter than this inside a section is a corner clip, not a traversal. */
 const TRAVERSAL_MIN_RUN = 1;
 
@@ -42,9 +49,14 @@ export interface LayoutNumbers {
   longestWires: { wire: string; length: number }[];
 }
 
-function sharesEnd(a: InteractiveCanvasConnection, b: InteractiveCanvasConnection): boolean {
+/** The nodes two wires both end on. */
+function sharedEnds(a: InteractiveCanvasConnection, b: InteractiveCanvasConnection): string[] {
   const ends = new Set([a.from.objectId, a.to.objectId]);
-  return ends.has(b.from.objectId) || ends.has(b.to.objectId);
+  return [...new Set([b.from.objectId, b.to.objectId])].filter((id) => ends.has(id));
+}
+
+function insideRect(point: Point, rect: Rect): boolean {
+  return point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
 }
 
 export function layoutNumbers(document: InteractiveCanvasDocument, canvasStyle?: CanvasStyle): LayoutNumbers {
@@ -54,14 +66,21 @@ export function layoutNumbers(document: InteractiveCanvasDocument, canvasStyle?:
     if (points.length >= 2) routed.push({ edge, points, length: polylineLength(points) });
   }
 
+  const objectsById = new Map(document.objects.map((object) => [object.id, object]));
   let crossings = 0;
   const pairs: LayoutNumbers["topCrossingPairs"] = [];
   for (let i = 0; i < routed.length; i += 1) {
     for (let j = i + 1; j < routed.length; j += 1) {
       const a = routed[i]!;
       const b = routed[j]!;
-      if (sharesEnd(a.edge, b.edge)) continue;
-      const count = crossingCount(a.points, b.points);
+      // Two wires on one node may meet where they leave it; that is not a
+      // crossing. Anywhere else they cross like any other pair.
+      const near = sharedEnds(a.edge, b.edge)
+        .map((id) => objectsById.get(id))
+        .filter((object) => object !== undefined)
+        .map((object) => inflate(rectOf(object), SHARED_END_MARGIN));
+      const count = crossingPoints(a.points, b.points)
+        .filter((point) => !near.some((rect) => insideRect(point, rect))).length;
       if (count === 0) continue;
       crossings += count;
       pairs.push({ a: a.edge.id, b: b.edge.id, crossings: count });
