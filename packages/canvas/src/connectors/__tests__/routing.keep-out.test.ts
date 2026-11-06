@@ -66,6 +66,34 @@ function crossesInterior(points: ReadonlyArray<CanvasPoint>, rect: CanvasBounds)
   return false;
 }
 
+/** The points the SVG path paints, each quadratic corner sampled finely. */
+function drawnPoints(path: string): CanvasPoint[] {
+  const tokens = path.trim().split(/\s+/);
+  const points: CanvasPoint[] = [];
+  let index = 0;
+  while (index < tokens.length) {
+    const command = tokens[index++];
+    const read = () => ({ x: Number(tokens[index++]), y: Number(tokens[index++]) });
+    if (command === "M" || command === "L") {
+      points.push(read());
+    } else if (command === "Q") {
+      const from = points[points.length - 1]!;
+      const control = read();
+      const to = read();
+      for (let step = 1; step <= 32; step += 1) {
+        const t = step / 32;
+        points.push({
+          x: (1 - t) * (1 - t) * from.x + 2 * t * (1 - t) * control.x + t * t * to.x,
+          y: (1 - t) * (1 - t) * from.y + 2 * t * (1 - t) * control.y + t * t * to.y,
+        });
+      }
+    } else {
+      throw new Error(`unexpected path command ${command}`);
+    }
+  }
+  return points;
+}
+
 function isOrthogonal(points: ReadonlyArray<CanvasPoint>): boolean {
   return points.every((point, index) => {
     const previous = points[index - 1];
@@ -149,5 +177,22 @@ describe("routeConnection: a walled-in route detours before it crosses a box", (
     const points = routed.points ?? [];
     expect(isOrthogonal(points)).toBe(true);
     expect(crossesInterior(points, hitBoundsForObject(wall))).toBe(false);
+  });
+});
+
+describe("routeConnection: a route is judged as the renderer draws it", () => {
+  it("never accepts a route whose rounded corner bends into a box it hugs", () => {
+    // The elbow runs along the blocker's bottom and right edges, so its
+    // straight legs touch it only on the edge, but the rounded corner at the
+    // blocker's corner cuts through its inside.
+    const source = box("source", 0, 100, 100, 100);
+    const target = box("target", 300, 0, 100, 100);
+    const blocker = box("blocker", 200, 100, 150, 50);
+    const routed = routeConnection(source, target, edge(
+      { objectId: "source", anchor: "right" },
+      { objectId: "target", anchor: "bottom" },
+    ), [source, target, blocker]);
+
+    expect(crossesInterior(drawnPoints(routed.path), hitBoundsForObject(blocker))).toBe(false);
   });
 });

@@ -251,8 +251,8 @@ function routeConnectionPolyline(
   // same from any side, explicit anchors and pins included; and only then the
   // least-bad route.
   const otherSides = detourPairs(fromObject, toObject, connection, startAnchor, endAnchor, false, canvasStyle);
-  const otherElbow = otherSides.find((pair) => isClear(pair.elbow, detourKeepOut));
-  if (otherElbow) return otherElbow.elbow;
+  const otherElbow = clearElbow(otherSides, detourKeepOut);
+  if (otherElbow) return otherElbow;
   if (boxesOnly.boxes.length < keepOut.boxes.length) {
     const relaxed = aStar(boxesOnly);
     if (relaxed && isClear(relaxed, boxesOnly)) return relaxed;
@@ -284,7 +284,7 @@ type KeepOutRect = { id: string; bounds: CanvasBounds; section?: boolean; wings?
  * from a side the router picked, while a strict-tier route keeps the route
  * its explicit side asked for.
  */
-type KeepOut = { boxes: KeepOutRect[]; captions: KeepOutRect[]; selves: KeepOutRect[] };
+type KeepOut = { boxes: KeepOutRect[]; captions: KeepOutRect[]; selves: KeepOutRect[]; cornerRadiusPx: number };
 
 /** What a route runs through: a box (an endpoint's own body included), or an endpoint's own caption. */
 export type RouteBlocker = { objectId: string; kind: "box" | "caption" };
@@ -315,6 +315,7 @@ function routeKeepOut(
       .map(({ object, point }) => ({ id: object.id, bounds: connectionBoundsForObject(object, canvasStyle), point }))
       .filter(({ bounds, point }) => !boundsStrictlyContain(bounds, point))
       .map(({ id, bounds }) => ({ id, bounds })),
+    cornerRadiusPx: canvasStyle.connectorCornerRadiusPx,
   };
 }
 
@@ -341,8 +342,11 @@ function isClear(route: RoutedConnection, keepOut: KeepOut): boolean {
 
 function routeBlockers(points: ReadonlyArray<CanvasPoint>, keepOut: KeepOut): RouteBlocker[] {
   const blockers: RouteBlocker[] = [];
+  // Boxes are judged on the path as drawn: a rounded corner cuts inside its
+  // turn, so a route hugging a box's two sides would bend into it.
+  const drawn = drawnPolyline(points, keepOut.cornerRadiusPx);
   for (const box of [...keepOut.boxes, ...keepOut.selves]) {
-    if (polylineCrossesObstacles(points, [box.bounds])) blockers.push({ objectId: box.id, kind: "box" });
+    if (polylineCrossesObstacles(drawn, [box.bounds])) blockers.push({ objectId: box.id, kind: "box" });
   }
   for (const caption of keepOut.captions) {
     if (polylineLengthInBounds(points, caption.bounds) > CAPTION_CLEAR_PX) {
@@ -437,6 +441,28 @@ function searchDetour(
   return null;
 }
 
+/**
+ * The shortest clear elbow among `pairs` that leaves and enters along its own
+ * sides: two stubs that meet head on collapse into one run along the boxes'
+ * edges, which leaves a side sideways.
+ */
+function clearElbow(pairs: ReadonlyArray<DetourPair>, keepOut: KeepOut): RoutedConnection | null {
+  const pair = pairs.find(
+    (candidate) => leavesAlongSides(candidate.elbow, candidate.fromSide, candidate.toSide) && isClear(candidate.elbow, keepOut),
+  );
+  return pair ? pair.elbow : null;
+}
+
+function leavesAlongSides(route: RoutedConnection, fromSide: Anchor, toSide: Anchor): boolean {
+  const points = route.points ?? [];
+  if (points.length < 2) return false;
+  const along = (from: CanvasPoint, to: CanvasPoint, side: Anchor) => {
+    const normal = normalFor(side);
+    return (to.x - from.x) * normal.x + (to.y - from.y) * normal.y > ROUTE_EPSILON;
+  };
+  return along(points[0]!, points[1]!, fromSide) && along(points[points.length - 1]!, points[points.length - 2]!, toSide);
+}
+
 /** The shortest clear elbow among `pairs`, else the first clear A* route. */
 function clearDetour(
   fromObject: InteractiveCanvasObject,
@@ -445,8 +471,7 @@ function clearDetour(
   keepOut: KeepOut,
   canvasStyle: CanvasStyle,
 ): RoutedConnection | null {
-  const elbow = pairs.find((pair) => isClear(pair.elbow, keepOut));
-  return elbow ? elbow.elbow : searchDetour(fromObject, toObject, pairs, keepOut, canvasStyle);
+  return clearElbow(pairs, keepOut) ?? searchDetour(fromObject, toObject, pairs, keepOut, canvasStyle);
 }
 
 /** The last resort: the route through the fewest boxes, then the fewest own captions. */
@@ -1384,6 +1409,41 @@ function roundedPolylinePath(
  * degenerate (zero length) or shorter than the gap itself (keeps at least a
  * hairline-visible stub rather than collapsing/inverting the segment).
  */
+/** Steps each rounded corner is sampled at when a route is judged as drawn. */
+const CORNER_SAMPLES = 8;
+
+/**
+ * The polyline roundedPolylinePath paints for `points`: the end gaps, and
+ * each corner's quadratic arc sampled into short chords. A chord lies on the
+ * inside of its arc, so a box the arc reaches is crossed by a chord too.
+ */
+function drawnPolyline(points: ReadonlyArray<CanvasPoint>, cornerRadiusPx: number): CanvasPoint[] {
+  if (points.length < 3 || cornerRadiusPx <= 0) return [...points];
+  const render = withEndGap([...points]);
+  const drawn: CanvasPoint[] = [render[0]!];
+  for (let index = 1; index < render.length - 1; index += 1) {
+    const previous = render[index - 1]!;
+    const corner = render[index]!;
+    const next = render[index + 1]!;
+    const radius = Math.min(cornerRadiusPx, distance(previous, corner) / 2, distance(corner, next) / 2);
+    if (radius <= 0) {
+      drawn.push(corner);
+      continue;
+    }
+    const enter = pointToward(corner, previous, radius);
+    const exit = pointToward(corner, next, radius);
+    for (let step = 0; step <= CORNER_SAMPLES; step += 1) {
+      const t = step / CORNER_SAMPLES;
+      const a = (1 - t) * (1 - t);
+      const b = 2 * t * (1 - t);
+      const c = t * t;
+      drawn.push({ x: a * enter.x + b * corner.x + c * exit.x, y: a * enter.y + b * corner.y + c * exit.y });
+    }
+  }
+  drawn.push(render[render.length - 1]!);
+  return drawn;
+}
+
 function withEndGap(points: CanvasPoint[]): CanvasPoint[] {
   if (points.length < 2) return points;
   const result = [...points];
