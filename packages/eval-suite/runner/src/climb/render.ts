@@ -90,8 +90,8 @@ export interface BoardExtent {
 }
 
 export function boardExtent(camera: { width: number; height: number }): BoardExtent {
-  const longEdge = Math.round(Math.max(camera.width, camera.height));
-  return { longEdge, overJudgeCap: longEdge > JUDGE_PNG_MAX_EDGE };
+  const extent = Math.max(camera.width, camera.height);
+  return { longEdge: Math.round(extent), overJudgeCap: extent > JUDGE_PNG_MAX_EDGE };
 }
 
 export interface TranscriptMetrics {
