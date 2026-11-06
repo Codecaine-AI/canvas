@@ -159,6 +159,26 @@ describe("section auto-grow", () => {
     expect(geometryOf(session.draft, "other").x).toBe(1040);
   });
 
+  test("an edit that pushes a child past a frame whose grow was already stuck is refused", () => {
+    // a's grow is stuck before the edit (kid sits in its right padding, and
+    // growing would pull neighbor in), but kid is still inside the frame.
+    const baseline = makeDocument([
+      section("page", -200, -200, 1600, 1000),
+      section("a", 0, 0, 400, 300, "page"),
+      child("kid", 240, 100, "a"),
+      child("neighbor", 400, 220, "page", 40, 60),
+    ]);
+    const session = makeTestSession(baseline, ["a"]);
+    const before = session.draft;
+
+    const result = runOp(session, "move_by", { id: "kid", dx: 40, dy: 0 });
+
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("growing would pull neighbor into it");
+    expect(session.draft).toBe(before);
+    expect(containment.check(session.draft)).toHaveLength(0);
+  });
+
   test("a child moved into the title band grows the top edge outward", () => {
     const baseline = makeDocument([
       section("page", -200, -200, 1600, 1000),

@@ -137,6 +137,24 @@ export function growSectionsToChildren(
   return { document: current, grown, blocked };
 }
 
+/**
+ * How far a section's children cross each of its edges, in px (0 when none
+ * does). The agent path compares it across an edit to a section whose grow is
+ * blocked, so such an edit may not push a child further out.
+ */
+export function sectionOverflow(document: InteractiveCanvasDocument, id: string) {
+  const out = { left: 0, top: 0, right: 0, bottom: 0 };
+  const frame = document.objects.find((object) => object.id === id)?.geometry;
+  if (!frame) return out;
+  for (const { geometry: g } of document.objects.filter((object) => object.parentId === id)) {
+    out.left = Math.max(out.left, frame.x - g.x);
+    out.top = Math.max(out.top, frame.y - g.y);
+    out.right = Math.max(out.right, g.x + g.width - (frame.x + frame.width));
+    out.bottom = Math.max(out.bottom, g.y + g.height - (frame.y + frame.height));
+  }
+  return out;
+}
+
 /** Reconcile membership, grow what can grow, reconcile again (an identity on a grown tree). */
 export function settleSections(document: InteractiveCanvasDocument): InteractiveCanvasDocument {
   return reconcileSectionMembership(growSectionsToChildren(reconcileSectionMembership(document)).document);
