@@ -59,8 +59,8 @@ import {
 } from "../schemas";
 
 /**
- * Place a new node, grow it to fit its text (auto-size.ts: its center held,
- * its row and column peers matched), and report the box that LANDED.
+ * Place a new node, grow it to fit its text, match it with its row and column
+ * peers (auto-size.ts: centers held), and report the box that LANDED.
  */
 function placeFitted(
   ctx: OpContext,
@@ -68,7 +68,7 @@ function placeFitted(
   lowered: OpOutcome,
   summary: (landed: { x: number; y: number; width: number; height: number }) => string,
 ): OpOutcome {
-  const outcome = withAutoSize(lowered, [id], ctx.canvasStyle);
+  const outcome = withAutoSize(lowered, [id], ctx.canvasStyle, "center", true);
   if (outcome.status !== "applied") return outcome;
   const landed = outcome.draft.objects.find((object) => object.id === id)!.geometry;
   return { ...outcome, summary: summary(landed) };
@@ -158,8 +158,9 @@ export const placeShape = defineOperationTool({
   description:
     "Place a shape with its name, its one-fact detail line and its color in one "
     + "call, at the default size for its kind. When the text does not fit that "
-    + "size the shape grows to fit, keeping its center, and same-type shapes in "
-    + "its row (height) and column (width) grow to match. Omit text or color and it arrives "
+    + "size the shape grows to fit, keeping its center. It and the same-type shapes "
+    + "in its row share the row's largest height, and those in its column the "
+    + "column's largest width. Omit text or color and it arrives "
     + "untitled or in its type's preferred color, for update_text and "
     + "change_color afterward; resizing and turning it are their own gestures. "
     + "Containment follows geometry: a shape outside every frame belongs to no "
@@ -259,7 +260,7 @@ export const clone = defineOperationTool({
     "Copy one object. The copy inherits the source's kind, size, color, shape "
     + "type/direction/glyph, detail line, and border style, so a row of options "
     + "matches without re-specifying a number. A copy whose new text does not fit "
-    + "grows to fit, like place_shape. Two things it does NOT carry: edges "
+    + "grows to fit and joins its row and column sizes, like place_shape. Two things it does NOT carry: edges "
     + "attached to the source (draw those with connect), and, for a section, "
     + "its contents — a cloned frame arrives empty, because copying "
     + "descendants without copying the edges between them would half-copy the "

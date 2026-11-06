@@ -15,12 +15,15 @@
  *    itself. A resize below the needed size therefore lands at the needed
  *    size, never clipped.
  *
- * 2. PEERS GROW WITH IT. When rule 1 grew a node, its peers are the shape
+ * 2. PEERS GROW WITH IT. When rule 1 grew a node, or the node was just
+ *    placed (`place_shape`, `clone`), its peers are the shape
  *    nodes of the same type and render shape, under the same parent section,
  *    whose center sits within half a grid unit (10px) of its center before it
- *    grew. Peers that share its ROW take the row's largest HEIGHT; peers that
- *    share its COLUMN take the column's largest WIDTH. Each keeps its center
- *    (corner on the grid). Nothing shrinks and nothing else moves.
+ *    grew. The node and the peers that share its ROW all take the row's
+ *    largest HEIGHT; the node and the peers that share its COLUMN all take the
+ *    column's largest WIDTH. Each keeps its center (corner on the grid).
+ *    Nothing shrinks and nothing else moves. So a node placed into a row that
+ *    already grew joins the row's size.
  *
  *    Why the dimension across the line, not along it: a row of equal heights
  *    keeps its tops and bottoms in line, and growing every member taller uses
@@ -131,6 +134,7 @@ export function autoSizeObjects(
   ids: readonly string[],
   canvasStyle: CanvasStyle,
   anchor: GrowAnchor = "center",
+  placed = false,
 ): AutoSizeResult {
   // A node placed in this same gesture has no parent yet; peers are judged
   // under the section its geometry puts it in.
@@ -149,13 +153,15 @@ export function autoSizeObjects(
     const object = objectOf(id);
     if (!object || !growsForText(object) || lockHolding(document, id) !== null) continue;
     const size = fittedSize(object, canvasStyle);
-    if (!size) continue;
+    if (!size && !placed) continue;
     const before = object.geometry;
-    const geometry = anchor === "corner"
-      ? { ...before, ...size }
-      : aroundCenter(before, size.width, size.height);
-    write(id, geometry);
-    notes.push(`grew ${id} to ${sizeOf(geometry)} so its text shows whole`);
+    if (size) {
+      const geometry = anchor === "corner"
+        ? { ...before, ...size }
+        : aroundCenter(before, size.width, size.height);
+      write(id, geometry);
+      notes.push(`grew ${id} to ${sizeOf(geometry)} so its text shows whole`);
+    }
     if (!canBePeer(object)) continue;
 
     // Peers are found where the node stood BEFORE it grew: rounding its
@@ -210,9 +216,10 @@ export function withAutoSize(
   ids: readonly string[],
   canvasStyle: CanvasStyle,
   anchor: GrowAnchor = "center",
+  placed = false,
 ): OpOutcome {
   if (outcome.status !== "applied") return outcome;
-  const { document, notes } = autoSizeObjects(outcome.draft, ids, canvasStyle, anchor);
+  const { document, notes } = autoSizeObjects(outcome.draft, ids, canvasStyle, anchor, placed);
   for (const id of ids) {
     const object = document.objects.find((entry) => entry.id === id);
     if (!object) continue;

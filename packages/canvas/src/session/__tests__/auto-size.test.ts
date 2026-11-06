@@ -168,6 +168,22 @@ describe("auto-size · peers grow with it", () => {
     expect(objectOf(session.draft, "outside").geometry).toMatchObject({ height: 80 });
   });
 
+  test("a node placed into a row that already grew joins the row's height", () => {
+    const session = makeTestSession(gridBoard(), ["frame"]);
+    runOp(session, "update_text", { id: "a", text: LONG });
+    const rowHeight = objectOf(session.draft, "a").geometry.height;
+    expect(rowHeight).toBeGreaterThan(80);
+    const rowCenter = center(objectOf(session.draft, "a")).cy;
+
+    // The default process is 280×100; the row is taller, so the new node takes its height.
+    runOp(session, "place_shape", { id: "e", type: "process", at: [520, rowCenter - 50], text: "Ship" });
+
+    const e = objectOf(session.draft, "e");
+    expect(e.geometry.height).toBe(Math.max(rowHeight, 100));
+    expect(objectOf(session.draft, "a").geometry.height).toBe(e.geometry.height);
+    expect(onGrid(e)).toBe(true);
+  });
+
   test("a resize the drawer asks for, that the text fits, moves no peer", () => {
     const session = makeTestSession(gridBoard(), ["frame"]);
 
