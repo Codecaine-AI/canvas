@@ -193,23 +193,25 @@ describe("ROUTES block", () => {
   });
 
   test("names true non-endpoint boxes the routed path crosses", () => {
+    // The router crosses a box only when nothing else reaches the other end:
+    // here a closed ring of walls shuts "inside" in.
     const baseline = makeDocument(
       [
-        box("source", 0, 0, 160, 80),
-        box("target", 480, 0, 160, 80),
-        box("blocker", 240, 0, 160, 80),
+        box("inside", 300, 300, 100, 100),
+        box("wall-n", 0, 0, 700, 80),
+        box("wall-s", 0, 620, 700, 80),
+        box("wall-w", 0, 0, 80, 700),
+        box("wall-e", 620, 0, 80, 700),
+        box("outside", 900, 300, 100, 100),
       ],
-      [connect("wire", "source", "target")],
+      [connect("wire", "inside", "outside")],
     );
-    const session = makeTestSession(baseline, ["source", "target"]);
+    const session = makeTestSession(baseline, ["inside", "outside"]);
 
-    const result = runOp(session, "reroute", {
-      id: "wire",
-      points: [[200, 40], [440, 40]],
-    });
+    const result = runOp(session, "style_edge", { id: "wire", patch: { style: "dashed" } });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("through blocker");
+    expect(result.text).toMatch(/through wall-/);
   });
 });
 

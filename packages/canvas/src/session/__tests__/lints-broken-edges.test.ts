@@ -202,7 +202,10 @@ describe("broken-edges lint", () => {
 
   // --- a wire through its own endpoint's caption ---
 
-  test("a port slid into its own endpoint's caption band is an error naming the port fix", () => {
+  // The router now keeps a wire out of its own icon's caption, so the two
+  // drawer scenarios that once ran through it produce no finding.
+
+  test("a port slid into its own endpoint's caption band is moved out of it: no finding", () => {
     const document = makeDocument(
       [page, icon("integrations", 2000, 680, "Action integrations", "stores no credentials"), icon("account", 1520, 1000, "Account system", "subscriptions")],
       [{
@@ -211,14 +214,10 @@ describe("broken-edges lint", () => {
         to: { objectId: "account", anchor: "top" },
       }],
     );
-    const findings = brokenEdges.check(document);
-    expect(findings).toHaveLength(1);
-    expect(findings[0]).toMatchObject({ severity: "error", at: ["subscription", "integrations"] });
-    expect(findings[0]!.message).toBe("connector subscription runs 60px through its endpoint integrations's caption");
-    expect(findings[0]!.suggestion).toStartWith("change_connection subscription to meet integrations on the side away from the caption");
+    expect(brokenEdges.check(document)).toEqual([]);
   });
 
-  test("a side port reached from below runs through its own caption and is an error", () => {
+  test("a side port reached from below is routed around its own caption: no finding", () => {
     const document = makeDocument(
       [
         page,
@@ -229,9 +228,7 @@ describe("broken-edges lint", () => {
       ],
       [{ ...connect("continue", "record", "worker"), from: { objectId: "record", anchor: "top" } }],
     );
-    const findings = brokenEdges.check(document).filter((finding) => finding.message.includes("caption"));
-    expect(findings.map((finding) => finding.at)).toEqual([["continue", "worker"]]);
-    expect(findings[0]!.message).toBe("connector continue runs 48px through its endpoint worker's caption");
+    expect(brokenEdges.check(document).filter((finding) => finding.message.includes("caption"))).toEqual([]);
   });
 
   test("a wire into the bottom port, under the caption, is quiet", () => {
