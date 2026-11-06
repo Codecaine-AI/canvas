@@ -29,12 +29,13 @@
  * one gesture whatever it lands on, and a frame's glyph is the only part of a
  * frame this tool can change — see `requireSwapTarget`.
  *
- * TEXT FIT. `update_text` runs the renderer's own wrap/clamp decision
- * (board/text-fit.ts) over the object's CURRENT box and the NEW text, and
- * attaches the verdict as an `OpOutcome.notes` line when the text would clip,
- * may clip (within 1px of the box edge), or cannot be measured exactly
- * (characters the bundled fonts lack). Report-only: the write still lands — say it, don't block it — the same family of warning `resize` and
- * `match_size` fire from the other direction.
+ * TEXT FIT. `update_text` and `change_shape` run auto-size (auto-size.ts)
+ * over the object: when the renderer's own wrap/clamp decision
+ * (board/text-fit.ts) says the NEW text would clip in the box, the node grows
+ * to the size it needs, keeping its center, and its row and column peers
+ * grow with it. A sticky or section, which does not grow, still gets the
+ * verdict as an `OpOutcome.notes` line, and so does text that cannot be
+ * measured exactly (characters the bundled fonts lack).
  *
  * WHY EDGE LABELS ARE NOT FIT-CHECKED HERE. `textFitReport`'s `edge-label`
  * slot answers "does the chip fit the corridor it renders in?" — it needs the
@@ -50,7 +51,7 @@
 import { Type } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasObject } from "../../../state/schema";
 
-import { textFitReport } from "../../../board/text-fit";
+import { withAutoSize } from "./auto-size";
 import { entityKindOf } from "../../perception/op-surface";
 import { detailDroppedNote, storedDetail } from "../detail-line";
 import { NO_GLYPH, isGlyphName, unknownGlyphMessage } from "../glyph-names";
@@ -86,7 +87,7 @@ function requireUnlockedTarget(ctx: OpContext, id: string): string[] {
 export const updateText = defineOperationTool({
   name: "update_text",
   description:
-    "Write the words on anything that carries them — a shape's, icon's, or section's name and its one-line detail, a sticky's body, an edge's label. Send text, detail, or both. Text that no longer fits its box still applies, with a warning naming the size it would need.",
+    "Write the words on anything that carries them — a shape's, icon's, or section's name and its one-line detail, a sticky's body, an edge's label. Send text, detail, or both. A shape or icon whose text no longer fits grows to fit, keeping its center, and the same-type shapes in its row (height) and column (width) grow to match, unless that would make them overlap another box; a sticky or section that no longer fits still applies, with a warning naming the size it would need.",
   fields: {
     id: Id,
     text: Type.Optional(Type.String({
@@ -130,12 +131,10 @@ export const updateText = defineOperationTool({
       }
     }
     if (Object.keys(patch).length === 0) return { status: "noop", note: notes[0]! };
-    // The fit verdict is over the NEW name and the NEW detail line together:
-    // a detail added under a name that just fitted can push it into clipping.
-    const next = "detail" in patch ? { ...target, detail: patch.detail } : target;
-    const report = textFitReport(next, target.geometry, patch.text ?? target.text, ctx.canvasStyle);
-    if (!report.fits || !report.reliable) notes.push(report.detail);
-    return ctx.mergeObject(p.id, patch, `update_text ${p.id}`, notes);
+    // The fit is judged over the NEW name and the NEW detail line together:
+    // a detail added under a name that just fitted can push it into clipping,
+    // and the node grows (with its peers) until both show whole.
+    return withAutoSize(ctx.mergeObject(p.id, patch, `update_text ${p.id}`, notes), [p.id], ctx.canvasStyle);
   },
 });
 
@@ -306,6 +305,8 @@ export const changeShape = defineOperationTool({
       return ctx.mergeObject(p.id, { icon } as ObjectPatch, `change_shape ${p.id}`);
     }
     const { patch, notes } = shapeSwapPatch(target, p.patch);
-    return ctx.mergeObject(p.id, patch, `change_shape ${p.id}`, notes);
+    // A new shape is a new text slot (a diamond's inscribed rect is narrower
+    // than a rectangle's), so the name can stop fitting: grow it back.
+    return withAutoSize(ctx.mergeObject(p.id, patch, `change_shape ${p.id}`, notes), [p.id], ctx.canvasStyle);
   },
 });

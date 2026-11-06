@@ -227,7 +227,8 @@ describe("BOARD DIFF block", () => {
     runOp(session, "update_text", { id: "alpha", text: "first pass" });
     runOp(session, "move_to", { id: "alpha", x: 0, y: 240 });
     runOp(session, "delete", { id: "gamma" });
-    runOp(session, "place_shape", { id: "note", type: "rectangle", at: [960, 0] });
+    // Off alpha's and beta's row, so auto-size matches no peer (auto-size.ts).
+    runOp(session, "place_shape", { id: "note", type: "rectangle", at: [960, 600] });
     const diff = boardDiffBlock(session);
 
     // Cumulative: the retext and move share one base-to-draft line.
@@ -271,7 +272,8 @@ describe("BOARD DIFF block", () => {
 
     runOp(session, "update_text", { id: "alpha", text: "renamed" });
     runOp(session, "change_color", { id: "alpha", color: "teal" });
-    runOp(session, "place_shape", { id: "note", type: "rectangle", at: [640, 0] });
+    // Off alpha's and beta's row, so auto-size matches no peer (auto-size.ts).
+    runOp(session, "place_shape", { id: "note", type: "rectangle", at: [640, 600] });
     const diff = boardDiffBlock(session);
     expect(diff).toContain("updateObject alpha  retexted · recolored");
     expect(diff).toContain("addObject note");
