@@ -11,7 +11,11 @@
  *   than 25% of the smaller painted area or cover a box's text center;
  * - section-on-section: two sections whose frames overlap when neither
  *   contains the other in the section tree (sections grow to hold their
- *   children, and a grow can push one frame into its neighbor).
+ *   children, and a grow can push one frame into its neighbor);
+ * - section-on-box: a section frame partly over a box it does not hold, by
+ *   the box-on-box measure (more than 25% of what the box paints, or its
+ *   text center). A box wholly inside the frame reads as grouped, not
+ *   covered; the injected page frame and a box's own ancestors are exempt.
  *
  * Label chips are not judged here: the renderer places each chip clear
  * along its own wire (connectors/label-placement.ts), and the chips that
@@ -19,6 +23,7 @@
  */
 import { paintedRects, type Rect } from "../geometry";
 import { kindOf } from "../../helpers";
+import { PAGE_FRAME_ID } from "../../page-frame";
 
 import type { LayoutRule } from "../types";
 
@@ -70,7 +75,8 @@ function isAncestor(byParent: ReadonlyMap<string, string | null>, ancestorId: st
 const GUIDANCE = `Nothing sits on content. Blocking (error tier):
 - a box overlap that swallows more than a quarter of what the smaller box paints (an icon's
   tile and caption, a shape's face), or lands on its text;
-- two section frames overlapping when neither holds the other.
+- two section frames overlapping when neither holds the other;
+- a section frame over a box it does not hold.
 Fix it by moving a box, or a section and its children, clear. Stickies float above the
 diagram and are exempt. Overlap and integrity are the only checks: wire routes, label chips,
 text fit and section fit are automatic, and integrity fires only when something bypassed them.`
@@ -138,6 +144,47 @@ export const rule: LayoutRule = {
           where: shared,
           message: `sections ${a.id} and ${b.id} overlap by ${Math.round(shared.width)}×${Math.round(shared.height)}px`,
           suggestion: `move_to ${b.id} clear of ${a.id}, or move the children that make one of them grow`,
+        });
+      }
+    }
+
+    // 1c — section-on-box: a frame grown over a box outside its tree. When
+    // the box's own section already overlaps that frame, 1b reports the
+    // collision once, so its children are not reported again.
+    const overlapping = new Set(
+      findings.filter((finding) => finding.message.startsWith("sections ")).map((finding) => [...finding.at].sort().join("\u0000")),
+    );
+    const sectionsOverlap = (a: string, b: string) => overlapping.has([a, b].sort().join("\u0000"));
+    const ancestorsOf = (id: string): string[] => {
+      const out: string[] = [];
+      for (let at = byParent.get(id); at != null && out.length <= byParent.size; at = byParent.get(at)) out.push(at);
+      return out;
+    };
+    for (const section of sections) {
+      if (section.id === PAGE_FRAME_ID) continue;
+      for (const node of boxes) {
+        if (isAncestor(byParent, section.id, node.id)) continue;
+        if (ancestorsOf(node.id).some((ancestor) => sectionsOverlap(ancestor, section.id))) continue;
+        const nodeFaces = faces.get(node.id)!;
+        const pieces = nodeFaces
+          .map((face) => intersection(section.geometry, face))
+          .filter((piece): piece is Rect => piece !== undefined);
+        if (pieces.length === 0) continue;
+        const nodeArea = nodeFaces.reduce((sum, face) => sum + area(face), 0);
+        if (nodeArea <= 0) continue;
+        const coveredArea = pieces.reduce((sum, piece) => sum + area(piece), 0);
+        // Wholly inside the frame: it reads as grouped, not covered.
+        if (coveredArea >= nodeArea - 0.5) continue;
+        const fraction = coveredArea / nodeArea;
+        const centered = coversTextCenter(nodeFaces, pieces);
+        if (fraction <= OVERLAP_FRACTION && !centered) continue;
+        findings.push({
+          rule: "covered-content",
+          severity: "error",
+          at: [section.id, node.id],
+          where: bounds(pieces),
+          message: `section ${section.id} covers ${Math.round(fraction * 100)}% of ${node.id}, which it does not hold${centered ? ", including its text center" : ""}`,
+          suggestion: `move_to ${node.id} clear of ${section.id}, or move the children that make ${section.id} grow`,
         });
       }
     }

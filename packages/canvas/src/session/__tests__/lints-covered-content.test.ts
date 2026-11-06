@@ -61,7 +61,9 @@ describe("covered-content lint", () => {
       { ...box("c", 320, 180), parentId: "left" },
     ]), FIGJAM_CONTEXT);
     const pairs = findings.map((finding) => [...finding.at].sort().join("+")).sort();
-    expect(pairs).toEqual(["a+b", "c+loose", "left+right"]); // the frames themselves: section-on-section
+    // left+right: the frames themselves (section-on-section); loose+right: the
+    // right frame partly over a top-level box it does not hold (section-on-box).
+    expect(pairs).toEqual(["a+b", "c+loose", "left+right", "loose+right"]);
     expect(findings.every((finding) => finding.severity === "error")).toBe(true);
   });
 
@@ -121,6 +123,20 @@ describe("covered-content: section-on-section", () => {
       where: { x: 540, y: 40, width: 20, height: 400 },
     });
     expect(findings[0]!.message).toBe("sections left and right overlap by 20×400px");
+  });
+
+  test("a frame grown partly over a box it does not hold is an error; a box wholly inside reads as grouped", () => {
+    const findings = coveredContent.check(makeDocument([
+      frame("page", 0, 0, 1200, 800),
+      frame("a", 40, 40, 500, 300, "page"),
+      { ...box("kid", 300, 100), parentId: "a" },
+      { ...box("neighbor", 460, 260, 140, 60), parentId: "page" },  // 80px of it under a
+      { ...box("grouped", 80, 80), parentId: "page" },             // wholly inside a
+    ]), FIGJAM_CONTEXT).filter((finding) => finding.message.startsWith("section "));
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({ severity: "error", at: ["a", "neighbor"] });
+    expect(findings[0]!.message).toContain("section a covers 57% of neighbor");
   });
 
   test("nesting at any depth and frames that only touch carry no finding", () => {
