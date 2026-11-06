@@ -21,7 +21,7 @@ import {
   DIGEST_GRAMMAR,
   DIGEST_ROUTE_LEGEND,
 } from "../board/digest";
-import { FINISHING_RULES, LAYOUT_RULES } from "../board/lints";
+import { LAYOUT_RULES } from "../board/lints";
 
 const INDENT = "    ";
 
@@ -52,11 +52,6 @@ const HEADER =
   + "- An empty block is a self-closing tag.";
 
 const ALWAYS_ON_RULES = LAYOUT_RULES.map((rule) => rule.id).join(", ");
-
-const FINISHING_ONLY_RULES = FINISHING_RULES
-  .filter((rule) => !LAYOUT_RULES.some((always) => always.id === rule.id))
-  .map((rule) => rule.id)
-  .join(", ");
 
 const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
   {
@@ -148,18 +143,15 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       "ids are stable only until the draft changes, then they reassign from E1/W1",
       `always-on rules: ${ALWAYS_ON_RULES}`,
       {
-        text: `a committed finalize adds ${FINISHING_ONLY_RULES}`,
-        children: ["is a frame far larger than its children need"],
-      },
-      {
-        text: "every open E* and W* in your edited scope blocks a committed finalize",
+        text: "every open E* in your edited scope blocks a committed finalize",
         children: ["the finding names the problem, the fix is yours to choose"],
       },
+      "W* warnings and N* notes never block: they ride along in the proposal",
       {
-        text: "N* notes never block: what cannot be promised",
+        text: "overlap and integrity are the only checks: overlap is a box on a box, or a section on a section",
         children: [
-          "text within 1px of its box edge may wrap or clip in the browser",
-          "characters the bundled fonts lack paint in fallback fonts, so their fit is an estimate",
+          "wire routes, label chips, text fit, and section fit are automatic; integrity fires only when something bypassed them",
+          "canvas_check counts label chips that found no clear spot under LAYOUT, never as a finding",
         ],
       },
     ],

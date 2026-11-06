@@ -34,6 +34,7 @@ import type { ViewportState } from "./viewport";
 import { ObjectShape } from "./ObjectShape";
 import { Connector, ConnectorSelectionTrim } from "../connectors/Connector";
 import { ArrowMarkerScopeProvider, arrowMarkerId, arrowMarkerScope } from "../connectors/arrow-markers";
+import { ARROWHEAD_TIP_OVERSHOOT_RATIO, arrowheadStrokeRatio } from "../connectors/arrowhead";
 import { SectionTitleChip } from "../objects/section/SectionTitleChip";
 import { SectionDepthProvider } from "../objects/section/section-depth-context";
 import type { CanvasTool } from "../state/actions";
@@ -69,13 +70,6 @@ const CANVAS_TEXT_RENDERING = {
   tabSize: 8,
 } as const;
 
-/**
- * Arrowhead geometry as multiples of the connector's stroke width. We use 5x
- * for BOTH base width and length — a slightly long, visually "solid" head.
- */
-const CONNECTOR_ARROWHEAD_WIDTH_TO_STROKE_RATIO = 5;
-const CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO = 5;
-
 // Same kite-shaped pointer as the dock's Select glyph (Nucleo
 // maps-location/pointer), filled for cursor use — the tool icon and the
 // on-canvas cursor are literally the same form. Inlined from the old
@@ -106,10 +100,6 @@ import type {
   InteractiveCanvasObject,
 } from "../state/schema";
 import { paintOrderedObjects } from "../state/z-order";
-
-/** Arrowhead marker geometry, expressed in units of the connector's own stroke width (see marker `<defs>` below). */
-const ARROW_LENGTH_RATIO = CONNECTOR_ARROWHEAD_LENGTH_TO_STROKE_RATIO;
-const ARROW_WIDTH_RATIO = CONNECTOR_ARROWHEAD_WIDTH_TO_STROKE_RATIO;
 
 export interface CanvasStageProps {
   document: InteractiveCanvasDocument;
@@ -289,6 +279,7 @@ function CanvasStageSurface({
   stageRef,
 }: Omit<CanvasStageProps, "canvasStyle">) {
   const resolvedCanvasStyle = useCanvasStyle();
+  const arrowRatio = arrowheadStrokeRatio(resolvedCanvasStyle.connectorStrokeWidthPx);
   const selected = new Set(selectedObjectIds);
   const changed = new Set(changedObjectIds);
   const zoom = viewport.zoom;
@@ -456,38 +447,37 @@ function CanvasStageSurface({
             {/*
               Arrowhead geometry: markerUnits defaults to "strokeWidth", so
               this viewBox is expressed in units of the connector's own
-              stroke width — a solid triangle ARROW_LENGTH_RATIO units long
-              and ARROW_WIDTH_RATIO units at the base reproduces FigJam's
-              5x/4.5x-of-stroke arrowhead (theme/tokens.ts,
-              CONNECTOR_ARROWHEAD_*_TO_STROKE_RATIO) regardless of the
-              connector's stroke color/width.
+              stroke width — a solid triangle arrowRatio units long and wide
+              (connectors/arrowhead.ts: 5x the style stroke, floored at 14
+              world px; render/static-svg.ts paints the same head) regardless
+              of the connector's stroke color.
             */}
             <marker
               id={arrowMarkerId(markerScope, "forward")}
-              markerHeight={ARROW_WIDTH_RATIO}
-              markerWidth={ARROW_LENGTH_RATIO}
+              markerHeight={arrowRatio}
+              markerWidth={arrowRatio}
               orient="auto"
-              refX={ARROW_LENGTH_RATIO - 0.5}
-              refY={ARROW_WIDTH_RATIO / 2}
+              refX={arrowRatio - ARROWHEAD_TIP_OVERSHOOT_RATIO}
+              refY={arrowRatio / 2}
             >
               {/* context-stroke: the arrowhead inherits the referencing path's
                   stroke, so per-connection colors (connection.color, W4) and
                   selection recoloring apply without per-color marker defs. */}
               <path
-                d={`M 0 0 L ${ARROW_LENGTH_RATIO} ${ARROW_WIDTH_RATIO / 2} L 0 ${ARROW_WIDTH_RATIO} Z`}
+                d={`M 0 0 L ${arrowRatio} ${arrowRatio / 2} L 0 ${arrowRatio} Z`}
                 fill="context-stroke"
               />
             </marker>
             <marker
               id={arrowMarkerId(markerScope, "back")}
-              markerHeight={ARROW_WIDTH_RATIO}
-              markerWidth={ARROW_LENGTH_RATIO}
+              markerHeight={arrowRatio}
+              markerWidth={arrowRatio}
               orient="auto-start-reverse"
-              refX={ARROW_LENGTH_RATIO - 0.5}
-              refY={ARROW_WIDTH_RATIO / 2}
+              refX={arrowRatio - ARROWHEAD_TIP_OVERSHOOT_RATIO}
+              refY={arrowRatio / 2}
             >
               <path
-                d={`M 0 0 L ${ARROW_LENGTH_RATIO} ${ARROW_WIDTH_RATIO / 2} L 0 ${ARROW_WIDTH_RATIO} Z`}
+                d={`M 0 0 L ${arrowRatio} ${arrowRatio / 2} L 0 ${arrowRatio} Z`}
                 fill="context-stroke"
               />
             </marker>

@@ -8,8 +8,9 @@ import type { InteractiveCanvasDocument } from "../../state/schema";
 import type { CanvasStyle } from "../../theme/canvas-style";
 
 /**
- * `error` and `warning` findings block a committed finalize in the edited
- * scope. A `note` never blocks: it says what cannot be promised — text
+ * `error` findings block a committed finalize in the edited scope. A
+ * `warning` never blocks: it rides along in the proposal. A `note` never
+ * blocks either: it says what cannot be promised — text
  * within a pixel of its box edge (it may wrap or clip in the browser), or
  * text the bundled fonts cannot measure exactly.
  */
@@ -32,16 +33,6 @@ export interface Diagnostic {
  */
 export interface LintContext {
   canvasStyle?: CanvasStyle;
-  /**
-   * The board the session STARTED from (its first draft, injected page frame
-   * included) — what separates text the agent wrote from text it found. The
-   * authorship rules (label-is-prose, detail-too-long) judge a name or detail
-   * only when the object is absent from it or that field changed since it, so
-   * a person's own labels are never theirs to flag. Absent means nothing is
-   * attributable to the agent, and those rules stay silent. Every other rule
-   * ignores it.
-   */
-  baseline?: InteractiveCanvasDocument;
 }
 
 export interface LayoutRule {

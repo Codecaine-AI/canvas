@@ -304,8 +304,20 @@ function readableOn(text: string, background: string): string {
 }
 
 /**
+ * Ink weight of an `ink-card` shape fill over the card fill. Strong enough
+ * that a colored node reads as its hue in a whole-board PNG, light enough
+ * that the ink border still reads at 3:1 and the text color at 4.5:1 on it.
+ */
+const SHAPE_CARD_INK_WEIGHT = 0.2;
+
+/** Colors whose `ink-card` shape stays the plain card: their ink is a neutral, so a mix would only gray the card. */
+const NEUTRAL_SHAPE_COLORS: ReadonlySet<CanvasColor> = new Set(["gray", "white"]);
+
+/**
  * Shape fill / border / text. `tint`: the pastel role-table fill with an ink
  * border (figjam). `card`: fill = cardFill, border = ink, text = textColor.
+ * `ink-card`: fill = mix(ink, cardFill, SHAPE_CARD_INK_WEIGHT), border = ink,
+ * text = textColor kept at 4.5:1; gray and white keep the `card` paint.
  */
 export function resolveShapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
   return cachedPaint(style, `shape|${color}`, () => shapePaint(color, style));
@@ -313,7 +325,13 @@ export function resolveShapePaint(color: CanvasColor, style: CanvasStyle): Shape
 
 function shapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
   const border = resolveInk(color, style);
-  if (style.shapeFill === "card") return { fill: style.cardFill, border, text: style.textColor };
+  if (style.shapeFill === "card" || (style.shapeFill === "ink-card" && NEUTRAL_SHAPE_COLORS.has(color))) {
+    return { fill: style.cardFill, border, text: style.textColor };
+  }
+  if (style.shapeFill === "ink-card") {
+    const fill = mixColors(border, style.cardFill, SHAPE_CARD_INK_WEIGHT);
+    return { fill, border, text: readableOn(style.textColor, fill) };
+  }
   const fill = swatchFor(color).shape.fill;
   return { fill, border, text: readableOn(style.textColor, fill) };
 }

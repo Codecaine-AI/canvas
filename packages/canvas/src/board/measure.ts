@@ -12,8 +12,7 @@
  * Pure and deterministic — document in, numbers out. Nothing here renders,
  * mutates, or looks at the session.
  *
- * It is also the shared home for `axisGap`, which the crowding and
- * unreadable-labels rules both need: a corridor width has exactly one
+ * It is also the shared home for `axisGap`: a corridor width has exactly one
  * definition on this board, and every consumer reads it from here.
  */
 import { objectPaintedBounds } from "../render/painted-bounds";
@@ -193,8 +192,7 @@ function axisPitch(members: InteractiveCanvasObject[], axis: Axis): AxisPitch | 
 }
 
 /**
- * The slack a fit would reclaim, per side — the frame-slack rule's arithmetic
- * without its reporting thresholds, because a readout states the number and
+ * The slack a fit would reclaim, per side — a readout states the number and
  * lets the model judge it.
  */
 function freeRectFor(

@@ -3,7 +3,8 @@
  * roster (docs/10-system-design/70-agent-tool-surface), in six groups:
  *
  *   Place     place_section, place_sticky, place_shape, clone, connect
- *   Arrange   move_to, move_by, resize, match_size, align, space_out
+ *   Arrange   move_to, move_by, resize, match_size, align, space_out,
+ *             arrange_section, tighten_wires
  *   Content   update_text, change_color, change_shape
  *   Sections  fit_section, change_section_border, lock, unlock
  *   Edges     style_edge, change_connection, reroute, shift_segment,
@@ -28,12 +29,14 @@ import type { LayoutToolRenderResult } from "../runtime";
 import type { OperationHost } from "./operation-tool";
 import {
   align,
+  arrangeSection,
   matchSize,
   moveBy,
   moveTo,
   resize,
   spaceOut,
 } from "./arrange";
+import { tightenWiresTool } from "./tighten-wires";
 import {
   changeColor,
   changeShape,
@@ -76,6 +79,7 @@ export interface OperationTool {
 
 export {
   align,
+  arrangeSection,
   changeColor,
   changeConnection,
   changeSectionBorder,
@@ -98,6 +102,7 @@ export {
   shiftSegment,
   spaceOut,
   styleEdge,
+  tightenWiresTool,
   unlock,
   updateText,
 };
@@ -110,15 +115,20 @@ export const operationTools: readonly OperationTool[] = [
   placeShape,
   clone,
   connect,
-  // Arrange (./arrange.ts). The six geometry-only gestures; frames travel
+  // Arrange (./arrange.ts). The geometry-only gestures; frames travel
   // whole, connection ids are rejected, everything snaps first and the result
-  // reports what landed.
+  // reports what landed. arrange_section lays one frame's nodes out in rows
+  // and fits the frame, so a section needs no coordinates per node.
   moveTo,
   moveBy,
   resize,
   matchSize,
   align,
   spaceOut,
+  arrangeSection,
+  // The last Arrange gesture (./tighten-wires.ts): every box slid toward
+  // what it is wired to, kept only where the drawn wires get shorter.
+  tightenWiresTool,
   // Content & appearance (./content.ts). Kind-agnostic: one home for text, one
   // for color, and the folded-type shape swap.
   updateText,

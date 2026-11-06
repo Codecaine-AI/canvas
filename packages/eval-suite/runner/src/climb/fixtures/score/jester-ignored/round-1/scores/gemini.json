@@ -1,0 +1,96 @@
+{
+  "judge": "gemini",
+  "round": 1,
+  "boards": [
+    {
+      "brief": "climb-a",
+      "scores": {
+        "system_fidelity": 2,
+        "requirement_coverage": 2,
+        "scope_discipline": 2,
+        "readability": 2,
+        "hierarchy_grouping": 2,
+        "layout_flow": 2,
+        "color_contrast": 2,
+        "typography_labels": 2,
+        "craft": 2
+      },
+      "findings": []
+    },
+    {
+      "brief": "climb-b",
+      "scores": {
+        "system_fidelity": 2,
+        "requirement_coverage": 2,
+        "scope_discipline": 2,
+        "readability": 2,
+        "hierarchy_grouping": 2,
+        "layout_flow": 2,
+        "color_contrast": 2,
+        "typography_labels": 2,
+        "craft": 2
+      },
+      "findings": []
+    },
+    {
+      "brief": "climb-c",
+      "scores": {
+        "system_fidelity": 2,
+        "requirement_coverage": 2,
+        "scope_discipline": 2,
+        "readability": 2,
+        "hierarchy_grouping": 2,
+        "layout_flow": 2,
+        "color_contrast": 2,
+        "typography_labels": 2,
+        "craft": 2
+      },
+      "findings": []
+    },
+    {
+      "brief": "climb-d",
+      "scores": {
+        "system_fidelity": 2,
+        "requirement_coverage": 2,
+        "scope_discipline": 2,
+        "readability": 2,
+        "hierarchy_grouping": 2,
+        "layout_flow": 2,
+        "color_contrast": 2,
+        "typography_labels": 2,
+        "craft": 2
+      },
+      "findings": []
+    },
+    {
+      "brief": "held-e",
+      "scores": {
+        "system_fidelity": 2,
+        "requirement_coverage": 2,
+        "scope_discipline": 2,
+        "readability": 2,
+        "hierarchy_grouping": 2,
+        "layout_flow": 2,
+        "color_contrast": 2,
+        "typography_labels": 2,
+        "craft": 2
+      },
+      "findings": []
+    },
+    {
+      "brief": "held-f",
+      "scores": {
+        "system_fidelity": 2,
+        "requirement_coverage": 2,
+        "scope_discipline": 2,
+        "readability": 2,
+        "hierarchy_grouping": 2,
+        "layout_flow": 2,
+        "color_contrast": 2,
+        "typography_labels": 2,
+        "craft": 2
+      },
+      "findings": []
+    }
+  ]
+}

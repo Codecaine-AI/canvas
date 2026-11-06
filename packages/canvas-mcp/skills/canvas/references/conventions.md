@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/conventions.ts (sha256 7512963793f4dc173bdaf245b42bba4841aa1e48ec9cab3b5313e609c438f474). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/conventions.ts (sha256 0bf8b29e931d8796ff8570ca0d5b46ddab1cb925436aad2de406284a630b0fa0). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Canvas Conventions
 
@@ -29,14 +29,12 @@
 </identity>
 
 <text_limits>
-    Names and detail lines on shapes, icons, and sections have limits, and two lint warnings enforce them:
+    Names and detail lines on shapes, icons, and sections have limits:
 
-    - label-is-prose: a name over 6 words or 40 characters, or one with a sentence break or line break. Aim for 5 words or fewer.
-    - detail-too-long: a detail over 48 characters, with more than one sentence, or with a line break.
+    - A name is 5 words or fewer, and never over 6 words or 40 characters, with no sentence break or line break.
+    - A detail is one fact of 48 characters or fewer, with no line break.
 
-    To fix either, shorten the name, keep one fact in the detail, and move the rest to a sticky beside the subject. Sticky bodies and connection labels are outside these limits.
-
-    Both warnings judge only the text you write: names and details on objects you create, and ones you change. A person's existing labels are theirs, so leave them as they are unless the request asks you to edit them.
+    Move anything longer to a sticky beside the subject. Sticky bodies and connection labels are outside these limits. A person's existing labels are theirs, so leave them as they are unless the request asks you to edit them.
 </text_limits>
 
 <containment>
@@ -44,9 +42,9 @@
 
     Position is the membership signal. You do not supply a parent ID.
 
-    The base section is the page; grow it when the diagram needs room. Only sections contain other entities.
+    The base section is the page. It grows by itself like any section. Only sections contain other entities.
 
-    Sections keep their geometry as content changes. fit_section fits a frame around its current children; it does not fit its ancestors automatically.
+    A section grows by itself to hold a child that crosses its edge, and never shrinks by itself. arrange_section lays out a section's nodes in rows and fits the frame. fit_section fits a frame around its current children. Neither fits the ancestors.
 </containment>
 
 <connection_binding>
@@ -58,7 +56,7 @@
 </connection_binding>
 
 <geometry>
-    Use multiples of 20 for the positions, widths, heights, nudges, gaps, padding, and routing coordinates you choose. For example: a 280×100 object at (240, 480), a 140-unit gap, or a 40-unit padding. A multiple of 10 that is not also a multiple of 20 is off-grid.
+    Use multiples of 20 for the positions, widths, heights, nudges, gaps, padding, and routing coordinates you choose. For example: a 280×100 object at (240, 480), a 200-unit gap, or a 40-unit padding. A multiple of 10 that is not also a multiple of 20 is off-grid.
 
     Tools snap the geometry they write to the 20-unit grid. Tool results report the geometry that actually landed; use those applied values for the next edit.
 
@@ -75,9 +73,9 @@
         Starting dimensions for local peer groups, not composition mandates. Adjust them for content and actual routes; section sizes and counts follow meaning.
 
         - flow node: 280×100, never narrower than 240
-        - node gaps: 140 across a row, 100 down a column
+        - node gaps: 200 across a row, 100 down a column
         - arrow corridor: 100 of clear channel wherever a wire and its label pass between siblings
-        - section gutters: 140 side by side, 160 between stacked rows
+        - section gutters: 200 side by side, 220 between stacked rows
         - frame padding: 40 inside every frame before its first child
     </spacing_targets>
 

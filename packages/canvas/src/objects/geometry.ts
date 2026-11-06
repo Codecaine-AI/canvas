@@ -238,6 +238,28 @@ export function connectionBoundsForObject(
   };
 }
 
+/**
+ * World rect of the caption band an icon paints under its glyph (name and
+ * detail, band width included — wider than the glyph column the connection
+ * bounds keep), or null when nothing paints there. Routes keep out of it.
+ */
+export function captionBandBounds(
+  object: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): CanvasBounds | null {
+  const glyph = iconGlyphBoxPx(object, canvasStyle);
+  const extended = belowExtendedBoundsPx(object, canvasStyle);
+  const top = glyph.y + glyph.height;
+  const height = extended.y + extended.height - top;
+  if (height <= 0) return null;
+  return {
+    x: object.geometry.x + extended.x,
+    y: object.geometry.y + top,
+    width: extended.width,
+    height,
+  };
+}
+
 /** Whether a caption (name lines and/or a detail line) paints below the glyph — detail-only captions count. */
 function hasExternalBelowBand(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): boolean {
   return belowBandSize(object.text, object, canvasStyle).heightPx > 0;

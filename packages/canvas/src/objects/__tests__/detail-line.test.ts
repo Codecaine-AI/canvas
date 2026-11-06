@@ -82,9 +82,9 @@ describe("detail line typography", () => {
       fontSizePx: 14,
       fontWeight: 500,
       lineHeightPx: 14 * 1.3,
-      color: "#666562",
+      color: "#2A2A2A",
     });
-    expect(detailTypography(DARK).color).toBe("#9198A1");
+    expect(detailTypography(DARK).color).toBe("#D1D9E0");
   });
 
   it("measures details in the font they paint: Plex Mono cells (layout units) and real Inter advances", () => {

@@ -4,7 +4,6 @@ import { canvasThemePreset, normalizeCanvasStyle, type CanvasStyle } from "../..
 import type { InteractiveCanvasObject } from "../../state/schema";
 
 import { textFitReport } from "../../board/text-fit";
-import { rule as clippedText } from "../../board/lints/rules/clipped-text";
 import { renderDocumentToSvg } from "../../render/static-svg.ts";
 import { makeDocument } from "./synthetic";
 import { FIGJAM_CANVAS_STYLE } from "./helpers";
@@ -179,39 +178,6 @@ describe("text-fit — the name gives up lines to the detail", () => {
     const object = shape({ text: "", detail: LONG_DETAIL });
     expect(textFitReport(object, object.geometry, "", LIGHT).fits).toBe(false);
     expect(textFitReport(shape({ text: "" }), shape().geometry, "", LIGHT).slot).toBe("none");
-  });
-});
-
-describe("clipped-text — detail findings", () => {
-  test("a truncated detail warns with a concrete shorten-or-widen remedy", () => {
-    const object = shape({ id: "llm", detail: LONG_DETAIL });
-    const findings = clippedText.check(makeDocument([object]), { canvasStyle: normalizeCanvasStyle(LIGHT) } as never);
-    expect(findings).toHaveLength(1);
-    const report = textFitReport(object, object.geometry, object.text, LIGHT);
-    expect(findings[0]).toMatchObject({
-      rule: "clipped-text",
-      at: ["llm"],
-      message: `llm: ${report.detail}`,
-      suggestion: `shorten llm's detail to ≤25 chars (it has ${LONG_DETAIL.length}) or widen llm to ≥${report.neededSize!.width}`,
-    });
-  });
-
-  test("a hidden detail warns with the box that shows it", () => {
-    const object = shape({ id: "short", detail: ":4820", geometry: { x: 0, y: 0, width: 200, height: 40 } });
-    const [finding] = clippedText.check(makeDocument([object]), { canvasStyle: LIGHT } as never);
-    const needed = textFitReport(object, object.geometry, object.text, LIGHT).neededSize!;
-    expect(finding!.suggestion).toBe(
-      `grow short to ≥${needed.width}×${needed.height} so the detail line fits under the name, or clear the detail`,
-    );
-  });
-
-  test("a fitting detail stays quiet, and a detail-only icon is still checked", () => {
-    expect(clippedText.check(makeDocument([shape({ detail: ":4820" })]), { canvasStyle: LIGHT } as never)).toEqual([]);
-    const findings = clippedText.check(
-      makeDocument([icon({ id: "glyph", text: "", detail: LONG_DETAIL })]),
-      { canvasStyle: LIGHT } as never,
-    );
-    expect(findings.map((finding) => finding.at[0])).toEqual(["glyph"]);
   });
 });
 

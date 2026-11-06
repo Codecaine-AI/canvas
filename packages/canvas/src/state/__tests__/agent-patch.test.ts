@@ -459,7 +459,7 @@ describe("canvas.applyAgentPatch", () => {
     expect(next.selection).toEqual({ kind: "objects", objectIds: ["b"] });
   });
 
-  it("keeps a section's geometry when an object is added inside it", () => {
+  it("grows a section outward when an object added inside it crosses its edge", () => {
     const state = createInteractiveCanvasState({
       schemaVersion: 1,
       id: "section-add-inside",
@@ -488,20 +488,22 @@ describe("canvas.applyAgentPatch", () => {
       },
     ]);
 
-    // Membership is derived from geometry; the frame itself does not move.
+    // Membership is derived from geometry, and auto-grow (state/section-grow.ts)
+    // pushes out the two sides a child crowds: right (second crosses it) and
+    // left (first sits 16px in, under the 20px trigger). Top and bottom stay.
     expect(next.document.objects.find((object) => object.id === "second")?.parentId).toBe(
       "section",
     );
     expect(next.document.objects.find((object) => object.id === "section")?.geometry).toEqual({
-      x: 496,
+      x: 460,
       y: 16,
-      width: 144,
+      width: 260,
       height: 144,
     });
     expect(next.lastChange?.changedObjectIds).toEqual(["second"]);
   });
 
-  it("keeps a section's geometry when an object moves out of it", () => {
+  it("never shrinks a section when an object moves out of it", () => {
     const state = createInteractiveCanvasState({
       schemaVersion: 1,
       id: "section-move-out",
@@ -529,16 +531,17 @@ describe("canvas.applyAgentPatch", () => {
     expect(next.document.objects.find((object) => object.id === "second")?.parentId ?? null).toBe(
       null,
     );
-    // The frame does not shrink to hug what is left.
+    // The frame does not shrink to hug what is left; it only grows its left
+    // side, where first sits 16px in, under the 20px trigger.
     expect(next.document.objects.find((object) => object.id === "section")?.geometry).toEqual({
-      x: 496,
+      x: 460,
       y: 16,
-      width: 208,
+      width: 244,
       height: 144,
     });
   });
 
-  it("leaves nested sections at the geometry they were given", () => {
+  it("grows nested sections from the inside out", () => {
     const state = createInteractiveCanvasState({
       schemaVersion: 1,
       id: "nested-sections",
@@ -569,17 +572,20 @@ describe("canvas.applyAgentPatch", () => {
       },
     ]);
 
+    // inner grows its left and right sides around first and second; outer then
+    // grows the same two sides around inner. Membership does not change.
     expect(next.document.objects.find((object) => object.id === "second")?.parentId).toBe("inner");
+    expect(next.document.objects.find((object) => object.id === "inner")?.parentId).toBe("outer");
     expect(next.document.objects.find((object) => object.id === "inner")?.geometry).toEqual({
-      x: 496,
+      x: 460,
       y: 112,
-      width: 144,
+      width: 260,
       height: 144,
     });
     expect(next.document.objects.find((object) => object.id === "outer")?.geometry).toEqual({
-      x: 480,
+      x: 420,
       y: 64,
-      width: 192,
+      width: 340,
       height: 224,
     });
     expect(next.lastChange?.changedObjectIds).toEqual(["second"]);

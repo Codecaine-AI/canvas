@@ -59,8 +59,9 @@ export function toolFinalize(
   // The finishing registry adds the polish rules that would only nag mid-build.
   const diagnostics = sessionDiagnostics(session, FINISHING_RULES);
   const scoped = scopedDiagnostics(session, diagnostics);
-  // Notes (text within a pixel of its box edge, text the bundled fonts cannot
-  // measure exactly) never block; they ride along in the proposal instead.
+  // Only errors block. Warnings and notes (text within a pixel of its box
+  // edge, text the bundled fonts cannot measure exactly) ride along in the
+  // proposal instead.
   const blocking = blockingDiagnostics(scoped);
   // A thread the agent opened is a question left for the user, answered on
   // their own time — it never gates the commit. User-authored requests do.
@@ -80,7 +81,7 @@ export function toolFinalize(
     };
   }
 
-  // Whatever is still open in scope here is non-blocking (notes): the
+  // Whatever is still open in scope here is non-blocking (warnings, notes): the
   // operator reads it with the proposal.
   const unresolvedWarnings = formatDiagnostics(scoped);
   const operations = diffDocuments(session.baseline, session.draft);
@@ -112,7 +113,7 @@ export const finalize = defineWorkflowTool({
   name: "finalize",
   label: "Finalize run",
   description:
-    "End the run. outcome \"committed\" proposes the current draft for operator review: it is blocked (and the run continues) while any lint error or warning remains in the edited scope (notes never block), any user request is still open, or the draft does not differ from the board — fix or dispose those first. outcome \"none\" ends the run without a proposal, leaving the board untouched — the message tells the operator why; prefer partial fulfillment over an empty-handed exit. message is required for both outcomes: one plain-language line. A successful finalize ends your run.",
+    "End the run. outcome \"committed\" proposes the current draft for operator review: it is blocked (and the run continues) while any lint error remains in the edited scope (warnings and notes never block; they ride along in the proposal), any user request is still open, or the draft does not differ from the board — fix or dispose those first. outcome \"none\" ends the run without a proposal, leaving the board untouched — the message tells the operator why; prefer partial fulfillment over an empty-handed exit. message is required for both outcomes: one plain-language line. A successful finalize ends your run.",
   fields: {
     outcome: Type.Union([Type.Literal("committed"), Type.Literal("none")], {
       description: "committed = propose the draft; none = end without a proposal.",

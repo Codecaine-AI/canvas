@@ -93,10 +93,9 @@ export const DIAGNOSTICS_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
   "digest-annotations": CLEAN,
   "digest-frameless": CLEAN,
   "digest-solo-section": CLEAN,
-  "digest-clipping": `DIAGNOSTICS · 0 errors · 1 warning
-  W1 clipped-text: wordy: label clips at 160×96: 16 wrapped line(s), the box holds 4 — needs 1751×96 (grow wordy to ≥1751×96 or shorten the text)`,
-  "perception-labeled-gap": `DIAGNOSTICS · 0 errors · 1 warning
-  W1 unreadable-labels: label "go" chip on edge (44×30px) bleeds onto alpha and beta: 48px of corridor where the chip needs 76px (open the alpha↔beta corridor to ≥76px so the chip and its 16px margins fit)`,
+  "digest-clipping": `DIAGNOSTICS · 1 error · 0 warnings
+  E1 integrity: wordy's text overflows its box: label clips at 160×96: 16 wrapped line(s), the box holds 4 — needs 1751×96 (resize wordy to ≥1751×96)`,
+  "perception-labeled-gap": CLEAN,
   "perception-single": CLEAN,
   "perception-object-delta": CLEAN,
   "perception-membership": CLEAN,
@@ -105,23 +104,7 @@ export const DIAGNOSTICS_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
   "perception-two-overlaps": `DIAGNOSTICS · 2 errors · 0 warnings
   E1 covered-content: a1 and a2 overlap by 75% of the smaller box; covers the text center of a1 and a2 (move a2 clear of a1)
   E2 covered-content: b1 and b2 overlap by 75% of the smaller box; covers the text center of b1 and b2 (move b2 clear of b1)`,
-  "perception-quickfix": `DIAGNOSTICS · 0 errors · 1 warning
-  W1 unreadable-labels: label "X" chip on edge (41×30px) bleeds onto alpha and beta: 44px of corridor where the chip needs 73px (open the alpha↔beta corridor to ≥73px so the chip and its 16px margins fit)`,
-  "comprehensive-all-blocks": `DIAGNOSTICS · 12 errors · 4 warnings
-  E1 covered-content: label "forward label" chip on edge-forward overlaps label "none label" chip on edge-none (separate the two edges (spacing or waypoints) so both labels read)
-  E2 covered-content: label "forward label" chip on edge-forward overlaps label "back label" chip on edge-back (separate the two edges (spacing or waypoints) so both labels read)
-  E3 covered-content: label "none label" chip on edge-none overlaps label "back label" chip on edge-back (separate the two edges (spacing or waypoints) so both labels read)
-  E4 covered-content: label "forward label" chip on edge-forward lies on edge-none's path for 30px (move the label with a waypoint or reroute edge-none so the chip owns its wire)
-  E5 covered-content: label "forward label" chip on edge-forward lies on edge-back's path for 30px (move the label with a waypoint or reroute edge-back so the chip owns its wire)
-  E6 covered-content: label "forward label" chip on edge-forward lies on edge-both's path for 30px (move the label with a waypoint or reroute edge-both so the chip owns its wire)
-  E7 covered-content: label "none label" chip on edge-none lies on edge-forward's path for 30px (move the label with a waypoint or reroute edge-forward so the chip owns its wire)
-  E8 covered-content: label "none label" chip on edge-none lies on edge-back's path for 30px (move the label with a waypoint or reroute edge-back so the chip owns its wire)
-  E9 covered-content: label "none label" chip on edge-none lies on edge-both's path for 30px (move the label with a waypoint or reroute edge-both so the chip owns its wire)
-  E10 covered-content: label "back label" chip on edge-back lies on edge-forward's path for 30px (move the label with a waypoint or reroute edge-forward so the chip owns its wire)
-  E11 covered-content: label "back label" chip on edge-back lies on edge-none's path for 30px (move the label with a waypoint or reroute edge-none so the chip owns its wire)
-  E12 covered-content: label "back label" chip on edge-back lies on edge-both's path for 30px (move the label with a waypoint or reroute edge-both so the chip owns its wire)
-  W1 broken-edges: edge-forward and edge-back run anti-parallel between node-a and node-b (use one edge with a both-ends arrow, or offset the two routes)
-  W2 broken-edges: edge-forward and edge-both run anti-parallel between node-a and node-b (use one edge with a both-ends arrow, or offset the two routes)
-  W3 broken-edges: edge-none and edge-back run anti-parallel between node-a and node-b (use one edge with a both-ends arrow, or offset the two routes)
-  W4 broken-edges: edge-none and edge-both run anti-parallel between node-a and node-b (use one edge with a both-ends arrow, or offset the two routes)`,
+  "perception-quickfix": CLEAN,
+  "comprehensive-all-blocks": `DIAGNOSTICS · 1 error · 0 warnings
+  E1 covered-content: sections nested-frame and section-all overlap by 304×192px (move_to section-all clear of nested-frame, or move the children that make one of them grow)`,
 };

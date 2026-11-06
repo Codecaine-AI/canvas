@@ -663,7 +663,7 @@
           [
             "place_section",
             "Place",
-            "draw a titled frame that adopts whatever its edges already cover, with an optional header icon and one-fact detail"
+            "draw a titled frame that adopts whatever its edges already cover, with an optional color, header icon, and one-fact detail"
           ],
           [
             "place_sticky",
@@ -673,7 +673,7 @@
           [
             "place_shape",
             "Place",
-            "the pick and the click: an untitled shape or glyph at its default size, with an optional one-fact detail"
+            "the pick and the click: a shape or glyph at its default size, with an optional name, one-fact detail, and color"
           ],
           [
             "clone",
@@ -714,6 +714,11 @@
             "space_out",
             "Arrange",
             "re-pitch a run so the clear gap between neighbours is exactly what you ask for"
+          ],
+          [
+            "arrange_section",
+            "Arrange",
+            "lay one section's nodes out in named rows at the craft-target gaps, then fit the frame around them"
           ],
           [
             "update_text",
@@ -821,7 +826,7 @@
             "end the run, with a proposal or without one"
           ]
         ],
-        "title": "Thirty-two tools, in registration order"
+        "title": "Thirty-three tools, in registration order"
       },
       "children": []
     },

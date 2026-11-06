@@ -1,8 +1,9 @@
 /**
- * The Arrange group — `move_to`, `move_by`, `resize`, `match_size`, `align`, `space_out`
+ * The Arrange group — `move_to`, `move_by`, `resize`, `match_size`, `align`,
+ * `space_out`, `arrange_section`
  * (docs/10-system-design/70-agent-tool-surface/20-gestures §Arrange).
  *
- * These are the six gestures that write geometry and nothing else, so they
+ * These are the gestures that write geometry and nothing else, so they
  * share three rules that live here rather than being restated per descriptor:
  *
  * FRAMES TRAVEL WHOLE. Moving a section moves everything it holds — the
@@ -44,9 +45,11 @@
  *
  * SIZE HAS RULES. `resize` and `match_size` measure the new box against the
  * text already in it with the renderer's own wrap/clamp decision
- * (board/text-fit.ts) and attach the verdict as a note when the text would
- * clip. Report-only — the size still lands — and the mirror image of the check
- * `update_text` fires from the other direction (new text into the current box).
+ * (board/text-fit.ts). A shape or icon asked to be smaller than its text needs
+ * lands at the needed size instead, top-left still held, and its row and
+ * column peers grow with it (auto-size.ts) — the mirror image of `update_text`
+ * growing a box for new text. A sticky or section still lands as asked, with
+ * the verdict as a note.
  */
 import { StringEnum, Type } from "@mariozechner/pi-ai";
 
@@ -63,11 +66,26 @@ import {
 } from "../../../state/geometry";
 
 import { textFitReport } from "../../../board/text-fit";
-import { applyOperationToDraft, resolveSizeLike } from "../../apply-ops";
-import { snapCoordinate, snapGap, snapPoint, snapSize } from "../grid";
+import { autoSizeObjects } from "./auto-size";
+import { CRAFT_TARGETS } from "../../../authoring/style-guide/craft-targets";
+import { hitBoundsForObject } from "../../../objects/geometry";
+import { entityKindOf } from "../../perception/op-surface";
+import {
+  SECTION_FIT_PADDING,
+  applyOperationToDraft,
+  resolveSizeLike,
+} from "../../apply-ops";
+import {
+  AGENT_GRID,
+  snapCoordinate,
+  snapGap,
+  snapPoint,
+  snapRectOutward,
+  snapSize,
+} from "../grid";
 import type { OpContext, OpOutcome } from "./op-context";
 import { defineOperationTool } from "./operation-tool";
-import { Id } from "../schemas";
+import { ArrangeSectionParams, Id } from "../schemas";
 
 // ---------------------------------------------------------------------------
 // Shared plumbing
@@ -288,30 +306,36 @@ function applySize(
   id: string,
   size: { width: number; height: number },
   summary: (landed: { width: number; height: number }) => string,
+  readOnly: readonly string[] = [],
 ): OpOutcome {
   const target = objectOf(ctx, id);
-  const { document } = lowerGeometry(ctx.draft, [
+  const { document: sized } = lowerGeometry(ctx.draft, [
     { ...target, geometry: { ...target.geometry, ...size } },
   ]);
+  // A box asked to be smaller than its text needs lands at the needed size
+  // instead, top-left still held, and its peers grow with it (auto-size.ts).
+  const { document, notes } = autoSizeObjects(sized, [id], ctx.canvasStyle, "corner", false, readOnly);
   // Read the size back off the document rather than reporting the one that
   // was computed: the write path normalizes on its own grid, so an untouched
   // legacy dimension can come back a hair different from the one carried in,
   // and the summary has to be the board's number, not the descriptor's.
   const landed = (document.objects.find((object) => object.id === id) ?? target).geometry;
-  // The readability verdict is taken on the box that LANDED.
+  // What still cannot be promised whole (a sticky, a section title, glyphs
+  // the bundled fonts lack) is said on the box that LANDED.
   const report = textFitReport(target, landed, target.text ?? "", ctx.canvasStyle);
+  if (!report.fits || !report.reliable) notes.push(report.detail);
   return {
     status: "applied",
     draft: document,
     summary: summary(landed),
-    ...(report.fits && report.reliable ? {} : { notes: [report.detail] }),
+    ...(notes.length > 0 ? { notes } : {}),
   };
 }
 
 export const resize = defineOperationTool({
   name: "resize",
   description:
-    "Re-size a box to explicit dimensions, holding its top-left corner still so it grows or shrinks toward its bottom-right. Matching another box is match_size's job. A section's new edges decide what it now contains, so it can adopt or release as it changes. Dimensions land on the board's grid, and a box that no longer shows its text still applies, with a warning naming the size it would need.",
+    "Re-size a box to explicit dimensions, holding its top-left corner still so it grows or shrinks toward its bottom-right. Matching another box is match_size's job. A section's new edges decide what it now contains, so it can adopt or release as it changes. Dimensions land on the board's grid. A shape or icon is never made smaller than its text needs: below that it lands at the needed size, and the same-type shapes in its row (height) and column (width) grow to match, keeping their centers, unless that would make them overlap another box.",
   fields: {
     id: Id,
     width: Type.Optional(
@@ -361,7 +385,7 @@ export const resize = defineOperationTool({
 export const matchSize = defineOperationTool({
   name: "match_size",
   description:
-    "Make a box the same width and height as another box, holding its top-left corner still. The source is only measured, so it can be locked. A section's new edges decide what it now contains, so it can adopt or release as it changes. Both dimensions land on the board's grid, and a box that no longer shows its text still applies, with a warning naming the size it would need.",
+    "Make a box the same width and height as another box, holding its top-left corner still. The source is only measured, so it can be locked. A section's new edges decide what it now contains, so it can adopt or release as it changes. Both dimensions land on the board's grid. A shape or icon is never made smaller than its text needs: below that it lands at the needed size.",
   fields: {
     id: Id,
     like: Type.String({
@@ -393,6 +417,7 @@ export const matchSize = defineOperationTool({
       size,
       (landed) =>
         `match_size ${p.id} → ${num(landed.width)}×${num(landed.height)} (matching ${p.like})`,
+      [p.like],
     );
   },
 });
@@ -550,7 +575,7 @@ function snapRun(
 export const spaceOut = defineOperationTool({
   name: "space_out",
   description:
-    "Re-pitch boxes in place so the clear gap between neighbours is exactly what you ask for. In positional order along the flow the first box holds and every later one slides; the run grows or shrinks to suit, and the cross axis is untouched. This is the corridor-opening fix for crowding. Sections re-pitch by their own frame and carry their contents; edges are not targets, they re-route themselves.",
+    "Re-pitch boxes in place so the clear gap between neighbours is exactly what you ask for. In positional order along the flow the first box holds and every later one slides; the run grows or shrinks to suit, and the cross axis is untouched. It opens a corridor between boxes in one call. Sections re-pitch by their own frame and carry their contents; edges are not targets, they re-route themselves.",
   fields: {
     ids: ArrangeIds,
     axis: SpaceAxis,
@@ -589,6 +614,201 @@ export const spaceOut = defineOperationTool({
       draft: document,
       summary: `space_out ${p.axis} gap ${num(gap)} · ${run}`
         + carriedSuffix(changedIds, roots),
+    };
+  },
+});
+
+// ---------------------------------------------------------------------------
+// arrange_section
+// ---------------------------------------------------------------------------
+
+/** Rounds a measured extent UP to the grid, so a cell never bites into its node. */
+function ceilToGrid(value: number): number {
+  return Math.ceil(value / AGENT_GRID) * AGENT_GRID;
+}
+
+/**
+ * Why one id in `rows` cannot take a cell, or nothing when it can. A cell
+ * holds one node of this section: a shape or an icon that is free or already
+ * the section's child, and that no lock covers.
+ */
+function rowIdErrors(ctx: OpContext, sectionId: string, id: string): string[] {
+  const missing = ctx.requirePositionable(id, "rows id");
+  if (missing.length > 0) return missing;
+  const object = objectOf(ctx, id);
+  const kind = entityKindOf(object);
+  if (id === sectionId) {
+    return [`rows id "${id}" is the section being arranged — list only the nodes inside it.`];
+  }
+  if (kind === "section") {
+    return [
+      `rows id "${id}" is a section — arrange_section lays out the nodes inside one frame;`
+      + ` arrange "${id}" on its own, and place the frame itself with move_to.`,
+    ];
+  }
+  if (kind === "sticky") {
+    return [
+      `rows id "${id}" is a sticky — a note is not a node in the flow; leave it out and put it`
+      + " beside the frame with move_to.",
+    ];
+  }
+  const parentId = object.parentId ?? undefined;
+  if (parentId !== undefined && parentId !== sectionId) {
+    return [
+      `rows id "${id}" belongs to section "${parentId}" — arrange_section arranges one section's`
+      + ` nodes; arrange "${parentId}" instead, or move_to "${id}" out of it first.`,
+    ];
+  }
+  return ctx.requireUnlocked(id, "rows id");
+}
+
+/**
+ * The cells of the arrangement: each node's painted footprint (its hit
+ * bounds, so an icon's caption band counts) and the offset from that footprint
+ * to the box the document stores.
+ */
+interface Cell {
+  readonly id: string;
+  readonly row: number;
+  readonly column: number;
+  /** Stored corner minus footprint corner: how far the box sits inside its footprint. */
+  readonly inset: { x: number; y: number };
+  readonly footprint: { width: number; height: number };
+}
+
+/**
+ * Pitch the rows and columns and return each node's new top-left corner.
+ *
+ * A column is as wide as its widest footprint and a row as tall as its
+ * tallest, both rounded up to the grid; neighbours in a row sit
+ * `nodeGapRow` apart, and rows sit `nodeGapColumn` apart. Every cell edge is
+ * on the agent grid.
+ *
+ * Each footprint is centered in its cell, so a row of mixed sizes shares one
+ * center line and its wires run straight. That shared center is the gesture,
+ * as it is for `align` center: a corner falls half an extent from it and is
+ * not snapped to the agent grid (the write path still puts it on its own grid
+ * of 4).
+ */
+function pitchCells(
+  cells: readonly Cell[],
+  origin: { x: number; y: number },
+): Map<string, { x: number; y: number }> {
+  const columnWidth: number[] = [];
+  const rowHeight: number[] = [];
+  for (const cell of cells) {
+    columnWidth[cell.column] = Math.max(columnWidth[cell.column] ?? 0, ceilToGrid(cell.footprint.width));
+    rowHeight[cell.row] = Math.max(rowHeight[cell.row] ?? 0, ceilToGrid(cell.footprint.height));
+  }
+  const columnX: number[] = [origin.x];
+  for (let column = 1; column < columnWidth.length; column += 1) {
+    columnX[column] = columnX[column - 1]! + columnWidth[column - 1]! + CRAFT_TARGETS.nodeGapRow;
+  }
+  const rowY: number[] = [origin.y];
+  for (let row = 1; row < rowHeight.length; row += 1) {
+    rowY[row] = rowY[row - 1]! + rowHeight[row - 1]! + CRAFT_TARGETS.nodeGapColumn;
+  }
+  const corners = new Map<string, { x: number; y: number }>();
+  for (const cell of cells) {
+    const left = columnX[cell.column]! + (columnWidth[cell.column]! - cell.footprint.width) / 2;
+    const top = rowY[cell.row]! + (rowHeight[cell.row]! - cell.footprint.height) / 2;
+    corners.set(cell.id, { x: left + cell.inset.x, y: top + cell.inset.y });
+  }
+  return corners;
+}
+
+export const arrangeSection = defineOperationTool({
+  name: "arrange_section",
+  description:
+    "Lay a section's nodes out in the rows you name, then fit the frame around them. "
+    + "Rows run top to bottom and each row left to right; columns line up across rows. "
+    + "The gaps come from the craft targets and each node's painted size, captions included, "
+    + "so the call carries no coordinates. The frame keeps its top-left corner. "
+    + "Children of the section you leave out stay where they are.",
+  fields: ArrangeSectionParams.properties,
+  validate: (ctx, p) => {
+    const sectionErrors = ctx.requireSection(p.section, "section");
+    if (sectionErrors.length > 0) return sectionErrors;
+    const errors = [...ctx.requireUnlocked(p.section, "section")];
+    const seen = new Set<string>();
+    for (const id of p.rows.flat()) {
+      if (seen.has(id)) {
+        errors.push(`rows id "${id}" appears more than once — each node takes one cell.`);
+        continue;
+      }
+      seen.add(id);
+      errors.push(...rowIdErrors(ctx, p.section, id));
+    }
+    return errors;
+  },
+  apply: (ctx, p) => {
+    const section = objectOf(ctx, p.section);
+    const cells: Cell[] = p.rows.flatMap((row, rowIndex) =>
+      row.map((id, column) => {
+        const object = objectOf(ctx, id);
+        const bounds = hitBoundsForObject(object, ctx.canvasStyle);
+        return {
+          id,
+          row: rowIndex,
+          column,
+          inset: { x: object.geometry.x - bounds.x, y: object.geometry.y - bounds.y },
+          footprint: { width: bounds.width, height: bounds.height },
+        };
+      }));
+    const padding = CRAFT_TARGETS.framePadding;
+    const corners = pitchCells(cells, {
+      x: section.geometry.x + padding,
+      y: section.geometry.y + padding + SECTION_FIT_PADDING.titleClearance,
+    });
+
+    const placed = cells.map((cell) => {
+      const object = objectOf(ctx, cell.id);
+      return { ...object, geometry: { ...object.geometry, ...corners.get(cell.id)! } };
+    });
+    // The frame closes around the footprints that landed, so a caption hanging
+    // below an icon stays inside the frame.
+    const footprints = placed.map((object) => hitBoundsForObject(object, ctx.canvasStyle));
+    const minX = Math.min(...footprints.map((bounds) => bounds.x));
+    const minY = Math.min(...footprints.map((bounds) => bounds.y));
+    const maxX = Math.max(...footprints.map((bounds) => bounds.x + bounds.width));
+    const maxY = Math.max(...footprints.map((bounds) => bounds.y + bounds.height));
+    const top = padding + SECTION_FIT_PADDING.titleClearance;
+    const frame = snapRectOutward({
+      x: minX - padding,
+      y: minY - top,
+      width: maxX - minX + padding * 2,
+      height: maxY - minY + top + padding,
+    });
+
+    const { document } = lowerGeometry(ctx.draft, [
+      ...placed,
+      { ...section, geometry: frame },
+    ]);
+
+    const listed = new Set(cells.map((cell) => cell.id));
+    const leftOut = ctx.draft.objects
+      .filter((object) => object.parentId === p.section && !listed.has(object.id))
+      .map((object) => object.id);
+    const landed = new Map(document.objects.map((object) => [object.id, object.geometry]));
+    const rowsLine = p.rows
+      .map((row, index) =>
+        `row ${index + 1}: `
+        + row.map((id) => `${id} ${point(landed.get(id)!.x, landed.get(id)!.y)}`).join(", "))
+      .join(" · ");
+    const box = landed.get(p.section)!;
+    return {
+      status: "applied",
+      draft: document,
+      summary: `arrange_section ${p.section} → frame ${num(box.x)},${num(box.y)} `
+        + `${num(box.width)}×${num(box.height)} · ${rowsLine}`,
+      ...(leftOut.length > 0
+        ? {
+            notes: [
+              `not arranged: ${leftOut.join(", ")} — they kept their place and can now sit outside or under`
+              + " the frame; list them in rows, or move them out with move_to",
+            ],
+          }
+        : {}),
     };
   },
 });

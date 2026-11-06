@@ -86,13 +86,13 @@ function rectsAlmostEqual(a: Rect, b: Rect): boolean {
  */
 function cameraFittingTitleChips(
   camera: Rect,
-  widthPx: number,
+  zoomFor: (camera: Rect) => number,
   sections: ReadonlyArray<InteractiveCanvasObject>,
   canvasStyle: CanvasStyle,
 ): Rect {
   let current = camera;
   for (let pass = 0; pass < CHIP_FIT_MAX_PASSES; pass += 1) {
-    const zoom = widthPx / Math.max(1, current.width);
+    const zoom = zoomFor(current);
     let expanded = current;
     for (const section of sections) {
       if (!titleChipHasContent(section, canvasStyle)) continue;
@@ -107,6 +107,33 @@ function cameraFittingTitleChips(
   return current;
 }
 
+function boardCamera(
+  document: InteractiveCanvasDocument,
+  zoomFor: (camera: Rect) => number,
+  canvasStyle: CanvasStyle,
+): Rect {
+  const sections = document.objects.filter((object) => object.type === "section");
+  return cameraFittingTitleChips(
+    inflateRect(paintedBounds(document, undefined, canvasStyle), VIEW_PADDING_PX),
+    zoomFor,
+    sections,
+    canvasStyle,
+  );
+}
+
+/**
+ * The whole-board camera at 1:1 world scale: what `renderBoardView` frames
+ * when its output width equals the camera's own width (the judged render's
+ * size for any board that fits its cap). Painted extents, padding and title
+ * chips at zoom 1.
+ */
+export function boardCameraAtWorldScale(
+  document: InteractiveCanvasDocument,
+  canvasStyle?: Partial<CanvasStyle>,
+): Rect {
+  return boardCamera(document, () => 1, normalizeCanvasStyle(canvasStyle));
+}
+
 /**
  * Renders the whole board framed by its painted extents plus padding.
  * Everything painted on the board — every object rect, routed connection
@@ -118,13 +145,7 @@ export function renderBoardView(
   opts: RenderViewOptions,
 ): RenderedView {
   const canvasStyle = normalizeCanvasStyle(opts.canvasStyle);
-  const sections = document.objects.filter((object) => object.type === "section");
-  const camera = cameraFittingTitleChips(
-    inflateRect(paintedBounds(document, undefined, canvasStyle), VIEW_PADDING_PX),
-    opts.width,
-    sections,
-    canvasStyle,
-  );
+  const camera = boardCamera(document, (current) => opts.width / Math.max(1, current.width), canvasStyle);
   const chipZoom = opts.width / Math.max(1, camera.width);
   const rendered = renderSceneToSvg(
     document,
@@ -190,7 +211,7 @@ export function renderSectionView(
   );
   const camera = cameraFittingTitleChips(
     inflateRect(base, VIEW_PADDING_PX),
-    opts.width,
+    (current) => opts.width / Math.max(1, current.width),
     memberSections,
     canvasStyle,
   );

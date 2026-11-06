@@ -74,10 +74,9 @@ export const Glyph = StringEnum([...CANVAS_ICON_GLYPHS], {
 // A shape, icon, or section carries a NAME (`text`) and at most ONE short fact
 // (`detail`), rendered muted on one line under the name — inline after a
 // section's title. Prose goes on a sticky. The numbers come from
-// board/text-rules.ts, the module the label-is-prose and detail-too-long lints
-// measure with, so a description can never quote a limit the lints disagree
-// with. The descriptions are the steering: the lints, not the schema, are the
-// enforcement, because an overlong name is legal and only reads badly.
+// board/text-rules.ts, so every surface quotes one limit. The descriptions
+// are the steering; nothing enforces them, because an overlong name is legal
+// and only reads badly.
 
 /** What a name is, said once for every field that writes one. */
 export const NAME_RULE =
@@ -88,8 +87,7 @@ const DETAIL_LIMITS = `≤ ${DETAIL_MAX_CHARS} chars, one line, no sentences`;
 
 /**
  * What a detail is, said once for every field that writes one. A free string
- * with no length cap everywhere it appears: an overlong detail applies and the
- * detail-too-long lint says so.
+ * with no length cap everywhere it appears: an overlong detail applies.
  */
 export const DETAIL_RULE =
   `ONE short fact shown under the name (beside a section's title): a port, path, version, model, or host — `
@@ -205,7 +203,7 @@ export const LabelPosition = Type.Object(
       description: "Perpendicular nudge in px; positive is left of the from→to direction.",
     })),
   },
-  { ...Seal, description: "Where the label chip sits on the edge. Omit it for the midpoint." },
+  { ...Seal, description: "Where the label chip sits on the edge. Omit it to let the renderer place the chip clear along its wire." },
 );
 export type LabelPosition = Static<typeof LabelPosition>;
 
@@ -319,13 +317,15 @@ export type ConnectionPatch = Static<typeof ConnectionPatch>;
 // Gesture payloads — Place
 // ---------------------------------------------------------------------------
 //
-// The place payloads carry ONLY what the UI's creation gesture carries: the
-// pick, the click, and the typing that is part of the same motion. Everything
-// else about a new object comes from the creation defaults
-// (session/tools/creation-defaults.ts), and every
-// property beyond the default is its own subsequent gesture — resize, then
-// recolor, then relabel. That is why there is no `color` and no `geometry`
-// here: they are not omissions, they are the point.
+// The place payloads carry what the UI's creation gesture carries: the pick,
+// the click, and the typing that is part of the same motion. Everything else
+// about a new object comes from the creation defaults
+// (session/tools/creation-defaults.ts), and every property beyond the default
+// is its own subsequent gesture — resize, then relabel. There is no
+// `geometry` here on purpose. `place_shape` and `place_section` are the
+// exceptions on color: climb round 4 measured naming and coloring after
+// placement at two of every seven drawer calls, so the color rides along with
+// the placement. A section with no color stays the default gray.
 //
 // `at` is the TOP-LEFT of the box, in world units, snapped to the agent grid
 // (session/tools/grid.ts, AGENT_GRID = 20) before it is lowered onto a
@@ -343,7 +343,8 @@ export type ConnectionPatch = Static<typeof ConnectionPatch>;
  * `place_section` — drawing a frame. Titling it is part of the gesture, so
  * `text` is required; the drawn size is optional because a frame dropped
  * without a drag takes the default section footprint. The header's detail and
- * glyph are part of the same chip as the title, so they ride along too.
+ * glyph are part of the same chip as the title, so they ride along too, and so
+ * does the frame's color.
  */
 export const PlaceSectionParams = Type.Object(
   {
@@ -356,8 +357,9 @@ export const PlaceSectionParams = Type.Object(
         `Optional: ONE short fact shown after the title in the frame's header — a host, version, or path; ${DETAIL_LIMITS}.`,
     })),
     icon: Type.Optional(SectionIcon),
+    color: Type.Optional(Color),
   },
-  { ...Seal, description: "Draw a section frame at `at` (its top-left corner)." },
+  { ...Seal, description: "Draw a section frame at `at` (its top-left corner), colored in the same call." },
 );
 export type PlaceSectionParams = Static<typeof PlaceSectionParams>;
 
@@ -376,25 +378,28 @@ export const PlaceStickyParams = Type.Object(
 export type PlaceStickyParams = Static<typeof PlaceStickyParams>;
 
 /**
- * `place_shape` — the pick and the click, plus the optional one-line detail.
- * No name, no color, no direction: those are `update_text` / `change_color` /
- * `change_shape` afterward. `type` is the FOLDED vocabulary — shape types with
- * the icon glyphs folded in as types of their own — so placing "decision" and
- * placing "memory" are the same gesture with a different pick (see
- * ./placeable-types).
+ * `place_shape` — the pick and the click, plus the name, the one-line detail
+ * and the color, each optional. No direction: that is `change_shape`
+ * afterward. `type` is the FOLDED vocabulary — shape types with the icon
+ * glyphs folded in as types of their own — so placing "decision" and placing
+ * "memory" are the same gesture with a different pick (see ./placeable-types).
  */
 export const PlaceShapeParams = Type.Object(
   {
     id: Id,
     type: PlaceableType,
     at: Point,
+    text: Type.Optional(Type.String({
+      description: `The name, ${NAME_RULE}. Omit it to place the shape untitled and name it with update_text.`,
+    })),
     detail: Type.Optional(Type.String({
       description:
         `Optional: ONE short fact shown under the name — a port, path, version, model, or host; ${DETAIL_LIMITS}.`
-        + " The name is written afterwards with update_text; explanations go on a sticky.",
+        + " Explanations go on a sticky.",
     })),
+    color: Type.Optional(Color),
   },
-  { ...Seal, description: "Place a shape at `at` (its top-left corner)." },
+  { ...Seal, description: "Place a shape at `at` (its top-left corner), named and colored in the same call." },
 );
 export type PlaceShapeParams = Static<typeof PlaceShapeParams>;
 
@@ -450,6 +455,36 @@ export const ConnectParams = Type.Object(
   { ...Seal, description: "Route an edge from one object to another." },
 );
 export type ConnectParams = Static<typeof ConnectParams>;
+
+// ---------------------------------------------------------------------------
+// Gesture payloads — Arrange
+// ---------------------------------------------------------------------------
+
+/**
+ * `arrange_section` — lay one frame's nodes out in rows the model names, then
+ * close the frame around them. The rows are the only layout input: the pitch
+ * comes from each node's painted footprint and the craft-target gaps, so the
+ * call carries no coordinates.
+ */
+export const ArrangeSectionParams = Type.Object(
+  {
+    section: Id,
+    rows: Type.Array(
+      Type.Array(Id, { minItems: 1, description: "One row of node ids, left to right." }),
+      {
+        minItems: 1,
+        description:
+          "The section's nodes as rows, top to bottom. Each id appears once. Shapes and icons only:"
+          + " no sections, stickies or nodes of another section.",
+      },
+    ),
+  },
+  {
+    ...Seal,
+    description: "Lay a section's nodes out in the given rows and fit the frame around them.",
+  },
+);
+export type ArrangeSectionParams = Static<typeof ArrangeSectionParams>;
 
 // ---------------------------------------------------------------------------
 // Gesture payloads — Sections
@@ -626,9 +661,9 @@ export const LabelAlong = Type.Union(
       description: "How far along the routed path the chip sits: 0 is the start, 1 the end.",
     }),
     StringEnum(["auto"], {
-      description: "Clear the pin and let the chip sit at the routed midpoint.",
+      description: "Clear the pin and let the renderer place the chip clear along its wire.",
     }),
   ],
-  { description: "A 0..1 fraction of the routed path, or \"auto\" for the midpoint." },
+  { description: "A 0..1 fraction of the routed path, or \"auto\" for automatic placement." },
 );
 export type LabelAlong = Static<typeof LabelAlong>;

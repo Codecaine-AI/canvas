@@ -1,0 +1,16 @@
+{
+  "climb": [
+    "ivr-agent-handoff",
+    "eval-harness-orchestration",
+    "chat-assistant-rollout",
+    "code-review-agents",
+    "llm-inference-gateway",
+    "agent-session-orchestration"
+  ],
+  "heldOut": [
+    "sandboxed-tool-fleet",
+    "rag-ingestion-retrieval",
+    "kb-state-chart",
+    "kb-ownership-map"
+  ]
+}

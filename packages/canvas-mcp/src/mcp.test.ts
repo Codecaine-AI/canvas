@@ -37,7 +37,7 @@ function tempWorkspace(): string {
 }
 
 describe("canvas MCP server", () => {
-  test("tools/list exposes all 25 operation tools with their exact names, descriptions, and schemas", async () => {
+  test("tools/list exposes all 27 operation tools with their exact names, descriptions, and schemas", async () => {
     const server = createCanvasMcpServer({ workspace: tempWorkspace() });
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -48,7 +48,7 @@ describe("canvas MCP server", () => {
     const { tools } = await client.listTools();
     const byName = new Map(tools.map((tool) => [tool.name, tool]));
 
-    expect(operationTools).toHaveLength(25);
+    expect(operationTools).toHaveLength(27);
     for (const operation of operationTools) {
       const listed = byName.get(operation.name);
       expect(listed, operation.name).toBeDefined();
@@ -60,7 +60,7 @@ describe("canvas MCP server", () => {
     }
     expect(byName.has("finalize")).toBe(false);
     expect(tools.slice(0, 3).map((tool) => tool.name)).toEqual(["canvas_list", "canvas_open", "canvas_guidance"]);
-    expect(tools).toHaveLength(5 + 25 + 6);
+    expect(tools).toHaveLength(5 + 27 + 6);
   });
 
   test("tools/list carries the name + detail fields and the section header glyph", async () => {
@@ -76,9 +76,10 @@ describe("canvas MCP server", () => {
       required?: string[];
     };
 
-    expect(Object.keys(schema("place_section").properties)).toEqual(["id", "text", "at", "size", "detail", "icon"]);
+    expect(Object.keys(schema("place_section").properties)).toEqual(["id", "text", "at", "size", "detail", "icon", "color"]);
     expect(schema("place_section").required).toEqual(["id", "text", "at"]);
-    expect(Object.keys(schema("place_shape").properties)).toEqual(["id", "type", "at", "detail"]);
+    expect(Object.keys(schema("place_shape").properties)).toEqual(["id", "type", "at", "text", "detail", "color"]);
+    expect(schema("place_shape").required).toEqual(["id", "type", "at"]);
     expect(Object.keys(schema("clone").properties)).toContain("detail");
     // update_text: either field alone, so only the id is required.
     expect(Object.keys(schema("update_text").properties)).toEqual(["id", "text", "detail"]);
@@ -219,21 +220,26 @@ describe("canvas MCP server", () => {
     expect(shown(opened)).toContain("OPENED · v2-flow");
     expect(shown(opened)).toContain("BOARD");
 
-    const raised = await client.callTool({
+    const placed = await client.callTool({
       name: "place_shape",
-      arguments: { id: "fb-shape", type: "process", at: [960, 1600], detail: "A detail written as a whole sentence that runs far past one fact" },
+      arguments: { id: "fb-shape", type: "process", at: [960, 1600] },
     });
-    expect(raised.isError).toBeFalsy();
-    expect(shown(raised)).toContain("APPLIED · place_shape fb-shape");
-    expect(shown(raised)).toMatch(/LINTS · \+\d+ −0/);
-    expect(shown(raised)).toContain("detail-too-long: fb-shape's detail has");
-    expect(shown(raised)).toContain("cut the detail to one fact with update_text fb-shape");
+    expect(placed.isError).toBeFalsy();
+    expect(shown(placed)).toContain("APPLIED · place_shape fb-shape");
 
-    const cleared = await client.callTool({ name: "update_text", arguments: { id: "fb-shape", detail: "One fact" } });
-    expect(shown(cleared)).toContain("APPLIED · update_text fb-shape");
-    expect(shown(cleared)).toMatch(/LINTS · \+0 −\d+/);
-    expect(shown(cleared)).toContain("− W");
-    expect(shown(cleared)).toMatch(/detail-too-long.*\(resolved\)/);
+    // Dropped onto predefined-get-next-question: the overlap is the edit's one new error.
+    const raised = await client.callTool({ name: "move_to", arguments: { id: "fb-shape", x: 1917, y: 1988 } });
+    expect(raised.isError).toBeFalsy();
+    expect(shown(raised)).toContain("APPLIED · move_to fb-shape");
+    expect(shown(raised)).toMatch(/LINTS · \+1 error \(\d+ open\)/);
+    expect(shown(raised)).toMatch(/\+ E\d+ covered-content: .*fb-shape.*predefined-get-next-question|\+ E\d+ covered-content: .*predefined-get-next-question.*fb-shape/);
+    expect(shown(raised)).toContain("clear of");
+
+    // Moved clear, nothing new: the resolved finding is not printed.
+    const cleared = await client.callTool({ name: "move_to", arguments: { id: "fb-shape", x: 960, y: 1600 } });
+    expect(shown(cleared)).toContain("APPLIED · move_to fb-shape");
+    expect(shown(cleared)).toMatch(/LINTS · (clean|no new errors)/);
+    expect(shown(cleared)).not.toContain("covered-content");
   }, 30_000);
 });
 

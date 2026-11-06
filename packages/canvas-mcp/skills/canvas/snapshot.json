@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:704aca97195f9df4c9bfd8ecbbf473b2b41c500aa8f0119eb176bc4cbc61af60",
+  "snapshotId": "sha256:7b4a2d716453a93e1a7924fb24473a0eee30dedb252e1d4d12b973cf5934af9f",
   "sources": [
     {
       "id": "prompt",
@@ -10,22 +10,22 @@
     {
       "id": "state_grammar",
       "path": "packages/canvas/src/authoring/state-grammar.ts",
-      "sha256": "0c69f2e5ec417815ee00ab7db5c330c2fa87a4320168a66743ee011bdef2db7f"
+      "sha256": "b014ad49b61d2c8f36aabb635ca8debf410c53bc790ab535d6b37d988d3f1f04"
     },
     {
       "id": "aesthetic",
       "path": "packages/canvas/src/authoring/style-guide/aesthetic.ts",
-      "sha256": "5c61496f5ac71b29c7ca95a01bd44de5979f774fe11d3c25f0046623f520d50b"
+      "sha256": "3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18"
     },
     {
       "id": "visual_patterns",
       "path": "packages/canvas/src/authoring/visual-patterns.ts",
-      "sha256": "236da37729039e37a11663f4dfde5426818d9bc3b412535674b081da4b686049"
+      "sha256": "3b4c3e43c20012092bb8b5654e9b4ba6eb18c46178ffbfacc883d30e72b9fc6b"
     },
     {
       "id": "diagram_design",
       "path": "packages/canvas/src/authoring/design.ts",
-      "sha256": "d9c69385bed0db82a4433280fa4da459bdbb1b54aeac2534d0caa54b52185fcc"
+      "sha256": "a4a84bfccbf57ab9bcb5bc29250a5baa6bc1fefd8343375ce5a7af2f54677ebd"
     },
     {
       "id": "visual_vocabulary",
@@ -35,12 +35,12 @@
     {
       "id": "color_palette",
       "path": "packages/canvas/src/authoring/vocabulary.ts",
-      "sha256": "943deac9d2f88e9e624640248340e98284266a1f2157ba90e400e0708195013b"
+      "sha256": "9b6c31e985490791b9ac91f66ecd559a1636513a9b81ed3ddf9c96a38ef65f88"
     },
     {
       "id": "canvas_conventions",
       "path": "packages/canvas/src/authoring/conventions.ts",
-      "sha256": "7512963793f4dc173bdaf245b42bba4841aa1e48ec9cab3b5313e609c438f474"
+      "sha256": "0bf8b29e931d8796ff8570ca0d5b46ddab1cb925436aad2de406284a630b0fa0"
     },
     {
       "id": "contact_sheet",
@@ -50,6 +50,6 @@
   ],
   "skill": {
     "path": "packages/canvas-mcp/src/skill/SKILL.md",
-    "sha256": "4a9127926a7b3d9c0861ac6432f63e575caa119db4c7c95d991b4694b22a797a"
+    "sha256": "99ae75121efa271bde1f603f21b7a8d44050c13fdf4f0d474e115aa701bedb57"
   }
 }

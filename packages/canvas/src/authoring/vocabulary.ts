@@ -99,7 +99,12 @@ export function colorPalette(): AuthoringTopic {
     text: `${CANVAS_COLORS.join(", ")}
 
 <color_meaning>
-    Color encodes kind, not decoration. Give each kind of thing one hue, such as one for every data store and another for every agent. Most nodes keep gray or the preferred color their catalog entry lists.
+    Color encodes kind, not decoration. Give each kind of thing one hue, such as one for every data store and another for every agent.
+
+    - Before you place nodes, write the board's color key: three to five roles, one hue each. Give each section the hue of the role it holds.
+    - A node takes its role's hue, whatever its icon. Use the preferred color a catalog entry lists only when its role has no hue in the key, so two nodes with different roles never share a hue by accident.
+    - Red means failure, reject, or error, and nothing else.
+    - When a viewer cannot guess the key from the names, put it on the board as a short note, one line per hue. A key that is only in the board description is invisible.
 </color_meaning>
 
 <theme>

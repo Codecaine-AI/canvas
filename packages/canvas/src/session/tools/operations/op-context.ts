@@ -207,7 +207,7 @@ const LOCK_RELEASE =
   "a lock is a don't-touch signal; unlock it first if the request requires editing here";
 
 /** What a lock gate found: the frame holding the lock, its mode, and whose it is. */
-interface LockHold {
+export interface LockHold {
   /** The object carrying the `locked` value — the id `unlock` takes. */
   holderId: string;
   mode: "all" | "background";
@@ -227,7 +227,7 @@ interface LockHold {
  * endpoint), so an object's own "background" lock and a background-locked
  * ancestor both read as free.
  */
-function lockHolding(
+export function lockHolding(
   document: InteractiveCanvasDocument,
   id: string,
   scope: "any" | "all" = "any",

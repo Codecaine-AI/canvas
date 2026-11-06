@@ -10,9 +10,9 @@
  *    the click, and the typing that happens in the same motion — nothing more.
  *    Size and color come from the creation defaults
  *    (../creation-defaults.ts), and every
- *    property beyond the default is its own later gesture. There is no `color`
- *    on `place_shape` because recoloring is `change_color`, not because it was
- *    forgotten.
+ *    property beyond the default is its own later gesture. `place_shape` and
+ *    `place_section` carry an optional `color`, because coloring right after
+ *    placing cost the drawer one call per node and left most frames gray.
  *
  * 2. THE GEOMETRY THAT LANDS IS ON THE AGENT GRID, and the summary reports what
  *    LANDED, not what was asked for (../grid.ts: snap, not reject). A model
@@ -46,6 +46,8 @@ import { creationDefaultFor } from "../creation-defaults";
 import { detailDroppedNote, storedDetail } from "../detail-line";
 import { NO_GLYPH, isGlyphName, unknownGlyphMessage } from "../glyph-names";
 import { snapPoint, snapSize } from "../grid";
+import { withAutoSize } from "./auto-size";
+import type { OpContext, OpOutcome } from "./op-context";
 import { defineOperationTool } from "./operation-tool";
 import { toDocumentFields } from "../placeable-types";
 import {
@@ -55,6 +57,22 @@ import {
   PlaceShapeParams,
   PlaceStickyParams,
 } from "../schemas";
+
+/**
+ * Place a new node, grow it to fit its text, match it with its row and column
+ * peers (auto-size.ts: centers held), and report the box that LANDED.
+ */
+function placeFitted(
+  ctx: OpContext,
+  id: string,
+  lowered: OpOutcome,
+  summary: (landed: { x: number; y: number; width: number; height: number }) => string,
+): OpOutcome {
+  const outcome = withAutoSize(lowered, [id], ctx.canvasStyle, "center", true);
+  if (outcome.status !== "applied") return outcome;
+  const landed = outcome.draft.objects.find((object) => object.id === id)!.geometry;
+  return { ...outcome, summary: summary(landed) };
+}
 
 /** The applied box, as the summary reports it: `x,y W×H`. */
 function placement(geometry: {
@@ -69,11 +87,11 @@ function placement(geometry: {
 export const placeSection = defineOperationTool({
   name: "place_section",
   description:
-    "Draw a titled frame. Membership is reconciled from geometry, so the frame "
-    + "adopts whatever its edges already cover, and it keeps the footprint it "
-    + "lands with until something fits or resizes it. Undrawn size takes the "
-    + "default section footprint. The header shows the optional icon, the "
-    + "title, and the optional one-fact detail.",
+    "Draw a titled frame, colored in the same call. Membership is reconciled "
+    + "from geometry, so the frame adopts whatever its edges already cover, and "
+    + "it keeps the footprint it lands with until something fits, arranges or "
+    + "resizes it. Undrawn size takes the default section footprint. The header "
+    + "shows the optional icon, the title, and the optional one-fact detail.",
   fields: PlaceSectionParams.properties,
   validate: (ctx, p) => [
     ...ctx.requireFreeId(p.id),
@@ -96,11 +114,11 @@ export const placeSection = defineOperationTool({
           id: p.id,
           text: p.text,
           detail: storedDetail(p.detail),
-          color: defaults.color,
+          color: p.color ?? defaults.color,
           ...(p.icon !== undefined && isGlyphName(p.icon) ? { icon: p.icon } : {}),
         }),
       },
-      `place_section ${p.id} ${placement(geometry)}`,
+      `place_section ${p.id} ${placement(geometry)}${p.color ? ` ${p.color}` : ""}`,
     );
   },
 });
@@ -138,11 +156,15 @@ export const placeSticky = defineOperationTool({
 export const placeShape = defineOperationTool({
   name: "place_shape",
   description:
-    "Place a shape — the pick and the click, plus an optional one-fact detail "
-    + "line. It arrives untitled, at the default size and color for its kind; "
-    + "naming, resizing, recoloring, and turning it are each their own gesture "
-    + "afterward. Containment follows geometry: a shape outside every frame "
-    + "belongs to no section.",
+    "Place a shape with its name, its one-fact detail line and its color in one "
+    + "call, at the default size for its kind. When the text does not fit that "
+    + "size the shape grows to fit, keeping its center. It and the same-type shapes "
+    + "in its row share the row's largest height, and those in its column the "
+    + "column's largest width. Omit text or color and it arrives "
+    + "untitled or in its type's preferred color, for update_text and "
+    + "change_color afterward; resizing and turning it are their own gestures. "
+    + "Containment follows geometry: a shape outside every frame belongs to no "
+    + "section.",
   fields: PlaceShapeParams.properties,
   validate: (ctx, p) => ctx.requireFreeId(p.id),
   apply: (ctx, p) => {
@@ -158,22 +180,23 @@ export const placeShape = defineOperationTool({
       width: defaults.size.width,
       height: defaults.size.height,
     };
-    return ctx.applyLowered(
+    return placeFitted(ctx, p.id, ctx.applyLowered(
       {
         type: "addObject",
         object: draftPlacedObject(fields.type, geometry, {
           id: p.id,
-          // This gesture does not carry text: the explicit empty string keeps
-          // a placed shape blank instead of taking draftPlacedObject's
-          // per-type label. `update_text` fills it later.
-          text: "",
+          // The explicit empty string keeps an unnamed shape blank instead of
+          // taking draftPlacedObject's per-type label. Carrying the name here
+          // saves the drawer one call per node (climb round 4: naming and
+          // coloring after placement were two of every seven calls).
+          text: p.text ?? "",
           detail: storedDetail(p.detail),
-          color: defaults.color,
+          color: p.color ?? defaults.color,
           ...(fields.icon ? { icon: fields.icon } : {}),
         }),
       },
-      `place_shape ${p.id} ${p.type} ${placement(geometry)}`,
-    );
+      "place_shape",
+    ), (landed) => `place_shape ${p.id} ${p.type} ${placement(landed)}${p.text ? ` "${p.text}"` : ""}${p.color ? ` ${p.color}` : ""}`);
   },
 });
 
@@ -236,7 +259,8 @@ export const clone = defineOperationTool({
   description:
     "Copy one object. The copy inherits the source's kind, size, color, shape "
     + "type/direction/glyph, detail line, and border style, so a row of options "
-    + "matches without re-specifying a number. Two things it does NOT carry: edges "
+    + "matches without re-specifying a number. A copy whose new text does not fit "
+    + "grows to fit and joins its row and column sizes, like place_shape. Two things it does NOT carry: edges "
     + "attached to the source (draw those with connect), and, for a section, "
     + "its contents — a cloned frame arrives empty, because copying "
     + "descendants without copying the edges between them would half-copy the "
@@ -286,7 +310,6 @@ export const clone = defineOperationTool({
       : snapPoint([source.geometry.x + offset[0], source.geometry.y + offset[1]]);
 
     const object = clonedFrom(source, p.id, position, p.text, p.detail);
-    const geometry = object.geometry as { x: number; y: number; width: number; height: number };
     // The same descendant walk the remove cascade uses, so "what a clone left
     // behind" and "what a delete would have taken" can never disagree.
     const emptied = source.type === "section"
@@ -302,11 +325,11 @@ export const clone = defineOperationTool({
         ? [detailDroppedNote("sticky")]
         : []),
     ];
-    return ctx.applyLowered(
+    return placeFitted(ctx, p.id, ctx.applyLowered(
       { type: "addObject", object },
-      `clone ${p.id} from ${p.sourceId} ${placement(geometry)}`,
+      "clone",
       notes.length > 0 ? notes : undefined,
-    );
+    ), (landed) => `clone ${p.id} from ${p.sourceId} ${placement(landed)}`);
   },
 });
 

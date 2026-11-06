@@ -7,7 +7,7 @@
  * `resize` shrinking a box below what its text needs, and `update_text`
  * writing text longer than its box holds, both fire a report-only warning in
  * the tool result (an `OpOutcome.notes` line under the APPLIED headline) —
- * the same philosophy as the unreadable-labels lint: say it, don't block it.
+ * say it, don't block it.
  *
  * Parity, not estimation. Every width comes from @codecaine-ai/text-measure
  * (the canvas's theme/text-measure.ts: Pretext line breaking over the active
@@ -744,8 +744,8 @@ function sectionDetailFit(layout: ReturnType<typeof titleChipLayout>): DetailLin
 // ---------------------------------------------------------------------------
 // Edge labels — the fixed-height chip from connectors/label-chip.ts, at the
 // size the workspace style draws it. The chip never truncates; it grows, and
-// an oversized chip stops fitting where it renders (exactly the
-// unreadable-labels finding). `size` is therefore the room available to the
+// an oversized chip stops fitting where it renders (label placement then
+// finds it no clear spot). `size` is therefore the room available to the
 // chip — the corridor between the endpoint boxes.
 // ---------------------------------------------------------------------------
 

@@ -130,10 +130,7 @@ describe("canvas_create and canvas_check", () => {
     await call(service, "connect", { id: "e1", from: { objectId: "client" }, to: { objectId: "api" } });
     await call(service, "connect", { id: "e2", from: { objectId: "api" }, to: { objectId: "db" } });
 
-    // The row ran past the page; the check says so, and fitting the page clears it.
-    expect(checked(await call(service, "canvas_check", {})).text).toContain("containment: db extends");
-    await call(service, "fit_section", { id: "page-frame" });
-
+    // The row ran past the page, and the page grew to hold it: no fit_section call.
     const result = await call(service, "canvas_check", {});
     const check = checked(result);
     expect(check.errors).toBe(0);
@@ -145,6 +142,18 @@ describe("canvas_create and canvas_check", () => {
     const saved = JSON.parse(readFileSync(path, "utf8"));
     expect(saved.objects.map((object: { id: string }) => object.id).sort()).toEqual(["api", "client", "db", "page-frame"]);
     expect(saved.connections).toHaveLength(2);
+  });
+
+  test("a sticky whose text clips is a TEXT note, never a finding", async () => {
+    const service = createCanvasService({ workspace: tempDir() });
+    await call(service, "canvas_create", { canvas: "sticky-clip", title: "Sticky clip" });
+    const rows = Array.from({ length: 30 }, (_, index) => `row ${index + 1}`).join("\n");
+    await call(service, "place_sticky", { id: "payload", text: rows, at: [80, 120] });
+
+    const check = checked(await call(service, "canvas_check", {}));
+    expect(check.text).toContain("LINTS · clean");
+    expect(check.text).toContain("TEXT · 1 note (never blocks)");
+    expect(check.text).toMatch(/^ {2}sticky payload clips its text: .*shorten the text\)$/m);
   });
 
   test("a chart.mmd redraws on a board with equal node and edge counts", async () => {

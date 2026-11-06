@@ -84,13 +84,17 @@ describe("static shapes: card vs tint paint", () => {
     expect(name!.attrs["font-weight"]).toBe("700");
   });
 
-  it("schematic shapes are cards: card fill, ink border at the theme's width, the style's name color and weight", () => {
+  it("schematic shapes are cards: the theme's card paint, ink border at the theme's width, the style's name color and weight", () => {
+    // schematic-light mixes the ink into the card (ink-card); schematic-dark keeps the plain card.
+    const expectedFill = { "schematic-light": mixColors("#0B6E99", "#F8F8F7", 0.2), "schematic-dark": "#32363E" };
     for (const theme of ["schematic-light", "schematic-dark"] as const) {
       const style = canvasThemePreset(theme);
+      const fill = resolveShapePaint("blue", style).fill;
+      expect(fill).toBe(expectedFill[theme]);
       const svg = render([shape(), shape({ id: "d1", type: "decision", style: { shape: "diamond" }, geometry: { x: 300, y: 0, width: 200, height: 140 } })], theme);
-      expect(svg).toContain(`fill="${style.cardFill}" stroke="${style.palette.blue}" stroke-width="2"`);
+      expect(svg).toContain(`fill="${fill}" stroke="${style.palette.blue}" stroke-width="2"`);
       // The diamond polygon too.
-      expect(svg).toMatch(new RegExp(`<polygon [^>]*fill="${style.cardFill}" stroke="${style.palette.blue}"`));
+      expect(svg).toMatch(new RegExp(`<polygon [^>]*fill="${fill}" stroke="${style.palette.blue}"`));
       const [name] = texts(svg);
       expect(name!.attrs.fill).toBe(style.textColor);
       expect(name!.attrs["font-weight"]).toBe("600");
@@ -99,12 +103,12 @@ describe("static shapes: card vs tint paint", () => {
 });
 
 describe("static detail line — center slots", () => {
-  it("paints the detail as its own muted mono <text> under the name, the pair centered as one block", () => {
+  it("paints the detail as its own body-text mono <text> under the name, the pair centered as one block", () => {
     const svg = render([shape({ detail: "Function Calling LLM" })], "schematic-light");
     const [name, detail] = texts(svg);
     expect(detail!.body).toBe("Function Calling LLM");
     expect(detail!.attrs).toMatchObject({
-      fill: "#666562",
+      fill: "#2A2A2A",
       "font-family": CANVAS_MONO_FONT_STACK_SVG,
       "font-size": "14",
       "font-weight": "500",

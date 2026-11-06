@@ -322,12 +322,15 @@ function diagnosticFingerprint(diagnostic: Diagnostic): string {
 }
 
 /**
- * The LINTS block as a delta against the diagnostics the previous result carried,
- * recording the new set on the session.
+ * The LINTS block of an edit: the error findings THIS edit added, one line
+ * each, against the diagnostics the previous result carried; the new full set
+ * is recorded on the session (`lastDiagnostics`). Warnings, notes and
+ * resolved findings are not printed here — canvas_check lists every finding.
  *
  * The session's recorded set is a cache, not the definition: when it is absent
  * the baseline is derived from `before`, the document as it stood ahead of this
- * operation, so a delta means the same thing on every path into here.
+ * operation, so a delta means the same thing on every path into here. With
+ * neither, every open error counts as added.
  */
 export function lintDeltaBlock(
   session: LayoutSession,
@@ -335,29 +338,18 @@ export function lintDeltaBlock(
   before?: InteractiveCanvasDocument,
 ): string {
   const previous = session.lastDiagnostics
-    ?? (before === undefined ? undefined : runDiagnostics(before, undefined, sessionLintContext(session)));
+    ?? (before === undefined ? [] : runDiagnostics(before, undefined, sessionLintContext(session)));
   session.lastDiagnostics = diagnostics;
-  if (previous === undefined) return formatDiagnostics(diagnostics);
+  if (diagnostics.length === 0) return "LINTS · clean";
   const previousPrints = new Set(previous.map(diagnosticFingerprint));
-  const currentPrints = new Set(diagnostics.map(diagnosticFingerprint));
-  const added = diagnostics.filter((item) => !previousPrints.has(diagnosticFingerprint(item)));
-  const resolved = previous.filter((item) => !currentPrints.has(diagnosticFingerprint(item)));
-  const header = `LINTS · +${added.length} −${resolved.length}`;
-  if (added.length === 0 && resolved.length === 0) {
-    return diagnostics.length === 0 ? "LINTS · clean" : `${header} (${diagnostics.length} open)`;
-  }
-  const lines = [header];
-  for (const diagnostic of added) {
-    const [entry, ...suggestedOps] = diagnosticLines(diagnostic);
-    lines.push(`  + ${entry}`);
-    lines.push(...suggestedOps.map((line) => `  ${line}`));
-  }
-  if (resolved.length > 0) {
-    lines.push(
-      `  ${resolved.map((item) => `− ${item.id} ${item.rule}`).join(", ")}  (resolved)`,
-    );
-  }
-  return lines.join("\n");
+  const errors = diagnostics.filter((item) => item.severity === "error");
+  const added = errors.filter((item) => !previousPrints.has(diagnosticFingerprint(item)));
+  const open = errors.length > 0 ? ` (${errors.length} open)` : "";
+  if (added.length === 0) return `LINTS · no new errors${open}`;
+  return [
+    `LINTS · +${added.length} error${added.length === 1 ? "" : "s"}${open}`,
+    ...added.flatMap(diagnosticLines).map((line) => `  + ${line}`),
+  ].join("\n");
 }
 
 /**

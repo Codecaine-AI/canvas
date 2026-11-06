@@ -1,0 +1,96 @@
+{
+  "judge": "opus",
+  "round": 1,
+  "boards": [
+    {
+      "brief": "climb-a",
+      "scores": {
+        "system_fidelity": 10,
+        "requirement_coverage": 10,
+        "scope_discipline": 10,
+        "readability": 9,
+        "hierarchy_grouping": 10,
+        "layout_flow": 10,
+        "color_contrast": 10,
+        "typography_labels": 10,
+        "craft": 10
+      },
+      "findings": []
+    },
+    {
+      "brief": "climb-b",
+      "scores": {
+        "system_fidelity": 10,
+        "requirement_coverage": 10,
+        "scope_discipline": 10,
+        "readability": 10,
+        "hierarchy_grouping": 10,
+        "layout_flow": 10,
+        "color_contrast": 10,
+        "typography_labels": 10,
+        "craft": 10
+      },
+      "findings": []
+    },
+    {
+      "brief": "climb-c",
+      "scores": {
+        "system_fidelity": 9,
+        "requirement_coverage": 9,
+        "scope_discipline": 9,
+        "readability": 9,
+        "hierarchy_grouping": 9,
+        "layout_flow": 9,
+        "color_contrast": 9,
+        "typography_labels": 9,
+        "craft": 9
+      },
+      "findings": []
+    },
+    {
+      "brief": "climb-d",
+      "scores": {
+        "system_fidelity": 9,
+        "requirement_coverage": 9,
+        "scope_discipline": 9,
+        "readability": 9,
+        "hierarchy_grouping": 9,
+        "layout_flow": 9,
+        "color_contrast": 9,
+        "typography_labels": 9,
+        "craft": 9
+      },
+      "findings": []
+    },
+    {
+      "brief": "held-e",
+      "scores": {
+        "system_fidelity": 10,
+        "requirement_coverage": 10,
+        "scope_discipline": 10,
+        "readability": 10,
+        "hierarchy_grouping": 10,
+        "layout_flow": 10,
+        "color_contrast": 10,
+        "typography_labels": 10,
+        "craft": 10
+      },
+      "findings": []
+    },
+    {
+      "brief": "held-f",
+      "scores": {
+        "system_fidelity": 9,
+        "requirement_coverage": 9,
+        "scope_discipline": 9,
+        "readability": 9,
+        "hierarchy_grouping": 9,
+        "layout_flow": 9,
+        "color_contrast": 9,
+        "typography_labels": 9,
+        "craft": 9
+      },
+      "findings": []
+    }
+  ]
+}
