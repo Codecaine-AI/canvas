@@ -9,10 +9,12 @@
  * 1. GROW TO FIT. When the renderer's own wrap/clamp verdict
  *    (board/text-fit.ts) says the name or the detail line does not show
  *    whole, the node grows to `neededSize`, each side rounded up to the
- *    20px agent grid. It never shrinks. It keeps its center (its corner lands
- *    on the grid, rounding half up), so a node in a row stays in that row —
- *    except under `resize`, which holds the top-left corner like the gesture
- *    itself. A resize below the needed size therefore lands at the needed
+ *    20px agent grid. It never shrinks. It keeps its center, so a node in a
+ *    row stays in that row: an on-grid side grows by whole 40px steps (two
+ *    grid units), so its corner stays on the grid and its center does not
+ *    move, however many edits it takes to get there. `resize` and
+ *    `match_size` hold the top-left corner instead, like the gestures
+ *    themselves. A resize below the needed size therefore lands at the needed
  *    size, never clipped.
  *
  * 2. PEERS GROW WITH IT. When rule 1 grew a node, or the node was just
@@ -21,9 +23,12 @@
  *    whose center sits within half a grid unit (10px) of its center before it
  *    grew. The node and the peers that share its ROW all take the row's
  *    largest HEIGHT; the node and the peers that share its COLUMN all take the
- *    column's largest WIDTH. Each keeps its center (corner on the grid).
- *    Nothing shrinks and nothing else moves. So a node placed into a row that
- *    already grew joins the row's size.
+ *    column's largest WIDTH. Each peer keeps its center (corner on the grid);
+ *    the node itself keeps the anchor of rule 1. Nothing shrinks and nothing
+ *    else moves. A box whose match would newly overlap another box it does
+ *    not overlap now keeps its size, and the note names the box in the way.
+ *    `match_size` never writes its `like` source. So a node placed into a
+ *    row that already grew joins the row's size.
  *
  *    Why the dimension across the line, not along it: a row of equal heights
  *    keeps its tops and bottoms in line, and growing every member taller uses
@@ -63,9 +68,16 @@ export interface AutoSizeResult {
 
 type Geometry = InteractiveCanvasObject["geometry"];
 
-/** A size rounded up to the grid, never below what the node already has. */
-function grown(current: number, needed: number): number {
-  return needed > current ? Math.ceil(needed / AGENT_GRID) * AGENT_GRID : current;
+/**
+ * A size rounded up to the grid, never below what the node already has. A
+ * centered on-grid side grows by whole 40px steps, so its corner and center
+ * both stay on the grid and repeated edits never drift.
+ */
+function grown(current: number, needed: number, anchor: GrowAnchor): number {
+  if (needed <= current) return current;
+  const size = Math.ceil(needed / AGENT_GRID) * AGENT_GRID;
+  const evenSteps = anchor === "corner" || current % AGENT_GRID !== 0 || (size - current) % (2 * AGENT_GRID) === 0;
+  return evenSteps ? size : size + AGENT_GRID;
 }
 
 /** The node's new box at `width`×`height`, keeping its center on the grid. */
@@ -99,6 +111,11 @@ function sizeOf(geometry: Geometry): string {
   return `${geometry.width}×${geometry.height}`;
 }
 
+/** Whether two boxes share some area (touching edges do not). */
+function overlaps(a: Geometry, b: Geometry): boolean {
+  return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+}
+
 /**
  * The smallest grid box at or above the current one that shows the text
  * whole, or undefined when the text fits, cannot fit any reasonable box, or
@@ -107,11 +124,12 @@ function sizeOf(geometry: Geometry): string {
 function fittedSize(
   object: InteractiveCanvasObject,
   canvasStyle: CanvasStyle,
+  anchor: GrowAnchor,
 ): { width: number; height: number } | undefined {
   const text = object.text ?? "";
   const first = textFitReport(object, object.geometry, text, canvasStyle);
   if (first.fits || !first.neededSize) return undefined;
-  const width = grown(object.geometry.width, first.neededSize.width);
+  const width = grown(object.geometry.width, first.neededSize.width, anchor);
   // The needed height was measured at the needed width; rounding the width
   // up can only lower it, so ask again at the width that will land.
   const atWidth = width === object.geometry.width
@@ -119,7 +137,7 @@ function fittedSize(
     : textFitReport(object, { width, height: object.geometry.height }, text, canvasStyle);
   const height = atWidth.fits || !atWidth.neededSize
     ? object.geometry.height
-    : grown(object.geometry.height, atWidth.neededSize.height);
+    : grown(object.geometry.height, atWidth.neededSize.height, anchor);
   if (width === object.geometry.width && height === object.geometry.height) return undefined;
   return { width, height };
 }
@@ -135,6 +153,7 @@ export function autoSizeObjects(
   canvasStyle: CanvasStyle,
   anchor: GrowAnchor = "center",
   placed = false,
+  readOnly: readonly string[] = [],
 ): AutoSizeResult {
   // A node placed in this same gesture has no parent yet; peers are judged
   // under the section its geometry puts it in.
@@ -152,7 +171,7 @@ export function autoSizeObjects(
   for (const id of ids) {
     const object = objectOf(id);
     if (!object || !growsForText(object) || lockHolding(document, id) !== null) continue;
-    const size = fittedSize(object, canvasStyle);
+    const size = fittedSize(object, canvasStyle, anchor);
     if (!size && !placed) continue;
     const before = object.geometry;
     if (size) {
@@ -170,6 +189,7 @@ export function autoSizeObjects(
     const peersOn = (axis: "row" | "column") =>
       document.objects.filter((other) =>
         other.id !== id
+        && !readOnly.includes(other.id)
         && canBePeer(other)
         && other.type === object.type
         && effectiveRenderShape(other) === effectiveRenderShape(object)
@@ -189,9 +209,22 @@ export function autoSizeObjects(
       for (const member of [self, ...peers]) {
         const g = member.geometry;
         if (g[dimension] >= largest) continue;
-        write(member.id, axis === "row"
-          ? aroundCenter(g, g.width, largest)
-          : aroundCenter(g, largest, g.height));
+        const width = axis === "row" ? g.width : largest;
+        const height = axis === "row" ? largest : g.height;
+        const next = member.id === id && anchor === "corner"
+          ? { ...g, width, height }
+          : aroundCenter(g, width, height);
+        // Matching is for looks: it never makes an overlap that was not there.
+        const blocker = document.objects.find((other) =>
+          other.id !== member.id
+          && other.type !== "section"
+          && overlaps(next, other.geometry)
+          && !overlaps(g, other.geometry));
+        if (blocker) {
+          notes.push(`kept ${member.id} at ${sizeOf(g)}: matching its ${axis} would overlap ${blocker.id}`);
+          continue;
+        }
+        write(member.id, next);
         matched.push(member.id);
       }
       if (matched.length > 0) {

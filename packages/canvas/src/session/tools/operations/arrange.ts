@@ -306,6 +306,7 @@ function applySize(
   id: string,
   size: { width: number; height: number },
   summary: (landed: { width: number; height: number }) => string,
+  readOnly: readonly string[] = [],
 ): OpOutcome {
   const target = objectOf(ctx, id);
   const { document: sized } = lowerGeometry(ctx.draft, [
@@ -313,7 +314,7 @@ function applySize(
   ]);
   // A box asked to be smaller than its text needs lands at the needed size
   // instead, top-left still held, and its peers grow with it (auto-size.ts).
-  const { document, notes } = autoSizeObjects(sized, [id], ctx.canvasStyle, "corner");
+  const { document, notes } = autoSizeObjects(sized, [id], ctx.canvasStyle, "corner", false, readOnly);
   // Read the size back off the document rather than reporting the one that
   // was computed: the write path normalizes on its own grid, so an untouched
   // legacy dimension can come back a hair different from the one carried in,
@@ -334,7 +335,7 @@ function applySize(
 export const resize = defineOperationTool({
   name: "resize",
   description:
-    "Re-size a box to explicit dimensions, holding its top-left corner still so it grows or shrinks toward its bottom-right. Matching another box is match_size's job. A section's new edges decide what it now contains, so it can adopt or release as it changes. Dimensions land on the board's grid. A shape or icon is never made smaller than its text needs: below that it lands at the needed size, and the same-type shapes in its row (height) and column (width) grow to match.",
+    "Re-size a box to explicit dimensions, holding its top-left corner still so it grows or shrinks toward its bottom-right. Matching another box is match_size's job. A section's new edges decide what it now contains, so it can adopt or release as it changes. Dimensions land on the board's grid. A shape or icon is never made smaller than its text needs: below that it lands at the needed size, and the same-type shapes in its row (height) and column (width) grow to match, keeping their centers, unless that would make them overlap another box.",
   fields: {
     id: Id,
     width: Type.Optional(
@@ -416,6 +417,7 @@ export const matchSize = defineOperationTool({
       size,
       (landed) =>
         `match_size ${p.id} → ${num(landed.width)}×${num(landed.height)} (matching ${p.like})`,
+      [p.like],
     );
   },
 });

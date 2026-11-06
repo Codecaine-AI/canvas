@@ -40,14 +40,14 @@ function pageBoard(objects: InteractiveCanvasObject[] = []): InteractiveCanvasDo
 /** A detail line wider than a 160px box: it widens the node, where a long name only heightens it. */
 const WIDE_DETAIL = "retries three times with jittered backoff";
 
-/** A section holding a 2×2 grid of 160×80 processes at a 240×160 pitch. */
+/** A section holding a 2×2 grid of 160×80 processes at a 480×160 pitch: room for a column to widen. */
 function gridBoard(): InteractiveCanvasDocument {
   const cell = (id: string, x: number, y: number) =>
     ({ ...box(id, x, y, 160, 80, "process"), parentId: "frame" });
   return makeDocument([
-    { ...box("frame", 0, 0, 800, 600, "section"), text: "Frame" },
-    cell("a", 40, 80), cell("b", 280, 80),
-    cell("c", 40, 240), cell("d", 280, 240),
+    { ...box("frame", 0, 0, 1200, 600, "section"), text: "Frame" },
+    cell("a", 40, 80), cell("b", 520, 80),
+    cell("c", 40, 240), cell("d", 520, 240),
   ]);
 }
 
@@ -125,7 +125,7 @@ describe("auto-size · peers grow with it", () => {
     expect(c!.geometry.width).toBe(a!.geometry.width);
     expect(c!.geometry.height).toBe(80);
     // d shares neither: untouched.
-    expect(d!.geometry).toEqual({ x: 280, y: 240, width: 160, height: 80 });
+    expect(d!.geometry).toEqual({ x: 520, y: 240, width: 160, height: 80 });
     for (const peer of [b!, c!]) {
       expect(onGrid(peer)).toBe(true);
       const was = before.get(peer.id)!;
@@ -176,7 +176,7 @@ describe("auto-size · peers grow with it", () => {
     const rowCenter = center(objectOf(session.draft, "a")).cy;
 
     // The default process is 280×100; the row is taller, so the new node takes its height.
-    runOp(session, "place_shape", { id: "e", type: "process", at: [520, rowCenter - 50], text: "Ship" });
+    runOp(session, "place_shape", { id: "e", type: "process", at: [760, rowCenter - 50], text: "Ship" });
 
     const e = objectOf(session.draft, "e");
     expect(e.geometry.height).toBe(Math.max(rowHeight, 100));
@@ -191,5 +191,60 @@ describe("auto-size · peers grow with it", () => {
 
     expect(objectOf(session.draft, "b").geometry.height).toBe(80);
     expect(objectOf(session.draft, "c").geometry.width).toBe(160);
+  });
+});
+
+describe("auto-size · review fixes", () => {
+  test("a peer whose match would newly overlap a neighbor keeps its size; the edited node still grows", () => {
+    const session = makeTestSession(pageBoard([
+      { ...box("a", 200, 200, 160, 80, "process"), text: "A" },
+      box("b", 600, 200, 160, 80, "process"),
+      box("neighbor", 600, 300, 160, 80, "rectangle"),
+    ]), ["page"]);
+
+    const result = runOp(session, "update_text", { id: "a", text: LONG });
+
+    expect(fits(objectOf(session.draft, "a"))).toBe(true);
+    expect(objectOf(session.draft, "b").geometry).toEqual({ x: 600, y: 200, width: 160, height: 80 });
+    expect(result.text).toContain("kept b at 160×80: matching its row would overlap neighbor");
+    expect(result.text).not.toContain("covered-content");
+  });
+
+  test("resize holds the target's top-left even when it matches a taller row peer", () => {
+    const session = makeTestSession(pageBoard([
+      { ...box("a", 200, 200, 160, 240, "process"), text: LONG },
+      box("b", 600, 80, 160, 320, "process"),
+    ]), ["page"]);
+
+    runOp(session, "resize", { id: "a", width: 160, height: 80 });
+
+    expect(objectOf(session.draft, "a").geometry).toMatchObject({ x: 200, y: 200 });
+    expect(fits(objectOf(session.draft, "a"))).toBe(true);
+  });
+
+  test("match_size never writes its like source", () => {
+    const session = makeTestSession(pageBoard([
+      { ...box("a", 200, 200, 160, 240, "process"), text: LONG },
+      box("source", 600, 200, 160, 80, "process"),
+    ]), ["page"]);
+
+    runOp(session, "match_size", { id: "a", like: "source" });
+
+    expect(objectOf(session.draft, "source").geometry).toEqual({ x: 600, y: 200, width: 160, height: 80 });
+    expect(fits(objectOf(session.draft, "a"))).toBe(true);
+  });
+
+  test("many text edits land where one edit to the same text lands, center unmoved", () => {
+    const stepped = makeTestSession(pageBoard([box("a", 200, 200, 160, 80, "process")]), ["page"]);
+    for (let words = 10; words <= 170; words += 10) {
+      runOp(stepped, "update_text", { id: "a", text: "word ".repeat(words) });
+    }
+    const once = makeTestSession(pageBoard([box("a", 200, 200, 160, 80, "process")]), ["page"]);
+    runOp(once, "update_text", { id: "a", text: "word ".repeat(170) });
+
+    const a = objectOf(stepped.draft, "a");
+    expect(a.geometry).toEqual(objectOf(once.draft, "a").geometry);
+    expect(center(a)).toEqual({ cx: 280, cy: 240 });
+    expect(onGrid(a)).toBe(true);
   });
 });
