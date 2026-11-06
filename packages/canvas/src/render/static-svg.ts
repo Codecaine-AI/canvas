@@ -54,7 +54,8 @@ import {
   outlineSpecFor,
   ARROW_SHAPE_GEOMETRY,
 } from "../objects/geometry";
-import { labelPointFor, routeConnection, CONNECTOR_END_GAP_PX } from "../connectors/routing";
+import { routeConnection, CONNECTOR_END_GAP_PX } from "../connectors/routing";
+import { placedLabelPoint } from "../connectors/label-placement";
 import { connectorDashArray } from "../connectors/def";
 import { ARROWHEAD_TIP_OVERSHOOT_RATIO, arrowheadStrokeRatio } from "../connectors/arrowhead";
 import {
@@ -1338,6 +1339,7 @@ export function connectionLabelChipRect(
 }
 
 function renderConnector(
+  document: InteractiveCanvasDocument,
   connection: InteractiveCanvasConnection,
   objectsById: Map<string, InteractiveCanvasObject>,
   obstacles: ReadonlyArray<InteractiveCanvasObject>,
@@ -1382,12 +1384,12 @@ function renderConnector(
     }
   }
 
-  // Label chip at the effective label point — the routed midpoint, or the
-  // connection's `labelPosition` pin when it has one. Mirrors the stage's SVG
-  // label chip (connectors/Connector.tsx), which reads the same helper.
+  // Label chip at the placed label point (connectors/label-placement.ts),
+  // placed on the whole document. Mirrors the stage's SVG label chip
+  // (connectors/Connector.tsx), which reads the same helper.
   const label = connection.label?.trim() ? connection.label : null;
   if (label) {
-    const labelPoint = labelPointFor(routed, connection);
+    const labelPoint = placedLabelPoint(routed, connection, document, canvasStyle);
     const chip = connectionLabelChipRect(label, labelPoint, canvasStyle);
     const metrics = connectionLabelChipMetrics(label, canvasStyle);
     const { x, y } = labelPoint;
@@ -1648,7 +1650,7 @@ export function renderSceneToSvg(
     parts.push(renderSectionBackdrop(section, sectionDepths.get(section.id) ?? 1, canvasStyle));
   }
   for (const connection of scene.connections) {
-    parts.push(renderConnector(connection, objectsById, scene.obstacles, canvasStyle));
+    parts.push(renderConnector(document, connection, objectsById, scene.obstacles, canvasStyle));
   }
   for (const object of nonSections) {
     parts.push(renderShapeBody(object, stickyShadowFilterId, bounds, canvasStyle));

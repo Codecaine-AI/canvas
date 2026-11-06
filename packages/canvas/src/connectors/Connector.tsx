@@ -10,7 +10,8 @@ import type {
   InteractiveCanvasObject,
 } from "../state/schema";
 import { connectorBendSegments } from "./bend-editing";
-import { labelPointFor, routeConnection } from "./routing";
+import { routeConnection } from "./routing";
+import { placedLabelPoint } from "./label-placement";
 import { connectorDashArray } from "./def";
 import { CONNECTION_LABEL_CHIP, connectionLabelChipMetrics } from "./label-chip";
 import { resolveConnectorPaint } from "../theme/palette";
@@ -76,9 +77,9 @@ export function Connector({
   // fill="context-stroke" (see <defs>).
   const stroke = resolveConnectorPaint(connection.color ?? FIRST_USE_COLORS.connector, canvasStyle).stroke;
   const label = connection.label?.trim() ? connection.label : null;
-  // The pinned chip center (S1.1) — `routed.labelPoint` unless the connection
-  // carries a `labelPosition`.
-  const labelPoint = labelPointFor(routed, connection);
+  // The placed chip center (./label-placement.ts): midpoint or pin, moved
+  // along the wire off boxes, chips and wires.
+  const labelPoint = placedLabelPoint(routed, connection, document, canvasStyle);
   const chip = label ? connectionLabelChipMetrics(label, canvasStyle) : null;
 
   return (
@@ -184,7 +185,7 @@ export function ConnectorSelectionTrim({
       ? connectorBendSegments(routed.points ?? [], {
           // Handles dodge the chip where it actually sits (S1.1 pin), not the
           // route midpoint.
-          labelPoint: label ? labelPointFor(routed, connection) : null,
+          labelPoint: label ? placedLabelPoint(routed, connection, document, canvasStyle) : null,
           labelClearancePx: label ? labelWidth / 2 + bendHandleLength / 2 : undefined,
         })
       : [];
