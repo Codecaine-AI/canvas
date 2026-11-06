@@ -15,7 +15,8 @@
  * connectionLabelChipRect). Pure, deterministic, Node-safe — no DOM.
  */
 
-import { labelPointFor, routeConnection } from "../connectors/routing";
+import { routeConnection } from "../connectors/routing";
+import { placedLabelPoint } from "../connectors/label-placement";
 import { belowExtendedBoundsPx } from "../objects/text-slots";
 import { sectionTitleChipWorldRect } from "../objects/section/title-chip-geometry";
 import { titleChipHasContent } from "../objects/section/title-chip-layout";
@@ -106,6 +107,7 @@ function polylineBounds(points: ReadonlyArray<{ x: number; y: number }>): Rect |
 }
 
 function routedConnectionBounds(
+  document: InteractiveCanvasDocument,
   connection: InteractiveCanvasConnection,
   objectsById: ReadonlyMap<string, InteractiveCanvasObject>,
   obstacles: ReadonlyArray<InteractiveCanvasObject>,
@@ -123,13 +125,13 @@ function routedConnectionBounds(
   if (!rect) return null;
 
   const label = connection.label?.trim() ? connection.label : null;
-  // The chip is measured where it is DRAWN — the `labelPosition` pin when the
-  // connection carries one, otherwise the routed midpoint. A pinned chip that
+  // The chip is measured where it is DRAWN — its placed point
+  // (connectors/label-placement.ts). A pinned chip that
   // sits off the wire still counts toward the painted extent — at the size
   // the style draws it (connectors/label-chip.ts: a 26px mono chip in the
   // schematic themes, the 30px sans chip in figjam).
   if (label) {
-    rect = unionRects(rect, connectionLabelChipRect(label, labelPointFor(routed, connection), canvasStyle));
+    rect = unionRects(rect, connectionLabelChipRect(label, placedLabelPoint(routed, connection, document, canvasStyle), canvasStyle));
   }
   return rect;
 }
@@ -148,7 +150,7 @@ export function connectionPaintedBounds(
   canvasStyle?: Partial<CanvasStyle>,
 ): Rect | null {
   const objectsById = new Map(document.objects.map((object) => [object.id, object]));
-  return routedConnectionBounds(connection, objectsById, document.objects, normalizeCanvasStyle(canvasStyle));
+  return routedConnectionBounds(document, connection, objectsById, document.objects, normalizeCanvasStyle(canvasStyle));
 }
 
 /**
@@ -188,7 +190,7 @@ export function paintedBounds(
       targetObjectIds.has(connection.from.objectId) ||
       targetObjectIds.has(connection.to.objectId);
     if (!touchesTarget) continue;
-    add(routedConnectionBounds(connection, objectsById, document.objects, style));
+    add(routedConnectionBounds(document, connection, objectsById, document.objects, style));
   }
 
   return (

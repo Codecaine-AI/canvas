@@ -8,9 +8,9 @@
  * package's shared chip geometry (packages/canvas/src/connectors/
  * label-chip.ts — what connectors/Connector.tsx draws on the stage and
  * render/static-svg.ts draws in the headless preview export) under the
- * board's canvas style, centered on the route's own effective label point
- * (`labelPointFor`: the arc-length midpoint, or the connection's
- * `labelPosition` pin), and no chip at all for empty/whitespace labels.
+ * board's canvas style, centered where the renderer places it
+ * (connectors/label-placement.ts `placedLabelPoint`), and no chip at all
+ * for empty/whitespace labels.
  * The chip is the label's measured width (text-measure, the chip font) plus
  * its padding: under the figjam style Inter 16/700 + 2×12px, at least 41px
  * wide and 30 high — the CHIP_* constants below; the schematic themes (the
@@ -29,11 +29,8 @@
  * character the font lacks at zero width, never under the minimum chip);
  * what only the measured full-width chip shows is a note, never a blocker.
  */
-import { labelPointFor, routeConnection } from "../../connectors/routing.ts";
+import { routeConnection } from "../../connectors/routing.ts";
 import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../../connectors/label-chip.ts";
-import { iconGlyphBoxPx } from "../../objects/text-slots.ts";
-import { captionBandBounds } from "../../objects/geometry.ts";
-import { kindOf } from "../helpers";
 import {
   graphemeClusters,
   fitText,
@@ -121,40 +118,10 @@ export function rectOf(object: InteractiveCanvasObject): Rect {
   return object.geometry;
 }
 
-/**
- * Where an object's box paints: its geometry, except a tile-style icon,
- * which paints only its tile (capped at the style's `iconTileMaxPx`,
- * centered in the box — the rect connectors meet and routes avoid).
- * Default style when `canvasStyle` is omitted.
- */
-export function drawnRectOf(object: InteractiveCanvasObject, canvasStyle?: CanvasStyle): Rect {
-  const local = iconGlyphBoxPx(object, canvasStyle);
-  return {
-    x: object.geometry.x + local.x,
-    y: object.geometry.y + local.y,
-    width: local.width,
-    height: local.height,
-  };
-}
-
-/**
- * The world rect of `object`'s caption band — the name and detail an icon
- * paints under its tile (the below-extended bounds minus the glyph box) — or
- * null when nothing paints under its glyph. Default style when omitted.
- */
-export function captionBand(object: InteractiveCanvasObject, canvasStyle?: CanvasStyle): Rect | null {
-  return kindOf(object) === "node" ? captionBandBounds(object, canvasStyle) : null;
-}
-
-/**
- * Where a box paints content a chip can cover: its drawn rect (a tile-style
- * icon's tile, else the whole box) and, under an icon, its caption band.
- * The empty sides of an icon's box paint nothing.
- */
-export function paintedRects(object: InteractiveCanvasObject, canvasStyle?: CanvasStyle): Rect[] {
-  const band = captionBand(object, canvasStyle);
-  return band ? [drawnRectOf(object, canvasStyle), band] : [drawnRectOf(object, canvasStyle)];
-}
+// Where a box paints (drawn rect, caption band) lives with the chip
+// placement, which avoids exactly what the lints judge.
+import { drawnRectOf, placedLabelPoint, routedConnectionIn } from "../../connectors/label-placement.ts";
+export { captionBand, drawnRectOf, paintedRects } from "../../connectors/label-placement.ts";
 
 export function inflate(rect: Rect, margin: number): Rect {
   return {
@@ -252,15 +219,15 @@ export function pathBoxViolationIds(
 /**
  * The renderer's label chip for an edge, or undefined when it draws none
  * (no label, whitespace-only label — the renderer's own `label?.trim()`
- * gate — or a missing endpoint). Centered on the route's EFFECTIVE label
- * point (`labelPointFor`) — the arc-length midpoint, or the connection's
- * `labelPosition` pin when it has one — i.e. exactly where Connector.tsx and
- * static-svg.ts hang the chip. A pinned chip is judged where it is drawn, so
- * `move_label` can actually clear an overlap the lints flagged.
+ * gate — or a missing endpoint). Centered on the PLACED label point
+ * (connectors/label-placement.ts `placedLabelPoint`: the midpoint or the
+ * `labelPosition` pin, moved along the wire off boxes, chips and wires when
+ * a clear spot exists) — exactly where Connector.tsx and static-svg.ts hang
+ * the chip.
  *
- * Every chip judgement in the lints goes through here, so the router's
- * `labelPointFor` is the single label-point implementation in the tree and
- * there is nothing for a lint to drift against.
+ * Every chip judgement in the lints goes through here, so the placement is
+ * the single label-point implementation in the tree and there is nothing
+ * for a lint to drift against.
  */
 export function chipFor(
   edge: InteractiveCanvasConnection, document: InteractiveCanvasDocument,
@@ -272,8 +239,8 @@ export function chipFor(
   const from = byId.get(edge.from.objectId);
   const to = byId.get(edge.to.objectId);
   if (!from || !to) return undefined;
-  const routed = routeConnection(from, to, edge, document.objects, canvasStyle);
-  const labelPoint = labelPointFor(routed, edge);
+  const routed = routedConnectionIn(document, edge, from, to, canvasStyle);
+  const labelPoint = placedLabelPoint(routed, edge, document, canvasStyle);
   const metrics = connectionLabelChipMetrics(label, canvasStyle);
   const { width, height } = metrics;
   const font = connectionLabelFontSpec(canvasStyle);
