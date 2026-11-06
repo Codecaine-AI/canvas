@@ -34,8 +34,12 @@
  * When no candidate is clear (dense boards), an unpinned chip takes the
  * least-bad one; the lint still reports what is left.
  *
- * Results are cached per (objects array, connections array, style value): documents
- * are immutable, so one board version is placed once however many chips read it.
+ * Results are cached per (objects array, connections array, style value,
+ * measuring-backend switch): documents are immutable, so one board version is
+ * placed once however many chips read it, and placed again when fonts load
+ * and chip widths change. The same cache holds each wire's route
+ * (`routedConnectionIn`), so the connectors that draw the wires reuse the
+ * routes placement made instead of routing every wire twice.
  *
  * Pure: no React, no DOM.
  */
@@ -44,6 +48,7 @@ import type { CanvasPoint } from "../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasDocument, InteractiveCanvasObject } from "../state/schema";
 import { belowExtendedBoundsPx, iconGlyphBoxPx } from "../objects/text-slots";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
+import { onBackendChange } from "../theme/text-measure";
 import { connectionLabelChipMetrics } from "./label-chip";
 import { labelPointFor, routeConnection, type RoutedConnection } from "./routing";
 
@@ -233,10 +238,19 @@ function bendAt(point: CanvasPoint, points: readonly CanvasPoint[], width: numbe
 }
 
 type Placements = ReadonlyMap<string, CanvasPoint>;
+type Board = Pick<InteractiveCanvasDocument, "objects" | "connections">;
+
+/** One board version under one style and measuring backend: its routes, filled as read, and its placements. */
+interface BoardCache {
+  byId: ReadonlyMap<string, InteractiveCanvasObject>;
+  connections: ReadonlySet<InteractiveCanvasConnection>;
+  routes: Map<string, RoutedConnection>;
+  placements?: Placements;
+}
 
 const cache = new WeakMap<
   readonly InteractiveCanvasObject[],
-  WeakMap<readonly InteractiveCanvasConnection[], Map<string, Placements>>
+  WeakMap<readonly InteractiveCanvasConnection[], Map<string, BoardCache>>
 >();
 // Styles are often freshly normalized copies, so the cache keys them by value.
 const styleKeys = new WeakMap<CanvasStyle, string>();
@@ -245,36 +259,82 @@ function styleKey(style: CanvasStyle): string {
   if (key === undefined) styleKeys.set(style, (key = JSON.stringify(style)));
   return key;
 }
+// Chip widths (and icon captions) change when the measuring backend switches
+// (fonts loaded, HarfBuzz ready), so every switch starts a fresh cache entry.
+let backendRevision = 0;
+onBackendChange(() => {
+  backendRevision += 1;
+});
 
-/** Every labeled connection's drawn chip center, by connection id. */
-export function placeConnectionLabels(
-  document: Pick<InteractiveCanvasDocument, "objects" | "connections">,
-  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
-): Placements {
+function boardCache(document: Board, canvasStyle: CanvasStyle): BoardCache {
   let byConnections = cache.get(document.objects);
   if (!byConnections) cache.set(document.objects, (byConnections = new WeakMap()));
   let byStyle = byConnections.get(document.connections);
   if (!byStyle) byConnections.set(document.connections, (byStyle = new Map()));
-  const key = styleKey(canvasStyle);
-  const hit = byStyle.get(key);
-  if (hit) return hit;
-  const placed = computePlacements(document, canvasStyle);
-  byStyle.set(key, placed);
-  return placed;
+  const key = `${backendRevision}:${styleKey(canvasStyle)}`;
+  let entry = byStyle.get(key);
+  if (!entry) {
+    // Entries for older backends are dead: drop them.
+    byStyle.forEach((_, old) => {
+      if (!old.startsWith(`${backendRevision}:`)) byStyle!.delete(old);
+    });
+    entry = {
+      byId: new Map(document.objects.map((object) => [object.id, object])),
+      connections: new Set(document.connections),
+      routes: new Map(),
+    };
+    byStyle.set(key, entry);
+  }
+  return entry;
 }
 
-function computePlacements(
-  document: Pick<InteractiveCanvasDocument, "objects" | "connections">,
-  canvasStyle: CanvasStyle,
-): Placements {
-  const byId = new Map(document.objects.map((object) => [object.id, object]));
+function cachedRoute(
+  entry: BoardCache, document: Board, connection: InteractiveCanvasConnection,
+  from: InteractiveCanvasObject, to: InteractiveCanvasObject, canvasStyle: CanvasStyle,
+): RoutedConnection {
+  let routed = entry.routes.get(connection.id);
+  if (!routed) entry.routes.set(connection.id, (routed = routeConnection(from, to, connection, document.objects, canvasStyle)));
+  return routed;
+}
+
+/**
+ * `routeConnection(fromObject, toObject, connection, document.objects,
+ * canvasStyle)`, shared with the placement through the board cache. A
+ * connection or endpoint that is not the document's own (a drag preview's
+ * stand-in) is routed afresh.
+ */
+export function routedConnectionIn(
+  document: Board,
+  connection: InteractiveCanvasConnection,
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): RoutedConnection {
+  const entry = boardCache(document, canvasStyle);
+  const own = entry.byId.get(connection.from.objectId) === fromObject
+    && entry.byId.get(connection.to.objectId) === toObject
+    && entry.connections.has(connection);
+  return own
+    ? cachedRoute(entry, document, connection, fromObject, toObject, canvasStyle)
+    : routeConnection(fromObject, toObject, connection, document.objects, canvasStyle);
+}
+
+/** Every labeled connection's drawn chip center, by connection id. */
+export function placeConnectionLabels(document: Board, canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE): Placements {
+  const entry = boardCache(document, canvasStyle);
+  return (entry.placements ??= computePlacements(entry, document, canvasStyle));
+}
+
+function computePlacements(entry: BoardCache, document: Board, canvasStyle: CanvasStyle): Placements {
+  const result = new Map<string, CanvasPoint>();
+  if (!document.connections.some((connection) => connection.label?.trim())) return result;
   const routes = new Map<string, RoutedConnection>();
   const wires: Wire[] = [];
   for (const connection of document.connections) {
-    const from = byId.get(connection.from.objectId);
-    const to = byId.get(connection.to.objectId);
+    const from = entry.byId.get(connection.from.objectId);
+    const to = entry.byId.get(connection.to.objectId);
     if (!from || !to) continue;
-    const routed = routeConnection(from, to, connection, document.objects, canvasStyle);
+    const routed = cachedRoute(entry, document, connection, from, to, canvasStyle);
     routes.set(connection.id, routed);
     const points = routed.points ?? [routed.start, routed.end];
     if (points.length >= 2) wires.push({ id: connection.id, points, bounds: boundsOf(points) });
@@ -284,7 +344,6 @@ function computePlacements(
     .map((object) => ({ id: object.id, rects: paintedRects(object, canvasStyle) }));
 
   const chips: Rect[] = [];
-  const result = new Map<string, CanvasPoint>();
   for (const connection of document.connections) {
     const label = connection.label?.trim() ? connection.label : null;
     const routed = routes.get(connection.id);
@@ -402,7 +461,7 @@ function lexLess(a: readonly number[], b: readonly number[]): boolean {
 export function placedLabelPoint(
   routed: RoutedConnection,
   connection: InteractiveCanvasConnection,
-  document: Pick<InteractiveCanvasDocument, "objects" | "connections">,
+  document: Board,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): CanvasPoint {
   return placeConnectionLabels(document, canvasStyle).get(connection.id) ?? labelPointFor(routed, connection);

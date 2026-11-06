@@ -120,7 +120,7 @@ export function rectOf(object: InteractiveCanvasObject): Rect {
 
 // Where a box paints (drawn rect, caption band) lives with the chip
 // placement, which avoids exactly what the lints judge.
-import { drawnRectOf, placedLabelPoint } from "../../connectors/label-placement.ts";
+import { drawnRectOf, placedLabelPoint, routedConnectionIn } from "../../connectors/label-placement.ts";
 export { captionBand, drawnRectOf, paintedRects } from "../../connectors/label-placement.ts";
 
 export function inflate(rect: Rect, margin: number): Rect {
@@ -239,7 +239,7 @@ export function chipFor(
   const from = byId.get(edge.from.objectId);
   const to = byId.get(edge.to.objectId);
   if (!from || !to) return undefined;
-  const routed = routeConnection(from, to, edge, document.objects, canvasStyle);
+  const routed = routedConnectionIn(document, edge, from, to, canvasStyle);
   const labelPoint = placedLabelPoint(routed, edge, document, canvasStyle);
   const metrics = connectionLabelChipMetrics(label, canvasStyle);
   const { width, height } = metrics;

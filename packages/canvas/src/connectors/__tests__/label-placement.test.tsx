@@ -6,6 +6,8 @@
  */
 import { describe, expect, it } from "bun:test";
 import { renderToStaticMarkup } from "react-dom/server";
+import { useTableBackend } from "@codecaine-ai/text-measure";
+import { useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 
 import type {
   InteractiveCanvasConnection,
@@ -19,6 +21,7 @@ import { renderDocumentToSvg } from "../../render/static-svg";
 import { Connector } from "../Connector";
 import { connectionLabelChipMetrics } from "../label-chip";
 import { placeConnectionLabels } from "../label-placement";
+import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 
 function box(id: string, x: number, y: number, width = 100, height = 60): InteractiveCanvasObject {
   return { id, type: "process", text: id, geometry: { x, y, width, height } };
@@ -134,6 +137,26 @@ describe("placeConnectionLabels", () => {
     expect(point.x - width / 2).toBeGreaterThanOrEqual(left.geometry.x + left.geometry.width);
     expect(point.x + width / 2).toBeLessThanOrEqual(right.geometry.x);
     expect(chipFindings(document)).toEqual([]);
+  });
+
+  it("places again when the measuring backend changes the chip's width", async () => {
+    // The table backend measures this figjam chip about 10px wider than
+    // HarfBuzz, so a box 1px right of the narrow chip's edge blocks only the
+    // wide one at the midpoint.
+    const label = "ÁVÁVÁVÁV";
+    const hbWidth = connectionLabelChipMetrics(label, FIGJAM_CANVAS_STYLE).width;
+    const document = doc([A, B, box("c", 300 + hbWidth / 2 + 1, 40, 80, 40)], [wire("ab", "a", "b", label)]);
+    try {
+      useTableBackend();
+      expect(connectionLabelChipMetrics(label, FIGJAM_CANVAS_STYLE).width).toBeGreaterThan(hbWidth + 2);
+      const table = placeConnectionLabels(document, FIGJAM_CANVAS_STYLE).get("ab")!;
+      await useHarfBuzz();
+      const fresh = placeConnectionLabels({ ...document, objects: [...document.objects] }, FIGJAM_CANVAS_STYLE).get("ab")!;
+      expect(fresh).not.toEqual(table);
+      expect(placeConnectionLabels(document, FIGJAM_CANVAS_STYLE).get("ab")).toEqual(fresh);
+    } finally {
+      await useHarfBuzz();
+    }
   });
 
   it("keeps a colliding pin when its wire has no clear spot", () => {
