@@ -1,7 +1,8 @@
 /**
  * `climb render`: for each drawn board in a round, `board.png` (the whole
  * board, framed as `canvas_check` frames it) and `metrics.json` (lint
- * findings by rule id, tool calls, tokens, PNG size).
+ * findings by rule id, tool calls, tokens, PNG size, and the board's long
+ * edge with an `overJudgeCap` flag past JUDGE_PNG_MAX_EDGE).
  *
  * Judges score `board.png` at 1:1 world scale, capped so its long edge is at
  * most 2576 px, the largest image Opus reads without scaling it down
@@ -18,7 +19,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { renderAtJudgeSize, type PngSize } from "../../../../canvas/src/render/judge-size.ts";
+import { JUDGE_PNG_MAX_EDGE, renderAtJudgeSize, type PngSize } from "../../../../canvas/src/render/judge-size.ts";
 import type { DrawRecord } from "./draw.ts";
 import { CANVAS_REPO_ROOT, DEFAULT_CLIMB_ROOT, parseFlags, roundDir, roundNumber } from "./paths.ts";
 
@@ -61,12 +62,36 @@ async function loadCanvas(root: string): Promise<CanvasModules> {
  * (renderAtJudgeSize, the same render `canvas_check` returns) when
  * `viewWidth` is undefined.
  */
-function renderBoardPng(canvas: CanvasModules, file: CanvasFile, viewWidth: number | undefined): { png: Buffer; size: PngSize } {
+function renderBoardPng(
+  canvas: CanvasModules,
+  file: CanvasFile,
+  viewWidth: number | undefined,
+): { png: Buffer; size: PngSize; board: BoardExtent } {
   const view = (width: number) =>
     canvas.render.renderBoardView(file.persisted, { width, canvasStyle: file.session.canvasStyle });
   const rendered = viewWidth === undefined ? renderAtJudgeSize(view, canvas.views.BOARD_VIEW_WIDTH).rendered : view(viewWidth);
   const png = canvas.rasterize.rasterizeSvgToPng(rendered.svg);
-  return { png: png.png, size: { width: png.width, height: png.height, scale: png.width / rendered.camera.width } };
+  return {
+    png: png.png,
+    size: { width: png.width, height: png.height, scale: png.width / rendered.camera.width },
+    board: boardExtent(rendered.camera),
+  };
+}
+
+/**
+ * The board's whole extent in world px, padding included, as the judged
+ * render frames it. Past JUDGE_PNG_MAX_EDGE on the long edge the judge PNG
+ * scales down and every label prints smaller than drawn. Not a lint: the
+ * drawer is never asked to fix it; the climb reads it here.
+ */
+export interface BoardExtent {
+  longEdge: number;
+  overJudgeCap: boolean;
+}
+
+export function boardExtent(camera: { width: number; height: number }): BoardExtent {
+  const extent = Math.max(camera.width, camera.height);
+  return { longEdge: Math.round(extent), overJudgeCap: extent > JUDGE_PNG_MAX_EDGE };
 }
 
 export interface TranscriptMetrics {
@@ -160,7 +185,7 @@ export async function runRender(argv: string[]): Promise<void> {
     const boardPath = resolve(briefDir, draw.board);
     const file = look.toolkit.openCanvasFile(boardPath);
     const check = look.toolkit.checkCanvasFile(file, brief);
-    let board: { png: Buffer; size: PngSize };
+    let board: { png: Buffer; size: PngSize; board: BoardExtent };
     try {
       if (check.isError) throw new Error(check.text);
       board = renderBoardPng(look, file, viewWidth);
@@ -181,6 +206,7 @@ export async function runRender(argv: string[]): Promise<void> {
       lintRoot,
       summary: check.text.split("\n")[0],
       png: board.size,
+      board: board.board,
       lints: {
         errors: diagnostics.filter((d) => d.severity === "error").length,
         warnings: diagnostics.filter((d) => d.severity === "warning").length,
@@ -197,6 +223,7 @@ export async function runRender(argv: string[]): Promise<void> {
     writeFileSync(resolve(briefDir, "metrics.json"), `${JSON.stringify(metrics, null, 2)}\n`);
     process.stdout.write(
       `${brief}: board.png ${board.size.width}×${board.size.height} at ${board.size.scale.toFixed(3)}`
+      + ` · long edge ${board.board.longEdge}px${board.board.overJudgeCap ? ` (over ${JUDGE_PNG_MAX_EDGE})` : ""}`
       + ` · ${metrics.lints.errors} errors · ${metrics.lints.warnings} warnings`
       + ` · ${transcript.toolCalls.total} tool calls · ${transcript.tokens.input} in / ${transcript.tokens.output} out tokens\n`,
     );

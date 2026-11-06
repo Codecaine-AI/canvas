@@ -24,6 +24,7 @@ import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
 import { BOARD_MAX_EDGE_PX } from "@codecaine-ai/canvas/lints";
 import {
   boardStateSnapshot,
+  brokenWiresLine,
   callToolkitTool,
   canvasStyleOverrides,
   checkCanvasFile,
@@ -222,7 +223,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     title: "Create canvas",
     description:
       "Create a new board at canvases/<id>.canvas.json holding only its page frame, and open it as canvas_open does. Refuses an id that already exists. Place, connect, and check it with the other canvas tools. "
-      + `The whole board, padding included, must fit within ${BOARD_MAX_EDGE_PX} × ${BOARD_MAX_EDGE_PX}px, so lay 4 or more sections out in 2 or 3 rows that grow down, not in one long row. `
+      + `The whole board, padding included, reads at real size up to ${BOARD_MAX_EDGE_PX} × ${BOARD_MAX_EDGE_PX}px, so lay 4 or more sections out in 2 or 3 rows that grow down, not in one long row. `
       + "Build order: place_section with title and color for each section, place_shape with text, detail and color for each node, arrange_section for each section, space_out the sections, connect every wire, tighten_wires once, then canvas_check and fix its errors.",
     inputSchema: {
       type: "object",
@@ -331,9 +332,11 @@ export function createCanvasService(options: CanvasServiceOptions) {
   function openedText(verb: "OPENED" | "CREATED", file: CanvasFileSession): string {
     const title = file.session.draft.title ?? "";
     const canvasStyle = file.session.canvasStyle;
+    const broken = brokenWiresLine(file.session.draft);
     return [
       `${verb} · ${file.canvasId} ${JSON.stringify(title)} · ${shownPath(file.canvasPath)} · sha256:${file.diskHash}`,
       ...(canvasStyle ? [styleLine(canvasStyle)] : []),
+      ...(broken ? [broken] : []),
       boardStateSnapshot(file.session),
     ].join("\n\n");
   }
@@ -444,7 +447,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
           `GUIDANCE · ${topics.length} topics · ${snapshot.snapshotId}`,
           ...topics.map((entry) => `  ${entry.id}  ${JSON.stringify(entry.title)}  ~${entry.approxTokens} tokens`),
           "Call canvas_guidance { \"topic\": \"<id>\" } to read one.",
-          "Read diagram_design before the first place_section: it holds the build order and the board-size limit canvas_check enforces.",
+          "Read diagram_design before the first place_section: it holds the build order and the board size the judge reads at real size.",
         ].join("\n"),
       );
     }

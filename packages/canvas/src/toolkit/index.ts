@@ -76,6 +76,7 @@ import { workflowTools } from "../session/tools/workflow";
 import type { WorkflowTool } from "../session/tools/workflow/workflow-tool";
 
 export { boardStateSnapshot, operationTools, workflowTools };
+export { brokenWiresLine } from "../board/wire-integrity";
 export { canvasStyleOverrides, loadCanvasStyle };
 export type { CanvasStyle, LayoutSession, LayoutToolRenderResult, LayoutToolRuntime, OperationTool, WorkflowTool };
 

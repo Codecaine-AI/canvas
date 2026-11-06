@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 e7594a8b38f473ae93eb3d008891a1ca32cd754a80b8d1ed3f5ec06dce19506a). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 5150127277eae86bbf9041cb02a221d45f58403038d3840ab77f3ec176495686). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -163,7 +163,7 @@
 
 <layout_and_connections>
     <board_size>
-        The board is judged as one image of its whole extent. Up to 2576 × 2576px that image is real size. board-too-large is an error past it.
+        The board is judged as one image of its whole extent. Up to 2576 × 2576px that image is real size. Past it the image scales down and every label prints smaller.
 
         - Lay 4 or more sections out in 2 or 3 rows that grow down, never in one long row.
         - Size each section to its content. A section with three nodes is small, not a full-width band.

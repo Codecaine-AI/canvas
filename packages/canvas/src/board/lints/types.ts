@@ -8,8 +8,9 @@ import type { InteractiveCanvasDocument } from "../../state/schema";
 import type { CanvasStyle } from "../../theme/canvas-style";
 
 /**
- * `error` and `warning` findings block a committed finalize in the edited
- * scope. A `note` never blocks: it says what cannot be promised — text
+ * `error` findings block a committed finalize in the edited scope. A
+ * `warning` never blocks: it rides along in the proposal. A `note` never
+ * blocks either: it says what cannot be promised — text
  * within a pixel of its box edge (it may wrap or clip in the browser), or
  * text the bundled fonts cannot measure exactly.
  */

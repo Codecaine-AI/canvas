@@ -44,15 +44,30 @@ describe("covered-content lint", () => {
     expect(findings[0]!.message).toContain("covers the text center of a");
   });
 
-  test("clean boards, exempt kinds, and cross-parent pairs carry no finding", () => {
+  test("clean boards and exempt kinds carry no finding; a box is never on the section that holds it", () => {
     const findings = coveredContent.check(makeDocument([
       box("a", 0, 0),
       box("b", 224, 0),                              // apart
       box("wrap", 0, 0, 480, 320, "section"),        // sections exempt
       box("note", 40, 40, 160, 96, "sticky"),        // stickies exempt
-      { ...box("other", 8, 8), parentId: "wrap" },   // overlaps a, different parent
+      { ...box("inside", 240, 160), parentId: "wrap" }, // inside its own section
     ]), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(0);
+  });
+
+  test("boxes with different parents that overlap are an error, like siblings", () => {
+    // Two sections pushed into each other: their children paint on one another.
+    const findings = coveredContent.check(makeDocument([
+      box("left", 0, 0, 480, 320, "section"),
+      box("right", 400, 0, 480, 320, "section"),
+      { ...box("a", 300, 100), parentId: "left" },
+      { ...box("b", 380, 100), parentId: "right" },
+      box("loose", 300, 200),                        // a top-level box on a's section child
+      { ...box("c", 320, 180), parentId: "left" },
+    ]), FIGJAM_CONTEXT);
+    const pairs = findings.map((finding) => [...finding.at].sort().join("+")).sort();
+    expect(pairs).toEqual(["a+b", "c+loose"]);
+    expect(findings.every((finding) => finding.severity === "error")).toBe(true);
   });
 
   test("exactly 25% with the text center on the seam is clean; a hair more is not", () => {

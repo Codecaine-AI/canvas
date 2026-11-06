@@ -34,7 +34,7 @@ function expectBlocked(result: LayoutToolTextResult, session: LayoutSession, det
   expect(session.events).toHaveLength(0);
 }
 
-describe("finalize committed — lint gate (all scoped diagnostics)", () => {
+describe("finalize committed — lint gate (scoped errors)", () => {
   test("blocks a parentId child that escapes its section", () => {
     const section = { ...box("section", 0, 0, 480, 320, "section"), text: "Section" };
     const child = { ...box("child", 80, 96, 184, 96, "process"), parentId: "section" };
@@ -67,7 +67,7 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     expectBlocked(result, session, "card extends 144px past the base section page");
   });
 
-  test.each(["five", "five 🚀"])("forced sticky rows block finalize whatever the last row holds (%s)", (last) => {
+  test.each(["five", "five 🚀"])("forced sticky rows clip as a warning, which rides along and never blocks (%s)", (last) => {
     // 128px holds two 36px rows: five forced lines clip whatever the rocket's fallback width.
     const note = { ...box("note", 0, 0, 176, 128, "sticky"), style: { shape: "note" as const }, text: "one" };
     const session = makeTestSession(makeDocument([note]), ["note"], { canvasStyle: FIGJAM_CANVAS_STYLE });
@@ -75,42 +75,27 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
 
     const result = toolFinalize(session, "committed", "Added five rows", emitSessionEvent);
 
-    expectBlocked(result, session, "clipped-text");
+    expect(result.isError).toBeUndefined();
+    expect(session.proposal!.lint).toContain("W1 clipped-text");
   });
 
-  test("warning-tier findings block until fixed, then the same session commits", () => {
+  test("warnings never block: the draft commits and the warning rides along in the proposal", () => {
     const there = connect("there", "a", "b");
     const baseline = makeDocument([
       box("a", 0, 0, 192, 96, "process"),
       box("b", 416, 0, 192, 96, "process"),
     ], [there]);
     const session = makeTestSession(baseline, ["a", "b"]);
-    // A return wire between the same pair reads as one ambiguous double line.
+    // A return wire between the same pair reads as one ambiguous double line (a warning).
     session.draft = makeDocument(baseline.objects, [there, connect("back", "b", "a")]);
 
-    const blocked = toolFinalize(session, "committed", "Added the return", emitSessionEvent);
-
-    expectBlocked(
-      blocked,
-      session,
-      "W1 broken-edges: there and back run anti-parallel between a and b",
-    );
-
-    session.draft = makeDocument(baseline.objects, [{ ...there, label: "go" }]);
-
-    const committed = toolFinalize(
-      session,
-      "committed",
-      "Labeled the flow",
-      emitSessionEvent,
-    );
+    const committed = toolFinalize(session, "committed", "Added the return", emitSessionEvent);
 
     expect(committed.isError).toBeUndefined();
     expect(committed.text).toContain("Committed:");
     expect(session.status).toBe("proposal-ready");
-    expect(session.proposal).not.toBeNull();
-    expect(session.proposal!.summary).toBe("Labeled the flow");
-    expect(session.proposal!.lint).toBe("DIAGNOSTICS · clean");
+    expect(session.proposal!.lint).toContain("DIAGNOSTICS · 0 errors · 1 warning");
+    expect(session.proposal!.lint).toContain("W1 broken-edges: there and back run anti-parallel between a and b");
   });
 
   test("notes never block: a label the bundled fonts cannot measure commits, and the note rides along", () => {

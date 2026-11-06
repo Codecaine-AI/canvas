@@ -10,6 +10,7 @@ import { reconcileSectionMembership } from "../../../state/section-membership";
 
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
+import { newBrokenWires } from "../../../board/wire-integrity";
 import type { LayoutToolRenderResult } from "../runtime";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { OpContext, OpOutcome } from "./op-context";
@@ -156,6 +157,20 @@ export function runOperation<TFields extends OperationFields>(
   // empty delta.
   if (JSON.stringify(before) === JSON.stringify(next)) {
     return noop("the board already matches this, so nothing changed.");
+  }
+  // No edit may make a self-loop, a dangling or a zero-length wire: refuse
+  // it here, once for every tool, and leave the draft as it was.
+  const broken = newBrokenWires(before, next);
+  if (broken.length > 0) {
+    return {
+      isError: true,
+      text: [
+        `ERROR · ${spec.name} — refused: it would break ${broken.length === 1 ? "a wire" : `${broken.length} wires`}, so nothing changed`,
+        ...broken.map((wire) => `  - ${wire.text}`),
+        "  Move or size the boxes so each wire's ends stay apart, or delete the wire first.",
+      ].join("\n"),
+      details,
+    };
   }
   session.proposalCount += 1;
   commitDraft(session, next, outcome.summary, { recordChange: true });

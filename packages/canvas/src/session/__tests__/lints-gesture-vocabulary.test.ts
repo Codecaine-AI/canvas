@@ -69,18 +69,6 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ),
     },
     {
-      // board-too-large: a page past the judge view's cap.
-      name: "board-too-large",
-      document: makeDocument(
-        [
-          box("page", 0, 0, 3000, 1400, "section"),
-          box("a", 100, 100, 280, 100, "process"),
-          box("b", 1500, 800, 280, 100, "process"),
-        ],
-        [connect("return", "b", "a")],
-      ),
-    },
-    {
       // broken-edges: a port slid into its own endpoint's caption band.
       name: "own-caption",
       document: makeDocument(
