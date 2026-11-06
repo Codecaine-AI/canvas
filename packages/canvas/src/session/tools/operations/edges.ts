@@ -47,7 +47,8 @@
  * checks the spec's own consecutive-points-share-an-axis rule for a precise
  * message, then routes a candidate edge and rejects anything the router would
  * have fallen back on (`routeWaypoints` in connectors/routing.ts rejects a
- * non-orthogonal polyline, including the two legs joining the endpoints).
+ * non-orthogonal polyline, including the two legs joining the endpoints, and
+ * a route through another box or an end's own caption — the refusal names it).
  *
  * `shift_segment` rejects an index the edge does not have, and a segment the
  * bend machinery refuses to drag — a near-diagonal run, which edge-route.ts
@@ -80,6 +81,7 @@ import {
 import {
   pointForObjectAnchor,
   routeConnection,
+  waypointRouteBlockers,
 } from "../../../connectors/routing";
 import { connectionBoundsForObject } from "../../../objects/geometry";
 
@@ -300,6 +302,32 @@ function routerAcceptsWaypoints(
   return false;
 }
 
+/**
+ * Why the router would refuse to draw these corners although they join the
+ * ends orthogonally: the route crosses another box, or runs through an end's
+ * own caption. Null when that is not the reason.
+ */
+function blockedRouteMessage(
+  connection: InteractiveCanvasConnection,
+  document: InteractiveCanvasDocument,
+  waypoints: ReadonlyArray<[number, number]>,
+  canvasStyle: OpContext["canvasStyle"],
+): string | null {
+  const from = objectOf(document, connection.from.objectId);
+  const to = objectOf(document, connection.to.objectId);
+  if (!from || !to) return null;
+  const blockers = waypointRouteBlockers(from, to, connection, waypoints, document.objects, canvasStyle);
+  if (!blockers || blockers.length === 0) return null;
+  const boxes = blockers.filter((blocker) => blocker.kind === "box").map((blocker) => blocker.objectId);
+  const captions = blockers.filter((blocker) => blocker.kind === "caption").map((blocker) => blocker.objectId);
+  const parts = [
+    ...(boxes.length > 0 ? [`crosses ${boxes.join(", ")}`] : []),
+    ...captions.map((id) => `runs through ${id}'s own caption (the name under its icon)`),
+  ];
+  return `these corners route ${connection.id} so it ${parts.join(" and ")} — a wire must pass around every`
+    + " box but its ends. Move the corners clear of it, or reset_route to let the router find the way.";
+}
+
 /** Where the router attaches this edge when nothing is steering it. */
 function autoAttachment(
   connection: InteractiveCanvasConnection,
@@ -324,7 +352,7 @@ function fmtPoint(point: WorldPoint | readonly [number, number]): string {
 export const reroute = defineOperationTool({
   name: "reroute",
   description:
-    "Replace an edge's whole route. `points` are the interior corners only — the two ends stay attached where they are. Every leg must be horizontal or vertical, including the two that join the endpoints; coordinates snap to the board grid.",
+    "Replace an edge's whole route. `points` are the interior corners only — the two ends stay attached where they are. Every leg must be horizontal or vertical, including the two that join the endpoints, and no leg may cross a box other than the two ends or run through an end's own caption; coordinates snap to the board grid.",
   fields: {
     id: Id,
     points: Type.Array(Point, {
@@ -354,6 +382,9 @@ export const reroute = defineOperationTool({
     }
 
     if (routerAcceptsWaypoints(connection, ctx.draft, points, ctx.canvasStyle)) return [];
+
+    const blocked = blockedRouteMessage(connection, ctx.draft, points, ctx.canvasStyle);
+    if (blocked) return [blocked];
 
     const attachment = autoAttachment(connection, ctx.draft, ctx.canvasStyle);
     if (!attachment) {

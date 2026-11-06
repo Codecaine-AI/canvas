@@ -281,6 +281,20 @@ describe("reroute", () => {
     expect(result.text).toContain("560,390");
     expect(edgeOf(session).waypoints).toBeUndefined();
   });
+
+  test("corners whose route crosses another box are refused, naming the box", () => {
+    const board = edgeBoard();
+    board.objects.push({ ...box("m", 400, 200, 100, 100), parentId: "frame" });
+    const session = makeTestSession(board, ["frame"]);
+
+    // Orthogonal and joined to both ends, but the vertical at x=420 runs through m.
+    const result = runOp(session, "reroute", { id: "e1", points: [[420, 160], [420, 400]] });
+
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("crosses m");
+    expect(result.text).not.toContain("diagonal");
+    expect(edgeOf(session).waypoints).toBeUndefined();
+  });
 });
 
 // ---------------------------------------------------------------------------
