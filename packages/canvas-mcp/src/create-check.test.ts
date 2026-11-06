@@ -130,10 +130,7 @@ describe("canvas_create and canvas_check", () => {
     await call(service, "connect", { id: "e1", from: { objectId: "client" }, to: { objectId: "api" } });
     await call(service, "connect", { id: "e2", from: { objectId: "api" }, to: { objectId: "db" } });
 
-    // The row ran past the page; the check says so, and fitting the page clears it.
-    expect(checked(await call(service, "canvas_check", {})).text).toContain("containment: db extends");
-    await call(service, "fit_section", { id: "page-frame" });
-
+    // The row ran past the page, and the page grew to hold it: no fit_section call.
     const result = await call(service, "canvas_check", {});
     const check = checked(result);
     expect(check.errors).toBe(0);

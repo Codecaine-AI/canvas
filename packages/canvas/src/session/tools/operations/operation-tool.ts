@@ -7,6 +7,7 @@ import { Type, type Static, type TSchema } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { reconcileConnectionWaypoints } from "../../../state/actions/waypoints";
 import { reconcileSectionMembership } from "../../../state/section-membership";
+import { growSectionsToChildren, sectionOverflow } from "../../../state/section-grow";
 
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
@@ -149,9 +150,43 @@ export function runOperation<TFields extends OperationFields>(
   // Membership follows geometry, so reconciliation derives state rather than
   // moving layout — and since it only writes `parentId`, it cannot disturb the
   // waypoint verdict taken above.
+  //
+  // Section auto-grow runs on the reconciled tree and before the waypoint
+  // pass, so a grown frame is an ordinary resize that pass judges like any
+  // other. It never changes membership, so the last reconcile agrees with it.
+  // A grow this edit needs but cannot make (it would capture a neighbor)
+  // refuses the edit: a child never stays outside its frame, and nothing the
+  // drawer did not touch changes parent. A grow already stuck before the edit
+  // does not block an edit that leaves every child's overflow no worse on every
+  // edge, but an edit that pushes any child further past that frame is refused.
+  const grow = growSectionsToChildren(reconcileSectionMembership(outcome.draft));
+  const reconciledBefore = reconcileSectionMembership(before);
+  const stuck = new Set(growSectionsToChildren(reconciledBefore).blocked.map((entry) => entry.section));
+  const worsens = (section: string) => {
+    const was = sectionOverflow(reconciledBefore, section);
+    const now = sectionOverflow(grow.document, section);
+    const none = { left: 0, top: 0, right: 0, bottom: 0 };
+    return [...now].some(([child, edges]) => {
+      const prior = was.get(child) ?? none;
+      return edges.left > prior.left || edges.top > prior.top || edges.right > prior.right || edges.bottom > prior.bottom;
+    });
+  };
+  const newlyBlocked = grow.blocked.filter((entry) => !stuck.has(entry.section) || worsens(entry.section));
+  if (newlyBlocked.length > 0) {
+    const reasons = newlyBlocked.map(({ section, captures }) =>
+      `${section} must grow to hold its children, and growing would pull ${captures.join(", ")} into it`);
+    return {
+      isError: true,
+      text: `ERROR · ${spec.name} — ${reasons.join("; ")}. Nothing changed. Move ${newlyBlocked.flatMap((entry) => entry.captures).join(", ")} clear first, or place the child where ${newlyBlocked.map((entry) => entry.section).join(", ")} has room.`,
+      details,
+    };
+  }
   const next = reconcileSectionMembership(
-    reconcileConnectionWaypoints(before, outcome.draft),
+    reconcileConnectionWaypoints(before, grow.document),
   );
+  const notes = grow.grown.length === 0
+    ? outcome.notes
+    : [...(outcome.notes ?? []), `grew ${grow.grown.join(", ")} to hold ${grow.grown.length === 1 ? "its" : "their"} children`];
   // A patch that asks for what the board already holds is legal and did
   // nothing, which is the no-op class rather than an APPLIED line over an
   // empty delta.
@@ -178,7 +213,7 @@ export function runOperation<TFields extends OperationFields>(
     session,
     before,
     `APPLIED · ${outcome.summary}`,
-    { notes: outcome.notes, details },
+    { notes, details },
   );
 
   host.emit(session, {

@@ -2,9 +2,10 @@
  * Draft mutation primitives for layout-session operations.
  *
  * Lower-level document edits apply the internal patch grammar directly to a
- * draft. No section is resized implicitly: a frame keeps exactly the geometry
- * it is given until fit_section asks for a fit, which lands as an ordinary
- * geometry update. Membership reconciliation and fit geometry both come from
+ * draft. The one implicit resize is section auto-grow (state/section-grow.ts),
+ * which the operation pipeline runs after each edit. A tighter fit is still
+ * fit_section's job, and either lands as an ordinary geometry update.
+ * Membership reconciliation and fit geometry both come from
  * the canvas package, so this draft applier and studio's accept-time reducer
  * produce identical documents.
  */
@@ -18,6 +19,7 @@ import {
 } from "../state/schema";
 import { sectionDescendantIds, sectionFitGeometry } from "../state/geometry";
 import { reconcileSectionMembership } from "../state/section-membership";
+import { SECTION_AUTO_GROW_FIT } from "../state/section-grow";
 import { clearsAsUndefined } from "../state/actions/agent-patch";
 import { nextId } from "../state/actions/helpers";
 import { mergeObjectPatch, withNormalizedDetail } from "../state/actions/objects";
@@ -316,7 +318,7 @@ export function applyOperationToDraft(
  * both numbers here are >= the UI's, so an agent fit is never tighter than the
  * interactive one.
  */
-export const SECTION_FIT_PADDING = { padding: 40, titleClearance: 40 } as const;
+export const SECTION_FIT_PADDING = SECTION_AUTO_GROW_FIT;
 
 /**
  * Resolve fit_section against the draft: membership is derived from geometry,

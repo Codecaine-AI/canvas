@@ -70,7 +70,7 @@ describe("covered-content lint", () => {
       { ...box("c", 320, 180), parentId: "left" },
     ]), FIGJAM_CONTEXT);
     const pairs = findings.map((finding) => [...finding.at].sort().join("+")).sort();
-    expect(pairs).toEqual(["a+b", "c+loose"]);
+    expect(pairs).toEqual(["a+b", "c+loose", "left+right"]); // the frames themselves: section-on-section
     expect(findings.every((finding) => finding.severity === "error")).toBe(true);
   });
 
@@ -309,5 +309,37 @@ describe("covered-content lint", () => {
     expect(chip.rect.x + chip.rect.width <= 450 || chip.rect.x >= 510).toBe(true);
     const findings = coveredContent.check(document, FIGJAM_CONTEXT);
     expect(findings.some((finding) => finding.at.includes("t"))).toBe(false);
+  });
+});
+
+describe("covered-content: section-on-section", () => {
+  const frame = (id: string, x: number, y: number, width: number, height: number, parentId: string | null = null) =>
+    ({ ...box(id, x, y, width, height, "section"), parentId });
+
+  test("two sections whose frames overlap, neither holding the other, is an error naming both", () => {
+    const findings = coveredContent.check(makeDocument([
+      frame("page", 0, 0, 1200, 800),
+      frame("left", 40, 40, 520, 400, "page"),
+      frame("right", 540, 40, 400, 400, "page"),
+    ]), FIGJAM_CONTEXT).filter((finding) => finding.message.startsWith("sections "));
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      severity: "error",
+      at: ["left", "right"],
+      where: { x: 540, y: 40, width: 20, height: 400 },
+    });
+    expect(findings[0]!.message).toBe("sections left and right overlap by 20×400px");
+  });
+
+  test("nesting at any depth and frames that only touch carry no finding", () => {
+    const findings = coveredContent.check(makeDocument([
+      frame("page", 0, 0, 1200, 800),
+      frame("outer", 40, 40, 600, 600, "page"),
+      frame("inner", 80, 80, 400, 400, "outer"),
+      frame("beside", 640, 40, 400, 400, "page"),
+    ]), FIGJAM_CONTEXT).filter((finding) => finding.message.startsWith("sections "));
+
+    expect(findings).toHaveLength(0);
   });
 });

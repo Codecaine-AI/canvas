@@ -21,9 +21,9 @@
  * parentId is NEVER written from patch ops: an added object's parentId is
  * nulled and updateObject patches have parentId stripped. After the whole
  * batch, membership is re-derived from geometry via
- * reconcileSectionMembership. No section is ever resized implicitly: a frame
- * keeps exactly the geometry the patch gives it, and a fit is an explicit
- * geometry update like any other. Waypoints of connectors whose endpoint
+ * reconcileSectionMembership. The reducer's choke point then runs section
+ * auto-grow (state/section-grow.ts), the same pass the agent's draft ran, so
+ * an accepted patch lands with the frames its draft had. Waypoints of connectors whose endpoint
  * owners moved are likewise handled downstream by the always-on
  * reconcileConnectionWaypoints choke point — nothing here duplicates it.
  *

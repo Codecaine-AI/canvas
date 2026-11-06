@@ -57,7 +57,7 @@ export function canvasConventions(): AuthoringTopic {
 
     The base section is the page; grow it when the diagram needs room. Only sections contain other entities.
 
-    Sections keep their geometry as content changes. arrange_section lays out a section's nodes in rows and fits the frame. fit_section fits a frame around its current children. Neither fits the ancestors.
+    A section grows by itself to hold a child that crosses its edge, and never shrinks by itself. arrange_section lays out a section's nodes in rows and fits the frame. fit_section fits a frame around its current children. Neither fits the ancestors.
 </containment>
 
 <connection_binding>
