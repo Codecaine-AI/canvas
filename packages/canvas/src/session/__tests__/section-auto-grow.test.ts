@@ -189,6 +189,20 @@ describe("section auto-grow", () => {
     expect(containment.check(grown)).toHaveLength(0);
   });
 
+  test("a grow against an off-grid locked parent edge never pulls that edge in", () => {
+    // lane's bottom sits on held's off-grid bottom (701.5); kid ends 1px above it.
+    const document = makeDocument([
+      { ...section("held", 0, 0, 1000, 701.5), locked: "background" },
+      section("lane", 100, 100, 400, 601.5, "held"),
+      child("kid", 140, 200, "lane", 160, 501),
+    ]);
+
+    const { document: grown } = growSectionsToChildren(document);
+
+    expect(geometryOf(grown, "lane")).toEqual({ x: 100, y: 100, width: 400, height: 601.5 });
+    expect(containment.check(grown)).toHaveLength(0);
+  });
+
   test("a grow on an off-grid frame replays through the reducer to the same document", () => {
     const baseline = makeDocument([
       section("page", 0, 0, 2000, 1400),

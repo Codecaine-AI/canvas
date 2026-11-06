@@ -107,14 +107,16 @@ export function growSectionsToChildren(
     // A grow is a geometry write, so it lands on the 4px grid the reducer
     // normalizes every write to (snapped outward, so no side moves in): the
     // draft and its accept-time replay then hold the same numbers.
+    // The wall clamp never pulls an edge in past where it was: an off-grid
+    // edge already at a locked parent's off-grid edge stays where it is.
     const snapped = snapOutward({ x: left, y: top, width: farRight - left, height: farBottom - top }, n);
-    const x = Math.max(snapped.x, wall.left);
-    const y = Math.max(snapped.y, wall.top);
+    const x = Math.min(rect.x, Math.max(snapped.x, wall.left));
+    const y = Math.min(rect.y, Math.max(snapped.y, wall.top));
     const geometry = {
       x,
       y,
-      width: Math.min(snapped.x + snapped.width, wall.right) - x,
-      height: Math.min(snapped.y + snapped.height, wall.bottom) - y,
+      width: Math.max(right, Math.min(snapped.x + snapped.width, wall.right)) - x,
+      height: Math.max(bottom, Math.min(snapped.y + snapped.height, wall.bottom)) - y,
     };
     if (geometry.x === rect.x && geometry.y === rect.y && geometry.width === rect.width && geometry.height === rect.height) continue;
     const candidate = {
