@@ -179,6 +179,26 @@ describe("section auto-grow", () => {
     expect(containment.check(session.draft)).toHaveLength(0);
   });
 
+  test("a child's own overflow past a stuck frame cannot grow behind another child's larger overflow", () => {
+    // old already sits 40px past a's right edge, and a's grow is stuck on
+    // neighbor. Pushing kid 20px past that edge is still a new overflow.
+    const baseline = makeDocument([
+      section("page", -200, -200, 1600, 1200),
+      section("a", 0, 0, 400, 500, "page"),
+      child("old", 280, 100, "a"),
+      child("kid", 200, 320, "a"),
+      child("neighbor", 420, 220, "page", 100, 60),
+    ]);
+    const session = makeTestSession(baseline, ["a"]);
+    const before = session.draft;
+
+    const result = runOp(session, "move_by", { id: "kid", dx: 60, dy: 0 });
+
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("growing would pull neighbor into it");
+    expect(session.draft).toBe(before);
+  });
+
   test("a child moved into the title band grows the top edge outward", () => {
     const baseline = makeDocument([
       section("page", -200, -200, 1600, 1000),

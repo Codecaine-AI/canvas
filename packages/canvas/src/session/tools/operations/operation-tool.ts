@@ -156,15 +156,19 @@ export function runOperation<TFields extends OperationFields>(
   // A grow this edit needs but cannot make (it would capture a neighbor)
   // refuses the edit: a child never stays outside its frame, and nothing the
   // drawer did not touch changes parent. A grow already stuck before the edit
-  // does not block an edit that leaves its overflow no worse on every side,
-  // but an edit that pushes a child further past that frame is refused.
+  // does not block an edit that leaves every child's overflow no worse on every
+  // edge, but an edit that pushes any child further past that frame is refused.
   const grow = growSectionsToChildren(reconcileSectionMembership(outcome.draft));
   const reconciledBefore = reconcileSectionMembership(before);
   const stuck = new Set(growSectionsToChildren(reconciledBefore).blocked.map((entry) => entry.section));
   const worsens = (section: string) => {
     const was = sectionOverflow(reconciledBefore, section);
     const now = sectionOverflow(grow.document, section);
-    return now.left > was.left || now.top > was.top || now.right > was.right || now.bottom > was.bottom;
+    const none = { left: 0, top: 0, right: 0, bottom: 0 };
+    return [...now].some(([child, edges]) => {
+      const prior = was.get(child) ?? none;
+      return edges.left > prior.left || edges.top > prior.top || edges.right > prior.right || edges.bottom > prior.bottom;
+    });
   };
   const newlyBlocked = grow.blocked.filter((entry) => !stuck.has(entry.section) || worsens(entry.section));
   if (newlyBlocked.length > 0) {
