@@ -46,6 +46,8 @@ import { creationDefaultFor } from "../creation-defaults";
 import { detailDroppedNote, storedDetail } from "../detail-line";
 import { NO_GLYPH, isGlyphName, unknownGlyphMessage } from "../glyph-names";
 import { snapPoint, snapSize } from "../grid";
+import { withAutoSize } from "./auto-size";
+import type { OpContext, OpOutcome } from "./op-context";
 import { defineOperationTool } from "./operation-tool";
 import { toDocumentFields } from "../placeable-types";
 import {
@@ -55,6 +57,22 @@ import {
   PlaceShapeParams,
   PlaceStickyParams,
 } from "../schemas";
+
+/**
+ * Place a new node, grow it to fit its text (auto-size.ts: its center held,
+ * its row and column peers matched), and report the box that LANDED.
+ */
+function placeFitted(
+  ctx: OpContext,
+  id: string,
+  lowered: OpOutcome,
+  summary: (landed: { x: number; y: number; width: number; height: number }) => string,
+): OpOutcome {
+  const outcome = withAutoSize(lowered, [id], ctx.canvasStyle);
+  if (outcome.status !== "applied") return outcome;
+  const landed = outcome.draft.objects.find((object) => object.id === id)!.geometry;
+  return { ...outcome, summary: summary(landed) };
+}
 
 /** The applied box, as the summary reports it: `x,y W×H`. */
 function placement(geometry: {
@@ -139,7 +157,9 @@ export const placeShape = defineOperationTool({
   name: "place_shape",
   description:
     "Place a shape with its name, its one-fact detail line and its color in one "
-    + "call, at the default size for its kind. Omit text or color and it arrives "
+    + "call, at the default size for its kind. When the text does not fit that "
+    + "size the shape grows to fit, keeping its center, and same-type shapes in "
+    + "its row (height) and column (width) grow to match. Omit text or color and it arrives "
     + "untitled or in its type's preferred color, for update_text and "
     + "change_color afterward; resizing and turning it are their own gestures. "
     + "Containment follows geometry: a shape outside every frame belongs to no "
@@ -159,7 +179,7 @@ export const placeShape = defineOperationTool({
       width: defaults.size.width,
       height: defaults.size.height,
     };
-    return ctx.applyLowered(
+    return placeFitted(ctx, p.id, ctx.applyLowered(
       {
         type: "addObject",
         object: draftPlacedObject(fields.type, geometry, {
@@ -174,8 +194,8 @@ export const placeShape = defineOperationTool({
           ...(fields.icon ? { icon: fields.icon } : {}),
         }),
       },
-      `place_shape ${p.id} ${p.type} ${placement(geometry)}${p.text ? ` "${p.text}"` : ""}${p.color ? ` ${p.color}` : ""}`,
-    );
+      "place_shape",
+    ), (landed) => `place_shape ${p.id} ${p.type} ${placement(landed)}${p.text ? ` "${p.text}"` : ""}${p.color ? ` ${p.color}` : ""}`);
   },
 });
 
@@ -238,7 +258,8 @@ export const clone = defineOperationTool({
   description:
     "Copy one object. The copy inherits the source's kind, size, color, shape "
     + "type/direction/glyph, detail line, and border style, so a row of options "
-    + "matches without re-specifying a number. Two things it does NOT carry: edges "
+    + "matches without re-specifying a number. A copy whose new text does not fit "
+    + "grows to fit, like place_shape. Two things it does NOT carry: edges "
     + "attached to the source (draw those with connect), and, for a section, "
     + "its contents — a cloned frame arrives empty, because copying "
     + "descendants without copying the edges between them would half-copy the "
@@ -288,7 +309,6 @@ export const clone = defineOperationTool({
       : snapPoint([source.geometry.x + offset[0], source.geometry.y + offset[1]]);
 
     const object = clonedFrom(source, p.id, position, p.text, p.detail);
-    const geometry = object.geometry as { x: number; y: number; width: number; height: number };
     // The same descendant walk the remove cascade uses, so "what a clone left
     // behind" and "what a delete would have taken" can never disagree.
     const emptied = source.type === "section"
@@ -304,11 +324,11 @@ export const clone = defineOperationTool({
         ? [detailDroppedNote("sticky")]
         : []),
     ];
-    return ctx.applyLowered(
+    return placeFitted(ctx, p.id, ctx.applyLowered(
       { type: "addObject", object },
-      `clone ${p.id} from ${p.sourceId} ${placement(geometry)}`,
+      "clone",
       notes.length > 0 ? notes : undefined,
-    );
+    ), (landed) => `clone ${p.id} from ${p.sourceId} ${placement(landed)}`);
   },
 });
 

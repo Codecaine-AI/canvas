@@ -7,6 +7,7 @@ import {
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
 import { diffDocuments } from "../../board/doc-diff";
+import { textFitReport } from "../../board/text-fit";
 import { findOperationTool } from "../tools/operations";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
@@ -161,7 +162,7 @@ describe("arrange · resize", () => {
     expect(session.draft).toBe(draftBefore);
   });
 
-  test("shrinking below what the text needs applies, with a warning note", () => {
+  test("shrinking below what the text needs lands at the needed size, top-left held", () => {
     const wordy = {
       ...box("alpha", 0, 0, 400, 200),
       text: "A deliberately long label that only reads in a generous box",
@@ -170,12 +171,17 @@ describe("arrange · resize", () => {
 
     const result = runOp(session, "resize", { id: "alpha", width: 80, height: 40 });
 
-    // Report-only: say it, don't block it.
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · resize alpha → 80×40");
-    expect(objectOf(session.draft, "alpha").geometry).toMatchObject({ width: 80, height: 40 });
-    // The note names a size, which is what makes the warning actionable.
-    expect(result.text).toMatch(/\n {2}.*\d+×\d+/);
+    const landed = objectOf(session.draft, "alpha").geometry;
+    // Never clipped: the box is the smallest grid box that shows the label.
+    expect(textFitReport(objectOf(session.draft, "alpha"), landed, wordy.text).fits).toBe(true);
+    expect(landed.x).toBe(0);
+    expect(landed.y).toBe(0);
+    expect(landed.width).toBeLessThan(400);
+    expect(landed.width % 20).toBe(0);
+    expect(landed.height % 20).toBe(0);
+    expect(result.text).toContain(`APPLIED · resize alpha → ${landed.width}×${landed.height}`);
+    expect(result.text).toContain(`grew alpha to ${landed.width}×${landed.height} so its text shows whole`);
   });
 
   test("a frame's new edges decide what it holds: shrinking releases an outsider", () => {
@@ -234,7 +240,7 @@ describe("arrange · match_size", () => {
     expect(missing.text).toContain('like "ghost" is not on the board');
   });
 
-  test("matching a small source still applies with the text-fit warning", () => {
+  test("matching a source too small for the text lands at the needed size", () => {
     const wordy = {
       ...box("alpha", 0, 0, 400, 200),
       text: "A deliberately long label that only reads in a generous box",
@@ -247,8 +253,10 @@ describe("arrange · match_size", () => {
     const result = runOp(session, "match_size", { id: "alpha", like: "small" });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · match_size alpha → 80×40 (matching small)");
-    expect(result.text).toMatch(/\n {2}.*\d+×\d+/);
+    const landed = objectOf(session.draft, "alpha").geometry;
+    expect(textFitReport(objectOf(session.draft, "alpha"), landed, wordy.text).fits).toBe(true);
+    expect(result.text).toContain(`APPLIED · match_size alpha → ${landed.width}×${landed.height} (matching small)`);
+    expect(result.text).toContain("grew alpha to");
   });
 
   test("a matched section's new edges release and adopt members", () => {

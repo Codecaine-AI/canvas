@@ -45,9 +45,11 @@
  *
  * SIZE HAS RULES. `resize` and `match_size` measure the new box against the
  * text already in it with the renderer's own wrap/clamp decision
- * (board/text-fit.ts) and attach the verdict as a note when the text would
- * clip. Report-only — the size still lands — and the mirror image of the check
- * `update_text` fires from the other direction (new text into the current box).
+ * (board/text-fit.ts). A shape or icon asked to be smaller than its text needs
+ * lands at the needed size instead, top-left still held, and its row and
+ * column peers grow with it (auto-size.ts) — the mirror image of `update_text`
+ * growing a box for new text. A sticky or section still lands as asked, with
+ * the verdict as a note.
  */
 import { StringEnum, Type } from "@mariozechner/pi-ai";
 
@@ -64,6 +66,7 @@ import {
 } from "../../../state/geometry";
 
 import { textFitReport } from "../../../board/text-fit";
+import { autoSizeObjects } from "./auto-size";
 import { CRAFT_TARGETS } from "../../../authoring/style-guide/craft-targets";
 import { hitBoundsForObject } from "../../../objects/geometry";
 import { entityKindOf } from "../../perception/op-surface";
@@ -305,28 +308,33 @@ function applySize(
   summary: (landed: { width: number; height: number }) => string,
 ): OpOutcome {
   const target = objectOf(ctx, id);
-  const { document } = lowerGeometry(ctx.draft, [
+  const { document: sized } = lowerGeometry(ctx.draft, [
     { ...target, geometry: { ...target.geometry, ...size } },
   ]);
+  // A box asked to be smaller than its text needs lands at the needed size
+  // instead, top-left still held, and its peers grow with it (auto-size.ts).
+  const { document, notes } = autoSizeObjects(sized, [id], ctx.canvasStyle, "corner");
   // Read the size back off the document rather than reporting the one that
   // was computed: the write path normalizes on its own grid, so an untouched
   // legacy dimension can come back a hair different from the one carried in,
   // and the summary has to be the board's number, not the descriptor's.
   const landed = (document.objects.find((object) => object.id === id) ?? target).geometry;
-  // The readability verdict is taken on the box that LANDED.
+  // What still cannot be promised whole (a sticky, a section title, glyphs
+  // the bundled fonts lack) is said on the box that LANDED.
   const report = textFitReport(target, landed, target.text ?? "", ctx.canvasStyle);
+  if (!report.fits || !report.reliable) notes.push(report.detail);
   return {
     status: "applied",
     draft: document,
     summary: summary(landed),
-    ...(report.fits && report.reliable ? {} : { notes: [report.detail] }),
+    ...(notes.length > 0 ? { notes } : {}),
   };
 }
 
 export const resize = defineOperationTool({
   name: "resize",
   description:
-    "Re-size a box to explicit dimensions, holding its top-left corner still so it grows or shrinks toward its bottom-right. Matching another box is match_size's job. A section's new edges decide what it now contains, so it can adopt or release as it changes. Dimensions land on the board's grid, and a box that no longer shows its text still applies, with a warning naming the size it would need.",
+    "Re-size a box to explicit dimensions, holding its top-left corner still so it grows or shrinks toward its bottom-right. Matching another box is match_size's job. A section's new edges decide what it now contains, so it can adopt or release as it changes. Dimensions land on the board's grid. A shape or icon is never made smaller than its text needs: below that it lands at the needed size, and the same-type shapes in its row (height) and column (width) grow to match.",
   fields: {
     id: Id,
     width: Type.Optional(
@@ -376,7 +384,7 @@ export const resize = defineOperationTool({
 export const matchSize = defineOperationTool({
   name: "match_size",
   description:
-    "Make a box the same width and height as another box, holding its top-left corner still. The source is only measured, so it can be locked. A section's new edges decide what it now contains, so it can adopt or release as it changes. Both dimensions land on the board's grid, and a box that no longer shows its text still applies, with a warning naming the size it would need.",
+    "Make a box the same width and height as another box, holding its top-left corner still. The source is only measured, so it can be locked. A section's new edges decide what it now contains, so it can adopt or release as it changes. Both dimensions land on the board's grid. A shape or icon is never made smaller than its text needs: below that it lands at the needed size.",
   fields: {
     id: Id,
     like: Type.String({
