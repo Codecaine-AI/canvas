@@ -237,7 +237,9 @@ function routeConnectionPolyline(
   if (straight && isClear(straight, keepOut)) return straight;
   if (isClear(elbow, keepOut)) return elbow;
   const aStar = (level: KeepOut) =>
-    routeOrthogonalAStar(fromObject, toObject, start, end, startAnchor, endAnchor, aStarObstacles(level), canvasStyle);
+    exitsClear(start, startAnchor, end, endAnchor, level)
+      ? routeOrthogonalAStar(fromObject, toObject, start, end, startAnchor, endAnchor, aStarObstacles(level), canvasStyle)
+      : null;
   const strict = aStar(keepOut);
   if (strict && isClear(strict, keepOut)) return strict;
   tried.push(strict);
@@ -366,8 +368,25 @@ function aStarObstacles(keepOut: KeepOut): CanvasBounds[] {
   return [...keepOut.boxes.map((box) => box.bounds), ...keepOut.captions.flatMap((caption) => caption.wings ?? [])];
 }
 
-/** At most this many side pairs get an A* search in one detour: each costs a full search. */
-const MAX_DETOUR_SEARCHES = 4;
+/**
+ * Room an end needs straight out from its anchor before a box: the end gap.
+ * A box closer than that walls the side in, so no A* search starts there.
+ */
+const EXIT_CLEARANCE_PX = END_GAP;
+
+/**
+ * Whether both ends can leave their sides: nothing in `keepOut.boxes` within
+ * EXIT_CLEARANCE_PX straight out of each anchor. It is the cheap check run
+ * before every A* search, because a search from a walled-in side fails, and
+ * a failed search costs the most.
+ */
+function exitsClear(start: CanvasPoint, startSide: Anchor, end: CanvasPoint, endSide: Anchor, keepOut: KeepOut): boolean {
+  const exitClear = (point: CanvasPoint, side: Anchor) => {
+    const tip = addScaled(point, normalFor(side), EXIT_CLEARANCE_PX);
+    return !keepOut.boxes.some((box) => segmentCrossesInterior(point, tip, box.bounds));
+  };
+  return exitClear(start, startSide) && exitClear(end, endSide);
+}
 
 /** Whether an end has an explicit side or a pin the any-side detour may override. */
 function hasSteeredEnd(connection: InteractiveCanvasConnection): boolean {
@@ -424,7 +443,11 @@ function detourPairs(
   return pairs.sort((a, b) => a.length - b.length);
 }
 
-/** The first clear A* route over the first MAX_DETOUR_SEARCHES pairs, or null. */
+/**
+ * The first clear A* route over `pairs`, shortest elbow first, or null. Every
+ * pair whose exits are clear gets a search: the one open pair can be the
+ * longest, and a crossing route is drawn only when none is clear.
+ */
 function searchDetour(
   fromObject: InteractiveCanvasObject,
   toObject: InteractiveCanvasObject,
@@ -432,7 +455,8 @@ function searchDetour(
   keepOut: KeepOut,
   canvasStyle: CanvasStyle,
 ): RoutedConnection | null {
-  for (const pair of pairs.slice(0, MAX_DETOUR_SEARCHES)) {
+  for (const pair of pairs) {
+    if (!exitsClear(pair.start, pair.fromSide, pair.end, pair.toSide, keepOut)) continue;
     const route = routeOrthogonalAStar(
       fromObject, toObject, pair.start, pair.end, pair.fromSide, pair.toSide, aStarObstacles(keepOut), canvasStyle,
     );

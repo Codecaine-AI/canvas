@@ -196,3 +196,27 @@ describe("routeConnection: a route is judged as the renderer draws it", () => {
     expect(crossesInterior(drawnPoints(routed.path), hitBoundsForObject(blocker))).toBe(false);
   });
 });
+
+describe("routeConnection: every exit pair is searched before a crossing route", () => {
+  it("finds the one clear pair even when it is the longest", () => {
+    // Each end is walled 20px off three sides; only source-left to
+    // target-right is open, and its elbow is the longest of all 16 pairs.
+    const source = box("source", 300, 300, 100, 100);
+    const target = box("target", 1000, 300, 100, 100);
+    const walls = [
+      box("source-top", 250, 180, 200, 100),
+      box("source-bottom", 250, 420, 200, 100),
+      box("source-right", 420, 300, 100, 100),
+      box("target-top", 950, 180, 200, 100),
+      box("target-bottom", 950, 420, 200, 100),
+      box("target-left", 880, 300, 100, 100),
+    ];
+    const routed = routeConnection(source, target, edge(
+      { objectId: "source", anchor: "right" },
+      { objectId: "target", anchor: "left" },
+    ), [source, target, ...walls]);
+
+    const drawn = drawnPoints(routed.path);
+    for (const wall of walls) expect([wall.id, crossesInterior(drawn, hitBoundsForObject(wall))]).toEqual([wall.id, false]);
+  });
+});
