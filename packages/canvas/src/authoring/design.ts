@@ -82,7 +82,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 
 <layout_and_connections>
     <board_size>
-        The board is judged as one image of its whole extent. Up to ${BOARD_MAX_EDGE_PX} × ${BOARD_MAX_EDGE_PX}px that image is real size. board-too-large is an error past it.
+        The board is judged as one image of its whole extent. Up to ${BOARD_MAX_EDGE_PX} × ${BOARD_MAX_EDGE_PX}px that image is real size. Past it the image scales down and every label prints smaller.
 
         - Lay 4 or more sections out in 2 or 3 rows that grow down, never in one long row.
         - Size each section to its content. A section with three nodes is small, not a full-width band.

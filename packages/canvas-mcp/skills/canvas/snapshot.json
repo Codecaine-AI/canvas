@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:86c0da37c657e079945dd6112819e3f50608b55119befaecb9dba6a3c84a5b76",
+  "snapshotId": "sha256:712e83970d09778ff0f0ca7158da3ca2529b1a9357d61ac06309da5fa5e22c7d",
   "sources": [
     {
       "id": "prompt",
@@ -10,7 +10,7 @@
     {
       "id": "state_grammar",
       "path": "packages/canvas/src/authoring/state-grammar.ts",
-      "sha256": "abfaa652ce42572ecb8279503acc90f0095c4d4ed49135439b626226aad86c70"
+      "sha256": "8b510c75f7317cbbeab0d0cc2a3e85fa61b1652ff06feeea62f90a411b530593"
     },
     {
       "id": "aesthetic",
@@ -25,7 +25,7 @@
     {
       "id": "diagram_design",
       "path": "packages/canvas/src/authoring/design.ts",
-      "sha256": "e7594a8b38f473ae93eb3d008891a1ca32cd754a80b8d1ed3f5ec06dce19506a"
+      "sha256": "5150127277eae86bbf9041cb02a221d45f58403038d3840ab77f3ec176495686"
     },
     {
       "id": "visual_vocabulary",

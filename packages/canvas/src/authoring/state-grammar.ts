@@ -21,8 +21,7 @@ import {
   DIGEST_GRAMMAR,
   DIGEST_ROUTE_LEGEND,
 } from "../board/digest";
-import { FINISHING_RULES, LAYOUT_RULES } from "../board/lints";
-import { BOARD_MAX_EDGE_PX } from "../board/lints/rules/board-too-large";
+import { LAYOUT_RULES } from "../board/lints";
 
 const INDENT = "    ";
 
@@ -53,11 +52,6 @@ const HEADER =
   + "- An empty block is a self-closing tag.";
 
 const ALWAYS_ON_RULES = LAYOUT_RULES.map((rule) => rule.id).join(", ");
-
-const FINISHING_ONLY_RULES = FINISHING_RULES
-  .filter((rule) => !LAYOUT_RULES.some((always) => always.id === rule.id))
-  .map((rule) => rule.id)
-  .join(", ");
 
 const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
   {
@@ -149,15 +143,10 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       "ids are stable only until the draft changes, then they reassign from E1/W1",
       `always-on rules: ${ALWAYS_ON_RULES}`,
       {
-        text: `a committed finalize adds ${FINISHING_ONLY_RULES}`,
-        children: [
-          `board-too-large: the whole board's long edge, padding included, is over ${BOARD_MAX_EDGE_PX}px`,
-        ],
-      },
-      {
-        text: "every open E* and W* in your edited scope blocks a committed finalize",
+        text: "every open E* in your edited scope blocks a committed finalize",
         children: ["the finding names the problem, the fix is yours to choose"],
       },
+      "W* warnings never block: they ride along in the proposal",
       {
         text: "N* notes never block: what cannot be promised",
         children: [

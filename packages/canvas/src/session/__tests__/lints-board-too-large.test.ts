@@ -19,9 +19,9 @@ function boardWithPage(width: number, height: number) {
 }
 
 describe("board-too-large lint", () => {
-  test("runs only in the finishing pass", () => {
+  test("runs in no product registry: board size is the eval harness's report", () => {
     expect(LAYOUT_RULES.map((rule) => rule.id)).not.toContain("board-too-large");
-    expect(FINISHING_RULES.map((rule) => rule.id)).toContain("board-too-large");
+    expect(FINISHING_RULES.map((rule) => rule.id)).not.toContain("board-too-large");
   });
 
   test("a wide board over the cap errors with its size, the cap and the layout fix", () => {

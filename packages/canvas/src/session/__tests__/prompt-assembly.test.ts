@@ -103,7 +103,7 @@ describe("layout-editor prompt contract", () => {
       for (const physical of ["covered-content", "containment", "broken-edges", "clipped-text"]) expect(ids).toContain(physical);
       expect(ids).not.toContain("section-child-color");
     }
-    expect(FINISHING_RULES.map(rule => rule.id)).toContain("board-too-large");
+    expect(FINISHING_RULES.map(rule => rule.id)).not.toContain("board-too-large");
     expect(content("node-section-success-criteria")).toContain("edited scope");
   });
 });
