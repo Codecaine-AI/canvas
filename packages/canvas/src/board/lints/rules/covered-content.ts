@@ -4,7 +4,8 @@
  * Checks, all on real geometry (chips are the renderer's own chips at the
  * router's own label point), and only real overlaps — contact is not a
  * finding:
- * - box-on-box: sibling boxes (same parent; sections and stickies exempt)
+ * - box-on-box: any two boxes, in the same section or not (sections and
+ *   stickies exempt, so a box is never "on" the section that holds it),
  *   whose painted faces (paintedRects: an icon's tile and caption, any other
  *   box's face — never the empty sides of an icon's box) intersect by more
  *   than 25% of the smaller painted area or cover a box's text center;
@@ -98,7 +99,6 @@ export const rule: LayoutRule = {
       for (let j = i + 1; j < boxes.length; j += 1) {
         const a = boxes[i]!;
         const b = boxes[j]!;
-        if ((a.parentId ?? null) !== (b.parentId ?? null)) continue;
         const aFaces = faces.get(a.id)!;
         const bFaces = faces.get(b.id)!;
         const pieces = aFaces.flatMap((aFace) => bFaces
