@@ -12,7 +12,10 @@
  *   caption, any other box's face), its own endpoint boxes included;
  * - chip-on-chip: two label chips overlapping;
  * - chip-on-edge: a chip lying along ANOTHER edge's routed wire for more
- *   than 8px.
+ *   than 8px;
+ * - section-on-section: two sections whose frames overlap when neither
+ *   contains the other in the section tree (sections grow to hold their
+ *   children, and a grow can push one frame into its neighbor).
  *
  * Chip findings that hang on the chip's last measured pixel, or on a label
  * whose width is an estimate, are notes (geometry.ts chipFindingSeverity).
@@ -75,7 +78,18 @@ function coversTextCenter(painted: readonly Rect[], rects: readonly Rect[]): boo
   return rects.some((rect) => cx > rect.x && cx < rect.x + rect.width && cy > rect.y && cy < rect.y + rect.height);
 }
 
+/** True when `ancestorId` is `id` itself or one of its section ancestors. */
+function isAncestor(byParent: ReadonlyMap<string, string | null>, ancestorId: string, id: string): boolean {
+  let at: string | null | undefined = id;
+  for (let steps = 0; at != null && steps <= byParent.size; steps += 1) {
+    if (at === ancestorId) return true;
+    at = byParent.get(at);
+  }
+  return false;
+}
+
 const GUIDANCE = `Nothing sits on content. Blocking (error tier):
+- two section frames overlapping when neither holds the other;
 - a box overlap that swallows more than a quarter of what the smaller box paints (an icon's
   tile and caption, a shape's face), or lands on its text;
 - a label chip on a box face (its own endpoints included), on another chip, or lying along
@@ -125,6 +139,28 @@ export const rule: LayoutRule = {
           where: rect,
           message: `${a.id} and ${b.id} overlap by ${pct}% of the smaller box${centerNote}`,
           suggestion: `move ${b.id} clear of ${a.id}`,
+        });
+      }
+    }
+
+    // 1b — section-on-section: frames that overlap outside a parent-child
+    // line. Contact is not a finding; only a real shared area is.
+    const sections = document.objects.filter((object) => kindOf(object) === "section");
+    const byParent = new Map(document.objects.map((object) => [object.id, object.parentId ?? null]));
+    for (let i = 0; i < sections.length; i += 1) {
+      for (let j = i + 1; j < sections.length; j += 1) {
+        const a = sections[i]!;
+        const b = sections[j]!;
+        if (isAncestor(byParent, a.id, b.id) || isAncestor(byParent, b.id, a.id)) continue;
+        const shared = intersection(a.geometry, b.geometry);
+        if (!shared) continue;
+        findings.push({
+          rule: "covered-content",
+          severity: "error",
+          at: [a.id, b.id],
+          where: shared,
+          message: `sections ${a.id} and ${b.id} overlap by ${Math.round(shared.width)}×${Math.round(shared.height)}px`,
+          suggestion: `move_to ${b.id} clear of ${a.id}, or move the children that make one of them grow`,
         });
       }
     }

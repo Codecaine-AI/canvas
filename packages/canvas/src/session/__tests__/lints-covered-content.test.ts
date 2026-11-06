@@ -306,3 +306,35 @@ describe("covered-content lint", () => {
     expect(findings.some((finding) => finding.severity === "error" && finding.at.includes("t"))).toBe(true);
   });
 });
+
+describe("covered-content: section-on-section", () => {
+  const frame = (id: string, x: number, y: number, width: number, height: number, parentId: string | null = null) =>
+    ({ ...box(id, x, y, width, height, "section"), parentId });
+
+  test("two sections whose frames overlap, neither holding the other, is an error naming both", () => {
+    const findings = coveredContent.check(makeDocument([
+      frame("page", 0, 0, 1200, 800),
+      frame("left", 40, 40, 520, 400, "page"),
+      frame("right", 540, 40, 400, 400, "page"),
+    ]), FIGJAM_CONTEXT).filter((finding) => finding.message.startsWith("sections "));
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      severity: "error",
+      at: ["left", "right"],
+      where: { x: 540, y: 40, width: 20, height: 400 },
+    });
+    expect(findings[0]!.message).toBe("sections left and right overlap by 20×400px");
+  });
+
+  test("nesting at any depth and frames that only touch carry no finding", () => {
+    const findings = coveredContent.check(makeDocument([
+      frame("page", 0, 0, 1200, 800),
+      frame("outer", 40, 40, 600, 600, "page"),
+      frame("inner", 80, 80, 400, 400, "outer"),
+      frame("beside", 640, 40, 400, 400, "page"),
+    ]), FIGJAM_CONTEXT).filter((finding) => finding.message.startsWith("sections "));
+
+    expect(findings).toHaveLength(0);
+  });
+});
