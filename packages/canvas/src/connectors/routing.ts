@@ -200,8 +200,10 @@ function routeConnectionPolyline(
     pointForObjectPosition(toObject, connection.to.position, endAnchor, canvasStyle) ??
     pointForObjectAnchor(toObject, endAnchor, canvasStyle);
 
-  const keepOut = routeKeepOut(fromObject, toObject, start, end, obstacles ?? [], canvasStyle);
+  const withSelves = routeKeepOut(fromObject, toObject, start, end, obstacles ?? [], canvasStyle);
+  const keepOut = { ...withSelves, selves: [] };
   const boxesOnly = withoutSections(keepOut);
+  const detourKeepOut = withoutSections(withSelves);
 
   // Stored bends are drawn only while they stay clear of boxes and the ends'
   // own captions: a move that puts one under them hands the edge back to the
@@ -230,31 +232,36 @@ function routeConnectionPolyline(
   const elbow = routeElbow(start, end, startAnchor, endAnchor, canvasStyle.connectorCornerRadiusPx);
   const tried: Array<RoutedConnection | null> = [straight, elbow];
 
-  // Unrelated sections are kept out of first, so a wire goes around a group it
-  // does not belong to; when that walls the route in, only boxes count.
-  for (const level of [keepOut, boxesOnly]) {
-    if (straight && isClear(straight, level)) return straight;
-    if (isClear(elbow, level)) return elbow;
-    const orthogonal = routeOrthogonalAStar(
-      fromObject,
-      toObject,
-      start,
-      end,
-      startAnchor,
-      endAnchor,
-      aStarObstacles(level),
-      canvasStyle,
-    );
-    if (orthogonal && isClear(orthogonal, level)) return orthogonal;
-    tried.push(orthogonal);
+  // Unrelated sections are kept out first, so a wire goes around a group it
+  // does not belong to.
+  if (straight && isClear(straight, keepOut)) return straight;
+  if (isClear(elbow, keepOut)) return elbow;
+  const aStar = (level: KeepOut) =>
+    routeOrthogonalAStar(fromObject, toObject, start, end, startAnchor, endAnchor, aStarObstacles(level), canvasStyle);
+  const strict = aStar(keepOut);
+  if (strict && isClear(strict, keepOut)) return strict;
+  tried.push(strict);
+  // When sections wall the route in, only boxes count.
+  if (straight && isClear(straight, detourKeepOut)) return straight;
+  if (isClear(elbow, detourKeepOut)) return elbow;
+
+  // The facing sides are walled in. Cheapest first: an elbow from the other
+  // sides an unpinned end may leave from; then A* with only boxes (a failed
+  // A* search is the costly step); then A* from those other sides; then the
+  // same from any side, explicit anchors and pins included; and only then the
+  // least-bad route.
+  const otherSides = detourPairs(fromObject, toObject, connection, startAnchor, endAnchor, false, canvasStyle);
+  const otherElbow = otherSides.find((pair) => isClear(pair.elbow, detourKeepOut));
+  if (otherElbow) return otherElbow.elbow;
+  if (boxesOnly.boxes.length < keepOut.boxes.length) {
+    const relaxed = aStar(boxesOnly);
+    if (relaxed && isClear(relaxed, boxesOnly)) return relaxed;
+    tried.push(relaxed);
   }
-  // The facing sides are walled in: try the other sides an unpinned end may
-  // leave from, then any side (explicit anchors and pins included), and only
-  // then draw the least-bad route.
   const detour =
-    routeDetour(fromObject, toObject, connection, startAnchor, endAnchor, boxesOnly, false, canvasStyle) ??
+    searchDetour(fromObject, toObject, otherSides, detourKeepOut, canvasStyle) ??
     (hasSteeredEnd(connection)
-      ? routeDetour(fromObject, toObject, connection, startAnchor, endAnchor, boxesOnly, true, canvasStyle)
+      ? clearDetour(fromObject, toObject, detourPairs(fromObject, toObject, connection, startAnchor, endAnchor, true, canvasStyle), detourKeepOut, canvasStyle)
       : null);
   return detour ?? leastBlocked(tried, boxesOnly);
 }
@@ -270,11 +277,16 @@ type KeepOutRect = { id: string; bounds: CanvasBounds; section?: boolean; wings?
  * (routingObstacleBounds). `captions`: each endpoint's own caption band —
  * connection bounds keep only the glyph column and other-node avoidance
  * exempts the endpoints, so nothing else keeps a wire off the name painted
- * under its own icon.
+ * under its own icon. `selves`: each endpoint's own connection bounds, which
+ * a detour from a side the router picked must not double back through (an
+ * end pinned inside its own body has none: every route leaves through it).
+ * Only the tiers past the strict search judge them: there a route can come
+ * from a side the router picked, while a strict-tier route keeps the route
+ * its explicit side asked for.
  */
-type KeepOut = { boxes: KeepOutRect[]; captions: KeepOutRect[] };
+type KeepOut = { boxes: KeepOutRect[]; captions: KeepOutRect[]; selves: KeepOutRect[] };
 
-/** What a route runs through: another object's box, or an endpoint's own caption. */
+/** What a route runs through: a box (an endpoint's own body included), or an endpoint's own caption. */
 export type RouteBlocker = { objectId: string; kind: "box" | "caption" };
 
 /** A route may touch an own caption band's edge; any longer run is through its text. */
@@ -296,6 +308,13 @@ function routeKeepOut(
   return {
     boxes: routingObstacleBounds(fromObject, toObject, start, end, obstacles, canvasStyle),
     captions,
+    selves: [
+      { object: fromObject, point: start },
+      { object: toObject, point: end },
+    ]
+      .map(({ object, point }) => ({ id: object.id, bounds: connectionBoundsForObject(object, canvasStyle), point }))
+      .filter(({ bounds, point }) => !boundsStrictlyContain(bounds, point))
+      .map(({ id, bounds }) => ({ id, bounds })),
   };
 }
 
@@ -311,7 +330,7 @@ function captionWings(band: CanvasBounds, column: CanvasBounds): CanvasBounds[] 
 
 /** The same keep-out set without unrelated sections: only boxes and own captions. */
 function withoutSections(keepOut: KeepOut): KeepOut {
-  return { boxes: keepOut.boxes.filter((box) => !box.section), captions: keepOut.captions };
+  return { ...keepOut, boxes: keepOut.boxes.filter((box) => !box.section) };
 }
 
 /** Whether `route` is orthogonal and runs through nothing in `keepOut`. */
@@ -322,7 +341,7 @@ function isClear(route: RoutedConnection, keepOut: KeepOut): boolean {
 
 function routeBlockers(points: ReadonlyArray<CanvasPoint>, keepOut: KeepOut): RouteBlocker[] {
   const blockers: RouteBlocker[] = [];
-  for (const box of keepOut.boxes) {
+  for (const box of [...keepOut.boxes, ...keepOut.selves]) {
     if (polylineCrossesObstacles(points, [box.bounds])) blockers.push({ objectId: box.id, kind: "box" });
   }
   for (const caption of keepOut.captions) {
@@ -356,28 +375,35 @@ function hasSteeredEnd(connection: InteractiveCanvasConnection): boolean {
   );
 }
 
+type DetourPair = {
+  fromSide: Anchor;
+  toSide: Anchor;
+  start: CanvasPoint;
+  end: CanvasPoint;
+  elbow: RoutedConnection;
+  length: number;
+};
+
 /**
- * Tries the other side pairs and returns a clear route, or null: the shortest
- * clear elbow, else the first clear A* route over the pairs in order of elbow
- * length (MAX_DETOUR_SEARCHES of them). An explicit anchor keeps its side and
- * a pin its point, unless `anySide`.
+ * The side pairs a detour may try, shortest elbow first: the other sides an
+ * unpinned end may leave from (an explicit anchor keeps its side and a pin its
+ * point), or with `anySide` every pair, anchors and pins included.
  */
-function routeDetour(
+function detourPairs(
   fromObject: InteractiveCanvasObject,
   toObject: InteractiveCanvasObject,
   connection: InteractiveCanvasConnection,
   startAnchor: Anchor,
   endAnchor: Anchor,
-  keepOut: KeepOut,
   anySide: boolean,
   canvasStyle: CanvasStyle,
-): RoutedConnection | null {
+): DetourPair[] {
   const sides: Anchor[] = ["top", "right", "bottom", "left"];
   const startSides = !anySide && explicitAnchor(connection.from.anchor) ? [startAnchor] : sides;
   const endSides = !anySide && explicitAnchor(connection.to.anchor) ? [endAnchor] : sides;
   const fromPin = anySide ? undefined : connection.from.position;
   const toPin = anySide ? undefined : connection.to.position;
-  const pairs: Array<{ fromSide: Anchor; toSide: Anchor; start: CanvasPoint; end: CanvasPoint; elbow: RoutedConnection; length: number }> = [];
+  const pairs: DetourPair[] = [];
   for (const fromSide of startSides) {
     for (const toSide of endSides) {
       if (!anySide && fromSide === startAnchor && toSide === endAnchor) continue;
@@ -391,9 +417,17 @@ function routeDetour(
       pairs.push({ fromSide, toSide, start, end, elbow, length: polylineLength(elbow.points ?? []) });
     }
   }
-  pairs.sort((a, b) => a.length - b.length);
-  const clearElbow = pairs.find((pair) => isClear(pair.elbow, keepOut));
-  if (clearElbow) return clearElbow.elbow;
+  return pairs.sort((a, b) => a.length - b.length);
+}
+
+/** The first clear A* route over the first MAX_DETOUR_SEARCHES pairs, or null. */
+function searchDetour(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  pairs: ReadonlyArray<DetourPair>,
+  keepOut: KeepOut,
+  canvasStyle: CanvasStyle,
+): RoutedConnection | null {
   for (const pair of pairs.slice(0, MAX_DETOUR_SEARCHES)) {
     const route = routeOrthogonalAStar(
       fromObject, toObject, pair.start, pair.end, pair.fromSide, pair.toSide, aStarObstacles(keepOut), canvasStyle,
@@ -401,6 +435,18 @@ function routeDetour(
     if (route && isClear(route, keepOut)) return route;
   }
   return null;
+}
+
+/** The shortest clear elbow among `pairs`, else the first clear A* route. */
+function clearDetour(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  pairs: ReadonlyArray<DetourPair>,
+  keepOut: KeepOut,
+  canvasStyle: CanvasStyle,
+): RoutedConnection | null {
+  const elbow = pairs.find((pair) => isClear(pair.elbow, keepOut));
+  return elbow ? elbow.elbow : searchDetour(fromObject, toObject, pairs, keepOut, canvasStyle);
 }
 
 /** The last resort: the route through the fewest boxes, then the fewest own captions. */
@@ -446,7 +492,7 @@ export function waypointRouteBlockers(
   const end =
     pointForObjectPosition(toObject, connection.to.position, endAnchor, canvasStyle) ??
     pointForObjectAnchor(toObject, endAnchor, canvasStyle);
-  const keepOut = withoutSections(routeKeepOut(fromObject, toObject, start, end, obstacles, canvasStyle));
+  const keepOut = { ...withoutSections(routeKeepOut(fromObject, toObject, start, end, obstacles, canvasStyle)), selves: [] };
   let fewest: RouteBlocker[] | null = null;
   routeWaypoints(start, end, waypoints.map(([x, y]) => ({ x, y })), startAnchor, endAnchor, {
     fromObject,
