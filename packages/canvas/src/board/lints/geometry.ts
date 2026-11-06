@@ -31,7 +31,8 @@
  */
 import { labelPointFor, routeConnection } from "../../connectors/routing.ts";
 import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../../connectors/label-chip.ts";
-import { belowExtendedBoundsPx, iconGlyphBoxPx } from "../../objects/text-slots.ts";
+import { iconGlyphBoxPx } from "../../objects/text-slots.ts";
+import { captionBandBounds } from "../../objects/geometry.ts";
 import { kindOf } from "../helpers";
 import {
   graphemeClusters,
@@ -142,18 +143,7 @@ export function drawnRectOf(object: InteractiveCanvasObject, canvasStyle?: Canva
  * null when nothing paints under its glyph. Default style when omitted.
  */
 export function captionBand(object: InteractiveCanvasObject, canvasStyle?: CanvasStyle): Rect | null {
-  if (kindOf(object) !== "node") return null;
-  const glyph = iconGlyphBoxPx(object, canvasStyle);
-  const extended = belowExtendedBoundsPx(object, canvasStyle);
-  const top = glyph.y + glyph.height;
-  const height = extended.y + extended.height - top;
-  if (height <= 0) return null;
-  return {
-    x: object.geometry.x + extended.x,
-    y: object.geometry.y + top,
-    width: extended.width,
-    height,
-  };
+  return kindOf(object) === "node" ? captionBandBounds(object, canvasStyle) : null;
 }
 
 /**
