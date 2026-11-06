@@ -107,15 +107,15 @@ describe("broken-edges renderer-path alignment", () => {
         expected: [],
       },
       {
-        name: "orthogonal waypoints can deliberately drive through a blocker",
+        name: "orthogonal waypoints through a blocker are not drawn: the router detours",
         document: makeDocument(
           baseObjects(),
           [{
-            ...connect("waypoint-hit", "source", "target"),
+            ...connect("waypoint-blocked", "source", "target"),
             waypoints: [[100, 50], [400, 50]],
           }],
         ),
-        expected: ["waypoint-hit"],
+        expected: [],
       },
       {
         name: "orthogonal waypoints can deliberately clear a blocker",
