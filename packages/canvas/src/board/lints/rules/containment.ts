@@ -42,9 +42,9 @@ function regionOf(
 }
 
 const GUIDANCE = `A section contains its children, and the page contains everything:
-- content sitting across a section boundary belongs somewhere — move_to the child where it
-  goes, or, when the frame is what is wrong, size it deliberately with resize or
-  fit_section; a section never resizes itself;
+- a section grows by itself to hold a child that crosses its edge; when it cannot (the
+  grow would swallow a neighbor, or the section is locked), move_to the child where it
+  goes, or make room and size the frame with resize or fit_section;
 - the base section is the page: keep everything within it, or grow it (${FRAME_TOLERANCE}px of bleed is
   tolerated; more is an error that blocks commit).`;
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:86c0da37c657e079945dd6112819e3f50608b55119befaecb9dba6a3c84a5b76",
+  "snapshotId": "sha256:24c05f2ef3e1a85f262b553091f1ca8fd37e4cd4aa157e97b24cf23903201fb9",
   "sources": [
     {
       "id": "prompt",
@@ -40,7 +40,7 @@
     {
       "id": "canvas_conventions",
       "path": "packages/canvas/src/authoring/conventions.ts",
-      "sha256": "bbfe0914cfad5a29fbffb32248d0c077ab909aea1d8ce67b590cc994cf01b553"
+      "sha256": "330be79b85dd959a5d807cbe075785e5845c2a05db4a58fa9a1ce5a11a3b9734"
     },
     {
       "id": "contact_sheet",

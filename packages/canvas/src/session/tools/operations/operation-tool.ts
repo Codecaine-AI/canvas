@@ -7,6 +7,7 @@ import { Type, type Static, type TSchema } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { reconcileConnectionWaypoints } from "../../../state/actions/waypoints";
 import { reconcileSectionMembership } from "../../../state/section-membership";
+import { growSectionsToChildren } from "../../apply-ops";
 
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
@@ -148,9 +149,17 @@ export function runOperation<TFields extends OperationFields>(
   // Membership follows geometry, so reconciliation derives state rather than
   // moving layout — and since it only writes `parentId`, it cannot disturb the
   // waypoint verdict taken above.
+  //
+  // Section auto-grow runs on the reconciled tree and before the waypoint
+  // pass, so a grown frame is an ordinary resize that pass judges like any
+  // other. It never changes membership, so the last reconcile agrees with it.
+  const grow = growSectionsToChildren(reconcileSectionMembership(outcome.draft));
   const next = reconcileSectionMembership(
-    reconcileConnectionWaypoints(before, outcome.draft),
+    reconcileConnectionWaypoints(before, grow.document),
   );
+  const notes = grow.grown.length === 0
+    ? outcome.notes
+    : [...(outcome.notes ?? []), `grew ${grow.grown.join(", ")} to hold ${grow.grown.length === 1 ? "its" : "their"} children`];
   // A patch that asks for what the board already holds is legal and did
   // nothing, which is the no-op class rather than an APPLIED line over an
   // empty delta.
@@ -163,7 +172,7 @@ export function runOperation<TFields extends OperationFields>(
     session,
     before,
     `APPLIED · ${outcome.summary}`,
-    { notes: outcome.notes, details },
+    { notes, details },
   );
 
   host.emit(session, {
