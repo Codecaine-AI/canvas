@@ -22,10 +22,10 @@ export const STICKY_GEOMETRY = {
 
 /**
  * Card sticky trim (the schematic themes' `stickyStyle: "card"`): the card
- * fill (the shell's sticky role paint) edged by a hairline, a rule in the
- * color pick's ink down the left side (CanvasStyle.stickyRuleWidthPx), no
- * shadow. Inline `code` chips tint with the text color at the paper chip's
- * alpha (./markdown.tsx).
+ * fill (the shell's sticky role paint) edged by a hairline, a straight rule in
+ * the color pick's ink down the left side just inside the hairline
+ * (CanvasStyle.stickyRuleWidthPx), no shadow. Inline `code` chips tint with
+ * the text color at the paper chip's alpha (./markdown.tsx).
  */
 export const CARD_STICKY_GEOMETRY = {
   borderWidthPx: 1,
@@ -46,13 +46,20 @@ const CHANGED_RING_SHADOW = `0 0 0 5px color-mix(in oklab, ${canvasStyleCssVar("
  */
 function cardStickyTrim(paint: StickyPaint, changed: boolean, canvasStyle: CanvasStyle): CSSProperties | undefined {
   if (paint.shadow) return undefined;
-  const rule = canvasStyle.stickyRuleWidthPx;
   const shadows = [
     ...(changed ? [CHANGED_RING_SHADOW] : []),
-    ...(paint.rule && rule > 0 ? [`inset ${rule}px 0 0 0 ${paint.rule}`] : []),
     ...(paint.border ? [`inset 0 0 0 ${CARD_STICKY_GEOMETRY.borderWidthPx}px ${paint.border}`] : []),
   ];
-  return { boxShadow: shadows.length > 0 ? shadows.join(", ") : "none" };
+  // The rule is a background strip, not an inset shadow: the corner radius
+  // clips its outer edge and its inner edge stays straight (an inset shadow's
+  // inner edge curls with the corners into a hook). It starts inside the
+  // hairline, so the edge runs unbroken around the card.
+  const from = CARD_STICKY_GEOMETRY.borderWidthPx;
+  const to = from + canvasStyle.stickyRuleWidthPx;
+  const rule = paint.rule && to > from
+    ? { background: `linear-gradient(to right, transparent ${from}px, ${paint.rule} ${from}px, ${paint.rule} ${to}px, transparent ${to}px), ${paint.fill}` }
+    : null;
+  return { ...rule, boxShadow: shadows.length > 0 ? shadows.join(", ") : "none" };
 }
 
 /**

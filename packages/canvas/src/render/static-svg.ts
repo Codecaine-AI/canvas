@@ -502,29 +502,27 @@ const STICKY_CODE_CHIP_FILL_OPACITY = 0.08;
 const CARD_STICKY_BORDER_WIDTH_PX = 1;
 
 /**
- * The card note's ink rule down the left side, as the live
- * `inset <ruleWidth>px 0 0 0` box-shadow paints it on a box with
- * `radius` corners: the box minus itself shifted `ruleWidth` right, a strip
- * whose ends curve with the corners (a radius of 0 gives the plain strip).
+ * The card note's ink rule (objects/sticky/def.tsx cardStickyTrim): the
+ * vertical strip from `from` to `from + width` px in from the left edge,
+ * clipped by the box's `radius` corners as the live background strip is. Its
+ * inner edge stays straight; only its ends follow the corner arcs.
  */
-function leftRulePath(geometry: CanvasBounds, ruleWidth: number, radius: number): string {
-  const { x, y, width, height } = geometry;
-  const w = Math.min(ruleWidth, width);
-  const r = Math.min(radius, width / 2, height / 2);
+function leftRulePath(geometry: CanvasBounds, from: number, width: number, radius: number): string {
+  const { x, y, height } = geometry;
+  const a = Math.min(from, geometry.width);
+  const b = Math.min(from + width, geometry.width);
+  const r = Math.min(radius, geometry.width / 2, height / 2);
   const bottom = y + height;
-  if (r <= 0) return `M${fmt(x)} ${fmt(y)}H${fmt(x + w)}V${fmt(bottom)}H${fmt(x)}Z`;
-  const arc = (sweep: 0 | 1, toX: number, toY: number) => `A${fmt(r)} ${fmt(r)} 0 0 ${sweep} ${fmt(toX)} ${fmt(toY)}`;
-  return [
-    `M${fmt(x + r)} ${fmt(y)}`,
-    arc(0, x, y + r),
-    `V${fmt(bottom - r)}`,
-    arc(0, x + r, bottom),
-    `H${fmt(x + r + w)}`,
-    arc(1, x + w, bottom - r),
-    `V${fmt(y + r)}`,
-    arc(1, x + r + w, y),
-    "Z",
-  ].join("");
+  // How far the corner arc sits below the top edge at `d` px in from the left.
+  const dip = (d: number) => (d >= r ? 0 : r - Math.sqrt(r * r - (r - d) * (r - d)));
+  const arc = (toX: number, toY: number) => `A${fmt(r)} ${fmt(r)} 0 0 1 ${fmt(toX)} ${fmt(toY)}`;
+  const top = [`M${fmt(x + a)} ${fmt(y + dip(a))}`];
+  if (a < r) top.push(arc(x + Math.min(b, r), y + dip(Math.min(b, r))));
+  if (b > r) top.push(`H${fmt(x + b)}`);
+  const end = [`V${fmt(bottom - dip(b))}`];
+  if (b > r) end.push(`H${fmt(x + Math.max(a, r))}`);
+  if (a < r) end.push(arc(x + a, bottom - dip(a)));
+  return [...top, ...end, "Z"].join("");
 }
 
 /**
@@ -532,9 +530,9 @@ function leftRulePath(geometry: CanvasBounds, ruleWidth: number, radius: number)
  * resolveStickyPaint), mirroring objects/sticky/def.tsx. `paper`: the flat
  * square sticky fill with the down-biased shadow (objects/sticky/def.tsx
  * STICKY_GEOMETRY) — drawn without the filter when wholly outside the
- * viewBox. `card`: the card fill, a hairline edge, and an ink rule
- * (stickyRuleWidthPx) down the left side (the live inset box-shadows: inside
- * the box, rule on top), no shadow. Both take stickyCornerRadiusPx.
+ * viewBox. `card`: the card fill, a straight ink rule (stickyRuleWidthPx)
+ * just inside the left hairline, then the hairline edge over it, no shadow.
+ * Both take stickyCornerRadiusPx.
  */
 function renderStickyBody(
   object: InteractiveCanvasObject,
@@ -569,6 +567,11 @@ function renderStickyBody(
       fill: paint.fill,
     }),
   ];
+  // The rule under the hairline, as the live background strip sits under its inset shadow.
+  if (paint.rule && canvasStyle.stickyRuleWidthPx > 0) {
+    const d = leftRulePath(geometry, CARD_STICKY_BORDER_WIDTH_PX, canvasStyle.stickyRuleWidthPx, radius);
+    parts.push(tag("path", { d, fill: paint.rule }));
+  }
   if (paint.border) {
     const inset = CARD_STICKY_BORDER_WIDTH_PX / 2;
     parts.push(
@@ -583,9 +586,6 @@ function renderStickyBody(
         "stroke-width": CARD_STICKY_BORDER_WIDTH_PX,
       }),
     );
-  }
-  if (paint.rule && canvasStyle.stickyRuleWidthPx > 0) {
-    parts.push(tag("path", { d: leftRulePath(geometry, canvasStyle.stickyRuleWidthPx, radius), fill: paint.rule }));
   }
   return parts.join("");
 }

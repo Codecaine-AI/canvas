@@ -285,19 +285,25 @@ describe("connector label chip per theme", () => {
 });
 
 describe("card stickies", () => {
-  it("live: card fill, hairline edge and 3px ink rule as inset shadows, no paper shadow", () => {
+  it("live: card fill, hairline edge, and a straight 3px ink rule inside it, no paper shadow", () => {
     const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
-    expect(note.style.background).toBe("#F8F8F7");
-    expect(note.style.boxShadow).toBe("inset 3px 0 0 0 #805F01, inset 0 0 0 1px #E6E5E3");
+    // The rule is a background strip the corner radius clips, so its inner edge never curls into a hook.
+    expect(note.style.background).toBe(
+      "linear-gradient(to right, transparent 1px, #805F01 1px, #805F01 4px, transparent 4px) #F8F8F7",
+    );
+    expect(note.style.boxShadow).toBe("inset 0 0 0 1px #E6E5E3");
   });
 
-  it("static: the same card with 4px corners, edge, and a rule that curves with them — and no shadow filter", () => {
+  it("static: the same card with 4px corners, a straight rule clipped by them under the edge, and no shadow filter", () => {
     const svg = staticSvg("schematic-light");
     expect(svg).not.toContain("feDropShadow");
     expect(svg).toContain('<rect x="900" y="80" width="240" height="160" rx="4" fill="#F8F8F7"/>');
     expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" rx="3.5" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
-    // The live inset box-shadow on a rounded box: the box minus itself shifted 3px right.
-    expect(svg).toContain('<path d="M904 80A4 4 0 0 0 900 84V236A4 4 0 0 0 904 240H907A4 4 0 0 1 903 236V84A4 4 0 0 1 907 80Z" fill="#805F01"/>');
+    // x 901 to 904: only its ends follow the corner arcs, its inner edge is one straight line,
+    // and it paints before the hairline, as the live background strip sits under the inset shadow.
+    expect(svg).toContain(
+      '<path d="M901 81.35A4 4 0 0 1 904 80V240A4 4 0 0 1 901 238.65Z" fill="#805F01"/><rect x="900.5" y="80.5"',
+    );
   });
 
   it("schematic note text reads under the node names: 16px on a 24px pitch, ink on the card at 4.5:1 or more", () => {
