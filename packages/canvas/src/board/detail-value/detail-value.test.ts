@@ -113,13 +113,16 @@ describe("detail-value", () => {
 
     const line = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
 
-    expect(line).toBe("DETAIL · Jev judged 2 node details (2 asked, 0 cached) · 1 to remove (confidence ≥ 0.3) · 700 input tokens");
+    expect(line).toBe("DETAIL · Jev judged 2 node details (2 asked, 0 cached) · 1 to remove (confidence ≥ 0.5) · 700 input tokens");
     // Both questions went in one request, carrying the board, section, and wired neighbors.
     expect(jev.bodies).toHaveLength(1);
     expect(jev.bodies[0]!.state).toEqual({ board_title: "Shop checkout" });
     const sent = Object.values(jev.bodies[0]!.questions).map((question) => question.instructions.node);
     expect(sent).toContainEqual({ name: "Payment step", detail: "part of checkout", section: "Checkout", wired_to: ["Orders table"] });
     expect(Object.keys(Object.values(jev.bodies[0]!.questions)[0]!.criteria)).toEqual(["keep", "remove"]);
+    // A variant that sets a box apart from its siblings (inline or file) counts as a fact.
+    const keep = Object.values(jev.bodies[0]!.questions)[0]!.criteria.keep as { counts_as_a_fact: string[] };
+    expect(keep.counts_as_a_fact).toContainEqual(expect.stringContaining("inline or file"));
 
     const findings = detailFindings(file);
     expect(findings.map(({ severity, at, suggestion }) => ({ severity, at, suggestion })))
@@ -134,14 +137,14 @@ describe("detail-value", () => {
 
     // A re-check of the unchanged board asks nothing.
     const again = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
-    expect(again).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.3)");
+    expect(again).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.5)");
     expect(jev.bodies).toHaveLength(1);
   });
 
   test("a remove below the confidence threshold is no finding", async () => {
     const file = openCanvasFile(boardFile());
-    // p(remove) 0.6 is confidence 0.2, under the 0.3 cut.
-    const jev = fakeJev({ "part of checkout": 0.6 });
+    // p(remove) 0.7 is confidence 0.4, under the 0.5 cut.
+    const jev = fakeJev({ "part of checkout": 0.7 });
     await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
     expect(detailFindings(file)).toEqual([]);
   });

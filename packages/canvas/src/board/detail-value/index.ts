@@ -36,19 +36,21 @@ import {
 export const DETAIL_VALUE_MODEL = "jev-1.14.0";
 
 /** Bump when the question, the options, or the state shape changes. Part of every cache key. */
-export const DETAIL_PROMPT_VERSION = 2;
+export const DETAIL_PROMPT_VERSION = 3;
 
 /**
  * A `remove` verdict at or above this confidence is an error finding.
- * Confidence on a two-option Choice is |2p − 1|, so 0.3 means p(remove) ≥ 0.65.
- * Calibrated with prompt version 2 on 1,664 details from the 14 Archon boards
- * and 62 replay boards: on a 40-row hand-read sample, 18 of the 20 removals
- * at this cut were filler (the two misses were weak facts: a scope, a side
- * effect), and every Archon removal was filler. It removes 8 of 230 Archon
- * details and 145 of 1,434 replay details. Raising it to 0.4 keeps the
- * obvious paraphrases ("inline prompt text" under `prompt`) on the board.
+ * Confidence on a two-option Choice is |2p − 1|, so 0.5 means p(remove) ≥ 0.75.
+ * Calibrated with prompt version 3 on 1,664 details from the 14 Archon boards
+ * and 62 replay boards. It removes 3 of 230 Archon details, all filler
+ * ("defined workflow" twice, "runs the bundle's agent"), and 85 of 1,434
+ * replay details. On a 40-row hand-read sample, 11 of the 12 removals at
+ * this cut were filler (the miss: "discard partial work", a side effect).
+ * At 0.4 or 0.3 the cut also removes Archon command names ("workflow wake,
+ * workflow signal", "archon workflow signal"), so it stays at 0.5 and leaves
+ * the weaker filler ("agent applies findings", p 0.68) on the board.
  */
-export const DETAIL_REMOVE_THRESHOLD = 0.3;
+export const DETAIL_REMOVE_THRESHOLD = 0.5;
 
 /** Questions per request. Each question is small; this keeps a request far under the 64k context. */
 const BATCH_SIZE = 40;
@@ -177,6 +179,7 @@ const CRITERIA: JevChoiceQuestion["criteria"] = {
       "a status, such as proposed, reserved, later or not in version 1",
       "a payload, data shape, format or protocol",
       "a named product, model, library or host",
+      "a variant that sets the box apart from sibling boxes of the same kind: inline or file, sync or async, local or remote, a mode or a source",
     ],
     examples: [
       { name: "Orders table", detail: "status, total_cents" },
@@ -186,6 +189,8 @@ const CRITERIA: JevChoiceQuestion["criteria"] = {
       { name: "Export job", detail: "nightly 02:00 UTC" },
       { name: "Retry skipped", detail: "card declined" },
       { name: "Billing API", detail: "proposed · not in v1" },
+      { name: "Config", detail: "read from env, not a file" },
+      { name: "Email sender", detail: "async · queued" },
     ],
   },
   remove: {
@@ -195,7 +200,7 @@ const CRITERIA: JevChoiceQuestion["criteria"] = {
       "it repeats `node.section` or the name of a box in `node.wired_to`",
       "it says in plain words what the box does, when the name already implies it",
       "it describes the box's job in generic words that fit many systems",
-      "it says what kind of thing the box is, which its name already shows",
+      "it says what kind of thing the box is, which its name already shows (a variant that sets it apart from its siblings is a fact, not a kind)",
       "it is a slogan, a vague summary, decoration or filler",
     ],
     examples: [
