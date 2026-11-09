@@ -7,7 +7,7 @@
  * file written by an older build, or a route with no clear path can still
  * leave one of these behind, so this rule reports what is definitely wrong
  * on the board as it stands, with no margins and no near misses:
- * - a box (shape or icon) whose name or detail definitely overflows it: the
+ * - a box (shape or icon) whose name definitely overflows it: the
  *   textFitReport "overflows" verdict, definite. Stickies and sections do
  *   not auto-size; canvas_check's TEXT note names theirs;
  * - a child extending outside its section's rect;
@@ -37,14 +37,10 @@ an older file, a route with no clear path). Blocking (error tier):
 - a self-loop, dangling or zero-length wire — delete it, or reconnect it with change_connection;
 - a wire drawn through a box because no clear route exists — move_to the box or an end so a path opens.`;
 
-/** The remedy for an overflow, worded for what clipped: the name, the detail line, or both. */
+/** The remedy for an overflowing name: grow to the needed size, else shorten it. */
 function textFix(id: string, report: TextFitReport): string {
   const needed = report.neededSize;
-  const grow = needed ? `resize ${id} to ≥${needed.width}×${needed.height}` : undefined;
-  const line = report.detailLine;
-  if (line === undefined || (line.shown && !line.truncated)) return grow ?? `shorten ${id}'s text`;
-  if (!line.shown) return grow ? `${grow} so the detail fits under the name, or clear the detail` : `clear ${id}'s detail`;
-  return grow ?? `shorten ${id}'s detail to ≤${line.fittingChars} chars`;
+  return needed ? `resize ${id} to ≥${needed.width}×${needed.height}` : `shorten ${id}'s text`;
 }
 
 /** How far `inner` reaches past `outer`'s rect on its worst side (≤ 0 when inside). */
@@ -75,7 +71,7 @@ export const rule: LayoutRule = {
     for (const object of document.objects) {
       if (kindOf(object) !== "node") continue;
       const text = object.text ?? "";
-      if (text === "" && !object.detail?.trim()) continue;
+      if (text === "") continue;
       const report = textFitReport(object, object.geometry, text, canvasStyle);
       if (report.verdict !== "overflows" || !report.definite) continue;
       findings.push({

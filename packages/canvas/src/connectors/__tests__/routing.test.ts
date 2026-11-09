@@ -513,13 +513,12 @@ describe("routing", () => {
 
 describe("routeConnection: styled below-band captions", () => {
   it("starts a bottom-anchored connection at the styled caption band's bottom", () => {
-    const style = { ...DEFAULT_CANVAS_STYLE, detailFontSizePx: 20 };
+    const style = { ...DEFAULT_CANVAS_STYLE, textFontSizePx: 26 };
     const icon: InteractiveCanvasObject = {
       id: "from",
       type: "icon",
       icon: "database",
-      text: "DB",
-      detail: "port: 5432",
+      text: "Orders database",
       geometry: { x: 0, y: 0, width: 64, height: 64 },
     };
     const below = { ...object("to", -18, 300) };
@@ -536,7 +535,6 @@ describe("routeConnection: captions wider than the glyph", () => {
   const source = object("from", 100, 102);
 
   for (const [label, overrides] of [
-    ["a detail line", { text: "Orders", detail: "claude-sonnet-4 · 200k ctx" }],
     ["a long name", { text: "Adapt Question Based on Interview History" }],
   ] as const) {
     it(`ends a left-side connection on the glyph edge for ${label}`, () => {
@@ -566,8 +564,7 @@ describe("routeConnection: other nodes' caption bands are obstacles", () => {
       id: "mid",
       type: "icon",
       icon: "database",
-      text: "Orders",
-      detail: "claude-sonnet-4 · 200k ctx",
+      text: "Adapt Question Based on Interview History",
       geometry: { x: 400, y: 200, width: 64, height: 64 },
     };
     const caption = hitBoundsForObject(icon);
@@ -575,7 +572,8 @@ describe("routeConnection: other nodes' caption bands are obstacles", () => {
     // The caption overhangs the glyph column on the left; a wire down that overhang
     // misses the glyph but runs through the caption text.
     expect(caption.x).toBeLessThan(glyph.x - 20);
-    const column = caption.x + 10;
+    // A whole-pixel column: a wrapped name's band edge is fractional.
+    const column = Math.ceil(caption.x) + 10;
     const from = { ...object("from", column - 50, 0) };
     const to = { ...object("to", column - 50, 500) };
     expect(column).toBeLessThan(glyph.x);

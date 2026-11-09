@@ -1,6 +1,8 @@
 /**
- * The object `detail` line and the section header `icon` (schematic theme
- * contract §1) at the two places a field can be silently lost:
+ * The stored object `detail` (older boards keep it readable, though it never
+ * renders: a node shows its name only) and the section header `icon`
+ * (schematic theme contract §1) at the two places a field can be silently
+ * lost:
  *
  *  - the load boundary — validateInteractiveCanvasDocument re-builds every
  *    object field by field, so a field missing from that whitelist is eaten
@@ -151,24 +153,19 @@ describe("actions — detail write paths", () => {
     expect("detail" in objectById(state, "note")).toBe(false);
   });
 
-  it("canvas.addObject seeds a trimmed detail and a section icon; stickies take no detail", () => {
+  it("canvas.addObject seeds a section icon, and no new object carries a detail", () => {
     let state = stateWith([]);
     state = reduceInteractiveCanvasState(state, {
       type: "canvas.addObject",
       objectType: "section",
       text: "Data",
-      detail: " us-east-1 ",
       icon: "memory",
     });
-    state = reduceInteractiveCanvasState(state, {
-      type: "canvas.addObject",
-      objectType: "sticky",
-      detail: "ignored",
-    });
-    const [section, sticky] = state.document.objects;
-    expect(section).toMatchObject({ type: "section", detail: "us-east-1", icon: "memory" });
-    expect(sticky?.type).toBe("sticky");
-    expect("detail" in sticky!).toBe(false);
+    state = reduceInteractiveCanvasState(state, { type: "canvas.addObject", objectType: "process", text: "API" });
+    const [section, shape] = state.document.objects;
+    expect(section).toMatchObject({ type: "section", icon: "memory" });
+    expect("detail" in section!).toBe(false);
+    expect("detail" in shape!).toBe(false);
   });
 
   it("shape-swap carries the detail between shapes and drops it on a sticky", () => {

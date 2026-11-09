@@ -84,7 +84,6 @@ interface ChannelField {
 
 const OBJECT_CHANNEL_FIELDS: readonly ChannelField[] = [
   { field: "text" },
-  { field: "detail" },
   { field: "color", fallback: "gray" },
   { field: "parentId" },
   { field: "style" },
@@ -123,16 +122,11 @@ function isSection(object: InteractiveCanvasObject): boolean {
 
 /**
  * What an added object's DELTA line carries beyond type, box, and name: a
- * section's header glyph and the one-line detail, when set — the same two
- * extras the digest prints, in the same spelling.
+ * section's header glyph, when set — the extra the digest prints, in the same
+ * spelling. A stored `detail` never renders, so it never prints.
  */
 function addedObjectExtras(object: InteractiveCanvasObject): string {
-  const extras: string[] = [];
-  if (isSection(object) && object.icon !== undefined) extras.push(`icon=${object.icon}`);
-  if (object.detail !== undefined && object.detail.trim() !== "") {
-    extras.push(`detail=${JSON.stringify(object.detail)}`);
-  }
-  return extras.length > 0 ? ` ${extras.join(" ")}` : "";
+  return isSection(object) && object.icon !== undefined ? ` icon=${object.icon}` : "";
 }
 
 export interface DocumentDelta {
@@ -363,7 +357,6 @@ export function lintDeltaBlock(
  */
 const OBJECT_DIFF_WORDS: Record<string, string> = {
   text: "retexted",
-  detail: "redetailed",
   color: "recolored",
   style: "restyled",
   type: "reshaped",
@@ -387,6 +380,8 @@ function updateObjectDescriptors(
   const parts: string[] = [];
   const target = baseline.objects.find((object) => object.id === operation.objectId);
   for (const [key, value] of Object.entries(operation.patch)) {
+    // A stored detail never renders, so a change to one is no change to read.
+    if (key === "detail") continue;
     if (key === "icon" && target !== undefined && isSection(target)) {
       parts.push(SECTION_ICON_DIFF_WORD);
       continue;

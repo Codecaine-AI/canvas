@@ -30,7 +30,7 @@ import type { Static } from "@mariozechner/pi-ai";
 
 import { CANVAS_COLORS, CANVAS_ICON_GLYPHS } from "../../state/schema";
 
-import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../board/text-rules";
+import { NAME_TARGET_WORDS } from "../../board/text-rules";
 import { SHAPE_OBJECT_TYPES } from "../perception/op-surface";
 import { BRAND_GLYPH_PREFIX } from "./glyph-names";
 import { PlaceableType } from "./placeable-types";
@@ -68,30 +68,17 @@ export const Glyph = StringEnum([...CANVAS_ICON_GLYPHS], {
 });
 
 // ---------------------------------------------------------------------------
-// Name + detail — the text convention the descriptions below teach
+// Names — the text convention the descriptions below teach
 // ---------------------------------------------------------------------------
 //
-// A shape or icon carries a NAME (`text`) and at most ONE short fact
-// (`detail`), rendered muted on one line under the name. A section carries a
-// title only. Prose goes on a sticky. The numbers come from
-// board/text-rules.ts, so every surface quotes one limit. The descriptions
-// are the steering; nothing enforces them, because an overlong name is legal
-// and only reads badly.
+// A shape, icon or section shows its NAME (`text`) only. Extra context goes
+// on a sticky note next to it. The numbers come from board/text-rules.ts, so
+// every surface quotes one limit. The descriptions are the steering; nothing
+// enforces them, because an overlong name is legal and only reads badly.
 
 /** What a name is, said once for every field that writes one. */
 export const NAME_RULE =
   `a short name — what the thing is in a few words (≤ ~${NAME_TARGET_WORDS}), one line, no sentences`;
-
-/** The limits every detail field quotes. */
-const DETAIL_LIMITS = `≤ ${DETAIL_MAX_CHARS} chars, one line, no sentences`;
-
-/**
- * What a detail is, said once for every field that writes one. A free string
- * with no length cap everywhere it appears: an overlong detail applies.
- */
-export const DETAIL_RULE =
-  `ONE short fact shown under the name: a port, path, version, model, or host — `
-  + `${DETAIL_LIMITS}. Explanations go on a sticky`;
 
 /**
  * A section's header glyph, as a FREE STRING rather than the `Glyph` enum: an
@@ -256,7 +243,6 @@ export const ObjectPayload = Type.Object(
     id: Id,
     type: ShapeType,
     text: Type.Optional(Type.String()),
-    detail: Type.Optional(Type.String()),
     color: Type.Optional(Color),
     geometry: Geometry,
     direction: Type.Optional(Direction),
@@ -270,7 +256,6 @@ export const ObjectPatch = Type.Object(
   {
     type: Type.Optional(ShapeType),
     text: Type.Optional(Type.String()),
-    detail: Type.Optional(Type.String()),
     color: Type.Optional(Color),
     geometry: Type.Optional(Geometry),
     direction: Type.Optional(Direction),
@@ -332,17 +317,13 @@ export type ConnectionPatch = Static<typeof ConnectionPatch>;
 // The payload/patch shapes above are not a second tool surface: they are the
 // internal vocabulary a gesture lowers onto, and nothing above this line except
 // the SectionIcon field is offered to the model directly.
-//
-// The one-line `detail` is the exception to "typing is a later gesture": it is
-// the fact that belongs to a node's name, so a placement may carry it the way
-// a frame's title rides on place_section — one call per node instead of two.
 
 /**
  * `place_section` — drawing a frame. Titling it is part of the gesture, so
  * `text` is required; the drawn size is optional because a frame dropped
  * without a drag takes the default section footprint. The header's glyph is
  * part of the same chip as the title, so it rides along too, and so does the
- * frame's color. A section has no detail: its header is the title alone.
+ * frame's color. The header is the title alone.
  */
 export const PlaceSectionParams = Type.Object(
   {
@@ -372,8 +353,8 @@ export const PlaceStickyParams = Type.Object(
 export type PlaceStickyParams = Static<typeof PlaceStickyParams>;
 
 /**
- * `place_shape` — the pick and the click, plus the name, the one-line detail
- * and the color, each optional. No direction: that is `change_shape`
+ * `place_shape` — the pick and the click, plus the name and the color, each
+ * optional. A node shows its name only. No direction: that is `change_shape`
  * afterward. `type` is the FOLDED vocabulary — shape types with the icon
  * glyphs folded in as types of their own — so placing "decision" and placing
  * "memory" are the same gesture with a different pick (see ./placeable-types).
@@ -386,11 +367,6 @@ export const PlaceShapeParams = Type.Object(
     text: Type.Optional(Type.String({
       description: `The name, ${NAME_RULE}. Omit it to place the shape untitled and name it with update_text.`,
     })),
-    detail: Type.Optional(Type.String({
-      description:
-        `Optional: ONE short fact shown under the name — a port, path, version, model, or host; ${DETAIL_LIMITS}.`
-        + " Explanations go on a sticky.",
-    })),
     color: Type.Optional(Color),
   },
   { ...Seal, description: "Place a shape at `at` (its top-left corner), named and colored in the same call." },
@@ -399,10 +375,10 @@ export type PlaceShapeParams = Static<typeof PlaceShapeParams>;
 
 /**
  * `clone` — "make another one of these". Everything about the source travels
- * with the copy (kind, size, color, shape type/direction/icon, detail, border
- * style), which is the whole point: a row of options matches without
- * re-specifying a single number. `text` and `detail` are the two things a row
- * of peers differs in, so each can be overridden in the same call.
+ * with the copy (kind, size, color, shape type/direction/icon, border style),
+ * which is the whole point: a row of options matches without re-specifying a
+ * single number. `text` is what a row of peers differs in, so it can be
+ * overridden in the same call.
  *
  * `at` and `by` are MUTUALLY EXCLUSIVE and both optional — a constraint JSON
  * Schema cannot state without a `oneOf` at the root, which the wire rules above
@@ -417,9 +393,6 @@ export const CloneParams = Type.Object(
     by: Type.Optional(Point),
     text: Type.Optional(Type.String({
       description: "Text for the copy. Omit it and the source's text carries over.",
-    })),
-    detail: Type.Optional(Type.String({
-      description: "Detail line for the copy. Omit it and the source's detail carries over; empty clears it.",
     })),
   },
   {

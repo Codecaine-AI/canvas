@@ -60,9 +60,9 @@ export function rectsIntersect(a: Rect, b: Rect): boolean {
 
 /**
  * The world-space painted extent of one object: its geometry rect, plus the
- * below-glyph caption band for below-text types (icon captions — the name,
- * then the detail line — render under the glyph box, unclamped), plus — for
- * a section whose header carries a title, icon, or detail — the natural-size
+ * below-glyph caption band for below-text types (icon captions — the name
+ * — render under the glyph box, unclamped), plus — for a section whose
+ * header carries a title or icon — the natural-size
  * (scale 1) title chip. Chip counter-scale at a specific camera zoom is the
  * caller's concern (see render/views.ts): world-space painted bounds are
  * measured at zoom 1. `canvasStyle` (partial bags normalized) sizes the title
@@ -72,8 +72,8 @@ export function objectPaintedBounds(
   object: InteractiveCanvasObject,
   canvasStyle?: Partial<CanvasStyle>,
 ): Rect {
-  // belowExtendedBoundsPx returns the glyph box ∪ caption band (name lines
-  // plus the detail line, sized in the style's detail font) in object-local
+  // belowExtendedBoundsPx returns the glyph box ∪ caption band (the name
+  // lines, sized in the style's name font) in object-local
   // coordinates (glyph box alone for types without a below band, or when
   // the band is empty/hidden).
   const local = belowExtendedBoundsPx(object, normalizeCanvasStyle(canvasStyle));

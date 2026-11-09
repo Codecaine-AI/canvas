@@ -7,9 +7,9 @@
  * ids it touched. Two rules, in order:
  *
  * 1. GROW TO FIT. When the renderer's own wrap/clamp verdict
- *    (board/text-fit.ts) says the name or the detail line does not show
- *    whole, the node grows to `neededSize`, each side rounded up to the
- *    20px agent grid. It never shrinks. It keeps its center, so a node in a
+ *    (board/text-fit.ts) says the name does not show whole, the node
+ *    grows to `neededSize`, each side rounded up to the 20px agent grid.
+ *    It never shrinks. It keeps its center, so a node in a
  *    row stays in that row: an on-grid side grows by whole 40px steps (two
  *    grid units), so its corner stays on the grid and its center does not
  *    move, however many edits it takes to get there. `resize` and
@@ -49,7 +49,7 @@
  *
  * Left alone: paper stickies (their square is their own business), sections (their
  * frames fit their contents), icons as peers (the glyph tile does not grow;
- * an icon still widens for its caption's detail line under rule 1), and any
+ * an icon's caption band sizes itself to its name), and any
  * node under a lock.
  */
 import type {

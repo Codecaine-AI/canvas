@@ -3,7 +3,6 @@
 import { useLayoutEffect, useRef, type CSSProperties } from "react";
 import { flat } from "@codecaine-ai/design-system";
 import { objectDefFor } from "../../../../objects/object-def";
-import { SlotDetailLine } from "../../../../objects/object-shell";
 import {
   resolveTextSlot,
   slotLineHeightPx,
@@ -158,10 +157,6 @@ interface SlotTextEditorProps {
  * flex-aligns an auto-height textarea for center/bottom slots and below-
  * glyph bands, and stretches it for top-anchored area slots (sticky body —
  * which shows its RAW markdown source here — and code blocks).
- *
- * The object's detail line (not edited here — the Inspector edits it) renders
- * under the textarea exactly as it does at rest, so the name block + detail
- * center as one block and the textarea sits exactly over the at-rest name.
  */
 function SlotTextEditor({ target, slot, value, setValue, commit, cancel }: SlotTextEditorProps) {
   const canvasStyle = useCanvasStyle();
@@ -251,7 +246,6 @@ function SlotTextEditor({ target, slot, value, setValue, commit, cancel }: SlotT
           WebkitUserSelect: "text",
         }}
       />
-      {resolved.detail ? <SlotDetailLine detail={resolved.detail} textAlign={typography.textAlign} /> : null}
     </div>
   );
 }

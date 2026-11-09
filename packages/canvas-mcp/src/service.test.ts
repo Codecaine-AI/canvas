@@ -279,7 +279,7 @@ describe("canvas service", () => {
     expect(textOf(renamed)).not.toContain("chip-adapt-question's name");
   });
 
-  test("a node's detail and a section's header glyph save to the file and read back in the digest", async () => {
+  test("a section's header glyph saves to the file and reads back in the digest; a node detail is dropped, never saved", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
     const service = createCanvasService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
@@ -292,11 +292,15 @@ describe("canvas service", () => {
       icon: "brand-bun",
     });
     expect(placed.isError).toBeUndefined();
-    const shape = await service.call("place_shape", { id: "mcp-db", type: "database", at: [4040, 80], detail: ":5432" });
+    // place_shape has no detail field: the schema refuses one.
+    const refused = await service.call("place_shape", { id: "mcp-db", type: "database", at: [4040, 80], detail: ":5432" });
+    expect(refused.isError).toBe(true);
+    const shape = await service.call("place_shape", { id: "mcp-db", type: "database", at: [4040, 80] });
     expect(shape.isError).toBeUndefined();
     const named = await service.call("update_text", { id: "mcp-db", text: "Postgres", detail: "16 · :5432" });
     expect(named.isError).toBeUndefined();
-    // No residual: the reducer's replay reproduced the draft, detail and glyph included.
+    expect(textOf(named)).toContain("detail dropped — a node shows its name only");
+    // No residual: the reducer's replay reproduced the draft, glyph included.
     for (const result of [placed, shape, named]) expect(textOf(result)).not.toContain("NOTE ·");
 
     const saved = readDoc(path);
@@ -309,14 +313,14 @@ describe("canvas service", () => {
       type: "icon",
       icon: "database",
       text: "Postgres",
-      detail: "16 · :5432",
     });
+    expect(saved.objects.find((object: any) => object.id === "mcp-db")).not.toHaveProperty("detail");
 
     const reopened = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(textOf(reopened)).toContain('mcp-services section "Bun services"');
     expect(textOf(reopened)).toContain("icon=brand-bun");
     expect(textOf(reopened)).toContain('mcp-db database "Postgres"');
-    expect(textOf(reopened)).toContain('detail="16 · :5432"');
+    expect(textOf(reopened)).not.toContain("detail=");
 
     // An enum miss on the folded type vocabulary comes back with the names it was
     // reaching for, appended to the schema's own refusal.

@@ -2,7 +2,6 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { CanvasStage } from "../CanvasStage";
 import { canvasThemePreset, type CanvasStyle, type CanvasThemeId } from "../../theme/canvas-style";
-import { CANVAS_MONO_FONT_STACK } from "../../theme/fonts";
 import { resolveIconPaint, resolveIconTilePaint } from "../../theme/palette";
 import { resolveIconGlyph } from "../../objects/shapes/icon/icon-glyphs";
 import { iconTileGlyphStrokeWidth } from "../../objects/shapes/icon/icon-tile";
@@ -13,9 +12,9 @@ afterEach(() => {
 });
 
 /**
- * The LIVE stage's shape / icon / detail rendering under the theme model —
- * the same decisions the static renderer makes (render/__tests__/
- * static-svg-shapes-detail.test.ts pins those).
+ * The LIVE stage's shape / icon rendering under the theme model — the same
+ * decisions the static renderer makes (render/__tests__/
+ * static-svg-shapes-icons.test.ts pins those). A stored detail never paints.
  */
 
 function stage(objects: InteractiveCanvasObject[], theme: CanvasThemeId | CanvasStyle = "figjam") {
@@ -64,82 +63,35 @@ function objectNode(container: HTMLElement, id: string): HTMLElement {
   return node;
 }
 
-describe("live detail line", () => {
-  it("renders under the name in a center slot: collapsed, one line, ellipsized, body-text mono", () => {
-    const container = stage([shape({ detail: "Function\nCalling LLM" })], "schematic-light");
-    const node = objectNode(container, "s1");
-    const detail = node.querySelector("[data-canvas-text-detail]") as HTMLElement;
-    expect(detail.textContent).toBe("Function Calling LLM");
-    expect(detail.style.whiteSpace).toBe("nowrap");
-    expect(detail.style.overflow).toBe("hidden");
-    expect(detail.style.textOverflow).toBe("ellipsis");
-    expect(detail.style.fontFamily).toBe(CANVAS_MONO_FONT_STACK);
-    expect(detail.style.fontSize).toBe("14px");
-    expect(detail.style.fontWeight).toBe("500");
-    expect(detail.style.lineHeight).toBe("18.2px");
-    expect(detail.style.marginTop).toBe("3px");
-    expect(detail.style.color).toBe("#2A2A2A");
-    // Name block + detail sit in one centered flex column; the name's clamp
-    // gave up lines to the detail's 3 + 18.2px reserve (56px slot of 21px name
-    // lines — 17.5px × 1.2: 2 lines → 1).
-    const slot = node.querySelector("[data-canvas-text-slot]") as HTMLElement;
-    expect(slot.style.justifyContent).toBe("center");
+describe("a stored detail never paints live: a node shows its name only", () => {
+  it("a center slot shows the name alone, with the whole slot for its lines", () => {
+    const node = objectNode(stage([shape({ detail: "Function\nCalling LLM" })], "schematic-light"), "s1");
+    expect(node.querySelector("[data-canvas-text-detail]")).toBeNull();
+    expect(node.textContent).not.toContain("Calling");
     const label = node.querySelector(".interactive-canvas-object-label") as HTMLElement;
-    expect(label.nextElementSibling).toBe(detail);
-    expect(label.style.maxHeight).toBe("21px");
+    expect(label.nextElementSibling).toBeNull();
+    // The 56px slot holds two 21px name lines (17.5px × 1.2), nothing reserved under them.
+    expect(label.style.maxHeight).toBe("42px");
     expect(label.style.fontSize).toBe("17.5px");
     expect(label.style.color).toBe("#1F1F1F");
     expect(label.style.fontWeight).toBe("600");
   });
 
-  it("is absent when the box is too short for a name line plus the detail, and on stickies", () => {
+  it("an icon's below band holds the caption only, and a detail-only node paints no text", () => {
     const container = stage(
-      [
-        shape({ detail: ":4820", geometry: { x: 0, y: 0, width: 200, height: 40 } }),
-        shape({
-          id: "n1",
-          type: "sticky",
-          style: { shape: "note" },
-          text: "Body",
-          detail: "never",
-          color: "yellow",
-          geometry: { x: 300, y: 0, width: 240, height: 200 },
-        }),
-      ],
-      "schematic-light",
+      [icon({ detail: "postgres 16" }), shape({ id: "s2", text: "", detail: "detail only", geometry: { x: 300, y: 0, width: 240, height: 80 } })],
+      "schematic-dark",
     );
-    expect(container.querySelector("[data-canvas-text-detail]")).toBeNull();
-    expect(container.textContent).not.toContain("never");
-  });
-
-  it("renders alone, without the gap, when the name is empty", () => {
-    const node = objectNode(stage([shape({ text: "", detail: "detail only" })], "schematic-light"), "s1");
-    expect(node.querySelector(".interactive-canvas-object-label")).toBeNull();
-    const detail = node.querySelector("[data-canvas-text-detail]") as HTMLElement;
-    expect(detail.textContent).toBe("detail only");
-    expect(detail.style.marginTop).toBe("");
-  });
-
-  it("follows an icon's caption in the below band, which grows by the line", () => {
-    const node = objectNode(stage([icon({ detail: "postgres 16" })], "schematic-dark"), "i1");
-    const slot = node.querySelector('[data-canvas-text-slot="below"]') as HTMLElement;
-    expect(slot.style.height).toBe(`${21 + 3 + 14 * 1.3}px`);
+    const slot = objectNode(container, "i1").querySelector('[data-canvas-text-slot="below"]') as HTMLElement;
+    expect(slot.style.height).toBe("21px");
     const caption = slot.querySelector(".interactive-canvas-label-below-icon") as HTMLElement;
     expect(caption.textContent).toBe("Orders DB");
     expect(caption.style.color).toBe(resolveIconPaint("violet", canvasThemePreset("schematic-dark")).label);
-    const detail = slot.querySelector("[data-canvas-text-detail]") as HTMLElement;
-    expect(caption.nextElementSibling).toBe(detail);
-    expect(detail.textContent).toBe("postgres 16");
-    expect(detail.style.color).toBe("#D1D9E0");
-  });
-
-  it("figjam paints a sans detail at 13px", () => {
-    const detail = objectNode(stage([shape({ detail: ":4820" })]), "s1").querySelector(
-      "[data-canvas-text-detail]",
-    ) as HTMLElement;
-    expect(detail.style.fontSize).toBe("13px");
-    expect(detail.style.fontWeight).toBe("400");
-    expect(detail.style.color).toBe("#5C5C5C");
+    expect(caption.nextElementSibling).toBeNull();
+    expect(objectNode(container, "s2").querySelector("[data-canvas-text-slot]")).toBeNull();
+    expect(container.querySelector("[data-canvas-text-detail]")).toBeNull();
+    expect(container.textContent).not.toContain("postgres 16");
+    expect(container.textContent).not.toContain("detail only");
   });
 });
 

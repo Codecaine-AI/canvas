@@ -1,22 +1,16 @@
 import { describe, expect, it } from "bun:test";
-import { ellipsizeDetailText, measureDetailTextPx, renderDocumentToSvg } from "../static-svg";
-import { measureWidth } from "../../theme/text-measure";
-
-/** The schematic detail font: IBM Plex Mono 500 at 14px. */
-const monoWidth = (text: string) => measureWidth(text, { family: "IBM Plex Mono", size: 14, weight: 500 });
-import { canvasThemePreset, DEFAULT_CANVAS_STYLE, FIGJAM_CANVAS_STYLE, type CanvasThemeId } from "../../theme/canvas-style";
-import { CANVAS_MONO_FONT_STACK_SVG } from "../../theme/fonts";
+import { renderDocumentToSvg } from "../static-svg";
+import { canvasThemePreset, FIGJAM_CANVAS_STYLE, type CanvasThemeId } from "../../theme/canvas-style";
 import { resolveIconPaint, resolveIconTilePaint, resolveShapePaint } from "../../theme/palette";
 import { mixColors } from "../../theme/color-math";
-import { CENTER_TEXT_INSET_PX, detailTypography } from "../../objects/text-slots";
 import { resolveIconGlyph } from "../../objects/shapes/icon/icon-glyphs";
 import { ICON_TILE, iconTileGlyphStrokeWidth, iconTileLayout } from "../../objects/shapes/icon/icon-tile";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 
 /**
  * The static renderer's shape / icon / text parts under the theme model:
- * card vs tint shape paint, the detail line (center slots and the below band),
- * icon tiles vs bare glyphs, fill-paint brand glyphs, and the icon pack.
+ * card vs tint shape paint, a stored detail that never paints, icon tiles vs
+ * bare glyphs, fill-paint brand glyphs, and the icon pack.
  */
 
 /** The schematic name line box: textFontSizePx × 1.2 (21px at 17.5px). */
@@ -102,128 +96,24 @@ describe("static shapes: card vs tint paint", () => {
   });
 });
 
-describe("static detail line — center slots", () => {
-  it("paints the detail as its own body-text mono <text> under the name, the pair centered as one block", () => {
-    const svg = render([shape({ detail: "Function Calling LLM" })], "schematic-light");
-    const [name, detail] = texts(svg);
-    expect(detail!.body).toBe("Function Calling LLM");
-    expect(detail!.attrs).toMatchObject({
-      fill: "#2A2A2A",
-      "font-family": CANVAS_MONO_FONT_STACK_SVG,
-      "font-size": "14",
-      "font-weight": "500",
-      "text-anchor": "middle",
-      "dominant-baseline": "central",
-      x: "120",
-    });
-    // Slot: y 12..68 (56px). Block = one name line + 3 + 18.2 (14px × 1.3), centered.
-    const block = NAME_LINE_PX + 3 + 18.2;
-    const top = CENTER_TEXT_INSET_PX.y + (56 - block) / 2;
-    expect(tspanYs(name!.body)).toEqual([Math.round((top + NAME_LINE_PX / 2) * 100) / 100]);
-    expect(Number(detail!.attrs.y)).toBeCloseTo(top + NAME_LINE_PX + 3 + 18.2 / 2, 2);
-  });
-
-  it("figjam paints a sans detail (the root font) in its own muted color", () => {
-    const [, detail] = texts(render([shape({ detail: ":4820" })]));
-    expect(detail!.attrs).toMatchObject({ fill: "#5C5C5C", "font-size": "13", "font-weight": "400" });
-    expect(detail!.attrs["font-family"]).toBeUndefined();
-  });
-
-  it("collapses newlines and ellipsizes the detail at the slot width", () => {
-    const [, collapsed] = texts(render([shape({ detail: "line one\nline two" })], "schematic-light"));
-    expect(collapsed!.body).toBe("line one line two");
-
-    const long = "s3://customer-data/normalized/2026/records.parquet";
-    const [, cut] = texts(render([shape({ detail: long })], "schematic-light"));
-    const slotWidth = 240 - CENTER_TEXT_INSET_PX.x * 2;
-    expect(cut!.body.endsWith("…")).toBe(true);
-    expect(long.startsWith(cut!.body.slice(0, -1))).toBe(true);
-    expect(monoWidth(cut!.body)).toBeLessThanOrEqual(slotWidth);
-    // One more character would not have fit.
-    expect(monoWidth(`${long.slice(0, [...cut!.body].length)}…`)).toBeGreaterThan(slotWidth);
-  });
-
-  it("the name loses lines before the detail disappears; a box too short for both keeps only the name", () => {
-    const name = "A name long enough to wrap onto three lines in this box";
-    // 56px slot less the detail's 3 + 18.2px reserve leaves 34.8px: one 18px name line of the three.
-    const [clamped, kept] = texts(render([shape({ text: name, detail: ":4820", geometry: { x: 0, y: 0, width: 180, height: 80 } })], "schematic-light"));
-    expect(tspanYs(clamped!.body)).toHaveLength(1);
-    expect(clamped!.body).toContain("…");
-    expect(kept!.body).toBe(":4820");
-
-    const short = render([shape({ detail: ":4820", geometry: { x: 0, y: 0, width: 200, height: 40 } })], "schematic-light");
-    expect(texts(short)).toHaveLength(1);
-    expect(short).not.toContain(":4820");
-  });
-
-  it("paints a detail alone (no gap) when the name is empty", () => {
-    const [only] = texts(render([shape({ text: "", detail: "detail only" })], "schematic-light"));
-    expect(only!.body).toBe("detail only");
-    expect(Number(only!.attrs.y)).toBeCloseTo(40, 2);
-  });
-
-  it("a detail-only box too short for a name line plus the detail still paints the detail", () => {
-    // 200×50 → a 26px slot: no room for 18 + 3 + 18.2, plenty for the 18.2px detail alone.
-    const [only] = texts(render([shape({ text: "", detail: "port: 5432", geometry: { x: 0, y: 0, width: 200, height: 50 } })], "schematic-light"));
-    expect(only?.body).toBe("port: 5432");
-    expect(Number(only!.attrs.y)).toBeCloseTo(25, 2);
-  });
-
-  it("stickies never paint a detail", () => {
-    const sticky = shape({ type: "sticky", style: { shape: "note" }, text: "Body", detail: "never", color: "yellow", geometry: { x: 0, y: 0, width: 240, height: 200 } });
-    for (const theme of ["figjam", "schematic-light"] as const) {
-      expect(render([sticky], theme)).not.toContain("never");
+describe("a stored detail paints nothing: a node shows its name only", () => {
+  it("a shape and an icon with a detail render byte-identically to the same nodes without one", () => {
+    for (const theme of ["figjam", "schematic-light", "schematic-dark"] as const) {
+      const stored = render([shape({ detail: "db.t3.micro:5432" }), icon({ id: "i1", geometry: { x: 400, y: 0, width: 64, height: 64 }, detail: "postgres 16" })], theme);
+      const plain = render([shape(), icon({ id: "i1", geometry: { x: 400, y: 0, width: 64, height: 64 } })], theme);
+      expect(stored).toBe(plain);
+      expect(stored).not.toContain("db.t3.micro");
+      expect(stored).not.toContain("postgres 16");
     }
   });
 
-  it("a blank or absent detail renders byte-identically to no detail", () => {
-    const plain = render([shape()]);
-    expect(render([shape({ detail: "" })])).toBe(plain);
-    expect(render([shape({ detail: "  \n " })])).toBe(plain);
-    expect(renderDocumentToSvg(documentOf([shape()])).svg).toBe(
-      renderDocumentToSvg(documentOf([shape()]), { canvasStyle: DEFAULT_CANVAS_STYLE }).svg,
-    );
-  });
-});
-
-describe("static detail line — the icon's below band", () => {
-  it("paints the caption, then the detail line under its last line", () => {
-    const svg = render([icon({ text: "Orders DB", detail: "postgres 16" })], "schematic-light");
-    const [caption, detail] = texts(svg);
-    const captionYs = tspanYs(caption!.body);
-    // The band hangs 6px under the 56px tile centered in the 64px box (tile bottom 4 + 56 = 60).
-    expect(captionYs).toEqual([60 + 6 + NAME_LINE_PX / 2]);
-    expect(detail!.body).toBe("postgres 16");
-    expect(Number(detail!.attrs.y)).toBeCloseTo(60 + 6 + NAME_LINE_PX + 3 + 18.2 / 2, 2);
-    expect(detail!.attrs.x).toBe("32");
-  });
-
-  it("ellipsizes a detail past the band's max width", () => {
-    const long = "a detail that runs well past the band and ellipsizes";
-    const [, detail] = texts(render([icon({ detail: long })], "schematic-light"));
-    expect(detail!.body.endsWith("…")).toBe(true);
-    expect(monoWidth(detail!.body)).toBeLessThanOrEqual(200);
-  });
-});
-
-describe("ellipsizeDetailText", () => {
-  it("returns the text unchanged when it fits and cuts mono runs at whole cells", () => {
-    const mono = detailTypography(canvasThemePreset("schematic-light"));
-    expect(ellipsizeDetailText(":4820", 100, mono)).toBe(":4820");
-    // 10 cells of 8.4px (0.6em × 14px): 9 characters + the ellipsis.
-    expect(ellipsizeDetailText("abcdefghijklmnop", 84, mono)).toBe("abcdefghi…");
-    expect(ellipsizeDetailText("abcd efgh", 5 * 8.4, mono)).toBe("abcd…");
-    expect(ellipsizeDetailText("abcd  efgh", 6 * 8.4, mono)).toBe("abcd…");
-  });
-
-  it("measures sans runs with Inter's regular advances", () => {
-    const sans = detailTypography(FIGJAM_CANVAS_STYLE);
-    const text = "postgres 16 · db.t3.micro";
-    const width = measureDetailTextPx(text, sans);
-    expect(ellipsizeDetailText(text, width, sans)).toBe(text);
-    const cut = ellipsizeDetailText(text, width - 1, sans);
-    expect(cut.endsWith("…")).toBe(true);
-    expect(measureDetailTextPx(cut, sans)).toBeLessThanOrEqual(width - 1);
+  it("the name keeps the whole slot, and a detail-only node paints no text at all", () => {
+    const name = "A name long enough to wrap onto three lines in this box";
+    const [clamped] = texts(render([shape({ text: name, detail: ":4820", geometry: { x: 0, y: 0, width: 180, height: 80 } })], "schematic-light"));
+    // 56px slot ÷ 21px lines: two name lines, nothing reserved under them.
+    expect(tspanYs(clamped!.body)).toHaveLength(Math.floor(56 / NAME_LINE_PX));
+    expect(texts(render([shape({ text: "", detail: "detail only" })], "schematic-light"))).toHaveLength(0);
+    expect(texts(render([icon({ text: "", detail: ":4820" })], "schematic-light"))).toHaveLength(0);
   });
 });
 

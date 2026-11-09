@@ -1,16 +1,13 @@
 /**
- * The name + detail line and the section header glyph, through the gestures
- * that write them: `place_section` / `place_shape` (detail, header icon at
- * creation), `update_text` (name and detail in one call, either alone),
- * `clone` (both travel with the copy), and `change_shape` (a section's header
- * glyph; an icon's glyph stays its type).
+ * Names and the section header glyph, through the gestures that write them:
+ * `place_section` / `place_shape` (name, header icon at creation),
+ * `update_text` (the name), `clone` (the glyph travels with the copy), and
+ * `change_shape` (a section's header glyph; an icon's glyph stays its type).
  *
  * What these pin, in order of how easy each is to break:
- *  - the stored form: a detail is trimmed and an empty one is no detail, so a
- *    draft and the file it saves to never disagree;
- *  - the kinds without a detail line (stickies, sections, edges) drop it with
- *    a note instead of refusing the rest of the call; place_section has no
- *    detail field at all;
+ *  - a node shows its name only: place_shape and clone take no detail, and
+ *    update_text drops one with a note for every kind instead of refusing
+ *    the rest of the call, leaving a detail an older file stored untouched;
  *  - a glyph sent as a free string is refused with the names it was reaching
  *    for, and a section's glyph never leaks into the folded type vocabulary.
  */
@@ -19,8 +16,9 @@ import { describe, expect, test } from "bun:test";
 import type { InteractiveCanvasObject } from "../../state/schema";
 
 import { diffDocuments } from "../../board/doc-diff";
-import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS } from "../../board/text-rules";
+import { NAME_TARGET_WORDS } from "../../board/text-rules";
 import { findOperationTool } from "../tools/operations";
+import { DETAIL_DROPPED_NOTE } from "../tools/operations/content";
 import { boardDiffBlock, documentDelta } from "../perception/perception";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
@@ -119,159 +117,80 @@ describe("place_section — title and header glyph in one gesture", () => {
   });
 });
 
-describe("place_shape — the pick, the click, and the optional detail", () => {
-  test("lands untitled with the detail under it", () => {
+describe("place_shape, clone and update_text — a node shows its name only", () => {
+  test("place_shape and clone have no detail field, and a placed node carries none", () => {
+    for (const name of ["place_shape", "clone"]) {
+      expect(findOperationTool(name)!.parameters.properties).not.toHaveProperty("detail");
+    }
     const session = makeTestSession(board(), ["frame"]);
-
-    const result = runOp(session, "place_shape", { id: "db", type: "memory", at: [600, 80], detail: ":5432" });
-
-    expect(result.isError).toBeUndefined();
-    expect(objectOf(session, "db")).toMatchObject({ type: "icon", icon: "memory", text: "", detail: ":5432" });
-  });
-
-  test("without a detail the object carries no detail key", () => {
-    const session = makeTestSession(board(), ["frame"]);
-
-    runOp(session, "place_shape", { id: "db", type: "process", at: [600, 80] });
-
+    runOp(session, "place_shape", { id: "db", type: "memory", at: [600, 80], text: "Orders" });
+    expect(objectOf(session, "db")).toMatchObject({ type: "icon", icon: "memory", text: "Orders" });
     expect("detail" in objectOf(session, "db")).toBe(false);
   });
-});
 
-describe("update_text — the name and its detail, together or apart", () => {
-  test("the field descriptions quote the limits the text lints measure", () => {
+  test("update_text drops a detail sent to a node with a note, and the name still lands", () => {
+    const session = makeTestSession(board(), ["frame"]);
+
+    const both = runOp(session, "update_text", { id: "step", text: "Postgres", detail: "16 · :5432" });
+    expect(both.isError).toBeUndefined();
+    expect(both.text).toContain("APPLIED · update_text step");
+    expect(both.text).toContain(DETAIL_DROPPED_NOTE);
+    expect(objectOf(session, "step").text).toBe("Postgres");
+    expect("detail" in objectOf(session, "step")).toBe(false);
+
+    const alone = runOp(session, "update_text", { id: "brain", detail: "claude-opus" });
+    expect(alone.isError).toBeUndefined();
+    expect(alone.text).toMatch(/^NO-OP · update_text brain — detail dropped/);
+    expect("detail" in objectOf(session, "brain")).toBe(false);
+  });
+
+  test("a stored detail is left as stored: update_text never rewrites or clears it", () => {
+    const stored = board();
+    stored.objects[1] = { ...stored.objects[1]!, detail: ":5432" };
+    const session = makeTestSession(stored, ["frame"]);
+
+    runOp(session, "update_text", { id: "step", text: "Postgres", detail: "" });
+
+    expect(objectOf(session, "step")).toMatchObject({ text: "Postgres", detail: ":5432" });
+  });
+
+  test("a detail sent to a section, a sticky or an edge drops the same way", () => {
+    const session = makeTestSession(board(), ["frame"]);
+    for (const [id, text] of [["frame", "Services"], ["note", "Rewritten"], ["step-brain", "calls"]] as const) {
+      const result = runOp(session, "update_text", { id, text, detail: "x" });
+      expect(result.isError).toBeUndefined();
+      expect(result.text).toContain(DETAIL_DROPPED_NOTE);
+    }
+    expect(objectOf(session, "frame").text).toBe("Services");
+    expect(objectOf(session, "note").text).toBe("Rewritten");
+    expect(session.draft.connections[0]!.label).toBe("calls");
+    expect(session.draft.objects.some((object) => "detail" in object)).toBe(false);
+  });
+
+  test("the name field quotes the name limit, and asking for no text is refused", () => {
     const fields = (findOperationTool("update_text")!.parameters as unknown as {
       properties: Record<string, { description: string }>;
     }).properties;
-
     expect(fields.text!.description).toContain(`≤ ~${NAME_TARGET_WORDS}`);
-    expect(fields.detail!.description).toContain(`≤ ${DETAIL_MAX_CHARS} chars`);
-  });
 
-  test("writes the name and the detail in one call", () => {
-    const session = makeTestSession(board(), ["frame"]);
-
-    const result = runOp(session, "update_text", { id: "step", text: "Postgres", detail: "16 · :5432" });
-
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · update_text step");
-    expect(objectOf(session, "step")).toMatchObject({ text: "Postgres", detail: "16 · :5432" });
-    expect(result.text).toContain('step  detail — → "16 · :5432"');
-  });
-
-  test("writes the detail alone and leaves the name", () => {
-    const session = makeTestSession(board(), ["frame"]);
-
-    runOp(session, "update_text", { id: "step", detail: ":5432" });
-
-    expect(objectOf(session, "step")).toMatchObject({ text: "Step", detail: ":5432" });
-  });
-
-  test("a section has no detail line: its title still lands and the detail is dropped with a note", () => {
-    const session = makeTestSession(board(), ["frame"]);
-
-    const both = runOp(session, "update_text", { id: "frame", text: "Services", detail: "127.0.0.1" });
-    expect(both.isError).toBeUndefined();
-    expect(both.text).toContain("detail dropped — a section has no detail line");
-    expect(objectOf(session, "frame").text).toBe("Services");
-    expect("detail" in objectOf(session, "frame")).toBe(false);
-
-    const alone = runOp(session, "update_text", { id: "frame", detail: "127.0.0.1" });
-    expect(alone.text).toMatch(/^NO-OP · update_text frame — detail dropped/);
-  });
-
-  test("an empty detail clears it", () => {
-    const session = makeTestSession(board(), ["frame"]);
-    runOp(session, "update_text", { id: "brain", detail: "claude-opus" });
-
-    const result = runOp(session, "update_text", { id: "brain", detail: "" });
-
-    expect(result.isError).toBeUndefined();
-    expect(objectOf(session, "brain").detail).toBeUndefined();
-  });
-
-  test("asking for neither field is refused", () => {
-    const session = makeTestSession(board(), ["frame"]);
-
-    const result = runOp(session, "update_text", { id: "step" });
-
+    const result = runOp(makeTestSession(board(), ["frame"]), "update_text", { id: "step" });
     expect(result.isError).toBe(true);
-    expect(result.text).toContain("text, detail, or both");
+    expect(result.text).toContain("send text");
   });
 
-  test("a sticky has no detail line: the text still lands and the detail is dropped with a note", () => {
-    const session = makeTestSession(board(), ["frame"]);
-
-    const both = runOp(session, "update_text", { id: "note", text: "Rewritten", detail: "x" });
-    expect(both.isError).toBeUndefined();
-    expect(both.text).toContain("detail dropped — a sticky has no detail line");
-    expect(objectOf(session, "note").text).toBe("Rewritten");
-    expect("detail" in objectOf(session, "note")).toBe(false);
-
-    const alone = runOp(session, "update_text", { id: "note", detail: "x" });
-    expect(alone.isError).toBeUndefined();
-    expect(alone.text).toMatch(/^NO-OP · update_text note — detail dropped/);
-  });
-
-  test("an edge has no detail line either", () => {
-    const session = makeTestSession(board(), ["frame"]);
-
-    const both = runOp(session, "update_text", { id: "step-brain", text: "calls", detail: "x" });
-    expect(both.isError).toBeUndefined();
-    expect(both.text).toContain("detail dropped — an edge has no detail line");
-    expect(session.draft.connections[0]!.label).toBe("calls");
-
-    const alone = runOp(session, "update_text", { id: "step-brain", detail: "x" });
-    expect(alone.text).toMatch(/^NO-OP · update_text step-brain — detail dropped/);
-  });
-
-  test("a detail write is lock-gated like any other edit", () => {
-    const locked = board();
-    locked.objects[0] = { ...locked.objects[0]!, locked: "all" };
-    const session = makeTestSession(locked, ["frame"]);
-
-    const result = runOp(session, "update_text", { id: "step", detail: "x" });
-
-    expect(result.isError).toBe(true);
-    expect(result.text).toContain("locked all");
-  });
-});
-
-describe("clone — the detail and the glyph travel with the copy", () => {
-  test("a section copy keeps its header glyph and never carries a stored detail", () => {
-    const withIcon = board();
-    withIcon.objects[0] = { ...withIcon.objects[0]!, detail: "127.0.0.1", icon: "agent" };
-    const session = makeTestSession(withIcon, ["frame"]);
+  test("a clone never carries its source's stored detail; a section copy keeps its header glyph", () => {
+    const stored = board();
+    stored.objects[0] = { ...stored.objects[0]!, detail: "127.0.0.1", icon: "agent" };
+    stored.objects[1] = { ...stored.objects[1]!, detail: ":5432" };
+    const session = makeTestSession(stored, ["frame"]);
 
     runOp(session, "clone", { sourceId: "frame", id: "frame-2", at: [1100, 0] });
-    const asked = runOp(session, "clone", { sourceId: "frame", id: "frame-3", detail: "x", at: [2200, 0] });
+    runOp(session, "clone", { sourceId: "step", id: "redis", text: "Redis", by: [0, 160] });
 
     expect(objectOf(session, "frame-2")).toMatchObject({ icon: "agent" });
     expect("detail" in objectOf(session, "frame-2")).toBe(false);
-    expect(asked.text).toContain("detail dropped — a section has no detail line");
-    expect("detail" in objectOf(session, "frame-3")).toBe(false);
-  });
-
-  test("a detail override replaces the source's, and an empty one clears it", () => {
-    const withDetail = board();
-    withDetail.objects[1] = { ...withDetail.objects[1]!, detail: ":5432" };
-    const session = makeTestSession(withDetail, ["frame"]);
-
-    runOp(session, "clone", { sourceId: "step", id: "redis", text: "Redis", detail: ":6379", by: [0, 160] });
-    runOp(session, "clone", { sourceId: "step", id: "bare", detail: "", by: [0, 320] });
-
-    expect(objectOf(session, "redis")).toMatchObject({ text: "Redis", detail: ":6379" });
-    expect("detail" in objectOf(session, "bare")).toBe(false);
-  });
-
-  test("a sticky copy drops a requested detail with a note", () => {
-    const session = makeTestSession(board(), ["frame"]);
-
-    const result = runOp(session, "clone", { sourceId: "note", id: "note-2", detail: "x", by: [240, 0] });
-
-    expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("detail dropped — a sticky has no detail line");
-    expect("detail" in objectOf(session, "note-2")).toBe(false);
+    expect(objectOf(session, "redis").text).toBe("Redis");
+    expect("detail" in objectOf(session, "redis")).toBe(false);
   });
 });
 
@@ -334,8 +253,8 @@ describe("change_shape — a section's header glyph", () => {
   });
 });
 
-describe("the diff carries the detail and the header glyph", () => {
-  test("diffDocuments emits the detail channel, including an explicit clear", () => {
+describe("the diff carries a stored detail and the header glyph", () => {
+  test("diffDocuments still replays the stored detail channel, including an explicit clear", () => {
     const baseline = board();
     baseline.objects[1] = { ...baseline.objects[1]!, detail: ":5432" };
     const draft = {
@@ -358,18 +277,14 @@ describe("the diff carries the detail and the header glyph", () => {
     });
   });
 
-  test("BOARD DIFF says redetailed, and reiconed for a section's glyph", () => {
+  test("BOARD DIFF says reiconed for a section's glyph", () => {
     const session = makeTestSession(board(), ["frame"]);
-    runOp(session, "update_text", { id: "step", detail: ":5432" });
     runOp(session, "change_shape", { id: "frame", patch: { icon: "agent" } });
 
-    const block = boardDiffBlock(session);
-
-    expect(block).toContain("updateObject step  redetailed");
-    expect(block).toContain("updateSection frame  reiconed");
+    expect(boardDiffBlock(session)).toContain("updateSection frame  reiconed");
   });
 
-  test("DELTA reports a removed detail and a removed glyph as → —", () => {
+  test("DELTA reports a removed glyph as → —, and never a stored detail, which does not render", () => {
     const before = board();
     before.objects[0] = { ...before.objects[0]!, icon: "agent" };
     before.objects[1] = { ...before.objects[1]!, detail: ":5432" };
@@ -385,6 +300,6 @@ describe("the diff carries the detail and the header glyph", () => {
     const { lines } = documentDelta(before, after);
 
     expect(lines).toContain("frame  icon agent → —");
-    expect(lines).toContain('step  detail ":5432" → —');
+    expect(lines.some((line) => line.includes("detail"))).toBe(false);
   });
 });

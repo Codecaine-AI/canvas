@@ -1,9 +1,8 @@
 /**
- * The in-place name editor with a detail line (contract §4): the detail is not
- * edited in place (the Inspector edits it), but it keeps painting under the
- * textarea exactly as it does at rest — so a centered name + detail block
- * stays put when editing starts, and the textarea sits exactly over the
- * at-rest name. The textarea and the line take the canvas style's typography.
+ * The in-place name editor on a node an older board stored a `detail` on: a
+ * node shows its name only, so neither the at-rest slot nor the editor paints
+ * the detail, and the textarea sits exactly over the at-rest name in the
+ * canvas style's typography.
  */
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
@@ -77,13 +76,12 @@ function renderBoth(object: InteractiveCanvasObject, theme: CanvasThemeId, value
   return { style, atRest, editor };
 }
 
-describe("the in-place name editor over a detail line", () => {
+describe("the in-place name editor on a node with a stored detail", () => {
   for (const theme of ["figjam", "schematic-light", "schematic-dark"] as const) {
-    it(`${theme}: the editor takes the at-rest slot's world rect and paints the same detail line`, () => {
+    it(`${theme}: the editor takes the at-rest slot's world rect, and neither paints the detail`, () => {
       for (const object of [SHAPE, ICON]) {
         const { style, atRest, editor } = renderBoth(object, theme);
         const resolved = resolveTextSlot(objectDefFor(object)!.textSlot!, object, 1, { canvasStyle: style });
-        expect(resolved.detail).not.toBeNull();
         // Compared as numbers: the DOM serializes a CSS length to fewer digits
         // than a float sum prints (a 56px tile centers the icon band at x −14.2).
         expect(parseFloat(editor.style.left)).toBeCloseTo(object.geometry.x + resolved.rect.x, 9);
@@ -92,12 +90,10 @@ describe("the in-place name editor over a detail line", () => {
         expect(editor.style.height).toBe(atRest.style.height);
         expect(editor.style.justifyContent).toBe(atRest.style.justifyContent);
 
-        const restDetail = atRest.querySelector<HTMLElement>("[data-canvas-text-detail]")!;
-        const editDetail = editor.querySelector<HTMLElement>("[data-canvas-text-detail]")!;
-        expect(editDetail.textContent).toBe(restDetail.textContent);
-        expect(editDetail.getAttribute("style")).toBe(restDetail.getAttribute("style"));
-        // The detail follows the textarea, as it follows the name at rest.
-        expect(editor.querySelector("textarea")!.nextElementSibling).toBe(editDetail);
+        expect(atRest.querySelector("[data-canvas-text-detail]")).toBeNull();
+        expect(editor.querySelector("[data-canvas-text-detail]")).toBeNull();
+        expect(editor.querySelector("textarea")!.nextElementSibling).toBeNull();
+        expect(editor.textContent).not.toContain(object.detail!);
 
         const textarea = editor.querySelector<HTMLTextAreaElement>("textarea")!;
         const label = atRest.querySelector<HTMLElement>(".interactive-canvas-object-label")!;
@@ -109,19 +105,13 @@ describe("the in-place name editor over a detail line", () => {
     });
   }
 
-  it("keeps the detail line while the draft name changes, and the below band tracks the draft", () => {
-    const { editor } = renderBoth(ICON, "schematic-light", "A much longer caption that wraps onto more lines");
-    expect(editor.querySelector("[data-canvas-text-detail]")!.textContent).toBe("postgres 16");
-    const resolved = resolveTextSlot(objectDefFor(ICON)!.textSlot!, ICON, 1, {
-      canvasStyle: canvasThemePreset("schematic-light"),
-      draftText: "A much longer caption that wraps onto more lines",
-    });
+  it("the below band tracks the draft name alone", () => {
+    const draft = "A much longer caption that wraps onto more lines";
+    const { editor } = renderBoth(ICON, "schematic-light", draft);
+    const canvasStyle = canvasThemePreset("schematic-light");
+    const resolved = resolveTextSlot(objectDefFor(ICON)!.textSlot!, ICON, 1, { canvasStyle, draftText: draft });
     expect(editor.style.height).toBe(`${resolved.rect.height}px`);
-    expect(resolved.rect.height).toBeGreaterThan(18 + 3 + 14 * 1.3);
-  });
-
-  it("paints no detail line in the editor for objects without one", () => {
-    const { editor } = renderBoth({ ...SHAPE, detail: undefined }, "schematic-light");
-    expect(editor.querySelector("[data-canvas-text-detail]")).toBeNull();
+    const plain = resolveTextSlot(objectDefFor(ICON)!.textSlot!, { ...ICON, detail: undefined }, 1, { canvasStyle, draftText: draft });
+    expect(resolved.rect).toEqual(plain.rect);
   });
 });

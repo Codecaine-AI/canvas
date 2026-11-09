@@ -16,14 +16,13 @@ function box(id: string, x: number, y: number, width = 300, height = 120): Inter
   return { id, type: "process", text: id, geometry: { x, y, width, height } };
 }
 
-/** An icon in a 300x120 box whose detail line paints a caption far wider than its 56px tile. */
+/** An icon in a 300x120 box whose name paints a caption far wider than its 56px tile. */
 function icon(id: string, x: number, y: number): InteractiveCanvasObject {
   return {
     id,
     type: "icon",
     icon: "database",
-    text: "Fallback reply",
-    detail: "static template · no model call",
+    text: "Fallback reply from a static template",
     geometry: { x, y, width: 300, height: 120 },
   };
 }

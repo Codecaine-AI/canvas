@@ -13,18 +13,16 @@
  * (the canvas's theme/text-measure.ts: Pretext line breaking over the active
  * backend — HarfBuzz on the bundled faces in every Bun/Node host), through
  * the functions the static renderer paints with, under the workspace
- * `CanvasStyle` (the name's weight, the detail line's font and size):
+ * `CanvasStyle` (the name's weight and size):
  *   - slot geometry     `resolveTextSlot` + `textSlotForObject` (the slot the
- *                        renderer picks, inscribed rects included, and the
- *                        detail line it paints there)
+ *                        renderer picks, inscribed rects included)
  *   - body wrap/clamp   `wrapTextLines` / `clampLines` (pre-wrap, break-word —
- *                        the stage's slot CSS), the name's clamp shortened by
- *                        the detail line's reserve (`slotNameLineCapacity`)
- *   - detail lines      `ellipsizeDetailText` (the stage's nowrap ellipsis)
+ *                        the stage's slot CSS), clamped at the slot's line
+ *                        capacity (`slotNameLineCapacity`)
  *   - sticky bodies     `layoutStickyText` + the style's `stickyLineHeightPx`
  *   - section titles    `titleChipLayout` + `titleChipMaxWidthPx` (the chip
  *                        as the workspace style draws it: header font, icon,
- *                        detail, border — the one measured layout the
+ *                        border — the one measured layout the
  *                        renderers paint and hit-test with)
  *   - edge labels       `connectionLabelChipMetrics` (connectors/label-chip.ts,
  *                        the chip the renderers draw: the 30px sans chip in
@@ -48,9 +46,9 @@
  * is reported, never judged — except an overflow that holds even with every
  * uncovered character at zero width, which is `definite`.
  *
- * Scope of `overflows`: TRUNCATION only — a dropped line or an ellipsis, in
- * the name or in its detail line, or a detail line the box is too short to
- * paint at all. Intra-word breaking (a single word wider than the slot) is
+ * Scope of `overflows`: TRUNCATION only — a dropped line or an ellipsis in
+ * the name. A node shows its name only: a stored `detail` (older boards)
+ * never paints, so it never enters a fit. Intra-word breaking (a single word wider than the slot) is
  * not truncation, so it does not on its own make text overflow; it does drive
  * `neededSize.width`, since no amount of extra height ever un-breaks a
  * too-long word.
@@ -64,7 +62,6 @@ import type {
 import {
   clampLines,
   effectiveRenderShape,
-  ellipsizeDetailText,
   textSlotForObject,
   wrapTextLines,
 } from "../render/static-svg.ts";
@@ -73,19 +70,13 @@ import {
   stickyTextUncovered,
 } from "../objects/sticky/sticky-text.ts";
 import {
-  belowBandMaxWidthPx,
-  detailFontSpec,
-  detailTypography,
   INSET_BODY_TEXT_SLOT,
   resolveTextSlot,
-  slotDetailText,
   slotFontSpec,
   slotLineHeightPx,
   slotNameLineCapacity,
   TITLE_CHIP,
   titleChipMaxWidthPx,
-  type DetailTypography,
-  type ResolvedTextSlot,
 } from "../objects/text-slots.ts";
 import {
   titleChipFontSpec,
@@ -137,30 +128,10 @@ export type TextFitVerdict = FitVerdict;
  */
 export const TEXT_FIT_TOLERANCE_PX = 1;
 
-/**
- * How an object's one-line `detail` paints at the asked size — present on
- * shape-label (shapes and icons) and section-title reports whenever the
- * object has a detail.
- */
-export interface DetailLineFit {
-  /** The detail as its one line (whitespace collapsed, trimmed). */
-  text: string;
-  /** False when the line is not painted at all (a shape box too short for a name line plus the detail). */
-  shown: boolean;
-  /** True when the painted line ends in an ellipsis. */
-  truncated: boolean;
-  /** The line as painted ("" when not shown). */
-  painted: string;
-  /** The most characters of this detail that paint whole at this width. */
-  fittingChars: number;
-  /** Characters the detail has. */
-  totalChars: number;
-}
-
 export interface TextFitReport {
   /** The verdict at `size` (see TextFitVerdict). */
   verdict: TextFitVerdict;
-  /** True when the verdict is `fits`: the render shows the text whole (name and detail line), with margin. */
+  /** True when the verdict is `fits`: the render shows the text whole, with margin. */
   fits: boolean;
   /**
    * False when the answer is an estimate: the text holds characters the
@@ -183,14 +154,6 @@ export interface TextFitReport {
   detail: string;
   /** The rendering path this verdict came from. */
   slot: TextFitSlot;
-  /**
-   * Whether the name alone shows whole (no dropped line, no ellipsis) at the
-   * box size — present on shape-label and section-title reports, so a caller
-   * can tell a cut name from a cut detail line.
-   */
-  nameFits?: boolean;
-  /** The object's detail line at `size`, when it has one. */
-  detailLine?: DetailLineFit;
 }
 
 /** Upper bound for the needed-size search — past this the box is absurd. */
@@ -237,12 +200,6 @@ function smallestFitting(start: number, fits: (value: number) => boolean): numbe
 function threeState(answers: readonly boolean[]): TextFitVerdict {
   if (answers.every(Boolean)) return "fits";
   return answers.some(Boolean) ? "borderline" : "overflows";
-}
-
-/** The worse of two verdicts (overflows > borderline > fits). */
-function worse(a: TextFitVerdict, b: TextFitVerdict): TextFitVerdict {
-  if (a === "overflows" || b === "overflows") return "overflows";
-  return a === "borderline" || b === "borderline" ? "borderline" : "fits";
 }
 
 /**
@@ -322,61 +279,9 @@ function cautionClause(verdict: TextFitVerdict, reliable: boolean, uncovered?: s
   return parts.join("; ");
 }
 
-/** The most leading graphemes of `text` whose run fits `widthPx` whole (no ellipsis). */
-function fittingCharCount(text: string, widthPx: number, typography: DetailTypography): number {
-  const font = detailFontSpec(typography);
-  const parts = graphemeClusters(text);
-  let low = 0;
-  let high = parts.length;
-  while (low < high) {
-    const mid = Math.ceil((low + high) / 2);
-    if (measureWidth(parts.slice(0, mid).join(""), font) <= widthPx) low = mid;
-    else high = mid - 1;
-  }
-  return low;
-}
-
-/** The detail line as the renderer paints it in `resolved` (renderDetailLine's ellipsis at the slot width). */
-function slotDetailFit(text: string, resolved: ResolvedTextSlot, canvasStyle: CanvasStyle): DetailLineFit {
-  const totalChars = graphemeClusters(text).length;
-  const detail = resolved.detail;
-  if (!detail) {
-    return {
-      text,
-      shown: false,
-      truncated: false,
-      painted: "",
-      fittingChars: fittingCharCount(text, Math.max(0, resolved.rect.width), detailTypography(canvasStyle)),
-      totalChars,
-    };
-  }
-  const painted = ellipsizeDetailText(detail.text, resolved.rect.width, detail.typography);
-  return {
-    text,
-    shown: true,
-    truncated: painted !== detail.text,
-    painted,
-    fittingChars: fittingCharCount(detail.text, resolved.rect.width, detail.typography),
-    totalChars,
-  };
-}
-
-/** A detail line that paints whole. */
-function detailWhole(line: DetailLineFit | undefined): boolean {
-  return !line || (line.shown && !line.truncated);
-}
-
-/** The detail clause of a report line ("" when the detail paints whole). */
-function detailClause(line: DetailLineFit | undefined): string {
-  if (!line || detailWhole(line)) return "";
-  return line.shown
-    ? `detail cut to ${line.fittingChars} of ${line.totalChars} chars`
-    : "detail line hidden (no room under the name)";
-}
-
 // ---------------------------------------------------------------------------
 // Shape labels — the center / rect / below slots, wrapped and clamped exactly
-// as renderSlotTextBlock does, plus the slot's detail line.
+// as renderSlotTextBlock does.
 // ---------------------------------------------------------------------------
 
 function shapeLabelReport(
@@ -391,18 +296,8 @@ function shapeLabelReport(
   }
 
   // The "below" band sizes itself to the text (renderObjectText passes
-  // clampToRect: false), so its name never truncates; its detail line still
-  // ellipsizes at the band's width.
+  // clampToRect: false), so its name never truncates.
   const clamps = slot.multiline && slot.placement !== "below";
-  const detailText = slotDetailText(object);
-
-  /**
-   * The width the detail line is judged against: the slot's own width in a
-   * shape, the band's max width in an icon caption — the band sizes itself to
-   * its widest line, so the detail is cut only past that cap.
-   */
-  const detailRoomFor = (probed: InteractiveCanvasObject, rectWidth: number) =>
-    slot.placement === "below" ? belowBandMaxWidthPx(probed) : rectWidth;
 
   // Wrapping and fit answers depend on the slot width (and the line limit),
   // not on the probe: the needed-size searches reuse them.
@@ -428,8 +323,7 @@ function shapeLabelReport(
     }
     const capacity =
       clamps && rect.height > 0 ? slotNameLineCapacity(resolved) : Number.POSITIVE_INFINITY;
-    const detailLine = detailText === "" ? undefined : slotDetailFit(detailText, resolved, canvasStyle);
-    return { resolved, rect, typography, lines, capacity, detailLine, detailRoom: detailRoomFor(probed, rect.width) };
+    return { resolved, rect, typography, lines, capacity };
   };
   type Measured = ReturnType<typeof measured>;
 
@@ -447,26 +341,11 @@ function shapeLabelReport(
     );
   };
 
-  /** The detail's verdict: one nowrap line in its room and at ±tolerance, or a hidden line. */
-  const detailVerdict = (at: Measured): TextFitVerdict => {
-    if (detailText === "") return "fits";
-    const detail = at.resolved.detail;
-    if (!detail) return "overflows";
-    return cachedFit(`detail|${at.detailRoom}`, () =>
-      fitText(
-        detail.text,
-        detailFontSpec(detail.typography),
-        { width: at.detailRoom, lineHeight: detail.typography.lineHeightPx, maxLines: 1 },
-        { tolerance: TEXT_FIT_TOLERANCE_PX },
-      ).verdict,
-    );
-  };
-
   const verdictAt = (at: Measured): TextFitVerdict => {
     // renderObjectText bails on a hidden slot; renderSlotTextBlock bails on a
     // zero-width rect. Either way the text is simply not painted.
     if (at.resolved.hidden || at.rect.width <= 0) return "overflows";
-    return worse(nameVerdict(at), detailVerdict(at));
+    return nameVerdict(at);
   };
 
   /** The renderer's own answer at exactly this box: no dropped line, no ellipsis. */
@@ -481,14 +360,8 @@ function shapeLabelReport(
   const at = measured(size.width, size.height);
   const verdict = verdictAt(at);
   const font = slotFontSpec(at.typography);
-  const detailFont = detailFontSpec(detailTypography(canvasStyle));
-  const measuredParts: MeasuredPart[] = [
-    ...(text === "" ? [] : [[text, font, "pre-wrap"] as const]),
-    ...(detailText === "" ? [] : [[detailText, detailFont, "normal"] as const]),
-  ];
-  const reliable = reliability(measuredParts);
+  const reliable = reliability(text === "" ? [] : [[text, font, "pre-wrap"]]);
   const caution = cautionClause(verdict, reliable.reliable, reliable.uncovered);
-  const detailLine = at.detailLine;
 
   if (verdict === "fits") {
     const held = at.capacity === Number.POSITIVE_INFINITY ? "any" : String(at.capacity);
@@ -498,20 +371,15 @@ function shapeLabelReport(
       ...reliable,
       detail: `label fits at ${fmtSize(size)}: ${at.lines.length} wrapped line(s), the box holds ${held}${caution ? ` (${caution})` : ""}`,
       slot: "shape-label",
-      nameFits: true,
-      ...(detailLine ? { detailLine } : null),
     };
   }
 
   // A word wider than the slot breaks mid-word no matter how tall the box is,
-  // and a detail line ellipsizes at the slot's width at any height — so width
-  // comes first.
+  // so width comes first.
   const widestWord = longestWordWidthPx(text, font) + TEXT_FIT_TOLERANCE_PX;
-  const detailWidth = detailText === "" ? 0 : measureWidth(detailText, detailFont) + TEXT_FIT_TOLERANCE_PX;
-  // A caption band sizes itself to its lines, so only its detail can need more width.
+  // A caption band sizes itself to its lines, so it never needs more width.
   const nameRoom = (rectWidth: number) => (slot.placement === "below" ? Number.POSITIVE_INFINITY : rectWidth);
-  const wideEnough = (rectWidth: number, detailRoom: number) =>
-    rectWidth > 0 && nameRoom(rectWidth) >= widestWord && detailRoom >= detailWidth;
+  const wideEnough = (rectWidth: number) => rectWidth > 0 && nameRoom(rectWidth) >= widestWord;
   const surelyFits = (width: number, height: number) => verdictAt(measured(width, height)) === "fits";
   // A fixed-aspect shape (the octagon) draws at its own ratio inside the box,
   // so extra width alone never makes room: it grows at that ratio from the
@@ -524,19 +392,16 @@ function shapeLabelReport(
     neededHeight = smallestFitting(start.height, (height) => surelyFits(height * aspect, height));
     neededWidth = neededHeight === undefined ? Math.ceil(start.width) : Math.ceil(neededHeight * aspect);
   } else {
-    neededWidth = wideEnough(at.rect.width, at.detailRoom)
+    neededWidth = wideEnough(at.rect.width)
       ? Math.ceil(size.width)
-      : (smallestFitting(size.width, (width) => {
-          const probed = probe(object, width, size.height, text);
-          const rectWidth = resolveTextSlot(slot, probed, 1, { canvasStyle }).rect.width;
-          return wideEnough(rectWidth, detailRoomFor(probed, rectWidth));
-        }) ?? Math.ceil(size.width));
+      : (smallestFitting(size.width, (width) =>
+          wideEnough(resolveTextSlot(slot, probe(object, width, size.height, text), 1, { canvasStyle }).rect.width),
+        ) ?? Math.ceil(size.width));
     neededHeight = smallestFitting(size.height, (height) => surelyFits(neededWidth, height));
   }
   const painted = !at.resolved.hidden && at.rect.width > 0;
   const nameShown = painted && nameShownAt(at);
-  const extras = { nameFits: nameShown, ...(detailLine ? { detailLine } : null) };
-  const base = { verdict, fits: false, ...reliable, slot: "shape-label" as const, ...extras };
+  const base = { verdict, fits: false, ...reliable, slot: "shape-label" as const };
   if (neededHeight === undefined) {
     return {
       ...base,
@@ -561,12 +426,11 @@ function shapeLabelReport(
         `${at.capacity === Number.POSITIVE_INFINITY ? "any" : at.capacity} (${caution}) — ${fmtSize(needed)} surely fits`,
     };
   }
-  const clause = detailClause(detailLine);
   const tail = caution ? ` (${caution})` : "";
   const detail = nameShown
-    ? `${clause || "label clips"} at ${fmtSize(size)} — needs ${fmtSize(needed)}${tail}`
+    ? `label clips at ${fmtSize(size)} — needs ${fmtSize(needed)}${tail}`
     : `label clips at ${fmtSize(size)}: ${at.lines.length} wrapped line(s), ` +
-      `the box holds ${at.capacity}${clause ? `; ${clause}` : ""} — needs ${fmtSize(needed)}${tail}`;
+      `the box holds ${at.capacity} — needs ${fmtSize(needed)}${tail}`;
   return { ...base, neededSize: needed, detail };
 }
 
@@ -665,9 +529,9 @@ function stickyBodyReport(
 
 // ---------------------------------------------------------------------------
 // Section titles — a chip, not a body slot. The chip auto-sizes to its
-// content ([icon] TITLE  detail, in the workspace style's header font) and
+// content ([icon] TITLE, in the workspace style's header font) and
 // ellipsizes at the section's inner width (objects/section/title-chip-layout
-// .ts, the layout the renderers draw with) — the detail run gives way first.
+// .ts, the layout the renderers draw with).
 // Judged at natural document scale (scale 1): zoomed-out renders
 // counter-scale the chip, which only ever clips it sooner.
 // ---------------------------------------------------------------------------
@@ -698,7 +562,6 @@ function sectionTitleReport(
       ...reliable,
       detail: `section title fits at ${fmtSize(size)}: ${wants}${caution ? ` (${caution})` : ""}`,
       slot: "section-title",
-      nameFits: true,
     };
   }
   const needed = round({
@@ -711,7 +574,6 @@ function sectionTitleReport(
     ...reliable,
     neededSize: needed,
     slot: "section-title" as const,
-    nameFits: false,
   };
   if (verdict === "borderline") {
     return { ...base, detail: `section title may not fit at ${fmtSize(size)}: ${wants} (${caution}) — needs ${needed.width} wide to be sure` };
@@ -785,11 +647,7 @@ function nothingToFit(slot: TextFitSlot, detail: string): TextFitReport {
  * target it is the room available to the label chip (the endpoint corridor);
  * pass the current corridor, or `Infinity` to ask only what the chip wants.
  *
- * "Whole" covers the object's one-line `detail` too (shapes, icons, and
- * sections): a detail line that ellipsizes, or that a shape box is too short
- * to paint under the name, fails the fit like a clipped name — and since the
- * name gives up lines to keep the detail, a detail can push a name that fit
- * into clipping. `detailLine` reports the detail line's own state.
+ * A stored `detail` (older boards) never paints, so it never enters the fit.
  *
  * `verdict` is three-state (see the module doc): `borderline` answers and
  * `reliable: false` answers are things to say, never to block on — unless
@@ -798,11 +656,11 @@ function nothingToFit(slot: TextFitSlot, detail: string): TextFitReport {
  * `neededSize` is the smallest box that surely shows the text whole, present
  * whenever the verdict is not `fits`. Aspect handling is deliberately simple:
  * the needed HEIGHT is measured at the given width, and the width grows only
- * when a single word or the detail line cannot fit it (or, for a section
+ * when a single word cannot fit it (or, for a section
  * title, when the chip itself overruns the frame).
  *
  * `canvasStyle` is the workspace style the board renders with (the session's
- * `canvasStyle`); the name weight, the detail font, and the section and
+ * `canvasStyle`); the name weight and size, and the section and
  * edge-label chip sizes come from it.
  */
 export function textFitReport(
@@ -817,11 +675,7 @@ export function textFitReport(
   // of them at zero width. If even that overflows — forced rows, or more text
   // than any fallback glyph can make room for — the overflow is definite.
   const missing = new Set(report.uncovered);
-  const leastText = atZeroWidth(text, missing);
-  const leastObject = isConnection(object)
-    ? object
-    : { ...object, ...(typeof object.detail === "string" ? { detail: atZeroWidth(object.detail, missing) } : null) };
-  const least = measuredReport(leastObject, size, leastText, canvasStyle);
+  const least = measuredReport(object, size, atZeroWidth(text, missing), canvasStyle);
   if (least.verdict !== "overflows" || !least.reliable) return report;
   return {
     ...report,
@@ -844,12 +698,9 @@ function measuredReport(
     if (text.trim() === "") return nothingToFit("none", "no label to fit");
     return edgeLabelReport(size, text, canvasStyle);
   }
-  // A section's header carries its own icon and detail (never a slot
-  // detail), so an empty title still has a detail run to fit.
-  const hasText =
-    object.type === "section"
-      ? titleChipHasContent({ ...object, text }, canvasStyle)
-      : text !== "" || slotDetailText(object) !== "";
+  // A section's header carries its own icon, so an empty title may still
+  // have a header to fit.
+  const hasText = object.type === "section" ? titleChipHasContent({ ...object, text }, canvasStyle) : text !== "";
   if (!hasText) return nothingToFit("none", "no text to fit");
   if (size.width <= 0 || size.height <= 0) {
     return {

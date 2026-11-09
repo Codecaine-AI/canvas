@@ -164,9 +164,8 @@ describe("text-fit / renderer parity — sticky bodies and section titles", () =
 });
 
 describe("text-fit / renderer parity — the schematic themes", () => {
-  // The schematic name weight (600) measures with Inter's bold advances, and
-  // the detail line paints IBM Plex Mono — the verdict must still be exactly
-  // the clipping the styled render shows.
+  // The schematic name weight (600) measures with Inter's bold advances — the
+  // verdict must still be exactly the clipping the styled render shows.
   for (const theme of ["schematic-light", "schematic-dark"] as const) {
     const style = canvasThemePreset(theme);
     const styledSvg = (object: InteractiveCanvasObject) =>
@@ -184,15 +183,13 @@ describe("text-fit / renderer parity — the schematic themes", () => {
       expect(textFitReport(shy, shy.geometry, shy.text, style).fits).toBe(false);
     });
 
-    test(`${theme}: with a detail line the needed size holds the name AND the detail whole`, () => {
-      const tight = { ...shape(LONG_LABEL, 200, 96), detail: "postgres 16 · db.t3.micro" };
-      const report = textFitReport(tight, tight.geometry, tight.text, style);
-      expect(report.fits).toBe(false);
-      const grown = { ...tight, geometry: { ...tight.geometry, ...report.neededSize! } };
-      expect(textFitReport(grown, grown.geometry, grown.text, style).fits).toBe(true);
-      const svg = styledSvg(grown);
-      expect(svg).not.toContain("…");
-      expect(svg).toContain(">postgres 16 · db.t3.micro</text>");
+    test(`${theme}: a stored detail changes neither the verdict nor the render`, () => {
+      const plain = shape(LONG_LABEL, 200, 96);
+      const stored = { ...plain, detail: "postgres 16 · db.t3.micro" };
+      expect(textFitReport(stored, stored.geometry, stored.text, style)).toEqual(
+        textFitReport(plain, plain.geometry, plain.text, style),
+      );
+      expect(styledSvg(stored)).toBe(styledSvg(plain));
     });
   }
 });

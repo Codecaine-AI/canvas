@@ -87,22 +87,18 @@ import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { resolveObjectStrokeWidth, resolveShapeCornerRadius } from "../theme/tokens";
 import { DEFAULT_CANVAS_STYLE, normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
 import { CANVAS_MONO_FONT_STACK_SVG, CANVAS_SANS_FONT_STACK_SVG } from "../theme/fonts";
-import { ellipsizeToWidth, fitsOnOneLine, measureWidth, wrapText } from "../theme/text-measure";
+import { ellipsizeToWidth, wrapText } from "../theme/text-measure";
 import {
   BELOW_TEXT_SLOT,
   CENTER_TEXT_SLOT,
   CENTER_TEXT_INSET_PX,
   INSET_BODY_TEXT_SLOT,
-  detailFontSpec,
   iconTileRectPx,
   rectTextSlot,
   resolveTextSlot,
   slotFontSpec,
   slotLineHeightPx,
-  slotNameLineCapacity,
-  type DetailTypography,
   type LocalRect,
-  type ResolvedSlotDetail,
   type SlotTypography,
   type TextSlot,
 } from "../objects/text-slots";
@@ -242,7 +238,7 @@ function paintsInsideViewBox(
 // zero-width spaces, CJK), preserved spaces, hanging trailing spaces, and
 // intra-word breaks only for a word wider than the line.
 //
-// `wrapTextLines` / `clampLines` / `ellipsizeDetailText` are exported (they
+// `wrapTextLines` / `clampLines` are exported (they
 // are not on the package's public `./render` surface — deep-import them) so
 // that off-renderer consumers can ask "would this text clip in this box?" and
 // get the RENDERER's answer rather than a second implementation of it. The
@@ -285,55 +281,9 @@ export function clampLines(
   return clamped;
 }
 
-/** Width of a detail-line run in its font (IBM Plex Mono or Inter, per the style). */
-export function measureDetailTextPx(text: string, typography: DetailTypography): number {
-  return measureWidth(text, detailFontSpec(typography));
-}
-
 /**
- * The detail line as painted at `widthPx` (mirrors the live line's
- * `white-space: nowrap; text-overflow: ellipsis`): unchanged when it fits;
- * otherwise the longest prefix that fits WITH a trailing ellipsis, trailing
- * whitespace dropped. Exported (deep-import, like wrapTextLines / clampLines)
- * so the agent's text-fit asks the renderer whether a detail is cut.
- */
-export function ellipsizeDetailText(text: string, widthPx: number, typography: DetailTypography): string {
-  const font = detailFontSpec(typography);
-  return fitsOnOneLine(text, font, widthPx) ? text : ellipsizeToWidth(text, font, widthPx);
-}
-
-/** One detail line as a `<text>`, centered vertically on `centerY` (world coordinates). */
-function renderDetailLine(
-  detail: ResolvedSlotDetail,
-  widthPx: number,
-  x: number,
-  centerY: number,
-  anchor: "middle" | "start",
-): string {
-  const { typography } = detail;
-  return tag(
-    "text",
-    {
-      x,
-      y: centerY,
-      fill: typography.color,
-      "font-size": typography.fontSizePx,
-      "font-weight": typography.fontWeight,
-      "text-anchor": anchor,
-      "dominant-baseline": "central",
-      // The root <svg> already carries the sans stack.
-      ...(typography.font === "mono" ? { "font-family": CANVAS_MONO_FONT_STACK_SVG } : null),
-    },
-    escapeXml(ellipsizeDetailText(detail.text, widthPx, typography)),
-  );
-}
-
-/**
- * Renders wrapped slot text as a `<text>` with one `<tspan>` per line, plus
- * the slot's detail line (its own `<text>`) when `options.detail` is set:
- * the name block and the detail line lay out as ONE block anchored by
- * `verticalAlign` (mirroring the live flex column), the name's clamp gives up
- * the detail line's reserve, and the detail ellipsizes at the slot width.
+ * Renders wrapped slot text as a `<text>` with one `<tspan>` per line, the
+ * block anchored by `verticalAlign` (mirroring the live flex column).
  * `rect` is in world coordinates.
  */
 function renderSlotTextBlock(
@@ -341,24 +291,18 @@ function renderSlotTextBlock(
   rect: { x: number; y: number; width: number; height: number },
   typography: SlotTypography,
   verticalAlign: "top" | "center" | "bottom",
-  options?: { clampToRect?: boolean; detail?: ResolvedSlotDetail | null },
+  options?: { clampToRect?: boolean },
 ): string {
-  const detail = options?.detail ?? null;
-  if ((text === "" && !detail) || rect.width <= 0) return "";
+  if (text === "" || rect.width <= 0) return "";
   const lineHeight = slotLineHeightPx(typography);
   let lines = wrapTextLines(text, rect.width, typography);
-  if (lines.length === 0 && !detail) return "";
+  if (lines.length === 0) return "";
   if (options?.clampToRect !== false && rect.height > 0) {
-    // slotNameLineCapacity: the detail line's reserve comes off the name's lines.
-    const reserve = detail ? detail.gapPx + detail.typography.lineHeightPx : 0;
-    const maxLines = Math.max(1, Math.floor((rect.height - reserve) / lineHeight));
+    const maxLines = Math.max(1, Math.floor(rect.height / lineHeight));
     lines = clampLines(lines, maxLines, rect.width, typography);
   }
 
-  const detailHeight = detail
-    ? (lines.length > 0 ? detail.gapPx : 0) + detail.typography.lineHeightPx
-    : 0;
-  const blockHeight = lines.length * lineHeight + detailHeight;
+  const blockHeight = lines.length * lineHeight;
   let top: number;
   if (verticalAlign === "top") {
     top = rect.y;
@@ -385,25 +329,21 @@ function renderSlotTextBlock(
     )
     .join("");
 
-  const name =
-    tspans === ""
-      ? ""
-      : tag(
-          "text",
-          {
-            fill: typography.color,
-            "font-size": typography.fontSizePx,
-            "font-weight": typography.fontWeight,
-            "text-anchor": anchor,
-            "dominant-baseline": "central",
-            ...(typography.fontFamily ? { "font-family": typography.fontFamily } : null),
-            ...(preserveSpaces ? { "xml:space": "preserve" } : null),
-          },
-          tspans,
-        );
-  if (!detail) return name;
-  const detailCenterY = top + blockHeight - detail.typography.lineHeightPx / 2;
-  return name + renderDetailLine(detail, rect.width, x, detailCenterY, anchor);
+  return tspans === ""
+    ? ""
+    : tag(
+        "text",
+        {
+          fill: typography.color,
+          "font-size": typography.fontSizePx,
+          "font-weight": typography.fontWeight,
+          "text-anchor": anchor,
+          "dominant-baseline": "central",
+          ...(typography.fontFamily ? { "font-family": typography.fontFamily } : null),
+          ...(preserveSpaces ? { "xml:space": "preserve" } : null),
+        },
+        tspans,
+      );
 }
 
 // ---------------------------------------------------------------------------
@@ -452,8 +392,8 @@ export function effectiveRenderShape(object: InteractiveCanvasObject): string {
 
 /**
  * An object's slot text under `canvasStyle`: the name in the style's name
- * color/weight, plus its detail line (resolveTextSlot decides whether one
- * paints — never for stickies, which render their markdown body).
+ * color/weight. A node shows its name only: a stored `detail` (older boards)
+ * never paints. Stickies render their markdown body.
  */
 function renderObjectText(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): string {
   // Sticky notes render their text as markdown line boxes, not plain slot text.
@@ -464,7 +404,7 @@ function renderObjectText(object: InteractiveCanvasObject, canvasStyle: CanvasSt
   if (!slot) return "";
   const resolved = resolveTextSlot(slot, object, 1, { canvasStyle });
   if (resolved.hidden) return "";
-  if (object.text === "" && !resolved.detail) return "";
+  if (object.text === "") return "";
   const worldRect = {
     x: object.geometry.x + resolved.rect.x,
     y: object.geometry.y + resolved.rect.y,
@@ -472,12 +412,9 @@ function renderObjectText(object: InteractiveCanvasObject, canvasStyle: CanvasSt
     height: resolved.rect.height,
   };
   // The "below" band renders every wrapped line (it sizes itself to the text)
-  // rather than clamping to the glyph box; its detail line follows the name.
+  // rather than clamping to the glyph box.
   const clampToRect = resolved.multiline && slot.placement !== "below";
-  return renderSlotTextBlock(object.text, worldRect, resolved.typography, resolved.verticalAlign, {
-    clampToRect,
-    detail: resolved.detail,
-  });
+  return renderSlotTextBlock(object.text, worldRect, resolved.typography, resolved.verticalAlign, { clampToRect });
 }
 
 function polygonPointsAttribute(points: CanvasPoint[]): string {

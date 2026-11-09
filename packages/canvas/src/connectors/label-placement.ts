@@ -85,7 +85,7 @@ function isBox(object: InteractiveCanvasObject): boolean {
 }
 
 /**
- * The world rect of `object`'s caption band — the name and detail an icon
+ * The world rect of `object`'s caption band — the name an icon
  * paints under its tile (the below-extended bounds minus the glyph box) — or
  * null when nothing paints under its glyph. Default style when omitted.
  */

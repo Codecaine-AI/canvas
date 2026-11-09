@@ -106,7 +106,6 @@ export function handleAddObject(
     {
       id,
       text: action.text,
-      detail: action.detail,
       parentId: action.parentId ?? null,
       // D17 — new objects take the last-picked color for their kind unless
       // the action pins one explicitly.

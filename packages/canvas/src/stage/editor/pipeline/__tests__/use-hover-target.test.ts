@@ -117,13 +117,12 @@ describe("resolveHoverTarget", () => {
 
 describe("resolveHoverTarget: styled below-band captions", () => {
   it("keeps hover within the halo around the caption the active style paints", () => {
-    const style = { ...DEFAULT_CANVAS_STYLE, detailFontSizePx: 20 };
+    const style = { ...DEFAULT_CANVAS_STYLE, textFontSizePx: 26 };
     const icon: InteractiveCanvasObject = {
       id: "db",
       type: "icon",
       icon: "database",
       text: "DB",
-      detail: "port: 5432",
       geometry: { x: 0, y: 0, width: 64, height: 64 },
     };
     const halo = ANCHOR_DOT_OFFSET_PX + HIT_TARGET_PX / 2 + 2;

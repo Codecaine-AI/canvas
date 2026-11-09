@@ -63,7 +63,7 @@ describe("canvas MCP server", () => {
     expect(tools).toHaveLength(5 + 27 + 6);
   });
 
-  test("tools/list carries the name + detail fields on nodes and the section header glyph, and no section detail", async () => {
+  test("tools/list carries the name fields and the section header glyph; no placement or copy takes a detail", async () => {
     const server = createCanvasMcpServer({ workspace: tempWorkspace() });
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -78,10 +78,10 @@ describe("canvas MCP server", () => {
 
     expect(Object.keys(schema("place_section").properties)).toEqual(["id", "text", "at", "size", "icon", "color"]);
     expect(schema("place_section").required).toEqual(["id", "text", "at"]);
-    expect(Object.keys(schema("place_shape").properties)).toEqual(["id", "type", "at", "text", "detail", "color"]);
+    expect(Object.keys(schema("place_shape").properties)).toEqual(["id", "type", "at", "text", "color"]);
     expect(schema("place_shape").required).toEqual(["id", "type", "at"]);
-    expect(Object.keys(schema("clone").properties)).toContain("detail");
-    // update_text: either field alone, so only the id is required.
+    expect(Object.keys(schema("clone").properties)).not.toContain("detail");
+    // update_text still accepts a detail so it can drop one with a note; only the id is required.
     expect(Object.keys(schema("update_text").properties)).toEqual(["id", "text", "detail"]);
     expect(schema("update_text").required).toEqual(["id"]);
     expect(Object.keys(schema("change_shape").properties.patch.properties)).toEqual(["type", "direction", "icon"]);

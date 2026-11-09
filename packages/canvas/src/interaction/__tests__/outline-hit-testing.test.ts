@@ -144,32 +144,32 @@ describe("styled below-band captions", () => {
     id: "db",
     type: "icon",
     icon: "database",
-    text: "DB",
-    detail: "port: 5432",
+    text: "Orders database",
     geometry: { x: 0, y: 0, width: 64, height: 64 },
   };
-  const largeDetailStyle = { ...DEFAULT_CANVAS_STYLE, detailFontSizePx: 20 };
+  const largeNameStyle = { ...DEFAULT_CANVAS_STYLE, textFontSizePx: 26 };
 
-  it("sizes the hit footprint and connection bounds with the active style's detail metrics", () => {
-    const painted = belowExtendedBoundsPx(icon, largeDetailStyle);
+  it("sizes the hit footprint and connection bounds with the active style's name metrics", () => {
+    const painted = belowExtendedBoundsPx(icon, largeNameStyle);
 
     // The picture starts at the tile: 56px (iconTileMaxPx) centered in the 64px box.
     expect(painted.y).toBe(4);
     // Hit footprint = object box ∪ painted (the caption is wider than the box).
-    expect(hitBoundsForObject(icon, largeDetailStyle)).toEqual({
+    expect(hitBoundsForObject(icon, largeNameStyle)).toEqual({
       x: painted.x,
       y: 0,
       width: painted.width,
       height: painted.y + painted.height,
     });
     // Connection bounds: the tile's columns, from the tile top down through the band.
-    expect(connectionBoundsForObject(icon, largeDetailStyle)).toEqual({ x: 4, y: 4, width: 56, height: painted.height });
+    expect(connectionBoundsForObject(icon, largeNameStyle)).toEqual({ x: 4, y: 4, width: 56, height: painted.height });
   });
 
-  it("hits the painted detail line that only the active style reaches", () => {
-    const point = { x: 32, y: 112 };
+  it("hits the painted caption that only the active style reaches", () => {
+    const painted = belowExtendedBoundsPx(icon, largeNameStyle);
+    const point = { x: 32, y: painted.y + painted.height - 2 };
 
-    expect(hitTestObjects(doc([icon]), point, { canvasStyle: largeDetailStyle })?.id).toBe("db");
+    expect(hitTestObjects(doc([icon]), point, { canvasStyle: largeNameStyle })?.id).toBe("db");
     expect(hitTestObjects(doc([icon]), point)).toBeNull();
   });
 });

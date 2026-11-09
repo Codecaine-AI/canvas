@@ -369,7 +369,7 @@ describe("getConnectionAnchors", () => {
     expect(anchors[3]!.point).toEqual({ x: 130, y: 90 });
   });
 
-  it("keeps glyph side anchors for a detail-only caption", () => {
+  it("an unnamed icon with a stored detail has no caption: its bounds and anchors are the tile's", () => {
     const object = shapeObject("icon", {
       icon: "database",
       text: "",
@@ -380,7 +380,8 @@ describe("getConnectionAnchors", () => {
     const anchors = getConnectionAnchors(object);
 
     // Default (schematic) tile style: the glyph box is the 56px tile centered in the 64px box.
-    expect(bounds.height).toBeGreaterThan(object.geometry.height);
+    expect(bounds).toEqual(connectionBoundsForObject({ ...object, detail: undefined }));
+    expect(bounds.height).toBe(56);
     expect(bounds.x).toBe(4);
     expect(bounds.width).toBe(56);
     expect(anchors[0]!.point).toEqual({ x: 32, y: 4 });

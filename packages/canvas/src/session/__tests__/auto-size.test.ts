@@ -37,8 +37,8 @@ function pageBoard(objects: InteractiveCanvasObject[] = []): InteractiveCanvasDo
   return makeDocument([{ ...box("page", 0, 0, 1600, 1200, "section"), text: "Page" }, ...objects]);
 }
 
-/** A detail line wider than a 160px box: it widens the node, where a long name only heightens it. */
-const WIDE_DETAIL = "retries three times with jittered backoff";
+/** One word wider than a 160px box's slot: it widens the node, where a long wrapping name only heightens it. */
+const WIDE_WORD = "ExponentialBackoffRetries";
 
 /** A section holding a 2×2 grid of 160×80 processes at a 480×160 pitch: room for a column to widen. */
 function gridBoard(): InteractiveCanvasDocument {
@@ -95,16 +95,6 @@ describe("auto-size · grow to fit", () => {
     expect(fits(n)).toBe(true);
   });
 
-  test("an icon whose caption detail does not fit widens, keeping its center", () => {
-    const session = makeTestSession(pageBoard(), ["page"]);
-    const detail = "consumes the order events stream and fans each one out to three workers";
-
-    runOp(session, "place_shape", { id: "i", type: "server", at: [400, 400], text: "Worker", detail });
-
-    const icon = objectOf(session.draft, "i");
-    expect(icon.type).toBe("icon");
-    expect(fits(icon)).toBe(true);
-  });
 });
 
 describe("auto-size · peers grow with it", () => {
@@ -112,7 +102,7 @@ describe("auto-size · peers grow with it", () => {
     const session = makeTestSession(gridBoard(), ["frame"]);
     const before = new Map(session.draft.objects.map((object) => [object.id, center(object)]));
 
-    runOp(session, "update_text", { id: "a", text: LONG, detail: WIDE_DETAIL });
+    runOp(session, "update_text", { id: "a", text: `${LONG} ${WIDE_WORD}` });
 
     const [a, b, c, d] = ["a", "b", "c", "d"].map((id) => objectOf(session.draft, id));
     expect(fits(a!)).toBe(true);
@@ -254,7 +244,7 @@ describe("auto-size · fixed aspect", () => {
     const session = makeTestSession(pageBoard(), ["page"]);
 
     const result = runOp(session, "place_shape", {
-      id: "stop", type: "octagon", at: [200, 200], text: "cancel", detail: "ends the run",
+      id: "stop", type: "octagon", at: [200, 200], text: "cancel",
     });
 
     expect(result.isError).toBeUndefined();

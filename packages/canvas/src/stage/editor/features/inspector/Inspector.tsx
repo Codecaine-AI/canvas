@@ -35,13 +35,6 @@ import type {
 import { animateSectionFitToChildren, isSectionFitted } from "../section-fit/animate-section-fit";
 import { IconGlyphPicker } from "./IconGlyphPicker";
 
-/**
- * Past this many characters (trimmed) a detail reads as more than one fact —
- * the authoring guidance's detail limit (board/text-rules.ts
- * DETAIL_MAX_CHARS). The Inspector only warns; it never blocks typing.
- */
-const DETAIL_SOFT_MAX_CHARS = 48;
-
 export interface InspectorProps {
   document: InteractiveCanvasDocument;
   lastChange: CanvasChangeSummary | undefined;
@@ -77,7 +70,6 @@ export function Inspector({
   };
   const selectedSectionFitted =
     selectedObject?.type === "section" ? isSectionFitted(document, selectedObject.id) : false;
-  const detailLength = selectedObject?.detail?.trim().length ?? 0;
   // A fixed-aspect shape (the octagon): either size field drives the other.
   const aspect = selectedObject ? naturalAspectOf(selectedObject) : null;
 
@@ -129,33 +121,7 @@ export function Inspector({
             }
           />
         </label>
-        {/* Stickies carry no detail line (their body is markdown), and a section's header is its title alone. */}
-        {selectedObject.type !== "sticky" && selectedObject.type !== "section" && (
-          <div className="text-ui-xs">
-            <label className="grid gap-1">
-              <span className="text-muted-foreground">Detail</span>
-              <Input
-                value={selectedObject.detail ?? ""}
-                placeholder="One short fact — a port, path, model"
-                onChange={(event) =>
-                  // Empty clears the detail (the reducer drops blank details).
-                  dispatch({
-                    type: "canvas.updateObject",
-                    objectId: selectedObject.id,
-                    patch: { detail: event.target.value },
-                  })
-                }
-              />
-            </label>
-            <div role="status" className="text-ui-2xs text-warning">
-              {detailLength > DETAIL_SOFT_MAX_CHARS ? (
-                <p className="mt-1">
-                  {detailLength} / {DETAIL_SOFT_MAX_CHARS} — keep it to one short fact
-                </p>
-              ) : null}
-            </div>
-          </div>
-        )}
+        {/* No kind has a Detail field: a node shows its name only, and extra context goes in a sticky note. */}
         {selectedObject.type === "section" && (
           <IconGlyphPicker
             key={selectedObject.id}

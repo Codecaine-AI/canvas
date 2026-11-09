@@ -124,8 +124,6 @@ export type CanvasAction =
       objectType: InteractiveCanvasObjectType;
       /** Seed for the object's unified `text` field; omit for the per-type default (type label for shapes/sections, empty for sticky). */
       text?: string;
-      /** Seed for the one-line `detail` under the name; omit (or empty) for none. Ignored for stickies. */
-      detail?: string;
       parentId?: string | null;
       geometry?: CanvasGeometry;
       /** Explicit color pick for the new object; omit to take the last-picked memory for its kind (D17). */

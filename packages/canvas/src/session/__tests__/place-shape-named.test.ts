@@ -18,14 +18,13 @@ describe("place · place_shape carries its name and color", () => {
     const session = makeTestSession(makeDocument([box("page", 0, 0, 1200, 800, "section")]), ["page"]);
 
     const result = runOp(session, "place_shape", {
-      id: "store", type: "database", at: [100, 100], text: "Orders", detail: "pg 16", color: "teal",
+      id: "store", type: "database", at: [100, 100], text: "Orders", color: "teal",
     });
 
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain('APPLIED · place_shape store database 100,100 300×120 "Orders" teal');
     const store = objectOf(session.draft, "store");
     expect(store.text).toBe("Orders");
-    expect(store.detail).toBe("pg 16");
     expect(store.color).toBe("teal");
   });
 

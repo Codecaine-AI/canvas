@@ -201,7 +201,7 @@ function rectPoints(bounds: CanvasBounds): CanvasPoint[] {
  * World-space hit footprint: the object box ∪ its painted picture (the glyph
  * box — a tile-style icon's tile — and any below-slot caption band, band
  * width included), sized under `canvasStyle` (the workspace style — its
- * detail metrics grow the band, its tile cap places it). Hit testing, hover,
+ * name metrics grow the band, its tile cap places it). Hit testing, hover,
  * and snap candidates read it. Default style when omitted.
  */
 export function hitBoundsForObject(
@@ -244,8 +244,8 @@ export function connectionBoundsForObject(
 }
 
 /**
- * World rect of the caption band an icon paints under its glyph (name and
- * detail, band width included — wider than the glyph column the connection
+ * World rect of the caption band an icon paints under its glyph (the name,
+ * band width included — wider than the glyph column the connection
  * bounds keep), or null when nothing paints there. Routes keep out of it.
  */
 export function captionBandBounds(
@@ -265,7 +265,7 @@ export function captionBandBounds(
   };
 }
 
-/** Whether a caption (name lines and/or a detail line) paints below the glyph — detail-only captions count. */
+/** Whether a caption (the name lines) paints below the glyph. */
 function hasExternalBelowBand(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): boolean {
   return belowBandSize(object.text, object, canvasStyle).heightPx > 0;
 }
