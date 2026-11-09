@@ -2,8 +2,10 @@
  * detail-value — does a node's one-line `detail` tell the reader anything?
  *
  * Every shape or icon with a detail becomes one Jev Choice question:
- * `keep` (the detail states a concrete fact the name, the section and the
- * wired neighbors do not) or `remove` (it restates, labels, or pads). The
+ * `remove` by default, `keep` only when the detail states an exact fact that
+ * is stated nowhere else on the board: not in the name, the section, the
+ * wired neighbors or their wire labels, the other details in the section,
+ * the sticky notes, or the board title. The
  * questions of one board go in one request (Jev evaluates them in parallel,
  * so a batch costs about one call), and every answer is cached by a hash of
  * what the question saw, so checking an unchanged node again costs nothing.
@@ -36,27 +38,54 @@ import {
 export const DETAIL_VALUE_MODEL = "jev-1.14.0";
 
 /** Bump when the question, the options, or the state shape changes. Part of every cache key. */
-export const DETAIL_PROMPT_VERSION = 3;
+export const DETAIL_PROMPT_VERSION = 7;
 
 /**
  * A `remove` verdict at or above this confidence is an error finding.
- * Confidence on a two-option Choice is |2p − 1|, so 0.5 means p(remove) ≥ 0.75.
- * Calibrated with prompt version 3 on 1,664 details from the 14 Archon boards
- * and 62 replay boards. It removes 3 of 230 Archon details, all filler
- * ("defined workflow" twice, "runs the bundle's agent"), and 85 of 1,434
- * replay details. On a 40-row hand-read sample, 11 of the 12 removals at
- * this cut were filler (the miss: "discard partial work", a side effect).
- * At 0.4 or 0.3 the cut also removes Archon command names ("workflow wake,
- * workflow signal", "archon workflow signal"), so it stays at 0.5 and leaves
- * the weaker filler ("agent applies findings", p 0.68) on the board.
+ * Confidence on a two-option Choice is |2p − 1|, so 0.3 means p(remove) ≥ 0.65.
+ * Calibrated with prompt version 7 on the 14 Archon boards (230 details)
+ * against Ford's bar: a detail stays only when it adds a fact stated nowhere
+ * else on the board, sticky notes included. The labels are a 40-row
+ * independent review plus a relabel of the rest against the same bar (56
+ * remove). Scored on the findings, after detailRemovals keeps one copy of a
+ * repeated detail, over two runs: this cut agrees with the 40-row review on
+ * 35 and 35 rows and with all 230 on 200 and 200 (1 or 2 useful details
+ * removed). At p ≥ 0.55 it agrees on 35/35 and 199/202 but removes 3 or 4
+ * useful details (key tuples, a wake signal), so the cut moved up: a lost
+ * fact costs more than a kept line. At p ≥ 0.75 it keeps 34 or more
+ * redundant ones. 10 of the remaining wrong keeps are copies of one detail
+ * whose fact is in a note or wire label: detailRemovals keeps them all by
+ * design. Jev's p(remove) moves about 0.02 between runs, 0.2 at most.
  */
-export const DETAIL_REMOVE_THRESHOLD = 0.5;
+export const DETAIL_REMOVE_THRESHOLD = 0.3;
 
-/** Questions per request. Each question is small; this keeps a request far under the 64k context. */
+/** At most this many questions go in one request. */
 const BATCH_SIZE = 40;
+
+/**
+ * At most this many JSON characters go in one request. Jev refuses a request
+ * of about 64k input tokens (HTTP 400): a 192k-character request of 32
+ * questions passed at 58k tokens, and a 216k-character one failed. Each
+ * question carries its board context, so a board's questions are split by
+ * size, well under that limit.
+ */
+const REQUEST_CHARS = 120_000;
 
 /** At most this many neighbor names go into a question; more only dilute it. */
 const MAX_NEIGHBORS = 8;
+
+/**
+ * Size caps for the board context. A note longer than NOTE_CHARS is cut, and
+ * notes stop once their total passes NOTES_CHARS. A question gets the other
+ * details in its section and on its wired neighbors, each cut to OTHER_CHARS,
+ * until their total passes OTHERS_CHARS, and at most MAX_WIRE_LABELS wire
+ * labels. Archon's largest board sends 1,251 note characters, under these caps.
+ */
+const NOTE_CHARS = 800;
+const NOTES_CHARS = 3_000;
+const OTHER_CHARS = 140;
+const OTHERS_CHARS = 3_000;
+const MAX_WIRE_LABELS = 8;
 
 /** What one question sees about one node. */
 export interface DetailSubject {
@@ -69,6 +98,24 @@ export interface DetailSubject {
   section: string | null;
   /** The names of the boxes wired to this node, either direction, sorted and deduplicated. */
   neighbors: string[];
+  /** The labels on the wires touching this node, sorted and deduplicated. */
+  wireLabels: string[];
+  /**
+   * The other details near this node, as `name: detail` in board order: every
+   * box in the same section and every wired neighbor, except a box with the
+   * same detail text (see `sameDetail`). Details farther away were tried and
+   * made Jev remove more details that only look alike.
+   */
+  otherDetails: string[];
+  /**
+   * The ids of every box whose detail has this text (normalized), this one
+   * included, in reading order: top to bottom, then left to right. One id when
+   * the detail is unique. Not sent to Jev: the group decides which verdicts
+   * become findings (detailRemovals).
+   */
+  sameDetail: string[];
+  /** The text of every sticky note on the board (shared by every subject of the board). */
+  notes: string[];
 }
 
 export interface DetailVerdict {
@@ -92,42 +139,97 @@ function nameOf(object: InteractiveCanvasObject): string {
   return (object.text ?? "").replace(/\s+/g, " ").trim();
 }
 
+/** Cut `text` to `max` characters, marking the cut. */
+function cut(text: string, max: number): string {
+  return text.length <= max ? text : `${text.slice(0, max - 1).trimEnd()}…`;
+}
+
+/**
+ * The text of every sticky note, in board order, on one line each with the
+ * Markdown heading and emphasis marks dropped (code spans stay: they mark the
+ * exact identifiers a detail might repeat). Capped by NOTE_CHARS and NOTES_CHARS.
+ */
+export function boardNotes(document: InteractiveCanvasDocument): string[] {
+  const notes: string[] = [];
+  let total = 0;
+  for (const object of document.objects) {
+    if (kindOf(object) !== "sticky") continue;
+    const text = (object.text ?? "")
+      .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+      .replace(/\*\*|__/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (text === "") continue;
+    const note = cut(text, NOTE_CHARS);
+    if (total + note.length > NOTES_CHARS) break;
+    total += note.length;
+    notes.push(note);
+  }
+  return notes;
+}
+
 /**
  * The nearest enclosing section that is not the page frame. The page frame's
  * title is the board title, which the request already states once.
  */
-function sectionTitleOf(
+function sectionOf(
   object: InteractiveCanvasObject,
   byId: ReadonlyMap<string, InteractiveCanvasObject>,
-): string | null {
+): InteractiveCanvasObject | null {
   let parentId = object.parentId ?? null;
   const seen = new Set<string>();
   while (parentId && !seen.has(parentId)) {
     seen.add(parentId);
     const parent = byId.get(parentId);
     if (!parent) return null;
-    if (parent.type === "section" && parent.parentId) return nameOf(parent) || null;
+    if (parent.type === "section" && parent.parentId) return parent;
     parentId = parent.parentId ?? null;
   }
   return null;
 }
 
-/** Every shape or icon with a non-empty detail, with the context its question gets. */
+const detailOf = (object: InteractiveCanvasObject): string => (object.detail ?? "").replace(/\s+/g, " ").trim();
+
+/** The text two details must share to be the same detail: case and Unicode forms folded. */
+const sameText = (detail: string): string => detail.normalize("NFKC").toLowerCase();
+
+/** Reading order: top to bottom, then left to right. */
+const readingOrder = (a: InteractiveCanvasObject, b: InteractiveCanvasObject): number =>
+  a.geometry.y - b.geometry.y || a.geometry.x - b.geometry.x || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+
+/** Add `value` to the set stored under `key`, creating the set on first use. */
+function addTo<T>(map: Map<string, Set<T>>, key: string, value: T): void {
+  (map.get(key) ?? map.set(key, new Set()).get(key)!).add(value);
+}
+
+/**
+ * Every shape or icon with a non-empty detail, with the board context its
+ * question gets: what else on the board could already state the same fact.
+ */
 export function detailSubjects(document: InteractiveCanvasDocument): DetailSubject[] {
   const byId = new Map(document.objects.map((object) => [object.id, object]));
   const neighborIds = new Map<string, Set<string>>();
+  const wireLabels = new Map<string, Set<string>>();
   for (const connection of document.connections) {
     const from = connection.from.objectId;
     const to = connection.to.objectId;
+    const label = (connection.label ?? "").replace(/\s+/g, " ").trim();
+    if (label !== "") {
+      addTo(wireLabels, from, label);
+      addTo(wireLabels, to, label);
+    }
     if (from === to) continue;
-    (neighborIds.get(from) ?? neighborIds.set(from, new Set()).get(from)!).add(to);
-    (neighborIds.get(to) ?? neighborIds.set(to, new Set()).get(to)!).add(from);
+    addTo(neighborIds, from, to);
+    addTo(neighborIds, to, from);
   }
-  const subjects: DetailSubject[] = [];
-  for (const object of document.objects) {
-    if (kindOf(object) !== "node") continue;
-    const detail = (object.detail ?? "").replace(/\s+/g, " ").trim();
-    if (detail === "") continue;
+  const withDetail = document.objects
+    .filter((object) => kindOf(object) === "node" && detailOf(object) !== "")
+    .map((object) => ({ object, detail: detailOf(object), text: sameText(detailOf(object)), section: sectionOf(object, byId) }));
+  const groups = new Map<string, InteractiveCanvasObject[]>();
+  for (const { object, text } of withDetail) (groups.get(text) ?? groups.set(text, []).get(text)!).push(object);
+  for (const group of groups.values()) group.sort(readingOrder);
+  const notes = boardNotes(document);
+  return withDetail.map(({ object, detail, text, section }) => {
     const neighbors = [...new Set(
       [...(neighborIds.get(object.id) ?? [])]
         .map((id) => byId.get(id))
@@ -135,9 +237,67 @@ export function detailSubjects(document: InteractiveCanvasDocument): DetailSubje
         .map(nameOf)
         .filter((name) => name !== ""),
     )].sort().slice(0, MAX_NEIGHBORS);
-    subjects.push({ id: object.id, board: document.title ?? "", name: nameOf(object), detail, section: sectionTitleOf(object, byId), neighbors });
-  }
-  return subjects;
+    const wired = neighborIds.get(object.id);
+    const name = nameOf(object);
+    // A detail is redundant only when its fact is in a note, a wire label or
+    // a detail with other text. Its own copies never count: copies that each
+    // saw the others were all removed together, and the fact with them (five
+    // `agent_runs row` boxes each saying `pi_session_id`). Leaving them out
+    // also keeps this question, and its cached verdict, the same when a copy
+    // is cleared.
+    const near = (other: (typeof withDetail)[number]) =>
+      (other.section === section || wired?.has(other.object.id) === true) && other.text !== text;
+    const otherDetails: string[] = [];
+    let total = 0;
+    for (const other of withDetail.filter((other) => other.object !== object && near(other))) {
+      const line = cut(`${nameOf(other.object)}: ${other.detail}`, OTHER_CHARS);
+      if (total + line.length > OTHERS_CHARS) break;
+      total += line.length;
+      otherDetails.push(line);
+    }
+    return {
+      id: object.id,
+      board: document.title ?? "",
+      name,
+      detail,
+      section: section ? nameOf(section) || null : null,
+      neighbors,
+      wireLabels: [...(wireLabels.get(object.id) ?? [])].sort().slice(0, MAX_WIRE_LABELS),
+      otherDetails,
+      sameDetail: groups.get(text)!.map((member) => member.id),
+      notes,
+    };
+  });
+}
+
+/**
+ * The details to remove: each subject whose verdict is a removal, except that
+ * a fact stated in several details always survives in one of them. For each
+ * group of details with the same text, the first in reading order is never a
+ * finding, and the later ones are findings only when the first one's own
+ * verdict is known and keeps it. When Jev would remove the first one too,
+ * clearing the later ones now would leave it alone, and the next check would
+ * remove it: every copy gone over two checks. So that group has no finding.
+ * Clearing a later copy changes no other copy's question (they never see each
+ * other), so it never turns the first one's keep into a remove.
+ */
+export function detailRemovals(
+  subjects: readonly DetailSubject[],
+  verdicts: ReadonlyMap<string, DetailVerdict>,
+): Array<{ subject: DetailSubject; verdict: DetailVerdict }> {
+  const byId = new Map(subjects.map((subject) => [subject.id, subject]));
+  const verdictOf = (subject: DetailSubject | undefined) => subject && verdicts.get(detailKey(subject));
+  return subjects.flatMap((subject) => {
+    const verdict = verdictOf(subject);
+    if (!isRemoval(verdict)) return [];
+    const [first] = subject.sameDetail;
+    if (subject.sameDetail.length > 1 && first !== undefined) {
+      if (first === subject.id) return [];
+      const kept = verdictOf(byId.get(first));
+      if (kept === undefined || isRemoval(kept)) return [];
+    }
+    return [{ subject, verdict }];
+  });
 }
 
 /** The cache key: everything the question saw (board title included), plus the prompt version and model. */
@@ -151,6 +311,9 @@ export function detailKey(subject: DetailSubject): string {
       subject.detail,
       subject.section,
       subject.neighbors,
+      subject.wireLabels,
+      subject.otherDetails,
+      subject.notes,
     ]))
     .digest("hex");
 }
@@ -161,88 +324,135 @@ export function isRemoval(verdict: DetailVerdict | undefined): verdict is Detail
 }
 
 /**
- * The two options. `keep` comes first on purpose: Jev leans slightly toward
- * the first option (TypeSafe's jaggedness notes), and a wrongly kept detail
- * costs less than a deleted fact. Each option says what it covers, what it
- * does not, and gives examples from outside any real board, so the
+ * The two options. `remove` is the default and comes first: Jev leans
+ * slightly toward the first option (TypeSafe's jaggedness notes), and Ford's
+ * bar is that a detail stays only when it adds context that would not
+ * otherwise be there: a fact stated nowhere else on the board, notes
+ * included. `keep` is narrow, but it wins over the remove list: one novel
+ * exact fact keeps the detail even when the rest of it is a role or a
+ * paraphrase. Every example comes from outside any real board, so the
  * calibration boards stay unseen.
  */
 const CRITERIA: JevChoiceQuestion["criteria"] = {
-  keep: {
-    what: "`node.detail` states a concrete, specific fact that a reader cannot get from `node.name`, `node.section` or `node.wired_to`.",
-    counts_as_a_fact: [
-      "a field, column, key or property name",
-      "a file path, module, table, endpoint, command or URL",
-      "a number: a limit, size, count, timeout, rate, port or version",
-      "a trigger, event name or schedule",
-      "a condition or cause: when or why it happens",
-      "a status, such as proposed, reserved, later or not in version 1",
-      "a payload, data shape, format or protocol",
-      "a named product, model, library or host",
-      "a variant that sets the box apart from sibling boxes of the same kind: inline or file, sync or async, local or remote, a mode or a source",
-    ],
-    examples: [
-      { name: "Orders table", detail: "status, total_cents" },
-      { name: "Rate limiter", detail: "100 req/min per key" },
-      { name: "Webhook handler", detail: "on invoice.paid" },
-      { name: "Session cache", detail: "Redis 7 · :6379" },
-      { name: "Export job", detail: "nightly 02:00 UTC" },
-      { name: "Retry skipped", detail: "card declined" },
-      { name: "Billing API", detail: "proposed · not in v1" },
-      { name: "Config", detail: "read from env, not a file" },
-      { name: "Email sender", detail: "async · queued" },
-    ],
-  },
   remove: {
-    what: "`node.detail` adds no concrete fact. A reader loses nothing if it is deleted.",
-    counts_as_no_fact: [
-      "it restates or paraphrases `node.name`",
-      "it repeats `node.section` or the name of a box in `node.wired_to`",
-      "it says in plain words what the box does, when the name already implies it",
-      "it describes the box's job in generic words that fit many systems",
-      "it says what kind of thing the box is, which its name already shows (a variant that sets it apart from its siblings is a fact, not a kind)",
-      "it is a slogan, a vague summary, decoration or filler",
+    what: "The default. Deleting `node.detail` loses no exact fact: every fact in it is stated somewhere else on the board, or it states no exact fact at all.",
+    counts_as_remove: [
+      "every exact fact in it already appears in `board_notes`, in `node.other_details`, or in `node.wire_labels`, in any words",
+      "it says what the box does, its job or its role, in any words, and holds no exact fact",
+      "it restates or paraphrases `node.name`, or is `node.name` with a prefix or suffix",
+      "it says what kind or category of thing the box is",
+      "it states a property the name already implies, such as an id being unique or a cancel step ending the run",
+      "it repeats `node.section`, `board_title`, or the name of a box in `node.wired_to`, or a count a reader can see from the wires",
+      "it is vague: a size, speed or status with no number or exact value, such as small, fast, grows over time or not measured",
+      "it is a slogan, a summary, decoration or filler",
     ],
     examples: [
       { name: "Auth service", detail: "handles authentication" },
-      { name: "Job queue", detail: "async processing" },
-      { name: "Dashboard", detail: "the main user view" },
+      { name: "Email worker", detail: "sends the outgoing emails" },
+      { name: "Image cache", detail: "a caching layer" },
+      { name: "user_id", detail: "the user's unique id" },
+      { name: "resize", detail: "image-resize" },
+      { name: "Fan-out", wired_to: ["Mobile push", "SMS", "Web push"], detail: "one of 3 channels" },
+      { name: "Upload bucket", detail: "small today, grows with use" },
+      { name: "Reject", detail: "stops the request" },
       { name: "Payment step", section: "Checkout", detail: "part of checkout" },
-      { name: "Router", detail: "routes requests to services" },
-      { name: "Content filter", detail: "safety layer" },
+      { name: "thumbnail", board_notes: ["Thumbnail step: sharp resizes to max 4096 px; stdout is the image"], detail: "sharp, stdout is the image" },
+      { name: "Retry loop", board_notes: ["Retry the charge until it clears, at most 3 attempts"], detail: "until it clears, max 3" },
+      { name: "invoice row", other_details: ["invoice row: amount_cents · due_at", "Invoices table: id, amount_cents, due_at"], detail: "amount_cents · due_at" },
+      { name: "Export", wire_labels: ["nightly 02:00 UTC"], detail: "runs nightly 02:00 UTC" },
+    ],
+  },
+  keep: {
+    what: "`node.detail` states at least one exact fact that appears nowhere else on the board: not in `node.name`, `node.section`, `node.wired_to`, `node.wire_labels`, `node.other_details`, `board_notes` or `board_title`. Such a fact keeps the detail even when the rest of the line says what the box does.",
+    counts_as_keep: [
+      "an exact identifier: a file path, file and line, package, table, column, field, key, event name, command or URL",
+      "a command a person or script types, even in plain words that echo the name, such as a CLI subcommand",
+      "a value the system's own config reads: a step type, a mode, a flag, a join rule or a model tier such as `model: small`",
+      "an exact value: a host, IP or port, a model id, a version, or a size, count, limit, timeout or threshold with its number",
+      "the unit a field is measured in, such as ms, bytes or rows",
+      "a schema, type, format or protocol name",
+      "the named product, library or machine it uses or runs on",
+      "the name of the host, machine, device or cluster it runs on: an exact fact even when the hostname reads like plain words, such as back-office, and even when every other word on the line is a wire label or a note",
+      "its scope status: in version 1, later, proposed or not installed",
+      "a non-obvious condition or side effect stated precisely: when it runs, what it writes, what it skips",
+      "one of the above that is new, next to words the board already states: the new fact keeps the whole line",
+      "the same words on a box with another name: there they state a fact about that box, not this one",
+    ],
+    examples: [
+      { name: "Orders table", detail: "status, total_cents" },
+      { name: "Thumbnail worker", detail: "sharp 0.33 · max 4096 px" },
+      { name: "Session cache", detail: "Redis 7 · :6379" },
+      { name: "Config loader", detail: "src/config/load.ts" },
+      { name: "Roll back", detail: "fly releases rollback" },
+      { name: "Pause or resume", detail: "queue pause, queue resume" },
+      { name: "on_timeout", detail: "jobs retry --last" },
+      { name: "ttl", detail: "seconds since last write" },
+      { name: "Classify", detail: "model: fast · tags each ticket" },
+      { name: "Summarize", detail: "llm step · small tier · writes summary.md" },
+      { name: "Webhook handler", detail: "on invoice.paid" },
+      { name: "Export job", detail: "nightly 02:00 UTC" },
+      { name: "Billing API", detail: "proposed · not in v1" },
+      { name: "Retry", detail: "skipped when the card is declined" },
+      { name: "Cache", board_notes: ["Every store in version 1 runs on services-02"], detail: "Redis 7 · services-02" },
+      { name: "On-site", section: "Where jobs run", wire_labels: ["phase one"], detail: "back-office · phase one" },
+      { name: "webhook", other_details: ["cron: later · not in v1"], detail: "later · not in v1" },
     ],
   },
 };
 
-/** One node's question. The node's facts ride in the instructions; the shared state is only the board title. */
+/** One node's question. The node and its neighborhood ride in the instructions; the board title and notes are shared state. */
 export function detailQuestion(subject: DetailSubject): JevChoiceQuestion {
   return {
     type: "choice",
     instructions: {
-      question: "Does `node.detail` give the reader a concrete fact that `node.name`, `node.section` and `node.wired_to` do not already give?",
-      context: "`node` is one box on a diagram titled `board_title`. `node.name` is the box's label. `node.detail` is the one small line printed under the label. `node.section` is the titled group the box sits in. `node.wired_to` lists the boxes connected to it by arrows.",
+      question: "Does `node.detail` add an exact fact that is stated nowhere else on the board? Answer `remove` when it states no exact fact, or when every exact fact in it is already in `board_notes`, `node.other_details`, `node.wire_labels`, `node.name`, `node.section`, `node.wired_to` or `board_title`. Answer `keep` when it holds even one exact fact found nowhere else, such as the name of the machine it runs on, even if the rest of the line describes the box's role or repeats a wire label.",
+      context: "`node` is one box on a diagram titled `board_title`. `node.name` is the box's label. `node.detail` is the one small line printed under the label. `node.section` is the titled group the box sits in. `node.wired_to` lists the boxes connected to it by arrows, and `node.wire_labels` the text on those arrows. `node.other_details` lists the details of the other boxes in the same group and of the wired boxes as `name: detail`, so a detail repeated on one of them is stated elsewhere. `board_notes` holds the text of every sticky note on the board. A detail line costs the reader attention, so it stays only when it adds a fact the reader cannot read anywhere else on the board.",
       node: {
         name: subject.name,
         detail: subject.detail,
         section: subject.section ?? "(none)",
         wired_to: subject.neighbors,
+        wire_labels: subject.wireLabels,
+        other_details: subject.otherDetails,
       },
     },
     criteria: CRITERIA,
   };
 }
 
-/** One board's requests: the board title as state, one question per subject, in batches. */
-export function detailRequests(boardTitle: string, subjects: readonly DetailSubject[]): JevRequest[] {
+/** The state every question about one board shares: its title and its notes. */
+export interface DetailBoard {
+  title: string;
+  notes: string[];
+}
+
+/**
+ * One board's requests: the board title and notes as state, one question per
+ * subject, in batches of at most BATCH_SIZE questions and REQUEST_CHARS
+ * characters. Question ids are `n<index into subjects>`.
+ */
+export function detailRequests(board: DetailBoard, subjects: readonly DetailSubject[]): JevRequest[] {
+  const state = { board_title: board.title, board_notes: board.notes };
+  const base = JSON.stringify({ model: DETAIL_VALUE_MODEL, state, questions: {} }).length;
   const requests: JevRequest[] = [];
-  for (let start = 0; start < subjects.length; start += BATCH_SIZE) {
-    const batch = subjects.slice(start, start + BATCH_SIZE);
-    requests.push({
-      model: DETAIL_VALUE_MODEL,
-      state: { board_title: boardTitle },
-      questions: Object.fromEntries(batch.map((subject, index) => [`n${start + index}`, detailQuestion(subject)])),
-    });
-  }
+  let questions: Record<string, JevChoiceQuestion> = {};
+  let count = 0;
+  let size = base;
+  subjects.forEach((subject, index) => {
+    const id = `n${index}`;
+    const question = detailQuestion(subject);
+    const added = JSON.stringify({ [id]: question }).length;
+    if (count > 0 && (count === BATCH_SIZE || size + added > REQUEST_CHARS)) {
+      requests.push({ model: DETAIL_VALUE_MODEL, state, questions });
+      questions = {};
+      count = 0;
+      size = base;
+    }
+    questions[id] = question;
+    count += 1;
+    size += added;
+  });
+  if (count > 0) requests.push({ model: DETAIL_VALUE_MODEL, state, questions });
   return requests;
 }
 
@@ -301,7 +511,7 @@ export async function judgeDetails(
   const usage: JevUsage = { input_tokens: 0, output_tokens: 0 };
   if (missing.length === 0) return { status: "checked", subjects, verdicts, asked: 0, usage };
 
-  const requests = detailRequests(document.title ?? "", missing);
+  const requests = detailRequests({ title: document.title ?? "", notes: boardNotes(document) }, missing);
   let responses;
   try {
     responses = await Promise.all(requests.map((request) => requestJev(request, {

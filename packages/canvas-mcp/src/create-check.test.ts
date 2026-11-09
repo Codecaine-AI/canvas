@@ -192,7 +192,12 @@ describe("canvas_create and canvas_check", () => {
     await call(service, "update_text", { id: "db", detail: "" });
     const fixed = checked(await call(service, "canvas_check", {}));
     expect(fixed.errors).toBe(0);
-    expect(requests).toBe(1);
+    // The cleared detail was context for the api question, so it is asked once more.
+    expect(fixed.text).toContain("DETAIL · Jev judged 1 node detail (1 asked, 0 cached) · 0 to remove");
+    expect(requests).toBe(2);
+    // An unchanged board asks nothing.
+    expect(checked(await call(service, "canvas_check", {})).text).toContain("(0 asked, 1 cached)");
+    expect(requests).toBe(2);
   });
 
   test("a chart.mmd redraws on a board with equal node and edge counts", async () => {

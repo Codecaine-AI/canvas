@@ -10,8 +10,10 @@
  * neighbors), so editing any of them leaves the old verdict unread: the
  * finding clears at once, and the next canvas_check judges the new inputs.
  * A check that could not run leaves no verdicts, so the rule reports nothing.
+ * A fact stated in several details with the same text is never removed from
+ * all of them: detailRemovals keeps the first in reading order.
  */
-import { detailKey, detailSubjects, isRemoval } from "../../detail-value";
+import { detailRemovals, detailSubjects } from "../../detail-value";
 import { rectOf } from "../geometry";
 
 import type { LayoutRule } from "../types";
@@ -32,9 +34,7 @@ export const rule: LayoutRule = {
     if (!verdicts || verdicts.size === 0) return [];
     const byId = new Map(document.objects.map((object) => [object.id, object]));
     const findings: ReturnType<LayoutRule["check"]> = [];
-    for (const subject of detailSubjects(document)) {
-      const verdict = verdicts.get(detailKey(subject));
-      if (!isRemoval(verdict)) continue;
+    for (const { subject, verdict } of detailRemovals(detailSubjects(document), verdicts)) {
       const object = byId.get(subject.id)!;
       findings.push({
         rule: "detail-value",

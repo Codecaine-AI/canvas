@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:a11ffa994ad317c22e997067f3a1648bc6e4d782f7ee2ca07576bc2812fe2774",
+  "snapshotId": "sha256:bb966834c86ef75882538253580e86810d7a9c917bfdb3242123f92d82471732",
   "sources": [
     {
       "id": "prompt",
@@ -25,7 +25,7 @@
     {
       "id": "diagram_design",
       "path": "packages/canvas/src/authoring/design.ts",
-      "sha256": "69188364ac1cc31f64d2ad611500f4bb01d1daa95694625d330fe97aa6945666"
+      "sha256": "af3d8d474748044375a838268c1afe0bdbf9457a9e3b113e34e35f4e2818d7ec"
     },
     {
       "id": "visual_vocabulary",
