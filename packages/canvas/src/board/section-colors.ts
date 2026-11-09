@@ -10,8 +10,10 @@
  *   (TOUCH_GUTTER) with some part of the gap between them clear of other
  *   siblings. Siblings with whitespace between them may share a hue: the gap
  *   is the separator, and same-role sections keep one color.
- * - A section never paints the hue of a node it holds: the node would lose
- *   its figure against the ground.
+ * - A section that holds nodes of several hues never paints one of them:
+ *   that node would lose its figure against the ground. A category section
+ *   (every colored node it holds directly shares one hue) may take that
+ *   hue: the frame then names the category, which is the board's meaning.
  *
  * Two sections look alike when either holds:
  * - they paint the same ink (sectionHue). Layer-cake (schematic) deepens one
@@ -256,11 +258,21 @@ function isChromatic(color: CanvasColor): boolean {
   return color !== "gray" && color !== "white";
 }
 
-/** The chromatic hues of the nodes `section` holds directly: its ground must not match their figure. */
+/** The chromatic hues of the nodes section `id` holds directly (gray and white nodes and stickies aside). */
 function heldNodeHues(document: InteractiveCanvasDocument, id: string): Set<CanvasColor> {
   return new Set(document.objects
     .filter((object) => object.parentId === id && kindOf(object) === "node" && object.color && isChromatic(object.color))
     .map((object) => object.color!));
+}
+
+/**
+ * The hue of a category section: the one chromatic hue every colored node
+ * it holds directly shares. Null when it holds no colored node, or several
+ * hues.
+ */
+export function categoryHue(document: InteractiveCanvasDocument, id: string): CanvasColor | null {
+  const held = heldNodeHues(document, id);
+  return held.size === 1 ? [...held][0]! : null;
 }
 
 /** The board's color key: the chromatic hues its nodes and wires use. */
@@ -283,8 +295,10 @@ function nearTwins(a: CanvasColor, b: CanvasColor): boolean {
 /**
  * The color for section `id` when its call names none, judged on a document
  * whose membership is already reconciled. Hard rules: it looks like neither
- * its parent section, a section it holds, nor a sibling it touches, and it
- * is not the hue of a node it holds. `prefer` (Studio's last pick, or a
+ * its parent section, a section it holds, nor a sibling it touches, and,
+ * holding nodes of several hues, it takes none of them. A category section
+ * takes its category's hue whenever that keeps the rules, past the hue cap:
+ * the category carries meaning. Then `prefer` (Studio's last pick, or a
  * copy's source color) wins whenever it keeps those rules. Otherwise the
  * first of CHOOSER_HUES the board's nodes and wires leave free, keeping the
  * board to MAX_SECTION_HUES chromatic section hues, and not teal beside a
@@ -309,10 +323,12 @@ export function pickSectionColor(
   const siblings = siblingSectionsOf(document, byId, section);
   const near = touchingSiblingsOf(section, siblings);
   const held = heldNodeHues(document, id);
+  const category = held.size === 1 ? [...held][0]! : null;
   const neighbors = [...(parent ? [parent] : []), ...children, ...near];
   const keeps = (color: CanvasColor) =>
-    !held.has(sectionHue({ color }, style))
+    (category !== null || !held.has(sectionHue({ color }, style)))
     && neighbors.every((other) => !looksAlike({ color, depth }, paintedOf(other, depths), style));
+  if (category && keeps(category)) return category;
   if (prefer && keeps(prefer)) return prefer;
 
   const key = keyHues(document);
@@ -408,7 +424,7 @@ export function siblingClashes(
   });
 }
 
-/** A section painted the hue of a node it holds. */
+/** A section holding nodes of several hues, painted one of them. */
 export interface HeldNodeClash {
   section: string;
   /** The first node it holds in that hue. */
@@ -418,7 +434,10 @@ export interface HeldNodeClash {
   suggestion: CanvasColor;
 }
 
-/** Every section painted the hue of a node it holds directly, so the node keeps only its border. */
+/**
+ * Every section that holds nodes of several hues directly and paints one of
+ * them, so that node keeps only its border. A category section is exempt.
+ */
 export function heldNodeClashes(
   document: InteractiveCanvasDocument,
   style: CanvasStyle = DEFAULT_CANVAS_STYLE,
@@ -427,7 +446,7 @@ export function heldNodeClashes(
   for (const section of document.objects) {
     if (kindOf(section) !== "section" || isPageSection(section)) continue;
     const hue = sectionHue(section, style);
-    if (!isChromatic(hue)) continue;
+    if (!isChromatic(hue) || categoryHue(document, section.id) !== null) continue;
     const node = document.objects.find((object) =>
       object.parentId === section.id && kindOf(object) === "node" && object.color === hue);
     if (!node) continue;

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:7fc0cbe8814d2df5c979ab1afc2137c8ac83cf13b81a73b3f79a0209819be10b",
+  "snapshotId": "sha256:513e4877b7fe6393b7dfab361ea2b140e12a683c67e6914dff777bef4e8c49a2",
   "sources": [
     {
       "id": "prompt",
@@ -35,7 +35,7 @@
     {
       "id": "color_palette",
       "path": "packages/canvas/src/authoring/vocabulary.ts",
-      "sha256": "bcdcab7e8ebb1dbcb317a80265fa3f68543a4b48902e51be6f8964152ada8ab7"
+      "sha256": "783f926700a0cfa2d4dac9ce43a0e8971400656e85acb15a53cc7d4940938aa5"
     },
     {
       "id": "canvas_conventions",

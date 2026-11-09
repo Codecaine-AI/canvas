@@ -210,11 +210,11 @@ export function runOperation<TFields extends OperationFields>(
     };
   }
   // No edit may nest a section in a parent section of its own color, give it
-  // a touching sibling's color, or paint it a node's hue it holds (a recolor,
-  // a move, a placement): the hierarchy, the group edges or the node's
-  // figure would stop reading. Every conflicting pair is compared before and
-  // after, so a repair that leaves older pairs standing is never refused for
-  // them; the integrity lint reports those.
+  // a touching sibling's color, or paint it one hue of the several its nodes
+  // carry (a recolor, a move, a placement): the hierarchy, the group edges
+  // or the node's figure would stop reading. Every conflicting pair is
+  // compared before and after, so a repair that leaves older pairs standing
+  // is never refused for them; the integrity lint reports those.
   const newOnly = <T,>(found: (document: InteractiveCanvasDocument) => T[], key: (item: T) => string) => {
     const had = new Set(found(reconciledBefore).map(key));
     return found(next).filter((item) => !had.has(key(item)));
@@ -229,7 +229,7 @@ export function runOperation<TFields extends OperationFields>(
     const rules = [
       ...(newNests.length > 0 ? ["a nested section never shares its parent's color"] : []),
       ...(newClashes.length > 0 ? ["touching sibling sections never share a color"] : []),
-      ...(newGrounds.length > 0 ? ["a section never paints the color of a node it holds"] : []),
+      ...(newGrounds.length > 0 ? ["a section holding nodes of several colors never paints one of them"] : []),
     ];
     return {
       isError: true,
@@ -242,7 +242,7 @@ export function runOperation<TFields extends OperationFields>(
           `  - ${clash.section} would share ${sharedSiblingLook(clash)} with its touching sibling section ${clash.sibling}`
           + ` — give ${clash.section} another color, such as ${clash.suggestion}`),
         ...newGrounds.map((clash) =>
-          `  - ${clash.section} would paint ${clash.color}, the color of ${clash.node} it holds`
+          `  - ${clash.section} would paint ${clash.color}, the color of ${clash.node} it holds among nodes of other colors`
           + ` — give ${clash.section} another color, such as ${clash.suggestion}`),
       ].join("\n"),
       details,
