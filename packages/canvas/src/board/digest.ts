@@ -86,7 +86,8 @@ function objectExtras(object: InteractiveCanvasObject): string[] {
   const extras: string[] = [];
   // The header glyph and the detail line belong to the name, so they lead.
   if (kindOf(object) === "section" && object.icon !== undefined) extras.push(`icon=${object.icon}`);
-  if (oneLine(object.detail) !== "") extras.push(`detail=${JSON.stringify(oneLine(object.detail))}`);
+  // A section's stored detail never renders, so the digest leaves it out too.
+  if (kindOf(object) !== "section" && oneLine(object.detail) !== "") extras.push(`detail=${JSON.stringify(oneLine(object.detail))}`);
   if (object.locked !== undefined) extras.push(`locked=${object.locked}`);
   const defaultShape = OBJECT_TYPE_DEFAULTS[object.type]?.shape;
   if (object.style?.shape !== undefined && object.style.shape !== defaultShape) {

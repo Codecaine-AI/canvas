@@ -40,6 +40,9 @@
  */
 import type { InteractiveCanvasObject } from "../../../state/schema";
 import { sectionDescendantIds } from "../../../state/geometry";
+import type { CanvasColor } from "../../../state/schema/colors";
+import { reconcileSectionMembership } from "../../../state/section-membership";
+import { pickSectionColor } from "../../../board/section-colors";
 import { draftPlacedObject } from "../../../state/schema/object-defaults";
 
 import { creationDefaultFor } from "../creation-defaults";
@@ -91,7 +94,10 @@ export const placeSection = defineOperationTool({
     + "from geometry, so the frame adopts whatever its edges already cover, and "
     + "it keeps the footprint it lands with until something fits, arranges or "
     + "resizes it. Undrawn size takes the default section footprint. The header "
-    + "shows the optional icon, the title, and the optional one-fact detail.",
+    + "shows the optional icon and the title. Without a color it takes one that "
+    + "paints apart from its parent section and the sections it holds (and, at "
+    + "the top level, from its sibling sections); a nested section never shares "
+    + "its parent's color or painted fill.",
   fields: PlaceSectionParams.properties,
   validate: (ctx, p) => [
     ...ctx.requireFreeId(p.id),
@@ -107,19 +113,27 @@ export const placeSection = defineOperationTool({
     const defaults = creationDefaultFor("section");
     const size = snapSize(p.size ?? defaults.size);
     const geometry = { x, y, width: size.width, height: size.height };
-    return ctx.applyLowered(
+    const lower = (color: CanvasColor, summary: string) => ctx.applyLowered(
       {
         type: "addObject",
         object: draftPlacedObject("section", geometry, {
           id: p.id,
           text: p.text,
-          detail: storedDetail(p.detail),
-          color: p.color ?? defaults.color,
+          color,
           ...(p.icon !== undefined && isGlyphName(p.icon) ? { icon: p.icon } : {}),
         }),
       },
-      `place_section ${p.id} ${placement(geometry)}${p.color ? ` ${p.color}` : ""}`,
+      summary,
     );
+    const at = `place_section ${p.id} ${placement(geometry)}`;
+    if (p.color) return lower(p.color, `${at} ${p.color}`);
+    // No color named: place it, read the parent and the sections it adopts
+    // from the reconciled tree, and pick a hue none of them (nor, at the top
+    // level, its siblings) paints, so the hierarchy reads.
+    const probe = lower(defaults.color, at);
+    if (probe.status !== "applied") return probe;
+    const color = pickSectionColor(reconcileSectionMembership(probe.draft), p.id, ctx.canvasStyle);
+    return lower(color, `${at} ${color}`);
   },
 });
 
@@ -226,8 +240,8 @@ function clonedFrom(
   // 240×160 copy, and a row built from it stays on the grid.
   const size = snapSize(source.geometry);
   // The detail travels like the name: carried over unless the call names one,
-  // and an empty one clears it. A sticky never carries one.
-  const copiedDetail = source.type === "sticky"
+  // and an empty one clears it. A sticky or a section never carries one.
+  const copiedDetail = source.type === "sticky" || source.type === "section"
     ? undefined
     : detail !== undefined ? storedDetail(detail) : storedDetail(source.detail);
   return {
@@ -258,7 +272,7 @@ export const clone = defineOperationTool({
   name: "clone",
   description:
     "Copy one object. The copy inherits the source's kind, size, color, shape "
-    + "type/direction/glyph, detail line, and border style, so a row of options "
+    + "type/direction/glyph, detail line (shapes and icons), and border style, so a row of options "
     + "matches without re-specifying a number. A copy whose new text does not fit "
     + "grows to fit and joins its row and column sizes, like place_shape. Two things it does NOT carry: edges "
     + "attached to the source (draw those with connect), and, for a section, "
@@ -321,8 +335,8 @@ export const clone = defineOperationTool({
             `the frame copied without its ${emptied} descendant${emptied === 1 ? "" : "s"} — place or clone the contents into ${p.id} yourself`,
           ]
         : []),
-      ...(source.type === "sticky" && storedDetail(p.detail) !== undefined
-        ? [detailDroppedNote("sticky")]
+      ...((source.type === "sticky" || source.type === "section") && storedDetail(p.detail) !== undefined
+        ? [detailDroppedNote(source.type)]
         : []),
     ];
     return placeFitted(ctx, p.id, ctx.applyLowered(

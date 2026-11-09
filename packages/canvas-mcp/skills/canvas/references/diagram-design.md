@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 c88c127a41f460ee7c89bba7d6db4fade8bac2fd7c1393a30bacb0d47987937f). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 69188364ac1cc31f64d2ad611500f4bb01d1daa95694625d330fe97aa6945666). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -124,7 +124,7 @@
 
 <text_and_evidence>
     <name_and_detail>
-        Shapes, icons, and sections each carry a name and at most one detail line.
+        Shapes and icons each carry a name and at most one detail line. A section carries a title only.
 
         - The name (`text`) says what the thing is in 5 words or fewer, on one line, with no sentences.
         - The detail (`detail`) is one short fact, such as a port, path, version, model, or host, in 48 characters or fewer.
@@ -144,7 +144,7 @@
     </wire_labels>
 
     <cover_every_requirement>
-        A reader looks for each requirement on a node or a wire. A fact only in a note, the board description, or a section detail counts as missing.
+        A reader looks for each requirement on a node or a wire. A fact only in a note, the board description, or a section title counts as missing.
 
         - Before you place anything, list every component, every field or measure, and every behavior with its trigger in the source.
         - Give each component a node. Put each field or measure in that node's detail.

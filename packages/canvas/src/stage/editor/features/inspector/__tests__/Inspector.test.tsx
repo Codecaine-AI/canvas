@@ -64,11 +64,11 @@ function pickerGroups(container: HTMLElement) {
 }
 
 describe("Inspector detail field", () => {
-  it("renders for shapes, icons, and sections, never for stickies", () => {
+  it("renders for shapes and icons, never for stickies or sections", () => {
     for (const [kind, object] of Object.entries(OBJECTS)) {
       const { queryByLabelText, unmount } = renderInspector(object);
       const detail = queryByLabelText("Detail");
-      if (kind === "sticky") expect(detail).toBeNull();
+      if (kind === "sticky" || kind === "section") expect(detail).toBeNull();
       else expect(detail).toBeTruthy();
       unmount();
     }

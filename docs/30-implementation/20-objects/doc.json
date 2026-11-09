@@ -673,13 +673,13 @@
       "props": {},
       "text": [
         {
-          "insert": "Decision",
+          "insert": "Decision.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": ": every piece of object text geometry has one source module that the live stage, the static renderer, the in-place editors, and the agent's text fit all read. "
+          "insert": " Every piece of object text geometry has one source module that the live stage, the static renderer, the in-place editors, and the agent's text fit all read. "
         },
         {
           "insert": "text-slots.ts",
@@ -714,7 +714,7 @@
           }
         },
         {
-          "insert": " lays out the section header chip: placement, icon, title, detail, scale, and width budget."
+          "insert": " lays out the section header chip: placement, icon, title, scale, and width budget."
         }
       ],
       "children": []

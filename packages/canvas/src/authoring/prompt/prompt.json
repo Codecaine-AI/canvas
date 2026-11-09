@@ -1255,7 +1255,7 @@
                                           "type": "listItem",
                                           "id": "node-map-concepts-patterns-name-detail",
                                           "content": [
-                                            "Put at most one short fact, such as a port, path, version, model, or host, in the `detail` of a shape, icon, or section, within 48 characters."
+                                            "Put at most one short fact, such as a port, path, version, model, or host, in the `detail` of a shape or icon, within 48 characters. A section carries a title only."
                                           ]
                                         },
                                         {

@@ -22,6 +22,7 @@
       "children": [
         "b-section-body-2",
         "b-section-frame-3",
+        "b-section-color-6",
         "b-section-code-4",
         "b-section-canvas-5"
       ]
@@ -111,7 +112,45 @@
       "props": {},
       "text": [
         {
-          "insert": "On the live board, the section's text renders as the title in its header chip. An optional icon, which can be any glyph, opens the chip, and an optional one-fact detail closes it. The chip is not a separate object. Give the title and content clear air, and repeat one deliberate gap through each group. A section keeps exactly the geometry it is given. When the region is finished, fit_section closes that one section around the children already inside it and leaves every other section alone. Sections do the grouping: every idea has a home, and each section is an addressable, linkable unit. Nest sections for hierarchy."
+          "insert": "On the live board, the section's text renders as the title in its header chip. An optional icon, which can be any glyph, opens the chip, and a section has no detail line. The chip is not a separate object. Give the title and content clear air, and repeat one deliberate gap through each group. A section keeps exactly the geometry it is given. When the region is finished, fit_section closes that one section around the children already inside it and leaves every other section alone. Sections do the grouping: every idea has a home, and each section is an addressable, linkable unit. Nest sections for hierarchy."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-6": {
+      "id": "b-section-color-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A nested section must not look like its parent, by the same ink or by the same painted fill at its depth under the board's style. "
+        },
+        {
+          "insert": "place_section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and Studio give a section placed without a color one that paints apart from its parent and the sections it holds. An agent edit that makes a look-alike nest is refused. A Studio recolor keeps the person's pick, and the "
+        },
+        {
+          "insert": "integrity",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lint reports the nest. Only the page is exempt as a parent: the section with id "
+        },
+        {
+          "insert": "page-frame",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or a parentless section stored white."
         }
       ],
       "children": []

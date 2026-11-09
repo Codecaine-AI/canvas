@@ -31,7 +31,7 @@ describe("integrity lint: what bypassed the automatic fixes", () => {
     const section = (id: string, x: number, y: number, w: number, h: number, parentId: string | null): InteractiveCanvasObject =>
       ({ ...box(id, x, y, w, h), type: "section", parentId });
     const base = makeDocument([
-      section("page", -200, -200, 1600, 1000, null),
+      { ...section("page", -200, -200, 1600, 1000, null), color: "white" },
       section("a", 0, 0, 400, 300, "page"),
       { ...box("kid", 200, 100, 160, 96, "process"), parentId: "a" },
       // A grow to hold kid would swallow neighbor, so the section refuses it.

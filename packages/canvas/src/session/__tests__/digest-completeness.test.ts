@@ -25,7 +25,7 @@ const OBJECT_FIELD_COVERAGE: Record<keyof InteractiveCanvasObject, Coverage> = {
   id: "rendered",
   type: "rendered",
   text: "rendered",
-  detail: "rendered", // detail="…" extra, whitespace collapsed like text
+  detail: "rendered", // detail="…" extra on shapes and icons, whitespace collapsed like text (a section's never renders)
   color: "legend", // rendered when non-default; default declared in the legend
   parentId: "structural", // containment = tree indentation
   geometry: "rendered",
@@ -129,7 +129,7 @@ describe("digest completeness invariant", () => {
     expect(digest).toContain('author="Ford"');
   });
 
-  test("a detail line and a section's header glyph render as extras beside the name", () => {
+  test("a detail line and a section's header glyph render as extras beside the name; a section's stored detail does not", () => {
     const section = {
       ...box("services", 0, 0, 640, 480, "section"),
       text: "Bun services",
@@ -151,7 +151,8 @@ describe("digest completeness invariant", () => {
     const digest = formatBoardDigest(makeDocument([section, shape, glyph]));
 
     // The glyph and the fact lead the extras; whitespace collapses like text.
-    expect(digest).toContain('  services section "Bun services" 0,0 640×480 icon=agent detail="127.0.0.1"');
+    // A section's stored detail never renders, so the digest leaves it out.
+    expect(digest).toContain('  services section "Bun services" 0,0 640×480 icon=agent\n');
     expect(digest).toContain('    db process "Postgres" 40,80 280×100 detail="16 · :5432"');
     // An icon object's glyph stays folded into the type column — never `icon=`.
     expect(digest).toContain('    brain model "brain" 360,80 120×120 detail="claude-opus"');

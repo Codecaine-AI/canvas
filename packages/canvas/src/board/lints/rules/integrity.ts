@@ -11,6 +11,10 @@
  *   textFitReport "overflows" verdict, definite. Stickies and sections do
  *   not auto-size; canvas_check's TEXT note names theirs;
  * - a child extending outside its section's rect;
+ * - a section that looks like its direct parent section: the same ink, or
+ *   the same fill the renderer paints (section-colors.ts; the page is
+ *   exempt), which place_section and every agent edit refuse to make. A
+ *   Studio recolor keeps the person's pick, so this reports it;
  * - a self-loop, dangling or zero-length wire (wire-integrity.ts);
  * - a wire whose drawn route runs through a box other than its ends, judged
  *   by the router's own check (routeThroughBoxIds), so lint and router agree.
@@ -19,6 +23,7 @@ import { routeThroughBoxIds } from "../../../connectors/routing";
 import { childrenOf, kindOf } from "../../helpers";
 import { textFitReport, type TextFitReport } from "../../text-fit";
 import { brokenWires } from "../../wire-integrity";
+import { sameHueNests, sharedLook } from "../../section-colors";
 import { rectOf } from "../geometry";
 
 import type { InteractiveCanvasObject } from "../../../state/schema";
@@ -28,6 +33,7 @@ const GUIDANCE = `Integrity fires only when something bypassed the automatic fix
 an older file, a route with no clear path). Blocking (error tier):
 - a box whose text overflows it — resize it to the size the finding names;
 - a child outside its section — move_to it back inside, or resize the section;
+- a nested section in its parent section's color — change_color one of them so the levels differ;
 - a self-loop, dangling or zero-length wire — delete it, or reconnect it with change_connection;
 - a wire drawn through a box because no clear route exists — move_to the box or an end so a path opens.`;
 
@@ -98,6 +104,19 @@ export const rule: LayoutRule = {
       }
     }
 
+    // A nested section in its parent's color. The tools refuse to make one.
+    const byId = new Map(document.objects.map((object) => [object.id, object]));
+    for (const nest of sameHueNests(document, canvasStyle)) {
+      findings.push({
+        rule: "integrity",
+        severity: "error",
+        at: [nest.section, nest.parent],
+        where: rectOf(byId.get(nest.section)!),
+        message: `${nest.section} shares ${sharedLook(nest)} with its parent section ${nest.parent}: nested levels must differ in color`,
+        suggestion: `change_color ${nest.section} to another color, such as ${nest.suggestion}`,
+      });
+    }
+
     // Wires no edit may make.
     const broken = brokenWires(document);
     for (const wire of broken) {
@@ -113,7 +132,6 @@ export const rule: LayoutRule = {
 
     // A route drawn through a box: the router found no clear path.
     const brokenIds = new Set(broken.map((wire) => wire.id));
-    const byId = new Map(document.objects.map((object) => [object.id, object]));
     for (const edge of document.connections) {
       if (brokenIds.has(edge.id)) continue;
       const from = byId.get(edge.from.objectId)!;

@@ -71,9 +71,9 @@ export const Glyph = StringEnum([...CANVAS_ICON_GLYPHS], {
 // Name + detail — the text convention the descriptions below teach
 // ---------------------------------------------------------------------------
 //
-// A shape, icon, or section carries a NAME (`text`) and at most ONE short fact
-// (`detail`), rendered muted on one line under the name — inline after a
-// section's title. Prose goes on a sticky. The numbers come from
+// A shape or icon carries a NAME (`text`) and at most ONE short fact
+// (`detail`), rendered muted on one line under the name. A section carries a
+// title only. Prose goes on a sticky. The numbers come from
 // board/text-rules.ts, so every surface quotes one limit. The descriptions
 // are the steering; nothing enforces them, because an overlong name is legal
 // and only reads badly.
@@ -90,7 +90,7 @@ const DETAIL_LIMITS = `≤ ${DETAIL_MAX_CHARS} chars, one line, no sentences`;
  * with no length cap everywhere it appears: an overlong detail applies.
  */
 export const DETAIL_RULE =
-  `ONE short fact shown under the name (beside a section's title): a port, path, version, model, or host — `
+  `ONE short fact shown under the name: a port, path, version, model, or host — `
   + `${DETAIL_LIMITS}. Explanations go on a sticky`;
 
 /**
@@ -211,7 +211,6 @@ export const SectionPayload = Type.Object(
   {
     id: Id,
     text: Type.String(),
-    detail: Type.Optional(Type.String()),
     color: Type.Optional(Color),
     geometry: Geometry,
     icon: Type.Optional(Glyph),
@@ -223,7 +222,6 @@ export type SectionPayload = Static<typeof SectionPayload>;
 export const SectionPatch = Type.Object(
   {
     text: Type.Optional(Type.String()),
-    detail: Type.Optional(Type.String()),
     color: Type.Optional(Color),
     geometry: Type.Optional(Geometry),
     icon: Type.Optional(Glyph),
@@ -336,15 +334,15 @@ export type ConnectionPatch = Static<typeof ConnectionPatch>;
 // the SectionIcon field is offered to the model directly.
 //
 // The one-line `detail` is the exception to "typing is a later gesture": it is
-// the fact that belongs to the name, so a placement may carry it the way a
-// frame's title rides on place_section — one call per node instead of two.
+// the fact that belongs to a node's name, so a placement may carry it the way
+// a frame's title rides on place_section — one call per node instead of two.
 
 /**
  * `place_section` — drawing a frame. Titling it is part of the gesture, so
  * `text` is required; the drawn size is optional because a frame dropped
- * without a drag takes the default section footprint. The header's detail and
- * glyph are part of the same chip as the title, so they ride along too, and so
- * does the frame's color.
+ * without a drag takes the default section footprint. The header's glyph is
+ * part of the same chip as the title, so it rides along too, and so does the
+ * frame's color. A section has no detail: its header is the title alone.
  */
 export const PlaceSectionParams = Type.Object(
   {
@@ -352,10 +350,6 @@ export const PlaceSectionParams = Type.Object(
     text: Type.String({ description: `The frame's title: ${NAME_RULE}.` }),
     at: Point,
     size: Type.Optional(Size),
-    detail: Type.Optional(Type.String({
-      description:
-        `Optional: ONE short fact shown after the title in the frame's header — a host, version, or path; ${DETAIL_LIMITS}.`,
-    })),
     icon: Type.Optional(SectionIcon),
     color: Type.Optional(Color),
   },

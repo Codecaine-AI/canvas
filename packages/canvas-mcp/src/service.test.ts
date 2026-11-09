@@ -279,7 +279,7 @@ describe("canvas service", () => {
     expect(textOf(renamed)).not.toContain("chip-adapt-question's name");
   });
 
-  test("detail and a section's header glyph save to the file and read back in the digest", async () => {
+  test("a node's detail and a section's header glyph save to the file and read back in the digest", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
     const service = createCanvasService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
@@ -289,7 +289,6 @@ describe("canvas service", () => {
       text: "Bun services",
       at: [4000, 0],
       size: { width: 480, height: 320 },
-      detail: "127.0.0.1",
       icon: "brand-bun",
     });
     expect(placed.isError).toBeUndefined();
@@ -303,9 +302,9 @@ describe("canvas service", () => {
     const saved = readDoc(path);
     expect(saved.objects.find((object: any) => object.id === "mcp-services")).toMatchObject({
       type: "section",
-      detail: "127.0.0.1",
       icon: "brand-bun",
     });
+    expect(saved.objects.find((object: any) => object.id === "mcp-services")).not.toHaveProperty("detail");
     expect(saved.objects.find((object: any) => object.id === "mcp-db")).toMatchObject({
       type: "icon",
       icon: "database",
@@ -315,7 +314,7 @@ describe("canvas service", () => {
 
     const reopened = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(textOf(reopened)).toContain('mcp-services section "Bun services"');
-    expect(textOf(reopened)).toContain('icon=brand-bun detail="127.0.0.1"');
+    expect(textOf(reopened)).toContain("icon=brand-bun");
     expect(textOf(reopened)).toContain('mcp-db database "Postgres"');
     expect(textOf(reopened)).toContain('detail="16 · :5432"');
 

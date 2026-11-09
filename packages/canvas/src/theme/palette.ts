@@ -189,10 +189,6 @@ export function resolveSwatchPreview(color: CanvasColor): string {
 
 /** Text on a figjam-mode pastel is pushed to this WCAG contrast when a dark theme borrows the mode. */
 const MIN_TEXT_CONTRAST = 4.5;
-/** Section header detail: WCAG contrast floor against its chip. */
-const HEADER_DETAIL_MIN_CONTRAST = 3;
-/** Section header detail starts as the ink mixed into the chip at this weight. */
-const HEADER_DETAIL_INK_WEIGHT = 0.6;
 /** Layer-cake chip border: the ink at this opacity. */
 const SECTION_CHIP_BORDER_OPACITY = 0.5;
 /**
@@ -251,8 +247,6 @@ export type SectionPaint = {
   chipBorder: string;
   /** Header title. */
   headerText: string;
-  /** Header detail run after the title. */
-  headerDetail: string;
   /** Header icon tile. In glyph mode there is no tile: this is the chip fill, so even a drawn tile is invisible. */
   iconTile: string;
   /** Header icon tile border — only the outlined white tile has one. */
@@ -292,7 +286,7 @@ export function resolveInk(color: CanvasColor, style: CanvasStyle): string {
 }
 
 /** Light vs dark theme, judged by the board surface. */
-function isLightBoard(style: CanvasStyle): boolean {
+export function isLightBoard(style: CanvasStyle): boolean {
   return oklabLightness(style.boardBackground) >= 0.5;
 }
 
@@ -483,7 +477,6 @@ function flatSectionPaint(color: CanvasColor, style: CanvasStyle): SectionPaint 
     chipFill,
     chipBorder: color === "white" ? family.chip.border : resolveInk(color, style),
     headerText,
-    headerDetail: ensureContrast(style.detailColor, chipFill, HEADER_DETAIL_MIN_CONTRAST, headerText),
     ...sectionIconPaint(color, chipFill, style),
   };
 }
@@ -497,7 +490,6 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
       chipFill,
       chipBorder: style.hairlineColor,
       headerText: style.textColor,
-      headerDetail: headerDetailColor(resolveInk("white", style), chipFill),
       ...sectionIconPaint("white", chipFill, style),
     };
   }
@@ -511,7 +503,6 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
     chipFill,
     chipBorder: withAlpha(ink, SECTION_CHIP_BORDER_OPACITY),
     headerText: style.textColor,
-    headerDetail: headerDetailColor(ink, chipFill),
     ...sectionIconPaint(paintColor, chipFill, style),
   };
 }
@@ -602,15 +593,6 @@ function layerCakeFill(ink: string, depth: number, style: CanvasStyle): string {
     parentLightness = oklabLightness(fillAt(weight));
   }
   return fillAt(weight);
-}
-
-function headerDetailColor(ink: string, chipFill: string): string {
-  return ensureContrast(
-    mixColors(ink, chipFill, HEADER_DETAIL_INK_WEIGHT),
-    chipFill,
-    HEADER_DETAIL_MIN_CONTRAST,
-    ink,
-  );
 }
 
 /** The header icon follows the icon objects' tile/glyph paint; glyph mode has no tile. */

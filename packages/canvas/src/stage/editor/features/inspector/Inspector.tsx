@@ -110,8 +110,8 @@ export function Inspector({
             }
           />
         </label>
-        {/* Stickies carry no detail line: their body is markdown. */}
-        {selectedObject.type !== "sticky" && (
+        {/* Stickies carry no detail line (their body is markdown), and a section's header is its title alone. */}
+        {selectedObject.type !== "sticky" && selectedObject.type !== "section" && (
           <div className="text-ui-xs">
             <label className="grid gap-1">
               <span className="text-muted-foreground">Detail</span>

@@ -27,6 +27,7 @@
         "b-engine-model-schema-doc-4",
         "b-engine-model-schema-objects-5",
         "b-engine-model-schema-detail-28",
+        "b-engine-model-schema-section-detail-29",
         "b-engine-model-schema-connections-6",
         "b-engine-model-schema-style-7",
         "b-engine-model-types-heading-8",
@@ -300,7 +301,7 @@
           }
         },
         {
-          "insert": " is an optional one-line fact under the name of a shape, icon, or section, such as a port, path, model, or version, and never prose. A sticky never keeps one, because its markdown body is its whole text, and every write path, agent patches included, clears an empty detail and drops one from a sticky. "
+          "insert": " is an optional one-line fact under the name of a shape or icon, such as a port, path, model, or version, and never prose. A sticky never keeps one, because its markdown body is its whole text, and every write path, agent patches included, clears an empty detail and drops one from a sticky. "
         },
         {
           "insert": "icon",
@@ -332,6 +333,26 @@
         },
         {
           "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-engine-model-schema-section-detail-29": {
+      "id": "b-engine-model-schema-section-detail-29",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A section has no detail line. The validator still accepts "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on a section so older files load, but no agent tool writes one and no renderer paints it."
         }
       ],
       "children": []

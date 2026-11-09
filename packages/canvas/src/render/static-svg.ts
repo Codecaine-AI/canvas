@@ -73,8 +73,7 @@ import {
   titleChipHasContent,
   titleChipIconDrawing,
   titleChipLayout,
-  titleChipTextWidthPx,
-  titleChipVisibleRuns,
+  titleChipVisibleTitle,
   type TitleChipFont,
   type TitleChipIconDrawing,
   type TitleChipLayout,
@@ -88,7 +87,7 @@ import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { resolveObjectStrokeWidth, resolveShapeCornerRadius } from "../theme/tokens";
 import { DEFAULT_CANVAS_STYLE, normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
 import { CANVAS_MONO_FONT_STACK_SVG, CANVAS_SANS_FONT_STACK_SVG } from "../theme/fonts";
-import { ELLIPSIS, ellipsizeToWidth, fitsOnOneLine, measureWidth, wrapText } from "../theme/text-measure";
+import { ellipsizeToWidth, fitsOnOneLine, measureWidth, wrapText } from "../theme/text-measure";
 import {
   BELOW_TEXT_SLOT,
   CENTER_TEXT_SLOT,
@@ -1147,7 +1146,7 @@ function renderTitleChipBody(layout: TitleChipLayout, paint: SectionPaint, x: nu
 }
 
 /**
- * A section's title chip — `[icon] TITLE  detail` from the shared layout
+ * A section's title chip — `[icon] TITLE` from the shared layout
  * (objects/section/title-chip-layout.ts) and the section paint at its depth:
  * floating (inset) or pinned (flush in the corner), ellipsized the way the
  * live chip's text-overflow cuts the run.
@@ -1194,46 +1193,15 @@ function renderSectionTitleChip(
       );
     }
   }
-  const runs = titleChipVisibleRuns(layout);
-  if (runs.title !== "") {
+  const title = titleChipVisibleTitle(layout);
+  if (title !== "") {
     parts.push(
       tag(
         "text",
         titleChipTextAttributes(layout.title.font, chipX + layout.title.x, chipY + layout.centerY, paint.headerText),
-        escapeXml(runs.title),
+        escapeXml(title),
       ),
     );
-  }
-  if (layout.detail && runs.detail !== null) {
-    // A cut detail ends in the chip's ellipsis, which CSS paints in the line's
-    // block font — the title's — so it is its own <text> in that font, right
-    // after the detail graphemes kept.
-    const cut = runs.detail !== layout.detail.text && runs.detail.endsWith(ELLIPSIS);
-    const kept = cut ? runs.detail.slice(0, -ELLIPSIS.length) : runs.detail;
-    if (kept !== "") {
-      parts.push(
-        tag(
-          "text",
-          titleChipTextAttributes(layout.detail.font, chipX + layout.detail.x, chipY + layout.centerY, paint.headerDetail),
-          escapeXml(kept),
-        ),
-      );
-    }
-    if (cut) {
-      const keptWidth = kept === "" ? 0 : titleChipTextWidthPx(kept, layout.detail.font);
-      parts.push(
-        tag(
-          "text",
-          titleChipTextAttributes(
-            layout.title.font,
-            chipX + layout.detail.x + keptWidth,
-            chipY + layout.centerY,
-            paint.headerText,
-          ),
-          ELLIPSIS,
-        ),
-      );
-    }
   }
   let contents = parts.join("");
   if (clipped && contents !== "") {

@@ -19,7 +19,7 @@ import { box, connect, makeDocument } from "./synthetic";
 
 /** Every board here needs one section, because the board always keeps one. */
 function boardWith(...objects: ReturnType<typeof box>[]) {
-  return makeDocument([box("page", 0, 0, 1200, 900, "section"), ...objects]);
+  return makeDocument([{ ...box("page", 0, 0, 1200, 900, "section"), color: "white" }, ...objects]);
 }
 
 describe("place gestures", () => {

@@ -1505,7 +1505,7 @@
       },
       "text": [
         {
-          "insert": "t(d)        = min(sectionTintMax, sectionTintBase + sectionTintStep × (d − 1))\nfill        = mix(ink, sectionTintMixBase, t(d))\nborder      = ink at sectionBorderOpacity\nchip fill   = mix(ink, fill, headerChipMix)\nchip border = ink at 0.5\ntitle       = textColor\ndetail      = mix(ink, chip fill, 0.6), pushed toward the ink until it reaches 3:1 against the chip"
+          "insert": "t(d)        = min(sectionTintMax, sectionTintBase + sectionTintStep × (d − 1))\nfill        = mix(ink, sectionTintMixBase, t(d))\nborder      = ink at sectionBorderOpacity\nchip fill   = mix(ink, fill, headerChipMix)\nchip border = ink at 0.5\ntitle       = textColor"
         }
       ],
       "children": []
@@ -1719,7 +1719,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A section's header chip holds an optional icon, the title, and an optional one-fact detail, in that order. Its geometry lives in one module, "
+          "insert": "A section's header chip holds an optional icon and the title, in that order. A section has no detail line. Its geometry lives in one module, "
         },
         {
           "insert": "title-chip-layout.ts",
@@ -1858,7 +1858,6 @@
       "children": [
         "b-themes-headers-contents-icon",
         "b-themes-headers-contents-title",
-        "b-themes-headers-contents-detail",
         "b-themes-headers-contents-width"
       ]
     },
@@ -1920,28 +1919,6 @@
         },
         {
           "insert": " is on, with 0.08em letter spacing for an uppercase mono title."
-        }
-      ],
-      "children": []
-    },
-    "b-themes-headers-contents-detail": {
-      "id": "b-themes-headers-contents-detail",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "The detail follows the title after a 10px gap, in the header detail color and "
-        },
-        {
-          "insert": "headerFont",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " at regular weight, never uppercased."
         }
       ],
       "children": []
