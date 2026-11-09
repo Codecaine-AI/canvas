@@ -464,6 +464,29 @@ describe("the chooser keeps the board's meaning", () => {
     expect(result.text).toContain("rounds would paint violet, the color of agent it holds among nodes of other colors");
   });
 
+  test("a node edit is never refused for a section's color: it applies, and integrity names the section with a color", () => {
+    /** A blue category section holding blue nodes. */
+    const category = () => makeDocument([
+      section("page", [0, 0, 4000, 3200], "white", null),
+      section("cat", [40, 40, 1200, 800], "blue", "page"),
+      node("blue-node", [100, 150, 120, 80], "blue", "cat"),
+      node("second-blue", [700, 150, 120, 80], "blue", "cat"),
+    ]);
+    const edits: [string, Record<string, unknown>][] = [
+      ["place_shape", { id: "green-node", type: "process", text: "Green role", color: "green", at: [400, 300] }],
+      ["change_color", { id: "blue-node", color: "green" }],
+    ];
+    for (const [name, params] of edits) {
+      const session = makeTestSession(category(), ["page"]);
+      expect(runOp(session, name, params).isError).toBeUndefined();
+      // The section keeps its color; the lint reports the clash and a color to use.
+      expect(colorOf(session, "cat")).toBe("blue");
+      const findings = integrity(session.draft);
+      expect(findings.map((finding) => finding.at?.[0])).toEqual(["cat"]);
+      expect(findings[0]!.suggestion).toBe("change_color cat to another color, such as gray");
+    }
+  });
+
   test("a category section takes the one hue its colored nodes share, past the hue cap, with no finding", () => {
     const doc = makeDocument([
       section("page", [0, 0, 2600, 1400], "white", null),
