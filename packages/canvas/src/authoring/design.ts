@@ -47,7 +47,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 
         - The name (\`text\`) says what the thing is in ${NAME_TARGET_WORDS} words or fewer, on one line, with no sentences.
         - The detail (\`detail\`) is one short fact, such as a port, path, version, model, or host, in ${DETAIL_MAX_CHARS} characters or fewer.
-        - Leave the detail empty by default. Write one only for an exact fact the name, the section and the wires do not give: an identifier, a value, or a precise condition. canvas_check marks every other detail as a detail-value error, and you clear it.
+        - Leave the detail empty by default. Write one only for an exact fact stated nowhere else on the board, not in the name, the section, the wires, the other boxes or the sticky notes: an identifier, a value, or a precise condition. canvas_check marks every other detail as a detail-value error, and you clear it.
         - Explanations, rationale, and examples go on a Markdown sticky beside the subject, in ${NOTE_MAX_WORDS} words or fewer.
 
         | Bad | Good |
