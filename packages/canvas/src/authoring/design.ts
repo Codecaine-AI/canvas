@@ -47,6 +47,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 
         - The name (\`text\`) says what the thing is in ${NAME_TARGET_WORDS} words or fewer, on one line, with no sentences.
         - The detail (\`detail\`) is one short fact, such as a port, path, version, model, or host, in ${DETAIL_MAX_CHARS} characters or fewer.
+        - A detail must state a fact the name does not. canvas_check marks every other detail as a detail-value error, and you clear it.
         - Explanations, rationale, and examples go on a Markdown sticky beside the subject, in ${NOTE_MAX_WORDS} words or fewer.
 
         | Bad | Good |
