@@ -721,7 +721,8 @@ export function resolveConnectorPaint(color: CanvasColor, style: CanvasStyle): C
  * when none does the level gives up the cards, never its place below its
  * parent (see layerCakeFill). `white` on a light
  * board is a plain card-colored section (hairline frame and chip border, chip
- * = mix(hairline, cardFill, 0.5)); on a dark board white takes the gray rule,
+ * = mix(hairline, cardFill, 0.5); below the page the label chip's firmer
+ * edge in place of the hairline); on a dark board white takes the gray rule,
  * as in the approved schematic mockups.
  */
 export function resolveSectionPaint(
@@ -752,12 +753,17 @@ function flatSectionPaint(color: CanvasColor, style: CanvasStyle): SectionPaint 
 
 function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasStyle): SectionPaint {
   if (color === "white" && isLightBoard(style)) {
-    const chipFill = mixColors(style.hairlineColor, style.cardFill, 0.5);
+    // A white section inside another (any level below the page) takes the
+    // label chip's firmer gray edge: the hairline (1.2:1) on a near-white
+    // parent let it vanish (UI climb round 4: boards 07 and 10). The page
+    // frame keeps the hairline.
+    const edge = depth > PAGE_SECTION_DEPTH ? resolveLabelChipBorder(style) : style.hairlineColor;
+    const chipFill = mixColors(edge, style.cardFill, 0.5);
     return {
       fill: style.cardFill,
-      border: style.hairlineColor,
+      border: edge,
       chipFill,
-      chipBorder: style.hairlineColor,
+      chipBorder: edge,
       headerText: style.textColor,
       ...sectionIconPaint("white", chipFill, style),
     };
@@ -904,6 +910,8 @@ function sectionChromaCapped(fill: string, color: CanvasColor, weight: number, s
 
 /** Nesting depth of a top-level section under the board's page section (state/section-depth.ts). */
 const TOP_LEVEL_SECTION_DEPTH = 2;
+/** Nesting depth of the board's page section itself. */
+const PAGE_SECTION_DEPTH = 1;
 
 /** The header icon follows the icon objects' tile/glyph paint; glyph mode has no tile. */
 function sectionIconPaint(

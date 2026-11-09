@@ -264,13 +264,28 @@ describe("layer-cake sections", () => {
   });
 
   it("white: a card-colored section on light boards, the gray rule on dark ones", () => {
-    expect(resolveSectionPaint("white", 2, LIGHT)).toMatchObject({
+    // The page keeps the hairline frame.
+    expect(resolveSectionPaint("white", 1, LIGHT)).toMatchObject({
       fill: "#F8F8F7",
       border: "#E6E5E3",
       chipFill: "#EFEFED", // mix(hairline, card, .5)
       chipBorder: "#E6E5E3",
       headerText: "#1F1F1F",
     });
+    // Below the page a white section takes the label chip's firmer edge, so
+    // it does not vanish on a near-white parent (UI climb round 4: 07, 10).
+    for (const depth of [2, 3, 4]) {
+      expect(resolveSectionPaint("white", depth, LIGHT)).toMatchObject({
+        fill: "#F8F8F7",
+        border: "#C0BFBC",
+        chipFill: "#DCDCDA", // mix(edge, card, .5)
+        chipBorder: "#C0BFBC",
+        headerText: "#1F1F1F",
+      });
+      const paint = resolveSectionPaint("white", depth, LIGHT);
+      expect(contrastRatio(paint.border, resolveSectionPaint("gray", 2, LIGHT).fill)).toBeGreaterThanOrEqual(1.5);
+      expect(contrastRatio(paint.headerText, paint.chipFill)).toBeGreaterThanOrEqual(4.5);
+    }
     for (const depth of [1, 2, 3]) {
       expect(resolveSectionPaint("white", depth, DARK)).toEqual(resolveSectionPaint("gray", depth, DARK));
     }
