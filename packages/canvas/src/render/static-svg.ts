@@ -151,10 +151,13 @@ const STICKY_SHADOW = { dx: 0, dy: 3, stdDeviation: 6, opacity: 0.15 } as const;
 
 /**
  * Card sticky lift — mirrors objects/sticky/def.tsx CARD_STICKY_GEOMETRY
- * (shadowOffsetYPx 1, shadowBlurPx 3: a CSS blur radius is two standard
- * deviations). Its color is the sticky paint's cardShadow.
+ * shadowLayers (offsets 1 and 4, blurs 2 and 14: a CSS blur radius is two
+ * standard deviations). Its color is the sticky paint's cardShadow.
  */
-const CARD_STICKY_SHADOW = { dx: 0, dy: 1, stdDeviation: 1.5 } as const;
+const CARD_STICKY_SHADOW_LAYERS = [
+  { dy: 1, stdDeviation: 1 },
+  { dy: 4, stdDeviation: 7 },
+] as const;
 
 /** The sticky shadow filters a scene defines: null where no sticky casts that shadow. */
 type StickyShadowFilterIds = { paper: string | null; card: string | null };
@@ -1346,7 +1349,7 @@ function renderConnector(
         height: chip.height,
         rx: canvasStyle.labelChipCornerRadiusPx,
         fill: canvasStyle.connectorLabelBackground,
-        stroke: resolveLabelChipBorder(canvasStyle),
+        stroke: resolveLabelChipBorder(canvasStyle, stroke),
         "stroke-width": CONNECTION_LABEL_CHIP.borderWidthPx,
       }),
       tag(
@@ -1580,11 +1583,20 @@ export function renderSceneToSvg(
   }
   if (stickyShadowFilters.card && cardShadow) {
     const flood = parseColor(cardShadow)!;
+    // Each layer is the note's alpha, offset and blurred, in the lift color;
+    // the layers merge under the note itself.
+    const shadowLayers = CARD_STICKY_SHADOW_LAYERS.map(
+      (layer, index) =>
+        `<feGaussianBlur in="SourceAlpha" stdDeviation="${fmt(layer.stdDeviation)}" result="b${index}"/>` +
+        `<feOffset in="b${index}" dy="${fmt(layer.dy)}" result="o${index}"/>` +
+        `<feFlood flood-color="${formatHex(flood)}" flood-opacity="${fmt(flood.a)}" result="f${index}"/>` +
+        `<feComposite in="f${index}" in2="o${index}" operator="in" result="s${index}"/>`,
+    ).join("");
+    const merge = CARD_STICKY_SHADOW_LAYERS.map((_, index) => `<feMergeNode in="s${index}"/>`).join("");
     parts.push(
-      `<defs><filter id="${escapeXml(stickyShadowFilters.card)}" x="-20%" y="-20%" width="140%" height="140%">` +
-        `<feDropShadow dx="${fmt(CARD_STICKY_SHADOW.dx)}" dy="${fmt(CARD_STICKY_SHADOW.dy)}" stdDeviation="${fmt(
-          CARD_STICKY_SHADOW.stdDeviation,
-        )}" flood-color="${formatHex(flood)}" flood-opacity="${fmt(flood.a)}"/></filter></defs>`,
+      `<defs><filter id="${escapeXml(stickyShadowFilters.card)}" x="-15%" y="-25%" width="130%" height="170%">` +
+        shadowLayers +
+        `<feMerge>${merge}<feMergeNode in="SourceGraphic"/></feMerge></filter></defs>`,
     );
   }
 

@@ -29,9 +29,15 @@ export const STICKY_GEOMETRY = {
  */
 export const CARD_STICKY_GEOMETRY = {
   borderWidthPx: 1,
-  /** The lift's offset down and its blur radius (render/static-svg.ts mirrors both). */
-  shadowOffsetYPx: 1,
-  shadowBlurPx: 3,
+  /**
+   * The lift: a tight contact shadow and a wide ambient one, each an offset
+   * down and a blur radius in the paint's cardShadow (render/static-svg.ts
+   * mirrors both).
+   */
+  shadowLayers: [
+    { offsetYPx: 1, blurPx: 2 },
+    { offsetYPx: 4, blurPx: 14 },
+  ],
 } as const;
 
 /**
@@ -52,7 +58,7 @@ function cardStickyTrim(paint: StickyPaint, changed: boolean, canvasStyle: Canva
     ...(changed ? [CHANGED_RING_SHADOW] : []),
     ...(paint.border ? [`inset 0 0 0 ${CARD_STICKY_GEOMETRY.borderWidthPx}px ${paint.border}`] : []),
     ...(paint.cardShadow
-      ? [`0 ${CARD_STICKY_GEOMETRY.shadowOffsetYPx}px ${CARD_STICKY_GEOMETRY.shadowBlurPx}px ${paint.cardShadow}`]
+      ? CARD_STICKY_GEOMETRY.shadowLayers.map((layer) => `0 ${layer.offsetYPx}px ${layer.blurPx}px ${paint.cardShadow}`)
       : []),
   ];
   // The rule is a background strip, not an inset shadow: the corner radius

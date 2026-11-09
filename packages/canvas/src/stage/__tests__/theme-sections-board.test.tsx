@@ -255,7 +255,7 @@ describe("connector label chip per theme", () => {
     expect(Number(rect.getAttribute("width"))).toBe(width);
     expect(rect.getAttribute("height")).toBe("26");
     expect(rect.getAttribute("fill")).toBe("#FDFDFD");
-    expect(rect.getAttribute("stroke")).toBe("#C0BFBC"); // the hairline 30% toward the gray ink: 1.8:1 on the chip
+    expect(rect.getAttribute("stroke")).toBe("#B3B2AF"); // the hairline 40% toward the gray wire's stroke
     const text = container.querySelector('[data-canvas-connection-label="edge"] text')!;
     expect(text.getAttribute("font-family")).toContain("IBM Plex Mono");
     expect(text.getAttribute("fill")).toBe("#2A2A2A");
@@ -264,7 +264,7 @@ describe("connector label chip per theme", () => {
 
     const svg = staticSvg("schematic-light");
     const chip = [...svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>HTTP<\/text>/g)][0]!;
-    expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.61", height: "26", fill: "#FDFDFD", stroke: "#C0BFBC" });
+    expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.61", height: "26", fill: "#FDFDFD", stroke: "#B3B2AF" });
     expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#2A2A2A", "font-size": "14", "font-weight": "600" });
   });
 
@@ -282,25 +282,32 @@ describe("connector label chip per theme", () => {
 });
 
 describe("card stickies", () => {
-  it("live: light boards paint cream paper with a warm edge and a tight lift, no rule", () => {
+  it("live: light boards paint a tinted callout with its hue's rule, a tinted edge and a two-layer lift", () => {
     const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
-    expect(note.style.background).not.toContain("linear-gradient");
     const paint = resolveStickyPaint("yellow", canvasThemePreset("schematic-light"));
-    expect(note.style.boxShadow).toBe(`inset 0 0 0 1px ${paint.border}, 0 1px 3px ${paint.cardShadow}`);
+    expect(note.style.background).toBe(
+      `linear-gradient(to right, transparent 1px, ${paint.rule} 1px, ${paint.rule} 4px, transparent 4px) ${paint.fill}`,
+    );
+    expect(note.style.boxShadow).toBe(
+      `inset 0 0 0 1px ${paint.border}, 0 1px 2px ${paint.cardShadow}, 0 4px 14px ${paint.cardShadow}`,
+    );
   });
 
-  it("static: the same paper with 6px corners, the firm edge and the card lift filter, no rule", () => {
+  it("static: the same callout with 6px corners, the rule, the edge and the two-layer lift filter", () => {
     const svg = staticSvg("schematic-light");
     const style = canvasThemePreset("schematic-light");
     const paint = resolveStickyPaint("yellow", style);
+    const opacity = parseColor(paint.cardShadow!)!.a;
     expect(svg).toContain(
-      `<feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="${style.textColor}" flood-opacity="${parseColor(paint.cardShadow!)!.a}"/>`,
+      `<feOffset in="b0" dy="1" result="o0"/><feFlood flood-color="${style.textColor}" flood-opacity="${opacity}" result="f0"/>`,
+    );
+    expect(svg).toContain('<feGaussianBlur in="SourceAlpha" stdDeviation="7" result="b1"/><feOffset in="b1" dy="4" result="o1"/>');
+    expect(svg).toContain(
+      `<rect x="900" y="80" width="240" height="160" rx="6" fill="${paint.fill}" filter="url(#theme-board-card-sticky-shadow)"/>`,
     );
     expect(svg).toContain(
-      '<rect x="900" y="80" width="240" height="160" rx="6" fill="#FFF7E5" filter="url(#theme-board-card-sticky-shadow)"/>',
+      `<path d="M901 82.68A6 6 0 0 1 904 80.34V239.66A6 6 0 0 1 901 237.32Z" fill="${paint.rule}"/><rect x="900.5" y="80.5" width="239" height="159" rx="5.5" fill="none" stroke="${paint.border}" stroke-width="1"/>`,
     );
-    expect(svg).toContain(`<rect x="900.5" y="80.5" width="239" height="159" rx="5.5" fill="none" stroke="${paint.border}" stroke-width="1"/>`);
-    expect(svg).not.toMatch(/<path d="M901 [^"]*" fill="#666562"\/>/);
   });
 
   it("dark boards: a straight 3px neutral rule inside the hairline, live and static", () => {
@@ -317,7 +324,7 @@ describe("card stickies", () => {
   });
 
   it("dark boards: a card note has no lift (its raised card fill sets it off)", () => {
-    expect(staticSvg("schematic-dark")).not.toContain("feDropShadow");
+    expect(staticSvg("schematic-dark")).not.toContain("card-sticky-shadow");
   });
 
   it("schematic note text reads under the node names: 16px on a 24px pitch, ink on the card at 4.5:1 or more", () => {

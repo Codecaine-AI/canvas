@@ -629,14 +629,12 @@ export function brandHeaderIconColors(
  * ink, stickyRuleWidthPx), and on a light board a soft lift in the text
  * color (cardShadow).
  *
- * A card note is an annotation, not a category: its rule is the gray ink
- * whatever the color pick. The pick's own ink put an olive bar (yellow, the
- * sticky default) on every note, which clashed with the cool sections round
- * it. The lift is what sets a note off the near-white board: the card fill
+ * Outside the light schematic preset a card note is an annotation, not a
+ * category: its rule is the gray ink whatever the color pick. The lift is what sets a note off the near-white board: the card fill
  * sits within 0.02 OKLab of the page, so a hairline alone left notes
  * floating as bare text. Dark boards raise the card fill itself instead.
- * Beside `ink-card` nodes (the light schematic preset) the card is cream
- * paper with a firm edge and no rule (paperCardStickyPaint).
+ * Beside `ink-card` nodes (the light schematic preset) the card is a tinted
+ * callout in the pick's own hue (noteCardStickyPaint).
  */
 export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
   return cachedPaint(style, `sticky|${color}`, () => stickyPaint(color, style));
@@ -644,53 +642,57 @@ export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle): Stic
 
 /** Card sticky lift: the text color at this opacity (light boards only). */
 const CARD_STICKY_SHADOW_OPACITY = 0.14;
-/** Card code chips keep the existing text tint outside the cream-paper theme. */
+/** Card code chips keep the existing text tint outside the tinted-callout theme. */
 const CARD_STICKY_CODE_CHIP_ALPHA = 0.045;
 
 /**
- * Beside `ink-card` nodes a card note is cream paper: the yellow anchor's hue
- * at OKLab L 0.977, chroma 0.03, with a warm edge and a tight lift.
- * Code chips keep the paper hue instead of adding gray patches.
+ * Beside `ink-card` nodes a card note is a tinted callout in its own color
+ * pick: a pale wash of the pick's ink (OKLab L 0.98), a hairline edge in the
+ * same hue, a vivid mid tone of it (L 0.74) as the 3px left rule, and a
+ * two-layer lift. Gray and white picks stay neutral (a gray wash, a white
+ * card, both with a gray rule).
  *
- * Round 4 made sections near white (L 0.955) on a near-white page section
- * (the panel, L 0.979), and the note was the panel itself: it sat on the page
- * in the page's own color and a shade above a gray section, so judges read it
- * as a borderless box or loose text with a bar (UI climb round 4: 46 of 138
- * findings, every board with notes). A tint off the gray axis sets the note
- * apart from both near-whites by hue, not by darkness, so it stays lighter
- * than every node and never reads as one.
- *
- * Picked from three variants on boards 01, 02, 07 and h3: a white card with a
- * firmer edge and a deeper lift still merged with the page, and a gold left
- * rule on the cream read olive, the bar Ford had turned down before. The
- * charcoal rule is gone: the paper alone says "note".
+ * Stage A round 0 (notes sheet 7.49): every pick painted one cream card with
+ * a tan edge, the look Ford had turned down, so ten colors read as one, and
+ * the notes sat flat on the board. The wash stays far lighter than every node
+ * fill (L 0.85 to 0.93) and the edge is a 1px tint, never the 2px ink, so a
+ * note reads as an annotation, not a node. Inline code takes a deeper step of
+ * the same wash so it separates from the note body.
  */
-const NOTE_PAPER_LIGHTNESS = 0.977;
-const NOTE_PAPER_CHROMA = 0.03;
+const NOTE_FILL_LIGHTNESS = 0.98;
+const NOTE_FILL_CHROMA = 0.03;
+const NOTE_EDGE_LIGHTNESS = 0.82;
+const NOTE_EDGE_CHROMA = 0.06;
+const NOTE_RULE_LIGHTNESS = 0.74;
+const NOTE_RULE_CHROMA = 0.15;
+const NOTE_CODE_CHIP_LIGHTNESS = 0.925;
+const NOTE_CODE_CHIP_CHROMA = 0.02;
+const NOTE_SHADOW_OPACITY = 0.08;
+/**
+ * The yellow note's hue anchor (OKLCH hue 95): the yellow ink sits at hue 87,
+ * whose pale wash is the beige paper Ford turned down and whose rule reads
+ * olive. A lemon anchor keeps the wash clean and the rule gold.
+ */
+const NOTE_YELLOW_ANCHOR = "#FFD600";
 
-/** Cream-note trim: a warm edge and a small lift keep annotations secondary. */
-const NOTE_EDGE_LIGHTNESS = 0.74;
-const NOTE_EDGE_CHROMA = 0.065;
-const NOTE_SHADOW_OPACITY = 0.07;
-const NOTE_CODE_CHIP_LIGHTNESS = 0.945;
-const NOTE_CODE_CHIP_CHROMA = 0.035;
-
-function paperCardStickyPaint(style: CanvasStyle): StickyPaint {
-  const yellow = paletteColor("yellow", style);
-  const fill = withLightnessChroma(yellow, NOTE_PAPER_LIGHTNESS, NOTE_PAPER_CHROMA);
+function noteCardStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
+  const ink = color === "yellow" ? NOTE_YELLOW_ANCHOR : resolveInk(color, style);
+  const neutral = color === "gray" || color === "white";
+  const chroma = (value: number) => (neutral ? 0 : value);
+  const fill = color === "white" ? "#FFFFFF" : withLightnessChroma(ink, NOTE_FILL_LIGHTNESS, chroma(NOTE_FILL_CHROMA));
   return {
     fill,
-    border: withLightnessChroma(yellow, NOTE_EDGE_LIGHTNESS, NOTE_EDGE_CHROMA),
-    rule: null,
+    border: withLightnessChroma(ink, NOTE_EDGE_LIGHTNESS, chroma(NOTE_EDGE_CHROMA)),
+    rule: withLightnessChroma(ink, NOTE_RULE_LIGHTNESS, chroma(NOTE_RULE_CHROMA)),
     text: readableOn(style.textColor, fill),
     shadow: false,
     cardShadow: withAlpha(style.textColor, NOTE_SHADOW_OPACITY),
-    codeChip: withLightnessChroma(yellow, NOTE_CODE_CHIP_LIGHTNESS, NOTE_CODE_CHIP_CHROMA),
+    codeChip: withLightnessChroma(ink, NOTE_CODE_CHIP_LIGHTNESS, chroma(NOTE_CODE_CHIP_CHROMA)),
   };
 }
 
 function stickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
-  if (style.stickyStyle === "card" && style.shapeFill === "ink-card") return paperCardStickyPaint(style);
+  if (style.stickyStyle === "card" && style.shapeFill === "ink-card") return noteCardStickyPaint(color, style);
   if (style.stickyStyle === "card") {
     return {
       fill: style.cardFill,
@@ -710,21 +712,22 @@ function stickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
 
 /**
  * A connector label chip's edge. Figjam: the hairline. Layer-cake modes: the
- * hairline moved LABEL_CHIP_BORDER_INK_WEIGHT of the way to the gray ink, as
- * the design system's border.strong moves the default border toward gray.
- * The hairline (#E6E5E3) sits at 1.24:1 on the page-colored chip, so a chip
- * between sections read as a gap in its line, not a tag (UI climb round 2:
- * boards 08, 09, 11, 13, 14, h1, h2, h5); the edge now reads 1.8:1.
+ * hairline moved LABEL_CHIP_BORDER_INK_WEIGHT of the way to the wire's own
+ * stroke, so a chip on a colored wire wears that wire's hue and a chip on a
+ * neutral wire the gray ink. The hairline (#E6E5E3) sits at 1.24:1 on the
+ * page-colored chip, so a chip between sections read as a gap in its line,
+ * not a tag (UI climb round 2: boards 08, 09, 11, 13, 14, h1, h2, h5); a gray
+ * edge kept on a red wire read as loosely tied to it (stage A round 0).
  */
-export function resolveLabelChipBorder(style: CanvasStyle): string {
+export function resolveLabelChipBorder(style: CanvasStyle, wireStroke: string): string {
   if (style.sectionFill !== "layer-cake") return style.hairlineColor;
-  return cachedPaint(style, "label-chip-border", () => ({
-    border: mixColors(resolveInk("gray", style), style.hairlineColor, LABEL_CHIP_BORDER_INK_WEIGHT),
+  return cachedPaint(style, `label-chip-border|${wireStroke}`, () => ({
+    border: mixColors(wireStroke, style.hairlineColor, LABEL_CHIP_BORDER_INK_WEIGHT),
   })).border;
 }
 
-/** Gray ink weight in a layer-cake label chip edge (resolveLabelChipBorder). */
-const LABEL_CHIP_BORDER_INK_WEIGHT = 0.3;
+/** Wire stroke weight in a layer-cake label chip edge (resolveLabelChipBorder). */
+const LABEL_CHIP_BORDER_INK_WEIGHT = 0.4;
 
 /** Connector stroke = the ink. */
 export function resolveConnectorPaint(color: CanvasColor, style: CanvasStyle): ConnectorPaint {

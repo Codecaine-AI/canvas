@@ -41,6 +41,7 @@ import {
   type StickyMarkdownLine,
   type StickyMarkdownSelection,
 } from "../../../../objects/sticky/markdown-editing";
+import { STICKY_CODE_FONT_EM } from "../../../../objects/sticky/sticky-text";
 import type { InteractiveCanvasObject } from "../../../../state/schema";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import type { TextEditingApi } from "./use-text-editing";
@@ -302,7 +303,7 @@ function renderInlineToken(
       style={{
         fontFamily: STICKY_MARKDOWN_MONO_FONT,
         fontWeight: STICKY_MARKDOWN_MONO_FONT_WEIGHT,
-        fontSize: "0.85em",
+        fontSize: `${STICKY_CODE_FONT_EM}em`,
         // The at-rest paper chip's tint and radius (objects/sticky/markdown.tsx).
         background: STICKY_CODE_CHIP_BACKGROUND,
         borderRadius: STICKY_CODE_CHIP_RADIUS,

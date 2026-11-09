@@ -128,7 +128,7 @@ export function Connector({
             height={chip.height}
             rx={canvasStyle.labelChipCornerRadiusPx}
             fill={canvasStyle.connectorLabelBackground}
-            stroke={resolveLabelChipBorder(canvasStyle)}
+            stroke={resolveLabelChipBorder(canvasStyle, stroke)}
             strokeWidth={CONNECTION_LABEL_CHIP.borderWidthPx}
           />
           <text

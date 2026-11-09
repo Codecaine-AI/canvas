@@ -361,12 +361,18 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(resolveIconPaint("teal", LIGHT).tileFill).toBe(resolveInk("teal", LIGHT));
   });
 
-  it("label chip edge: figjam keeps the hairline; schematic edges read at least 1.6:1 on the chip", () => {
-    expect(resolveLabelChipBorder(FIGJAM_CANVAS_STYLE)).toBe(FIGJAM_CANVAS_STYLE.hairlineColor);
+  it("label chip edge: figjam keeps the hairline; schematic edges take the wire's hue and read at least 1.6:1 on the chip", () => {
+    const figjamStroke = resolveConnectorPaint("red", FIGJAM_CANVAS_STYLE).stroke;
+    expect(resolveLabelChipBorder(FIGJAM_CANVAS_STYLE, figjamStroke)).toBe(FIGJAM_CANVAS_STYLE.hairlineColor);
+    const hue = (value: string) => Math.atan2(oklab(value).b, oklab(value).a);
     for (const style of [LIGHT, DARK]) {
-      const edge = resolveLabelChipBorder(style);
-      expect(contrastRatio(edge, style.connectorLabelBackground)).toBeGreaterThanOrEqual(1.6);
-      expect(contrastRatio(edge, style.connectorLabelBackground)).toBeGreaterThan(contrastRatio(style.hairlineColor, style.connectorLabelBackground));
+      for (const color of CANVAS_COLORS) {
+        const stroke = resolveConnectorPaint(color, style).stroke;
+        const edge = resolveLabelChipBorder(style, stroke);
+        expect(contrastRatio(edge, style.connectorLabelBackground)).toBeGreaterThanOrEqual(1.6);
+        expect(contrastRatio(edge, style.connectorLabelBackground)).toBeGreaterThan(contrastRatio(style.hairlineColor, style.connectorLabelBackground));
+        if (oklabChroma(stroke) > 0.05) expect(Math.abs(hue(edge) - hue(stroke))).toBeLessThan(0.35);
+      }
     }
   });
 
@@ -480,22 +486,24 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(resolveIconPaint("white", DARK)).toMatchObject({ tileFill: "#F0F6FC", tileBorder: null, glyph: "#0D1117" });
   });
 
-  it("card stickies: cream paper beside ink-card nodes, the card with a gray left rule on dark boards", () => {
+  it("card stickies: a tinted callout per color pick beside ink-card nodes, the card with a gray left rule on dark boards", () => {
+    const fills = new Set<string>();
     for (const color of CANVAS_COLORS) {
       const paint = resolveStickyPaint(color, LIGHT);
-      expect(paint).toMatchObject({
-        fill: "#FFF7E5",
-        rule: null,
-        text: LIGHT.textColor,
-        shadow: false,
-      });
+      expect(paint).toMatchObject({ text: LIGHT.textColor, shadow: false });
+      fills.add(paint.fill);
+      expect(paint.rule).not.toBeNull();
       expect(paint.border).not.toBeNull();
       expect(paint.codeChip).not.toBeNull();
+      expect(contrastRatio(paint.text, paint.fill)).toBeGreaterThanOrEqual(7);
       expect(contrastRatio(paint.text, paint.codeChip!)).toBeGreaterThanOrEqual(7);
-      expect(oklabDistance(paint.fill, paint.codeChip!)).toBeLessThan(0.04);
-      expect(oklabChroma(paint.border!)).toBeGreaterThan(0.04);
+      // Inline code sits a clear step below the note body.
+      expect(oklabLightness(paint.fill) - oklabLightness(paint.codeChip!)).toBeGreaterThanOrEqual(0.04);
+      expect(contrastRatio(paint.border!, paint.fill)).toBeGreaterThanOrEqual(1.6);
+      if (color !== "gray" && color !== "white") expect(oklabChroma(paint.border!)).toBeGreaterThan(0.04);
       expect(parseColor(paint.cardShadow!)!.a).toBeLessThanOrEqual(0.08);
     }
+    expect(fills.size).toBe(CANVAS_COLORS.length);
     expect(resolveStickyPaint("yellow", DARK)).toMatchObject({ fill: "#32363E", border: "#3D444D", rule: "#9198A1", cardShadow: null });
   });
 

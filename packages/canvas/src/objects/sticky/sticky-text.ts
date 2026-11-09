@@ -19,7 +19,7 @@
  * Fonts (all bundled, so all measurable exactly): body Inter 400, `**bold**`
  * Inter 700 (CSS `bolder` — a bold run inside a 700 heading asks for 900 and
  * paints Inter Bold, the heaviest face), headings Inter 700 at 1.5 / 1.25 /
- * 1.1em, inline code IBM Plex Mono 400 at 0.85em with 0.15em padding a side.
+ * 1.1em, inline code IBM Plex Mono 400 at 0.9375em with 0.15em padding a side.
  *
  * Visual constants are mirrored from the live implementation (markdown.tsx
  * HEADING_STYLE, the sticky def's line CSS in objects/sticky/def.tsx — those
@@ -51,7 +51,7 @@ const BODY_FONT_WEIGHT = 400;
 const STRONG_FONT_WEIGHT = 700;
 
 /** Inline-code sizing (markdown.tsx renderInline `<code>` style). */
-export const STICKY_CODE_FONT_EM = 0.85;
+export const STICKY_CODE_FONT_EM = 0.9375;
 /** Inline-code horizontal padding a side, em of the code font size (`padding: 0 0.15em`). */
 export const STICKY_CODE_PADDING_X_EM = 0.15;
 

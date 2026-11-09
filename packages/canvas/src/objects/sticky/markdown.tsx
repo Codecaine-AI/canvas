@@ -11,6 +11,7 @@ import {
   type StickyMarkdownInlineToken,
   type StickyMarkdownLine,
 } from "./markdown-editing";
+import { STICKY_CODE_FONT_EM } from "./sticky-text";
 
 /**
  * Minimal sticky markdown (D18) — just enough to style sticky text without a
@@ -101,7 +102,7 @@ function renderInline(
         style={{
           fontFamily: STICKY_MARKDOWN_MONO_FONT,
           fontWeight: STICKY_MARKDOWN_MONO_FONT_WEIGHT,
-          fontSize: "0.85em",
+          fontSize: `${STICKY_CODE_FONT_EM}em`,
           background: codeBackground,
           borderRadius: STICKY_CODE_CHIP_RADIUS,
           padding: "0 0.15em",
