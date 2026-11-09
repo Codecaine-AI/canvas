@@ -18,8 +18,7 @@ import { describe, expect, test } from "bun:test";
 
 import type { InteractiveCanvasDocument } from "../../state/schema";
 
-import { FINISHING_RULES, type LintContext } from "../../board/lints";
-import { detailKey, detailSubjects } from "../../board/detail-value";
+import { FINISHING_RULES } from "../../board/lints";
 import { operationTools } from "../tools/operations";
 import { box, connect, makeDocument } from "./synthetic";
 
@@ -35,20 +34,8 @@ const GESTURES = new Set(operationTools.map((tool) => tool.name));
  */
 const NON_TOOL_TERMS = new Set<string>([]);
 
-/** detail-value: a node whose detail Jev judged filler, with that verdict in the lint context. */
-function detailValueFixture(): { name: string; document: InteractiveCanvasDocument; context: LintContext } {
-  const document = makeDocument([{ ...box("db", 0, 0, 280, 120, "process"), text: "Postgres", detail: "the database" }]);
-  const [subject] = detailSubjects(document);
-  return {
-    name: "detail-value",
-    document,
-    context: { detailVerdicts: new Map([[detailKey(subject!), { choice: "remove", confidence: 0.9, pRemove: 0.95, model: "jev-1.14.0" }]]) },
-  };
-}
-
-function fixtures(): { name: string; document: InteractiveCanvasDocument; context?: LintContext }[] {
+function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
   return [
-    detailValueFixture(),
     {
       // covered-content: boxes on top of each other.
       name: "covered-content",
@@ -96,9 +83,9 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument; contex
 
 function everyDiagnostic(): { rule: string; text: string; source: string }[] {
   const collected: { rule: string; text: string; source: string }[] = [];
-  for (const { name, document, context } of fixtures()) {
+  for (const { name, document } of fixtures()) {
     for (const rule of FINISHING_RULES) {
-      for (const finding of rule.check(document, context)) {
+      for (const finding of rule.check(document)) {
         collected.push({ rule: finding.rule, text: finding.message, source: `${name}/message` });
         if (finding.suggestion !== undefined) {
           collected.push({

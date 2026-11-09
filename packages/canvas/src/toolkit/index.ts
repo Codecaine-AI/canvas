@@ -53,16 +53,6 @@ import {
   sessionDiagnostics,
   type Diagnostic,
 } from "../lints";
-import {
-  DETAIL_REMOVE_THRESHOLD,
-  detailKey,
-  detailRemovals,
-  detailSubjects,
-  judgeDetails,
-  type DetailJudgement,
-  type DetailSubject,
-  type JudgeDetailsOptions,
-} from "../board/detail-value";
 import { rasterizeSvgToPng } from "../render/rasterize";
 import { renderAtJudgeSize } from "../render/judge-size";
 import { BOARD_VIEW_WIDTH, renderBoardView } from "../session/perception/views";
@@ -90,12 +80,6 @@ export { boardStateSnapshot, operationTools, workflowTools };
 export { brokenWiresLine } from "../board/wire-integrity";
 export { fitNotesToText } from "../objects/sticky/note-fit";
 export { canvasStyleOverrides, loadCanvasStyle };
-export {
-  fileDetailCache,
-  memoryDetailCache,
-  type DetailVerdictCache,
-  type JudgeDetailsOptions,
-} from "../board/detail-value";
 export type { CanvasStyle, LayoutSession, LayoutToolRenderResult, LayoutToolRuntime, OperationTool, WorkflowTool };
 
 /**
@@ -334,14 +318,8 @@ function plural(count: number, one: string, many = `${one}s`): string {
  * edit the file never received. A file saved elsewhere since the session
  * last read or wrote it conflicts the session here too, so the check never
  * approves a board the file no longer holds.
- * `options.detailLine` is the DETAIL line `checkDetailValues` returned; it
- * prints after the lint findings.
  */
-export function checkCanvasFile(
-  file: CanvasFileSession,
-  label: string,
-  options: { detailLine?: string } = {},
-): LayoutToolRenderResult {
+export function checkCanvasFile(file: CanvasFileSession, label: string): LayoutToolRenderResult {
   if (!file.conflicted && sha256(readFileSync(file.canvasPath)) !== file.diskHash) file.conflicted = true;
   if (file.conflicted) {
     return { isError: true, text: new CanvasFileConflictError(file.canvasPath).message };
@@ -383,63 +361,9 @@ export function checkCanvasFile(
     lines.push(`  ${name} (${found.length})`);
     for (const diagnostic of found) lines.push(...diagnosticLines(diagnostic).map((line) => `    ${line}`));
   }
-  if (options.detailLine) lines.push(options.detailLine);
   lines.push(layoutBlock(layoutNumbers(board, file.session.canvasStyle)));
   lines.push(...clippedFrameNotes(board, file.session.canvasStyle));
   return { text: lines.join("\n"), pngs };
-}
-
-/** Rounds checkDetailValues runs while edits land during Jev's request. */
-const DETAIL_CHECK_ROUNDS = 3;
-
-/**
- * Ask Jev whether each node detail on the board carries a fact
- * (board/detail-value), store the verdicts on the session so the
- * detail-value finishing lint (and finalize) can read them, and return the
- * one DETAIL line canvas_check prints. Never throws and never blocks by
- * itself: a missing key or a failed request reads "DETAIL · not checked
- * (<reason>)" and drops every verdict, so the lint reports nothing.
- * A verdict is keyed by everything its question saw, so an edit made while
- * Jev answers leaves the edited detail without one: the check judges the
- * board again (the cache answers the unchanged details) until every detail
- * on it has a verdict.
- */
-export async function checkDetailValues(file: CanvasFileSession, options: JudgeDetailsOptions): Promise<string> {
-  // Usage and asks add up across rounds, so the line reports what the check spent.
-  const spent = { asked: 0, input_tokens: 0, output_tokens: 0 };
-  for (let round = 1; ; round++) {
-    const judgement = await judgeDetails(file.session.draft, options);
-    if (judgement.status === "not-checked") {
-      file.session.detailVerdicts = undefined;
-      return `DETAIL · not checked (${judgement.reason})`;
-    }
-    spent.asked += judgement.asked;
-    spent.input_tokens += judgement.usage.input_tokens;
-    spent.output_tokens += judgement.usage.output_tokens;
-    file.session.detailVerdicts = judgement.verdicts;
-    const subjects = detailSubjects(file.session.draft);
-    if (subjects.every((subject) => judgement.verdicts.has(detailKey(subject)))) {
-      return detailLine(subjects, judgement, spent);
-    }
-    if (round === DETAIL_CHECK_ROUNDS) {
-      file.session.detailVerdicts = undefined;
-      return "DETAIL · not checked (the board kept changing during the check)";
-    }
-  }
-}
-
-function detailLine(
-  subjects: readonly DetailSubject[],
-  judgement: Extract<DetailJudgement, { status: "checked" }>,
-  spent: { asked: number; input_tokens: number },
-): string {
-  if (subjects.length === 0) return "DETAIL · no node details to judge";
-  const removals = detailRemovals(subjects, judgement.verdicts).length;
-  // Cached: current details the last round answered from the cache.
-  const cached = Math.max(0, subjects.length - judgement.asked);
-  return `DETAIL · Jev judged ${plural(subjects.length, "node detail")}`
-    + ` (${spent.asked} asked, ${cached} cached) · ${removals} to remove (confidence ≥ ${DETAIL_REMOVE_THRESHOLD})`
-    + (spent.asked > 0 ? ` · ${spent.input_tokens} input tokens` : "");
 }
 
 /**

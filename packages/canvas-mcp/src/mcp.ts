@@ -10,12 +10,9 @@ import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprot
 import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { identityFromEnv, newRunId, openActionLog, type ActionLog } from "@codecaine-ai/action-log";
 import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
-import { homedir } from "node:os";
-import { join, resolve } from "node:path";
-import { fileDetailCache } from "@codecaine-ai/canvas/toolkit";
+import { resolve } from "node:path";
 
 import { version } from "../package.json";
-import { codecaineEnv } from "./codecaine-env";
 import { type CanvasServiceOptions, type CanvasToolResult, createCanvasService } from "./service";
 
 /** Sent once at initialize; kept short because clients inline it into every session. */
@@ -102,14 +99,7 @@ export async function startMcp(options: CanvasServiceOptions): Promise<Server> {
   if (!activeBackend().exact) {
     throw new Error(`text-measure: HarfBuzz did not become the active backend (${activeBackend().name} is)`);
   }
-  // The served process asks Jev about node details at canvas_check; tests build the server without it.
-  const server = createCanvasMcpServer({
-    ...options,
-    detailValue: options.detailValue ?? {
-      apiKey: () => codecaineEnv("TYPESAFE_API_KEY"),
-      cache: fileDetailCache(join(homedir(), ".cache", "codecaine-canvas", "detail-value.json")),
-    },
-  });
+  const server = createCanvasMcpServer(options);
   await server.connect(new StdioServerTransport());
   return server;
 }

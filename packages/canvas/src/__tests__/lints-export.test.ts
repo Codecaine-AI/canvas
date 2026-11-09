@@ -21,8 +21,7 @@ describe("board lints export", () => {
     const findings = runDiagnostics(document, FINISHING_RULES);
     expect(findings.some((finding) => finding.rule === "covered-content" && finding.severity === "error")).toBe(true);
     expect(formatDiagnostics(findings)).toMatch(/^DIAGNOSTICS · \d+ errors?/);
-    // The finish adds detail-value, which reads Jev verdicts the board check stored; edits never run it.
-    expect(FINISHING_RULES.map((rule) => rule.id)).toEqual([...LAYOUT_RULES.map((rule) => rule.id), "detail-value"]);
+    expect(FINISHING_RULES.map((rule) => rule.id)).toEqual(LAYOUT_RULES.map((rule) => rule.id));
     expect(entry.runDiagnostics).toBe(runDiagnostics);
   });
 });

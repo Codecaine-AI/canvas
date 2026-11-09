@@ -8,7 +8,6 @@ import type { InteractiveCanvasDocument } from "../state/schema";
 
 import type { ScopeResolution } from "../board/scope";
 import type { Diagnostic } from "../board/lints";
-import type { DetailVerdict } from "../board/detail-value";
 import type {
   AgentProposal,
   AgentSessionAnnotation,
@@ -93,12 +92,6 @@ export interface LayoutSession {
    * makes resolves through it; absent means the defaults.
    */
   canvasStyle?: CanvasStyle;
-  /**
-   * Jev's verdicts on node details (board/detail-value), keyed by
-   * `detailKey`, filled by canvas_check. The finishing lints read them, so
-   * finalize blocks on a known `remove` without calling the network.
-   */
-  detailVerdicts?: Map<string, DetailVerdict>;
 }
 
 /** Record an event and fan it out without letting a dead subscriber fail the session. */

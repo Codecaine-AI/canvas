@@ -164,42 +164,6 @@ describe("canvas_create and canvas_check", () => {
     expect(check.text).toMatch(/^ {2}sticky payload clips its text: .*shorten the text\)$/m);
   });
 
-  test("canvas_check asks Jev about node details and reports a filler detail as an error", async () => {
-    let requests = 0;
-    const fetch = (async (_url: unknown, init?: RequestInit) => {
-      requests += 1;
-      const body = JSON.parse(String(init?.body));
-      const answers = Object.fromEntries(Object.entries(body.questions).map(([id, question]) => {
-        const filler = (question as { instructions: { node: { detail: string } } }).instructions.node.detail === "the database";
-        return [id, filler
-          ? { type: "choice", choice: "remove", probabilities: { keep: 0.05, remove: 0.95 }, confidence: 0.9 }
-          : { type: "choice", choice: "keep", probabilities: { keep: 0.98, remove: 0.02 }, confidence: 0.96 }];
-      }));
-      return Response.json({ model: body.model, answers, usage: { input_tokens: 1400, output_tokens: 4 } });
-    }) as typeof globalThis.fetch;
-    const service = createCanvasService({ workspace: tempDir(), detailValue: { apiKey: () => "test-key", fetch } });
-    await call(service, "canvas_create", { canvas: "details", title: "Details" });
-    await call(service, "place_shape", { id: "api", type: "process", at: [80, 140] });
-    await call(service, "update_text", { id: "api", text: "API server", detail: ":8080 · Bun 1.4" });
-    await call(service, "place_shape", { id: "db", type: "database", at: [520, 140] });
-    await call(service, "update_text", { id: "db", text: "Postgres", detail: "the database" });
-
-    const check = checked(await call(service, "canvas_check", {}));
-    expect(check.errors).toBe(1);
-    expect(check.text).toMatch(/^ {4}E1 detail-value: db's detail "the database" adds no fact .*\(update_text db detail ""\)$/m);
-    expect(check.text).toContain("DETAIL · Jev judged 2 node details (2 asked, 0 cached) · 1 to remove");
-
-    await call(service, "update_text", { id: "db", detail: "" });
-    const fixed = checked(await call(service, "canvas_check", {}));
-    expect(fixed.errors).toBe(0);
-    // The cleared detail was context for the api question, so it is asked once more.
-    expect(fixed.text).toContain("DETAIL · Jev judged 1 node detail (1 asked, 0 cached) · 0 to remove");
-    expect(requests).toBe(2);
-    // An unchanged board asks nothing.
-    expect(checked(await call(service, "canvas_check", {})).text).toContain("(0 asked, 1 cached)");
-    expect(requests).toBe(2);
-  });
-
   test("a chart.mmd redraws on a board with equal node and edge counts", async () => {
     const service = createCanvasService({ workspace: tempDir() });
     const chart = parseChart(CHECKOUT_CHART);
@@ -207,17 +171,14 @@ describe("canvas_create and canvas_check", () => {
 
     for (const [index, state] of chart.states.entries()) {
       await call(service, "place_shape", { id: state.id, type: "process", at: [80 + (index % 3) * 520, 120 + Math.floor(index / 3) * 360] });
-      const broken = chart.breaks.has(state.id);
-      await call(service, "update_text", { id: state.id, text: state.label, ...(broken ? { detail: "breaks PaidOnce" } : {}) });
-      await call(service, "change_color", { id: state.id, color: broken ? "red" : chart.groups.get(state.id)! });
+      await call(service, "update_text", { id: state.id, text: state.label });
+      await call(service, "change_color", { id: state.id, color: chart.breaks.has(state.id) ? "red" : chart.groups.get(state.id)! });
     }
     for (const [index, arrow] of chart.arrows.entries()) {
       await call(service, "connect", { id: `a${index}`, from: { objectId: arrow.from }, to: { objectId: arrow.to }, label: arrow.label });
     }
 
     const check = checked(await call(service, "canvas_check", {}));
-    // No TypeSafe key in this service: the detail check says so and blocks nothing.
-    expect(check.text).toMatch(/^DETAIL · not checked \(TYPESAFE_API_KEY is not set\)$/m);
     expect(check.errors).toBe(0);
     expect(check.nodes).toBe(chart.states.length);
     expect(check.edges).toBe(chart.arrows.length);
