@@ -1931,7 +1931,7 @@
       },
       "text": [
         {
-          "insert": "The chip's measured width counts the icon and the detail, and both placements keep the zoom counter-scaling and the ellipsis at the chip's maximum width."
+          "insert": "The chip's measured width counts the icon and the title, and both placements keep the zoom counter-scaling and the ellipsis at the chip's maximum width."
         }
       ],
       "children": []
@@ -2003,22 +2003,13 @@
           "insert": " (IBM Plex Mono): "
         },
         {
-          "insert": "detailFont",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " for detail lines, "
-        },
-        {
           "insert": "headerFont",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " for section headers, and "
+          "insert": " for section headers and "
         },
         {
           "insert": "connectorLabelFont",
@@ -2027,7 +2018,7 @@
           }
         },
         {
-          "insert": " for edge labels. The schematic themes set all three in IBM Plex Mono, and figjam keeps Inter. The font stacks live in "
+          "insert": " for edge labels. The schematic themes set both in IBM Plex Mono, and figjam keeps Inter. The font stacks live in "
         },
         {
           "insert": "theme/fonts.ts",
@@ -2041,7 +2032,7 @@
           }
         },
         {
-          "insert": ", and detail lines, measurement, the bundled faces, and weights follow these rules:"
+          "insert": ", and measurement, the bundled faces, and weights follow these rules:"
         }
       ],
       "children": []
@@ -2054,7 +2045,7 @@
       },
       "text": [
         {
-          "insert": "Detail lines",
+          "insert": "Detail tokens",
           "attributes": {
             "bold": true
           }
@@ -2072,16 +2063,13 @@
       },
       "text": [
         {
-          "insert": "A detail line sets in "
-        },
-        {
-          "insert": "detailColor",
+          "insert": "detailFont",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " at "
+          "insert": ", "
         },
         {
           "insert": "detailFontSizePx",
@@ -2090,7 +2078,16 @@
           }
         },
         {
-          "insert": " with a 1.3 line height, 3px under the name block, in Inter 400 or IBM Plex Mono 500."
+          "insert": ", and "
+        },
+        {
+          "insert": "detailColor",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " stay in the style so older settings files load, but no board text paints with them, because a node shows its name only."
         }
       ],
       "children": []
