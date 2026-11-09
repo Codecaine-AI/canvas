@@ -8,6 +8,7 @@ import type { CanvasAction, CanvasSelection } from "../../../state/actions";
 import { objectById } from "../../../state/geometry";
 import { connectorBendSegments } from "../../../connectors/bend-editing";
 import { routeConnection } from "../../../connectors/routing";
+import { noteDrawnGeometry } from "../../../objects/sticky/note-fit";
 import { createMoveGesture, stepFromMove } from "../features/move/move";
 import { stepFromResize } from "../features/selection/resize";
 import { stepFromDragSelect } from "../features/selection/drag-select";
@@ -185,7 +186,8 @@ function stepFromIdle(
       startWorld: event.world,
       objectId: object.id,
       handle: hit.handle,
-      startGeometry: object.geometry,
+      // From the box the handle sits on: a card note's drawn height (objects/sticky/note-fit.ts).
+      startGeometry: noteDrawnGeometry(object, ctx.canvasStyle),
       hasEmitted: false,
     };
     // Enter "pressing" until the 3px threshold is crossed, but resize handles

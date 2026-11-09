@@ -4,6 +4,7 @@ import { CanvasStage } from "../CanvasStage";
 import { TextEditingOverlay } from "../editor/features/text-editing/TextEditingOverlay";
 import type { TextEditingApi } from "../editor/features/text-editing/use-text-editing";
 import { renderDocumentToSvg } from "../../render/static-svg";
+import { hitBoundsForObject } from "../../objects/geometry";
 import { canvasThemePreset, type CanvasThemeId } from "../../theme/canvas-style";
 import { contrastRatio } from "../../theme/color-math";
 import type { InteractiveCanvasDocument } from "../../state/schema";
@@ -297,13 +298,31 @@ describe("card stickies", () => {
   it("static: the same card with 4px corners, a straight rule clipped by them under the edge, and no shadow filter", () => {
     const svg = staticSvg("schematic-light");
     expect(svg).not.toContain("feDropShadow");
-    expect(svg).toContain('<rect x="900" y="80" width="240" height="160" rx="4" fill="#F8F8F7"/>');
-    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" rx="3.5" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
+    // One line of text: 14 + 24 + 14 padding and pitch, 60 on the grid (note-fit).
+    expect(svg).toContain('<rect x="900" y="80" width="240" height="60" rx="4" fill="#F8F8F7"/>');
+    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="59" rx="3.5" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
     // x 901 to 904: only its ends follow the corner arcs, its inner edge is one straight line,
     // and it paints before the hairline, as the live background strip sits under the inset shadow.
     expect(svg).toContain(
-      '<path d="M901 81.35A4 4 0 0 1 904 80V240A4 4 0 0 1 901 238.65Z" fill="#805F01"/><rect x="900.5" y="80.5"',
+      '<path d="M901 81.35A4 4 0 0 1 904 80V140A4 4 0 0 1 901 138.65Z" fill="#805F01"/><rect x="900.5" y="80.5"',
     );
+  });
+
+  it("a card note taller than its text draws at its text height, the same in app and PNG, and hits there", () => {
+    // Stored 240x160 for one line of text: the card ends 60px down (padding + one 24px line, on the grid).
+    const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
+    expect(note.style.height).toBe("60px");
+    expect(staticSvg("schematic-light")).toContain('<rect x="900" y="80" width="240" height="60" rx="4" fill="#F8F8F7"/>');
+    const stored = themedDocument().objects.find((object) => object.id === "note")!;
+    expect(hitBoundsForObject(stored, canvasThemePreset("schematic-light")).height).toBe(60);
+    expect(stored.geometry.height).toBe(160);
+  });
+
+  it("a note keeps its stored height where its text needs it all, and a figjam paper sticky never shrinks", () => {
+    const long = { ...themedDocument().objects.find((object) => object.id === "note")!, text: "line\n".repeat(12) };
+    expect(hitBoundsForObject(long, canvasThemePreset("schematic-light")).height).toBe(160);
+    const paper = renderLive("figjam").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
+    expect(paper.style.height).toBe("160px");
   });
 
   it("schematic note text reads under the node names: 16px on a 24px pitch, ink on the card at 4.5:1 or more", () => {
