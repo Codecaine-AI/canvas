@@ -296,22 +296,24 @@ function nearTwins(a: CanvasColor, b: CanvasColor): boolean {
  * The color for section `id` when its call names none, judged on a document
  * whose membership is already reconciled. Hard rules: it looks like neither
  * its parent section, a section it holds, nor a sibling it touches, and,
- * holding nodes of several hues, it takes none of them. A category section
- * takes its category's hue whenever that keeps the rules, past the hue cap:
- * the category carries meaning. Then `prefer` (Studio's last pick, or a
- * copy's source color) wins whenever it keeps those rules. Otherwise the
+ * holding nodes of several hues, it takes none of them. A copy keeps its
+ * `source` color whenever that keeps the hard rules: the drawer chose it.
+ * A category section then takes its category's hue whenever that keeps the
+ * rules, past the hue cap: the category carries meaning. Otherwise the
  * first of CHOOSER_HUES the board's nodes and wires leave free, keeping the
  * board to MAX_SECTION_HUES chromatic section hues, and not teal beside a
  * touching blue or green (nor those beside a touching teal) while another
- * fits. With nothing free under the cap, the hue of the farthest sibling
- * it does not touch (a cool one first), then a cool hue the key uses; warm
- * hues come last.
+ * fits; `prefer` (Studio's last pick) wins over the first only when it
+ * passes those same limits. With nothing free under the cap, the hue of
+ * the farthest sibling it does not touch (a cool one first), then a cool
+ * hue the key uses; warm hues come last.
  */
 export function pickSectionColor(
   document: InteractiveCanvasDocument,
   id: string,
   style: CanvasStyle = DEFAULT_CANVAS_STYLE,
   prefer?: CanvasColor,
+  source?: CanvasColor,
 ): CanvasColor {
   const byId = new Map(document.objects.map((object) => [object.id, object]));
   const section = byId.get(id);
@@ -328,8 +330,8 @@ export function pickSectionColor(
   const keeps = (color: CanvasColor) =>
     (category !== null || !held.has(sectionHue({ color }, style)))
     && neighbors.every((other) => !looksAlike({ color, depth }, paintedOf(other, depths), style));
+  if (source && keeps(source)) return source;
   if (category && keeps(category)) return category;
-  if (prefer && keeps(prefer)) return prefer;
 
   const key = keyHues(document);
   const used = new Set(document.objects
@@ -338,7 +340,9 @@ export function pickSectionColor(
     .filter(isChromatic));
   const underCap = (color: CanvasColor) => !isChromatic(color) || used.has(color) || used.size < MAX_SECTION_HUES;
   const pool = CHOOSER_HUES.filter((color) => !key.has(color) && keeps(color) && underCap(color));
-  const calm = pool.find((color) => near.every((other) => !nearTwins(color, sectionHue(paintedOf(other, depths), style))));
+  const isCalm = (color: CanvasColor) => near.every((other) => !nearTwins(color, sectionHue(paintedOf(other, depths), style)));
+  const calm = pool.find(isCalm);
+  if (prefer && pool.includes(prefer) && (calm === undefined || isCalm(prefer))) return prefer;
   if (calm ?? pool[0]) return (calm ?? pool[0])!;
 
   // Nothing free under the cap: repeat the farthest sibling it does not touch
@@ -460,8 +464,9 @@ const PLACEMENT_PROBE_ID = "__section-color-probe__";
 
 /**
  * Studio's placement of a section with no color named, given the color
- * place_section would pick: the last-picked color when it keeps the rules,
- * else pickSectionColor's. Membership is read the way the reducer will
+ * place_section would pick, with the last-picked color as a preference
+ * that must pass the chooser's limits (key hues, the hue cap, warm hues,
+ * teal beside blue or green). Membership is read the way the reducer will
  * assign it (snapped geometry, reconciled tree). Every other action passes
  * through unchanged.
  */
@@ -500,7 +505,7 @@ export function withCopiedSectionColors(
   for (const copy of after.objects) {
     if (existing.has(copy.id) || kindOf(copy) !== "section" || isPageSection(copy)) continue;
     const kept = copy.color ?? FIRST_USE_COLORS.section;
-    const color = pickSectionColor(document, copy.id, style, kept);
+    const color = pickSectionColor(document, copy.id, style, undefined, kept);
     if (color === kept) continue;
     document = {
       ...document,

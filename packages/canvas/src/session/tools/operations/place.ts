@@ -362,7 +362,7 @@ export const clone = defineOperationTool({
     // A section copy lands beside its source as a sibling: keep the source's
     // color only while it reads apart from the copy's parent and siblings.
     const kept = source.color ?? FIRST_USE_COLORS.section;
-    const color = pickSectionColor(reconcileSectionMembership(probe.draft), p.id, ctx.canvasStyle, kept);
+    const color = pickSectionColor(reconcileSectionMembership(probe.draft), p.id, ctx.canvasStyle, undefined, kept);
     if (color === kept) return probe;
     return lower({ ...object, color }, [`the copy takes ${color}: ${kept} would match its parent, a touching sibling or a node it holds`]);
   },

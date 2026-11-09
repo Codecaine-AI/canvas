@@ -487,6 +487,32 @@ describe("the chooser keeps the board's meaning", () => {
     }
   });
 
+  test("Studio's remembered color is a preference that keeps the chooser's limits", () => {
+    // Three chromatic section hues already, and a blue node in the key.
+    const doc = makeDocument([
+      section("page", [0, 0, 4000, 3200], "white", null),
+      section("a", [1000, 40, 400, 300], "violet", "page"),
+      section("b", [1800, 40, 400, 300], "green", "page"),
+      section("c", [2600, 40, 400, 300], "orange", "page"),
+      node("blue-role", [100, 1500, 120, 80], "blue", "page"),
+    ]);
+    const place = { type: "canvas.addObject", objectType: "section", geometry: { x: 40, y: 40, width: 400, height: 300 } } as const;
+    // Red is warm, blue is the key's, teal would be a fourth hue: gray fits.
+    for (const remembered of ["red", "blue", "teal"] as const) {
+      expect((withPlacedSectionColor(doc, place as never, style, remembered) as { color?: CanvasColor }).color).toBe("gray");
+    }
+    // A hue already on the board passes the cap, so the preference holds.
+    expect((withPlacedSectionColor(doc, place as never, style, "green") as { color?: CanvasColor }).color).toBe("green");
+    // Teal never sits beside a touching blue while another hue fits.
+    const beside = makeDocument([
+      section("page", [0, 0, 2000, 1400], "white", null),
+      section("g", [40, 40, 400, 300], "gray", "page"),
+      section("t", [40, 380, 400, 300], "blue", "page"),
+      section("x", [480, 40, 400, 640], "gray", "page"),
+    ]);
+    expect(pickSectionColor(beside, "x", style, "teal")).toBe("violet");
+  });
+
   test("a category section takes the one hue its colored nodes share, past the hue cap, with no finding", () => {
     const doc = makeDocument([
       section("page", [0, 0, 2600, 1400], "white", null),
@@ -590,6 +616,18 @@ describe("Studio duplicate and paste give copied sections a color that keeps the
     expect(copy.color).not.toBe("gray");
     expect(siblingClashes(document, style)).toEqual([]);
     expect(integrity(document)).toEqual([]);
+  });
+
+  test("a pasted category section set apart keeps its source fill over its nodes' hue", () => {
+    const source = makeDocument([
+      section("page", [0, 0, 4000, 3200], "white", null),
+      section("a", [40, 40, 400, 300], "gray", "page"),
+      node("blue-node", [100, 150, 120, 80], "blue", "a"),
+    ]);
+    const payload = buildPastePayload(copySelection(source, { kind: "objects", objectIds: ["a"] })!, { x: 1400, y: 700 });
+    const document = studio(source, [{ type: "canvas.addObjects", objects: payload.objects, connections: payload.connections }]);
+    const copy = document.objects.find((object) => object.type === "section" && !["page", "a"].includes(object.id));
+    expect(copy?.color).toBe("gray");
   });
 
   test("a paste set apart keeps its color; a paste that touches its source changes it", () => {
