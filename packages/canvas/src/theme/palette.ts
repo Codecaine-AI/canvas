@@ -319,8 +319,23 @@ function paletteColor(color: CanvasColor, style: CanvasStyle): string {
 export function resolveInk(color: CanvasColor, style: CanvasStyle): string {
   if (style.sectionFill !== "layer-cake") return paletteColor(color, style);
   return cachedPaint(style, `ink|${color}`, () => ({
-    ink: ensureContrast(paletteColor(color, style), shapeFillBase(color, style), NON_TEXT_CONTRAST),
+    ink: ensureContrast(style.shapeFill === "ink-card" ? chromaCappedInk(paletteColor(color, style)) : paletteColor(color, style), shapeFillBase(color, style), NON_TEXT_CONTRAST),
   })).ink;
+}
+
+/**
+ * Most OKLCH chroma a layer-cake ink keeps. The design-system text steps of
+ * red (#C62121, 0.199) and pink (#AD1A72, 0.193) stood well above every other
+ * ink (0.09 to 0.157), so their strokes and tiles shouted over the muted
+ * palette (UI climb round 6: astra on 02, 06, 12, h3, h5 and h6; kimi on the
+ * magenta icons of 01, 11, 13 and h6). The cap sits at violet's chroma, so
+ * only red and pink move, each at its own lightness and hue.
+ */
+const INK_CHROMA_MAX = 0.16;
+
+/** `anchor` at its own lightness and hue with its chroma cut to INK_CHROMA_MAX. */
+function chromaCappedInk(anchor: string): string {
+  return oklabChroma(anchor) <= INK_CHROMA_MAX ? anchor : withLightnessChroma(anchor, oklabLightness(anchor), INK_CHROMA_MAX);
 }
 
 /**
@@ -402,7 +417,7 @@ const SHAPE_CARD_CHROMA = 0.08;
  * 0.11 it reads yellow (#F0CC79). Orange asks for 0.09 and gets about the
  * most sRGB holds there (#FFC298), so it reads orange, not peach.
  */
-const SHAPE_CARD_CHROMA_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: 0.11, orange: 0.09 };
+const SHAPE_CARD_CHROMA_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: 0.11, orange: 0.09, blue: 0.065 };
 
 /**
  * How far a gray node sits above the hued node lightness: L 0.894 (#DCDCDC),

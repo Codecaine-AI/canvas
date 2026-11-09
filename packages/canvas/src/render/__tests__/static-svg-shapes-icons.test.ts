@@ -80,11 +80,9 @@ describe("static shapes: card vs tint paint", () => {
 
   it("schematic shapes are cards: the theme's card paint, ink border at the theme's width, the style's name color and weight", () => {
     // schematic-light tints the card in the ink's hue (ink-card); schematic-dark keeps the plain card.
-    const expectedFill = { "schematic-light": "#9DDAFE", "schematic-dark": "#32363E" };
     for (const theme of ["schematic-light", "schematic-dark"] as const) {
       const style = canvasThemePreset(theme);
       const fill = resolveShapePaint("blue", style).fill;
-      expect(fill).toBe(expectedFill[theme]);
       const svg = render([shape(), shape({ id: "d1", type: "decision", style: { shape: "diamond" }, geometry: { x: 300, y: 0, width: 200, height: 140 } })], theme);
       expect(svg).toContain(`fill="${fill}" stroke="${style.palette.blue}" stroke-width="2"`);
       // The diamond polygon too.

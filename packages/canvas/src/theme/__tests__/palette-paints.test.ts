@@ -303,7 +303,7 @@ describe("layer-cake sections", () => {
 describe("schematic shapes, icons, stickies, connectors", () => {
   it("light ink-card shapes: one lightness and chroma in the ink's hue, ink border, theme text", () => {
     expect(LIGHT.shapeFill).toBe("ink-card");
-    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#9DDAFE", border: "#0B6E99", text: "#1F1F1F" });
+    expect(resolveShapePaint("blue", LIGHT)).toMatchObject({ border: LIGHT.palette.blue, text: LIGHT.textColor });
     const chroma = (color: string) => Math.hypot(oklab(color).a, oklab(color).b);
     const hue = (color: string) => Math.atan2(oklab(color).b, oklab(color).a);
     const hues = CANVAS_COLORS.filter((candidate) => !["white", "gray"].includes(candidate));
@@ -312,7 +312,8 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       expect(paint.border).toBe(resolveInk(color, LIGHT));
       expect(Math.abs(oklabLightness(paint.fill) - (oklabLightness(LIGHT.cardFill) - 0.12))).toBeLessThan(0.003);
       // The kind reads from the fill, not only the border: chroma 0.08 (yellow 0.11, orange the most sRGB holds).
-      expect(chroma(paint.fill)).toBeGreaterThanOrEqual(0.075);
+      expect(chroma(paint.fill)).toBeGreaterThanOrEqual(color === "blue" ? 0.06 : 0.075);
+      if (color === "blue") expect(chroma(paint.fill)).toBeLessThan(0.07);
       expect(chroma(paint.fill)).toBeLessThan(color === "yellow" ? 0.113 : 0.091);
       expect(Math.abs(hue(paint.fill) - hue(LIGHT.palette[color]))).toBeLessThan(0.12);
     }
@@ -369,8 +370,20 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     }
   });
 
+  it("light red and pink ink retain their hue while matching the quieter families", () => {
+    for (const color of ["red", "pink"] as const) {
+      const ink = resolveInk(color, LIGHT);
+      const anchor = LIGHT.palette[color];
+      const hue = (value: string) => Math.atan2(oklab(value).b, oklab(value).a);
+      expect(Math.abs(hue(ink) - hue(anchor))).toBeLessThan(0.03);
+      expect(oklabChroma(ink)).toBeLessThanOrEqual(0.162);
+      expect(oklabChroma(ink)).toBeLessThan(oklabChroma(anchor));
+      expect(contrastRatio(ink, resolveShapePaint(color, LIGHT).fill)).toBeGreaterThanOrEqual(3);
+    }
+  });
+
   it("text-step anchors stroke in the palette color itself", () => {
-    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "yellow" && candidate !== "orange")) {
+    for (const color of CANVAS_COLORS.filter((candidate) => !["yellow", "orange", "red", "pink"].includes(candidate))) {
       expect(resolveInk(color, LIGHT)).toBe(LIGHT.palette[color]);
     }
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "yellow")) {
