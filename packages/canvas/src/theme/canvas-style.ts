@@ -484,7 +484,7 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   stickyPaddingTopPx: 14,
   stickyPaddingBottomPx: 14,
   stickyCornerRadiusPx: 6,
-  stickyHeadingScale: 0.8,
+  stickyHeadingScale: 0.3,
   stickyRuleWidthPx: 3,
   ...schematicColors("light"),
 });

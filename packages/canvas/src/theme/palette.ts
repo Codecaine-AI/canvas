@@ -647,47 +647,68 @@ const CARD_STICKY_CODE_CHIP_ALPHA = 0.045;
 
 /**
  * Beside `ink-card` nodes a card note is a tinted callout in its own color
- * pick: a pale wash of the pick's ink (OKLab L 0.98), a hairline edge in the
- * same hue, a vivid mid tone of it (L 0.74) as the 3px left rule, and a
- * two-layer lift. Gray and white picks stay neutral (a gray wash, a white
- * card, both with a gray rule).
+ * pick: a wash of the pick's ink (OKLab L 0.952, chroma 0.03), a hairline
+ * edge one step deeper in the same hue, a muted mid tone of it (L 0.68,
+ * chroma 0.115) as the 3px left rule, and a tight lift. Gray is a neutral
+ * wash; white is a white card. Both take a slate rule.
  *
  * Stage A round 0 (notes sheet 7.49): every pick painted one cream card with
- * a tan edge, the look Ford had turned down, so ten colors read as one, and
- * the notes sat flat on the board. The wash stays far lighter than every node
- * fill (L 0.85 to 0.93) and the edge is a 1px tint, never the 2px ink, so a
- * note reads as an annotation, not a node. Inline code takes a deeper step of
+ * a tan edge, the look Ford had turned down. Round 1 (7.75): washes at L 0.98
+ * hit the sRGB edge at chroma 0.01 for red, blue, violet and pink, so those
+ * read as empty boxes beside mint green and teal; yellow still read cream;
+ * rules at chroma 0.15 clipped to a loud cyan on teal; the wide lift was
+ * louder than a side note. At L 0.952 every hue reaches chroma 0.03, and the
+ * wash still sits lighter than every node fill (L 0.85 to 0.93) and differs
+ * from the gray sections (L 0.96) by hue. Inline code takes a deeper step of
  * the same wash so it separates from the note body.
  */
-const NOTE_FILL_LIGHTNESS = 0.98;
+const NOTE_FILL_LIGHTNESS = 0.952;
 const NOTE_FILL_CHROMA = 0.03;
-const NOTE_EDGE_LIGHTNESS = 0.82;
-const NOTE_EDGE_CHROMA = 0.06;
-const NOTE_RULE_LIGHTNESS = 0.74;
-const NOTE_RULE_CHROMA = 0.15;
-const NOTE_CODE_CHIP_LIGHTNESS = 0.925;
-const NOTE_CODE_CHIP_CHROMA = 0.02;
-const NOTE_SHADOW_OPACITY = 0.08;
+const NOTE_EDGE_LIGHTNESS = 0.88;
+const NOTE_EDGE_CHROMA = 0.05;
+const NOTE_RULE_LIGHTNESS = 0.68;
+const NOTE_RULE_CHROMA = 0.115;
+/** Neutral rules: slate on the gray wash, near charcoal on the white card, which has no wash to carry it. */
+const NOTE_GRAY_RULE_LIGHTNESS = 0.62;
+const NOTE_WHITE_RULE_LIGHTNESS = 0.45;
+const NOTE_CODE_CHIP_LIGHTNESS = 0.9;
+const NOTE_CODE_CHIP_CHROMA = 0.03;
+const NOTE_SHADOW_OPACITY = 0.06;
 /**
- * The yellow note's hue anchor (OKLCH hue 95): the yellow ink sits at hue 87,
- * whose pale wash is the beige paper Ford turned down and whose rule reads
- * olive. A lemon anchor keeps the wash clean and the rule gold.
+ * The yellow note: a clean lemon wash (OKLCH hue 102, chroma 0.065), not the
+ * hue-87 ink, whose pale wash is the beige paper Ford turned down. Yellow
+ * reads weak at the other hues' chroma, so its wash and gold rule run deeper.
  */
-const NOTE_YELLOW_ANCHOR = "#FFD600";
+const NOTE_YELLOW = {
+  fill: { anchor: "#FFEE00", lightness: 0.977, chroma: 0.072 },
+  edge: { anchor: "#FFE600", lightness: 0.9, chroma: 0.09 },
+  rule: { anchor: "#FFD000", lightness: 0.8, chroma: 0.16 },
+  codeChip: { anchor: "#FFE600", lightness: 0.92, chroma: 0.07 },
+} as const;
 
 function noteCardStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
-  const ink = color === "yellow" ? NOTE_YELLOW_ANCHOR : resolveInk(color, style);
+  const ink = resolveInk(color, style);
   const neutral = color === "gray" || color === "white";
-  const chroma = (value: number) => (neutral ? 0 : value);
-  const fill = color === "white" ? "#FFFFFF" : withLightnessChroma(ink, NOTE_FILL_LIGHTNESS, chroma(NOTE_FILL_CHROMA));
+  const tone = (part: keyof typeof NOTE_YELLOW, lightness: number, chroma: number) => {
+    if (color === "yellow") {
+      const yellow = NOTE_YELLOW[part];
+      return withLightnessChroma(yellow.anchor, yellow.lightness, yellow.chroma);
+    }
+    return withLightnessChroma(ink, lightness, neutral ? 0 : chroma);
+  };
+  const fill = color === "white" ? "#FFFFFF" : tone("fill", NOTE_FILL_LIGHTNESS, NOTE_FILL_CHROMA);
   return {
     fill,
-    border: withLightnessChroma(ink, NOTE_EDGE_LIGHTNESS, chroma(NOTE_EDGE_CHROMA)),
-    rule: withLightnessChroma(ink, NOTE_RULE_LIGHTNESS, chroma(NOTE_RULE_CHROMA)),
+    border: tone("edge", NOTE_EDGE_LIGHTNESS, NOTE_EDGE_CHROMA),
+    rule: tone(
+      "rule",
+      color === "white" ? NOTE_WHITE_RULE_LIGHTNESS : color === "gray" ? NOTE_GRAY_RULE_LIGHTNESS : NOTE_RULE_LIGHTNESS,
+      NOTE_RULE_CHROMA,
+    ),
     text: readableOn(style.textColor, fill),
     shadow: false,
     cardShadow: withAlpha(style.textColor, NOTE_SHADOW_OPACITY),
-    codeChip: withLightnessChroma(ink, NOTE_CODE_CHIP_LIGHTNESS, chroma(NOTE_CODE_CHIP_CHROMA)),
+    codeChip: tone("codeChip", NOTE_CODE_CHIP_LIGHTNESS, NOTE_CODE_CHIP_CHROMA),
   };
 }
 

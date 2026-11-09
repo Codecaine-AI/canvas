@@ -499,7 +499,8 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       expect(contrastRatio(paint.text, paint.codeChip!)).toBeGreaterThanOrEqual(7);
       // Inline code sits a clear step below the note body.
       expect(oklabLightness(paint.fill) - oklabLightness(paint.codeChip!)).toBeGreaterThanOrEqual(0.04);
-      expect(contrastRatio(paint.border!, paint.fill)).toBeGreaterThanOrEqual(1.6);
+      // The edge is a soft in-hue boundary, not an outline: the wash and the rule carry the note (stage A round 1).
+      expect(contrastRatio(paint.border!, paint.fill)).toBeGreaterThanOrEqual(1.2);
       if (color !== "gray" && color !== "white") expect(oklabChroma(paint.border!)).toBeGreaterThan(0.04);
       expect(parseColor(paint.cardShadow!)!.a).toBeLessThanOrEqual(0.08);
     }
@@ -519,7 +520,7 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       expect(oklabLightness(note.fill) - oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill)).toBeGreaterThanOrEqual(0.08);
     }
     expect(contrastRatio(note.text, note.fill)).toBeGreaterThanOrEqual(4.5);
-    expect(contrastRatio(note.border, note.fill)).toBeGreaterThanOrEqual(1.6);
+    expect(contrastRatio(note.border, note.fill)).toBeGreaterThanOrEqual(1.2);
   });
 
   it("connectors stroke with the ink", () => {

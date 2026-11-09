@@ -151,12 +151,12 @@ const STICKY_SHADOW = { dx: 0, dy: 3, stdDeviation: 6, opacity: 0.15 } as const;
 
 /**
  * Card sticky lift — mirrors objects/sticky/def.tsx CARD_STICKY_GEOMETRY
- * shadowLayers (offsets 1 and 4, blurs 2 and 14: a CSS blur radius is two
+ * shadowLayers (offsets 1 and 2, blurs 2 and 6: a CSS blur radius is two
  * standard deviations). Its color is the sticky paint's cardShadow.
  */
 const CARD_STICKY_SHADOW_LAYERS = [
   { dy: 1, stdDeviation: 1 },
-  { dy: 4, stdDeviation: 7 },
+  { dy: 2, stdDeviation: 3 },
 ] as const;
 
 /** The sticky shadow filters a scene defines: null where no sticky casts that shadow. */

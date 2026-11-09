@@ -30,13 +30,13 @@ export const STICKY_GEOMETRY = {
 export const CARD_STICKY_GEOMETRY = {
   borderWidthPx: 1,
   /**
-   * The lift: a tight contact shadow and a wide ambient one, each an offset
+   * The lift: a tight contact shadow and a short ambient one, each an offset
    * down and a blur radius in the paint's cardShadow (render/static-svg.ts
-   * mirrors both).
+   * mirrors both). Kept small: a note is a side remark, not a raised panel.
    */
   shadowLayers: [
     { offsetYPx: 1, blurPx: 2 },
-    { offsetYPx: 4, blurPx: 14 },
+    { offsetYPx: 2, blurPx: 6 },
   ],
 } as const;
 

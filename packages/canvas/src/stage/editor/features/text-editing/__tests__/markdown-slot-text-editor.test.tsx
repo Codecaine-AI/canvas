@@ -203,8 +203,8 @@ describe("MarkdownSlotTextEditor", () => {
     const lines = container.querySelectorAll<HTMLElement>("[data-sticky-markdown-line]");
     expect(lines).toHaveLength(3);
     expect(lines[0].getAttribute("data-heading")).toBe("1");
-    // The default (schematic) style steps headings 80% of the full scale: H1 at 1.4em.
-    expect(lines[0].style.fontSize).toBe("1.4em");
+    // The default (schematic) style steps headings 30% of the full scale: H1 at 1.15em.
+    expect(lines[0].style.fontSize).toBe("1.15em");
 
     const headingMarker = lines[0].querySelector<HTMLElement>(
       '[data-sticky-markdown-marker="heading-prefix"]',
@@ -528,7 +528,7 @@ describe("MarkdownSlotTextEditor", () => {
 
     expect(line?.getAttribute("data-heading")).toBe("1");
     expect(line?.getAttribute("data-line-depth")).toBe("1");
-    expect(line?.style.fontSize).toBe("1.4em");
+    expect(line?.style.fontSize).toBe("1.15em");
     expect(prefix).not.toBeNull();
     expect(prefix!.getAttribute("data-sticky-markdown-marker-hidden")).toBe("true");
   });

@@ -289,7 +289,7 @@ describe("card stickies", () => {
       `linear-gradient(to right, transparent 1px, ${paint.rule} 1px, ${paint.rule} 4px, transparent 4px) ${paint.fill}`,
     );
     expect(note.style.boxShadow).toBe(
-      `inset 0 0 0 1px ${paint.border}, 0 1px 2px ${paint.cardShadow}, 0 4px 14px ${paint.cardShadow}`,
+      `inset 0 0 0 1px ${paint.border}, 0 1px 2px ${paint.cardShadow}, 0 2px 6px ${paint.cardShadow}`,
     );
   });
 
@@ -301,7 +301,7 @@ describe("card stickies", () => {
     expect(svg).toContain(
       `<feOffset in="b0" dy="1" result="o0"/><feFlood flood-color="${style.textColor}" flood-opacity="${opacity}" result="f0"/>`,
     );
-    expect(svg).toContain('<feGaussianBlur in="SourceAlpha" stdDeviation="7" result="b1"/><feOffset in="b1" dy="4" result="o1"/>');
+    expect(svg).toContain('<feGaussianBlur in="SourceAlpha" stdDeviation="3" result="b1"/><feOffset in="b1" dy="2" result="o1"/>');
     expect(svg).toContain(
       `<rect x="900" y="80" width="240" height="160" rx="6" fill="${paint.fill}" filter="url(#theme-board-card-sticky-shadow)"/>`,
     );
