@@ -12,9 +12,9 @@ import {
   type CanvasAction,
   type CanvasTool,
 } from "../../../../state/actions";
-import { normalizeBounds, snapGeometry, type CanvasBounds, type CanvasPoint } from "../../../../state/geometry";
-import { fittedNoteGeometry } from "../../../../objects/sticky/note-fit";
-import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../../../theme/canvas-style";
+import { normalizeBounds, type CanvasBounds, type CanvasPoint } from "../../../../state/geometry";
+import { placementGeometry } from "../../../../objects/sticky/note-fit";
+import type { CanvasStyle } from "../../../../theme/canvas-style";
 import type {
   CanvasColor,
   CanvasGeometry,
@@ -152,24 +152,6 @@ export function objectTypeForTool(tool: CanvasTool): InteractiveCanvasObjectType
 }
 
 export const MIN_PLACE_DRAG_SIZE = 24;
-
-/**
- * The geometry fields of a Studio canvas.addObject (a place gesture, the
- * context menu's Add). A card note is snapped here, then fitted to the
- * height its text needs (objects/sticky/note-fit.ts) and sent unsnapped, so
- * the reducer's 16px snap cannot move that height. Everything else is left
- * to the reducer's snap.
- */
-export function placementGeometry(
-  objectType: InteractiveCanvasObjectType,
-  geometry: CanvasGeometry,
-  text: string | undefined,
-  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
-): { geometry: CanvasGeometry; snap?: false } {
-  const snapped = snapGeometry(geometry);
-  const fitted = fittedNoteGeometry(draftPlacedObject(objectType, snapped, { text }), canvasStyle);
-  return fitted === snapped ? { geometry } : { geometry: fitted, snap: false };
-}
 
 /**
  * Sizes/positions the ghost preview (and eventual created object) for a place

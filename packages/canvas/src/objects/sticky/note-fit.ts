@@ -22,10 +22,11 @@
  *
  * Pure: no React, no DOM.
  */
-import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
-import type { CanvasStyle } from "../../theme/canvas-style";
+import type { CanvasGeometry, InteractiveCanvasDocument, InteractiveCanvasObject, InteractiveCanvasObjectType } from "../../state/schema";
+import { draftPlacedObject } from "../../state/schema/object-defaults";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../theme/canvas-style";
 import { fittedNoteParents, settleSections } from "../../state/section-grow";
-import { AGENT_GRID } from "../../state/geometry";
+import { AGENT_GRID, snapGeometry } from "../../state/geometry";
 import { layoutStickyText } from "./sticky-text";
 import { INSET_BODY_TEXT_SLOT, insetBodyPaddingPx, resolveTextSlot, slotLineHeightPx } from "../text-slots";
 
@@ -124,4 +125,22 @@ export function fitNotesToText(
  */
 export function noteTextStyleKey(canvasStyle: CanvasStyle): string {
   return JSON.stringify(Object.entries(canvasStyle).filter(([key]) => key.startsWith("sticky")));
+}
+
+/**
+ * The geometry fields of a Studio canvas.addObject (a place gesture, the
+ * context menu's Add). A card note is snapped here, then fitted to the
+ * height its text needs (objects/sticky/note-fit.ts) and sent unsnapped, so
+ * the reducer's 16px snap cannot move that height. Everything else is left
+ * to the reducer's snap.
+ */
+export function placementGeometry(
+  objectType: InteractiveCanvasObjectType,
+  geometry: CanvasGeometry,
+  text: string | undefined,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): { geometry: CanvasGeometry; snap?: false } {
+  const snapped = snapGeometry(geometry);
+  const fitted = fittedNoteGeometry(draftPlacedObject(objectType, snapped, { text }), canvasStyle);
+  return fitted === snapped ? { geometry } : { geometry: fitted, snap: false };
 }

@@ -14,7 +14,7 @@ import type {
   InteractiveCanvasObjectType,
 } from "../../../../state/schema";
 import { animateSectionFitToChildren, isSectionFitted } from "../section-fit/animate-section-fit";
-import { placementGeometry } from "../place/place";
+import { placementGeometry } from "../../../../objects/sticky/note-fit";
 import { exportDocumentAsPng, exportDocumentAsSvg } from "../../../../render/download";
 import type { CanvasStyle } from "../../../../theme/canvas-style";
 import {
