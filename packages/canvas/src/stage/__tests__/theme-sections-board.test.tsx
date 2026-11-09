@@ -4,7 +4,8 @@ import { CanvasStage } from "../CanvasStage";
 import { TextEditingOverlay } from "../editor/features/text-editing/TextEditingOverlay";
 import type { TextEditingApi } from "../editor/features/text-editing/use-text-editing";
 import { renderDocumentToSvg } from "../../render/static-svg";
-import type { CanvasThemeId } from "../../theme/canvas-style";
+import { canvasThemePreset, type CanvasThemeId } from "../../theme/canvas-style";
+import { contrastRatio } from "../../theme/color-math";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 import { measureWidth } from "../../theme/text-measure";
 
@@ -282,18 +283,29 @@ describe("connector label chip per theme", () => {
 });
 
 describe("card stickies", () => {
-  it("live: card fill, hairline edge and 2px ink rule as inset shadows, no paper shadow", () => {
+  it("live: card fill, hairline edge and 3px ink rule as inset shadows, no paper shadow", () => {
     const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
     expect(note.style.background).toBe("#F8F8F7");
-    expect(note.style.boxShadow).toBe("inset 2px 0 0 0 #805F01, inset 0 0 0 1px #E6E5E3");
+    expect(note.style.boxShadow).toBe("inset 3px 0 0 0 #805F01, inset 0 0 0 1px #E6E5E3");
   });
 
-  it("static: the same card, edge, and rule — and no shadow filter", () => {
+  it("static: the same card with 4px corners, edge, and a rule that curves with them — and no shadow filter", () => {
     const svg = staticSvg("schematic-light");
     expect(svg).not.toContain("feDropShadow");
-    expect(svg).toContain('<rect x="900" y="80" width="240" height="160" fill="#F8F8F7"/>');
-    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
-    expect(svg).toContain('<rect x="900" y="80" width="2" height="160" fill="#805F01"/>');
+    expect(svg).toContain('<rect x="900" y="80" width="240" height="160" rx="4" fill="#F8F8F7"/>');
+    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" rx="3.5" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
+    // The live inset box-shadow on a rounded box: the box minus itself shifted 3px right.
+    expect(svg).toContain('<path d="M904 80A4 4 0 0 0 900 84V236A4 4 0 0 0 904 240H907A4 4 0 0 1 903 236V84A4 4 0 0 1 907 80Z" fill="#805F01"/>');
+  });
+
+  it("schematic note text reads under the node names: 16px on a 24px pitch, ink on the card at 4.5:1 or more", () => {
+    const style = canvasThemePreset("schematic-light");
+    const svg = staticSvg("schematic-light");
+    expect(svg).toContain('<text fill="#1F1F1F" font-size="16" font-weight="400"');
+    expect(style.stickyFontSizePx).toBeLessThan(style.textFontSizePx);
+    expect(contrastRatio(style.textColor, style.cardFill)).toBeGreaterThanOrEqual(4.5);
+    const dark = canvasThemePreset("schematic-dark");
+    expect(contrastRatio(dark.textColor, dark.cardFill)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("paper stickies keep the shadow and the note CSS (no inline trim)", () => {

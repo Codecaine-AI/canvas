@@ -171,8 +171,27 @@ export interface CanvasStyle {
   connectorLabelTextColor: string;
 
   // --- Stickies -------------------------------------------------------------
-  /** `paper` = colored note with a shadow (FigJam); `card` = card + hairline border + 2px ink left rule. */
+  /** `paper` = colored note with a shadow (FigJam); `card` = card + hairline border + an ink left rule. */
   stickyStyle: "paper" | "card";
+  /** Note body font size; headings scale up from it (stickyHeadingScale). */
+  stickyFontSizePx: number;
+  /** Note line pitch: every markdown row, headings included, takes this line box. */
+  stickyLineHeightPx: number;
+  /** Note text inset from the left and right edges. */
+  stickyPaddingXPx: number;
+  /** Note text inset from the top edge. */
+  stickyPaddingTopPx: number;
+  /** Note text inset from the bottom edge. */
+  stickyPaddingBottomPx: number;
+  /** Note corner radius. */
+  stickyCornerRadiusPx: number;
+  /**
+   * How far note headings step up from the body size: 1 = the full H1/H2/H3
+   * scale (1.5 / 1.25 / 1.1em), 0 = headings at the body size (bold only).
+   */
+  stickyHeadingScale: number;
+  /** Width of the card note's left rule in the ink (card style only). */
+  stickyRuleWidthPx: number;
 
   /** Ink (line / stroke / tile color) per roster color. */
   palette: CanvasStylePalette;
@@ -269,6 +288,14 @@ const FIGJAM_PRESET: CanvasStyle = {
   connectorLabelBackground: "#F5F5F5",
   connectorLabelTextColor: "#000000",
   stickyStyle: "paper",
+  stickyFontSizePx: 24,
+  stickyLineHeightPx: 36,
+  stickyPaddingXPx: 21,
+  stickyPaddingTopPx: 28,
+  stickyPaddingBottomPx: 21,
+  stickyCornerRadiusPx: 0,
+  stickyHeadingScale: 1,
+  stickyRuleWidthPx: 2,
   palette: {
     gray: "#757575",
     red: "#D5322F",
@@ -405,6 +432,20 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   connectorLabelFontSizePx: 14,
   connectorLabelHeightPx: 26,
   stickyStyle: "card",
+  // A note is a secondary annotation: body text under the 17.5px names, a
+  // 1.5 line pitch, headings at about the body size (bold carries them), a
+  // 3px ink rule and 4px corners. Picked from three variants on Archon
+  // boards 01 and 03 (callout card, tinted note, margin note): the card keeps
+  // ink on panel for contrast, and its hairline edge and rule read as a
+  // note, never a node (2px ink border, 12px corners) or a section.
+  stickyFontSizePx: 16,
+  stickyLineHeightPx: 24,
+  stickyPaddingXPx: 18,
+  stickyPaddingTopPx: 14,
+  stickyPaddingBottomPx: 14,
+  stickyCornerRadiusPx: 4,
+  stickyHeadingScale: 0.15,
+  stickyRuleWidthPx: 3,
   ...schematicColors("light"),
 });
 
@@ -814,6 +855,41 @@ export const CANVAS_STYLE_CONTROLS: readonly CanvasStyleControl[] = [
       { value: "paper", label: "Paper note" },
       { value: "card", label: "Card" },
     ],
+  },
+  { key: "stickyFontSizePx", group: "stickies", label: "Text size", kind: "number", min: 10, max: 32, step: 0.5 },
+  {
+    key: "stickyLineHeightPx",
+    group: "stickies",
+    label: "Line height",
+    description: "Every row, headings included, takes this line box.",
+    kind: "number",
+    min: 12,
+    max: 56,
+    step: 1,
+  },
+  { key: "stickyPaddingXPx", group: "stickies", label: "Side padding", kind: "number", min: 0, max: 48, step: 1 },
+  { key: "stickyPaddingTopPx", group: "stickies", label: "Top padding", kind: "number", min: 0, max: 48, step: 1 },
+  { key: "stickyPaddingBottomPx", group: "stickies", label: "Bottom padding", kind: "number", min: 0, max: 48, step: 1 },
+  { key: "stickyCornerRadiusPx", group: "stickies", label: "Corner radius", kind: "number", min: 0, max: 24, step: 0.5 },
+  {
+    key: "stickyHeadingScale",
+    group: "stickies",
+    label: "Heading scale",
+    description: "1 steps headings up to 1.5, 1.25 and 1.1 times the text size; 0 keeps them at the text size, bold.",
+    kind: "number",
+    min: 0,
+    max: 1,
+    step: 0.05,
+  },
+  {
+    key: "stickyRuleWidthPx",
+    group: "stickies",
+    label: "Left rule width",
+    kind: "number",
+    min: 0,
+    max: 8,
+    step: 0.5,
+    visibleWhen: { key: "stickyStyle", equals: "card" },
   },
   // Palette
   ...CANVAS_COLORS.map(paletteRow),

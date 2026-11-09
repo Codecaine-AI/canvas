@@ -125,7 +125,7 @@ import type {
   InteractiveCanvasObject,
 } from "../state/schema";
 import { STICKY_MARKDOWN_MONO_FONT_WEIGHT } from "../objects/sticky/markdown-editing";
-import { ellipsizeStickyRow, layoutStickyText, STICKY_LINE_PITCH_PX } from "./sticky-text";
+import { ellipsizeStickyRow, layoutStickyText } from "./sticky-text";
 import type { RenderDocumentToSvg, RenderStaticSvgOptions, RenderedSvg } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -498,18 +498,43 @@ function polygonPointsAttribute(points: CanvasPoint[]): string {
  * (objects/sticky/def.tsx CARD_STICKY_GEOMETRY.codeChipAlpha).
  */
 const STICKY_CODE_CHIP_FILL_OPACITY = 0.08;
-/** Card sticky edges — mirror objects/sticky/def.tsx CARD_STICKY_GEOMETRY (React; not importable here). */
-const CARD_STICKY_RULE_WIDTH_PX = 2;
+/** Card sticky hairline — mirrors objects/sticky/def.tsx CARD_STICKY_GEOMETRY.borderWidthPx (React; not importable here). */
 const CARD_STICKY_BORDER_WIDTH_PX = 1;
+
+/**
+ * The card note's ink rule down the left side, as the live
+ * `inset <ruleWidth>px 0 0 0` box-shadow paints it on a box with
+ * `radius` corners: the box minus itself shifted `ruleWidth` right, a strip
+ * whose ends curve with the corners (a radius of 0 gives the plain strip).
+ */
+function leftRulePath(geometry: CanvasBounds, ruleWidth: number, radius: number): string {
+  const { x, y, width, height } = geometry;
+  const w = Math.min(ruleWidth, width);
+  const r = Math.min(radius, width / 2, height / 2);
+  const bottom = y + height;
+  if (r <= 0) return `M${fmt(x)} ${fmt(y)}H${fmt(x + w)}V${fmt(bottom)}H${fmt(x)}Z`;
+  const arc = (sweep: 0 | 1, toX: number, toY: number) => `A${fmt(r)} ${fmt(r)} 0 0 ${sweep} ${fmt(toX)} ${fmt(toY)}`;
+  return [
+    `M${fmt(x + r)} ${fmt(y)}`,
+    arc(0, x, y + r),
+    `V${fmt(bottom - r)}`,
+    arc(0, x + r, bottom),
+    `H${fmt(x + r + w)}`,
+    arc(1, x + w, bottom - r),
+    `V${fmt(y + r)}`,
+    arc(1, x + r + w, y),
+    "Z",
+  ].join("");
+}
 
 /**
  * The sticky note body under the style's sticky paint (theme/palette.ts
  * resolveStickyPaint), mirroring objects/sticky/def.tsx. `paper`: the flat
  * square sticky fill with the down-biased shadow (objects/sticky/def.tsx
  * STICKY_GEOMETRY) — drawn without the filter when wholly outside the
- * viewBox. `card`: the card fill, a hairline edge, and a 2px ink rule down
- * the left side (the live inset box-shadows: inside the box, rule on top),
- * no shadow.
+ * viewBox. `card`: the card fill, a hairline edge, and an ink rule
+ * (stickyRuleWidthPx) down the left side (the live inset box-shadows: inside
+ * the box, rule on top), no shadow. Both take stickyCornerRadiusPx.
  */
 function renderStickyBody(
   object: InteractiveCanvasObject,
@@ -519,12 +544,15 @@ function renderStickyBody(
 ): string {
   const { geometry } = object;
   const paint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle);
+  const radius = Math.min(canvasStyle.stickyCornerRadiusPx, geometry.width / 2, geometry.height / 2);
+  const rounded = radius > 0 ? { rx: radius } : null;
   if (paint.shadow) {
     return tag("rect", {
       x: geometry.x,
       y: geometry.y,
       width: geometry.width,
       height: geometry.height,
+      ...rounded,
       fill: paint.fill,
       ...(stickyShadowFilterId && insideViewBox
         ? { filter: `url(#${stickyShadowFilterId})` }
@@ -537,6 +565,7 @@ function renderStickyBody(
       y: geometry.y,
       width: geometry.width,
       height: geometry.height,
+      ...rounded,
       fill: paint.fill,
     }),
   ];
@@ -548,22 +577,15 @@ function renderStickyBody(
         y: geometry.y + inset,
         width: Math.max(0, geometry.width - CARD_STICKY_BORDER_WIDTH_PX),
         height: Math.max(0, geometry.height - CARD_STICKY_BORDER_WIDTH_PX),
+        ...(radius > 0 ? { rx: Math.max(0, radius - inset) } : null),
         fill: "none",
         stroke: paint.border,
         "stroke-width": CARD_STICKY_BORDER_WIDTH_PX,
       }),
     );
   }
-  if (paint.rule) {
-    parts.push(
-      tag("rect", {
-        x: geometry.x,
-        y: geometry.y,
-        width: Math.min(CARD_STICKY_RULE_WIDTH_PX, geometry.width),
-        height: geometry.height,
-        fill: paint.rule,
-      }),
-    );
+  if (paint.rule && canvasStyle.stickyRuleWidthPx > 0) {
+    parts.push(tag("path", { d: leftRulePath(geometry, canvasStyle.stickyRuleWidthPx, radius), fill: paint.rule }));
   }
   return parts.join("");
 }
@@ -573,7 +595,7 @@ const STICKY_CODE_CHIP_HEIGHT_EM = 1.3;
 
 /**
  * Sticky body text as its markdown line stack: per-line font size/weight,
- * bullet glyph columns, depth indentation and 36px line pitch mirroring the
+ * bullet glyph columns, depth indentation and the style's line pitch mirroring the
  * live StickyMarkdown layout, each line wrapped as its mixed inline runs
  * (render/sticky-text.ts). Rows beyond the slot's height clamp are dropped
  * and the last visible row ellipsized — the same overflow the live
@@ -595,8 +617,9 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
   if (rect.width <= 0 || rect.height <= 0) return "";
   const typography = resolved.typography;
 
-  const rows = layoutStickyText(object.text, rect.width, typography.fontSizePx);
-  const maxRows = Math.max(1, Math.floor(rect.height / STICKY_LINE_PITCH_PX));
+  const rows = layoutStickyText(object.text, rect.width, typography.fontSizePx, canvasStyle.stickyHeadingScale);
+  const pitch = slotLineHeightPx(typography);
+  const maxRows = Math.max(1, Math.floor(rect.height / pitch));
   const clamped = rows.slice(0, maxRows);
   if (rows.length > maxRows && clamped.length > 0) {
     ellipsizeStickyRow(clamped[clamped.length - 1]!, rect.width);
@@ -607,7 +630,7 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
   // Pre-wrap: repeated spaces paint, which SVG keeps only under xml:space="preserve".
   let preserveSpaces = false;
   clamped.forEach((row, rowIndex) => {
-    const centerY = rect.y + rowIndex * STICKY_LINE_PITCH_PX + STICKY_LINE_PITCH_PX / 2;
+    const centerY = rect.y + rowIndex * pitch + pitch / 2;
     if (row.bullet) {
       tspans.push(
         tag(

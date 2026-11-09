@@ -393,6 +393,7 @@ export function resolveSlotTypography(
   let color: string;
   let fontWeight = base.fontWeight;
   let fontSizePx = base.fontSizePx;
+  let lineHeight = base.lineHeight;
   if (base === SHAPE_TEXT_TYPOGRAPHY) {
     const pick = object.color ?? FIRST_USE_COLORS.shape;
     color =
@@ -403,12 +404,17 @@ export function resolveSlotTypography(
     fontSizePx = canvasStyle.textFontSizePx;
   } else if (base === INSET_BODY_TEXT_SLOT.typography) {
     color = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).text;
+    fontSizePx = canvasStyle.stickyFontSizePx;
+    lineHeight = `${canvasStyle.stickyLineHeightPx}px`;
   } else {
     return base;
   }
-  return color === base.color && fontWeight === base.fontWeight && fontSizePx === base.fontSizePx
+  return color === base.color &&
+    fontWeight === base.fontWeight &&
+    fontSizePx === base.fontSizePx &&
+    lineHeight === base.lineHeight
     ? base
-    : { ...base, color, fontWeight, fontSizePx };
+    : { ...base, color, fontWeight, fontSizePx, lineHeight };
 }
 
 /**
@@ -494,8 +500,17 @@ export function belowTextSlot(options?: { compactBelowHeightPx?: number }): Text
 
 export const BELOW_TEXT_SLOT: TextSlot = belowTextSlot();
 
-/** Sticky body inset (px) — FigJam-sampled (STICKY text inset left/top). */
-export const INSET_BODY_PADDING_PX = { left: 21, top: 28, right: 21, bottom: 21 } as const;
+/** Sticky body inset (px) under the style's note padding tokens (figjam: the FigJam-sampled 21 / 28 / 21 / 21). */
+export function insetBodyPaddingPx(
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): { left: number; top: number; right: number; bottom: number } {
+  return {
+    left: canvasStyle.stickyPaddingXPx,
+    top: canvasStyle.stickyPaddingTopPx,
+    right: canvasStyle.stickyPaddingXPx,
+    bottom: canvasStyle.stickyPaddingBottomPx,
+  };
+}
 
 /**
  * Paper sticky body text: the text color at this opacity (mirrors
@@ -503,7 +518,12 @@ export const INSET_BODY_PADDING_PX = { left: 21, top: 28, right: 21, bottom: 21 
  */
 const INSET_BODY_TEXT_OPACITY = 0.8;
 
-/** "inset-body" — padded multi-line body area (sticky). Renders simple markdown at rest (D18). */
+/**
+ * "inset-body" — padded multi-line body area (sticky). Renders simple markdown
+ * at rest (D18). The size and line height here are the figjam preset's; the
+ * style's sticky tokens replace them (resolveSlotTypography), and its padding
+ * tokens place the rect (insetBodyPaddingPx).
+ */
 export const INSET_BODY_TEXT_SLOT: TextSlot = {
   placement: "inset-body",
   typography: {
@@ -597,11 +617,12 @@ export function resolveTextSlot(
       heightPx: Math.max(1, band.lines) * slotLineHeightPx(typography) + detailReserve,
     });
   } else if (slot.placement === "inset-body") {
+    const padding = insetBodyPaddingPx(canvasStyle);
     rect = {
-      x: INSET_BODY_PADDING_PX.left,
-      y: INSET_BODY_PADDING_PX.top,
-      width: Math.max(0, width - INSET_BODY_PADDING_PX.left - INSET_BODY_PADDING_PX.right),
-      height: Math.max(0, height - INSET_BODY_PADDING_PX.top - INSET_BODY_PADDING_PX.bottom),
+      x: padding.left,
+      y: padding.top,
+      width: Math.max(0, width - padding.left - padding.right),
+      height: Math.max(0, height - padding.top - padding.bottom),
     };
   } else {
     // title-chip: the section header chip's painted box (objects/section/

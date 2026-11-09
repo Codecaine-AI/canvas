@@ -21,7 +21,7 @@
  *                        the stage's slot CSS), the name's clamp shortened by
  *                        the detail line's reserve (`slotNameLineCapacity`)
  *   - detail lines      `ellipsizeDetailText` (the stage's nowrap ellipsis)
- *   - sticky bodies     `layoutStickyText` + `STICKY_LINE_PITCH_PX`
+ *   - sticky bodies     `layoutStickyText` + the style's `stickyLineHeightPx`
  *   - section titles    `titleChipLayout` + `titleChipMaxWidthPx` (the chip
  *                        as the workspace style draws it: header font, icon,
  *                        detail, border — the one measured layout the
@@ -70,7 +70,6 @@ import {
 } from "../render/static-svg.ts";
 import {
   layoutStickyText,
-  STICKY_LINE_PITCH_PX,
   stickyTextUncovered,
 } from "../render/sticky-text.ts";
 import {
@@ -573,19 +572,20 @@ function shapeLabelReport(
 }
 
 // ---------------------------------------------------------------------------
-// Sticky bodies — markdown line boxes on the 36px pitch.
+// Sticky bodies — markdown line boxes on the style's note line pitch.
 // ---------------------------------------------------------------------------
 
 function stickyBodyReport(
   object: InteractiveCanvasObject,
   size: TextFitSize,
   text: string,
+  canvasStyle: CanvasStyle,
 ): TextFitReport {
   // Rows depend on the slot width only: a height search must not wrap the
   // same text again for every probe.
   const rowCache = new Map<string, number>();
   const measured = (width: number, height: number) => {
-    const resolved = resolveTextSlot(INSET_BODY_TEXT_SLOT, probe(object, width, height, text));
+    const resolved = resolveTextSlot(INSET_BODY_TEXT_SLOT, probe(object, width, height, text), 1, { canvasStyle });
     const { rect, typography } = resolved;
     // A slot with no width holds no row at all.
     const rowsAt = (slotWidth: number): number => {
@@ -593,12 +593,12 @@ function stickyBodyReport(
       const key = `${slotWidth}|${typography.fontSizePx}`;
       let rows = rowCache.get(key);
       if (rows === undefined) {
-        rows = layoutStickyText(text, slotWidth, typography.fontSizePx).length;
+        rows = layoutStickyText(text, slotWidth, typography.fontSizePx, canvasStyle.stickyHeadingScale).length;
         rowCache.set(key, rows);
       }
       return rows;
     };
-    const capacity = rect.height > 0 ? Math.max(1, Math.floor(rect.height / STICKY_LINE_PITCH_PX)) : 0;
+    const capacity = rect.height > 0 ? Math.max(1, Math.floor(rect.height / slotLineHeightPx(typography))) : 0;
     return {
       resolved,
       rect,
@@ -895,6 +895,6 @@ function measuredReport(
     };
   }
   if (object.type === "section") return sectionTitleReport(object, size, text, canvasStyle);
-  if (effectiveRenderShape(object) === "note") return stickyBodyReport(object, size, text);
+  if (effectiveRenderShape(object) === "note") return stickyBodyReport(object, size, text, canvasStyle);
   return shapeLabelReport(object, size, text, canvasStyle);
 }

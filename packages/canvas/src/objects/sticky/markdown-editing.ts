@@ -121,6 +121,18 @@ export const STICKY_MARKDOWN_MONO_FONT = CANVAS_MONO_FONT_STACK;
 /** Inline `code` weight: Plex Mono Regular at every row weight. */
 export const STICKY_MARKDOWN_MONO_FONT_WEIGHT = 400;
 
+/** Full-scale heading sizes in em of the body size (H1 / H2 / H3). */
+const STICKY_HEADING_FULL_EM: Record<1 | 2 | 3, number> = { 1: 1.5, 2: 1.25, 3: 1.1 };
+
+/**
+ * A heading's font size in em of the note body size under the style's
+ * `stickyHeadingScale`: 1 = the full 1.5 / 1.25 / 1.1em scale, 0 = the body
+ * size. One function for the live note, its editor and the static layout.
+ */
+export function stickyHeadingEm(level: 1 | 2 | 3, scale: number): number {
+  return 1 + (STICKY_HEADING_FULL_EM[level] - 1) * scale;
+}
+
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }

@@ -458,8 +458,8 @@ function brandIconPaint(brandColor: string, style: CanvasStyle): IconTilePaint {
 
 /**
  * Sticky paint. `paper` (figjam): the sticky role-table fill, no border, a
- * shadow. `card`: cardFill, hairline border, a 2px left rule in the ink, no
- * shadow.
+ * shadow. `card`: cardFill, hairline border, a left rule in the ink
+ * (stickyRuleWidthPx), no shadow.
  */
 export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
   return cachedPaint(style, `sticky|${color}`, () => stickyPaint(color, style));
