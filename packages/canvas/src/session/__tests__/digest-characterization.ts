@@ -98,7 +98,8 @@ export const DIAGNOSTICS_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
   "perception-labeled-gap": CLEAN,
   "perception-single": CLEAN,
   "perception-object-delta": CLEAN,
-  "perception-membership": CLEAN,
+  "perception-membership": `DIAGNOSTICS · 1 error · 0 warnings
+  E1 integrity: section-b shares gray with its sibling section section-a: adjacent sibling sections must differ in color (change_color section-b to another color, such as blue)`,
   "perception-connections": CLEAN,
   "perception-clean-pair": CLEAN,
   "perception-two-overlaps": `DIAGNOSTICS · 2 errors · 0 warnings

@@ -1,6 +1,6 @@
 /**
- * A nested section never shares its parent section's color, so the hierarchy
- * reads (board/section-colors.ts). The tools prevent the break — place_section
+ * A section never shares its parent section's color, nor a sibling's, so the
+ * hierarchy and the group edges read (board/section-colors.ts). The tools prevent the break — place_section
  * picks a hue its parent does not paint, and every edit that would nest a
  * section in its own color is refused — and the integrity lint reports one a
  * Studio edit or an older file left behind. Two sections look alike when
@@ -11,7 +11,7 @@ import { describe, expect, test } from "bun:test";
 
 import { FINISHING_RULES } from "../../board/lints";
 import { runDiagnostics } from "../../board/lints/run";
-import { sameHueNests, sectionHue } from "../../board/section-colors";
+import { pickSectionColor, sameHueNests, sectionHue, siblingClashes, withPlacedSectionColor } from "../../board/section-colors";
 import { PAGE_FRAME_ID } from "../../board/page-frame";
 import type { CanvasColor } from "../../state/schema/colors";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
@@ -33,13 +33,13 @@ function section(
   return { ...box(id, x, y, width, height, "section"), color, parentId };
 }
 
-/** A white page holding a gray pack, which holds a blue rounds frame. */
+/** A white page holding a gray pack (which holds a blue rounds frame) and a teal outside frame. */
 function board(): InteractiveCanvasDocument {
   return makeDocument([
     section("page", [0, 0, 2400, 1600], "white", null),
     section("pack", [40, 40, 1500, 1400], "gray", "page"),
     section("rounds", [80, 120, 1000, 700], "blue", "pack"),
-    section("outside", [1600, 40, 600, 400], "gray", "page"),
+    section("outside", [1600, 40, 600, 400], "teal", "page"),
   ]);
 }
 
@@ -73,17 +73,17 @@ describe("place_section picks a color when the call names none", () => {
     const session = makeTestSession(board(), ["page"]);
     runOp(session, "place_section", { id: "first", text: "First", at: [1600, 600], size: { width: 300, height: 200 } });
     runOp(session, "place_section", { id: "second", text: "Second", at: [1600, 1000], size: { width: 300, height: 200 } });
-    // Siblings on the page: pack and outside are gray.
+    // Siblings on the page: pack is gray and outside teal.
     expect(colorOf(session, "first")).toBe("blue");
-    expect(colorOf(session, "second")).toBe("teal");
+    expect(colorOf(session, "second")).toBe("violet");
   });
 
   test("a frame drawn around a section never takes that section's color", () => {
     const session = makeTestSession(board(), ["page"]);
     runOp(session, "place_section", { id: "wrap", text: "Wrap", at: [1580, 20], size: { width: 640, height: 460 } });
     expect(session.draft.objects.find((object) => object.id === "outside")?.parentId).toBe("wrap");
-    // Not gray (outside, inside it), and not blue (its parent page is white, so blue is just the next free hue).
-    expect(colorOf(session, "wrap")).not.toBe("gray");
+    // Not teal (outside, inside it), and not gray (pack, its sibling on the page).
+    expect(colorOf(session, "wrap")).toBe("blue");
   });
 });
 
@@ -105,7 +105,9 @@ describe("an edit that nests a section in its own color is refused", () => {
   });
 
   test("a move that reparents a section into a parent of its color is refused", () => {
-    const session = makeTestSession(board(), ["page"]);
+    const doc = board();
+    doc.objects[3] = { ...doc.objects[3]!, color: "gray" };
+    const session = makeTestSession(doc, ["page"]);
     const before = session.draft;
     // outside (gray, 600×400) dropped inside pack (gray) clear of rounds.
     const result = runOp(session, "move_to", { id: "outside", x: 120, y: 900 });
@@ -180,7 +182,9 @@ describe("integrity reports a stored same-color nest", () => {
   test("a second root never changes which nests count", () => {
     const stored = board();
     stored.objects[0] = { ...stored.objects[0]!, color: "gray" };
-    const nests = [["pack", "page"], ["outside", "page"]];
+    stored.objects[3] = { ...stored.objects[3]!, color: "gray" };
+    // pack and outside also share gray as siblings: one sibling finding beside the two nests.
+    const nests = [["pack", "page"], ["outside", "page"], ["outside", "pack"]];
     expect(integrity(stored).map((finding) => finding.at)).toEqual(nests);
     stored.objects.push(section("other", [3000, 0, 400, 400], "white", null));
     expect(integrity(stored).map((finding) => finding.at)).toEqual(nests);
@@ -227,7 +231,8 @@ describe("sections that paint one fill look alike, whatever their names", () => 
   test("blue in gray is a nest when both paint one fill, and the report names the fill", () => {
     expect(integrity(board())).toEqual([]);
     const findings = integrity(board(), flatTint);
-    expect(findings.map((finding) => finding.at)).toEqual([["rounds", "pack"]]);
+    // pack (gray) and outside (teal) paint one fill too, and they face each other across the page.
+    expect(findings.map((finding) => finding.at)).toEqual([["rounds", "pack"], ["outside", "pack"]]);
     expect(findings[0]!.message).toBe("rounds shares one fill (blue in gray) with its parent section pack: nested levels must differ in color");
     // The suggestion paints apart: white is the one fill left at zero tint.
     expect(findings[0]!.suggestion).toBe("change_color rounds to another color, such as white");
@@ -238,7 +243,8 @@ describe("sections that paint one fill look alike, whatever their names", () => 
     doc.objects[2] = { ...doc.objects[2]!, color: "white" };
     const session = makeTestSession(doc, ["page"]);
     const result = findOperationTool("place_section")!.execute(
-      { id: "lenses", text: "Lenses", at: [100, 880], size: { width: 400, height: 120 } },
+      // Clear of rounds' row and column: white repeats rounds' fill, the one left, so it must not face it.
+      { id: "lenses", text: "Lenses", at: [1120, 880], size: { width: 360, height: 120 } },
       { currentSession: () => session, context: (draft) => createOpContext(draft, flatTint), emit: emitSessionEvent },
     );
     expect(result.isError).toBeUndefined();
@@ -253,5 +259,103 @@ describe("sections that paint one fill look alike, whatever their names", () => 
     const stored = board();
     stored.objects[2] = { ...stored.objects[2]!, color: "gray" };
     expect(integrity(stored, canvasThemePreset("schematic-light")).map((finding) => finding.at)).toEqual([["rounds", "pack"]]);
+  });
+});
+
+describe("sibling sections never share a look", () => {
+  test("a nested section placed with no color avoids its parent's and its siblings' colors", () => {
+    const session = makeTestSession(board(), ["page"]);
+    runOp(session, "place_section", { id: "lenses", text: "Lenses", at: [100, 880], size: { width: 400, height: 120 } });
+    expect(session.draft.objects.find((object) => object.id === "lenses")?.parentId).toBe("pack");
+    // Not gray (pack, its parent) and not blue (rounds, its sibling).
+    expect(colorOf(session, "lenses")).toBe("teal");
+  });
+
+  test("a recolor into a sibling's color is refused, naming the sibling", () => {
+    const session = makeTestSession(board(), ["page"]);
+    const before = session.draft;
+    const result = runOp(session, "change_color", { id: "outside", color: "gray" });
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("refused: sibling sections never share a color");
+    expect(result.text).toContain("outside would share gray with its sibling section pack — give outside another color, such as blue");
+    expect(session.draft).toBe(before);
+  });
+
+  test("integrity reports a stored sibling clash on the later section, with a color that reads apart", () => {
+    const stored = board();
+    stored.objects[3] = { ...stored.objects[3]!, color: "gray" };
+    const findings = integrity(stored);
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({ severity: "error", at: ["outside", "pack"] });
+    expect(findings[0]!.message).toBe("outside shares gray with its sibling section pack: adjacent sibling sections must differ in color");
+    expect(findings[0]!.suggestion).toBe("change_color outside to another color, such as blue");
+  });
+
+  test("top-level sections are siblings under the page frame and under a parentless white page alike", () => {
+    const framed = makeDocument([
+      section(PAGE_FRAME_ID, [0, 0, 2000, 1200], "white", null),
+      section("a", [40, 40, 400, 300], "violet", PAGE_FRAME_ID),
+      section("b", [1200, 800, 400, 300], "violet", PAGE_FRAME_ID),
+    ]);
+    // Far apart and diagonal, but a free color exists, so the repeat is a clash.
+    expect(integrity(framed).map((finding) => finding.at)).toEqual([["b", "a"]]);
+  });
+
+  test("a section copy beside its source takes another color and says so", () => {
+    const session = makeTestSession(board(), ["page"]);
+    const result = runOp(session, "clone", { sourceId: "outside", id: "outside-2", at: [1600, 600] });
+    expect(result.isError).toBeUndefined();
+    // Siblings on the page: pack gray, outside teal.
+    expect(colorOf(session, "outside-2")).toBe("blue");
+    expect(result.text).toContain("the copy takes blue: teal would match its parent or a sibling section");
+  });
+
+  test("Studio's last-picked color loses to a sibling that paints it", () => {
+    const style = canvasThemePreset("schematic-light");
+    const action = { type: "canvas.addObject", objectType: "section", geometry: { x: 1600, y: 600, width: 400, height: 300 } } as const;
+    const placed = withPlacedSectionColor(board(), action as never, style, "teal");
+    expect((placed as { color?: CanvasColor }).color).toBe("blue");
+  });
+});
+
+describe("when the palette runs out, a sibling repeat never faces its twin", () => {
+  /** Nine top-level sections in a row, one per hue the chooser picks from. */
+  const HUES: CanvasColor[] = ["gray", "blue", "teal", "violet", "green", "orange", "yellow", "pink", "red"];
+  function fullRow(): InteractiveCanvasDocument {
+    return makeDocument([
+      section("page", [0, 0, 3200, 2600], "white", null),
+      ...HUES.map((hue, index) => section(`s${index}`, [40 + index * 340, 40, 280, 200], hue, "page")),
+    ]);
+  }
+
+  test("place_section repeats the color of the farthest sibling, one it does not face", () => {
+    const session = makeTestSession(fullRow(), ["page"]);
+    // Directly under s0 (gray): gray would face its twin; red (s8) sits farthest.
+    const result = runOp(session, "place_section", { id: "extra", text: "Extra", at: [40, 2000], size: { width: 280, height: 200 } });
+    expect(result.isError).toBeUndefined();
+    expect(colorOf(session, "extra")).toBe("red");
+    expect(siblingClashes(session.draft, canvasThemePreset("schematic-light"))).toEqual([]);
+  });
+
+  test("a repeat that faces its twin across a column is reported and refused", () => {
+    const doc = fullRow();
+    doc.objects.push(section("extra", [40, 2000, 280, 200], "gray", "page"));
+    const findings = integrity(doc);
+    expect(findings.map((finding) => finding.at)).toEqual([["extra", "s0"]]);
+    expect(findings[0]!.message).toContain("adjacent sibling sections must differ in color");
+    expect(findings[0]!.suggestion).toBe("change_color extra to another color, such as red");
+    // A sibling between them breaks the adjacency: the repeat is allowed.
+    doc.objects.push(section("between", [40, 1000, 280, 200], "blue", "page"));
+    expect(pickSectionColor(doc, "extra", canvasThemePreset("schematic-light"))).not.toBe("gray");
+  });
+
+  test("recoloring a far repeat into a facing one is refused", () => {
+    const doc = fullRow();
+    doc.objects.push(section("extra", [40, 2000, 280, 200], "red", "page"));
+    expect(integrity(doc)).toEqual([]);
+    const session = makeTestSession(doc, ["page"]);
+    const result = runOp(session, "change_color", { id: "extra", color: "gray" });
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("extra would share gray with its sibling section s0");
   });
 });

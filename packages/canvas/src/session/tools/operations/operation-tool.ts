@@ -12,7 +12,7 @@ import { fittedNoteParents, growSectionsToChildren, reconcileHolding, sectionOve
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
 import { newBrokenWires } from "../../../board/wire-integrity";
-import { sameHueNests, sharedLook } from "../../../board/section-colors";
+import { sameHueNests, sharedLook, sharedSiblingLook, siblingClashes } from "../../../board/section-colors";
 import type { LayoutToolRenderResult } from "../runtime";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { OpContext, OpOutcome } from "./op-context";
@@ -209,21 +209,32 @@ export function runOperation<TFields extends OperationFields>(
       details,
     };
   }
-  // No edit may nest a section in a parent section of its own color (a
-  // recolor, a move into the parent, a placement): the hierarchy would stop
-  // reading. Nests the board already had before this edit do not block it;
-  // the integrity lint reports those.
+  // No edit may nest a section in a parent section of its own color, or give
+  // it a sibling's color (a recolor, a move, a placement): the hierarchy and
+  // the group edges would stop reading. Clashes the board already had before
+  // this edit do not block it; the integrity lint reports those.
   const nestKey = (nest: { section: string; parent: string }) => `${nest.section}>${nest.parent}`;
   const hadNests = new Set(sameHueNests(reconciledBefore, ctx.canvasStyle).map(nestKey));
   const newNests = sameHueNests(next, ctx.canvasStyle).filter((nest) => !hadNests.has(nestKey(nest)));
-  if (newNests.length > 0) {
+  const clashKey = (clash: { section: string; sibling: string }) => [clash.section, clash.sibling].sort().join("~");
+  const hadClashes = new Set(siblingClashes(reconciledBefore, ctx.canvasStyle).map(clashKey));
+  const newClashes = siblingClashes(next, ctx.canvasStyle).filter((clash) => !hadClashes.has(clashKey(clash)));
+  if (newNests.length > 0 || newClashes.length > 0) {
+    const rule = newClashes.length === 0
+      ? "a nested section never shares its parent's color"
+      : newNests.length === 0
+        ? "sibling sections never share a color"
+        : "a section never shares its parent's or a sibling's color";
     return {
       isError: true,
       text: [
-        `ERROR · ${spec.name} — refused: a nested section never shares its parent's color, so nothing changed`,
+        `ERROR · ${spec.name} — refused: ${rule}, so nothing changed`,
         ...newNests.map((nest) =>
           `  - ${nest.section} would share ${sharedLook(nest)} with its parent section ${nest.parent}`
           + ` — give ${nest.section} another color, such as ${nest.suggestion}`),
+        ...newClashes.map((clash) =>
+          `  - ${clash.section} would share ${sharedSiblingLook(clash)} with its sibling section ${clash.sibling}`
+          + ` — give ${clash.section} another color, such as ${clash.suggestion}`),
       ].join("\n"),
       details,
     };
