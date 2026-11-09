@@ -65,17 +65,19 @@ describe("place_section — title and header glyph in one gesture", () => {
     expect(findOperationTool("place_section")!.parameters.properties).not.toHaveProperty("detail");
   });
 
-  test("takes a color in the same call, and stays the default gray without one", () => {
+  test("takes a color in the same call, and picks one without", () => {
     const session = makeTestSession(board(), ["frame"]);
 
     const colored = runOp(session, "place_section", { id: "data", text: "Data", at: [1000, 0], color: "teal" });
-    runOp(session, "place_section", { id: "plain", text: "Plain", at: [1000, 400] });
+    const plain = runOp(session, "place_section", { id: "plain", text: "Plain", at: [1000, 400] });
 
     expect(colored.isError).toBeUndefined();
     expect(colored.text).toContain("APPLIED · place_section data 1000,0");
     expect(colored.text).toContain(" teal");
     expect(objectOf(session, "data").color).toBe("teal");
-    expect(objectOf(session, "plain").color).toBe("gray");
+    // Its top-level siblings paint gray (frame) and teal (data): the first free hue, named in the summary.
+    expect(objectOf(session, "plain").color).toBe("blue");
+    expect(plain.text).toContain("APPLIED · place_section plain 1000,400 480×360 blue");
   });
 
   test("the color field is the board's closed roster", () => {

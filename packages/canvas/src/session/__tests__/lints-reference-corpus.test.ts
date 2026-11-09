@@ -18,11 +18,13 @@ const CORPUS_DIR = join(import.meta.dir, "..", "..", "..", "..", "..", "canvases
  * Re-measured when the lints were cut to overlap only (covered-content):
  * no reference board has a box on a box or a section on a section. Then
  * integrity was added: bubba-voice's rect-prompt-code holds 34 wrapped
- * lines in a box with room for 29, saved before nodes auto-sized.
+ * lines in a box with room for 29, saved before nodes auto-sized. Then
+ * integrity began reporting a section in its parent's color: bubba-voice's
+ * gray section-ml-completed-sent sits in the gray section-ml-session-tasks.
  */
 const CEILING: Record<string, number> = {
   "agent-flows-2": 0,
-  "bubba-voice": 1,
+  "bubba-voice": 2,
   "claude-code-researcher": 0,
   "gc-decomp-harness": 0,
   "ink-diagrams": 0,
@@ -31,7 +33,7 @@ const CEILING: Record<string, number> = {
   "v2-flow": 0,
 };
 
-const TOTAL_CEILING = 1;
+const TOTAL_CEILING = 2;
 
 function corpus(): { name: string; document: InteractiveCanvasDocument }[] {
   return readdirSync(CORPUS_DIR)

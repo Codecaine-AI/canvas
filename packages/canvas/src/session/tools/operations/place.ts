@@ -40,6 +40,9 @@
  */
 import type { InteractiveCanvasObject } from "../../../state/schema";
 import { sectionDescendantIds } from "../../../state/geometry";
+import type { CanvasColor } from "../../../state/schema/colors";
+import { reconcileSectionMembership } from "../../../state/section-membership";
+import { pickSectionColor } from "../../../board/section-colors";
 import { draftPlacedObject } from "../../../state/schema/object-defaults";
 
 import { creationDefaultFor } from "../creation-defaults";
@@ -91,7 +94,9 @@ export const placeSection = defineOperationTool({
     + "from geometry, so the frame adopts whatever its edges already cover, and "
     + "it keeps the footprint it lands with until something fits, arranges or "
     + "resizes it. Undrawn size takes the default section footprint. The header "
-    + "shows the optional icon and the title.",
+    + "shows the optional icon and the title. Without a color it takes a hue its "
+    + "parent section does not paint (and, at the top level, one its sibling "
+    + "sections do not); a nested section never shares its parent's color.",
   fields: PlaceSectionParams.properties,
   validate: (ctx, p) => [
     ...ctx.requireFreeId(p.id),
@@ -107,18 +112,27 @@ export const placeSection = defineOperationTool({
     const defaults = creationDefaultFor("section");
     const size = snapSize(p.size ?? defaults.size);
     const geometry = { x, y, width: size.width, height: size.height };
-    return ctx.applyLowered(
+    const lower = (color: CanvasColor, summary: string) => ctx.applyLowered(
       {
         type: "addObject",
         object: draftPlacedObject("section", geometry, {
           id: p.id,
           text: p.text,
-          color: p.color ?? defaults.color,
+          color,
           ...(p.icon !== undefined && isGlyphName(p.icon) ? { icon: p.icon } : {}),
         }),
       },
-      `place_section ${p.id} ${placement(geometry)}${p.color ? ` ${p.color}` : ""}`,
+      summary,
     );
+    const at = `place_section ${p.id} ${placement(geometry)}`;
+    if (p.color) return lower(p.color, `${at} ${p.color}`);
+    // No color named: place it, read the parent and the sections it adopts
+    // from the reconciled tree, and pick a hue none of them (nor, at the top
+    // level, its siblings) paints, so the hierarchy reads.
+    const probe = lower(defaults.color, at);
+    if (probe.status !== "applied") return probe;
+    const color = pickSectionColor(reconcileSectionMembership(probe.draft), p.id, ctx.canvasStyle);
+    return lower(color, `${at} ${color}`);
   },
 });
 

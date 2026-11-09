@@ -12,6 +12,7 @@ import { growSectionsToChildren, sectionOverflow } from "../../../state/section-
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
 import { newBrokenWires } from "../../../board/wire-integrity";
+import { otherSectionColor, sameHueNests } from "../../../board/section-colors";
 import type { LayoutToolRenderResult } from "../runtime";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { OpContext, OpOutcome } from "./op-context";
@@ -203,6 +204,25 @@ export function runOperation<TFields extends OperationFields>(
         `ERROR · ${spec.name} — refused: it would break ${broken.length === 1 ? "a wire" : `${broken.length} wires`}, so nothing changed`,
         ...broken.map((wire) => `  - ${wire.text}`),
         "  Move or size the boxes so each wire's ends stay apart, or delete the wire first.",
+      ].join("\n"),
+      details,
+    };
+  }
+  // No edit may nest a section in a parent section of its own color (a
+  // recolor, a move into the parent, a placement): the hierarchy would stop
+  // reading. Nests the board already had before this edit do not block it;
+  // the integrity lint reports those.
+  const nestKey = (nest: { section: string; parent: string }) => `${nest.section}>${nest.parent}`;
+  const hadNests = new Set(sameHueNests(reconciledBefore, ctx.canvasStyle).map(nestKey));
+  const newNests = sameHueNests(next, ctx.canvasStyle).filter((nest) => !hadNests.has(nestKey(nest)));
+  if (newNests.length > 0) {
+    return {
+      isError: true,
+      text: [
+        `ERROR · ${spec.name} — refused: a nested section never shares its parent's color, so nothing changed`,
+        ...newNests.map((nest) =>
+          `  - ${nest.section} would share ${nest.parentColor} with its parent section ${nest.parent}`
+          + ` — give ${nest.section} another color, such as ${otherSectionColor(nest.parentColor)}`),
       ].join("\n"),
       details,
     };
