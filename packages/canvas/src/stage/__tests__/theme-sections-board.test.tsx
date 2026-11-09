@@ -230,8 +230,8 @@ describe("in-place section title editor", () => {
     expect(input.style.fontFamily).toContain("IBM Plex Mono");
     expect(input.style.textTransform).toBe("uppercase");
     // The chip fill at its depth — the same color the static chip paints.
-    expect(input.style.background).toBe("#BED8D5");
-    expect(staticSvg("schematic-light")).toContain('fill="#BED8D5"/>');
+    expect(input.style.background).toBe("#CEE2DF");
+    expect(staticSvg("schematic-light")).toContain('fill="#CEE2DF"/>');
   });
 
   it("floating (figjam): the original inset chip editor", () => {

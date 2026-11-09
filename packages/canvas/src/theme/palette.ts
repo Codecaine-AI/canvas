@@ -351,14 +351,14 @@ function lightnessMatchedMix(source: string, base: string, lightness: number): s
   return mixColors(source, base, (low + high) / 2);
 }
 
-/** The fill an `ink-card` node of `color` paints (the card itself for neutral picks and other shape modes). */
+/** The fill an `ink-card` node of `color` paints (the card itself in other shape modes). */
 function shapeFillBase(color: CanvasColor, style: CanvasStyle): string {
-  if (style.shapeFill !== "ink-card" || NEUTRAL_SHAPE_COLORS.has(color)) return style.cardFill;
-  return withLightnessChroma(
-    paletteColor(color, style),
-    oklabLightness(style.cardFill) - SHAPE_CARD_LIGHTNESS_DROP,
-    SHAPE_CARD_CHROMA,
-  );
+  if (style.shapeFill !== "ink-card") return style.cardFill;
+  if (color === "white") return style.boardBackground;
+  const lightness = oklabLightness(style.cardFill) - SHAPE_CARD_LIGHTNESS_DROP;
+  // Gray's ink is a near-neutral whose faint hue a chroma target would blow up: gray takes the neutral.
+  if (color === "gray") return withLightnessChroma(style.cardFill, lightness, 0);
+  return withLightnessChroma(paletteColor(color, style), lightness, SHAPE_CARD_CHROMA);
 }
 
 /** Light vs dark theme, judged by the board surface. */
@@ -375,30 +375,31 @@ function readableOn(text: string, background: string): string {
 
 /**
  * An `ink-card` node fill is set in OKLCH, not mixed: the anchor's hue at the
- * card's lightness less SHAPE_CARD_LIGHTNESS_DROP, at SHAPE_CARD_CHROMA. A
- * mix of a dark text-step ink gains chroma only by darkening, and a node must
- * stay lighter than every section level (the figure on its ground): at the
- * 0.08 mix nodes sat at chroma 0.008 to 0.015, green and teal 0.003 apart
- * (OKLab), and judges read them as white boxes whose kind only the 2px border
- * named (UI climb round 2). Now every hue takes one chroma at one lightness
- * (OKLab L 0.944; chroma 0.04, cut to 0.032 for blue and violet, where sRGB
- * holds no more): kind pairs stand 0.049 apart on average (0.021 before), and
- * a node stays at least 0.03 L above every section level.
- * Picked over a 0.14 mix (a pink node fell below a yellow section, green and
- * teal stayed 0.007 apart) and over L 0.959 (red and violet capped at 0.02).
+ * card's lightness less SHAPE_CARD_LIGHTNESS_DROP (OKLab L 0.859), at
+ * SHAPE_CARD_CHROMA; gray takes the neutral there (#D0D0D0) and white the
+ * board surface. A node is the figure and its section the ground: the node is
+ * the darker, more colorful field, and every section level is a pale tint
+ * above it (L 0.95 to 0.96 at top level, about 0.91 at the deepest).
+ *
+ * Round 3 put nodes at L 0.944, chroma 0.04, just above sections at L 0.89 to
+ * 0.91, so a node and a section of one hue stood 0.03 to 0.05 apart and Ford
+ * read them as one color (UI climb, after round 2: "items / objects having
+ * the same color as the background are still causing readability issues").
+ * Now a hued or gray node stands at least 0.049 L and 0.059 OKLab from any
+ * section it can sit in, and 0.069 from a section of its own hue.
+ *
+ * Picked over white node cards with a colored stroke, which named the kind by
+ * the 2px border alone (round 2's complaint), and over sections at L 0.965,
+ * which faded into the page.
  */
-const SHAPE_CARD_LIGHTNESS_DROP = 0.035;
+const SHAPE_CARD_LIGHTNESS_DROP = 0.12;
 /** OKLCH chroma of an `ink-card` node fill (cut back where sRGB holds less at that lightness). */
-const SHAPE_CARD_CHROMA = 0.04;
-
-/** Colors whose `ink-card` shape stays the plain card: their ink is a neutral, so a mix would only gray the card. */
-const NEUTRAL_SHAPE_COLORS: ReadonlySet<CanvasColor> = new Set(["gray", "white"]);
-
+const SHAPE_CARD_CHROMA = 0.08;
 /**
  * Shape fill / border / text. `tint`: the pastel role-table fill with an ink
  * border (figjam). `card`: fill = cardFill, border = ink, text = textColor.
- * `ink-card`: fill = the anchor hue in OKLCH (shapeFillBase), border = ink,
- * text = textColor kept at 4.5:1; gray and white keep the `card` paint.
+ * `ink-card`: fill = the anchor hue in OKLCH (shapeFillBase; gray a neutral,
+ * white the board), border = ink, text = textColor kept at 4.5:1.
  */
 export function resolveShapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
   return cachedPaint(style, `shape|${color}`, () => shapePaint(color, style));
@@ -406,7 +407,7 @@ export function resolveShapePaint(color: CanvasColor, style: CanvasStyle): Shape
 
 function shapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
   const border = resolveInk(color, style);
-  if (style.shapeFill === "card" || (style.shapeFill === "ink-card" && NEUTRAL_SHAPE_COLORS.has(color))) {
+  if (style.shapeFill === "card") {
     return { fill: style.cardFill, border, text: style.textColor };
   }
   if (style.shapeFill === "ink-card") {
@@ -813,30 +814,27 @@ function layerCakeFill(color: CanvasColor, depth: number, style: CanvasStyle): s
 
 /**
  * Most OKLCH chroma a top-level layer-cake section fill keeps beside
- * `ink-card` nodes: half the node chroma. Deeper levels may grow with their
- * ink weight (sectionChromaCapped), as a mix's chroma does, so a nested level
- * still steps off its parent when both would sit at the cap. A section is ground and its nodes the figure, so a
- * big field must never be the most colorful thing in it. Uncapped, the
- * top-level yellow section painted chroma 0.076 (a butter field judges called
- * the loudest fill on board 12), pink 0.038 and red 0.036, and nested violet
- * and blue sections (0.032 to 0.037) outshone the icons inside them (boards
- * 02, 05, 14). The title chip and the frame still carry the full hue, and the
- * lightness is kept, so the node-over-section gap holds.
+ * `ink-card` nodes. Deeper levels may grow with their ink weight
+ * (sectionChromaCapped), as a mix's chroma does, so a nested level still
+ * steps off its parent when both would sit at the cap. A section is ground
+ * and its nodes the figure, so a big field must never be the most colorful
+ * thing in it: uncapped, a yellow field painted a butter judges called the
+ * loudest fill on board 12 (UI climb round 2). The title chip and the frame
+ * still carry the full hue, and the lightness is kept.
  */
-const SECTION_CHROMA_MAX = SHAPE_CARD_CHROMA / 2;
+const SECTION_CHROMA_MAX = 0.02;
 
 /**
  * Hues whose section cap differs. Yellow needs about twice the chroma to read
- * as its hue at section lightness (L 0.91): at 0.02 it is greige (#E7E1D3),
- * the khaki of UI climb round 0; at 0.04 a pale wheat (#EDE0C4), half its
- * uncapped 0.076.
+ * as its hue at section lightness: at 0.02 it is greige, the khaki of UI
+ * climb round 0.
  */
-const SECTION_CHROMA_MAX_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: SHAPE_CARD_CHROMA };
+const SECTION_CHROMA_MAX_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: 0.04 };
 
 /**
  * `fill` (a section level at ink `weight`) with its chroma cut, at the same
  * lightness and hue, to the cap for `color` scaled by `weight` over the
- * top-level weight: nested violet at 0.26 keeps 0.027 (0.037 uncapped).
+ * top-level weight.
  * Only beside `ink-card` nodes; other shape modes keep the fill.
  */
 function sectionChromaCapped(fill: string, color: CanvasColor, weight: number, style: CanvasStyle): string {

@@ -86,10 +86,10 @@ describe("renderDocumentToSvg canvasStyle", () => {
       canvasStyle: canvasThemePreset("schematic-light"),
     }).svg;
     expect(svg).toBe(schematic);
-    // Layer-cake section frame (1.5px border at half opacity) and a card shape with a 2px ink border,
+    // Layer-cake section frame (1.5px border at half opacity) and a gray node (the neutral at the node lightness) with a 2px ink border,
     // rounded at the process radius (rx = 12 − 1).
     expect(svg).toContain('stroke="rgba(102, 101, 98, 0.5)" stroke-width="1.5"');
-    expect(svg).toContain('rx="11" fill="#F8F8F7" stroke="#666562" stroke-width="2"');
+    expect(svg).toContain('rx="11" fill="#D0D0D0" stroke="#666562" stroke-width="2"');
     expect(svg).not.toBe(
       renderDocumentToSvg(styleFixture(), { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE }).svg,
     );

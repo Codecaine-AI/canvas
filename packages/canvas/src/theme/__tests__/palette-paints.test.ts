@@ -7,7 +7,17 @@
 import { describe, expect, it } from "bun:test";
 import { CANVAS_COLORS } from "../../state/schema/colors";
 import { FIGJAM_CANVAS_STYLE, canvasThemePreset } from "../canvas-style";
-import { contrastRatio, ensureContrast, mixColors, oklab, oklabChroma, oklabDistance, oklabLightness } from "../color-math";
+import {
+  contrastRatio,
+  ensureContrast,
+  formatHex,
+  mixColors,
+  oklab,
+  oklabChroma,
+  oklabDistance,
+  oklabLightness,
+  parseColor,
+} from "../color-math";
 import {
   resolveConnectorPaint,
   resolveConnectorStroke,
@@ -23,6 +33,14 @@ import {
 } from "../palette";
 
 const LIGHT = canvasThemePreset("schematic-light");
+
+/** An rgba() paint composited over an opaque fill, as the frame edge renders. */
+function overFill(paint: string, fill: string): string {
+  const top = parseColor(paint)!;
+  const base = parseColor(fill)!;
+  const mix = (a: number, b: number) => a * top.a + b * (1 - top.a);
+  return formatHex({ r: mix(top.r, base.r), g: mix(top.g, base.g), b: mix(top.b, base.b), a: 1 });
+}
 const DARK = canvasThemePreset("schematic-dark");
 
 describe("figjam paints equal the role tables", () => {
@@ -76,44 +94,50 @@ describe("figjam paints equal the role tables", () => {
 describe("layer-cake sections", () => {
   it("mixes the ink into the base by depth: t0, t0 + step, …, capped at tmax", () => {
     // The lightness is the mix's at t(d); the chroma is the mix's, cut to the section cap.
-    for (const [depth, weight] of [[1, 0.12], [2, 0.19], [3, 0.26], [4, 0.33], [9, 0.33]] as const) {
+    for (const [depth, weight] of [[1, 0.04], [2, 0.08], [3, 0.12], [4, 0.16], [9, 0.16]] as const) {
       const fill = resolveSectionPaint("teal", depth, LIGHT).fill;
       const mix = mixColors("#0D7164", "#FDFDFD", weight);
       expect(Math.abs(oklabLightness(fill) - oklabLightness(mix))).toBeLessThan(0.002);
       expect(oklabChroma(fill)).toBeLessThanOrEqual(oklabChroma(mix) + 0.001);
     }
-    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe("#CFE2E0");
+    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe("#EAF2F1");
   });
 
   it("light preset: a section never outweighs its nodes, at top level chroma 0.02 (yellow 0.04), growing with the ink weight", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
       const cap = color === "yellow" ? 0.04 : 0.02;
-      for (const [depth, weight] of [[2, 0.19], [3, 0.26], [4, 0.33]] as const) {
-        expect(oklabChroma(resolveSectionPaint(color, depth, LIGHT).fill)).toBeLessThanOrEqual((cap * weight) / 0.19 + 0.0015);
+      for (const [depth, weight] of [[2, 0.08], [3, 0.12], [4, 0.16]] as const) {
+        expect(oklabChroma(resolveSectionPaint(color, depth, LIGHT).fill)).toBeLessThanOrEqual((cap * weight) / 0.08 + 0.0015);
       }
       expect(oklabChroma(resolveSectionPaint(color, 2, LIGHT).fill)).toBeLessThanOrEqual(oklabChroma(resolveShapePaint(color, LIGHT).fill) + 0.001);
     }
-    // The butter field on board 12 (chroma 0.076) is now a pale wheat.
-    expect(resolveSectionPaint("yellow", 2, LIGHT).fill).toBe("#EBE1C4");
+    // The butter field on board 12 (chroma 0.076) is now a pale cream.
+    expect(resolveSectionPaint("yellow", 2, LIGHT).fill).toBe("#F9F1DA");
     // Dark boards (card shapes) keep the uncapped mix.
     expect(oklabChroma(resolveSectionPaint("violet", 3, DARK).fill)).toBeGreaterThan(0.045);
   });
 
-  it("light preset: each of three nested levels under the page is its own layer, whatever the hues", () => {
-    // Top-level sections are depth 2 (the page is depth 1). A level and its
-    // parent level must step apart in the same hue, and stay apart when the
-    // nest switches hue.
-    // The light anchors (the yellow and orange solids) step on the lightness of
-    // their solid pushed to 4.5:1, a lighter reference than a text step: at
-    // least 0.028 (orange 3 to 4: 0.029), the text-step hues at least 0.03.
-    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
-      const floor = color === "yellow" || color === "orange" ? 0.028 : 0.03;
-      for (const depth of [3, 4]) {
-        expect(oklabDistance(resolveSectionPaint(color, depth, LIGHT).fill, resolveSectionPaint(color, depth - 1, LIGHT).fill))
-          .toBeGreaterThanOrEqual(floor);
+  it("light preset: sections are light zones, and each nested level still steps and keeps a visible edge", () => {
+    // Top-level sections are depth 2 (the page is depth 1). Every level stays
+    // at OKLab L 0.9 or above (round 3: 0.83 at depth 4, 0.89 at top level).
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
+      expect(oklabLightness(resolveSectionPaint(color, 2, LIGHT).fill)).toBeGreaterThanOrEqual(0.945);
+      for (const depth of [2, 3, 4, 5]) {
+        const paint = resolveSectionPaint(color, depth, LIGHT);
+        expect(oklabLightness(paint.fill)).toBeGreaterThanOrEqual(0.895);
+        // The tint steps are small (about 0.02 L), so the frame edge marks
+        // where a group ends: the ink at 0.75 over the fill, at least 2.5:1.
+        expect(contrastRatio(overFill(paint.border, paint.fill), paint.fill)).toBeGreaterThanOrEqual(2.5);
       }
     }
-    expect(oklabDistance(resolveSectionPaint("blue", 3, LIGHT).fill, resolveSectionPaint("teal", 4, LIGHT).fill)).toBeGreaterThanOrEqual(0.03);
+    // A nested level still deepens from its parent, in its own hue or another.
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
+      for (const depth of [3, 4]) {
+        const step = oklabLightness(resolveSectionPaint(color, depth - 1, LIGHT).fill) - oklabLightness(resolveSectionPaint(color, depth, LIGHT).fill);
+        expect(step).toBeGreaterThanOrEqual(0.013);
+      }
+    }
+    expect(oklabDistance(resolveSectionPaint("blue", 3, LIGHT).fill, resolveSectionPaint("teal", 4, LIGHT).fill)).toBeGreaterThanOrEqual(0.02);
   });
 
   it.each([
@@ -152,9 +176,9 @@ describe("layer-cake sections", () => {
 
   it("light preset: a top-level section shows its hue, and the dark preset keeps its own tint", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
-      expect(oklabDistance(resolveSectionPaint(color, 1, LIGHT).fill, LIGHT.boardBackground)).toBeGreaterThanOrEqual(0.04);
+      expect(oklabDistance(resolveSectionPaint(color, 2, LIGHT).fill, LIGHT.boardBackground)).toBeGreaterThanOrEqual(0.035);
     }
-    expect(LIGHT.sectionTintBase).toBe(0.12);
+    expect(LIGHT.sectionTintBase).toBe(0.04);
     expect(DARK.sectionTintBase).toBe(0.1);
   });
 
@@ -234,7 +258,7 @@ describe("layer-cake sections", () => {
   it("the light theme never applies the guard (base and card are both near-white)", () => {
     // Yellow's and orange's anchors are not text steps: their fills follow their own rule (see "light yellow" below).
     for (const color of CANVAS_COLORS.filter((candidate) => !["white", "yellow", "orange"].includes(candidate))) {
-      const mix = mixColors(LIGHT.palette[color], "#FDFDFD", 0.12);
+      const mix = mixColors(LIGHT.palette[color], "#FDFDFD", 0.04);
       expect(Math.abs(oklabLightness(resolveSectionPaint(color, 1, LIGHT).fill) - oklabLightness(mix))).toBeLessThan(0.002);
     }
   });
@@ -273,22 +297,22 @@ describe("layer-cake sections", () => {
 describe("schematic shapes, icons, stickies, connectors", () => {
   it("light ink-card shapes: one lightness and chroma in the ink's hue, ink border, theme text", () => {
     expect(LIGHT.shapeFill).toBe("ink-card");
-    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#D9F0FF", border: "#0B6E99", text: "#1F1F1F" });
+    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#9DDAFE", border: "#0B6E99", text: "#1F1F1F" });
     const chroma = (color: string) => Math.hypot(oklab(color).a, oklab(color).b);
     const hue = (color: string) => Math.atan2(oklab(color).b, oklab(color).a);
     const hues = CANVAS_COLORS.filter((candidate) => !["white", "gray"].includes(candidate));
     for (const color of hues) {
       const paint = resolveShapePaint(color, LIGHT);
       expect(paint.border).toBe(resolveInk(color, LIGHT));
-      expect(Math.abs(oklabLightness(paint.fill) - (oklabLightness(LIGHT.cardFill) - 0.035))).toBeLessThan(0.003);
-      // The kind reads from the fill, not only the border: chroma 0.04, or the most sRGB holds there.
-      expect(chroma(paint.fill)).toBeGreaterThanOrEqual(0.027);
-      expect(chroma(paint.fill)).toBeLessThan(0.043);
+      expect(Math.abs(oklabLightness(paint.fill) - (oklabLightness(LIGHT.cardFill) - 0.12))).toBeLessThan(0.003);
+      // The kind reads from the fill, not only the border: chroma 0.08.
+      expect(chroma(paint.fill)).toBeGreaterThanOrEqual(0.075);
+      expect(chroma(paint.fill)).toBeLessThan(0.083);
       expect(Math.abs(hue(paint.fill) - hue(LIGHT.palette[color]))).toBeLessThan(0.12);
     }
     // Green and teal (and teal and blue) were 0.003 / 0.005 apart at the 0.08 mix.
     for (const [a, b] of [["green", "teal"], ["teal", "blue"], ["red", "orange"], ["violet", "pink"]] as const) {
-      expect(oklabDistance(resolveShapePaint(a, LIGHT).fill, resolveShapePaint(b, LIGHT).fill)).toBeGreaterThan(0.012);
+      expect(oklabDistance(resolveShapePaint(a, LIGHT).fill, resolveShapePaint(b, LIGHT).fill)).toBeGreaterThan(0.025);
     }
   });
 
@@ -298,20 +322,22 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     const node = resolveShapePaint("yellow", LIGHT);
     expect(node.border).toBe(resolveInk("yellow", LIGHT));
     expect(contrastRatio(node.border, node.fill)).toBeGreaterThanOrEqual(3);
-    expect(contrastRatio(node.border, LIGHT.boardBackground)).toBeLessThan(4.5);
+    // Lighter than the olive yellow.text (#805F01, L 0.51), though the stronger node fill pushes it darker than round 3's gold.
+    expect(oklabLightness(node.border)).toBeGreaterThan(oklabLightness("#805F01") + 0.04);
     const chroma = (color: string) => Math.hypot(oklab(color).a, oklab(color).b);
     const paints: [string, string][] = [2, 3, 4].map((depth): [string, string] => [
       resolveSectionPaint("yellow", depth, LIGHT).fill,
-      mixColors(textStep, LIGHT.boardBackground, Math.min(0.33, 0.12 + 0.07 * (depth - 1))),
+      mixColors(textStep, LIGHT.boardBackground, Math.min(0.16, 0.04 + 0.04 * (depth - 1))),
     ]);
     for (const [fill, olive] of paints) {
       expect(Math.abs(oklabLightness(fill) - oklabLightness(olive))).toBeLessThan(0.002);
       // Yellow, not khaki: well above the olive mix, though capped as a section (0.04 at top level).
       expect(chroma(fill)).toBeGreaterThan(1.3 * chroma(olive));
     }
-    // A tile glyph on the gold ink is the dark text color, as the design system's yellow.on-solid.
-    expect(resolveIconPaint("yellow", LIGHT).glyph).toBe(LIGHT.textColor);
-    expect(contrastRatio(LIGHT.textColor, resolveInk("yellow", LIGHT))).toBeGreaterThanOrEqual(4.5);
+    // A tile glyph on the yellow solid tile is the dark text color, as the design system's yellow.on-solid.
+    const tile = resolveIconPaint("yellow", LIGHT);
+    expect(tile.glyph).toBe(LIGHT.textColor);
+    expect(contrastRatio(LIGHT.textColor, tile.tileFill!)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("light yellow and orange: tiles are the design-system solid under a dark glyph, strokes the solid at 3:1", () => {
@@ -322,8 +348,8 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       expect(contrastRatio(tile.glyph, solid)).toBeGreaterThanOrEqual(4.5);
       expect(contrastRatio(resolveInk(color, LIGHT), resolveShapePaint(color, LIGHT).fill)).toBeGreaterThanOrEqual(3);
     }
-    // Orange no longer strokes the brown text step (#9D530D).
-    expect(oklabLightness(resolveInk("orange", LIGHT))).toBeGreaterThan(0.6);
+    // Orange no longer strokes the brown text step (#9D530D, L 0.52).
+    expect(oklabLightness(resolveInk("orange", LIGHT))).toBeGreaterThan(oklabLightness("#9D530D") + 0.04);
     // Text-step hues keep the ink tile.
     expect(resolveIconPaint("teal", LIGHT).tileFill).toBe(resolveInk("teal", LIGHT));
   });
@@ -347,22 +373,39 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(resolveInk("yellow", FIGJAM_CANVAS_STYLE)).toBe(FIGJAM_CANVAS_STYLE.palette.yellow);
   });
 
-  it("light preset: a node stands lighter than every section level it can sit in, its own hue included", () => {
-    const sectionColors = CANVAS_COLORS.filter((color) => color !== "white");
-    for (const nodeColor of CANVAS_COLORS) {
-      const node = oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill);
+  it("light preset: a node never reads as the color of the section it sits in, its own hue included", () => {
+    // Every hued and gray node is the darker, stronger field: at least 0.045 L
+    // and 0.055 OKLab from any section level, and 0.065 from a section of its
+    // own hue (round 3: 0.03 to 0.05 L, nodes lighter than their sections).
+    const sectionColors = CANVAS_COLORS;
+    for (const nodeColor of CANVAS_COLORS.filter((color) => color !== "white")) {
+      const node = resolveShapePaint(nodeColor, LIGHT).fill;
       for (const sectionColor of sectionColors) {
         for (const depth of [2, 3, 4, 5]) {
-          const section = oklabLightness(resolveSectionPaint(sectionColor, depth, LIGHT).fill);
-          expect(node - section).toBeGreaterThanOrEqual(0.025);
+          const section = resolveSectionPaint(sectionColor, depth, LIGHT).fill;
+          expect(oklabLightness(section) - oklabLightness(node)).toBeGreaterThanOrEqual(0.045);
+          expect(oklabDistance(node, section)).toBeGreaterThanOrEqual(sectionColor === nodeColor ? 0.065 : 0.055);
         }
       }
     }
+    // A white node is the board surface: lighter than every section, and at
+    // least 0.035 from any colored one. On a white section (the card) both
+    // are the uncolored pick, 0.015 apart, and the node's full-ink border
+    // carries it.
+    const white = resolveShapePaint("white", LIGHT);
+    for (const sectionColor of CANVAS_COLORS) {
+      for (const depth of [2, 3, 4]) {
+        const section = resolveSectionPaint(sectionColor, depth, LIGHT).fill;
+        expect(oklabLightness(white.fill)).toBeGreaterThan(oklabLightness(section));
+        if (sectionColor !== "white") expect(oklabDistance(white.fill, section)).toBeGreaterThanOrEqual(0.035);
+      }
+    }
+    expect(contrastRatio(white.border, white.fill)).toBeGreaterThanOrEqual(10);
   });
 
-  it("light ink-card shapes: gray and white stay the plain card", () => {
-    expect(resolveShapePaint("gray", LIGHT)).toEqual({ fill: "#F8F8F7", border: "#666562", text: "#1F1F1F" });
-    expect(resolveShapePaint("white", LIGHT)).toEqual({ fill: "#F8F8F7", border: "#1F1F1F", text: "#1F1F1F" });
+  it("light ink-card shapes: gray is the neutral at the node lightness, white the board surface", () => {
+    expect(resolveShapePaint("gray", LIGHT)).toEqual({ fill: "#D0D0D0", border: "#666562", text: "#1F1F1F" });
+    expect(resolveShapePaint("white", LIGHT)).toEqual({ fill: "#FDFDFD", border: "#1F1F1F", text: "#1F1F1F" });
   });
 
   it.each([

@@ -152,7 +152,7 @@ describe("live shape paint", () => {
     const outlined = objectNode(stage([decision], "schematic-light"), "s1");
     const polygon = outlined.querySelector('[data-canvas-shape-silhouette="diamond"] polygon') as SVGPolygonElement;
     expect(polygon.getAttribute("points")).toBe("100,0 200,70 100,140 0,70");
-    expect(polygon.getAttribute("fill")).toBe("#D9F0FF"); // ink-card: the blue hue at the node lightness and chroma
+    expect(polygon.getAttribute("fill")).toBe("#9DDAFE"); // ink-card: the blue hue at the node lightness and chroma
     expect(polygon.getAttribute("stroke")).toBe("#0B6E99");
     expect(outlined.style.clipPath).toBe("none");
     expect(outlined.style.borderWidth).toBe("0px");

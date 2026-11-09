@@ -110,7 +110,8 @@ export interface CanvasStyle {
   // --- Shapes ---------------------------------------------------------------
   /**
    * `tint` = the pastel fill per color (FigJam); `card` = `cardFill` with an ink border;
-   * `ink-card` = the ink mixed into `cardFill` with an ink border (gray and white stay `cardFill`).
+   * `ink-card` = a strong fill in the ink's hue with an ink border, darker than every section level
+   * (gray takes a neutral at that weight, white the board surface).
    */
   shapeFill: "tint" | "card" | "ink-card";
   /** Card surface: card shapes, card stickies, outlined white tiles; layer-cake fills keep clear of it. */
@@ -440,17 +441,19 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   detailFontSizePx: 14,
   shapeFill: "ink-card",
   sectionFill: "layer-cake",
-  // Each nesting level is its own layer: top-level sections (depth 2 under
-  // the page) paint 0.19, then 0.26, then the 0.33 cap, so three levels of
-  // groups step apart (OKLab 0.037 to 0.043 between a level and its parent,
-  // against 0.016 to 0.024 with a 0.035 step and a 0.21 cap, which stopped
-  // deepening after one nested level). The frame edge is the ink at 0.75: it
-  // marks where a group ends without the full-ink 2px edge a node carries.
-  // Picked from three variants on Archon boards 01, 02, 10 and 14 (hue only,
-  // full-ink edge, deeper steps).
-  sectionTintBase: 0.12,
-  sectionTintStep: 0.07,
-  sectionTintMax: 0.33,
+  // Sections are light zones and the nodes carry the weight (UI climb round
+  // 4, after Ford: "the section backgrounds are too dark and items are
+  // having a hard time showing up"). Top-level sections (depth 2 under the
+  // page) paint 0.085, then 0.13, then the 0.175 cap: OKLab L about 0.955,
+  // 0.935 and 0.915 (0.907, 0.87 and 0.83 at round 3's 0.19, 0.26 and 0.33).
+  // Each level steps about 0.02 L from its parent, so the frame edge (the
+  // ink at 0.75) marks where a group ends as much as the tint does.
+  // Picked from three variants on Archon boards 02, 04, 07 and 12 (paler
+  // sections at 0.06 to 0.12, which faded into the page; white node cards,
+  // which left the kind on the border alone).
+  sectionTintBase: 0.04,
+  sectionTintStep: 0.04,
+  sectionTintMax: 0.16,
   sectionBorderOpacity: 0.75,
   headerPlacement: "pinned",
   headerFont: "mono",
