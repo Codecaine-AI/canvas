@@ -87,7 +87,7 @@ function requireUnlockedTarget(ctx: OpContext, id: string): string[] {
 export const updateText = defineOperationTool({
   name: "update_text",
   description:
-    "Write the words on anything that carries them — a shape's, icon's, or section's name and its one-line detail, a sticky's body, an edge's label. Send text, detail, or both. A shape or icon whose text no longer fits grows to fit, keeping its center, and the same-type shapes in its row (height) and column (width) grow to match, unless that would make them overlap another box; a sticky or section that no longer fits still applies, with a warning naming the size it would need.",
+    "Write the words on anything that carries them — a shape's, icon's, or section's name and its one-line detail, a sticky's body, an edge's label. Send text, detail, or both. A shape or icon whose text no longer fits grows to fit, keeping its center, and the same-type shapes in its row (height) and column (width) grow to match, unless that would make them overlap another box. A note on the schematic themes takes the height its new text needs, shrinking or growing, width as set; a figjam sticky or a section that no longer fits still applies, with a warning naming the size it would need.",
   fields: {
     id: Id,
     text: Type.Optional(Type.String({

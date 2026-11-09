@@ -66,7 +66,7 @@ afterEach(() => {
 });
 
 describe("useTextEditing object targets (single unified text field, D3/D11)", () => {
-  it("opens sticky editing seeded with its text and commits a text patch", () => {
+  it("opens sticky editing seeded with its text and commits a text patch at the height the text needs", () => {
     const { result, dispatch } = setup();
 
     act(() => {
@@ -84,7 +84,8 @@ describe("useTextEditing object targets (single unified text field, D3/D11)", ()
     expect(dispatch).toHaveBeenCalledTimes(1);
     const action = dispatch.mock.calls[0][0] as Extract<CanvasAction, { type: "canvas.updateObject" }>;
     expect(action.objectId).toBe("sticky-a");
-    expect(action.patch).toEqual({ text: "new body\n- item" });
+    // A schematic card note takes its text's height: 14 + two 24px lines + 14 = 76, on the grid 80.
+    expect(action.patch).toEqual({ text: "new body\n- item", geometry: { x: 80, y: 100, width: 240, height: 80 } });
   });
 
   it("keeps plain shapes editing and committing their text", () => {

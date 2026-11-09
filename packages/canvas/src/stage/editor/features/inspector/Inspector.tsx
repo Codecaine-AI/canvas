@@ -22,6 +22,8 @@ import {
 } from "../../../../state/actions";
 import { resolveSwatchPreview } from "../../../../theme/palette";
 import { naturalAspectOf } from "../../../../objects/natural-aspect";
+import { noteNeededHeight, noteTextPatch } from "../../../../objects/sticky/note-fit";
+import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import { CANVAS_COLORS } from "../../../../state/schema";
 import type {
   CanvasColor,
@@ -60,6 +62,10 @@ export function Inspector({
   applyColorToSelection,
 }: InspectorProps) {
   const [annotationBody, setAnnotationBody] = useState("");
+  const canvasStyle = useCanvasStyle();
+  // A card note is never shorter than its text needs (objects/sticky/note-fit.ts).
+  const atLeastNoteHeight = (width: number, height: number) =>
+    selectedObject ? Math.max(height, noteNeededHeight(selectedObject, canvasStyle, width) ?? 0) : height;
   const selectedSectionFitted =
     selectedObject?.type === "section" ? isSectionFitted(document, selectedObject.id) : false;
   const detailLength = selectedObject?.detail?.trim().length ?? 0;
@@ -108,7 +114,8 @@ export function Inspector({
               dispatch({
                 type: "canvas.updateObject",
                 objectId: selectedObject.id,
-                patch: { text: event.target.value },
+                // A card note's height follows its text (objects/sticky/note-fit.ts).
+                patch: noteTextPatch(selectedObject, event.target.value, canvasStyle),
               })
             }
           />
@@ -214,7 +221,7 @@ export function Inspector({
                 type: "canvas.resizeObject",
                 objectId: selectedObject.id,
                 width,
-                height: aspect === null ? selectedObject.geometry.height : width / aspect,
+                height: aspect === null ? atLeastNoteHeight(width, selectedObject.geometry.height) : width / aspect,
               })
             }
           />
@@ -227,7 +234,7 @@ export function Inspector({
                 type: "canvas.resizeObject",
                 objectId: selectedObject.id,
                 width: aspect === null ? selectedObject.geometry.width : height * aspect,
-                height,
+                height: aspect === null ? atLeastNoteHeight(selectedObject.geometry.width, height) : height,
               })
             }
           />

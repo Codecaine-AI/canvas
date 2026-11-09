@@ -8,6 +8,8 @@ import { renderShapeFor } from "../../objects/object-def";
 import { effectiveRenderShape } from "../../render/static-svg";
 import { creationDefaultFor } from "../tools/creation-defaults";
 import { FIGJAM_CANVAS_STYLE, makeTestSession, runOp } from "./helpers";
+import { fittedNoteGeometry } from "../../objects/sticky/note-fit";
+import { DEFAULT_CANVAS_STYLE } from "../../theme/canvas-style";
 import { box, makeDocument } from "./synthetic";
 
 const NOTE_TEXT = "run `deploy` now";
@@ -44,16 +46,18 @@ function placementFixture() {
   ];
   for (const result of results) expect(result.isError).toBeUndefined();
 
+  // A note typed in Studio commits the height its text needs (use-text-editing.ts).
+  const uiNote = draftPlacedObject(
+    "sticky",
+    { x: 0, y: 0, width: 180, height: 120 },
+    {
+      id: "note",
+      text: NOTE_TEXT,
+      color: creationDefaultFor("sticky").color,
+    },
+  );
   const uiObjects = [
-    draftPlacedObject(
-      "sticky",
-      { x: 0, y: 0, width: 180, height: 120 },
-      {
-        id: "note",
-        text: NOTE_TEXT,
-        color: creationDefaultFor("sticky").color,
-      },
-    ),
+    { ...uiNote, geometry: fittedNoteGeometry(uiNote, DEFAULT_CANVAS_STYLE) },
     draftPlacedObject(
       "decision",
       { x: 400, y: 0, width: 280, height: 100 },

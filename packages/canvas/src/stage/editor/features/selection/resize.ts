@@ -13,6 +13,7 @@ import { computeSnapGuides, type SnapGuide } from "../snapping/snapping";
 import { gatherSnapCandidates } from "../../../../interaction/hit-testing";
 import { hitBoundsForObject } from "../../../../objects/geometry";
 import { grownToAspect, naturalAspectOf } from "../../../../objects/natural-aspect";
+import { noteNeededHeight } from "../../../../objects/sticky/note-fit";
 import type { CanvasGeometry, InteractiveCanvasDocument } from "../../../../state/schema";
 import {
   SNAP_THRESHOLD_SCREEN_PX,
@@ -20,7 +21,7 @@ import {
   type ResizeHandle,
 } from "../../../../interaction/types";
 import type { ViewportState } from "../../../viewport";
-import type { CanvasStyle } from "../../../../theme/canvas-style";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../../../theme/canvas-style";
 
 export type ResizeGesture = {
   kind: "resize";
@@ -209,6 +210,15 @@ export function stepFromResize(
     width: Math.max(MIN_DIRECT_RESIZE_SIZE, geometry.width),
     height: Math.max(MIN_DIRECT_RESIZE_SIZE, geometry.height),
   };
+
+  // A card note is never shorter than its text needs at the dragged width
+  // (objects/sticky/note-fit.ts): a north handle holds the bottom edge.
+  const needed = target ? noteNeededHeight({ ...target, geometry }, ctx.canvasStyle ?? DEFAULT_CANVAS_STYLE) : undefined;
+  if (needed !== undefined && geometry.height < needed) {
+    geometry = affectsNorth
+      ? { ...geometry, y: geometry.y + geometry.height - needed, height: needed }
+      : { ...geometry, height: needed };
+  }
 
   // A fixed-aspect shape keeps its ratio under every handle.
   const aspect = target ? naturalAspectOf(target) : null;

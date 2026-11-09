@@ -1,53 +1,109 @@
 /**
- * A card note drawn at the height its text needs.
+ * A card note's one height: the height its text needs.
  *
- * A note's text height depends on the theme (its sticky font, line pitch and
- * padding tokens), and the theme is a view setting, not part of the file. A
- * stored height can only be right for the theme it was written under: notes
- * written for the 24px paper sticky keep that height when the schematic card
- * draws them at 16px, and show a band of empty card under the text.
+ * On the schematic themes (stickyStyle "card") a note is a text card, so its
+ * stored height is fitted on every write that changes its text, its shape or
+ * its size: padding plus its wrapped rows, at least one row, rounded up to
+ * the agent grid. Width stays as set. The renderers, hit testing, selection,
+ * connector anchors and export framing all read that one stored height.
  *
- * So the renderers (the live sticky view, the static SVG) and the note's hit
- * and selection bounds take the note's height from here: the height its text
- * needs under the current style, padding included, rounded up to the agent
- * grid, never above the stored height. The stored height stays the source of
- * truth for everything else, and it caps the note: text longer than it still
- * clips with the ellipsis. Only card notes fit; a paper sticky (figjam) keeps
- * its square paper.
+ * Writers: the agent's auto-size pass (session/tools/operations/auto-size.ts:
+ * place_sticky, update_text, change_shape, resize, match_size), Studio's text
+ * editor and Inspector text field (noteTextPatch), and Studio's resize
+ * gesture (stage/editor/features/selection/resize.ts). A resize keeps a
+ * dragged height at or above the needed one; every other write sets it
+ * exactly, so a note shrinks as well as grows. fitNotesToText fits a whole
+ * board once, for migrating boards written before this rule.
+ *
+ * A paper sticky (figjam, stickyStyle "paper") keeps its square paper and is
+ * never fitted.
  *
  * Pure: no React, no DOM.
  */
-import type { CanvasGeometry, InteractiveCanvasObject } from "../../state/schema";
-import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../theme/canvas-style";
-import { layoutStickyText } from "./sticky-text";
+import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
+import type { CanvasStyle } from "../../theme/canvas-style";
+import { settleSections } from "../../state/section-grow";
 import { AGENT_GRID } from "../../state/geometry";
+import { layoutStickyText } from "./sticky-text";
 import { INSET_BODY_TEXT_SLOT, insetBodyPaddingPx, resolveTextSlot, slotLineHeightPx } from "../text-slots";
 
-/**
- * The geometry `object` draws at under `canvasStyle`: a card note with text
- * shrinks to the height its text needs (at least one line, padding included,
- * on the agent grid); every other object, and a note whose text needs its
- * full height, draws at its stored geometry.
- */
-export function noteDrawnGeometry(
-  object: InteractiveCanvasObject,
-  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
-): CanvasGeometry {
-  const { geometry } = object;
-  if (object.style?.shape !== "note" || canvasStyle.stickyStyle !== "card" || object.text.trim() === "") {
-    return geometry;
-  }
-  const { rect, typography } = resolveTextSlot(INSET_BODY_TEXT_SLOT, object, 1, { canvasStyle });
-  if (rect.width <= 0) return geometry;
-  const rows = layoutStickyText(object.text, rect.width, typography.fontSizePx, canvasStyle.stickyHeadingScale).length;
-  const padding = insetBodyPaddingPx(canvasStyle);
-  const needed = padding.top + Math.max(1, rows) * slotLineHeightPx(typography) + padding.bottom;
-  const height = Math.min(geometry.height, Math.ceil(needed / AGENT_GRID) * AGENT_GRID);
-  return height === geometry.height ? geometry : { ...geometry, height };
+type Geometry = InteractiveCanvasObject["geometry"];
+
+/** Whether `object` is a card note under `canvasStyle`: the only kind that fits its text. */
+export function isCardNote(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): boolean {
+  return object.style?.shape === "note" && canvasStyle.stickyStyle === "card";
 }
 
-/** `object` at its drawn geometry (noteDrawnGeometry): the same object when nothing changes. */
-export function asDrawn(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): InteractiveCanvasObject {
-  const geometry = noteDrawnGeometry(object, canvasStyle);
-  return geometry === object.geometry ? object : { ...object, geometry };
+/**
+ * The height a card note's text needs at `width` (default: its own): top
+ * padding, its wrapped rows (at least one) on the line pitch, bottom
+ * padding, rounded up to the agent grid. Undefined for anything that is not
+ * a card note.
+ */
+export function noteNeededHeight(
+  object: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle,
+  width: number = object.geometry.width,
+): number | undefined {
+  if (!isCardNote(object, canvasStyle)) return undefined;
+  const sized = width === object.geometry.width ? object : { ...object, geometry: { ...object.geometry, width } };
+  const { rect, typography } = resolveTextSlot(INSET_BODY_TEXT_SLOT, sized, 1, { canvasStyle });
+  const rows = object.text.trim() === "" || rect.width <= 0
+    ? 1
+    : layoutStickyText(object.text, rect.width, typography.fontSizePx, canvasStyle.stickyHeadingScale).length;
+  const padding = insetBodyPaddingPx(canvasStyle);
+  const needed = padding.top + Math.max(1, rows) * slotLineHeightPx(typography) + padding.bottom;
+  return Math.ceil(needed / AGENT_GRID - 1e-9) * AGENT_GRID;
+}
+
+/**
+ * `object`'s geometry with its height fitted to its text, top-left held:
+ * exactly the needed height, or with `atLeast` the current height when that
+ * is taller (a resize). The same geometry object when nothing changes, or
+ * when `object` is not a card note.
+ */
+export function fittedNoteGeometry(
+  object: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle,
+  atLeast = false,
+): Geometry {
+  const needed = noteNeededHeight(object, canvasStyle);
+  if (needed === undefined) return object.geometry;
+  const height = atLeast ? Math.max(needed, object.geometry.height) : needed;
+  return height === object.geometry.height ? object.geometry : { ...object.geometry, height };
+}
+
+/**
+ * A Studio text patch for `object`: `{ text }`, plus the fitted geometry
+ * when `object` is a card note whose height must change for the new text.
+ */
+export function noteTextPatch(
+  object: InteractiveCanvasObject | undefined,
+  text: string,
+  canvasStyle: CanvasStyle,
+): { text: string; geometry?: Geometry } {
+  if (!object) return { text };
+  const geometry = fittedNoteGeometry({ ...object, text }, canvasStyle);
+  return geometry === object.geometry ? { text } : { text, geometry };
+}
+
+/**
+ * `document` with every card note fitted to its text (paper stickies and
+ * every other object untouched), then its sections grown around any note
+ * that grew. Sections never shrink. The same document when nothing changes.
+ * For a one-off migration of boards written before the fit-on-write rule;
+ * opening a board never runs it.
+ */
+export function fitNotesToText(
+  document: InteractiveCanvasDocument,
+  canvasStyle: CanvasStyle,
+): InteractiveCanvasDocument {
+  let changed = false;
+  const objects = document.objects.map((object) => {
+    const geometry = fittedNoteGeometry(object, canvasStyle);
+    if (geometry === object.geometry) return object;
+    changed = true;
+    return { ...object, geometry };
+  });
+  return changed ? settleSections({ ...document, objects }) : document;
 }

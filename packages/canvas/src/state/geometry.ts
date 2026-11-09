@@ -32,7 +32,7 @@ export const GEOMETRY_NORMALIZATION_GRID = 4;
 /**
  * The AGENT grid: every number the agent writes to board geometry lands on
  * it (session/tools/grid.ts quantizes to it). Defined here so objects/ can
- * read it too: a card note draws its fitted height on it (objects/sticky/note-fit.ts).
+ * read it too: a card note's fitted height lands on it (objects/sticky/note-fit.ts).
  */
 export const AGENT_GRID = 20;
 

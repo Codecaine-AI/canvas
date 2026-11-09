@@ -41,7 +41,13 @@
  *    short side to the ratio (on the grid), with rule 1's anchor. It is never
  *    a peer, so no row or column match stretches it again.
  *
- * Left alone: stickies (their body is their own business), sections (their
+ * 0. A CARD NOTE (a note on the schematic themes) comes before all three:
+ *    its height becomes the height its text needs, padding included, on the
+ *    grid (objects/sticky/note-fit.ts), shrinking as well as growing; under
+ *    `resize` and `match_size` a taller asked height stays. Top-left held,
+ *    width as set, never a peer.
+ *
+ * Left alone: paper stickies (their square is their own business), sections (their
  * frames fit their contents), icons as peers (the glyph tile does not grow;
  * an icon still widens for its caption's detail line under rule 1), and any
  * node under a lock.
@@ -57,6 +63,7 @@ import { applyOperationToDraft } from "../../apply-ops";
 import { effectiveRenderShape } from "../../../render/static-svg";
 import type { CanvasStyle } from "../../../theme/canvas-style";
 import { grownToAspect, naturalAspectOf } from "../../../objects/natural-aspect";
+import { fittedNoteGeometry, isCardNote } from "../../../objects/sticky/note-fit";
 import { AGENT_GRID, snapCoordinate } from "../grid";
 import { lockHolding, type OpOutcome } from "./op-context";
 
@@ -181,7 +188,18 @@ export function autoSizeObjects(
 
   for (const id of ids) {
     const object = objectOf(id);
-    if (!object || !growsForText(object) || lockHolding(document, id) !== null) continue;
+    if (!object || lockHolding(document, id) !== null) continue;
+    // 0. A CARD NOTE takes the height its text needs (objects/sticky/note-fit.ts):
+    // exactly, or at least, under a resize. Top-left held, width as set, no peers.
+    if (isCardNote(object, canvasStyle)) {
+      const geometry = fittedNoteGeometry(object, canvasStyle, anchor === "corner");
+      if (geometry !== object.geometry) {
+        write(id, geometry);
+        notes.push(`fitted ${id} to ${sizeOf(geometry)}: a note is as tall as its text`);
+      }
+      continue;
+    }
+    if (!growsForText(object)) continue;
     const fitted = fittedSize(object, canvasStyle, anchor);
     // A fixed-aspect shape (natural-aspect.ts) keeps its box at its ratio
     // whatever the gesture asked, grown on its longer side.

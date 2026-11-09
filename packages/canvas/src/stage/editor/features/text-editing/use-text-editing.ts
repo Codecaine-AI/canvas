@@ -7,6 +7,7 @@ import type { CanvasPoint } from "../../../../state/geometry";
 import { routeConnection } from "../../../../connectors/routing";
 import { placedLabelPoint } from "../../../../connectors/label-placement";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";
+import { noteTextPatch } from "../../../../objects/sticky/note-fit";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -140,11 +141,12 @@ export function useTextEditing({ document, dispatch }: UseTextEditingArgs): Text
     dispatch({
       type: "canvas.updateObject",
       objectId: objectTextEditId,
-      patch: { text: nextText },
+      // A card note's height follows its text (objects/sticky/note-fit.ts).
+      patch: noteTextPatch(target, nextText, canvasStyle),
     });
     setObjectTextEditId(null);
     setObjectTextEditValue("");
-  }, [objectTextEditId, objectTextEditValue, dispatch, document.objects]);
+  }, [objectTextEditId, objectTextEditValue, dispatch, document.objects, canvasStyle]);
 
   const cancelObjectTextEdit = useCallback(() => {
     setObjectTextEditId(null);

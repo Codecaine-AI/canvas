@@ -335,7 +335,7 @@ function applySize(
 export const resize = defineOperationTool({
   name: "resize",
   description:
-    "Re-size a box to explicit dimensions, holding its top-left corner still so it grows or shrinks toward its bottom-right. Matching another box is match_size's job. A section's new edges decide what it now contains, so it can adopt or release as it changes. Dimensions land on the board's grid. A shape or icon is never made smaller than its text needs: below that it lands at the needed size, and the same-type shapes in its row (height) and column (width) grow to match, keeping their centers, unless that would make them overlap another box.",
+    "Re-size a box to explicit dimensions, holding its top-left corner still so it grows or shrinks toward its bottom-right. Matching another box is match_size's job. A section's new edges decide what it now contains, so it can adopt or release as it changes. Dimensions land on the board's grid. A shape, icon, or schematic note is never made smaller than its text needs: below that it lands at the needed size, and the same-type shapes in its row (height) and column (width) grow to match, keeping their centers, unless that would make them overlap another box.",
   fields: {
     id: Id,
     width: Type.Optional(
