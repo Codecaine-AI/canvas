@@ -121,7 +121,7 @@ describe("detail-value", () => {
 
     const line = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
 
-    expect(line).toBe("DETAIL · Jev judged 2 node details (2 asked, 0 cached) · 1 to remove (confidence ≥ 0.1) · 700 input tokens");
+    expect(line).toBe("DETAIL · Jev judged 2 node details (2 asked, 0 cached) · 1 to remove (confidence ≥ 0.3) · 700 input tokens");
     // Both questions went in one request, carrying the board, section, and wired neighbors.
     expect(jev.bodies).toHaveLength(1);
     expect(jev.bodies[0]!.state).toEqual({ board_title: "Shop checkout", board_notes: [] });
@@ -154,16 +154,16 @@ describe("detail-value", () => {
 
     // The cleared detail was context for the orders question, so it is asked again once.
     const again = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
-    expect(again).toBe("DETAIL · Jev judged 1 node detail (1 asked, 0 cached) · 0 to remove (confidence ≥ 0.1) · 700 input tokens");
+    expect(again).toBe("DETAIL · Jev judged 1 node detail (1 asked, 0 cached) · 0 to remove (confidence ≥ 0.3) · 700 input tokens");
     // A re-check of the unchanged board asks nothing.
     const third = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
-    expect(third).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.1)");
+    expect(third).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.3)");
     expect(jev.bodies).toHaveLength(2);
   });
 
-  test("a remove is a finding from p(remove) 0.55, and below it is none", async () => {
-    // p(remove) 0.55 is confidence 0.1, the cut; 0.52 is confidence 0.04, under it.
-    for (const [pRemove, findings] of [[0.55, 1], [0.52, 0]] as const) {
+  test("a remove is a finding from p(remove) 0.65, and below it is none", async () => {
+    // p(remove) 0.65 is confidence 0.3, the cut; 0.62 is confidence 0.24, under it.
+    for (const [pRemove, findings] of [[0.65, 1], [0.62, 0]] as const) {
       const file = openCanvasFile(boardFile());
       const jev = fakeJev({ "part of checkout": pRemove });
       await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
@@ -438,7 +438,7 @@ describe("detail-value", () => {
     const sent = jev.bodies.flatMap((body) => Object.values(body.questions)).map((question) => question.instructions.node);
     // Five copies with one question between them (same name, section and context), and it sees no copy.
     expect(sent.map((node) => node.other_details)).toEqual([[]]);
-    expect(line).toBe("DETAIL · Jev judged 5 node details (1 asked, 4 cached) · 0 to remove (confidence ≥ 0.1) · 700 input tokens");
+    expect(line).toBe("DETAIL · Jev judged 5 node details (1 asked, 4 cached) · 0 to remove (confidence ≥ 0.3) · 700 input tokens");
     expect(detailFindings(file)).toEqual([]);
   });
 
@@ -471,8 +471,19 @@ describe("detail-value", () => {
     for (const finding of findings) await callToolkitTool(file, "update_text", { id: finding.at[0]!, detail: "" });
     const again = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
     // The kept copy's question never saw the others, so it is not asked again and stays a keep.
-    expect(again).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.1)");
+    expect(again).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.3)");
     expect(detailFindings(file)).toEqual([]);
     expect(file.session.draft.objects.find((object) => object.id === "left")!.detail).toBe("pi_session_id · container_id");
+  });
+  test("a host name keeps its line even when the rest repeats a wire label", async () => {
+    // Jev removed "command-center · version 1" under a "version 1" wire; the question now names the case.
+    const file = openCanvasFile(boardFile());
+    const jev = fakeJev({});
+    await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
+    const question = Object.values(jev.bodies[0]!.questions)[0]!;
+    expect(question.instructions.question).toContain("such as the name of the machine it runs on, even if the rest of the line describes the box's role or repeats a wire label");
+    const keep = question.criteria.keep as { counts_as_keep: string[]; examples: Array<Record<string, unknown>> };
+    expect(keep.counts_as_keep).toContainEqual(expect.stringContaining("the name of the host, machine, device or cluster it runs on"));
+    expect(keep.examples).toContainEqual({ name: "On-site", section: "Where jobs run", wire_labels: ["phase one"], detail: "back-office · phase one" });
   });
 });

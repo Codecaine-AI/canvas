@@ -38,24 +38,26 @@ import {
 export const DETAIL_VALUE_MODEL = "jev-1.14.0";
 
 /** Bump when the question, the options, or the state shape changes. Part of every cache key. */
-export const DETAIL_PROMPT_VERSION = 6;
+export const DETAIL_PROMPT_VERSION = 7;
 
 /**
  * A `remove` verdict at or above this confidence is an error finding.
- * Confidence on a two-option Choice is |2p − 1|, so 0.1 means p(remove) ≥ 0.55.
- * Calibrated with prompt version 6 on the 14 Archon boards (230 details)
+ * Confidence on a two-option Choice is |2p − 1|, so 0.3 means p(remove) ≥ 0.65.
+ * Calibrated with prompt version 7 on the 14 Archon boards (230 details)
  * against Ford's bar: a detail stays only when it adds a fact stated nowhere
  * else on the board, sticky notes included. The labels are a 40-row
  * independent review plus a relabel of the rest against the same bar (56
- * remove). Over two runs this cut agrees with the 40-row review on 37 and
- * 38 rows, and with all 230 on 214 and 212 (2 or 3 useful details removed,
- * 14 or 15 redundant ones kept). Jev's p(remove) moves 0.02 on average
- * between runs, 0.13 at most. At p ≥ 0.7 it removes 1 useful detail but
- * keeps 20 or more redundant ones; at p ≥ 0.5 it removes 4 or 5 useful ones.
- * Its wrong removals are exact facts beside words the board already states
- * ("command-center · version 1" under a "version 1" wire).
+ * remove). Scored on the findings, after detailRemovals keeps one copy of a
+ * repeated detail, over two runs: this cut agrees with the 40-row review on
+ * 35 and 35 rows and with all 230 on 200 and 200 (1 or 2 useful details
+ * removed). At p ≥ 0.55 it agrees on 35/35 and 199/202 but removes 3 or 4
+ * useful details (key tuples, a wake signal), so the cut moved up: a lost
+ * fact costs more than a kept line. At p ≥ 0.75 it keeps 34 or more
+ * redundant ones. 10 of the remaining wrong keeps are copies of one detail
+ * whose fact is in a note or wire label: detailRemovals keeps them all by
+ * design. Jev's p(remove) moves about 0.02 between runs, 0.2 at most.
  */
-export const DETAIL_REMOVE_THRESHOLD = 0.1;
+export const DETAIL_REMOVE_THRESHOLD = 0.3;
 
 /** At most this many questions go in one request. */
 const BATCH_SIZE = 40;
@@ -370,6 +372,7 @@ const CRITERIA: JevChoiceQuestion["criteria"] = {
       "the unit a field is measured in, such as ms, bytes or rows",
       "a schema, type, format or protocol name",
       "the named product, library or machine it uses or runs on",
+      "the name of the host, machine, device or cluster it runs on: an exact fact even when the hostname reads like plain words, such as back-office, and even when every other word on the line is a wire label or a note",
       "its scope status: in version 1, later, proposed or not installed",
       "a non-obvious condition or side effect stated precisely: when it runs, what it writes, what it skips",
       "one of the above that is new, next to words the board already states: the new fact keeps the whole line",
@@ -391,6 +394,7 @@ const CRITERIA: JevChoiceQuestion["criteria"] = {
       { name: "Billing API", detail: "proposed · not in v1" },
       { name: "Retry", detail: "skipped when the card is declined" },
       { name: "Cache", board_notes: ["Every store in version 1 runs on services-02"], detail: "Redis 7 · services-02" },
+      { name: "On-site", section: "Where jobs run", wire_labels: ["phase one"], detail: "back-office · phase one" },
       { name: "webhook", other_details: ["cron: later · not in v1"], detail: "later · not in v1" },
     ],
   },
@@ -401,7 +405,7 @@ export function detailQuestion(subject: DetailSubject): JevChoiceQuestion {
   return {
     type: "choice",
     instructions: {
-      question: "Does `node.detail` add an exact fact that is stated nowhere else on the board? Answer `remove` when it states no exact fact, or when every exact fact in it is already in `board_notes`, `node.other_details`, `node.wire_labels`, `node.name`, `node.section`, `node.wired_to` or `board_title`. Answer `keep` when it holds even one exact fact found nowhere else, even if the rest of the line describes the box's role.",
+      question: "Does `node.detail` add an exact fact that is stated nowhere else on the board? Answer `remove` when it states no exact fact, or when every exact fact in it is already in `board_notes`, `node.other_details`, `node.wire_labels`, `node.name`, `node.section`, `node.wired_to` or `board_title`. Answer `keep` when it holds even one exact fact found nowhere else, such as the name of the machine it runs on, even if the rest of the line describes the box's role or repeats a wire label.",
       context: "`node` is one box on a diagram titled `board_title`. `node.name` is the box's label. `node.detail` is the one small line printed under the label. `node.section` is the titled group the box sits in. `node.wired_to` lists the boxes connected to it by arrows, and `node.wire_labels` the text on those arrows. `node.other_details` lists the details of the other boxes in the same group and of the wired boxes as `name: detail`, so a detail repeated on one of them is stated elsewhere. `board_notes` holds the text of every sticky note on the board. A detail line costs the reader attention, so it stays only when it adds a fact the reader cannot read anywhere else on the board.",
       node: {
         name: subject.name,
