@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 69188364ac1cc31f64d2ad611500f4bb01d1daa95694625d330fe97aa6945666). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 92e546f6cfd77339f02bed4cada419260ebb09b58e7be10490c350df18150b12). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -128,7 +128,7 @@
 
         - The name (`text`) says what the thing is in 5 words or fewer, on one line, with no sentences.
         - The detail (`detail`) is one short fact, such as a port, path, version, model, or host, in 48 characters or fewer.
-        - A detail must state a fact the name does not. canvas_check marks every other detail as a detail-value error, and you clear it.
+        - Leave the detail empty by default. Write one only for an exact fact the name, the section and the wires do not give: an identifier, a value, or a precise condition. canvas_check marks every other detail as a detail-value error, and you clear it.
         - Explanations, rationale, and examples go on a Markdown sticky beside the subject, in 40 words or fewer.
 
         | Bad | Good |
