@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/conventions.ts (sha256 35d0532c11bc90c1e6fc7b7e519dfd8972fded86f16228913c36b77f9eeadda5). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/conventions.ts (sha256 4767191eed510b7842a08065676ceb89616716f275deb4f9ba56b01a1ea30d14). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Canvas Conventions
 
@@ -11,16 +11,16 @@
     Creation actions accept the IDs you choose and reject collisions.
 
     <naming_examples>
-        | Entity | ID | Visible title or label | Detail |
-        | --- | --- | --- | --- |
-        | Ingestion section | s01-ingestion | Ingestion | |
-        | Parser in that section | s01-ingestion-parser | Parse source | tree-sitter |
-        | Supporting sticky | s01-ingestion-input-example | Input example | |
-        | Internal connection | s01-ingestion-parser-to-index | writes | |
-        | Retrieval section | s02-retrieval | Retrieval | |
-        | Cross-section connection | s01-ingestion-to-s02-retrieval | indexed records | |
+        | Entity | ID | Visible title or label |
+        | --- | --- | --- |
+        | Ingestion section | s01-ingestion | Ingestion |
+        | Parser in that section | s01-ingestion-parser | Parse source |
+        | Supporting sticky | s01-ingestion-input-example | Input example |
+        | Internal connection | s01-ingestion-parser-to-index | writes |
+        | Retrieval section | s02-retrieval | Retrieval |
+        | Cross-section connection | s01-ingestion-to-s02-retrieval | indexed records |
 
-        Use descriptive strings rather than IDs such as object1 or shape2. The group number identifies the section; the remaining words identify the entity's purpose. Visible labels stay short and do not need the ID prefix. Sections, stickies, and connections have no detail line.
+        Use descriptive strings rather than IDs such as object1 or shape2. The group number identifies the section; the remaining words identify the entity's purpose. Visible labels stay short and do not need the ID prefix.
 
         Keep group numbers stable when sections move or the reading order changes. For additions to an existing diagram, follow its naming convention and preserve its IDs. Choose an unused group prefix for a new section and check every complete ID for collisions.
 
@@ -29,10 +29,7 @@
 </identity>
 
 <text_limits>
-    Names on shapes, icons, and sections, and detail lines on shapes and icons, have limits:
-
-    - A name is 5 words or fewer, and never over 6 words or 40 characters, with no sentence break or line break.
-    - A detail is one fact of 48 characters or fewer, with no line break.
+    A name on a shape, icon, or section is 5 words or fewer, and never over 6 words or 40 characters, with no sentence break or line break.
 
     Move anything longer to a sticky beside the subject. Sticky bodies and connection labels are outside these limits. A person's existing labels are theirs, so leave them as they are unless the request asks you to edit them.
 </text_limits>

@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/vocabulary.ts (sha256 3abf7f9a2aed05b745451b83b41b5b6582628083a4f9934e1a0135fc1aee2971). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/vocabulary.ts (sha256 368d2c4956a112b98ff398ca25e6467657a4293fc5a71551e9268caa8655ce5e). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Visual Vocabulary
 
@@ -6,13 +6,13 @@
     <sections>
         A section is a titled frame that groups related content. Sections can contain objects and other sections.
 
-        The header shows an optional icon and the title. A section has no detail line.
+        The header shows an optional icon and the title.
     </sections>
 
     <objects>
         Shapes and glyphs represent diagram nodes. Their type communicates what they represent.
 
-        Shape labels render inside the shape. Glyph labels render below the glyph. Either can add one detail line under its label: a single fact, rendered muted.
+        Shape labels render inside the shape. Glyph labels render below the glyph. A node shows its name only; put extra context in a sticky note next to it.
     </objects>
 
     <stickies>

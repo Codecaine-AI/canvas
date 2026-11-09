@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/state-grammar.ts (sha256 b014ad49b61d2c8f36aabb635ca8debf410c53bc790ab535d6b37d988d3f1f04), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/state-grammar.ts (sha256 d7a7521abdd21cf55a7af9c23195b950798f0c8e39f7de395d5bd6d5fe4c2a62), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Operating Context
 
@@ -24,7 +24,6 @@ The reading key for MCP results, and the house style.
         - elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type
         - object extras appear only when set:
             - icon= (a section's header glyph; an icon object's glyph is its type)
-            - detail= (the one-line fact under the name)
             - locked=
             - shape=
             - layout=mode,pad=,gap=

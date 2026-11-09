@@ -27,7 +27,7 @@ const SHARED_JUDGE_RULES = [
   "Exclude declared infrastructure failures from scoring.",
   "Visual axes are scored absolutely against their rubric anchors; no comparison or reference board exists.",
   "Boards are operational maps: icons carry the components (generic glyphs for a role, filled brand logos for a named product), the small shape core carries steps and branches, and an edge means only what its line shows — label, arrowhead, style.",
-  "An object's text is a short name. A shape or icon may add one muted detail line under its name, and a section one after its header title: a single fact such as a port, path, version, model, or host. A section header may also carry an icon for what the region holds. Read both as part of that object's label, not as stray text or decoration.",
+  "An object's text is a short name, and a node shows its name only. A section header may also carry an icon for what the region holds. Read it as part of that section's label, not as stray decoration. Extra context sits on sticky notes beside its subject.",
   "The render may use any workspace theme (figjam, schematic-light, schematic-dark). A theme restyles fills, borders, type, and icon tiles, never meaning; the theme itself is not graded.",
 ].join("\n");
 
@@ -52,7 +52,7 @@ const OPERATIONAL_MAP_NOTATION = [
   "Icons name components and stores at fixed meanings, by family. Generic glyphs are outline pictograms for a role; brand-* glyphs are filled product logos that name that exact product.",
   ...ICON_NOTATION,
   "The shape core names steps and branches: rectangle = message or payload container; rounded rectangle (process) = a step; predefined process = a delegated step (spawned sub-agent, subroutine, enqueued task); decision diamond = a branch; ellipse = start/end terminator; octagon = stop; arrow = routing outcome; triangle = directional marker.",
-  "Names and details: an object's text is a short name. A shape or icon may add one muted detail line under its name, and a section one after its header title: a single fact (a port, path, version, model, or host) about that object. A section header may also carry an icon for what the region holds. Explanations sit on sticky notes beside their subject.",
+  "Names: an object's text is a short name, and a node shows its name only. A section header may also carry an icon for what the region holds. Explanations sit on sticky notes beside their subject.",
   "Any region of a board reads in one of two genres. System map: nodes are components, edges are standing relationships (reads, writes, feeds, informs) and time is not an axis. Procedure: nodes are steps, edges mean 'then', branch outcomes ride as on-line text, back-edges are loops, and time is the axis. Genres mix per region; a crossover edge (a procedure step touching a store) joins them.",
   "Edges say only what the line shows: label, arrowhead, and line style. Do not assume hidden semantics; put unreadable or ambiguous edge meaning in uncertain.",
 ].join("\n");

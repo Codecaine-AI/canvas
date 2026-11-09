@@ -1,4 +1,4 @@
-import { DETAIL_MAX_CHARS, NAME_TARGET_WORDS, NOTE_MAX_WORDS } from "../board/text-rules";
+import { NAME_TARGET_WORDS, NOTE_MAX_WORDS } from "../board/text-rules";
 import { JUDGE_PNG_MAX_EDGE } from "../render/judge-size";
 import { creationDefaultFor } from "../session/tools/creation-defaults";
 import { CRAFT_TARGETS } from "./style-guide/craft-targets";
@@ -31,7 +31,7 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
         | Card grid layout | Visual structure matches conceptual structure |
         | Icons decorating text | Shapes that ARE the meaning |
         | Same container for everything | Distinct visual vocabulary per concept |
-        | Everything in a diagram node | Short names with one detail line, Markdown stickies for prose, and selective section containers |
+        | Everything in a diagram node | Short names, Markdown stickies for prose, and selective section containers |
     </bad_vs_good>
 </multi_zoom_architecture>
 
@@ -42,21 +42,18 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 </visual_pattern_library>
 
 <text_and_evidence>
-    <name_and_detail>
-        Shapes and icons each carry a name and at most one detail line. A section carries a title only.
+    <names>
+        A node shows its name only; put extra context in a sticky note next to it. A section carries a title only.
 
         - The name (\`text\`) says what the thing is in ${NAME_TARGET_WORDS} words or fewer, on one line, with no sentences.
-        - The detail (\`detail\`) is one short fact, such as a port, path, version, model, or host, in ${DETAIL_MAX_CHARS} characters or fewer.
-        - Leave the detail empty by default. Write one only for an exact fact stated nowhere else on the board, not in the name, the section, the wires, the other boxes or the sticky notes: an identifier, a value, or a precise condition. canvas_check marks every other detail as a detail-value error, and you clear it.
         - Explanations, rationale, and examples go on a Markdown sticky beside the subject, in ${NOTE_MAX_WORDS} words or fewer.
 
         | Bad | Good |
         | --- | --- |
-        | name \`Postgres database that stores user sessions\` | name \`Postgres\`, detail \`16 · :5432\`, and a sticky about the sessions it stores |
-        | detail \`Handles auth. Retries 3 times on failure.\` | detail \`3 retries · 30s timeout\`, and the auth explanation on a sticky |
+        | name \`Postgres database that stores user sessions\` | name \`Postgres\`, and a sticky about the sessions it stores |
 
         Give a section a header icon when a glyph fits what it holds: a generic glyph for its role, such as \`database\`, or a brand logo for a technology the source names, such as \`brand-postgres\`. Leave it off when none fits.
-    </name_and_detail>
+    </names>
 
     <wire_labels>
         Label a wire only for a condition, a branch, or a payload the source names. A plain next-step wire has no label.
@@ -66,7 +63,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         A reader looks for each requirement on a node or a wire. A fact only in a note, the board description, or a section title counts as missing.
 
         - Before you place anything, list every component, every field or measure, and every behavior with its trigger in the source.
-        - Give each component a node. Put each field or measure in that node's detail.
+        - Give each component a node.
         - Draw each behavior as a wire from the node that acts to the node it changes. A rule with a trigger and an effect is a wire, a decision with its exits, or a node, never a sentence in a note.
         - Every node has a wire in and a wire out, except a start, an end, or a store.
         - Before canvas_check, tick each item on the list against a node or a wire.
@@ -94,7 +91,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         Every move after the board is wired is rework. Write the plan first: the sections in rows, the nodes in each section as rows, the color key, and every wire.
 
         1. place_section for each section, with its title, icon, and color in one call. Leave wide room between sections. Step 4 closes it.
-        2. place_shape for each node inside its section, with its name, detail, and color in one call. Keep the default size: ${defaultSize("shape")} for a shape, ${defaultSize("icon")} for an icon. clone a finished node for each peer of the same role.
+        2. place_shape for each node inside its section, with its name and color in one call. Keep the default size: ${defaultSize("shape")} for a shape, ${defaultSize("icon")} for an icon. clone a finished node for each peer of the same role.
         3. arrange_section for each section, with its node ids as rows. It sets the gaps (${CRAFT_TARGETS.nodeGapRow} across a row, ${CRAFT_TARGETS.nodeGapColumn} down a column) and fits the frame, so you write no coordinates.
         4. space_out each row of sections with gap ${CRAFT_TARGETS.sectionGutterSideBySide}, then align their tops.
         5. connect every wire, then call tighten_wires once.

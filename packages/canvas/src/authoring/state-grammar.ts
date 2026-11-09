@@ -69,7 +69,6 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
         text: "object extras appear only when set:",
         children: [
           "icon= (a section's header glyph; an icon object's glyph is its type)",
-          "detail= (the one-line fact under the name)",
           "locked=",
           "shape=",
           "layout=mode,pad=,gap=",

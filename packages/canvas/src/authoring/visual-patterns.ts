@@ -47,7 +47,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "sequence",
     name: "Sequence",
-    description: "Ordered stages or events form a readable chain. Label a transition only for its condition. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects. The line under each stage is its detail: one fact, not a description.",
+    description: "Ordered stages or events form a readable chain. Label a transition only for its condition. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects.",
     ascii: `[Request] --> [Validate] --> [Process] --> [Respond]
  POST /runs    JSON schema    worker pool   201 Created`,
     useCase: "A request passes through validation, processing, and response delivery.",
@@ -101,7 +101,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "state-machine",
     name: "State Machine",
-    description: "A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board's node and edge counts equal the chart's. Keep about 20 arrows or fewer. Labels are the reader's words from the chart, never variable or action names. Each node wears its group's color; a state that breaks a rule wears red instead and names the rule in its detail. The start state comes first in reading order.",
+    description: "A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board's node and edge counts equal the chart's. Keep about 20 arrows or fewer. Labels are the reader's words from the chart, never variable or action names. Each node wears its group's color; a state that breaks a rule wears red instead, with a sticky note beside it naming the rule. The start state comes first in reading order.",
     ascii: `[Cart open] --you press pay--> [Paying] --the card clears--> [Paid]
    teal                           yellow    |                 yellow
                                             +--the card is declined--> [Payment failed]

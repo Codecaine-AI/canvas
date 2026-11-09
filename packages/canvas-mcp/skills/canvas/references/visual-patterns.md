@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/visual-patterns.ts (sha256 3b4c3e43c20012092bb8b5654e9b4ba6eb18c46178ffbfacc883d30e72b9fc6b). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/visual-patterns.ts (sha256 eb88e20d8dc0e4f0552f0cb3a47d8572b8b31368f6c243b1a0a301630c39b16c). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Visual Patterns
 
@@ -50,7 +50,7 @@ Use case: A service owns two subsystems, one of which owns a smaller component.
 
 ## Sequence (`sequence`)
 
-Ordered stages or events form a readable chain. Label a transition only for its condition. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects. The line under each stage is its detail: one fact, not a description.
+Ordered stages or events form a readable chain. Label a transition only for its condition. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects.
 
 ```text
 [Request] --> [Validate] --> [Process] --> [Respond]
@@ -122,7 +122,7 @@ Use case: One ingestion process updates an index that multiple query services re
 
 ## State Machine (`state-machine`)
 
-A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board's node and edge counts equal the chart's. Keep about 20 arrows or fewer. Labels are the reader's words from the chart, never variable or action names. Each node wears its group's color; a state that breaks a rule wears red instead and names the rule in its detail. The start state comes first in reading order.
+A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board's node and edge counts equal the chart's. Keep about 20 arrows or fewer. Labels are the reader's words from the chart, never variable or action names. Each node wears its group's color; a state that breaks a rule wears red instead, with a sticky note beside it naming the rule. The start state comes first in reading order.
 
 ```text
 [Cart open] --you press pay--> [Paying] --the card clears--> [Paid]

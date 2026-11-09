@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:51a6a517cf54bd4d154378340256549fdd1ad523bb03eb05746480016795fb43",
+  "snapshotId": "sha256:6dcbbb4097a3e7d01e66f3ed4bb6a8be4225793993d904b4ff3ec5d981703657",
   "sources": [
     {
       "id": "prompt",
       "path": "packages/canvas/src/authoring/prompt/prompt.json",
-      "sha256": "c213e91aa86de717b43cf0100f6a7280e2e6150b25d2c888711c63ad55263b44"
+      "sha256": "f1ace77c3c24e78e389af860c57afd6d5d4b9e4cbd7612f1727223a67c1a30a6"
     },
     {
       "id": "state_grammar",
       "path": "packages/canvas/src/authoring/state-grammar.ts",
-      "sha256": "b014ad49b61d2c8f36aabb635ca8debf410c53bc790ab535d6b37d988d3f1f04"
+      "sha256": "d7a7521abdd21cf55a7af9c23195b950798f0c8e39f7de395d5bd6d5fe4c2a62"
     },
     {
       "id": "aesthetic",
@@ -20,17 +20,17 @@
     {
       "id": "visual_patterns",
       "path": "packages/canvas/src/authoring/visual-patterns.ts",
-      "sha256": "3b4c3e43c20012092bb8b5654e9b4ba6eb18c46178ffbfacc883d30e72b9fc6b"
+      "sha256": "eb88e20d8dc0e4f0552f0cb3a47d8572b8b31368f6c243b1a0a301630c39b16c"
     },
     {
       "id": "diagram_design",
       "path": "packages/canvas/src/authoring/design.ts",
-      "sha256": "af3d8d474748044375a838268c1afe0bdbf9457a9e3b113e34e35f4e2818d7ec"
+      "sha256": "0cd5bd8f0045cdbd51b06d9b755929aeebd5d3ee3dbab6e24af2f9ef91fc4ae8"
     },
     {
       "id": "visual_vocabulary",
       "path": "packages/canvas/src/authoring/vocabulary.ts",
-      "sha256": "3abf7f9a2aed05b745451b83b41b5b6582628083a4f9934e1a0135fc1aee2971"
+      "sha256": "368d2c4956a112b98ff398ca25e6467657a4293fc5a71551e9268caa8655ce5e"
     },
     {
       "id": "color_palette",
@@ -40,7 +40,7 @@
     {
       "id": "canvas_conventions",
       "path": "packages/canvas/src/authoring/conventions.ts",
-      "sha256": "35d0532c11bc90c1e6fc7b7e519dfd8972fded86f16228913c36b77f9eeadda5"
+      "sha256": "4767191eed510b7842a08065676ceb89616716f275deb4f9ba56b01a1ea30d14"
     },
     {
       "id": "contact_sheet",
@@ -50,6 +50,6 @@
   ],
   "skill": {
     "path": "packages/canvas-mcp/src/skill/SKILL.md",
-    "sha256": "569b48cf9a2d953c51c0c834b506f3144f909012d46eef48862e0aa7a0ad1d38"
+    "sha256": "077fe355f819f08aa17e376cd0119f0f466e94aca7fe2b18a9347b67e0e16f72"
   }
 }

@@ -1,4 +1,4 @@
-import { DETAIL_MAX_CHARS, NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../board/text-rules";
+import { NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../board/text-rules";
 import { formatCraftTargets } from "./style-guide/craft-targets";
 import { creationDefaultFor } from "../session/tools/creation-defaults";
 import { AGENT_GRID } from "../session/tools/grid";
@@ -24,16 +24,16 @@ export function canvasConventions(): AuthoringTopic {
     Creation actions accept the IDs you choose and reject collisions.
 
     <naming_examples>
-        | Entity | ID | Visible title or label | Detail |
-        | --- | --- | --- | --- |
-        | Ingestion section | s01-ingestion | Ingestion | |
-        | Parser in that section | s01-ingestion-parser | Parse source | tree-sitter |
-        | Supporting sticky | s01-ingestion-input-example | Input example | |
-        | Internal connection | s01-ingestion-parser-to-index | writes | |
-        | Retrieval section | s02-retrieval | Retrieval | |
-        | Cross-section connection | s01-ingestion-to-s02-retrieval | indexed records | |
+        | Entity | ID | Visible title or label |
+        | --- | --- | --- |
+        | Ingestion section | s01-ingestion | Ingestion |
+        | Parser in that section | s01-ingestion-parser | Parse source |
+        | Supporting sticky | s01-ingestion-input-example | Input example |
+        | Internal connection | s01-ingestion-parser-to-index | writes |
+        | Retrieval section | s02-retrieval | Retrieval |
+        | Cross-section connection | s01-ingestion-to-s02-retrieval | indexed records |
 
-        Use descriptive strings rather than IDs such as object1 or shape2. The group number identifies the section; the remaining words identify the entity's purpose. Visible labels stay short and do not need the ID prefix. Sections, stickies, and connections have no detail line.
+        Use descriptive strings rather than IDs such as object1 or shape2. The group number identifies the section; the remaining words identify the entity's purpose. Visible labels stay short and do not need the ID prefix.
 
         Keep group numbers stable when sections move or the reading order changes. For additions to an existing diagram, follow its naming convention and preserve its IDs. Choose an unused group prefix for a new section and check every complete ID for collisions.
 
@@ -42,10 +42,7 @@ export function canvasConventions(): AuthoringTopic {
 </identity>
 
 <text_limits>
-    Names on shapes, icons, and sections, and detail lines on shapes and icons, have limits:
-
-    - A name is ${NAME_TARGET_WORDS} words or fewer, and never over ${NAME_MAX_WORDS} words or ${NAME_MAX_CHARS} characters, with no sentence break or line break.
-    - A detail is one fact of ${DETAIL_MAX_CHARS} characters or fewer, with no line break.
+    A name on a shape, icon, or section is ${NAME_TARGET_WORDS} words or fewer, and never over ${NAME_MAX_WORDS} words or ${NAME_MAX_CHARS} characters, with no sentence break or line break.
 
     Move anything longer to a sticky beside the subject. Sticky bodies and connection labels are outside these limits. A person's existing labels are theirs, so leave them as they are unless the request asks you to edit them.
 </text_limits>
