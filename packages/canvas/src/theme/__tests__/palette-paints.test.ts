@@ -7,7 +7,7 @@
 import { describe, expect, it } from "bun:test";
 import { CANVAS_COLORS } from "../../state/schema/colors";
 import { FIGJAM_CANVAS_STYLE, canvasThemePreset } from "../canvas-style";
-import { contrastRatio, mixColors, oklabDistance, oklabLightness } from "../color-math";
+import { contrastRatio, ensureContrast, mixColors, oklab, oklabDistance, oklabLightness } from "../color-math";
 import {
   resolveConnectorPaint,
   resolveConnectorStroke,
@@ -210,7 +210,8 @@ describe("layer-cake sections", () => {
   });
 
   it("the light theme never applies the guard (base and card are both near-white)", () => {
-    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
+    // Yellow's anchor is not a text step: its fill follows its own rule (see "light yellow" below).
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "yellow")) {
       expect(resolveSectionPaint(color, 1, LIGHT).fill).toBe(mixColors(LIGHT.palette[color], "#FDFDFD", 0.12));
     }
   });
@@ -250,12 +251,44 @@ describe("schematic shapes, icons, stickies, connectors", () => {
   it("light ink-card shapes: the ink mixed into the card fill, ink border, theme text", () => {
     expect(LIGHT.shapeFill).toBe("ink-card");
     expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#E5EDEF", border: "#0B6E99", text: "#1F1F1F" });
-    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
+    for (const color of CANVAS_COLORS.filter((candidate) => !["white", "gray", "yellow"].includes(candidate))) {
       const paint = resolveShapePaint(color, LIGHT);
       expect(paint.fill).toBe(mixColors(LIGHT.palette[color], LIGHT.cardFill, 0.08));
       expect(paint.border).toBe(LIGHT.palette[color]);
       expect(paint.fill).not.toBe(LIGHT.cardFill);
     }
+  });
+
+  it("light yellow: a gold stroke at 3:1 on its node, and fills at the text step's lightness that stay yellow", () => {
+    // The anchor is the yellow solid; the olive text step is only the lightness reference.
+    const textStep = ensureContrast(LIGHT.palette.yellow, LIGHT.boardBackground, 4.5);
+    const node = resolveShapePaint("yellow", LIGHT);
+    expect(node.border).toBe(resolveInk("yellow", LIGHT));
+    expect(contrastRatio(node.border, node.fill)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(node.border, LIGHT.boardBackground)).toBeLessThan(4.5);
+    const chroma = (color: string) => Math.hypot(oklab(color).a, oklab(color).b);
+    const paints: [string, string][] = [
+      [node.fill, mixColors(textStep, LIGHT.cardFill, 0.08)],
+      ...[2, 3, 4].map((depth): [string, string] => [
+        resolveSectionPaint("yellow", depth, LIGHT).fill,
+        mixColors(textStep, LIGHT.boardBackground, Math.min(0.33, 0.12 + 0.07 * (depth - 1))),
+      ]),
+    ];
+    for (const [fill, olive] of paints) {
+      expect(Math.abs(oklabLightness(fill) - oklabLightness(olive))).toBeLessThan(0.002);
+      expect(chroma(fill)).toBeGreaterThan(2 * chroma(olive));
+    }
+    // A tile glyph on the gold ink is the dark text color, as the design system's yellow.on-solid.
+    expect(resolveIconPaint("yellow", LIGHT).glyph).toBe(LIGHT.textColor);
+    expect(contrastRatio(LIGHT.textColor, resolveInk("yellow", LIGHT))).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("text-step anchors stroke in the palette color itself", () => {
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "yellow")) {
+      expect(resolveInk(color, LIGHT)).toBe(LIGHT.palette[color]);
+      expect(resolveInk(color, DARK)).toBe(DARK.palette[color]);
+    }
+    expect(resolveInk("yellow", FIGJAM_CANVAS_STYLE)).toBe(FIGJAM_CANVAS_STYLE.palette.yellow);
   });
 
   it("light preset: a node stands lighter than every section level it can sit in, its own hue included", () => {

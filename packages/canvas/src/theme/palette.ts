@@ -186,9 +186,20 @@ export function resolveSwatchPreview(color: CanvasColor): string {
 // derive every color from the palette ink plus a few surface tokens (see the
 // rules on each resolver). Inks come from `style.palette`, so a palette
 // override recolors lines, borders, and tiles in every mode.
+//
+// In the layer-cake modes the palette color is the hue's ANCHOR, and two
+// WCAG floors turn it into paint (resolveInk, inkFill): strokes take the
+// anchor pushed to NON_TEXT_CONTRAST against its own node fill, and fills
+// take the anchor at the weight that lands on the lightness a TEXT-safe
+// anchor's mix would. A text-step anchor (every hue but light yellow) passes
+// both floors as it is, so its paint is the plain mix it always was. A light
+// anchor (the yellow solid) keeps its chroma in the pale fills, where a dark
+// text step mixed toward white turns beige.
 
 /** Text on a figjam-mode pastel is pushed to this WCAG contrast when a dark theme borrows the mode. */
 const MIN_TEXT_CONTRAST = 4.5;
+/** WCAG 1.4.11 non-text contrast: a layer-cake stroke keeps this against its node fill. */
+const NON_TEXT_CONTRAST = 3;
 /** Layer-cake chip border: the ink at this opacity. */
 const SECTION_CHIP_BORDER_OPACITY = 0.5;
 /**
@@ -283,9 +294,58 @@ export type ConnectorPaint = {
   stroke: string;
 };
 
-/** The ink — line / stroke / tile color — of a color pick under `style`. */
-export function resolveInk(color: CanvasColor, style: CanvasStyle): string {
+/** The palette color of a pick: the ink itself in figjam modes, the hue's anchor in layer-cake modes. */
+function paletteColor(color: CanvasColor, style: CanvasStyle): string {
   return style.palette?.[color] ?? swatchFor(color).connector;
+}
+
+/**
+ * The ink — line / stroke / tile color — of a color pick under `style`. Figjam
+ * modes stroke in the palette color as it is. Layer-cake modes push the
+ * anchor to NON_TEXT_CONTRAST against the pick's node fill (so against the
+ * board too), and leave an anchor that already reads there unchanged.
+ */
+export function resolveInk(color: CanvasColor, style: CanvasStyle): string {
+  if (style.sectionFill !== "layer-cake") return paletteColor(color, style);
+  return cachedPaint(style, `ink|${color}`, () => ({
+    ink: ensureContrast(paletteColor(color, style), shapeFillBase(color, style), NON_TEXT_CONTRAST),
+  })).ink;
+}
+
+/**
+ * The layer-cake fill of `color` at ink `weight` over `base`: the anchor mixed
+ * in at the weight that lands on the OKLab lightness that `weight` of the
+ * anchor's text-safe step (MIN_TEXT_CONTRAST on the board) gives. A text-step
+ * anchor is its own text-safe step: the plain mix.
+ */
+function inkFill(color: CanvasColor, base: string, weight: number, style: CanvasStyle): string {
+  const anchor = paletteColor(color, style);
+  const textSafe = ensureContrast(anchor, style.boardBackground, MIN_TEXT_CONTRAST);
+  if (textSafe === anchor) return mixColors(anchor, base, weight);
+  return lightnessMatchedMix(anchor, base, oklabLightness(mixColors(textSafe, base, weight)));
+}
+
+/** Bisection steps for lightnessMatchedMix: far below one 8-bit channel step. */
+const LIGHTNESS_MATCH_STEPS = 24;
+
+/** mix(source, base, t) with t chosen so its OKLab lightness is `lightness` (clamped to the reachable range). */
+function lightnessMatchedMix(source: string, base: string, lightness: number): string {
+  const darker = oklabLightness(source) < oklabLightness(base);
+  let low = 0;
+  let high = 1;
+  for (let step = 0; step < LIGHTNESS_MATCH_STEPS; step += 1) {
+    const middle = (low + high) / 2;
+    const tooLight = oklabLightness(mixColors(source, base, middle)) > lightness;
+    if (tooLight === darker) low = middle;
+    else high = middle;
+  }
+  return mixColors(source, base, (low + high) / 2);
+}
+
+/** The fill an `ink-card` node of `color` paints (the card itself for neutral picks and other shape modes). */
+function shapeFillBase(color: CanvasColor, style: CanvasStyle): string {
+  if (style.shapeFill !== "ink-card" || NEUTRAL_SHAPE_COLORS.has(color)) return style.cardFill;
+  return inkFill(color, style.cardFill, SHAPE_CARD_INK_WEIGHT, style);
 }
 
 /** Light vs dark theme, judged by the board surface. */
@@ -330,7 +390,7 @@ function shapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
     return { fill: style.cardFill, border, text: style.textColor };
   }
   if (style.shapeFill === "ink-card") {
-    const fill = mixColors(border, style.cardFill, SHAPE_CARD_INK_WEIGHT);
+    const fill = shapeFillBase(color, style);
     return { fill, border, text: readableOn(style.textColor, fill) };
   }
   const fill = swatchFor(color).shape.fill;
@@ -339,7 +399,9 @@ function shapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
 
 /**
  * Icon object paint. `glyph` (figjam): the bare glyph in the ink, closed
- * interiors in the shape fill. `tile`: tile = ink, glyph = iconTileGlyphColor;
+ * interiors in the shape fill. `tile`: tile = ink, glyph = iconTileGlyphColor,
+ * or the text color where that falls under 4.5:1 on the ink (the light yellow
+ * ink: an ink glyph, as the design system's yellow.on-solid);
  * `white` on a light board becomes an outlined tile (cardFill, ink border,
  * ink glyph) instead of a solid near-black square.
  */
@@ -356,7 +418,14 @@ function iconPaint(color: CanvasColor, style: CanvasStyle): IconPaint {
   if (color === "white" && isLightBoard(style)) {
     return { tileFill: style.cardFill, tileBorder: ink, glyph: ink, glyphFill: null, label };
   }
-  return { tileFill: ink, tileBorder: null, glyph: style.iconTileGlyphColor, glyphFill: null, label };
+  return { tileFill: ink, tileBorder: null, glyph: tileGlyphOn(ink, style), glyphFill: null, label };
+}
+
+/** The tile glyph color on a solid `ink` tile: iconTileGlyphColor, or the text color where that reads better and the glyph would fall under MIN_TEXT_CONTRAST. */
+function tileGlyphOn(ink: string, style: CanvasStyle): string {
+  const glyph = style.iconTileGlyphColor;
+  if (contrastRatio(glyph, ink) >= MIN_TEXT_CONTRAST) return glyph;
+  return contrastRatio(style.textColor, ink) > contrastRatio(glyph, ink) ? style.textColor : glyph;
 }
 
 /** Ink weight of a tinted icon tile over the card fill. */
@@ -408,7 +477,9 @@ export function resolveIconTilePaint(
   const ink = resolveInk(color, style);
   return {
     ...paint,
-    tileFill: mixColors(ink, style.cardFill, ICON_TILE_TINT_WEIGHT),
+    tileFill: style.sectionFill === "layer-cake"
+      ? inkFill(color, style.cardFill, ICON_TILE_TINT_WEIGHT, style)
+      : mixColors(ink, style.cardFill, ICON_TILE_TINT_WEIGHT),
     tileBorder: ink,
     glyph: ink,
     tileMode,
@@ -526,7 +597,7 @@ export function resolveConnectorPaint(color: CanvasColor, style: CanvasStyle): C
  * = ink (white keeps its light-gray chip border); the header detail is
  * detailColor (contrast-guarded).
  *
- * `layer-cake`: fill = opaque sRGB mix(ink, sectionTintMixBase, t(d)) with
+ * `layer-cake`: fill = opaque sRGB mix(anchor, sectionTintMixBase, t(d)) (inkFill: for a text-step anchor the plain mix) with
  * t(d) = min(sectionTintMax, sectionTintBase + sectionTintStep·(d−1)), border
  * = ink at sectionBorderOpacity, chip = mix(ink, fill, headerChipMix), chip
  * border = ink at 50%, header detail = mix(ink, chip, 0.6) pushed toward the
@@ -582,7 +653,7 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
   const ink = resolveInk(paintColor, style);
   // Gray gains nothing from a deeper step but darkness: past the top-level
   // tone it reads as a disabled slab, and its chip loses contrast.
-  const fill = layerCakeFill(ink, paintColor === "gray" ? Math.min(depth, GRAY_SECTION_MAX_DEPTH) : depth, style);
+  const fill = layerCakeFill(paintColor, paintColor === "gray" ? Math.min(depth, GRAY_SECTION_MAX_DEPTH) : depth, style);
   const chipFill = mixColors(ink, fill, style.headerChipMix);
   return {
     fill,
@@ -609,10 +680,10 @@ function layerCakeWeight(level: number, style: CanvasStyle): number {
   );
 }
 
-function layerCakeFill(ink: string, depth: number, style: CanvasStyle): string {
+function layerCakeFill(color: CanvasColor, depth: number, style: CanvasStyle): string {
   const level = Number.isFinite(depth) ? Math.max(1, Math.floor(depth)) : 1;
   const base = style.sectionTintMixBase;
-  const fillAt = (weight: number) => mixColors(ink, base, weight);
+  const fillAt = (weight: number) => inkFill(color, base, weight, style);
   // Moving the weight only separates the fill from the cards when the mix
   // base itself stands clear of them (a dark board under raised cards); on a
   // light theme base and card are both white and the guard stays off.

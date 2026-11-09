@@ -346,14 +346,16 @@ export const SCHEMATIC_THEME_TOKENS = {
 /**
  * The palette inks of the schematic presets: the design-system hue roster, a
  * categorical set (tokens.md rule 3). The ink strokes 2px card borders and
- * connectors, fills solid icon tiles under the one iconTileGlyphColor, and is
- * the fallback the section header detail is pushed toward, so it takes each
- * hue's text-safe step. Guarantees: the ink reads at >= 4.5:1 on the board
- * (the page) and on the light card (the panel), and the on-solid tile glyph
- * reads at >= 4.5:1 on the ink (the `.solid` light gray, yellow and orange
- * would need an ink glyph instead). On the dark preset's raised card
+ * connectors, fills solid icon tiles, and is mixed into node and section
+ * fills, so it takes each hue's text-safe step. Guarantees: the ink reads at
+ * >= 4.5:1 on the board (the page) and on the light card (the panel), and a
+ * tile glyph reads at >= 4.5:1 on the ink (resolveIconPaint swaps in the text
+ * color where the on-solid glyph would not). On the dark preset's raised card
  * (SCHEMATIC_DARK_CARD_FILL) the inks read 3.8-5.8:1: enough for the 2px card
  * strokes (>= 3:1, non-text), not for text. `white` objects stroke in ink.
+ *
+ * Light yellow is the exception: an anchor the paints derive its ink from
+ * (SCHEMATIC_LIGHT_PALETTE_TOKENS).
  */
 export const SCHEMATIC_PALETTE_TOKENS = {
   gray: "color.gray.text",
@@ -366,6 +368,23 @@ export const SCHEMATIC_PALETTE_TOKENS = {
   violet: "color.violet.text",
   pink: "color.pink.text",
   white: "color.text.ink",
+} as const satisfies Record<CanvasColor, ThemeTokenPath>;
+
+/**
+ * Light-theme palette colors that leave the text-safe step. Yellow:
+ * yellow.text (#805F01, OKLCH L 0.51) is the step the design system itself
+ * says "reads olive"; it stroked olive-brown, and mixed into the near-white
+ * fills it painted khaki (UI climb round 0, on every yellow board). Light
+ * yellow takes the yellow solid (#DFAB01) as its anchor instead: the
+ * layer-cake paints (theme/palette.ts resolveInk, inkFill) push it to 3:1
+ * against its node fill for strokes and tiles (a gold, #A98201), and keep
+ * its chroma in the fills at the lightness yellow.text gave, so every
+ * layer and node lightness guard holds. Amber.text was the other candidate,
+ * but at hue 65 it sits 9 degrees from orange.text.
+ */
+export const SCHEMATIC_LIGHT_PALETTE_TOKENS = {
+  ...SCHEMATIC_PALETTE_TOKENS,
+  yellow: "color.yellow.solid",
 } as const satisfies Record<CanvasColor, ThemeTokenPath>;
 
 /** A design-system color resolved for one theme, in the canonical spelling the style tokens store. */
@@ -384,7 +403,8 @@ function schematicColors(theme: ThemeName): SchematicColors {
     colors[key] = tokenColor(theme, SCHEMATIC_THEME_TOKENS[key]);
   }
   const palette = {} as CanvasStylePalette;
-  for (const color of CANVAS_COLORS) palette[color] = tokenColor(theme, SCHEMATIC_PALETTE_TOKENS[color]);
+  const inks = theme === "light" ? SCHEMATIC_LIGHT_PALETTE_TOKENS : SCHEMATIC_PALETTE_TOKENS;
+  for (const color of CANVAS_COLORS) palette[color] = tokenColor(theme, inks[color]);
   return { ...colors, palette };
 }
 
