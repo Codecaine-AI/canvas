@@ -145,10 +145,18 @@ describe("canvas_create and canvas_check", () => {
   });
 
   test("a sticky whose text clips is a TEXT note, never a finding", async () => {
-    const service = createCanvasService({ workspace: tempDir() });
+    const workspace = tempDir();
+    const service = createCanvasService({ workspace });
     await call(service, "canvas_create", { canvas: "sticky-clip", title: "Sticky clip" });
     const rows = Array.from({ length: 30 }, (_, index) => `row ${index + 1}`).join("\n");
     await call(service, "place_sticky", { id: "payload", text: rows, at: [80, 120] });
+    // A write fits a note to its text, so only a board written before that rule
+    // still holds a note that clips: give the file such a legacy height.
+    const path = join(workspace, "canvases", "sticky-clip.canvas.json");
+    const board = JSON.parse(readFileSync(path, "utf8"));
+    board.objects.find((object: { id: string }) => object.id === "payload").geometry.height = 120;
+    writeFileSync(path, JSON.stringify(board, null, 2));
+    await call(service, "canvas_open", { canvas: "sticky-clip" });
 
     const check = checked(await call(service, "canvas_check", {}));
     expect(check.text).toContain("LINTS · clean");

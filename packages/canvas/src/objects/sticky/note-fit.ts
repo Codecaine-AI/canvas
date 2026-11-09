@@ -89,8 +89,10 @@ export function noteTextPatch(
 
 /**
  * `document` with every card note fitted to its text (paper stickies and
- * every other object untouched), then its sections grown around any note
- * that grew. Sections never shrink. The same document when nothing changes.
+ * every other object untouched). When a note grew, its sections grow around
+ * it by section auto-grow (state/section-grow.ts); when notes only shrank,
+ * no section moves. Sections never shrink. The same document when nothing
+ * changes.
  * For a one-off migration of boards written before the fit-on-write rule;
  * opening a board never runs it.
  */
@@ -99,11 +101,14 @@ export function fitNotesToText(
   canvasStyle: CanvasStyle,
 ): InteractiveCanvasDocument {
   let changed = false;
+  let grew = false;
   const objects = document.objects.map((object) => {
     const geometry = fittedNoteGeometry(object, canvasStyle);
     if (geometry === object.geometry) return object;
     changed = true;
+    grew ||= geometry.height > object.geometry.height;
     return { ...object, geometry };
   });
-  return changed ? settleSections({ ...document, objects }) : document;
+  if (!changed) return document;
+  return grew ? settleSections({ ...document, objects }) : { ...document, objects };
 }

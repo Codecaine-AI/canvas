@@ -73,23 +73,35 @@ describe("card note · fit on write", () => {
 });
 
 describe("fitNotesToText", () => {
-  test("fits every card note, leaves shapes alone, grows a section around a note that grew and never shrinks one", () => {
+  test("fits every card note and leaves shapes and the frame of a note that shrank alone", () => {
     const document = makeDocument([
-      { ...box("frame", 0, 0, 400, 200, "section"), text: "Frame" },
+      { ...box("frame", 0, 0, 400, 340, "section"), text: "Frame" },
       { ...note("tall", "Short", 40, 60, 240, 240), parentId: "frame" },
-      { ...note("deep", "x\n".repeat(12).trim(), 40, 340, 240, 60), parentId: null },
       box("shape", 600, 60, 160, 96, "process"),
     ]);
 
     const fitted = fitNotesToText(document, CARD);
 
-    expect(geometryOf(fitted, "tall").height).toBe(60);
-    expect(geometryOf(fitted, "deep").height).toBe(noteNeededHeight(fitted.objects.find((o) => o.id === "deep")!, CARD));
-    expect(geometryOf(fitted, "deep").height).toBeGreaterThan(60);
+    expect(geometryOf(fitted, "tall")).toEqual({ x: 40, y: 60, width: 240, height: 60 });
     expect(geometryOf(fitted, "shape")).toEqual({ x: 600, y: 60, width: 160, height: 96 });
-    expect(geometryOf(fitted, "frame")).toEqual({ x: 0, y: 0, width: 400, height: 200 });
+    expect(geometryOf(fitted, "frame")).toEqual({ x: 0, y: 0, width: 400, height: 340 });
     // Fitting is a fixed point.
     expect(fitNotesToText(fitted, CARD)).toBe(fitted);
+  });
+
+  test("grows the section that holds a note whose text needs more room", () => {
+    const document = makeDocument([
+      { ...box("frame", 0, 0, 400, 200, "section"), text: "Frame" },
+      { ...note("deep", "x\n".repeat(6).trim(), 40, 60, 240, 100), parentId: "frame" },
+    ]);
+
+    const fitted = fitNotesToText(document, CARD);
+
+    const deep = geometryOf(fitted, "deep");
+    expect(deep.height).toBe(noteNeededHeight(fitted.objects.find((o) => o.id === "deep")!, CARD));
+    expect(deep.height).toBeGreaterThan(100);
+    const frame = geometryOf(fitted, "frame");
+    expect(frame.y + frame.height).toBeGreaterThanOrEqual(deep.y + deep.height);
   });
 
   test("leaves every figjam paper sticky as it is", () => {
