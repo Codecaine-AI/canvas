@@ -56,8 +56,11 @@ import {
 import {
   DETAIL_REMOVE_THRESHOLD,
   detailKey,
+  detailSubjects,
   isRemoval,
   judgeDetails,
+  type DetailJudgement,
+  type DetailSubject,
   type JudgeDetailsOptions,
 } from "../board/detail-value";
 import { rasterizeSvgToPng } from "../render/rasterize";
@@ -385,23 +388,45 @@ export function checkCanvasFile(
   return { text: lines.join("\n"), pngs };
 }
 
+/** Rounds checkDetailValues runs while edits land during Jev's request. */
+const DETAIL_CHECK_ROUNDS = 3;
+
 /**
  * Ask Jev whether each node detail on the board carries a fact
  * (board/detail-value), store the verdicts on the session so the
  * detail-value finishing lint (and finalize) can read them, and return the
  * one DETAIL line canvas_check prints. Never throws and never blocks by
  * itself: a missing key or a failed request reads "DETAIL · not checked
- * (<reason>)", and the lint then has only the verdicts it already held.
+ * (<reason>)" and drops every verdict, so the lint reports nothing.
+ * A verdict is keyed by everything its question saw, so an edit made while
+ * Jev answers leaves the edited detail without one: the check judges the
+ * board again (the cache answers the unchanged details) until every detail
+ * on it has a verdict.
  */
 export async function checkDetailValues(file: CanvasFileSession, options: JudgeDetailsOptions): Promise<string> {
-  const judgement = await judgeDetails(file.session.draft, options);
-  if (judgement.status === "not-checked") return `DETAIL · not checked (${judgement.reason})`;
-  const verdicts = (file.session.detailVerdicts ??= new Map());
-  for (const [key, verdict] of judgement.verdicts) verdicts.set(key, verdict);
-  if (judgement.subjects.length === 0) return "DETAIL · no node details to judge";
-  const removals = judgement.subjects.filter((subject) => isRemoval(verdicts.get(detailKey(subject)))).length;
-  const cached = judgement.subjects.length - judgement.asked;
-  return `DETAIL · Jev judged ${plural(judgement.subjects.length, "node detail")}`
+  for (let round = 1; ; round++) {
+    const judgement = await judgeDetails(file.session.draft, options);
+    if (judgement.status === "not-checked") {
+      file.session.detailVerdicts = undefined;
+      return `DETAIL · not checked (${judgement.reason})`;
+    }
+    file.session.detailVerdicts = judgement.verdicts;
+    const subjects = detailSubjects(file.session.draft);
+    if (subjects.every((subject) => judgement.verdicts.has(detailKey(subject)))) {
+      return detailLine(subjects, judgement);
+    }
+    if (round === DETAIL_CHECK_ROUNDS) {
+      file.session.detailVerdicts = undefined;
+      return "DETAIL · not checked (the board kept changing during the check)";
+    }
+  }
+}
+
+function detailLine(subjects: readonly DetailSubject[], judgement: Extract<DetailJudgement, { status: "checked" }>): string {
+  if (subjects.length === 0) return "DETAIL · no node details to judge";
+  const removals = subjects.filter((subject) => isRemoval(judgement.verdicts.get(detailKey(subject)))).length;
+  const cached = subjects.length - judgement.asked;
+  return `DETAIL · Jev judged ${plural(subjects.length, "node detail")}`
     + ` (${judgement.asked} asked, ${cached} cached) · ${removals} to remove (confidence ≥ ${DETAIL_REMOVE_THRESHOLD})`
     + (judgement.asked > 0 ? ` · ${judgement.usage.input_tokens} input tokens` : "");
 }

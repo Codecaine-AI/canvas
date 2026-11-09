@@ -36,8 +36,8 @@ export interface LintContext {
   canvasStyle?: CanvasStyle;
   /**
    * Jev's verdicts on node details, keyed by `detailKey`, as canvas_check
-   * last judged them (board/detail-value). Absent or empty: the
-   * detail-value rule reports nothing.
+   * last judged them (board/detail-value). Absent or empty (no key, or the
+   * last check could not run): the detail-value rule reports nothing.
    */
   detailVerdicts?: ReadonlyMap<string, DetailVerdict>;
 }

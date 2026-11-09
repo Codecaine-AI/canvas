@@ -5,9 +5,11 @@
  * detail (board/detail-value: one Choice question per detail, cached by what
  * the question saw) and stores the verdicts on the session; this rule reads
  * them from the lint context. A detail with no verdict yet, a `keep`, or a
- * `remove` below DETAIL_REMOVE_THRESHOLD is no finding. Editing the detail
- * changes its key, so the finding clears the moment the detail is cleared or
- * rewritten, and the next canvas_check judges the new text.
+ * `remove` below DETAIL_REMOVE_THRESHOLD is no finding. A verdict is keyed by
+ * everything its question saw (board title, name, detail, section, wired
+ * neighbors), so editing any of them leaves the old verdict unread: the
+ * finding clears at once, and the next canvas_check judges the new inputs.
+ * A check that could not run leaves no verdicts, so the rule reports nothing.
  */
 import { detailKey, detailSubjects, isRemoval } from "../../detail-value";
 import { rectOf } from "../geometry";

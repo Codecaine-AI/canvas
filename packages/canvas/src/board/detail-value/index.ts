@@ -59,6 +59,8 @@ const MAX_NEIGHBORS = 8;
 /** What one question sees about one node. */
 export interface DetailSubject {
   id: string;
+  /** The board title, which the request sends as state. */
+  board: string;
   name: string;
   detail: string;
   /** The title of the nearest enclosing section, or null on the page itself. */
@@ -131,17 +133,18 @@ export function detailSubjects(document: InteractiveCanvasDocument): DetailSubje
         .map(nameOf)
         .filter((name) => name !== ""),
     )].sort().slice(0, MAX_NEIGHBORS);
-    subjects.push({ id: object.id, name: nameOf(object), detail, section: sectionTitleOf(object, byId), neighbors });
+    subjects.push({ id: object.id, board: document.title ?? "", name: nameOf(object), detail, section: sectionTitleOf(object, byId), neighbors });
   }
   return subjects;
 }
 
-/** The cache key: everything the question saw about the node, plus the prompt version and model. */
+/** The cache key: everything the question saw (board title included), plus the prompt version and model. */
 export function detailKey(subject: DetailSubject): string {
   return createHash("sha256")
     .update(JSON.stringify([
       DETAIL_PROMPT_VERSION,
       DETAIL_VALUE_MODEL,
+      subject.board,
       subject.name,
       subject.detail,
       subject.section,
@@ -265,7 +268,8 @@ const sharedLimiter = new JevRateLimiter(12);
 
 /**
  * Judge every node detail on the board: cached verdicts first, then one Jev
- * request per batch of the rest. Never throws: a missing key or a failed
+ * request per batch of the rest. Never throws: a missing key (even with every
+ * verdict cached) or a failed
  * request is a `not-checked` result with the reason, and nothing is cached
  * from a failed run.
  */
@@ -273,6 +277,9 @@ export async function judgeDetails(
   document: InteractiveCanvasDocument,
   options: JudgeDetailsOptions,
 ): Promise<DetailJudgement> {
+  // No key is no check, even when every verdict is cached: the documented bypass blocks nothing.
+  const apiKey = options.apiKey?.trim();
+  if (!apiKey) return { status: "not-checked", reason: "TYPESAFE_API_KEY is not set" };
   const subjects = detailSubjects(document);
   const verdicts = new Map<string, DetailVerdict>();
   const missing: DetailSubject[] = [];
@@ -288,8 +295,6 @@ export async function judgeDetails(
   }
   const usage: JevUsage = { input_tokens: 0, output_tokens: 0 };
   if (missing.length === 0) return { status: "checked", subjects, verdicts, asked: 0, usage };
-  const apiKey = options.apiKey?.trim();
-  if (!apiKey) return { status: "not-checked", reason: "TYPESAFE_API_KEY is not set" };
 
   const requests = detailRequests(document.title ?? "", missing);
   let responses;
@@ -337,26 +342,26 @@ export function memoryDetailCache(): DetailVerdictCache {
 
 /**
  * A cache kept in one JSON file, read once and rewritten atomically on each
- * set. The cache is a convenience: an unreadable file starts empty, and a
- * failed write keeps the verdicts in memory.
+ * set. Each set rereads the file and merges per key before it writes, so two
+ * caches on one file (two server processes) keep each other's verdicts. The
+ * cache is a convenience: an unreadable file starts empty, and a failed write
+ * keeps the verdicts in memory.
  */
 export function fileDetailCache(path: string): DetailVerdictCache {
   let entries: Record<string, DetailVerdict> | null = null;
-  const load = (): Record<string, DetailVerdict> => {
-    if (entries) return entries;
+  const read = (): Record<string, DetailVerdict> => {
     try {
       const parsed = JSON.parse(readFileSync(path, "utf8")) as { entries?: Record<string, DetailVerdict> };
-      entries = parsed.entries && typeof parsed.entries === "object" ? parsed.entries : {};
+      return parsed.entries && typeof parsed.entries === "object" ? parsed.entries : {};
     } catch {
-      entries = {};
+      return {};
     }
-    return entries;
   };
   return {
-    get: (key) => load()[key],
+    get: (key) => (entries ??= read())[key],
     set: (fresh) => {
       if (fresh.length === 0) return;
-      const all = load();
+      const all = (entries = { ...entries, ...read() });
       for (const [key, verdict] of fresh) all[key] = verdict;
       try {
         mkdirSync(dirname(path), { recursive: true });
