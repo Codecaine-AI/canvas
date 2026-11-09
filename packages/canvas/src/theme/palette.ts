@@ -403,7 +403,7 @@ const SHAPE_CARD_CHROMA = 0.08;
 const SHAPE_CARD_CHROMA_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: 0.11, orange: 0.09 };
 
 /**
- * How far a gray node sits above the hued node lightness: L 0.895 (#DEDEDE),
+ * How far a gray node sits above the hued node lightness: L 0.894 (#DCDCDC),
  * not 0.859 (#D0D0D0). At one OKLab lightness a neutral reads darker than a
  * colored fill (the Helmholtz-Kohlrausch effect), so round 4's #D0D0D0 was
  * the heaviest fill on gray-heavy boards, a "concrete slab" that read as
@@ -411,7 +411,7 @@ const SHAPE_CARD_CHROMA_BY_COLOR: Partial<Record<CanvasColor, number>> = { yello
  * h5). Picked from L 0.885, 0.9 and a warm 0.895 on board 02: the warm one
  * read greige. The gray node stays darker than every section: 0.06 L under a
  * gray section, 0.035 under any depth-3 level, where gray nodes sit on the
- * climb boards, and 0.015 under the deepest tint, where its ink border
+ * climb boards, and 0.014 under the deepest tint, where its ink border
  * carries it.
  */
 const SHAPE_CARD_GRAY_LIGHTNESS_LIFT = 0.036;
