@@ -25,6 +25,7 @@ import { naturalAspectOf } from "../../../../objects/natural-aspect";
 import { noteNeededHeight, noteTextPatch } from "../../../../objects/sticky/note-fit";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import { CANVAS_COLORS } from "../../../../state/schema";
+import { snapGeometry } from "../../../../state/geometry";
 import type {
   CanvasColor,
   InteractiveCanvasConnection,
@@ -64,8 +65,16 @@ export function Inspector({
   const [annotationBody, setAnnotationBody] = useState("");
   const canvasStyle = useCanvasStyle();
   // A card note is never shorter than its text needs (objects/sticky/note-fit.ts).
-  const atLeastNoteHeight = (width: number, height: number) =>
-    selectedObject ? Math.max(height, noteNeededHeight(selectedObject, canvasStyle, width) ?? 0) : height;
+  // A size field's resize. A card note is snapped here, then kept at least
+  // as tall as its text needs, and sent unsnapped: the reducer's 16px snap
+  // would pull a 100px three-line note down to 96 and clip it.
+  const resizeTo = (object: InteractiveCanvasObject, width: number, height: number): CanvasAction => {
+    const snapped = snapGeometry({ x: 0, y: 0, width, height });
+    const needed = noteNeededHeight(object, canvasStyle, snapped.width);
+    return needed === undefined
+      ? { type: "canvas.resizeObject", objectId: object.id, width, height }
+      : { type: "canvas.resizeObject", objectId: object.id, width: snapped.width, height: Math.max(snapped.height, needed), snap: false };
+  };
   const selectedSectionFitted =
     selectedObject?.type === "section" ? isSectionFitted(document, selectedObject.id) : false;
   const detailLength = selectedObject?.detail?.trim().length ?? 0;
@@ -217,12 +226,7 @@ export function Inspector({
             label="Object width"
             value={selectedObject.geometry.width}
             onCommit={(width) =>
-              dispatch({
-                type: "canvas.resizeObject",
-                objectId: selectedObject.id,
-                width,
-                height: aspect === null ? atLeastNoteHeight(width, selectedObject.geometry.height) : width / aspect,
-              })
+              dispatch(resizeTo(selectedObject, width, aspect === null ? selectedObject.geometry.height : width / aspect))
             }
           />
           <SizeInput
@@ -230,12 +234,7 @@ export function Inspector({
             label="Object height"
             value={selectedObject.geometry.height}
             onCommit={(height) =>
-              dispatch({
-                type: "canvas.resizeObject",
-                objectId: selectedObject.id,
-                width: aspect === null ? selectedObject.geometry.width : height * aspect,
-                height: aspect === null ? atLeastNoteHeight(selectedObject.geometry.width, height) : height,
-              })
+              dispatch(resizeTo(selectedObject, aspect === null ? selectedObject.geometry.width : height * aspect, height))
             }
           />
         </div>

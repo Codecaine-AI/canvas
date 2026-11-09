@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render, within } from "@testing-library/react";
-import { buildSelectionContext, type CanvasAction } from "../../../../../state/actions";
+import {
+  buildSelectionContext,
+  createInteractiveCanvasState,
+  reduceInteractiveCanvasState,
+  type CanvasAction,
+} from "../../../../../state/actions";
+import { noteNeededHeight } from "../../../../../objects/sticky/note-fit";
+import { DEFAULT_CANVAS_STYLE } from "../../../../../theme/canvas-style";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -235,6 +242,33 @@ describe("Inspector keyboard and size fields", () => {
     fireEvent.keyDown(height, { key: "Enter" });
     expect(dispatch).toHaveBeenLastCalledWith({ type: "canvas.resizeObject", objectId: "stop", width: 96, height: 96 });
   });
+});
+
+describe("Inspector size fields on a card note", () => {
+  // Three lines need 14 + 3×24 + 14 = 100px; the reducer's 16px snap alone would store 96.
+  const note: InteractiveCanvasObject = {
+    id: "note",
+    type: "sticky",
+    text: "one\ntwo\nthree",
+    color: "yellow",
+    geometry: { x: 80, y: 80, width: 240, height: 100 },
+    style: { shape: "note" },
+  };
+
+  for (const [field, value] of [["Object height", "20"], ["Object width", "256"]] as const) {
+    it(`${field} keeps the note as tall as its text after the reducer's snap`, () => {
+      let state = createInteractiveCanvasState(documentWith(note));
+      const { getByLabelText } = render(inspectorFor(note, (action) => {
+        state = reduceInteractiveCanvasState(state, action);
+      }));
+      const input = getByLabelText(field);
+      fireEvent.change(input, { target: { value } });
+      fireEvent.keyDown(input, { key: "Enter" });
+      const landed = state.document.objects[0]!;
+      expect(landed.geometry.height).toBe(noteNeededHeight(landed, DEFAULT_CANVAS_STYLE)!);
+      expect(landed.geometry.height).toBe(100);
+    });
+  }
 });
 
 describe("InteractiveCanvasEditor showInspector", () => {
