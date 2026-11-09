@@ -280,15 +280,38 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     expect(render([icon({ color: "white" })], "schematic-dark")).toContain(`fill="${dark.palette.white}"/>`);
   });
 
-  it("fills fill-paint brand glyphs: with the tile glyph color on a tile, with the ink when bare", () => {
+  it("fills a brand logo with its own brand color, never the object's color pick", () => {
     const brand = resolveIconGlyph("brand-docker", "tabler");
     expect(brand.paint).toBe("fill");
+    // Simple Icons records Docker as #2496ED (tools/dev-icons/manifest.json).
+    expect(brand.brandColor).toBe("#2496ED");
+    const light = canvasThemePreset("schematic-light");
     const tiled = render([icon({ icon: "brand-docker" })], "schematic-light");
-    expect(tiled).toContain(`viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="#FFFFFF" stroke="none"`);
+    expect(tiled).toContain(`viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="#2496ED" stroke="none"`);
+    // On a neutral card tile edged by a hairline, not the violet ink tile.
+    expect(tiled).toContain(`fill="${light.cardFill}" stroke="${light.hairlineColor}"`);
+    expect(tiled).not.toContain(`fill="${light.palette.violet}"`);
     const bare = render([icon({ icon: "brand-docker" })]);
-    const ink = resolveIconPaint("violet", FIGJAM_CANVAS_STYLE).glyph;
-    expect(bare).toContain(`fill="${ink}" stroke="none"`);
+    expect(bare).toContain(`fill="#2496ED" stroke="none"`);
+    expect(bare).not.toContain(`fill="${resolveIconPaint("violet", FIGJAM_CANVAS_STYLE).glyph}" stroke="none"`);
     expect(bare).not.toContain(`<g fill=`);
+  });
+
+  it("paints Claude Code's logo Claude orange on the default theme", () => {
+    expect(render([icon({ icon: "brand-claude", text: "Claude Code" })], "schematic-light"))
+      .toContain(`fill="#D97757" stroke="none"`);
+  });
+
+  it("falls back to the ink where a brand color would vanish: a black logo on the dark card", () => {
+    const dark = canvasThemePreset("schematic-dark");
+    const svg = render([icon({ icon: "brand-github" })], "schematic-dark");
+    expect(svg).not.toContain(`fill="#181717" stroke="none"`);
+    expect(svg).toContain(`fill="${dark.textColor}" stroke="none"`);
+  });
+
+  it("keeps tinting a generic glyph with its color pick", () => {
+    const light = canvasThemePreset("schematic-light");
+    expect(render([icon({ icon: "database" })], "schematic-light")).toContain(`fill="${light.palette.violet}"`);
   });
 
   it("the icon pack swaps a generic glyph's geometry", () => {

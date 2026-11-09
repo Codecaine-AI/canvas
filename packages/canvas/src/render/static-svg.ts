@@ -721,7 +721,7 @@ function glyphPaintAttributes(
  *    meet" centers the square glyph in a non-square bbox. Outline glyphs
  *    stroke the ink with the shape fill in their closed interiors (SVG
  *    chord-closes open paths, so all-open line art gets no fill layer);
- *    fill-paint (brand) glyphs fill with the ink.
+ *    fill-paint (brand) glyphs fill with their brand color.
  *  - tile style: renderIconTile.
  * Returns null for an unknown/missing glyph id (caller falls back to the
  * neutral rect).
@@ -736,7 +736,7 @@ function renderIconGlyph(
   const { geometry } = object;
   const sizePx = Math.min(geometry.width, geometry.height);
   const tileSidePx = iconTileRectPx(geometry.width, geometry.height, canvasStyle.iconTileMaxPx).width;
-  const paint = resolveIconTilePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, tileSidePx);
+  const paint = resolveIconTilePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, tileSidePx, glyph.brandColor);
   if (paint.tileFill !== null) {
     return renderIconTile(object, glyph, paint, viewBox, canvasStyle.iconTileMaxPx);
   }
