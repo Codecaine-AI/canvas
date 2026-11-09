@@ -151,10 +151,10 @@ const STICKY_SHADOW = { dx: 0, dy: 3, stdDeviation: 6, opacity: 0.15 } as const;
 
 /**
  * Card sticky lift — mirrors objects/sticky/def.tsx CARD_STICKY_GEOMETRY
- * (shadowOffsetYPx 2, shadowBlurPx 8: a CSS blur radius is two standard
+ * (shadowOffsetYPx 1, shadowBlurPx 3: a CSS blur radius is two standard
  * deviations). Its color is the sticky paint's cardShadow.
  */
-const CARD_STICKY_SHADOW = { dx: 0, dy: 2, stdDeviation: 4 } as const;
+const CARD_STICKY_SHADOW = { dx: 0, dy: 1, stdDeviation: 1.5 } as const;
 
 /** The sticky shadow filters a scene defines: null where no sticky casts that shadow. */
 type StickyShadowFilterIds = { paper: string | null; card: string | null };
@@ -442,12 +442,10 @@ function polygonPointsAttribute(points: CanvasPoint[]): string {
 
 /**
  * Code chip visuals — mirrors the inline `<code>` CSS in objects/sticky/
- * markdown.tsx: black at 8% on a paper sticky, the text color at 4.5% on a
- * card (objects/sticky/def.tsx CARD_STICKY_GEOMETRY.codeChipAlpha).
+ * markdown.tsx: black at 8% on a paper sticky; on a card, the sticky paint's
+ * codeChip, as the live note reads it.
  */
 const STICKY_CODE_CHIP_FILL_OPACITY = 0.08;
-/** Card sticky code chips — mirrors objects/sticky/markdown.tsx CARD_STICKY_CODE_CHIP_ALPHA. */
-const CARD_STICKY_CODE_CHIP_FILL_OPACITY = 0.045;
 /** Card sticky hairline — mirrors objects/sticky/def.tsx CARD_STICKY_GEOMETRY.borderWidthPx (React; not importable here). */
 const CARD_STICKY_BORDER_WIDTH_PX = 1;
 
@@ -557,9 +555,11 @@ const STICKY_CODE_CHIP_HEIGHT_EM = 1.3;
 function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): string {
   // The slot typography carries the sticky paint's text color.
   const resolved = resolveTextSlot(INSET_BODY_TEXT_SLOT, object, 1, { canvasStyle });
-  const paper = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).shadow;
-  const codeChipFill = paper ? "#000000" : resolved.typography.color;
-  const codeChipOpacity = paper ? STICKY_CODE_CHIP_FILL_OPACITY : CARD_STICKY_CODE_CHIP_FILL_OPACITY;
+  const stickyPaint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle);
+  // A card's chip is its paint's codeChip (an opaque hex or an rgba): split into fill + fill-opacity.
+  const cardChip = stickyPaint.codeChip === null ? null : parseColor(stickyPaint.codeChip);
+  const codeChipFill = cardChip ? formatHex(cardChip) : "#000000";
+  const codeChipOpacity = cardChip ? cardChip.a : STICKY_CODE_CHIP_FILL_OPACITY;
   if (resolved.hidden) return "";
   const rect = {
     x: object.geometry.x + resolved.rect.x,
@@ -613,7 +613,7 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
             height: chipHeight,
             rx: STICKY_CODE_CHIP_RADIUS_PX,
             fill: codeChipFill,
-            "fill-opacity": codeChipOpacity,
+            "fill-opacity": String(codeChipOpacity),
           }),
         );
       }

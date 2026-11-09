@@ -1,8 +1,10 @@
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import { CanvasStage } from "../CanvasStage";
+import { renderDocumentToSvg } from "../../render/static-svg";
+import { formatHex, parseColor } from "../../theme/color-math";
 import { canvasThemePreset, type CanvasStyle, type CanvasThemeId } from "../../theme/canvas-style";
-import { resolveIconPaint, resolveIconTilePaint } from "../../theme/palette";
+import { resolveIconPaint, resolveIconTilePaint, resolveStickyPaint } from "../../theme/palette";
 import { resolveIconGlyph } from "../../objects/shapes/icon/icon-glyphs";
 import { iconTileGlyphStrokeWidth } from "../../objects/shapes/icon/icon-tile";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
@@ -228,5 +230,23 @@ describe("live icons", () => {
     const brandTile = objectNode(container, "i2").querySelector("[data-canvas-icon-tile]") as SVGRectElement;
     expect(brandTile.getAttribute("fill")).toBe("#F8F8F7");
     expect(brandTile.getAttribute("stroke")).toBe("#E6E5E3");
+  });
+});
+
+
+describe("note code-chip paint parity", () => {
+  it.each(["schematic-light", "schematic-dark"] as const)("uses the card paint in the stage and export (%s)", (theme) => {
+    const style = canvasThemePreset(theme);
+    const note = shape({ type: "sticky", color: "yellow", text: "run `deploy` now", style: { shape: "note" } });
+    const container = stage([note], style);
+    const chip = objectNode(container, note.id).querySelector("code");
+    if (!(chip instanceof HTMLElement)) throw new Error("note has no code chip");
+    const paint = resolveStickyPaint("yellow", style);
+    expect(chip.style.background).toBe(paint.codeChip!);
+    const { svg } = renderDocumentToSvg({ schemaVersion: 1, id: "note-paint", mode: "diagram", objects: [note], connections: [] }, { canvasStyle: style });
+    const chipColor = parseColor(paint.codeChip!)!;
+    expect(svg).toContain(`fill="${formatHex(chipColor)}" fill-opacity="${chipColor.a}"`);
+    expect(chip.textContent).toBe("deploy");
+    expect(svg).toContain(">deploy</tspan>");
   });
 });

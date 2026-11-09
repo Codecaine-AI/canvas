@@ -2,7 +2,6 @@
 
 import type { CSSProperties } from "react";
 import { FIRST_USE_COLORS, objectTypeDefaults } from "../../state/schema/object-defaults";
-import { withAlpha } from "../../theme/color-math";
 import { resolveStickyPaint, type StickyPaint } from "../../theme/palette";
 import { canvasStyleCssVar, useCanvasStyle } from "../../theme/canvas-style-context";
 import type { CanvasStyle } from "../../theme/canvas-style";
@@ -10,7 +9,7 @@ import { BBOX_OUTLINE } from "../geometry";
 import { ObjectShell, ObjectSlotText } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { INSET_BODY_TEXT_SLOT } from "../text-slots";
-import { CARD_STICKY_CODE_CHIP_ALPHA, StickyMarkdown } from "./markdown";
+import { StickyMarkdown } from "./markdown";
 
 /** Sticky geometry/typography (per-kind constants co-locate with their def; the text inset/typography live on the inset-body slot preset in objects/text-slots.ts). */
 export const STICKY_GEOMETRY = {
@@ -26,15 +25,13 @@ export const STICKY_GEOMETRY = {
  * the paint's neutral ink down the left side just inside the hairline
  * (CanvasStyle.stickyRuleWidthPx), and on light boards a soft lift
  * (StickyPaint.cardShadow) that sets the note off the near-white board.
- * Inline `code` chips tint with the text color at a lighter alpha than the
- * paper chip's: at 8% a run of chips read as gray blotches on the note.
+ * Inline `code` chips take the paint's codeChip (StickyPaint.codeChip).
  */
 export const CARD_STICKY_GEOMETRY = {
   borderWidthPx: 1,
-  codeChipAlpha: CARD_STICKY_CODE_CHIP_ALPHA,
   /** The lift's offset down and its blur radius (render/static-svg.ts mirrors both). */
-  shadowOffsetYPx: 2,
-  shadowBlurPx: 8,
+  shadowOffsetYPx: 1,
+  shadowBlurPx: 3,
 } as const;
 
 /**
@@ -114,9 +111,7 @@ function StickyObjectView(props: ObjectRenderProps) {
           <StickyMarkdown
             text={object.text}
             headingScale={canvasStyle.stickyHeadingScale}
-            codeBackground={
-              paint.shadow ? undefined : withAlpha(paint.text, CARD_STICKY_GEOMETRY.codeChipAlpha)
-            }
+            codeBackground={paint.codeChip ?? undefined}
           />
         </ObjectSlotText>
       )}

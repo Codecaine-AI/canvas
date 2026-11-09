@@ -297,6 +297,8 @@ export type StickyPaint = {
   shadow: boolean;
   /** A card sticky's soft lift: the shadow color, or null for none (paper stickies, dark boards). */
   cardShadow: string | null;
+  /** A card sticky's inline `code` chip body, or null on paper stickies (their chip is the figjam black at 8%). */
+  codeChip: string | null;
 };
 
 export type ConnectorPaint = {
@@ -627,11 +629,13 @@ export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle): Stic
 
 /** Card sticky lift: the text color at this opacity (light boards only). */
 const CARD_STICKY_SHADOW_OPACITY = 0.14;
+/** Card code chips keep the existing text tint outside the cream-paper theme. */
+const CARD_STICKY_CODE_CHIP_ALPHA = 0.045;
 
 /**
  * Beside `ink-card` nodes a card note is cream paper: the yellow anchor's hue
- * at OKLab L 0.977, chroma 0.03, edged in the label chip's firm gray and
- * lifted, with no left rule.
+ * at OKLab L 0.977, chroma 0.03, with a warm edge and a tight lift.
+ * Code chips keep the paper hue instead of adding gray patches.
  *
  * Round 4 made sections near white (L 0.955) on a near-white page section
  * (the panel, L 0.979), and the note was the panel itself: it sat on the page
@@ -649,15 +653,24 @@ const CARD_STICKY_SHADOW_OPACITY = 0.14;
 const NOTE_PAPER_LIGHTNESS = 0.977;
 const NOTE_PAPER_CHROMA = 0.03;
 
+/** Cream-note trim: a warm edge and a small lift keep annotations secondary. */
+const NOTE_EDGE_LIGHTNESS = 0.74;
+const NOTE_EDGE_CHROMA = 0.065;
+const NOTE_SHADOW_OPACITY = 0.07;
+const NOTE_CODE_CHIP_LIGHTNESS = 0.945;
+const NOTE_CODE_CHIP_CHROMA = 0.035;
+
 function paperCardStickyPaint(style: CanvasStyle): StickyPaint {
-  const fill = withLightnessChroma(paletteColor("yellow", style), NOTE_PAPER_LIGHTNESS, NOTE_PAPER_CHROMA);
+  const yellow = paletteColor("yellow", style);
+  const fill = withLightnessChroma(yellow, NOTE_PAPER_LIGHTNESS, NOTE_PAPER_CHROMA);
   return {
     fill,
-    border: resolveLabelChipBorder(style),
+    border: withLightnessChroma(yellow, NOTE_EDGE_LIGHTNESS, NOTE_EDGE_CHROMA),
     rule: null,
     text: readableOn(style.textColor, fill),
     shadow: false,
-    cardShadow: withAlpha(style.textColor, CARD_STICKY_SHADOW_OPACITY),
+    cardShadow: withAlpha(style.textColor, NOTE_SHADOW_OPACITY),
+    codeChip: withLightnessChroma(yellow, NOTE_CODE_CHIP_LIGHTNESS, NOTE_CODE_CHIP_CHROMA),
   };
 }
 
@@ -671,12 +684,13 @@ function stickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
       text: style.textColor,
       shadow: false,
       cardShadow: isLightBoard(style) ? withAlpha(style.textColor, CARD_STICKY_SHADOW_OPACITY) : null,
+      codeChip: withAlpha(style.textColor, CARD_STICKY_CODE_CHIP_ALPHA),
     };
   }
   const fill = swatchFor(color).sticky;
   // The paper body has always been the text color at 80% (INSET_BODY_TEXT_SLOT: rgba(0, 0, 0, 0.8)).
   const text = withAlpha(readableOn(style.textColor, fill), PAPER_STICKY_TEXT_OPACITY);
-  return { fill, border: null, rule: null, text, shadow: true, cardShadow: null };
+  return { fill, border: null, rule: null, text, shadow: true, cardShadow: null, codeChip: null };
 }
 
 /**

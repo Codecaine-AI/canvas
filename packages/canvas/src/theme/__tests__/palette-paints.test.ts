@@ -62,6 +62,7 @@ describe("figjam paints equal the role tables", () => {
       text: "rgba(0, 0, 0, 0.8)",
       shadow: true,
       cardShadow: null,
+      codeChip: null,
     });
     // Glyph icons: ink stroke, shape-fill interiors, no tile (IconShapeBody / static-svg).
     expect(resolveIconPaint(color, FIGJAM_CANVAS_STYLE)).toEqual({
@@ -478,14 +479,19 @@ describe("schematic shapes, icons, stickies, connectors", () => {
 
   it("card stickies: cream paper beside ink-card nodes, the card with a gray left rule on dark boards", () => {
     for (const color of CANVAS_COLORS) {
-      expect(resolveStickyPaint(color, LIGHT)).toEqual({
+      const paint = resolveStickyPaint(color, LIGHT);
+      expect(paint).toMatchObject({
         fill: "#FFF7E5",
-        border: "#C0BFBC",
         rule: null,
-        text: "#1F1F1F",
+        text: LIGHT.textColor,
         shadow: false,
-        cardShadow: "rgba(31, 31, 31, 0.14)",
       });
+      expect(paint.border).not.toBeNull();
+      expect(paint.codeChip).not.toBeNull();
+      expect(contrastRatio(paint.text, paint.codeChip!)).toBeGreaterThanOrEqual(7);
+      expect(oklabDistance(paint.fill, paint.codeChip!)).toBeLessThan(0.04);
+      expect(oklabChroma(paint.border!)).toBeGreaterThan(0.04);
+      expect(parseColor(paint.cardShadow!)!.a).toBeLessThanOrEqual(0.08);
     }
     expect(resolveStickyPaint("yellow", DARK)).toMatchObject({ fill: "#32363E", border: "#3D444D", rule: "#9198A1", cardShadow: null });
   });
