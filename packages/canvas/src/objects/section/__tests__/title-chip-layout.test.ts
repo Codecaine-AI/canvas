@@ -7,9 +7,11 @@ import {
   estimateTitleChipWidthPx,
   titleChipHasContent,
   titleChipLayout,
+  titleChipIconDrawing,
   titleChipScale,
   titleChipVisibleRuns,
 } from "../title-chip-layout";
+import { resolveSectionPaint } from "../../../theme/palette";
 
 /**
  * The section header chip layout (contract §4): floating vs pinned geometry,
@@ -219,5 +221,22 @@ describe("titleChipHasContent", () => {
     expect(titleChipHasContent(section({ text: "", icon: "server", detail: undefined }))).toBe(true);
     expect(titleChipHasContent(section({ text: "", icon: undefined, detail: "port 80" }))).toBe(true);
     expect(titleChipHasContent(section({ text: "", icon: "nope" as never, detail: " \n " }))).toBe(false);
+  });
+});
+
+describe("header brand logo", () => {
+  it("keeps its brand color on a neutral tile, as the same logo does on an icon object", () => {
+    for (const theme of ["figjam", "schematic-light", "schematic-dark"] as const) {
+      const style = canvasThemePreset(theme);
+      const header = titleChipIconDrawing("brand-typescript", resolveSectionPaint("blue", 0, style), style);
+      expect(header?.glyph.color).toBe("#3178C6");
+      if (style.iconStyle === "tile") expect(header?.tile?.fill).toBe(style.cardFill);
+    }
+  });
+
+  it("falls back to the theme ink where the brand color would vanish (GitHub black on the dark card)", () => {
+    const style = canvasThemePreset("schematic-dark");
+    const header = titleChipIconDrawing("brand-github", resolveSectionPaint("gray", 0, style), style);
+    expect(header?.glyph.color).toBe(style.textColor);
   });
 });

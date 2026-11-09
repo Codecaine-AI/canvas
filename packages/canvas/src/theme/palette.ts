@@ -457,6 +457,25 @@ function brandIconPaint(brandColor: string, style: CanvasStyle): IconTilePaint {
 }
 
 /**
+ * A section header's brand logo (objects/section/title-chip-layout.ts):
+ * the same brand policy as an icon object (brandIconPaint). Tile style: the
+ * mark on the neutral card tile. Glyph style: the bare mark on the header
+ * chip (`colors.iconTile` is the chip fill there), falling back to the
+ * section's own glyph ink where the brand color would vanish.
+ */
+export function brandHeaderIconColors(
+  brandColor: string,
+  colors: Pick<SectionPaint, "iconTile" | "iconTileBorder" | "iconGlyph">,
+  style: CanvasStyle,
+): Pick<SectionPaint, "iconTile" | "iconTileBorder" | "iconGlyph"> {
+  if (style.iconStyle !== "tile") {
+    return { ...colors, iconGlyph: visibleBrandColor(brandColor, colors.iconTile, colors.iconGlyph) };
+  }
+  const paint = brandIconPaint(brandColor, style);
+  return { iconTile: paint.tileFill ?? colors.iconTile, iconTileBorder: paint.tileBorder, iconGlyph: paint.glyph };
+}
+
+/**
  * Sticky paint. `paper` (figjam): the sticky role-table fill, no border, a
  * shadow. `card`: cardFill, hairline border, a left rule in the ink
  * (stickyRuleWidthPx), no shadow.

@@ -156,7 +156,9 @@ describe("pinned title chip with icon + detail", () => {
     expect(svg).toContain(`x="${Math.round((101.5 + 28 + titleWidth + 10) * 100) / 100}" y="93.5"`);
     expect(svg).toMatch(/font-weight="400"[^>]*>127\.0\.0\.1<\/text>/);
     // The 16px tile sits 6px in, centered on the content line (93.5); the glyph is 11px inside it.
-    expect(svg).toContain('<rect x="107.5" y="85.5" width="16" height="16" rx="2" fill="#0D7164"/>');
+    // Bun is a brand logo: its own black mark on the neutral card tile, edged by a hairline.
+    expect(svg).toContain('<rect x="108" y="86" width="15" height="15" rx="1.5" fill="#F8F8F7" stroke="#E6E5E3" stroke-width="1"/>');
+    expect(svg).toContain('transform="translate(110 88) scale(0.4583)" fill="#000000"');
     expect(svg).toContain('transform="translate(110 88) scale(0.4583)"');
     // Only the right and bottom edges are stroked, inside the box like a CSS border
     // (box: 6 lead + 22 icon + 114.25 title + 10 + 75.61 detail + 10 + 1.5 edge).
