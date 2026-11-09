@@ -2,7 +2,7 @@
 
 import type { InteractiveCanvasDocument } from "../schema";
 import { reconcileSectionMembership } from "../section-membership";
-import { settleSections } from "../section-grow";
+import { fittedNoteParents, settleSections } from "../section-grow";
 import { handleApplyAgentPatch } from "./agent-patch";
 import {
   handleAddAnnotation,
@@ -76,7 +76,10 @@ export function reduceInteractiveCanvasState(
   // Section auto-grow on every discrete geometry commit, before waypoints, in
   // runOperation's order (state/section-grow.ts). A grow that would capture a
   // neighbor is not made: Studio keeps the human's drop, and containment names it.
-  const grownDocument = shouldReconcileSections ? settleSections(next.document) : next.document;
+  // A note whose text fit grew it keeps its frame, which grows to hold it.
+  const grownDocument = shouldReconcileSections
+    ? settleSections(next.document, fittedNoteParents(state.document, next.document))
+    : next.document;
   const waypointsReconciledDocument = reconcileConnectionWaypoints(state.document, grownDocument);
   const sectionReconciledDocument = shouldReconcileSections
     ? reconcileSectionMembership(waypointsReconciledDocument)

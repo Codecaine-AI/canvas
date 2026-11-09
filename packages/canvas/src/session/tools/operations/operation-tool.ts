@@ -7,7 +7,7 @@ import { Type, type Static, type TSchema } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { reconcileConnectionWaypoints } from "../../../state/actions/waypoints";
 import { reconcileSectionMembership } from "../../../state/section-membership";
-import { growSectionsToChildren, sectionOverflow } from "../../../state/section-grow";
+import { fittedNoteParents, growSectionsToChildren, reconcileHolding, sectionOverflow } from "../../../state/section-grow";
 
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
@@ -159,7 +159,8 @@ export function runOperation<TFields extends OperationFields>(
   // drawer did not touch changes parent. A grow already stuck before the edit
   // does not block an edit that leaves every child's overflow no worse on every
   // edge, but an edit that pushes any child further past that frame is refused.
-  const grow = growSectionsToChildren(reconcileSectionMembership(outcome.draft));
+  // A note whose text fit grew it keeps its frame, which grows to hold it.
+  const grow = growSectionsToChildren(reconcileHolding(outcome.draft, fittedNoteParents(before, outcome.draft)));
   const reconciledBefore = reconcileSectionMembership(before);
   const stuck = new Set(growSectionsToChildren(reconciledBefore).blocked.map((entry) => entry.section));
   const worsens = (section: string) => {

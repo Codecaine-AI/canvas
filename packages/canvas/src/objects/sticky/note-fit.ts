@@ -22,7 +22,7 @@
  */
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 import type { CanvasStyle } from "../../theme/canvas-style";
-import { settleSections } from "../../state/section-grow";
+import { fittedNoteParents, settleSections } from "../../state/section-grow";
 import { AGENT_GRID } from "../../state/geometry";
 import { layoutStickyText } from "./sticky-text";
 import { INSET_BODY_TEXT_SLOT, insetBodyPaddingPx, resolveTextSlot, slotLineHeightPx } from "../text-slots";
@@ -89,8 +89,8 @@ export function noteTextPatch(
 
 /**
  * `document` with every card note fitted to its text (paper stickies and
- * every other object untouched). When a note grew, its sections grow around
- * it by section auto-grow (state/section-grow.ts); when notes only shrank,
+ * every other object untouched). When a note grew, it keeps its section,
+ * which grows around it by section auto-grow (state/section-grow.ts); when notes only shrank,
  * no section moves. Sections never shrink. The same document when nothing
  * changes.
  * For a one-off migration of boards written before the fit-on-write rule;
@@ -110,5 +110,6 @@ export function fitNotesToText(
     return { ...object, geometry };
   });
   if (!changed) return document;
-  return grew ? settleSections({ ...document, objects }) : { ...document, objects };
+  const fitted = { ...document, objects };
+  return grew ? settleSections(fitted, fittedNoteParents(document, fitted)) : fitted;
 }

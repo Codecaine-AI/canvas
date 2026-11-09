@@ -5,7 +5,8 @@
 import { describe, expect, test } from "bun:test";
 
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
-import { fitNotesToText, noteNeededHeight } from "../../objects/sticky/note-fit";
+import { fitNotesToText, noteNeededHeight, noteTextPatch } from "../../objects/sticky/note-fit";
+import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../../state/actions";
 import { canvasThemePreset, FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import { makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
@@ -107,5 +108,44 @@ describe("fitNotesToText", () => {
   test("leaves every figjam paper sticky as it is", () => {
     const document = makeDocument([note("paper", "Short", 0, 0, 240, 240)]);
     expect(fitNotesToText(document, FIGJAM_CANVAS_STYLE)).toBe(document);
+  });
+});
+
+describe("a note that outgrows its section keeps it", () => {
+  // A 400×200 frame and a one-line note at (40,60): twelve lines make the note
+  // 320 tall, so less than half of it overlaps the old frame.
+  const TWELVE = Array(12).fill("line").join("\n");
+  const board = () => makeDocument([
+    { ...box("frame", 0, 0, 400, 200, "section"), text: "Frame" },
+    { ...note("n", "short", 40, 60, 240, 60), parentId: "frame" },
+  ]);
+  const held = (document: InteractiveCanvasDocument) => {
+    const n = document.objects.find((object) => object.id === "n")!;
+    const frame = geometryOf(document, "frame");
+    expect(n.geometry.height).toBe(320);
+    expect(n.parentId).toBe("frame");
+    expect(frame.y + frame.height).toBeGreaterThanOrEqual(n.geometry.y + n.geometry.height);
+  };
+
+  test("agent update_text", () => {
+    const session = makeTestSession(board(), ["frame"], { canvasStyle: CARD });
+    runOp(session, "update_text", { id: "n", text: TWELVE });
+    held(session.draft);
+  });
+
+  test("Studio text edit", () => {
+    const state = createInteractiveCanvasState(board());
+    const object = state.document.objects.find((candidate) => candidate.id === "n");
+    const next = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObject",
+      objectId: "n",
+      patch: noteTextPatch(object, TWELVE, CARD),
+    });
+    held(next.document);
+  });
+
+  test("fitNotesToText", () => {
+    const document = board();
+    held(fitNotesToText({ ...document, objects: document.objects.map((o) => (o.id === "n" ? { ...o, text: TWELVE } : o)) }, CARD));
   });
 });
