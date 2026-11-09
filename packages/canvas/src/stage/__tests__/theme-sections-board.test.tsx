@@ -118,8 +118,8 @@ describe.each(["schematic-light", "schematic-dark"] as const)("layer-cake sectio
   });
 });
 
-describe("pinned title chip with icon + detail", () => {
-  it("live: flush inside the 1.5px frame, right + bottom edges, the icon tile, the uppercased title, the detail run", () => {
+describe("pinned title chip with icon (a stored detail never paints)", () => {
+  it("live: flush inside the 1.5px frame, right + bottom edges, the icon tile, the uppercased title alone", () => {
     const chip = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-section-title-chip="outer"]')!;
     expect(chip.style.left).toBe("101.5px");
     expect(chip.style.top).toBe("81.5px");
@@ -135,31 +135,27 @@ describe("pinned title chip with icon + detail", () => {
     expect(chip.style.fontFamily).toContain("IBM Plex Mono");
     const [icon, title] = [...chip.children];
     expect(icon?.getAttribute("data-canvas-section-icon")).toBe("brand-bun");
-    expect(title?.textContent).toBe("Bun services127.0.0.1");
-    const detail = chip.querySelector<HTMLElement>("[data-canvas-section-detail]")!;
-    expect(detail.textContent).toBe("127.0.0.1");
-    expect(detail.style.marginLeft).toBe("10px");
-    expect(detail.style.textTransform).toBe("none");
+    expect(title?.textContent).toBe("Bun services");
+    expect(chip.textContent).not.toContain("127.0.0.1");
   });
 
-  it("static: the same box at the same origin, edges, icon, and runs", () => {
+  it("static: the same box at the same origin, edges, icon, and title", () => {
     const svg = staticSvg("schematic-light");
     // Fill path from the frame's inner corner (0.5px radius) at (101.5, 81.5).
     expect(svg).toContain('<path d="M102 81.5H');
     // Title at box x + 28 (6 lead + 16 tile + 6 gap), centered in the 25.5px box less its bottom edge.
     expect(svg).toContain('x="129.5" y="93.5" fill="#1F1F1F" font-size="14" font-weight="600"');
     expect(svg).toMatch(/>BUN SERVICES<\/text>/);
-    // Detail 10px after the title: 12 tracked Plex Mono cells, 114.24px → 114.25 in layout units.
+    // 12 tracked Plex Mono cells, 114.24px → 114.25 in layout units; the stored detail paints nothing.
     const titleWidth = measureWidth("BUN SERVICES", { family: "IBM Plex Mono", size: 14, weight: 600, letterSpacing: 1.12 });
     expect(titleWidth).toBe(114.25);
-    expect(svg).toContain(`x="${Math.round((101.5 + 28 + titleWidth + 10) * 100) / 100}" y="93.5"`);
-    expect(svg).toMatch(/font-weight="400"[^>]*>127\.0\.0\.1<\/text>/);
+    expect(svg).not.toContain("127.0.0.1");
     // The 16px tile sits 6px in, centered on the content line (93.5); the glyph is 11px inside it.
     expect(svg).toContain('<rect x="107.5" y="85.5" width="16" height="16" rx="2" fill="#0D7164"/>');
     expect(svg).toContain('transform="translate(110 88) scale(0.4583)"');
     // Only the right and bottom edges are stroked, inside the box like a CSS border
-    // (box: 6 lead + 22 icon + 114.25 title + 10 + 75.61 detail + 10 + 1.5 edge).
-    expect(svg).toMatch(/<path d="M340\.11 81\.5V105A1\.25 1\.25 0 0 1 338\.86 106\.25H101\.5" fill="none" stroke="rgba\(13, 113, 100, 0\.5\)" stroke-width="1\.5"/);
+    // (box: 6 lead + 22 icon + 114.25 title + 10 + 1.5 edge).
+    expect(svg).toMatch(/<path d="M254\.5 81\.5V105A1\.25 1\.25 0 0 1 253\.25 106\.25H101\.5" fill="none" stroke="rgba\(13, 113, 100, 0\.5\)" stroke-width="1\.5"/);
   });
 
   it("figjam keeps the floating chip markup for a plain title (live and static)", () => {

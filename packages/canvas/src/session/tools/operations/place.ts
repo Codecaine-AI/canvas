@@ -91,7 +91,7 @@ export const placeSection = defineOperationTool({
     + "from geometry, so the frame adopts whatever its edges already cover, and "
     + "it keeps the footprint it lands with until something fits, arranges or "
     + "resizes it. Undrawn size takes the default section footprint. The header "
-    + "shows the optional icon, the title, and the optional one-fact detail.",
+    + "shows the optional icon and the title.",
   fields: PlaceSectionParams.properties,
   validate: (ctx, p) => [
     ...ctx.requireFreeId(p.id),
@@ -113,7 +113,6 @@ export const placeSection = defineOperationTool({
         object: draftPlacedObject("section", geometry, {
           id: p.id,
           text: p.text,
-          detail: storedDetail(p.detail),
           color: p.color ?? defaults.color,
           ...(p.icon !== undefined && isGlyphName(p.icon) ? { icon: p.icon } : {}),
         }),
@@ -226,8 +225,8 @@ function clonedFrom(
   // 240×160 copy, and a row built from it stays on the grid.
   const size = snapSize(source.geometry);
   // The detail travels like the name: carried over unless the call names one,
-  // and an empty one clears it. A sticky never carries one.
-  const copiedDetail = source.type === "sticky"
+  // and an empty one clears it. A sticky or a section never carries one.
+  const copiedDetail = source.type === "sticky" || source.type === "section"
     ? undefined
     : detail !== undefined ? storedDetail(detail) : storedDetail(source.detail);
   return {
@@ -258,7 +257,7 @@ export const clone = defineOperationTool({
   name: "clone",
   description:
     "Copy one object. The copy inherits the source's kind, size, color, shape "
-    + "type/direction/glyph, detail line, and border style, so a row of options "
+    + "type/direction/glyph, detail line (shapes and icons), and border style, so a row of options "
     + "matches without re-specifying a number. A copy whose new text does not fit "
     + "grows to fit and joins its row and column sizes, like place_shape. Two things it does NOT carry: edges "
     + "attached to the source (draw those with connect), and, for a section, "
@@ -321,8 +320,8 @@ export const clone = defineOperationTool({
             `the frame copied without its ${emptied} descendant${emptied === 1 ? "" : "s"} — place or clone the contents into ${p.id} yourself`,
           ]
         : []),
-      ...(source.type === "sticky" && storedDetail(p.detail) !== undefined
-        ? [detailDroppedNote("sticky")]
+      ...((source.type === "sticky" || source.type === "section") && storedDetail(p.detail) !== undefined
+        ? [detailDroppedNote(source.type)]
         : []),
     ];
     return placeFitted(ctx, p.id, ctx.applyLowered(

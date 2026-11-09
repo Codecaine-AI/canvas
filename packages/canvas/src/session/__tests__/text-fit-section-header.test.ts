@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 
 import { textFitReport } from "../../board/text-fit";
 import { renderDocumentToSvg } from "../../render/static-svg.ts";
+import { titleChipLayout } from "../../objects/section/title-chip-layout";
 import { canvasThemePreset, DEFAULT_CANVAS_STYLE } from "../../theme/canvas-style";
 import type { InteractiveCanvasObject } from "../../state/schema";
 import { FIGJAM_CANVAS_STYLE } from "./helpers";
@@ -9,7 +10,8 @@ import { FIGJAM_CANVAS_STYLE } from "./helpers";
 /**
  * Section header fit reads the one shared chip layout the renderers paint and
  * hit-test with (objects/section/title-chip-layout.ts): a header that paints
- * whole fits, one that paints an ellipsis does not — empty title or not.
+ * whole fits, one that paints an ellipsis does not. A stored section detail
+ * never paints, so it never enters the fit.
  */
 
 function section(partial: Partial<InteractiveCanvasObject> = {}): InteractiveCanvasObject {
@@ -34,29 +36,32 @@ function paint(object: InteractiveCanvasObject, style = DEFAULT_CANVAS_STYLE): s
 
 describe("section header text-fit", () => {
   test("a figjam header the renderer paints whole is measured, and within a pixel of the frame it is borderline", () => {
-    const cli = section({ detail: "cli.ts" });
-    expect(paint(cli, FIGJAM_CANVAS_STYLE)).toContain(">cli.ts</text>");
-    // The chip wants 1.5 + 10 + "CLI" + 10 + "cli.ts" + 10 + 1.5 ≈ 93.6px of the 94px budget:
-    // it paints whole, but by less than a pixel — the browser may cut it, so no promise.
-    const tight = textFitReport(cli, { width: 100, height: 300 }, "CLI", FIGJAM_CANVAS_STYLE);
+    const natural = titleChipLayout(section({ text: "Command line" }), FIGJAM_CANVAS_STYLE).naturalWidthPx;
+    // The budget is the section width less the 3px inset a side. Within a
+    // pixel the chip paints whole, but the browser may cut it, so no promise.
+    const width = natural + 6 + 0.5;
+    const cli = section({ text: "Command line", geometry: { x: 0, y: 0, width, height: 300 } });
+    expect(paint(cli, FIGJAM_CANVAS_STYLE)).toContain(">Command line</text>");
+    const tight = textFitReport(cli, { width, height: 300 }, "Command line", FIGJAM_CANVAS_STYLE);
     expect(tight.verdict).toBe("borderline");
     expect(tight.fits).toBe(false);
-    expect(tight.detailLine).toMatchObject({ shown: true, truncated: false, painted: "cli.ts" });
     expect(tight.detail).toContain("can't promise");
     // Two pixels wider it surely fits.
-    const roomy = textFitReport(cli, { width: 102, height: 300 }, "CLI", FIGJAM_CANVAS_STYLE);
+    const roomy = textFitReport(cli, { width: width + 2, height: 300 }, "Command line", FIGJAM_CANVAS_STYLE);
     expect(roomy.verdict).toBe("fits");
     expect(roomy.fits).toBe(true);
   });
 
-  test("an empty title does not skip the detail's fit check", () => {
-    const detailOnly = section({ text: "", detail: "Detail line long enough to be cut", geometry: { x: 0, y: 0, width: 80, height: 300 } });
-    expect(paint(detailOnly, canvasThemePreset("schematic-light"))).toContain("…</text>");
-    const report = textFitReport(detailOnly, { width: 80, height: 300 }, "", canvasThemePreset("schematic-light"));
-    expect(report.fits).toBe(false);
-    expect(report.slot).toBe("section-title");
-    expect(report.detailLine?.truncated).toBe(true);
-    expect(report.neededSize!.width).toBeGreaterThan(80);
+  test("a stored section detail never paints and adds nothing to the fit", () => {
+    const withDetail = section({ detail: "Detail line long enough to be cut", geometry: { x: 0, y: 0, width: 80, height: 300 } });
+    const light = canvasThemePreset("schematic-light");
+    expect(paint(withDetail, light)).not.toContain("Detail line");
+    const report = textFitReport(withDetail, { width: 80, height: 300 }, "CLI", light);
+    expect(report).toEqual(textFitReport(section({ geometry: withDetail.geometry }), { width: 80, height: 300 }, "CLI", light));
+    expect(report.fits).toBe(true);
+    expect(report.detailLine).toBeUndefined();
+    // An empty title with only a detail has no header at all.
+    expect(textFitReport(withDetail, { width: 80, height: 300 }, "", light).slot).toBe("none");
   });
 
   test("a section header with nothing in it has nothing to fit", () => {

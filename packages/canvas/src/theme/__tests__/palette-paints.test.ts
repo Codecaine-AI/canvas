@@ -94,18 +94,6 @@ describe("layer-cake sections", () => {
   it.each([
     ["schematic-light", LIGHT],
     ["schematic-dark", DARK],
-  ] as const)("keeps the header detail at ≥ 3:1 on its chip for every color (%s)", (_id, style) => {
-    for (const color of CANVAS_COLORS) {
-      for (const depth of [1, 2, 3]) {
-        const paint = resolveSectionPaint(color, depth, style);
-        expect(contrastRatio(paint.headerDetail, paint.chipFill)).toBeGreaterThanOrEqual(3);
-      }
-    }
-  });
-
-  it.each([
-    ["schematic-light", LIGHT],
-    ["schematic-dark", DARK],
   ] as const)("keeps the header title at ≥ 4.5:1 on its chip for every color (%s)", (_id, style) => {
     for (const color of CANVAS_COLORS) {
       for (const depth of [1, 2, 3, 4]) {

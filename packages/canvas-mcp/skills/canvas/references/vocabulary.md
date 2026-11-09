@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/vocabulary.ts (sha256 a1fb49385006dd5575e6c1336b6ff9d111e91138bab6fa02700bbc55f5f34b8c). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/vocabulary.ts (sha256 3abf7f9a2aed05b745451b83b41b5b6582628083a4f9934e1a0135fc1aee2971). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Visual Vocabulary
 
@@ -6,7 +6,7 @@
     <sections>
         A section is a titled frame that groups related content. Sections can contain objects and other sections.
 
-        The header shows an optional icon, the title, and an optional detail: one short fact after the title.
+        The header shows an optional icon and the title. A section has no detail line.
     </sections>
 
     <objects>

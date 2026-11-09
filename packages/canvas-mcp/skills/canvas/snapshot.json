@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:7b4a2d716453a93e1a7924fb24473a0eee30dedb252e1d4d12b973cf5934af9f",
+  "snapshotId": "sha256:f0dc7603f267786b74b584e57817758979fc605e04e27fdf08637c49d8c7ee18",
   "sources": [
     {
       "id": "prompt",
       "path": "packages/canvas/src/authoring/prompt/prompt.json",
-      "sha256": "9c91daf8919ba6bc6d15e2886a360c696a9908c435f1ebbdc98983102a0e5294"
+      "sha256": "c213e91aa86de717b43cf0100f6a7280e2e6150b25d2c888711c63ad55263b44"
     },
     {
       "id": "state_grammar",
@@ -25,12 +25,12 @@
     {
       "id": "diagram_design",
       "path": "packages/canvas/src/authoring/design.ts",
-      "sha256": "a4a84bfccbf57ab9bcb5bc29250a5baa6bc1fefd8343375ce5a7af2f54677ebd"
+      "sha256": "06395f143d892929f3c4a8a3fdd960018737be12f847ec1f44f18bd409b707d5"
     },
     {
       "id": "visual_vocabulary",
       "path": "packages/canvas/src/authoring/vocabulary.ts",
-      "sha256": "a1fb49385006dd5575e6c1336b6ff9d111e91138bab6fa02700bbc55f5f34b8c"
+      "sha256": "3abf7f9a2aed05b745451b83b41b5b6582628083a4f9934e1a0135fc1aee2971"
     },
     {
       "id": "color_palette",
@@ -40,7 +40,7 @@
     {
       "id": "canvas_conventions",
       "path": "packages/canvas/src/authoring/conventions.ts",
-      "sha256": "0bf8b29e931d8796ff8570ca0d5b46ddab1cb925436aad2de406284a630b0fa0"
+      "sha256": "35d0532c11bc90c1e6fc7b7e519dfd8972fded86f16228913c36b77f9eeadda5"
     },
     {
       "id": "contact_sheet",
@@ -50,6 +50,6 @@
   ],
   "skill": {
     "path": "packages/canvas-mcp/src/skill/SKILL.md",
-    "sha256": "99ae75121efa271bde1f603f21b7a8d44050c13fdf4f0d474e115aa701bedb57"
+    "sha256": "569b48cf9a2d953c51c0c834b506f3144f909012d46eef48862e0aa7a0ad1d38"
   }
 }

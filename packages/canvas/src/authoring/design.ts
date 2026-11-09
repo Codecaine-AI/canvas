@@ -43,7 +43,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
 
 <text_and_evidence>
     <name_and_detail>
-        Shapes, icons, and sections each carry a name and at most one detail line.
+        Shapes and icons each carry a name and at most one detail line. A section carries a title only.
 
         - The name (\`text\`) says what the thing is in ${NAME_TARGET_WORDS} words or fewer, on one line, with no sentences.
         - The detail (\`detail\`) is one short fact, such as a port, path, version, model, or host, in ${DETAIL_MAX_CHARS} characters or fewer.
@@ -62,7 +62,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
     </wire_labels>
 
     <cover_every_requirement>
-        A reader looks for each requirement on a node or a wire. A fact only in a note, the board description, or a section detail counts as missing.
+        A reader looks for each requirement on a node or a wire. A fact only in a note, the board description, or a section title counts as missing.
 
         - Before you place anything, list every component, every field or measure, and every behavior with its trigger in the source.
         - Give each component a node. Put each field or measure in that node's detail.

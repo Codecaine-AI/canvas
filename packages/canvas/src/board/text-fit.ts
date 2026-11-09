@@ -92,7 +92,6 @@ import {
   titleChipFontSpec,
   titleChipHasContent,
   titleChipLayout,
-  titleChipVisibleRuns,
 } from "../objects/section/title-chip-layout.ts";
 import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../connectors/label-chip.ts";
 import {
@@ -674,15 +673,10 @@ function sectionTitleReport(
   );
   const chip = layout.naturalWidthPx;
   const budget = titleChipMaxWidthPx(size.width, 1);
-  const detailLine = sectionDetailFit(layout);
   const verdict = threeState(
     [budget - TEXT_FIT_TOLERANCE_PX, budget, budget + TEXT_FIT_TOLERANCE_PX].map((room) => chip <= room),
   );
-  const runs: Array<readonly [string, FontSpec]> = [
-    [layout.title.text, titleChipFontSpec(layout.title.font)],
-    ...(layout.detail ? [[layout.detail.text, titleChipFontSpec(layout.detail.font)] as const] : []),
-  ];
-  const reliable = reliability(runs.map(([runText, runFont]) => [runText, runFont, "normal"] as const));
+  const reliable = reliability([[layout.title.text, titleChipFontSpec(layout.title.font), "normal"]]);
   const caution = cautionClause(verdict, reliable.reliable, reliable.uncovered);
   const wants = `the chip wants ${Math.ceil(chip)}px of ${Math.floor(budget)}px`;
   if (verdict === "fits") {
@@ -693,52 +687,25 @@ function sectionTitleReport(
       detail: `section title fits at ${fmtSize(size)}: ${wants}${caution ? ` (${caution})` : ""}`,
       slot: "section-title",
       nameFits: true,
-      ...(detailLine ? { detailLine } : null),
     };
   }
   const needed = round({
     width: chip + TITLE_CHIP.insetFromSectionCornerPx * 2 + TEXT_FIT_TOLERANCE_PX,
     height: size.height,
   });
-  // The detail run gives way first: the title is whole while any of the detail still shows.
-  const titleWhole = titleChipVisibleRuns(layout).title === layout.title.text;
   const base = {
     verdict,
     fits: false,
     ...reliable,
     neededSize: needed,
     slot: "section-title" as const,
-    nameFits: titleWhole,
-    ...(detailLine ? { detailLine } : null),
+    nameFits: false,
   };
   if (verdict === "borderline") {
     return { ...base, detail: `section title may not fit at ${fmtSize(size)}: ${wants} (${caution}) — needs ${needed.width} wide to be sure` };
   }
   const tail = caution ? ` (${caution})` : "";
-  return {
-    ...base,
-    detail: titleWhole && detailLine
-      ? `section detail cut at ${fmtSize(size)}: ${wants} — needs ${needed.width} wide${tail}`
-      : `section title ellipsizes at ${fmtSize(size)}: ${wants} — needs ${needed.width} wide${tail}`,
-  };
-}
-
-/** The header chip's detail run as painted (titleChipVisibleRuns), when the section has a detail. */
-function sectionDetailFit(layout: ReturnType<typeof titleChipLayout>): DetailLineFit | undefined {
-  const detail = layout.detail;
-  if (!detail) return undefined;
-  const visible = titleChipVisibleRuns(layout).detail;
-  const totalChars = graphemeClusters(detail.text).length;
-  const painted = visible ?? "";
-  const truncated = visible !== null && visible !== detail.text;
-  return {
-    text: detail.text,
-    shown: visible !== null,
-    truncated,
-    painted,
-    fittingChars: visible === null ? 0 : truncated ? graphemeClusters(visible).length - 1 : totalChars,
-    totalChars,
-  };
+  return { ...base, detail: `section title ellipsizes at ${fmtSize(size)}: ${wants} — needs ${needed.width} wide${tail}` };
 }
 
 // ---------------------------------------------------------------------------

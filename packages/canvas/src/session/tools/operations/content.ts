@@ -9,11 +9,11 @@
  * four targets, not four tools. That is why the first two gate on
  * `requireBoardEntity` — mere existence — and dispatch on kind inside `apply`,
  * where the only difference is which document channel the patch names
- * (`text` on an object, `label` on a connection). A shape's, icon's, or
- * section's one-line `detail` is text too, so it rides the same call: the name
- * and its fact are written together or apart, never through a second tool. A
- * detail sent to a sticky or an edge — kinds with no detail line — is dropped
- * with a note rather than refused, so the rest of the call still lands.
+ * (`text` on an object, `label` on a connection). A shape's or icon's
+ * one-line `detail` is text too, so it rides the same call: the name and its
+ * fact are written together or apart, never through a second tool. A detail
+ * sent to a sticky, a section, or an edge — kinds with no detail line — is
+ * dropped with a note rather than refused, so the rest of the call still lands.
  *
  * LOCKS GATE ALL THREE. Text and color are edits like any other, so a box under
  * a lock refuses them, and so does an edge whose ends sit inside a locked-all
@@ -87,7 +87,7 @@ function requireUnlockedTarget(ctx: OpContext, id: string): string[] {
 export const updateText = defineOperationTool({
   name: "update_text",
   description:
-    "Write the words on anything that carries them — a shape's, icon's, or section's name and its one-line detail, a sticky's body, an edge's label. Send text, detail, or both. A shape or icon whose text no longer fits grows to fit, keeping its center, and the same-type shapes in its row (height) and column (width) grow to match, unless that would make them overlap another box; a sticky or section that no longer fits still applies, with a warning naming the size it would need.",
+    "Write the words on anything that carries them — a shape's or icon's name and its one-line detail, a section's title, a sticky's body, an edge's label. Send text, detail, or both. A shape or icon whose text no longer fits grows to fit, keeping its center, and the same-type shapes in its row (height) and column (width) grow to match, unless that would make them overlap another box; a sticky or section that no longer fits still applies, with a warning naming the size it would need.",
   fields: {
     id: Id,
     text: Type.Optional(Type.String({
@@ -96,7 +96,7 @@ export const updateText = defineOperationTool({
         + "On a sticky it is the markdown body; on an edge, the label. Empty clears it.",
     })),
     detail: Type.Optional(Type.String({
-      description: `Shapes, icons, and sections only: ${DETAIL_RULE}. Empty clears it.`,
+      description: `Shapes and icons only: ${DETAIL_RULE}. Empty clears it.`,
     })),
   },
   validate: (ctx, p) => {
@@ -123,8 +123,9 @@ export const updateText = defineOperationTool({
     const patch: ObjectPatch = {};
     if (p.text !== undefined) patch.text = p.text;
     if (p.detail !== undefined) {
-      if (entityKindOf(target) === "sticky") {
-        notes.push(detailDroppedNote("sticky"));
+      const kind = entityKindOf(target);
+      if (kind === "sticky" || kind === "section") {
+        notes.push(detailDroppedNote(kind));
       } else {
         // An own `detail: undefined` is how the applier clears it.
         patch.detail = storedDetail(p.detail);

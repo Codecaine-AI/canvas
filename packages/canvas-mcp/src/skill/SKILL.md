@@ -41,8 +41,9 @@ subject is a canvas at all. This skill says how to draw one.
 
 - Color encodes kind, never decoration. Give each section and node its
   role's hue. Never change the workspace theme.
-- A name is 5 words or fewer. A detail is one fact of 48 characters or
-  fewer. Explanations go on a sticky.
+- A name is 5 words or fewer. A node's detail is one fact of 48
+  characters or fewer. A section has a title only, no detail.
+  Explanations go on a sticky.
 - Label a wire only for a condition, a branch or a payload.
 - Geometry lands on a 20 unit grid. A flow node is 280 by 100.
   `arrange_section` sets the gaps: 200 across a row and 100 down a

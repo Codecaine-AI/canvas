@@ -8,8 +8,9 @@
  * What these pin, in order of how easy each is to break:
  *  - the stored form: a detail is trimmed and an empty one is no detail, so a
  *    draft and the file it saves to never disagree;
- *  - the kinds without a detail line (stickies, edges) drop it with a note
- *    instead of refusing the rest of the call;
+ *  - the kinds without a detail line (stickies, sections, edges) drop it with
+ *    a note instead of refusing the rest of the call; place_section has no
+ *    detail field at all;
  *  - a glyph sent as a free string is refused with the names it was reaching
  *    for, and a section's glyph never leaks into the folded type vocabulary.
  */
@@ -45,27 +46,23 @@ function board() {
   return makeDocument([frame, step, brain, note], [edge]);
 }
 
-describe("place_section — title, detail, and header glyph in one gesture", () => {
-  test("stores a trimmed detail and a known glyph on the frame", () => {
+describe("place_section — title and header glyph in one gesture", () => {
+  test("stores a known glyph on the frame, and has no detail field", () => {
     const session = makeTestSession(board(), ["frame"]);
 
     const result = runOp(session, "place_section", {
       id: "services",
       text: "Bun services",
       at: [1000, 0],
-      detail: "  127.0.0.1 ",
       icon: "agent",
     });
 
     expect(result.isError).toBeUndefined();
-    expect(objectOf(session, "services")).toMatchObject({
-      type: "section",
-      text: "Bun services",
-      detail: "127.0.0.1",
-      icon: "agent",
-    });
-    // The DELTA line carries both, in the digest's own spelling.
-    expect(result.text).toContain('icon=agent detail="127.0.0.1"');
+    expect(objectOf(session, "services")).toMatchObject({ type: "section", text: "Bun services", icon: "agent" });
+    expect("detail" in objectOf(session, "services")).toBe(false);
+    // The DELTA line carries the glyph, in the digest's own spelling.
+    expect(result.text).toContain("icon=agent");
+    expect(findOperationTool("place_section")!.parameters.properties).not.toHaveProperty("detail");
   });
 
   test("takes a color in the same call, and stays the default gray without one", () => {
@@ -87,10 +84,10 @@ describe("place_section — title, detail, and header glyph in one gesture", () 
     expect(color.enum).not.toContain("magenta");
   });
 
-  test("an empty detail, and an empty or \"none\" icon, mean none", () => {
+  test("an empty or \"none\" icon means none", () => {
     const session = makeTestSession(board(), ["frame"]);
 
-    runOp(session, "place_section", { id: "plain", text: "Plain", at: [1000, 0], detail: "  ", icon: "" });
+    runOp(session, "place_section", { id: "plain", text: "Plain", at: [1000, 0], icon: "" });
     const none = runOp(session, "place_section", { id: "bare", text: "Bare", at: [1000, 400], icon: "none" });
 
     expect(none.isError).toBeUndefined();
@@ -163,9 +160,22 @@ describe("update_text — the name and its detail, together or apart", () => {
   test("writes the detail alone and leaves the name", () => {
     const session = makeTestSession(board(), ["frame"]);
 
-    runOp(session, "update_text", { id: "frame", detail: "127.0.0.1" });
+    runOp(session, "update_text", { id: "step", detail: ":5432" });
 
-    expect(objectOf(session, "frame")).toMatchObject({ text: "Frame", detail: "127.0.0.1" });
+    expect(objectOf(session, "step")).toMatchObject({ text: "Step", detail: ":5432" });
+  });
+
+  test("a section has no detail line: its title still lands and the detail is dropped with a note", () => {
+    const session = makeTestSession(board(), ["frame"]);
+
+    const both = runOp(session, "update_text", { id: "frame", text: "Services", detail: "127.0.0.1" });
+    expect(both.isError).toBeUndefined();
+    expect(both.text).toContain("detail dropped — a section has no detail line");
+    expect(objectOf(session, "frame").text).toBe("Services");
+    expect("detail" in objectOf(session, "frame")).toBe(false);
+
+    const alone = runOp(session, "update_text", { id: "frame", detail: "127.0.0.1" });
+    expect(alone.text).toMatch(/^NO-OP · update_text frame — detail dropped/);
   });
 
   test("an empty detail clears it", () => {
@@ -226,14 +236,18 @@ describe("update_text — the name and its detail, together or apart", () => {
 });
 
 describe("clone — the detail and the glyph travel with the copy", () => {
-  test("a section copy keeps its detail and header glyph", () => {
+  test("a section copy keeps its header glyph and never carries a stored detail", () => {
     const withIcon = board();
     withIcon.objects[0] = { ...withIcon.objects[0]!, detail: "127.0.0.1", icon: "agent" };
     const session = makeTestSession(withIcon, ["frame"]);
 
     runOp(session, "clone", { sourceId: "frame", id: "frame-2", at: [1100, 0] });
+    const asked = runOp(session, "clone", { sourceId: "frame", id: "frame-3", detail: "x", at: [2200, 0] });
 
-    expect(objectOf(session, "frame-2")).toMatchObject({ detail: "127.0.0.1", icon: "agent" });
+    expect(objectOf(session, "frame-2")).toMatchObject({ icon: "agent" });
+    expect("detail" in objectOf(session, "frame-2")).toBe(false);
+    expect(asked.text).toContain("detail dropped — a section has no detail line");
+    expect("detail" in objectOf(session, "frame-3")).toBe(false);
   });
 
   test("a detail override replaces the source's, and an empty one clears it", () => {

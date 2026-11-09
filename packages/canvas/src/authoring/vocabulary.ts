@@ -62,7 +62,7 @@ export function visualVocabulary(): AuthoringTopic {
     <sections>
         A section is a titled frame that groups related content. Sections can contain objects and other sections.
 
-        The header shows an optional icon, the title, and an optional detail: one short fact after the title.
+        The header shows an optional icon and the title. A section has no detail line.
     </sections>
 
     <objects>

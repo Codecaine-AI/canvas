@@ -10,7 +10,6 @@ import { useCanvasStyle } from "../../theme/canvas-style-context";
 import type { IconGlyphElement } from "../shapes/icon/icon-glyphs";
 import {
   TITLE_CHIP,
-  TITLE_CHIP_DETAIL,
   TITLE_CHIP_ICON,
   titleChipIconDrawing,
   titleChipLayout,
@@ -60,18 +59,6 @@ function chipThemeStyle(layout: TitleChipLayout, headerText: string): CSSPropert
   return style;
 }
 
-/** The detail run: the header font at regular weight, muted, never uppercased or tracked. */
-function detailStyle(layout: TitleChipLayout, headerDetail: string): CSSProperties {
-  const font = layout.title.font;
-  return {
-    marginLeft: `${TITLE_CHIP_DETAIL.gapPx}px`,
-    color: headerDetail,
-    fontWeight: TITLE_CHIP_DETAIL.fontWeight,
-    ...(font.letterSpacingEm !== 0 ? { letterSpacing: "normal" } : null),
-    ...(font.uppercase ? { textTransform: "none" as const } : null),
-  };
-}
-
 function glyphElement(element: IconGlyphElement, key: number) {
   if (element.kind === "path") return <path key={key} d={element.d} />;
   if (element.kind === "circle") return <circle key={key} cx={element.cx} cy={element.cy} r={element.r} />;
@@ -119,7 +106,7 @@ export function TitleChipIcon({ id, drawing }: { id: string; drawing: TitleChipI
 }
 
 /**
- * A section's title chip — `[icon] TITLE  detail` (objects/section/
+ * A section's title chip — `[icon] TITLE` (objects/section/
  * title-chip-layout.ts): floating inset in the corner, or pinned flush into
  * it (the frame is its top and left edge); counter-scaled when zoomed out,
  * ellipsized at the section's inner width. Colors come from the section
@@ -174,14 +161,7 @@ export function SectionTitleChip({
       }}
     >
       {icon && layout.icon ? <TitleChipIcon id={layout.icon.id} drawing={icon} /> : null}
-      <span>
-        {section.text}
-        {layout.detail ? (
-          <span data-canvas-section-detail="" style={detailStyle(layout, paint.headerDetail)}>
-            {layout.detail.text}
-          </span>
-        ) : null}
-      </span>
+      <span>{section.text}</span>
     </span>
   );
 }

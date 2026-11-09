@@ -7,14 +7,14 @@
  * (title-chip-geometry.ts), and the agent's title fit all read it, so the
  * chip lines up the same way everywhere.
  *
- * Anatomy, left to right: `[icon] TITLE  detail`.
+ * Anatomy, left to right: `[icon] TITLE`.
  *  - icon: the section's optional `icon` glyph in a 16px box — a solid ink
  *    tile in the theme's `tile` icon style, the bare glyph in `glyph` style.
  *  - title: the section's `text` in the header font (`headerFont` /
  *    `headerFontSizePx` / `textFontWeight`, uppercased with 0.08em tracking
  *    for mono when `headerUppercase`).
- *  - detail: the section's optional one-line `detail`, inline 10px after the
- *    title, same font, regular weight, never uppercased.
+ *  A section's stored `detail` (older boards) never paints: the chip is the
+ *  title only.
  *
  * Placement (`headerPlacement`):
  *  - `floating` (FigJam): a fully bordered chip inset 3px from the section's
@@ -32,8 +32,8 @@
  * the agent's text-fit — reads them from this one layout. Every run measures
  * in the font it paints in through theme/text-measure.ts (the header font's
  * family stack, size, weight, and tracking; the title as displayed — cased,
- * whitespace collapsed the way the chip's `nowrap` paints it), so the detail
- * lands where the live chip's flow puts it and the chip hits where it paints.
+ * whitespace collapsed the way the chip's `nowrap` paints it), so the chip
+ * hits where it paints.
  *
  * Pure: no React, no DOM — safe for the Node-side static renderer.
  */
@@ -46,11 +46,9 @@ import {
 } from "../../theme/canvas-style";
 import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK } from "../../theme/fonts";
 import {
-  ELLIPSIS,
   ellipsizeToWidth,
   layoutBoxWidth,
   measureWidth,
-  wrapRuns,
   type FontSpec,
 } from "../../theme/text-measure";
 import type { InteractiveCanvasObject } from "../../state/schema";
@@ -106,13 +104,6 @@ export const TITLE_CHIP_ICON = {
   strokePerGlyphPx: 1.75 / 24,
   /** Outlined tile border (white tiles on a light board). */
   tileBorderPx: 1,
-} as const;
-
-/** The inline detail run after the title. */
-export const TITLE_CHIP_DETAIL = {
-  /** Gap between the title and the detail. */
-  gapPx: 10,
-  fontWeight: 400,
 } as const;
 
 /** Tracking for uppercase mono titles. */
@@ -174,17 +165,6 @@ export function titleChipTitleFont(canvasStyle: CanvasStyle = DEFAULT_CANVAS_STY
   };
 }
 
-/** The detail run's font: the header font at regular weight, never uppercased. */
-export function titleChipDetailFont(canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE): TitleChipFont {
-  return {
-    font: canvasStyle.headerFont,
-    fontSizePx: canvasStyle.headerFontSizePx,
-    fontWeight: TITLE_CHIP_DETAIL.fontWeight,
-    letterSpacingEm: 0,
-    uppercase: false,
-  };
-}
-
 /** `font` as a text-measure FontSpec: the family stack the chip paints, size, weight, and tracking in px. */
 export function titleChipFontSpec(font: TitleChipFont): FontSpec {
   return {
@@ -208,15 +188,6 @@ export function titleChipTextWidthPx(text: string, font: TitleChipFont): number 
 /** `text` as the chip displays it (uppercased when the font says so). */
 export function titleChipDisplayText(text: string, font: TitleChipFont): string {
   return font.uppercase ? text.toUpperCase() : text;
-}
-
-/**
- * The section's header detail as displayed — one line, whitespace runs
- * (newlines included) collapsed to single spaces — or null when it has none.
- */
-export function titleChipDetailText(section: Pick<InteractiveCanvasObject, "detail">): string | null {
-  const detail = typeof section.detail === "string" ? section.detail.replace(/\s+/g, " ").trim() : "";
-  return detail === "" ? null : detail;
 }
 
 /** The section's header icon id when it names a glyph the registry knows, else null. */
@@ -300,10 +271,9 @@ export interface TitleChipLayout {
   /** The leading icon (box-local x of its 16px box), or null. */
   icon: { id: NonNullable<InteractiveCanvasObject["icon"]>; x: number } | null;
   title: TitleChipRun;
-  detail: TitleChipRun | null;
 }
 
-type ChipSection = Pick<InteractiveCanvasObject, "text" | "geometry" | "style" | "icon" | "detail">;
+type ChipSection = Pick<InteractiveCanvasObject, "text" | "geometry" | "style" | "icon">;
 
 export interface TitleChipLayoutOptions {
   /** Overrides the section's title (the in-place editor sizes itself against the draft). */
@@ -311,20 +281,20 @@ export interface TitleChipLayoutOptions {
 }
 
 /**
- * Whether a section's header paints anything: a title, a known icon, or a
- * detail. The static chip, painted extents, and view framing / retention all
- * ask this one predicate.
+ * Whether a section's header paints anything: a title or a known icon. The
+ * static chip, painted extents, and view framing / retention all ask this one
+ * predicate.
  */
 export function titleChipHasContent(
-  section: Pick<InteractiveCanvasObject, "text" | "icon" | "detail">,
+  section: Pick<InteractiveCanvasObject, "text" | "icon">,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): boolean {
-  return section.text !== "" || titleChipIconId(section, canvasStyle) !== null || titleChipDetailText(section) !== null;
+  return section.text !== "" || titleChipIconId(section, canvasStyle) !== null;
 }
 
 /** The width-relevant content of a chip, independent of the section's geometry. */
 function chipContent(
-  section: Pick<InteractiveCanvasObject, "text" | "style" | "icon" | "detail">,
+  section: Pick<InteractiveCanvasObject, "text" | "style" | "icon">,
   canvasStyle: CanvasStyle,
   text: string,
 ) {
@@ -340,31 +310,11 @@ function chipContent(
   const titleFont = titleChipTitleFont(canvasStyle);
   const titleText = titleChipDisplayText(text, titleFont);
   const titleWidth = measure(titleText, titleFont);
-  const detailText = titleChipDetailText(section);
-  const detailFont = titleChipDetailFont(canvasStyle);
-  const detailWidth = detailText === null ? 0 : measure(detailText, detailFont);
-  // Where the detail starts after the title. The chip's one line is
-  // `TITLE<span style="margin-left: 10px">detail</span>`: a space the title
-  // ends with sits inside that line, so it paints (collapsed to one) and pushes
-  // the detail right — measured as the browser lays the two runs out.
-  let titleAdvance = titleWidth;
-  if (detailText !== null) {
-    const line = wrapRuns(
-      [
-        { text: titleText, font: titleChipFontSpec(titleFont) },
-        { text: detailText, font: titleChipFontSpec(detailFont) },
-      ],
-      { maxWidth: Number.POSITIVE_INFINITY, lineHeight: TITLE_CHIP.heightPx, whiteSpace: "normal" },
-    ).lines[0];
-    const detailRun = line?.fragments.find((fragment) => fragment.run === 1);
-    if (detailRun) titleAdvance = Math.max(titleWidth, detailRun.x);
-  }
 
   const iconX = border.left + paddingLeftPx;
   const titleX = iconX + (iconId ? TITLE_CHIP_ICON.sizePx + TITLE_CHIP_ICON.gapPx : 0);
   const contentWidth =
-    (iconId ? TITLE_CHIP_ICON.sizePx + TITLE_CHIP_ICON.gapPx : 0) +
-    (detailText === null ? titleWidth : titleAdvance + TITLE_CHIP_DETAIL.gapPx + detailWidth);
+    (iconId ? TITLE_CHIP_ICON.sizePx + TITLE_CHIP_ICON.gapPx : 0) + titleWidth;
   const naturalWidthPx = border.left + paddingLeftPx + contentWidth + paddingRightPx + border.right;
 
   return {
@@ -374,15 +324,6 @@ function chipContent(
     paddingRightPx,
     icon: iconId ? { id: iconId, x: iconX } : null,
     title: { text: titleText, x: titleX, widthPx: titleWidth, font: titleFont },
-    detail:
-      detailText === null
-        ? null
-        : {
-            text: detailText,
-            x: titleX + titleAdvance + TITLE_CHIP_DETAIL.gapPx,
-            widthPx: detailWidth,
-            font: detailFont,
-          },
     naturalWidthPx,
   };
 }
@@ -427,63 +368,39 @@ export function titleChipLayout(
     centerY: content.border.top + (height - content.border.top - content.border.bottom) / 2,
     icon: content.icon,
     title: content.title,
-    detail: content.detail,
   };
 }
 
 /**
  * Natural (uncapped) chip width for a title — mirrors the chip's CSS auto
- * width. `section` adds what else sits in the chip (its icon and detail) and
- * the frame it may be pinned into; omit it for a plain title.
+ * width. `section` adds what else sits in the chip (its icon) and the frame
+ * it may be pinned into; omit it for a plain title.
  */
 export function estimateTitleChipWidthPx(
   text: string,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
-  section: Pick<InteractiveCanvasObject, "style" | "icon" | "detail"> = {},
+  section: Pick<InteractiveCanvasObject, "style" | "icon"> = {},
 ): number {
   return chipContent({ ...section, text }, canvasStyle, text).naturalWidthPx;
 }
 
 // ---------------------------------------------------------------------------
 // Truncation (static renderer) — mirrors the live chip's text-overflow:
-// ellipsis on the title + detail run
+// ellipsis on the title
 // ---------------------------------------------------------------------------
 
-export interface TitleChipVisibleRuns {
-  title: string;
-  /** The detail as drawn (possibly ellipsized), or null when it does not show. */
-  detail: string | null;
-}
-
 /**
- * What of the title + detail run is visible in the (possibly capped) box,
- * cut the way the live chip's `text-overflow: ellipsis` cuts its one line:
- * the title, the 10px gap, and the detail form one run; graphemes drop from
- * its end until the rest plus an ellipsis fits — so the detail gives way
- * first, then the title. The ellipsis paints in the chip's (title) font, as
- * CSS paints it in the line's block font: after the detail's last kept
- * grapheme, alone after the gap when no detail grapheme fits, or after the
- * title when not even the gap fits. When not even the ellipsis fits, the run
- * paints nothing (`title: ""`) — the live chip's overflow hides it the same
- * way.
+ * The title as visible in the (possibly capped) box, cut the way the live
+ * chip's `text-overflow: ellipsis` cuts its one line: graphemes drop from its
+ * end until the rest plus an ellipsis fits. When not even the ellipsis fits,
+ * it paints nothing (`""`) — the live chip's overflow hides it the same way.
  */
-export function titleChipVisibleRuns(layout: TitleChipLayout): TitleChipVisibleRuns {
-  const { title, detail } = layout;
-  if (!layout.truncated) return { title: title.text, detail: detail?.text ?? null };
+export function titleChipVisibleTitle(layout: TitleChipLayout): string {
+  const { title } = layout;
+  if (!layout.truncated) return title.text;
   const contentEnd = layout.box.width - layout.paddingRightPx - layout.border.right;
   const available = layoutBoxWidth(contentEnd - title.x);
-  const titleSpec = titleChipFontSpec(title.font);
-  const ellipsisWidth = measureWidth(ELLIPSIS, titleSpec);
-
-  if (detail) {
-    // The detail starts where the title ends plus the gap; the ellipsis follows its last kept grapheme.
-    const detailRoom = available - (detail.x - title.x);
-    if (detailRoom >= ellipsisWidth) {
-      return { title: title.text, detail: ellipsizeToWidth(detail.text, titleChipFontSpec(detail.font), detailRoom, titleSpec) };
-    }
-    if (title.widthPx + ellipsisWidth <= available) return { title: `${title.text}${ELLIPSIS}`, detail: null };
-  }
-  return { title: ellipsizeToWidth(title.text, titleSpec, available), detail: null };
+  return ellipsizeToWidth(title.text, titleChipFontSpec(title.font), available);
 }
 
 // ---------------------------------------------------------------------------

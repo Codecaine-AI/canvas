@@ -198,7 +198,7 @@
                 3. Represent the chosen patterns using supported Canvas objects.
                     - Use native object labels and section titles for names.
                         - Keep each name to what the thing is, in about five words or fewer on one line, with no sentences.
-                        - Put at most one short fact, such as a port, path, version, model, or host, in the `detail` of a shape, icon, or section, within 48 characters.
+                        - Put at most one short fact, such as a port, path, version, model, or host, in the `detail` of a shape or icon, within 48 characters. A section carries a title only.
                         - Write `Postgres` with the detail `16 · :5432`, not `Postgres database that stores user sessions`.
                     - Use Markdown stickies for explanations, annotations, and examples, placed beside their subject. Canvas has no standalone text object.
                     - Give a section a header icon only when a glyph fits what it holds, never as decoration.
