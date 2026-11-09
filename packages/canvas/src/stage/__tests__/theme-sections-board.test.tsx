@@ -5,7 +5,7 @@ import { TextEditingOverlay } from "../editor/features/text-editing/TextEditingO
 import type { TextEditingApi } from "../editor/features/text-editing/use-text-editing";
 import { renderDocumentToSvg } from "../../render/static-svg";
 import { canvasThemePreset, type CanvasThemeId } from "../../theme/canvas-style";
-import { contrastRatio } from "../../theme/color-math";
+import { contrastRatio, parseColor } from "../../theme/color-math";
 import { resolveStickyPaint } from "../../theme/palette";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 import { measureWidth } from "../../theme/text-measure";
@@ -282,21 +282,24 @@ describe("connector label chip per theme", () => {
 });
 
 describe("card stickies", () => {
-  it("live: light boards paint cream paper with a firm gray edge and the soft card lift, no rule", () => {
+  it("live: light boards paint cream paper with a warm edge and a tight lift, no rule", () => {
     const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
     expect(note.style.background).not.toContain("linear-gradient");
-    expect(note.style.boxShadow).toBe("inset 0 0 0 1px #C0BFBC, 0 2px 8px rgba(31, 31, 31, 0.14)");
+    const paint = resolveStickyPaint("yellow", canvasThemePreset("schematic-light"));
+    expect(note.style.boxShadow).toBe(`inset 0 0 0 1px ${paint.border}, 0 1px 3px ${paint.cardShadow}`);
   });
 
   it("static: the same paper with 6px corners, the firm edge and the card lift filter, no rule", () => {
     const svg = staticSvg("schematic-light");
+    const style = canvasThemePreset("schematic-light");
+    const paint = resolveStickyPaint("yellow", style);
     expect(svg).toContain(
-      '<feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1F1F1F" flood-opacity="0.14"/>',
+      `<feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="${style.textColor}" flood-opacity="${parseColor(paint.cardShadow!)!.a}"/>`,
     );
     expect(svg).toContain(
       '<rect x="900" y="80" width="240" height="160" rx="6" fill="#FFF7E5" filter="url(#theme-board-card-sticky-shadow)"/>',
     );
-    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" rx="5.5" fill="none" stroke="#C0BFBC" stroke-width="1"/>');
+    expect(svg).toContain(`<rect x="900.5" y="80.5" width="239" height="159" rx="5.5" fill="none" stroke="${paint.border}" stroke-width="1"/>`);
     expect(svg).not.toMatch(/<path d="M901 [^"]*" fill="#666562"\/>/);
   });
 
