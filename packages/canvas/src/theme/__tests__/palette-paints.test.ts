@@ -258,33 +258,23 @@ describe("layer-cake sections", () => {
 
   it("the light theme never applies the guard (base and card are both near-white)", () => {
     // Yellow's and orange's anchors are not text steps: their fills follow their own rule (see "light yellow" below).
-    for (const color of CANVAS_COLORS.filter((candidate) => !["white", "yellow", "orange"].includes(candidate))) {
+    for (const color of CANVAS_COLORS.filter((candidate) => !["white", "gray", "yellow", "orange"].includes(candidate))) {
       const mix = mixColors(LIGHT.palette[color], "#FDFDFD", 0.04);
       expect(Math.abs(oklabLightness(resolveSectionPaint(color, 1, LIGHT).fill) - oklabLightness(mix))).toBeLessThan(0.002);
     }
   });
 
-  it("white: a card-colored section on light boards, the gray rule on dark ones", () => {
-    // The page keeps the hairline frame.
+  it("white: a light page and nested groups with a visible edge, the gray rule on dark boards", () => {
     expect(resolveSectionPaint("white", 1, LIGHT)).toMatchObject({
-      fill: "#F8F8F7",
-      border: "#E6E5E3",
-      chipFill: "#EFEFED", // mix(hairline, card, .5)
-      chipBorder: "#E6E5E3",
-      headerText: "#1F1F1F",
+      fill: LIGHT.boardBackground,
+      border: LIGHT.hairlineColor,
+      chipBorder: LIGHT.hairlineColor,
+      headerText: LIGHT.textColor,
     });
-    // Below the page a white section takes the label chip's firmer edge, so
-    // it does not vanish on a near-white parent (UI climb round 4: 07, 10).
     for (const depth of [2, 3, 4]) {
-      expect(resolveSectionPaint("white", depth, LIGHT)).toMatchObject({
-        fill: "#F8F8F7",
-        border: "#C0BFBC",
-        chipFill: "#DCDCDA", // mix(edge, card, .5)
-        chipBorder: "#C0BFBC",
-        headerText: "#1F1F1F",
-      });
       const paint = resolveSectionPaint("white", depth, LIGHT);
-      expect(contrastRatio(paint.border, resolveSectionPaint("gray", 2, LIGHT).fill)).toBeGreaterThanOrEqual(1.5);
+      expect(paint.fill).toBe(LIGHT.cardFill);
+      expect(contrastRatio(paint.border, resolveSectionPaint("gray", 2, LIGHT).fill)).toBeGreaterThanOrEqual(2);
       expect(contrastRatio(paint.headerText, paint.chipFill)).toBeGreaterThanOrEqual(4.5);
     }
     for (const depth of [1, 2, 3]) {
@@ -415,7 +405,7 @@ describe("schematic shapes, icons, stickies, connectors", () => {
         expect(oklabLightness(section) - oklabLightness(gray.fill)).toBeGreaterThanOrEqual(floor);
       }
     }
-    expect(oklabLightness(resolveSectionPaint("gray", 2, LIGHT).fill) - oklabLightness(gray.fill)).toBeGreaterThanOrEqual(0.055);
+    expect(oklabLightness(resolveSectionPaint("gray", 2, LIGHT).fill) - oklabLightness(gray.fill)).toBeGreaterThanOrEqual(0.07);
     expect(contrastRatio(gray.border, gray.fill)).toBeGreaterThanOrEqual(3);
     // A white node is the board surface: lighter than every section, and at
     // least 0.035 from any colored one. On a white section (the card) both
@@ -426,7 +416,7 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       for (const depth of [2, 3, 4]) {
         const section = resolveSectionPaint(sectionColor, depth, LIGHT).fill;
         expect(oklabLightness(white.fill)).toBeGreaterThan(oklabLightness(section));
-        if (sectionColor !== "white") expect(oklabDistance(white.fill, section)).toBeGreaterThanOrEqual(0.035);
+        if (sectionColor !== "white") expect(oklabDistance(white.fill, section)).toBeGreaterThanOrEqual(sectionColor === "gray" ? 0.025 : 0.035);
       }
     }
     expect(contrastRatio(white.border, white.fill)).toBeGreaterThanOrEqual(10);

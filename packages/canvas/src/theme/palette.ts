@@ -771,10 +771,12 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
     // label chip's firmer gray edge: the hairline (1.2:1) on a near-white
     // parent let it vanish (UI climb round 4: boards 07 and 10). The page
     // frame keeps the hairline.
-    const edge = depth > PAGE_SECTION_DEPTH ? resolveLabelChipBorder(style) : style.hairlineColor;
-    const chipFill = mixColors(edge, style.cardFill, 0.5);
+    const nested = depth > PAGE_SECTION_DEPTH;
+    const edge = nested ? nestedWhiteSectionEdge(style) : style.hairlineColor;
+    const fill = nested ? style.cardFill : style.boardBackground;
+    const chipFill = mixColors(edge, fill, 0.5);
     return {
-      fill: style.cardFill,
+      fill,
       border: edge,
       chipFill,
       chipBorder: edge,
@@ -786,7 +788,9 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
   const ink = resolveInk(paintColor, style);
   // Gray gains nothing from a deeper step but darkness: past the top-level
   // tone it reads as a disabled slab, and its chip loses contrast.
-  const fill = layerCakeFill(paintColor, paintColor === "gray" ? Math.min(depth, GRAY_SECTION_MAX_DEPTH) : depth, style);
+  const fill = paintColor === "gray" && style.shapeFill === "ink-card"
+    ? inkFill("gray", style.sectionTintMixBase, Math.min(layerCakeWeight(depth, style), GRAY_SECTION_INK_WEIGHT), style)
+    : layerCakeFill(paintColor, paintColor === "gray" ? Math.min(depth, GRAY_SECTION_MAX_DEPTH) : depth, style);
   const chipFill = mixColors(ink, fill, style.headerChipMix);
   return {
     fill,
@@ -797,6 +801,23 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
     ...sectionIconPaint(paintColor, chipFill, style),
   };
 }
+
+/**
+ * The edge of a white section below the page: the gray ink moved
+ * NESTED_WHITE_SECTION_EDGE_INK_WEIGHT of the way from the hairline. A
+ * nested white group sits on a gray parent one fill step from it, often with
+ * a dashed frame, so its edge carries the group (UI climb round 6: astra on
+ * 07 and 10, "the pale dashed boundary nearly disappears").
+ */
+function nestedWhiteSectionEdge(style: CanvasStyle): string {
+  return cachedPaint(style, "nested-white-section-edge", () => ({
+    edge: mixColors(resolveInk("gray", style), style.hairlineColor, NESTED_WHITE_SECTION_EDGE_INK_WEIGHT),
+  })).edge;
+}
+
+const NESTED_WHITE_SECTION_EDGE_INK_WEIGHT = 0.5;
+
+const GRAY_SECTION_INK_WEIGHT = 0.06;
 
 /** The deepest level a gray layer-cake section deepens to: the top-level section's tone (depth 2 under the page). */
 const GRAY_SECTION_MAX_DEPTH = 2;
