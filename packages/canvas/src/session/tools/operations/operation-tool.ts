@@ -12,7 +12,7 @@ import { fittedNoteParents, growSectionsToChildren, reconcileHolding, sectionOve
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
 import { newBrokenWires } from "../../../board/wire-integrity";
-import { sameHueNests, sharedLook, sharedSiblingLook, siblingClashes } from "../../../board/section-colors";
+import { heldNodeClashes, sameHueNests, sharedLook, sharedSiblingLook, siblingClashPairs } from "../../../board/section-colors";
 import type { LayoutToolRenderResult } from "../runtime";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { OpContext, OpOutcome } from "./op-context";
@@ -209,31 +209,40 @@ export function runOperation<TFields extends OperationFields>(
       details,
     };
   }
-  // No edit may nest a section in a parent section of its own color, or give
-  // it a sibling's color (a recolor, a move, a placement): the hierarchy and
-  // the group edges would stop reading. Clashes the board already had before
-  // this edit do not block it; the integrity lint reports those.
-  const nestKey = (nest: { section: string; parent: string }) => `${nest.section}>${nest.parent}`;
-  const hadNests = new Set(sameHueNests(reconciledBefore, ctx.canvasStyle).map(nestKey));
-  const newNests = sameHueNests(next, ctx.canvasStyle).filter((nest) => !hadNests.has(nestKey(nest)));
-  const clashKey = (clash: { section: string; sibling: string }) => [clash.section, clash.sibling].sort().join("~");
-  const hadClashes = new Set(siblingClashes(reconciledBefore, ctx.canvasStyle).map(clashKey));
-  const newClashes = siblingClashes(next, ctx.canvasStyle).filter((clash) => !hadClashes.has(clashKey(clash)));
-  if (newNests.length > 0 || newClashes.length > 0) {
-    const rule = newClashes.length === 0
-      ? "a nested section never shares its parent's color"
-      : newNests.length === 0
-        ? "sibling sections never share a color"
-        : "a section never shares its parent's or a sibling's color";
+  // No edit may nest a section in a parent section of its own color, give it
+  // a touching sibling's color, or paint it a node's hue it holds (a recolor,
+  // a move, a placement): the hierarchy, the group edges or the node's
+  // figure would stop reading. Every conflicting pair is compared before and
+  // after, so a repair that leaves older pairs standing is never refused for
+  // them; the integrity lint reports those.
+  const newOnly = <T,>(found: (document: InteractiveCanvasDocument) => T[], key: (item: T) => string) => {
+    const had = new Set(found(reconciledBefore).map(key));
+    return found(next).filter((item) => !had.has(key(item)));
+  };
+  const newNests = newOnly((document) => sameHueNests(document, ctx.canvasStyle), (nest) => `${nest.section}>${nest.parent}`);
+  const newClashes = newOnly(
+    (document) => siblingClashPairs(document, ctx.canvasStyle),
+    (clash) => [clash.section, clash.sibling].sort().join("~"),
+  );
+  const newGrounds = newOnly((document) => heldNodeClashes(document, ctx.canvasStyle), (clash) => `${clash.section}:${clash.color}`);
+  if (newNests.length + newClashes.length + newGrounds.length > 0) {
+    const rules = [
+      ...(newNests.length > 0 ? ["a nested section never shares its parent's color"] : []),
+      ...(newClashes.length > 0 ? ["touching sibling sections never share a color"] : []),
+      ...(newGrounds.length > 0 ? ["a section never paints the color of a node it holds"] : []),
+    ];
     return {
       isError: true,
       text: [
-        `ERROR · ${spec.name} — refused: ${rule}, so nothing changed`,
+        `ERROR · ${spec.name} — refused: ${rules.join(", and ")}, so nothing changed`,
         ...newNests.map((nest) =>
           `  - ${nest.section} would share ${sharedLook(nest)} with its parent section ${nest.parent}`
           + ` — give ${nest.section} another color, such as ${nest.suggestion}`),
         ...newClashes.map((clash) =>
-          `  - ${clash.section} would share ${sharedSiblingLook(clash)} with its sibling section ${clash.sibling}`
+          `  - ${clash.section} would share ${sharedSiblingLook(clash)} with its touching sibling section ${clash.sibling}`
+          + ` — give ${clash.section} another color, such as ${clash.suggestion}`),
+        ...newGrounds.map((clash) =>
+          `  - ${clash.section} would paint ${clash.color}, the color of ${clash.node} it holds`
           + ` — give ${clash.section} another color, such as ${clash.suggestion}`),
       ].join("\n"),
       details,

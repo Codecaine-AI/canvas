@@ -28,7 +28,7 @@ import {
   type CanvasTool,
   type InteractiveCanvasState,
 } from "../../state/actions";
-import { withPlacedSectionColor } from "../../board/section-colors";
+import { withCopiedSectionColors, withPlacedSectionColor } from "../../board/section-colors";
 import { fitBounds, type ViewportState } from "../viewport";
 import { CanvasStage } from "../CanvasStage";
 import { objectTypeForTool } from "./features/place/place";
@@ -211,15 +211,19 @@ function InteractiveCanvasEditorBody({
 }: Omit<InteractiveCanvasEditorProps, "canvasStyle">) {
   // The provider InteractiveCanvasEditor mounts: exports render with it too.
   const resolvedCanvasStyle = useCanvasStyle();
-  // A section placed with no color takes one that reads apart from its parent
-  // section, the same chooser place_section uses (board/section-colors.ts).
-  // An Inspector recolor keeps the person's pick; integrity reports a nest.
+  // A section placed with no color, or copied by duplicate or paste, takes
+  // one that keeps the section color rules, the same chooser place_section
+  // uses (board/section-colors.ts). An Inspector recolor keeps the person's
+  // pick; integrity reports a break.
   const [state, dispatchCanvasAction] = useReducer(
-    (current: InteractiveCanvasState, action: CanvasAction) =>
-      reduceInteractiveCanvasState(
+    (current: InteractiveCanvasState, action: CanvasAction) => {
+      const next = reduceInteractiveCanvasState(
         current,
         withPlacedSectionColor(current.document, action, resolvedCanvasStyle, current.lastPickedColor.section),
-      ),
+      );
+      const document = withCopiedSectionColors(current.document, next.document, action, resolvedCanvasStyle);
+      return document === next.document ? next : { ...next, document };
+    },
     document,
     createInteractiveCanvasState,
   );

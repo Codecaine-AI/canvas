@@ -1,14 +1,17 @@
 /**
  * Section colors and hierarchy — one rule, read by the tools that prevent a
- * break and the integrity lint that reports one: a section never looks like
- * its parent section or a sibling section (same parent; the page is the
- * parent of top-level sections), so a viewer sees where each group starts
- * and ends.
+ * break and the integrity lint that reports one, so a viewer sees where each
+ * group starts and ends without the colors losing the board's meaning:
  *
- * Siblings may repeat a look only when the palette runs out: no color reads
- * apart from the parent, the children and every sibling. Even then two
- * adjacent siblings (facing across a row or column with no sibling between)
- * never share one.
+ * - A section never looks like its parent section. It takes the next tone
+ *   step of its own hue (layer cake), so the nest reads by tone and hue.
+ * - Two sibling sections (same parent; the page is the parent of top-level
+ *   sections) never look alike when they touch: edges closer than one gutter
+ *   (TOUCH_GUTTER) with some part of the gap between them clear of other
+ *   siblings. Siblings with whitespace between them may share a hue: the gap
+ *   is the separator, and same-role sections keep one color.
+ * - A section never paints the hue of a node it holds: the node would lose
+ *   its figure against the ground.
  *
  * Two sections look alike when either holds:
  * - they paint the same ink (sectionHue). Layer-cake (schematic) deepens one
@@ -18,6 +21,12 @@
  *   real depth, under the board's style) are equal or within
  *   SAME_FILL_DISTANCE. With `sectionTintMax` 0 every hue paints one fill,
  *   so blue in gray is a nest there.
+ *
+ * The chooser (place_section, Studio placement and copies, every suggestion)
+ * keeps meaning first: hues the board's nodes and wires use are its key and
+ * stay off the list, warm hues stay for the emphasis a drawer picks, and a
+ * board carries at most MAX_SECTION_HUES chromatic section hues plus gray.
+ * It never recolors a section by itself.
  *
  * The page is exempt as a parent, and only the page: the page frame
  * (PAGE_FRAME_ID), or a parentless section stored white (a page-colored
@@ -38,22 +47,24 @@ import { kindOf } from "./helpers";
 import { PAGE_FRAME_ID } from "./page-frame";
 
 /**
- * The order a section's color is picked in when the call names none: gray
- * first (the default), then the hues that read as groups. White is the page's
- * color and red means failure, so red comes last and white is picked only for
- * a nested section when no hue paints apart from its neighbors.
+ * The hues the chooser hands out, in order. Gray is the neutral and costs no
+ * hue; teal comes last, since at one tone it sits close to both blue and
+ * green. Warm hues (orange, yellow, pink, red) are not here: they read as
+ * emphasis, which the drawer chooses.
  */
-const SECTION_PICK_ORDER: readonly CanvasColor[] = [
-  "gray",
-  "blue",
-  "teal",
-  "violet",
-  "green",
-  "orange",
-  "yellow",
-  "pink",
-  "red",
-];
+const CHOOSER_HUES: readonly CanvasColor[] = ["gray", "blue", "violet", "green", "teal"];
+
+/** The emphasis hues, picked by the chooser only when nothing cooler keeps the rules. */
+const WARM_HUES: readonly CanvasColor[] = ["orange", "yellow", "pink", "red"];
+
+/** Most chromatic hues (gray and white aside) the chooser lets one board's sections carry. */
+const MAX_SECTION_HUES = 3;
+
+/**
+ * One gutter: sibling frames whose edges sit closer than this read as one
+ * border, so they touch. Wider whitespace separates them on its own.
+ */
+export const TOUCH_GUTTER = 48;
 
 /**
  * Fills closer than this (OKLab distance) are one fill: about one RGB step
@@ -144,6 +155,7 @@ export function sameHueNests(
   return nests;
 }
 
+
 /** The sections that share `section`'s parent: the page (or no parent) counts as one parent. */
 function siblingSectionsOf(
   document: InteractiveCanvasDocument,
@@ -177,37 +189,6 @@ function overlap(a0: number, a1: number, b0: number, b1: number): [number, numbe
   return hi > lo ? [lo, hi] : null;
 }
 
-function boxesMeet(a: Box, b: Box): boolean {
-  return overlap(a.x, a.x + a.width, b.x, b.x + b.width) !== null
-    && overlap(a.y, a.y + a.height, b.y, b.y + b.height) !== null;
-}
-
-/**
- * Two sibling frames are adjacent when they face each other across a row or
- * a column (their spans overlap on one axis) and no other sibling frame sits
- * in the gap between them: the eye reads their edges as one border.
- */
-function adjacent(a: Box, b: Box, others: readonly Box[]): boolean {
-  const across = (
-    span: [number, number] | null,
-    gapOf: (lo: Box, hi: Box) => Box,
-    start: (box: Box) => number,
-  ) => {
-    if (!span) return false;
-    const [lo, hi] = start(a) <= start(b) ? [a, b] : [b, a];
-    const gap = gapOf(lo, hi);
-    return !others.some((other) => boxesMeet(other, gap));
-  };
-  const xSpan = overlap(a.x, a.x + a.width, b.x, b.x + b.width);
-  const ySpan = overlap(a.y, a.y + a.height, b.y, b.y + b.height);
-  return across(xSpan, (top, bottom) => ({
-    x: xSpan![0], width: xSpan![1] - xSpan![0], y: top.y + top.height, height: Math.max(0, bottom.y - top.y - top.height),
-  }), (box) => box.y)
-    || across(ySpan, (left, right) => ({
-      y: ySpan![0], height: ySpan![1] - ySpan![0], x: left.x + left.width, width: Math.max(0, right.x - left.x - left.width),
-    }), (box) => box.x);
-}
-
 /** The edge-to-edge distance between two frames (0 when they meet). */
 function gapBetween(a: Box, b: Box): number {
   const dx = Math.max(0, a.x - (b.x + b.width), b.x - (a.x + a.width));
@@ -215,68 +196,102 @@ function gapBetween(a: Box, b: Box): number {
   return Math.hypot(dx, dy);
 }
 
-/** What the chooser settled on for one section. */
-interface SectionColorChoice {
-  color: CanvasColor;
-  /** True when `color` reads apart from every sibling; false when the palette ran out and it repeats one. */
-  fresh: boolean;
+/** True when the intervals leave some part of [lo, hi] uncovered. */
+function leavesGap(lo: number, hi: number, covers: readonly [number, number][]): boolean {
+  let reach = lo;
+  for (const [start, end] of [...covers].sort((a, b) => a[0] - b[0])) {
+    if (start > reach) return true;
+    reach = Math.max(reach, end);
+    if (reach >= hi) return false;
+  }
+  return reach < hi;
 }
 
-function chooseSectionColor(
-  document: InteractiveCanvasDocument,
-  id: string,
-  style: CanvasStyle,
-  prefer?: CanvasColor,
-): SectionColorChoice {
-  const byId = new Map(document.objects.map((object) => [object.id, object]));
-  const section = byId.get(id);
-  if (!section) return { color: FIRST_USE_COLORS.section, fresh: true };
-  const depths = sectionDepthMap(document.objects);
-  const depth = depths.get(id) ?? 1;
-  const parent = parentSectionOf(byId, section);
-  const children = document.objects.filter((object) => kindOf(object) === "section" && object.parentId === id);
-  const neighbors = [...(parent ? [parent] : []), ...children];
-  const fits = (color: CanvasColor) =>
-    neighbors.every((other) => !looksAlike({ color, depth }, paintedOf(other, depths), style));
-  const siblings = siblingSectionsOf(document, byId, section);
-  const repeats = (color: CanvasColor) =>
-    siblings.filter((other) => looksAlike({ color, depth }, paintedOf(other, depths), style));
-  if (prefer && fits(prefer) && repeats(prefer).length === 0) return { color: prefer, fresh: true };
-  // White only as a nested section's last resort: on the page, white is the page's own color.
-  const order = parent ? [...SECTION_PICK_ORDER, "white" as const] : SECTION_PICK_ORDER;
-  const allowed = order.filter(fits);
-  const fresh = allowed.find((color) => repeats(color).length === 0);
-  if (fresh) return { color: fresh, fresh: true };
-  if (allowed.length === 0) return { color: FIRST_USE_COLORS.section, fresh: false };
-  // The palette ran out: repeat the color whose look-alike siblings are none
-  // adjacent to this section, and of those the one farthest away.
-  const others = siblings.map((other) => other.geometry);
-  const score = (color: CanvasColor) => {
-    const twins = repeats(color);
-    const touching = twins.some((twin) =>
-      adjacent(section.geometry, twin.geometry, others.filter((box) => box !== twin.geometry)));
-    const nearest = Math.min(...twins.map((twin) => gapBetween(section.geometry, twin.geometry)));
-    return { touching, nearest };
-  };
-  let best = allowed[0]!;
-  let bestScore = score(best);
-  for (const color of allowed.slice(1)) {
-    const next = score(color);
-    if ((bestScore.touching && !next.touching) || (bestScore.touching === next.touching && next.nearest > bestScore.nearest)) {
-      best = color;
-      bestScore = next;
-    }
+/**
+ * Two sibling frames touch when their edges sit closer than one gutter and
+ * the eye can cross straight from one to the other: they overlap, they meet
+ * at a near corner, or they face across a row or column and some part of
+ * that shared span is clear of every other sibling frame. A blocker that
+ * covers only part of the span leaves the rest facing.
+ */
+function touching(a: Box, b: Box, others: readonly Box[]): boolean {
+  if (gapBetween(a, b) >= TOUCH_GUTTER) return false;
+  const xSpan = overlap(a.x, a.x + a.width, b.x, b.x + b.width);
+  const ySpan = overlap(a.y, a.y + a.height, b.y, b.y + b.height);
+  // Both spans overlap: the frames overlap. Neither does: a near corner.
+  if (Boolean(xSpan) === Boolean(ySpan)) return true;
+  // Facing across a gap: the strip between the two edges, along the shared span.
+  const [span, gapLo, gapHi, along, across] = xSpan
+    ? (() => {
+      const [top, bottom] = a.y <= b.y ? [a, b] : [b, a];
+      return [xSpan, top.y + top.height, bottom.y, "x", "y"] as const;
+    })()
+    : (() => {
+      const [left, right] = a.x <= b.x ? [a, b] : [b, a];
+      return [ySpan!, left.x + left.width, right.x, "y", "x"] as const;
+    })();
+  const size = { x: "width", y: "height" } as const;
+  const covers: [number, number][] = [];
+  for (const other of others) {
+    const depth = overlap(other[across], other[across] + other[size[across]], gapLo, gapHi);
+    const cover = overlap(other[along], other[along] + other[size[along]], span[0], span[1]);
+    if (depth && cover) covers.push(cover);
   }
-  return { color: best, fresh: false };
+  return leavesGap(span[0], span[1], covers);
+}
+
+/** The sibling sections `section` touches. */
+function touchingSiblingsOf(
+  section: InteractiveCanvasObject,
+  siblings: readonly InteractiveCanvasObject[],
+): InteractiveCanvasObject[] {
+  return siblings.filter((twin) => touching(
+    section.geometry,
+    twin.geometry,
+    siblings.filter((other) => other !== twin).map((other) => other.geometry),
+  ));
+}
+
+function isChromatic(color: CanvasColor): boolean {
+  return color !== "gray" && color !== "white";
+}
+
+/** The chromatic hues of the nodes `section` holds directly: its ground must not match their figure. */
+function heldNodeHues(document: InteractiveCanvasDocument, id: string): Set<CanvasColor> {
+  return new Set(document.objects
+    .filter((object) => object.parentId === id && kindOf(object) === "node" && object.color && isChromatic(object.color))
+    .map((object) => object.color!));
+}
+
+/** The board's color key: the chromatic hues its nodes and wires use. */
+function keyHues(document: InteractiveCanvasDocument): Set<CanvasColor> {
+  const hues = new Set<CanvasColor>();
+  for (const object of document.objects) {
+    if (kindOf(object) === "node" && object.color && isChromatic(object.color)) hues.add(object.color);
+  }
+  for (const connection of document.connections) {
+    if (connection.color && isChromatic(connection.color)) hues.add(connection.color);
+  }
+  return hues;
+}
+
+/** Teal beside blue or green at one tone reads as one family. */
+function nearTwins(a: CanvasColor, b: CanvasColor): boolean {
+  return (a === "teal" && (b === "blue" || b === "green")) || (b === "teal" && (a === "blue" || a === "green"));
 }
 
 /**
  * The color for section `id` when its call names none, judged on a document
- * whose membership is already reconciled: one that looks like neither its
- * parent section, a section it holds, nor a sibling section. When the palette
- * runs out of colors that read apart from every sibling, it repeats one no
- * adjacent sibling paints, the farthest-away repeat first. `prefer` (Studio's
- * last-picked color) wins whenever it reads apart from all of them.
+ * whose membership is already reconciled. Hard rules: it looks like neither
+ * its parent section, a section it holds, nor a sibling it touches, and it
+ * is not the hue of a node it holds. `prefer` (Studio's last pick, or a
+ * copy's source color) wins whenever it keeps those rules. Otherwise the
+ * first of CHOOSER_HUES the board's nodes and wires leave free, keeping the
+ * board to MAX_SECTION_HUES chromatic section hues, and not teal beside a
+ * touching blue or green (nor those beside a touching teal) while another
+ * fits. With nothing free under the cap, the hue of the farthest sibling
+ * it does not touch (a cool one first), then a cool hue the key uses; warm
+ * hues come last.
  */
 export function pickSectionColor(
   document: InteractiveCanvasDocument,
@@ -284,20 +299,55 @@ export function pickSectionColor(
   style: CanvasStyle = DEFAULT_CANVAS_STYLE,
   prefer?: CanvasColor,
 ): CanvasColor {
-  return chooseSectionColor(document, id, style, prefer).color;
+  const byId = new Map(document.objects.map((object) => [object.id, object]));
+  const section = byId.get(id);
+  if (!section) return FIRST_USE_COLORS.section;
+  const depths = sectionDepthMap(document.objects);
+  const depth = depths.get(id) ?? 1;
+  const parent = parentSectionOf(byId, section);
+  const children = document.objects.filter((object) => kindOf(object) === "section" && object.parentId === id);
+  const siblings = siblingSectionsOf(document, byId, section);
+  const near = touchingSiblingsOf(section, siblings);
+  const held = heldNodeHues(document, id);
+  const neighbors = [...(parent ? [parent] : []), ...children, ...near];
+  const keeps = (color: CanvasColor) =>
+    !held.has(sectionHue({ color }, style))
+    && neighbors.every((other) => !looksAlike({ color, depth }, paintedOf(other, depths), style));
+  if (prefer && keeps(prefer)) return prefer;
+
+  const key = keyHues(document);
+  const used = new Set(document.objects
+    .filter((object) => object.id !== id && kindOf(object) === "section" && !isPageSection(object))
+    .map((object) => sectionHue(paintedOf(object, depths), style))
+    .filter(isChromatic));
+  const underCap = (color: CanvasColor) => !isChromatic(color) || used.has(color) || used.size < MAX_SECTION_HUES;
+  const pool = CHOOSER_HUES.filter((color) => !key.has(color) && keeps(color) && underCap(color));
+  const calm = pool.find((color) => near.every((other) => !nearTwins(color, sectionHue(paintedOf(other, depths), style))));
+  if (calm ?? pool[0]) return (calm ?? pool[0])!;
+
+  // Nothing free under the cap: repeat the farthest sibling it does not touch
+  // (a cool hue first), then a cool hue the key uses, then a warm repeat.
+  const far = siblings
+    .filter((twin) => !near.includes(twin) && keeps(paintedOf(twin, depths).color))
+    .sort((a, b) => gapBetween(section.geometry, b.geometry) - gapBetween(section.geometry, a.geometry))
+    .map((twin) => paintedOf(twin, depths).color);
+  const fallback = far.find((color) => CHOOSER_HUES.includes(color))
+    ?? CHOOSER_HUES.find((color) => keeps(color) && underCap(color))
+    ?? far[0]
+    // White only as a nested section's last resort: on the page, white is the page's own color.
+    ?? [...CHOOSER_HUES, ...WARM_HUES, ...(parent ? ["white" as const] : [])].find(keeps);
+  return fallback ?? FIRST_USE_COLORS.section;
 }
 
-/** Two sibling sections that look alike where the rule forbids it. */
+/** Two touching sibling sections that look alike. */
 export interface SiblingClash {
-  /** The section to recolor. */
+  /** The section to recolor: the later one in document order. */
   section: string;
   /** The sibling it looks like. */
   sibling: string;
   color: CanvasColor;
   siblingColor: CanvasColor;
-  /** True when the two face each other with no sibling between. */
-  adjacent: boolean;
-  /** A color that reads apart from the section's parent, children and siblings (a far repeat when none does). */
+  /** A color that reads apart from the section's parent, children and touching siblings. */
   suggestion: CanvasColor;
 }
 
@@ -307,26 +357,24 @@ export function sharedSiblingLook(clash: SiblingClash): string {
 }
 
 /**
- * Every pair of sibling sections that look alike, unless the palette ran out
- * for both and they are not adjacent. Each clash names the later section in
- * document order (the earlier keeps its color), or the earlier one when only
- * it has a color left. One clash per recolored section.
+ * Every pair of touching sibling sections that look alike, each named on
+ * the later section in document order (the earlier keeps its color). The
+ * tools compare these pairs before and after an edit.
  */
-export function siblingClashes(
+export function siblingClashPairs(
   document: InteractiveCanvasDocument,
   style: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): SiblingClash[] {
   const byId = new Map(document.objects.map((object) => [object.id, object]));
   const depths = sectionDepthMap(document.objects);
   const sections = document.objects.filter((object) => kindOf(object) === "section" && !isPageSection(object));
-  const choices = new Map<string, SectionColorChoice>();
-  const choiceOf = (id: string) => {
-    let choice = choices.get(id);
-    if (!choice) choices.set(id, (choice = chooseSectionColor(document, id, style)));
-    return choice;
+  const suggestions = new Map<string, CanvasColor>();
+  const suggestionFor = (id: string) => {
+    let color = suggestions.get(id);
+    if (!color) suggestions.set(id, (color = pickSectionColor(document, id, style)));
+    return color;
   };
   const clashes: SiblingClash[] = [];
-  const reported = new Set<string>();
   for (const [index, later] of sections.entries()) {
     const key = siblingKey(byId, later);
     const group = sections.filter((other) => siblingKey(byId, other) === key);
@@ -334,22 +382,56 @@ export function siblingClashes(
       if (siblingKey(byId, earlier) !== key) continue;
       if (!looksAlike(paintedOf(later, depths), paintedOf(earlier, depths), style)) continue;
       const others = group.filter((other) => other !== later && other !== earlier).map((other) => other.geometry);
-      const touching = adjacent(later.geometry, earlier.geometry, others);
-      const laterFresh = choiceOf(later.id).fresh;
-      const earlierFresh = choiceOf(earlier.id).fresh;
-      if (!touching && !laterFresh && !earlierFresh) continue;
-      const [target, twin] = laterFresh || !earlierFresh ? [later, earlier] : [earlier, later];
-      if (reported.has(target.id)) continue;
-      reported.add(target.id);
+      if (!touching(later.geometry, earlier.geometry, others)) continue;
       clashes.push({
-        section: target.id,
-        sibling: twin.id,
-        color: paintedOf(target, depths).color,
-        siblingColor: paintedOf(twin, depths).color,
-        adjacent: touching,
-        suggestion: choiceOf(target.id).color,
+        section: later.id,
+        sibling: earlier.id,
+        color: paintedOf(later, depths).color,
+        siblingColor: paintedOf(earlier, depths).color,
+        suggestion: suggestionFor(later.id),
       });
     }
+  }
+  return clashes;
+}
+
+/** Touching sibling clashes, one per section to recolor: what integrity reports. */
+export function siblingClashes(
+  document: InteractiveCanvasDocument,
+  style: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): SiblingClash[] {
+  const reported = new Set<string>();
+  return siblingClashPairs(document, style).filter((clash) => {
+    if (reported.has(clash.section)) return false;
+    reported.add(clash.section);
+    return true;
+  });
+}
+
+/** A section painted the hue of a node it holds. */
+export interface HeldNodeClash {
+  section: string;
+  /** The first node it holds in that hue. */
+  node: string;
+  color: CanvasColor;
+  /** A color that keeps the section apart from its parent, children, touching siblings and nodes. */
+  suggestion: CanvasColor;
+}
+
+/** Every section painted the hue of a node it holds directly, so the node keeps only its border. */
+export function heldNodeClashes(
+  document: InteractiveCanvasDocument,
+  style: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): HeldNodeClash[] {
+  const clashes: HeldNodeClash[] = [];
+  for (const section of document.objects) {
+    if (kindOf(section) !== "section" || isPageSection(section)) continue;
+    const hue = sectionHue(section, style);
+    if (!isChromatic(hue)) continue;
+    const node = document.objects.find((object) =>
+      object.parentId === section.id && kindOf(object) === "node" && object.color === hue);
+    if (!node) continue;
+    clashes.push({ section: section.id, node: node.id, color: hue, suggestion: pickSectionColor(document, section.id, style) });
   }
   return clashes;
 }
@@ -359,10 +441,10 @@ const PLACEMENT_PROBE_ID = "__section-color-probe__";
 
 /**
  * Studio's placement of a section with no color named, given the color
- * place_section would pick: the last-picked color when it reads apart from
- * the parent and the sections the new frame adopts, else pickSectionColor's.
- * Membership is read the way the reducer will assign it (snapped geometry,
- * reconciled tree). Every other action passes through unchanged.
+ * place_section would pick: the last-picked color when it keeps the rules,
+ * else pickSectionColor's. Membership is read the way the reducer will
+ * assign it (snapped geometry, reconciled tree). Every other action passes
+ * through unchanged.
  */
 export function withPlacedSectionColor(
   document: InteractiveCanvasDocument,
@@ -379,4 +461,32 @@ export function withPlacedSectionColor(
   });
   const reconciled = reconcileSectionMembership({ ...document, objects: [...document.objects, probe] });
   return { ...action, color: pickSectionColor(reconciled, PLACEMENT_PROBE_ID, style, lastPicked) };
+}
+
+/**
+ * Studio's duplicate and paste, after the reducer has reconciled membership:
+ * each copied section keeps its source color while that keeps the rules,
+ * else takes pickSectionColor's, one copy at a time in document order so a
+ * later copy sees the earlier ones. Other actions pass `after` through.
+ */
+export function withCopiedSectionColors(
+  before: InteractiveCanvasDocument,
+  after: InteractiveCanvasDocument,
+  action: CanvasAction,
+  style: CanvasStyle,
+): InteractiveCanvasDocument {
+  if (after === before || (action.type !== "canvas.duplicateSelection" && action.type !== "canvas.addObjects")) return after;
+  const existing = new Set(before.objects.map((object) => object.id));
+  let document = after;
+  for (const copy of after.objects) {
+    if (existing.has(copy.id) || kindOf(copy) !== "section" || isPageSection(copy)) continue;
+    const kept = copy.color ?? FIRST_USE_COLORS.section;
+    const color = pickSectionColor(document, copy.id, style, kept);
+    if (color === kept) continue;
+    document = {
+      ...document,
+      objects: document.objects.map((object) => (object.id === copy.id ? { ...object, color } : object)),
+    };
+  }
+  return document;
 }

@@ -23,7 +23,7 @@ import { routeThroughBoxIds } from "../../../connectors/routing";
 import { childrenOf, kindOf } from "../../helpers";
 import { textFitReport, type TextFitReport } from "../../text-fit";
 import { brokenWires } from "../../wire-integrity";
-import { sameHueNests, sharedLook, sharedSiblingLook, siblingClashes } from "../../section-colors";
+import { heldNodeClashes, sameHueNests, sharedLook, sharedSiblingLook, siblingClashes } from "../../section-colors";
 import { rectOf } from "../geometry";
 
 import type { InteractiveCanvasObject } from "../../../state/schema";
@@ -117,8 +117,8 @@ export const rule: LayoutRule = {
       });
     }
 
-    // Sibling sections in one look: where one group ends and the next starts
-    // stops reading. The tools refuse to make one.
+    // Touching sibling sections in one look: where one group ends and the
+    // next starts stops reading. The tools refuse to make one.
     for (const clash of siblingClashes(document, canvasStyle)) {
       findings.push({
         rule: "integrity",
@@ -126,7 +126,20 @@ export const rule: LayoutRule = {
         at: [clash.section, clash.sibling],
         where: rectOf(byId.get(clash.section)!),
         message: `${clash.section} shares ${sharedSiblingLook(clash)} with its sibling section ${clash.sibling}`
-          + `: ${clash.adjacent ? "adjacent " : ""}sibling sections must differ in color`,
+          + ": touching sibling sections must differ in color",
+        suggestion: `change_color ${clash.section} to another color, such as ${clash.suggestion}`,
+      });
+    }
+
+    // A section in the hue of a node it holds: the node loses its figure
+    // against the ground. The tools refuse to make one.
+    for (const clash of heldNodeClashes(document, canvasStyle)) {
+      findings.push({
+        rule: "integrity",
+        severity: "error",
+        at: [clash.section, clash.node],
+        where: rectOf(byId.get(clash.section)!),
+        message: `${clash.section} paints ${clash.color}, the color of ${clash.node} it holds: a section must differ from its nodes`,
         suggestion: `change_color ${clash.section} to another color, such as ${clash.suggestion}`,
       });
     }
