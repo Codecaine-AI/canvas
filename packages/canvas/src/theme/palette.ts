@@ -561,7 +561,9 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
   }
   const paintColor: CanvasColor = color === "white" ? "gray" : color;
   const ink = resolveInk(paintColor, style);
-  const fill = layerCakeFill(ink, depth, style);
+  // Gray gains nothing from a deeper step but darkness: past the top-level
+  // tone it reads as a disabled slab, and its chip loses contrast.
+  const fill = layerCakeFill(ink, paintColor === "gray" ? Math.min(depth, GRAY_SECTION_MAX_DEPTH) : depth, style);
   const chipFill = mixColors(ink, fill, style.headerChipMix);
   return {
     fill,
@@ -572,6 +574,9 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
     ...sectionIconPaint(paintColor, chipFill, style),
   };
 }
+
+/** The deepest level a gray layer-cake section deepens to: the top-level section's tone (depth 2 under the page). */
+const GRAY_SECTION_MAX_DEPTH = 2;
 
 /** Rounds an ink weight so float noise (0.07 + 0.035 = 0.10500000000000001) never flips a channel's rounding. */
 function roundWeight(weight: number): number {
