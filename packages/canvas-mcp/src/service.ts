@@ -28,11 +28,14 @@ import {
   callToolkitTool,
   canvasStyleOverrides,
   checkCanvasFile,
+  checkDetailValues,
   createCanvasFile,
+  memoryDetailCache,
   openCanvasFile,
   toolkitTools,
   type CanvasFileSession,
   type CanvasStyle,
+  type DetailVerdictCache,
 } from "@codecaine-ai/canvas/toolkit";
 
 export type CanvasToolContent =
@@ -65,6 +68,17 @@ export interface CanvasServiceOptions {
   project?: string;
   /** The standalone boards folder that ids, canvas_list, and canvas_create use. Default `<project>/canvases`. */
   canvasesDir?: string;
+  /**
+   * The Jev detail check canvas_check runs (board/detail-value). `apiKey` is
+   * read on every check, so a key added later works without a restart.
+   * Absent: no key, so canvas_check prints "DETAIL · not checked" and never
+   * calls the network; the verdict cache defaults to one in memory.
+   */
+  detailValue?: {
+    apiKey: () => string | undefined;
+    cache?: DetailVerdictCache;
+    fetch?: typeof fetch;
+  };
 }
 
 /** The id grammar the layout session store accepts for a canvas file. */
@@ -242,7 +256,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_check",
     title: "Check canvas",
     description:
-      "Check the open board before you call it done: runs every lint and returns the findings grouped by severity with counts, the node and edge counts, and a PNG of the whole board at its full bounds. Overlap and integrity are the only lints: overlap is a box on a box, or a section on a section, and integrity fires only when something bypassed the automatic fixes. Wire routes, label chips, text fit, and section fit are automatic: the LAYOUT block counts wire length, crossings, and label chips that found no clear spot, and a TEXT note names a sticky or section whose text clips. None of those block. The PNG shows the board at 1:1 world scale, scaled down only so its long edge is at most 2576px: the size the judges see. Read the flow, the grouping and the text in it, and use look to read one section up close. look frames one region; canvas_check shows all of it. Changes nothing.",
+      "Check the open board before you call it done: runs every lint and returns the findings grouped by severity with counts, the node and edge counts, and a PNG of the whole board at its full bounds. Overlap and integrity are the only lints: overlap is a box on a box, or a section on a section, and integrity fires only when something bypassed the automatic fixes. Wire routes, label chips, text fit, and section fit are automatic: the LAYOUT block counts wire length, crossings, and label chips that found no clear spot, and a TEXT note names a sticky or section whose text clips. None of those block. The DETAIL line reports a Jev check of every node detail line: a detail Jev judges to add no fact beyond its name is a detail-value error until you clear it with update_text <id> detail \"\". Without a TypeSafe key the line reads \"not checked\" and blocks nothing. The PNG shows the board at 1:1 world scale, scaled down only so its long edge is at most 2576px: the size the judges see. Read the flow, the grouping and the text in it, and use look to read one section up close. look frames one region; canvas_check shows all of it. Changes nothing.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
 ];
@@ -261,6 +275,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
   const project = resolve(options.project ?? options.workspace);
   const canvasesDir = resolve(options.canvasesDir ?? join(project, "canvases"));
   let active: CanvasFileSession | null = null;
+  const detailCache = options.detailValue?.cache ?? memoryDetailCache();
 
   function canvasPath(id: string): string {
     return join(canvasesDir, `${id}${CANVAS_SUFFIX}`);
@@ -420,16 +435,23 @@ export function createCanvasService(options: CanvasServiceOptions) {
     return { ...text(`${openedText("CREATED", file)}\nSAVED · ${shownPath(file.canvasPath)}`), _meta: { canvasId: file.canvasId } };
   }
 
-  function checkCanvas(): CanvasToolResult {
-    if (!active) return text(NO_ACTIVE_CANVAS, true);
-    const result = checkCanvasFile(active, `${active.canvasId} · ${shownPath(active.canvasPath)}`);
+  async function checkCanvas(): Promise<CanvasToolResult> {
+    // The board this check runs on: a canvas_open in flight can replace `active` during the await.
+    const file = active;
+    if (!file) return text(NO_ACTIVE_CANVAS, true);
+    const detailLine = await checkDetailValues(file, {
+      apiKey: options.detailValue?.apiKey(),
+      cache: detailCache,
+      fetch: options.detailValue?.fetch,
+    });
+    const result = checkCanvasFile(file, `${file.canvasId} · ${shownPath(file.canvasPath)}`, { detailLine });
     return {
       ...toolResult([
         { type: "text", text: result.text },
         ...(result.pngs ?? []).map((png) =>
           ({ type: "image" as const, data: png.toString("base64"), mimeType: "image/png" })),
       ], result.isError),
-      _meta: { canvasId: active.canvasId },
+      _meta: { canvasId: file.canvasId },
     };
   }
 
@@ -504,7 +526,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
           case "canvas_open": return openCanvas(args);
           case "canvas_guidance": return guidance(args);
           case "canvas_create": return createCanvas(args);
-          case "canvas_check": return checkCanvas();
+          case "canvas_check": return await checkCanvas();
           default:
             if (TOOLKIT_NAMES.has(name)) return await toolkit(name, args);
             return text(`Unknown tool: ${name}.`, true);

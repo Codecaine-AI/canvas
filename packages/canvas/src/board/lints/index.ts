@@ -2,7 +2,7 @@
  * The always-on and finishing layout-lint registries.
  *
  * LAYOUT_RULES runs on every edit and at spawn. FINISHING_RULES is what the
- * finalize gate runs; today it is the same set.
+ * finalize gate and canvas_check run.
  *
  * A lint reports only a defect the system cannot prevent: content covering
  * content (covered-content: box on box, section on section). Everything else
@@ -16,6 +16,10 @@
  * (canvas_check prints them), not findings; the eval harness (`climb
  * render`) reports the board's long edge.
  *
+ * FINISHING_RULES adds detail-value: a node detail Jev judged to carry no
+ * fact. Its verdicts come from canvas_check (network, cached), never from an
+ * edit, so the rule stays off the per-edit pass and blocks only the finish.
+ *
  * The diagnostics runner calls each registry's lints in order and then floats
  * error-severity findings ahead of warnings when assigning ids, so registry
  * order drives id stability. The commit gate blocks on every scoped error.
@@ -23,10 +27,11 @@
 import type { LayoutRule } from "./types";
 
 import { rule as coveredContent } from "./rules/covered-content";
+import { rule as detailValue } from "./rules/detail-value";
 import { rule as integrity } from "./rules/integrity";
 
 export const LAYOUT_RULES: readonly LayoutRule[] = [coveredContent, integrity];
 
-export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES];
+export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES, detailValue];
 
 export type { Diagnostic, LayoutRule, LintContext, Severity } from "./types";
