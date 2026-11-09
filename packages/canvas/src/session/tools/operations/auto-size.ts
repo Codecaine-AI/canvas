@@ -36,6 +36,11 @@
  *    member of a row would close each gap along the row twice as fast as the
  *    one grown node did, and pushes neighbors into each other.
  *
+ * 3. A FIXED-ASPECT shape (the octagon, objects/natural-aspect.ts) takes its
+ *    ratio: the box from rule 1, or the box the gesture left, grows on its
+ *    short side to the ratio (on the grid), with rule 1's anchor. It is never
+ *    a peer, so no row or column match stretches it again.
+ *
  * Left alone: stickies (their body is their own business), sections (their
  * frames fit their contents), icons as peers (the glyph tile does not grow;
  * an icon still widens for its caption's detail line under rule 1), and any
@@ -51,6 +56,7 @@ import { textFitReport } from "../../../board/text-fit";
 import { applyOperationToDraft } from "../../apply-ops";
 import { effectiveRenderShape } from "../../../render/static-svg";
 import type { CanvasStyle } from "../../../theme/canvas-style";
+import { grownToAspect, naturalAspectOf } from "../../../objects/natural-aspect";
 import { AGENT_GRID, snapCoordinate } from "../grid";
 import { lockHolding, type OpOutcome } from "./op-context";
 
@@ -98,9 +104,14 @@ function growsForText(object: InteractiveCanvasObject): boolean {
   return object.type !== "section" && object.type !== "sticky" && effectiveRenderShape(object) !== "note";
 }
 
-/** A node that can be matched to its row or column. Icons size by their tile. */
+/** A node that can be matched to its row or column. Icons size by their tile; a fixed-aspect shape by its ratio. */
 function canBePeer(object: InteractiveCanvasObject): boolean {
-  return growsForText(object) && object.type !== "icon";
+  return growsForText(object) && object.type !== "icon" && naturalAspectOf(object) === null;
+}
+
+/** A side on the agent grid, rounded up (a fixed-aspect box grown from an off-grid side). */
+function snapUp(value: number): number {
+  return Math.ceil(value / AGENT_GRID - 1e-9) * AGENT_GRID;
 }
 
 function center(geometry: Geometry): { cx: number; cy: number } {
@@ -171,7 +182,16 @@ export function autoSizeObjects(
   for (const id of ids) {
     const object = objectOf(id);
     if (!object || !growsForText(object) || lockHolding(document, id) !== null) continue;
-    const size = fittedSize(object, canvasStyle, anchor);
+    const fitted = fittedSize(object, canvasStyle, anchor);
+    // A fixed-aspect shape (natural-aspect.ts) keeps its box at its ratio
+    // whatever the gesture asked, grown on its longer side.
+    const aspect = naturalAspectOf(object);
+    let size = fitted;
+    if (aspect !== null) {
+      const atRatio = grownToAspect(fitted ?? object.geometry, aspect);
+      const snapped = { width: snapUp(atRatio.width), height: snapUp(atRatio.height) };
+      size = snapped.width === object.geometry.width && snapped.height === object.geometry.height ? undefined : snapped;
+    }
     if (!size && !placed) continue;
     const before = object.geometry;
     if (size) {
@@ -179,7 +199,9 @@ export function autoSizeObjects(
         ? { ...before, ...size }
         : aroundCenter(before, size.width, size.height);
       write(id, geometry);
-      notes.push(`grew ${id} to ${sizeOf(geometry)} so its text shows whole`);
+      notes.push(fitted
+        ? `grew ${id} to ${sizeOf(geometry)} so its text shows whole`
+        : `sized ${id} to ${sizeOf(geometry)}: a ${object.type} keeps its natural aspect ratio`);
     }
     if (!canBePeer(object)) continue;
 

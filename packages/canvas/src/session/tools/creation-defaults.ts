@@ -34,7 +34,8 @@
  * Recoloring afterward is its own gesture (`change_color`).
  */
 import { FIRST_USE_COLORS } from "../../state/actions";
-import type { CanvasColor } from "../../state/schema";
+import type { CanvasColor, InteractiveCanvasObjectType } from "../../state/schema";
+import { naturalAspectOf } from "../../objects/natural-aspect";
 
 import { preferredObjectColor } from "../../objects/registry";
 
@@ -148,5 +149,20 @@ export function creationDefaultFor(
 ): CreationDefault {
   const byKind = CREATION_DEFAULTS[creationKindFor(kindOrType)];
   const preferred = preferredObjectColor(kindOrType);
-  return preferred === undefined ? byKind : { size: byKind.size, color: preferred };
+  const size = fixedAspectSize(kindOrType) ?? byKind.size;
+  return { size, color: preferred ?? byKind.color };
+}
+
+/**
+ * A fixed-aspect type (natural-aspect.ts: the octagon) is placed at its UI
+ * default width on the grid, at its own ratio, not at the 280×100 node box
+ * it would only grow out of.
+ */
+function fixedAspectSize(kindOrType: string): CreationDefault["size"] | undefined {
+  if (!(kindOrType in OBJECT_TYPE_DEFAULTS)) return undefined;
+  const type = kindOrType as InteractiveCanvasObjectType;
+  const aspect = naturalAspectOf({ type });
+  if (aspect === null) return undefined;
+  const width = toGrid(OBJECT_TYPE_DEFAULTS[type].geometry.width);
+  return { width, height: toGrid(width / aspect) };
 }

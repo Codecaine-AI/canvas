@@ -248,3 +248,38 @@ describe("auto-size · review fixes", () => {
     expect(onGrid(a)).toBe(true);
   });
 });
+
+describe("auto-size · fixed aspect", () => {
+  test("place_shape places an octagon at its square default, and its text shows whole", () => {
+    const session = makeTestSession(pageBoard(), ["page"]);
+
+    const result = runOp(session, "place_shape", {
+      id: "stop", type: "octagon", at: [200, 200], text: "cancel", detail: "ends the run",
+    });
+
+    expect(result.isError).toBeUndefined();
+    const stop = objectOf(session.draft, "stop");
+    expect(stop.geometry).toMatchObject({ width: 140, height: 140 });
+    expect(onGrid(stop)).toBe(true);
+    expect(fits(stop)).toBe(true);
+  });
+
+  test("resize of an octagon to a wide box lands square on the longer side", () => {
+    const session = makeTestSession(pageBoard([{ ...box("stop", 200, 200, 140, 140, "octagon"), text: "cancel" }]), ["page"]);
+
+    runOp(session, "resize", { id: "stop", width: 280, height: 120 });
+
+    expect(objectOf(session.draft, "stop").geometry).toMatchObject({ x: 200, y: 200, width: 280, height: 280 });
+  });
+
+  test("an octagon whose name needs more room grows at its ratio", () => {
+    const session = makeTestSession(pageBoard([{ ...box("stop", 200, 200, 120, 120, "octagon"), text: "x" }]), ["page"]);
+
+    runOp(session, "update_text", { id: "stop", text: LONG });
+
+    const stop = objectOf(session.draft, "stop");
+    expect(stop.geometry.width).toBe(stop.geometry.height);
+    expect(stop.geometry.width).toBeGreaterThan(120);
+    expect(fits(stop)).toBe(true);
+  });
+});

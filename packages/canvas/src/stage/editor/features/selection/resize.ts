@@ -12,6 +12,7 @@ import type { CanvasPoint } from "../../../../state/geometry";
 import { computeSnapGuides, type SnapGuide } from "../snapping/snapping";
 import { gatherSnapCandidates } from "../../../../interaction/hit-testing";
 import { hitBoundsForObject } from "../../../../objects/geometry";
+import { grownToAspect, naturalAspectOf } from "../../../../objects/natural-aspect";
 import type { CanvasGeometry, InteractiveCanvasDocument } from "../../../../state/schema";
 import {
   SNAP_THRESHOLD_SCREEN_PX,
@@ -89,6 +90,37 @@ export function applyResizeHandle(
     y: newTop,
     width: newRight - newLeft,
     height: newBottom - newTop,
+  };
+}
+
+/**
+ * `geometry` (a handle-resized box) brought back to `aspect` (width / height)
+ * for a fixed-aspect shape (objects/natural-aspect.ts). An edge handle drives
+ * the other side, centered on the start box's middle; a corner handle takes
+ * the larger of the two sides it implies and holds the opposite corner.
+ */
+export function lockResizeAspect(
+  geometry: CanvasGeometry,
+  startGeometry: CanvasGeometry,
+  handle: ResizeHandle,
+  aspect: number,
+): CanvasGeometry {
+  if (handle === "e" || handle === "w") {
+    const height = geometry.width / aspect;
+    return { ...geometry, y: startGeometry.y + (startGeometry.height - height) / 2, height };
+  }
+  if (handle === "n" || handle === "s") {
+    const width = geometry.height * aspect;
+    return { ...geometry, x: startGeometry.x + (startGeometry.width - width) / 2, width };
+  }
+  const { width, height } = grownToAspect(geometry, aspect);
+  const right = startGeometry.x + startGeometry.width;
+  const bottom = startGeometry.y + startGeometry.height;
+  return {
+    x: handle === "nw" || handle === "sw" ? right - width : startGeometry.x,
+    y: handle === "nw" || handle === "ne" ? bottom - height : startGeometry.y,
+    width,
+    height,
   };
 }
 
@@ -177,6 +209,10 @@ export function stepFromResize(
     width: Math.max(MIN_DIRECT_RESIZE_SIZE, geometry.width),
     height: Math.max(MIN_DIRECT_RESIZE_SIZE, geometry.height),
   };
+
+  // A fixed-aspect shape keeps its ratio under every handle.
+  const aspect = target ? naturalAspectOf(target) : null;
+  if (aspect !== null) geometry = lockResizeAspect(geometry, state.startGeometry, state.handle, aspect);
 
   const guides = snap.guides.filter((guide) => {
     if (guide.axis === "x") return affectsWest || affectsEast;

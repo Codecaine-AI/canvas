@@ -169,6 +169,24 @@ describe("interaction: applyResizeHandle", () => {
 });
 
 describe("interaction: resize gesture via stepInteraction", () => {
+  it("keeps an octagon square under edge and corner handles", () => {
+    const document = makeDocument([
+      makeObject({ id: "stop", type: "octagon", geometry: { x: 100, y: 100, width: 140, height: 140 } }),
+    ]);
+    const ctx = makeContext(document, { selection: { kind: "objects", objectIds: ["stop"] } });
+    const drag = (handle: ResizeHandle, from: { x: number; y: number }, to: { x: number; y: number }) => {
+      const hit = { kind: "handle" as const, objectId: "stop", handle };
+      const started = stepInteraction(IDLE_INTERACTION_STATE, down(from, hit), ctx);
+      return updateGeometriesActions(stepInteraction(started.state, move(to, hit), ctx).dispatch)[0]!.geometries.stop!;
+    };
+
+    // East edge: the height follows the width, centered on the start box.
+    expect(drag("e", { x: 240, y: 170 }, { x: 300, y: 170 })).toEqual({ x: 100, y: 70, width: 200, height: 200 });
+    // Corner: the larger implied side wins, the opposite corner holds.
+    expect(drag("se", { x: 240, y: 240 }, { x: 300, y: 260 })).toEqual({ x: 100, y: 100, width: 200, height: 200 });
+    expect(drag("nw", { x: 100, y: 100 }, { x: 80, y: 40 })).toEqual({ x: 40, y: 40, width: 200, height: 200 });
+  });
+
   it("emits updateObjectGeometries with recordHistory true once, then false, for a handle drag", () => {
     const document = makeDocument([makeObject({ id: "a", geometry: { x: 100, y: 100, width: 200, height: 150 } })]);
     const ctx = makeContext(document, { selection: { kind: "objects", objectIds: ["a"] } });

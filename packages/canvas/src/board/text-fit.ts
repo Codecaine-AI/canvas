@@ -95,6 +95,7 @@ import {
   titleChipVisibleRuns,
 } from "../objects/section/title-chip-layout.ts";
 import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../connectors/label-chip.ts";
+import { grownToAspect, naturalAspectOf } from "../objects/natural-aspect.ts";
 import {
   activeBackend,
   fitText,
@@ -513,16 +514,27 @@ function shapeLabelReport(
   const nameRoom = (rectWidth: number) => (slot.placement === "below" ? Number.POSITIVE_INFINITY : rectWidth);
   const wideEnough = (rectWidth: number, detailRoom: number) =>
     rectWidth > 0 && nameRoom(rectWidth) >= widestWord && detailRoom >= detailWidth;
-  const neededWidth = wideEnough(at.rect.width, at.detailRoom)
-    ? Math.ceil(size.width)
-    : (smallestFitting(size.width, (width) => {
-        const probed = probe(object, width, size.height, text);
-        const rectWidth = resolveTextSlot(slot, probed, 1, { canvasStyle }).rect.width;
-        return wideEnough(rectWidth, detailRoomFor(probed, rectWidth));
-      }) ?? Math.ceil(size.width));
-
   const surelyFits = (width: number, height: number) => verdictAt(measured(width, height)) === "fits";
-  const neededHeight = smallestFitting(size.height, (height) => surelyFits(neededWidth, height));
+  // A fixed-aspect shape (the octagon) draws at its own ratio inside the box,
+  // so extra width alone never makes room: it grows at that ratio from the
+  // box it has, as autosize and resize size it (natural-aspect.ts).
+  const aspect = naturalAspectOf(object);
+  let neededWidth: number;
+  let neededHeight: number | undefined;
+  if (aspect !== null) {
+    const start = grownToAspect(size, aspect);
+    neededHeight = smallestFitting(start.height, (height) => surelyFits(height * aspect, height));
+    neededWidth = neededHeight === undefined ? Math.ceil(start.width) : Math.ceil(neededHeight * aspect);
+  } else {
+    neededWidth = wideEnough(at.rect.width, at.detailRoom)
+      ? Math.ceil(size.width)
+      : (smallestFitting(size.width, (width) => {
+          const probed = probe(object, width, size.height, text);
+          const rectWidth = resolveTextSlot(slot, probed, 1, { canvasStyle }).rect.width;
+          return wideEnough(rectWidth, detailRoomFor(probed, rectWidth));
+        }) ?? Math.ceil(size.width));
+    neededHeight = smallestFitting(size.height, (height) => surelyFits(neededWidth, height));
+  }
   const painted = !at.resolved.hidden && at.rect.width > 0;
   const nameShown = painted && nameShownAt(at);
   const extras = { nameFits: nameShown, ...(detailLine ? { detailLine } : null) };
