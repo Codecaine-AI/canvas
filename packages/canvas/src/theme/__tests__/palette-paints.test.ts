@@ -374,11 +374,11 @@ describe("schematic shapes, icons, stickies, connectors", () => {
   });
 
   it("light preset: a node never reads as the color of the section it sits in, its own hue included", () => {
-    // Every hued and gray node is the darker, stronger field: at least 0.045 L
+    // Every hued node is the darker, stronger field: at least 0.045 L
     // and 0.055 OKLab from any section level, and 0.065 from a section of its
     // own hue (round 3: 0.03 to 0.05 L, nodes lighter than their sections).
     const sectionColors = CANVAS_COLORS;
-    for (const nodeColor of CANVAS_COLORS.filter((color) => color !== "white")) {
+    for (const nodeColor of CANVAS_COLORS.filter((color) => color !== "white" && color !== "gray")) {
       const node = resolveShapePaint(nodeColor, LIGHT).fill;
       for (const sectionColor of sectionColors) {
         for (const depth of [2, 3, 4, 5]) {
@@ -388,6 +388,19 @@ describe("schematic shapes, icons, stickies, connectors", () => {
         }
       }
     }
+    // A gray node sits lighter than the hued nodes, where a neutral matches
+    // their weight, yet stays darker than every section: 0.055 L under a gray
+    // section, 0.03 under any depth-3 level (where gray nodes sit on the climb
+    // boards), and 0.01 under the deepest tint, where its ink border carries it.
+    const gray = resolveShapePaint("gray", LIGHT);
+    for (const sectionColor of sectionColors) {
+      for (const [depth, floor] of [[2, 0.05], [3, 0.03], [4, 0.01], [5, 0.01]] as const) {
+        const section = resolveSectionPaint(sectionColor, depth, LIGHT).fill;
+        expect(oklabLightness(section) - oklabLightness(gray.fill)).toBeGreaterThanOrEqual(floor);
+      }
+    }
+    expect(oklabLightness(resolveSectionPaint("gray", 2, LIGHT).fill) - oklabLightness(gray.fill)).toBeGreaterThanOrEqual(0.055);
+    expect(contrastRatio(gray.border, gray.fill)).toBeGreaterThanOrEqual(3);
     // A white node is the board surface: lighter than every section, and at
     // least 0.035 from any colored one. On a white section (the card) both
     // are the uncolored pick, 0.015 apart, and the node's full-ink border
@@ -403,8 +416,12 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(contrastRatio(white.border, white.fill)).toBeGreaterThanOrEqual(10);
   });
 
-  it("light ink-card shapes: gray is the neutral at the node lightness, white the board surface", () => {
-    expect(resolveShapePaint("gray", LIGHT)).toEqual({ fill: "#D0D0D0", border: "#666562", text: "#1F1F1F" });
+  it("light ink-card shapes: gray is a neutral lighter than the hued nodes, white the board surface", () => {
+    // Round 4's #D0D0D0 at the hued node lightness read as the heaviest fill (UI climb round 4).
+    expect(resolveShapePaint("gray", LIGHT)).toEqual({ fill: "#DCDCDC", border: "#666562", text: "#1F1F1F" });
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
+      expect(oklabLightness("#DCDCDC") - oklabLightness(resolveShapePaint(color, LIGHT).fill)).toBeGreaterThanOrEqual(0.03);
+    }
     expect(resolveShapePaint("white", LIGHT)).toEqual({ fill: "#FDFDFD", border: "#1F1F1F", text: "#1F1F1F" });
   });
 

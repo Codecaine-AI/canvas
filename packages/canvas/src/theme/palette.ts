@@ -357,7 +357,7 @@ function shapeFillBase(color: CanvasColor, style: CanvasStyle): string {
   if (color === "white") return style.boardBackground;
   const lightness = oklabLightness(style.cardFill) - SHAPE_CARD_LIGHTNESS_DROP;
   // Gray's ink is a near-neutral whose faint hue a chroma target would blow up: gray takes the neutral.
-  if (color === "gray") return withLightnessChroma(style.cardFill, lightness, 0);
+  if (color === "gray") return withLightnessChroma(style.cardFill, lightness + SHAPE_CARD_GRAY_LIGHTNESS_LIFT, 0);
   return withLightnessChroma(paletteColor(color, style), lightness, SHAPE_CARD_CHROMA_BY_COLOR[color] ?? SHAPE_CARD_CHROMA);
 }
 
@@ -376,7 +376,7 @@ function readableOn(text: string, background: string): string {
 /**
  * An `ink-card` node fill is set in OKLCH, not mixed: the anchor's hue at the
  * card's lightness less SHAPE_CARD_LIGHTNESS_DROP (OKLab L 0.859), at
- * SHAPE_CARD_CHROMA; gray takes the neutral there (#D0D0D0) and white the
+ * SHAPE_CARD_CHROMA; gray takes a lighter neutral (#DCDCDC) and white the
  * board surface. A node is the figure and its section the ground: the node is
  * the darker, more colorful field, and every section level is a pale tint
  * above it (L 0.95 to 0.96 at top level, about 0.91 at the deepest).
@@ -401,6 +401,20 @@ const SHAPE_CARD_CHROMA = 0.08;
  * most sRGB holds there (#FFC298), so it reads orange, not peach.
  */
 const SHAPE_CARD_CHROMA_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: 0.11, orange: 0.09 };
+
+/**
+ * How far a gray node sits above the hued node lightness: L 0.895 (#DEDEDE),
+ * not 0.859 (#D0D0D0). At one OKLab lightness a neutral reads darker than a
+ * colored fill (the Helmholtz-Kohlrausch effect), so round 4's #D0D0D0 was
+ * the heaviest fill on gray-heavy boards, a "concrete slab" that read as
+ * disabled (UI climb round 4: argon and fable on 01, 02, 03, 04, 08, 10, h1,
+ * h5). Picked from L 0.885, 0.9 and a warm 0.895 on board 02: the warm one
+ * read greige. The gray node stays darker than every section: 0.06 L under a
+ * gray section, 0.035 under any depth-3 level, where gray nodes sit on the
+ * climb boards, and 0.015 under the deepest tint, where its ink border
+ * carries it.
+ */
+const SHAPE_CARD_GRAY_LIGHTNESS_LIFT = 0.036;
 
 /**
  * Shape fill / border / text. `tint`: the pastel role-table fill with an ink
