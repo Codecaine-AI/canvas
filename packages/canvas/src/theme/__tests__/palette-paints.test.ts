@@ -102,10 +102,14 @@ describe("layer-cake sections", () => {
     // Top-level sections are depth 2 (the page is depth 1). A level and its
     // parent level must step apart in the same hue, and stay apart when the
     // nest switches hue.
+    // The light anchors (the yellow and orange solids) step on the lightness of
+    // their solid pushed to 4.5:1, a lighter reference than a text step: at
+    // least 0.028 (orange 3 to 4: 0.029), the text-step hues at least 0.03.
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
+      const floor = color === "yellow" || color === "orange" ? 0.028 : 0.03;
       for (const depth of [3, 4]) {
         expect(oklabDistance(resolveSectionPaint(color, depth, LIGHT).fill, resolveSectionPaint(color, depth - 1, LIGHT).fill))
-          .toBeGreaterThanOrEqual(0.03);
+          .toBeGreaterThanOrEqual(floor);
       }
     }
     expect(oklabDistance(resolveSectionPaint("blue", 3, LIGHT).fill, resolveSectionPaint("teal", 4, LIGHT).fill)).toBeGreaterThanOrEqual(0.03);
@@ -227,8 +231,8 @@ describe("layer-cake sections", () => {
   });
 
   it("the light theme never applies the guard (base and card are both near-white)", () => {
-    // Yellow's anchor is not a text step: its fill follows its own rule (see "light yellow" below).
-    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "yellow")) {
+    // Yellow's and orange's anchors are not text steps: their fills follow their own rule (see "light yellow" below).
+    for (const color of CANVAS_COLORS.filter((candidate) => !["white", "yellow", "orange"].includes(candidate))) {
       const mix = mixColors(LIGHT.palette[color], "#FDFDFD", 0.12);
       expect(Math.abs(oklabLightness(resolveSectionPaint(color, 1, LIGHT).fill) - oklabLightness(mix))).toBeLessThan(0.002);
     }
@@ -309,9 +313,25 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(contrastRatio(LIGHT.textColor, resolveInk("yellow", LIGHT))).toBeGreaterThanOrEqual(4.5);
   });
 
+  it("light yellow and orange: tiles are the design-system solid under a dark glyph, strokes the solid at 3:1", () => {
+    for (const [color, solid] of [["yellow", "#DFAB01"], ["orange", "#D9730D"]] as const) {
+      expect(LIGHT.palette[color]).toBe(solid);
+      const tile = resolveIconPaint(color, LIGHT);
+      expect(tile).toMatchObject({ tileFill: solid, tileBorder: null, glyph: LIGHT.textColor });
+      expect(contrastRatio(tile.glyph, solid)).toBeGreaterThanOrEqual(4.5);
+      expect(contrastRatio(resolveInk(color, LIGHT), resolveShapePaint(color, LIGHT).fill)).toBeGreaterThanOrEqual(3);
+    }
+    // Orange no longer strokes the brown text step (#9D530D).
+    expect(oklabLightness(resolveInk("orange", LIGHT))).toBeGreaterThan(0.6);
+    // Text-step hues keep the ink tile.
+    expect(resolveIconPaint("teal", LIGHT).tileFill).toBe(resolveInk("teal", LIGHT));
+  });
+
   it("text-step anchors stroke in the palette color itself", () => {
-    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "yellow")) {
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "yellow" && candidate !== "orange")) {
       expect(resolveInk(color, LIGHT)).toBe(LIGHT.palette[color]);
+    }
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "yellow")) {
       expect(resolveInk(color, DARK)).toBe(DARK.palette[color]);
     }
     expect(resolveInk("yellow", FIGJAM_CANVAS_STYLE)).toBe(FIGJAM_CANVAS_STYLE.palette.yellow);

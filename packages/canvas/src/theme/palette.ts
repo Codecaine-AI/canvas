@@ -419,9 +419,10 @@ function shapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
 
 /**
  * Icon object paint. `glyph` (figjam): the bare glyph in the ink, closed
- * interiors in the shape fill. `tile`: tile = ink, glyph = iconTileGlyphColor,
- * or the text color where that falls under 4.5:1 on the ink (the light yellow
- * ink: an ink glyph, as the design system's yellow.on-solid);
+ * interiors in the shape fill. `tile`: tile = ink (a light anchor's solid,
+ * solidTileFill), glyph = iconTileGlyphColor, or the text color where that
+ * falls under 4.5:1 on the tile (light yellow and orange: a dark glyph, as
+ * the design system's on-solid);
  * `white` on a light board becomes an outlined tile (cardFill, ink border,
  * ink glyph) instead of a solid near-black square.
  */
@@ -438,7 +439,23 @@ function iconPaint(color: CanvasColor, style: CanvasStyle): IconPaint {
   if (color === "white" && isLightBoard(style)) {
     return { tileFill: style.cardFill, tileBorder: ink, glyph: ink, glyphFill: null, label };
   }
-  return { tileFill: ink, tileBorder: null, glyph: tileGlyphOn(ink, style), glyphFill: null, label };
+  const tile = solidTileFill(color, ink, style);
+  return { tileFill: tile, tileBorder: null, glyph: tileGlyphOn(tile, style), glyphFill: null, label };
+}
+
+/**
+ * A solid tile's body: the ink, or in the layer-cake modes the anchor itself
+ * where the anchor is a light solid, not a text step (light yellow and
+ * orange). The ink is that solid pushed to 3:1 against the node, a darker
+ * mustard and rust that judges read as murky behind the dark on-solid glyph
+ * (UI climb round 2: yellow on 06, 09, 12, h6 from all three judges; orange
+ * on 14, h1, h3, h4, h5). The solid under the text color is the design
+ * system's own solid / on-solid pair: 7.8:1 on yellow, 5.0:1 on orange.
+ */
+function solidTileFill(color: CanvasColor, ink: string, style: CanvasStyle): string {
+  if (style.sectionFill !== "layer-cake") return ink;
+  const anchor = paletteColor(color, style);
+  return ensureContrast(anchor, style.boardBackground, MIN_TEXT_CONTRAST) === anchor ? ink : anchor;
 }
 
 /** The tile glyph color on a solid `ink` tile: iconTileGlyphColor, or the text color where that reads better and the glyph would fall under MIN_TEXT_CONTRAST. */

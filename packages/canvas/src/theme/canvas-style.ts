@@ -381,9 +381,15 @@ export const SCHEMATIC_PALETTE_TOKENS = {
  * its chroma in the fills at the lightness yellow.text gave, so every
  * layer and node lightness guard holds. Amber.text was the other candidate,
  * but at hue 65 it sits 9 degrees from orange.text.
+ *
+ * Orange: orange.text (#9D530D, OKLCH L 0.52) stroked and tiled a mud brown
+ * that judges read as "not orange" on every orange board (UI climb round 2:
+ * 14, h1, h3, h4, h5). Light orange takes the orange solid (#D9730D) the same
+ * way: strokes at 3:1 on the node (#CE6D0C, 3.5:1 on the board).
  */
 export const SCHEMATIC_LIGHT_PALETTE_TOKENS = {
   ...SCHEMATIC_PALETTE_TOKENS,
+  orange: "color.orange.solid",
   yellow: "color.yellow.solid",
 } as const satisfies Record<CanvasColor, ThemeTokenPath>;
 
