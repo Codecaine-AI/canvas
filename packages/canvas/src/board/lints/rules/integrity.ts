@@ -23,7 +23,7 @@ import { routeThroughBoxIds } from "../../../connectors/routing";
 import { childrenOf, kindOf } from "../../helpers";
 import { textFitReport, type TextFitReport } from "../../text-fit";
 import { brokenWires } from "../../wire-integrity";
-import { sameHueNests, sharedLook } from "../../section-colors";
+import { heldNodeClashes, sameHueNests, sharedLook, sharedSiblingLook, siblingClashes } from "../../section-colors";
 import { rectOf } from "../geometry";
 
 import type { InteractiveCanvasObject } from "../../../state/schema";
@@ -114,6 +114,34 @@ export const rule: LayoutRule = {
         where: rectOf(byId.get(nest.section)!),
         message: `${nest.section} shares ${sharedLook(nest)} with its parent section ${nest.parent}: nested levels must differ in color`,
         suggestion: `change_color ${nest.section} to another color, such as ${nest.suggestion}`,
+      });
+    }
+
+    // Touching sibling sections in one look: where one group ends and the
+    // next starts stops reading. The tools refuse to make one.
+    for (const clash of siblingClashes(document, canvasStyle)) {
+      findings.push({
+        rule: "integrity",
+        severity: "error",
+        at: [clash.section, clash.sibling],
+        where: rectOf(byId.get(clash.section)!),
+        message: `${clash.section} shares ${sharedSiblingLook(clash)} with its sibling section ${clash.sibling}`
+          + ": touching sibling sections must differ in color",
+        suggestion: `change_color ${clash.section} to another color, such as ${clash.suggestion}`,
+      });
+    }
+
+    // A section that holds nodes of several hues, in one of their hues: that
+    // node loses its figure against the ground. A category section (one
+    // node hue) may take it. The tools refuse to make one.
+    for (const clash of heldNodeClashes(document, canvasStyle)) {
+      findings.push({
+        rule: "integrity",
+        severity: "error",
+        at: [clash.section, clash.node],
+        where: rectOf(byId.get(clash.section)!),
+        message: `${clash.section} paints ${clash.color}, the color of ${clash.node} it holds among nodes of other colors: a section must differ from its nodes unless they all share one color`,
+        suggestion: `change_color ${clash.section} to another color, such as ${clash.suggestion}`,
       });
     }
 

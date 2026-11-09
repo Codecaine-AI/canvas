@@ -43,7 +43,7 @@ import { sectionDescendantIds } from "../../../state/geometry";
 import type { CanvasColor } from "../../../state/schema/colors";
 import { reconcileSectionMembership } from "../../../state/section-membership";
 import { pickSectionColor } from "../../../board/section-colors";
-import { draftPlacedObject } from "../../../state/schema/object-defaults";
+import { draftPlacedObject, FIRST_USE_COLORS } from "../../../state/schema/object-defaults";
 
 import { creationDefaultFor } from "../creation-defaults";
 import { detailDroppedNote, storedDetail } from "../detail-line";
@@ -95,9 +95,9 @@ export const placeSection = defineOperationTool({
     + "it keeps the footprint it lands with until something fits, arranges or "
     + "resizes it. Undrawn size takes the default section footprint. The header "
     + "shows the optional icon and the title. Without a color it takes one that "
-    + "paints apart from its parent section and the sections it holds (and, at "
-    + "the top level, from its sibling sections); a nested section never shares "
-    + "its parent's color or painted fill.",
+    + "paints apart from its parent section, the sections it holds and its "
+    + "sibling sections; a section never shares its parent's or a sibling's "
+    + "color or painted fill.",
   fields: PlaceSectionParams.properties,
   validate: (ctx, p) => [
     ...ctx.requireFreeId(p.id),
@@ -128,8 +128,8 @@ export const placeSection = defineOperationTool({
     const at = `place_section ${p.id} ${placement(geometry)}`;
     if (p.color) return lower(p.color, `${at} ${p.color}`);
     // No color named: place it, read the parent and the sections it adopts
-    // from the reconciled tree, and pick a hue none of them (nor, at the top
-    // level, its siblings) paints, so the hierarchy reads.
+    // from the reconciled tree, and pick a hue none of them nor
+    // its siblings paints, so the hierarchy and the group edges read.
     const probe = lower(defaults.color, at);
     if (probe.status !== "applied") return probe;
     const color = pickSectionColor(reconcileSectionMembership(probe.draft), p.id, ctx.canvasStyle);
@@ -285,7 +285,10 @@ export const clone = defineOperationTool({
     + "attached to the source (draw those with connect), and, for a section, "
     + "its contents — a cloned frame arrives empty, because copying "
     + "descendants without copying the edges between them would half-copy the "
-    + "structure. A copy is never locked, whatever the source is.",
+    + "structure. A copy is never locked, whatever the source is. A section "
+    + "copy keeps the source's color unless that color would match its parent "
+    + "or a sibling (the source itself, beside it); then it takes the color "
+    + "place_section would pick, and says so.",
   fields: CloneParams.properties,
   validate: (ctx, p) => {
     const errors = [...ctx.requireFreeId(p.id)];
@@ -346,11 +349,22 @@ export const clone = defineOperationTool({
         ? [detailDroppedNote(source.type)]
         : []),
     ];
-    return placeFitted(ctx, p.id, ctx.applyLowered(
-      { type: "addObject", object },
-      "clone",
-      notes.length > 0 ? notes : undefined,
-    ), (landed) => `clone ${p.id} from ${p.sourceId} ${placement(landed)}`);
+    const lower = (copy: Record<string, unknown>, extra: string[]) => {
+      const all = [...notes, ...extra];
+      return placeFitted(ctx, p.id, ctx.applyLowered(
+        { type: "addObject", object: copy },
+        "clone",
+        all.length > 0 ? all : undefined,
+      ), (landed) => `clone ${p.id} from ${p.sourceId} ${placement(landed)}`);
+    };
+    const probe = lower(object, []);
+    if (source.type !== "section" || probe.status !== "applied") return probe;
+    // A section copy lands beside its source as a sibling: keep the source's
+    // color only while it reads apart from the copy's parent and siblings.
+    const kept = source.color ?? FIRST_USE_COLORS.section;
+    const color = pickSectionColor(reconcileSectionMembership(probe.draft), p.id, ctx.canvasStyle, undefined, kept);
+    if (color === kept) return probe;
+    return lower({ ...object, color }, [`the copy takes ${color}: ${kept} would match its parent, a touching sibling or a node it holds`]);
   },
 });
 

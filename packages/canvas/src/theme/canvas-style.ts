@@ -414,10 +414,18 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   detailFontSizePx: 14,
   shapeFill: "ink-card",
   sectionFill: "layer-cake",
-  sectionTintBase: 0.14,
-  sectionTintStep: 0.035,
-  sectionTintMax: 0.21,
-  sectionBorderOpacity: 0.5,
+  // Each nesting level is its own layer: top-level sections (depth 2 under
+  // the page) paint 0.19, then 0.26, then the 0.33 cap, so three levels of
+  // groups step apart (OKLab 0.037 to 0.043 between a level and its parent,
+  // against 0.016 to 0.024 with a 0.035 step and a 0.21 cap, which stopped
+  // deepening after one nested level). The frame edge is the ink at 0.75: it
+  // marks where a group ends without the full-ink 2px edge a node carries.
+  // Picked from three variants on Archon boards 01, 02, 10 and 14 (hue only,
+  // full-ink edge, deeper steps).
+  sectionTintBase: 0.12,
+  sectionTintStep: 0.07,
+  sectionTintMax: 0.33,
+  sectionBorderOpacity: 0.75,
   headerPlacement: "pinned",
   headerFont: "mono",
   headerUppercase: true,
@@ -472,6 +480,7 @@ const SCHEMATIC_DARK_PRESET: CanvasStyle = inPresetKeyOrder({
   sectionTintBase: 0.1,
   sectionTintStep: 0.05,
   sectionTintMax: 0.22,
+  sectionBorderOpacity: 0.5,
   headerChipMix: 0.2,
   ...schematicColors("dark"),
   cardFill: SCHEMATIC_DARK_CARD_FILL,

@@ -21,19 +21,25 @@ const CORPUS_DIR = join(import.meta.dir, "..", "..", "..", "..", "..", "canvases
  * lines in a box with room for 29, saved before nodes auto-sized. Then
  * integrity began reporting a section in its parent's color: bubba-voice's
  * gray section-ml-completed-sent sits in the gray section-ml-session-tasks.
+ * Then integrity began reporting touching sibling sections in one color:
+ * v2-flow's yellow card-question-1 and -2. And a section painted the hue of
+ * a node it holds: gc-decomp-harness colors each of six sections like its
+ * own nodes (hero blue, board teal, score-gate violet, pr orange, knowledge
+ * pink, health red), ink-diagrams' blue input and output adapters hold blue
+ * nodes, and v2-flow's blue section holds a blue node.
  */
 const CEILING: Record<string, number> = {
   "agent-flows-2": 0,
   "bubba-voice": 2,
   "claude-code-researcher": 0,
-  "gc-decomp-harness": 0,
-  "ink-diagrams": 0,
+  "gc-decomp-harness": 6,
+  "ink-diagrams": 2,
   "intent-classification-1": 0,
   "intent-classification-2": 0,
-  "v2-flow": 0,
+  "v2-flow": 2,
 };
 
-const TOTAL_CEILING = 2;
+const TOTAL_CEILING = 12;
 
 function corpus(): { name: string; document: InteractiveCanvasDocument }[] {
   return readdirSync(CORPUS_DIR)

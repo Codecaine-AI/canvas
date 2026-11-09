@@ -23,6 +23,9 @@
         "b-section-body-2",
         "b-section-frame-3",
         "b-section-color-6",
+        "b-section-color-refuse-8",
+        "b-section-color-pick-7",
+        "b-section-color-pool-9",
         "b-section-code-4",
         "b-section-canvas-5"
       ]
@@ -123,25 +126,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A nested section must not look like its parent, by the same ink or by the same painted fill at its depth under the board's style. "
-        },
-        {
-          "insert": "place_section",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and Studio give a section placed without a color one that paints apart from its parent and the sections it holds. An agent edit that makes a look-alike nest is refused. A Studio recolor keeps the person's pick, and the "
-        },
-        {
-          "insert": "integrity",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " lint reports the nest. Only the page is exempt as a parent: the section with id "
+          "insert": "A section must not paint the ink or fill of its parent section or of a sibling it touches. A section that holds nodes of several hues must not paint one of them. A category section, whose nodes that are not gray or white all share one hue, can paint that hue. The page ("
         },
         {
           "insert": "page-frame",
@@ -150,7 +135,64 @@
           }
         },
         {
-          "insert": ", or a parentless section stored white."
+          "insert": ", or a parentless white section) is the parent of top-level sections. Siblings touch when their edges are closer than one gutter (48px) and part of the gap is clear of other siblings."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-refuse-8": {
+      "id": "b-section-color-refuse-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "An agent edit that adds, removes, recolors, reparents, moves or resizes a section is refused when it makes a new break. An edit that changes only nodes is never refused for a section's color, such as a green node placed in a blue category section. The "
+        },
+        {
+          "insert": "integrity",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lint reports each break left on the board with a suggested color, and no tool recolors the section."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-pick-7": {
+      "id": "b-section-color-pick-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "place_section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and Studio give a section without a color one that keeps these rules. "
+        },
+        {
+          "insert": "clone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and Studio's duplicate and paste keep the source's color first, while it keeps the rules. A category section with no kept color gets its category's hue when that hue keeps them, even past the cap."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-pool-9": {
+      "id": "b-section-color-pool-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Otherwise the chooser tries gray, blue, violet, green, then teal, and skips the hues of the board's nodes and wires. It keeps a board to three section hues besides gray, category hues included. It does not put teal beside a touching blue or green section while another hue fits. Studio's last-picked section color wins only when it passes these same limits. Past that, the chooser repeats the hue of the farthest sibling the section does not touch, a cool hue first. Warm hues come last."
         }
       ],
       "children": []

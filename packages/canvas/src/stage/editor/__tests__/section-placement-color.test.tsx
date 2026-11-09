@@ -1,7 +1,8 @@
 /**
  * Studio places a section with the same color chooser as place_section
  * (board/section-colors.ts): a section dropped into a gray section never
- * comes out gray, so the nest reads as a level.
+ * comes out gray, so the nest reads as a level, and never takes a sibling
+ * section's color, so the groups read apart.
  */
 import { afterEach, describe, expect, it } from "bun:test";
 import { act, cleanup, fireEvent, render } from "@testing-library/react";
@@ -15,7 +16,7 @@ import {
 const STAGE_WIDTH = 1200;
 const STAGE_HEIGHT = 900;
 
-function boardDocument(): InteractiveCanvasDocument {
+function boardDocument(extra: InteractiveCanvasDocument["objects"] = []): InteractiveCanvasDocument {
   return {
     schemaVersion: 1,
     id: "section-placement-color",
@@ -23,6 +24,7 @@ function boardDocument(): InteractiveCanvasDocument {
     objects: [
       { id: "page", type: "section", text: "Page", color: "white", parentId: null, geometry: { x: 0, y: 0, width: 1200, height: 900 } },
       { id: "pack", type: "section", text: "Pack", color: "gray", parentId: "page", geometry: { x: 40, y: 40, width: 1100, height: 800 } },
+      ...extra,
     ],
     connections: [],
   };
@@ -74,6 +76,35 @@ describe("Studio section placement", () => {
       const placed = documents.at(-1)!.objects.find((object) => !["page", "pack"].includes(object.id));
       expect(placed).toMatchObject({ type: "section", parentId: "pack" });
       expect(placed!.color).not.toBe("gray");
+    } finally {
+      restoreRect();
+    }
+  });
+
+  it("a section placed beside a blue sibling in a gray section takes neither color", () => {
+    const restoreRect = stubStageRect();
+    try {
+      const states: InteractiveCanvasEditorState[] = [];
+      const documents: InteractiveCanvasDocument[] = [];
+      const rounds = { id: "rounds", type: "section", text: "Rounds", color: "blue", parentId: "pack", geometry: { x: 80, y: 120, width: 360, height: 240 } } as const;
+      const view = render(
+        <InteractiveCanvasEditor
+          document={boardDocument([rounds])}
+          onEditorStateChange={(state) => states.push(state)}
+          onDocumentChange={(document) => documents.push(document)}
+        />,
+      );
+      const stage = view.container.querySelector("[data-canvas-stage]") as HTMLElement;
+      act(() => {
+        window.dispatchEvent(new KeyboardEvent("keydown", { key: "a", bubbles: true, cancelable: true }));
+      });
+      const point = worldToScreen(states.at(-1)!.viewport, { x: 700, y: 520 });
+      fireEvent.pointerDown(stage, { button: 0, pointerId: 1, clientX: point.x, clientY: point.y });
+      fireEvent.pointerUp(stage, { button: 0, pointerId: 1, clientX: point.x, clientY: point.y });
+
+      const placed = documents.at(-1)!.objects.find((object) => !["page", "pack", "rounds"].includes(object.id));
+      expect(placed).toMatchObject({ type: "section", parentId: "pack" });
+      expect(["gray", "blue"]).not.toContain(placed!.color);
     } finally {
       restoreRect();
     }

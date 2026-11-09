@@ -73,16 +73,40 @@ describe("figjam paints equal the role tables", () => {
 
 describe("layer-cake sections", () => {
   it("mixes the ink into the base by depth: t0, t0 + step, …, capped at tmax", () => {
-    expect(resolveSectionPaint("teal", 1, LIGHT).fill).toBe("#DBE9E8"); // mix(#0D7164, #FDFDFD, .14)
-    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.175));
-    expect(resolveSectionPaint("teal", 3, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.21));
-    expect(resolveSectionPaint("teal", 4, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.21));
-    expect(resolveSectionPaint("teal", 9, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.21));
+    expect(resolveSectionPaint("teal", 1, LIGHT).fill).toBe("#E0ECEB"); // mix(#0D7164, #FDFDFD, .12)
+    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.19));
+    expect(resolveSectionPaint("teal", 3, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.26));
+    expect(resolveSectionPaint("teal", 4, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.33));
+    expect(resolveSectionPaint("teal", 9, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.33));
+  });
+
+  it("light preset: each of three nested levels under the page is its own layer, whatever the hues", () => {
+    // Top-level sections are depth 2 (the page is depth 1). A level and its
+    // parent level must step apart in the same hue, and stay apart when the
+    // nest switches hue.
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
+      for (const depth of [3, 4]) {
+        expect(oklabDistance(resolveSectionPaint(color, depth, LIGHT).fill, resolveSectionPaint(color, depth - 1, LIGHT).fill))
+          .toBeGreaterThanOrEqual(0.03);
+      }
+    }
+    expect(oklabDistance(resolveSectionPaint("blue", 3, LIGHT).fill, resolveSectionPaint("teal", 4, LIGHT).fill)).toBeGreaterThanOrEqual(0.03);
+  });
+
+  it.each([
+    ["schematic-light", LIGHT],
+    ["schematic-dark", DARK],
+  ] as const)("gray stops deepening at the top-level tone, so a deep gray never reads as a disabled slab (%s)", (_id, style) => {
+    const top = resolveSectionPaint("gray", 2, style).fill;
+    expect(resolveSectionPaint("gray", 1, style).fill).not.toBe(top);
+    for (const depth of [3, 4, 7]) expect(resolveSectionPaint("gray", depth, style).fill).toBe(top);
+    // Chromatic hues keep stepping.
+    expect(resolveSectionPaint("blue", 4, style).fill).not.toBe(resolveSectionPaint("blue", 2, style).fill);
   });
 
   it("derives border, chip, and chip border from the ink", () => {
     const paint = resolveSectionPaint("teal", 1, LIGHT);
-    expect(paint.border).toBe("rgba(13, 113, 100, 0.5)");
+    expect(paint.border).toBe("rgba(13, 113, 100, 0.75)");
     expect(paint.chipFill).toBe(mixColors("#0D7164", paint.fill, 0.16));
     expect(paint.chipBorder).toBe("rgba(13, 113, 100, 0.5)");
     expect(paint.headerText).toBe("#1F1F1F");
@@ -107,19 +131,15 @@ describe("layer-cake sections", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
       expect(oklabDistance(resolveSectionPaint(color, 1, LIGHT).fill, LIGHT.boardBackground)).toBeGreaterThanOrEqual(0.04);
     }
-    expect(LIGHT.sectionTintBase).toBe(0.14);
+    expect(LIGHT.sectionTintBase).toBe(0.12);
     expect(DARK.sectionTintBase).toBe(0.1);
   });
 
   it("dark preset: every level's fill stands clear of the cards and nested levels stay distinct", () => {
-    for (const color of CANVAS_COLORS) {
+    // The gray chain (white shares it on dark boards) stops at depth 2: see the gray test above.
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
       const fills = [1, 2, 3, 4].map((depth) => resolveSectionPaint(color, depth, DARK).fill);
-      // The gray chain (white shares it on dark boards) reaches the cap 0.0297 from the cards:
-      // no weight there is both clear of them and a distinct layer, so the guard keeps the cap.
-      const capOnGrayChain = (depth: number) => depth === 4 && (color === "gray" || color === "white");
-      fills.forEach((fill, index) =>
-        expect(oklabDistance(fill, DARK.cardFill)).toBeGreaterThanOrEqual(capOnGrayChain(index + 1) ? 0.029 : 0.03),
-      );
+      fills.forEach((fill) => expect(oklabDistance(fill, DARK.cardFill)).toBeGreaterThanOrEqual(0.03));
       const lightness = fills.map((fill) => oklabLightness(fill));
       // d1 → d2 → d3 step by a visible amount; d3 → d4 is the short step into the cap.
       expect(lightness[1]! - lightness[0]!).toBeGreaterThanOrEqual(0.015);
@@ -132,12 +152,10 @@ describe("layer-cake sections", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
       expect(resolveSectionPaint(color, 1, DARK).fill).toBe(mixColors(DARK.palette[color], "#0D1117", 0.1));
     }
-    // The gray chain (white takes it on dark boards) sits below the raised cards at every depth
-    // (at the cap by 0.029: L 0.3028 under the cards' 0.3322).
+    // The gray chain (white takes it on dark boards) sits below the raised cards at every depth.
     for (const depth of [1, 2, 3, 4]) {
-      expect(oklabLightness(resolveSectionPaint("gray", depth, DARK).fill)).toBeLessThan(
-        oklabLightness(DARK.cardFill) - (depth === 4 ? 0.029 : 0.03),
-      );
+      expect(oklabLightness(resolveSectionPaint("gray", depth, DARK).fill)).toBeLessThan(oklabLightness(DARK.cardFill) - 0.03);
+      expect(resolveSectionPaint("white", depth, DARK)).toEqual(resolveSectionPaint("gray", depth, DARK));
     }
   });
 
@@ -192,7 +210,7 @@ describe("layer-cake sections", () => {
 
   it("the light theme never applies the guard (base and card are both near-white)", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
-      expect(resolveSectionPaint(color, 1, LIGHT).fill).toBe(mixColors(LIGHT.palette[color], "#FDFDFD", 0.14));
+      expect(resolveSectionPaint(color, 1, LIGHT).fill).toBe(mixColors(LIGHT.palette[color], "#FDFDFD", 0.12));
     }
   });
 

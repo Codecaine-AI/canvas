@@ -75,9 +75,9 @@ describe("place_section — title and header glyph in one gesture", () => {
     expect(colored.text).toContain("APPLIED · place_section data 1000,0");
     expect(colored.text).toContain(" teal");
     expect(objectOf(session, "data").color).toBe("teal");
-    // Its top-level siblings paint gray (frame) and teal (data): the first free hue, named in the summary.
-    expect(objectOf(session, "plain").color).toBe("blue");
-    expect(plain.text).toContain("APPLIED · place_section plain 1000,400 480×360 blue");
+    // It touches gray (frame) and teal (data): blue would sit beside teal, so violet, named in the summary.
+    expect(objectOf(session, "plain").color).toBe("violet");
+    expect(plain.text).toContain("APPLIED · place_section plain 1000,400 480×360 violet");
   });
 
   test("the color field is the board's closed roster", () => {
