@@ -42,6 +42,7 @@ import {
   contrastRatio,
   ensureContrast,
   mixColors,
+  oklabChroma,
   oklabDistance,
   oklabLightness,
   withAlpha,
@@ -702,7 +703,7 @@ function layerCakeWeight(level: number, style: CanvasStyle): number {
 function layerCakeFill(color: CanvasColor, depth: number, style: CanvasStyle): string {
   const level = Number.isFinite(depth) ? Math.max(1, Math.floor(depth)) : 1;
   const base = style.sectionTintMixBase;
-  const fillAt = (weight: number) => inkFill(color, base, weight, style);
+  const fillAt = (weight: number) => sectionChromaCapped(inkFill(color, base, weight, style), color, weight, style);
   // Moving the weight only separates the fill from the cards when the mix
   // base itself stands clear of them (a dark board under raised cards); on a
   // light theme base and card are both white and the guard stays off.
@@ -774,6 +775,45 @@ function layerCakeFill(color: CanvasColor, depth: number, style: CanvasStyle): s
   }
   return fillAt(weight);
 }
+
+/**
+ * Most OKLCH chroma a top-level layer-cake section fill keeps beside
+ * `ink-card` nodes: half the node chroma. Deeper levels may grow with their
+ * ink weight (sectionChromaCapped), as a mix's chroma does, so a nested level
+ * still steps off its parent when both would sit at the cap. A section is ground and its nodes the figure, so a
+ * big field must never be the most colorful thing in it. Uncapped, the
+ * top-level yellow section painted chroma 0.076 (a butter field judges called
+ * the loudest fill on board 12), pink 0.038 and red 0.036, and nested violet
+ * and blue sections (0.032 to 0.037) outshone the icons inside them (boards
+ * 02, 05, 14). The title chip and the frame still carry the full hue, and the
+ * lightness is kept, so the node-over-section gap holds.
+ */
+const SECTION_CHROMA_MAX = SHAPE_CARD_CHROMA / 2;
+
+/**
+ * Hues whose section cap differs. Yellow needs about twice the chroma to read
+ * as its hue at section lightness (L 0.91): at 0.02 it is greige (#E7E1D3),
+ * the khaki of UI climb round 0; at 0.04 a pale wheat (#EDE0C4), half its
+ * uncapped 0.076.
+ */
+const SECTION_CHROMA_MAX_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: SHAPE_CARD_CHROMA };
+
+/**
+ * `fill` (a section level at ink `weight`) with its chroma cut, at the same
+ * lightness and hue, to the cap for `color` scaled by `weight` over the
+ * top-level weight: nested violet at 0.26 keeps 0.027 (0.037 uncapped).
+ * Only beside `ink-card` nodes; other shape modes keep the fill.
+ */
+function sectionChromaCapped(fill: string, color: CanvasColor, weight: number, style: CanvasStyle): string {
+  if (style.shapeFill !== "ink-card") return fill;
+  const topLevelWeight = layerCakeWeight(TOP_LEVEL_SECTION_DEPTH, style);
+  const cap = ((SECTION_CHROMA_MAX_BY_COLOR[color] ?? SECTION_CHROMA_MAX) * weight) / topLevelWeight;
+  if (oklabChroma(fill) <= cap) return fill;
+  return withLightnessChroma(fill, oklabLightness(fill), cap);
+}
+
+/** Nesting depth of a top-level section under the board's page section (state/section-depth.ts). */
+const TOP_LEVEL_SECTION_DEPTH = 2;
 
 /** The header icon follows the icon objects' tile/glyph paint; glyph mode has no tile. */
 function sectionIconPaint(

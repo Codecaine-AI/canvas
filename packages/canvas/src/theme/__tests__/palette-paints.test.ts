@@ -7,7 +7,7 @@
 import { describe, expect, it } from "bun:test";
 import { CANVAS_COLORS } from "../../state/schema/colors";
 import { FIGJAM_CANVAS_STYLE, canvasThemePreset } from "../canvas-style";
-import { contrastRatio, ensureContrast, mixColors, oklab, oklabDistance, oklabLightness } from "../color-math";
+import { contrastRatio, ensureContrast, mixColors, oklab, oklabChroma, oklabDistance, oklabLightness } from "../color-math";
 import {
   resolveConnectorPaint,
   resolveConnectorStroke,
@@ -74,11 +74,28 @@ describe("figjam paints equal the role tables", () => {
 
 describe("layer-cake sections", () => {
   it("mixes the ink into the base by depth: t0, t0 + step, …, capped at tmax", () => {
-    expect(resolveSectionPaint("teal", 1, LIGHT).fill).toBe("#E0ECEB"); // mix(#0D7164, #FDFDFD, .12)
-    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.19));
-    expect(resolveSectionPaint("teal", 3, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.26));
-    expect(resolveSectionPaint("teal", 4, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.33));
-    expect(resolveSectionPaint("teal", 9, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.33));
+    // The lightness is the mix's at t(d); the chroma is the mix's, cut to the section cap.
+    for (const [depth, weight] of [[1, 0.12], [2, 0.19], [3, 0.26], [4, 0.33], [9, 0.33]] as const) {
+      const fill = resolveSectionPaint("teal", depth, LIGHT).fill;
+      const mix = mixColors("#0D7164", "#FDFDFD", weight);
+      expect(Math.abs(oklabLightness(fill) - oklabLightness(mix))).toBeLessThan(0.002);
+      expect(oklabChroma(fill)).toBeLessThanOrEqual(oklabChroma(mix) + 0.001);
+    }
+    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe("#CFE2E0");
+  });
+
+  it("light preset: a section never outweighs its nodes, at top level chroma 0.02 (yellow 0.04), growing with the ink weight", () => {
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
+      const cap = color === "yellow" ? 0.04 : 0.02;
+      for (const [depth, weight] of [[2, 0.19], [3, 0.26], [4, 0.33]] as const) {
+        expect(oklabChroma(resolveSectionPaint(color, depth, LIGHT).fill)).toBeLessThanOrEqual((cap * weight) / 0.19 + 0.0015);
+      }
+      expect(oklabChroma(resolveSectionPaint(color, 2, LIGHT).fill)).toBeLessThanOrEqual(oklabChroma(resolveShapePaint(color, LIGHT).fill) + 0.001);
+    }
+    // The butter field on board 12 (chroma 0.076) is now a pale wheat.
+    expect(resolveSectionPaint("yellow", 2, LIGHT).fill).toBe("#EBE1C4");
+    // Dark boards (card shapes) keep the uncapped mix.
+    expect(oklabChroma(resolveSectionPaint("violet", 3, DARK).fill)).toBeGreaterThan(0.045);
   });
 
   it("light preset: each of three nested levels under the page is its own layer, whatever the hues", () => {
@@ -212,7 +229,8 @@ describe("layer-cake sections", () => {
   it("the light theme never applies the guard (base and card are both near-white)", () => {
     // Yellow's anchor is not a text step: its fill follows its own rule (see "light yellow" below).
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "yellow")) {
-      expect(resolveSectionPaint(color, 1, LIGHT).fill).toBe(mixColors(LIGHT.palette[color], "#FDFDFD", 0.12));
+      const mix = mixColors(LIGHT.palette[color], "#FDFDFD", 0.12);
+      expect(Math.abs(oklabLightness(resolveSectionPaint(color, 1, LIGHT).fill) - oklabLightness(mix))).toBeLessThan(0.002);
     }
   });
 
@@ -283,7 +301,8 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     ]);
     for (const [fill, olive] of paints) {
       expect(Math.abs(oklabLightness(fill) - oklabLightness(olive))).toBeLessThan(0.002);
-      expect(chroma(fill)).toBeGreaterThan(2 * chroma(olive));
+      // Yellow, not khaki: well above the olive mix, though capped as a section (0.04 at top level).
+      expect(chroma(fill)).toBeGreaterThan(1.3 * chroma(olive));
     }
     // A tile glyph on the gold ink is the dark text color, as the design system's yellow.on-solid.
     expect(resolveIconPaint("yellow", LIGHT).glyph).toBe(LIGHT.textColor);
