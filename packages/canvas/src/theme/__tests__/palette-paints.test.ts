@@ -444,16 +444,33 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(resolveIconPaint("white", DARK)).toMatchObject({ tileFill: "#F0F6FC", tileBorder: null, glyph: "#0D1117" });
   });
 
-  it("card stickies: card + hairline border + neutral gray left rule, a lift on light boards only", () => {
-    expect(resolveStickyPaint("yellow", LIGHT)).toEqual({
-      fill: "#F8F8F7",
-      border: "#E6E5E3",
-      rule: "#666562",
-      text: "#1F1F1F",
-      shadow: false,
-      cardShadow: "rgba(31, 31, 31, 0.14)",
-    });
+  it("card stickies: cream paper beside ink-card nodes, the card with a gray left rule on dark boards", () => {
+    for (const color of CANVAS_COLORS) {
+      expect(resolveStickyPaint(color, LIGHT)).toEqual({
+        fill: "#FFF7E5",
+        border: "#C0BFBC",
+        rule: null,
+        text: "#1F1F1F",
+        shadow: false,
+        cardShadow: "rgba(31, 31, 31, 0.14)",
+      });
+    }
     expect(resolveStickyPaint("yellow", DARK)).toMatchObject({ fill: "#32363E", border: "#3D444D", rule: "#9198A1", cardShadow: null });
+  });
+
+  it("light preset: a note reads off the page and off every top-level section, and stays lighter than every node", () => {
+    // Round 4: the note was the page's own color and a shade above a gray
+    // section, so it read as a borderless box (UI climb round 4).
+    const note = resolveStickyPaint("yellow", LIGHT);
+    for (const sectionColor of CANVAS_COLORS) {
+      const minimum = sectionColor === "yellow" ? 0.018 : 0.023;
+      expect(oklabDistance(note.fill, resolveSectionPaint(sectionColor, 2, LIGHT).fill)).toBeGreaterThanOrEqual(minimum);
+    }
+    for (const nodeColor of CANVAS_COLORS.filter((color) => color !== "white")) {
+      expect(oklabLightness(note.fill) - oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill)).toBeGreaterThanOrEqual(0.08);
+    }
+    expect(contrastRatio(note.text, note.fill)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(note.border, note.fill)).toBeGreaterThanOrEqual(1.6);
   });
 
   it("connectors stroke with the ink", () => {

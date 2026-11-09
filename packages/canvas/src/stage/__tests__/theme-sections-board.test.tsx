@@ -6,6 +6,7 @@ import type { TextEditingApi } from "../editor/features/text-editing/use-text-ed
 import { renderDocumentToSvg } from "../../render/static-svg";
 import { canvasThemePreset, type CanvasThemeId } from "../../theme/canvas-style";
 import { contrastRatio } from "../../theme/color-math";
+import { resolveStickyPaint } from "../../theme/palette";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 import { measureWidth } from "../../theme/text-measure";
 
@@ -281,29 +282,34 @@ describe("connector label chip per theme", () => {
 });
 
 describe("card stickies", () => {
-  it("live: card fill, hairline edge, a straight 3px neutral rule inside it, and the soft card lift", () => {
+  it("live: light boards paint cream paper with a firm gray edge and the soft card lift, no rule", () => {
     const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
-    // The rule is a background strip the corner radius clips, so its inner edge never curls into a hook.
-    // A yellow note takes the gray ink, not the olive yellow ink.
-    expect(note.style.background).toBe(
-      "linear-gradient(to right, transparent 1px, #666562 1px, #666562 4px, transparent 4px) #F8F8F7",
-    );
-    expect(note.style.boxShadow).toBe("inset 0 0 0 1px #E6E5E3, 0 2px 8px rgba(31, 31, 31, 0.14)");
+    expect(note.style.background).not.toContain("linear-gradient");
+    expect(note.style.boxShadow).toBe("inset 0 0 0 1px #C0BFBC, 0 2px 8px rgba(31, 31, 31, 0.14)");
   });
 
-  it("static: the same card with 6px corners, a straight rule clipped by them under the edge, and the card lift filter", () => {
+  it("static: the same paper with 6px corners, the firm edge and the card lift filter, no rule", () => {
     const svg = staticSvg("schematic-light");
     expect(svg).toContain(
       '<feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1F1F1F" flood-opacity="0.14"/>',
     );
     expect(svg).toContain(
-      '<rect x="900" y="80" width="240" height="160" rx="6" fill="#F8F8F7" filter="url(#theme-board-card-sticky-shadow)"/>',
+      '<rect x="900" y="80" width="240" height="160" rx="6" fill="#FFF7E5" filter="url(#theme-board-card-sticky-shadow)"/>',
     );
-    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" rx="5.5" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
+    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" rx="5.5" fill="none" stroke="#C0BFBC" stroke-width="1"/>');
+    expect(svg).not.toMatch(/<path d="M901 [^"]*" fill="#666562"\/>/);
+  });
+
+  it("dark boards: a straight 3px neutral rule inside the hairline, live and static", () => {
+    const note = renderLive("schematic-dark").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
+    // The rule is a background strip the corner radius clips, so its inner edge never curls into a hook.
+    expect(note.style.background).toBe(
+      "linear-gradient(to right, transparent 1px, #9198A1 1px, #9198A1 4px, transparent 4px) #32363E",
+    );
     // x 901 to 904: only its ends follow the corner arcs, its inner edge is one straight line,
     // and it paints before the hairline, as the live background strip sits under the inset shadow.
-    expect(svg).toContain(
-      '<path d="M901 82.68A6 6 0 0 1 904 80.34V239.66A6 6 0 0 1 901 237.32Z" fill="#666562"/><rect x="900.5" y="80.5"',
+    expect(staticSvg("schematic-dark")).toContain(
+      '<path d="M901 82.68A6 6 0 0 1 904 80.34V239.66A6 6 0 0 1 901 237.32Z" fill="#9198A1"/><rect x="900.5" y="80.5"',
     );
   });
 
@@ -316,7 +322,7 @@ describe("card stickies", () => {
     const svg = staticSvg("schematic-light");
     expect(svg).toContain('<text fill="#1F1F1F" font-size="16" font-weight="400"');
     expect(style.stickyFontSizePx).toBeLessThan(style.textFontSizePx);
-    expect(contrastRatio(style.textColor, style.cardFill)).toBeGreaterThanOrEqual(4.5);
+    expect(contrastRatio(style.textColor, resolveStickyPaint("yellow", style).fill)).toBeGreaterThanOrEqual(4.5);
     const dark = canvasThemePreset("schematic-dark");
     expect(contrastRatio(dark.textColor, dark.cardFill)).toBeGreaterThanOrEqual(4.5);
   });

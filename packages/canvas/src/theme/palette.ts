@@ -604,6 +604,8 @@ export function brandHeaderIconColors(
  * it. The lift is what sets a note off the near-white board: the card fill
  * sits within 0.02 OKLab of the page, so a hairline alone left notes
  * floating as bare text. Dark boards raise the card fill itself instead.
+ * Beside `ink-card` nodes (the light schematic preset) the card is cream
+ * paper with a firm edge and no rule (paperCardStickyPaint).
  */
 export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
   return cachedPaint(style, `sticky|${color}`, () => stickyPaint(color, style));
@@ -612,7 +614,41 @@ export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle): Stic
 /** Card sticky lift: the text color at this opacity (light boards only). */
 const CARD_STICKY_SHADOW_OPACITY = 0.14;
 
+/**
+ * Beside `ink-card` nodes a card note is cream paper: the yellow anchor's hue
+ * at OKLab L 0.977, chroma 0.03, edged in the label chip's firm gray and
+ * lifted, with no left rule.
+ *
+ * Round 4 made sections near white (L 0.955) on a near-white page section
+ * (the panel, L 0.979), and the note was the panel itself: it sat on the page
+ * in the page's own color and a shade above a gray section, so judges read it
+ * as a borderless box or loose text with a bar (UI climb round 4: 46 of 138
+ * findings, every board with notes). A tint off the gray axis sets the note
+ * apart from both near-whites by hue, not by darkness, so it stays lighter
+ * than every node and never reads as one.
+ *
+ * Picked from three variants on boards 01, 02, 07 and h3: a white card with a
+ * firmer edge and a deeper lift still merged with the page, and a gold left
+ * rule on the cream read olive, the bar Ford had turned down before. The
+ * charcoal rule is gone: the paper alone says "note".
+ */
+const NOTE_PAPER_LIGHTNESS = 0.977;
+const NOTE_PAPER_CHROMA = 0.03;
+
+function paperCardStickyPaint(style: CanvasStyle): StickyPaint {
+  const fill = withLightnessChroma(paletteColor("yellow", style), NOTE_PAPER_LIGHTNESS, NOTE_PAPER_CHROMA);
+  return {
+    fill,
+    border: resolveLabelChipBorder(style),
+    rule: null,
+    text: readableOn(style.textColor, fill),
+    shadow: false,
+    cardShadow: withAlpha(style.textColor, CARD_STICKY_SHADOW_OPACITY),
+  };
+}
+
 function stickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
+  if (style.stickyStyle === "card" && style.shapeFill === "ink-card") return paperCardStickyPaint(style);
   if (style.stickyStyle === "card") {
     return {
       fill: style.cardFill,
