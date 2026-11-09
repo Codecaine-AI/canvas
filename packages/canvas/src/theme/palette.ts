@@ -358,7 +358,7 @@ function shapeFillBase(color: CanvasColor, style: CanvasStyle): string {
   const lightness = oklabLightness(style.cardFill) - SHAPE_CARD_LIGHTNESS_DROP;
   // Gray's ink is a near-neutral whose faint hue a chroma target would blow up: gray takes the neutral.
   if (color === "gray") return withLightnessChroma(style.cardFill, lightness, 0);
-  return withLightnessChroma(paletteColor(color, style), lightness, SHAPE_CARD_CHROMA);
+  return withLightnessChroma(paletteColor(color, style), lightness, SHAPE_CARD_CHROMA_BY_COLOR[color] ?? SHAPE_CARD_CHROMA);
 }
 
 /** Light vs dark theme, judged by the board surface. */
@@ -395,6 +395,13 @@ function readableOn(text: string, background: string): string {
 const SHAPE_CARD_LIGHTNESS_DROP = 0.12;
 /** OKLCH chroma of an `ink-card` node fill (cut back where sRGB holds less at that lightness). */
 const SHAPE_CARD_CHROMA = 0.08;
+/**
+ * Hues whose node chroma differs. At L 0.859 yellow at 0.08 is a khaki; at
+ * 0.11 it reads yellow (#F0CC79). Orange asks for 0.09 and gets about the
+ * most sRGB holds there (#FFC298), so it reads orange, not peach.
+ */
+const SHAPE_CARD_CHROMA_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: 0.11, orange: 0.09 };
+
 /**
  * Shape fill / border / text. `tint`: the pastel role-table fill with an ink
  * border (figjam). `card`: fill = cardFill, border = ink, text = textColor.

@@ -305,9 +305,9 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       const paint = resolveShapePaint(color, LIGHT);
       expect(paint.border).toBe(resolveInk(color, LIGHT));
       expect(Math.abs(oklabLightness(paint.fill) - (oklabLightness(LIGHT.cardFill) - 0.12))).toBeLessThan(0.003);
-      // The kind reads from the fill, not only the border: chroma 0.08.
+      // The kind reads from the fill, not only the border: chroma 0.08 (yellow 0.11, orange the most sRGB holds).
       expect(chroma(paint.fill)).toBeGreaterThanOrEqual(0.075);
-      expect(chroma(paint.fill)).toBeLessThan(0.083);
+      expect(chroma(paint.fill)).toBeLessThan(color === "yellow" ? 0.113 : 0.091);
       expect(Math.abs(hue(paint.fill) - hue(LIGHT.palette[color]))).toBeLessThan(0.12);
     }
     // Green and teal (and teal and blue) were 0.003 / 0.005 apart at the 0.08 mix.
