@@ -13,6 +13,8 @@ import {
   type CanvasTool,
 } from "../../../../state/actions";
 import { normalizeBounds, type CanvasBounds, type CanvasPoint } from "../../../../state/geometry";
+import { placementGeometry } from "../../../../objects/sticky/note-fit";
+import type { CanvasStyle } from "../../../../theme/canvas-style";
 import type {
   CanvasColor,
   CanvasGeometry,
@@ -65,6 +67,8 @@ type PlaceOverlay = {
 
 type PlaceContext = {
   stickyPlacement?: boolean;
+  /** Workspace style: a card note is created at the height its text needs. Default when omitted. */
+  canvasStyle?: CanvasStyle;
   lastPickedColor?: Readonly<Record<ReturnType<typeof colorKindForType>, CanvasColor>>;
 };
 
@@ -195,14 +199,13 @@ export function stepFromPlace(
   }
 
   if (event.type === "up") {
-    const geometry = placeGeometryFor(state);
     return {
       state: { kind: "idle" },
       dispatch: [
         {
           type: "canvas.addObject",
           objectType: state.objectType,
-          geometry,
+          ...placementGeometry(state.objectType, placeGeometryFor(state), state.variant?.text, ctx.canvasStyle),
           // Catalog-entry variant (Shapes panel pick): orientation, Advanced
           // glyph, and glyph-name text ride along so the created object
           // matches the picked entry, not just its bare type.

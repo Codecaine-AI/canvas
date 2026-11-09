@@ -18,7 +18,8 @@
  * version AND its registry `dist.integrity`. `--vendor` downloads exactly that
  * tarball, refuses it unless its sha512 matches the pin, and checks each brand
  * entry's declared `license` against the per-logo license Simple Icons records
- * (absent = the package's CC0). Only when every package verifies does it copy
+ * (absent = the package's CC0) and its brand color `hex` against the one
+ * Simple Icons records. Only when every package verifies does it copy
  * the SVGs the manifest names (plus each package's license file) into
  * vendor/<package>/, prune files no longer named, and rewrite
  * vendor/VERSIONS.md. To bump a package: set its new version + integrity (from
@@ -99,12 +100,14 @@ type GlyphEntry = {
   source: string;
   /** Brands only: the SPDX id of a per-logo license Simple Icons records (absent = the package's CC0). */
   license?: string;
+  /** Brands only: the logo's brand color as Simple Icons records it (`hex`), `#RRGGBB` uppercase. */
+  hex?: string;
 };
 type Manifest = { packages: Record<PackageKey, PackagePin>; tabler: GlyphEntry[]; brands: GlyphEntry[] };
 
 const BRAND_PREFIX = "brand-";
 
-/** Simple Icons' icon metadata (package-relative) — read by --vendor to verify per-logo licenses, never vendored. */
+/** Simple Icons' icon metadata (package-relative) — read by --vendor to verify per-logo licenses and brand colors, never vendored. */
 const SIMPLE_ICONS_DATA = "data/simple-icons.json";
 
 /** Load + validate the manifest; null (after recording problems) if unusable. */
@@ -147,6 +150,9 @@ function loadManifest(errors: string[]): Manifest | null {
       }
       if (entry.license !== undefined && (name !== "brands" || !/^[A-Za-z0-9.+-]+$/.test(entry.license))) {
         errors.push(`manifest ${name}: "${entry.id}" — "license" is an SPDX id, and only brand entries carry one`);
+      }
+      if ((name === "brands") !== (typeof entry.hex === "string" && /^#[0-9A-F]{6}$/.test(entry.hex))) {
+        errors.push(`manifest ${name}: "${entry.id}" — every brand entry (and only a brand entry) carries "hex", its Simple Icons brand color as #RRGGBB`);
       }
     }
   };
@@ -413,6 +419,19 @@ function emitModule(exportName: string, provenance: string[], doc: string, block
   ].join("\n");
 }
 
+/** The brand color table appended to the brands module, sorted by id. */
+function emitBrandColors(entries: readonly GlyphEntry[]): string {
+  const sorted = [...entries].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  return [
+    "",
+    "/** Brand color per `brand-*` glyph id: the `hex` Simple Icons records for the logo (verified on every `--vendor` run). */",
+    "export const BRAND_ICON_COLORS: Record<string, string> = {",
+    ...sorted.map((entry) => `  ${JSON.stringify(entry.id)}: ${JSON.stringify(entry.hex)},`),
+    "};",
+    "",
+  ].join("\n");
+}
+
 export type DevIconModules = { tabler: string; brands: string };
 
 /**
@@ -462,7 +481,7 @@ export function renderDevIconModules(): DevIconModules {
       ],
       "Simple Icons logo geometry per `brand-*` glyph id — 24-unit grid, fill paint.",
       brandBlocks,
-    ),
+    ) + emitBrandColors(manifest.brands),
   };
 }
 
@@ -523,7 +542,7 @@ async function stagePackage(manifest: Manifest, key: PackageKey, errors: string[
       return null;
     }
     if (key === "simple-icons") {
-      checkBrandLicenses(manifest, JSON.parse(readFileSync(join(work, "package", SIMPLE_ICONS_DATA), "utf8")), errors);
+      checkBrandMetadata(manifest, JSON.parse(readFileSync(join(work, "package", SIMPLE_ICONS_DATA), "utf8")), errors);
     }
     const files = new Map<string, Buffer>();
     for (const member of vendored) {
@@ -538,22 +557,32 @@ async function stagePackage(manifest: Manifest, key: PackageKey, errors: string[
 /**
  * Each brand entry's `license` must match the per-logo license Simple Icons
  * records for its slug (none = the package's CC0), so a version bump cannot
- * silently change what THIRD-PARTY-NOTICES.md has to say.
+ * silently change what THIRD-PARTY-NOTICES.md has to say; and its `hex` must
+ * match the brand color Simple Icons records, so the logo's color comes from
+ * the pack, never by hand.
  */
-function checkBrandLicenses(manifest: Manifest, data: unknown, errors: string[]): void {
+function checkBrandMetadata(manifest: Manifest, data: unknown, errors: string[]): void {
   if (!Array.isArray(data)) {
     errors.push(`simple-icons: ${SIMPLE_ICONS_DATA} is not an icon list`);
     return;
   }
-  const bySlug = new Map((data as { slug?: string; license?: { type?: string } }[]).map((icon) => [icon.slug, icon]));
+  const bySlug = new Map(
+    (data as { slug?: string; hex?: string; license?: { type?: string } }[]).map((icon) => [icon.slug, icon]),
+  );
   for (const entry of manifest.brands) {
     const icon = bySlug.get(entry.source);
     if (!icon) {
       errors.push(`simple-icons: "${entry.id}" — slug "${entry.source}" is missing from ${SIMPLE_ICONS_DATA}`);
-    } else if (icon.license?.type !== entry.license) {
+      continue;
+    }
+    if (icon.license?.type !== entry.license) {
       errors.push(
         `simple-icons: "${entry.id}" — Simple Icons records logo license ${icon.license?.type ?? "none (CC0)"} but manifest.json says ${entry.license ?? "none"}; update manifest.json and THIRD-PARTY-NOTICES.md`,
       );
+    }
+    const hex = `#${(icon.hex ?? "").toUpperCase()}`;
+    if (hex !== entry.hex) {
+      errors.push(`simple-icons: "${entry.id}" — Simple Icons records brand color ${hex} but manifest.json says ${entry.hex}; update manifest.json`);
     }
   }
 }
@@ -585,7 +614,7 @@ function versionsNote(manifest: Manifest): string {
     "|---|---|---|---|---|",
     ...rows,
     "",
-    "Per-logo licenses that Simple Icons records are declared on the brand entries in `../manifest.json`",
+    "Per-logo licenses and brand colors (`hex`) that Simple Icons records are declared on the brand entries in `../manifest.json`",
     "and verified against the package's `data/simple-icons.json` on every `--vendor` run.",
     "",
     "Pinned tarballs (sha512 `dist.integrity`, verified on every `--vendor` run):",

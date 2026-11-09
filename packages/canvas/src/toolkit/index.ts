@@ -88,6 +88,7 @@ import type { WorkflowTool } from "../session/tools/workflow/workflow-tool";
 
 export { boardStateSnapshot, operationTools, workflowTools };
 export { brokenWiresLine } from "../board/wire-integrity";
+export { fitNotesToText } from "../objects/sticky/note-fit";
 export { canvasStyleOverrides, loadCanvasStyle };
 export {
   fileDetailCache,

@@ -98,6 +98,14 @@ describe("theme presets", () => {
       connectorLabelBackground: "#F5F5F5",
       connectorLabelTextColor: "#000000",
       stickyStyle: "paper",
+      stickyFontSizePx: 24,
+      stickyLineHeightPx: 36,
+      stickyPaddingXPx: 21,
+      stickyPaddingTopPx: 28,
+      stickyPaddingBottomPx: 21,
+      stickyCornerRadiusPx: 0,
+      stickyHeadingScale: 1,
+      stickyRuleWidthPx: 2,
       // The palette.ts inks (connector strokes / shape borders).
       palette: {
         gray: "#757575",

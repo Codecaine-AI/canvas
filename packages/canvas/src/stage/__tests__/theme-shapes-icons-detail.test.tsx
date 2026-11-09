@@ -263,14 +263,18 @@ describe("live icons", () => {
     expect(glyph.getAttribute("stroke")).toBe(style.palette.violet);
   });
 
-  it("outlines a white tile on a light board and fills brand glyphs", () => {
+  it("outlines a white tile on a light board and fills brand glyphs in their brand color", () => {
     const container = stage([icon({ color: "white" }), icon({ id: "i2", icon: "brand-docker", geometry: { x: 200, y: 0, width: 64, height: 64 } })], "schematic-light");
     const white = objectNode(container, "i1").querySelector("[data-canvas-icon-tile]") as SVGRectElement;
     expect(white.getAttribute("fill")).toBe("#F8F8F7");
     expect(white.getAttribute("stroke")).toBe("#1F1F1F");
     expect(white.getAttribute("stroke-width")).toBe("1");
     const brand = objectNode(container, "i2").querySelector('[data-canvas-icon-glyph="brand-docker"]') as SVGSVGElement;
-    expect(brand.getAttribute("fill")).toBe("#FFFFFF");
+    // Docker's Simple Icons color on a neutral card tile, not white on the violet ink tile.
+    expect(brand.getAttribute("fill")).toBe("#2496ED");
     expect(brand.getAttribute("stroke")).toBe("none");
+    const brandTile = objectNode(container, "i2").querySelector("[data-canvas-icon-tile]") as SVGRectElement;
+    expect(brandTile.getAttribute("fill")).toBe("#F8F8F7");
+    expect(brandTile.getAttribute("stroke")).toBe("#E6E5E3");
   });
 });

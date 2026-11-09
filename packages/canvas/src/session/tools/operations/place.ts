@@ -140,8 +140,9 @@ export const placeSection = defineOperationTool({
 export const placeSticky = defineOperationTool({
   name: "place_sticky",
   description:
-    "Drop a note with its text already on it. Size and color are the defaults — "
-    + "resize or recolor it afterward if the note earns it.",
+    "Drop a note with its text already on it. Width and color are the defaults; on the "
+    + "schematic themes its height is the height its text needs. Resize or recolor it "
+    + "afterward if the note earns it.",
   fields: PlaceStickyParams.properties,
   validate: (ctx, p) => ctx.requireFreeId(p.id),
   apply: (ctx, p) => {
@@ -153,16 +154,22 @@ export const placeSticky = defineOperationTool({
       width: defaults.size.width,
       height: defaults.size.height,
     };
-    return ctx.applyLowered(
-      {
-        type: "addObject",
-        object: draftPlacedObject("sticky", geometry, {
-          id: p.id,
-          text: p.text,
-          color: defaults.color,
-        }),
-      },
-      `place_sticky ${p.id} ${placement(geometry)}`,
+    // A card note lands at the height its text needs (auto-size.ts rule 0).
+    return placeFitted(
+      ctx,
+      p.id,
+      ctx.applyLowered(
+        {
+          type: "addObject",
+          object: draftPlacedObject("sticky", geometry, {
+            id: p.id,
+            text: p.text,
+            color: defaults.color,
+          }),
+        },
+        `place_sticky ${p.id} ${placement(geometry)}`,
+      ),
+      (landed) => `place_sticky ${p.id} ${placement(landed)}`,
     );
   },
 });

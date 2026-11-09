@@ -16,6 +16,7 @@ import {
   type InteractiveCanvasObject,
   type ResizeHandle,
 } from "../../../../../index";
+import { canvasThemePreset } from "../../../../../theme/canvas-style";
 
 /** Selection slice resize-handle math and gesture coverage. */
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
@@ -169,6 +170,24 @@ describe("interaction: applyResizeHandle", () => {
 });
 
 describe("interaction: resize gesture via stepInteraction", () => {
+  it("keeps an octagon square under edge and corner handles", () => {
+    const document = makeDocument([
+      makeObject({ id: "stop", type: "octagon", geometry: { x: 100, y: 100, width: 140, height: 140 } }),
+    ]);
+    const ctx = makeContext(document, { selection: { kind: "objects", objectIds: ["stop"] } });
+    const drag = (handle: ResizeHandle, from: { x: number; y: number }, to: { x: number; y: number }) => {
+      const hit = { kind: "handle" as const, objectId: "stop", handle };
+      const started = stepInteraction(IDLE_INTERACTION_STATE, down(from, hit), ctx);
+      return updateGeometriesActions(stepInteraction(started.state, move(to, hit), ctx).dispatch)[0]!.geometries.stop!;
+    };
+
+    // East edge: the height follows the width, centered on the start box.
+    expect(drag("e", { x: 240, y: 170 }, { x: 300, y: 170 })).toEqual({ x: 100, y: 70, width: 200, height: 200 });
+    // Corner: the larger implied side wins, the opposite corner holds.
+    expect(drag("se", { x: 240, y: 240 }, { x: 300, y: 260 })).toEqual({ x: 100, y: 100, width: 200, height: 200 });
+    expect(drag("nw", { x: 100, y: 100 }, { x: 80, y: 40 })).toEqual({ x: 40, y: 40, width: 200, height: 200 });
+  });
+
   it("emits updateObjectGeometries with recordHistory true once, then false, for a handle drag", () => {
     const document = makeDocument([makeObject({ id: "a", geometry: { x: 100, y: 100, width: 200, height: 150 } })]);
     const ctx = makeContext(document, { selection: { kind: "objects", objectIds: ["a"] } });
@@ -253,5 +272,34 @@ describe("interaction: resize gesture via stepInteraction", () => {
 
     expect(result.state.kind).toBe("idle");
     expect(updateGeometriesActions(result.dispatch)).toHaveLength(0);
+  });
+});
+
+describe("interaction: resizing a card note", () => {
+  // One line of schematic note text needs 60px (14 + 24 + 14, on the grid): objects/sticky/note-fit.ts.
+  const note = makeObject({
+    id: "n",
+    type: "sticky",
+    text: "Short note",
+    style: { shape: "note" },
+    geometry: { x: 100, y: 100, width: 240, height: 60 },
+  });
+  const drag = (handle: ResizeHandle, from: { x: number; y: number }, to: { x: number; y: number }) => {
+    const ctx = makeContext(makeDocument([note]), {
+      selection: { kind: "objects", objectIds: ["n"] },
+      canvasStyle: canvasThemePreset("schematic-light"),
+    });
+    const hit = { kind: "handle" as const, objectId: "n", handle };
+    const pressed = stepInteraction(IDLE_INTERACTION_STATE, down(from, hit), ctx);
+    return updateGeometriesActions(stepInteraction(pressed.state, move(to, hit), ctx).dispatch)[0]!.geometries.n;
+  };
+
+  it("keeps a dragged height taller than its text needs", () => {
+    expect(drag("s", { x: 220, y: 160 }, { x: 220, y: 260 })).toEqual({ x: 100, y: 100, width: 240, height: 160 });
+  });
+
+  it("stops at the height its text needs, from the south and the north handle", () => {
+    expect(drag("s", { x: 220, y: 160 }, { x: 220, y: 120 })).toEqual({ x: 100, y: 100, width: 240, height: 60 });
+    expect(drag("n", { x: 220, y: 100 }, { x: 220, y: 140 })).toEqual({ x: 100, y: 100, width: 240, height: 60 });
   });
 });

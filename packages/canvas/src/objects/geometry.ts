@@ -38,6 +38,7 @@ import type {
 } from "../state/schema";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { belowBandSize, belowExtendedBoundsPx, iconGlyphBoxPx } from "./text-slots";
+import { NATURAL_ASPECT_BY_TYPE, naturalAspectRect } from "./natural-aspect";
 export { inscribedTextRect, type InscribedTextRectResolver } from "./inscribed-text-rects";
 
 /**
@@ -143,9 +144,13 @@ function regularPolygonPoints(bounds: CanvasBounds, sides: number, startAngle: n
   return points;
 }
 
-/** Octagon: 8-point regular polygon, flat-top orientation (no vertex due north/south — the first edge is horizontal across the top). */
+/**
+ * Octagon: a REGULAR 8-point polygon (a stop sign), flat-top orientation (no
+ * vertex due north/south — the first edge is horizontal across the top),
+ * drawn in the centered square of `bounds` (NATURAL_ASPECT_BY_TYPE).
+ */
 export function octagonPoints(bounds: CanvasBounds): CanvasPoint[] {
-  return regularPolygonPoints(bounds, 8, -Math.PI / 2 + Math.PI / 8);
+  return regularPolygonPoints(naturalAspectRect(bounds, NATURAL_ASPECT_BY_TYPE.octagon!), 8, -Math.PI / 2 + Math.PI / 8);
 }
 
 /**

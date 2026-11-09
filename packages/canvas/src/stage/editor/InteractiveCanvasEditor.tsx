@@ -58,6 +58,7 @@ import { useCanvasHotkeys } from "./use-canvas-hotkeys";
 import { useCanvasViewport } from "../../navigation/use-canvas-viewport";
 import type { CanvasStyle } from "../../theme/canvas-style";
 import { CanvasStyleProvider, useCanvasStyle } from "../../theme/canvas-style-context";
+import { fitNotesToText, noteTextStyleKey } from "../../objects/sticky/note-fit";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObjectType,
@@ -357,6 +358,28 @@ function InteractiveCanvasEditorBody({
   const skipDocumentReportRef = useRef(false);
   const currentDocumentRef = useRef(state.document);
   currentDocumentRef.current = state.document;
+
+  // A sticky text style change (font, line, padding, card vs paper) refits
+  // every card note on the board in one undo step, as fitNotesToText does.
+  // Opening a board never refits it.
+  const noteStyleKey = noteTextStyleKey(resolvedCanvasStyle);
+  const noteStyleKeyRef = useRef(noteStyleKey);
+  useEffect(() => {
+    if (noteStyleKeyRef.current === noteStyleKey) return;
+    noteStyleKeyRef.current = noteStyleKey;
+    const before = currentDocumentRef.current;
+    const fitted = fitNotesToText(before, resolvedCanvasStyle);
+    if (fitted === before) return;
+    const prior = new Map(before.objects.map((object) => [object.id, object.geometry]));
+    dispatch({
+      type: "canvas.updateObjectGeometries",
+      geometries: Object.fromEntries(
+        fitted.objects.filter((object) => prior.get(object.id) !== object.geometry).map((object) => [object.id, object.geometry]),
+      ),
+      snap: false,
+      summary: "Fitted notes to the sticky text style",
+    });
+  }, [dispatch, noteStyleKey, resolvedCanvasStyle]);
 
   useEffect(() => {
     if (!didReportInitialDocumentRef.current) {

@@ -9,7 +9,7 @@ names are vendored, plus each package's license file.
 | `tabler/` | `@tabler/icons` | 3.48.0 | MIT (`tabler/LICENSE`) | 65 SVGs for 66 glyph ids, from `icons/outline/` |
 | `simple-icons/` | `simple-icons` | 16.33.0 | CC0-1.0 (`simple-icons/LICENSE.md`) | 29 SVGs for 29 glyph ids, from `icons/` |
 
-Per-logo licenses that Simple Icons records are declared on the brand entries in `../manifest.json`
+Per-logo licenses and brand colors (`hex`) that Simple Icons records are declared on the brand entries in `../manifest.json`
 and verified against the package's `data/simple-icons.json` on every `--vendor` run.
 
 Pinned tarballs (sha512 `dist.integrity`, verified on every `--vendor` run):

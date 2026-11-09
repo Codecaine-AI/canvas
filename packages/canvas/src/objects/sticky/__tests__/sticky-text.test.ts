@@ -3,15 +3,23 @@ import {
   layoutStickyText,
   STICKY_CODE_FONT_EM,
   STICKY_CODE_PADDING_X_EM,
-  STICKY_LINE_PITCH_PX,
   stickyTextUncovered,
 } from "../sticky-text";
-import { measureWidth } from "../../theme/text-measure";
-import { renderDocumentToSvg } from "../static-svg";
-import { INSET_BODY_PADDING_PX } from "../../objects/text-slots";
-import type { InteractiveCanvasDocument } from "../../state/schema";
+import { measureWidth } from "../../../theme/text-measure";
+import { renderDocumentToSvg } from "../../../render/static-svg";
+import { insetBodyPaddingPx } from "../../text-slots";
+import { canvasThemePreset, FIGJAM_CANVAS_STYLE } from "../../../theme/canvas-style";
+import type { InteractiveCanvasDocument } from "../../../state/schema";
 
-const BODY_FONT_SIZE_PX = 24; // the inset-body slot's typography
+/** These cases pin the figjam note: 24px body text on a 36px pitch. */
+const BODY_FONT_SIZE_PX = FIGJAM_CANVAS_STYLE.stickyFontSizePx;
+const LINE_PITCH_PX = FIGJAM_CANVAS_STYLE.stickyLineHeightPx;
+const PADDING = insetBodyPaddingPx(FIGJAM_CANVAS_STYLE);
+
+/** The static render under the figjam style (the layout cases above pin its metrics). */
+function renderFigjam(document: InteractiveCanvasDocument, options: Parameters<typeof renderDocumentToSvg>[1] = {}) {
+  return renderDocumentToSvg(document, { canvasStyle: FIGJAM_CANVAS_STYLE, ...options });
+}
 
 function stickyDocument(text: string, width = 416, height = 420): InteractiveCanvasDocument {
   return {
@@ -33,7 +41,7 @@ function stickyDocument(text: string, width = 416, height = 420): InteractiveCan
 }
 
 /** The inset-body slot width of the default 416px sticky. */
-const SLOT_WIDTH_PX = 416 - INSET_BODY_PADDING_PX.left - INSET_BODY_PADDING_PX.right;
+const SLOT_WIDTH_PX = 416 - PADDING.left - PADDING.right;
 
 describe("layoutStickyText", () => {
   it("mirrors the live markdown line boxes: heading sizes, bullet grid, blank lines", () => {
@@ -142,17 +150,17 @@ describe("layoutStickyText", () => {
 
 describe("sticky markdown static rendering", () => {
   it("paints the same text for markup that does not change the face", () => {
-    const text = (source: string) => renderDocumentToSvg(stickyDocument(source)).svg.match(/<text [\s\S]*?<\/text>/g);
+    const text = (source: string) => renderFigjam(stickyDocument(source)).svg.match(/<text [\s\S]*?<\/text>/g);
     expect(text("# =**>**")).toEqual(text("# =>"));
   });
 
   it("keeps a literal leading space after the heading marker (xml:space)", () => {
-    const svg = renderDocumentToSvg(stickyDocument("#  a")).svg;
+    const svg = renderFigjam(stickyDocument("#  a")).svg;
     expect(svg).toMatch(/<text [^>]*xml:space="preserve"[^>]*><tspan [^>]*> a<\/tspan><\/text>/);
   });
 
   it("emits the live line grid: 36px pitch from the inset-body slot top", () => {
-    const { svg } = renderDocumentToSvg(stickyDocument("# Plan\n- alpha\n  - beta\ngamma"), {
+    const { svg } = renderFigjam(stickyDocument("# Plan\n- alpha\n  - beta\ngamma"), {
       background: "transparent",
     });
     // Row centers: top padding 28 + 18 + n×36.
@@ -168,7 +176,7 @@ describe("sticky markdown static rendering", () => {
   });
 
   it("draws inline-code chip backgrounds behind the code run", () => {
-    const { svg } = renderDocumentToSvg(stickyDocument("run `deploy` now"), {
+    const { svg } = renderFigjam(stickyDocument("run `deploy` now"), {
       background: "transparent",
     });
     expect(svg).toContain('rx="3"');
@@ -180,7 +188,7 @@ describe("sticky markdown static rendering", () => {
 
   it("clamps to whole line boxes in the slot height and ellipsizes the last row", () => {
     const source = Array.from({ length: 14 }, (_, i) => `line ${i}`).join("\n");
-    const { svg } = renderDocumentToSvg(stickyDocument(source), { background: "transparent" });
+    const { svg } = renderFigjam(stickyDocument(source), { background: "transparent" });
     const spans = [...svg.matchAll(/<tspan [^>]*?y="(-?[0-9.]+)"[^>]*>([^<]*)<\/tspan>/g)].map((m) => ({ y: Number(m[1]), text: m[2]! }));
     // Slot height 420 − 28 − 21 = 371px → 10 full 36px line boxes.
     expect(new Set(spans.map((span) => span.y)).size).toBe(10);
@@ -204,14 +212,31 @@ describe("sticky markdown static rendering", () => {
     const rows = layoutStickyText(source, SLOT_WIDTH_PX, BODY_FONT_SIZE_PX);
     expect(rows.length).toBe(8);
     // All rows fit the default sticky's 10-line budget, so nothing ellipsizes.
-    const { svg } = renderDocumentToSvg(stickyDocument(source), { background: "transparent" });
+    const { svg } = renderFigjam(stickyDocument(source), { background: "transparent" });
     expect(svg).not.toContain("…");
     const ys = new Set(
       [...svg.matchAll(/<tspan [^>]*?y="(-?[0-9.]+)"/g)].map((match) => Number(match[1])),
     );
     expect(ys.size).toBe(7); // 8 line boxes minus the blank one that paints nothing
     for (const y of ys) {
-      expect((y - 46) % STICKY_LINE_PITCH_PX).toBe(0);
+      expect((y - 46) % LINE_PITCH_PX).toBe(0);
     }
+  });
+
+  it("lays a schematic note on the style's own pitch and heading scale", () => {
+    const style = canvasThemePreset("schematic-light");
+    const { svg } = renderDocumentToSvg(stickyDocument("### Title\nfirst\nsecond"), {
+      canvasStyle: style,
+      background: "transparent",
+    });
+    const ys = [...svg.matchAll(/<tspan [^>]*?y="(-?[0-9.]+)"/g)].map((match) => Number(match[1]));
+    expect(ys).toHaveLength(3);
+    expect(ys[1]! - ys[0]!).toBe(style.stickyLineHeightPx);
+    expect(ys[2]! - ys[1]!).toBe(style.stickyLineHeightPx);
+    // The first row centers in the first line box under the top padding.
+    expect(ys[0]).toBe(style.stickyPaddingTopPx + style.stickyLineHeightPx / 2);
+    // An H3 steps up only by the style's heading scale.
+    const rows = layoutStickyText("### Title", 300, style.stickyFontSizePx, style.stickyHeadingScale);
+    expect(rows[0]!.fontSizePx).toBeCloseTo(style.stickyFontSizePx * (1 + 0.1 * style.stickyHeadingScale), 10);
   });
 });

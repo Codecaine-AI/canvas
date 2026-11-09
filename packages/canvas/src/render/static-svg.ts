@@ -25,7 +25,7 @@
  * @codecaine-ai/text-measure (theme/text-measure.ts: Pretext line breaking
  * over the active measuring backend, the faces the stage and resvg paint),
  * names wrap the way the stage's pre-wrap / break-word slot does, sticky
- * text lays out as its markdown line boxes (render/sticky-text.ts mirroring
+ * text lays out as its markdown line boxes (objects/sticky/sticky-text.ts mirroring
  * objects/sticky/markdown.tsx), and the
  * types whose live defs draw custom inline-SVG silhouettes
  * (predefined-process) draw the same silhouette geometry here. Icon objects
@@ -124,7 +124,7 @@ import type {
   InteractiveCanvasObject,
 } from "../state/schema";
 import { STICKY_MARKDOWN_MONO_FONT_WEIGHT } from "../objects/sticky/markdown-editing";
-import { ellipsizeStickyRow, layoutStickyText, STICKY_LINE_PITCH_PX } from "./sticky-text";
+import { ellipsizeStickyRow, layoutStickyText } from "../objects/sticky/sticky-text";
 import type { RenderDocumentToSvg, RenderStaticSvgOptions, RenderedSvg } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -485,7 +485,7 @@ function polygonPointsAttribute(points: CanvasPoint[]): string {
 }
 
 // ---------------------------------------------------------------------------
-// Sticky markdown — line boxes from render/sticky-text.ts (which mirrors the
+// Sticky markdown — line boxes from objects/sticky/sticky-text.ts (which mirrors the
 // live StickyMarkdown renderer), emitted as one <text> plus code-chip
 // background rects. Only the geometry-bearing pieces are exact; the chip
 // visuals approximate the live CSS tastefully (same tint, radius, size).
@@ -497,18 +497,41 @@ function polygonPointsAttribute(points: CanvasPoint[]): string {
  * (objects/sticky/def.tsx CARD_STICKY_GEOMETRY.codeChipAlpha).
  */
 const STICKY_CODE_CHIP_FILL_OPACITY = 0.08;
-/** Card sticky edges — mirror objects/sticky/def.tsx CARD_STICKY_GEOMETRY (React; not importable here). */
-const CARD_STICKY_RULE_WIDTH_PX = 2;
+/** Card sticky hairline — mirrors objects/sticky/def.tsx CARD_STICKY_GEOMETRY.borderWidthPx (React; not importable here). */
 const CARD_STICKY_BORDER_WIDTH_PX = 1;
+
+/**
+ * The card note's ink rule (objects/sticky/def.tsx cardStickyTrim): the
+ * vertical strip from `from` to `from + width` px in from the left edge,
+ * clipped by the box's `radius` corners as the live background strip is. Its
+ * inner edge stays straight; only its ends follow the corner arcs.
+ */
+function leftRulePath(geometry: CanvasBounds, from: number, width: number, radius: number): string {
+  const { x, y, height } = geometry;
+  const a = Math.min(from, geometry.width);
+  const b = Math.min(from + width, geometry.width);
+  const r = Math.min(radius, geometry.width / 2, height / 2);
+  const bottom = y + height;
+  // How far the corner arc sits below the top edge at `d` px in from the left.
+  const dip = (d: number) => (d >= r ? 0 : r - Math.sqrt(r * r - (r - d) * (r - d)));
+  const arc = (toX: number, toY: number) => `A${fmt(r)} ${fmt(r)} 0 0 1 ${fmt(toX)} ${fmt(toY)}`;
+  const top = [`M${fmt(x + a)} ${fmt(y + dip(a))}`];
+  if (a < r) top.push(arc(x + Math.min(b, r), y + dip(Math.min(b, r))));
+  if (b > r) top.push(`H${fmt(x + b)}`);
+  const end = [`V${fmt(bottom - dip(b))}`];
+  if (b > r) end.push(`H${fmt(x + Math.max(a, r))}`);
+  if (a < r) end.push(arc(x + a, bottom - dip(a)));
+  return [...top, ...end, "Z"].join("");
+}
 
 /**
  * The sticky note body under the style's sticky paint (theme/palette.ts
  * resolveStickyPaint), mirroring objects/sticky/def.tsx. `paper`: the flat
  * square sticky fill with the down-biased shadow (objects/sticky/def.tsx
  * STICKY_GEOMETRY) — drawn without the filter when wholly outside the
- * viewBox. `card`: the card fill, a hairline edge, and a 2px ink rule down
- * the left side (the live inset box-shadows: inside the box, rule on top),
- * no shadow.
+ * viewBox. `card`: the card fill, a straight ink rule (stickyRuleWidthPx)
+ * just inside the left hairline, then the hairline edge over it, no shadow.
+ * Both take stickyCornerRadiusPx.
  */
 function renderStickyBody(
   object: InteractiveCanvasObject,
@@ -518,12 +541,15 @@ function renderStickyBody(
 ): string {
   const { geometry } = object;
   const paint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle);
+  const radius = Math.min(canvasStyle.stickyCornerRadiusPx, geometry.width / 2, geometry.height / 2);
+  const rounded = radius > 0 ? { rx: radius } : null;
   if (paint.shadow) {
     return tag("rect", {
       x: geometry.x,
       y: geometry.y,
       width: geometry.width,
       height: geometry.height,
+      ...rounded,
       fill: paint.fill,
       ...(stickyShadowFilterId && insideViewBox
         ? { filter: `url(#${stickyShadowFilterId})` }
@@ -536,9 +562,15 @@ function renderStickyBody(
       y: geometry.y,
       width: geometry.width,
       height: geometry.height,
+      ...rounded,
       fill: paint.fill,
     }),
   ];
+  // The rule under the hairline, as the live background strip sits under its inset shadow.
+  if (paint.rule && canvasStyle.stickyRuleWidthPx > 0) {
+    const d = leftRulePath(geometry, CARD_STICKY_BORDER_WIDTH_PX, canvasStyle.stickyRuleWidthPx, radius);
+    parts.push(tag("path", { d, fill: paint.rule }));
+  }
   if (paint.border) {
     const inset = CARD_STICKY_BORDER_WIDTH_PX / 2;
     parts.push(
@@ -547,20 +579,10 @@ function renderStickyBody(
         y: geometry.y + inset,
         width: Math.max(0, geometry.width - CARD_STICKY_BORDER_WIDTH_PX),
         height: Math.max(0, geometry.height - CARD_STICKY_BORDER_WIDTH_PX),
+        ...(radius > 0 ? { rx: Math.max(0, radius - inset) } : null),
         fill: "none",
         stroke: paint.border,
         "stroke-width": CARD_STICKY_BORDER_WIDTH_PX,
-      }),
-    );
-  }
-  if (paint.rule) {
-    parts.push(
-      tag("rect", {
-        x: geometry.x,
-        y: geometry.y,
-        width: Math.min(CARD_STICKY_RULE_WIDTH_PX, geometry.width),
-        height: geometry.height,
-        fill: paint.rule,
       }),
     );
   }
@@ -572,9 +594,9 @@ const STICKY_CODE_CHIP_HEIGHT_EM = 1.3;
 
 /**
  * Sticky body text as its markdown line stack: per-line font size/weight,
- * bullet glyph columns, depth indentation and 36px line pitch mirroring the
+ * bullet glyph columns, depth indentation and the style's line pitch mirroring the
  * live StickyMarkdown layout, each line wrapped as its mixed inline runs
- * (render/sticky-text.ts). Rows beyond the slot's height clamp are dropped
+ * (objects/sticky/sticky-text.ts). Rows beyond the slot's height clamp are dropped
  * and the last visible row ellipsized — the same overflow the live
  * -webkit-line-clamp shows.
  */
@@ -594,8 +616,9 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
   if (rect.width <= 0 || rect.height <= 0) return "";
   const typography = resolved.typography;
 
-  const rows = layoutStickyText(object.text, rect.width, typography.fontSizePx);
-  const maxRows = Math.max(1, Math.floor(rect.height / STICKY_LINE_PITCH_PX));
+  const rows = layoutStickyText(object.text, rect.width, typography.fontSizePx, canvasStyle.stickyHeadingScale);
+  const pitch = slotLineHeightPx(typography);
+  const maxRows = Math.max(1, Math.floor(rect.height / pitch));
   const clamped = rows.slice(0, maxRows);
   if (rows.length > maxRows && clamped.length > 0) {
     ellipsizeStickyRow(clamped[clamped.length - 1]!, rect.width);
@@ -606,7 +629,7 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
   // Pre-wrap: repeated spaces paint, which SVG keeps only under xml:space="preserve".
   let preserveSpaces = false;
   clamped.forEach((row, rowIndex) => {
-    const centerY = rect.y + rowIndex * STICKY_LINE_PITCH_PX + STICKY_LINE_PITCH_PX / 2;
+    const centerY = rect.y + rowIndex * pitch + pitch / 2;
     if (row.bullet) {
       tspans.push(
         tag(
@@ -720,7 +743,7 @@ function glyphPaintAttributes(
  *    meet" centers the square glyph in a non-square bbox. Outline glyphs
  *    stroke the ink with the shape fill in their closed interiors (SVG
  *    chord-closes open paths, so all-open line art gets no fill layer);
- *    fill-paint (brand) glyphs fill with the ink.
+ *    fill-paint (brand) glyphs fill with their brand color.
  *  - tile style: renderIconTile.
  * Returns null for an unknown/missing glyph id (caller falls back to the
  * neutral rect).
@@ -735,7 +758,7 @@ function renderIconGlyph(
   const { geometry } = object;
   const sizePx = Math.min(geometry.width, geometry.height);
   const tileSidePx = iconTileRectPx(geometry.width, geometry.height, canvasStyle.iconTileMaxPx).width;
-  const paint = resolveIconTilePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, tileSidePx);
+  const paint = resolveIconTilePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, tileSidePx, glyph.brandColor);
   if (paint.tileFill !== null) {
     return renderIconTile(object, glyph, paint, viewBox, canvasStyle.iconTileMaxPx);
   }

@@ -52,6 +52,7 @@ import {
   type FontSpec,
 } from "../../theme/text-measure";
 import type { InteractiveCanvasObject } from "../../state/schema";
+import { brandHeaderIconColors } from "../../theme/palette";
 import { resolveIconGlyph, type IconGlyphElement } from "../shapes/icon/icon-glyphs";
 import type { LocalRect } from "../text-slots";
 
@@ -440,6 +441,8 @@ export function titleChipIconDrawing(
 ): TitleChipIconDrawing | null {
   const glyph = resolveIconGlyph(iconId, canvasStyle.iconPack);
   if (!glyph) return null;
+  // A brand logo keeps its brand color, as on an icon object (theme/palette.ts).
+  if (glyph.brandColor) colors = brandHeaderIconColors(glyph.brandColor, colors, canvasStyle);
   const tiled = canvasStyle.iconStyle === "tile";
   const glyphSize = tiled ? TITLE_CHIP_ICON.tileGlyphPx : TITLE_CHIP_ICON.bareGlyphPx;
   return {

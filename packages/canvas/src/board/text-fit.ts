@@ -21,7 +21,7 @@
  *                        the stage's slot CSS), the name's clamp shortened by
  *                        the detail line's reserve (`slotNameLineCapacity`)
  *   - detail lines      `ellipsizeDetailText` (the stage's nowrap ellipsis)
- *   - sticky bodies     `layoutStickyText` + `STICKY_LINE_PITCH_PX`
+ *   - sticky bodies     `layoutStickyText` + the style's `stickyLineHeightPx`
  *   - section titles    `titleChipLayout` + `titleChipMaxWidthPx` (the chip
  *                        as the workspace style draws it: header font, icon,
  *                        detail, border — the one measured layout the
@@ -70,9 +70,8 @@ import {
 } from "../render/static-svg.ts";
 import {
   layoutStickyText,
-  STICKY_LINE_PITCH_PX,
   stickyTextUncovered,
-} from "../render/sticky-text.ts";
+} from "../objects/sticky/sticky-text.ts";
 import {
   belowBandMaxWidthPx,
   detailFontSpec,
@@ -94,6 +93,7 @@ import {
   titleChipLayout,
 } from "../objects/section/title-chip-layout.ts";
 import { connectionLabelChipMetrics, connectionLabelFontSpec } from "../connectors/label-chip.ts";
+import { grownToAspect, naturalAspectOf } from "../objects/natural-aspect.ts";
 import {
   activeBackend,
   fitText,
@@ -512,16 +512,27 @@ function shapeLabelReport(
   const nameRoom = (rectWidth: number) => (slot.placement === "below" ? Number.POSITIVE_INFINITY : rectWidth);
   const wideEnough = (rectWidth: number, detailRoom: number) =>
     rectWidth > 0 && nameRoom(rectWidth) >= widestWord && detailRoom >= detailWidth;
-  const neededWidth = wideEnough(at.rect.width, at.detailRoom)
-    ? Math.ceil(size.width)
-    : (smallestFitting(size.width, (width) => {
-        const probed = probe(object, width, size.height, text);
-        const rectWidth = resolveTextSlot(slot, probed, 1, { canvasStyle }).rect.width;
-        return wideEnough(rectWidth, detailRoomFor(probed, rectWidth));
-      }) ?? Math.ceil(size.width));
-
   const surelyFits = (width: number, height: number) => verdictAt(measured(width, height)) === "fits";
-  const neededHeight = smallestFitting(size.height, (height) => surelyFits(neededWidth, height));
+  // A fixed-aspect shape (the octagon) draws at its own ratio inside the box,
+  // so extra width alone never makes room: it grows at that ratio from the
+  // box it has, as autosize and resize size it (natural-aspect.ts).
+  const aspect = naturalAspectOf(object);
+  let neededWidth: number;
+  let neededHeight: number | undefined;
+  if (aspect !== null) {
+    const start = grownToAspect(size, aspect);
+    neededHeight = smallestFitting(start.height, (height) => surelyFits(height * aspect, height));
+    neededWidth = neededHeight === undefined ? Math.ceil(start.width) : Math.ceil(neededHeight * aspect);
+  } else {
+    neededWidth = wideEnough(at.rect.width, at.detailRoom)
+      ? Math.ceil(size.width)
+      : (smallestFitting(size.width, (width) => {
+          const probed = probe(object, width, size.height, text);
+          const rectWidth = resolveTextSlot(slot, probed, 1, { canvasStyle }).rect.width;
+          return wideEnough(rectWidth, detailRoomFor(probed, rectWidth));
+        }) ?? Math.ceil(size.width));
+    neededHeight = smallestFitting(size.height, (height) => surelyFits(neededWidth, height));
+  }
   const painted = !at.resolved.hidden && at.rect.width > 0;
   const nameShown = painted && nameShownAt(at);
   const extras = { nameFits: nameShown, ...(detailLine ? { detailLine } : null) };
@@ -560,19 +571,20 @@ function shapeLabelReport(
 }
 
 // ---------------------------------------------------------------------------
-// Sticky bodies — markdown line boxes on the 36px pitch.
+// Sticky bodies — markdown line boxes on the style's note line pitch.
 // ---------------------------------------------------------------------------
 
 function stickyBodyReport(
   object: InteractiveCanvasObject,
   size: TextFitSize,
   text: string,
+  canvasStyle: CanvasStyle,
 ): TextFitReport {
   // Rows depend on the slot width only: a height search must not wrap the
   // same text again for every probe.
   const rowCache = new Map<string, number>();
   const measured = (width: number, height: number) => {
-    const resolved = resolveTextSlot(INSET_BODY_TEXT_SLOT, probe(object, width, height, text));
+    const resolved = resolveTextSlot(INSET_BODY_TEXT_SLOT, probe(object, width, height, text), 1, { canvasStyle });
     const { rect, typography } = resolved;
     // A slot with no width holds no row at all.
     const rowsAt = (slotWidth: number): number => {
@@ -580,12 +592,12 @@ function stickyBodyReport(
       const key = `${slotWidth}|${typography.fontSizePx}`;
       let rows = rowCache.get(key);
       if (rows === undefined) {
-        rows = layoutStickyText(text, slotWidth, typography.fontSizePx).length;
+        rows = layoutStickyText(text, slotWidth, typography.fontSizePx, canvasStyle.stickyHeadingScale).length;
         rowCache.set(key, rows);
       }
       return rows;
     };
-    const capacity = rect.height > 0 ? Math.max(1, Math.floor(rect.height / STICKY_LINE_PITCH_PX)) : 0;
+    const capacity = rect.height > 0 ? Math.max(1, Math.floor(rect.height / slotLineHeightPx(typography))) : 0;
     return {
       resolved,
       rect,
@@ -850,6 +862,6 @@ function measuredReport(
     };
   }
   if (object.type === "section") return sectionTitleReport(object, size, text, canvasStyle);
-  if (effectiveRenderShape(object) === "note") return stickyBodyReport(object, size, text);
+  if (effectiveRenderShape(object) === "note") return stickyBodyReport(object, size, text, canvasStyle);
   return shapeLabelReport(object, size, text, canvasStyle);
 }

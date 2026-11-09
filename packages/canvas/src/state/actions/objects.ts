@@ -100,7 +100,9 @@ export function handleAddObject(
   // so the placed object matches the preview exactly (id/parent/snap aside).
   const object: InteractiveCanvasObject = draftPlacedObject(
     action.objectType,
-    snapGeometry(action.geometry ?? defaultGeometryFor(action.objectType)),
+    action.snap === false && action.geometry
+      ? action.geometry
+      : snapGeometry(action.geometry ?? defaultGeometryFor(action.objectType)),
     {
       id,
       text: action.text,

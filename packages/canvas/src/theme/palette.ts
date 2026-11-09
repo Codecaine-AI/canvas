@@ -386,7 +386,13 @@ export function iconTileModeFor(style: CanvasStyle, sizePx: number): IconTileMod
  * outlined tile (card fill, 1px ink border, ink glyph) at every size. Glyph
  * style ignores the size.
  */
-export function resolveIconTilePaint(color: CanvasColor, style: CanvasStyle, sizePx: number): IconTilePaint {
+export function resolveIconTilePaint(
+  color: CanvasColor,
+  style: CanvasStyle,
+  sizePx: number,
+  brandColor?: string | null,
+): IconTilePaint {
+  if (brandColor) return cachedPaint(style, `brand-icon|${brandColor}`, () => brandIconPaint(brandColor, style));
   const paint = resolveIconPaint(color, style);
   if (paint.tileFill === null) return { ...paint, tileMode: null, tileBorderWidthPx: 0 };
   const tileMode = iconTileModeFor(style, sizePx);
@@ -404,9 +410,69 @@ export function resolveIconTilePaint(color: CanvasColor, style: CanvasStyle, siz
 }
 
 /**
+ * Least contrast a brand mark keeps against what it sits on before it falls
+ * back to the ink. Logos are exempt from WCAG 1.4.11's 3:1 for graphics, and
+ * a 3:1 floor would drop real brand colors (Claude's #D97757 is 2.9:1 on the
+ * light card); 2:1 still keeps the mark visible, and catches the brands that
+ * vanish: black marks on the dark card, Hugging Face yellow, React and
+ * Supabase on the light card. Canvas-owned: no token names this.
+ */
+export const BRAND_MARK_MIN_CONTRAST = 2;
+
+/** The brand color where it keeps BRAND_MARK_MIN_CONTRAST on `background`, else the ink (the monochrome logo). */
+function visibleBrandColor(brandColor: string, background: string, ink: string): string {
+  return contrastRatio(brandColor, background) >= BRAND_MARK_MIN_CONTRAST ? brandColor : ink;
+}
+
+/**
+ * A brand logo's paint (a `brand-*` glyph, objects/shapes/icon/icon-glyphs.ts):
+ * the mark keeps its own brand color (the Simple Icons `hex`), never the
+ * object's color pick, which would tint every logo one hue. Glyph style: the
+ * bare mark on the board. Tile style: the mark on a neutral card tile edged by
+ * a hairline, so it reads as a badge beside the ink tiles without taking a
+ * hue that is not its own. Either way the mark falls back to the ink where its
+ * color would vanish (BRAND_MARK_MIN_CONTRAST).
+ */
+function brandIconPaint(brandColor: string, style: CanvasStyle): IconTilePaint {
+  const label = style.textColor;
+  if (style.iconStyle !== "tile") {
+    const glyph = visibleBrandColor(brandColor, style.boardBackground, style.textColor);
+    return { tileFill: null, tileBorder: null, glyph, glyphFill: null, label, tileMode: null, tileBorderWidthPx: 0 };
+  }
+  return {
+    tileFill: style.cardFill,
+    tileBorder: style.hairlineColor,
+    glyph: visibleBrandColor(brandColor, style.cardFill, style.textColor),
+    glyphFill: null,
+    label,
+    tileMode: "tint",
+    tileBorderWidthPx: ICON_TILE_OUTLINE_WIDTH_PX,
+  };
+}
+
+/**
+ * A section header's brand logo (objects/section/title-chip-layout.ts):
+ * the same brand policy as an icon object (brandIconPaint). Tile style: the
+ * mark on the neutral card tile. Glyph style: the bare mark on the header
+ * chip (`colors.iconTile` is the chip fill there), falling back to the
+ * section's own glyph ink where the brand color would vanish.
+ */
+export function brandHeaderIconColors(
+  brandColor: string,
+  colors: Pick<SectionPaint, "iconTile" | "iconTileBorder" | "iconGlyph">,
+  style: CanvasStyle,
+): Pick<SectionPaint, "iconTile" | "iconTileBorder" | "iconGlyph"> {
+  if (style.iconStyle !== "tile") {
+    return { ...colors, iconGlyph: visibleBrandColor(brandColor, colors.iconTile, colors.iconGlyph) };
+  }
+  const paint = brandIconPaint(brandColor, style);
+  return { iconTile: paint.tileFill ?? colors.iconTile, iconTileBorder: paint.tileBorder, iconGlyph: paint.glyph };
+}
+
+/**
  * Sticky paint. `paper` (figjam): the sticky role-table fill, no border, a
- * shadow. `card`: cardFill, hairline border, a 2px left rule in the ink, no
- * shadow.
+ * shadow. `card`: cardFill, hairline border, a left rule in the ink
+ * (stickyRuleWidthPx), no shadow.
  */
 export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
   return cachedPaint(style, `sticky|${color}`, () => stickyPaint(color, style));

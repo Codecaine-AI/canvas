@@ -4,7 +4,8 @@ import { CanvasStage } from "../CanvasStage";
 import { TextEditingOverlay } from "../editor/features/text-editing/TextEditingOverlay";
 import type { TextEditingApi } from "../editor/features/text-editing/use-text-editing";
 import { renderDocumentToSvg } from "../../render/static-svg";
-import type { CanvasThemeId } from "../../theme/canvas-style";
+import { canvasThemePreset, type CanvasThemeId } from "../../theme/canvas-style";
+import { contrastRatio } from "../../theme/color-math";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 import { measureWidth } from "../../theme/text-measure";
 
@@ -151,7 +152,9 @@ describe("pinned title chip with icon (a stored detail never paints)", () => {
     expect(titleWidth).toBe(114.25);
     expect(svg).not.toContain("127.0.0.1");
     // The 16px tile sits 6px in, centered on the content line (93.5); the glyph is 11px inside it.
-    expect(svg).toContain('<rect x="107.5" y="85.5" width="16" height="16" rx="2" fill="#0D7164"/>');
+    // Bun is a brand logo: its own black mark on the neutral card tile, edged by a hairline.
+    expect(svg).toContain('<rect x="108" y="86" width="15" height="15" rx="1.5" fill="#F8F8F7" stroke="#E6E5E3" stroke-width="1"/>');
+    expect(svg).toContain('transform="translate(110 88) scale(0.4583)" fill="#000000"');
     expect(svg).toContain('transform="translate(110 88) scale(0.4583)"');
     // Only the right and bottom edges are stroked, inside the box like a CSS border
     // (box: 6 lead + 22 icon + 114.25 title + 10 + 1.5 edge).
@@ -278,18 +281,35 @@ describe("connector label chip per theme", () => {
 });
 
 describe("card stickies", () => {
-  it("live: card fill, hairline edge and 2px ink rule as inset shadows, no paper shadow", () => {
+  it("live: card fill, hairline edge, and a straight 3px ink rule inside it, no paper shadow", () => {
     const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
-    expect(note.style.background).toBe("#F8F8F7");
-    expect(note.style.boxShadow).toBe("inset 2px 0 0 0 #805F01, inset 0 0 0 1px #E6E5E3");
+    // The rule is a background strip the corner radius clips, so its inner edge never curls into a hook.
+    expect(note.style.background).toBe(
+      "linear-gradient(to right, transparent 1px, #805F01 1px, #805F01 4px, transparent 4px) #F8F8F7",
+    );
+    expect(note.style.boxShadow).toBe("inset 0 0 0 1px #E6E5E3");
   });
 
-  it("static: the same card, edge, and rule — and no shadow filter", () => {
+  it("static: the same card with 4px corners, a straight rule clipped by them under the edge, and no shadow filter", () => {
     const svg = staticSvg("schematic-light");
     expect(svg).not.toContain("feDropShadow");
-    expect(svg).toContain('<rect x="900" y="80" width="240" height="160" fill="#F8F8F7"/>');
-    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
-    expect(svg).toContain('<rect x="900" y="80" width="2" height="160" fill="#805F01"/>');
+    expect(svg).toContain('<rect x="900" y="80" width="240" height="160" rx="4" fill="#F8F8F7"/>');
+    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" rx="3.5" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
+    // x 901 to 904: only its ends follow the corner arcs, its inner edge is one straight line,
+    // and it paints before the hairline, as the live background strip sits under the inset shadow.
+    expect(svg).toContain(
+      '<path d="M901 81.35A4 4 0 0 1 904 80V240A4 4 0 0 1 901 238.65Z" fill="#805F01"/><rect x="900.5" y="80.5"',
+    );
+  });
+
+  it("schematic note text reads under the node names: 16px on a 24px pitch, ink on the card at 4.5:1 or more", () => {
+    const style = canvasThemePreset("schematic-light");
+    const svg = staticSvg("schematic-light");
+    expect(svg).toContain('<text fill="#1F1F1F" font-size="16" font-weight="400"');
+    expect(style.stickyFontSizePx).toBeLessThan(style.textFontSizePx);
+    expect(contrastRatio(style.textColor, style.cardFill)).toBeGreaterThanOrEqual(4.5);
+    const dark = canvasThemePreset("schematic-dark");
+    expect(contrastRatio(dark.textColor, dark.cardFill)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("paper stickies keep the shadow and the note CSS (no inline trim)", () => {

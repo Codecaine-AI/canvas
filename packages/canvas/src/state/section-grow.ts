@@ -158,7 +158,56 @@ export function sectionOverflow(document: InteractiveCanvasDocument, id: string)
   return out;
 }
 
-/** Reconcile membership, grow what can grow, reconcile again (an identity on a grown tree). */
-export function settleSections(document: InteractiveCanvasDocument): InteractiveCanvasDocument {
-  return reconcileSectionMembership(growSectionsToChildren(reconcileSectionMembership(document)).document);
+/**
+ * The section parent of each note whose text fit changed only its height
+ * (top-left and width held) between `before` and `after`, keyed by note id.
+ * A fitted note that grew past its frame is still that frame's child: the
+ * frame grows to hold it rather than lose it (objects/sticky/note-fit.ts).
+ */
+export function fittedNoteParents(
+  before: InteractiveCanvasDocument,
+  after: InteractiveCanvasDocument,
+): Map<string, string> {
+  const prior = new Map(before.objects.map((object) => [object.id, object]));
+  const held = new Map<string, string>();
+  for (const object of after.objects) {
+    const was = prior.get(object.id);
+    if (object.style?.shape !== "note" || !was?.parentId) continue;
+    const a = was.geometry;
+    const b = object.geometry;
+    if (a.x === b.x && a.y === b.y && a.width === b.width && a.height !== b.height) held.set(object.id, was.parentId);
+  }
+  return held;
+}
+
+/**
+ * Membership reconciled from geometry, except each id in `held` keeps the
+ * parent it names (while that parent is still on the board), so a section
+ * grow can catch up with it. The grow's last reconcile then confirms it.
+ */
+export function reconcileHolding(
+  document: InteractiveCanvasDocument,
+  held: ReadonlyMap<string, string> = new Map(),
+): InteractiveCanvasDocument {
+  const reconciled = reconcileSectionMembership(document);
+  if (held.size === 0) return reconciled;
+  const ids = new Set(reconciled.objects.map((object) => object.id));
+  return {
+    ...reconciled,
+    objects: reconciled.objects.map((object) => {
+      const parentId = held.get(object.id);
+      return parentId && ids.has(parentId) && object.parentId !== parentId ? { ...object, parentId } : object;
+    }),
+  };
+}
+
+/**
+ * Reconcile membership (holding `held`, see reconcileHolding), grow what can
+ * grow, reconcile again (an identity on a grown tree).
+ */
+export function settleSections(
+  document: InteractiveCanvasDocument,
+  held?: ReadonlyMap<string, string>,
+): InteractiveCanvasDocument {
+  return reconcileSectionMembership(growSectionsToChildren(reconcileHolding(document, held)).document);
 }

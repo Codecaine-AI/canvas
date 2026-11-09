@@ -16,6 +16,9 @@ import {
   type InteractiveCanvasObject,
   type ResizeHandle,
 } from "../../../../../index";
+import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../../../../../state/actions";
+import { noteNeededHeight } from "../../../../../objects/sticky/note-fit";
+import { canvasThemePreset } from "../../../../../theme/canvas-style";
 
 /** Place slice armed-tool creation gesture coverage. */
 function makeObject(overrides: Partial<InteractiveCanvasObject> & { id: string }): InteractiveCanvasObject {
@@ -168,9 +171,24 @@ describe("interaction: armed-tool object creation (4.2.2)", () => {
         type: "canvas.addObject",
         objectType: "sticky",
         geometry: expect.any(Object),
+        snap: false,
       },
       { type: "canvas.setTool", tool: "select" },
     ]);
+  });
+
+  it("a sticky click on a card theme creates a note as tall as its empty text, at that height after the reducer", () => {
+    const ctx = makeContext(makeDocument([]), { tool: "sticky", canvasStyle: canvasThemePreset("schematic-light") });
+
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 200, y: 200 }, { kind: "canvas" }), ctx);
+    result = stepInteraction(result.state, up({ x: 200, y: 200 }), ctx);
+    let state = createInteractiveCanvasState(makeDocument([]));
+    for (const action of result.dispatch) state = reduceInteractiveCanvasState(state, action);
+
+    const placed = state.document.objects[0]!;
+    // 14px padding + one 24px row + 14px padding = 52, on the 20 grid: 60.
+    expect(placed.geometry).toEqual({ x: 112, y: 144, width: 176, height: 60 });
+    expect(noteNeededHeight(placed, canvasThemePreset("schematic-light"))).toBe(60);
   });
 
   it("an armed click that lands on an existing object still places a new object rather than selecting it", () => {

@@ -1,12 +1,13 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import { withAlpha } from "../../theme/color-math";
 import {
   parseStickyMarkdown,
   STICKY_MARKDOWN_MONO_FONT,
   STICKY_MARKDOWN_MONO_FONT_WEIGHT,
+  stickyHeadingEm,
   type StickyMarkdownInlineToken,
   type StickyMarkdownLine,
 } from "./markdown-editing";
@@ -23,25 +24,16 @@ import {
  * is a heading, a bullet line is a bullet; inline marks apply within either).
  */
 
-export const STICKY_MARKDOWN_LINE_HEIGHT_PX = 36;
-
 /**
- * Headings keep their em-relative font-size hierarchy, but every markdown row
- * uses the sticky body's 36px line pitch so raw-source editing and at-rest
- * markdown share the same deterministic vertical budget.
+ * A heading row's style: its em size under the style's `stickyHeadingScale`
+ * (markdown-editing.ts stickyHeadingEm), bold. No line height of its own:
+ * every row inherits the slot's px line box (CanvasStyle.stickyLineHeightPx),
+ * so raw-source editing and at-rest markdown share one vertical budget.
+ * Shared by the at-rest renderer and the live editor.
  */
-export const STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX: Record<1 | 2 | 3, number> = {
-  1: STICKY_MARKDOWN_LINE_HEIGHT_PX,
-  2: STICKY_MARKDOWN_LINE_HEIGHT_PX,
-  3: STICKY_MARKDOWN_LINE_HEIGHT_PX,
-};
-
-/** em-relative heading sizes so headings scale with the slot's body typography. */
-const HEADING_STYLE: Record<1 | 2 | 3, { fontSize: string; lineHeight: string }> = {
-  1: { fontSize: "1.5em", lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[1]}px` },
-  2: { fontSize: "1.25em", lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[2]}px` },
-  3: { fontSize: "1.1em", lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[3]}px` },
-};
+export function stickyHeadingStyle(level: 1 | 2 | 3, headingScale: number): CSSProperties {
+  return { fontSize: `${stickyHeadingEm(level, headingScale)}em`, fontWeight: 700 };
+}
 
 type StickyMarkdownLineAttrs = {
   "data-line-depth": string;
@@ -122,7 +114,7 @@ function renderInline(
   });
 }
 
-function renderLine(line: StickyMarkdownLine, codeBackground: string): ReactNode {
+function renderLine(line: StickyMarkdownLine, codeBackground: string, headingScale: number): ReactNode {
   if (line.kind === "heading") {
     const level = line.headingLevel!;
     return (
@@ -132,7 +124,7 @@ function renderLine(line: StickyMarkdownLine, codeBackground: string): ReactNode
         className="interactive-canvas-sticky-line"
         data-heading={level}
         {...stickyMarkdownLineAttrs(line)}
-        style={{ ...HEADING_STYLE[level], fontWeight: 700 }}
+        style={stickyHeadingStyle(level, headingScale)}
       >
         {renderInline(line.inline, codeBackground)}
       </span>
@@ -160,9 +152,12 @@ function renderLine(line: StickyMarkdownLine, codeBackground: string): ReactNode
 export function StickyMarkdown({
   text,
   codeBackground = STICKY_CODE_CHIP_BACKGROUND,
+  headingScale = 1,
 }: {
   text: string;
   codeBackground?: string;
+  /** CanvasStyle.stickyHeadingScale (1 = the full heading scale). */
+  headingScale?: number;
 }) {
-  return <>{parseStickyMarkdown(text).lines.map((line) => renderLine(line, codeBackground))}</>;
+  return <>{parseStickyMarkdown(text).lines.map((line) => renderLine(line, codeBackground, headingScale))}</>;
 }

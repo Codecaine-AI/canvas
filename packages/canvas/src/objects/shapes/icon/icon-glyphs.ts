@@ -1,7 +1,7 @@
 "use client";
 
 import { CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "../../../state/schema/object-types";
-import { BRAND_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data-brands.generated";
+import { BRAND_ICON_COLORS, BRAND_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data-brands.generated";
 import { TABLER_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data-tabler.generated";
 import { GENERATED_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data.generated";
 
@@ -168,6 +168,12 @@ export type IconGlyphDefinition = {
   /** viewBox width/height — 18 for Nucleo glyphs, 24 for Tabler and Simple Icons. */
   viewBoxSize: number;
   /**
+   * A brand logo's own color (the Simple Icons `hex`, tools/dev-icons); the
+   * renderers paint the mark in it instead of the object's color pick
+   * (theme/palette.ts resolveIconTilePaint). Absent on generic glyphs.
+   */
+  brandColor?: string;
+  /**
    * One or more `<path>`/`<circle>`/`<line>` element descriptors making up
    * the glyph. Kept as plain data (not JSX) so the registry stays a pure,
    * serializable module — IconShapeBody turns this into markup.
@@ -317,6 +323,12 @@ function glyphDefinition(id: IconGlyphId, source: IconGlyphSource, generated: Ge
   } else {
     ({ label, category } = GENERIC_GLYPH_META[id]);
   }
+  const brandColor = isBrandIconGlyphId(id) ? BRAND_ICON_COLORS[id] : undefined;
+  if (isBrandIconGlyphId(id) && !brandColor) {
+    throw new Error(
+      `icon-glyphs: no brand color for "${id}" — add its Simple Icons "hex" to tools/dev-icons/manifest.json and re-run \`bun tools/dev-icons/generate.ts\``,
+    );
+  }
   return {
     id,
     label,
@@ -324,6 +336,7 @@ function glyphDefinition(id: IconGlyphId, source: IconGlyphSource, generated: Ge
     source,
     paint: source === "simple-icons" ? "fill" : "stroke",
     viewBoxSize: generated.viewBoxSize,
+    ...(brandColor ? { brandColor } : null),
     elements: generated.elements,
   };
 }

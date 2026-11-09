@@ -5,6 +5,7 @@ import { FIRST_USE_COLORS, objectTypeDefaults } from "../../state/schema/object-
 import { withAlpha } from "../../theme/color-math";
 import { resolveStickyPaint, type StickyPaint } from "../../theme/palette";
 import { canvasStyleCssVar, useCanvasStyle } from "../../theme/canvas-style-context";
+import type { CanvasStyle } from "../../theme/canvas-style";
 import { BBOX_OUTLINE } from "../geometry";
 import { ObjectShell, ObjectSlotText } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
@@ -13,7 +14,6 @@ import { STICKY_CODE_CHIP_ALPHA, StickyMarkdown } from "./markdown";
 
 /** Sticky geometry/typography (per-kind constants co-locate with their def; the text inset/typography live on the inset-body slot preset in objects/text-slots.ts). */
 export const STICKY_GEOMETRY = {
-  cornerRadiusPx: 0,
   foldedCorner: false,
   defaultSizePx: { width: 416, height: 420 },
   /** Down-biased falloff shadow: FigJam paper-sticky art (paper stickies only; a card replaces it). */
@@ -22,12 +22,12 @@ export const STICKY_GEOMETRY = {
 
 /**
  * Card sticky trim (the schematic themes' `stickyStyle: "card"`): the card
- * fill (the shell's sticky role paint) edged by a hairline, a 2px rule in
- * the color pick's ink down the left side, no shadow. Inline `code` chips
- * tint with the text color at the paper chip's alpha (./markdown.tsx).
+ * fill (the shell's sticky role paint) edged by a hairline, a straight rule in
+ * the color pick's ink down the left side just inside the hairline
+ * (CanvasStyle.stickyRuleWidthPx), no shadow. Inline `code` chips tint with
+ * the text color at the paper chip's alpha (./markdown.tsx).
  */
 export const CARD_STICKY_GEOMETRY = {
-  ruleWidthPx: 2,
   borderWidthPx: 1,
   codeChipAlpha: STICKY_CODE_CHIP_ALPHA,
 } as const;
@@ -44,14 +44,22 @@ const CHANGED_RING_SHADOW = `0 0 0 5px color-mix(in oklab, ${canvasStyleCssVar("
  * slot keeps its exact position — replacing the paper shadow. Paper stickies
  * get no override: the note CSS (shadow, changed ring) applies untouched.
  */
-function cardStickyTrim(paint: StickyPaint, changed: boolean): CSSProperties | undefined {
+function cardStickyTrim(paint: StickyPaint, changed: boolean, canvasStyle: CanvasStyle): CSSProperties | undefined {
   if (paint.shadow) return undefined;
   const shadows = [
     ...(changed ? [CHANGED_RING_SHADOW] : []),
-    ...(paint.rule ? [`inset ${CARD_STICKY_GEOMETRY.ruleWidthPx}px 0 0 0 ${paint.rule}`] : []),
     ...(paint.border ? [`inset 0 0 0 ${CARD_STICKY_GEOMETRY.borderWidthPx}px ${paint.border}`] : []),
   ];
-  return { boxShadow: shadows.length > 0 ? shadows.join(", ") : "none" };
+  // The rule is a background strip, not an inset shadow: the corner radius
+  // clips its outer edge and its inner edge stays straight (an inset shadow's
+  // inner edge curls with the corners into a hook). It starts inside the
+  // hairline, so the edge runs unbroken around the card.
+  const from = CARD_STICKY_GEOMETRY.borderWidthPx;
+  const to = from + canvasStyle.stickyRuleWidthPx;
+  const rule = paint.rule && to > from
+    ? { background: `linear-gradient(to right, transparent ${from}px, ${paint.rule} ${from}px, ${paint.rule} ${to}px, transparent ${to}px), ${paint.fill}` }
+    : null;
+  return { ...rule, boxShadow: shadows.length > 0 ? shadows.join(", ") : "none" };
 }
 
 /**
@@ -84,7 +92,7 @@ function StickyObjectView(props: ObjectRenderProps) {
       buttonBorder="painted"
       onObjectSelect={props.onObjectSelect}
       onObjectContextMenu={props.onObjectContextMenu}
-      style={cardStickyTrim(paint, props.changed)}
+      style={cardStickyTrim(paint, props.changed, canvasStyle)}
     >
       {!hideText && (
         <ObjectSlotText
@@ -97,6 +105,7 @@ function StickyObjectView(props: ObjectRenderProps) {
         >
           <StickyMarkdown
             text={object.text}
+            headingScale={canvasStyle.stickyHeadingScale}
             codeBackground={
               paint.shadow ? undefined : withAlpha(paint.text, CARD_STICKY_GEOMETRY.codeChipAlpha)
             }
@@ -113,13 +122,13 @@ export const stickyDef: ObjectDef = {
   css: `
         /*
          * W2 — sticky is the ONLY object type with a shadow (per spec, every
-         * other shape is flat/shadowless). Square corners (STICKY_GEOMETRY.
-         * cornerRadiusPx = 0) and the measured down-biased shadow live here;
-         * body typography comes from the inset-body text slot.
+         * other shape is flat/shadowless). The measured down-biased shadow
+         * lives here; corners follow CanvasStyle.stickyCornerRadiusPx and body
+         * typography the inset-body slot.
          */
         .interactive-canvas-object-note {
           justify-content: flex-start;
-          border-radius: ${STICKY_GEOMETRY.cornerRadiusPx}px;
+          border-radius: ${canvasStyleCssVar("stickyCornerRadiusPx")};
           box-shadow: ${STICKY_GEOMETRY.shadow};
         }
         .interactive-canvas-object-note[data-changed="true"] {

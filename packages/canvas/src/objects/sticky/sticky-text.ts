@@ -5,7 +5,7 @@
  * The live sticky renders its text through StickyMarkdown
  * (objects/sticky/markdown.tsx over the pure D18 grammar in
  * objects/sticky/markdown-editing.ts): headings, bullets with depth
- * indentation, bold and inline code, one 36px-pitch line box per source line,
+ * indentation, bold and inline code, one line box (the style's stickyLineHeightPx) per source line,
  * wrapped by the browser inside the inset-body slot (`white-space: pre-wrap;
  * overflow-wrap: break-word`, inherited from the slot text). This module
  * reproduces those LINE BOXES — per-line font size/weight, indentation,
@@ -30,9 +30,10 @@
 import {
   parseStickyMarkdown,
   STICKY_MARKDOWN_MONO_FONT_WEIGHT,
+  stickyHeadingEm,
   type StickyMarkdownInlineToken,
-} from "../objects/sticky/markdown-editing";
-import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK } from "../theme/fonts";
+} from "./markdown-editing";
+import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK } from "../../theme/fonts";
 import {
   graphemeClusters,
   measureLineWidth,
@@ -41,17 +42,7 @@ import {
   wrapRuns,
   type FontSpec,
   type TextRun,
-} from "../theme/text-measure";
-
-/**
- * Line pitch: every markdown row — headings included — uses the sticky
- * body's 36px line box (mirrors STICKY_MARKDOWN_LINE_HEIGHT_PX and
- * STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX in objects/sticky/markdown.tsx).
- */
-export const STICKY_LINE_PITCH_PX = 36;
-
-/** Heading font sizes in em of the body size (markdown.tsx HEADING_STYLE). */
-const HEADING_FONT_EM: Record<1 | 2 | 3, number> = { 1: 1.5, 2: 1.25, 3: 1.1 };
+} from "../../theme/text-measure";
 
 /** Heading rows render bold (markdown.tsx renderLine: fontWeight 700). */
 const HEADING_FONT_WEIGHT = 700;
@@ -100,7 +91,7 @@ export interface StickyTextRow {
   indentPx: number;
   /** Bullet glyph in its gutter column — first visual row of a bullet line only. */
   bullet?: { glyph: string; xPx: number };
-  /** Empty for a blank source line (which still occupies its 36px line box). */
+  /** Empty for a blank source line (which still occupies its line box). */
   segments: StickyTextSegment[];
 }
 
@@ -148,20 +139,23 @@ function lineRuns(
 /**
  * Lays sticky markdown source out into visual rows for a slot of the given
  * width. `bodyFontSizePx` is the inset-body slot's font size (the em basis
- * for headings, indentation and code sizing). Every returned row occupies one
- * STICKY_LINE_PITCH_PX line box; the caller owns vertical clamping.
+ * for headings, indentation and code sizing); `headingScale` is the style's
+ * `stickyHeadingScale` (1 = the full heading scale). Every returned row
+ * occupies one line box of the style's `stickyLineHeightPx` (the slot
+ * typography's line height); the caller owns vertical clamping.
  */
 export function layoutStickyText(
   source: string,
   slotWidthPx: number,
   bodyFontSizePx: number,
+  headingScale = 1,
 ): StickyTextRow[] {
   const rows: StickyTextRow[] = [];
 
   for (const line of parseStickyMarkdown(source).lines) {
     const heading = line.kind === "heading";
     const fontSizePx = heading
-      ? bodyFontSizePx * HEADING_FONT_EM[line.headingLevel!]
+      ? bodyFontSizePx * stickyHeadingEm(line.headingLevel!, headingScale)
       : bodyFontSizePx;
     const fontWeight = heading ? HEADING_FONT_WEIGHT : BODY_FONT_WEIGHT;
     const visualDepth = Math.min(line.depth, MAX_VISUAL_DEPTH);
@@ -187,9 +181,10 @@ export function layoutStickyText(
       continue;
     }
 
+    // Row pitch is the caller's (it only scales wrapRuns' reported height).
     const wrapped = wrapRuns(runs, {
       maxWidth: Math.max(0, slotWidthPx - indentPx),
-      lineHeight: STICKY_LINE_PITCH_PX,
+      lineHeight: fontSizePx,
       whiteSpace: "pre-wrap",
     });
     const visualRows = wrapped.lines.length > 0 ? wrapped.lines : [{ fragments: [] }];
