@@ -21,6 +21,7 @@ import {
   type CanvasChangeSummary,
 } from "../../../../state/actions";
 import { resolveSwatchPreview } from "../../../../theme/palette";
+import { naturalAspectOf } from "../../../../objects/natural-aspect";
 import { CANVAS_COLORS } from "../../../../state/schema";
 import type {
   CanvasColor,
@@ -62,6 +63,8 @@ export function Inspector({
   const selectedSectionFitted =
     selectedObject?.type === "section" ? isSectionFitted(document, selectedObject.id) : false;
   const detailLength = selectedObject?.detail?.trim().length ?? 0;
+  // A fixed-aspect shape (the octagon): either size field drives the other.
+  const aspect = selectedObject ? naturalAspectOf(selectedObject) : null;
 
   const addAnnotation = () => {
     const body = annotationBody.trim();
@@ -211,7 +214,7 @@ export function Inspector({
                 type: "canvas.resizeObject",
                 objectId: selectedObject.id,
                 width,
-                height: selectedObject.geometry.height,
+                height: aspect === null ? selectedObject.geometry.height : width / aspect,
               })
             }
           />
@@ -223,7 +226,7 @@ export function Inspector({
               dispatch({
                 type: "canvas.resizeObject",
                 objectId: selectedObject.id,
-                width: selectedObject.geometry.width,
+                width: aspect === null ? selectedObject.geometry.width : height * aspect,
                 height,
               })
             }

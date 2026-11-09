@@ -216,6 +216,25 @@ describe("Inspector keyboard and size fields", () => {
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(height.value).toBe(String(geometry.height));
   });
+
+  it("keeps a stop-sign octagon square: either typed side drives the other", () => {
+    const stop: InteractiveCanvasObject = {
+      id: "stop",
+      type: "octagon",
+      text: "Cancel",
+      geometry: { x: 100, y: 100, width: 144, height: 144 },
+    };
+    const { getByLabelText, dispatch } = renderInspector(stop);
+    const width = getByLabelText("Object width") as HTMLInputElement;
+    fireEvent.change(width, { target: { value: "288" } });
+    fireEvent.keyDown(width, { key: "Enter" });
+    expect(dispatch).toHaveBeenLastCalledWith({ type: "canvas.resizeObject", objectId: "stop", width: 288, height: 288 });
+
+    const height = getByLabelText("Object height") as HTMLInputElement;
+    fireEvent.change(height, { target: { value: "96" } });
+    fireEvent.keyDown(height, { key: "Enter" });
+    expect(dispatch).toHaveBeenLastCalledWith({ type: "canvas.resizeObject", objectId: "stop", width: 96, height: 96 });
+  });
 });
 
 describe("InteractiveCanvasEditor showInspector", () => {
