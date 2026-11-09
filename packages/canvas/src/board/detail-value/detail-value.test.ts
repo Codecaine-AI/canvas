@@ -72,12 +72,15 @@ interface SentQuestion {
   criteria: Record<string, unknown>;
 }
 
+type SentNode = SentQuestion["instructions"]["node"];
+
 /**
- * A fake Jev: answers each question with p(remove) from `pRemove` by detail
- * text (0 when unlisted), and records every request body it received.
+ * A fake Jev: answers each question with p(remove) from `pRemove`, by detail
+ * text (0 when unlisted) or from the question's node, and records every
+ * request body it received.
  */
 function fakeJev(
-  pRemove: Record<string, number>,
+  pRemove: Record<string, number> | ((node: SentNode) => number),
   options: { boardTitle?: string; beforeAnswer?: (call: number) => Promise<void> } = {},
 ) {
   const bodies: Array<{ model: string; state: { board_title: string; board_notes: string[] }; questions: Record<string, SentQuestion> }> = [];
@@ -88,7 +91,8 @@ function fakeJev(
     // With `boardTitle`, only questions about that board get p(remove) from `pRemove`.
     const onBoard = options.boardTitle === undefined || body.state.board_title === options.boardTitle;
     const answers = Object.fromEntries(Object.entries(body.questions as Record<string, SentQuestion>).map(([id, question]) => {
-      const remove = onBoard ? pRemove[question.instructions.node.detail] ?? 0 : 0;
+      const sent = question.instructions.node;
+      const remove = !onBoard ? 0 : typeof pRemove === "function" ? pRemove(sent) : pRemove[sent.detail] ?? 0;
       const choice = remove > 0.5 ? "remove" : "keep";
       return [id, {
         type: "choice",
@@ -294,7 +298,7 @@ describe("detail-value", () => {
   /**
    * A board where every fact a detail might repeat sits somewhere else: a
    * sticky note, a wire label, a box in the same section, a wired box in
-   * another section, and a box with another name and the same words.
+   * another section, and a copy of the same detail on another box.
    */
   function contextBoard(): string {
     const dir = mkdtempSync(join(tmpdir(), "detail-context-"));
@@ -341,7 +345,7 @@ describe("detail-value", () => {
       wire_labels: ["on failure"],
       other_details: ["cron: later · not in v1", "hook: later · not in v1", "send: jobs send-email"],
     });
-    // The same words on a box with another name are about that box: hook never sees cron's "later".
+    // A copy of a detail is never its context: hook never sees cron's "later · not in v1".
     expect(byName.get("hook")!.other_details).toEqual(["retry: until it clears, max 3"]);
     // A box in another section with no wire is not context.
     expect(byName.get("retry")!.other_details.join(" ")).not.toContain("cold-archive");
@@ -392,5 +396,83 @@ describe("detail-value", () => {
     expect(line).toContain("Jev judged 60 node details (60 asked, 0 cached)");
     expect(jev.bodies.length).toBeGreaterThan(2);
     for (const body of jev.bodies) expect(JSON.stringify(body).length).toBeLessThanOrEqual(120_000);
+  });
+  /**
+   * Boxes that all carry one detail, written to the board out of reading
+   * order, in one section. A box with `round` is wired to its own session box
+   * by a wire with that label.
+   */
+  function copiesBoard(boxes: Array<{ id: string; name: string; x: number; y: number; round?: string }>): string {
+    const dir = mkdtempSync(join(tmpdir(), "detail-copies-"));
+    dirs.push(dir);
+    const path = join(dir, "runs.canvas.json");
+    writeFileSync(path, JSON.stringify({
+      schemaVersion: 1, id: "runs", title: "Agent runs", mode: "diagram", viewport: { x: 0, y: 0, zoom: 1 },
+      objects: [
+        { id: "page", type: "section", text: "Agent runs", color: "white", parentId: null, geometry: { x: 0, y: 0, width: 1000, height: 1000 } },
+        { id: "s1", type: "section", text: "Kernel side", color: "gray", parentId: "page", geometry: { x: 80, y: 80, width: 840, height: 800 }, style: { shape: "section" } },
+        ...boxes.map(({ id, name, x, y }) => ({ ...node(id, name, "pi_session_id · container_id", y), geometry: { x, y, width: 280, height: 120 } })),
+        ...boxes.filter((box) => box.round).map(({ id, x, y }) => ({ ...node(`${id}-session`, "session", "", y), geometry: { x: x + 160, y: y + 40, width: 100, height: 60 } })),
+      ],
+      connections: boxes.filter((box) => box.round).map(({ id, round }) => ({
+        id: `${id}-wire`, from: { objectId: id, anchor: "right" }, to: { objectId: `${id}-session`, anchor: "left" }, label: round, style: "solid", arrow: "forward",
+      })),
+      annotations: [],
+    }));
+    return path;
+  }
+
+  const fiveRows = [
+    { id: "r4", name: "agent_runs row", x: 120, y: 600 },
+    { id: "r2", name: "agent_runs row", x: 120, y: 280 },
+    { id: "r1", name: "agent_runs row", x: 120, y: 120 },
+    { id: "r5", name: "agent_runs row", x: 520, y: 600 },
+    { id: "r3", name: "agent_runs row", x: 520, y: 280 },
+  ];
+
+  test("copies of one detail never make each other redundant", async () => {
+    const file = openCanvasFile(copiesBoard(fiveRows));
+    // Jev removes a detail it sees repeated nearby, as it did on five agent_runs rows.
+    const jev = fakeJev((sent) => sent.other_details.some((line) => line.endsWith(`: ${sent.detail}`)) ? 0.99 : 0.2);
+    const line = await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
+    const sent = jev.bodies.flatMap((body) => Object.values(body.questions)).map((question) => question.instructions.node);
+    // Five copies with one question between them (same name, section and context), and it sees no copy.
+    expect(sent.map((node) => node.other_details)).toEqual([[]]);
+    expect(line).toBe("DETAIL · Jev judged 5 node details (1 asked, 4 cached) · 0 to remove (confidence ≥ 0.1) · 700 input tokens");
+    expect(detailFindings(file)).toEqual([]);
+  });
+
+  test("when Jev would remove every copy, none is a finding", async () => {
+    // The fact must survive in one copy, and removing all but the first now
+    // would remove the first on the next check.
+    const file = openCanvasFile(copiesBoard(fiveRows));
+    const jev = fakeJev({ "pi_session_id · container_id": 0.99 });
+    const line = await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
+    expect(line).toContain("0 to remove");
+    expect(detailFindings(file)).toEqual([]);
+  });
+
+  test("the first copy in reading order keeps the fact, and clearing the rest never removes it", async () => {
+    // Reading order is top to bottom, then left to right: left (y 120) comes first.
+    const file = openCanvasFile(copiesBoard([
+      { id: "low", name: "agent_runs row", x: 120, y: 440, round: "round 3" },
+      { id: "right", name: "agent_runs row", x: 520, y: 120, round: "round 2" },
+      { id: "left", name: "agent_runs row", x: 120, y: 120, round: "round 1" },
+    ]));
+    const cache = memoryDetailCache();
+    // Jev keeps only the round 1 copy, and removes any detail it sees repeated nearby.
+    const jev = fakeJev((sent) =>
+      sent.wire_labels.includes("round 1") && !sent.other_details.some((line) => line.endsWith(`: ${sent.detail}`)) ? 0.2 : 0.99);
+    await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
+    const findings = detailFindings(file);
+    expect(findings.map((finding) => finding.at[0]).sort()).toEqual(["low", "right"]);
+
+    // Apply the whole batch, then check again.
+    for (const finding of findings) await callToolkitTool(file, "update_text", { id: finding.at[0]!, detail: "" });
+    const again = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
+    // The kept copy's question never saw the others, so it is not asked again and stays a keep.
+    expect(again).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.1)");
+    expect(detailFindings(file)).toEqual([]);
+    expect(file.session.draft.objects.find((object) => object.id === "left")!.detail).toBe("pi_session_id · container_id");
   });
 });

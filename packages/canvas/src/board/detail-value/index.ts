@@ -100,11 +100,18 @@ export interface DetailSubject {
   wireLabels: string[];
   /**
    * The other details near this node, as `name: detail` in board order: every
-   * box in the same section and every wired neighbor, except a box with
-   * another name and this exact detail. Details farther away were tried and
+   * box in the same section and every wired neighbor, except a box with the
+   * same detail text (see `sameDetail`). Details farther away were tried and
    * made Jev remove more details that only look alike.
    */
   otherDetails: string[];
+  /**
+   * The ids of every box whose detail has this text (normalized), this one
+   * included, in reading order: top to bottom, then left to right. One id when
+   * the detail is unique. Not sent to Jev: the group decides which verdicts
+   * become findings (detailRemovals).
+   */
+  sameDetail: string[];
   /** The text of every sticky note on the board (shared by every subject of the board). */
   notes: string[];
 }
@@ -181,6 +188,13 @@ function sectionOf(
 
 const detailOf = (object: InteractiveCanvasObject): string => (object.detail ?? "").replace(/\s+/g, " ").trim();
 
+/** The text two details must share to be the same detail: case and Unicode forms folded. */
+const sameText = (detail: string): string => detail.normalize("NFKC").toLowerCase();
+
+/** Reading order: top to bottom, then left to right. */
+const readingOrder = (a: InteractiveCanvasObject, b: InteractiveCanvasObject): number =>
+  a.geometry.y - b.geometry.y || a.geometry.x - b.geometry.x || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
+
 /** Add `value` to the set stored under `key`, creating the set on first use. */
 function addTo<T>(map: Map<string, Set<T>>, key: string, value: T): void {
   (map.get(key) ?? map.set(key, new Set()).get(key)!).add(value);
@@ -208,9 +222,12 @@ export function detailSubjects(document: InteractiveCanvasDocument): DetailSubje
   }
   const withDetail = document.objects
     .filter((object) => kindOf(object) === "node" && detailOf(object) !== "")
-    .map((object) => ({ object, detail: detailOf(object), section: sectionOf(object, byId) }));
+    .map((object) => ({ object, detail: detailOf(object), text: sameText(detailOf(object)), section: sectionOf(object, byId) }));
+  const groups = new Map<string, InteractiveCanvasObject[]>();
+  for (const { object, text } of withDetail) (groups.get(text) ?? groups.set(text, []).get(text)!).push(object);
+  for (const group of groups.values()) group.sort(readingOrder);
   const notes = boardNotes(document);
-  return withDetail.map(({ object, detail, section }) => {
+  return withDetail.map(({ object, detail, text, section }) => {
     const neighbors = [...new Set(
       [...(neighborIds.get(object.id) ?? [])]
         .map((id) => byId.get(id))
@@ -220,12 +237,14 @@ export function detailSubjects(document: InteractiveCanvasDocument): DetailSubje
     )].sort().slice(0, MAX_NEIGHBORS);
     const wired = neighborIds.get(object.id);
     const name = nameOf(object);
-    // The same words on a box with another name state a fact about that box
-    // ("later" on both `schedule` and `webhook`), so they never make this
-    // detail redundant. The same words on a box with the same name do.
+    // A detail is redundant only when its fact is in a note, a wire label or
+    // a detail with other text. Its own copies never count: copies that each
+    // saw the others were all removed together, and the fact with them (five
+    // `agent_runs row` boxes each saying `pi_session_id`). Leaving them out
+    // also keeps this question, and its cached verdict, the same when a copy
+    // is cleared.
     const near = (other: (typeof withDetail)[number]) =>
-      (other.section === section || wired?.has(other.object.id) === true)
-      && !(other.detail === detail && nameOf(other.object) !== name);
+      (other.section === section || wired?.has(other.object.id) === true) && other.text !== text;
     const otherDetails: string[] = [];
     let total = 0;
     for (const other of withDetail.filter((other) => other.object !== object && near(other))) {
@@ -243,8 +262,39 @@ export function detailSubjects(document: InteractiveCanvasDocument): DetailSubje
       neighbors,
       wireLabels: [...(wireLabels.get(object.id) ?? [])].sort().slice(0, MAX_WIRE_LABELS),
       otherDetails,
+      sameDetail: groups.get(text)!.map((member) => member.id),
       notes,
     };
+  });
+}
+
+/**
+ * The details to remove: each subject whose verdict is a removal, except that
+ * a fact stated in several details always survives in one of them. For each
+ * group of details with the same text, the first in reading order is never a
+ * finding, and the later ones are findings only when the first one's own
+ * verdict is known and keeps it. When Jev would remove the first one too,
+ * clearing the later ones now would leave it alone, and the next check would
+ * remove it: every copy gone over two checks. So that group has no finding.
+ * Clearing a later copy changes no other copy's question (they never see each
+ * other), so it never turns the first one's keep into a remove.
+ */
+export function detailRemovals(
+  subjects: readonly DetailSubject[],
+  verdicts: ReadonlyMap<string, DetailVerdict>,
+): Array<{ subject: DetailSubject; verdict: DetailVerdict }> {
+  const byId = new Map(subjects.map((subject) => [subject.id, subject]));
+  const verdictOf = (subject: DetailSubject | undefined) => subject && verdicts.get(detailKey(subject));
+  return subjects.flatMap((subject) => {
+    const verdict = verdictOf(subject);
+    if (!isRemoval(verdict)) return [];
+    const [first] = subject.sameDetail;
+    if (subject.sameDetail.length > 1 && first !== undefined) {
+      if (first === subject.id) return [];
+      const kept = verdictOf(byId.get(first));
+      if (kept === undefined || isRemoval(kept)) return [];
+    }
+    return [{ subject, verdict }];
   });
 }
 

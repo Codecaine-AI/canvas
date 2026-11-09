@@ -56,8 +56,8 @@ import {
 import {
   DETAIL_REMOVE_THRESHOLD,
   detailKey,
+  detailRemovals,
   detailSubjects,
-  isRemoval,
   judgeDetails,
   type DetailJudgement,
   type DetailSubject,
@@ -434,7 +434,7 @@ function detailLine(
   spent: { asked: number; input_tokens: number },
 ): string {
   if (subjects.length === 0) return "DETAIL · no node details to judge";
-  const removals = subjects.filter((subject) => isRemoval(judgement.verdicts.get(detailKey(subject)))).length;
+  const removals = detailRemovals(subjects, judgement.verdicts).length;
   // Cached: current details the last round answered from the cache.
   const cached = Math.max(0, subjects.length - judgement.asked);
   return `DETAIL · Jev judged ${plural(subjects.length, "node detail")}`
