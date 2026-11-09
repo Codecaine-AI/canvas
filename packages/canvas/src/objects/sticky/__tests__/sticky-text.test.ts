@@ -5,11 +5,11 @@ import {
   STICKY_CODE_PADDING_X_EM,
   stickyTextUncovered,
 } from "../sticky-text";
-import { measureWidth } from "../../theme/text-measure";
-import { renderDocumentToSvg } from "../static-svg";
-import { insetBodyPaddingPx } from "../../objects/text-slots";
-import { canvasThemePreset, FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
-import type { InteractiveCanvasDocument } from "../../state/schema";
+import { measureWidth } from "../../../theme/text-measure";
+import { renderDocumentToSvg } from "../../../render/static-svg";
+import { insetBodyPaddingPx } from "../../text-slots";
+import { canvasThemePreset, FIGJAM_CANVAS_STYLE } from "../../../theme/canvas-style";
+import type { InteractiveCanvasDocument } from "../../../state/schema";
 
 /** These cases pin the figjam note: 24px body text on a 36px pitch. */
 const BODY_FONT_SIZE_PX = FIGJAM_CANVAS_STYLE.stickyFontSizePx;

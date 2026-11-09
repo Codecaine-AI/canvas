@@ -59,9 +59,10 @@
  *    keeping their exact relative geometry — an off-grid child of an off-grid
  *    frame stays where it was put relative to the frame)
  */
+import { AGENT_GRID } from "../../state/geometry";
 
-/** The grid every number the agent writes to board geometry lands on. */
-export const AGENT_GRID = 20;
+/** The grid every number the agent writes to board geometry lands on (defined in state/geometry.ts). */
+export { AGENT_GRID };
 
 /**
  * Rounds one world coordinate to the nearest grid multiple. Ties round up

@@ -25,7 +25,7 @@
  * @codecaine-ai/text-measure (theme/text-measure.ts: Pretext line breaking
  * over the active measuring backend, the faces the stage and resvg paint),
  * names wrap the way the stage's pre-wrap / break-word slot does, sticky
- * text lays out as its markdown line boxes (render/sticky-text.ts mirroring
+ * text lays out as its markdown line boxes (objects/sticky/sticky-text.ts mirroring
  * objects/sticky/markdown.tsx), and the
  * types whose live defs draw custom inline-SVG silhouettes
  * (predefined-process) draw the same silhouette geometry here. Icon objects
@@ -125,7 +125,7 @@ import type {
   InteractiveCanvasObject,
 } from "../state/schema";
 import { STICKY_MARKDOWN_MONO_FONT_WEIGHT } from "../objects/sticky/markdown-editing";
-import { ellipsizeStickyRow, layoutStickyText } from "./sticky-text";
+import { ellipsizeStickyRow, layoutStickyText } from "../objects/sticky/sticky-text";
 import { asDrawn } from "../objects/sticky/note-fit";
 import type { RenderDocumentToSvg, RenderStaticSvgOptions, RenderedSvg } from "./types";
 
@@ -487,7 +487,7 @@ function polygonPointsAttribute(points: CanvasPoint[]): string {
 }
 
 // ---------------------------------------------------------------------------
-// Sticky markdown — line boxes from render/sticky-text.ts (which mirrors the
+// Sticky markdown — line boxes from objects/sticky/sticky-text.ts (which mirrors the
 // live StickyMarkdown renderer), emitted as one <text> plus code-chip
 // background rects. Only the geometry-bearing pieces are exact; the chip
 // visuals approximate the live CSS tastefully (same tint, radius, size).
@@ -598,7 +598,7 @@ const STICKY_CODE_CHIP_HEIGHT_EM = 1.3;
  * Sticky body text as its markdown line stack: per-line font size/weight,
  * bullet glyph columns, depth indentation and the style's line pitch mirroring the
  * live StickyMarkdown layout, each line wrapped as its mixed inline runs
- * (render/sticky-text.ts). Rows beyond the slot's height clamp are dropped
+ * (objects/sticky/sticky-text.ts). Rows beyond the slot's height clamp are dropped
  * and the last visible row ellipsized — the same overflow the live
  * -webkit-line-clamp shows.
  */

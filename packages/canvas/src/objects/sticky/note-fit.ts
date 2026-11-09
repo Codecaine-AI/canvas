@@ -19,8 +19,8 @@
  */
 import type { CanvasGeometry, InteractiveCanvasObject } from "../../state/schema";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../theme/canvas-style";
-import { layoutStickyText } from "../../render/sticky-text";
-import { AGENT_GRID } from "../../session/tools/grid";
+import { layoutStickyText } from "./sticky-text";
+import { AGENT_GRID } from "../../state/geometry";
 import { INSET_BODY_TEXT_SLOT, insetBodyPaddingPx, resolveTextSlot, slotLineHeightPx } from "../text-slots";
 
 /**

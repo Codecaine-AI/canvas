@@ -71,7 +71,7 @@ import {
 import {
   layoutStickyText,
   stickyTextUncovered,
-} from "../render/sticky-text.ts";
+} from "../objects/sticky/sticky-text.ts";
 import {
   belowBandMaxWidthPx,
   detailFontSpec,

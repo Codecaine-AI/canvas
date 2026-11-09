@@ -32,8 +32,8 @@ import {
   STICKY_MARKDOWN_MONO_FONT_WEIGHT,
   stickyHeadingEm,
   type StickyMarkdownInlineToken,
-} from "../objects/sticky/markdown-editing";
-import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK } from "../theme/fonts";
+} from "./markdown-editing";
+import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK } from "../../theme/fonts";
 import {
   graphemeClusters,
   measureLineWidth,
@@ -42,7 +42,7 @@ import {
   wrapRuns,
   type FontSpec,
   type TextRun,
-} from "../theme/text-measure";
+} from "../../theme/text-measure";
 
 /** Heading rows render bold (markdown.tsx renderLine: fontWeight 700). */
 const HEADING_FONT_WEIGHT = 700;
