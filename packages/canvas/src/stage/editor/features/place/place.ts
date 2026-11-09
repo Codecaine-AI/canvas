@@ -12,7 +12,9 @@ import {
   type CanvasAction,
   type CanvasTool,
 } from "../../../../state/actions";
-import { normalizeBounds, type CanvasBounds, type CanvasPoint } from "../../../../state/geometry";
+import { normalizeBounds, snapGeometry, type CanvasBounds, type CanvasPoint } from "../../../../state/geometry";
+import { fittedNoteGeometry } from "../../../../objects/sticky/note-fit";
+import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../../../theme/canvas-style";
 import type {
   CanvasColor,
   CanvasGeometry,
@@ -65,6 +67,8 @@ type PlaceOverlay = {
 
 type PlaceContext = {
   stickyPlacement?: boolean;
+  /** Workspace style: a card note is created at the height its text needs. Default when omitted. */
+  canvasStyle?: CanvasStyle;
   lastPickedColor?: Readonly<Record<ReturnType<typeof colorKindForType>, CanvasColor>>;
 };
 
@@ -150,6 +154,24 @@ export function objectTypeForTool(tool: CanvasTool): InteractiveCanvasObjectType
 export const MIN_PLACE_DRAG_SIZE = 24;
 
 /**
+ * The geometry fields of a Studio canvas.addObject (a place gesture, the
+ * context menu's Add). A card note is snapped here, then fitted to the
+ * height its text needs (objects/sticky/note-fit.ts) and sent unsnapped, so
+ * the reducer's 16px snap cannot move that height. Everything else is left
+ * to the reducer's snap.
+ */
+export function placementGeometry(
+  objectType: InteractiveCanvasObjectType,
+  geometry: CanvasGeometry,
+  text: string | undefined,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): { geometry: CanvasGeometry; snap?: false } {
+  const snapped = snapGeometry(geometry);
+  const fitted = fittedNoteGeometry(draftPlacedObject(objectType, snapped, { text }), canvasStyle);
+  return fitted === snapped ? { geometry } : { geometry: fitted, snap: false };
+}
+
+/**
  * Sizes/positions the ghost preview (and eventual created object) for a place
  * gesture: below the drag threshold it's the default-size box centered on the
  * start point (so a plain click still shows/creates a sensible default-sized
@@ -195,14 +217,13 @@ export function stepFromPlace(
   }
 
   if (event.type === "up") {
-    const geometry = placeGeometryFor(state);
     return {
       state: { kind: "idle" },
       dispatch: [
         {
           type: "canvas.addObject",
           objectType: state.objectType,
-          geometry,
+          ...placementGeometry(state.objectType, placeGeometryFor(state), state.variant?.text, ctx.canvasStyle),
           // Catalog-entry variant (Shapes panel pick): orientation, Advanced
           // glyph, and glyph-name text ride along so the created object
           // matches the picked entry, not just its bare type.

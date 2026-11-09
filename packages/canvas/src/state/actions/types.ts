@@ -137,6 +137,8 @@ export type CanvasAction =
        * blank) or the optional header icon for `objectType: "section"`.
        */
       icon?: CanvasIconGlyph;
+      /** false: store `geometry` as given (a card note already fitted to its text), not snapped to the grid. */
+      snap?: boolean;
     }
   | { type: "canvas.duplicateSelection" }
   | {

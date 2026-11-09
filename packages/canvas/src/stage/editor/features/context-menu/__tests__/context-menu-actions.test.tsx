@@ -281,3 +281,18 @@ describe("CanvasContextMenu board export", () => {
     expect(screen.queryByRole("menu", { name: "Canvas context menu" })).toBeNull();
   });
 });
+
+describe("CanvasContextMenu Add sticky", () => {
+  it("adds a card note as tall as its empty text (default schematic theme), unsnapped", () => {
+    const dispatch = mock((_action: CanvasAction) => {});
+    render(<ContextMenuHarness object={processObject} dispatch={dispatch} />);
+    fireEvent.contextMenu(screen.getByRole("button", { name: "Open canvas menu" }), { clientX: 200, clientY: 200 });
+
+    fireEvent.click(screen.getByRole("menuitem", { name: "Add sticky" }));
+
+    const action = dispatch.mock.calls.at(-1)?.[0];
+    expect(action).toMatchObject({ type: "canvas.addObject", objectType: "sticky", snap: false });
+    // 14px padding + one 24px row + 14px padding = 52, on the 20 grid: 60.
+    expect(action?.type === "canvas.addObject" ? action.geometry?.height : undefined).toBe(60);
+  });
+});
