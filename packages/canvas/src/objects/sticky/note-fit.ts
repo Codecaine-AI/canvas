@@ -12,8 +12,10 @@
  * editor and Inspector text field (noteTextPatch), and Studio's resize
  * gesture (stage/editor/features/selection/resize.ts). A resize keeps a
  * dragged height at or above the needed one; every other write sets it
- * exactly, so a note shrinks as well as grows. fitNotesToText fits a whole
- * board once, for migrating boards written before this rule.
+ * exactly, so a note shrinks as well as grows. Studio's place gesture and
+ * context-menu Add create a note at its fitted height. fitNotesToText fits a
+ * whole board once, for migrating boards written before this rule; the
+ * editor runs it when the sticky text style changes (noteTextStyleKey).
  *
  * A paper sticky (figjam, stickyStyle "paper") keeps its square paper and is
  * never fitted.
@@ -112,4 +114,14 @@ export function fitNotesToText(
   if (!changed) return document;
   const fitted = { ...document, objects };
   return grew ? settleSections(fitted, fittedNoteParents(document, fitted)) : fitted;
+}
+
+/**
+ * A key over the style tokens a note's fitted height reads: every `sticky*`
+ * token (style, font, line, padding, heading scale). The editor refits the
+ * board's notes when it changes (InteractiveCanvasEditor), and only then: a
+ * color edit or a font-backend switch on open leaves the board as it is.
+ */
+export function noteTextStyleKey(canvasStyle: CanvasStyle): string {
+  return JSON.stringify(Object.entries(canvasStyle).filter(([key]) => key.startsWith("sticky")));
 }
