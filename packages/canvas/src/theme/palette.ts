@@ -298,11 +298,15 @@ function readableOn(text: string, background: string): string {
 }
 
 /**
- * Ink weight of an `ink-card` shape fill over the card fill. Strong enough
- * that a colored node reads as its hue in a whole-board PNG, light enough
- * that the ink border still reads at 3:1 and the text color at 4.5:1 on it.
+ * Ink weight of an `ink-card` shape fill over the card fill. A node is the
+ * figure and every section is ground, so the node stays lighter than the
+ * lightest layer-cake level of any hue (a top-level section paints 0.19):
+ * at 0.20 a teal node on a teal section matched it (OKLab 0.018), and a
+ * lavender node sat at the gray section's lightness. 0.08 keeps a hue
+ * wash the ink border names, with the text at 4.5:1 and more on it.
+ * Picked over a node shadow and lighter sections (UI climb round 1).
  */
-const SHAPE_CARD_INK_WEIGHT = 0.2;
+const SHAPE_CARD_INK_WEIGHT = 0.08;
 
 /** Colors whose `ink-card` shape stays the plain card: their ink is a neutral, so a mix would only gray the card. */
 const NEUTRAL_SHAPE_COLORS: ReadonlySet<CanvasColor> = new Set(["gray", "white"]);

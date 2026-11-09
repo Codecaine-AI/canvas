@@ -248,12 +248,25 @@ describe("layer-cake sections", () => {
 describe("schematic shapes, icons, stickies, connectors", () => {
   it("light ink-card shapes: the ink mixed into the card fill, ink border, theme text", () => {
     expect(LIGHT.shapeFill).toBe("ink-card");
-    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#C9DCE4", border: "#0B6E99", text: "#1F1F1F" });
+    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#E5EDEF", border: "#0B6E99", text: "#1F1F1F" });
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
       const paint = resolveShapePaint(color, LIGHT);
-      expect(paint.fill).toBe(mixColors(LIGHT.palette[color], LIGHT.cardFill, 0.2));
+      expect(paint.fill).toBe(mixColors(LIGHT.palette[color], LIGHT.cardFill, 0.08));
       expect(paint.border).toBe(LIGHT.palette[color]);
-      expect(oklabDistance(paint.fill, LIGHT.cardFill)).toBeGreaterThanOrEqual(0.04);
+      expect(paint.fill).not.toBe(LIGHT.cardFill);
+    }
+  });
+
+  it("light preset: a node stands lighter than every section level it can sit in, its own hue included", () => {
+    const sectionColors = CANVAS_COLORS.filter((color) => color !== "white");
+    for (const nodeColor of CANVAS_COLORS) {
+      const node = oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill);
+      for (const sectionColor of sectionColors) {
+        for (const depth of [2, 3, 4, 5]) {
+          const section = oklabLightness(resolveSectionPaint(sectionColor, depth, LIGHT).fill);
+          expect(node - section).toBeGreaterThanOrEqual(0.025);
+        }
+      }
     }
   });
 

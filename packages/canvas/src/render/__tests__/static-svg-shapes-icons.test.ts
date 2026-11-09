@@ -80,7 +80,7 @@ describe("static shapes: card vs tint paint", () => {
 
   it("schematic shapes are cards: the theme's card paint, ink border at the theme's width, the style's name color and weight", () => {
     // schematic-light mixes the ink into the card (ink-card); schematic-dark keeps the plain card.
-    const expectedFill = { "schematic-light": mixColors("#0B6E99", "#F8F8F7", 0.2), "schematic-dark": "#32363E" };
+    const expectedFill = { "schematic-light": mixColors("#0B6E99", "#F8F8F7", 0.08), "schematic-dark": "#32363E" };
     for (const theme of ["schematic-light", "schematic-dark"] as const) {
       const style = canvasThemePreset(theme);
       const fill = resolveShapePaint("blue", style).fill;
