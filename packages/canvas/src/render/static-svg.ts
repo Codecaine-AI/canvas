@@ -62,6 +62,7 @@ import {
   resolveConnectorPaint,
   resolveIconPaint,
   resolveIconTilePaint,
+  resolveLabelChipBorder,
   resolveSectionPaint,
   resolveShapePaint,
   resolveStickyPaint,
@@ -1345,7 +1346,7 @@ function renderConnector(
         height: chip.height,
         rx: canvasStyle.labelChipCornerRadiusPx,
         fill: canvasStyle.connectorLabelBackground,
-        stroke: canvasStyle.hairlineColor,
+        stroke: resolveLabelChipBorder(canvasStyle),
         "stroke-width": CONNECTION_LABEL_CHIP.borderWidthPx,
       }),
       tag(

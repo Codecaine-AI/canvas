@@ -254,7 +254,7 @@ describe("connector label chip per theme", () => {
     expect(Number(rect.getAttribute("width"))).toBe(width);
     expect(rect.getAttribute("height")).toBe("26");
     expect(rect.getAttribute("fill")).toBe("#FDFDFD");
-    expect(rect.getAttribute("stroke")).toBe("#E6E5E3");
+    expect(rect.getAttribute("stroke")).toBe("#C0BFBC"); // the hairline 30% toward the gray ink: 1.8:1 on the chip
     const text = container.querySelector('[data-canvas-connection-label="edge"] text')!;
     expect(text.getAttribute("font-family")).toContain("IBM Plex Mono");
     expect(text.getAttribute("fill")).toBe("#2A2A2A");
@@ -263,7 +263,7 @@ describe("connector label chip per theme", () => {
 
     const svg = staticSvg("schematic-light");
     const chip = [...svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>HTTP<\/text>/g)][0]!;
-    expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.61", height: "26", fill: "#FDFDFD", stroke: "#E6E5E3" });
+    expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.61", height: "26", fill: "#FDFDFD", stroke: "#C0BFBC" });
     expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#2A2A2A", "font-size": "14", "font-weight": "600" });
   });
 

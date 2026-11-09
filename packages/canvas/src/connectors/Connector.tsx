@@ -13,7 +13,7 @@ import { connectorBendSegments } from "./bend-editing";
 import { placedLabelPoint, routedConnectionIn } from "./label-placement";
 import { connectorDashArray } from "./def";
 import { CONNECTION_LABEL_CHIP, connectionLabelChipMetrics } from "./label-chip";
-import { resolveConnectorPaint } from "../theme/palette";
+import { resolveConnectorPaint, resolveLabelChipBorder } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { CANVAS_MONO_FONT_STACK } from "../theme/fonts";
 import { stageMarkColors } from "../theme/canvas-style";
@@ -128,7 +128,7 @@ export function Connector({
             height={chip.height}
             rx={canvasStyle.labelChipCornerRadiusPx}
             fill={canvasStyle.connectorLabelBackground}
-            stroke={canvasStyle.hairlineColor}
+            stroke={resolveLabelChipBorder(canvasStyle)}
             strokeWidth={CONNECTION_LABEL_CHIP.borderWidthPx}
           />
           <text

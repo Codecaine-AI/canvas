@@ -13,6 +13,7 @@ import {
   resolveConnectorStroke,
   resolveIconPaint,
   resolveInk,
+  resolveLabelChipBorder,
   resolveSectionColors,
   resolveSectionPaint,
   resolveShapeColors,
@@ -325,6 +326,15 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(oklabLightness(resolveInk("orange", LIGHT))).toBeGreaterThan(0.6);
     // Text-step hues keep the ink tile.
     expect(resolveIconPaint("teal", LIGHT).tileFill).toBe(resolveInk("teal", LIGHT));
+  });
+
+  it("label chip edge: figjam keeps the hairline; schematic edges read at least 1.6:1 on the chip", () => {
+    expect(resolveLabelChipBorder(FIGJAM_CANVAS_STYLE)).toBe(FIGJAM_CANVAS_STYLE.hairlineColor);
+    for (const style of [LIGHT, DARK]) {
+      const edge = resolveLabelChipBorder(style);
+      expect(contrastRatio(edge, style.connectorLabelBackground)).toBeGreaterThanOrEqual(1.6);
+      expect(contrastRatio(edge, style.connectorLabelBackground)).toBeGreaterThan(contrastRatio(style.hairlineColor, style.connectorLabelBackground));
+    }
   });
 
   it("text-step anchors stroke in the palette color itself", () => {

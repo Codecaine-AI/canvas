@@ -621,6 +621,24 @@ function stickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
   return { fill, border: null, rule: null, text, shadow: true, cardShadow: null };
 }
 
+/**
+ * A connector label chip's edge. Figjam: the hairline. Layer-cake modes: the
+ * hairline moved LABEL_CHIP_BORDER_INK_WEIGHT of the way to the gray ink, as
+ * the design system's border.strong moves the default border toward gray.
+ * The hairline (#E6E5E3) sits at 1.24:1 on the page-colored chip, so a chip
+ * between sections read as a gap in its line, not a tag (UI climb round 2:
+ * boards 08, 09, 11, 13, 14, h1, h2, h5); the edge now reads 1.8:1.
+ */
+export function resolveLabelChipBorder(style: CanvasStyle): string {
+  if (style.sectionFill !== "layer-cake") return style.hairlineColor;
+  return cachedPaint(style, "label-chip-border", () => ({
+    border: mixColors(resolveInk("gray", style), style.hairlineColor, LABEL_CHIP_BORDER_INK_WEIGHT),
+  })).border;
+}
+
+/** Gray ink weight in a layer-cake label chip edge (resolveLabelChipBorder). */
+const LABEL_CHIP_BORDER_INK_WEIGHT = 0.3;
+
 /** Connector stroke = the ink. */
 export function resolveConnectorPaint(color: CanvasColor, style: CanvasStyle): ConnectorPaint {
   return cachedPaint(style, `connector|${color}`, () => ({ stroke: resolveInk(color, style) }));
