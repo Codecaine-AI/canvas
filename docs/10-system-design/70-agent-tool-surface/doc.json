@@ -199,9 +199,63 @@
           "attributes": {
             "bold": true
           }
-        },
+        }
+      ],
+      "children": [
+        "b-overview-step-read-9a",
+        "b-overview-step-read-9b",
+        "b-overview-step-read-9c",
+        "b-overview-step-read-9d"
+      ]
+    },
+    "b-overview-step-read-9a": {
+      "id": "b-overview-step-read-9a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
-          "insert": " Twenty-five typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool. Creation is per-kind and carries only what the UI's creation gesture carries, so a placement is a bare payload and everything else about the placed object comes from defaults. The exceptions travel with the name: place_shape and place_section may carry the one-line detail, and place_section may also carry a header icon for the section's title chip. The closed shape-and-icon type roster folds icon glyphs in under their own names. The roster intentionally gives bare type names, with icon glyphs and colors enumerated one per line, and geometry the agent writes lands on its own 20 grid."
+          "insert": "Twenty-five typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-step-read-9b": {
+      "id": "b-overview-step-read-9b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Creation is per-kind and carries only what the UI's creation gesture carries, so a placement is a bare payload and everything else about the placed object comes from defaults."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-step-read-9c": {
+      "id": "b-overview-step-read-9c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The exceptions travel with the name: place_shape may carry the one-line detail, and place_section may carry a header icon for the section's title chip."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-step-read-9d": {
+      "id": "b-overview-step-read-9d",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The closed shape-and-icon type roster folds icon glyphs in under their own names, gives bare type names with icon glyphs and colors one per line, and the geometry the agent writes lands on its own 20 grid."
         }
       ],
       "children": []
@@ -401,7 +455,7 @@
       },
       "text": [
         {
-          "insert": "The other two, label-is-prose and detail-too-long, hold object text to the name and detail convention. A shape, icon, or section name stays a few words on one line, its detail holds one short fact, and prose goes on a sticky."
+          "insert": "The other two, label-is-prose and detail-too-long, hold object text to the name and detail convention. A shape, icon, or section name stays a few words on one line, a shape's or icon's detail holds one short fact, and prose goes on a sticky."
         }
       ],
       "children": []

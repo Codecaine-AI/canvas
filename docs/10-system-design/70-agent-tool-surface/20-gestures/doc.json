@@ -251,7 +251,7 @@
       },
       "text": [
         {
-          "insert": "place_section({ id: Id, text: string, at: Point, size?: Size, detail?: string,\n                icon?: string, color?: Color })\nplace_sticky ({ id: Id, text: string, at: Point })\nplace_shape  ({ id: Id, type: ShapeType | Glyph, at: Point,\n                text?: string, detail?: string, color?: Color })\n\nclone({ sourceId: Id, id: Id, at?: Point, by?: Point, text?: string, detail?: string })\n\nconnect({ id: Id, from: Endpoint, to: Endpoint,\n          label?: string, style?: LineStyle, arrow?: Arrow, color?: Color })"
+          "insert": "place_section({ id: Id, text: string, at: Point, size?: Size,\n                icon?: string, color?: Color })\nplace_sticky ({ id: Id, text: string, at: Point })\nplace_shape  ({ id: Id, type: ShapeType | Glyph, at: Point,\n                text?: string, detail?: string, color?: Color })\n\nclone({ sourceId: Id, id: Id, at?: Point, by?: Point, text?: string, detail?: string })\n\nconnect({ id: Id, from: Endpoint, to: Endpoint,\n          label?: string, style?: LineStyle, arrow?: Arrow, color?: Color })"
         }
       ],
       "children": []
@@ -446,7 +446,7 @@
           }
         },
         {
-          "insert": " is the make-another-one-of-these shortcut. The copy inherits the source's kind, size, color, shape type, direction, glyph, detail line, and border style, so a row of options matches without a number being re-specified. An icon's glyph and a section's header icon are the same field, so the copy carries either. Exactly one of "
+          "insert": " is the make-another-one-of-these shortcut. The copy inherits the source's kind, size, color, shape type, direction, glyph, detail line on a shape or icon, and border style, so a row of options matches without a number being re-specified. An icon's glyph and a section's header icon are the same field, so the copy carries either. Exactly one of "
         },
         {
           "insert": "at",

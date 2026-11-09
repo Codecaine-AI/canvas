@@ -22,6 +22,7 @@
       "children": [
         "b-section-body-2",
         "b-section-frame-3",
+        "b-section-color-6",
         "b-section-code-4",
         "b-section-canvas-5"
       ]
@@ -111,7 +112,36 @@
       "props": {},
       "text": [
         {
-          "insert": "On the live board, the section's text renders as the title in its header chip. An optional icon, which can be any glyph, opens the chip, and an optional one-fact detail closes it. The chip is not a separate object. Give the title and content clear air, and repeat one deliberate gap through each group. A section keeps exactly the geometry it is given. When the region is finished, fit_section closes that one section around the children already inside it and leaves every other section alone. Sections do the grouping: every idea has a home, and each section is an addressable, linkable unit. Nest sections for hierarchy."
+          "insert": "On the live board, the section's text renders as the title in its header chip. An optional icon, which can be any glyph, opens the chip, and a section has no detail line. The chip is not a separate object. Give the title and content clear air, and repeat one deliberate gap through each group. A section keeps exactly the geometry it is given. When the region is finished, fit_section closes that one section around the children already inside it and leaves every other section alone. Sections do the grouping: every idea has a home, and each section is an addressable, linkable unit. Nest sections for hierarchy."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-6": {
+      "id": "b-section-color-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Give each top-level section its own hue, and never give a nested section its parent's color, so each level of the hierarchy reads. "
+        },
+        {
+          "insert": "place_section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " without a color picks a hue that the parent section and the sections the new frame holds do not paint. An edit that would nest a section in its parent's color is refused. The "
+        },
+        {
+          "insert": "integrity",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lint reports such a nest on a stored board. The page frame, or a board's one root section, is exempt as a parent."
         }
       ],
       "children": []

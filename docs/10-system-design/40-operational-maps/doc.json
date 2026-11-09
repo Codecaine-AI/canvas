@@ -705,7 +705,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every shape, icon, and section carries a short name and at most one detail line. The name says what the thing is in about five words on one line. The detail is one muted fact under it, such as a port, path, version, model, or host, in 48 characters or fewer. Prose goes on a Markdown sticky beside its subject: the why, the how, caveats, and examples. Two lint warnings enforce it. "
+          "insert": "Every shape and icon carries a short name and at most one detail line, and a section carries a title only. The name says what the thing is in about five words on one line. The detail is one muted fact under it, such as a port, path, version, model, or host, in 48 characters or fewer. Prose goes on a Markdown sticky beside its subject: the why, the how, caveats, and examples. Two lint warnings enforce it. "
         },
         {
           "insert": "label-is-prose",

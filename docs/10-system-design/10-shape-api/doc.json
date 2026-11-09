@@ -1377,7 +1377,16 @@
       },
       "text": [
         {
-          "insert": "A section's detail renders inline in its header chip after the title, never in a text slot, and a sticky never paints one."
+          "insert": "A section has no detail line, so its header chip paints the title alone even when an older file stores a section "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". A sticky never paints one either."
         }
       ],
       "children": []
