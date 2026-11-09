@@ -391,7 +391,9 @@ describe("canvas.applyAgentPatch", () => {
     const next = apply(state, operations);
 
     const objectById = (id: string) => next.document.objects.find((object) => object.id === id)!;
-    expect("detail" in objectById("a")).toBe(false);
+    // A detail is never written, so its null clear is ignored too: the legacy
+    // value stays as stored, and no null lands in its place.
+    expect(objectById("a").detail).toBe(":5432");
     // toBeUndefined fails on null, so these also pin that no null was stored.
     expect(objectById("sec-1").icon).toBeUndefined();
     expect(next.document.connections[0]!.label).toBeUndefined();

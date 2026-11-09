@@ -22,7 +22,7 @@ import { reconcileSectionMembership } from "../state/section-membership";
 import { SECTION_AUTO_GROW_FIT } from "../state/section-grow";
 import { clearsAsUndefined } from "../state/actions/agent-patch";
 import { nextId } from "../state/actions/helpers";
-import { mergeObjectPatch, withNormalizedDetail } from "../state/actions/objects";
+import { mergeObjectPatch, withoutDetail } from "../state/actions/objects";
 
 import type { AgentPatchOperation } from "./protocol";
 import { snapRectOutward } from "./tools/grid";
@@ -103,13 +103,12 @@ export function applyOperationToDraft(
           touched: [object.id],
         };
       }
-      // `detail` follows the reducer's add rule (agent-patch.ts): an empty one,
-      // or one on a sticky, is no detail at all — so the draft and an accepted
-      // replay of it never disagree.
+      // A new object carries no `detail`, the reducer's add rule
+      // (agent-patch.ts), so the draft and an accepted replay never disagree.
       return {
         document: {
           ...document,
-          objects: [...document.objects, withNormalizedDetail({ ...object, parentId: null })],
+          objects: [...document.objects, withoutDetail({ ...object, parentId: null })],
         },
         summary: `${label} ${object.id}`,
         touched: [object.id],

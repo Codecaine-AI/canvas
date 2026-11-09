@@ -39,7 +39,7 @@ import type { InteractiveCanvasDocument } from "../schema";
 import { hasValidEndpoint, removeConnection } from "./connections";
 import { nextId } from "./helpers";
 import { withHistory } from "./history";
-import { mergeObjectPatch, withNormalizedDetail } from "./objects";
+import { mergeObjectPatch, withoutDetail } from "./objects";
 import type {
   CanvasAction,
   CanvasAgentPatchOperation,
@@ -95,11 +95,11 @@ function applyOperation(
       if (document.objects.some((object) => object.id === operation.object.id)) return;
       accumulator.document = {
         ...document,
-        // parentId is derived, never written — see module doc. `detail`
-        // follows the same write rule as updateObject (empty / sticky → none).
+        // parentId is derived, never written — see module doc. A new object
+        // carries no `detail`: a node shows its name only (withoutDetail).
         objects: [
           ...document.objects,
-          withNormalizedDetail({ ...operation.object, parentId: null }),
+          withoutDetail({ ...operation.object, parentId: null }),
         ],
       };
       accumulator.changedObjectIds.add(operation.object.id);
