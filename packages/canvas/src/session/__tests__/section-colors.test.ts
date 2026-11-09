@@ -3,18 +3,23 @@
  * reads (board/section-colors.ts). The tools prevent the break — place_section
  * picks a hue its parent does not paint, and every edit that would nest a
  * section in its own color is refused — and the integrity lint reports one a
- * Studio edit or an older file left behind. The page (the page frame, or a
- * board's one root section) is exempt.
+ * Studio edit or an older file left behind. Two sections look alike when
+ * they paint the same ink or the same fill. The page (the page frame, or a
+ * parentless section stored white) is exempt, and nothing else is.
  */
 import { describe, expect, test } from "bun:test";
 
 import { FINISHING_RULES } from "../../board/lints";
 import { runDiagnostics } from "../../board/lints/run";
-import { sectionHue } from "../../board/section-colors";
+import { sameHueNests, sectionHue } from "../../board/section-colors";
 import { PAGE_FRAME_ID } from "../../board/page-frame";
 import type { CanvasColor } from "../../state/schema/colors";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 import { canvasThemePreset } from "../../theme/canvas-style";
+import { resolveSectionPaint } from "../../theme/palette";
+import { createOpContext } from "../tools/operations/op-context";
+import { findOperationTool } from "../tools/operations";
+import { emitSessionEvent } from "..";
 import { makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 
@@ -154,18 +159,31 @@ describe("integrity reports a stored same-color nest", () => {
     expect(integrity(stored).map((finding) => finding.at)).toEqual([["rounds", "pack"]]);
   });
 
-  test("the page is exempt as a parent: the page frame, or a board's one root section", () => {
+  test("the page is exempt as a parent: the page frame, or a parentless white section", () => {
     const doc = makeDocument([
       section(PAGE_FRAME_ID, [0, 0, 2000, 1200], "white", null),
       section("a", [40, 40, 400, 300], "white", PAGE_FRAME_ID),
     ]);
     expect(integrity(doc)).toEqual([]);
+    // board()'s page is a parentless white section: its gray children are groups on a page.
+    expect(integrity(board())).toEqual([]);
+  });
+
+  test("an ordinary gray root is not the page, even as the board's only root", () => {
+    const doc = makeDocument([
+      section("ordinary", [0, 0, 1000, 800], "gray", null),
+      section("child", [80, 160, 400, 300], "gray", "ordinary"),
+    ]);
+    expect(integrity(doc).map((finding) => finding.at)).toEqual([["child", "ordinary"]]);
+  });
+
+  test("a second root never changes which nests count", () => {
     const stored = board();
     stored.objects[0] = { ...stored.objects[0]!, color: "gray" };
-    expect(integrity(stored)).toEqual([]);
-    // Two roots: neither is the page, so a nest under either counts.
-    stored.objects.push(section("other", [3000, 0, 400, 400], "gray", null));
-    expect(integrity(stored).map((finding) => finding.at)).toEqual([["pack", "page"], ["outside", "page"]]);
+    const nests = [["pack", "page"], ["outside", "page"]];
+    expect(integrity(stored).map((finding) => finding.at)).toEqual(nests);
+    stored.objects.push(section("other", [3000, 0, 400, 400], "white", null));
+    expect(integrity(stored).map((finding) => finding.at)).toEqual(nests);
   });
 
   test("on a dark layer-cake board white paints as gray, so white in gray is a nest, while the page stays exempt", () => {
@@ -176,5 +194,64 @@ describe("integrity reports a stored same-color nest", () => {
     doc.objects[2] = { ...doc.objects[2]!, color: "white" };
     expect(integrity(doc, canvasThemePreset("schematic-light"))).toEqual([]);
     expect(integrity(doc, dark).map((finding) => finding.at)).toEqual([["rounds", "pack"]]);
+  });
+});
+
+describe("the page identity is stable", () => {
+  test("a recolor that nests gray in an ordinary gray root is refused, even when it is the only root", () => {
+    const doc = makeDocument([
+      section("ordinary", [0, 0, 1000, 800], "gray", null),
+      section("child", [80, 160, 400, 300], "blue", "ordinary"),
+    ]);
+    const session = makeTestSession(doc, ["ordinary"]);
+    const result = runOp(session, "change_color", { id: "child", color: "gray" });
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("child would share gray with its parent section ordinary");
+  });
+
+  test("placing a second root does not turn an untouched nest into a refusal", () => {
+    const doc = makeDocument([
+      section("ordinary", [0, 0, 1000, 800], "gray", null),
+      section("child", [80, 160, 400, 300], "gray", "ordinary"),
+    ]);
+    const session = makeTestSession(doc, ["ordinary"]);
+    const result = runOp(session, "place_section", { id: "elsewhere", text: "Elsewhere", at: [1400, 0], size: { width: 400, height: 300 }, color: "green" });
+    expect(result.isError).toBeUndefined();
+  });
+});
+
+describe("sections that paint one fill look alike, whatever their names", () => {
+  /** schematic-light with no tint: every hue paints the same near-white fill. */
+  const flatTint = { ...canvasThemePreset("schematic-light"), sectionTintMax: 0 };
+
+  test("blue in gray is a nest when both paint one fill, and the report names the fill", () => {
+    expect(integrity(board())).toEqual([]);
+    const findings = integrity(board(), flatTint);
+    expect(findings.map((finding) => finding.at)).toEqual([["rounds", "pack"]]);
+    expect(findings[0]!.message).toBe("rounds shares one fill (blue in gray) with its parent section pack: nested levels must differ in color");
+    // The suggestion paints apart: white is the one fill left at zero tint.
+    expect(findings[0]!.suggestion).toBe("change_color rounds to another color, such as white");
+  });
+
+  test("place_section with no color picks one whose fill differs from its parent's", () => {
+    const doc = board();
+    doc.objects[2] = { ...doc.objects[2]!, color: "white" };
+    const session = makeTestSession(doc, ["page"]);
+    const result = findOperationTool("place_section")!.execute(
+      { id: "lenses", text: "Lenses", at: [100, 880], size: { width: 400, height: 120 } },
+      { currentSession: () => session, context: (draft) => createOpContext(draft, flatTint), emit: emitSessionEvent },
+    );
+    expect(result.isError).toBeUndefined();
+    expect(session.draft.objects.find((object) => object.id === "lenses")?.parentId).toBe("pack");
+    // Every hue paints the parent's fill at zero tint; only white paints apart.
+    expect(colorOf(session, "lenses")).toBe("white");
+    expect(resolveSectionPaint("white", 3, flatTint).fill).not.toBe(resolveSectionPaint("gray", 2, flatTint).fill);
+    expect(sameHueNests(session.draft, flatTint)).toEqual([]);
+  });
+
+  test("on the default theme a gray child of a gray parent is still a nest, though one tint step deeper", () => {
+    const stored = board();
+    stored.objects[2] = { ...stored.objects[2]!, color: "gray" };
+    expect(integrity(stored, canvasThemePreset("schematic-light")).map((finding) => finding.at)).toEqual([["rounds", "pack"]]);
   });
 });

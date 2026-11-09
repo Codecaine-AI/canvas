@@ -11,9 +11,10 @@
  *   textFitReport "overflows" verdict, definite. Stickies and sections do
  *   not auto-size; canvas_check's TEXT note names theirs;
  * - a child extending outside its section's rect;
- * - a section painted in its direct parent section's color, judged by the hue
- *   the renderer paints (section-colors.ts; the page is exempt), which
- *   place_section and every edit refuse to make;
+ * - a section that looks like its direct parent section: the same ink, or
+ *   the same fill the renderer paints (section-colors.ts; the page is
+ *   exempt), which place_section and every agent edit refuse to make. A
+ *   Studio recolor keeps the person's pick, so this reports it;
  * - a self-loop, dangling or zero-length wire (wire-integrity.ts);
  * - a wire whose drawn route runs through a box other than its ends, judged
  *   by the router's own check (routeThroughBoxIds), so lint and router agree.
@@ -22,7 +23,7 @@ import { routeThroughBoxIds } from "../../../connectors/routing";
 import { childrenOf, kindOf } from "../../helpers";
 import { textFitReport, type TextFitReport } from "../../text-fit";
 import { brokenWires } from "../../wire-integrity";
-import { otherSectionColor, sameHueNests } from "../../section-colors";
+import { sameHueNests, sharedLook } from "../../section-colors";
 import { rectOf } from "../geometry";
 
 import type { InteractiveCanvasObject } from "../../../state/schema";
@@ -111,8 +112,8 @@ export const rule: LayoutRule = {
         severity: "error",
         at: [nest.section, nest.parent],
         where: rectOf(byId.get(nest.section)!),
-        message: `${nest.section} shares ${nest.parentColor} with its parent section ${nest.parent}: nested levels must differ in color`,
-        suggestion: `change_color ${nest.section} to another color, such as ${otherSectionColor(nest.parentColor)}`,
+        message: `${nest.section} shares ${sharedLook(nest)} with its parent section ${nest.parent}: nested levels must differ in color`,
+        suggestion: `change_color ${nest.section} to another color, such as ${nest.suggestion}`,
       });
     }
 

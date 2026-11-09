@@ -26,7 +26,9 @@ import {
   type CanvasChangeSummary,
   type CanvasSelection,
   type CanvasTool,
+  type InteractiveCanvasState,
 } from "../../state/actions";
+import { withPlacedSectionColor } from "../../board/section-colors";
 import { fitBounds, type ViewportState } from "../viewport";
 import { CanvasStage } from "../CanvasStage";
 import { objectTypeForTool } from "./features/place/place";
@@ -138,10 +140,6 @@ export interface InteractiveCanvasEditorProps {
   canvasStyle?: Partial<CanvasStyle>;
 }
 
-function reducer(state: ReturnType<typeof createInteractiveCanvasState>, action: CanvasAction) {
-  return reduceInteractiveCanvasState(state, action);
-}
-
 function selectedObjectIds(selection: CanvasSelection): string[] {
   return selection.kind === "objects" ? selection.objectIds : [];
 }
@@ -212,7 +210,18 @@ function InteractiveCanvasEditorBody({
 }: Omit<InteractiveCanvasEditorProps, "canvasStyle">) {
   // The provider InteractiveCanvasEditor mounts: exports render with it too.
   const resolvedCanvasStyle = useCanvasStyle();
-  const [state, dispatchCanvasAction] = useReducer(reducer, document, createInteractiveCanvasState);
+  // A section placed with no color takes one that reads apart from its parent
+  // section, the same chooser place_section uses (board/section-colors.ts).
+  // An Inspector recolor keeps the person's pick; integrity reports a nest.
+  const [state, dispatchCanvasAction] = useReducer(
+    (current: InteractiveCanvasState, action: CanvasAction) =>
+      reduceInteractiveCanvasState(
+        current,
+        withPlacedSectionColor(current.document, action, resolvedCanvasStyle, current.lastPickedColor.section),
+      ),
+    document,
+    createInteractiveCanvasState,
+  );
   const cameraOnlyRef = useRef(cameraOnly);
   cameraOnlyRef.current = cameraOnly;
   const dispatch = useCallback(

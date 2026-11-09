@@ -12,7 +12,7 @@ import { growSectionsToChildren, sectionOverflow } from "../../../state/section-
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
 import { newBrokenWires } from "../../../board/wire-integrity";
-import { otherSectionColor, sameHueNests } from "../../../board/section-colors";
+import { sameHueNests, sharedLook } from "../../../board/section-colors";
 import type { LayoutToolRenderResult } from "../runtime";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { OpContext, OpOutcome } from "./op-context";
@@ -221,8 +221,8 @@ export function runOperation<TFields extends OperationFields>(
       text: [
         `ERROR · ${spec.name} — refused: a nested section never shares its parent's color, so nothing changed`,
         ...newNests.map((nest) =>
-          `  - ${nest.section} would share ${nest.parentColor} with its parent section ${nest.parent}`
-          + ` — give ${nest.section} another color, such as ${otherSectionColor(nest.parentColor)}`),
+          `  - ${nest.section} would share ${sharedLook(nest)} with its parent section ${nest.parent}`
+          + ` — give ${nest.section} another color, such as ${nest.suggestion}`),
       ].join("\n"),
       details,
     };

@@ -94,9 +94,10 @@ export const placeSection = defineOperationTool({
     + "from geometry, so the frame adopts whatever its edges already cover, and "
     + "it keeps the footprint it lands with until something fits, arranges or "
     + "resizes it. Undrawn size takes the default section footprint. The header "
-    + "shows the optional icon and the title. Without a color it takes a hue its "
-    + "parent section does not paint (and, at the top level, one its sibling "
-    + "sections do not); a nested section never shares its parent's color.",
+    + "shows the optional icon and the title. Without a color it takes one that "
+    + "paints apart from its parent section and the sections it holds (and, at "
+    + "the top level, from its sibling sections); a nested section never shares "
+    + "its parent's color or painted fill.",
   fields: PlaceSectionParams.properties,
   validate: (ctx, p) => [
     ...ctx.requireFreeId(p.id),
