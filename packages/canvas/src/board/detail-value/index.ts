@@ -2,8 +2,8 @@
  * detail-value — does a node's one-line `detail` tell the reader anything?
  *
  * Every shape or icon with a detail becomes one Jev Choice question:
- * `keep` (the detail states a concrete fact the name, the section and the
- * wired neighbors do not) or `remove` (it restates, labels, or pads). The
+ * `remove` by default, `keep` only when the detail states an exact fact the
+ * name, the section, the wired neighbors and the board title do not. The
  * questions of one board go in one request (Jev evaluates them in parallel,
  * so a batch costs about one call), and every answer is cached by a hash of
  * what the question saw, so checking an unchanged node again costs nothing.
@@ -36,21 +36,23 @@ import {
 export const DETAIL_VALUE_MODEL = "jev-1.14.0";
 
 /** Bump when the question, the options, or the state shape changes. Part of every cache key. */
-export const DETAIL_PROMPT_VERSION = 3;
+export const DETAIL_PROMPT_VERSION = 5;
 
 /**
  * A `remove` verdict at or above this confidence is an error finding.
- * Confidence on a two-option Choice is |2p − 1|, so 0.5 means p(remove) ≥ 0.75.
- * Calibrated with prompt version 3 on 1,664 details from the 14 Archon boards
- * and 62 replay boards. It removes 3 of 230 Archon details, all filler
- * ("defined workflow" twice, "runs the bundle's agent"), and 85 of 1,434
- * replay details. On a 40-row hand-read sample, 11 of the 12 removals at
- * this cut were filler (the miss: "discard partial work", a side effect).
- * At 0.4 or 0.3 the cut also removes Archon command names ("workflow wake,
- * workflow signal", "archon workflow signal"), so it stays at 0.5 and leaves
- * the weaker filler ("agent applies findings", p 0.68) on the board.
+ * Confidence on a two-option Choice is |2p − 1|, so 0.4 means p(remove) ≥ 0.7.
+ * Calibrated with prompt version 5 against a hand label of all 230 details
+ * on the 14 Archon boards (Ford's bar: a detail stays only when it adds an
+ * exact fact found nowhere else on the board; 33 labeled remove). At this
+ * cut Jev removes 29: 22 of them the label's (precision 0.76, recall 0.67,
+ * 92% agreement). On a 40-row hand-labeled replay sample (34 remove) it
+ * scores precision 0.94, recall 0.85, and it removes 425 of 1,434 replay
+ * details. Its wrong removals are mostly plain-word commands that repeat the
+ * name ("workflow wake, workflow signal" under "Wake or signal"). At
+ * p ≥ 0.6 it removes 11 Archon keeps; at p ≥ 0.75 it has the same Archon
+ * agreement but replay sample recall drops to 0.79.
  */
-export const DETAIL_REMOVE_THRESHOLD = 0.5;
+export const DETAIL_REMOVE_THRESHOLD = 0.4;
 
 /** Questions per request. Each question is small; this keeps a request far under the 64k context. */
 const BATCH_SIZE = 40;
@@ -161,55 +163,60 @@ export function isRemoval(verdict: DetailVerdict | undefined): verdict is Detail
 }
 
 /**
- * The two options. `keep` comes first on purpose: Jev leans slightly toward
- * the first option (TypeSafe's jaggedness notes), and a wrongly kept detail
- * costs less than a deleted fact. Each option says what it covers, what it
- * does not, and gives examples from outside any real board, so the
- * calibration boards stay unseen.
+ * The two options. `remove` is the default and comes first: Jev leans
+ * slightly toward the first option (TypeSafe's jaggedness notes), and Ford's
+ * bar is that a detail stays only when it adds a fact that is nowhere else on
+ * the board. `keep` is narrow: an exact identifier or value, or a non-obvious
+ * condition stated precisely. Every example comes from outside any real
+ * board, so the calibration boards stay unseen.
  */
 const CRITERIA: JevChoiceQuestion["criteria"] = {
-  keep: {
-    what: "`node.detail` states a concrete, specific fact that a reader cannot get from `node.name`, `node.section` or `node.wired_to`.",
-    counts_as_a_fact: [
-      "a field, column, key or property name",
-      "a file path, module, table, endpoint, command or URL",
-      "a number: a limit, size, count, timeout, rate, port or version",
-      "a trigger, event name or schedule",
-      "a condition or cause: when or why it happens",
-      "a status, such as proposed, reserved, later or not in version 1",
-      "a payload, data shape, format or protocol",
-      "a named product, model, library or host",
-      "a variant that sets the box apart from sibling boxes of the same kind: inline or file, sync or async, local or remote, a mode or a source",
-    ],
-    examples: [
-      { name: "Orders table", detail: "status, total_cents" },
-      { name: "Rate limiter", detail: "100 req/min per key" },
-      { name: "Webhook handler", detail: "on invoice.paid" },
-      { name: "Session cache", detail: "Redis 7 · :6379" },
-      { name: "Export job", detail: "nightly 02:00 UTC" },
-      { name: "Retry skipped", detail: "card declined" },
-      { name: "Billing API", detail: "proposed · not in v1" },
-      { name: "Config", detail: "read from env, not a file" },
-      { name: "Email sender", detail: "async · queued" },
-    ],
-  },
   remove: {
-    what: "`node.detail` adds no concrete fact. A reader loses nothing if it is deleted.",
-    counts_as_no_fact: [
-      "it restates or paraphrases `node.name`",
-      "it repeats `node.section` or the name of a box in `node.wired_to`",
-      "it says in plain words what the box does, when the name already implies it",
-      "it describes the box's job in generic words that fit many systems",
-      "it says what kind of thing the box is, which its name already shows (a variant that sets it apart from its siblings is a fact, not a kind)",
-      "it is a slogan, a vague summary, decoration or filler",
+    what: "The default. `node.detail` does not earn its place: a reader loses no exact fact if it is deleted.",
+    counts_as_remove: [
+      "it says what the box does, its job or its role, in any words",
+      "it restates or paraphrases `node.name`, or is `node.name` with a prefix or suffix",
+      "it says what kind or category of thing the box is",
+      "it states a property the name already implies, such as an id being unique or a cancel step ending the run",
+      "it repeats `node.section`, `board_title`, or the name of a box in `node.wired_to`, or a count a reader can see from the wires",
+      "it is vague: a size, speed or status with no number or exact value, such as small, fast, grows over time or not measured",
+      "it is a slogan, a summary, decoration or filler",
     ],
     examples: [
       { name: "Auth service", detail: "handles authentication" },
-      { name: "Job queue", detail: "async processing" },
-      { name: "Dashboard", detail: "the main user view" },
+      { name: "Email worker", detail: "sends the outgoing emails" },
+      { name: "Image cache", detail: "a caching layer" },
+      { name: "user_id", detail: "the user's unique id" },
+      { name: "resize", detail: "image-resize" },
+      { name: "Fan-out", wired_to: ["Mobile push", "SMS", "Web push"], detail: "one of 3 channels" },
+      { name: "Upload bucket", detail: "small today, grows with use" },
+      { name: "Reject", detail: "stops the request" },
       { name: "Payment step", section: "Checkout", detail: "part of checkout" },
-      { name: "Router", detail: "routes requests to services" },
-      { name: "Content filter", detail: "safety layer" },
+    ],
+  },
+  keep: {
+    what: "`node.detail` states an exact fact that a reader cannot get from `node.name`, `node.section`, `node.wired_to` or `board_title`.",
+    counts_as_keep: [
+      "an exact identifier: a file path, file and line, package, table, column, field, key, event name, command or URL",
+      "a command a person or script types, even in plain words, such as a CLI subcommand",
+      "a value the system's own config reads: a step type, a mode, a flag, a join rule or a model tier",
+      "an exact value: a host, IP or port, a model id, a version, or a size, count, limit, timeout or threshold with its number",
+      "a schema, type, format or protocol name",
+      "the named product, library or machine it uses or runs on",
+      "its scope status: in version 1, later, proposed or not installed",
+      "a non-obvious condition or side effect stated precisely: when it runs, what it writes, what it skips",
+    ],
+    examples: [
+      { name: "Orders table", detail: "status, total_cents" },
+      { name: "Thumbnail worker", detail: "sharp 0.33 · max 4096 px" },
+      { name: "Session cache", detail: "Redis 7 · :6379" },
+      { name: "Config loader", detail: "src/config/load.ts" },
+      { name: "Roll back", detail: "fly releases rollback" },
+      { name: "Summarize", detail: "llm step · small tier · writes summary.md" },
+      { name: "Webhook handler", detail: "on invoice.paid" },
+      { name: "Export job", detail: "nightly 02:00 UTC" },
+      { name: "Billing API", detail: "proposed · not in v1" },
+      { name: "Retry", detail: "skipped when the card is declined" },
     ],
   },
 };
@@ -219,8 +226,8 @@ export function detailQuestion(subject: DetailSubject): JevChoiceQuestion {
   return {
     type: "choice",
     instructions: {
-      question: "Does `node.detail` give the reader a concrete fact that `node.name`, `node.section` and `node.wired_to` do not already give?",
-      context: "`node` is one box on a diagram titled `board_title`. `node.name` is the box's label. `node.detail` is the one small line printed under the label. `node.section` is the titled group the box sits in. `node.wired_to` lists the boxes connected to it by arrows.",
+      question: "Does `node.detail` earn its place on the board? Answer `remove` unless it states an exact fact that `node.name`, `node.section`, `node.wired_to` and `board_title` do not give.",
+      context: "`node` is one box on a diagram titled `board_title`. `node.name` is the box's label. `node.detail` is the one small line printed under the label. `node.section` is the titled group the box sits in. `node.wired_to` lists the boxes connected to it by arrows. A detail line costs the reader attention, so it stays only when it adds a fact.",
       node: {
         name: subject.name,
         detail: subject.detail,

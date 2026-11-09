@@ -91,7 +91,8 @@ function fakeJev(
         type: "choice",
         choice,
         probabilities: { keep: 1 - remove, remove },
-        confidence: Math.abs(2 * remove - 1),
+        // Rounded like Jev's own answers (p 0.7 comes back as confidence 0.4, not 0.3999…).
+        confidence: Math.round(Math.abs(2 * remove - 1) * 1000) / 1000,
       }];
     }));
     return Response.json({ model: body.model, answers, usage: { input_tokens: 700, output_tokens: 2 } });
@@ -113,16 +114,18 @@ describe("detail-value", () => {
 
     const line = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
 
-    expect(line).toBe("DETAIL · Jev judged 2 node details (2 asked, 0 cached) · 1 to remove (confidence ≥ 0.5) · 700 input tokens");
+    expect(line).toBe("DETAIL · Jev judged 2 node details (2 asked, 0 cached) · 1 to remove (confidence ≥ 0.4) · 700 input tokens");
     // Both questions went in one request, carrying the board, section, and wired neighbors.
     expect(jev.bodies).toHaveLength(1);
     expect(jev.bodies[0]!.state).toEqual({ board_title: "Shop checkout" });
     const sent = Object.values(jev.bodies[0]!.questions).map((question) => question.instructions.node);
     expect(sent).toContainEqual({ name: "Payment step", detail: "part of checkout", section: "Checkout", wired_to: ["Orders table"] });
-    expect(Object.keys(Object.values(jev.bodies[0]!.questions)[0]!.criteria)).toEqual(["keep", "remove"]);
-    // A variant that sets a box apart from its siblings (inline or file) counts as a fact.
-    const keep = Object.values(jev.bodies[0]!.questions)[0]!.criteria.keep as { counts_as_a_fact: string[] };
-    expect(keep.counts_as_a_fact).toContainEqual(expect.stringContaining("inline or file"));
+    // `remove` is the default: it is the first option, and the question keeps a detail only for an exact fact.
+    const question = Object.values(jev.bodies[0]!.questions)[0]!;
+    expect(Object.keys(question.criteria)).toEqual(["remove", "keep"]);
+    expect((question.instructions as unknown as { question: string }).question).toContain("Answer `remove` unless");
+    const remove = question.criteria.remove as { counts_as_remove: string[] };
+    expect(remove.counts_as_remove).toContainEqual(expect.stringContaining("what the box does"));
 
     const findings = detailFindings(file);
     expect(findings.map(({ severity, at, suggestion }) => ({ severity, at, suggestion })))
@@ -137,16 +140,18 @@ describe("detail-value", () => {
 
     // A re-check of the unchanged board asks nothing.
     const again = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
-    expect(again).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.5)");
+    expect(again).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.4)");
     expect(jev.bodies).toHaveLength(1);
   });
 
-  test("a remove below the confidence threshold is no finding", async () => {
-    const file = openCanvasFile(boardFile());
-    // p(remove) 0.7 is confidence 0.4, under the 0.5 cut.
-    const jev = fakeJev({ "part of checkout": 0.7 });
-    await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
-    expect(detailFindings(file)).toEqual([]);
+  test("a remove is a finding from p(remove) 0.7, and below it is none", async () => {
+    // p(remove) 0.7 is confidence 0.4, the cut; 0.65 is confidence 0.3, under it.
+    for (const [pRemove, findings] of [[0.7, 1], [0.65, 0]] as const) {
+      const file = openCanvasFile(boardFile());
+      const jev = fakeJev({ "part of checkout": pRemove });
+      await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
+      expect(detailFindings(file)).toHaveLength(findings);
+    }
   });
 
   const failing = (respond: () => Response) => (async () => respond()) as unknown as typeof fetch;
