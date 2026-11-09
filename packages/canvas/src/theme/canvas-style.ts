@@ -401,7 +401,7 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   shapeCornerRadiusPx: 2,
   processCornerRadiusPx: 12,
   shapeBorderWidthPx: 2,
-  sectionCornerRadiusPx: 2,
+  sectionCornerRadiusPx: 6,
   sectionBorderWidthPx: 1.5,
   titleChipCornerRadiusPx: 2,
   titleChipBorderWidthPx: 1.5,
@@ -442,16 +442,19 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   stickyStyle: "card",
   // A note is a secondary annotation: body text under the 17.5px names, a
   // 1.5 line pitch, headings at about the body size (bold carries them), a
-  // 3px ink rule and 4px corners. Picked from three variants on Archon
-  // boards 01 and 03 (callout card, tinted note, margin note): the card keeps
-  // ink on panel for contrast, and its hairline edge and rule read as a
-  // note, never a node (2px ink border, 12px corners) or a section.
+  // 3px neutral rule, a soft lift off the board (theme/palette.ts
+  // resolveStickyPaint) and the sections' 6px corners. Picked from three
+  // variants on Archon boards 01 and 03 (callout card, tinted note, margin
+  // note): the card keeps ink on panel for contrast, and its hairline edge,
+  // rule and lift read as a note, never a node (2px ink border, 12px
+  // corners) or a section. UI climb round 1: 4px note corners next to 2px
+  // section corners read as sharp; notes and sections now share 6px.
   stickyFontSizePx: 16,
   stickyLineHeightPx: 24,
   stickyPaddingXPx: 18,
   stickyPaddingTopPx: 14,
   stickyPaddingBottomPx: 14,
-  stickyCornerRadiusPx: 4,
+  stickyCornerRadiusPx: 6,
   stickyHeadingScale: 0.15,
   stickyRuleWidthPx: 3,
   ...schematicColors("light"),

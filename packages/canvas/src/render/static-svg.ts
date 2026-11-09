@@ -86,6 +86,7 @@ import {
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { resolveObjectStrokeWidth, resolveShapeCornerRadius } from "../theme/tokens";
 import { DEFAULT_CANVAS_STYLE, normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
+import { formatHex, parseColor } from "../theme/color-math";
 import { CANVAS_MONO_FONT_STACK_SVG, CANVAS_SANS_FONT_STACK_SVG } from "../theme/fonts";
 import { ellipsizeToWidth, wrapText } from "../theme/text-measure";
 import {
@@ -146,6 +147,16 @@ const CANVAS_FONT_FAMILY = CANVAS_SANS_FONT_STACK_SVG;
 
 /** Sticky shadow — mirrors STICKY_GEOMETRY.shadow ("0 3px 12px rgba(0,0,0,0.15)") in objects/sticky/def.tsx. */
 const STICKY_SHADOW = { dx: 0, dy: 3, stdDeviation: 6, opacity: 0.15 } as const;
+
+/**
+ * Card sticky lift — mirrors objects/sticky/def.tsx CARD_STICKY_GEOMETRY
+ * (shadowOffsetYPx 2, shadowBlurPx 8: a CSS blur radius is two standard
+ * deviations). Its color is the sticky paint's cardShadow.
+ */
+const CARD_STICKY_SHADOW = { dx: 0, dy: 2, stdDeviation: 4 } as const;
+
+/** The sticky shadow filters a scene defines: null where no sticky casts that shadow. */
+type StickyShadowFilterIds = { paper: string | null; card: string | null };
 
 /** Default world padding, mirroring each bounds primitive's own default (documentBounds 80 / containerViewBounds 32). */
 const DEFAULT_DOCUMENT_PADDING_PX = 80;
@@ -430,10 +441,12 @@ function polygonPointsAttribute(points: CanvasPoint[]): string {
 
 /**
  * Code chip visuals — mirrors the inline `<code>` CSS in objects/sticky/
- * markdown.tsx: black at 8% on a paper sticky, the text color at 8% on a card
- * (objects/sticky/def.tsx CARD_STICKY_GEOMETRY.codeChipAlpha).
+ * markdown.tsx: black at 8% on a paper sticky, the text color at 4.5% on a
+ * card (objects/sticky/def.tsx CARD_STICKY_GEOMETRY.codeChipAlpha).
  */
 const STICKY_CODE_CHIP_FILL_OPACITY = 0.08;
+/** Card sticky code chips — mirrors objects/sticky/markdown.tsx CARD_STICKY_CODE_CHIP_ALPHA. */
+const CARD_STICKY_CODE_CHIP_FILL_OPACITY = 0.045;
 /** Card sticky hairline — mirrors objects/sticky/def.tsx CARD_STICKY_GEOMETRY.borderWidthPx (React; not importable here). */
 const CARD_STICKY_BORDER_WIDTH_PX = 1;
 
@@ -472,7 +485,7 @@ function leftRulePath(geometry: CanvasBounds, from: number, width: number, radiu
  */
 function renderStickyBody(
   object: InteractiveCanvasObject,
-  stickyShadowFilterId: string | null,
+  shadowFilters: StickyShadowFilterIds,
   insideViewBox: boolean,
   canvasStyle: CanvasStyle,
 ): string {
@@ -488,8 +501,8 @@ function renderStickyBody(
       height: geometry.height,
       ...rounded,
       fill: paint.fill,
-      ...(stickyShadowFilterId && insideViewBox
-        ? { filter: `url(#${stickyShadowFilterId})` }
+      ...(shadowFilters.paper && insideViewBox
+        ? { filter: `url(#${shadowFilters.paper})` }
         : null),
     });
   }
@@ -501,6 +514,9 @@ function renderStickyBody(
       height: geometry.height,
       ...rounded,
       fill: paint.fill,
+      ...(paint.cardShadow && shadowFilters.card && insideViewBox
+        ? { filter: `url(#${shadowFilters.card})` }
+        : null),
     }),
   ];
   // The rule under the hairline, as the live background strip sits under its inset shadow.
@@ -540,9 +556,9 @@ const STICKY_CODE_CHIP_HEIGHT_EM = 1.3;
 function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): string {
   // The slot typography carries the sticky paint's text color.
   const resolved = resolveTextSlot(INSET_BODY_TEXT_SLOT, object, 1, { canvasStyle });
-  const codeChipFill = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).shadow
-    ? "#000000"
-    : resolved.typography.color;
+  const paper = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).shadow;
+  const codeChipFill = paper ? "#000000" : resolved.typography.color;
+  const codeChipOpacity = paper ? STICKY_CODE_CHIP_FILL_OPACITY : CARD_STICKY_CODE_CHIP_FILL_OPACITY;
   if (resolved.hidden) return "";
   const rect = {
     x: object.geometry.x + resolved.rect.x,
@@ -596,7 +612,7 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
             height: chipHeight,
             rx: STICKY_CODE_CHIP_RADIUS_PX,
             fill: codeChipFill,
-            "fill-opacity": STICKY_CODE_CHIP_FILL_OPACITY,
+            "fill-opacity": codeChipOpacity,
           }),
         );
       }
@@ -877,7 +893,7 @@ function renderCustomSilhouette(
  */
 function renderShapeBody(
   object: InteractiveCanvasObject,
-  stickyShadowFilterId: string | null,
+  stickyShadowFilters: StickyShadowFilterIds,
   viewBox: CanvasBounds,
   canvasStyle: CanvasStyle,
 ): string {
@@ -889,7 +905,7 @@ function renderShapeBody(
 
   // Sticky note ("note" render shape): the sticky paint's body (renderStickyBody).
   if (renderShape === "note") {
-    return renderStickyBody(object, stickyShadowFilterId, insideViewBox, canvasStyle);
+    return renderStickyBody(object, stickyShadowFilters, insideViewBox, canvasStyle);
   }
 
   // The style's shape fill mode: `tint` (pastel fill + ink border) or `card`
@@ -1540,22 +1556,34 @@ export function renderSceneToSvg(
   const nonSections = ordered.filter((object) => object.type !== "section");
   const objectsById = new Map(scene.objects.map((object) => [object.id, object]));
 
-  // Only paper stickies cast the shadow (card stickies have none).
-  const hasShadowSticky = nonSections.some(
-    (object) =>
-      effectiveRenderShape(object) === "note" &&
-      resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).shadow,
-  );
-  const stickyShadowFilterId = hasShadowSticky ? `${idSlug(document.id)}-sticky-shadow` : null;
+  // Paper stickies cast the paper shadow; card stickies the paint's softer
+  // lift (cardShadow, light boards only). One filter per kind serves the scene.
+  const stickyPaints = nonSections
+    .filter((object) => effectiveRenderShape(object) === "note")
+    .map((object) => resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle));
+  const cardShadow = stickyPaints.find((paint) => paint.cardShadow !== null)?.cardShadow ?? null;
+  const stickyShadowFilters: StickyShadowFilterIds = {
+    paper: stickyPaints.some((paint) => paint.shadow) ? `${idSlug(document.id)}-sticky-shadow` : null,
+    card: cardShadow ? `${idSlug(document.id)}-card-sticky-shadow` : null,
+  };
 
   const parts: string[] = [];
 
-  if (stickyShadowFilterId) {
+  if (stickyShadowFilters.paper) {
     parts.push(
-      `<defs><filter id="${escapeXml(stickyShadowFilterId)}" x="-20%" y="-20%" width="140%" height="140%">` +
+      `<defs><filter id="${escapeXml(stickyShadowFilters.paper)}" x="-20%" y="-20%" width="140%" height="140%">` +
         `<feDropShadow dx="${fmt(STICKY_SHADOW.dx)}" dy="${fmt(STICKY_SHADOW.dy)}" stdDeviation="${fmt(
           STICKY_SHADOW.stdDeviation,
         )}" flood-color="#000000" flood-opacity="${fmt(STICKY_SHADOW.opacity)}"/></filter></defs>`,
+    );
+  }
+  if (stickyShadowFilters.card && cardShadow) {
+    const flood = parseColor(cardShadow)!;
+    parts.push(
+      `<defs><filter id="${escapeXml(stickyShadowFilters.card)}" x="-20%" y="-20%" width="140%" height="140%">` +
+        `<feDropShadow dx="${fmt(CARD_STICKY_SHADOW.dx)}" dy="${fmt(CARD_STICKY_SHADOW.dy)}" stdDeviation="${fmt(
+          CARD_STICKY_SHADOW.stdDeviation,
+        )}" flood-color="${formatHex(flood)}" flood-opacity="${fmt(flood.a)}"/></filter></defs>`,
     );
   }
 
@@ -1581,7 +1609,7 @@ export function renderSceneToSvg(
     parts.push(renderConnector(document, connection, objectsById, scene.obstacles, canvasStyle));
   }
   for (const object of nonSections) {
-    parts.push(renderShapeBody(object, stickyShadowFilterId, bounds, canvasStyle));
+    parts.push(renderShapeBody(object, stickyShadowFilters, bounds, canvasStyle));
     parts.push(renderObjectText(object, canvasStyle));
   }
   for (const section of sections) {

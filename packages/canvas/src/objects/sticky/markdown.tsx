@@ -66,11 +66,15 @@ export function stickyMarkdownLineAttrs(line: StickyMarkdownLine): StickyMarkdow
 export const STICKY_STRONG_STYLE = { fontFamily: "inherit" } as const;
 
 /**
- * Inline `code` chip tint: the sticky's text color at this alpha. Card
- * stickies tint with their own text color (def.tsx CARD_STICKY_GEOMETRY.
- * codeChipAlpha reads it here: def.tsx imports this module, not the reverse).
+ * Inline `code` chip tint on a paper sticky: the text color at this alpha.
+ * Card stickies tint with their own text color at CARD_STICKY_CODE_CHIP_ALPHA
+ * (def.tsx CARD_STICKY_GEOMETRY.codeChipAlpha reads it here: def.tsx imports
+ * this module, not the reverse).
  */
 export const STICKY_CODE_CHIP_ALPHA = 0.08;
+
+/** Inline `code` chip tint on a card sticky: its text color at this alpha (def.tsx CARD_STICKY_GEOMETRY). */
+export const CARD_STICKY_CODE_CHIP_ALPHA = 0.045;
 
 /** Inline `code` chip tint on a paper sticky: the figjam text color at STICKY_CODE_CHIP_ALPHA (`rgba(0, 0, 0, 0.08)`). */
 export const STICKY_CODE_CHIP_BACKGROUND = withAlpha(FIGJAM_CANVAS_STYLE.textColor, STICKY_CODE_CHIP_ALPHA);

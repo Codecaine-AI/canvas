@@ -42,6 +42,7 @@ describe("figjam paints equal the role tables", () => {
       rule: null,
       text: "rgba(0, 0, 0, 0.8)",
       shadow: true,
+      cardShadow: null,
     });
     // Glyph icons: ink stroke, shape-fill interiors, no tile (IconShapeBody / static-svg).
     expect(resolveIconPaint(color, FIGJAM_CANVAS_STYLE)).toEqual({
@@ -311,15 +312,16 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(resolveIconPaint("white", DARK)).toMatchObject({ tileFill: "#F0F6FC", tileBorder: null, glyph: "#0D1117" });
   });
 
-  it("card stickies: card + hairline border + ink left rule, no shadow", () => {
+  it("card stickies: card + hairline border + neutral gray left rule, a lift on light boards only", () => {
     expect(resolveStickyPaint("yellow", LIGHT)).toEqual({
       fill: "#F8F8F7",
       border: "#E6E5E3",
-      rule: "#805F01",
+      rule: "#666562",
       text: "#1F1F1F",
       shadow: false,
+      cardShadow: "rgba(31, 31, 31, 0.14)",
     });
-    expect(resolveStickyPaint("yellow", DARK)).toMatchObject({ fill: "#32363E", border: "#3D444D", rule: "#D29922" });
+    expect(resolveStickyPaint("yellow", DARK)).toMatchObject({ fill: "#32363E", border: "#3D444D", rule: "#9198A1", cardShadow: null });
   });
 
   it("connectors stroke with the ink", () => {

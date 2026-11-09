@@ -127,7 +127,7 @@ describe("pinned title chip with icon (a stored detail never paints)", () => {
     // 27px outer extent from the section's top edge, less the 1.5px frame.
     expect(chip.style.height).toBe("25.5px");
     expect(chip.style.borderWidth).toBe("0px 1.5px 1.5px 0px");
-    expect(chip.style.borderTopLeftRadius).toBe("0.5px");
+    expect(chip.style.borderTopLeftRadius).toBe("4.5px");
     expect(chip.style.borderTopRightRadius).toBe("0px");
     expect(chip.style.borderBottomRightRadius).toBe("2px");
     expect(chip.style.borderBottomLeftRadius).toBe("0px");
@@ -142,8 +142,8 @@ describe("pinned title chip with icon (a stored detail never paints)", () => {
 
   it("static: the same box at the same origin, edges, icon, and title", () => {
     const svg = staticSvg("schematic-light");
-    // Fill path from the frame's inner corner (0.5px radius) at (101.5, 81.5).
-    expect(svg).toContain('<path d="M102 81.5H');
+    // Fill path from the frame's inner corner (4.5px radius: the 6px frame corner less its 1.5px border) at (101.5, 81.5).
+    expect(svg).toContain('<path d="M106 81.5H');
     // Title at box x + 28 (6 lead + 16 tile + 6 gap), centered in the 25.5px box less its bottom edge.
     expect(svg).toContain('x="129.5" y="93.5" fill="#1F1F1F" font-size="14" font-weight="600"');
     expect(svg).toMatch(/>BUN SERVICES<\/text>/);
@@ -281,25 +281,34 @@ describe("connector label chip per theme", () => {
 });
 
 describe("card stickies", () => {
-  it("live: card fill, hairline edge, and a straight 3px ink rule inside it, no paper shadow", () => {
+  it("live: card fill, hairline edge, a straight 3px neutral rule inside it, and the soft card lift", () => {
     const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
     // The rule is a background strip the corner radius clips, so its inner edge never curls into a hook.
+    // A yellow note takes the gray ink, not the olive yellow ink.
     expect(note.style.background).toBe(
-      "linear-gradient(to right, transparent 1px, #805F01 1px, #805F01 4px, transparent 4px) #F8F8F7",
+      "linear-gradient(to right, transparent 1px, #666562 1px, #666562 4px, transparent 4px) #F8F8F7",
     );
-    expect(note.style.boxShadow).toBe("inset 0 0 0 1px #E6E5E3");
+    expect(note.style.boxShadow).toBe("inset 0 0 0 1px #E6E5E3, 0 2px 8px rgba(31, 31, 31, 0.14)");
   });
 
-  it("static: the same card with 4px corners, a straight rule clipped by them under the edge, and no shadow filter", () => {
+  it("static: the same card with 6px corners, a straight rule clipped by them under the edge, and the card lift filter", () => {
     const svg = staticSvg("schematic-light");
-    expect(svg).not.toContain("feDropShadow");
-    expect(svg).toContain('<rect x="900" y="80" width="240" height="160" rx="4" fill="#F8F8F7"/>');
-    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" rx="3.5" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
+    expect(svg).toContain(
+      '<feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#1F1F1F" flood-opacity="0.14"/>',
+    );
+    expect(svg).toContain(
+      '<rect x="900" y="80" width="240" height="160" rx="6" fill="#F8F8F7" filter="url(#theme-board-card-sticky-shadow)"/>',
+    );
+    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" rx="5.5" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
     // x 901 to 904: only its ends follow the corner arcs, its inner edge is one straight line,
     // and it paints before the hairline, as the live background strip sits under the inset shadow.
     expect(svg).toContain(
-      '<path d="M901 81.35A4 4 0 0 1 904 80V240A4 4 0 0 1 901 238.65Z" fill="#805F01"/><rect x="900.5" y="80.5"',
+      '<path d="M901 82.68A6 6 0 0 1 904 80.34V239.66A6 6 0 0 1 901 237.32Z" fill="#666562"/><rect x="900.5" y="80.5"',
     );
+  });
+
+  it("dark boards: a card note has no lift (its raised card fill sets it off)", () => {
+    expect(staticSvg("schematic-dark")).not.toContain("feDropShadow");
   });
 
   it("schematic note text reads under the node names: 16px on a 24px pitch, ink on the card at 4.5:1 or more", () => {

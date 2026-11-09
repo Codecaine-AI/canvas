@@ -56,8 +56,8 @@ describe("pinned title chip (schematic)", () => {
     expect(layout.box.y).toBe(1.5);
     expect(layout.box.height).toBe(25.5);
     expect(layout.border).toEqual({ top: 0, right: 1.5, bottom: 1.5, left: 0 });
-    // Inner frame corner (2px radius − 1.5px frame), the chip radius bottom-right.
-    expect(layout.radius).toEqual({ topLeft: 0.5, topRight: 0, bottomRight: 2, bottomLeft: 0 });
+    // Inner frame corner (6px radius − 1.5px frame), the chip radius bottom-right.
+    expect(layout.radius).toEqual({ topLeft: 4.5, topRight: 0, bottomRight: 2, bottomLeft: 0 });
     // Content centers in the band between the frame line and the bottom edge.
     expect(layout.box.y + layout.centerY).toBe(13.5);
   });
@@ -91,10 +91,10 @@ describe("pinned title chip (schematic)", () => {
   it("flush in a borderless section's corner, and inside a thicker per-section frame", () => {
     const borderless = titleChipLayout(section({ style: { shape: "section", strokeStyle: "none" } }), LIGHT);
     expect(borderless.box).toMatchObject({ x: 0, y: 0, height: 27 });
-    expect(borderless.radius.topLeft).toBe(2);
+    expect(borderless.radius.topLeft).toBe(6);
     const thick = titleChipLayout(section({ style: { shape: "section", strokeWidth: 3 } }), LIGHT);
     expect(thick.box).toMatchObject({ x: 3, y: 3, height: 24 });
-    expect(thick.radius.topLeft).toBe(0);
+    expect(thick.radius.topLeft).toBe(3);
   });
 
   it("drops an icon the registry does not know", () => {

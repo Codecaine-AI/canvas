@@ -10,7 +10,7 @@ import { BBOX_OUTLINE } from "../geometry";
 import { ObjectShell, ObjectSlotText } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { INSET_BODY_TEXT_SLOT } from "../text-slots";
-import { STICKY_CODE_CHIP_ALPHA, StickyMarkdown } from "./markdown";
+import { CARD_STICKY_CODE_CHIP_ALPHA, StickyMarkdown } from "./markdown";
 
 /** Sticky geometry/typography (per-kind constants co-locate with their def; the text inset/typography live on the inset-body slot preset in objects/text-slots.ts). */
 export const STICKY_GEOMETRY = {
@@ -23,13 +23,18 @@ export const STICKY_GEOMETRY = {
 /**
  * Card sticky trim (the schematic themes' `stickyStyle: "card"`): the card
  * fill (the shell's sticky role paint) edged by a hairline, a straight rule in
- * the color pick's ink down the left side just inside the hairline
- * (CanvasStyle.stickyRuleWidthPx), no shadow. Inline `code` chips tint with
- * the text color at the paper chip's alpha (./markdown.tsx).
+ * the paint's neutral ink down the left side just inside the hairline
+ * (CanvasStyle.stickyRuleWidthPx), and on light boards a soft lift
+ * (StickyPaint.cardShadow) that sets the note off the near-white board.
+ * Inline `code` chips tint with the text color at a lighter alpha than the
+ * paper chip's: at 8% a run of chips read as gray blotches on the note.
  */
 export const CARD_STICKY_GEOMETRY = {
   borderWidthPx: 1,
-  codeChipAlpha: STICKY_CODE_CHIP_ALPHA,
+  codeChipAlpha: CARD_STICKY_CODE_CHIP_ALPHA,
+  /** The lift's offset down and its blur radius (render/static-svg.ts mirrors both). */
+  shadowOffsetYPx: 2,
+  shadowBlurPx: 8,
 } as const;
 
 /**
@@ -49,6 +54,9 @@ function cardStickyTrim(paint: StickyPaint, changed: boolean, canvasStyle: Canva
   const shadows = [
     ...(changed ? [CHANGED_RING_SHADOW] : []),
     ...(paint.border ? [`inset 0 0 0 ${CARD_STICKY_GEOMETRY.borderWidthPx}px ${paint.border}`] : []),
+    ...(paint.cardShadow
+      ? [`0 ${CARD_STICKY_GEOMETRY.shadowOffsetYPx}px ${CARD_STICKY_GEOMETRY.shadowBlurPx}px ${paint.cardShadow}`]
+      : []),
   ];
   // The rule is a background strip, not an inset shadow: the corner radius
   // clips its outer edge and its inner edge stays straight (an inset shadow's

@@ -265,7 +265,7 @@ describe("CanvasStyleProvider / CanvasStage canvasStyle", () => {
 describe("canvasStyleCssVariables / canvasStyleCssVar", () => {
   it("emits the original six variables plus one per color/number token and one per ink", () => {
     const variables = canvasStyleCssVariables(canvasThemePreset("schematic-dark"));
-    expect(variables["--canvas-section-radius"]).toBe("2px");
+    expect(variables["--canvas-section-radius"]).toBe("6px");
     expect(variables["--canvas-title-chip-border"]).toBe("1.5px");
     expect(variables["--canvas-board-background"]).toBe("#0D1117");
     expect(variables["--canvas-grid-dot-color"]).toBe("#3D444D");

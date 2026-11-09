@@ -270,10 +270,13 @@ export type IconPaint = {
 export type StickyPaint = {
   fill: string;
   border: string | null;
-  /** 2px left rule (card stickies). */
+  /** Left rule (card stickies), stickyRuleWidthPx wide. */
   rule: string | null;
   text: string;
+  /** The paper sticky's down-biased drop shadow (paper stickies only). */
   shadow: boolean;
+  /** A card sticky's soft lift: the shadow color, or null for none (paper stickies, dark boards). */
+  cardShadow: string | null;
 };
 
 export type ConnectorPaint = {
@@ -475,27 +478,39 @@ export function brandHeaderIconColors(
 
 /**
  * Sticky paint. `paper` (figjam): the sticky role-table fill, no border, a
- * shadow. `card`: cardFill, hairline border, a left rule in the ink
- * (stickyRuleWidthPx), no shadow.
+ * shadow. `card`: cardFill, hairline border, a neutral left rule (the gray
+ * ink, stickyRuleWidthPx), and on a light board a soft lift in the text
+ * color (cardShadow).
+ *
+ * A card note is an annotation, not a category: its rule is the gray ink
+ * whatever the color pick. The pick's own ink put an olive bar (yellow, the
+ * sticky default) on every note, which clashed with the cool sections round
+ * it. The lift is what sets a note off the near-white board: the card fill
+ * sits within 0.02 OKLab of the page, so a hairline alone left notes
+ * floating as bare text. Dark boards raise the card fill itself instead.
  */
 export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
   return cachedPaint(style, `sticky|${color}`, () => stickyPaint(color, style));
 }
+
+/** Card sticky lift: the text color at this opacity (light boards only). */
+const CARD_STICKY_SHADOW_OPACITY = 0.14;
 
 function stickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
   if (style.stickyStyle === "card") {
     return {
       fill: style.cardFill,
       border: style.hairlineColor,
-      rule: resolveInk(color, style),
+      rule: resolveInk("gray", style),
       text: style.textColor,
       shadow: false,
+      cardShadow: isLightBoard(style) ? withAlpha(style.textColor, CARD_STICKY_SHADOW_OPACITY) : null,
     };
   }
   const fill = swatchFor(color).sticky;
   // The paper body has always been the text color at 80% (INSET_BODY_TEXT_SLOT: rgba(0, 0, 0, 0.8)).
   const text = withAlpha(readableOn(style.textColor, fill), PAPER_STICKY_TEXT_OPACITY);
-  return { fill, border: null, rule: null, text, shadow: true };
+  return { fill, border: null, rule: null, text, shadow: true, cardShadow: null };
 }
 
 /** Connector stroke = the ink. */
