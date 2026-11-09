@@ -123,7 +123,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Give each top-level section its own hue, and never give a nested section its parent's color, so each level of the hierarchy reads. "
+          "insert": "A nested section must not look like its parent, by the same ink or by the same painted fill at its depth under the board's style. "
         },
         {
           "insert": "place_section",
@@ -132,7 +132,7 @@
           }
         },
         {
-          "insert": " without a color picks a hue that the parent section and the sections the new frame holds do not paint. An edit that would nest a section in its parent's color is refused. The "
+          "insert": " and Studio give a section placed without a color one that paints apart from its parent and the sections it holds. An agent edit that makes a look-alike nest is refused. A Studio recolor keeps the person's pick, and the "
         },
         {
           "insert": "integrity",
@@ -141,7 +141,16 @@
           }
         },
         {
-          "insert": " lint reports such a nest on a stored board. The page frame, or a board's one root section, is exempt as a parent."
+          "insert": " lint reports the nest. Only the page is exempt as a parent: the section with id "
+        },
+        {
+          "insert": "page-frame",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or a parentless section stored white."
         }
       ],
       "children": []
