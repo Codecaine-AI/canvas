@@ -13,7 +13,7 @@ import {
 } from "@codecaine-ai/canvas/style";
 
 import { StyleRail, type StyleRailProps } from ".";
-import { OPEN_GROUPS_STORAGE_KEY } from "./constants";
+import { OPEN_GROUPS_STORAGE_KEY, RETIRED_KEYS } from "./constants";
 import { useCanvasStyleSettings } from "@/shared/useCanvasStyleSettings";
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean })
@@ -113,11 +113,36 @@ describe("StyleRail", () => {
     const visible = CANVAS_STYLE_CONTROLS.filter(
       (control) =>
         control.key !== "theme" &&
+        !RETIRED_KEYS.has(control.key) &&
         (!control.visibleWhen || figjam[control.visibleWhen.key] === control.visibleWhen.equals),
     );
     expect(visible.length).toBeLessThan(CANVAS_STYLE_CONTROLS.length - 1);
     expect(container.querySelectorAll("[data-control]")).toHaveLength(visible.length);
     expect($('[data-control="theme"]')).toBeNull();
+  });
+
+  it("hides the detail color, font and size controls, which change nothing, in every theme", () => {
+    for (const theme of ["figjam", "schematic-light", "schematic-dark"] as const) {
+      act(() => root.unmount());
+      root = createRoot(container);
+      renderRail({ theme, themes: {} });
+      for (const header of container.querySelectorAll<HTMLButtonElement>("section[data-group] > button")) {
+        if (header.getAttribute("aria-expanded") !== "true") act(() => header.click());
+      }
+      expect($('[data-control="textColor"]')).not.toBeNull();
+      for (const key of ["detailColor", "detailFont", "detailFontSizePx"]) {
+        expect($(`[data-control="${key}"]`)).toBeNull();
+      }
+      expect(container.textContent).not.toContain("Detail");
+    }
+  });
+
+  it("keeps a stored detail override loading, though no control shows it", () => {
+    const settings = normalizeCanvasStyleSettings({
+      theme: "schematic-light",
+      themes: { "schematic-light": { detailFont: "sans", detailFontSizePx: 18 } },
+    });
+    expect(settings.themes["schematic-light"]).toEqual({ detailFont: "sans", detailFontSizePx: 18 });
   });
 
   // Slider, segmented select, and the save path are covered end to end below
@@ -295,8 +320,6 @@ describe("StyleRail", () => {
     expect(rows).toEqual([
       "textFontWeight",
       "textFontSizePx",
-      "detailFont",
-      "detailFontSizePx",
       "processCornerRadiusPx",
       "shapeCornerRadiusPx",
       "shapeBorderWidthPx",
