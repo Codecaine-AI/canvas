@@ -23,7 +23,9 @@
         "b-section-body-2",
         "b-section-frame-3",
         "b-section-color-6",
+        "b-section-color-refuse-8",
         "b-section-color-pick-7",
+        "b-section-color-pool-9",
         "b-section-code-4",
         "b-section-canvas-5"
       ]
@@ -133,7 +135,18 @@
           }
         },
         {
-          "insert": ", or a parentless white section) is the parent of top-level sections. Siblings touch when their edges are closer than one gutter (48px) and part of the gap is clear of other siblings. An agent edit that makes a new break is refused. The "
+          "insert": ", or a parentless white section) is the parent of top-level sections. Siblings touch when their edges are closer than one gutter (48px) and part of the gap is clear of other siblings."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-refuse-8": {
+      "id": "b-section-color-refuse-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "An agent edit that adds, removes, recolors, reparents, moves or resizes a section is refused when it makes a new break. An edit that changes only nodes is never refused for a section's color, such as a green node placed in a blue category section. The "
         },
         {
           "insert": "integrity",
@@ -142,7 +155,7 @@
           }
         },
         {
-          "insert": " lint reports each break left on the board with a suggested color."
+          "insert": " lint reports each break left on the board with a suggested color, and no tool recolors the section."
         }
       ],
       "children": []
@@ -159,7 +172,7 @@
           }
         },
         {
-          "insert": " and Studio give a section without a color one that keeps these rules. A category section gets its category's hue when that hue keeps them, even past the cap. "
+          "insert": " and Studio give a section without a color one that keeps these rules. "
         },
         {
           "insert": "clone",
@@ -168,7 +181,18 @@
           }
         },
         {
-          "insert": " and Studio's duplicate and paste keep the source's color while it keeps the rules. Otherwise the chooser tries gray, blue, violet, green, then teal, and skips the hues of the board's nodes and wires. It keeps a board to three section hues besides gray, category hues included. It does not put teal beside a touching blue or green section while another hue fits. Past that, it repeats the hue of the farthest sibling the section does not touch, a cool hue first. Warm hues come last."
+          "insert": " and Studio's duplicate and paste keep the source's color first, while it keeps the rules. A category section with no kept color gets its category's hue when that hue keeps them, even past the cap."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-pool-9": {
+      "id": "b-section-color-pool-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Otherwise the chooser tries gray, blue, violet, green, then teal, and skips the hues of the board's nodes and wires. It keeps a board to three section hues besides gray, category hues included. It does not put teal beside a touching blue or green section while another hue fits. Studio's last-picked section color wins only when it passes these same limits. Past that, the chooser repeats the hue of the farthest sibling the section does not touch, a cool hue first. Warm hues come last."
         }
       ],
       "children": []
