@@ -198,7 +198,7 @@ describe("detail-value", () => {
 
     expect(jev.bodies.map((body) => Object.values(body.questions).map((question) => question.instructions.node.detail)))
       .toEqual([["part of checkout", "status, total_cents"], ["the payment one"]]);
-    expect(line).toContain("Jev judged 2 node details (1 asked, 1 cached) · 1 to remove");
+    expect(line).toContain("Jev judged 2 node details (3 asked, 1 cached) · 1 to remove"); // asks add up across both rounds
     expect(detailFindings(file).map((finding) => finding.message)).toEqual([
       expect.stringContaining('pay\'s detail "the payment one" adds no fact'),
     ]);
@@ -241,5 +241,34 @@ describe("detail-value", () => {
     const entries = JSON.parse(readFileSync(path, "utf8")).entries;
     expect(Object.keys(entries).sort()).toEqual(["a", "b"]);
     expect(fileDetailCache(path).get("b")).toEqual(verdict("keep"));
+  });
+
+  test("writers in separate processes that read first keep every verdict", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "detail-cache-"));
+    dirs.push(dir);
+    const path = join(dir, "detail-value.json");
+    const writer = join(dir, "writer.ts");
+    const module = join(import.meta.dir, "index.ts");
+    writeFileSync(writer, [
+      `import { fileDetailCache } from ${JSON.stringify(module)};`,
+      "const cache = fileDetailCache(process.argv[2]!); cache.get('absent'); console.log('ready');",
+      "await Bun.stdin.text();",
+      "cache.set([[process.argv[3]!, { choice: 'keep', confidence: 0.9, pRemove: 0.05, model: 'jev-1.14.0' }]]);",
+    ].join("\n"));
+    const writers = Array.from({ length: 5 }, (_, index) =>
+      Bun.spawn(["bun", writer, path, `k${index}`], { stdin: "pipe", stdout: "pipe" }));
+    // Every writer has read the (empty) file before any of them writes.
+    await Promise.all(writers.map(async (child) => {
+      const reader = child.stdout.getReader();
+      let text = "";
+      while (!text.includes("ready")) text += new TextDecoder().decode((await reader.read()).value);
+      reader.releaseLock();
+    }));
+    for (const child of writers) {
+      child.stdin.write("go\n");
+      child.stdin.end();
+    }
+    await Promise.all(writers.map((child) => child.exited));
+    expect(Object.keys(JSON.parse(readFileSync(path, "utf8")).entries).sort()).toEqual(["k0", "k1", "k2", "k3", "k4"]);
   });
 });

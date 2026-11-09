@@ -404,16 +404,21 @@ const DETAIL_CHECK_ROUNDS = 3;
  * on it has a verdict.
  */
 export async function checkDetailValues(file: CanvasFileSession, options: JudgeDetailsOptions): Promise<string> {
+  // Usage and asks add up across rounds, so the line reports what the check spent.
+  const spent = { asked: 0, input_tokens: 0, output_tokens: 0 };
   for (let round = 1; ; round++) {
     const judgement = await judgeDetails(file.session.draft, options);
     if (judgement.status === "not-checked") {
       file.session.detailVerdicts = undefined;
       return `DETAIL · not checked (${judgement.reason})`;
     }
+    spent.asked += judgement.asked;
+    spent.input_tokens += judgement.usage.input_tokens;
+    spent.output_tokens += judgement.usage.output_tokens;
     file.session.detailVerdicts = judgement.verdicts;
     const subjects = detailSubjects(file.session.draft);
     if (subjects.every((subject) => judgement.verdicts.has(detailKey(subject)))) {
-      return detailLine(subjects, judgement);
+      return detailLine(subjects, judgement, spent);
     }
     if (round === DETAIL_CHECK_ROUNDS) {
       file.session.detailVerdicts = undefined;
@@ -422,13 +427,18 @@ export async function checkDetailValues(file: CanvasFileSession, options: JudgeD
   }
 }
 
-function detailLine(subjects: readonly DetailSubject[], judgement: Extract<DetailJudgement, { status: "checked" }>): string {
+function detailLine(
+  subjects: readonly DetailSubject[],
+  judgement: Extract<DetailJudgement, { status: "checked" }>,
+  spent: { asked: number; input_tokens: number },
+): string {
   if (subjects.length === 0) return "DETAIL · no node details to judge";
   const removals = subjects.filter((subject) => isRemoval(judgement.verdicts.get(detailKey(subject)))).length;
-  const cached = subjects.length - judgement.asked;
+  // Cached: current details the last round answered from the cache.
+  const cached = Math.max(0, subjects.length - judgement.asked);
   return `DETAIL · Jev judged ${plural(subjects.length, "node detail")}`
-    + ` (${judgement.asked} asked, ${cached} cached) · ${removals} to remove (confidence ≥ ${DETAIL_REMOVE_THRESHOLD})`
-    + (judgement.asked > 0 ? ` · ${judgement.usage.input_tokens} input tokens` : "");
+    + ` (${spent.asked} asked, ${cached} cached) · ${removals} to remove (confidence ≥ ${DETAIL_REMOVE_THRESHOLD})`
+    + (spent.asked > 0 ? ` · ${spent.input_tokens} input tokens` : "");
 }
 
 /**

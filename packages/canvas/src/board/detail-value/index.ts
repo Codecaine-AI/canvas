@@ -18,7 +18,7 @@
  * question that produced it, then recalibrate DETAIL_REMOVE_THRESHOLD.
  */
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { closeSync, mkdirSync, openSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
@@ -366,16 +366,61 @@ export function fileDetailCache(path: string): DetailVerdictCache {
     get: (key) => (entries ??= read())[key],
     set: (fresh) => {
       if (fresh.length === 0) return;
-      const all = (entries = { ...entries, ...read() });
-      for (const [key, verdict] of fresh) all[key] = verdict;
+      for (const [key, verdict] of fresh) (entries ??= {})[key] = verdict;
       try {
         mkdirSync(dirname(path), { recursive: true });
+      } catch {
+        return;
+      }
+      // Read, merge and write under one lock file, so writers in other
+      // processes never drop each other's verdicts.
+      withFileLock(`${path}.lock`, () => {
+        const all = (entries = { ...read(), ...entries });
+        for (const [key, verdict] of fresh) all[key] = verdict;
         const temp = `${path}.${process.pid}.tmp`;
         writeFileSync(temp, `${JSON.stringify({ entries: all })}\n`);
         renameSync(temp, path);
-      } catch {
-        // Keep the in-memory verdicts; the next check can try the write again.
-      }
+      });
     },
   };
+}
+
+/** How long a writer waits for the cache lock, and when a lock counts as stale. */
+const LOCK_WAIT_MS = 2_000;
+const LOCK_STALE_MS = 10_000;
+
+/**
+ * Run `work` while holding an exclusive lock file (created with the `wx`
+ * flag, which fails when it exists). A lock older than LOCK_STALE_MS is a
+ * crashed writer's and is taken over. When the lock stays busy past
+ * LOCK_WAIT_MS, or any step fails, `work` is skipped: the cache is a
+ * convenience, and the next check asks Jev again.
+ */
+function withFileLock(lockPath: string, work: () => void): void {
+  const deadline = Date.now() + LOCK_WAIT_MS;
+  for (;;) {
+    try {
+      closeSync(openSync(lockPath, "wx"));
+      break;
+    } catch {
+      try {
+        if (Date.now() - statSync(lockPath).mtimeMs > LOCK_STALE_MS) unlinkSync(lockPath);
+      } catch {
+        // The holder released it between the two calls; try again.
+      }
+      if (Date.now() > deadline) return;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 5);
+    }
+  }
+  try {
+    work();
+  } catch {
+    // Keep the in-memory verdicts; the next check can try the write again.
+  } finally {
+    try {
+      unlinkSync(lockPath);
+    } catch {
+      // Already gone.
+    }
+  }
 }
