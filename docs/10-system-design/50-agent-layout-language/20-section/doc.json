@@ -124,7 +124,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A section must not paint the same ink or fill as its parent section or a sibling section. Siblings share one parent, and the page is the parent of top-level sections. The page is the section with id "
+          "insert": "A section must not paint the ink or fill of its parent section or of a sibling it touches. It must not paint the hue of a node it holds. The page ("
         },
         {
           "insert": "page-frame",
@@ -133,7 +133,7 @@
           }
         },
         {
-          "insert": ", or a parentless section stored white. An agent edit that makes a new clash is refused, and the "
+          "insert": ", or a parentless white section) is the parent of top-level sections. Siblings touch when their edges are closer than one gutter (48px) and part of the gap is clear of other siblings. Siblings with wider whitespace can share a color. An agent edit that makes a new break is refused. The "
         },
         {
           "insert": "integrity",
@@ -142,7 +142,7 @@
           }
         },
         {
-          "insert": " lint reports each clash left on the board."
+          "insert": " lint reports the breaks left on the board, one finding per section for each rule, with a suggested color."
         }
       ],
       "children": []
@@ -159,7 +159,7 @@
           }
         },
         {
-          "insert": " and Studio give a section without a color one that paints apart from its parent, its children, and its siblings. "
+          "insert": " and Studio give a section without a color one that keeps these rules. "
         },
         {
           "insert": "clone",
@@ -168,7 +168,7 @@
           }
         },
         {
-          "insert": " does the same when the source's color clashes. When every color matches a sibling, the chooser prefers one that no facing sibling paints, the farthest first. Facing siblings overlap on one axis with no sibling between them. When neither of two look-alike siblings has a free color, their repeat is a clash only if they face each other."
+          "insert": " and Studio's duplicate and paste keep the source's color while it keeps the rules. The chooser first tries the hues that the board's nodes and wires do not use. It tries gray, blue, violet, green, then teal, and keeps a board to three section hues besides gray. It does not put teal beside a touching blue or green section while another hue fits. When no free hue fits, it repeats the hue of the farthest sibling that the section does not touch, a cool hue first. It picks orange, yellow, pink, or red only when no cool hue fits under the cap."
         }
       ],
       "children": []
