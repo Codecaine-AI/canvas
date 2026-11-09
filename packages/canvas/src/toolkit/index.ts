@@ -53,6 +53,13 @@ import {
   sessionDiagnostics,
   type Diagnostic,
 } from "../lints";
+import {
+  DETAIL_REMOVE_THRESHOLD,
+  detailKey,
+  isRemoval,
+  judgeDetails,
+  type JudgeDetailsOptions,
+} from "../board/detail-value";
 import { rasterizeSvgToPng } from "../render/rasterize";
 import { renderAtJudgeSize } from "../render/judge-size";
 import { BOARD_VIEW_WIDTH, renderBoardView } from "../session/perception/views";
@@ -79,6 +86,12 @@ import type { WorkflowTool } from "../session/tools/workflow/workflow-tool";
 export { boardStateSnapshot, operationTools, workflowTools };
 export { brokenWiresLine } from "../board/wire-integrity";
 export { canvasStyleOverrides, loadCanvasStyle };
+export {
+  fileDetailCache,
+  memoryDetailCache,
+  type DetailVerdictCache,
+  type JudgeDetailsOptions,
+} from "../board/detail-value";
 export type { CanvasStyle, LayoutSession, LayoutToolRenderResult, LayoutToolRuntime, OperationTool, WorkflowTool };
 
 /**
@@ -317,8 +330,14 @@ function plural(count: number, one: string, many = `${one}s`): string {
  * edit the file never received. A file saved elsewhere since the session
  * last read or wrote it conflicts the session here too, so the check never
  * approves a board the file no longer holds.
+ * `options.detailLine` is the DETAIL line `checkDetailValues` returned; it
+ * prints after the lint findings.
  */
-export function checkCanvasFile(file: CanvasFileSession, label: string): LayoutToolRenderResult {
+export function checkCanvasFile(
+  file: CanvasFileSession,
+  label: string,
+  options: { detailLine?: string } = {},
+): LayoutToolRenderResult {
   if (!file.conflicted && sha256(readFileSync(file.canvasPath)) !== file.diskHash) file.conflicted = true;
   if (file.conflicted) {
     return { isError: true, text: new CanvasFileConflictError(file.canvasPath).message };
@@ -360,9 +379,31 @@ export function checkCanvasFile(file: CanvasFileSession, label: string): LayoutT
     lines.push(`  ${name} (${found.length})`);
     for (const diagnostic of found) lines.push(...diagnosticLines(diagnostic).map((line) => `    ${line}`));
   }
+  if (options.detailLine) lines.push(options.detailLine);
   lines.push(layoutBlock(layoutNumbers(board, file.session.canvasStyle)));
   lines.push(...clippedFrameNotes(board, file.session.canvasStyle));
   return { text: lines.join("\n"), pngs };
+}
+
+/**
+ * Ask Jev whether each node detail on the board carries a fact
+ * (board/detail-value), store the verdicts on the session so the
+ * detail-value finishing lint (and finalize) can read them, and return the
+ * one DETAIL line canvas_check prints. Never throws and never blocks by
+ * itself: a missing key or a failed request reads "DETAIL · not checked
+ * (<reason>)", and the lint then has only the verdicts it already held.
+ */
+export async function checkDetailValues(file: CanvasFileSession, options: JudgeDetailsOptions): Promise<string> {
+  const judgement = await judgeDetails(file.session.draft, options);
+  if (judgement.status === "not-checked") return `DETAIL · not checked (${judgement.reason})`;
+  const verdicts = (file.session.detailVerdicts ??= new Map());
+  for (const [key, verdict] of judgement.verdicts) verdicts.set(key, verdict);
+  if (judgement.subjects.length === 0) return "DETAIL · no node details to judge";
+  const removals = judgement.subjects.filter((subject) => isRemoval(verdicts.get(detailKey(subject)))).length;
+  const cached = judgement.subjects.length - judgement.asked;
+  return `DETAIL · Jev judged ${plural(judgement.subjects.length, "node detail")}`
+    + ` (${judgement.asked} asked, ${cached} cached) · ${removals} to remove (confidence ≥ ${DETAIL_REMOVE_THRESHOLD})`
+    + (judgement.asked > 0 ? ` · ${judgement.usage.input_tokens} input tokens` : "");
 }
 
 /**

@@ -50,11 +50,12 @@ export function runDiagnostics(
 export interface LintSession {
   readonly draft: InteractiveCanvasDocument;
   readonly canvasStyle?: LintContext["canvasStyle"];
+  readonly detailVerdicts?: LintContext["detailVerdicts"];
 }
 
-/** The lint context of a layout session: its workspace canvas style. */
+/** The lint context of a layout session: its workspace canvas style and its Jev detail verdicts. */
 export function sessionLintContext(session: LintSession): LintContext {
-  return { canvasStyle: session.canvasStyle };
+  return { canvasStyle: session.canvasStyle, detailVerdicts: session.detailVerdicts };
 }
 
 /**

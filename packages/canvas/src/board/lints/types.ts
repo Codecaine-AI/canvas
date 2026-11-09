@@ -6,6 +6,7 @@
  */
 import type { InteractiveCanvasDocument } from "../../state/schema";
 import type { CanvasStyle } from "../../theme/canvas-style";
+import type { DetailVerdict } from "../detail-value";
 
 /**
  * `error` findings block a committed finalize in the edited scope. A
@@ -33,6 +34,12 @@ export interface Diagnostic {
  */
 export interface LintContext {
   canvasStyle?: CanvasStyle;
+  /**
+   * Jev's verdicts on node details, keyed by `detailKey`, as canvas_check
+   * last judged them (board/detail-value). Absent or empty: the
+   * detail-value rule reports nothing.
+   */
+  detailVerdicts?: ReadonlyMap<string, DetailVerdict>;
 }
 
 export interface LayoutRule {
