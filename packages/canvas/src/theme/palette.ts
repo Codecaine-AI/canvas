@@ -38,7 +38,15 @@
 import type { CanvasColor, CanvasHue } from "../state/schema/colors";
 import { CANVAS_COLORS } from "../state/schema/colors";
 import type { CanvasStyle } from "./canvas-style";
-import { contrastRatio, ensureContrast, mixColors, oklabDistance, oklabLightness, withAlpha } from "./color-math";
+import {
+  contrastRatio,
+  ensureContrast,
+  mixColors,
+  oklabDistance,
+  oklabLightness,
+  withAlpha,
+  withLightnessChroma,
+} from "./color-math";
 
 export type ShapeColors = {
   fill: string;
@@ -345,7 +353,11 @@ function lightnessMatchedMix(source: string, base: string, lightness: number): s
 /** The fill an `ink-card` node of `color` paints (the card itself for neutral picks and other shape modes). */
 function shapeFillBase(color: CanvasColor, style: CanvasStyle): string {
   if (style.shapeFill !== "ink-card" || NEUTRAL_SHAPE_COLORS.has(color)) return style.cardFill;
-  return inkFill(color, style.cardFill, SHAPE_CARD_INK_WEIGHT, style);
+  return withLightnessChroma(
+    paletteColor(color, style),
+    oklabLightness(style.cardFill) - SHAPE_CARD_LIGHTNESS_DROP,
+    SHAPE_CARD_CHROMA,
+  );
 }
 
 /** Light vs dark theme, judged by the board surface. */
@@ -361,15 +373,22 @@ function readableOn(text: string, background: string): string {
 }
 
 /**
- * Ink weight of an `ink-card` shape fill over the card fill. A node is the
- * figure and every section is ground, so the node stays lighter than the
- * lightest layer-cake level of any hue (a top-level section paints 0.19):
- * at 0.20 a teal node on a teal section matched it (OKLab 0.018), and a
- * lavender node sat at the gray section's lightness. 0.08 keeps a hue
- * wash the ink border names, with the text at 4.5:1 and more on it.
- * Picked over a node shadow and lighter sections (UI climb round 1).
+ * An `ink-card` node fill is set in OKLCH, not mixed: the anchor's hue at the
+ * card's lightness less SHAPE_CARD_LIGHTNESS_DROP, at SHAPE_CARD_CHROMA. A
+ * mix of a dark text-step ink gains chroma only by darkening, and a node must
+ * stay lighter than every section level (the figure on its ground): at the
+ * 0.08 mix nodes sat at chroma 0.008 to 0.015, green and teal 0.003 apart
+ * (OKLab), and judges read them as white boxes whose kind only the 2px border
+ * named (UI climb round 2). Now every hue takes one chroma at one lightness
+ * (OKLab L 0.944; chroma 0.04, cut to 0.032 for blue and violet, where sRGB
+ * holds no more): kind pairs stand 0.049 apart on average (0.021 before), and
+ * a node stays at least 0.03 L above every section level.
+ * Picked over a 0.14 mix (a pink node fell below a yellow section, green and
+ * teal stayed 0.007 apart) and over L 0.959 (red and violet capped at 0.02).
  */
-const SHAPE_CARD_INK_WEIGHT = 0.08;
+const SHAPE_CARD_LIGHTNESS_DROP = 0.035;
+/** OKLCH chroma of an `ink-card` node fill (cut back where sRGB holds less at that lightness). */
+const SHAPE_CARD_CHROMA = 0.04;
 
 /** Colors whose `ink-card` shape stays the plain card: their ink is a neutral, so a mix would only gray the card. */
 const NEUTRAL_SHAPE_COLORS: ReadonlySet<CanvasColor> = new Set(["gray", "white"]);
@@ -377,7 +396,7 @@ const NEUTRAL_SHAPE_COLORS: ReadonlySet<CanvasColor> = new Set(["gray", "white"]
 /**
  * Shape fill / border / text. `tint`: the pastel role-table fill with an ink
  * border (figjam). `card`: fill = cardFill, border = ink, text = textColor.
- * `ink-card`: fill = mix(ink, cardFill, SHAPE_CARD_INK_WEIGHT), border = ink,
+ * `ink-card`: fill = the anchor hue in OKLCH (shapeFillBase), border = ink,
  * text = textColor kept at 4.5:1; gray and white keep the `card` paint.
  */
 export function resolveShapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {

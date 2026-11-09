@@ -129,6 +129,60 @@ export function oklab(color: string | RgbaColor): { L: number; a: number; b: num
   };
 }
 
+/** OKLCH chroma (OKLab a/b radius) of the color's RGB (alpha ignored): 0 for a neutral. */
+export function oklabChroma(color: string | RgbaColor): number {
+  const { a, b } = oklab(color);
+  return Math.hypot(a, b);
+}
+
+function encodeChannel(linear: number): number {
+  const c = linear <= 0.0031308 ? 12.92 * linear : 1.055 * linear ** (1 / 2.4) - 0.055;
+  return c * 255;
+}
+
+/** Linear sRGB of an OKLab point; channels may fall outside 0–1 (out of gamut). */
+function oklabToLinear(L: number, a: number, b: number): [number, number, number] {
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ];
+}
+
+/** Bisection steps for the gamut search: far below one 8-bit channel step. */
+const GAMUT_SEARCH_STEPS = 24;
+
+/**
+ * `color`'s OKLCH hue at OKLab lightness `lightness` and chroma `chroma`, as
+ * opaque `#RRGGBB`. Where that point falls outside sRGB the chroma drops to
+ * the most the gamut holds at that lightness and hue (lightness and hue are
+ * kept). A neutral `color` has no hue: the result is the neutral at
+ * `lightness`.
+ */
+export function withLightnessChroma(color: string | RgbaColor, lightness: number, chroma: number): string {
+  const { a, b } = oklab(color);
+  const radius = Math.hypot(a, b);
+  const hueA = radius > 1e-6 ? a / radius : 0;
+  const hueB = radius > 1e-6 ? b / radius : 0;
+  const inGamut = (c: number) => oklabToLinear(lightness, hueA * c, hueB * c).every((v) => v >= -1e-6 && v <= 1 + 1e-6);
+  let reach = Math.max(0, radius > 1e-6 ? chroma : 0);
+  if (!inGamut(reach)) {
+    let low = 0;
+    let high = reach;
+    for (let step = 0; step < GAMUT_SEARCH_STEPS; step += 1) {
+      const middle = (low + high) / 2;
+      if (inGamut(middle)) low = middle;
+      else high = middle;
+    }
+    reach = low;
+  }
+  const [r, g, bl] = oklabToLinear(lightness, hueA * reach, hueB * reach);
+  return formatHex({ r: encodeChannel(r), g: encodeChannel(g), b: encodeChannel(bl), a: 1 });
+}
+
 /** Perceptual distance between two colors: Euclidean in OKLab (alpha ignored). */
 export function oklabDistance(a: string | RgbaColor, b: string | RgbaColor): number {
   const p = oklab(a);

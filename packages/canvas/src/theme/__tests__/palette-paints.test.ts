@@ -248,14 +248,24 @@ describe("layer-cake sections", () => {
 });
 
 describe("schematic shapes, icons, stickies, connectors", () => {
-  it("light ink-card shapes: the ink mixed into the card fill, ink border, theme text", () => {
+  it("light ink-card shapes: one lightness and chroma in the ink's hue, ink border, theme text", () => {
     expect(LIGHT.shapeFill).toBe("ink-card");
-    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#E5EDEF", border: "#0B6E99", text: "#1F1F1F" });
-    for (const color of CANVAS_COLORS.filter((candidate) => !["white", "gray", "yellow"].includes(candidate))) {
+    expect(resolveShapePaint("blue", LIGHT)).toEqual({ fill: "#D9F0FF", border: "#0B6E99", text: "#1F1F1F" });
+    const chroma = (color: string) => Math.hypot(oklab(color).a, oklab(color).b);
+    const hue = (color: string) => Math.atan2(oklab(color).b, oklab(color).a);
+    const hues = CANVAS_COLORS.filter((candidate) => !["white", "gray"].includes(candidate));
+    for (const color of hues) {
       const paint = resolveShapePaint(color, LIGHT);
-      expect(paint.fill).toBe(mixColors(LIGHT.palette[color], LIGHT.cardFill, 0.08));
-      expect(paint.border).toBe(LIGHT.palette[color]);
-      expect(paint.fill).not.toBe(LIGHT.cardFill);
+      expect(paint.border).toBe(resolveInk(color, LIGHT));
+      expect(Math.abs(oklabLightness(paint.fill) - (oklabLightness(LIGHT.cardFill) - 0.035))).toBeLessThan(0.003);
+      // The kind reads from the fill, not only the border: chroma 0.04, or the most sRGB holds there.
+      expect(chroma(paint.fill)).toBeGreaterThanOrEqual(0.027);
+      expect(chroma(paint.fill)).toBeLessThan(0.043);
+      expect(Math.abs(hue(paint.fill) - hue(LIGHT.palette[color]))).toBeLessThan(0.12);
+    }
+    // Green and teal (and teal and blue) were 0.003 / 0.005 apart at the 0.08 mix.
+    for (const [a, b] of [["green", "teal"], ["teal", "blue"], ["red", "orange"], ["violet", "pink"]] as const) {
+      expect(oklabDistance(resolveShapePaint(a, LIGHT).fill, resolveShapePaint(b, LIGHT).fill)).toBeGreaterThan(0.012);
     }
   });
 
@@ -267,13 +277,10 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(contrastRatio(node.border, node.fill)).toBeGreaterThanOrEqual(3);
     expect(contrastRatio(node.border, LIGHT.boardBackground)).toBeLessThan(4.5);
     const chroma = (color: string) => Math.hypot(oklab(color).a, oklab(color).b);
-    const paints: [string, string][] = [
-      [node.fill, mixColors(textStep, LIGHT.cardFill, 0.08)],
-      ...[2, 3, 4].map((depth): [string, string] => [
-        resolveSectionPaint("yellow", depth, LIGHT).fill,
-        mixColors(textStep, LIGHT.boardBackground, Math.min(0.33, 0.12 + 0.07 * (depth - 1))),
-      ]),
-    ];
+    const paints: [string, string][] = [2, 3, 4].map((depth): [string, string] => [
+      resolveSectionPaint("yellow", depth, LIGHT).fill,
+      mixColors(textStep, LIGHT.boardBackground, Math.min(0.33, 0.12 + 0.07 * (depth - 1))),
+    ]);
     for (const [fill, olive] of paints) {
       expect(Math.abs(oklabLightness(fill) - oklabLightness(olive))).toBeLessThan(0.002);
       expect(chroma(fill)).toBeGreaterThan(2 * chroma(olive));
