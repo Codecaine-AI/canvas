@@ -73,16 +73,29 @@ describe("figjam paints equal the role tables", () => {
 
 describe("layer-cake sections", () => {
   it("mixes the ink into the base by depth: t0, t0 + step, …, capped at tmax", () => {
-    expect(resolveSectionPaint("teal", 1, LIGHT).fill).toBe("#DBE9E8"); // mix(#0D7164, #FDFDFD, .14)
-    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.175));
-    expect(resolveSectionPaint("teal", 3, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.21));
-    expect(resolveSectionPaint("teal", 4, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.21));
-    expect(resolveSectionPaint("teal", 9, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.21));
+    expect(resolveSectionPaint("teal", 1, LIGHT).fill).toBe("#E0ECEB"); // mix(#0D7164, #FDFDFD, .12)
+    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.19));
+    expect(resolveSectionPaint("teal", 3, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.26));
+    expect(resolveSectionPaint("teal", 4, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.33));
+    expect(resolveSectionPaint("teal", 9, LIGHT).fill).toBe(mixColors("#0D7164", "#FDFDFD", 0.33));
+  });
+
+  it("light preset: each of three nested levels under the page is its own layer, whatever the hues", () => {
+    // Top-level sections are depth 2 (the page is depth 1). A level and its
+    // parent level must step apart in the same hue, and stay apart when the
+    // nest switches hue.
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
+      for (const depth of [3, 4]) {
+        expect(oklabDistance(resolveSectionPaint(color, depth, LIGHT).fill, resolveSectionPaint(color, depth - 1, LIGHT).fill))
+          .toBeGreaterThanOrEqual(0.03);
+      }
+    }
+    expect(oklabDistance(resolveSectionPaint("blue", 3, LIGHT).fill, resolveSectionPaint("teal", 4, LIGHT).fill)).toBeGreaterThanOrEqual(0.03);
   });
 
   it("derives border, chip, and chip border from the ink", () => {
     const paint = resolveSectionPaint("teal", 1, LIGHT);
-    expect(paint.border).toBe("rgba(13, 113, 100, 0.5)");
+    expect(paint.border).toBe("rgba(13, 113, 100, 0.75)");
     expect(paint.chipFill).toBe(mixColors("#0D7164", paint.fill, 0.16));
     expect(paint.chipBorder).toBe("rgba(13, 113, 100, 0.5)");
     expect(paint.headerText).toBe("#1F1F1F");
@@ -107,7 +120,7 @@ describe("layer-cake sections", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
       expect(oklabDistance(resolveSectionPaint(color, 1, LIGHT).fill, LIGHT.boardBackground)).toBeGreaterThanOrEqual(0.04);
     }
-    expect(LIGHT.sectionTintBase).toBe(0.14);
+    expect(LIGHT.sectionTintBase).toBe(0.12);
     expect(DARK.sectionTintBase).toBe(0.1);
   });
 
@@ -192,7 +205,7 @@ describe("layer-cake sections", () => {
 
   it("the light theme never applies the guard (base and card are both near-white)", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
-      expect(resolveSectionPaint(color, 1, LIGHT).fill).toBe(mixColors(LIGHT.palette[color], "#FDFDFD", 0.14));
+      expect(resolveSectionPaint(color, 1, LIGHT).fill).toBe(mixColors(LIGHT.palette[color], "#FDFDFD", 0.12));
     }
   });
 
