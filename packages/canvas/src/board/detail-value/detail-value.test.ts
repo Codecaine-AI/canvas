@@ -65,7 +65,10 @@ function boardFile(): string {
 }
 
 interface SentQuestion {
-  instructions: { node: { name: string; detail: string; section: string; wired_to: string[] } };
+  instructions: {
+    question: string;
+    node: { name: string; detail: string; section: string; wired_to: string[]; wire_labels: string[]; other_details: string[] };
+  };
   criteria: Record<string, unknown>;
 }
 
@@ -77,7 +80,7 @@ function fakeJev(
   pRemove: Record<string, number>,
   options: { boardTitle?: string; beforeAnswer?: (call: number) => Promise<void> } = {},
 ) {
-  const bodies: Array<{ model: string; state: { board_title: string }; questions: Record<string, SentQuestion> }> = [];
+  const bodies: Array<{ model: string; state: { board_title: string; board_notes: string[] }; questions: Record<string, SentQuestion> }> = [];
   const fetch = (async (_url: unknown, init?: RequestInit) => {
     const body = JSON.parse(String(init?.body));
     bodies.push(body);
@@ -114,16 +117,23 @@ describe("detail-value", () => {
 
     const line = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
 
-    expect(line).toBe("DETAIL · Jev judged 2 node details (2 asked, 0 cached) · 1 to remove (confidence ≥ 0.4) · 700 input tokens");
+    expect(line).toBe("DETAIL · Jev judged 2 node details (2 asked, 0 cached) · 1 to remove (confidence ≥ 0.1) · 700 input tokens");
     // Both questions went in one request, carrying the board, section, and wired neighbors.
     expect(jev.bodies).toHaveLength(1);
-    expect(jev.bodies[0]!.state).toEqual({ board_title: "Shop checkout" });
+    expect(jev.bodies[0]!.state).toEqual({ board_title: "Shop checkout", board_notes: [] });
     const sent = Object.values(jev.bodies[0]!.questions).map((question) => question.instructions.node);
-    expect(sent).toContainEqual({ name: "Payment step", detail: "part of checkout", section: "Checkout", wired_to: ["Orders table"] });
+    expect(sent).toContainEqual({
+      name: "Payment step",
+      detail: "part of checkout",
+      section: "Checkout",
+      wired_to: ["Orders table"],
+      wire_labels: [],
+      other_details: ["Orders table: status, total_cents"],
+    });
     // `remove` is the default: it is the first option, and the question keeps a detail only for an exact fact.
     const question = Object.values(jev.bodies[0]!.questions)[0]!;
     expect(Object.keys(question.criteria)).toEqual(["remove", "keep"]);
-    expect((question.instructions as unknown as { question: string }).question).toContain("Answer `remove` unless");
+    expect(question.instructions.question).toContain("Answer `remove` when it states no exact fact");
     const remove = question.criteria.remove as { counts_as_remove: string[] };
     expect(remove.counts_as_remove).toContainEqual(expect.stringContaining("what the box does"));
 
@@ -138,15 +148,18 @@ describe("detail-value", () => {
     expect(detailFindings(file)).toEqual([]);
     expect(toolFinalize(file.session, "committed", "Cleared a filler detail.", () => {}).isError).toBeUndefined();
 
-    // A re-check of the unchanged board asks nothing.
+    // The cleared detail was context for the orders question, so it is asked again once.
     const again = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
-    expect(again).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.4)");
-    expect(jev.bodies).toHaveLength(1);
+    expect(again).toBe("DETAIL · Jev judged 1 node detail (1 asked, 0 cached) · 0 to remove (confidence ≥ 0.1) · 700 input tokens");
+    // A re-check of the unchanged board asks nothing.
+    const third = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
+    expect(third).toBe("DETAIL · Jev judged 1 node detail (0 asked, 1 cached) · 0 to remove (confidence ≥ 0.1)");
+    expect(jev.bodies).toHaveLength(2);
   });
 
-  test("a remove is a finding from p(remove) 0.7, and below it is none", async () => {
-    // p(remove) 0.7 is confidence 0.4, the cut; 0.65 is confidence 0.3, under it.
-    for (const [pRemove, findings] of [[0.7, 1], [0.65, 0]] as const) {
+  test("a remove is a finding from p(remove) 0.55, and below it is none", async () => {
+    // p(remove) 0.55 is confidence 0.1, the cut; 0.52 is confidence 0.04, under it.
+    for (const [pRemove, findings] of [[0.55, 1], [0.52, 0]] as const) {
       const file = openCanvasFile(boardFile());
       const jev = fakeJev({ "part of checkout": pRemove });
       await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
@@ -202,8 +215,9 @@ describe("detail-value", () => {
     const line = await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
 
     expect(jev.bodies.map((body) => Object.values(body.questions).map((question) => question.instructions.node.detail)))
-      .toEqual([["part of checkout", "status, total_cents"], ["the payment one"]]);
-    expect(line).toContain("Jev judged 2 node details (3 asked, 1 cached) · 1 to remove"); // asks add up across both rounds
+      // The edit is context for the orders question too, so the second round asks both.
+      .toEqual([["part of checkout", "status, total_cents"], ["the payment one", "status, total_cents"]]);
+    expect(line).toContain("Jev judged 2 node details (4 asked, 0 cached) · 1 to remove"); // asks add up across both rounds
     expect(detailFindings(file).map((finding) => finding.message)).toEqual([
       expect.stringContaining('pay\'s detail "the payment one" adds no fact'),
     ]);
@@ -275,5 +289,108 @@ describe("detail-value", () => {
     }
     await Promise.all(writers.map((child) => child.exited));
     expect(Object.keys(JSON.parse(readFileSync(path, "utf8")).entries).sort()).toEqual(["k0", "k1", "k2", "k3", "k4"]);
+  });
+
+  /**
+   * A board where every fact a detail might repeat sits somewhere else: a
+   * sticky note, a wire label, a box in the same section, a wired box in
+   * another section, and a box with another name and the same words.
+   */
+  function contextBoard(): string {
+    const dir = mkdtempSync(join(tmpdir(), "detail-context-"));
+    dirs.push(dir);
+    const path = join(dir, "jobs.canvas.json");
+    const box = (id: string, text: string, detail: string, parentId: string, y: number) =>
+      ({ ...node(id, text, detail, y), parentId });
+    writeFileSync(path, JSON.stringify({
+      schemaVersion: 1,
+      id: "jobs",
+      title: "Job runner",
+      mode: "diagram",
+      viewport: { x: 0, y: 0, zoom: 1 },
+      objects: [
+        { id: "page", type: "section", text: "Job runner", color: "white", parentId: null, geometry: { x: 0, y: 0, width: 1400, height: 900 } },
+        { id: "s1", type: "section", text: "Queue", color: "gray", parentId: "page", geometry: { x: 80, y: 80, width: 400, height: 700 }, style: { shape: "section" } },
+        { id: "s2", type: "section", text: "Workers", color: "gray", parentId: "page", geometry: { x: 600, y: 80, width: 400, height: 700 }, style: { shape: "section" } },
+        { id: "s3", type: "section", text: "Archive", color: "gray", parentId: "page", geometry: { x: 1050, y: 80, width: 300, height: 300 }, style: { shape: "section" } },
+        box("retry", "retry", "until it clears, max 3", "s1", 120),
+        box("cron", "cron", "later · not in v1", "s1", 280),
+        box("hook", "hook", "later · not in v1", "s1", 440),
+        box("send", "send", "jobs send-email", "s2", 120),
+        box("far", "far", "bucket cold-archive", "s3", 120),
+        { id: "note", type: "sticky", text: "### Retry\n\nRetry **until it clears**, at most 3 attempts.", parentId: "page", geometry: { x: 80, y: 800, width: 300, height: 80 } },
+      ],
+      connections: [
+        { id: "retry-send", from: { objectId: "retry", anchor: "right" }, to: { objectId: "send", anchor: "left" }, label: "on failure", style: "solid", arrow: "forward" },
+      ],
+      annotations: [],
+    }));
+    return path;
+  }
+
+  test("each question sees the board context that can make its detail redundant", async () => {
+    const file = openCanvasFile(contextBoard());
+    const jev = fakeJev({});
+    await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
+
+    // Every sticky note rides once in the shared state, on one line without Markdown marks.
+    expect(jev.bodies[0]!.state.board_notes).toEqual(["Retry Retry until it clears, at most 3 attempts."]);
+    const byName = new Map(jev.bodies.flatMap((body) => Object.values(body.questions)).map((question) => [question.instructions.node.name, question.instructions.node]));
+    // retry: its wire's label, the other details in its section, and its wired neighbor's in another section.
+    expect(byName.get("retry")).toMatchObject({
+      wire_labels: ["on failure"],
+      other_details: ["cron: later · not in v1", "hook: later · not in v1", "send: jobs send-email"],
+    });
+    // The same words on a box with another name are about that box: hook never sees cron's "later".
+    expect(byName.get("hook")!.other_details).toEqual(["retry: until it clears, max 3"]);
+    // A box in another section with no wire is not context.
+    expect(byName.get("retry")!.other_details.join(" ")).not.toContain("cold-archive");
+    // A novel exact fact wins over the remove list.
+    expect(byName.get("retry") && Object.values(jev.bodies[0]!.questions)[0]!.instructions.question)
+      .toContain("Answer `keep` when it holds even one exact fact found nowhere else");
+  });
+
+  test("a changed sticky note asks every question on the board again", async () => {
+    const file = openCanvasFile(contextBoard());
+    const cache = memoryDetailCache();
+    const jev = fakeJev({ "until it clears, max 3": 0.9 });
+    await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
+    expect(detailFindings(file).map((finding) => finding.at)).toEqual([["retry"]]);
+
+    await callToolkitTool(file, "update_text", { id: "note", text: "Workers run in one pool." });
+    // The old verdict saw a note that no longer exists, so it no longer blocks.
+    expect(detailFindings(file)).toEqual([]);
+    const line = await checkDetailValues(file, { apiKey: "test-key", cache, fetch: jev.fetch, limiter: instant });
+    expect(line).toContain("(5 asked, 0 cached)");
+    expect(jev.bodies.at(-1)!.state.board_notes).toEqual(["Workers run in one pool."]);
+  });
+
+  test("a board's questions split into requests Jev accepts by size", async () => {
+    // Long notes and 60 details in one section: as one request this passes Jev's ~64k-token limit.
+    const dir = mkdtempSync(join(tmpdir(), "detail-size-"));
+    dirs.push(dir);
+    const path = join(dir, "big.canvas.json");
+    const note = (index: number) => ({
+      id: `note${index}`, type: "sticky", parentId: "page",
+      text: "Retry policy: ".concat("attempts, backoff and jitter values; ".repeat(20)),
+      geometry: { x: 80 + index * 320, y: 40, width: 300, height: 200 },
+    });
+    writeFileSync(path, JSON.stringify({
+      schemaVersion: 1, id: "big", title: "Big board", mode: "diagram", viewport: { x: 0, y: 0, zoom: 1 },
+      objects: [
+        { id: "page", type: "section", text: "Big board", color: "white", parentId: null, geometry: { x: 0, y: 0, width: 4000, height: 9000 } },
+        { id: "s1", type: "section", text: "Steps", color: "gray", parentId: "page", geometry: { x: 80, y: 300, width: 3800, height: 8600 }, style: { shape: "section" } },
+        ...[0, 1, 2, 3].map(note),
+        ...Array.from({ length: 60 }, (_, index) => node(`step${index}`, `step ${index}`, `queue-${index} · max ${index}`, 320 + index * 140)),
+      ],
+      connections: [],
+      annotations: [],
+    }));
+    const file = openCanvasFile(path);
+    const jev = fakeJev({});
+    const line = await checkDetailValues(file, { apiKey: "test-key", cache: memoryDetailCache(), fetch: jev.fetch, limiter: instant });
+    expect(line).toContain("Jev judged 60 node details (60 asked, 0 cached)");
+    expect(jev.bodies.length).toBeGreaterThan(2);
+    for (const body of jev.bodies) expect(JSON.stringify(body).length).toBeLessThanOrEqual(120_000);
   });
 });
