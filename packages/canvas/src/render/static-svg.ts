@@ -126,7 +126,6 @@ import type {
 } from "../state/schema";
 import { STICKY_MARKDOWN_MONO_FONT_WEIGHT } from "../objects/sticky/markdown-editing";
 import { ellipsizeStickyRow, layoutStickyText } from "../objects/sticky/sticky-text";
-import { asDrawn } from "../objects/sticky/note-fit";
 import type { RenderDocumentToSvg, RenderStaticSvgOptions, RenderedSvg } from "./types";
 
 // ---------------------------------------------------------------------------
@@ -1676,9 +1675,7 @@ export function renderSceneToSvg(
   for (const connection of scene.connections) {
     parts.push(renderConnector(document, connection, objectsById, scene.obstacles, canvasStyle));
   }
-  for (const stored of nonSections) {
-    // A card note draws at the height its text needs (objects/sticky/note-fit.ts).
-    const object = asDrawn(stored, canvasStyle);
+  for (const object of nonSections) {
     parts.push(renderShapeBody(object, stickyShadowFilterId, bounds, canvasStyle));
     parts.push(renderObjectText(object, canvasStyle));
   }

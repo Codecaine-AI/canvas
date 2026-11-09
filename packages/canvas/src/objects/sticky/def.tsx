@@ -11,7 +11,6 @@ import { ObjectShell, ObjectSlotText } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { INSET_BODY_TEXT_SLOT } from "../text-slots";
 import { STICKY_CODE_CHIP_ALPHA, StickyMarkdown } from "./markdown";
-import { asDrawn } from "./note-fit";
 
 /** Sticky geometry/typography (per-kind constants co-locate with their def; the text inset/typography live on the inset-body slot preset in objects/text-slots.ts). */
 export const STICKY_GEOMETRY = {
@@ -74,10 +73,8 @@ function cardStickyTrim(paint: StickyPaint, changed: boolean, canvasStyle: Canva
  * out while it is open.
  */
 function StickyObjectView(props: ObjectRenderProps) {
-  const { hideText } = props;
+  const { object, hideText } = props;
   const canvasStyle = useCanvasStyle();
-  // A card note draws at the height its text needs (./note-fit.ts), as the static SVG does.
-  const object = asDrawn(props.object, canvasStyle);
   const paint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle);
   return (
     <ObjectShell

@@ -14,7 +14,6 @@ import { objectDefForType } from "../../../../objects/object-def";
 import { stageMarkColors } from "../../../../theme/canvas-style";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import { resizeCursorFor } from "./resize";
-import { asDrawn } from "../../../../objects/sticky/note-fit";
 
 const HANDLE_SIZE = 12;
 const SELECTION_BORDER_WIDTH = 2;
@@ -54,13 +53,9 @@ export function SelectionBox({
 }) {
   // A stage mark in the board's colors (decision 56): the accent outline and
   // handle rings, board-surface handle bodies.
-  const canvasStyle = useCanvasStyle();
-  const marks = stageMarkColors(canvasStyle);
+  const marks = stageMarkColors(useCanvasStyle());
   if (selectedObjectIds.length === 0) return null;
-  // A card note's outline follows the card it draws (objects/sticky/note-fit.ts).
-  const objects = document.objects
-    .filter((object) => selectedObjectIds.includes(object.id))
-    .map((object) => asDrawn(object, canvasStyle));
+  const objects = document.objects.filter((object) => selectedObjectIds.includes(object.id));
   if (objects.length === 0) return null;
 
   const minX = Math.min(...objects.map((object) => object.geometry.x));

@@ -39,7 +39,6 @@ import type {
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { belowBandSize, belowExtendedBoundsPx, iconGlyphBoxPx } from "./text-slots";
 import { NATURAL_ASPECT_BY_TYPE, naturalAspectRect } from "./natural-aspect";
-import { asDrawn } from "./sticky/note-fit";
 export { inscribedTextRect, type InscribedTextRectResolver } from "./inscribed-text-rects";
 
 /**
@@ -209,8 +208,6 @@ export function hitBoundsForObject(
   object: InteractiveCanvasObject,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): CanvasBounds {
-  // A card note hits where it draws: at the height its text needs.
-  object = asDrawn(object, canvasStyle);
   const local = belowExtendedBoundsPx(object, canvasStyle);
   const minX = Math.min(0, local.x);
   const minY = Math.min(0, local.y);
