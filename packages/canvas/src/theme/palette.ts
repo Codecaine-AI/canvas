@@ -1149,9 +1149,10 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
   }
   const paintColor: CanvasColor = color === "white" ? "gray" : color;
   const ink = resolveInk(paintColor, style);
+  // Gray is flat: one off-gray layer at every depth (Ford, stage C round 2).
   const fill = paintColor === "gray" && style.shapeFill === "ink-card"
-    ? inkFill("gray", style.sectionTintMixBase, graySectionWeight(depth, style), style)
-    : layerCakeFill(paintColor, paintColor === "gray" ? Math.min(depth, GRAY_SECTION_MAX_DEPTH) : depth, style);
+    ? inkFill("gray", style.sectionTintMixBase, graySectionWeight(style), style)
+    : layerCakeFill(paintColor, paintColor === "gray" ? PAGE_SECTION_DEPTH : depth, style);
   const chipFill = sectionChipFill(ink, fill, paintColor === "gray", style);
   return {
     fill,
@@ -1228,30 +1229,19 @@ const CHIP_INK_GROUND = {
 } as const;
 
 /**
- * A gray section beside `ink-card` nodes: GRAY_SECTION_INK_WEIGHT at top
- * level (0.068, up from 0.062: the lighter gray sat too close to the page
- * and read by its edge alone, stage A round 9: opus on 'Payments' and
- * 'Shared platform'), a clear tone under the white section (stage A round 4: white and
- * gray read as one fill, so white looked unstyled), then
- * GRAY_SECTION_STEP_SCALE of each hue's step per level, so a gray child
- * still sits a tone below its parent (round 4: gray 'Rules' on violet read
- * near-white) without turning the disabled slab a full step gives, and gray
- * nodes (L 0.894) keep their ground.
+ * A gray section beside `ink-card` nodes: GRAY_SECTION_TOP_LEVEL_SHARE of the
+ * top-level ink weight, at every depth (#F7F7F6 at the default controls).
+ * Gray is the off-white zone on the white base section, not a layer that
+ * darkens as it nests (Ford, stage C round 2: "Every gray section is
+ * #F7F7F6 at any depth. Gray nodes keep #F6F9FE. Gray still reads apart
+ * from the white base (#FDFDFD)"). The share keeps the fill on the tint
+ * controls, so a zero cap paints the page.
  */
-function graySectionWeight(depth: number, style: CanvasStyle): number {
-  const top = layerCakeWeight(TOP_LEVEL_SECTION_DEPTH, style);
-  const weight = layerCakeWeight(depth, style);
-  if (top <= 0) return weight;
-  return roundWeight(weight <= top
-    ? (GRAY_SECTION_INK_WEIGHT * weight) / top
-    : GRAY_SECTION_INK_WEIGHT + (weight - top) * GRAY_SECTION_STEP_SCALE);
+function graySectionWeight(style: CanvasStyle): number {
+  return roundWeight(GRAY_SECTION_TOP_LEVEL_SHARE * Math.max(0, layerCakeWeight(TOP_LEVEL_SECTION_DEPTH, style)));
 }
 
-const GRAY_SECTION_INK_WEIGHT = 0.068;
-const GRAY_SECTION_STEP_SCALE = 0.5;
-
-/** The deepest level a gray layer-cake section deepens to: the top-level section's tone (depth 2 under the page). */
-const GRAY_SECTION_MAX_DEPTH = 2;
+const GRAY_SECTION_TOP_LEVEL_SHARE = 0.65;
 
 /** Rounds an ink weight so float noise (0.07 + 0.035 = 0.10500000000000001) never flips a channel's rounding. */
 function roundWeight(weight: number): number {
