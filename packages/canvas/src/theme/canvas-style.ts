@@ -135,6 +135,12 @@ export interface CanvasStyle {
   headerFont: CanvasStyleFont;
   headerUppercase: boolean;
   headerFontSizePx: number;
+  /**
+   * The board title (the page section's title) as a heading: bold sans at this
+   * size, with no tab behind it. 0 = the page takes the section tab like any
+   * other section.
+   */
+  boardTitleFontSizePx: number;
   /** Layer-cake header chip = the ink mixed into the section fill at this weight. */
   headerChipMix: number;
 
@@ -275,6 +281,7 @@ const FIGJAM_PRESET: CanvasStyle = {
   headerFont: "sans",
   headerUppercase: false,
   headerFontSizePx: 16,
+  boardTitleFontSizePx: 0,
   headerChipMix: 0.16,
   iconPack: "nucleo",
   iconStyle: "glyph",
@@ -466,6 +473,12 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   headerFont: "mono",
   headerUppercase: true,
   headerFontSizePx: 14,
+  // The board title is a heading, not a fifth section tab: every judge read
+  // the 14px mono uppercase page chip as the same level as the section tabs
+  // under it (stage B round 0: astra, kimi and fable on all 20 boards). Bold
+  // sans at 21px, sentence case, with no tab, fits the 27px header band, so
+  // content placed just under the page's top edge stays clear.
+  boardTitleFontSizePx: 21,
   headerChipMix: 0.16,
   iconPack: "tabler",
   iconStyle: "tile",
@@ -813,6 +826,16 @@ export const CANVAS_STYLE_CONTROLS: readonly CanvasStyleControl[] = [
   { key: "headerFont", group: "sections", label: "Header font", kind: "select", options: FONT_OPTIONS },
   { key: "headerUppercase", group: "sections", label: "Uppercase header", kind: "boolean" },
   { key: "headerFontSizePx", group: "sections", label: "Header size", kind: "number", min: 9, max: 24, step: 0.5 },
+  {
+    key: "boardTitleFontSizePx",
+    group: "sections",
+    label: "Board title size",
+    description: "The page's title as a bold sans heading with no tab; 0 keeps the section tab.",
+    kind: "number",
+    min: 0,
+    max: 24,
+    step: 0.5,
+  },
   {
     key: "headerChipMix",
     group: "sections",

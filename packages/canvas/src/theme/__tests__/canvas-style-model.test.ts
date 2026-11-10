@@ -83,6 +83,7 @@ describe("theme presets", () => {
       headerFont: "sans",
       headerUppercase: false,
       headerFontSizePx: 16,
+      boardTitleFontSizePx: 0,
       headerChipMix: 0.16,
       iconPack: "nucleo",
       iconStyle: "glyph",

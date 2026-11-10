@@ -125,7 +125,7 @@ function SectionTitleEditor({ target, slot, value, setValue, commit, cancel, zoo
         ...(font.uppercase ? { textTransform: "uppercase" as const } : null),
         // A pinned chip's content box is its height less the bottom edge.
         lineHeight: `${layout.placement === "pinned" ? rect.height - border.top - border.bottom : rect.height}px`,
-        background: paint.chipFill,
+        background: layout.boardTitle ? "transparent" : paint.chipFill,
         color: paint.headerText,
         outline: "none",
         whiteSpace: "nowrap",

@@ -51,6 +51,7 @@ function chipThemeStyle(layout: TitleChipLayout, headerText: string): CSSPropert
   }
   const font = layout.title.font;
   if (font.font === "mono") style.fontFamily = CANVAS_MONO_FONT_STACK;
+  if (layout.boardTitle) style.borderWidth = 0;
   if (font.fontSizePx !== TITLE_CHIP.fontSizePx) style.fontSize = `${font.fontSizePx}px`;
   if (font.fontWeight !== TITLE_CHIP.fontWeight) style.fontWeight = font.fontWeight;
   if (headerText !== TITLE_CHIP.textColor) style.color = headerText;
@@ -138,7 +139,8 @@ export function SectionTitleChip({
       style={{
         left: `${section.geometry.x + box.x}px`,
         top: `${section.geometry.y + box.y}px`,
-        background: paint.chipFill,
+        // The board title is a heading on the page, not a tab.
+        background: layout.boardTitle ? "transparent" : paint.chipFill,
         borderColor: paint.chipBorder,
         maxWidth: `${titleChipMaxWidthPx(section.geometry.width, scale)}px`,
         pointerEvents: "auto",

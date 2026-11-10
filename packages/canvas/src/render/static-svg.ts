@@ -1101,6 +1101,8 @@ function titleChipTextAttributes(font: TitleChipFont, x: number, y: number, fill
  */
 function renderTitleChipBody(layout: TitleChipLayout, paint: SectionPaint, x: number, y: number): string {
   const { box, border, radius } = layout;
+  // The board title is a heading on the page: no tab behind it.
+  if (layout.boardTitle) return "";
   if (layout.placement === "floating") {
     const borderWidthPx = border.top;
     const borderInset = borderWidthPx / 2;

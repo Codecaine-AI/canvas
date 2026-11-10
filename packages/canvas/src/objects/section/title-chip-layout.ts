@@ -153,8 +153,32 @@ export interface TitleChipFont {
   uppercase: boolean;
 }
 
-/** The title run's font under `canvasStyle`. */
-export function titleChipTitleFont(canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE): TitleChipFont {
+/** Weight of the board title heading (titleChipIsBoardTitle). */
+const BOARD_TITLE_FONT_WEIGHT = 700;
+
+/**
+ * Whether `section`'s chip is the board title: the page (a parentless white
+ * section, board/section-colors.ts isPageSection) under a style that sets the
+ * title as a heading (`boardTitleFontSizePx` > 0).
+ */
+export function titleChipIsBoardTitle(
+  section: Partial<Pick<InteractiveCanvasObject, "parentId" | "color">>,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): boolean {
+  return canvasStyle.boardTitleFontSizePx > 0 && (section.parentId ?? null) === null && section.color === "white";
+}
+
+/** The title run's font under `canvasStyle`; the board title (`boardTitle`) is the bold sans heading. */
+export function titleChipTitleFont(canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE, boardTitle = false): TitleChipFont {
+  if (boardTitle) {
+    return {
+      font: "sans",
+      fontSizePx: canvasStyle.boardTitleFontSizePx,
+      fontWeight: BOARD_TITLE_FONT_WEIGHT,
+      letterSpacingEm: 0,
+      uppercase: false,
+    };
+  }
   const uppercase = canvasStyle.headerUppercase;
   return {
     font: canvasStyle.headerFont,
@@ -263,6 +287,8 @@ export interface TitleChipLayout {
   truncated: boolean;
   /** Edge widths the box paints: all four floating; right + bottom pinned. */
   border: TitleChipEdges;
+  /** The board title: a heading with no tab (no fill, no edges). */
+  boardTitle: boolean;
   /** Corner radii: floating = titleChipCornerRadiusPx all round; pinned = the frame's inner corner top-left and titleChipCornerRadiusPx bottom-right. */
   radius: TitleChipCorners;
   paddingLeftPx: number;
@@ -274,7 +300,8 @@ export interface TitleChipLayout {
   title: TitleChipRun;
 }
 
-type ChipSection = Pick<InteractiveCanvasObject, "text" | "geometry" | "style" | "icon">;
+type ChipSection = Pick<InteractiveCanvasObject, "text" | "geometry" | "style" | "icon"> &
+  Partial<Pick<InteractiveCanvasObject, "parentId" | "color">>;
 
 export interface TitleChipLayoutOptions {
   /** Overrides the section's title (the in-place editor sizes itself against the draft). */
@@ -295,12 +322,13 @@ export function titleChipHasContent(
 
 /** The width-relevant content of a chip, independent of the section's geometry. */
 function chipContent(
-  section: Pick<InteractiveCanvasObject, "text" | "style" | "icon">,
+  section: Pick<InteractiveCanvasObject, "text" | "style" | "icon"> & Partial<Pick<InteractiveCanvasObject, "parentId" | "color">>,
   canvasStyle: CanvasStyle,
   text: string,
 ) {
   const pinned = canvasStyle.headerPlacement === "pinned";
-  const chipBorder = canvasStyle.titleChipBorderWidthPx;
+  const boardTitle = titleChipIsBoardTitle(section, canvasStyle);
+  const chipBorder = boardTitle ? 0 : canvasStyle.titleChipBorderWidthPx;
   const border: TitleChipEdges = pinned
     ? { top: 0, right: chipBorder, bottom: chipBorder, left: 0 }
     : { top: chipBorder, right: chipBorder, bottom: chipBorder, left: chipBorder };
@@ -308,7 +336,7 @@ function chipContent(
   const measure = titleChipTextWidthPx;
   const paddingLeftPx = iconId ? TITLE_CHIP_ICON.leadPaddingPx : TITLE_CHIP.paddingXPx;
   const paddingRightPx = TITLE_CHIP.paddingXPx;
-  const titleFont = titleChipTitleFont(canvasStyle);
+  const titleFont = titleChipTitleFont(canvasStyle, boardTitle);
   const titleText = titleChipDisplayText(text, titleFont);
   const titleWidth = measure(titleText, titleFont);
 
@@ -320,6 +348,7 @@ function chipContent(
 
   return {
     pinned,
+    boardTitle,
     border,
     paddingLeftPx,
     paddingRightPx,
@@ -362,6 +391,7 @@ export function titleChipLayout(
     scale,
     naturalWidthPx: content.naturalWidthPx,
     truncated: content.naturalWidthPx > width,
+    boardTitle: content.boardTitle,
     border: content.border,
     radius,
     paddingLeftPx: content.paddingLeftPx,
@@ -380,7 +410,7 @@ export function titleChipLayout(
 export function estimateTitleChipWidthPx(
   text: string,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
-  section: Pick<InteractiveCanvasObject, "style" | "icon"> = {},
+  section: Pick<InteractiveCanvasObject, "style" | "icon"> & Partial<Pick<InteractiveCanvasObject, "parentId" | "color">> = {},
 ): number {
   return chipContent({ ...section, text }, canvasStyle, text).naturalWidthPx;
 }
