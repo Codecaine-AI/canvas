@@ -81,17 +81,29 @@ export const changeSectionBorder = defineOperationTool({
 export const lock = defineOperationTool({
   name: "lock",
   description:
-    "Protect a region. \"background\" pins the frame itself and leaves what is "
-    + "inside it editable; \"all\" freezes the frame and every descendant. "
-    + "Sections only — a lock covers an area of the board, not a single box.",
+    "Protect a region, or release one. \"background\" pins the frame itself and "
+    + "leaves what is inside it editable; \"all\" freezes the frame and every "
+    + "descendant; \"none\" deletes the lock and restores normal editing. "
+    + "Sections only — a lock covers an area of the board, not a single box. "
+    + "A lock a person set is a don't-touch signal: release one only when the "
+    + "request cannot be carried out otherwise, and say that you did.",
   fields: LockParams.properties,
-  // No lock gate: re-locking a frame that is already locked changes the MODE of
-  // its own lock, which is lock management. (A frame inside an ancestor locked
-  // "all" is likewise still lockable — the ancestor's protection is not a
-  // reason the region cannot be protected further.)
+  // Never lock-gated, by definition. Re-locking a frame that is already locked
+  // changes the MODE of its own lock, and mode "none" is the one call that
+  // lifts a lock, so gating it on the lock it lifts would make every lock
+  // permanent. (A frame inside an ancestor locked "all" is likewise still
+  // lockable — the ancestor's protection is not a reason the region cannot be
+  // protected further.)
   validate: (ctx, p) => ctx.requireSection(p.id),
   apply: (ctx, p) => ctx.applyLowered(
-    { type: "updateObject", objectId: p.id, patch: { locked: p.mode } },
+    // `undefined` in an object patch deletes the key on the way down, so mode
+    // "none" on a frame with no lock produces an identical document — which the
+    // factory reports as a no-op rather than an empty APPLIED line.
+    {
+      type: "updateObject",
+      objectId: p.id,
+      patch: { locked: p.mode === "none" ? undefined : p.mode },
+    },
     `lock ${p.id} ${p.mode}`,
   ),
 });

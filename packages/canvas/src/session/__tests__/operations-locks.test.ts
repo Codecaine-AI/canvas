@@ -145,13 +145,13 @@ describe("background pins the frame and nothing else", () => {
 });
 
 describe("lock management is exempt from the lock", () => {
-  test("unlock releases a locked frame", () => {
+  test("lock mode none releases a locked frame", () => {
     const session = lockedSession();
 
-    const released = runOp(session, "unlock", { id: "ops" });
+    const released = runOp(session, "lock", { id: "ops", mode: "none" });
 
     expect(released.isError).toBeUndefined();
-    expect(released.text).toContain("APPLIED · unlock ops");
+    expect(released.text).toContain("APPLIED · lock ops none");
     expect(session.draft.objects.find((object) => object.id === "ops")?.locked)
       .toBeUndefined();
     // And the region it protected is editable again, in the same turn.

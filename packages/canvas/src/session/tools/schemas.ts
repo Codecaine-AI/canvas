@@ -478,12 +478,13 @@ export const ChangeSectionBorderParams = Type.Object(
 export type ChangeSectionBorderParams = Static<typeof ChangeSectionBorderParams>;
 
 /**
- * The two lock strengths the document model carries. `"background"` pins the
- * frame itself and leaves its contents draggable; `"all"` freezes every
- * descendant too.
+ * The two lock strengths the document model carries, plus `"none"`, which
+ * deletes the lock. `"background"` pins the frame itself and leaves its
+ * contents draggable; `"all"` freezes every descendant too.
  */
-export const LockMode = StringEnum(["all", "background"], {
-  description: "How much the lock covers: the frame alone, or the frame and everything in it.",
+export const LockMode = StringEnum(["all", "background", "none"], {
+  description:
+    "How much the lock covers: the frame alone, the frame and everything in it, or nothing (\"none\" deletes the lock).",
 });
 
 export const LockParams = Type.Object(
@@ -491,7 +492,7 @@ export const LockParams = Type.Object(
     id: Id,
     mode: LockMode,
   },
-  { ...Seal, description: "Lock a section." },
+  { ...Seal, description: "Set or delete a section's lock." },
 );
 export type LockParams = Static<typeof LockParams>;
 

@@ -395,7 +395,7 @@ describe("section gestures", () => {
       .toEqual({ shape: "section", strokeStyle: "none" });
   });
 
-  test("lock and unlock write and clear the section's lock", () => {
+  test("lock writes the section's lock, and mode none clears it", () => {
     const session = makeTestSession(makeDocument([frame]), ["frame"]);
 
     const locked = runOp(session, "lock", { id: "frame", mode: "background" });
@@ -404,21 +404,21 @@ describe("section gestures", () => {
     expect(session.draft.objects.find((object) => object.id === "frame")?.locked)
       .toBe("background");
 
-    const released = runOp(session, "unlock", { id: "frame" });
+    const released = runOp(session, "lock", { id: "frame", mode: "none" });
     expect(released.isError).toBeUndefined();
-    expect(released.text).toContain("APPLIED · unlock frame");
+    expect(released.text).toContain("APPLIED · lock frame none");
     expect(session.draft.objects.find((object) => object.id === "frame")?.locked)
       .toBeUndefined();
   });
 
-  test("unlocking an unlocked frame is a no-op, not an error", () => {
+  test("lock mode none on a frame with no lock is a no-op, not an error", () => {
     const session = makeTestSession(makeDocument([frame]), ["frame"]);
     const draftBefore = session.draft;
 
-    const result = runOp(session, "unlock", { id: "frame" });
+    const result = runOp(session, "lock", { id: "frame", mode: "none" });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("NO-OP · unlock frame");
+    expect(result.text).toContain("NO-OP · lock frame");
     expect(session.draft).toBe(draftBefore);
     expect(session.events).toEqual([]);
   });
