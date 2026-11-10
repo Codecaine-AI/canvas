@@ -157,13 +157,17 @@ describe("layer-cake sections", () => {
     expect(resolveSectionPaint("blue", 4, style).fill).not.toBe(resolveSectionPaint("blue", 2, style).fill);
   });
 
-  it("light preset: gray sits a clear tone under white and steps at half a hue's step, so a gray child still deepens yet stays lighter than a gray node", () => {
+  it("light preset: gray sits a clear tone under white and steps at half a hue's step, so a gray child still deepens under a near-white gray node", () => {
     const gray = [2, 3, 4, 5].map((depth) => oklabLightness(resolveSectionPaint("gray", depth, LIGHT).fill));
     expect(oklabLightness(resolveSectionPaint("white", 2, LIGHT).fill) - gray[0]!).toBeGreaterThanOrEqual(0.03);
     expect(gray[0]! - gray[1]!).toBeGreaterThanOrEqual(0.008);
     expect(gray[1]! - gray[2]!).toBeGreaterThanOrEqual(0.006);
     expect(gray[3]).toBe(gray[2]);
-    expect(gray[2]! - oklabLightness(resolveShapePaint("gray", LIGHT).fill)).toBeGreaterThanOrEqual(0.04);
+    // Stage B round 4: the gray node is a near-white card ABOVE every gray
+    // level (it was a mid slate under them, which read as disabled). The
+    // gray sections stay light (Ford: "the section backgrounds are too
+    // dark"), so the card's edge carries it and the fill step is small.
+    expect(oklabLightness(resolveShapePaint("gray", LIGHT).fill) - gray[0]!).toBeGreaterThanOrEqual(0.015);
   });
 
   it("light preset: red and pink washes stand apart in hue at every level (round 4: a red child read as its pink parent)", () => {
@@ -454,18 +458,19 @@ describe("schematic shapes, icons, stickies, connectors", () => {
         }
       }
     }
-    // A gray node sits lighter than the hued nodes, where a neutral matches
-    // their weight, yet stays darker than every section: 0.055 L under a gray
-    // section, 0.03 under any depth-3 level (where gray nodes sit on the climb
-    // boards), and 0.01 under the deepest tint, where its ink border carries it.
+    // A gray node is a near-white card with a firm ink edge (stage B round 4:
+    // the mid slate under every section read as disabled, fable on 13
+    // boards). It sits lighter than every colored or gray section, 0.014 L
+    // and 0.018 OKLab from each (the sections stay light, after Ford), and
+    // its 2px border (5.5:1) carries it there, as the white node's does.
     const gray = resolveShapePaint("gray", LIGHT);
-    for (const sectionColor of sectionColors) {
-      for (const [depth, floor] of [[2, 0.05], [3, 0.03], [4, 0.01], [5, 0.01]] as const) {
+    for (const sectionColor of sectionColors.filter((color) => color !== "white")) {
+      for (const depth of [2, 3, 4, 5]) {
         const section = resolveSectionPaint(sectionColor, depth, LIGHT).fill;
-        expect(oklabLightness(section) - oklabLightness(gray.fill)).toBeGreaterThanOrEqual(floor);
+        expect(oklabLightness(gray.fill) - oklabLightness(section)).toBeGreaterThanOrEqual(0.014);
+        expect(oklabDistance(gray.fill, section)).toBeGreaterThanOrEqual(0.018);
       }
     }
-    expect(oklabLightness(resolveSectionPaint("gray", 2, LIGHT).fill) - oklabLightness(gray.fill)).toBeGreaterThanOrEqual(0.07);
     expect(contrastRatio(gray.border, gray.fill)).toBeGreaterThanOrEqual(3);
     // A white node is the board surface: lighter than every colored or gray
     // section, and at least 0.035 from any colored one. On a white section
@@ -525,21 +530,20 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(oklabDistance(inner.bar, colors.border)).toBeGreaterThanOrEqual(0.1);
   });
 
-  it("light ink-card shapes: gray is a faint cool slate at the hued nodes' depth, white the board surface", () => {
-    // The neutral #DCDCDC read dull beside the clear hues, so gray takes a
-    // faint cool slate (stage A round 11). It moved from L 0.891 (#D7DCDF)
-    // to the hued nodes' depth (stage B round 1): there a gray node or tile
-    // stood only 0.05 to 0.07 off a gray section and read as a hole in it
-    // (stage B round 0: fable on 13 boards). This pin used to hold gray
-    // 0.03 L over the hued nodes; it now holds gray within 0.04 L of them.
+  it("light ink-card shapes: gray is a near-white cool card, white the board surface", () => {
+    // The neutral #DCDCDC read dull beside the clear hues, so gray took a
+    // faint cool slate (stage A round 11), then the hued nodes' depth
+    // (#CBD1D5, stage B round 1). There it still read as a disabled panel on
+    // gray sections (stage B round 1: fable on 13 boards, "give the neutral
+    // kind a white or light fill with a firm border"), so it is now a
+    // near-white card with a cool cast, lighter than every gray level and
+    // still apart from the plain white node.
     const gray = resolveShapePaint("gray", LIGHT);
-    expect(gray).toEqual({ fill: "#CBD1D5", border: "#666562", text: "#1F1F1F" });
+    expect(gray).toEqual({ fill: "#F6F9FE", border: "#666562", text: "#1F1F1F" });
     expect(Math.hypot(oklab(gray.fill).a, oklab(gray.fill).b)).toBeLessThan(0.01);
-    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
-      expect(Math.abs(oklabLightness(gray.fill) - oklabLightness(resolveShapePaint(color, LIGHT).fill))).toBeLessThanOrEqual(0.04);
-    }
+    expect(oklabDistance(gray.fill, resolveShapePaint("white", LIGHT).fill)).toBeGreaterThanOrEqual(0.014);
     for (const depth of [2, 3, 4, 5]) {
-      expect(oklabDistance(gray.fill, resolveSectionPaint("gray", depth, LIGHT).fill)).toBeGreaterThanOrEqual(0.08);
+      expect(oklabDistance(gray.fill, resolveSectionPaint("gray", depth, LIGHT).fill)).toBeGreaterThanOrEqual(0.018);
     }
     expect(resolveShapePaint("white", LIGHT)).toEqual({ fill: "#FDFDFD", border: "#666562", text: "#1F1F1F" });
   });
@@ -602,7 +606,7 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(resolveStickyPaint("yellow", DARK)).toMatchObject({ fill: "#32363E", border: "#3D444D", rule: "#9198A1", cardShadow: null });
   });
 
-  it("light preset: a note reads off the page and off every top-level section, and stays lighter than every node", () => {
+  it("light preset: a note reads off the page and off every top-level section, and stays lighter than every hued node", () => {
     // Round 4: the note was the page's own color and a shade above a gray
     // section, so it read as a borderless box (UI climb round 4).
     const note = resolveStickyPaint("yellow", LIGHT);
@@ -614,7 +618,10 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     // step (L 0.962, not the loud L 0.977 lemon; stage A round 9: opus). Every
     // other note wash sits at L 0.952, 0.06 over the lightest node; yellow
     // keeps 0.07 over the slate gray node and 0.095 over the yellow node.
-    for (const nodeColor of CANVAS_COLORS.filter((color) => color !== "white")) {
+    // Gray left the rule in stage B round 4: the gray node is a near-white
+    // card now, and a note stands 0.04 OKLab off it by its wash's hue.
+    expect(oklabDistance(note.fill, resolveShapePaint("gray", LIGHT).fill)).toBeGreaterThanOrEqual(0.04);
+    for (const nodeColor of CANVAS_COLORS.filter((color) => color !== "white" && color !== "gray")) {
       expect(oklabLightness(note.fill) - oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill)).toBeGreaterThanOrEqual(0.065);
     }
     expect(contrastRatio(note.text, note.fill)).toBeGreaterThanOrEqual(4.5);

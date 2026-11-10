@@ -381,7 +381,7 @@ function shapeFillBase(color: CanvasColor, style: CanvasStyle): string {
  */
 function retonedNodeFill(color: CanvasColor, base: string, style: CanvasStyle): string {
   if (color === "white") return base;
-  if (color === "gray") return withLightnessChroma(paletteColor("blue", style), oklabLightness(base) + GRAY_NODE_RETONE.lightness, GRAY_NODE_RETONE.chroma);
+  if (color === "gray") return withLightnessChroma(paletteColor("blue", style), GRAY_NODE.lightness, GRAY_NODE.chroma, SLATE_HUE_TURN);
   const { lightness = -NODE_FILL_DEEPER_STEP, chroma, hue = 0 } = NODE_FILL_RETONE[color] ?? {};
   return withLightnessChroma(base, oklabLightness(base) + lightness, chroma ?? oklabChroma(base), hue);
 }
@@ -419,16 +419,21 @@ const NODE_FILL_RETONE: Partial<Record<CanvasColor, { lightness?: number; chroma
 };
 
 /**
- * The gray node: a faint cool slate (chroma 0.008 at the blue anchor's hue)
- * at OKLab L 0.858 (#CBD1D5), the hued nodes' depth, not the L 0.891 it had.
- * At 0.891 a gray node or tile stood only 0.05 to 0.07 off a gray section,
- * half a hued node's step, and read as a hole in the section (stage B round
- * 0: fable on 01, 02, 03, 05, 06, 07, 08, 09, 10, 11, h4, h5 and h6; kimi on
- * the gray wires' ground). It now stands 0.086 to 0.107 off every gray
- * level. A cool gray reads clean where a warm one read greige (UI climb
- * round 4).
+ * The gray node: a near-white card (OKLab L 0.982, chroma 0.007, the blue
+ * anchor's hue turned SLATE_HUE_TURN toward violet), edged in the gray ink at
+ * the node border width. The mid slate #CBD1D5 a gray node or tile had read
+ * as a disabled panel on the gray sections, and on the page (stage B round
+ * 1: fable on 01, 02, 03, 05 to 11, h1, h3 to h6: "give the neutral kind a
+ * white or light fill with a firm border"). Gray sections stay a light warm
+ * neutral (Ford: "the section backgrounds are too dark"; stage B round 2:
+ * astra marked the darker slate section down on every board), so the card
+ * stands only 0.018 L over them and its 2px edge (5.5:1) carries it, as the
+ * white node's does. The cool cast tells it from the warm section and from
+ * the plain white node.
  */
-const GRAY_NODE_RETONE = { lightness: -0.037, chroma: 0.008 } as const;
+const GRAY_NODE = { lightness: 0.982, chroma: 0.007 } as const;
+/** The gray card turns this far (OKLCH degrees) from the blue anchor, toward violet: clear of the blue nodes' hue. */
+const SLATE_HUE_TURN = 20;
 
 /**
  * A light-board `ink-card` white node edges in the gray ink, not its own ink
@@ -489,10 +494,8 @@ const SHAPE_CARD_CHROMA_BY_COLOR: Partial<Record<CanvasColor, number>> = { yello
  * the heaviest fill on gray-heavy boards, a "concrete slab" that read as
  * disabled (UI climb round 4: argon and fable on 01, 02, 03, 04, 08, 10, h1,
  * h5). Picked from L 0.885, 0.9 and a warm 0.895 on board 02: the warm one
- * read greige. The gray node stays darker than every section: 0.06 L under a
- * gray section, 0.035 under any depth-3 level, where gray nodes sit on the
- * climb boards, and 0.014 under the deepest tint, where its ink border
- * carries it.
+ * read greige. This neutral is now only the ground the gray inks are set
+ * against: the gray node paints the near-white GRAY_NODE card.
  */
 const SHAPE_CARD_GRAY_LIGHTNESS_LIFT = 0.036;
 
@@ -633,8 +636,15 @@ function tileGlyphOn(ink: string, style: CanvasStyle): string {
 
 /** Ink weight of a tinted icon tile over the card fill. */
 const ICON_TILE_TINT_WEIGHT = 0.16;
-/** Border width of a node-paint tile, the outlined `white` tile and a brand tile, px (the section frame weight). */
-const ICON_TILE_OUTLINE_WIDTH_PX = 1.5;
+/**
+ * A node-paint tile, the outlined `white` tile and a brand tile edge at the
+ * node border width (shapeBorderWidthPx). At the 1.5px section frame weight
+ * a tile read thinner and lighter than the nodes beside it, so the node
+ * family looked mixed (stage B round 1: fable on 04, 06, 08 and h2).
+ */
+function iconTileOutlineWidthPx(style: CanvasStyle): number {
+  return style.shapeBorderWidthPx;
+}
 
 /** The tile body an icon gets in the tile style. */
 export type IconTileMode = "solid" | "tint";
@@ -689,9 +699,9 @@ export function resolveIconTilePaint(
     // A white tile draws in its gray edge, not the near-black ink, which
     // made it heavier than the tinted tiles (round 9: opus on 'Scheduler', 'Secrets').
     const glyph = ensureContrast(whiteNodeEdgeAsGray(color, style) ? shape.border : ink, shape.fill, MIN_TEXT_CONTRAST);
-    return { ...paint, tileFill: shape.fill, tileBorder: shape.border, glyph, tileMode, tileBorderWidthPx: ICON_TILE_OUTLINE_WIDTH_PX };
+    return { ...paint, tileFill: shape.fill, tileBorder: shape.border, glyph, tileMode, tileBorderWidthPx: iconTileOutlineWidthPx(style) };
   }
-  if (paint.tileBorder !== null) return { ...paint, tileMode, tileBorderWidthPx: ICON_TILE_OUTLINE_WIDTH_PX };
+  if (paint.tileBorder !== null) return { ...paint, tileMode, tileBorderWidthPx: iconTileOutlineWidthPx(style) };
   return {
     ...paint,
     tileFill: style.sectionFill === "layer-cake"
@@ -763,20 +773,21 @@ export function resolveBrandMarkFill(fill: string, background: string, style: Ca
   })).fill;
 }
 
-/** Share of the gray ink in a brand tile's edge (the rest is the tile fill). */
-const BRAND_TILE_EDGE_INK_WEIGHT = 0.55;
-
 /**
  * A brand logo's paint (a `brand-*` glyph, objects/shapes/icon/icon-glyphs.ts):
  * the mark keeps its own brand color (the Simple Icons `hex`, or a full-color
  * mark's per-shape colors), never the object's color pick, which would tint
  * every logo one hue. Glyph style: the bare mark on the board. Tile style: the
- * mark on a `white` node's fill, edged in a soft gray (the gray ink at
- * BRAND_TILE_EDGE_INK_WEIGHT) at the node-tile edge width, so a logo sits in
- * the same tile system as the pastel tiles without taking a hue that is not
- * its own. The card hairline it had (1.24:1) left the tile edge nearly gone
- * on the page (stage A round 2).
+ * mark on a `white` node's fill, edged like the white node (the gray ink at
+ * the node border width), so a logo sits in the same tile system as the
+ * pastel tiles without taking a hue that is not its own. The card hairline
+ * it had (1.24:1) left the tile edge nearly gone on the page (stage A round
+ * 2); the 55% gray edge after it read lighter than the colored tile edges
+ * (stage B round 1: fable on h2). A dark board keeps the soft edge.
  */
+/** Share of the gray ink in a dark-board brand tile's edge (the rest is the tile fill). */
+const DARK_BRAND_TILE_EDGE_INK_WEIGHT = 0.55;
+
 function brandIconPaint(brandColor: string, style: CanvasStyle): IconTilePaint {
   const label = style.textColor;
   if (style.iconStyle !== "tile") {
@@ -786,12 +797,12 @@ function brandIconPaint(brandColor: string, style: CanvasStyle): IconTilePaint {
   const tileFill = resolveShapePaint("white", style).fill;
   return {
     tileFill,
-    tileBorder: mixColors(resolveInk("gray", style), tileFill, BRAND_TILE_EDGE_INK_WEIGHT),
+    tileBorder: isLightBoard(style) ? resolveShapePaint("white", style).border : mixColors(resolveInk("gray", style), tileFill, DARK_BRAND_TILE_EDGE_INK_WEIGHT),
     glyph: brandMarkColor(brandColor, tileFill, BRAND_MARK_MIN_CONTRAST, style),
     glyphFill: null,
     label,
     tileMode: "tint",
-    tileBorderWidthPx: ICON_TILE_OUTLINE_WIDTH_PX,
+    tileBorderWidthPx: iconTileOutlineWidthPx(style),
   };
 }
 

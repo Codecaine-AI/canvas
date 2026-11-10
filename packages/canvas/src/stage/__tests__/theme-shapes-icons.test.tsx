@@ -184,13 +184,15 @@ describe("live icons", () => {
     // The violet node's pastel fill, edged in its ink.
     expect(tile.getAttribute("fill")).toBe("#CEBBFA");
     expect(tile.getAttribute("stroke")).toBe("#6940A5");
-    expect(tile.getAttribute("stroke-width")).toBe("1.5");
+    // The node border width (stage B round 4: at 1.5px tiles read thinner than the nodes beside them).
+    expect(tile.getAttribute("stroke-width")).toBe("2");
     // The 64px box carries the 56px (iconTileMaxPx) tile, centered: 4px in on every side, the edge inside it.
-    expect(tile.getAttribute("width")).toBe("54.5");
-    expect(tile.getAttribute("height")).toBe("54.5");
-    expect(tile.getAttribute("x")).toBe("4.75");
-    expect(tile.getAttribute("y")).toBe("4.75");
-    expect(tile.getAttribute("rx")).toBe("1.25");
+    expect(tile.getAttribute("width")).toBe("54");
+    expect(tile.getAttribute("height")).toBe("54");
+    expect(tile.getAttribute("x")).toBe("5");
+    expect(tile.getAttribute("y")).toBe("5");
+    // The 2px outer corner, less half the edge.
+    expect(tile.getAttribute("rx")).toBe("1");
     const glyph = node.querySelector('[data-canvas-icon-glyph="database"]') as SVGSVGElement;
     expect(glyph.getAttribute("viewBox")).toBe("0 0 24 24");
     // The ink held at 4.5:1 on the tile.
@@ -227,7 +229,7 @@ describe("live icons", () => {
     const white = objectNode(container, "i1").querySelector("[data-canvas-icon-tile]") as SVGRectElement;
     expect(white.getAttribute("fill")).toBe("#FDFDFD");
     expect(white.getAttribute("stroke")).toBe("#666562");
-    expect(white.getAttribute("stroke-width")).toBe("1.5");
+    expect(white.getAttribute("stroke-width")).toBe("2");
     const brand = objectNode(container, "i2").querySelector('[data-canvas-icon-glyph="brand-docker"]') as SVGSVGElement;
     // Docker's Simple Icons color in its optical box on the neutral brand tile, not on the violet tile.
     expect(brand.getAttribute("fill")).toBe("#2496ED");
@@ -235,7 +237,8 @@ describe("live icons", () => {
     expect(brand.getAttribute("viewBox")).toBe(resolveIconGlyph("brand-docker", "tabler").viewBox.join(" "));
     const brandTile = objectNode(container, "i2").querySelector("[data-canvas-icon-tile]") as SVGRectElement;
     expect(brandTile.getAttribute("fill")).toBe("#FDFDFD");
-    expect(brandTile.getAttribute("stroke")).toBe("#AAA9A8");
+    // The white node's full gray edge (stage B round 4: the 55% edge read lighter than the colored tiles).
+    expect(brandTile.getAttribute("stroke")).toBe("#666562");
   });
 });
 

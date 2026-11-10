@@ -132,10 +132,11 @@ describe("static icons: tile vs glyph, packs, brands", () => {
       const svg = render([icon({ geometry: { x: 0, y: 0, width: 100, height: 64 } })], theme);
       const shapePaint = resolveShapePaint("violet", style);
       const layout = iconTileLayout(100, 64, style.iconTileMaxPx);
-      // min(100, 64, 56) = 56, centered both ways in the 100×64 box; the 1.5px ink edge paints inside it.
+      // min(100, 64, 56) = 56, centered both ways in the 100×64 box; the 2px ink edge (the node border
+      // width since stage B round 4: at 1.5px tiles read thinner than the nodes) paints inside it.
       expect(layout.tile).toEqual({ x: 22, y: 4, width: 56, height: 56 });
       expect(svg).toContain(
-        `<rect x="22.75" y="4.75" width="54.5" height="54.5" rx="1.25" fill="${shapePaint.fill}" stroke="${shapePaint.border}" stroke-width="1.5"/>`,
+        `<rect x="23" y="5" width="54" height="54" rx="1" fill="${shapePaint.fill}" stroke="${shapePaint.border}" stroke-width="2"/>`,
       );
       // The caption hangs 6px under the tile (tile bottom 60), centered on it.
       const [caption] = texts(svg);
@@ -156,13 +157,13 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     }
   });
 
-  it("a white tile is the white node: its fill, a 1.5px edge inside the edge, the tile paint's glyph", () => {
+  it("a white tile is the white node: its fill, a 2px edge inside the edge, the tile paint's glyph", () => {
     for (const theme of ["schematic-light", "schematic-dark"] as const) {
       const style = canvasThemePreset(theme);
       const svg = render([icon({ color: "white" })], theme);
-      // The 56px tile centered in the 64px box (4..60), its 1.5px border inside the edge.
+      // The 56px tile centered in the 64px box (4..60), its 2px border (the node border width) inside the edge.
       expect(svg).toContain(
-        `<rect x="4.75" y="4.75" width="54.5" height="54.5" rx="1.25" fill="${resolveShapePaint("white", style).fill}" stroke="${resolveShapePaint("white", style).border}" stroke-width="1.5"/>`,
+        `<rect x="5" y="5" width="54" height="54" rx="1" fill="${resolveShapePaint("white", style).fill}" stroke="${resolveShapePaint("white", style).border}" stroke-width="2"/>`,
       );
       expect(svg).toContain(`fill="none" stroke="${resolveIconTilePaint("white", style, 56).glyph}" stroke-width=`);
     }
@@ -178,10 +179,10 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     // In its optical box (the generator's brand viewBox), not the 24-unit grid.
     expect(brand.viewBox).not.toEqual([0, 0, 24, 24]);
     expect(tiled).toContain(`viewBox="${brand.viewBox.join(" ")}" preserveAspectRatio="xMidYMid meet" fill="#2496ED" stroke="none"`);
-    // On the neutral brand tile (the white node's fill, a soft gray edge), not the violet tile.
+    // On the neutral brand tile (the white node's fill and edge, stage B round 4), not the violet tile.
     const brandTile = resolveIconTilePaint("violet", light, 56, brand.brandColor);
     expect(brandTile.tileFill).toBe(resolveShapePaint("white", light).fill);
-    expect(tiled).toContain(`fill="${brandTile.tileFill}" stroke="${brandTile.tileBorder}" stroke-width="1.5"`);
+    expect(tiled).toContain(`fill="${brandTile.tileFill}" stroke="${brandTile.tileBorder}" stroke-width="2"`);
     expect(tiled).not.toContain(`stroke="${light.palette.violet}"`);
     const bare = render([icon({ icon: "brand-docker" })]);
     // Docker blue moved to 3:1 on the figjam board at its own hue (BRAND_MARK_MIN_CONTRAST).
@@ -229,7 +230,7 @@ describe("static icons: tile vs glyph, packs, brands", () => {
       }).svg;
     const ink = style.palette.violet;
     const pastel = resolveShapePaint("violet", style).fill;
-    expect(renderAt(72)).toContain(`fill="${pastel}" stroke="${ink}" stroke-width="1.5"/>`);
+    expect(renderAt(72)).toContain(`fill="${pastel}" stroke="${ink}" stroke-width="2"/>`);
     const tinted = renderAt(170);
     const tint = resolveIconTilePaint("violet", style, 170);
     expect(tint.tileFill).toBe(mixColors(ink, style.cardFill, 0.16));
@@ -240,7 +241,7 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     expect(tinted).toContain(`<svg x="57" y="57" width="56" height="56" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="none" stroke="${ink}"`);
     // Under the preset's 56px cap the same box draws a node-paint 56px tile, centered.
     expect(render([icon({ geometry: { x: 0, y: 0, width: 170, height: 170 } })], "schematic-light")).toContain(
-      `<rect x="57.75" y="57.75" width="54.5" height="54.5" rx="1.25" fill="${pastel}" stroke="${ink}" stroke-width="1.5"/>`,
+      `<rect x="58" y="58" width="54" height="54" rx="1" fill="${pastel}" stroke="${ink}" stroke-width="2"/>`,
     );
   });
 
@@ -250,7 +251,7 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     const big = icon({ geometry: { x: 0, y: 0, width: 170, height: 170 } });
     const small = icon();
     const solidSvg = renderDocumentToSvg(documentOf([big]), { canvasStyle: { ...style, iconTileFill: "solid" } }).svg;
-    expect(solidSvg).toContain(`fill="${resolveShapePaint("violet", style).fill}" stroke="${style.palette.violet}" stroke-width="1.5"/>`);
+    expect(solidSvg).toContain(`fill="${resolveShapePaint("violet", style).fill}" stroke="${style.palette.violet}" stroke-width="2"/>`);
     const tintSvg = renderDocumentToSvg(documentOf([small]), { canvasStyle: { ...style, iconTileFill: "tint" } }).svg;
     expect(tintSvg).toContain(`stroke="${style.palette.violet}" stroke-width="2"/>`);
   });

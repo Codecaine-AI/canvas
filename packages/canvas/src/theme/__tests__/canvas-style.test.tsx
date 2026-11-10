@@ -86,11 +86,11 @@ describe("renderDocumentToSvg canvasStyle", () => {
       canvasStyle: canvasThemePreset("schematic-light"),
     }).svg;
     expect(svg).toBe(schematic);
-    // Layer-cake section frame (1.5px border at half opacity) and a gray node (a faint cool slate) with a 2px ink border,
+    // Layer-cake section frame (1.5px border at half opacity) and a gray node (a near-white cool card) with a 2px ink border,
     // rounded at the process radius (rx = 2 − 1).
     expect(svg).toContain('stroke="rgba(102, 101, 98, 0.5)" stroke-width="1.5"');
-    // The gray node at the hued nodes' depth (stage B round 1: it read as a hole in gray sections at #D7DCDF).
-    expect(svg).toContain('rx="1" fill="#CBD1D5" stroke="#666562" stroke-width="2"');
+    // The gray node is a near-white cool card (stage B round 4: the mid slate #CBD1D5 read as disabled on gray sections).
+    expect(svg).toContain('rx="1" fill="#F6F9FE" stroke="#666562" stroke-width="2"');
     expect(svg).not.toBe(
       renderDocumentToSvg(styleFixture(), { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE }).svg,
     );

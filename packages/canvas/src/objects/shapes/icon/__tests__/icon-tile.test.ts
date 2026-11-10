@@ -58,7 +58,7 @@ describe("icon tile paint by size", () => {
           tileBorder: node.border,
           glyph: ensureContrast(resolveInk(color, style), node.fill, 4.5),
           tileMode: "solid",
-          tileBorderWidthPx: 1.5,
+          tileBorderWidthPx: 2,
         });
         expect(contrastRatio(tile.glyph, node.fill)).toBeGreaterThanOrEqual(4.5);
       }
@@ -86,13 +86,13 @@ describe("icon tile paint by size", () => {
       tileFill: resolveShapePaint("white", LIGHT).fill,
       tileBorder: resolveShapePaint("white", LIGHT).border,
       glyph: resolveShapePaint("white", LIGHT).border,
-      tileBorderWidthPx: 1.5,
+      tileBorderWidthPx: 2,
     });
     expect(resolveIconTilePaint("white", LIGHT, 160)).toMatchObject({
       tileFill: LIGHT.cardFill,
       tileBorder: LIGHT.palette.white,
       glyph: LIGHT.palette.white,
-      tileBorderWidthPx: 1.5,
+      tileBorderWidthPx: 2,
     });
     expect(resolveIconTilePaint("white", DARK, 160).tileFill).toBe(mixColors(DARK.palette.white, DARK.cardFill, 0.16));
   });
