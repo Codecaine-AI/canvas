@@ -985,27 +985,14 @@ const LABEL_CHIP_BORDER_INK_WEIGHT = 0.7;
 
 /**
  * A connector label chip's text. Figjam: connectorLabelTextColor. Layer-cake
- * modes: on a colored wire, a deep shade of the wire's own stroke held at
- * LABEL_CHIP_TEXT_CONTRAST on the chip, so the label echoes its line; on a
- * neutral wire the name color (textColor). Dark gray text on a red or blue
- * chip read as loosely tied to its line (stage A round 10: opus on 'retry
- * later' and 'card token'). The wire color at 4.5:1 and the body gray read
- * thin and a step lighter than the node names beside them (stage B round
- * 0: kimi and fable on h2, 09 and 12).
+ * modes: the name color (textColor) on every wire; the chip edge carries the
+ * wire's hue (resolveLabelChipBorder). Text in a deep shade of each wire
+ * gave one label color per wire, a second color code beside the wires'
+ * own (stage C: Ford picked one ink for every label, mockup2 change 1).
  */
-export function resolveLabelChipText(style: CanvasStyle, wireStroke: string): string {
-  if (style.sectionFill !== "layer-cake") return style.connectorLabelTextColor;
-  if (oklabChroma(wireStroke) < LABEL_CHIP_TEXT_MIN_WIRE_CHROMA) return style.textColor;
-  return cachedPaint(style, `label-chip-text|${wireStroke}`, () => ({
-    text: ensureContrast(wireStroke, style.connectorLabelBackground, LABEL_CHIP_TEXT_CONTRAST),
-  })).text;
+export function resolveLabelChipText(style: CanvasStyle): string {
+  return style.sectionFill === "layer-cake" ? style.textColor : style.connectorLabelTextColor;
 }
-
-/** Contrast a colored label chip's text holds on the chip: the body-text floor of 7:1, a step over it. */
-const LABEL_CHIP_TEXT_CONTRAST = 8;
-
-/** A wire under this OKLCH chroma is neutral: its chip keeps the label text color. */
-const LABEL_CHIP_TEXT_MIN_WIRE_CHROMA = 0.04;
 
 /**
  * Connector stroke = the ink. In the layer-cake modes `white` (whose ink is

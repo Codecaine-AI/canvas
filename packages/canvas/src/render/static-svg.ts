@@ -1363,7 +1363,7 @@ function renderConnector(
         {
           x,
           y,
-          fill: resolveLabelChipText(canvasStyle, stroke),
+          fill: resolveLabelChipText(canvasStyle),
           "font-size": metrics.fontSizePx,
           "font-weight": metrics.fontWeight,
           "text-anchor": "middle",

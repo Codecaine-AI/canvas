@@ -134,7 +134,7 @@ export function Connector({
           <text
             textAnchor="middle"
             dominantBaseline="central"
-            fill={resolveLabelChipText(canvasStyle, stroke)}
+            fill={resolveLabelChipText(canvasStyle)}
             fontSize={chip.fontSizePx}
             fontWeight={chip.fontWeight}
             fontFamily={chip.font === "mono" ? CANVAS_MONO_FONT_STACK : undefined}
