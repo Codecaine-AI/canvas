@@ -89,7 +89,8 @@ describe("renderDocumentToSvg canvasStyle", () => {
     // Layer-cake section frame (1.5px border at half opacity) and a gray node (a faint cool slate) with a 2px ink border,
     // rounded at the process radius (rx = 2 − 1).
     expect(svg).toContain('stroke="rgba(102, 101, 98, 0.5)" stroke-width="1.5"');
-    expect(svg).toContain('rx="1" fill="#D7DCDF" stroke="#666562" stroke-width="2"');
+    // The gray node at the hued nodes' depth (stage B round 1: it read as a hole in gray sections at #D7DCDF).
+    expect(svg).toContain('rx="1" fill="#CBD1D5" stroke="#666562" stroke-width="2"');
     expect(svg).not.toBe(
       renderDocumentToSvg(styleFixture(), { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE }).svg,
     );

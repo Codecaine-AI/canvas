@@ -506,18 +506,21 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(resolveShapePaint("violet", DARK, "violet")).toEqual(resolveShapePaint("violet", DARK));
   });
 
-  it("light ink-card shapes: gray is a faint cool slate lighter than the hued nodes, white the board surface", () => {
-    // Round 4's #D0D0D0 at the hued node lightness read as the heaviest fill
-    // (UI climb round 4); the neutral #DCDCDC read dull beside the clear hues,
-    // so gray takes a faint cool slate (stage A round 11).
+  it("light ink-card shapes: gray is a faint cool slate at the hued nodes' depth, white the board surface", () => {
+    // The neutral #DCDCDC read dull beside the clear hues, so gray takes a
+    // faint cool slate (stage A round 11). It moved from L 0.891 (#D7DCDF)
+    // to the hued nodes' depth (stage B round 1): there a gray node or tile
+    // stood only 0.05 to 0.07 off a gray section and read as a hole in it
+    // (stage B round 0: fable on 13 boards). This pin used to hold gray
+    // 0.03 L over the hued nodes; it now holds gray within 0.04 L of them.
     const gray = resolveShapePaint("gray", LIGHT);
-    expect(gray).toEqual({ fill: "#D7DCDF", border: "#666562", text: "#1F1F1F" });
+    expect(gray).toEqual({ fill: "#CBD1D5", border: "#666562", text: "#1F1F1F" });
     expect(Math.hypot(oklab(gray.fill).a, oklab(gray.fill).b)).toBeLessThan(0.01);
-    // Yellow, a light hue that read as a heavy mustard at the shared lightness,
-    // stands lighter (stage A round 9), so it keeps a smaller 0.02 step (was
-    // 0.025: the slate gray sits 0.006 under the neutral); it differs from gray by chroma 0.125.
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
-      expect(oklabLightness(gray.fill) - oklabLightness(resolveShapePaint(color, LIGHT).fill)).toBeGreaterThanOrEqual(color === "yellow" ? 0.02 : 0.03);
+      expect(Math.abs(oklabLightness(gray.fill) - oklabLightness(resolveShapePaint(color, LIGHT).fill))).toBeLessThanOrEqual(0.04);
+    }
+    for (const depth of [2, 3, 4, 5]) {
+      expect(oklabDistance(gray.fill, resolveSectionPaint("gray", depth, LIGHT).fill)).toBeGreaterThanOrEqual(0.08);
     }
     expect(resolveShapePaint("white", LIGHT)).toEqual({ fill: "#FDFDFD", border: "#666562", text: "#1F1F1F" });
   });

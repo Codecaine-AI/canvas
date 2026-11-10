@@ -423,13 +423,16 @@ const NODE_FILL_RETONE: Partial<Record<CanvasColor, { lightness?: number; chroma
 };
 
 /**
- * The gray node: a faint cool slate (chroma 0.007 at the blue anchor's hue),
- * a touch under the neutral #DCDCDC. The neutral read dull and flat beside
- * the clear hues and on mint and blue sections (stage A round 9: opus on
- * 'Scheduler', 'Queue', 'Archive' and the 'In stock?' diamond); a cool
- * gray reads clean where a warm one read greige (UI climb round 4).
+ * The gray node: a faint cool slate (chroma 0.008 at the blue anchor's hue)
+ * at OKLab L 0.858 (#CBD1D5), the hued nodes' depth, not the L 0.891 it had.
+ * At 0.891 a gray node or tile stood only 0.05 to 0.07 off a gray section,
+ * half a hued node's step, and read as a hole in the section (stage B round
+ * 0: fable on 01, 02, 03, 05, 06, 07, 08, 09, 10, 11, h4, h5 and h6; kimi on
+ * the gray wires' ground). It now stands 0.086 to 0.107 off every gray
+ * level. A cool gray reads clean where a warm one read greige (UI climb
+ * round 4).
  */
-const GRAY_NODE_RETONE = { lightness: -0.004, chroma: 0.007 } as const;
+const GRAY_NODE_RETONE = { lightness: -0.037, chroma: 0.008 } as const;
 
 /**
  * A light-board `ink-card` white node edges in the gray ink, not its own ink
