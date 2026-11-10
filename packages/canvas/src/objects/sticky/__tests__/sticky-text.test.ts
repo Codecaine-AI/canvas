@@ -128,6 +128,13 @@ describe("layoutStickyText", () => {
     expect(rows[0]!.segments.map((segment) => segment.text.trim())).toEqual(["pre", "fix"]);
   });
 
+  it("keeps a wrapped code span's whole text on each of its rows, so every part colors by the span's kind", () => {
+    const rows = layoutStickyText("`archon workflow abandon`", 120, BODY_FONT_SIZE_PX);
+    const code = rows.flatMap((row) => row.segments).filter((segment) => segment.style === "code");
+    expect(code.length).toBeGreaterThan(1);
+    for (const segment of code) expect(segment.codeSpan).toBe("archon workflow abandon");
+  });
+
   it("lists characters the bundled faces lack, per run font", () => {
     expect(stickyTextUncovered("ship 🚀 `春` **ok**")).toEqual(["🚀", "春"]);
     expect(stickyTextUncovered("- plain text")).toEqual([]);

@@ -3,6 +3,8 @@
 import type { CSSProperties, ReactNode } from "react";
 import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import { withAlpha } from "../../theme/color-math";
+import type { StickyPaint } from "../../theme/palette";
+import { codeKind } from "./code-kind";
 import {
   parseStickyMarkdown,
   STICKY_MARKDOWN_MONO_FONT,
@@ -82,10 +84,16 @@ export const STICKY_CODE_CHIP_BACKGROUND = withAlpha(FIGJAM_CANVAS_STYLE.textCol
  */
 export const STICKY_CODE_CHIP_RADIUS = "2px";
 
+/** How inline `code` paints: the chip body, and the text color per kind (null: the body text color). */
+interface StickyCodePaint {
+  background: string;
+  text: StickyPaint["codeText"];
+}
+
 /** Inline pass: `**bold**` and `` `code` `` (no nesting), from the shared D18 tokens. */
 function renderInline(
   tokens: readonly StickyMarkdownInlineToken[],
-  codeBackground: string,
+  code: StickyCodePaint,
 ): ReactNode[] {
   return tokens.map((token) => {
     if (token.kind === "text") return token.leaf.text;
@@ -103,7 +111,8 @@ function renderInline(
           fontFamily: STICKY_MARKDOWN_MONO_FONT,
           fontWeight: STICKY_MARKDOWN_MONO_FONT_WEIGHT,
           fontSize: `${STICKY_CODE_FONT_EM}em`,
-          background: codeBackground,
+          background: code.background,
+          ...(code.text ? { color: code.text[codeKind(token.content.text)] } : null),
           borderRadius: STICKY_CODE_CHIP_RADIUS,
           padding: "0 0.15em",
         }}
@@ -114,7 +123,7 @@ function renderInline(
   });
 }
 
-function renderLine(line: StickyMarkdownLine, codeBackground: string, headingScale: number): ReactNode {
+function renderLine(line: StickyMarkdownLine, code: StickyCodePaint, headingScale: number): ReactNode {
   if (line.kind === "heading") {
     const level = line.headingLevel!;
     return (
@@ -126,7 +135,7 @@ function renderLine(line: StickyMarkdownLine, codeBackground: string, headingSca
         {...stickyMarkdownLineAttrs(line)}
         style={stickyHeadingStyle(level, headingScale)}
       >
-        {renderInline(line.inline, codeBackground)}
+        {renderInline(line.inline, code)}
       </span>
     );
   }
@@ -139,25 +148,28 @@ function renderLine(line: StickyMarkdownLine, codeBackground: string, headingSca
     >
       {/* A blank line keeps its line box (nbsp) so at-rest paragraph spacing
           matches the raw-source line count the editor shows (D14). */}
-      {line.placeholder ? line.placeholder.text : renderInline(line.inline, codeBackground)}
+      {line.placeholder ? line.placeholder.text : renderInline(line.inline, code)}
     </span>
   );
 }
 
 /**
  * Renders sticky `text` as the D18 markdown line stack. `codeBackground`
- * tints inline `code` chips (a card sticky passes its text color at low
- * alpha so chips read on a dark card too).
+ * tints inline `code` chips (a card sticky passes its paint's codeChip), and
+ * `codeText` colors each chip's text by its kind (StickyPaint.codeText).
  */
 export function StickyMarkdown({
   text,
   codeBackground = STICKY_CODE_CHIP_BACKGROUND,
+  codeText = null,
   headingScale = 1,
 }: {
   text: string;
   codeBackground?: string;
+  codeText?: StickyPaint["codeText"];
   /** CanvasStyle.stickyHeadingScale (1 = the full heading scale). */
   headingScale?: number;
 }) {
-  return <>{parseStickyMarkdown(text).lines.map((line) => renderLine(line, codeBackground, headingScale))}</>;
+  const code = { background: codeBackground, text: codeText };
+  return <>{parseStickyMarkdown(text).lines.map((line) => renderLine(line, code, headingScale))}</>;
 }

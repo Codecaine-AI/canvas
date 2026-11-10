@@ -65,6 +65,7 @@ describe("figjam paints equal the role tables", () => {
       shadow: true,
       cardShadow: null,
       codeChip: null,
+      codeText: null,
     });
     // Glyph icons: ink stroke, shape-fill interiors, no tile (IconShapeBody / static-svg).
     expect(resolveIconPaint(color, FIGJAM_CANVAS_STYLE)).toEqual({
@@ -514,11 +515,13 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       // Any other section, and no section, keeps the hued node.
       expect(resolveShapePaint(color, LIGHT, color === "blue" ? "teal" : "blue")).toEqual(resolveShapePaint(color, LIGHT));
     }
-    // A note in a section of its own color is the white card, with its own edge, rule and code chips
-    // (stage B round 0: a yellow note melted into its yellow section on 12).
+    // A note in a section of its own color is the white card, with its own edge and rule
+    // (stage B round 0: a yellow note melted into its yellow section on 12). Its code chip
+    // is the white card's: the chip is a white wash of the fill the note paints (stage C).
+    const whiteNote = resolveStickyPaint("white", LIGHT);
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
       const own = resolveStickyPaint(color, LIGHT, color);
-      expect(own).toEqual({ ...resolveStickyPaint(color, LIGHT), fill: resolveStickyPaint("white", LIGHT).fill });
+      expect(own).toEqual({ ...resolveStickyPaint(color, LIGHT), fill: whiteNote.fill, codeChip: whiteNote.codeChip });
       expect(contrastRatio(own.text, own.fill)).toBeGreaterThanOrEqual(7);
     }
     expect(resolveStickyPaint("yellow", LIGHT, "gray")).toEqual(resolveStickyPaint("yellow", LIGHT));
@@ -601,16 +604,21 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       expect(paint.border).not.toBeNull();
       expect(paint.codeChip).not.toBeNull();
       expect(contrastRatio(paint.text, paint.fill)).toBeGreaterThanOrEqual(7);
+      // Inline code is the docs viewer's typed chip on a white wash of the note
+      // (stage C: Ford picked "B. White wash" from mockup2). The chip sits in the
+      // note's own family, never darker than the note, and every kind's text
+      // reads on it at the chip-text floor; untyped code is the body text.
+      expect(oklabLightness(paint.codeChip!)).toBeGreaterThanOrEqual(oklabLightness(paint.fill));
+      expect(paint.codeText?.other).toBe(paint.text);
+      for (const text of Object.values(paint.codeText!)) expect(contrastRatio(text, paint.codeChip!)).toBeGreaterThanOrEqual(4.5);
       expect(contrastRatio(paint.text, paint.codeChip!)).toBeGreaterThanOrEqual(7);
-      // Inline code sits a clear step below the note body.
-      expect(oklabLightness(paint.fill) - oklabLightness(paint.codeChip!)).toBeGreaterThanOrEqual(0.04);
       // The edge is a soft in-hue boundary, not an outline: the wash and the rule carry the note (stage A round 1).
       expect(contrastRatio(paint.border!, paint.fill)).toBeGreaterThanOrEqual(1.2);
       if (color !== "gray" && color !== "white") expect(oklabChroma(paint.border!)).toBeGreaterThan(0.04);
       expect(parseColor(paint.cardShadow!)!.a).toBeLessThanOrEqual(0.08);
     }
     expect(fills.size).toBe(CANVAS_COLORS.length);
-    expect(resolveStickyPaint("yellow", DARK)).toMatchObject({ fill: "#32363E", border: "#3D444D", rule: "#9198A1", cardShadow: null });
+    expect(resolveStickyPaint("yellow", DARK)).toMatchObject({ fill: "#32363E", border: "#3D444D", rule: "#9198A1", cardShadow: null, codeText: null });
   });
 
   it("light preset: a note reads off the page and off every top-level section, and stays lighter than every hued node", () => {

@@ -82,6 +82,8 @@ export interface StickyTextSegment {
   /** Effective font size (code runs at STICKY_CODE_FONT_EM of the row size). */
   fontSizePx: number;
   fontWeight: number;
+  /** A code segment's whole code span (it can wrap across rows), so its text colors by the span's kind; null outside code. */
+  codeSpan: string | null;
 }
 
 export interface StickyTextRow {
@@ -201,6 +203,7 @@ export function layoutStickyText(
           textOffsetPx: fragment.start === 0 ? Math.floor((run.padStart ?? 0) * 64 + 1e-6) / 64 : 0,
           fontSizePx: run.font.size,
           fontWeight: run.font.weight ?? BODY_FONT_WEIGHT,
+          codeSpan: styles[fragment.run] === "code" ? run.text : null,
         };
         // Adjacent runs in one font are one shaped run in the browser (a bold
         // ">" after a heading's "=" still forms Inter's arrow): paint them as
@@ -276,6 +279,7 @@ export function ellipsizeStickyRow(row: StickyTextRow, slotWidthPx: number): voi
     textOffsetPx: 0,
     fontSizePx: row.fontSizePx,
     fontWeight: row.fontWeight,
+    codeSpan: null,
   });
 }
 

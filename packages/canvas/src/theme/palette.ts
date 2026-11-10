@@ -295,7 +295,12 @@ export type StickyPaint = {
   cardShadow: string | null;
   /** A card sticky's inline `code` chip body, or null on paper stickies (their chip is the figjam black at 8%). */
   codeChip: string | null;
+  /** Inline `code` text color per kind (objects/sticky/code-kind.ts), or null where code keeps the body text color. */
+  codeText: Readonly<Record<CodeKind, string>> | null;
 };
+
+/** What an inline `code` span is (objects/sticky/code-kind.ts codeKind, the docs viewer's classifier). */
+export type CodeKind = "path" | "string" | "type" | "call" | "literal" | "keyword" | "prop" | "other";
 
 export type ConnectorPaint = {
   stroke: string;
@@ -834,7 +839,10 @@ export function brandHeaderIconColors(
  */
 export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle, container: CanvasColor | null = null): StickyPaint {
   if (noteOnOwnHueSection(color, container, style)) {
-    return cachedPaint(style, `sticky-own-hue|${color}`, () => ({ ...stickyPaint(color, style), fill: stickyPaint("white", style).fill }));
+    return cachedPaint(style, `sticky-own-hue|${color}`, () => {
+      const white = stickyPaint("white", style);
+      return { ...stickyPaint(color, style), fill: white.fill, codeChip: white.codeChip };
+    });
   }
   return cachedPaint(style, `sticky|${color}`, () => stickyPaint(color, style));
 }
@@ -870,8 +878,8 @@ const CARD_STICKY_CODE_CHIP_ALPHA = 0.045;
  * rules at chroma 0.15 clipped to a loud cyan on teal; the wide lift was
  * louder than a side note. At L 0.952 every hue reaches chroma 0.03, and the
  * wash still sits lighter than every node fill (L 0.85 to 0.93) and differs
- * from the gray sections (L 0.96) by hue. Inline code takes a deeper, more
- * colorful step of the same wash so it separates from the note body.
+ * from the gray sections (L 0.96) by hue. Inline code is a typed chip on a
+ * white wash of the note (NOTE_CODE_KIND_TEXT).
  */
 const NOTE_FILL_LIGHTNESS = 0.952;
 const NOTE_FILL_CHROMA = 0.03;
@@ -880,13 +888,30 @@ const NOTE_EDGE_CHROMA = 0.05;
 const NOTE_RULE_LIGHTNESS = 0.68;
 const NOTE_RULE_CHROMA = 0.115;
 /**
- * Inline code: a deeper, MORE colorful step of the note's own wash (L 0.9,
- * chroma 0.055). At the wash's chroma (0.03) the darker step read as a gray
- * smudge laid on the note (stage A rounds 9 and 10: opus on 'Token check',
- * 'Idempotent writes' and 'Prompt in prompts/plan.md').
+ * Inline code on a tinted note: the docs viewer's typed chip. The text takes
+ * its kind's color (NOTE_CODE_KIND_TEXT) on a white wash of the note's own
+ * fill (NOTE_CODE_CHIP_WHITE_WEIGHT of white over it), so a chip stays in
+ * the note's family a step lighter than the paper. The deeper tint chip
+ * under ink text (L 0.9) read as plain dark boxes, not code (stage C: Ford
+ * picked "B. White wash" from mockup2 over the tint and a white paper chip).
  */
-const NOTE_CODE_CHIP_LIGHTNESS = 0.9;
-const NOTE_CODE_CHIP_CHROMA = 0.055;
+const NOTE_CODE_CHIP_WHITE_WEIGHT = 0.65;
+/**
+ * The docs viewer's light chip colors (design-system tokens.css
+ * --ds-light-color-code-chip-*: VS Code Light+, with type and number darkened
+ * 10%), so a span on a board reads as it does on the docs page. `other` is
+ * the note's body text. Each holds 4.5:1 or more on the washed chip of every
+ * note color.
+ */
+const NOTE_CODE_KIND_TEXT: Readonly<Record<Exclude<CodeKind, "other">, string>> = {
+  path: "#A31515",
+  string: "#A31515",
+  type: "#22728A",
+  call: "#795E26",
+  literal: "#08794F",
+  keyword: "#0000FF",
+  prop: "#001080",
+};
 const NOTE_SHADOW_OPACITY = 0.06;
 /**
  * Neutral notes. Gray is a faint cool slate (chroma 0.008 at the blue
@@ -899,7 +924,6 @@ const NOTE_NEUTRAL = {
   fill: { lightness: NOTE_FILL_LIGHTNESS, chroma: 0.008 },
   edge: { lightness: 0.875, chroma: 0.012 },
   rule: { lightness: 0.62, chroma: 0.03 },
-  codeChip: { lightness: NOTE_CODE_CHIP_LIGHTNESS, chroma: 0.014 },
 } as const;
 /**
  * The yellow note: a pale butter wash (OKLCH hue 95), not the hue-87 ink,
@@ -914,7 +938,6 @@ const NOTE_YELLOW = {
   fill: { anchor: "#FFE600", lightness: 0.962, chroma: 0.06, hue: -6 },
   edge: { anchor: "#FFE600", lightness: 0.885, chroma: 0.075, hue: -6 },
   rule: { anchor: "#FFD000", lightness: 0.76, chroma: 0.11, hue: 0 },
-  codeChip: { anchor: "#FFE600", lightness: 0.905, chroma: 0.085, hue: -6 },
 } as const;
 
 function noteCardStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
@@ -929,14 +952,16 @@ function noteCardStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPain
     return withLightnessChroma(ink, lightness, chroma);
   };
   const fill = color === "white" ? "#FFFFFF" : tone("fill", NOTE_FILL_LIGHTNESS, NOTE_FILL_CHROMA);
+  const text = readableOn(style.textColor, fill);
   return {
     fill,
     border: tone("edge", NOTE_EDGE_LIGHTNESS, NOTE_EDGE_CHROMA),
     rule: tone("rule", NOTE_RULE_LIGHTNESS, NOTE_RULE_CHROMA),
-    text: readableOn(style.textColor, fill),
+    text,
     shadow: false,
     cardShadow: withAlpha(style.textColor, NOTE_SHADOW_OPACITY),
-    codeChip: tone("codeChip", NOTE_CODE_CHIP_LIGHTNESS, NOTE_CODE_CHIP_CHROMA),
+    codeChip: mixColors("#FFFFFF", fill, NOTE_CODE_CHIP_WHITE_WEIGHT),
+    codeText: { ...NOTE_CODE_KIND_TEXT, other: text },
   };
 }
 
@@ -951,12 +976,13 @@ function stickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
       shadow: false,
       cardShadow: isLightBoard(style) ? withAlpha(style.textColor, CARD_STICKY_SHADOW_OPACITY) : null,
       codeChip: withAlpha(style.textColor, CARD_STICKY_CODE_CHIP_ALPHA),
+      codeText: null,
     };
   }
   const fill = swatchFor(color).sticky;
   // The paper body has always been the text color at 80% (INSET_BODY_TEXT_SLOT: rgba(0, 0, 0, 0.8)).
   const text = withAlpha(readableOn(style.textColor, fill), PAPER_STICKY_TEXT_OPACITY);
-  return { fill, border: null, rule: null, text, shadow: true, cardShadow: null, codeChip: null };
+  return { fill, border: null, rule: null, text, shadow: true, cardShadow: null, codeChip: null, codeText: null };
 }
 
 /**

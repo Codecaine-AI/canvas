@@ -26,7 +26,7 @@ export const STICKY_GEOMETRY = {
  * the paint's neutral ink down the left side just inside the hairline
  * (CanvasStyle.stickyRuleWidthPx), and on light boards a soft lift
  * (StickyPaint.cardShadow) that sets the note off the near-white board.
- * Inline `code` chips take the paint's codeChip (StickyPaint.codeChip).
+ * Inline `code` chips take the paint's codeChip and codeText (StickyPaint).
  */
 export const CARD_STICKY_GEOMETRY = {
   borderWidthPx: 1,
@@ -120,6 +120,7 @@ function StickyObjectView(props: ObjectRenderProps) {
             text={object.text}
             headingScale={canvasStyle.stickyHeadingScale}
             codeBackground={paint.codeChip ?? undefined}
+            codeText={paint.codeText}
           />
         </ObjectSlotText>
       )}

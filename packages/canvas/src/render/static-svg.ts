@@ -130,6 +130,7 @@ import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
 } from "../state/schema";
+import { codeKind } from "../objects/sticky/code-kind";
 import { STICKY_MARKDOWN_MONO_FONT_WEIGHT } from "../objects/sticky/markdown-editing";
 import { ellipsizeStickyRow, layoutStickyText } from "../objects/sticky/sticky-text";
 import type { RenderDocumentToSvg, RenderStaticSvgOptions, RenderedSvg } from "./types";
@@ -419,10 +420,10 @@ export function effectiveRenderShape(object: InteractiveCanvasObject): string {
  * color/weight. A node shows its name only: a stored `detail` (older boards)
  * never paints. Stickies render their markdown body.
  */
-function renderObjectText(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): string {
+function renderObjectText(object: InteractiveCanvasObject, canvasStyle: CanvasStyle, container: CanvasColor | null): string {
   // Sticky notes render their text as markdown line boxes, not plain slot text.
   if (effectiveRenderShape(object) === "note") {
-    return object.text === "" ? "" : renderStickyMarkdownText(object, canvasStyle);
+    return object.text === "" ? "" : renderStickyMarkdownText(object, canvasStyle, container);
   }
   const slot = textSlotForObject(object);
   if (!slot) return "";
@@ -565,10 +566,10 @@ const STICKY_CODE_CHIP_HEIGHT_EM = 1.3;
  * and the last visible row ellipsized — the same overflow the live
  * -webkit-line-clamp shows.
  */
-function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): string {
+function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: CanvasStyle, container: CanvasColor | null): string {
   // The slot typography carries the sticky paint's text color.
   const resolved = resolveTextSlot(INSET_BODY_TEXT_SLOT, object, 1, { canvasStyle });
-  const stickyPaint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle);
+  const stickyPaint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle, container);
   // A card's chip is its paint's codeChip (an opaque hex or an rgba): split into fill + fill-opacity.
   const cardChip = stickyPaint.codeChip === null ? null : parseColor(stickyPaint.codeChip);
   const codeChipFill = cardChip ? formatHex(cardChip) : "#000000";
@@ -644,6 +645,7 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
               : null),
             ...(fontWeight !== typography.fontWeight ? { "font-weight": fontWeight } : null),
             ...(code ? { "font-family": CANVAS_MONO_FONT_STACK_SVG } : null),
+            ...(code && stickyPaint.codeText ? { fill: stickyPaint.codeText[codeKind(segment.codeSpan ?? text)] } : null),
           },
           escapeXml(text),
         ),
@@ -1630,7 +1632,7 @@ export function renderSceneToSvg(
   }
   for (const object of nonSections) {
     parts.push(renderShapeBody(object, stickyShadowFilters, bounds, canvasStyle, sectionContainers.get(object.id) ?? null));
-    parts.push(renderObjectText(object, canvasStyle));
+    parts.push(renderObjectText(object, canvasStyle, sectionContainers.get(object.id) ?? null));
   }
   for (const section of sections) {
     parts.push(

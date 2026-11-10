@@ -258,4 +258,23 @@ describe("note code-chip paint parity", () => {
     expect(chip.textContent).toBe("deploy");
     expect(svg).toContain(">deploy</tspan>");
   });
+
+  it("colors each code span by its kind in the stage and the export, as the docs viewer does", () => {
+    // Stage C: Ford picked the docs viewer's typed chips for note code (mockup2 change 2).
+    const style = canvasThemePreset("schematic-light");
+    const note = shape({ type: "sticky", color: "blue", text: "`abandonRun()` writes `cli/src/run.ts` and `RawRecord`", geometry: { x: 0, y: 0, width: 240, height: 160 }, style: { shape: "note" } });
+    const container = stage([note], style);
+    const chips = [...objectNode(container, note.id).querySelectorAll("code")] as HTMLElement[];
+    const paint = resolveStickyPaint("blue", style);
+    const expected = [paint.codeText!.call, paint.codeText!.path, paint.codeText!.type];
+    expect(chips.map((chip) => formatHex(parseColor(chip.style.color)!))).toEqual(expected);
+    const { svg } = renderDocumentToSvg({ schemaVersion: 1, id: "note-kinds", mode: "diagram", objects: [note], connections: [] }, { canvasStyle: style });
+    for (const [text, color] of [["abandonRun()", expected[0]], ["cli/src/run.ts", expected[1]], ["RawRecord", expected[2]]] as const) {
+      expect(svg).toMatch(new RegExp(`fill="${color}"[^>]*>${text.replace(/[().]/g, "\\$&")}</tspan>`));
+    }
+    // The dark card keeps code in the body text color.
+    const dark = canvasThemePreset("schematic-dark");
+    const darkChip = objectNode(stage([note], dark), note.id).querySelector("code") as HTMLElement;
+    expect(darkChip.style.color).toBe("");
+  });
 });
