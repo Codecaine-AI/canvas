@@ -211,6 +211,30 @@ describe("canvas service", () => {
     expect(names).toEqual(expect.arrayContaining(["look", "describe_board", "annotate", "resolve_request"]));
   });
 
+  test("a null field reaches describe_board and annotate as absent, and an empty one is still refused", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = createCanvasService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    const target = readDoc(path).objects.find((object: any) => object.id !== "page-frame").id;
+
+    const renamed = await service.call("describe_board", { title: "Renamed", description: null });
+    expect(renamed.isError).toBeUndefined();
+    expect(textOf(renamed)).not.toContain("DELTA · description");
+    const emptied = await service.call("describe_board", { title: "", description: "# Kept" });
+    expect(textOf(emptied)).toBe("describe_board rejected: title must be a non-empty string — the board is never left nameless.");
+
+    const asked = await service.call("annotate", { objectId: target, thread: null, body: "Still needed?" });
+    expect(asked.isError).toBeUndefined();
+    const replied = await service.call("annotate", { objectId: null, thread: "R1", body: "Yes." });
+    expect(replied.isError).toBeUndefined();
+
+    const saved = readDoc(path);
+    expect(saved.title).toBe("Renamed");
+    expect(saved.description).not.toBe("# Kept");
+    const thread = saved.annotations.find((annotation: any) => annotation.target.objectId === target);
+    expect(thread.replies.map((reply: any) => reply.body)).toEqual(["Yes."]);
+  });
+
   test("canvas_open reads canvases/canvas-style.json, and look renders with it", async () => {
     const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
     const stylePath = join(workspace, "canvases", "canvas-style.json");

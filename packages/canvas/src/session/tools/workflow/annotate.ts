@@ -36,7 +36,7 @@ import { commitDraft } from "../../perception/live-draft-view";
 import type { SessionEventSink } from "../../perception/perception";
 import type { LayoutSession } from "../../session";
 import type { LayoutToolTextResult } from "../runtime";
-import { defineWorkflowTool } from "./workflow-tool";
+import { defineWorkflowTool, nullableString } from "./workflow-tool";
 
 /** What `annotate` was sent. A null `objectId` or `thread` counts as absent. */
 export interface AnnotateFields {
@@ -199,12 +199,12 @@ export const annotate = defineWorkflowTool({
   description:
     "Write in an annotation thread. Send exactly one of objectId or thread, with a body; a null objectId or thread counts as absent. objectId opens a new question thread on that object, which the user answers on their own time. Ask only where the answer would genuinely change the diagram and you cannot settle it yourself — one or two per run at most; a question on every object is noise, not care. A new thread never waits: leave the question and proceed on your best reading. thread posts a reply into an existing thread without closing it — answer a follow-up, report what you did so far, or ask one more thing in the same place. The thread's status does not move; resolve_request is still what disposes a request. Returns the applied line and the updated REQUESTS block.",
   fields: {
-    objectId: Type.Optional(Type.Union([Type.String(), Type.Null()], {
-      description: "The id of the object a new thread asks about. Send it to open a thread.",
-    })),
-    thread: Type.Optional(Type.Union([Type.String(), Type.Null()], {
-      description: "The thread to reply in: its queue alias (R1) or its annotation id. Send it to reply.",
-    })),
+    objectId: nullableString(
+      "The id of the object a new thread asks about. Send it to open a thread.",
+    ),
+    thread: nullableString(
+      "The thread to reply in: its queue alias (R1) or its annotation id. Send it to reply.",
+    ),
     body: Type.String({
       description: "What to say, in plain language, readable on its own. A new thread's question is specific enough to answer without further context.",
     }),

@@ -18,14 +18,12 @@
  * being swallowed. The description is stored verbatim and must not be blank.
  * A field that already reads exactly what was sent is the ordinary no-op.
  */
-import { Type } from "@mariozechner/pi-ai";
-
 import { formatDiagnostics, sessionDiagnostics } from "../../../board/lints/run";
 import { commitDraft } from "../../perception/live-draft-view";
 import { lintDeltaBlock, type SessionEventSink } from "../../perception/perception";
 import type { LayoutSession } from "../../session";
 import type { LayoutToolTextResult } from "../runtime";
-import { defineWorkflowTool } from "./workflow-tool";
+import { defineWorkflowTool, nullableString } from "./workflow-tool";
 
 /** What `describe_board` was sent. A null field counts as absent. */
 export interface DescribeBoardFields {
@@ -113,12 +111,12 @@ export const describeBoard = defineWorkflowTool({
   description:
     "Rename the board, rewrite its description, or both, in one call. Send title, description or both; a call with neither is refused, and a null field counts as absent. title is the name shown above the board, not the description: change it when the diagram's subject has moved on from the name it was created with. description is the board's standing account of what the diagram represents, its pieces, and how it reads, replaced whole with this markdown; a later run reads it to orientate before editing. Both fields are checked before anything is saved, and the board saves once.",
   fields: {
-    title: Type.Optional(Type.Union([Type.String(), Type.Null()], {
-      description: "The board's new name — short, and what a person would call it. Omit it, or send null, to keep the name.",
-    })),
-    description: Type.Optional(Type.Union([Type.String(), Type.Null()], {
-      description: "The full replacement markdown for the board description. Omit it, or send null, to keep the description.",
-    })),
+    title: nullableString(
+      "The board's new name — short, and what a person would call it. Omit it, or send null, to keep the name.",
+    ),
+    description: nullableString(
+      "The full replacement markdown for the board description. Omit it, or send null, to keep the description.",
+    ),
   },
   invoke: async (runtime, params) =>
     runtime.describeBoard({ title: params.title, description: params.description }),
