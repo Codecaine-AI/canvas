@@ -51,7 +51,25 @@
       "props": {},
       "text": [
         {
-          "insert": "Install the Codecaine Docs client connection and companion skill once. Open the Canvas repository and call docs_discover, or discover the Core workspace to work on Canvas and Docs System documentation in the same request. Each tool call identifies its target project explicitly."
+          "insert": "Install the Codecaine Docs client connection and companion skill once. Open the Canvas repository and call "
+        },
+        {
+          "insert": "docs_capabilities",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " to get its project id. To work on Canvas and Docs System documentation in the same request, call "
+        },
+        {
+          "insert": "docs_capabilities",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with the Core workspace. Each tool call identifies its target project explicitly."
         }
       ],
       "children": []
