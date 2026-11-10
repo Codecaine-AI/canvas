@@ -149,6 +149,31 @@ describe("a note that outgrows its section keeps it", () => {
     held(fitNotesToText({ ...document, objects: document.objects.map((o) => (o.id === "n" ? { ...o, text: TWELVE } : o)) }, CARD));
   });
 
+  test("fitting both groups together: the blocked one keeps its frame, and the healthy nested one still grows", () => {
+    // The neighbor case (frame would land in big) beside the nested case
+    // (inner must grow past outer, which grows with it), far apart.
+    const document = makeDocument([
+      { ...box("frame", 0, 0, 400, 200, "section"), text: "Frame" },
+      { ...note("n", Array(24).fill("line").join("\n"), 40, 60, 240, 60), parentId: "frame" },
+      { ...box("big", -300, 200, 1000, 600, "section"), text: "Big", color: "blue" },
+      { ...box("outer", 2000, 0, 480, 300, "section"), text: "Outer" },
+      { ...box("inner", 2040, 60, 400, 200, "section"), text: "Inner", color: "blue", parentId: "outer" },
+      { ...note("m", TWELVE, 2080, 120, 240, 60), parentId: "inner" },
+    ]);
+    const fitted = fitNotesToText(document, CARD);
+    const parentOf = (id: string) => fitted.objects.find((object) => object.id === id)!.parentId ?? null;
+
+    expect(parentOf("frame")).toBeNull();
+    expect(geometryOf(fitted, "frame")).toEqual({ x: 0, y: 0, width: 400, height: 200 });
+    expect(geometryOf(fitted, "m").height).toBe(320);
+    expect(parentOf("m")).toBe("inner");
+    expect(parentOf("inner")).toBe("outer");
+    const inner = geometryOf(fitted, "inner");
+    const outer = geometryOf(fitted, "outer");
+    expect(inner.y + inner.height).toBeGreaterThanOrEqual(120 + 320);
+    expect(outer.y + outer.height).toBeGreaterThanOrEqual(inner.y + inner.height);
+  });
+
   test("a frame whose growth would land it inside a neighbor keeps its parent, on update_text and in Studio", () => {
     // 24 lines grow frame to 400×720, and big would cover 72% of it.
     const LINES = Array(24).fill("line").join("\n");

@@ -230,16 +230,21 @@ export function heldMoves(
  * grow, reconcile again (an identity on a grown tree).
  *
  * Holding judges the grows as if the held tree stayed. When the settled board
- * still moves a held object (a grown frame lands inside a neighbor), the grows
- * are judged on bare membership instead, which blocks that grow: the frame
- * keeps its parent, and a note it could not hold leaves it as before.
+ * still moves a held object (a grown frame lands inside a neighbor), only that
+ * object's hold is dropped and the grows run again, so a grow that would move
+ * it is blocked and every other group keeps its hold. A note its frame then
+ * cannot hold moves in the next round and is dropped too. Each round drops at
+ * least one hold, so this ends.
  */
 export function settleSections(
   document: InteractiveCanvasDocument,
-  held?: ReadonlyMap<string, string | null>,
+  held: ReadonlyMap<string, string | null> = new Map(),
 ): InteractiveCanvasDocument {
-  const reconciled = reconcileHolding(document, held);
-  const settled = reconcileSectionMembership(growSectionsToChildren(reconciled, held).document);
-  if (heldMoves(settled, held).length === 0) return settled;
-  return reconcileSectionMembership(growSectionsToChildren(reconciled).document);
+  const keep = new Map(held);
+  for (;;) {
+    const settled = reconcileSectionMembership(growSectionsToChildren(reconcileHolding(document, keep), keep).document);
+    const moved = heldMoves(settled, keep);
+    if (moved.length === 0) return settled;
+    for (const { id } of moved) keep.delete(id);
+  }
 }
