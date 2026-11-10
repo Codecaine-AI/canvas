@@ -190,6 +190,12 @@ describe("layer-cake sections", () => {
         expect(Math.abs(oklabChroma(chipFill) - oklabChroma(fill) - 0.03)).toBeLessThan(0.004);
       }
     }
+    // A gray chip steps 0.05 L and keeps its fill's chroma (stage B round 4: at 0.095 the mid-gray
+    // tab read heavy, astra on 01, 06, 09 and 14); its ink edge frames it.
+    for (const depth of [2, 3, 4]) {
+      const gray = resolveSectionPaint("gray", depth, LIGHT);
+      expect(Math.abs(oklabLightness(gray.fill) - oklabLightness(gray.chipFill) - 0.05)).toBeLessThan(0.004);
+    }
     expect(paint.chipBorder).toBe("rgba(13, 113, 100, 0.5)");
     expect(paint.headerText).toBe("#1F1F1F");
     expect(resolveSectionPaint("teal", 1, DARK).chipFill).toBe(
@@ -308,10 +314,11 @@ describe("layer-cake sections", () => {
     for (const depth of [2, 3, 4]) {
       const paint = resolveSectionPaint("white", depth, LIGHT);
       // A faint warm paper, not pure white, which matched the page and read
-      // as a hole in a hued parent (stage A round 9: opus), with a neutral chip one step under it.
+      // as a hole in a hued parent (stage A round 9: opus), with a neutral chip 0.05 L under it (was
+      // 0.095: the mid-gray tab read heavy, stage B round 3: astra on 01, 06, 09 and 14).
       expect(paint.fill).toBe("#FFFDF9");
       expect(oklabChroma(paint.fill)).toBeLessThan(0.008);
-      expect(Math.abs(oklabLightness(paint.fill) - oklabLightness(paint.chipFill) - 0.095)).toBeLessThan(0.004);
+      expect(Math.abs(oklabLightness(paint.fill) - oklabLightness(paint.chipFill) - 0.05)).toBeLessThan(0.004);
       expect(paint.chipBorder).toBe(resolveSectionPaint("gray", depth, LIGHT).chipBorder);
       expect(contrastRatio(paint.border, resolveSectionPaint("gray", 2, LIGHT).fill)).toBeGreaterThanOrEqual(2);
       expect(contrastRatio(paint.headerText, paint.chipFill)).toBeGreaterThanOrEqual(4.5);

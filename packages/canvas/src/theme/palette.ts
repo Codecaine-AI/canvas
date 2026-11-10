@@ -1191,15 +1191,22 @@ const WHITE_SECTION_CHROMA = 0.006;
  * stands off its own fill in that fill's hue. The 16% ink mix sat 0.07 L
  * under the fill, so the chip edge carried the title, and the olive yellow
  * ink muddied the yellow chips (stage A round 9: opus on 'Messaging',
- * 'Identity' and 'Payments'). Other modes: mix(ink, fill, headerChipMix).
+ * 'Identity' and 'Payments'). A gray or white chip steps
+ * SECTION_CHIP_NEUTRAL_LIGHTNESS_STEP: at the full step the mid-gray tab
+ * read heavy on its light section (stage B round 3: astra on 01, 06, 09
+ * and 14, "the gray title tab is visually heavy"), and its ink edge already
+ * frames it. Other modes: mix(ink, fill, headerChipMix).
  */
 function sectionChipFill(ink: string, fill: string, neutral: boolean, style: CanvasStyle): string {
   if (style.shapeFill !== "ink-card") return mixColors(ink, fill, style.headerChipMix);
   const chroma = oklabChroma(fill);
-  return withLightnessChroma(fill, oklabLightness(fill) - SECTION_CHIP_LIGHTNESS_STEP, neutral ? chroma : chroma + SECTION_CHIP_CHROMA_STEP);
+  return neutral
+    ? withLightnessChroma(fill, oklabLightness(fill) - SECTION_CHIP_NEUTRAL_LIGHTNESS_STEP, chroma)
+    : withLightnessChroma(fill, oklabLightness(fill) - SECTION_CHIP_LIGHTNESS_STEP, chroma + SECTION_CHIP_CHROMA_STEP);
 }
 
 const SECTION_CHIP_LIGHTNESS_STEP = 0.095;
+const SECTION_CHIP_NEUTRAL_LIGHTNESS_STEP = 0.05;
 const SECTION_CHIP_CHROMA_STEP = 0.03;
 
 /**
