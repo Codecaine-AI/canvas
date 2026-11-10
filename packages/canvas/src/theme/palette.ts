@@ -558,6 +558,35 @@ function goldNodeEdge(style: CanvasStyle, fill: string): string {
   return ensureContrast(withLightnessChroma(paletteColor("yellow", style), 0.59, 0.13, -8), fill, NON_TEXT_CONTRAST);
 }
 
+/** A predefined process's inner paint: the two bars, and the end bands between each bar and the outline (null = none). */
+export interface PredefinedProcessPaint {
+  bar: string;
+  band: string | null;
+}
+
+/**
+ * The predefined process's inner paint for a node of `colors`. FigJam: bars
+ * in the border color, no bands. Other themes: each end band (outline to
+ * bar) is the fill with PREDEFINED_PROCESS_BAND_INK of the border mixed in,
+ * and the bar the border PREDEFINED_PROCESS_BAR_INK of the way from the
+ * fill, so the shape reads as one box with two end caps. Bars in the full
+ * border color read as a second, inner border at 1:1 (stage B round 0: kimi
+ * and fable on 01, 04 and 05).
+ */
+export function resolvePredefinedProcessPaint(
+  colors: { fill: string; border: string },
+  canvasStyle: CanvasStyle,
+): PredefinedProcessPaint {
+  if (canvasStyle.theme === "figjam") return { bar: colors.border, band: null };
+  return {
+    bar: mixColors(colors.border, colors.fill, PREDEFINED_PROCESS_BAR_INK),
+    band: mixColors(colors.border, colors.fill, PREDEFINED_PROCESS_BAND_INK),
+  };
+}
+
+const PREDEFINED_PROCESS_BAR_INK = 0.5;
+const PREDEFINED_PROCESS_BAND_INK = 0.12;
+
 /**
  * Icon object paint. `glyph` (figjam): the bare glyph in the ink, closed
  * interiors in the shape fill. `tile`: tile = ink (a light anchor's solid,

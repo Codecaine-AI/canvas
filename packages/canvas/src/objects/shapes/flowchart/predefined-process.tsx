@@ -5,6 +5,7 @@ import type { ShapeDef } from "../shape-def";
 import { DEFAULT_CANVAS_STYLE } from "../../../theme/canvas-style";
 import { canvasStyleCssVar } from "../../../theme/canvas-style-context";
 import { FIGJAM_PREDEFINED_PROCESS_BAR_PX, resolvePredefinedProcessBarWidth } from "../../../theme/tokens";
+import { resolvePredefinedProcessPaint } from "../../../theme/palette";
 
 /**
  * Predefined-process shape: rect with rounded corners and two inner vertical
@@ -47,17 +48,35 @@ export const predefinedProcessShapeDef: ShapeDef = {
       const width = barWidthPx !== FIGJAM_PREDEFINED_PROCESS_BAR_PX ? { width: `${barWidthPx}px` } : null;
       const vertical =
         strokedBorderPx > 0 ? { top: `${strokedBorderPx}px`, bottom: `${strokedBorderPx}px` } : null;
+      // Outside FigJam each end band (outline to bar) takes a light tint and
+      // the bar a softer line (theme/palette.ts resolvePredefinedProcessPaint).
+      const inner = resolvePredefinedProcessPaint(colors, canvasStyle);
+      const bandWidth = `calc(${inset} - ${strokedBorderPx}px + ${barWidthPx}px)`;
       return (
         <>
+          {inner.band ? (
+            <>
+              <span
+                aria-hidden="true"
+                data-canvas-predefined-process-band="true"
+                style={{ position: "absolute", top: 0, bottom: 0, left: `${strokedBorderPx}px`, width: bandWidth, background: inner.band, ...vertical }}
+              />
+              <span
+                aria-hidden="true"
+                data-canvas-predefined-process-band="true"
+                style={{ position: "absolute", top: 0, bottom: 0, right: `${strokedBorderPx}px`, left: "auto", width: bandWidth, background: inner.band, ...vertical }}
+              />
+            </>
+          ) : null}
           <span
             aria-hidden="true"
             className="interactive-canvas-predefined-process-bar"
-            style={{ left: inset, ...width, background: colors.border, ...vertical }}
+            style={{ left: inset, ...width, background: inner.bar, ...vertical }}
           />
           <span
             aria-hidden="true"
             className="interactive-canvas-predefined-process-bar"
-            style={{ right: inset, left: "auto", ...width, background: colors.border, ...vertical }}
+            style={{ right: inset, left: "auto", ...width, background: inner.bar, ...vertical }}
           />
         </>
       );

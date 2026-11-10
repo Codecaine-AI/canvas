@@ -63,6 +63,7 @@ import {
   resolveConnectorPaint,
   resolveIconPaint,
   resolveIconTilePaint,
+  resolvePredefinedProcessPaint,
   resolveLabelChipBorder,
   resolveLabelChipText,
   resolveSectionPaint,
@@ -878,18 +879,17 @@ function renderPredefinedProcessSilhouette(
   const innerWidth = Math.max(0, rect.width - strokeWidth * 2);
   const innerHeight = Math.max(0, rect.height - strokeWidth * 2);
   const barInset = innerWidth * PREDEFINED_PROCESS_GEOMETRY.barInsetRatio;
-  const bar = (x: number) =>
-    tag("rect", {
-      x,
-      y: innerY,
-      width: barWidth,
-      height: innerHeight,
-      fill: paint.border,
-    });
+  const inner = resolvePredefinedProcessPaint(paint, canvasStyle);
+  const strip = (x: number, width: number, fill: string) =>
+    tag("rect", { x, y: innerY, width, height: innerHeight, fill });
+  const bands = inner.band
+    ? strip(innerX, barInset + barWidth, inner.band) + strip(innerX + innerWidth - barInset - barWidth, barInset + barWidth, inner.band)
+    : "";
   return (
     bboxRoundedRect(rect, paint, strokeWidth, resolveShapeCornerRadius("predefined-process", canvasStyle)) +
-    bar(innerX + barInset) +
-    bar(innerX + innerWidth - barInset - barWidth)
+    bands +
+    strip(innerX + barInset, barWidth, inner.bar) +
+    strip(innerX + innerWidth - barInset - barWidth, barWidth, inner.bar)
   );
 }
 
