@@ -234,9 +234,10 @@ describe("in-place section title editor", () => {
     expect(input.style.padding).toBe("0px 10px 0px 28px");
     expect(input.style.fontFamily).toContain("IBM Plex Mono");
     expect(input.style.textTransform).toBe("uppercase");
-    // The chip fill at its depth — the same color the static chip paints.
-    expect(input.style.background).toBe("#BEE2E2");
-    expect(staticSvg("schematic-light")).toContain('fill="#BEE2E2"/>');
+    // The chip fill at its depth — the same color the static chip paints
+    // (stage C: the lighter tab Ford picked from mockup2, 0.045 L under its section).
+    expect(input.style.background).toBe("#D1F2F2");
+    expect(staticSvg("schematic-light")).toContain('fill="#D1F2F2"/>');
   });
 
   it("floating (figjam): the original inset chip editor", () => {

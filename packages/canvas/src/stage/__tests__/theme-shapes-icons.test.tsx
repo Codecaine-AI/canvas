@@ -181,8 +181,8 @@ describe("live icons", () => {
     const body = node.querySelector("[data-canvas-icon-shape-body]") as HTMLElement;
     expect(body.getAttribute("data-canvas-icon-style")).toBe("tile");
     const tile = node.querySelector("[data-canvas-icon-tile]") as SVGRectElement;
-    // The violet node's pastel fill, edged in its ink.
-    expect(tile.getAttribute("fill")).toBe("#CEBBFA");
+    // The violet node's pastel fill (stage C: the lighter L 0.915 step Ford picked from mockup2), edged in its ink.
+    expect(tile.getAttribute("fill")).toBe("#E6DDFF");
     expect(tile.getAttribute("stroke")).toBe("#6940A5");
     // The node border width (stage B round 4: at 1.5px tiles read thinner than the nodes beside them).
     expect(tile.getAttribute("stroke-width")).toBe("2");

@@ -380,47 +380,63 @@ function shapeFillBase(color: CanvasColor, style: CanvasStyle): string {
 }
 
 /**
- * The painted `ink-card` node fill: shapeFillBase, the tone the inks are set
- * against, moved by NODE_FILL_RETONE, so retuning the node fills leaves every
- * ink line (borders, wires, section edges, note stripes) where it was.
+ * The painted `ink-card` node fill: the hue of shapeFillBase, the tone the
+ * inks are set against, at NODE_FILL (turned by NODE_FILL_HUE_TURN), so
+ * retuning the node fills leaves every ink line (borders, wires, section
+ * edges, note stripes) where it was.
  */
 function retonedNodeFill(color: CanvasColor, base: string, style: CanvasStyle): string {
   if (color === "white") return base;
   if (color === "gray") return withLightnessChroma(paletteColor("blue", style), GRAY_NODE.lightness, GRAY_NODE.chroma, SLATE_HUE_TURN);
-  const { lightness = -NODE_FILL_DEEPER_STEP, chroma, hue = 0 } = NODE_FILL_RETONE[color] ?? {};
-  return withLightnessChroma(base, oklabLightness(base) + lightness, chroma ?? oklabChroma(base), hue);
+  const { lightness, chroma } = color === "yellow" ? NODE_FILL_YELLOW : NODE_FILL;
+  return withLightnessChroma(base, lightness, chroma, NODE_FILL_HUE_TURN[color] ?? 0);
 }
 
 /**
- * How far a hued node fill sits under its ink ground, OKLab L (0.859 to
- * 0.844). A violet node in the violet 'Agents' section stood out by tone
- * alone and sank (stage A round 8: sol and opus on the nodes sheet); the
- * deeper step lifts every node off its section and leaves sections as they
- * were. Text holds 9.9:1 or more.
+ * A hued node and its icon tile: one pale fill at OKLCH L 0.915, chroma
+ * 0.05 in its hue (stage C: Ford picked the "Lighter" step from mockup2,
+ * FigJam's own fill lightness). The deeper L 0.84 to 0.87 fills at chroma
+ * 0.07 to 0.125 read heavy, and dark text, glyphs and edges read better on
+ * the lighter field. Yellow sits NODE_FILL_YELLOW_LIFT higher in L and
+ * chroma: under about L 0.93 it turns khaki.
  */
-const NODE_FILL_DEEPER_STEP = 0.015;
+const NODE_FILL = { lightness: 0.915, chroma: 0.05 } as const;
+const NODE_FILL_YELLOW_LIFT = { lightness: 0.03, chroma: 0.02 } as const;
+const NODE_FILL_YELLOW = {
+  lightness: NODE_FILL.lightness + NODE_FILL_YELLOW_LIFT.lightness,
+  chroma: NODE_FILL.chroma + NODE_FILL_YELLOW_LIFT.chroma,
+} as const;
 /**
- * Hues that leave the deeper step. Yellow at L 0.859 read as a muddy
- * mustard or ochre (stage A rounds 8 to 10: sol and opus on every yellow
- * node): a clean yellow sits near its own peak lightness, so it stands as
- * light as the node-on-section guard allows (0.045 L under the deepest
- * section), a touch toward lemon and more colorful, a butter yellow
- * (#F3D06D, L 0.867, chroma 0.125). Orange, the other light hue, keeps its
- * #FFC298. Violet takes chroma 0.09, more colorful than its own pale
- * section (0.02 to 0.036), and one step deeper
- * again, so a violet node in a violet section stands out by color as well
- * as tone (round 10: opus on 'Agents'). Red and pink drop to chroma 0.072:
- * the salmon and pink read a touch loud beside the softer fills (round 9:
- * opus). Teal turns 6 degrees toward cyan, clear of the green beside it
- * (round 9: opus on 'Worker', 'Indexer' and 'Usage').
+ * Hue turns (OKLCH degrees) of a node fill from its ink ground. Yellow turns
+ * 4 toward lemon, off the ochre of its ink (stage A rounds 8 to 10: sol and
+ * opus on every yellow node). Teal turns 6 toward cyan, clear of the green
+ * beside it (round 9: opus on 'Worker', 'Indexer' and 'Usage').
  */
-const NODE_FILL_RETONE: Partial<Record<CanvasColor, { lightness?: number; chroma?: number; hue?: number }>> = {
-  yellow: { lightness: 0.008, chroma: 0.125, hue: 4 },
+const NODE_FILL_HUE_TURN: Partial<Record<CanvasColor, number>> = { yellow: 4, teal: 6 };
+
+/**
+ * The ground a node's pushed inks are held against: the yellow gold edge and
+ * wire (goldNodeEdge) and the tile glyphs. It is the node fill stage A and B
+ * tuned them on (OKLab L 0.829 to 0.867), so the lighter stage C fill leaves
+ * every edge and glyph color where it was (Ford: edges, glyphs and text keep
+ * their colors). On the lighter fill each still clears its floor by more.
+ */
+function nodeInkGround(color: CanvasColor, style: CanvasStyle): string {
+  if (style.shapeFill !== "ink-card") return resolveShapePaint(color, style).fill;
+  const base = shapeFillBase(color, style);
+  if (color === "white" || color === "gray") return retonedNodeFill(color, base, style);
+  const { lightness = -INK_GROUND_DEEPER_STEP, chroma } = INK_GROUND_RETONE[color] ?? {};
+  return withLightnessChroma(base, oklabLightness(base) + lightness, chroma ?? oklabChroma(base), NODE_FILL_HUE_TURN[color] ?? 0);
+}
+
+/** How far the ink ground sits under shapeFillBase, OKLab L, unless INK_GROUND_RETONE says otherwise. */
+const INK_GROUND_DEEPER_STEP = 0.015;
+const INK_GROUND_RETONE: Partial<Record<CanvasColor, { lightness?: number; chroma?: number }>> = {
+  yellow: { lightness: 0.008, chroma: 0.125 },
   orange: { lightness: 0 },
-  violet: { lightness: -2 * NODE_FILL_DEEPER_STEP, chroma: 0.09 },
+  violet: { lightness: -2 * INK_GROUND_DEEPER_STEP, chroma: 0.09 },
   red: { chroma: 0.072 },
   pink: { chroma: 0.072 },
-  teal: { hue: 6 },
 };
 
 /**
@@ -481,6 +497,9 @@ function readableOn(text: string, background: string): string {
  * Picked over white node cards with a colored stroke, which named the kind by
  * the 2px border alone (round 2's complaint), and over sections at L 0.965,
  * which faded into the page.
+ *
+ * Since stage C the painted node is lighter (retonedNodeFill, L 0.915); this
+ * base stays the ground the inks are set against.
  */
 const SHAPE_CARD_LIGHTNESS_DROP = 0.12;
 /** OKLCH chroma of an `ink-card` node fill (cut back where sRGB holds less at that lightness). */
@@ -545,7 +564,7 @@ function shapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
   }
   if (style.shapeFill === "ink-card") {
     const fill = retonedNodeFill(color, shapeFillBase(color, style), style);
-    return { fill, border: color === "yellow" ? goldNodeEdge(style, fill) : border, text: readableOn(style.textColor, fill) };
+    return { fill, border: color === "yellow" ? goldNodeEdge(style, nodeInkGround("yellow", style)) : border, text: readableOn(style.textColor, fill) };
   }
   const fill = swatchFor(color).shape.fill;
   return { fill, border, text: readableOn(style.textColor, fill) };
@@ -703,7 +722,9 @@ export function resolveIconTilePaint(
     // (stage A rounds 9 and 10: sol and opus on 'Agent' and 'Webhook').
     // A white tile draws in its gray edge, not the near-black ink, which
     // made it heavier than the tinted tiles (round 9: opus on 'Scheduler', 'Secrets').
-    const glyph = ensureContrast(whiteNodeEdgeAsGray(color, style) ? shape.border : ink, shape.fill, MIN_TEXT_CONTRAST);
+    // The push measures on the ink ground (nodeInkGround), so the lighter stage C tile keeps the glyph color.
+    const ground = onOwnHueSection(color, container, style) ? shape.fill : nodeInkGround(color, style);
+    const glyph = ensureContrast(whiteNodeEdgeAsGray(color, style) ? shape.border : ink, ground, MIN_TEXT_CONTRAST);
     return { ...paint, tileFill: shape.fill, tileBorder: shape.border, glyph, tileMode, tileBorderWidthPx: iconTileOutlineWidthPx(style) };
   }
   if (paint.tileBorder !== null) return { ...paint, tileMode, tileBorderWidthPx: iconTileOutlineWidthPx(style) };
@@ -1037,7 +1058,7 @@ function connectorStroke(color: CanvasColor, style: CanvasStyle): string {
   if (style.sectionFill !== "layer-cake") return resolveInk(color, style);
   if (color === "white") return lineSafeOnSections(slateWireStroke(style), style);
   if (style.shapeFill !== "ink-card") return resolveInk(color, style);
-  if (color === "yellow") return lineSafeOnSections(goldNodeEdge(style, resolveShapePaint("yellow", style).fill), style);
+  if (color === "yellow") return lineSafeOnSections(goldNodeEdge(style, nodeInkGround("yellow", style)), style);
   if (color === "teal") return lineSafeOnSections(withLightnessChroma(resolveInk("teal", style), oklabLightness(resolveInk("teal", style)), oklabChroma(resolveInk("teal", style)), TEAL_WIRE_HUE_TURN), style);
   return resolveInk(color, style);
 }
@@ -1163,7 +1184,7 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
     chipFill,
     chipBorder: withAlpha(ink, SECTION_CHIP_BORDER_OPACITY),
     headerText: style.textColor,
-    ...sectionIconPaint(paintColor, chipFill, style),
+    ...sectionIconPaint(paintColor, sectionChipInkGround(fill, paintColor === "gray", chipFill, style), style),
   };
 }
 
@@ -1198,29 +1219,38 @@ const WHITE_SECTION_LIGHTNESS = 0.994;
 const WHITE_SECTION_CHROMA = 0.006;
 
 /**
- * A header chip's body. Beside `ink-card` nodes: its section fill one clear
- * step deeper and more colorful in OKLCH (SECTION_CHIP_LIGHTNESS_STEP,
- * SECTION_CHIP_CHROMA_STEP; a gray or white chip keeps its fill's chroma), so every chip
- * stands off its own fill in that fill's hue. The 16% ink mix sat 0.07 L
- * under the fill, so the chip edge carried the title, and the olive yellow
- * ink muddied the yellow chips (stage A round 9: opus on 'Messaging',
- * 'Identity' and 'Payments'). A gray or white chip steps
- * SECTION_CHIP_NEUTRAL_LIGHTNESS_STEP: at the full step the mid-gray tab
- * read heavy on its light section (stage B round 3: astra on 01, 06, 09
- * and 14, "the gray title tab is visually heavy"), and its ink edge already
- * frames it. Other modes: mix(ink, fill, headerChipMix).
+ * A header chip's body. Beside `ink-card` nodes: its section fill
+ * SECTION_CHIP_LIGHTNESS_STEP deeper in OKLCH at SECTION_CHIP_CHROMA in
+ * that fill's hue (a gray or white chip at chroma 0), so every chip stands
+ * off its own fill in its fill's hue as a light tab. Stage C (Ford picked
+ * the "Lighter" step from mockup2): the 0.095 L step at the fill's chroma
+ * plus 0.03 read as a heavy colored band over each section; the edge in the
+ * ink at 50% still frames the tab. Other modes: mix(ink, fill, headerChipMix).
  */
 function sectionChipFill(ink: string, fill: string, neutral: boolean, style: CanvasStyle): string {
   if (style.shapeFill !== "ink-card") return mixColors(ink, fill, style.headerChipMix);
-  const chroma = oklabChroma(fill);
-  return neutral
-    ? withLightnessChroma(fill, oklabLightness(fill) - SECTION_CHIP_NEUTRAL_LIGHTNESS_STEP, chroma)
-    : withLightnessChroma(fill, oklabLightness(fill) - SECTION_CHIP_LIGHTNESS_STEP, chroma + SECTION_CHIP_CHROMA_STEP);
+  return withLightnessChroma(fill, oklabLightness(fill) - SECTION_CHIP_LIGHTNESS_STEP, neutral ? 0 : SECTION_CHIP_CHROMA);
 }
 
-const SECTION_CHIP_LIGHTNESS_STEP = 0.095;
-const SECTION_CHIP_NEUTRAL_LIGHTNESS_STEP = 0.05;
-const SECTION_CHIP_CHROMA_STEP = 0.03;
+const SECTION_CHIP_LIGHTNESS_STEP = 0.045;
+const SECTION_CHIP_CHROMA = 0.035;
+
+/**
+ * The ground a header glyph's push measures on beside `ink-card` nodes: the
+ * stage B tab (the fill 0.095 L deeper at its chroma plus 0.03; a neutral
+ * tab 0.05 deeper at its own chroma), so the lighter stage C tab keeps every
+ * header glyph color (Ford: glyphs keep their colors). Other modes: the chip.
+ */
+function sectionChipInkGround(fill: string, neutral: boolean, chipFill: string, style: CanvasStyle): string {
+  if (style.shapeFill !== "ink-card") return chipFill;
+  const { lightnessStep, chromaStep } = neutral ? CHIP_INK_GROUND.neutral : CHIP_INK_GROUND.hued;
+  return withLightnessChroma(fill, oklabLightness(fill) - lightnessStep, oklabChroma(fill) + chromaStep);
+}
+
+const CHIP_INK_GROUND = {
+  hued: { lightnessStep: 0.095, chromaStep: 0.03 },
+  neutral: { lightnessStep: 0.05, chromaStep: 0 },
+} as const;
 
 /**
  * A gray section beside `ink-card` nodes: GRAY_SECTION_INK_WEIGHT at top

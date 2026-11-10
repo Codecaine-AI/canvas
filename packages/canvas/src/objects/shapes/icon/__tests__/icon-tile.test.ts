@@ -48,6 +48,9 @@ describe("icon tile paint by size", () => {
   });
 
   it("solid tiles are small nodes: the node fill and ink edge, the glyph the ink held at 4.5:1 on the tile", () => {
+    // Stage C lightened the light tiles (Ford picked mockup2's "Lighter" step)
+    // and kept every glyph color: the light glyphs are their stage B values.
+    const lightGlyph = { violet: "#633C9B", yellow: "#715701", orange: "#884808" } as const;
     for (const style of [LIGHT, DARK]) {
       for (const color of ["violet", "yellow", "orange"] as const) {
         const node = resolveShapePaint(color, style);
@@ -56,7 +59,7 @@ describe("icon tile paint by size", () => {
           ...resolveIconPaint(color, style),
           tileFill: node.fill,
           tileBorder: node.border,
-          glyph: ensureContrast(resolveInk(color, style), node.fill, 4.5),
+          glyph: style === LIGHT ? lightGlyph[color] : ensureContrast(resolveInk(color, style), node.fill, 4.5),
           tileMode: "solid",
           tileBorderWidthPx: 2,
         });

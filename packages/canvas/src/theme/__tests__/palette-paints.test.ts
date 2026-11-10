@@ -114,7 +114,11 @@ describe("layer-cake sections", () => {
         const chroma = oklabChroma(resolveSectionPaint(color, depth, LIGHT).fill);
         // Set, not only capped: blue, green, teal and violet mixed to 0.008 at top level and told siblings apart by the frame alone.
         expect(Math.abs(chroma - top * (weight / 0.065) ** 0.75)).toBeLessThan(0.0025);
-        expect(chroma).toBeLessThan(oklabChroma(resolveShapePaint(color, LIGHT).fill) - 0.02);
+        // A top-level field stays 0.02 less colorful than its hue's node. Deeper
+        // levels are small nested groups: the stage C node (chroma 0.043 to 0.07,
+        // Ford's "Lighter" pick from mockup2) no longer clears them by 0.02, and a
+        // node in a section of its own hue paints the white card there.
+        if (depth === 2) expect(chroma).toBeLessThan(oklabChroma(resolveShapePaint(color, LIGHT).fill) - 0.02);
       }
     }
     // The butter field on board 12 (chroma 0.076) is now a pale yellow.
@@ -183,19 +187,21 @@ describe("layer-cake sections", () => {
   it("derives border and chip border from the ink, and the chip one clear step under its fill", () => {
     const paint = resolveSectionPaint("teal", 1, LIGHT);
     expect(paint.border).toBe("rgba(13, 113, 100, 0.9)");
-    // Beside ink-card nodes the chip is its fill 0.095 L deeper and 0.03 more colorful in OKLCH (stage A round 11).
+    // Beside ink-card nodes the chip is its fill 0.045 L deeper at chroma 0.035 in OKLCH, a light
+    // tab (stage C: Ford picked mockup2's "Lighter" step; the 0.095 step read as a heavy band).
     for (const color of ["teal", "yellow", "red"] as const) {
       for (const depth of [2, 3, 4]) {
         const { fill, chipFill } = resolveSectionPaint(color, depth, LIGHT);
-        expect(Math.abs(oklabLightness(fill) - oklabLightness(chipFill) - 0.095)).toBeLessThan(0.004);
-        expect(Math.abs(oklabChroma(chipFill) - oklabChroma(fill) - 0.03)).toBeLessThan(0.004);
+        expect(Math.abs(oklabLightness(fill) - oklabLightness(chipFill) - 0.045)).toBeLessThan(0.004);
+        expect(Math.abs(oklabChroma(chipFill) - 0.035)).toBeLessThan(0.004);
       }
     }
-    // A gray chip steps 0.05 L and keeps its fill's chroma (stage B round 4: at 0.095 the mid-gray
-    // tab read heavy, astra on 01, 06, 09 and 14); its ink edge frames it.
+    // A gray chip takes the same 0.045 L step as a neutral (stage B round 4: the
+    // mid-gray tab read heavy, astra on 01, 06, 09 and 14); its ink edge frames it.
     for (const depth of [2, 3, 4]) {
       const gray = resolveSectionPaint("gray", depth, LIGHT);
-      expect(Math.abs(oklabLightness(gray.fill) - oklabLightness(gray.chipFill) - 0.05)).toBeLessThan(0.004);
+      expect(Math.abs(oklabLightness(gray.fill) - oklabLightness(gray.chipFill) - 0.045)).toBeLessThan(0.004);
+      expect(oklabChroma(gray.chipFill)).toBeLessThan(0.002);
     }
     expect(paint.chipBorder).toBe("rgba(13, 113, 100, 0.5)");
     expect(paint.headerText).toBe("#1F1F1F");
@@ -315,11 +321,12 @@ describe("layer-cake sections", () => {
     for (const depth of [2, 3, 4]) {
       const paint = resolveSectionPaint("white", depth, LIGHT);
       // A faint warm paper, not pure white, which matched the page and read
-      // as a hole in a hued parent (stage A round 9: opus), with a neutral chip 0.05 L under it (was
-      // 0.095: the mid-gray tab read heavy, stage B round 3: astra on 01, 06, 09 and 14).
+      // as a hole in a hued parent (stage A round 9: opus), with a neutral chip 0.045 L under it (was
+      // 0.095: the mid-gray tab read heavy, stage B round 3: astra on 01, 06, 09 and 14; 0.05 until
+      // stage C, Ford's "Lighter" pick from mockup2).
       expect(paint.fill).toBe("#FFFDF9");
       expect(oklabChroma(paint.fill)).toBeLessThan(0.008);
-      expect(Math.abs(oklabLightness(paint.fill) - oklabLightness(paint.chipFill) - 0.05)).toBeLessThan(0.004);
+      expect(Math.abs(oklabLightness(paint.fill) - oklabLightness(paint.chipFill) - 0.045)).toBeLessThan(0.004);
       expect(paint.chipBorder).toBe(resolveSectionPaint("gray", depth, LIGHT).chipBorder);
       expect(contrastRatio(paint.border, resolveSectionPaint("gray", 2, LIGHT).fill)).toBeGreaterThanOrEqual(2);
       expect(contrastRatio(paint.headerText, paint.chipFill)).toBeGreaterThanOrEqual(4.5);
@@ -358,20 +365,18 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       const paint = resolveShapePaint(color, LIGHT);
       // Yellow edges in its own amber gold (the next test), every other hue in its ink.
       if (color !== "yellow") expect(paint.border).toBe(resolveInk(color, LIGHT));
-      // Hued nodes sit 0.135 under the card; violet one step deeper (0.15); the light hues stand lighter: orange 0.12, yellow 0.112 (stage A rounds 9 and 11).
-      const drop = color === "orange" ? 0.12 : color === "yellow" ? 0.112 : color === "violet" ? 0.15 : 0.135;
-      expect(Math.abs(oklabLightness(paint.fill) - (oklabLightness(LIGHT.cardFill) - drop))).toBeLessThan(0.003);
-      // The kind reads from the fill, not only the border: chroma 0.08 (red and pink 0.072, yellow 0.125, violet 0.09, orange the most sRGB holds).
-      // Red and pink sit at 0.072 (floor 0.07, was 0.075): their salmon and pink read loud beside the softer fills (stage A round 9: opus).
-      expect(chroma(paint.fill)).toBeGreaterThanOrEqual(color === "blue" ? 0.06 : color === "red" || color === "pink" ? 0.07 : 0.075);
-      if (color === "blue") expect(chroma(paint.fill)).toBeLessThan(0.07);
-      // Yellow's cap is 0.13 (was 0.095): at its node lightness a less colorful yellow reads as a muddy mustard (stage A rounds 9 and 10).
-      expect(chroma(paint.fill)).toBeLessThan(color === "yellow" ? 0.13 : 0.091);
+      // Stage C (Ford picked mockup2's "Lighter" step): every hued node at L 0.915,
+      // chroma 0.05; yellow 0.03 lighter and 0.02 more colorful, since under
+      // L 0.93 it turns khaki. Red, blue and violet take what sRGB holds (0.043 to 0.047).
+      expect(Math.abs(oklabLightness(paint.fill) - (color === "yellow" ? 0.945 : 0.915))).toBeLessThan(0.003);
+      expect(chroma(paint.fill)).toBeGreaterThanOrEqual(color === "yellow" ? 0.068 : 0.042);
+      expect(chroma(paint.fill)).toBeLessThan(color === "yellow" ? 0.072 : 0.052);
       expect(Math.abs(hue(paint.fill) - hue(LIGHT.palette[color]))).toBeLessThan(0.12);
     }
     // Green and teal (and teal and blue) were 0.003 / 0.005 apart at the 0.08 mix.
+    // At the lighter stage C fill neighbors sit 0.024 apart, over the 0.02 just-visible step.
     for (const [a, b] of [["green", "teal"], ["teal", "blue"], ["red", "orange"], ["violet", "pink"]] as const) {
-      expect(oklabDistance(resolveShapePaint(a, LIGHT).fill, resolveShapePaint(b, LIGHT).fill)).toBeGreaterThan(0.025);
+      expect(oklabDistance(resolveShapePaint(a, LIGHT).fill, resolveShapePaint(b, LIGHT).fill)).toBeGreaterThan(0.02);
     }
   });
 
@@ -452,17 +457,20 @@ describe("schematic shapes, icons, stickies, connectors", () => {
   });
 
   it("light preset: a node never reads as the color of the section it sits in, its own hue included", () => {
-    // Every hued node is the darker, stronger field: at least 0.045 L
-    // and 0.055 OKLab from any section level, and 0.065 from a section of its
-    // own hue (round 3: 0.03 to 0.05 L, nodes lighter than their sections).
+    // Every hued node, as it paints in each section (the white card in its own
+    // hue), stands at least 0.02 OKLab (one just-visible step) off every
+    // section level, and its ink edge (3:1) carries it. Stage C lightened the
+    // nodes to L 0.915 (Ford picked mockup2's "Lighter" step), so they are no
+    // longer the darker field by 0.045 L and 0.055 OKLab (round 3 had nodes
+    // lighter than their sections; the edge and the hue now tell them apart).
     const sectionColors = CANVAS_COLORS;
     for (const nodeColor of CANVAS_COLORS.filter((color) => color !== "white" && color !== "gray")) {
-      const node = resolveShapePaint(nodeColor, LIGHT).fill;
       for (const sectionColor of sectionColors) {
+        const node = resolveShapePaint(nodeColor, LIGHT, sectionColor);
         for (const depth of [2, 3, 4, 5]) {
           const section = resolveSectionPaint(sectionColor, depth, LIGHT).fill;
-          expect(oklabLightness(section) - oklabLightness(node)).toBeGreaterThanOrEqual(0.045);
-          expect(oklabDistance(node, section)).toBeGreaterThanOrEqual(sectionColor === nodeColor ? 0.065 : 0.055);
+          expect(oklabDistance(node.fill, section)).toBeGreaterThanOrEqual(0.02);
+          expect(contrastRatio(node.border, section)).toBeGreaterThanOrEqual(3);
         }
       }
     }
@@ -636,8 +644,9 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     // Gray left the rule in stage B round 4: the gray node is a near-white
     // card now, and a note stands 0.04 OKLab off it by its wash's hue.
     expect(oklabDistance(note.fill, resolveShapePaint("gray", LIGHT).fill)).toBeGreaterThanOrEqual(0.04);
+    // Stage C lightened the nodes (L 0.915, yellow 0.945): the yellow note stays 0.015 over the yellow node.
     for (const nodeColor of CANVAS_COLORS.filter((color) => color !== "white" && color !== "gray")) {
-      expect(oklabLightness(note.fill) - oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill)).toBeGreaterThanOrEqual(0.065);
+      expect(oklabLightness(note.fill) - oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill)).toBeGreaterThanOrEqual(0.015);
     }
     expect(contrastRatio(note.text, note.fill)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(note.border, note.fill)).toBeGreaterThanOrEqual(1.2);
