@@ -816,13 +816,13 @@
       "props": {},
       "text": [
         {
-          "insert": "Decision",
+          "insert": "Decision.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": ": the editor route opens one right-hand panel at a time: the Style rail, the editor's Inspector, or the agent sidebar. The editor mounts the rail in its "
+          "insert": " The editor route opens one right-hand panel at a time: the Style rail, the editor's Inspector, or the agent sidebar. The editor mounts the rail in its "
         },
         {
           "insert": "sidePanel",
@@ -840,7 +840,7 @@
           }
         },
         {
-          "insert": " is set, which Studio's Inspect toggle drives. The Inspector edits a selection's detail line and its glyph: an icon's Glyph field, and a section's Icon field with a None choice."
+          "insert": " is set, which Studio's Inspect toggle drives. The Inspector edits a glyph: an icon's Glyph field, and a section's Icon field with a None choice. It has no Detail field, because a node shows its name only."
         }
       ],
       "children": []

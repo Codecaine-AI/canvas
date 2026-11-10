@@ -38,6 +38,7 @@ import type {
 } from "../state/schema";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { belowBandSize, belowExtendedBoundsPx, iconGlyphBoxPx } from "./text-slots";
+import { NATURAL_ASPECT_BY_TYPE, naturalAspectRect } from "./natural-aspect";
 export { inscribedTextRect, type InscribedTextRectResolver } from "./inscribed-text-rects";
 
 /**
@@ -143,9 +144,13 @@ function regularPolygonPoints(bounds: CanvasBounds, sides: number, startAngle: n
   return points;
 }
 
-/** Octagon: 8-point regular polygon, flat-top orientation (no vertex due north/south — the first edge is horizontal across the top). */
+/**
+ * Octagon: a REGULAR 8-point polygon (a stop sign), flat-top orientation (no
+ * vertex due north/south — the first edge is horizontal across the top),
+ * drawn in the centered square of `bounds` (NATURAL_ASPECT_BY_TYPE).
+ */
 export function octagonPoints(bounds: CanvasBounds): CanvasPoint[] {
-  return regularPolygonPoints(bounds, 8, -Math.PI / 2 + Math.PI / 8);
+  return regularPolygonPoints(naturalAspectRect(bounds, NATURAL_ASPECT_BY_TYPE.octagon!), 8, -Math.PI / 2 + Math.PI / 8);
 }
 
 /**
@@ -196,7 +201,7 @@ function rectPoints(bounds: CanvasBounds): CanvasPoint[] {
  * World-space hit footprint: the object box ∪ its painted picture (the glyph
  * box — a tile-style icon's tile — and any below-slot caption band, band
  * width included), sized under `canvasStyle` (the workspace style — its
- * detail metrics grow the band, its tile cap places it). Hit testing, hover,
+ * name metrics grow the band, its tile cap places it). Hit testing, hover,
  * and snap candidates read it. Default style when omitted.
  */
 export function hitBoundsForObject(
@@ -238,7 +243,29 @@ export function connectionBoundsForObject(
   };
 }
 
-/** Whether a caption (name lines and/or a detail line) paints below the glyph — detail-only captions count. */
+/**
+ * World rect of the caption band an icon paints under its glyph (the name,
+ * band width included — wider than the glyph column the connection
+ * bounds keep), or null when nothing paints there. Routes keep out of it.
+ */
+export function captionBandBounds(
+  object: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): CanvasBounds | null {
+  const glyph = iconGlyphBoxPx(object, canvasStyle);
+  const extended = belowExtendedBoundsPx(object, canvasStyle);
+  const top = glyph.y + glyph.height;
+  const height = extended.y + extended.height - top;
+  if (height <= 0) return null;
+  return {
+    x: object.geometry.x + extended.x,
+    y: object.geometry.y + top,
+    width: extended.width,
+    height,
+  };
+}
+
+/** Whether a caption (the name lines) paints below the glyph. */
 function hasExternalBelowBand(object: InteractiveCanvasObject, canvasStyle: CanvasStyle): boolean {
   return belowBandSize(object.text, object, canvasStyle).heightPx > 0;
 }

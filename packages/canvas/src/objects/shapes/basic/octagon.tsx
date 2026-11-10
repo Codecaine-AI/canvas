@@ -4,6 +4,7 @@ import type { CanvasPoint } from "../../../state/geometry";
 import { OCTAGON_OUTLINE, octagonPoints } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+import { resolveTrueOutlineStrokeWidth } from "../../../theme/tokens";
 
 function pointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${point.x},${point.y}`).join(" ");
@@ -21,7 +22,7 @@ export const octagonShapeDef: ShapeDef = {
   outline: OCTAGON_OUTLINE,
   silhouette: {
     className: "interactive-canvas-object-octagon",
-    silhouette: ({ object, colors, strokeWidth }) => {
+    silhouette: ({ object, colors, strokeWidth, canvasStyle }) => {
       const points = pointsAttribute(
         octagonPoints({ x: 0, y: 0, width: object.geometry.width, height: object.geometry.height }),
       );
@@ -38,7 +39,7 @@ export const octagonShapeDef: ShapeDef = {
             points={points}
             fill={colors.fill}
             stroke={colors.border}
-            strokeWidth={strokeWidth}
+            strokeWidth={resolveTrueOutlineStrokeWidth(strokeWidth, canvasStyle)}
             strokeLinejoin="round"
           />
         </svg>

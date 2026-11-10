@@ -9,11 +9,10 @@
  * four targets, not four tools. That is why the first two gate on
  * `requireBoardEntity` — mere existence — and dispatch on kind inside `apply`,
  * where the only difference is which document channel the patch names
- * (`text` on an object, `label` on a connection). A shape's, icon's, or
- * section's one-line `detail` is text too, so it rides the same call: the name
- * and its fact are written together or apart, never through a second tool. A
- * detail sent to a sticky or an edge — kinds with no detail line — is dropped
- * with a note rather than refused, so the rest of the call still lands.
+ * (`text` on an object, `label` on a connection). The board shows names only:
+ * no kind has a detail line, so a `detail` sent to any of them is dropped
+ * with a note rather than refused, and the rest of the call still lands. A
+ * detail an older file still holds is left as stored and never renders.
  *
  * LOCKS GATE ALL THREE. Text and color are edits like any other, so a box under
  * a lock refuses them, and so does an edge whose ends sit inside a locked-all
@@ -29,31 +28,30 @@
  * one gesture whatever it lands on, and a frame's glyph is the only part of a
  * frame this tool can change — see `requireSwapTarget`.
  *
- * TEXT FIT. `update_text` runs the renderer's own wrap/clamp decision
- * (board/text-fit.ts) over the object's CURRENT box and the NEW text, and
- * attaches the verdict as an `OpOutcome.notes` line when the text would clip,
- * may clip (within 1px of the box edge), or cannot be measured exactly
- * (characters the bundled fonts lack). Report-only: the write still lands. Same philosophy as the unreadable-labels
- * lint — say it, don't block it — and the same family of warning `resize` and
- * `match_size` fire from the other direction.
+ * TEXT FIT. `update_text` and `change_shape` run auto-size (auto-size.ts)
+ * over the object: when the renderer's own wrap/clamp decision
+ * (board/text-fit.ts) says the NEW text would clip in the box, the node grows
+ * to the size it needs, keeping its center, and its row and column peers
+ * grow with it. A sticky or section, which does not grow, still gets the
+ * verdict as an `OpOutcome.notes` line, and so does text that cannot be
+ * measured exactly (characters the bundled fonts lack).
  *
  * WHY EDGE LABELS ARE NOT FIT-CHECKED HERE. `textFitReport`'s `edge-label`
  * slot answers "does the chip fit the corridor it renders in?" — it needs the
  * corridor as its `size`, and a label chip never truncates, it grows. So the
  * verdict is a CROWDING one, not a legibility one, and computing an honest
  * corridor means routing the edge and measuring against both endpoint rects —
- * which is exactly what the `unreadable-labels` rule already does, with the
- * routed truth, and which already fires in the lint delta of this very same
- * APPLIED result. A second, cruder corridor estimate here could only duplicate
- * that finding or contradict it, so `update_text` on a connection writes the
- * label and leaves the verdict to the lint that owns it.
+ * which is exactly what label placement (connectors/label-placement.ts) does
+ * with the routed truth: it slides the chip to a clear spot, and canvas_check
+ * counts a chip that found none. A second, cruder corridor estimate here
+ * could only contradict it, so `update_text` on a connection writes the label
+ * and leaves the chip to the placement.
  */
 import { Type } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasObject } from "../../../state/schema";
 
-import { textFitReport } from "../../../board/text-fit";
+import { withAutoSize } from "./auto-size";
 import { entityKindOf } from "../../perception/op-surface";
-import { detailDroppedNote, storedDetail } from "../detail-line";
 import { NO_GLYPH, isGlyphName, unknownGlyphMessage } from "../glyph-names";
 import { defineOperationTool } from "./operation-tool";
 import type { OpContext } from "./op-context";
@@ -62,7 +60,7 @@ import {
   toDocumentFields,
   type FoldedTypeName,
 } from "../placeable-types";
-import { Color, DETAIL_RULE, Id, NAME_RULE, ShapeSwapPatch } from "../schemas";
+import { Color, Id, NAME_RULE, ShapeSwapPatch } from "../schemas";
 import type { ConnectionPatch, ObjectPatch, ShapeSwapPatch as ShapeSwap } from "../schemas";
 
 /** Whether this id names an edge rather than an object. */
@@ -84,10 +82,18 @@ function requireUnlockedTarget(ctx: OpContext, id: string): string[] {
 // update_text
 // ---------------------------------------------------------------------------
 
+/**
+ * The note for a `detail` sent to update_text. The board shows names only, so
+ * the detail is dropped and the call says so; the rest of it still applies,
+ * the way change_shape drops a direction a type cannot hold.
+ */
+export const DETAIL_DROPPED_NOTE =
+  "detail dropped — a node shows its name only; put extra context in a sticky note next to it";
+
 export const updateText = defineOperationTool({
   name: "update_text",
   description:
-    "Write the words on anything that carries them — a shape's, icon's, or section's name and its one-line detail, a sticky's body, an edge's label. Send text, detail, or both. Text that no longer fits its box still applies, with a warning naming the size it would need.",
+    "Write the words on anything that carries them — a shape's or icon's name, a section's title, a sticky's body, an edge's label. A node shows its name only; put extra context in a sticky note next to it. A shape or icon whose text no longer fits grows to fit, keeping its center, and the same-type shapes in its row (height) and column (width) grow to match, unless that would make them overlap another box. A note on the schematic themes takes the height its new text needs, shrinking or growing, width as set; a figjam sticky or a section that no longer fits still applies, with a warning naming the size it would need.",
   fields: {
     id: Id,
     text: Type.Optional(Type.String({
@@ -96,47 +102,32 @@ export const updateText = defineOperationTool({
         + "On a sticky it is the markdown body; on an edge, the label. Empty clears it.",
     })),
     detail: Type.Optional(Type.String({
-      description: `Shapes, icons, and sections only: ${DETAIL_RULE}. Empty clears it.`,
+      description: "Not shown on any kind: a detail sent here is dropped with a note. Put extra context in a sticky note next to the node.",
     })),
   },
   validate: (ctx, p) => {
-    // Both fields are optional so either can be written alone; asking for
-    // neither is not a gesture. (A root-level "at least one" would be dropped
-    // by providers that keep only `properties` and `required`.)
+    // `text` is optional so a detail-only call (an older habit) reaches apply
+    // and gets its drop note; asking for neither is not a gesture. (A
+    // root-level "at least one" would be dropped by providers that keep only
+    // `properties` and `required`.)
     if (p.text === undefined && p.detail === undefined) {
-      return ["name what to write — text, detail, or both; an update_text with neither changes nothing."];
+      return ["name what to write — send text; an update_text without it changes nothing."];
     }
     const errors = ctx.requireBoardEntity(p.id);
     return errors.length > 0 ? errors : requireUnlockedTarget(ctx, p.id);
   },
   apply: (ctx, p) => {
+    const notes = p.detail === undefined ? [] : [DETAIL_DROPPED_NOTE];
+    if (p.text === undefined) return { status: "noop", note: DETAIL_DROPPED_NOTE };
     if (isConnectionId(ctx, p.id)) {
-      const notes = p.detail === undefined ? [] : [detailDroppedNote("edge")];
-      if (p.text === undefined) return { status: "noop", note: detailDroppedNote("edge") };
       // An emptied label is a REMOVED label, not an empty chip: the spread-
       // merging applier reads an own `label: undefined` as "clear it".
       const patch = (p.text === "" ? { label: undefined } : { label: p.text }) as ConnectionPatch;
       return ctx.mergeConnection(p.id, patch, `update_text ${p.id}`, notes);
     }
-    const target = ctx.draft.objects.find((object) => object.id === p.id)!;
-    const notes: string[] = [];
-    const patch: ObjectPatch = {};
-    if (p.text !== undefined) patch.text = p.text;
-    if (p.detail !== undefined) {
-      if (entityKindOf(target) === "sticky") {
-        notes.push(detailDroppedNote("sticky"));
-      } else {
-        // An own `detail: undefined` is how the applier clears it.
-        patch.detail = storedDetail(p.detail);
-      }
-    }
-    if (Object.keys(patch).length === 0) return { status: "noop", note: notes[0]! };
-    // The fit verdict is over the NEW name and the NEW detail line together:
-    // a detail added under a name that just fitted can push it into clipping.
-    const next = "detail" in patch ? { ...target, detail: patch.detail } : target;
-    const report = textFitReport(next, target.geometry, patch.text ?? target.text, ctx.canvasStyle);
-    if (!report.fits || !report.reliable) notes.push(report.detail);
-    return ctx.mergeObject(p.id, patch, `update_text ${p.id}`, notes);
+    const patch: ObjectPatch = { text: p.text };
+    // The node grows (with its peers) until its new name shows whole.
+    return withAutoSize(ctx.mergeObject(p.id, patch, `update_text ${p.id}`, notes), [p.id], ctx.canvasStyle);
   },
 });
 
@@ -307,6 +298,8 @@ export const changeShape = defineOperationTool({
       return ctx.mergeObject(p.id, { icon } as ObjectPatch, `change_shape ${p.id}`);
     }
     const { patch, notes } = shapeSwapPatch(target, p.patch);
-    return ctx.mergeObject(p.id, patch, `change_shape ${p.id}`, notes);
+    // A new shape is a new text slot (a diamond's inscribed rect is narrower
+    // than a rectangle's), so the name can stop fitting: grow it back.
+    return withAutoSize(ctx.mergeObject(p.id, patch, `change_shape ${p.id}`, notes), [p.id], ctx.canvasStyle);
   },
 });

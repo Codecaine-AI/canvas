@@ -237,7 +237,7 @@ export function documentWithinCrop(
 }
 
 // Page-frame injection is a pure board transformation, so it lives in the
-// board layer (where the lint authorship baseline also needs it); the session
+// board layer (the toolkit's createCanvasFile writes it too); the session
 // surface keeps exporting it from here.
 export { draftWithPageFrame, injectedPageFrame } from "../../board/page-frame";
 

@@ -20,7 +20,7 @@ import {
 import {
   STICKY_CODE_CHIP_BACKGROUND,
   STICKY_CODE_CHIP_RADIUS,
-  STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX,
+  stickyHeadingStyle,
   stickyMarkdownLineAttrs,
   STICKY_STRONG_STYLE,
 } from "../../../../objects/sticky/markdown";
@@ -41,6 +41,7 @@ import {
   type StickyMarkdownLine,
   type StickyMarkdownSelection,
 } from "../../../../objects/sticky/markdown-editing";
+import { STICKY_CODE_FONT_EM } from "../../../../objects/sticky/sticky-text";
 import type { InteractiveCanvasObject } from "../../../../state/schema";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import type { TextEditingApi } from "./use-text-editing";
@@ -71,24 +72,6 @@ const LEAF_ROLE_ATTR = "data-sticky-markdown-leaf-role";
 const SOURCE_START_ATTR = "data-sticky-markdown-source-start";
 const SOURCE_END_ATTR = "data-sticky-markdown-source-end";
 const NBSP = "\u00A0";
-
-const HEADING_STYLE: Record<1 | 2 | 3, CSSProperties> = {
-  1: {
-    fontSize: "1.5em",
-    lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[1]}px`,
-    fontWeight: 700,
-  },
-  2: {
-    fontSize: "1.25em",
-    lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[2]}px`,
-    fontWeight: 700,
-  },
-  3: {
-    fontSize: "1.1em",
-    lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[3]}px`,
-    fontWeight: 700,
-  },
-};
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -320,7 +303,7 @@ function renderInlineToken(
       style={{
         fontFamily: STICKY_MARKDOWN_MONO_FONT,
         fontWeight: STICKY_MARKDOWN_MONO_FONT_WEIGHT,
-        fontSize: "0.85em",
+        fontSize: `${STICKY_CODE_FONT_EM}em`,
         // The at-rest paper chip's tint and radius (objects/sticky/markdown.tsx).
         background: STICKY_CODE_CHIP_BACKGROUND,
         borderRadius: STICKY_CODE_CHIP_RADIUS,
@@ -334,7 +317,7 @@ function renderInlineToken(
   );
 }
 
-function renderLine(line: StickyMarkdownLine, markerVisible: boolean): ReactNode {
+function renderLine(line: StickyMarkdownLine, markerVisible: boolean, headingScale: number): ReactNode {
   return (
     <span
       // eslint-disable-next-line react/no-array-index-key -- lines are position-stable within a single render
@@ -343,7 +326,7 @@ function renderLine(line: StickyMarkdownLine, markerVisible: boolean): ReactNode
       {...{ [LINE_ATTR]: line.index }}
       data-heading={line.headingLevel}
       {...stickyMarkdownLineAttrs(line)}
-      style={line.headingLevel ? HEADING_STYLE[line.headingLevel] : undefined}
+      style={line.headingLevel ? stickyHeadingStyle(line.headingLevel, headingScale) : undefined}
     >
       {line.prefix ? renderLeaf(line.prefix, markerVisible) : null}
       {line.placeholder
@@ -628,7 +611,7 @@ export function MarkdownSlotTextEditor({
           WebkitUserSelect: "text",
         }}
       >
-        {documentModel.lines.map((line) => renderLine(line, activeLines.has(line.index)))}
+        {documentModel.lines.map((line) => renderLine(line, activeLines.has(line.index), canvasStyle.stickyHeadingScale))}
       </div>
     </div>
   );

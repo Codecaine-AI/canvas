@@ -18,7 +18,8 @@
  * version AND its registry `dist.integrity`. `--vendor` downloads exactly that
  * tarball, refuses it unless its sha512 matches the pin, and checks each brand
  * entry's declared `license` against the per-logo license Simple Icons records
- * (absent = the package's CC0). Only when every package verifies does it copy
+ * (absent = the package's CC0) and its brand color `hex` against the one
+ * Simple Icons records. Only when every package verifies does it copy
  * the SVGs the manifest names (plus each package's license file) into
  * vendor/<package>/, prune files no longer named, and rewrite
  * vendor/VERSIONS.md. To bump a package: set its new version + integrity (from
@@ -52,6 +53,8 @@ const REPO_ROOT = resolve(TOOL_DIR, "..", "..");
 const MANIFEST_PATH = resolve(TOOL_DIR, "manifest.json");
 const VENDOR_DIR = resolve(TOOL_DIR, "vendor");
 const VERSIONS_PATH = resolve(VENDOR_DIR, "VERSIONS.md");
+/** Full-color brand marks (a brand entry's `art`), flattened from the CC0 `logos` set — see THIRD-PARTY-NOTICES.md. */
+const BRAND_ART_DIR = resolve(TOOL_DIR, "brand-art");
 /** Canvas-content output: glyph data co-locates with the icon object def. */
 const GLYPH_OUT_DIR = resolve(REPO_ROOT, "packages", "canvas", "src", "objects", "shapes", "icon");
 export const TABLER_OUT_PATH = resolve(GLYPH_OUT_DIR, "icon-glyph-data-tabler.generated.ts");
@@ -99,12 +102,16 @@ type GlyphEntry = {
   source: string;
   /** Brands only: the SPDX id of a per-logo license Simple Icons records (absent = the package's CC0). */
   license?: string;
+  /** Brands only: the logo's brand color as Simple Icons records it (`hex`), `#RRGGBB` uppercase. */
+  hex?: string;
+  /** Brands only: a full-color mark in brand-art/<art>.svg drawn instead of the one-color Simple Icons logo. */
+  art?: string;
 };
 type Manifest = { packages: Record<PackageKey, PackagePin>; tabler: GlyphEntry[]; brands: GlyphEntry[] };
 
 const BRAND_PREFIX = "brand-";
 
-/** Simple Icons' icon metadata (package-relative) — read by --vendor to verify per-logo licenses, never vendored. */
+/** Simple Icons' icon metadata (package-relative) — read by --vendor to verify per-logo licenses and brand colors, never vendored. */
 const SIMPLE_ICONS_DATA = "data/simple-icons.json";
 
 /** Load + validate the manifest; null (after recording problems) if unusable. */
@@ -147,6 +154,12 @@ function loadManifest(errors: string[]): Manifest | null {
       }
       if (entry.license !== undefined && (name !== "brands" || !/^[A-Za-z0-9.+-]+$/.test(entry.license))) {
         errors.push(`manifest ${name}: "${entry.id}" — "license" is an SPDX id, and only brand entries carry one`);
+      }
+      if (entry.art !== undefined && (name !== "brands" || !/^[a-z0-9_-]+$/.test(entry.art))) {
+        errors.push(`manifest ${name}: "${entry.id}" — "art" names a brand-art/<art>.svg file, and only brand entries carry one`);
+      }
+      if ((name === "brands") !== (typeof entry.hex === "string" && /^#[0-9A-F]{6}$/.test(entry.hex))) {
+        errors.push(`manifest ${name}: "${entry.id}" — every brand entry (and only a brand entry) carries "hex", its Simple Icons brand color as #RRGGBB`);
       }
     }
   };
@@ -219,8 +232,8 @@ function parseSvg(context: string, text: string, errors: string[]): ParsedSvg | 
 // ---------------------------------------------------------------------------
 
 type GlyphElementOut =
-  | { kind: "path"; d: string }
-  | { kind: "circle"; cx: number; cy: number; r: number }
+  | { kind: "path"; d: string; fill?: string }
+  | { kind: "circle"; cx: number; cy: number; r: number; fill?: string }
   | { kind: "line"; x1: number; y1: number; x2: number; y2: number };
 
 function fmtNum(n: number): string {
@@ -313,7 +326,14 @@ function convertElement(el: SvgElement, context: string, errors: string[]): Glyp
   return errors.length === before ? out : null;
 }
 
-type GlyphBlock = { id: string; comment: string; viewBoxSize: number; elements: GlyphElementOut[] };
+type GlyphBlock = {
+  id: string;
+  comment: string;
+  viewBoxSize: number;
+  /** Brands only: the square viewBox that sets the mark in its optical box (brandViewBox). */
+  viewBox?: readonly [number, number, number, number];
+  elements: GlyphElementOut[];
+};
 
 /** One Tabler outline icon → glyph block (root paint checked, bounding box stripped). */
 function tablerGlyph(entry: GlyphEntry, text: string, errors: string[]): GlyphBlock | null {
@@ -360,8 +380,240 @@ function brandGlyph(entry: GlyphEntry, text: string, errors: string[]): GlyphBlo
   const out = convertElement(svg.elements[0]!, context, errors);
   const license = entry.license ? ` — logo license ${entry.license}` : "";
   return out
-    ? { id: entry.id, comment: `simple-icons: ${entry.source} (${svg.title})${license}`, viewBoxSize: 24, elements: [out] }
+    ? {
+        id: entry.id,
+        comment: `simple-icons: ${entry.source} (${svg.title})${license}`,
+        viewBoxSize: 24,
+        viewBox: brandViewBox([out], entry.id),
+        elements: [out],
+      }
     : null;
+}
+
+/**
+ * One full-color mark (brand-art/<art>.svg) → glyph block: any "0 0 W H"
+ * viewBox, every shape painted with its own `fill` (#RRGGBB), which the glyph
+ * keeps per element.
+ */
+function brandArtGlyph(entry: GlyphEntry, text: string, errors: string[]): GlyphBlock | null {
+  const context = `brand-art/${entry.art}.svg (glyph "${entry.id}")`;
+  const root = parseAttrs(text.match(/<svg\b([^>]*)>/)?.[1] ?? "");
+  const vb = (root.get("viewBox") ?? "").trim().split(/[\s,]+/).map(Number);
+  const title = text.match(/<title>([^<]*)<\/title>/)?.[1];
+  if (vb.length !== 4 || vb.some((n) => !Number.isFinite(n)) || vb[0] !== 0 || vb[1] !== 0 || !title) {
+    errors.push(`${context}: expected a titled logo with a "0 0 W H" viewBox`);
+    return null;
+  }
+  const elements: GlyphElementOut[] = [];
+  for (const m of text.matchAll(/<(path|circle|ellipse)\b([^>]*?)\/?>/g)) {
+    const attrs = parseAttrs(m[2]!);
+    const fill = attrs.get("fill");
+    attrs.delete("fill");
+    if (!fill || !/^#[0-9A-F]{6}$/.test(fill)) {
+      errors.push(`${context}: every <${m[1]}> needs fill="#RRGGBB"`);
+      return null;
+    }
+    const out = convertElement({ tag: m[1]!, attrs }, context, errors);
+    if (!out || out.kind === "line") return null;
+    elements.push({ ...out, fill });
+  }
+  const size = Math.max(vb[2]!, vb[3]!);
+  return { id: entry.id, comment: `brand-art: ${entry.art} (${title})`, viewBoxSize: size, viewBox: brandViewBox(elements, entry.id), elements };
+}
+
+// ---------------------------------------------------------------------------
+// Optical box: every brand mark reads at one visual size
+// ---------------------------------------------------------------------------
+
+/**
+ * A brand mark's square viewBox, centered on the mark's ink bounds. Its side
+ * gives every mark one optical area: the mark's geometric-mean extent
+ * √(w·h) fills BRAND_OPTICAL_AREA of the side, so a wide wordmark (Go) or a
+ * tall one (Figma) is not drawn smaller than a square mark, while its long
+ * side never passes BRAND_MAX_EXTENT of the box.
+ */
+function brandViewBox(elements: readonly GlyphElementOut[], id: string): readonly [number, number, number, number] {
+  const box = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
+  const add = (x: number, y: number) => {
+    box.minX = Math.min(box.minX, x);
+    box.minY = Math.min(box.minY, y);
+    box.maxX = Math.max(box.maxX, x);
+    box.maxY = Math.max(box.maxY, y);
+  };
+  for (const el of elements) {
+    if (el.kind === "path") flattenPath(el.d, add);
+    else if (el.kind === "circle") {
+      add(el.cx - el.r, el.cy - el.r);
+      add(el.cx + el.r, el.cy + el.r);
+    }
+  }
+  const w = box.maxX - box.minX;
+  const h = box.maxY - box.minY;
+  const scale = BRAND_OPTICAL_SCALE[id] ?? 1;
+  const side = Math.max(
+    Math.max(Math.max(w, h) / BRAND_MAX_EXTENT, Math.sqrt(w * h) / BRAND_OPTICAL_AREA) / scale,
+    Math.max(w, h) / BRAND_SCALED_MAX_EXTENT,
+  );
+  const fix = (n: number) => Number(fmtNum(n));
+  return [fix((box.minX + box.maxX - side) / 2), fix((box.minY + box.maxY - side) / 2), fix(side), fix(side)];
+}
+
+/** Share of the viewBox side a brand mark's geometric-mean extent fills. */
+const BRAND_OPTICAL_AREA = 0.78;
+/** Most of the viewBox side a brand mark's long side takes. */
+const BRAND_MAX_EXTENT = 0.92;
+/** Most of the viewBox side a mark's long side takes after its BRAND_OPTICAL_SCALE: never past the box. */
+const BRAND_SCALED_MAX_EXTENT = 1;
+
+/**
+ * Per-mark optical correction over the shared box: equal bounds are not
+ * equal weight. Fine, detailed marks (the PostgreSQL elephant, the
+ * Kubernetes wheel, the Rust gear, the Redis stack, the Bun face) read
+ * small and soft at tile size, so they grow; solid, heavy marks (the Vercel
+ * triangle, the TypeScript badge, the Supabase bolt, GitHub) fill or
+ * overflow the tile, so they shrink (stage A rounds 9 and 10: sol and opus
+ * on the wires sheet). Read by eye on the specimen sheet at 1:1.
+ */
+const BRAND_OPTICAL_SCALE: Readonly<Record<string, number>> = {
+  "brand-postgres": 1.16,
+  "brand-kubernetes": 1.16,
+  "brand-rust": 1.12,
+  "brand-redis": 1.1,
+  "brand-bun": 1.1,
+  "brand-cloudflare": 1.12,
+  "brand-claude": 1.08,
+  "brand-python": 1.05,
+  "brand-go": 1.08,
+  "brand-vercel": 0.82,
+  "brand-typescript": 0.86,
+  "brand-supabase": 0.88,
+  "brand-sqlite": 0.9,
+  "brand-anthropic": 0.9,
+  "brand-github": 0.92,
+  "brand-kafka": 0.92,
+  "brand-node": 0.95,
+  "brand-linear": 0.95,
+};
+
+/** Points along SVG path data (curves and arcs sampled), each passed to `add`: enough for its bounds. */
+function flattenPath(d: string, add: (x: number, y: number) => void): void {
+  const STEPS = 16;
+  let x = 0, y = 0, startX = 0, startY = 0, ctrlX = 0, ctrlY = 0, prev = "";
+  for (const [, cmd, args] of d.matchAll(/([MmLlHhVvCcSsQqTtAaZz])([^MmLlHhVvCcSsQqTtAaZz]*)/g)) {
+    const rel = cmd !== cmd!.toUpperCase();
+    const upper = cmd!.toUpperCase();
+    const nums = pathNumbers(args!, upper === "A");
+    if (upper === "Z") {
+      x = startX;
+      y = startY;
+      prev = upper;
+      continue;
+    }
+    const arity = { M: 2, L: 2, T: 2, H: 1, V: 1, C: 6, S: 4, Q: 4, A: 7 }[upper]!;
+    for (let i = 0; i + arity <= nums.length; i += arity) {
+      const n = nums.slice(i, i + arity);
+      const ox = rel ? x : 0, oy = rel ? y : 0;
+      const kind = upper === "M" && i > 0 ? "L" : upper;
+      const cubic = (x1: number, y1: number, x2: number, y2: number, ex: number, ey: number) => {
+        for (let s = 1; s <= STEPS; s += 1) {
+          const t = s / STEPS, u = 1 - t;
+          add(u * u * u * x + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t * ex, u * u * u * y + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * ey);
+        }
+        [ctrlX, ctrlY, x, y] = [x2, y2, ex, ey];
+      };
+      const quad = (x1: number, y1: number, ex: number, ey: number) => {
+        for (let s = 1; s <= STEPS; s += 1) {
+          const t = s / STEPS, u = 1 - t;
+          add(u * u * x + 2 * u * t * x1 + t * t * ex, u * u * y + 2 * u * t * y1 + t * t * ey);
+        }
+        [ctrlX, ctrlY, x, y] = [x1, y1, ex, ey];
+      };
+      const reflect = (kinds: string) => (kinds.includes(prev) ? [2 * x - ctrlX, 2 * y - ctrlY] : [x, y]);
+      switch (kind) {
+        case "M":
+          [x, y] = [ox + n[0]!, oy + n[1]!];
+          [startX, startY] = [x, y];
+          add(x, y);
+          break;
+        case "L":
+          [x, y] = [ox + n[0]!, oy + n[1]!];
+          add(x, y);
+          break;
+        case "H":
+          x = ox + n[0]!;
+          add(x, y);
+          break;
+        case "V":
+          y = oy + n[0]!;
+          add(x, y);
+          break;
+        case "C":
+          cubic(ox + n[0]!, oy + n[1]!, ox + n[2]!, oy + n[3]!, ox + n[4]!, oy + n[5]!);
+          break;
+        case "S": {
+          const [x1, y1] = reflect("CS");
+          cubic(x1!, y1!, ox + n[0]!, oy + n[1]!, ox + n[2]!, oy + n[3]!);
+          break;
+        }
+        case "Q":
+          quad(ox + n[0]!, oy + n[1]!, ox + n[2]!, oy + n[3]!);
+          break;
+        case "T": {
+          const [x1, y1] = reflect("QT");
+          quad(x1!, y1!, ox + n[0]!, oy + n[1]!);
+          break;
+        }
+        case "A":
+          arcPoints(x, y, n[0]!, n[1]!, n[2]!, n[3]!, n[4]!, ox + n[5]!, oy + n[6]!, STEPS, add);
+          [x, y] = [ox + n[5]!, oy + n[6]!];
+          break;
+      }
+      prev = kind;
+    }
+  }
+}
+
+/** The numbers in one path command's arguments; arc flags are single 0/1 digits, which minified data runs together ("01.5"). */
+function pathNumbers(args: string, arc: boolean): number[] {
+  const out: number[] = [];
+  const number = /\s*,?\s*(-?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)/y;
+  const flag = /\s*,?\s*([01])/y;
+  let at = 0;
+  while (at < args.length && args.slice(at).trim() !== "") {
+    const pattern = arc && (out.length % 7 === 3 || out.length % 7 === 4) ? flag : number;
+    pattern.lastIndex = at;
+    const m = pattern.exec(args);
+    if (!m) break;
+    out.push(Number(m[1]));
+    at = pattern.lastIndex;
+  }
+  return out;
+}
+
+/** Samples an SVG elliptical arc (endpoint parameterization, SVG 1.1 F.6.5). */
+function arcPoints(
+  x1: number, y1: number, rxIn: number, ryIn: number, angle: number, large: number, sweep: number,
+  x2: number, y2: number, steps: number, add: (x: number, y: number) => void,
+): void {
+  let rx = Math.abs(rxIn), ry = Math.abs(ryIn);
+  if (rx === 0 || ry === 0) return add(x2, y2);
+  const phi = (angle * Math.PI) / 180, cos = Math.cos(phi), sin = Math.sin(phi);
+  const dx = (x1 - x2) / 2, dy = (y1 - y2) / 2;
+  const px = cos * dx + sin * dy, py = -sin * dx + cos * dy;
+  const scale = (px * px) / (rx * rx) + (py * py) / (ry * ry);
+  if (scale > 1) [rx, ry] = [rx * Math.sqrt(scale), ry * Math.sqrt(scale)];
+  const num = rx * rx * ry * ry - rx * rx * py * py - ry * ry * px * px;
+  const coef = (large === sweep ? -1 : 1) * Math.sqrt(Math.max(0, num / (rx * rx * py * py + ry * ry * px * px)));
+  const cx1 = (coef * rx * py) / ry, cy1 = (-coef * ry * px) / rx;
+  const cx = cos * cx1 - sin * cy1 + (x1 + x2) / 2, cy = sin * cx1 + cos * cy1 + (y1 + y2) / 2;
+  const theta = Math.atan2((py - cy1) / ry, (px - cx1) / rx);
+  let delta = Math.atan2((-py - cy1) / ry, (-px - cx1) / rx) - theta;
+  if (sweep && delta < 0) delta += 2 * Math.PI;
+  if (!sweep && delta > 0) delta -= 2 * Math.PI;
+  for (let s = 1; s <= steps * 2; s += 1) {
+    const t = theta + (delta * s) / (steps * 2);
+    add(cx + rx * Math.cos(t) * cos - ry * Math.sin(t) * sin, cy + rx * Math.cos(t) * sin + ry * Math.sin(t) * cos);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -371,9 +623,9 @@ function brandGlyph(entry: GlyphEntry, text: string, errors: string[]): GlyphBlo
 function emitElement(el: GlyphElementOut): string {
   switch (el.kind) {
     case "path":
-      return `{ kind: "path", d: ${JSON.stringify(el.d)} }`;
+      return `{ kind: "path", d: ${JSON.stringify(el.d)}${el.fill ? `, fill: ${JSON.stringify(el.fill)}` : ""} }`;
     case "circle":
-      return `{ kind: "circle", cx: ${el.cx}, cy: ${el.cy}, r: ${el.r} }`;
+      return `{ kind: "circle", cx: ${el.cx}, cy: ${el.cy}, r: ${el.r}${el.fill ? `, fill: ${JSON.stringify(el.fill)}` : ""} }`;
     case "line":
       return `{ kind: "line", x1: ${el.x1}, y1: ${el.y1}, x2: ${el.x2}, y2: ${el.y2} }`;
   }
@@ -388,26 +640,40 @@ function emitModule(exportName: string, provenance: string[], doc: string, block
     "// Structural twin of IconGlyphElement in ./icon-glyphs.ts (kept local to",
     "// avoid an import cycle — the shapes must stay assignment-compatible).",
     "type IconGlyphElement =",
-    '  | { kind: "path"; d: string }',
-    '  | { kind: "circle"; cx: number; cy: number; r: number }',
+    '  | { kind: "path"; d: string; fill?: string }',
+    '  | { kind: "circle"; cx: number; cy: number; r: number; fill?: string }',
     '  | { kind: "line"; x1: number; y1: number; x2: number; y2: number };',
     "",
     `/** ${doc} */`,
     `export const ${exportName}: Record<`,
     "  string,",
-    "  { viewBoxSize: number; elements: readonly IconGlyphElement[] }",
+    "  { viewBoxSize: number; viewBox?: readonly [number, number, number, number]; elements: readonly IconGlyphElement[] }",
     "> = {",
     ...sorted.map((block) =>
       [
         `  // ${block.comment}`,
         `  ${JSON.stringify(block.id)}: {`,
         `    viewBoxSize: ${block.viewBoxSize},`,
+        ...(block.viewBox ? [`    viewBox: [${block.viewBox.join(", ")}],`] : []),
         "    elements: [",
         ...block.elements.map((el) => `      ${emitElement(el)},`),
         "    ],",
         "  },",
       ].join("\n"),
     ),
+    "};",
+    "",
+  ].join("\n");
+}
+
+/** The brand color table appended to the brands module, sorted by id. */
+function emitBrandColors(entries: readonly GlyphEntry[]): string {
+  const sorted = [...entries].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  return [
+    "",
+    "/** Brand color per `brand-*` glyph id: the `hex` Simple Icons records for the logo (verified on every `--vendor` run). */",
+    "export const BRAND_ICON_COLORS: Record<string, string> = {",
+    ...sorted.map((entry) => `  ${JSON.stringify(entry.id)}: ${JSON.stringify(entry.hex)},`),
     "};",
     "",
   ].join("\n");
@@ -427,6 +693,13 @@ export function renderDevIconModules(): DevIconModules {
   const build = (key: PackageKey, toBlock: typeof tablerGlyph): GlyphBlock[] => {
     const blocks: GlyphBlock[] = [];
     for (const entry of entriesFor(manifest, key)) {
+      if (entry.art) {
+        const artPath = resolve(BRAND_ART_DIR, `${entry.art}.svg`);
+        const block = existsSync(artPath) ? brandArtGlyph(entry, readFileSync(artPath, "utf8"), errors) : null;
+        if (!existsSync(artPath)) errors.push(`brand-art/${entry.art}.svg (glyph "${entry.id}") is missing`);
+        if (block) blocks.push(block);
+        continue;
+      }
       const path = resolve(VENDOR_DIR, key, `${entry.source}.svg`);
       if (!existsSync(path)) {
         errors.push(`${key}/${entry.source}.svg (glyph "${entry.id}") is not vendored — run \`bun tools/dev-icons/generate.ts --vendor\``);
@@ -460,9 +733,9 @@ export function renderDevIconModules(): DevIconModules {
         "vendored in tools/dev-icons/vendor/simple-icons/. Logos are trademarks of their respective owners; see",
         "tools/dev-icons/THIRD-PARTY-NOTICES.md.",
       ],
-      "Simple Icons logo geometry per `brand-*` glyph id — 24-unit grid, fill paint.",
+      "Brand logo geometry per `brand-*` glyph id, fill paint: the Simple Icons logo (24-unit grid, one color), or a full-color brand-art mark whose shapes keep their own `fill`. `viewBox` sets every mark in one optical box.",
       brandBlocks,
-    ),
+    ) + emitBrandColors(manifest.brands),
   };
 }
 
@@ -523,7 +796,7 @@ async function stagePackage(manifest: Manifest, key: PackageKey, errors: string[
       return null;
     }
     if (key === "simple-icons") {
-      checkBrandLicenses(manifest, JSON.parse(readFileSync(join(work, "package", SIMPLE_ICONS_DATA), "utf8")), errors);
+      checkBrandMetadata(manifest, JSON.parse(readFileSync(join(work, "package", SIMPLE_ICONS_DATA), "utf8")), errors);
     }
     const files = new Map<string, Buffer>();
     for (const member of vendored) {
@@ -538,22 +811,32 @@ async function stagePackage(manifest: Manifest, key: PackageKey, errors: string[
 /**
  * Each brand entry's `license` must match the per-logo license Simple Icons
  * records for its slug (none = the package's CC0), so a version bump cannot
- * silently change what THIRD-PARTY-NOTICES.md has to say.
+ * silently change what THIRD-PARTY-NOTICES.md has to say; and its `hex` must
+ * match the brand color Simple Icons records, so the logo's color comes from
+ * the pack, never by hand.
  */
-function checkBrandLicenses(manifest: Manifest, data: unknown, errors: string[]): void {
+function checkBrandMetadata(manifest: Manifest, data: unknown, errors: string[]): void {
   if (!Array.isArray(data)) {
     errors.push(`simple-icons: ${SIMPLE_ICONS_DATA} is not an icon list`);
     return;
   }
-  const bySlug = new Map((data as { slug?: string; license?: { type?: string } }[]).map((icon) => [icon.slug, icon]));
+  const bySlug = new Map(
+    (data as { slug?: string; hex?: string; license?: { type?: string } }[]).map((icon) => [icon.slug, icon]),
+  );
   for (const entry of manifest.brands) {
     const icon = bySlug.get(entry.source);
     if (!icon) {
       errors.push(`simple-icons: "${entry.id}" — slug "${entry.source}" is missing from ${SIMPLE_ICONS_DATA}`);
-    } else if (icon.license?.type !== entry.license) {
+      continue;
+    }
+    if (icon.license?.type !== entry.license) {
       errors.push(
         `simple-icons: "${entry.id}" — Simple Icons records logo license ${icon.license?.type ?? "none (CC0)"} but manifest.json says ${entry.license ?? "none"}; update manifest.json and THIRD-PARTY-NOTICES.md`,
       );
+    }
+    const hex = `#${(icon.hex ?? "").toUpperCase()}`;
+    if (hex !== entry.hex) {
+      errors.push(`simple-icons: "${entry.id}" — Simple Icons records brand color ${hex} but manifest.json says ${entry.hex}; update manifest.json`);
     }
   }
 }
@@ -585,7 +868,7 @@ function versionsNote(manifest: Manifest): string {
     "|---|---|---|---|---|",
     ...rows,
     "",
-    "Per-logo licenses that Simple Icons records are declared on the brand entries in `../manifest.json`",
+    "Per-logo licenses and brand colors (`hex`) that Simple Icons records are declared on the brand entries in `../manifest.json`",
     "and verified against the package's `data/simple-icons.json` on every `--vendor` run.",
     "",
     "Pinned tarballs (sha512 `dist.integrity`, verified on every `--vendor` run):",

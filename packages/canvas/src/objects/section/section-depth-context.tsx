@@ -11,6 +11,8 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 
+import type { CanvasColor } from "../../state/schema";
+
 const SectionDepthContext = createContext<ReadonlyMap<string, number> | null>(null);
 
 export function SectionDepthProvider({
@@ -26,4 +28,25 @@ export function SectionDepthProvider({
 /** Nesting depth of `sectionId` (1 = top-level) — 1 outside a stage or for an unknown id. */
 export function useSectionDepth(sectionId: string): number {
   return useContext(SectionDepthContext)?.get(sectionId) ?? 1;
+}
+
+const SectionContainerColorContext = createContext<ReadonlyMap<string, CanvasColor> | null>(null);
+
+/**
+ * Each object's nearest section color (state/section-depth.ts
+ * sectionContainerColorMap), for node and tile paint on the live stage.
+ */
+export function SectionContainerColorProvider({
+  containers,
+  children,
+}: {
+  containers: ReadonlyMap<string, CanvasColor>;
+  children?: ReactNode;
+}) {
+  return <SectionContainerColorContext.Provider value={containers}>{children}</SectionContainerColorContext.Provider>;
+}
+
+/** The color of the section `objectId` sits in — null outside a stage or outside every section. */
+export function useContainerColor(objectId: string): CanvasColor | null {
+  return useContext(SectionContainerColorContext)?.get(objectId) ?? null;
 }

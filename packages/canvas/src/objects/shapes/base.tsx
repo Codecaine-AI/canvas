@@ -4,6 +4,7 @@ import { resolveObjectStrokeWidth, resolveShapeCornerRadius } from "../../theme/
 import { useCanvasStyle } from "../../theme/canvas-style-context";
 import { objectTypeDefaults } from "../../state/schema/object-defaults";
 import { BBOX_OUTLINE } from "../geometry";
+import { useContainerColor } from "../section/section-depth-context";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { ObjectShell, ObjectSlotText, resolveObjectRoleColors, type ResolvedShapeObjectColors } from "../object-shell";
 import {
@@ -81,7 +82,8 @@ export function shapeObjectDef(shape: ShapeDef): ObjectDef {
     // P1/D13 — every shape (silhouettes included) takes its resolved palette
     // fill plus ink border, in the canvas style's shape fill mode (tint/card).
     const canvasStyle = useCanvasStyle();
-    const colors = resolveObjectRoleColors(object, "shape", canvasStyle) as ResolvedShapeObjectColors;
+    const container = useContainerColor(object.id);
+    const colors = resolveObjectRoleColors(object, "shape", canvasStyle, container) as ResolvedShapeObjectColors;
     const strokeWidth = resolveObjectStrokeWidth(object.style, canvasStyle);
     // A per-style trim swaps the button's border policy / paint (the slot
     // text offsets by the same border, so both read the effective policy).

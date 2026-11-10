@@ -6,6 +6,7 @@ import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 
 import { resolveScope } from "../../board/scope";
 import { createOpContext } from "../tools/operations/op-context";
+import { sessionCanvasStyle } from "../canvas-style";
 import { findOperationTool } from "../tools/operations";
 import {
   emitSessionEvent,
@@ -41,6 +42,8 @@ export type OperationToolName =
   | "match_size"
   | "align"
   | "space_out"
+  | "arrange_section"
+  | "tighten_wires"
   // Content & appearance
   | "update_text"
   | "change_color"
@@ -73,7 +76,8 @@ export function runOp(
   if (!operation) throw new Error(`Unknown operation tool: ${tool}`);
   return operation.execute(params, {
     currentSession: () => session,
-    context: createOpContext,
+    // As the runtime does (tools/create-runtime.ts): measure in the session's style.
+    context: (draft: InteractiveCanvasDocument) => createOpContext(draft, sessionCanvasStyle(session)),
     emit: emitSessionEvent,
   });
 }

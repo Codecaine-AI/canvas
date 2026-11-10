@@ -1,4 +1,4 @@
-import { DETAIL_MAX_CHARS, NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../board/text-rules";
+import { NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../board/text-rules";
 import { formatCraftTargets } from "./style-guide/craft-targets";
 import { creationDefaultFor } from "../session/tools/creation-defaults";
 import { AGENT_GRID } from "../session/tools/grid";
@@ -24,16 +24,16 @@ export function canvasConventions(): AuthoringTopic {
     Creation actions accept the IDs you choose and reject collisions.
 
     <naming_examples>
-        | Entity | ID | Visible title or label | Detail |
-        | --- | --- | --- | --- |
-        | Ingestion section | s01-ingestion | Ingestion | nightly batch |
-        | Parser in that section | s01-ingestion-parser | Parse source | tree-sitter |
-        | Supporting sticky | s01-ingestion-input-example | Input example | |
-        | Internal connection | s01-ingestion-parser-to-index | writes | |
-        | Retrieval section | s02-retrieval | Retrieval | pgvector |
-        | Cross-section connection | s01-ingestion-to-s02-retrieval | indexed records | |
+        | Entity | ID | Visible title or label |
+        | --- | --- | --- |
+        | Ingestion section | s01-ingestion | Ingestion |
+        | Parser in that section | s01-ingestion-parser | Parse source |
+        | Supporting sticky | s01-ingestion-input-example | Input example |
+        | Internal connection | s01-ingestion-parser-to-index | writes |
+        | Retrieval section | s02-retrieval | Retrieval |
+        | Cross-section connection | s01-ingestion-to-s02-retrieval | indexed records |
 
-        Use descriptive strings rather than IDs such as object1 or shape2. The group number identifies the section; the remaining words identify the entity's purpose. Visible labels stay short and do not need the ID prefix. Stickies and connections have no detail line.
+        Use descriptive strings rather than IDs such as object1 or shape2. The group number identifies the section; the remaining words identify the entity's purpose. Visible labels stay short and do not need the ID prefix.
 
         Keep group numbers stable when sections move or the reading order changes. For additions to an existing diagram, follow its naming convention and preserve its IDs. Choose an unused group prefix for a new section and check every complete ID for collisions.
 
@@ -42,14 +42,9 @@ export function canvasConventions(): AuthoringTopic {
 </identity>
 
 <text_limits>
-    Names and detail lines on shapes, icons, and sections have limits, and two lint warnings enforce them:
+    A name on a shape, icon, or section is ${NAME_TARGET_WORDS} words or fewer, and never over ${NAME_MAX_WORDS} words or ${NAME_MAX_CHARS} characters, with no sentence break or line break.
 
-    - label-is-prose: a name over ${NAME_MAX_WORDS} words or ${NAME_MAX_CHARS} characters, or one with a sentence break or line break. Aim for ${NAME_TARGET_WORDS} words or fewer.
-    - detail-too-long: a detail over ${DETAIL_MAX_CHARS} characters, with more than one sentence, or with a line break.
-
-    To fix either, shorten the name, keep one fact in the detail, and move the rest to a sticky beside the subject. Sticky bodies and connection labels are outside these limits.
-
-    Both warnings judge only the text you write: names and details on objects you create, and ones you change. A person's existing labels are theirs, so leave them as they are unless the request asks you to edit them.
+    Move anything longer to a sticky beside the subject. Sticky bodies and connection labels are outside these limits. A person's existing labels are theirs, so leave them as they are unless the request asks you to edit them.
 </text_limits>
 
 <containment>
@@ -57,9 +52,9 @@ export function canvasConventions(): AuthoringTopic {
 
     Position is the membership signal. You do not supply a parent ID.
 
-    The base section is the page; grow it when the diagram needs room. Only sections contain other entities.
+    The base section is the page. It grows by itself like any section. Only sections contain other entities.
 
-    Sections keep their geometry as content changes. fit_section fits a frame around its current children; it does not fit its ancestors automatically.
+    A section grows by itself to hold a child that crosses its edge, and never shrinks by itself. arrange_section lays out a section's nodes in rows and fits the frame. fit_section fits a frame around its current children. Neither fits the ancestors.
 </containment>
 
 <connection_binding>
@@ -71,7 +66,7 @@ export function canvasConventions(): AuthoringTopic {
 </connection_binding>
 
 <geometry>
-    Use multiples of ${AGENT_GRID} for the positions, widths, heights, nudges, gaps, padding, and routing coordinates you choose. For example: a 280×100 object at (240, 480), a 140-unit gap, or a 40-unit padding. A multiple of 10 that is not also a multiple of ${AGENT_GRID} is off-grid.
+    Use multiples of ${AGENT_GRID} for the positions, widths, heights, nudges, gaps, padding, and routing coordinates you choose. For example: a 280×100 object at (240, 480), a 200-unit gap, or a 40-unit padding. A multiple of 10 that is not also a multiple of ${AGENT_GRID} is off-grid.
 
     Tools snap the geometry they write to the ${AGENT_GRID}-unit grid. Tool results report the geometry that actually landed; use those applied values for the next edit.
 

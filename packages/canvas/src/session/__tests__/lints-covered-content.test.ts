@@ -3,11 +3,6 @@ import { describe, expect, test } from "bun:test";
 import { rule as coveredContent } from "../../board/lints/rules/covered-content";
 import { box, connect, makeDocument } from "./synthetic";
 import { FIGJAM_CONTEXT } from "./helpers";
-import { chipFor, chipWidth } from "../../board/lints/geometry";
-import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
-
-// Chip geometry here is figjam's (30px sans chip), so every check measures in
-// the figjam theme explicitly.
 
 describe("covered-content lint", () => {
   test("declares its faces", () => {
@@ -44,15 +39,32 @@ describe("covered-content lint", () => {
     expect(findings[0]!.message).toContain("covers the text center of a");
   });
 
-  test("clean boards, exempt kinds, and cross-parent pairs carry no finding", () => {
+  test("clean boards and exempt kinds carry no finding; a box is never on the section that holds it", () => {
     const findings = coveredContent.check(makeDocument([
       box("a", 0, 0),
       box("b", 224, 0),                              // apart
       box("wrap", 0, 0, 480, 320, "section"),        // sections exempt
       box("note", 40, 40, 160, 96, "sticky"),        // stickies exempt
-      { ...box("other", 8, 8), parentId: "wrap" },   // overlaps a, different parent
+      { ...box("inside", 240, 160), parentId: "wrap" }, // inside its own section
     ]), FIGJAM_CONTEXT);
     expect(findings).toHaveLength(0);
+  });
+
+  test("boxes with different parents that overlap are an error, like siblings", () => {
+    // Two sections pushed into each other: their children paint on one another.
+    const findings = coveredContent.check(makeDocument([
+      box("left", 0, 0, 480, 320, "section"),
+      box("right", 400, 0, 480, 320, "section"),
+      { ...box("a", 300, 100), parentId: "left" },
+      { ...box("b", 380, 100), parentId: "right" },
+      box("loose", 300, 200),                        // a top-level box on a's section child
+      { ...box("c", 320, 180), parentId: "left" },
+    ]), FIGJAM_CONTEXT);
+    const pairs = findings.map((finding) => [...finding.at].sort().join("+")).sort();
+    // left+right: the frames themselves (section-on-section); loose+right: the
+    // right frame partly over a top-level box it does not hold (section-on-box).
+    expect(pairs).toEqual(["a+b", "c+loose", "left+right", "loose+right"]);
+    expect(findings.every((finding) => finding.severity === "error")).toBe(true);
   });
 
   test("exactly 25% with the text center on the seam is clean; a hair more is not", () => {
@@ -70,248 +82,71 @@ describe("covered-content lint", () => {
     expect(pastThreshold[0]!.message).toContain("25%");
   });
 
-  // --- chip vs box (ported from rules-label-clearance, + clearance margin) ---
+  test("icon boxes are judged by what they paint: apart tiles and captions are clean, touching tiles are not", () => {
+    // Default (tile) style: a 300x120 icon paints a centered tile and its
+    // caption (56px tile at x 122 and 272 here), not the empty sides of its box.
+    const icon = (id: string, x: number) => ({ ...box(id, x, 0, 300, 120, "icon"), text: id, icon: "database" });
+    expect(coveredContent.check(makeDocument([icon("db", 0), icon("api", 150)]))).toEqual([]);
 
-  test("a label chip landing on a third box is an error", () => {
-    // Waypoints pin the route straight through "mid", label point (480,48);
-    // the true "X" chip is 41×30 (renderer min width) at x 459.5..500.5 —
-    // inside "mid" (400..560 × 0..96).
+    const findings = coveredContent.check(makeDocument([icon("db", 0), icon("api", 20)]));
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({ severity: "error", at: ["db", "api"] });
+  });
+
+  // --- label chips: placed by the renderer, never judged ---
+
+  test("a label chip on a box is not a finding: placement owns chips", () => {
+    // A 64px gap cannot hold the chip clear of a and b, yet only boxes are judged.
     const findings = coveredContent.check(makeDocument(
-      [box("a", 0, 0), box("mid", 400, 0), box("b", 800, 0)],
-      [{ ...connect("e", "a", "b"), label: "X", waypoints: [[480, 48]] }],
+      [box("a", 0, 0), box("b", 224, 0)],
+      [{ ...connect("e", "a", "b"), label: "connect()" }],
     ), FIGJAM_CONTEXT);
-    const errors = findings.filter((finding) => finding.severity === "error");
-    expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({
-      rule: "covered-content",
-      at: ["e", "mid"],
-      where: { x: 459.5, y: 33, width: 41, height: 30 },
+    expect(findings).toEqual([]);
+  });
+});
+
+describe("covered-content: section-on-section", () => {
+  const frame = (id: string, x: number, y: number, width: number, height: number, parentId: string | null = null) =>
+    ({ ...box(id, x, y, width, height, "section"), parentId });
+
+  test("two sections whose frames overlap, neither holding the other, is an error naming both", () => {
+    const findings = coveredContent.check(makeDocument([
+      frame("page", 0, 0, 1200, 800),
+      frame("left", 40, 40, 520, 400, "page"),
+      frame("right", 540, 40, 400, 400, "page"),
+    ]), FIGJAM_CONTEXT).filter((finding) => finding.message.startsWith("sections "));
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({
+      severity: "error",
+      at: ["left", "right"],
+      where: { x: 540, y: 40, width: 20, height: 400 },
     });
-    expect(errors[0]!.message).toContain('label "X" chip on e covers mid');
+    expect(findings[0]!.message).toBe("sections left and right overlap by 20×400px");
   });
 
-  test("chips ignore their own endpoints; unlabeled edges carry no chip", () => {
-    const findings = coveredContent.check(makeDocument(
-      [box("a", 0, 0), box("b", 224, 0), box("far", 1200, 600), box("far2", 1600, 600)],
-      [
-        { ...connect("labeled", "a", "b"), label: "connect()" },  // chip pokes into a and b only
-        connect("bare", "far", "far2"),
-      ],
-    ), FIGJAM_CONTEXT);
+  test("a frame grown partly over a box it does not hold is an error; a box wholly inside reads as grouped", () => {
+    const findings = coveredContent.check(makeDocument([
+      frame("page", 0, 0, 1200, 800),
+      frame("a", 40, 40, 500, 300, "page"),
+      { ...box("kid", 300, 100), parentId: "a" },
+      { ...box("neighbor", 460, 260, 140, 60), parentId: "page" },  // 80px of it under a
+      { ...box("grouped", 80, 80), parentId: "page" },             // wholly inside a
+    ]), FIGJAM_CONTEXT).filter((finding) => finding.message.startsWith("section "));
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]).toMatchObject({ severity: "error", at: ["a", "neighbor"] });
+    expect(findings[0]!.message).toContain("section a covers 57% of neighbor");
+  });
+
+  test("nesting at any depth and frames that only touch carry no finding", () => {
+    const findings = coveredContent.check(makeDocument([
+      frame("page", 0, 0, 1200, 800),
+      frame("outer", 40, 40, 600, 600, "page"),
+      frame("inner", 80, 80, 400, 400, "outer"),
+      frame("beside", 640, 40, 400, 400, "page"),
+    ]), FIGJAM_CONTEXT).filter((finding) => finding.message.startsWith("sections "));
+
     expect(findings).toHaveLength(0);
-  });
-
-  test("waypointed edges hang the chip at the routed path's arc midpoint", () => {
-    // A valid orthogonal renderer route runs (160,48)→(160,300)→
-    // (800,300)→(800,48), so its arc midpoint is (480,300), over "w";
-    // the straight a→b midpoint (480,48) would not be.
-    const findings = coveredContent.check(makeDocument(
-      [box("a", 0, 0), box("w", 400, 252), box("b", 800, 0)],
-      [{
-        ...connect("e", "a", "b"),
-        label: "X",
-        waypoints: [[160, 300], [800, 300]],
-      }],
-    ), FIGJAM_CONTEXT);
-    const errors = findings.filter((finding) => finding.severity === "error");
-    expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({ at: ["e", "w"] });
-  });
-
-  test("a chip kissing a box is a clearance warning; inside is an error", () => {
-    // The true "X" chip spans x 459.5..500.5; a box starting at 501 sits
-    // clear of the chip but inside its 16px margin — contact reads as
-    // merged, so it warns even without true overlap.
-    const touching = coveredContent.check(makeDocument(
-      [box("a", 0, 0), box("t", 501, 0), box("b", 800, 0)],
-      [{
-        ...connect("e", "a", "b"),
-        label: "X",
-        waypoints: [[160, 48], [800, 48]],
-      }],
-    ), FIGJAM_CONTEXT);
-    expect(touching).toHaveLength(1);
-    expect(touching[0]).toMatchObject({ severity: "warning", at: ["e", "t"] });
-    expect(touching[0]!.message).toContain("sits within 16px of t");
-
-    // At 500 the box takes the chip's last half pixel — true overlap, error.
-    const overlapping = coveredContent.check(makeDocument(
-      [box("a", 0, 0), box("t", 500, 0), box("b", 800, 0)],
-      [{
-        ...connect("e", "a", "b"),
-        label: "X",
-        waypoints: [[160, 48], [800, 48]],
-      }],
-    ), FIGJAM_CONTEXT);
-    const errors = overlapping.filter((finding) => finding.severity === "error");
-    expect(errors).toHaveLength(1);
-    expect(errors[0]!.message).toContain("covers t");
-  });
-
-  test("an overlap inside the 1px measuring band is not an error, but the clearance it breaks still warns", () => {
-    // "go live" sizes its chip from the measured label: centered at x 480, its
-    // right edge is 480 + w/2. A box 0.25px inside that edge overlaps the
-    // measured chip only — the browser's chip may be a hair narrower — yet it
-    // sits well inside the 16px margin either way: a warning, not an error,
-    // and never a mere note.
-    const right = 480 + chipWidth("go live", FIGJAM_CANVAS_STYLE) / 2;
-    const findings = coveredContent.check(makeDocument(
-      [box("a", 0, 0), box("t", right - 0.25, 0), box("b", 800, 0)],
-      [{
-        ...connect("e", "a", "b"),
-        label: "go live",
-        waypoints: [[160, 48], [800, 48]],
-      }],
-    ), FIGJAM_CONTEXT);
-    expect(findings.map((finding) => finding.severity)).toEqual(["warning"]);
-    expect(findings[0]!.message).toContain("sits within 16px of t");
-  });
-
-  test("clearance margin edge: contact inside 16px warns, past it is clean", () => {
-    // The auto route detours around "t", but the chip (right edge 500.5,
-    // inflated to 516.5) still reaches t's face at x 516 — warning.
-    const atMargin = coveredContent.check(makeDocument(
-      [box("a", 0, 0), box("t", 516, 0), box("b", 800, 0)],
-      [{ ...connect("e", "a", "b"), label: "X" }],
-    ), FIGJAM_CONTEXT);
-    expect(atMargin.filter((finding) => finding.at.includes("t"))).toHaveLength(1);
-    expect(atMargin[0]!.severity).toBe("warning");
-
-    // One px further the inflated chip no longer touches t.
-    const clear = coveredContent.check(makeDocument(
-      [box("a", 0, 0), box("t", 517, 0), box("b", 800, 0)],
-      [{ ...connect("e", "a", "b"), label: "X" }],
-    ), FIGJAM_CONTEXT);
-    expect(clear.filter((finding) => finding.at.includes("t"))).toHaveLength(0);
-  });
-
-  // --- chip vs chip (ported, + clearance margin) ---
-
-  test("two chips over each other are an error (plus wire-contact warnings)", () => {
-    // Waypoint-pinned horizontal runs at y=48 and y=68: chips 459.5..500.5
-    // at y 33..63 and 53..83 overlap; each chip also sits within clearance
-    // of the other edge's wire. Box columns staggered so no box-on-box fires.
-    const findings = coveredContent.check(makeDocument(
-      [box("a", 0, 0), box("b", 800, 0), box("c", 200, 20), box("d", 600, 20)],
-      [
-        { ...connect("e1", "a", "b"), label: "X", waypoints: [[480, 48]] },
-        { ...connect("e2", "c", "d"), label: "Y", waypoints: [[480, 68]] },
-      ],
-    ), FIGJAM_CONTEXT);
-    const errors = findings.filter((finding) => finding.severity === "error");
-    expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({ at: ["e1", "e2"] });
-    expect(errors[0]!.message).toContain("overlaps label");
-  });
-
-  test("two chips 16px-close but not overlapping are a clearance warning", () => {
-    // Runs pinned at y=48 and y=90: chip rects y 33..63 and 75..105 sit
-    // 12px apart — inside the 16px clearance, outside true overlap.
-    const near = coveredContent.check(makeDocument(
-      [box("a", 0, 0), box("b", 800, 0), box("c", 200, 42), box("d", 600, 42)],
-      [
-        { ...connect("e1", "a", "b"), label: "X", waypoints: [[480, 48]] },
-        { ...connect("e2", "c", "d"), label: "Y", waypoints: [[480, 90]] },
-      ],
-    ), FIGJAM_CONTEXT);
-    const chipChip = near.filter((finding) =>
-      finding.at.includes("e1") && finding.at.includes("e2")
-      && finding.message.includes("chip"));
-    expect(chipChip.length).toBeGreaterThanOrEqual(1);
-    expect(chipChip.every((finding) => finding.severity === "warning")).toBe(true);
-    expect(chipChip.some((finding) => finding.message.includes("sits within 16px of label"))).toBe(true);
-  });
-
-  // --- chip vs another edge's routed polyline (NEW — flowchart R1 blind spot) ---
-
-  test("a chip lying on another edge's path is an error", () => {
-    // e's chip sits at (480,48), rect 459.5..500.5 × 33..63. f runs
-    // vertically at x=480 straight through it (30px of run inside the chip
-    // — the full renderer chip height).
-    const findings = coveredContent.check(makeDocument(
-      [
-        box("a", 0, 0), box("b", 800, 0),
-        box("c", 400, 300), box("d", 400, -396),
-      ],
-      [
-        { ...connect("e", "a", "b"), label: "X" },
-        { ...connect("f", "c", "d") },
-      ],
-    ), FIGJAM_CONTEXT);
-    const errors = findings.filter((finding) => finding.severity === "error");
-    expect(errors).toHaveLength(1);
-    expect(errors[0]).toMatchObject({ at: ["e", "f"] });
-    expect(errors[0]!.message).toContain("lies on f's path for 30px");
-  });
-
-  test("another edge within the 16px clearance of a chip is a warning", () => {
-    // f's vertical run at x=516 — 15.5px right of the chip's edge at 500.5.
-    const near = coveredContent.check(makeDocument(
-      [
-        box("a", 0, 0), box("b", 800, 0),
-        box("c", 436, 300), box("d", 436, -396),
-      ],
-      [
-        { ...connect("e", "a", "b"), label: "X" },
-        { ...connect("f", "c", "d") },
-      ],
-    ), FIGJAM_CONTEXT);
-    const chipEdge = near.filter((finding) => finding.at.includes("f"));
-    expect(chipEdge).toHaveLength(1);
-    expect(chipEdge[0]!.severity).toBe("warning");
-    expect(chipEdge[0]!.message).toContain("sits within 16px of f's path");
-
-    // One px further out (x=517, 16.5px away) the wire is clear.
-    const clear = coveredContent.check(makeDocument(
-      [
-        box("a", 0, 0), box("b", 800, 0),
-        box("c", 437, 300), box("d", 437, -396),
-      ],
-      [
-        { ...connect("e", "a", "b"), label: "X" },
-        { ...connect("f", "c", "d") },
-      ],
-    ), FIGJAM_CONTEXT);
-    expect(clear.filter((finding) => finding.at.includes("f"))).toHaveLength(0);
-  });
-
-  test("run-length edge: ≤8px of path inside the chip is not an error", () => {
-    // f's waypointed route clips the chip's top-left corner (chip 459.5..
-    // 500.5 × 33..63): horizontal leg at y=36 entering at x=459.5, turning
-    // up at the waypoint, exiting through the chip top at y=33. Turn at
-    // x=464 → 4.5+3 = 7.5px of run (≤8, no error); turn at x=466 →
-    // 6.5+3 = 9.5px (>8, error). d tracks the turn so the final leg stays
-    // a straight vertical drop into its bottom anchor.
-    const objectsFor = (turnX: number) => [
-      box("a", 0, 0), box("b", 800, 0),
-      box("c", -360, -12), box("d", turnX - 80, -396),
-    ];
-    const edgesFor = (turnX: number) => [
-      { ...connect("e", "a", "b"), label: "X" },
-      {
-        ...connect("f", "c", "d"),
-        from: { objectId: "c", anchor: "right" as const },
-        to: { objectId: "d", anchor: "bottom" as const },
-        waypoints: [[turnX, 36]] as Array<[number, number]>,
-      },
-    ];
-    const under = coveredContent.check(makeDocument(objectsFor(464), edgesFor(464)), FIGJAM_CONTEXT);
-    expect(under.filter((finding) => finding.severity === "error")).toHaveLength(0);
-
-    const over = coveredContent.check(makeDocument(objectsFor(466), edgesFor(466)), FIGJAM_CONTEXT);
-    const errors = over.filter((finding) => finding.severity === "error");
-    expect(errors).toHaveLength(1);
-    expect(errors[0]!.message).toContain("lies on f's path for 9px");
-  });
-  test.each(["go", "🚀"])("a chip centered on a box is an error whatever its label's fallback width (%s)", (label) => {
-    // The label point (480,48) lies inside t: even the chip's guaranteed footprint covers it.
-    const document = makeDocument(
-      [box("a", 0, 0), box("t", 450, 20, 60, 60), box("b", 800, 0)],
-      [{ ...connect("e", "a", "b"), label, waypoints: [[160, 48], [800, 48]] }],
-    );
-    const chip = chipFor(document.connections[0]!, document, FIGJAM_CANVAS_STYLE)!;
-    expect(chip.rect.x + chip.rect.width / 2).toBe(480);
-    const findings = coveredContent.check(document, FIGJAM_CONTEXT);
-    expect(findings.some((finding) => finding.severity === "error" && finding.at.includes("t"))).toBe(true);
   });
 });

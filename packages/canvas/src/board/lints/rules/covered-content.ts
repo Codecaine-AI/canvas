@@ -1,56 +1,36 @@
 /**
- * covered-content — nothing may sit on content (error tier, with
- * warning-tier near-miss findings).
+ * covered-content — nothing may sit on content (error tier).
  *
- * Checks, all on real geometry (chips are the renderer's own chips at the
- * router's own label point):
- * - box-on-box (error): sibling boxes (same parent; sections and stickies
- *   exempt) whose intersection exceeds 25% of the smaller box or covers a
- *   box's text center;
- * - chip-on-box (error) / chip-near-box (warning): a label chip over a third
- *   box's face; contact inside the 16px clearance margin is the warning;
- * - chip-on-chip (error) / chip-near-chip (warning): same margin logic;
- * - chip-on-edge (error) / chip-near-edge (warning): a chip lying along
- *   ANOTHER edge's routed wire for more than 8px.
+ * The one lint left: overlap is what the system cannot prevent, since the
+ * drawer places the boxes. Both checks read real geometry, and only real
+ * overlaps count — contact is not a finding:
+ * - box-on-box: any two boxes, in the same section or not (sections and
+ *   stickies exempt, so a box is never "on" the section that holds it),
+ *   whose painted faces (paintedRects: an icon's tile and caption, any other
+ *   box's face — never the empty sides of an icon's box) intersect by more
+ *   than 25% of the smaller painted area or cover a box's text center;
+ * - section-on-section: two sections whose frames overlap when neither
+ *   contains the other in the section tree (sections grow to hold their
+ *   children, and a grow can push one frame into its neighbor);
+ * - section-on-box: a section frame partly over a box it does not hold, by
+ *   the box-on-box measure (more than 25% of what the box paints, or its
+ *   text center). A box wholly inside the frame reads as grouped, not
+ *   covered; the injected page frame and a box's own ancestors are exempt.
  *
- * A chip's own edge and its endpoint boxes are not counted here — a chip
- * nosing into its endpoints is a fit matter (unreadable-labels).
- *
- * Chip findings that hang on the chip's last measured pixel, or on a label
- * whose width is an estimate, are notes (geometry.ts chipFindingSeverity).
+ * Label chips are not judged here: the renderer places each chip clear
+ * along its own wire (connectors/label-placement.ts), and the chips that
+ * find no clear spot are a number in canvas_check's LAYOUT block.
  */
-import {
-  CHIP_CLEARANCE,
-  chipContactFinding,
-  chipFor,
-  chipNoteClause,
-  inflate,
-  intersects,
-  polylineLengthInRect,
-  rectOf,
-  routedPolyline,
-  type Chip,
-  type Rect,
-} from "../geometry";
+import { paintedRects, type Rect } from "../geometry";
 import { kindOf } from "../../helpers";
+import { PAGE_FRAME_ID } from "../../page-frame";
 
-import type { InteractiveCanvasObject } from "../../../state/schema";
-import type { LayoutRule, Severity } from "../types";
-
-/** The note clause for a chip pair: whichever chip is the unreliable one, else the tolerance. */
-function pairNoteClause(a: Chip, b: Chip, severity: Severity): string {
-  if (severity !== "note") return "";
-  return chipNoteClause(!a.reliable ? a : b, severity);
-}
+import type { LayoutRule } from "../types";
 
 /** Intersection larger than this fraction of the smaller box is an error. */
 const OVERLAP_FRACTION = 0.25;
-/** A chip lying on another edge's path for more than this run is a finding. */
-const EDGE_RUN_TOLERANCE = 8;
 
-function intersection(a: InteractiveCanvasObject, b: InteractiveCanvasObject): Rect | undefined {
-  const aRect = a.geometry;
-  const bRect = b.geometry;
+function intersection(aRect: Rect, bRect: Rect): Rect | undefined {
   const x = Math.max(aRect.x, bRect.x);
   const y = Math.max(aRect.y, bRect.y);
   const width = Math.min(aRect.x + aRect.width, bRect.x + bRect.width) - x;
@@ -59,19 +39,47 @@ function intersection(a: InteractiveCanvasObject, b: InteractiveCanvasObject): R
   return { x, y, width, height };
 }
 
-/** Is the node's text center (its geometric center) strictly inside `rect`? */
-function coversTextCenter(node: InteractiveCanvasObject, rect: Rect): boolean {
-  const cx = node.geometry.x + node.geometry.width / 2;
-  const cy = node.geometry.y + node.geometry.height / 2;
-  return cx > rect.x && cx < rect.x + rect.width && cy > rect.y && cy < rect.y + rect.height;
+const area = (rect: Rect) => rect.width * rect.height;
+
+/** The bounding rect of `rects` (at least one). */
+function bounds(rects: readonly Rect[]): Rect {
+  const x = Math.min(...rects.map((rect) => rect.x));
+  const y = Math.min(...rects.map((rect) => rect.y));
+  const right = Math.max(...rects.map((rect) => rect.x + rect.width));
+  const bottom = Math.max(...rects.map((rect) => rect.y + rect.height));
+  return { x, y, width: right - x, height: bottom - y };
+}
+
+/**
+ * Is the node's text center strictly inside one of `rects`? The text center
+ * is the center of the last face it paints: an icon's caption band (its
+ * tile when it has no caption), any other box's face.
+ */
+function coversTextCenter(painted: readonly Rect[], rects: readonly Rect[]): boolean {
+  const face = painted[painted.length - 1]!;
+  const cx = face.x + face.width / 2;
+  const cy = face.y + face.height / 2;
+  return rects.some((rect) => cx > rect.x && cx < rect.x + rect.width && cy > rect.y && cy < rect.y + rect.height);
+}
+
+/** True when `ancestorId` is `id` itself or one of its section ancestors. */
+function isAncestor(byParent: ReadonlyMap<string, string | null>, ancestorId: string, id: string): boolean {
+  let at: string | null | undefined = id;
+  for (let steps = 0; at != null && steps <= byParent.size; steps += 1) {
+    if (at === ancestorId) return true;
+    at = byParent.get(at);
+  }
+  return false;
 }
 
 const GUIDANCE = `Nothing sits on content. Blocking (error tier):
-- a box overlap that swallows more than a quarter of the smaller box, or lands on its text;
-- a label chip on a box face, on another chip, or lying along another edge's wire.
-Even ${CHIP_CLEARANCE}px of kissing contact reads as merged (warning tier).
-Fix it by routing around the crowd, moving the label with a waypoint, or giving the region air.
-Stickies float above the diagram and are exempt.`;
+- a box overlap that swallows more than a quarter of what the smaller box paints (an icon's
+  tile and caption, a shape's face), or lands on its text;
+- two section frames overlapping when neither holds the other;
+- a section frame over a box it does not hold.
+Fix it by moving a box, or a section and its children, clear. Stickies float above the
+diagram and are exempt. Overlap and integrity are the only checks: wire routes, label chips,
+text fit and section fit are automatic, and integrity fires only when something bypassed them.`
 
 export const rule: LayoutRule = {
   id: "covered-content",
@@ -82,21 +90,26 @@ export const rule: LayoutRule = {
     const findings: ReturnType<LayoutRule["check"]> = [];
     const boxes = document.objects.filter((object) => kindOf(object) === "node");
 
-    // 1 — box-on-box.
+    // 1 — box-on-box, on what each box paints.
+    const faces = new Map(boxes.map((node) => [node.id, paintedRects(node, context?.canvasStyle)]));
     for (let i = 0; i < boxes.length; i += 1) {
       for (let j = i + 1; j < boxes.length; j += 1) {
         const a = boxes[i]!;
         const b = boxes[j]!;
-        if ((a.parentId ?? null) !== (b.parentId ?? null)) continue;
-        const rect = intersection(a, b);
-        if (!rect) continue;
+        const aFaces = faces.get(a.id)!;
+        const bFaces = faces.get(b.id)!;
+        const pieces = aFaces.flatMap((aFace) => bFaces
+          .map((bFace) => intersection(aFace, bFace))
+          .filter((piece): piece is Rect => piece !== undefined));
+        if (pieces.length === 0) continue;
         const smallerArea = Math.min(
-          a.geometry.width * a.geometry.height,
-          b.geometry.width * b.geometry.height,
+          aFaces.reduce((sum, face) => sum + area(face), 0),
+          bFaces.reduce((sum, face) => sum + area(face), 0),
         );
         if (smallerArea <= 0) continue;
-        const fraction = (rect.width * rect.height) / smallerArea;
-        const covered = [a, b].filter((node) => coversTextCenter(node, rect));
+        const fraction = pieces.reduce((sum, piece) => sum + area(piece), 0) / smallerArea;
+        const covered = [a, b].filter((node) => coversTextCenter(faces.get(node.id)!, pieces));
+        const rect = bounds(pieces);
         if (fraction <= OVERLAP_FRACTION && covered.length === 0) continue;
         const pct = Math.round(fraction * 100);
         const centerNote = covered.length > 0
@@ -113,116 +126,66 @@ export const rule: LayoutRule = {
       }
     }
 
-    const chips = document.connections
-      .map((edge) => chipFor(edge, document, context?.canvasStyle))
-      .filter((chip): chip is Chip => chip !== undefined);
+    // 1b — section-on-section: frames that overlap outside a parent-child
+    // line. Contact is not a finding; only a real shared area is.
+    const sections = document.objects.filter((object) => kindOf(object) === "section");
+    const byParent = new Map(document.objects.map((object) => [object.id, object.parentId ?? null]));
+    for (let i = 0; i < sections.length; i += 1) {
+      for (let j = i + 1; j < sections.length; j += 1) {
+        const a = sections[i]!;
+        const b = sections[j]!;
+        if (isAncestor(byParent, a.id, b.id) || isAncestor(byParent, b.id, a.id)) continue;
+        const shared = intersection(a.geometry, b.geometry);
+        if (!shared) continue;
+        findings.push({
+          rule: "covered-content",
+          severity: "error",
+          at: [a.id, b.id],
+          where: shared,
+          message: `sections ${a.id} and ${b.id} overlap by ${Math.round(shared.width)}×${Math.round(shared.height)}px`,
+          suggestion: `move_to ${b.id} clear of ${a.id}, or move the children that make one of them grow`,
+        });
+      }
+    }
 
-    // 2 — chip vs box (own endpoints exempt): overlap E, 16px contact W.
-    for (const chip of chips) {
+    // 1c — section-on-box: a frame grown over a box outside its tree. When
+    // the box's own section already overlaps that frame, 1b reports the
+    // collision once, so its children are not reported again.
+    const overlapping = new Set(
+      findings.filter((finding) => finding.message.startsWith("sections ")).map((finding) => [...finding.at].sort().join("\u0000")),
+    );
+    const sectionsOverlap = (a: string, b: string) => overlapping.has([a, b].sort().join("\u0000"));
+    const ancestorsOf = (id: string): string[] => {
+      const out: string[] = [];
+      for (let at = byParent.get(id); at != null && out.length <= byParent.size; at = byParent.get(at)) out.push(at);
+      return out;
+    };
+    for (const section of sections) {
+      if (section.id === PAGE_FRAME_ID) continue;
       for (const node of boxes) {
-        if (
-          node.id === chip.edge.from.objectId
-          || node.id === chip.edge.to.objectId
-        ) continue;
-        const boxRect = rectOf(node);
-        const contact = (rect: Rect) => ({
-          on: intersects(rect, boxRect),
-          near: intersects(inflate(rect, CHIP_CLEARANCE), boxRect),
+        if (isAncestor(byParent, section.id, node.id)) continue;
+        if (ancestorsOf(node.id).some((ancestor) => sectionsOverlap(ancestor, section.id))) continue;
+        const nodeFaces = faces.get(node.id)!;
+        const pieces = nodeFaces
+          .map((face) => intersection(section.geometry, face))
+          .filter((piece): piece is Rect => piece !== undefined);
+        if (pieces.length === 0) continue;
+        const nodeArea = nodeFaces.reduce((sum, face) => sum + area(face), 0);
+        if (nodeArea <= 0) continue;
+        const coveredArea = pieces.reduce((sum, piece) => sum + area(piece), 0);
+        // Wholly inside the frame: it reads as grouped, not covered.
+        if (coveredArea >= nodeArea - 0.5) continue;
+        const fraction = coveredArea / nodeArea;
+        const centered = coversTextCenter(nodeFaces, pieces);
+        if (fraction <= OVERLAP_FRACTION && !centered) continue;
+        findings.push({
+          rule: "covered-content",
+          severity: "error",
+          at: [section.id, node.id],
+          where: bounds(pieces),
+          message: `section ${section.id} covers ${Math.round(fraction * 100)}% of ${node.id}, which it does not hold${centered ? ", including its text center" : ""}`,
+          suggestion: `move_to ${node.id} clear of ${section.id}, or move the children that make ${section.id} grow`,
         });
-        const finding = chipContactFinding(contact(chip.rect), contact(chip.narrowRect));
-        if (!finding) continue;
-        const { severity } = finding;
-        findings.push(
-          finding.kind === "on"
-            ? {
-              rule: "covered-content",
-              severity,
-              at: [chip.edge.id, node.id],
-              where: chip.rect,
-              message: `label "${chip.label}" chip on ${chip.edge.id} covers ${node.id}${chipNoteClause(chip, severity)}`,
-              suggestion: `route ${chip.edge.id} around ${node.id} or move the label with a waypoint`,
-            }
-            : {
-              rule: "covered-content",
-              severity,
-              at: [chip.edge.id, node.id],
-              where: chip.rect,
-              message: `label "${chip.label}" chip on ${chip.edge.id} sits within ${CHIP_CLEARANCE}px of ${node.id}${chipNoteClause(chip, severity)}`,
-              suggestion: `give the chip clear air — nudge ${node.id} or reroute ${chip.edge.id}`,
-            },
-        );
-      }
-    }
-
-    // 3 — chip vs chip: overlap E, 16px contact W.
-    for (let i = 0; i < chips.length; i += 1) {
-      for (let j = i + 1; j < chips.length; j += 1) {
-        const a = chips[i]!;
-        const b = chips[j]!;
-        const contact = (ra: Rect, rb: Rect) => ({
-          on: intersects(ra, rb),
-          near: intersects(inflate(ra, CHIP_CLEARANCE), rb),
-        });
-        const finding = chipContactFinding(contact(a.rect, b.rect), contact(a.narrowRect, b.narrowRect));
-        if (!finding) continue;
-        const { severity } = finding;
-        findings.push(
-          finding.kind === "on"
-            ? {
-              rule: "covered-content",
-              severity,
-              at: [a.edge.id, b.edge.id],
-              where: a.rect,
-              message: `label "${a.label}" chip on ${a.edge.id} overlaps label "${b.label}" chip on ${b.edge.id}${pairNoteClause(a, b, severity)}`,
-              suggestion: "separate the two edges (spacing or waypoints) so both labels read",
-            }
-            : {
-              rule: "covered-content",
-              severity,
-              at: [a.edge.id, b.edge.id],
-              where: a.rect,
-              message: `label "${a.label}" chip on ${a.edge.id} sits within ${CHIP_CLEARANCE}px of label "${b.label}" chip on ${b.edge.id}${pairNoteClause(a, b, severity)}`,
-              suggestion: "separate the two edges so the chips read as two labels",
-            },
-        );
-      }
-    }
-
-    // 4 — chip vs another edge's routed polyline (flowchart R1 blind spot):
-    // a run of more than EDGE_RUN_TOLERANCE px through the chip is an error;
-    // the same run through the 16px-inflated chip is the margin warning.
-    for (const chip of chips) {
-      for (const edge of document.connections) {
-        if (edge.id === chip.edge.id) continue;
-        const polyline = routedPolyline(edge, document, context?.canvasStyle);
-        if (polyline.length < 2) continue;
-        const rawRun = polylineLengthInRect(polyline, chip.rect);
-        const contact = (rect: Rect) => ({
-          on: polylineLengthInRect(polyline, rect) > EDGE_RUN_TOLERANCE,
-          near: polylineLengthInRect(polyline, inflate(rect, CHIP_CLEARANCE)) > EDGE_RUN_TOLERANCE,
-        });
-        const finding = chipContactFinding(contact(chip.rect), contact(chip.narrowRect));
-        if (!finding) continue;
-        const { severity } = finding;
-        findings.push(
-          finding.kind === "on"
-            ? {
-              rule: "covered-content",
-              severity,
-              at: [chip.edge.id, edge.id],
-              where: chip.rect,
-              message: `label "${chip.label}" chip on ${chip.edge.id} lies on ${edge.id}'s path for ${Math.round(rawRun)}px${chipNoteClause(chip, severity)}`,
-              suggestion: `move the label with a waypoint or reroute ${edge.id} so the chip owns its wire`,
-            }
-            : {
-              rule: "covered-content",
-              severity,
-              at: [chip.edge.id, edge.id],
-              where: chip.rect,
-              message: `label "${chip.label}" chip on ${chip.edge.id} sits within ${CHIP_CLEARANCE}px of ${edge.id}'s path${chipNoteClause(chip, severity)}`,
-              suggestion: `offset ${edge.id} or move the label so it cannot read as ${edge.id}'s label`,
-            },
-        );
       }
     }
 

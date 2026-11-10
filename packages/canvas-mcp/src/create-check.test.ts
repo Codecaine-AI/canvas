@@ -130,10 +130,7 @@ describe("canvas_create and canvas_check", () => {
     await call(service, "connect", { id: "e1", from: { objectId: "client" }, to: { objectId: "api" } });
     await call(service, "connect", { id: "e2", from: { objectId: "api" }, to: { objectId: "db" } });
 
-    // The row ran past the page; the check says so, and fitting the page clears it.
-    expect(checked(await call(service, "canvas_check", {})).text).toContain("containment: db extends");
-    await call(service, "fit_section", { id: "page-frame" });
-
+    // The row ran past the page, and the page grew to hold it: no fit_section call.
     const result = await call(service, "canvas_check", {});
     const check = checked(result);
     expect(check.errors).toBe(0);
@@ -147,6 +144,26 @@ describe("canvas_create and canvas_check", () => {
     expect(saved.connections).toHaveLength(2);
   });
 
+  test("a sticky whose text clips is a TEXT note, never a finding", async () => {
+    const workspace = tempDir();
+    const service = createCanvasService({ workspace });
+    await call(service, "canvas_create", { canvas: "sticky-clip", title: "Sticky clip" });
+    const rows = Array.from({ length: 30 }, (_, index) => `row ${index + 1}`).join("\n");
+    await call(service, "place_sticky", { id: "payload", text: rows, at: [80, 120] });
+    // A write fits a note to its text, so only a board written before that rule
+    // still holds a note that clips: give the file such a legacy height.
+    const path = join(workspace, "canvases", "sticky-clip.canvas.json");
+    const board = JSON.parse(readFileSync(path, "utf8"));
+    board.objects.find((object: { id: string }) => object.id === "payload").geometry.height = 120;
+    writeFileSync(path, JSON.stringify(board, null, 2));
+    await call(service, "canvas_open", { canvas: "sticky-clip" });
+
+    const check = checked(await call(service, "canvas_check", {}));
+    expect(check.text).toContain("LINTS · clean");
+    expect(check.text).toContain("TEXT · 1 note (never blocks)");
+    expect(check.text).toMatch(/^ {2}sticky payload clips its text: .*shorten the text\)$/m);
+  });
+
   test("a chart.mmd redraws on a board with equal node and edge counts", async () => {
     const service = createCanvasService({ workspace: tempDir() });
     const chart = parseChart(CHECKOUT_CHART);
@@ -154,15 +171,15 @@ describe("canvas_create and canvas_check", () => {
 
     for (const [index, state] of chart.states.entries()) {
       await call(service, "place_shape", { id: state.id, type: "process", at: [80 + (index % 3) * 520, 120 + Math.floor(index / 3) * 360] });
-      const broken = chart.breaks.has(state.id);
-      await call(service, "update_text", { id: state.id, text: state.label, ...(broken ? { detail: "breaks PaidOnce" } : {}) });
-      await call(service, "change_color", { id: state.id, color: broken ? "red" : chart.groups.get(state.id)! });
+      await call(service, "update_text", { id: state.id, text: state.label });
+      await call(service, "change_color", { id: state.id, color: chart.breaks.has(state.id) ? "red" : chart.groups.get(state.id)! });
     }
     for (const [index, arrow] of chart.arrows.entries()) {
       await call(service, "connect", { id: `a${index}`, from: { objectId: arrow.from }, to: { objectId: arrow.to }, label: arrow.label });
     }
 
     const check = checked(await call(service, "canvas_check", {}));
+    expect(check.errors).toBe(0);
     expect(check.nodes).toBe(chart.states.length);
     expect(check.edges).toBe(chart.arrows.length);
     expect(chart.states).toHaveLength(5);

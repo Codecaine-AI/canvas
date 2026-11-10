@@ -3,6 +3,7 @@
 import { ELLIPSE_OUTLINE } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+import { resolveTrueOutlineStrokeWidth } from "../../../theme/tokens";
 
 /**
  * Ellipse (W5, Wave A) — a true-outline SVG silhouette (an explicit stroke
@@ -16,7 +17,7 @@ export const ellipseShapeDef: ShapeDef = {
   outline: ELLIPSE_OUTLINE,
   silhouette: {
     className: "interactive-canvas-object-ellipse",
-    silhouette: ({ object, colors, strokeWidth }) => (
+    silhouette: ({ object, colors, strokeWidth, canvasStyle }) => (
       <svg
         aria-hidden="true"
         className="interactive-canvas-true-outline-silhouette"
@@ -32,7 +33,7 @@ export const ellipseShapeDef: ShapeDef = {
           ry="50%"
           fill={colors.fill}
           stroke={colors.border}
-          strokeWidth={strokeWidth}
+          strokeWidth={resolveTrueOutlineStrokeWidth(strokeWidth, canvasStyle)}
         />
       </svg>
     ),

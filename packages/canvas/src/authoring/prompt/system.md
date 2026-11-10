@@ -198,8 +198,8 @@
                 3. Represent the chosen patterns using supported Canvas objects.
                     - Use native object labels and section titles for names.
                         - Keep each name to what the thing is, in about five words or fewer on one line, with no sentences.
-                        - Put at most one short fact, such as a port, path, version, model, or host, in the `detail` of a shape, icon, or section, within 48 characters.
-                        - Write `Postgres` with the detail `16 · :5432`, not `Postgres database that stores user sessions`.
+                        - A node shows its name only; put extra context in a sticky note next to it. A section carries a title only.
+                        - Write `Postgres`, not `Postgres database that stores user sessions`.
                     - Use Markdown stickies for explanations, annotations, and examples, placed beside their subject. Canvas has no standalone text object.
                     - Give a section a header icon only when a glyph fits what it holds, never as decoration.
                         - Use a generic glyph for a role, such as `database` or `users`, and a `brand-*` logo for a technology the diagram names, such as `brand-postgres`.
@@ -491,7 +491,7 @@
     <container_discipline>
         - Labels and supporting text
             - Do names use native object labels and section titles, with explanations and examples on Markdown stickies?
-            - Is each name a few words on one line, with at most one short fact in its `detail`? The `label-is-prose` and `detail-too-long` warnings report violations.
+            - Is each name a few words on one line, with extra context in a sticky note next to its node?
         - Trees and timelines
             - Do supported objects and connections express the branches or sequence without unnecessary enclosing frames?
         - Hierarchy

@@ -2,7 +2,9 @@
  * The digest completeness invariant: everything the op surface can write is
  * either RENDERED by the digest when set to a non-default value, covered by
  * the header's elided-defaults LEGEND, or represented STRUCTURALLY (parentId
- * as tree indentation). The coverage maps below are compile-time exhaustive
+ * as tree indentation). A stored field nothing paints and no op writes (a
+ * node's `detail`, kept only so older boards open) is UNRENDERED and never
+ * printed. The coverage maps below are compile-time exhaustive
  * over the real schema types — adding an op-writable field without teaching
  * the digest breaks this file at tsc time, and the runtime assertions prove
  * each rendered field actually shows up in the text.
@@ -18,14 +20,14 @@ import { DIGEST_DEFAULTS_LEGEND, formatBoardDigest } from "../../board/digest";
 import { formatStateGrammar } from "../../authoring/state-grammar";
 import { box, connect, makeDocument } from "./synthetic";
 
-type Coverage = "rendered" | "legend" | "structural";
+type Coverage = "rendered" | "legend" | "structural" | "unrendered";
 
 /** Compile-time exhaustive over the object schema (tsc fails on a new field). */
 const OBJECT_FIELD_COVERAGE: Record<keyof InteractiveCanvasObject, Coverage> = {
   id: "rendered",
   type: "rendered",
   text: "rendered",
-  detail: "rendered", // detail="…" extra, whitespace collapsed like text
+  detail: "unrendered", // older boards store it; a node shows its name only, so the digest never prints it
   color: "legend", // rendered when non-default; default declared in the legend
   parentId: "structural", // containment = tree indentation
   geometry: "rendered",
@@ -67,7 +69,9 @@ describe("digest completeness invariant", () => {
       ...Object.values(ENDPOINT_FIELD_COVERAGE),
     ];
     expect(classifications.every((value) =>
-      value === "rendered" || value === "legend" || value === "structural")).toBe(true);
+      value === "rendered" || value === "legend" || value === "structural" || value === "unrendered")).toBe(true);
+    // Only the stored node detail is unrendered: no op writes it any more.
+    expect(Object.entries(OBJECT_FIELD_COVERAGE).filter(([, value]) => value === "unrendered").map(([key]) => key)).toEqual(["detail"]);
   });
 
   test("the declared legend covers every legend-covered default and ships in the state grammar", () => {
@@ -129,7 +133,7 @@ describe("digest completeness invariant", () => {
     expect(digest).toContain('author="Ford"');
   });
 
-  test("a detail line and a section's header glyph render as extras beside the name", () => {
+  test("a section's header glyph renders as an extra beside the name; a stored detail never prints", () => {
     const section = {
       ...box("services", 0, 0, 640, 480, "section"),
       text: "Bun services",
@@ -150,11 +154,13 @@ describe("digest completeness invariant", () => {
     };
     const digest = formatBoardDigest(makeDocument([section, shape, glyph]));
 
-    // The glyph and the fact lead the extras; whitespace collapses like text.
-    expect(digest).toContain('  services section "Bun services" 0,0 640×480 icon=agent detail="127.0.0.1"');
-    expect(digest).toContain('    db process "Postgres" 40,80 280×100 detail="16 · :5432"');
+    // The glyph leads the extras. A stored detail never renders, so the digest leaves it out.
+    expect(digest).toContain('  services section "Bun services" 0,0 640×480 icon=agent\n');
+    expect(digest).toContain('    db process "Postgres" 40,80 280×100\n');
     // An icon object's glyph stays folded into the type column — never `icon=`.
-    expect(digest).toContain('    brain model "brain" 360,80 120×120 detail="claude-opus"');
+    expect(digest).toContain('    brain model "brain" 360,80 120×120');
+    expect(digest).not.toContain("detail=");
+    expect(digest).not.toContain("claude-opus");
     expect(digest.split("\n").find((line) => line.includes(" brain "))).not.toContain("icon=");
   });
 

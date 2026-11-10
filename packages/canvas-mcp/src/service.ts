@@ -21,8 +21,10 @@ import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
+import { JUDGE_PNG_MAX_EDGE } from "@codecaine-ai/canvas/render";
 import {
   boardStateSnapshot,
+  brokenWiresLine,
   callToolkitTool,
   canvasStyleOverrides,
   checkCanvasFile,
@@ -220,7 +222,9 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_create",
     title: "Create canvas",
     description:
-      "Create a new board at canvases/<id>.canvas.json holding only its page frame, and open it as canvas_open does. Refuses an id that already exists. Place, connect, and check it with the other canvas tools.",
+      "Create a new board at canvases/<id>.canvas.json holding only its page frame, and open it as canvas_open does. Refuses an id that already exists. Place, connect, and check it with the other canvas tools. "
+      + `The whole board, padding included, reads at real size up to ${JUDGE_PNG_MAX_EDGE} × ${JUDGE_PNG_MAX_EDGE}px, so lay 4 or more sections out in 2 or 3 rows that grow down, not in one long row. `
+      + "Build order: place_section with title and color for each section, place_shape with text and color for each node, arrange_section for each section, space_out the sections, connect every wire, tighten_wires once, then canvas_check and fix its errors.",
     inputSchema: {
       type: "object",
       properties: {
@@ -238,7 +242,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_check",
     title: "Check canvas",
     description:
-      "Check the open board before you call it done: runs every lint (the finishing rules included) and returns the findings grouped by severity with counts, the node and edge counts, and a PNG of the whole board at its full bounds. look frames one region; canvas_check shows all of it. Changes nothing.",
+      "Check the open board before you call it done: runs every lint and returns the findings grouped by severity with counts, the node and edge counts, and a PNG of the whole board at its full bounds. Overlap and integrity are the only lints: overlap is a box on a box, or a section on a section, and integrity fires only when something bypassed the automatic fixes. Wire routes, label chips, text fit, and section fit are automatic: the LAYOUT block counts wire length, crossings, and label chips that found no clear spot, and a TEXT note names a sticky or section whose text clips. None of those block. The PNG shows the board at 1:1 world scale, scaled down only so its long edge is at most 2576px: the size the judges see. Read the flow, the grouping and the text in it, and use look to read one section up close. look frames one region; canvas_check shows all of it. Changes nothing.",
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
 ];
@@ -328,9 +332,11 @@ export function createCanvasService(options: CanvasServiceOptions) {
   function openedText(verb: "OPENED" | "CREATED", file: CanvasFileSession): string {
     const title = file.session.draft.title ?? "";
     const canvasStyle = file.session.canvasStyle;
+    const broken = brokenWiresLine(file.session.draft);
     return [
       `${verb} · ${file.canvasId} ${JSON.stringify(title)} · ${shownPath(file.canvasPath)} · sha256:${file.diskHash}`,
       ...(canvasStyle ? [styleLine(canvasStyle)] : []),
+      ...(broken ? [broken] : []),
       boardStateSnapshot(file.session),
     ].join("\n\n");
   }
@@ -415,15 +421,16 @@ export function createCanvasService(options: CanvasServiceOptions) {
   }
 
   function checkCanvas(): CanvasToolResult {
-    if (!active) return text(NO_ACTIVE_CANVAS, true);
-    const result = checkCanvasFile(active, `${active.canvasId} · ${shownPath(active.canvasPath)}`);
+    const file = active;
+    if (!file) return text(NO_ACTIVE_CANVAS, true);
+    const result = checkCanvasFile(file, `${file.canvasId} · ${shownPath(file.canvasPath)}`);
     return {
       ...toolResult([
         { type: "text", text: result.text },
         ...(result.pngs ?? []).map((png) =>
           ({ type: "image" as const, data: png.toString("base64"), mimeType: "image/png" })),
       ], result.isError),
-      _meta: { canvasId: active.canvasId },
+      _meta: { canvasId: file.canvasId },
     };
   }
 
@@ -441,6 +448,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
           `GUIDANCE · ${topics.length} topics · ${snapshot.snapshotId}`,
           ...topics.map((entry) => `  ${entry.id}  ${JSON.stringify(entry.title)}  ~${entry.approxTokens} tokens`),
           "Call canvas_guidance { \"topic\": \"<id>\" } to read one.",
+          "Read diagram_design before the first place_section: it holds the build order and the board size the judge reads at real size.",
         ].join("\n"),
       );
     }

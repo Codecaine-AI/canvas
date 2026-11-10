@@ -155,11 +155,11 @@ const noteRule: LayoutRule = {
 };
 
 describe("notes", () => {
-  test("number after errors and warnings as N*, render in the count line, and never block", () => {
+  test("number after errors and warnings as N*, render in the count line, and never block; warnings do not block either", () => {
     const document = makeDocument([...offLadderObjects(), ...escapedChildObjects(), box("edgy", 0, 900)]);
     const diagnostics = runAll(document, [noteRule, spacingRule, containmentRule]);
     expect(diagnostics.map((diagnostic) => diagnostic.id)).toEqual(["E1", "W1", "N1"]);
-    expect(blockingDiagnostics(diagnostics).map((diagnostic) => diagnostic.id)).toEqual(["E1", "W1"]);
+    expect(blockingDiagnostics(diagnostics).map((diagnostic) => diagnostic.id)).toEqual(["E1"]);
     const text = formatDiagnostics(diagnostics);
     expect(text).toContain("DIAGNOSTICS · 1 error · 1 warning · 1 note");
     expect(text).toContain("N1 edgy: edgy: within 1px of its box edge — can't promise");
@@ -188,17 +188,12 @@ describe("formatDiagnostics", () => {
   });
 
   test("renders a finding's prose suggestion without structured operations", () => {
-    const document = makeDocument(
-      [box("alpha", 0, 0), box("beta", 204, 0)],
-      [{ ...connect("edge", "alpha", "beta"), label: "X" }],
-    );
-    // Figjam chip geometry: the 41px "X" chip needs a 73px corridor.
+    // Same-size boxes offset 80px: half of each is covered.
+    const document = makeDocument([box("alpha", 0, 0), box("beta", 80, 0)]);
     const text = formatDiagnostics(runAll(document, undefined, FIGJAM_CONTEXT));
 
-    expect(text).toContain("W1 unreadable-labels:");
-    expect(text).toContain(
-      "(open the alpha↔beta corridor to ≥73px so the chip and its 16px margins fit)",
-    );
+    expect(text).toContain("E1 covered-content: alpha and beta overlap by 50% of the smaller box");
+    expect(text).toContain("(move beta clear of alpha)");
     expect(text).not.toContain('"operations"');
     expect(text).not.toContain("suggested op:");
     expect(text).not.toContain("[quickfix]");

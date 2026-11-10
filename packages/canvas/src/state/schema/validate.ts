@@ -427,8 +427,9 @@ export function validateInteractiveCanvasDocument(value: unknown): CanvasValidat
       }
     }
 
-    // The one-line `detail` under the name — shapes, icons, and sections
-    // only. Trimmed; empty means "no detail line" and is omitted. Stickies
+    // The one-line `detail` older boards stored under a name. It stays
+    // readable so those boards open and round-trip, but it never renders: a
+    // node shows its name only. Trimmed; empty is omitted. Stickies
     // never carry one (their body is markdown), and a non-string value is
     // dropped with a warning like an unknown color.
     let detail: string | undefined;

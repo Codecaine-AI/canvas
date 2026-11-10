@@ -199,9 +199,63 @@
           "attributes": {
             "bold": true
           }
-        },
+        }
+      ],
+      "children": [
+        "b-overview-step-read-9a",
+        "b-overview-step-read-9b",
+        "b-overview-step-read-9c",
+        "b-overview-step-read-9d"
+      ]
+    },
+    "b-overview-step-read-9a": {
+      "id": "b-overview-step-read-9a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
-          "insert": " Twenty-five typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool. Creation is per-kind and carries only what the UI's creation gesture carries, so a placement is a bare payload and everything else about the placed object comes from defaults. The exceptions travel with the name: place_shape and place_section may carry the one-line detail, and place_section may also carry a header icon for the section's title chip. The closed shape-and-icon type roster folds icon glyphs in under their own names. The roster intentionally gives bare type names, with icon glyphs and colors enumerated one per line, and geometry the agent writes lands on its own 20 grid."
+          "insert": "Twenty-five typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-step-read-9b": {
+      "id": "b-overview-step-read-9b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Creation is per-kind and carries only what the UI's creation gesture carries, so a placement is a bare payload and everything else about the placed object comes from defaults."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-step-read-9c": {
+      "id": "b-overview-step-read-9c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The exception travels with the name: place_section may carry a header icon for the section's title chip. A node shows its name only, so place_shape takes no detail."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-step-read-9d": {
+      "id": "b-overview-step-read-9d",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The closed shape-and-icon type roster folds icon glyphs in under their own names, gives bare type names with icon glyphs and colors one per line, and the geometry the agent writes lands on its own 20 grid."
         }
       ],
       "children": []
@@ -294,9 +348,51 @@
           "attributes": {
             "bold": true
           }
-        },
+        }
+      ],
+      "children": [
+        "b-overview-fact-view-15a",
+        "b-overview-fact-view-15b",
+        "b-overview-fact-view-15c",
+        "b-overview-fact-view-15d",
+        "b-overview-fact-view-15e"
+      ]
+    },
+    "b-overview-fact-view-15a": {
+      "id": "b-overview-fact-view-15a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
-          "insert": " The standing picture arrives on its own: every turn's state block carries the board digest, the cumulative change, the complete lints, routed truth, the request queue, and a render of the board as it stands, followed by up to three prior post-change renders. The digest is an indented containment tree followed by one EDGES block. Its legend declares elided defaults, and object text is never truncated. An object line's extras open with "
+          "insert": "The standing picture arrives on its own. Every turn's state block carries the board digest, the cumulative change, the complete lints, routed truth, the request queue, a render of the board as it stands, and up to three prior post-change renders."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-view-15b": {
+      "id": "b-overview-fact-view-15b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The digest is an indented containment tree followed by one EDGES block. Its legend declares elided defaults, and object text is never truncated."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-view-15c": {
+      "id": "b-overview-fact-view-15c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "An object line's extras open with "
         },
         {
           "insert": "icon=<glyph>",
@@ -305,16 +401,33 @@
           }
         },
         {
-          "insert": " for a section's header icon and "
-        },
+          "insert": " for a section's header icon, printed only when set."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-view-15d": {
+      "id": "b-overview-fact-view-15d",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
-          "insert": "detail=\"…\"",
-          "attributes": {
-            "code": true
-          }
-        },
+          "insert": "look is the deliberate close-up layered on that. It frames exactly one region per call, with view taking a section or a single object and at cropping to a world rect, either/or and never both."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-view-15e": {
+      "id": "b-overview-fact-view-15e",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
-          "insert": " for a detail line, each printed only when set. look is the deliberate close-up layered on that. It frames exactly one region per call, with view taking a section or a single object and at cropping to a world rect, either/or and never both. The framed region comes back both rendered and measured: per-pair gaps on each axis, row and column pitch, the section's free margins, and ink share. Conformance is therefore read rather than computed. Operation results stay focused on what they touched and carry no render at all."
+          "insert": "The framed region comes back rendered and measured: per-pair gaps on each axis, row and column pitch, the section's free margins, and ink share. Operation results stay focused on what they touched and carry no render at all."
         }
       ],
       "children": []
@@ -401,7 +514,7 @@
       },
       "text": [
         {
-          "insert": "The other two, label-is-prose and detail-too-long, hold object text to the name and detail convention. A shape, icon, or section name stays a few words on one line, its detail holds one short fact, and prose goes on a sticky."
+          "insert": "The other two, label-is-prose and detail-too-long, hold object text to the name convention. A name stays a few words on one line, and a node shows its name only, with extra context in a sticky note next to it."
         }
       ],
       "children": []
@@ -427,7 +540,7 @@
       },
       "text": [
         {
-          "insert": "Clipped text fires when a shape label, sticky body, or section title would drop words behind an ellipsis, or a detail line would be cut short or hidden. It names the measured box size that shows the text whole."
+          "insert": "Clipped text fires when a shape label, sticky body, or section title would drop words behind an ellipsis. It names the measured box size that shows the text whole."
         }
       ],
       "children": []
@@ -663,7 +776,7 @@
           [
             "place_section",
             "Place",
-            "draw a titled frame that adopts whatever its edges already cover, with an optional header icon and one-fact detail"
+            "draw a titled frame that adopts whatever its edges already cover, with an optional color and header icon"
           ],
           [
             "place_sticky",
@@ -673,12 +786,12 @@
           [
             "place_shape",
             "Place",
-            "the pick and the click: an untitled shape or glyph at its default size, with an optional one-fact detail"
+            "the pick and the click: a shape or glyph at its default size, with an optional name and color"
           ],
           [
             "clone",
             "Place",
-            "copy one object's kind, size, and look onto a new id, its detail line and glyph included"
+            "copy one object's kind, size, and look onto a new id, its glyph included"
           ],
           [
             "connect",
@@ -716,9 +829,14 @@
             "re-pitch a run so the clear gap between neighbours is exactly what you ask for"
           ],
           [
+            "arrange_section",
+            "Arrange",
+            "lay one section's nodes out in named rows at the craft-target gaps, then fit the frame around them"
+          ],
+          [
             "update_text",
             "Content & appearance",
-            "write a name and its one-line detail, a sticky's body, or an edge's label"
+            "write a name, a sticky's body, or an edge's label"
           ],
           [
             "change_color",
@@ -821,7 +939,7 @@
             "end the run, with a proposal or without one"
           ]
         ],
-        "title": "Thirty-two tools, in registration order"
+        "title": "Thirty-three tools, in registration order"
       },
       "children": []
     },

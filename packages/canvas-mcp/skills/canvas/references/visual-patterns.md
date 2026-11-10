@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/visual-patterns.ts (sha256 236da37729039e37a11663f4dfde5426818d9bc3b412535674b081da4b686049). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/visual-patterns.ts (sha256 eb88e20d8dc0e4f0552f0cb3a47d8572b8b31368f6c243b1a0a301630c39b16c). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Visual Patterns
 
@@ -6,7 +6,7 @@ The 10 patterns a diagram composes. Each sketch is conceptual, not literal coord
 
 ## Fan-Out (`fan-out`)
 
-One source produces or delegates to many recipients. Spread recipients across the reading direction and label the dispatched work. Conditional choices belong to a decision; parallel delegation shows the recipients that actually work.
+One source produces or delegates to many recipients. Spread recipients across the reading direction. Conditional choices belong to a decision; parallel delegation shows the recipients that actually work.
 
 ```text
 [Source] --+--> [Recipient A]
@@ -50,7 +50,7 @@ Use case: A service owns two subsystems, one of which owns a smaller component.
 
 ## Sequence (`sequence`)
 
-Ordered stages or events form a readable chain with labeled transitions. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects. The line under each stage is its detail: one fact, not a description.
+Ordered stages or events form a readable chain. Label a transition only for its condition. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects.
 
 ```text
 [Request] --> [Validate] --> [Process] --> [Respond]
@@ -61,7 +61,7 @@ Use case: A request passes through validation, processing, and response delivery
 
 ## Feedback Cycle (`feedback-cycle`)
 
-A result affects later work through a return connection between distinct stages or participants. Label the return trigger and destination. Canvas rejects a self-loop on one object.
+A result affects later work through a return connection between distinct stages or participants. Label the return with its trigger. Canvas rejects a self-loop on one object.
 
 ```text
 [Act] -----> [Observe]
@@ -110,7 +110,7 @@ Use case: A producer hands a completed work item to a separately owned processin
 
 ## Shared Resource (`shared-resource`)
 
-Several participants use one shared store placed near its consumers. Label read/write relationships and retain one store instead of drawing misleading duplicates.
+Several participants use one shared store placed near its consumers. Retain one store instead of drawing misleading duplicates.
 
 ```text
 [Writer] --write--> [Shared Store] --read--> [Reader A]
@@ -122,7 +122,7 @@ Use case: One ingestion process updates an index that multiple query services re
 
 ## State Machine (`state-machine`)
 
-A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board's node and edge counts equal the chart's. Keep about 20 arrows or fewer. Labels are the reader's words from the chart, never variable or action names. Each node wears its group's color; a state that breaks a rule wears red instead and names the rule in its detail. The start state comes first in reading order.
+A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board's node and edge counts equal the chart's. Keep about 20 arrows or fewer. Labels are the reader's words from the chart, never variable or action names. Each node wears its group's color; a state that breaks a rule wears red instead, with a sticky note beside it naming the rule. The start state comes first in reading order.
 
 ```text
 [Cart open] --you press pay--> [Paying] --the card clears--> [Paid]

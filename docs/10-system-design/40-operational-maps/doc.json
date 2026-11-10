@@ -694,7 +694,7 @@
       },
       "text": [
         {
-          "insert": "Names and Detail Lines"
+          "insert": "Names Only"
         }
       ],
       "children": []
@@ -705,7 +705,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Every shape, icon, and section carries a short name and at most one detail line. The name says what the thing is in about five words on one line. The detail is one muted fact under it, such as a port, path, version, model, or host, in 48 characters or fewer. Prose goes on a Markdown sticky beside its subject: the why, the how, caveats, and examples. Two lint warnings enforce it. "
+          "insert": "Every shape and icon shows its name only, and a section shows its title only. The name says what the thing is in about five words on one line. Put extra context in a Markdown sticky note next to its subject: the why, the how, caveats, and examples. The "
         },
         {
           "insert": "label-is-prose",
@@ -714,16 +714,7 @@
           }
         },
         {
-          "insert": " flags a name over six words or 40 characters, or with a sentence or line break. "
-        },
-        {
-          "insert": "detail-too-long",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " flags a detail over 48 characters, with a second sentence, or with a line break."
+          "insert": " warning flags a name over six words or 40 characters, or with a sentence or line break."
         }
       ],
       "children": []
@@ -734,7 +725,6 @@
       "props": {
         "columns": [
           "name",
-          "detail",
           "instead of"
         ],
         "rows": [
@@ -742,14 +732,6 @@
             [
               {
                 "insert": "Postgres",
-                "attributes": {
-                  "code": true
-                }
-              }
-            ],
-            [
-              {
-                "insert": "16 · :5432",
                 "attributes": {
                   "code": true
                 }
@@ -766,7 +748,7 @@
                 }
               },
               {
-                "insert": ", with the sessions explained on a sticky"
+                "insert": ", with the sessions on a sticky note"
               }
             ]
           ],
@@ -774,14 +756,6 @@
             [
               {
                 "insert": "canvas-agent",
-                "attributes": {
-                  "code": true
-                }
-              }
-            ],
-            [
-              {
-                "insert": "harness · :4820",
                 "attributes": {
                   "code": true
                 }
@@ -819,21 +793,16 @@
             ],
             [
               {
-                "insert": "3 retries · 30s timeout",
-                "attributes": {
-                  "code": true
-                }
-              }
-            ],
-            [
-              {
-                "insert": "a detail of "
+                "insert": "a name of "
               },
               {
                 "insert": "Handles auth. Retries 3 times on failure.",
                 "attributes": {
                   "code": true
                 }
+              },
+              {
+                "insert": ", with the retry policy on a sticky note"
               }
             ]
           ],
@@ -849,18 +818,10 @@
                 "insert": " (a section)"
               }
             ],
-            [
-              {
-                "insert": "127.0.0.1",
-                "attributes": {
-                  "code": true
-                }
-              }
-            ],
             "a section title that lists every service it holds"
           ]
         ],
-        "title": "A name and one fact"
+        "title": "Short names"
       },
       "children": []
     },

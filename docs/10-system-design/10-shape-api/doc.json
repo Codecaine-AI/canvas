@@ -47,10 +47,6 @@
         "b-sapi-text-p3",
         "b-sapi-h3-detail",
         "b-sapi-detail-p1",
-        "b-sapi-detail-center",
-        "b-sapi-detail-below",
-        "b-sapi-detail-chip",
-        "b-sapi-detail-p2",
         "b-sapi-decision-detail",
         "b-sapi-h2-outline",
         "b-sapi-outline-p1",
@@ -94,7 +90,7 @@
           }
         },
         {
-          "insert": " in this engine is not a drawing primitive but a typed, agent-editable JSON record: a member of the closed "
+          "insert": " in this engine is a typed, agent-editable JSON record, not a drawing primitive. It is a member of the closed "
         },
         {
           "insert": "InteractiveCanvasObjectType",
@@ -109,7 +105,7 @@
           }
         },
         {
-          "insert": " union (11 types), carrying an axis-aligned "
+          "insert": " union (11 types). It carries an axis-aligned "
         },
         {
           "insert": "geometry",
@@ -136,16 +132,7 @@
           }
         },
         {
-          "insert": " name with an optional one-line "
-        },
-        {
-          "insert": "detail",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and a single optional "
+          "insert": " name, and one optional "
         },
         {
           "insert": "color",
@@ -1067,7 +1054,7 @@
       },
       "text": [
         {
-          "insert": "Text: Name, Detail, and Slot Presets"
+          "insert": "Text: Name and Slot Presets"
         }
       ],
       "children": []
@@ -1107,16 +1094,7 @@
           }
         },
         {
-          "insert": "), and shapes render it in their declared slot. Shapes, icons, and sections can add an optional one-line "
-        },
-        {
-          "insert": "detail",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " under the name, and connections keep their own separate "
+          "insert": "), and shapes render it in their declared slot. A node shows its name only, and connections keep their own separate "
         },
         {
           "insert": "label",
@@ -1251,7 +1229,7 @@
       },
       "text": [
         {
-          "insert": "The Detail Line"
+          "insert": "A Stored Detail Never Paints"
         }
       ],
       "children": []
@@ -1262,7 +1240,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A slot paints the detail line only when "
+          "insert": "Older files can hold a one-line "
         },
         {
           "insert": "detail",
@@ -1271,148 +1249,25 @@
           }
         },
         {
-          "insert": " holds non-blank text, with every whitespace run, newlines included, collapsed to one space. The line sets in the theme's detail typography ("
+          "insert": " under a node's name. "
         },
         {
-          "insert": "workspace themes",
-          "attributes": {
-            "reference": {
-              "kind": "doc",
-              "path": "10-system-design/15-themes",
-              "label": "workspace themes"
-            }
-          }
-        },
-        {
-          "insert": "), 3px under the name block, and ellipsizes at the slot width instead of wrapping. Each placement fits it differently:"
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-detail-center": {
-      "id": "b-sapi-detail-center",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "Center and rect slots",
-          "attributes": {
-            "bold": true
-          }
-        }
-      ],
-      "children": [
-        "b-sapi-detail-center-body"
-      ]
-    },
-    "b-sapi-detail-center-body": {
-      "id": "b-sapi-detail-center-body",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "The name and the detail form one vertically centered block. The detail reserves its line first, so the name loses lines before the detail does, and a slot too short for one name line plus the detail line drops the detail."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-detail-below": {
-      "id": "b-sapi-detail-below",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "The below slot",
-          "attributes": {
-            "bold": true
-          }
-        }
-      ],
-      "children": [
-        "b-sapi-detail-below-body"
-      ]
-    },
-    "b-sapi-detail-below-body": {
-      "id": "b-sapi-detail-below-body",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "An icon's detail follows its label lines, and the band and the painted bounds grow by the gap plus one detail line."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-detail-chip": {
-      "id": "b-sapi-detail-chip",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "Title chips and sticky bodies",
-          "attributes": {
-            "bold": true
-          }
-        }
-      ],
-      "children": [
-        "b-sapi-detail-chip-body"
-      ]
-    },
-    "b-sapi-detail-chip-body": {
-      "id": "b-sapi-detail-chip-body",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "A section's detail renders inline in its header chip after the title, never in a text slot, and a sticky never paints one."
-        }
-      ],
-      "children": []
-    },
-    "b-sapi-detail-p2": {
-      "id": "b-sapi-detail-p2",
-      "type": "paragraph",
-      "props": {},
-      "text": [
-        {
-          "insert": "The resolved slot carries the line as "
-        },
-        {
-          "insert": "ResolvedTextSlot.detail",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/objects/text-slots.ts",
-              "symbol": "ResolvedSlotDetail",
-              "label": "ResolvedTextSlot.detail"
-            }
-          }
-        },
-        {
-          "insert": ", so the at-rest renderer, the static renderer, and the in-place editor draw the same line. The in-place editor edits the name only and shows the detail beneath its textarea exactly as at rest. The detail itself is edited in the Inspector's Detail field, which warns past 48 characters, or by an agent's "
-        },
-        {
-          "insert": "update_text",
+          "insert": "validateInteractiveCanvasDocument",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": "."
+          "insert": " keeps the field, so those boards open and save back unchanged. "
+        },
+        {
+          "insert": "resolveTextSlot",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " never resolves a line for it, so the live slot, the in-place editor, the static renderer, the icon caption band, and text fit all read past it. No tool and no Inspector field writes one."
         }
       ],
       "children": []
@@ -1422,29 +1277,11 @@
       "type": "callout",
       "props": {
         "kind": "decision",
-        "title": "One name plus one fact: the detail line is not a second body"
+        "title": "A node shows its name only"
       },
       "text": [
         {
-          "insert": "The detail line keeps D11's single-text model intact. "
-        },
-        {
-          "insert": "text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " stays the one name every kind edits in place. "
-        },
-        {
-          "insert": "detail",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " holds at most one short fact under it, such as a port, path, version, model, or host. The line is muted, single, and ellipsized rather than wrapped, so prose has nowhere to grow, and explanations go on a sticky beside the subject. Stickies never carry a detail because their markdown body is already the whole note."
+          "insert": "Put extra context in a sticky note next to the node. On the Archon test boards almost every node detail added no fact, and a model check could not reliably tell the useful ones apart."
         }
       ],
       "children": []

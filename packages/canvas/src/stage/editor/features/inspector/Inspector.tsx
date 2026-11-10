@@ -21,7 +21,11 @@ import {
   type CanvasChangeSummary,
 } from "../../../../state/actions";
 import { resolveSwatchPreview } from "../../../../theme/palette";
+import { naturalAspectOf } from "../../../../objects/natural-aspect";
+import { noteNeededHeight, noteTextPatch } from "../../../../objects/sticky/note-fit";
+import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import { CANVAS_COLORS } from "../../../../state/schema";
+import { snapGeometry } from "../../../../state/geometry";
 import type {
   CanvasColor,
   InteractiveCanvasConnection,
@@ -30,13 +34,6 @@ import type {
 } from "../../../../state/schema";
 import { animateSectionFitToChildren, isSectionFitted } from "../section-fit/animate-section-fit";
 import { IconGlyphPicker } from "./IconGlyphPicker";
-
-/**
- * Past this many characters (trimmed) a detail reads as more than one fact —
- * the agent's detail-too-long lint threshold (board/text-rules.ts
- * DETAIL_MAX_CHARS). The Inspector only warns; it never blocks typing.
- */
-const DETAIL_SOFT_MAX_CHARS = 48;
 
 export interface InspectorProps {
   document: InteractiveCanvasDocument;
@@ -59,9 +56,22 @@ export function Inspector({
   applyColorToSelection,
 }: InspectorProps) {
   const [annotationBody, setAnnotationBody] = useState("");
+  const canvasStyle = useCanvasStyle();
+  // A card note is never shorter than its text needs (objects/sticky/note-fit.ts).
+  // A size field's resize. A card note is snapped here, then kept at least
+  // as tall as its text needs, and sent unsnapped: the reducer's 16px snap
+  // would pull a 100px three-line note down to 96 and clip it.
+  const resizeTo = (object: InteractiveCanvasObject, width: number, height: number): CanvasAction => {
+    const snapped = snapGeometry({ x: 0, y: 0, width, height });
+    const needed = noteNeededHeight(object, canvasStyle, snapped.width);
+    return needed === undefined
+      ? { type: "canvas.resizeObject", objectId: object.id, width, height }
+      : { type: "canvas.resizeObject", objectId: object.id, width: snapped.width, height: Math.max(snapped.height, needed), snap: false };
+  };
   const selectedSectionFitted =
     selectedObject?.type === "section" ? isSectionFitted(document, selectedObject.id) : false;
-  const detailLength = selectedObject?.detail?.trim().length ?? 0;
+  // A fixed-aspect shape (the octagon): either size field drives the other.
+  const aspect = selectedObject ? naturalAspectOf(selectedObject) : null;
 
   const addAnnotation = () => {
     const body = annotationBody.trim();
@@ -105,38 +115,13 @@ export function Inspector({
               dispatch({
                 type: "canvas.updateObject",
                 objectId: selectedObject.id,
-                patch: { text: event.target.value },
+                // A card note's height follows its text (objects/sticky/note-fit.ts).
+                patch: noteTextPatch(selectedObject, event.target.value, canvasStyle),
               })
             }
           />
         </label>
-        {/* Stickies carry no detail line: their body is markdown. */}
-        {selectedObject.type !== "sticky" && (
-          <div className="text-ui-xs">
-            <label className="grid gap-1">
-              <span className="text-muted-foreground">Detail</span>
-              <Input
-                value={selectedObject.detail ?? ""}
-                placeholder="One short fact — a port, path, model"
-                onChange={(event) =>
-                  // Empty clears the detail (the reducer drops blank details).
-                  dispatch({
-                    type: "canvas.updateObject",
-                    objectId: selectedObject.id,
-                    patch: { detail: event.target.value },
-                  })
-                }
-              />
-            </label>
-            <div role="status" className="text-ui-2xs text-warning">
-              {detailLength > DETAIL_SOFT_MAX_CHARS ? (
-                <p className="mt-1">
-                  {detailLength} / {DETAIL_SOFT_MAX_CHARS} — keep it to one short fact
-                </p>
-              ) : null}
-            </div>
-          </div>
-        )}
+        {/* No kind has a Detail field: a node shows its name only, and extra context goes in a sticky note. */}
         {selectedObject.type === "section" && (
           <IconGlyphPicker
             key={selectedObject.id}
@@ -207,12 +192,7 @@ export function Inspector({
             label="Object width"
             value={selectedObject.geometry.width}
             onCommit={(width) =>
-              dispatch({
-                type: "canvas.resizeObject",
-                objectId: selectedObject.id,
-                width,
-                height: selectedObject.geometry.height,
-              })
+              dispatch(resizeTo(selectedObject, width, aspect === null ? selectedObject.geometry.height : width / aspect))
             }
           />
           <SizeInput
@@ -220,12 +200,7 @@ export function Inspector({
             label="Object height"
             value={selectedObject.geometry.height}
             onCommit={(height) =>
-              dispatch({
-                type: "canvas.resizeObject",
-                objectId: selectedObject.id,
-                width: selectedObject.geometry.width,
-                height,
-              })
+              dispatch(resizeTo(selectedObject, aspect === null ? selectedObject.geometry.width : height * aspect, height))
             }
           />
         </div>

@@ -10,10 +10,10 @@ import type {
   InteractiveCanvasObject,
 } from "../state/schema";
 import { connectorBendSegments } from "./bend-editing";
-import { labelPointFor, routeConnection } from "./routing";
+import { placedLabelPoint, routedConnectionIn } from "./label-placement";
 import { connectorDashArray } from "./def";
 import { CONNECTION_LABEL_CHIP, connectionLabelChipMetrics } from "./label-chip";
-import { resolveConnectorPaint } from "../theme/palette";
+import { resolveConnectorPaint, resolveLabelChipBorder, resolveLabelChipText } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { CANVAS_MONO_FONT_STACK } from "../theme/fonts";
 import { stageMarkColors } from "../theme/canvas-style";
@@ -65,7 +65,7 @@ export function Connector({
   const canvasStyle = useCanvasStyle();
   const forwardMarkerUrl = useArrowMarkerUrl(document.id, "forward");
   const backMarkerUrl = useArrowMarkerUrl(document.id, "back");
-  const routed = routeConnection(fromObject, toObject, connection, document.objects, canvasStyle);
+  const routed = routedConnectionIn(document, connection, fromObject, toObject, canvasStyle);
   // FigJam's dash pattern scaled with the style's line width (./def.ts).
   const strokeDasharray = connection.style === "dashed" ? connectorDashArray(canvasStyle) : undefined;
   const arrow = connection.arrow ?? "forward";
@@ -76,9 +76,9 @@ export function Connector({
   // fill="context-stroke" (see <defs>).
   const stroke = resolveConnectorPaint(connection.color ?? FIRST_USE_COLORS.connector, canvasStyle).stroke;
   const label = connection.label?.trim() ? connection.label : null;
-  // The pinned chip center (S1.1) — `routed.labelPoint` unless the connection
-  // carries a `labelPosition`.
-  const labelPoint = labelPointFor(routed, connection);
+  // The placed chip center (./label-placement.ts): midpoint or pin, moved
+  // along the wire off boxes, chips and wires.
+  const labelPoint = placedLabelPoint(routed, connection, document, canvasStyle);
   const chip = label ? connectionLabelChipMetrics(label, canvasStyle) : null;
 
   return (
@@ -128,13 +128,13 @@ export function Connector({
             height={chip.height}
             rx={canvasStyle.labelChipCornerRadiusPx}
             fill={canvasStyle.connectorLabelBackground}
-            stroke={canvasStyle.hairlineColor}
+            stroke={resolveLabelChipBorder(canvasStyle, stroke)}
             strokeWidth={CONNECTION_LABEL_CHIP.borderWidthPx}
           />
           <text
             textAnchor="middle"
             dominantBaseline="central"
-            fill={canvasStyle.connectorLabelTextColor}
+            fill={resolveLabelChipText(canvasStyle)}
             fontSize={chip.fontSizePx}
             fontWeight={chip.fontWeight}
             fontFamily={chip.font === "mono" ? CANVAS_MONO_FONT_STACK : undefined}
@@ -170,7 +170,7 @@ export function ConnectorSelectionTrim({
 }) {
   const canvasStyle = useCanvasStyle();
   const marks = stageMarkColors(canvasStyle);
-  const routed = routeConnection(fromObject, toObject, connection, document.objects, canvasStyle);
+  const routed = routedConnectionIn(document, connection, fromObject, toObject, canvasStyle);
   const safeZoom = Math.max(zoom, 0.001);
   const label = connection.label?.trim() ? connection.label : null;
   const endpointRadius = ENDPOINT_HANDLE_RADIUS_PX / safeZoom;
@@ -184,7 +184,7 @@ export function ConnectorSelectionTrim({
       ? connectorBendSegments(routed.points ?? [], {
           // Handles dodge the chip where it actually sits (S1.1 pin), not the
           // route midpoint.
-          labelPoint: label ? labelPointFor(routed, connection) : null,
+          labelPoint: label ? placedLabelPoint(routed, connection, document, canvasStyle) : null,
           labelClearancePx: label ? labelWidth / 2 + bendHandleLength / 2 : undefined,
         })
       : [];

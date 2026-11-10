@@ -6,7 +6,8 @@ import { resolveObjectStrokeWidth } from "../theme/tokens";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { useCanvasStyle } from "../theme/canvas-style-context";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
-import type { InteractiveCanvasObject } from "../state/schema";
+import type { CanvasColor, InteractiveCanvasObject } from "../state/schema";
+import { useContainerColor } from "./section/section-depth-context";
 import type {
   ObjectButtonBorderPolicy,
   ObjectColorRole,
@@ -17,11 +18,8 @@ import {
   OBJECT_TEXT_COLOR,
   resolveTextSlot,
   slotLineHeightPx,
-  slotNameLineCapacity,
   textPlacementName,
   textSlotClampLineCount,
-  type ResolvedSlotDetail,
-  type SlotTypography,
   type TextSlot,
 } from "./text-slots";
 
@@ -68,10 +66,12 @@ export function resolveObjectRoleColors(
   object: Pick<InteractiveCanvasObject, "color">,
   role: ObjectColorRole,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+  /** The color of the section the object sits in (state/section-depth.ts sectionContainerColorMap). */
+  container: CanvasColor | null = null,
 ): ResolvedObjectColors {
   if (role === "sticky") {
     return {
-      fill: resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).fill,
+      fill: resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle, container).fill,
       border: null,
       text: canvasStyle.textColor,
     };
@@ -80,7 +80,7 @@ export function resolveObjectRoleColors(
     const section = resolveSectionColors(object.color ?? FIRST_USE_COLORS.section);
     return { fill: section.tint, border: section.chip.fill, text: OBJECT_TEXT_COLOR };
   }
-  const shape = resolveShapePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle);
+  const shape = resolveShapePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, container);
   return { fill: shape.fill, border: shape.border, text: shape.text };
 }
 
@@ -117,8 +117,9 @@ export function objectStyle(
   colorRole: ObjectColorRole = "shape",
   buttonBorder: ObjectButtonBorderPolicy = "painted",
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+  container: CanvasColor | null = null,
 ): CSSProperties {
-  const colors = resolveObjectRoleColors(object, colorRole, canvasStyle);
+  const colors = resolveObjectRoleColors(object, colorRole, canvasStyle, container);
   const borderWidth = resolveObjectBorderWidth(object, colorRole, buttonBorder, undefined, canvasStyle);
   return {
     left: `${object.geometry.x}px`,
@@ -181,6 +182,7 @@ export function ObjectShell({
   style?: CSSProperties;
 }) {
   const canvasStyle = useCanvasStyle();
+  const container = useContainerColor(object.id);
   return (
     <button
       type="button"
@@ -199,8 +201,8 @@ export function ObjectShell({
       aria-label={object.text || object.type}
       style={
         style
-          ? { ...objectStyle(object, colorRole, buttonBorder, canvasStyle), ...style }
-          : objectStyle(object, colorRole, buttonBorder, canvasStyle)
+          ? { ...objectStyle(object, colorRole, buttonBorder, canvasStyle, container), ...style }
+          : objectStyle(object, colorRole, buttonBorder, canvasStyle, container)
       }
       onClick={(event) => {
         event.stopPropagation();
@@ -226,73 +228,16 @@ const SLOT_JUSTIFY: Record<TextSlot["verticalAlign"], CSSProperties["justifyCont
 };
 
 /**
- * The detail line's inline style (contract §4): one line in the detail
- * font, ellipsized at the slot width, `gapPx` under the name block (no gap
- * when there is no name above it).
- */
-export function detailLineStyle(
-  detail: ResolvedSlotDetail,
-  textAlign: SlotTypography["textAlign"],
-  gap = true,
-): CSSProperties {
-  const { typography } = detail;
-  return {
-    display: "block",
-    width: "100%",
-    flexShrink: 0,
-    ...(gap ? { marginTop: `${detail.gapPx}px` } : null),
-    overflow: "hidden",
-    whiteSpace: "nowrap",
-    textOverflow: "ellipsis",
-    fontFamily: typography.fontFamily,
-    fontSize: `${typography.fontSizePx}px`,
-    fontWeight: typography.fontWeight,
-    lineHeight: `${typography.lineHeightPx}px`,
-    textAlign,
-    color: typography.color,
-  };
-}
-
-/**
- * The detail line under a slot's name. Rendered by the at-rest slot text and
- * by the in-place name editor (stage/editor/features/text-editing), so the
- * line holds still while the name above it is edited.
- */
-export function SlotDetailLine({
-  detail,
-  textAlign,
-  gap = true,
-}: {
-  detail: ResolvedSlotDetail;
-  textAlign: SlotTypography["textAlign"];
-  gap?: boolean;
-}) {
-  return (
-    <span
-      className="interactive-canvas-object-detail"
-      data-canvas-text-detail=""
-      style={detailLineStyle(detail, textAlign, gap)}
-    >
-      {detail.text}
-    </span>
-  );
-}
-
-/**
  * At-rest slot text (D3/D6): renders `object.text` absolutely positioned at
  * the def's resolved text-slot rect with the slot's typography. The in-place
  * editor (stage/editor/features/text-editing) positions and styles itself from the
  * SAME resolved slot, so editing is WYSIWYG for every kind that renders
  * through this component (D14).
  *
- * Plain slot text carries the object's detail line under the name when the
- * resolved slot has one: in a centered slot the name and the detail center
- * as one block, and the name's line clamp gives up lines to keep the detail
- * (slotNameLineCapacity); in the below band the detail follows the name.
+ * A node shows its name only: a stored `detail` (older boards) never paints.
  *
  * `children` overrides the default plain-text rendering (sticky passes its
- * markdown lines) while keeping the shared rect/typography plumbing; it
- * never carries a detail line.
+ * markdown lines) while keeping the shared rect/typography plumbing.
  */
 export function ObjectSlotText({
   object,
@@ -323,13 +268,9 @@ export function ObjectSlotText({
   const borderInset = resolveObjectBorderWidth(object, colorRole, buttonBorder, undefined, canvasStyle);
   const placementName = textPlacementName(slot.placement);
   const isBelowPlacement = placementName === "below";
-  const plainText = children === undefined;
-  const detail = plainText ? resolved.detail : null;
-  const hasName = !plainText || object.text !== "";
+  const hasName = children !== undefined || object.text !== "";
   const clampLineHeightPx = slotLineHeightPx(typography);
-  const clampLines = detail
-    ? slotNameLineCapacity(resolved)
-    : textSlotClampLineCount(rect.height, clampLineHeightPx);
+  const clampLines = textSlotClampLineCount(rect.height, clampLineHeightPx);
   const shouldClampContent = !isBelowPlacement && (children === undefined || clampChildrenToSlot);
   const clampMaxHeightPx = clampLines * clampLineHeightPx;
   const labelRef = useRef<HTMLSpanElement | null>(null);
@@ -352,7 +293,7 @@ export function ObjectSlotText({
   }, [shouldClampContent, clampLines, clampMaxHeightPx]);
 
   if (resolved.hidden) return null;
-  if (!hasName && !detail) return null;
+  if (!hasName) return null;
   return (
     <span
       className="interactive-canvas-object-text-slot"
@@ -371,36 +312,33 @@ export function ObjectSlotText({
         zIndex: 1,
       }}
     >
-      {hasName ? (
-        <span
-          ref={labelRef}
-          className={className ? `interactive-canvas-object-label ${className}` : "interactive-canvas-object-label"}
-          style={{
-            display: shouldClampContent ? "-webkit-box" : "block",
-            width: "100%",
-            whiteSpace: "pre-wrap",
-            overflowWrap: "break-word",
-            overflow: isBelowPlacement ? "visible" : "hidden",
-            ...(shouldClampContent
-              ? {
-                  WebkitBoxOrient: "vertical",
-                  WebkitLineClamp: String(clampLines),
-                  maxHeight: `${clampMaxHeightPx}px`,
-                  textOverflow: "ellipsis",
-                }
-              : null),
-            fontSize: `${typography.fontSizePx}px`,
-            fontWeight: typography.fontWeight,
-            lineHeight: typography.lineHeight,
-            textAlign: typography.textAlign,
-            color: typography.color,
-            ...(typography.fontFamily ? { fontFamily: typography.fontFamily } : null),
-          }}
-        >
-          {children ?? object.text}
-        </span>
-      ) : null}
-      {detail ? <SlotDetailLine detail={detail} textAlign={typography.textAlign} gap={hasName} /> : null}
+      <span
+        ref={labelRef}
+        className={className ? `interactive-canvas-object-label ${className}` : "interactive-canvas-object-label"}
+        style={{
+          display: shouldClampContent ? "-webkit-box" : "block",
+          width: "100%",
+          whiteSpace: "pre-wrap",
+          overflowWrap: "break-word",
+          overflow: isBelowPlacement ? "visible" : "hidden",
+          ...(shouldClampContent
+            ? {
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: String(clampLines),
+                maxHeight: `${clampMaxHeightPx}px`,
+                textOverflow: "ellipsis",
+              }
+            : null),
+          fontSize: `${typography.fontSizePx}px`,
+          fontWeight: typography.fontWeight,
+          lineHeight: typography.lineHeight,
+          textAlign: typography.textAlign,
+          color: typography.color,
+          ...(typography.fontFamily ? { fontFamily: typography.fontFamily } : null),
+        }}
+      >
+        {children ?? object.text}
+      </span>
     </span>
   );
 }

@@ -45,11 +45,18 @@ describe("icon picker previews follow the canvas style", () => {
     expect(container.querySelector("mask")).toBeNull();
   });
 
-  it("fills brand logos with currentColor in glyph style", () => {
-    const container = preview("brand-docker", "figjam");
-    const group = container.querySelector("svg > g")!;
-    expect(group.getAttribute("fill")).toBe("currentColor");
-    expect(group.getAttribute("stroke")).toBe("none");
+  it("previews a brand logo as itself in every style: its brand color in its optical box, no tile", () => {
+    for (const theme of ["figjam", "schematic-dark"] as const) {
+      const container = preview("brand-docker", theme, SOLID);
+      const svg = container.querySelector("svg")!;
+      expect(svg.getAttribute("viewBox")).toBe(resolveIconGlyph("brand-docker", "tabler").viewBox.join(" "));
+      expect(container.querySelector("svg > g")!.getAttribute("fill")).toBe("#2496ED");
+      expect(container.querySelector("rect")).toBeNull();
+      cleanup();
+    }
+    // A full-color mark keeps each shape's own color.
+    const bun = preview("brand-bun", "schematic-light");
+    expect(bun.querySelector('path[fill="#FBF0DF"]')).not.toBeNull();
   });
 
   it("schematic style, auto tile fill: the default 120px icon previews solid; past the solid cap, a tinted tile with the glyph in currentColor", () => {
@@ -84,10 +91,7 @@ describe("icon picker previews follow the canvas style", () => {
     expect(knockout.querySelectorAll("path").length).toBe(tabler.elements.filter((element) => element.kind === "path").length);
   });
 
-  it("knocks a brand logo out of its tile by fill, and gives every preview its own mask id", () => {
-    const container = preview("brand-docker", "schematic-dark", SOLID);
-    expect(container.querySelector("mask > g")!.getAttribute("fill")).toBe("black");
-    cleanup();
+  it("gives every preview its own mask id", () => {
     const entries = ["agent", "database"].map((glyphId) => SHAPE_CATALOG_ENTRIES.find((candidate) => candidate.icon === glyphId)!);
     const [First, Second] = entries.map((entry) => shapeCatalogPreview(entry));
     const both = render(

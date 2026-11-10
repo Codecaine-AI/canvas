@@ -179,7 +179,6 @@ describe("inscribedTextRect", () => {
       y2: number;
     }> = [
       { type: "predefined-process", x1: width * 0.047 + 10, x2: width - (width * 0.047 + 10), y1: 12, y2: height - 12 },
-      { type: "octagon", x1: width * 0.19, x2: width * 0.81, y1: height * 0.19, y2: height * 0.81 },
     ];
 
     for (const testCase of cases) {
@@ -223,6 +222,42 @@ describe("outlinePolygon: the universal shape core", () => {
     const object = shapeObject("octagon");
     const polygon = outlinePolygon(object);
     expect(polygon.length).toBe(8);
+  });
+
+  it("draws a stretched octagon box as a regular octagon centered in it, its text band inside", () => {
+    // Board 04's cancel stop sign: a 280×120 octagon box.
+    const object = shapeObject("octagon", { geometry: { x: 0, y: 0, width: 280, height: 120 } });
+    const polygon = outlinePolygon(object);
+    const sides = polygon.map((point, index) => {
+      const next = polygon[(index + 1) % polygon.length]!;
+      return Math.hypot(next.x - point.x, next.y - point.y);
+    });
+    for (const side of sides) expect(side).toBeCloseTo(sides[0]!, 6);
+    const xs = polygon.map((point) => point.x);
+    const ys = polygon.map((point) => point.y);
+    expect((Math.min(...xs) + Math.max(...xs)) / 2).toBeCloseTo(140, 6);
+    expect((Math.min(...ys) + Math.max(...ys)) / 2).toBeCloseTo(60, 6);
+    expect(Math.max(...xs) - Math.min(...xs)).toBeCloseTo(Math.max(...ys) - Math.min(...ys), 6);
+
+    // Every corner of the text band lies inside the drawn (convex) octagon.
+    const band = inscribedTextRect(object)!;
+    const inside = (x: number, y: number) =>
+      polygon.every((point, index) => {
+        const next = polygon[(index + 1) % polygon.length]!;
+        return (next.x - point.x) * (y - point.y) - (next.y - point.y) * (x - point.x) >= 0;
+      }) ||
+      polygon.every((point, index) => {
+        const next = polygon[(index + 1) % polygon.length]!;
+        return (next.x - point.x) * (y - point.y) - (next.y - point.y) * (x - point.x) <= 0;
+      });
+    for (const [x, y] of [
+      [band.x, band.y],
+      [band.x + band.width, band.y],
+      [band.x, band.y + band.height],
+      [band.x + band.width, band.y + band.height],
+    ] as const) {
+      expect(inside(x, y)).toBe(true);
+    }
   });
 
   it("falls back to the bounding-rect outline for bbox-fallback types, extended for below-slot icon text", () => {
@@ -334,7 +369,7 @@ describe("getConnectionAnchors", () => {
     expect(anchors[3]!.point).toEqual({ x: 130, y: 90 });
   });
 
-  it("keeps glyph side anchors for a detail-only caption", () => {
+  it("an unnamed icon with a stored detail has no caption: its bounds and anchors are the tile's", () => {
     const object = shapeObject("icon", {
       icon: "database",
       text: "",
@@ -345,7 +380,8 @@ describe("getConnectionAnchors", () => {
     const anchors = getConnectionAnchors(object);
 
     // Default (schematic) tile style: the glyph box is the 56px tile centered in the 64px box.
-    expect(bounds.height).toBeGreaterThan(object.geometry.height);
+    expect(bounds).toEqual(connectionBoundsForObject({ ...object, detail: undefined }));
+    expect(bounds.height).toBe(56);
     expect(bounds.x).toBe(4);
     expect(bounds.width).toBe(56);
     expect(anchors[0]!.point).toEqual({ x: 32, y: 4 });

@@ -1,14 +1,16 @@
 /**
  * Creation defaults — the size and color a PLACED object lands at.
  *
- * `place_shape` and `place_sticky` carry no size and no color parameters at
- * all (docs/10-system-design/70-agent-tool-surface/20-gestures §Place: "only the pick
+ * `place_shape` and `place_sticky` carry no size parameter at all
+ * (docs/10-system-design/70-agent-tool-surface/20-gestures §Place: "only the pick
  * and the click"; the numbers themselves are
  * docs/10-system-design/70-agent-tool-surface/30-grid-and-defaults), so
  * these numbers are load-bearing, not a convenience: they are the entire
  * answer to "how big is a new node". The agent never reasons about size at
  * placement; sizing afterward is `resize` / `match_size`, and spacing is
- * `space_out` — deliberate steps like everything else.
+ * `space_out` — deliberate steps like everything else. `place_shape` may
+ * carry a color since climb round 4 (one call per node instead of three);
+ * the color here is what it lands in when the call names none.
  *
  * WHERE THE NUMBERS COME FROM (plan D5). Two rules, applied in order:
  *
@@ -32,7 +34,8 @@
  * Recoloring afterward is its own gesture (`change_color`).
  */
 import { FIRST_USE_COLORS } from "../../state/actions";
-import type { CanvasColor } from "../../state/schema";
+import type { CanvasColor, InteractiveCanvasObjectType } from "../../state/schema";
+import { naturalAspectOf } from "../../objects/natural-aspect";
 
 import { preferredObjectColor } from "../../objects/registry";
 
@@ -64,7 +67,7 @@ function toGrid(value: number): number {
   return Math.max(AGENT_GRID, Math.round(value / AGENT_GRID) * AGENT_GRID);
 }
 
-/** A placed icon's width: room for a one-fact detail under the glyph. */
+/** A placed icon's width: room for its name caption under the glyph. */
 const ICON_WIDTH = 300;
 
 /**
@@ -104,9 +107,9 @@ export const CREATION_DEFAULTS: Readonly<Record<CreationKind, CreationDefault>> 
 
   // Icons — 300 wide, OBJECT_TYPE_DEFAULTS.icon's 120 tall. An icon is a
   // glyph with its text captioned beneath, and the caption band is as wide as
-  // the box (at least 200px), so the UI's 120×120 cut any detail past about 23
-  // characters. 300 holds about 35, the width the research board's icons were
-  // resized to before they linted clean. The glyph keeps its own size, centered.
+  // the box (at least 200px), so the UI's 120×120 wrapped a name past about
+  // 23 characters. 300 holds about 35 on one line, the width the research
+  // board's icons were resized to before they linted clean. The glyph keeps its own size, centered.
   icon: {
     size: {
       width: ICON_WIDTH,
@@ -146,5 +149,20 @@ export function creationDefaultFor(
 ): CreationDefault {
   const byKind = CREATION_DEFAULTS[creationKindFor(kindOrType)];
   const preferred = preferredObjectColor(kindOrType);
-  return preferred === undefined ? byKind : { size: byKind.size, color: preferred };
+  const size = fixedAspectSize(kindOrType) ?? byKind.size;
+  return { size, color: preferred ?? byKind.color };
+}
+
+/**
+ * A fixed-aspect type (natural-aspect.ts: the octagon) is placed at its UI
+ * default width on the grid, at its own ratio, not at the 280×100 node box
+ * it would only grow out of.
+ */
+function fixedAspectSize(kindOrType: string): CreationDefault["size"] | undefined {
+  if (!(kindOrType in OBJECT_TYPE_DEFAULTS)) return undefined;
+  const type = kindOrType as InteractiveCanvasObjectType;
+  const aspect = naturalAspectOf({ type });
+  if (aspect === null) return undefined;
+  const width = toGrid(OBJECT_TYPE_DEFAULTS[type].geometry.width);
+  return { width, height: toGrid(width / aspect) };
 }

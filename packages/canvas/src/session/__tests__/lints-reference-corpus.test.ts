@@ -1,10 +1,7 @@
 /** Reference boards calibrate lint changes; they are not exempt from real defects.
- * Same-hue regions are judged visually. Crowding checks visible box separation;
- * rendered wire and label obstructions retain their dedicated checks.
+ * The lints are covered-content (box on box, section on section) and
+ * integrity (what bypassed the automatic fixes).
  * Count ceilings catch unexpected expansion, not correctness of each finding.
- * They count the findings that block a finalize; notes (text within a pixel of
- * its box edge, characters the bundled fonts lack) never block and are pinned
- * separately.
  */
 import { describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
@@ -18,28 +15,31 @@ const CORPUS_DIR = join(import.meta.dir, "..", "..", "..", "..", "..", "canvases
 
 /**
  * Measured ceilings; inspect individual findings before changing these.
- * The text-convention rules (label-is-prose, detail-too-long) judge only text
- * an agent wrote in its session, and these boards are people's own work read
- * with no session, so those rules never contribute here.
+ * Re-measured when the lints were cut to overlap only (covered-content):
+ * no reference board has a box on a box or a section on a section. Then
+ * integrity was added: bubba-voice's rect-prompt-code holds 34 wrapped
+ * lines in a box with room for 29, saved before nodes auto-sized. Then
+ * integrity began reporting a section in its parent's color: bubba-voice's
+ * gray section-ml-completed-sent sits in the gray section-ml-session-tasks.
+ * Then integrity began reporting touching sibling sections in one color:
+ * v2-flow's yellow card-question-1 and -2. And a section painted the hue of
+ * a node it holds: gc-decomp-harness colors each of six sections like its
+ * own nodes (hero blue, board teal, score-gate violet, pr orange, knowledge
+ * pink, health red), ink-diagrams' blue input and output adapters hold blue
+ * nodes, and v2-flow's blue section holds a blue node.
  */
 const CEILING: Record<string, number> = {
-  "agent-flows-2": 2,
-  // 1 → 2 with the schematic 17.5px names: rect-prompt-code's 34-line XML
-  // prompt no longer fits its 800×640 box (29 lines of 21px) — a real clip.
+  "agent-flows-2": 0,
   "bubba-voice": 2,
   "claude-code-researcher": 0,
-  "gc-decomp-harness": 13,
-  "ink-diagrams": 17,
-  "intent-classification-1": 1,
+  "gc-decomp-harness": 6,
+  "ink-diagrams": 2,
+  "intent-classification-1": 0,
   "intent-classification-2": 0,
-  // 1 → 2 with the schematic 56px icon-tile cap: chip-generate-transition-response's
-  // left anchor moved onto its (now centered, smaller) tile, which pulls the router's
-  // mid-elbow leg to 3.7px from `section`'s left border for 447px — a real
-  // border-hugging route, not a measurement artifact.
   "v2-flow": 2,
 };
 
-const TOTAL_CEILING = 35;
+const TOTAL_CEILING = 12;
 
 function corpus(): { name: string; document: InteractiveCanvasDocument }[] {
   return readdirSync(CORPUS_DIR)
@@ -69,30 +69,8 @@ describe("lint calibration against the reference corpus", () => {
     }
   });
 
-  test("its notes only say what cannot be promised: estimated glyphs and edge-of-box fits", () => {
-    const notes = corpus().flatMap((entry) =>
-      findings(entry.document)
-        .filter((finding) => finding.severity === "note")
-        .map((finding) => ({ board: entry.name, rule: finding.rule, message: finding.message })),
-    );
-    // claude-code-researcher's directory tree draws └ ─ ├, which Inter lacks.
-    expect(notes).toContainEqual(expect.objectContaining({ board: "claude-code-researcher", rule: "clipped-text" }));
-    for (const note of notes) expect(note.message).toMatch(/estimated:|can't promise/);
-  });
-
   test("the corpus total stays within its ceiling", () => {
     const total = corpus().reduce((sum, entry) => sum + findingCount(entry.document), 0);
     expect(total).toBeLessThanOrEqual(TOTAL_CEILING);
-  });
-
-  test("crowding findings describe near-touching boxes on either axis", () => {
-    for (const { document } of corpus()) {
-      for (const rule of LAYOUT_RULES.filter(rule => rule.id === "crowding")) {
-        for (const finding of rule.check(document)) {
-          const gap = Number(/(\d+)px apart/.exec(finding.message)?.[1]);
-          expect(gap).toBeLessThan(16);
-        }
-      }
-    }
   });
 });

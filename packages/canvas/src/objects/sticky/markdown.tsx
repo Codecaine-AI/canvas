@@ -1,15 +1,19 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 import { withAlpha } from "../../theme/color-math";
+import type { StickyPaint } from "../../theme/palette";
+import { codeKind } from "./code-kind";
 import {
   parseStickyMarkdown,
   STICKY_MARKDOWN_MONO_FONT,
   STICKY_MARKDOWN_MONO_FONT_WEIGHT,
+  stickyHeadingEm,
   type StickyMarkdownInlineToken,
   type StickyMarkdownLine,
 } from "./markdown-editing";
+import { STICKY_CODE_FONT_EM } from "./sticky-text";
 
 /**
  * Minimal sticky markdown (D18) — just enough to style sticky text without a
@@ -23,25 +27,16 @@ import {
  * is a heading, a bullet line is a bullet; inline marks apply within either).
  */
 
-export const STICKY_MARKDOWN_LINE_HEIGHT_PX = 36;
-
 /**
- * Headings keep their em-relative font-size hierarchy, but every markdown row
- * uses the sticky body's 36px line pitch so raw-source editing and at-rest
- * markdown share the same deterministic vertical budget.
+ * A heading row's style: its em size under the style's `stickyHeadingScale`
+ * (markdown-editing.ts stickyHeadingEm), bold. No line height of its own:
+ * every row inherits the slot's px line box (CanvasStyle.stickyLineHeightPx),
+ * so raw-source editing and at-rest markdown share one vertical budget.
+ * Shared by the at-rest renderer and the live editor.
  */
-export const STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX: Record<1 | 2 | 3, number> = {
-  1: STICKY_MARKDOWN_LINE_HEIGHT_PX,
-  2: STICKY_MARKDOWN_LINE_HEIGHT_PX,
-  3: STICKY_MARKDOWN_LINE_HEIGHT_PX,
-};
-
-/** em-relative heading sizes so headings scale with the slot's body typography. */
-const HEADING_STYLE: Record<1 | 2 | 3, { fontSize: string; lineHeight: string }> = {
-  1: { fontSize: "1.5em", lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[1]}px` },
-  2: { fontSize: "1.25em", lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[2]}px` },
-  3: { fontSize: "1.1em", lineHeight: `${STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX[3]}px` },
-};
+export function stickyHeadingStyle(level: 1 | 2 | 3, headingScale: number): CSSProperties {
+  return { fontSize: `${stickyHeadingEm(level, headingScale)}em`, fontWeight: 700 };
+}
 
 type StickyMarkdownLineAttrs = {
   "data-line-depth": string;
@@ -74,9 +69,8 @@ export function stickyMarkdownLineAttrs(line: StickyMarkdownLine): StickyMarkdow
 export const STICKY_STRONG_STYLE = { fontFamily: "inherit" } as const;
 
 /**
- * Inline `code` chip tint: the sticky's text color at this alpha. Card
- * stickies tint with their own text color (def.tsx CARD_STICKY_GEOMETRY.
- * codeChipAlpha reads it here: def.tsx imports this module, not the reverse).
+ * Inline `code` chip tint on a paper sticky: the text color at this alpha.
+ * Card stickies take their sticky paint's codeChip (theme/palette.ts).
  */
 export const STICKY_CODE_CHIP_ALPHA = 0.08;
 
@@ -84,16 +78,22 @@ export const STICKY_CODE_CHIP_ALPHA = 0.08;
 export const STICKY_CODE_CHIP_BACKGROUND = withAlpha(FIGJAM_CANVAS_STYLE.textColor, STICKY_CODE_CHIP_ALPHA);
 
 /**
- * Inline `code` chip corner radius: FigJam board art, shared by the at-rest
+ * Inline `code` chip corner radius: 2px like every board corner, shared by the at-rest
  * chip here and the live editor's chip (MarkdownSlotTextEditor) so both
  * draw the same box.
  */
-export const STICKY_CODE_CHIP_RADIUS = "3px";
+export const STICKY_CODE_CHIP_RADIUS = "2px";
+
+/** How inline `code` paints: the chip body, and the text color per kind (null: the body text color). */
+interface StickyCodePaint {
+  background: string;
+  text: StickyPaint["codeText"];
+}
 
 /** Inline pass: `**bold**` and `` `code` `` (no nesting), from the shared D18 tokens. */
 function renderInline(
   tokens: readonly StickyMarkdownInlineToken[],
-  codeBackground: string,
+  code: StickyCodePaint,
 ): ReactNode[] {
   return tokens.map((token) => {
     if (token.kind === "text") return token.leaf.text;
@@ -110,8 +110,9 @@ function renderInline(
         style={{
           fontFamily: STICKY_MARKDOWN_MONO_FONT,
           fontWeight: STICKY_MARKDOWN_MONO_FONT_WEIGHT,
-          fontSize: "0.85em",
-          background: codeBackground,
+          fontSize: `${STICKY_CODE_FONT_EM}em`,
+          background: code.background,
+          ...(code.text ? { color: code.text[codeKind(token.content.text)] } : null),
           borderRadius: STICKY_CODE_CHIP_RADIUS,
           padding: "0 0.15em",
         }}
@@ -122,7 +123,7 @@ function renderInline(
   });
 }
 
-function renderLine(line: StickyMarkdownLine, codeBackground: string): ReactNode {
+function renderLine(line: StickyMarkdownLine, code: StickyCodePaint, headingScale: number): ReactNode {
   if (line.kind === "heading") {
     const level = line.headingLevel!;
     return (
@@ -132,9 +133,9 @@ function renderLine(line: StickyMarkdownLine, codeBackground: string): ReactNode
         className="interactive-canvas-sticky-line"
         data-heading={level}
         {...stickyMarkdownLineAttrs(line)}
-        style={{ ...HEADING_STYLE[level], fontWeight: 700 }}
+        style={stickyHeadingStyle(level, headingScale)}
       >
-        {renderInline(line.inline, codeBackground)}
+        {renderInline(line.inline, code)}
       </span>
     );
   }
@@ -147,22 +148,28 @@ function renderLine(line: StickyMarkdownLine, codeBackground: string): ReactNode
     >
       {/* A blank line keeps its line box (nbsp) so at-rest paragraph spacing
           matches the raw-source line count the editor shows (D14). */}
-      {line.placeholder ? line.placeholder.text : renderInline(line.inline, codeBackground)}
+      {line.placeholder ? line.placeholder.text : renderInline(line.inline, code)}
     </span>
   );
 }
 
 /**
  * Renders sticky `text` as the D18 markdown line stack. `codeBackground`
- * tints inline `code` chips (a card sticky passes its text color at low
- * alpha so chips read on a dark card too).
+ * tints inline `code` chips (a card sticky passes its paint's codeChip), and
+ * `codeText` colors each chip's text by its kind (StickyPaint.codeText).
  */
 export function StickyMarkdown({
   text,
   codeBackground = STICKY_CODE_CHIP_BACKGROUND,
+  codeText = null,
+  headingScale = 1,
 }: {
   text: string;
   codeBackground?: string;
+  codeText?: StickyPaint["codeText"];
+  /** CanvasStyle.stickyHeadingScale (1 = the full heading scale). */
+  headingScale?: number;
 }) {
-  return <>{parseStickyMarkdown(text).lines.map((line) => renderLine(line, codeBackground))}</>;
+  const code = { background: codeBackground, text: codeText };
+  return <>{parseStickyMarkdown(text).lines.map((line) => renderLine(line, code, headingScale))}</>;
 }

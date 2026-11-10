@@ -22,6 +22,10 @@
       "children": [
         "b-section-body-2",
         "b-section-frame-3",
+        "b-section-color-6",
+        "b-section-color-refuse-8",
+        "b-section-color-pick-7",
+        "b-section-color-pool-9",
         "b-section-code-4",
         "b-section-canvas-5"
       ]
@@ -111,7 +115,84 @@
       "props": {},
       "text": [
         {
-          "insert": "On the live board, the section's text renders as the title in its header chip. An optional icon, which can be any glyph, opens the chip, and an optional one-fact detail closes it. The chip is not a separate object. Give the title and content clear air, and repeat one deliberate gap through each group. A section keeps exactly the geometry it is given. When the region is finished, fit_section closes that one section around the children already inside it and leaves every other section alone. Sections do the grouping: every idea has a home, and each section is an addressable, linkable unit. Nest sections for hierarchy."
+          "insert": "On the live board, the section's text renders as the title in its header chip. An optional icon, which can be any glyph, opens the chip, and a section has no detail line. The chip is not a separate object. Give the title and content clear air, and repeat one deliberate gap through each group. A section keeps exactly the geometry it is given. When the region is finished, fit_section closes that one section around the children already inside it and leaves every other section alone. Sections do the grouping: every idea has a home, and each section is an addressable, linkable unit. Nest sections for hierarchy."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-6": {
+      "id": "b-section-color-6",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A section must not paint the ink or fill of its parent section or of a sibling it touches. A section that holds nodes of several hues must not paint one of them. A category section, whose nodes that are not gray or white all share one hue, can paint that hue. The page ("
+        },
+        {
+          "insert": "page-frame",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", or a parentless white section) is the parent of top-level sections. Siblings touch when their edges are closer than one gutter (48px) and part of the gap is clear of other siblings."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-refuse-8": {
+      "id": "b-section-color-refuse-8",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "An agent edit that adds, removes, recolors, reparents, moves or resizes a section is refused when it makes a new break. An edit that changes only nodes is never refused for a section's color, such as a green node placed in a blue category section. The "
+        },
+        {
+          "insert": "integrity",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lint reports each break left on the board with a suggested color, and no tool recolors the section."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-pick-7": {
+      "id": "b-section-color-pick-7",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "place_section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and Studio give a section without a color one that keeps these rules. "
+        },
+        {
+          "insert": "clone",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and Studio's duplicate and paste keep the source's color first, while it keeps the rules. A category section with no kept color gets its category's hue when that hue keeps them, even past the cap."
+        }
+      ],
+      "children": []
+    },
+    "b-section-color-pool-9": {
+      "id": "b-section-color-pool-9",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Otherwise the chooser tries gray, blue, violet, green, then teal, and skips the hues of the board's nodes and wires. It keeps a board to three section hues besides gray, category hues included. It does not put teal beside a touching blue or green section while another hue fits. Studio's last-picked section color wins only when it passes these same limits. Past that, the chooser repeats the hue of the farthest sibling the section does not touch, a cool hue first. Warm hues come last."
         }
       ],
       "children": []

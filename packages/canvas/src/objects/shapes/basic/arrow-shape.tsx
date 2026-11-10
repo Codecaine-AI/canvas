@@ -5,6 +5,7 @@ import { ARROW_SHAPE_OUTLINE, ARROW_SHAPE_GEOMETRY, arrowShapePoints } from "../
 import { CENTER_TEXT_INSET_PX, rectTextSlot, type LocalRect } from "../../text-slots";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+import { resolveTrueOutlineStrokeWidth } from "../../../theme/tokens";
 import type { InteractiveCanvasObject } from "../../../state/schema";
 
 function pointsAttribute(points: CanvasPoint[]): string {
@@ -45,7 +46,7 @@ export const arrowShapeShapeDef: ShapeDef = {
   outline: ARROW_SHAPE_OUTLINE,
   silhouette: {
     className: "interactive-canvas-object-arrow-shape",
-    silhouette: ({ object, colors, strokeWidth }) => {
+    silhouette: ({ object, colors, strokeWidth, canvasStyle }) => {
       const direction: "left" | "right" = object.direction === "left" ? "left" : "right";
       const points = pointsAttribute(
         arrowShapePoints({ x: 0, y: 0, width: object.geometry.width, height: object.geometry.height }, direction),
@@ -63,7 +64,7 @@ export const arrowShapeShapeDef: ShapeDef = {
             points={points}
             fill={colors.fill}
             stroke={colors.border}
-            strokeWidth={strokeWidth}
+            strokeWidth={resolveTrueOutlineStrokeWidth(strokeWidth, canvasStyle)}
             strokeLinejoin="round"
           />
         </svg>

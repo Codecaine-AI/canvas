@@ -7,10 +7,9 @@ import type { CanvasBounds } from "../../state/geometry";
 import type { InteractiveCanvasObject } from "../../state/schema";
 import { CANVAS_MONO_FONT_STACK } from "../../theme/fonts";
 import { useCanvasStyle } from "../../theme/canvas-style-context";
-import type { IconGlyphElement } from "../shapes/icon/icon-glyphs";
+import { iconGlyphTransform, type IconGlyphElement } from "../shapes/icon/icon-glyphs";
 import {
   TITLE_CHIP,
-  TITLE_CHIP_DETAIL,
   TITLE_CHIP_ICON,
   titleChipIconDrawing,
   titleChipLayout,
@@ -52,6 +51,7 @@ function chipThemeStyle(layout: TitleChipLayout, headerText: string): CSSPropert
   }
   const font = layout.title.font;
   if (font.font === "mono") style.fontFamily = CANVAS_MONO_FONT_STACK;
+  if (layout.boardTitle) style.borderWidth = 0;
   if (font.fontSizePx !== TITLE_CHIP.fontSizePx) style.fontSize = `${font.fontSizePx}px`;
   if (font.fontWeight !== TITLE_CHIP.fontWeight) style.fontWeight = font.fontWeight;
   if (headerText !== TITLE_CHIP.textColor) style.color = headerText;
@@ -60,28 +60,15 @@ function chipThemeStyle(layout: TitleChipLayout, headerText: string): CSSPropert
   return style;
 }
 
-/** The detail run: the header font at regular weight, muted, never uppercased or tracked. */
-function detailStyle(layout: TitleChipLayout, headerDetail: string): CSSProperties {
-  const font = layout.title.font;
-  return {
-    marginLeft: `${TITLE_CHIP_DETAIL.gapPx}px`,
-    color: headerDetail,
-    fontWeight: TITLE_CHIP_DETAIL.fontWeight,
-    ...(font.letterSpacingEm !== 0 ? { letterSpacing: "normal" } : null),
-    ...(font.uppercase ? { textTransform: "none" as const } : null),
-  };
-}
-
 function glyphElement(element: IconGlyphElement, key: number) {
-  if (element.kind === "path") return <path key={key} d={element.d} />;
-  if (element.kind === "circle") return <circle key={key} cx={element.cx} cy={element.cy} r={element.r} />;
+  if (element.kind === "path") return <path key={key} d={element.d} fill={element.fill} />;
+  if (element.kind === "circle") return <circle key={key} cx={element.cx} cy={element.cy} r={element.r} fill={element.fill} />;
   return <line key={key} x1={element.x1} y1={element.y1} x2={element.x2} y2={element.y2} />;
 }
 
-/** The header icon: a 16px tile (or bare glyph) leading the chip — same primitives the static renderer draws. */
+/** The header icon: a 16px bare glyph leading the chip — same primitives the static renderer draws. */
 export function TitleChipIcon({ id, drawing }: { id: string; drawing: TitleChipIconDrawing }) {
-  const { tile, glyph } = drawing;
-  const tileInset = tile?.border ? tile.borderWidthPx / 2 : 0;
+  const { glyph } = drawing;
   const stroked = glyph.paint === "stroke";
   return (
     <svg
@@ -92,20 +79,8 @@ export function TitleChipIcon({ id, drawing }: { id: string; drawing: TitleChipI
       viewBox={`0 0 ${drawing.sizePx} ${drawing.sizePx}`}
       style={{ display: "block", flexShrink: 0, marginRight: `${TITLE_CHIP_ICON.gapPx}px`, overflow: "visible" }}
     >
-      {tile ? (
-        <rect
-          x={tileInset}
-          y={tileInset}
-          width={drawing.sizePx - tileInset * 2}
-          height={drawing.sizePx - tileInset * 2}
-          rx={Math.max(0, tile.radiusPx - tileInset)}
-          fill={tile.fill}
-          stroke={tile.border ?? undefined}
-          strokeWidth={tile.border ? tile.borderWidthPx : undefined}
-        />
-      ) : null}
       <g
-        transform={`translate(${glyph.offsetPx} ${glyph.offsetPx}) scale(${glyph.sizePx / glyph.viewBoxSize})`}
+        transform={iconGlyphTransform(glyph, glyph.offsetPx, glyph.offsetPx, glyph.sizePx)}
         fill={stroked ? "none" : glyph.color}
         stroke={stroked ? glyph.color : "none"}
         strokeWidth={stroked ? glyph.strokeWidth : undefined}
@@ -119,7 +94,7 @@ export function TitleChipIcon({ id, drawing }: { id: string; drawing: TitleChipI
 }
 
 /**
- * A section's title chip — `[icon] TITLE  detail` (objects/section/
+ * A section's title chip — `[icon] TITLE` (objects/section/
  * title-chip-layout.ts): floating inset in the corner, or pinned flush into
  * it (the frame is its top and left edge); counter-scaled when zoomed out,
  * ellipsized at the section's inner width. Colors come from the section
@@ -151,7 +126,8 @@ export function SectionTitleChip({
       style={{
         left: `${section.geometry.x + box.x}px`,
         top: `${section.geometry.y + box.y}px`,
-        background: paint.chipFill,
+        // The board title is a heading on the page, not a tab.
+        background: layout.boardTitle ? "transparent" : paint.chipFill,
         borderColor: paint.chipBorder,
         maxWidth: `${titleChipMaxWidthPx(section.geometry.width, scale)}px`,
         pointerEvents: "auto",
@@ -174,14 +150,7 @@ export function SectionTitleChip({
       }}
     >
       {icon && layout.icon ? <TitleChipIcon id={layout.icon.id} drawing={icon} /> : null}
-      <span>
-        {section.text}
-        {layout.detail ? (
-          <span data-canvas-section-detail="" style={detailStyle(layout, paint.headerDetail)}>
-            {layout.detail.text}
-          </span>
-        ) : null}
-      </span>
+      <span>{section.text}</span>
     </span>
   );
 }

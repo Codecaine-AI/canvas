@@ -30,17 +30,29 @@ import { iconTileRectPx, type LocalRect } from "../../text-slots";
 
 export const ICON_TILE = {
   /** Tile corner radius, px. */
-  cornerRadiusPx: 3,
-  /** Glyph inset from each tile edge, as a fraction of the tile side (≈ the mockups' 10px on a 44px tile). */
-  glyphInsetRatio: 0.22,
+  cornerRadiusPx: 2,
+  /**
+   * Glyph inset from each tile edge, as a fraction of the tile side: 0.2
+   * (11px on the 56px tile). At 0.22 the line glyphs read small inside their
+   * tiles (stage A round 9: opus on 'CLI', 'Grader' and 'Branch').
+   */
+  glyphInsetRatio: 0.2,
+  /**
+   * A brand mark's inset. Its glyph box is larger because a brand viewBox
+   * already pads the mark to one optical size (tools/dev-icons/generate.ts
+   * brandViewBox): a square logo lands near an outline glyph's size, and a
+   * wide one (Go) gets the room to match it.
+   */
+  brandGlyphInsetRatio: 0.14,
   /** Largest glyph a tile carries, px: beyond it the glyph stays this size, centered. */
   maxGlyphPx: 56,
   /**
    * The box size whose `iconGlyphStrokeWidthForViewBox` weight every tile
-   * glyph strokes with, in its own glyph units: ≈1.76 units on Tabler's
-   * 24-unit grid (the mockups' 1.75), 1.32 on Nucleo's 18-unit grid.
+   * glyph strokes with, in its own glyph units. 56 (was 64, the mockups'
+   * 1.75 units on Tabler's 24-unit grid): the thinner line glyphs read thin
+   * on their pastel tiles (stage A round 9: opus on ten line icons).
    */
-  strokeReferencePx: 64,
+  strokeReferencePx: 56,
 } as const;
 
 export interface IconTileLayout {
@@ -53,13 +65,20 @@ export interface IconTileLayout {
 /**
  * The tile square (min(width, height, maxSidePx), centered — the style's
  * `iconTileMaxPx`; uncapped when omitted) and the glyph box centered inside
- * it: min(side × (1 − 2 × glyphInsetRatio), maxGlyphPx). Tile borders paint
+ * it: min(side × (1 − 2 × inset), maxGlyphPx), the inset being
+ * brandGlyphInsetRatio for a brand `glyph`, else glyphInsetRatio. Tile borders paint
  * inside the tile edge, so they never move the glyph.
  */
-export function iconTileLayout(width: number, height: number, maxSidePx?: number): IconTileLayout {
+export function iconTileLayout(
+  width: number,
+  height: number,
+  maxSidePx?: number,
+  glyph?: Pick<IconGlyphDefinition, "brandColor">,
+): IconTileLayout {
   const tile = iconTileRectPx(width, height, maxSidePx);
   const side = tile.width;
-  const glyphSide = Math.min(Math.max(0, side * (1 - ICON_TILE.glyphInsetRatio * 2)), ICON_TILE.maxGlyphPx);
+  const insetRatio = glyph?.brandColor ? ICON_TILE.brandGlyphInsetRatio : ICON_TILE.glyphInsetRatio;
+  const glyphSide = Math.min(Math.max(0, side * (1 - insetRatio * 2)), ICON_TILE.maxGlyphPx);
   const inset = (side - glyphSide) / 2;
   return {
     tile,

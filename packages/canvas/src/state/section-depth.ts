@@ -1,6 +1,7 @@
 "use client";
 
-import type { InteractiveCanvasObject } from "./schema";
+import type { CanvasColor, InteractiveCanvasObject } from "./schema";
+import { FIRST_USE_COLORS } from "./schema/object-defaults";
 
 /**
  * Nesting depth per object: 1 + the number of SECTION ancestors on its
@@ -31,4 +32,33 @@ export function sectionDepthMap(
     depths.set(object.id, depth);
   }
   return depths;
+}
+
+/**
+ * Per object: the color pick of its nearest SECTION ancestor (a section with
+ * no stored color takes the section first-use default), or nothing for an
+ * object outside every section. Node and tile paint read it
+ * (theme/palette.ts resolveShapePaint, resolveIconTilePaint): a node of its
+ * container's own hue paints apart from it. Cycle-safe like sectionDepthMap.
+ */
+export function sectionContainerColorMap(
+  objects: readonly Pick<InteractiveCanvasObject, "id" | "type" | "parentId" | "color">[],
+): Map<string, CanvasColor> {
+  const byId = new Map(objects.map((object) => [object.id, object]));
+  const containers = new Map<string, CanvasColor>();
+  for (const object of objects) {
+    const visited = new Set<string>([object.id]);
+    let parentId = object.parentId ?? null;
+    while (parentId && !visited.has(parentId)) {
+      visited.add(parentId);
+      const parent = byId.get(parentId);
+      if (!parent) break;
+      if (parent.type === "section") {
+        containers.set(object.id, parent.color ?? FIRST_USE_COLORS.section);
+        break;
+      }
+      parentId = parent.parentId ?? null;
+    }
+  }
+  return containers;
 }

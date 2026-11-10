@@ -3,7 +3,8 @@
 import { IconShapeBody, type IconShapeBodyColors } from "./IconShapeBody";
 import { FIRST_USE_COLORS, objectTypeDefaults } from "../../../state/schema/object-defaults";
 import { useCanvasStyle } from "../../../theme/canvas-style-context";
-import { resolveIconTilePaint } from "../../../theme/palette";
+import { resolveBrandMarkFill, resolveIconTilePaint } from "../../../theme/palette";
+import { resolveIconGlyph } from "./icon-glyphs";
 import { BBOX_OUTLINE } from "../../geometry";
 import { ObjectShell, ObjectSlotText } from "../../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../../object-def";
@@ -24,19 +25,24 @@ function IconObjectView(props: ObjectRenderProps) {
   // on a tile — solid ink, or a light ink tint for a large tile
   // (theme/palette.ts resolveIconTilePaint, sized by the capped tile side).
   const canvasStyle = useCanvasStyle();
+  // A brand logo keeps its own color (resolveIconTilePaint's brand paint).
   const paint = resolveIconTilePaint(
     object.color ?? FIRST_USE_COLORS.shape,
     canvasStyle,
     iconTileRectPx(object.geometry.width, object.geometry.height, canvasStyle.iconTileMaxPx).width,
+    resolveIconGlyph(object.icon, canvasStyle.iconPack)?.brandColor,
   );
+  const markBackground = paint.tileFill ?? canvasStyle.boardBackground;
+  const markFill = (fill: string) => resolveBrandMarkFill(fill, markBackground, canvasStyle);
   const colors: IconShapeBodyColors =
     paint.tileFill === null
-      ? { stroke: paint.glyph, fill: paint.glyphFill ?? undefined }
+      ? { stroke: paint.glyph, fill: paint.glyphFill ?? undefined, markFill }
       : {
           stroke: paint.glyph,
           tileFill: paint.tileFill,
           tileBorder: paint.tileBorder ?? undefined,
           tileBorderWidthPx: paint.tileBorderWidthPx,
+          markFill,
         };
 
   return (

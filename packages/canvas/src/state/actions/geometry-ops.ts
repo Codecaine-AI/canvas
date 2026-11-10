@@ -8,7 +8,7 @@ import {
   sectionCaptureMembers,
   snapGeometry,
 } from "../geometry";
-import { reconcileSectionMembership } from "../section-membership";
+import { settleSections } from "../section-grow";
 import { selectedObjectIds } from "./helpers";
 import { withHistory } from "./history";
 import type { CanvasAction, InteractiveCanvasState } from "./types";
@@ -118,14 +118,14 @@ export function handleReconcileSectionMembership(
   state: InteractiveCanvasState,
   action: Extract<CanvasAction, { type: "canvas.reconcileSectionMembership" }>,
 ): InteractiveCanvasState {
-  const document = reconcileSectionMembership(state.document);
+  // The end of a drag or resize gesture: membership settles and sections grow
+  // to hold what was dropped in them (state/section-grow.ts).
+  const document = settleSections(state.document);
   if (document === state.document) return state;
 
-  const previousParentById = new Map(
-    state.document.objects.map((object) => [object.id, object.parentId ?? null]),
-  );
+  const previousById = new Map(state.document.objects.map((object) => [object.id, object]));
   const changedObjectIds = document.objects
-    .filter((object) => (previousParentById.get(object.id) ?? null) !== (object.parentId ?? null))
+    .filter((object) => previousById.get(object.id) !== object)
     .map((object) => object.id);
   const lastChange = {
     source: "human" as const,

@@ -5,14 +5,14 @@
 // Structural twin of IconGlyphElement in ./icon-glyphs.ts (kept local to
 // avoid an import cycle — the shapes must stay assignment-compatible).
 type IconGlyphElement =
-  | { kind: "path"; d: string }
-  | { kind: "circle"; cx: number; cy: number; r: number }
+  | { kind: "path"; d: string; fill?: string }
+  | { kind: "circle"; cx: number; cy: number; r: number; fill?: string }
   | { kind: "line"; x1: number; y1: number; x2: number; y2: number };
 
 /** Tabler outline geometry per glyph id — 24-unit grid, stroke paint, bounding-box path stripped. */
 export const TABLER_ICON_GLYPH_ELEMENTS: Record<
   string,
-  { viewBoxSize: number; elements: readonly IconGlyphElement[] }
+  { viewBoxSize: number; viewBox?: readonly [number, number, number, number]; elements: readonly IconGlyphElement[] }
 > = {
   // tabler: activity
   "activity": {

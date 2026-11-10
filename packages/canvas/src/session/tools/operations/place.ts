@@ -10,9 +10,9 @@
  *    the click, and the typing that happens in the same motion — nothing more.
  *    Size and color come from the creation defaults
  *    (../creation-defaults.ts), and every
- *    property beyond the default is its own later gesture. There is no `color`
- *    on `place_shape` because recoloring is `change_color`, not because it was
- *    forgotten.
+ *    property beyond the default is its own later gesture. `place_shape` and
+ *    `place_section` carry an optional `color`, because coloring right after
+ *    placing cost the drawer one call per node and left most frames gray.
  *
  * 2. THE GEOMETRY THAT LANDS IS ON THE AGENT GRID, and the summary reports what
  *    LANDED, not what was asked for (../grid.ts: snap, not reject). A model
@@ -40,12 +40,16 @@
  */
 import type { InteractiveCanvasObject } from "../../../state/schema";
 import { sectionDescendantIds } from "../../../state/geometry";
-import { draftPlacedObject } from "../../../state/schema/object-defaults";
+import type { CanvasColor } from "../../../state/schema/colors";
+import { reconcileSectionMembership } from "../../../state/section-membership";
+import { pickSectionColor } from "../../../board/section-colors";
+import { draftPlacedObject, FIRST_USE_COLORS } from "../../../state/schema/object-defaults";
 
 import { creationDefaultFor } from "../creation-defaults";
-import { detailDroppedNote, storedDetail } from "../detail-line";
 import { NO_GLYPH, isGlyphName, unknownGlyphMessage } from "../glyph-names";
 import { snapPoint, snapSize } from "../grid";
+import { withAutoSize } from "./auto-size";
+import type { OpContext, OpOutcome } from "./op-context";
 import { defineOperationTool } from "./operation-tool";
 import { toDocumentFields } from "../placeable-types";
 import {
@@ -55,6 +59,22 @@ import {
   PlaceShapeParams,
   PlaceStickyParams,
 } from "../schemas";
+
+/**
+ * Place a new node, grow it to fit its text, match it with its row and column
+ * peers (auto-size.ts: centers held), and report the box that LANDED.
+ */
+function placeFitted(
+  ctx: OpContext,
+  id: string,
+  lowered: OpOutcome,
+  summary: (landed: { x: number; y: number; width: number; height: number }) => string,
+): OpOutcome {
+  const outcome = withAutoSize(lowered, [id], ctx.canvasStyle, "center", true);
+  if (outcome.status !== "applied") return outcome;
+  const landed = outcome.draft.objects.find((object) => object.id === id)!.geometry;
+  return { ...outcome, summary: summary(landed) };
+}
 
 /** The applied box, as the summary reports it: `x,y W×H`. */
 function placement(geometry: {
@@ -69,11 +89,14 @@ function placement(geometry: {
 export const placeSection = defineOperationTool({
   name: "place_section",
   description:
-    "Draw a titled frame. Membership is reconciled from geometry, so the frame "
-    + "adopts whatever its edges already cover, and it keeps the footprint it "
-    + "lands with until something fits or resizes it. Undrawn size takes the "
-    + "default section footprint. The header shows the optional icon, the "
-    + "title, and the optional one-fact detail.",
+    "Draw a titled frame, colored in the same call. Membership is reconciled "
+    + "from geometry, so the frame adopts whatever its edges already cover, and "
+    + "it keeps the footprint it lands with until something fits, arranges or "
+    + "resizes it. Undrawn size takes the default section footprint. The header "
+    + "shows the optional icon and the title. Without a color it takes one that "
+    + "paints apart from its parent section, the sections it holds and its "
+    + "sibling sections; a section never shares its parent's or a sibling's "
+    + "color or painted fill.",
   fields: PlaceSectionParams.properties,
   validate: (ctx, p) => [
     ...ctx.requireFreeId(p.id),
@@ -89,27 +112,36 @@ export const placeSection = defineOperationTool({
     const defaults = creationDefaultFor("section");
     const size = snapSize(p.size ?? defaults.size);
     const geometry = { x, y, width: size.width, height: size.height };
-    return ctx.applyLowered(
+    const lower = (color: CanvasColor, summary: string) => ctx.applyLowered(
       {
         type: "addObject",
         object: draftPlacedObject("section", geometry, {
           id: p.id,
           text: p.text,
-          detail: storedDetail(p.detail),
-          color: defaults.color,
+          color,
           ...(p.icon !== undefined && isGlyphName(p.icon) ? { icon: p.icon } : {}),
         }),
       },
-      `place_section ${p.id} ${placement(geometry)}`,
+      summary,
     );
+    const at = `place_section ${p.id} ${placement(geometry)}`;
+    if (p.color) return lower(p.color, `${at} ${p.color}`);
+    // No color named: place it, read the parent and the sections it adopts
+    // from the reconciled tree, and pick a hue none of them nor
+    // its siblings paints, so the hierarchy and the group edges read.
+    const probe = lower(defaults.color, at);
+    if (probe.status !== "applied") return probe;
+    const color = pickSectionColor(reconcileSectionMembership(probe.draft), p.id, ctx.canvasStyle);
+    return lower(color, `${at} ${color}`);
   },
 });
 
 export const placeSticky = defineOperationTool({
   name: "place_sticky",
   description:
-    "Drop a note with its text already on it. Size and color are the defaults — "
-    + "resize or recolor it afterward if the note earns it.",
+    "Drop a note with its text already on it. Width and color are the defaults; on the "
+    + "schematic themes its height is the height its text needs. Resize or recolor it "
+    + "afterward if the note earns it.",
   fields: PlaceStickyParams.properties,
   validate: (ctx, p) => ctx.requireFreeId(p.id),
   apply: (ctx, p) => {
@@ -121,16 +153,22 @@ export const placeSticky = defineOperationTool({
       width: defaults.size.width,
       height: defaults.size.height,
     };
-    return ctx.applyLowered(
-      {
-        type: "addObject",
-        object: draftPlacedObject("sticky", geometry, {
-          id: p.id,
-          text: p.text,
-          color: defaults.color,
-        }),
-      },
-      `place_sticky ${p.id} ${placement(geometry)}`,
+    // A card note lands at the height its text needs (auto-size.ts rule 0).
+    return placeFitted(
+      ctx,
+      p.id,
+      ctx.applyLowered(
+        {
+          type: "addObject",
+          object: draftPlacedObject("sticky", geometry, {
+            id: p.id,
+            text: p.text,
+            color: defaults.color,
+          }),
+        },
+        `place_sticky ${p.id} ${placement(geometry)}`,
+      ),
+      (landed) => `place_sticky ${p.id} ${placement(landed)}`,
     );
   },
 });
@@ -138,11 +176,14 @@ export const placeSticky = defineOperationTool({
 export const placeShape = defineOperationTool({
   name: "place_shape",
   description:
-    "Place a shape — the pick and the click, plus an optional one-fact detail "
-    + "line. It arrives untitled, at the default size and color for its kind; "
-    + "naming, resizing, recoloring, and turning it are each their own gesture "
-    + "afterward. Containment follows geometry: a shape outside every frame "
-    + "belongs to no section.",
+    "Place a shape with its name and its color in one call, at the default size for its kind. When the text does not fit that "
+    + "size the shape grows to fit, keeping its center. It and the same-type shapes "
+    + "in its row share the row's largest height, and those in its column the "
+    + "column's largest width. Omit text or color and it arrives "
+    + "untitled or in its type's preferred color, for update_text and "
+    + "change_color afterward; resizing and turning it are their own gestures. "
+    + "Containment follows geometry: a shape outside every frame belongs to no "
+    + "section.",
   fields: PlaceShapeParams.properties,
   validate: (ctx, p) => ctx.requireFreeId(p.id),
   apply: (ctx, p) => {
@@ -158,22 +199,22 @@ export const placeShape = defineOperationTool({
       width: defaults.size.width,
       height: defaults.size.height,
     };
-    return ctx.applyLowered(
+    return placeFitted(ctx, p.id, ctx.applyLowered(
       {
         type: "addObject",
         object: draftPlacedObject(fields.type, geometry, {
           id: p.id,
-          // This gesture does not carry text: the explicit empty string keeps
-          // a placed shape blank instead of taking draftPlacedObject's
-          // per-type label. `update_text` fills it later.
-          text: "",
-          detail: storedDetail(p.detail),
-          color: defaults.color,
+          // The explicit empty string keeps an unnamed shape blank instead of
+          // taking draftPlacedObject's per-type label. Carrying the name here
+          // saves the drawer one call per node (climb round 4: naming and
+          // coloring after placement were two of every seven calls).
+          text: p.text ?? "",
+          color: p.color ?? defaults.color,
           ...(fields.icon ? { icon: fields.icon } : {}),
         }),
       },
-      `place_shape ${p.id} ${p.type} ${placement(geometry)}`,
-    );
+      "place_shape",
+    ), (landed) => `place_shape ${p.id} ${p.type} ${placement(landed)}${p.text ? ` "${p.text}"` : ""}${p.color ? ` ${p.color}` : ""}`);
   },
 });
 
@@ -196,22 +237,15 @@ function clonedFrom(
   id: string,
   position: readonly [number, number],
   text: string | undefined,
-  detail: string | undefined,
 ): Record<string, unknown> {
   // The copy's size is a number this gesture WRITES, so it lands on the grid
   // even when the source's does not: cloning a hand-drawn 243×157 box gives a
   // 240×160 copy, and a row built from it stays on the grid.
   const size = snapSize(source.geometry);
-  // The detail travels like the name: carried over unless the call names one,
-  // and an empty one clears it. A sticky never carries one.
-  const copiedDetail = source.type === "sticky"
-    ? undefined
-    : detail !== undefined ? storedDetail(detail) : storedDetail(source.detail);
   return {
     id,
     type: source.type,
     text: text ?? source.text,
-    ...(copiedDetail !== undefined ? { detail: copiedDetail } : {}),
     geometry: {
       x: position[0],
       y: position[1],
@@ -226,8 +260,9 @@ function clonedFrom(
     // so a copy that dropped it would not look like its source.
     ...(source.style !== undefined ? { style: { ...source.style } } : {}),
     // NOT copied: `parentId` (membership is re-derived from the copy's own
-    // geometry) and `locked` (a lock is a person's don't-touch mark on one
-    // region of the board, not a property of the thing that was copied).
+    // geometry), `locked` (a lock is a person's don't-touch mark on one
+    // region of the board, not a property of the thing that was copied), and
+    // a stored `detail` (older boards): a node shows its name only.
   };
 }
 
@@ -235,12 +270,16 @@ export const clone = defineOperationTool({
   name: "clone",
   description:
     "Copy one object. The copy inherits the source's kind, size, color, shape "
-    + "type/direction/glyph, detail line, and border style, so a row of options "
-    + "matches without re-specifying a number. Two things it does NOT carry: edges "
+    + "type/direction/glyph, and border style, so a row of options "
+    + "matches without re-specifying a number. A copy whose new text does not fit "
+    + "grows to fit and joins its row and column sizes, like place_shape. Two things it does NOT carry: edges "
     + "attached to the source (draw those with connect), and, for a section, "
     + "its contents — a cloned frame arrives empty, because copying "
     + "descendants without copying the edges between them would half-copy the "
-    + "structure. A copy is never locked, whatever the source is.",
+    + "structure. A copy is never locked, whatever the source is. A section "
+    + "copy keeps the source's color unless that color would match its parent "
+    + "or a sibling (the source itself, beside it); then it takes the color "
+    + "place_section would pick, and says so.",
   fields: CloneParams.properties,
   validate: (ctx, p) => {
     const errors = [...ctx.requireFreeId(p.id)];
@@ -258,14 +297,12 @@ export const clone = defineOperationTool({
         id: p.id,
         at: p.at,
         ...(p.text !== undefined ? { text: p.text } : {}),
-        ...(p.detail !== undefined ? { detail: p.detail } : {}),
       });
       const byCall = JSON.stringify({
         sourceId: p.sourceId,
         id: p.id,
         by: p.by,
         ...(p.text !== undefined ? { text: p.text } : {}),
-        ...(p.detail !== undefined ? { detail: p.detail } : {}),
       });
       errors.push(
         `one position source per call: send clone ${atCall} to set the copy's absolute corner, or clone ${byCall} to offset it from the source — never both; omit both for the paste offset.`,
@@ -285,8 +322,7 @@ export const clone = defineOperationTool({
       ? snapPoint(p.at)
       : snapPoint([source.geometry.x + offset[0], source.geometry.y + offset[1]]);
 
-    const object = clonedFrom(source, p.id, position, p.text, p.detail);
-    const geometry = object.geometry as { x: number; y: number; width: number; height: number };
+    const object = clonedFrom(source, p.id, position, p.text);
     // The same descendant walk the remove cascade uses, so "what a clone left
     // behind" and "what a delete would have taken" can never disagree.
     const emptied = source.type === "section"
@@ -298,15 +334,23 @@ export const clone = defineOperationTool({
             `the frame copied without its ${emptied} descendant${emptied === 1 ? "" : "s"} — place or clone the contents into ${p.id} yourself`,
           ]
         : []),
-      ...(source.type === "sticky" && storedDetail(p.detail) !== undefined
-        ? [detailDroppedNote("sticky")]
-        : []),
     ];
-    return ctx.applyLowered(
-      { type: "addObject", object },
-      `clone ${p.id} from ${p.sourceId} ${placement(geometry)}`,
-      notes.length > 0 ? notes : undefined,
-    );
+    const lower = (copy: Record<string, unknown>, extra: string[]) => {
+      const all = [...notes, ...extra];
+      return placeFitted(ctx, p.id, ctx.applyLowered(
+        { type: "addObject", object: copy },
+        "clone",
+        all.length > 0 ? all : undefined,
+      ), (landed) => `clone ${p.id} from ${p.sourceId} ${placement(landed)}`);
+    };
+    const probe = lower(object, []);
+    if (source.type !== "section" || probe.status !== "applied") return probe;
+    // A section copy lands beside its source as a sibling: keep the source's
+    // color only while it reads apart from the copy's parent and siblings.
+    const kept = source.color ?? FIRST_USE_COLORS.section;
+    const color = pickSectionColor(reconcileSectionMembership(probe.draft), p.id, ctx.canvasStyle, undefined, kept);
+    if (color === kept) return probe;
+    return lower({ ...object, color }, [`the copy takes ${color}: ${kept} would match its parent, a touching sibling or a node it holds`]);
   },
 });
 

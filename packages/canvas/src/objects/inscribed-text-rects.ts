@@ -5,6 +5,7 @@ import type {
   InteractiveCanvasObject,
   InteractiveCanvasObjectType,
 } from "../state/schema";
+import { NATURAL_ASPECT_BY_TYPE, naturalAspectRect } from "./natural-aspect";
 import type { LocalRect } from "./text-slots";
 
 export type InscribedTextRectResolver = (object: InteractiveCanvasObject) => LocalRect;
@@ -44,6 +45,21 @@ function triangleTextRect(object: InteractiveCanvasObject): LocalRect {
   };
 }
 
+/**
+ * The octagon's text band, inside the regular octagon drawn in the centered
+ * square (natural-aspect.ts): the wide middle band, as on a stop sign, not a
+ * small inner square. The vertices sit on the square's inscribed circle, so
+ * the side flats run from 31% to 69% down and, 30% down, the slanted edges
+ * sit 4.7% in: 5% side insets keep every corner of the band inside.
+ */
+function octagonTextRect(object: InteractiveCanvasObject): LocalRect {
+  const { x, y, width: side } = naturalAspectRect(
+    { x: 0, y: 0, width: object.geometry.width, height: object.geometry.height },
+    NATURAL_ASPECT_BY_TYPE.octagon!,
+  );
+  return rectFromRanges(x + side * 0.05, x + side * 0.95, y + side * 0.3, y + side * 0.7);
+}
+
 function rectFromRanges(x1: number, x2: number, y1: number, y2: number): LocalRect {
   return {
     x: x1,
@@ -64,10 +80,7 @@ const INSCRIBED_TEXT_RECTS_BY_TYPE: Partial<
     const xInset = width * 0.047 + 10;
     return rectFromRanges(xInset, width - xInset, 12, height - 12);
   },
-  octagon: (object) => {
-    const { width, height } = object.geometry;
-    return rectFromRanges(width * 0.19, width * 0.81, height * 0.19, height * 0.81);
-  },
+  octagon: octagonTextRect,
 };
 
 const INSCRIBED_TEXT_RECTS_BY_STYLE_SHAPE: Partial<

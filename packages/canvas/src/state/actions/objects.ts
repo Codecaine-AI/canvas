@@ -20,12 +20,11 @@ import { withHistory } from "./history";
 import type { CanvasAction, InteractiveCanvasState } from "./types";
 
 /**
- * The `detail` write rule every reducer path shares: an empty, whitespace-only,
- * or non-string detail means "no detail line" and removes the key, and a
- * sticky never carries one (its body is markdown). A non-empty value is kept
- * verbatim — trimming on every write would eat the trailing space of a detail
- * being typed; validate.ts trims on load. Returns `object` itself when there
- * is nothing to drop.
+ * A node shows its name only, so no write adds or changes a `detail`. The one
+ * a legacy board already stores stays as it is on every edit (it never
+ * renders), except that a sticky never carries one (its body is markdown) and
+ * an empty or non-string value is no detail at all. Returns `object` itself
+ * when there is nothing to drop.
  */
 export function withNormalizedDetail(object: InteractiveCanvasObject): InteractiveCanvasObject {
   if (!("detail" in object)) return object;
@@ -35,32 +34,64 @@ export function withNormalizedDetail(object: InteractiveCanvasObject): Interacti
 }
 
 /**
+ * A new object (an add, a paste, a duplicate, an agent add) carries no
+ * `detail`, whatever its source held: copying a stored detail onto a new node
+ * would write one. Returns `object` itself when it has none.
+ */
+export function withoutDetail(object: InteractiveCanvasObject): InteractiveCanvasObject {
+  if (!("detail" in object)) return object;
+  const { detail: _dropped, ...rest } = object;
+  return rest;
+}
+
+/**
  * Merge an object patch the way canvas.updateObject does: geometry normalizes
  * to GEOMETRY_NORMALIZATION_GRID, style patches merge per-key (undefined
- * deletes), and `detail` follows withNormalizedDetail (undefined or "" clears
- * it). Shared with the agent apply path (./agent-patch.ts) so agent
- * updates behave exactly like human ones.
+ * deletes), and a `detail` in the patch is ignored: no edit adds, changes or
+ * clears one, so a legacy node's stored detail rides through untouched
+ * (withNormalizedDetail). Shared with the agent apply path (./agent-patch.ts)
+ * so agent updates behave exactly like human ones.
  *
  * D1 — this is the write path, not an interaction path, so it rounds on 4 and
  * not on CANVAS_GRID_SIZE. Both a UI drag's 16-grid result and an agent's
  * 20-grid box are multiples of 4 and therefore pass through untouched; only
- * genuinely off-grid values (hand-authored imports, legacy docs) move.
+ * genuinely off-grid values (hand-authored imports, legacy docs) move, and
+ * only the ones the patch changes.
  */
 export function mergeObjectPatch(
   object: InteractiveCanvasObject,
   patch: Partial<Omit<InteractiveCanvasObject, "id">>,
 ): InteractiveCanvasObject {
-  const geometry = patch.geometry
-    ? snapGeometry(patch.geometry, GEOMETRY_NORMALIZATION_GRID)
-      : object.geometry;
+  // A value the patch leaves as it was keeps its exact number, so an off-grid
+  // edge a section grow held in place (a locked parent's edge) survives the
+  // accept-time replay instead of rounding inward past a child.
+  const { detail: _ignored, ...fields } = patch;
+  const was = object.geometry;
+  const asked = fields.geometry;
+  const snapped = asked && snapGeometry(asked, GEOMETRY_NORMALIZATION_GRID);
+  // Per axis: an unchanged start keeps its value; an unchanged size keeps its
+  // value; a changed size whose far edge (start + size) is unchanged keeps
+  // that edge, so a grow on the near side never rounds the far edge inward.
+  const axis = (start: "x" | "y", size: "width" | "height") => {
+    if (!asked || !snapped) return { s: was[start], z: was[size] };
+    const s = asked[start] === was[start] ? was[start] : snapped[start];
+    const farKept = asked[start] + asked[size] === was[start] + was[size];
+    const z = asked[size] === was[size] ? was[size] : farKept ? was[start] + was[size] - s : snapped[size];
+    return { s, z };
+  };
+  const horizontal = axis("x", "width");
+  const vertical = axis("y", "height");
+  const geometry = asked && snapped
+    ? { x: horizontal.s, y: vertical.s, width: horizontal.z, height: vertical.z }
+    : was;
   const merged: InteractiveCanvasObject = {
     ...object,
-    ...patch,
+    ...fields,
     geometry,
     // undefined in a style patch deletes the key.
-    style: patch.style
+    style: fields.style
       ? (Object.fromEntries(
-          Object.entries({ ...object.style, ...patch.style }).filter(([, value]) => value !== undefined),
+          Object.entries({ ...object.style, ...fields.style }).filter(([, value]) => value !== undefined),
         ) as CanvasObjectStyle)
       : object.style,
   };
@@ -81,11 +112,12 @@ export function handleAddObject(
   // so the placed object matches the preview exactly (id/parent/snap aside).
   const object: InteractiveCanvasObject = draftPlacedObject(
     action.objectType,
-    snapGeometry(action.geometry ?? defaultGeometryFor(action.objectType)),
+    action.snap === false && action.geometry
+      ? action.geometry
+      : snapGeometry(action.geometry ?? defaultGeometryFor(action.objectType)),
     {
       id,
       text: action.text,
-      detail: action.detail,
       parentId: action.parentId ?? null,
       // D17 — new objects take the last-picked color for their kind unless
       // the action pins one explicitly.
@@ -145,7 +177,7 @@ export function handleDuplicateSelection(
   const newObjects = originals.map((object) => {
     const id = oldIdToNewId.get(object.id)!;
     return {
-      ...object,
+      ...withoutDetail(object),
       id,
       parentId: oldIdToNewId.get(object.parentId ?? "") ?? object.parentId ?? null,
       geometry: {
@@ -220,7 +252,7 @@ export function handleAddObjects(
       ? createObjectId(objectDocument, object.text.trim() || objectTypeLabel(object.type))
       : object.id;
     oldIdToNewId.set(object.id, id);
-    const newObject = withNormalizedDetail({ ...object, id });
+    const newObject = withoutDetail({ ...object, id });
     newObjects.push(newObject);
     objectDocument = { ...objectDocument, objects: [...objectDocument.objects, newObject] };
   }

@@ -4,9 +4,8 @@
  * place into. The frame lives only in the draft — a session never writes it
  * back (toolkit `draftForDisk`), and its title is the board's own title.
  *
- * Pure document → document, so both the session layer (which builds drafts)
- * and the lints (whose authorship baseline is the draft a session STARTS
- * from, frame included) read it from here.
+ * Pure document → document, so the session layer (which builds drafts) and
+ * the toolkit read it from here.
  */
 import type {
   CanvasGeometry,
@@ -21,7 +20,8 @@ import {
 } from "../state/geometry";
 import { nextId } from "../state/actions/helpers";
 
-const PAGE_FRAME_ID = "page-frame";
+/** The id canvas_create and the draft injection give the page frame. */
+export const PAGE_FRAME_ID = "page-frame";
 const PAGE_FRAME_INSET = 32;
 const DEFAULT_PAGE_SIZE = { width: 1200, height: 720 } as const;
 

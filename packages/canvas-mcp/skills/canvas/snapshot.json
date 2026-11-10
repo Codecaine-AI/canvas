@@ -1,46 +1,46 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:704aca97195f9df4c9bfd8ecbbf473b2b41c500aa8f0119eb176bc4cbc61af60",
+  "snapshotId": "sha256:6dcbbb4097a3e7d01e66f3ed4bb6a8be4225793993d904b4ff3ec5d981703657",
   "sources": [
     {
       "id": "prompt",
       "path": "packages/canvas/src/authoring/prompt/prompt.json",
-      "sha256": "9c91daf8919ba6bc6d15e2886a360c696a9908c435f1ebbdc98983102a0e5294"
+      "sha256": "f1ace77c3c24e78e389af860c57afd6d5d4b9e4cbd7612f1727223a67c1a30a6"
     },
     {
       "id": "state_grammar",
       "path": "packages/canvas/src/authoring/state-grammar.ts",
-      "sha256": "0c69f2e5ec417815ee00ab7db5c330c2fa87a4320168a66743ee011bdef2db7f"
+      "sha256": "d7a7521abdd21cf55a7af9c23195b950798f0c8e39f7de395d5bd6d5fe4c2a62"
     },
     {
       "id": "aesthetic",
       "path": "packages/canvas/src/authoring/style-guide/aesthetic.ts",
-      "sha256": "5c61496f5ac71b29c7ca95a01bd44de5979f774fe11d3c25f0046623f520d50b"
+      "sha256": "3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18"
     },
     {
       "id": "visual_patterns",
       "path": "packages/canvas/src/authoring/visual-patterns.ts",
-      "sha256": "236da37729039e37a11663f4dfde5426818d9bc3b412535674b081da4b686049"
+      "sha256": "eb88e20d8dc0e4f0552f0cb3a47d8572b8b31368f6c243b1a0a301630c39b16c"
     },
     {
       "id": "diagram_design",
       "path": "packages/canvas/src/authoring/design.ts",
-      "sha256": "d9c69385bed0db82a4433280fa4da459bdbb1b54aeac2534d0caa54b52185fcc"
+      "sha256": "0cd5bd8f0045cdbd51b06d9b755929aeebd5d3ee3dbab6e24af2f9ef91fc4ae8"
     },
     {
       "id": "visual_vocabulary",
       "path": "packages/canvas/src/authoring/vocabulary.ts",
-      "sha256": "a1fb49385006dd5575e6c1336b6ff9d111e91138bab6fa02700bbc55f5f34b8c"
+      "sha256": "368d2c4956a112b98ff398ca25e6467657a4293fc5a71551e9268caa8655ce5e"
     },
     {
       "id": "color_palette",
       "path": "packages/canvas/src/authoring/vocabulary.ts",
-      "sha256": "943deac9d2f88e9e624640248340e98284266a1f2157ba90e400e0708195013b"
+      "sha256": "783f926700a0cfa2d4dac9ce43a0e8971400656e85acb15a53cc7d4940938aa5"
     },
     {
       "id": "canvas_conventions",
       "path": "packages/canvas/src/authoring/conventions.ts",
-      "sha256": "7512963793f4dc173bdaf245b42bba4841aa1e48ec9cab3b5313e609c438f474"
+      "sha256": "4767191eed510b7842a08065676ceb89616716f275deb4f9ba56b01a1ea30d14"
     },
     {
       "id": "contact_sheet",
@@ -50,6 +50,6 @@
   ],
   "skill": {
     "path": "packages/canvas-mcp/src/skill/SKILL.md",
-    "sha256": "4a9127926a7b3d9c0861ac6432f63e575caa119db4c7c95d991b4694b22a797a"
+    "sha256": "077fe355f819f08aa17e376cd0119f0f466e94aca7fe2b18a9347b67e0e16f72"
   }
 }

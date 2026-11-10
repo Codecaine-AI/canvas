@@ -88,6 +88,7 @@ export * from "./stage/viewer/InteractiveCanvasViewer";
 export * from "./state/schema";
 export { OBJECT_TYPE_DEFAULTS, objectTypeDefaults } from "./state/schema/object-defaults";
 export { objectDefForType } from "./objects/object-def";
+export { fitNotesToText, noteNeededHeight } from "./objects/sticky/note-fit";
 export {
   BELOW_BAND_GAP_PX,
   BELOW_BAND_MIN_WIDTH_PX,

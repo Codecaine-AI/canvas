@@ -5,8 +5,6 @@ import { ObjectSlotText, textSlotClampLineCount } from "../../object-shell";
 import { CENTER_TEXT_SLOT } from "../../text-slots";
 import type { InteractiveCanvasObject } from "../../../state/schema";
 import {
-  STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX,
-  STICKY_MARKDOWN_LINE_HEIGHT_PX,
   StickyMarkdown,
 } from "../markdown";
 
@@ -35,28 +33,28 @@ afterEach(() => {
 });
 
 describe("sticky markdown", () => {
-  it("pins heading line heights to the sticky body pitch while preserving heading font sizes", () => {
+  it("gives headings no line height of their own (they take the slot's pitch) and the full scale by default", () => {
     const { container } = render(<StickyMarkdown text={"# One\n## Two\n### Three"} />);
     const headings = Array.from(
       container.querySelectorAll<HTMLElement>(".interactive-canvas-sticky-line[data-heading]"),
     );
 
     expect(headings).toHaveLength(3);
-    expect(STICKY_MARKDOWN_HEADING_LINE_HEIGHT_PX).toEqual({
-      1: STICKY_MARKDOWN_LINE_HEIGHT_PX,
-      2: STICKY_MARKDOWN_LINE_HEIGHT_PX,
-      3: STICKY_MARKDOWN_LINE_HEIGHT_PX,
-    });
     expect(headings.map((heading) => heading.style.fontSize)).toEqual([
       "1.5em",
       "1.25em",
       "1.1em",
     ]);
-    expect(headings.map((heading) => heading.style.lineHeight)).toEqual([
-      "36px",
-      "36px",
-      "36px",
-    ]);
+    expect(headings.map((heading) => heading.style.lineHeight)).toEqual(["", "", ""]);
+  });
+
+  it("steps headings by the style's heading scale", () => {
+    const { container } = render(<StickyMarkdown text={"# One\n### Three"} headingScale={0} />);
+    const headings = Array.from(
+      container.querySelectorAll<HTMLElement>(".interactive-canvas-sticky-line[data-heading]"),
+    );
+    expect(headings.map((heading) => heading.style.fontSize)).toEqual(["1em", "1em"]);
+    expect(headings.map((heading) => heading.style.fontWeight)).toEqual(["700", "700"]);
   });
 
   it("renders indented bullets with clamped depth and glyph attributes", () => {
@@ -106,11 +104,11 @@ describe("sticky markdown", () => {
     expect(lines[1].textContent).toBe("Heading");
   });
 
-  it("floors sticky clamp budget to whole 36px body lines", () => {
-    expect(textSlotClampLineCount(371, STICKY_MARKDOWN_LINE_HEIGHT_PX)).toBe(10);
-    expect(textSlotClampLineCount(72, STICKY_MARKDOWN_LINE_HEIGHT_PX)).toBe(2);
-    expect(textSlotClampLineCount(35, STICKY_MARKDOWN_LINE_HEIGHT_PX)).toBe(1);
-    expect(textSlotClampLineCount(0, STICKY_MARKDOWN_LINE_HEIGHT_PX)).toBe(1);
+  it("floors sticky clamp budget to whole 36px body lines (the figjam pitch)", () => {
+    expect(textSlotClampLineCount(371, 36)).toBe(10);
+    expect(textSlotClampLineCount(72, 36)).toBe(2);
+    expect(textSlotClampLineCount(35, 36)).toBe(1);
+    expect(textSlotClampLineCount(0, 36)).toBe(1);
   });
 
   it("clamps rendered sticky markdown to whole slot lines with a multiline ellipsis", () => {
@@ -135,10 +133,11 @@ describe("sticky markdown", () => {
 
     expect(slot).not.toBeNull();
     expect(label).not.toBeNull();
-    expect(slot!.style.height).toBe("371px");
-    expect(label!.style.lineHeight).toBe("36px");
-    expect(label!.style.maxHeight).toBe("360px");
-    expect(webkitLineClamp(label!)).toBe("10");
+    // The default (schematic) note: 14px top and bottom padding, 24px lines.
+    expect(slot!.style.height).toBe("392px");
+    expect(label!.style.lineHeight).toBe("24px");
+    expect(label!.style.maxHeight).toBe("384px");
+    expect(webkitLineClamp(label!)).toBe("16");
     expect(label!.style.getPropertyValue("-webkit-box-orient")).toBe("vertical");
     expect(label!.style.textOverflow).toBe("ellipsis");
   });

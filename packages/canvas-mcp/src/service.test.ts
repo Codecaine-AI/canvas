@@ -43,6 +43,32 @@ function textOf(result: { content: Array<{ type: string; text?: string }> }): st
 }
 
 describe("canvas service", () => {
+  test("canvas_open reports the broken wires an older file holds", async () => {
+    const original = realCanvas();
+    const node = original.objects.find((object: any) => object.type !== "section" && object.type !== "sticky");
+    const twin = { ...node, id: "twin" };
+    const broken = {
+      ...original,
+      objects: [...original.objects, twin],
+      connections: [
+        ...original.connections,
+        { id: "loop-wire", from: { objectId: node.id }, to: { objectId: node.id } },
+        { id: "flat-wire", from: { objectId: node.id }, to: { objectId: "twin" } },
+      ],
+    };
+    const { workspace } = workspaceWith(SOURCE_ID, broken);
+    const service = createCanvasService({ workspace });
+
+    const opened = textOf(await service.call("canvas_open", { canvas: SOURCE_ID }));
+
+    expect(opened).toContain("BROKEN WIRES · 2 in this file");
+    expect(opened).toContain(`loop-wire connects ${node.id} to itself`);
+    expect(opened).toContain(`flat-wire has zero length: ${node.id} and twin share one center`);
+    const clean = workspaceWith(SOURCE_ID, original);
+    const cleanText = textOf(await createCanvasService({ workspace: clean.workspace }).call("canvas_open", { canvas: SOURCE_ID }));
+    expect(cleanText).not.toContain("BROKEN WIRES");
+  });
+
   test("place_sticky then move_by save each edit to the canvas file", async () => {
     const original = realCanvas();
     const { workspace, path } = workspaceWith(SOURCE_ID, original);
@@ -234,30 +260,26 @@ describe("canvas service", () => {
     expect(await lookPng()).toBe(defaultPng);
   });
 
-  test("canvas_open never flags a person's own prose names; prose the agent writes is flagged", async () => {
+  test("no lint judges a name's wording, a person's or the agent's", async () => {
     // v2-flow, as its author left it, holds two long names.
     const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
     const service = createCanvasService({ workspace });
 
     const opened = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(textOf(opened)).toContain('"Does Response Provide Enough Context to Answer the Research Objective"');
-    expect(textOf(opened)).not.toContain("label-is-prose");
+    expect(textOf(opened)).not.toContain("emphasis-box-research-objective's name");
 
-    // An unrelated edit leaves them alone too.
-    const moved = await service.call("move_by", { id: "chip-adapt-question", dx: 0, dy: 20 });
-    expect(textOf(moved)).not.toContain("label-is-prose");
-
-    // A name the agent writes is the agent's, and the lint judges it.
+    // A long name the agent writes adds no error either.
     const renamed = await service.call("update_text", {
       id: "chip-adapt-question",
       text: "Adapt the next question based on the whole interview history",
     });
     expect(renamed.isError).toBeUndefined();
-    expect(textOf(renamed)).toContain("label-is-prose: chip-adapt-question's name has");
-    expect(textOf(renamed)).not.toContain("emphasis-box-research-objective's name");
+    expect(textOf(renamed)).toMatch(/LINTS · (clean|no new errors)/);
+    expect(textOf(renamed)).not.toContain("chip-adapt-question's name");
   });
 
-  test("detail and a section's header glyph save to the file and read back in the digest", async () => {
+  test("a section's header glyph saves to the file and reads back in the digest; a node detail is dropped, never saved", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
     const service = createCanvasService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
@@ -267,35 +289,38 @@ describe("canvas service", () => {
       text: "Bun services",
       at: [4000, 0],
       size: { width: 480, height: 320 },
-      detail: "127.0.0.1",
       icon: "brand-bun",
     });
     expect(placed.isError).toBeUndefined();
-    const shape = await service.call("place_shape", { id: "mcp-db", type: "database", at: [4040, 80], detail: ":5432" });
+    // place_shape has no detail field: the schema refuses one.
+    const refused = await service.call("place_shape", { id: "mcp-db", type: "database", at: [4040, 80], detail: ":5432" });
+    expect(refused.isError).toBe(true);
+    const shape = await service.call("place_shape", { id: "mcp-db", type: "database", at: [4040, 80] });
     expect(shape.isError).toBeUndefined();
     const named = await service.call("update_text", { id: "mcp-db", text: "Postgres", detail: "16 · :5432" });
     expect(named.isError).toBeUndefined();
-    // No residual: the reducer's replay reproduced the draft, detail and glyph included.
+    expect(textOf(named)).toContain("detail dropped — a node shows its name only");
+    // No residual: the reducer's replay reproduced the draft, glyph included.
     for (const result of [placed, shape, named]) expect(textOf(result)).not.toContain("NOTE ·");
 
     const saved = readDoc(path);
     expect(saved.objects.find((object: any) => object.id === "mcp-services")).toMatchObject({
       type: "section",
-      detail: "127.0.0.1",
       icon: "brand-bun",
     });
+    expect(saved.objects.find((object: any) => object.id === "mcp-services")).not.toHaveProperty("detail");
     expect(saved.objects.find((object: any) => object.id === "mcp-db")).toMatchObject({
       type: "icon",
       icon: "database",
       text: "Postgres",
-      detail: "16 · :5432",
     });
+    expect(saved.objects.find((object: any) => object.id === "mcp-db")).not.toHaveProperty("detail");
 
     const reopened = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(textOf(reopened)).toContain('mcp-services section "Bun services"');
-    expect(textOf(reopened)).toContain('icon=brand-bun detail="127.0.0.1"');
+    expect(textOf(reopened)).toContain("icon=brand-bun");
     expect(textOf(reopened)).toContain('mcp-db database "Postgres"');
-    expect(textOf(reopened)).toContain('detail="16 · :5432"');
+    expect(textOf(reopened)).not.toContain("detail=");
 
     // An enum miss on the folded type vocabulary comes back with the names it was
     // reaching for, appended to the schema's own refusal.

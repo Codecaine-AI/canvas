@@ -74,7 +74,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A box's content is its name plus at most one detail line. The name says what the thing is in about five words. The detail holds one fact of at most 48 characters, such as a port, path, version, model, or host. Prose goes on a sticky beside the box. Size the box for the name and the detail together."
+          "insert": "A box's content is its name, and the name says what the thing is in about five words. A node shows its name only. Put extra context in a sticky note next to the box, and size the box for the name."
         }
       ],
       "children": []
@@ -98,20 +98,7 @@
           }
         },
         {
-          "insert": " lint warns when a name runs past six words or 40 characters or spans more than one line or sentence. The "
-        },
-        {
-          "insert": "detail-too-long",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/board/lints/rules/detail-too-long.ts"
-            }
-          }
-        },
-        {
-          "insert": " lint warns when a detail runs past 48 characters or spans more than one line or sentence. Both judge only text the agent wrote this session, so a person's own long name stays as it is."
+          "insert": " lint warns when a name runs past six words or 40 characters or spans more than one line or sentence. It judges only text the agent wrote this session, so a person's own long name stays as it is."
         }
       ],
       "children": []
@@ -122,7 +109,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Fit counts the detail line. The text-fit check ("
+          "insert": "The text-fit check ("
         },
         {
           "insert": "text-fit.ts",
@@ -136,7 +123,7 @@
           }
         },
         {
-          "insert": ") measures a shape's name in the slot left after the detail line's reserve, and a section title in its header chip as the workspace theme draws it, icon and detail included. "
+          "insert": ") measures a shape's name in its slot, and a section title in its header chip as the workspace theme draws it, icon included. "
         },
         {
           "insert": "resize",
@@ -163,7 +150,7 @@
           }
         },
         {
-          "insert": " add a note when the name or the detail would clip, may clip within 1 px of the box edge, or cannot be measured exactly. The "
+          "insert": " add a note when the name would clip, may clip within 1 px of the box edge, or cannot be measured exactly. The "
         },
         {
           "insert": "clipped-text",
@@ -172,7 +159,7 @@
           }
         },
         {
-          "insert": " finding names the size the box needs or the characters the detail can keep."
+          "insert": " finding names the size the box needs."
         }
       ],
       "children": []
@@ -220,7 +207,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Stickies have no documentation-level base size or override. Size a note for its markdown content and role, keep it inside the section it explains, and use the pushed render to judge readability. Short names and one-fact details belong on objects. Prose belongs on stickies: summaries, legends, callouts, explanations, and open questions."
+          "insert": "Stickies have no documentation-level base size or override. Size a note for its markdown content and role, keep it inside the section it explains, and use the pushed render to judge readability. Short names belong on objects. Prose belongs on stickies: summaries, legends, callouts, explanations, and open questions."
         }
       ],
       "children": []

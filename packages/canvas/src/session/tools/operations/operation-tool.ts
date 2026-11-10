@@ -7,9 +7,13 @@ import { Type, type Static, type TSchema } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { reconcileConnectionWaypoints } from "../../../state/actions/waypoints";
 import { reconcileSectionMembership } from "../../../state/section-membership";
+import { fittedNoteParents, growSectionsToChildren, heldMoves, reconcileHolding, sectionOverflow } from "../../../state/section-grow";
 
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
+import { newBrokenWires } from "../../../board/wire-integrity";
+import { kindOf } from "../../../board/helpers";
+import { heldNodeClashes, sameHueNests, sharedLook, sharedSiblingLook, siblingClashPairs } from "../../../board/section-colors";
 import type { LayoutToolRenderResult } from "../runtime";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { OpContext, OpOutcome } from "./op-context";
@@ -148,14 +152,121 @@ export function runOperation<TFields extends OperationFields>(
   // Membership follows geometry, so reconciliation derives state rather than
   // moving layout — and since it only writes `parentId`, it cannot disturb the
   // waypoint verdict taken above.
+  //
+  // Section auto-grow runs on the reconciled tree and before the waypoint
+  // pass, so a grown frame is an ordinary resize that pass judges like any
+  // other. It never changes membership, so the last reconcile agrees with it.
+  // A grow this edit needs but cannot make (it would capture a neighbor)
+  // refuses the edit: a child never stays outside its frame, and nothing the
+  // drawer did not touch changes parent. A grow already stuck before the edit
+  // does not block an edit that leaves every child's overflow no worse on every
+  // edge, but an edit that pushes any child further past that frame is refused.
+  // A note whose text fit grew it keeps its frame, which grows to hold it.
+  const held = new Map([...fittedNoteParents(before, outcome.draft), ...(outcome.held ?? [])]);
+  const grow = growSectionsToChildren(reconcileHolding(outcome.draft, held), held);
+  const reconciledBefore = reconcileSectionMembership(before);
+  const stuck = new Set(growSectionsToChildren(reconciledBefore).blocked.map((entry) => entry.section));
+  const worsens = (section: string) => {
+    const was = sectionOverflow(reconciledBefore, section);
+    const now = sectionOverflow(grow.document, section);
+    const none = { left: 0, top: 0, right: 0, bottom: 0 };
+    return [...now].some(([child, edges]) => {
+      const prior = was.get(child) ?? none;
+      return edges.left > prior.left || edges.top > prior.top || edges.right > prior.right || edges.bottom > prior.bottom;
+    });
+  };
+  const newlyBlocked = grow.blocked.filter((entry) => !stuck.has(entry.section) || worsens(entry.section));
+  if (newlyBlocked.length > 0) {
+    const reasons = newlyBlocked.map(({ section, captures }) =>
+      `${section} must grow to hold its children, and growing would pull ${captures.join(", ")} into it`);
+    return {
+      isError: true,
+      text: `ERROR · ${spec.name} — ${reasons.join("; ")}. Nothing changed. Move ${newlyBlocked.flatMap((entry) => entry.captures).join(", ")} clear first, or place the child where ${newlyBlocked.map((entry) => entry.section).join(", ")} has room.`,
+      details,
+    };
+  }
   const next = reconcileSectionMembership(
-    reconcileConnectionWaypoints(before, outcome.draft),
+    reconcileConnectionWaypoints(before, grow.document),
   );
+  // The grows were judged with `held` kept. A parent that cannot grow to hold
+  // its child (locked, or stopped at a locked frame's edge), or a grown frame
+  // that lands inside a neighbor, would still move a held object: refuse.
+  const moved = heldMoves(next, held).map(({ id, from, to }) =>
+    from === null ? `${id} would land inside ${to}` : `${id} would leave ${from}, which cannot grow to hold it`);
+  if (moved.length > 0) {
+    return {
+      isError: true,
+      text: `ERROR · ${spec.name} — ${moved.join("; ")}. Nothing changed. Move the other section clear, unlock or make room around the frame, or make the edit smaller.`,
+      details,
+    };
+  }
+  const notes = grow.grown.length === 0
+    ? outcome.notes
+    : [...(outcome.notes ?? []), `grew ${grow.grown.join(", ")} to hold ${grow.grown.length === 1 ? "its" : "their"} children`];
   // A patch that asks for what the board already holds is legal and did
   // nothing, which is the no-op class rather than an APPLIED line over an
   // empty delta.
   if (JSON.stringify(before) === JSON.stringify(next)) {
     return noop("the board already matches this, so nothing changed.");
+  }
+  // No edit may make a self-loop, a dangling or a zero-length wire: refuse
+  // it here, once for every tool, and leave the draft as it was.
+  const broken = newBrokenWires(before, next);
+  if (broken.length > 0) {
+    return {
+      isError: true,
+      text: [
+        `ERROR · ${spec.name} — refused: it would break ${broken.length === 1 ? "a wire" : `${broken.length} wires`}, so nothing changed`,
+        ...broken.map((wire) => `  - ${wire.text}`),
+        "  Move or size the boxes so each wire's ends stay apart, or delete the wire first.",
+      ].join("\n"),
+      details,
+    };
+  }
+  // No edit to a section (a placement, recolor, reparent, move, resize or
+  // delete) may nest a section in a parent section of its own color, give it
+  // a touching sibling's color, or paint it one hue of the several its nodes
+  // carry: the hierarchy, the group edges or the node's figure would stop
+  // reading. Every conflicting pair is compared before and after, so a repair
+  // that leaves older pairs standing is never refused for them. A node edit
+  // (place, recolor, move a node in) is never refused for a section's color:
+  // it applies, and the integrity lint reports the break with a color to use.
+  const sectionsOf = (document: InteractiveCanvasDocument) =>
+    JSON.stringify(document.objects.filter((object) => kindOf(object) === "section")
+      .map(({ id, color, parentId, geometry }) => ({ id, color, parentId: parentId ?? null, geometry })));
+  const editsSections = sectionsOf(before) !== sectionsOf(outcome.draft);
+  const newOnly = <T,>(found: (document: InteractiveCanvasDocument) => T[], key: (item: T) => string) => {
+    const had = new Set(found(reconciledBefore).map(key));
+    return found(next).filter((item) => !had.has(key(item)));
+  };
+  const newNests = newOnly((document) => sameHueNests(document, ctx.canvasStyle), (nest) => `${nest.section}>${nest.parent}`);
+  const newClashes = newOnly(
+    (document) => siblingClashPairs(document, ctx.canvasStyle),
+    (clash) => [clash.section, clash.sibling].sort().join("~"),
+  );
+  const newGrounds = newOnly((document) => heldNodeClashes(document, ctx.canvasStyle), (clash) => `${clash.section}:${clash.color}`);
+  if (editsSections && newNests.length + newClashes.length + newGrounds.length > 0) {
+    const rules = [
+      ...(newNests.length > 0 ? ["a nested section never shares its parent's color"] : []),
+      ...(newClashes.length > 0 ? ["touching sibling sections never share a color"] : []),
+      ...(newGrounds.length > 0 ? ["a section holding nodes of several colors never paints one of them"] : []),
+    ];
+    return {
+      isError: true,
+      text: [
+        `ERROR · ${spec.name} — refused: ${rules.join(", and ")}, so nothing changed`,
+        ...newNests.map((nest) =>
+          `  - ${nest.section} would share ${sharedLook(nest)} with its parent section ${nest.parent}`
+          + ` — give ${nest.section} another color, such as ${nest.suggestion}`),
+        ...newClashes.map((clash) =>
+          `  - ${clash.section} would share ${sharedSiblingLook(clash)} with its touching sibling section ${clash.sibling}`
+          + ` — give ${clash.section} another color, such as ${clash.suggestion}`),
+        ...newGrounds.map((clash) =>
+          `  - ${clash.section} would paint ${clash.color}, the color of ${clash.node} it holds among nodes of other colors`
+          + ` — give ${clash.section} another color, such as ${clash.suggestion}`),
+      ].join("\n"),
+      details,
+    };
   }
   session.proposalCount += 1;
   commitDraft(session, next, outcome.summary, { recordChange: true });
@@ -163,7 +274,7 @@ export function runOperation<TFields extends OperationFields>(
     session,
     before,
     `APPLIED · ${outcome.summary}`,
-    { notes: outcome.notes, details },
+    { notes, details },
   );
 
   host.emit(session, {

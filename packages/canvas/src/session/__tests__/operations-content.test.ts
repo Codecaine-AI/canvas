@@ -13,6 +13,7 @@ import { describe, expect, test } from "bun:test";
 
 import type { InteractiveCanvasObject } from "../../state/schema";
 
+import { textFitReport } from "../../board/text-fit";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 
@@ -73,19 +74,38 @@ describe("update_text", () => {
     expect(session.draft.connections[0]!.label).toBeUndefined();
   });
 
-  test("text that no longer fits its box still APPLIES, carrying the warning", () => {
+  test("text that no longer fits grows the box around its center, and its column peer matches", () => {
     const session = makeTestSession(contentBoard(), ["frame"]);
     const overflowing = "This label is far too long to survive inside a box this small, "
       + "and every extra clause anyone adds only makes the overflow worse and more obvious.";
 
     const result = runOp(session, "update_text", { id: "step", text: overflowing });
 
-    // Report-only, same philosophy as the lints: the write lands.
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain("APPLIED · update_text step");
-    expect(objectOf(session, "step").text).toBe(overflowing);
-    // The note rides under the headline as an indented line.
-    expect(result.text).toMatch(/\n\s+label clips at 200×120/);
+    const step = objectOf(session, "step");
+    expect(step.text).toBe(overflowing);
+    expect(textFitReport(step, step.geometry, overflowing).fits).toBe(true);
+    // The center held (to the grid), so the column it sits in still lines up.
+    expect(Math.abs(step.geometry.x + step.geometry.width / 2 - 400)).toBeLessThanOrEqual(10);
+    expect(Math.abs(step.geometry.y + step.geometry.height / 2 - 140)).toBeLessThanOrEqual(10);
+    expect(result.text).toContain(`grew step to ${step.geometry.width}×${step.geometry.height}`);
+    expect(result.text).not.toContain("clips at");
+    // "next" is the same type in the same column: it takes the same width, centered.
+    const next = objectOf(session, "next");
+    expect(next.geometry.width).toBe(step.geometry.width);
+    expect(next.geometry.x + next.geometry.width / 2).toBe(400);
+    expect(next.geometry.height).toBe(120);
+  });
+
+  test("a sticky that no longer fits does not grow, and says the size it needs", () => {
+    const session = makeTestSession(contentBoard(), ["frame"]);
+    const overflowing = Array.from({ length: 12 }, (_, i) => `- line ${i} of a long note`).join("\n");
+
+    const result = runOp(session, "update_text", { id: "note", text: overflowing });
+
+    expect(result.isError).toBeUndefined();
+    expect(objectOf(session, "note").geometry).toMatchObject({ width: 200, height: 200 });
     expect(result.text).toContain("needs");
   });
 

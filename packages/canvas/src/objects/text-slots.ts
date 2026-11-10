@@ -8,11 +8,10 @@ import {
   DEFAULT_CANVAS_STYLE,
   FIGJAM_CANVAS_STYLE,
   type CanvasStyle,
-  type CanvasStyleFont,
 } from "../theme/canvas-style";
 import { withAlpha } from "../theme/color-math";
-import { CANVAS_MONO_FONT_STACK, CANVAS_SANS_FONT_STACK } from "../theme/fonts";
-import { measureWidth, wrapText, type FontSpec } from "../theme/text-measure";
+import { CANVAS_SANS_FONT_STACK } from "../theme/fonts";
+import { wrapText, type FontSpec } from "../theme/text-measure";
 import { resolveIconPaint, resolveShapePaint, resolveStickyPaint } from "../theme/palette";
 import { TITLE_CHIP, titleChipLayout, titleChipScale } from "./section/title-chip-layout";
 
@@ -94,22 +93,6 @@ export interface ResolvedTextSlot {
   hidden: boolean;
   /** View counter-scale factor (title-chip when zoomed out); 1 everywhere else. */
   scale: number;
-  /**
-   * The detail line this slot paints under the name, or null when there is
-   * none: the object has no detail, the kind never paints one in its slot
-   * (stickies, sections), or a center slot is too short to hold a name line
-   * plus the detail line.
-   */
-  detail: ResolvedSlotDetail | null;
-}
-
-/** A detail line resolved for one slot (contract §4). */
-export interface ResolvedSlotDetail {
-  /** The detail as its one painted line: whitespace runs collapsed, trimmed — not yet ellipsized. */
-  text: string;
-  typography: DetailTypography;
-  /** Gap between the name block and the line (renderers drop it when the name is empty). */
-  gapPx: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -232,22 +215,19 @@ export function belowBandMaxWidthPx(object: Pick<InteractiveCanvasObject, "geome
 
 /**
  * Content band size for below-glyph text: the name wrapped the way the stage
- * paints it (pre-wrap, break-word) at the band's max width, then — when the
- * object has a detail — the gap and the one detail line (contract §4: the
- * band grows by the detail). `lines` counts name lines only. The band is as
+ * paints it (pre-wrap, break-word) at the band's max width. The band is as
  * wide as its widest line (measured in Chromium layout units, so the same
- * lines wrap identically inside it) and the detail widens it up to the max
- * width (where it ellipsizes). Name and detail fonts come from `canvasStyle`
- * (`textFontSizePx` / weight, the detail font — callers without one size
- * with the default style). The gap to the glyph is owned by the slot rect.
+ * lines wrap identically inside it). The name font comes from `canvasStyle`
+ * (`textFontSizePx` / weight — callers without one size with the default
+ * style). A node shows its name only: a stored `detail` (older boards) never
+ * paints. The gap to the glyph is owned by the slot rect.
  */
 export function belowBandSize(
   text: string,
   object: InteractiveCanvasObject,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): BelowBandSize {
-  const detailText = slotDetailText(object);
-  if (!isBelowTextType(object.type) || (text === "" && detailText === "")) {
+  if (!isBelowTextType(object.type) || text === "") {
     return { lines: 0, widthPx: 0, heightPx: 0 };
   }
   const slot = belowTextSlotForType(object.type);
@@ -257,18 +237,12 @@ export function belowBandSize(
   const maxWidth = belowBandMaxWidthPx(object);
   const typography = resolveSlotTypography(slot, object, canvasStyle);
   const lineHeightPx = slotLineHeightPx(typography);
-  const wrapped =
-    text === ""
-      ? { lineCount: 0, maxLineWidth: 0 }
-      : wrapText(text, slotFontSpec(typography), { maxWidth, lineHeight: lineHeightPx, whiteSpace: "pre-wrap" });
-  let widthPx = Math.min(maxWidth, wrapped.maxLineWidth);
-  let heightPx = wrapped.lineCount * lineHeightPx;
-  if (detailText !== "") {
-    const detail = detailTypography(canvasStyle);
-    widthPx = Math.max(widthPx, Math.min(maxWidth, measureWidth(detailText, detailFontSpec(detail))));
-    heightPx += (wrapped.lineCount > 0 ? DETAIL_LINE_GAP_PX : 0) + detail.lineHeightPx;
-  }
-  return { lines: wrapped.lineCount, widthPx, heightPx };
+  const wrapped = wrapText(text, slotFontSpec(typography), { maxWidth, lineHeight: lineHeightPx, whiteSpace: "pre-wrap" });
+  return {
+    lines: wrapped.lineCount,
+    widthPx: Math.min(maxWidth, wrapped.maxLineWidth),
+    heightPx: wrapped.lineCount * lineHeightPx,
+  };
 }
 
 function belowTextSlotForType(_type: BelowTextType): TextSlot {
@@ -290,7 +264,7 @@ function belowBandRectPx(glyph: LocalRect, band: Pick<BelowBandSize, "widthPx" |
 
 /**
  * The painted picture, object-local: glyph box (the tile in the tile style —
- * iconGlyphBoxPx) ∪ caption band (name lines + detail line). Painted bounds
+ * iconGlyphBoxPx) ∪ caption band (the name lines). Painted bounds
  * read it directly; objects/geometry.ts builds hit bounds (∪ the object box)
  * and connection bounds (the glyph box's columns, down through the band) on
  * it. Default style when `canvasStyle` is omitted.
@@ -314,67 +288,6 @@ export function belowExtendedBoundsPx(
   };
 }
 
-// ---------------------------------------------------------------------------
-// Detail line (contract §4): ONE muted line under the name — inside a shape's
-// center/rect slot (name + detail center as one block, and the name loses
-// lines before the detail disappears) and at the end of an icon's below band
-// (the band grows by it). Stickies never paint one (their body is markdown);
-// sections paint theirs in the header chip, not in a text slot. Live and
-// static renderers both read it from ResolvedTextSlot.detail.
-// ---------------------------------------------------------------------------
-
-/** Gap between the name block and the detail line. */
-export const DETAIL_LINE_GAP_PX = 3;
-/** Detail line-height as a multiple of its font size. */
-export const DETAIL_LINE_HEIGHT = 1.3;
-/** IBM Plex Mono detail weight. */
-export const DETAIL_MONO_FONT_WEIGHT = 500;
-/** Inter detail weight. */
-export const DETAIL_SANS_FONT_WEIGHT = 400;
-
-/** How a detail line paints under one canvas style. */
-export interface DetailTypography {
-  font: CanvasStyleFont;
-  /** CSS font stack (theme/fonts.ts). */
-  fontFamily: string;
-  fontSizePx: number;
-  fontWeight: number;
-  lineHeightPx: number;
-  color: string;
-}
-
-/** The detail line's font, size, weight, line box, and color under `canvasStyle`. */
-export function detailTypography(canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE): DetailTypography {
-  const mono = canvasStyle.detailFont === "mono";
-  return {
-    font: mono ? "mono" : "sans",
-    fontFamily: mono ? CANVAS_MONO_FONT_STACK : CANVAS_SANS_FONT_STACK,
-    fontSizePx: canvasStyle.detailFontSizePx,
-    fontWeight: mono ? DETAIL_MONO_FONT_WEIGHT : DETAIL_SANS_FONT_WEIGHT,
-    lineHeightPx: canvasStyle.detailFontSizePx * DETAIL_LINE_HEIGHT,
-    color: canvasStyle.detailColor,
-  };
-}
-
-/** A detail as the one line it paints: whitespace runs (newlines included) collapsed to single spaces, trimmed. */
-export function collapseDetailText(detail: string | undefined): string {
-  return typeof detail === "string" ? detail.replace(/\s+/g, " ").trim() : "";
-}
-
-/**
- * The detail line `object`'s text slot paints ("" for none). Stickies and
- * sections never paint one in a slot, whatever the document holds.
- */
-export function slotDetailText(object: Pick<InteractiveCanvasObject, "type" | "detail">): string {
-  if (object.type === "sticky" || object.type === "section") return "";
-  return collapseDetailText(object.detail);
-}
-
-/** The font a detail line paints in, for measuring (its family stack, size, and weight). */
-export function detailFontSpec(typography: DetailTypography): FontSpec {
-  return { family: typography.fontFamily, size: typography.fontSizePx, weight: typography.fontWeight };
-}
-
 /**
  * `slot`'s typography under the workspace canvas style. The shape-text
  * baseline (center / below / rect slots) takes the style's name size, weight,
@@ -393,6 +306,7 @@ export function resolveSlotTypography(
   let color: string;
   let fontWeight = base.fontWeight;
   let fontSizePx = base.fontSizePx;
+  let lineHeight = base.lineHeight;
   if (base === SHAPE_TEXT_TYPOGRAPHY) {
     const pick = object.color ?? FIRST_USE_COLORS.shape;
     color =
@@ -403,58 +317,32 @@ export function resolveSlotTypography(
     fontSizePx = canvasStyle.textFontSizePx;
   } else if (base === INSET_BODY_TEXT_SLOT.typography) {
     color = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).text;
+    fontSizePx = canvasStyle.stickyFontSizePx;
+    lineHeight = `${canvasStyle.stickyLineHeightPx}px`;
   } else {
     return base;
   }
-  return color === base.color && fontWeight === base.fontWeight && fontSizePx === base.fontSizePx
+  return color === base.color &&
+    fontWeight === base.fontWeight &&
+    fontSizePx === base.fontSizePx &&
+    lineHeight === base.lineHeight
     ? base
-    : { ...base, color, fontWeight, fontSizePx };
+    : { ...base, color, fontWeight, fontSizePx, lineHeight };
 }
 
 /**
  * The most lines the name may paint in `resolved` (the live
- * -webkit-line-clamp, the static clampLines): the slot height less the detail
- * line's reserve, one line at minimum.
+ * -webkit-line-clamp, the static clampLines): the slot height in line boxes,
+ * one line at minimum.
  */
 export function slotNameLineCapacity(resolved: ResolvedTextSlot): number {
-  const reserve = resolved.detail
-    ? resolved.detail.gapPx + resolved.detail.typography.lineHeightPx
-    : 0;
-  return textSlotClampLineCount(resolved.rect.height - reserve, slotLineHeightPx(resolved.typography));
-}
-
-/**
- * The detail line a slot paints, or null. Center / rect slots paint it only
- * while the name block's first line (when there is a name) plus the detail
- * line fit the slot height (shorter, the detail drops and the name keeps the
- * slot) — a detail-only shape needs just the detail line. `named` is true
- * whenever a name line paints above it: a non-empty name, or the in-place
- * editor's textarea. The below band always makes room. Title chips
- * (sections) and inset bodies (stickies) never do.
- */
-function resolveSlotDetail(
-  slot: TextSlot,
-  object: InteractiveCanvasObject,
-  rect: LocalRect,
-  typography: SlotTypography,
-  hidden: boolean,
-  canvasStyle: CanvasStyle,
-  named: boolean,
-): ResolvedSlotDetail | null {
-  const text = slotDetailText(object);
-  if (text === "" || hidden || rect.width <= 0) return null;
-  const placement = textPlacementName(slot.placement);
-  if (placement === "title-chip" || placement === "inset-body") return null;
-  const detail = { text, typography: detailTypography(canvasStyle), gapPx: DETAIL_LINE_GAP_PX };
-  if (placement === "below") return detail;
-  const nameReserve = named ? slotLineHeightPx(typography) + detail.gapPx : 0;
-  return rect.height >= nameReserve + detail.typography.lineHeightPx ? detail : null;
+  return textSlotClampLineCount(resolved.rect.height, slotLineHeightPx(resolved.typography));
 }
 
 // ---------------------------------------------------------------------------
 // Section title chip geometry — the chip IS the title-chip preset, and the
 // editor overlay consumes the same numbers. The layout (placement, icon,
-// title, detail, scale, width budget) lives with the section in
+// title, scale, width budget) lives with the section in
 // objects/section/title-chip-layout.ts; re-exported here for back-compat.
 // ---------------------------------------------------------------------------
 
@@ -494,8 +382,17 @@ export function belowTextSlot(options?: { compactBelowHeightPx?: number }): Text
 
 export const BELOW_TEXT_SLOT: TextSlot = belowTextSlot();
 
-/** Sticky body inset (px) — FigJam-sampled (STICKY text inset left/top). */
-export const INSET_BODY_PADDING_PX = { left: 21, top: 28, right: 21, bottom: 21 } as const;
+/** Sticky body inset (px) under the style's note padding tokens (figjam: the FigJam-sampled 21 / 28 / 21 / 21). */
+export function insetBodyPaddingPx(
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): { left: number; top: number; right: number; bottom: number } {
+  return {
+    left: canvasStyle.stickyPaddingXPx,
+    top: canvasStyle.stickyPaddingTopPx,
+    right: canvasStyle.stickyPaddingXPx,
+    bottom: canvasStyle.stickyPaddingBottomPx,
+  };
+}
 
 /**
  * Paper sticky body text: the text color at this opacity (mirrors
@@ -503,7 +400,12 @@ export const INSET_BODY_PADDING_PX = { left: 21, top: 28, right: 21, bottom: 21 
  */
 const INSET_BODY_TEXT_OPACITY = 0.8;
 
-/** "inset-body" — padded multi-line body area (sticky). Renders simple markdown at rest (D18). */
+/**
+ * "inset-body" — padded multi-line body area (sticky). Renders simple markdown
+ * at rest (D18). The size and line height here are the figjam preset's; the
+ * style's sticky tokens replace them (resolveSlotTypography), and its padding
+ * tokens place the rect (insetBodyPaddingPx).
+ */
 export const INSET_BODY_TEXT_SLOT: TextSlot = {
   placement: "inset-body",
   typography: {
@@ -562,9 +464,9 @@ export function resolveTextSlot(
   options?: {
     draftText?: string;
     /**
-     * Workspace canvas style: the typography's name color/weight, the detail
-     * line's font and size (and so the below band), and the title-chip width
-     * (its border width). Omitted = the default style.
+     * Workspace canvas style: the typography's name color/weight and size
+     * (and so the below band), and the title-chip width (its border width).
+     * Omitted = the default style.
      */
     canvasStyle?: CanvasStyle;
   },
@@ -587,26 +489,24 @@ export function resolveTextSlot(
     };
   } else if (slot.placement === "below") {
     const band = belowBandSize(options?.draftText ?? object.text, object, canvasStyle);
-    // At least one name line box (the editor's textarea), then the detail
-    // line's reserve when the object has one.
-    const detailLine = detailTypography(canvasStyle).lineHeightPx;
-    const detailReserve = slotDetailText(object) !== "" && !hidden ? DETAIL_LINE_GAP_PX + detailLine : 0;
-    // Directly under the glyph box — the tile, in the tile style.
+    // At least one name line box (the editor's textarea), directly under the
+    // glyph box — the tile, in the tile style.
     rect = belowBandRectPx(iconGlyphBoxPx(object, canvasStyle), {
       widthPx: band.widthPx,
-      heightPx: Math.max(1, band.lines) * slotLineHeightPx(typography) + detailReserve,
+      heightPx: Math.max(1, band.lines) * slotLineHeightPx(typography),
     });
   } else if (slot.placement === "inset-body") {
+    const padding = insetBodyPaddingPx(canvasStyle);
     rect = {
-      x: INSET_BODY_PADDING_PX.left,
-      y: INSET_BODY_PADDING_PX.top,
-      width: Math.max(0, width - INSET_BODY_PADDING_PX.left - INSET_BODY_PADDING_PX.right),
-      height: Math.max(0, height - INSET_BODY_PADDING_PX.top - INSET_BODY_PADDING_PX.bottom),
+      x: padding.left,
+      y: padding.top,
+      width: Math.max(0, width - padding.left - padding.right),
+      height: Math.max(0, height - padding.top - padding.bottom),
     };
   } else {
     // title-chip: the section header chip's painted box (objects/section/
     // title-chip-layout.ts) — floating (inset) or pinned (flush in the
-    // corner), its width tracking the icon, title, and detail (a mirror of
+    // corner), its width tracking the icon and title (a mirror of
     // the chip's CSS auto width), capped to the section's inner width at
     // every zoom.
     rect = titleChipLayout(object, canvasStyle, zoom).box;
@@ -619,16 +519,6 @@ export function resolveTextSlot(
     multiline: slot.multiline,
     hidden,
     scale,
-    // A draft means the in-place editor is open: its textarea is a name line.
-    detail: resolveSlotDetail(
-      slot,
-      object,
-      rect,
-      typography,
-      hidden,
-      canvasStyle,
-      options?.draftText !== undefined || object.text !== "",
-    ),
   };
 }
 

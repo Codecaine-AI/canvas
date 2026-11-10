@@ -175,20 +175,7 @@
           }
         },
         {
-          "insert": " and "
-        },
-        {
-          "insert": "detail-too-long",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/board/lints/rules/detail-too-long.ts"
-            }
-          }
-        },
-        {
-          "insert": " lints judge object text against the name and detail convention: a short name plus at most one detail line, with prose on a sticky. Every finding in the edited scope, error or warning, blocks a committed finalize. A fixable finding includes ready-to-send "
+          "insert": " lint judges object text against the name convention: a node shows its name only, with extra context in a sticky note next to it. Every finding in the edited scope, error or warning, blocks a committed finalize. A fixable finding includes ready-to-send "
         },
         {
           "insert": "suggested op:",
@@ -394,7 +381,7 @@
           }
         },
         {
-          "insert": ": a box's content is a short name plus at most one detail line, and content determines size from one shared 288×96 target. Peers match the largest member, and deliberate size differences communicate importance or exception."
+          "insert": ": a box's content is a short name, and content determines size from one shared 288×96 target. Peers match the largest member, and deliberate size differences communicate importance or exception."
         }
       ],
       "children": []

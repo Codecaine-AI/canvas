@@ -130,7 +130,7 @@
           }
         },
         {
-          "insert": " owns the shape contract: ObjectDef v2, ShapeDef, text slots and the detail line, outlines and anchors, and color roles."
+          "insert": " owns the shape contract: ObjectDef v2, ShapeDef, text slots, outlines and anchors, and color roles."
         }
       ],
       "children": []
@@ -673,13 +673,13 @@
       "props": {},
       "text": [
         {
-          "insert": "Decision",
+          "insert": "Decision.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": ": every piece of object text geometry has one source module that the live stage, the static renderer, the in-place editors, and the agent's text fit all read. "
+          "insert": " Every piece of object text geometry has one source module that the live stage, the static renderer, the in-place editors, and the agent's text fit all read. "
         },
         {
           "insert": "text-slots.ts",
@@ -692,16 +692,7 @@
           }
         },
         {
-          "insert": " resolves each slot's rect, its theme typography, and the detail line under the name ("
-        },
-        {
-          "insert": "ResolvedTextSlot.detail",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "), and "
+          "insert": " resolves each slot's rect and its theme typography, and "
         },
         {
           "insert": "section/title-chip-layout.ts",
@@ -714,7 +705,16 @@
           }
         },
         {
-          "insert": " lays out the section header chip: placement, icon, title, detail, scale, and width budget."
+          "insert": " lays out the section header chip: placement, icon, title, scale, and width budget. A node shows its name only, so neither module resolves a stored "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -725,13 +725,13 @@
       "props": {},
       "text": [
         {
-          "insert": "Why",
+          "insert": "Why.",
           "attributes": {
             "bold": true
           }
         },
         {
-          "insert": ": a name, a detail, or a header chip measured one way and painted another clips on one surface and not the other, and the DOM-equivalence tests compare live and static output exactly. The rejected alternative was per-renderer layout code, where each surface measures text its own way."
+          "insert": " A name or a header chip measured one way and painted another clips on one surface and not the other. The DOM-equivalence tests compare live and static output exactly. The rejected alternative was per-renderer layout code, where each surface measures text its own way."
         }
       ],
       "children": []
@@ -1502,35 +1502,6 @@
             "As wide as the widest wrapped line, at most the larger of the object width and 200px"
           ],
           [
-            "Detail lines",
-            [
-              {
-                "insert": "text-slots.ts",
-                "attributes": {
-                  "code": true
-                }
-              },
-              {
-                "insert": ", "
-              },
-              {
-                "insert": "static-svg.ts",
-                "attributes": {
-                  "code": true
-                }
-              }
-            ],
-            [
-              {
-                "insert": "measureWidth",
-                "attributes": {
-                  "code": true
-                }
-              }
-            ],
-            "One line, cut with … in the detail font"
-          ],
-          [
             "Sticky bodies",
             [
               {
@@ -1566,12 +1537,9 @@
                 "attributes": {
                   "code": true
                 }
-              },
-              {
-                "insert": " per run"
               }
             ],
-            "Title and detail each in their own font, ellipsis in the title font"
+            "The title in the header font, ellipsis in the title font"
           ],
           [
             "Edge label chips",

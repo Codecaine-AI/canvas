@@ -14,6 +14,7 @@ import type {
   InteractiveCanvasObjectType,
 } from "../../../../state/schema";
 import { animateSectionFitToChildren, isSectionFitted } from "../section-fit/animate-section-fit";
+import { placementGeometry } from "../../../../objects/sticky/note-fit";
 import { exportDocumentAsPng, exportDocumentAsSvg } from "../../../../render/download";
 import type { CanvasStyle } from "../../../../theme/canvas-style";
 import {
@@ -198,7 +199,7 @@ export function useCanvasContextMenu({
     dispatch({
       type: "canvas.addObject",
       objectType,
-      geometry: geometryForContextObject(objectType, contextMenu.canvasPoint),
+      ...placementGeometry(objectType, geometryForContextObject(objectType, contextMenu.canvasPoint), undefined, canvasStyle),
       parentId:
         contextObject?.type === "section"
           ? contextObject.id

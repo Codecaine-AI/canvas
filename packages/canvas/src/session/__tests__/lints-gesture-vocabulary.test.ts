@@ -37,28 +37,8 @@ const NON_TOOL_TERMS = new Set<string>([]);
 function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
   return [
     {
-      // containment: a child hanging out of its frame, and a stray past the page.
-      name: "containment",
-      document: makeDocument([
-        box("page", 0, 0, 1200, 800, "section"),
-        { ...box("frame", 40, 40, 480, 320, "section"), parentId: "page" },
-        { ...box("child", 440, 96, 184, 96, "process"), parentId: "frame" },
-        box("stray", 1300, 96, 184, 96, "process"),
-      ]),
-    },
-    {
-      // frame-slack: a frame far larger than the one child inside it.
-      name: "frame-slack",
-      document: makeDocument([
-        box("page", 0, 0, 4000, 3000, "section"),
-        { ...box("roomy", 100, 100, 2400, 2000, "section"), parentId: "page" },
-        { ...box("lonely", 200, 200, 184, 96, "process"), parentId: "roomy" },
-      ]),
-    },
-    {
-      // covered-content and crowding: boxes on top of each other, and boxes
-      // with nearly touching boundaries.
-      name: "covered-and-crowded",
+      // covered-content: boxes on top of each other.
+      name: "covered-content",
       document: makeDocument([
         box("page", 0, 0, 1200, 800, "section"),
         box("under", 80, 80, 200, 120, "process"),
@@ -68,77 +48,44 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
       ]),
     },
     {
-      // broken-edges: a self-loop and a dangling endpoint.
-      name: "broken-edges",
-      document: makeDocument(
-        [
-          box("page", 0, 0, 1200, 800, "section"),
-          box("alpha", 80, 80, 160, 96, "process"),
-        ],
-        [connect("loop", "alpha", "alpha"), connect("dangle", "alpha", "ghost")],
-      ),
-    },
-    {
-      // unreadable-labels: a long chip in a corridor too narrow to draw it.
-      name: "unreadable-labels",
-      document: makeDocument(
-        [
-          box("page", 0, 0, 1200, 800, "section"),
-          box("left", 80, 80, 160, 96, "process"),
-          box("right", 280, 80, 160, 96, "process"),
-        ],
-        [{
-          ...connect("labeled", "left", "right"),
-          label: "a label far too long for this corridor",
-        }],
-      ),
-    },
-    {
-      // clipped-text: a sticky body with more rows than its note can paint.
-      name: "clipped-text",
-      document: makeDocument([{
-        ...box("clipped-note", 0, 0, 176, 128, "sticky"),
-        text: "- one\n- two\n- three\n- four\n- five",
-        style: { shape: "note" },
-      }]),
-    },
-    {
-      // section-child-color: a red section directly holding a red child.
-      name: "section-child-color",
+      // covered-content: two section frames pushed into each other.
+      name: "section-on-section",
       document: makeDocument([
         box("page", 0, 0, 1200, 800, "section"),
-        { ...box("hot", 40, 40, 480, 320, "section"), color: "red", parentId: "page" },
-        { ...box("ember", 80, 120, 184, 96, "process"), color: "red", parentId: "hot" },
+        { ...box("left", 40, 40, 520, 400, "section"), parentId: "page" },
+        { ...box("right", 540, 40, 400, 400, "section"), parentId: "page" },
       ]),
     },
     {
-      // label-is-prose: two sentences written where a name belongs.
-      name: "label-is-prose",
-      document: makeDocument([{
-        ...box("session-db", 0, 0, 400, 200, "process"),
-        text: "Postgres database that stores user sessions. It is the source of truth.",
-      }]),
-    },
-    {
-      // detail-too-long: an explanation crammed into the one-fact detail line.
-      name: "detail-too-long",
-      document: makeDocument([{
-        ...box("auth", 0, 0, 400, 200, "process"),
-        detail: "Handles auth. Retries 3 times on failure, then gives up.",
-      }]),
+      // integrity: clipped text, a child outside its section, broken wires,
+      // and a wire walled in by touching boxes.
+      name: "integrity",
+      document: makeDocument([
+        { ...box("wordy", 0, 0, 160, 80, "process"), text: "a label far too long for the box it was given to hold whole" },
+        box("group", 0, 200, 300, 200, "section"),
+        { ...box("stray", 220, 240, 160, 96, "process"), parentId: "group" },
+        box("note", 0, 0, 160, 80, "sticky"),
+        { ...box("inside", 100, 600, 160, 80, "process"), text: "" },
+        { ...box("outside", 600, 600, 160, 80, "process"), text: "" },
+        { ...box("top", 0, 500, 400, 40, "process"), text: "" },
+        { ...box("bottom", 0, 800, 400, 40, "process"), text: "" },
+        { ...box("left", 0, 540, 40, 260, "process"), text: "" },
+        { ...box("right", 360, 540, 40, 260, "process"), text: "" },
+      ], [
+        connect("loop", "stray", "stray"),
+        connect("lost", "stray", "gone"),
+        connect("flat", "wordy", "note"),
+        connect("escape", "inside", "outside"),
+      ]),
     },
   ];
 }
 
 function everyDiagnostic(): { rule: string; text: string; source: string }[] {
   const collected: { rule: string; text: string; source: string }[] = [];
-  // Every fixture is read as the agent's own work — a session that started
-  // from an empty board — so the authorship rules (label-is-prose,
-  // detail-too-long) judge it like every other rule does.
-  const context = { baseline: makeDocument([]) };
   for (const { name, document } of fixtures()) {
     for (const rule of FINISHING_RULES) {
-      for (const finding of rule.check(document, context)) {
+      for (const finding of rule.check(document)) {
         collected.push({ rule: finding.rule, text: finding.message, source: `${name}/message` });
         if (finding.suggestion !== undefined) {
           collected.push({

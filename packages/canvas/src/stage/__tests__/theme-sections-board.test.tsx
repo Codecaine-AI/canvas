@@ -3,8 +3,11 @@ import { cleanup, render } from "@testing-library/react";
 import { CanvasStage } from "../CanvasStage";
 import { TextEditingOverlay } from "../editor/features/text-editing/TextEditingOverlay";
 import type { TextEditingApi } from "../editor/features/text-editing/use-text-editing";
+import { connectorDashArray } from "../../connectors/def";
 import { renderDocumentToSvg } from "../../render/static-svg";
-import type { CanvasThemeId } from "../../theme/canvas-style";
+import { canvasThemePreset, type CanvasThemeId } from "../../theme/canvas-style";
+import { contrastRatio, parseColor } from "../../theme/color-math";
+import { resolveStickyPaint } from "../../theme/palette";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 import { measureWidth } from "../../theme/text-measure";
 
@@ -111,22 +114,33 @@ describe.each(["schematic-light", "schematic-dark"] as const)("layer-cake sectio
       (id) => container.querySelector<HTMLElement>(`button[data-canvas-object-id="${id}"]`)!.style.background,
     );
     expect(new Set(live).size).toBe(3);
-    // Static: solid frames inset by half their 1.5px border; the dashed frame too.
-    expect([staticSectionFill(svg, 100, 80, 0.75), staticSectionFill(svg, 140, 140, 0.75), staticSectionFill(svg, 180, 200, 0.75)]).toEqual(
+    // Static: solid frames inset by half their 2px border; the dashed frame by half its 1.5px stroke.
+    expect([staticSectionFill(svg, 100, 80, 1), staticSectionFill(svg, 140, 140, 0.75), staticSectionFill(svg, 180, 200, 1)]).toEqual(
       live.map((background) => background.toUpperCase()),
     );
   });
+
+  it("draws a dashed frame as a short 5/4 dash at 1.5px, live as static; wires keep their dash", () => {
+    const dash = renderLive(theme).querySelector('button[data-canvas-object-id="middle"] [data-section-border-dash] rect')!;
+    expect([dash.getAttribute("stroke-width"), dash.getAttribute("stroke-dasharray"), dash.getAttribute("x")]).toEqual(["1.5", "5 4", "0.75"]);
+    const frame = attributesOf(staticSvg(theme).match(/<rect [^>]*x="140.75"[^>]*\/>/)![0]);
+    expect([frame["stroke-width"], frame["stroke-dasharray"]]).toEqual(["1.5", "5 4"]);
+    expect(connectorDashArray(canvasThemePreset(theme))).toBe("11.88 4.38");
+  });
 });
 
-describe("pinned title chip with icon + detail", () => {
-  it("live: flush inside the 1.5px frame, right + bottom edges, the icon tile, the uppercased title, the detail run", () => {
+describe("pinned title chip with icon (a stored detail never paints)", () => {
+  it("live: flush inside the 2px frame, right + bottom edges, the icon tile, the uppercased title alone", () => {
     const chip = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-section-title-chip="outer"]')!;
-    expect(chip.style.left).toBe("101.5px");
-    expect(chip.style.top).toBe("81.5px");
-    // 27px outer extent from the section's top edge, less the 1.5px frame.
-    expect(chip.style.height).toBe("25.5px");
+    // The schematic section frame is 2px since stage B round 4 (at 1.5px
+    // sibling sections parted by a thin line), so the chip sits 2px in.
+    expect(chip.style.left).toBe("102px");
+    expect(chip.style.top).toBe("82px");
+    // 27px outer extent from the section's top edge, less the 2px frame.
+    expect(chip.style.height).toBe("25px");
     expect(chip.style.borderWidth).toBe("0px 1.5px 1.5px 0px");
-    expect(chip.style.borderTopLeftRadius).toBe("0.5px");
+    // The frame's inner corner: the 2px frame corner less its 2px border.
+    expect(chip.style.borderTopLeftRadius).toBe("0px");
     expect(chip.style.borderTopRightRadius).toBe("0px");
     expect(chip.style.borderBottomRightRadius).toBe("2px");
     expect(chip.style.borderBottomLeftRadius).toBe("0px");
@@ -135,31 +149,30 @@ describe("pinned title chip with icon + detail", () => {
     expect(chip.style.fontFamily).toContain("IBM Plex Mono");
     const [icon, title] = [...chip.children];
     expect(icon?.getAttribute("data-canvas-section-icon")).toBe("brand-bun");
-    expect(title?.textContent).toBe("Bun services127.0.0.1");
-    const detail = chip.querySelector<HTMLElement>("[data-canvas-section-detail]")!;
-    expect(detail.textContent).toBe("127.0.0.1");
-    expect(detail.style.marginLeft).toBe("10px");
-    expect(detail.style.textTransform).toBe("none");
+    expect(title?.textContent).toBe("Bun services");
+    expect(chip.textContent).not.toContain("127.0.0.1");
   });
 
-  it("static: the same box at the same origin, edges, icon, and runs", () => {
+  it("static: the same box at the same origin, edges, icon, and title", () => {
     const svg = staticSvg("schematic-light");
-    // Fill path from the frame's inner corner (0.5px radius) at (101.5, 81.5).
-    expect(svg).toContain('<path d="M102 81.5H');
-    // Title at box x + 28 (6 lead + 16 tile + 6 gap), centered in the 25.5px box less its bottom edge.
-    expect(svg).toContain('x="129.5" y="93.5" fill="#1F1F1F" font-size="14" font-weight="600"');
+    // Fill path from the frame's inner corner (square: the 2px frame corner less its 2px border) at (102, 82).
+    expect(svg).toContain('<path d="M102 82H');
+    // Title at box x + 28 (6 lead + 16 tile + 6 gap), centered in the 25px box less its bottom edge.
+    expect(svg).toContain('x="130" y="93.75" fill="#1F1F1F" font-size="14" font-weight="600"');
     expect(svg).toMatch(/>BUN SERVICES<\/text>/);
-    // Detail 10px after the title: 12 tracked Plex Mono cells, 114.24px → 114.25 in layout units.
+    // 12 tracked Plex Mono cells, 114.24px → 114.25 in layout units; the stored detail paints nothing.
     const titleWidth = measureWidth("BUN SERVICES", { family: "IBM Plex Mono", size: 14, weight: 600, letterSpacing: 1.12 });
     expect(titleWidth).toBe(114.25);
-    expect(svg).toContain(`x="${Math.round((101.5 + 28 + titleWidth + 10) * 100) / 100}" y="93.5"`);
-    expect(svg).toMatch(/font-weight="400"[^>]*>127\.0\.0\.1<\/text>/);
-    // The 16px tile sits 6px in, centered on the content line (93.5); the glyph is 11px inside it.
-    expect(svg).toContain('<rect x="107.5" y="85.5" width="16" height="16" rx="2" fill="#0D7164"/>');
-    expect(svg).toContain('transform="translate(110 88) scale(0.4583)"');
+    expect(svg).not.toContain("127.0.0.1");
+    // The 16px icon box sits 6px in, centered on the content line (93.75). Bun is a brand logo: its
+    // full-color mark, set in its optical box, drawn bare and filling the box. The header tile and its
+    // 11px glyph read as a smudge at 1:1 (stage B round 0: fable on 11 and 13), so no tile is drawn.
+    expect(svg).not.toContain('<rect x="108" y="86" width="15" height="15"');
+    expect(svg).toContain('transform="translate(108 85.75) scale(0.0573) translate(11.6751 27.4726)" fill="#000000"');
+    expect(svg).toContain('fill="#FBF0DF"');
     // Only the right and bottom edges are stroked, inside the box like a CSS border
-    // (box: 6 lead + 22 icon + 114.25 title + 10 + 75.61 detail + 10 + 1.5 edge).
-    expect(svg).toMatch(/<path d="M340\.11 81\.5V105A1\.25 1\.25 0 0 1 338\.86 106\.25H101\.5" fill="none" stroke="rgba\(13, 113, 100, 0\.5\)" stroke-width="1\.5"/);
+    // (box: 6 lead + 22 icon + 114.25 title + 10 + 1.5 edge).
+    expect(svg).toMatch(/<path d="M255 82V105A1\.25 1\.25 0 0 1 253\.75 106\.25H102" fill="none" stroke="rgba\(13, 113, 100, 0\.5\)" stroke-width="1\.5"/);
   });
 
   it("figjam keeps the floating chip markup for a plain title (live and static)", () => {
@@ -223,16 +236,17 @@ describe("in-place section title editor", () => {
 
   it("pinned: the input takes the chip's box and edges, and its text starts where the title does (past the icon)", () => {
     const input = editing("schematic-light");
-    expect(input.style.left).toBe("101.5px");
-    expect(input.style.top).toBe("81.5px");
-    expect(input.style.height).toBe("25.5px");
+    expect(input.style.left).toBe("102px");
+    expect(input.style.top).toBe("82px");
+    expect(input.style.height).toBe("25px");
     expect(input.style.borderWidth).toBe("0px 1.5px 1.5px 0px");
     expect(input.style.padding).toBe("0px 10px 0px 28px");
     expect(input.style.fontFamily).toContain("IBM Plex Mono");
     expect(input.style.textTransform).toBe("uppercase");
-    // The chip fill at its depth — the same color the static chip paints.
-    expect(input.style.background).toBe("#C8DEDB");
-    expect(staticSvg("schematic-light")).toContain('fill="#C8DEDB"/>');
+    // The chip fill at its depth — the same color the static chip paints
+    // (stage C: the lighter tab Ford picked from mockup2, 0.045 L under its section).
+    expect(input.style.background).toBe("#D1F2F2");
+    expect(staticSvg("schematic-light")).toContain('fill="#D1F2F2"/>');
   });
 
   it("floating (figjam): the original inset chip editor", () => {
@@ -247,25 +261,28 @@ describe("in-place section title editor", () => {
 
 describe("connector label chip per theme", () => {
   it("schematic: a 26px mono chip sized to the measured label + 0.5em padding a side, live == static", () => {
-    // "HTTP" at 14px: 4 Plex Mono cells (33.6px → 33.609375 in layout units) + 2 × 7.
-    const width = measureWidth("HTTP", { family: "IBM Plex Mono", size: 14, weight: 500 }) + 2 * 7;
-    expect(width).toBe(47.609375);
+    // "HTTP" at 15px: 4 Plex Mono cells (36px) + 2 × 7.5.
+    const width = measureWidth("HTTP", { family: "IBM Plex Mono", size: 15, weight: 600 }) + 2 * 7.5;
+    expect(width).toBe(51);
     const container = renderLive("schematic-light");
     const rect = container.querySelector('[data-canvas-connection-label="edge"] rect')!;
     expect(Number(rect.getAttribute("width"))).toBe(width);
     expect(rect.getAttribute("height")).toBe("26");
     expect(rect.getAttribute("fill")).toBe("#FDFDFD");
-    expect(rect.getAttribute("stroke")).toBe("#E6E5E3");
+    expect(rect.getAttribute("stroke")).toBe("#838280"); // the hairline 70% toward the gray wire's stroke
     const text = container.querySelector('[data-canvas-connection-label="edge"] text')!;
     expect(text.getAttribute("font-family")).toContain("IBM Plex Mono");
-    expect(text.getAttribute("fill")).toBe("#2A2A2A");
-    expect(text.getAttribute("font-size")).toBe("14");
+    // A neutral wire's chip text is the name color, not the body gray: the body gray read thin and
+    // light beside the node names (stage B round 0: fable on 12).
+    expect(text.getAttribute("fill")).toBe("#1F1F1F");
+    expect(text.getAttribute("font-size")).toBe("15");
+    // Medium, was SemiBold: the bolder mono chip competed with the node names (stage B round 4: astra).
     expect(text.getAttribute("font-weight")).toBe("500");
 
     const svg = staticSvg("schematic-light");
     const chip = [...svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>HTTP<\/text>/g)][0]!;
-    expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.61", height: "26", fill: "#FDFDFD", stroke: "#E6E5E3" });
-    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#2A2A2A", "font-size": "14", "font-weight": "500" });
+    expect(attributesOf(chip[1]!)).toMatchObject({ width: "51", height: "26", fill: "#FDFDFD", stroke: "#838280" });
+    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#1F1F1F", "font-size": "15", "font-weight": "500" });
   });
 
   it("figjam: the 30px sans chip with black text (live now matches static)", () => {
@@ -282,18 +299,59 @@ describe("connector label chip per theme", () => {
 });
 
 describe("card stickies", () => {
-  it("live: card fill, hairline edge and 2px ink rule as inset shadows, no paper shadow", () => {
+  it("live: light boards paint a tinted callout with its hue's rule, a tinted edge and a two-layer lift", () => {
     const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
-    expect(note.style.background).toBe("#F8F8F7");
-    expect(note.style.boxShadow).toBe("inset 2px 0 0 0 #805F01, inset 0 0 0 1px #E6E5E3");
+    const paint = resolveStickyPaint("yellow", canvasThemePreset("schematic-light"));
+    expect(note.style.background).toBe(
+      `linear-gradient(to right, transparent 1px, ${paint.rule} 1px, ${paint.rule} 5px, transparent 5px) ${paint.fill}`,
+    );
+    expect(note.style.boxShadow).toBe(
+      `inset 0 0 0 1px ${paint.border}, 0 1px 2px ${paint.cardShadow}, 0 2px 6px ${paint.cardShadow}`,
+    );
   });
 
-  it("static: the same card, edge, and rule — and no shadow filter", () => {
+  it("static: the same callout with 2px corners, the rule, the edge and the two-layer lift filter", () => {
     const svg = staticSvg("schematic-light");
-    expect(svg).not.toContain("feDropShadow");
-    expect(svg).toContain('<rect x="900" y="80" width="240" height="160" fill="#F8F8F7"/>');
-    expect(svg).toContain('<rect x="900.5" y="80.5" width="239" height="159" fill="none" stroke="#E6E5E3" stroke-width="1"/>');
-    expect(svg).toContain('<rect x="900" y="80" width="2" height="160" fill="#805F01"/>');
+    const style = canvasThemePreset("schematic-light");
+    const paint = resolveStickyPaint("yellow", style);
+    const opacity = parseColor(paint.cardShadow!)!.a;
+    expect(svg).toContain(
+      `<feOffset in="b0" dy="1" result="o0"/><feFlood flood-color="${style.textColor}" flood-opacity="${opacity}" result="f0"/>`,
+    );
+    expect(svg).toContain('<feGaussianBlur in="SourceAlpha" stdDeviation="3" result="b1"/><feOffset in="b1" dy="2" result="o1"/>');
+    expect(svg).toContain(
+      `<rect x="900" y="80" width="240" height="160" rx="2" fill="${paint.fill}" filter="url(#theme-board-card-sticky-shadow)"/>`,
+    );
+    expect(svg).toContain(
+      `<path d="M901 80.27A2 2 0 0 1 902 80H905V240H902A2 2 0 0 1 901 239.73Z" fill="${paint.rule}"/><rect x="900.5" y="80.5" width="239" height="159" rx="1.5" fill="none" stroke="${paint.border}" stroke-width="1"/>`,
+    );
+  });
+
+  it("dark boards: a straight 4px neutral rule inside the hairline, live and static", () => {
+    const note = renderLive("schematic-dark").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
+    // The rule is a background strip the corner radius clips, so its inner edge never curls into a hook.
+    expect(note.style.background).toBe(
+      "linear-gradient(to right, transparent 1px, #9198A1 1px, #9198A1 5px, transparent 5px) #32363E",
+    );
+    // x 901 to 904: only its ends follow the corner arcs, its inner edge is one straight line,
+    // and it paints before the hairline, as the live background strip sits under the inset shadow.
+    expect(staticSvg("schematic-dark")).toContain(
+      '<path d="M901 80.27A2 2 0 0 1 902 80H905V240H902A2 2 0 0 1 901 239.73Z" fill="#9198A1"/><rect x="900.5" y="80.5"',
+    );
+  });
+
+  it("dark boards: a card note has no lift (its raised card fill sets it off)", () => {
+    expect(staticSvg("schematic-dark")).not.toContain("card-sticky-shadow");
+  });
+
+  it("schematic note text reads under the node names: 16px on a 24px pitch, ink on the card at 4.5:1 or more", () => {
+    const style = canvasThemePreset("schematic-light");
+    const svg = staticSvg("schematic-light");
+    expect(svg).toContain('<text fill="#1F1F1F" font-size="16" font-weight="400"');
+    expect(style.stickyFontSizePx).toBeLessThan(style.textFontSizePx);
+    expect(contrastRatio(style.textColor, resolveStickyPaint("yellow", style).fill)).toBeGreaterThanOrEqual(4.5);
+    const dark = canvasThemePreset("schematic-dark");
+    expect(contrastRatio(dark.textColor, dark.cardFill)).toBeGreaterThanOrEqual(4.5);
   });
 
   it("paper stickies keep the shadow and the note CSS (no inline trim)", () => {

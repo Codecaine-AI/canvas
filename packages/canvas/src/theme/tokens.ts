@@ -69,19 +69,60 @@ export function resolveObjectStrokeWidth(
 
 /**
  * Corner radius of a rect-family shape's trim (logical px), by its effective
- * render shape (`style.shape`; absent = the rounded rect): the default
- * rounded rect — process and rectangle objects — takes the canvas style's
- * `processCornerRadiusPx`, every other rect-family silhouette (predefined
- * process) `shapeCornerRadiusPx`.
+ * render shape (`style.shape`; absent = the rounded rect): the rounded rect —
+ * process and rectangle objects — and the predefined process take the canvas
+ * style's `processCornerRadiusPx`, every other rect-family silhouette
+ * `shapeCornerRadiusPx`. A square-cornered predefined process broke from the
+ * rounded nodes beside it (stage A round 8: sol and opus on the nodes sheet).
+ * Every preset sets both radii to 2px.
  */
 export function resolveShapeCornerRadius(
   renderShape: string | undefined,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
 ): number {
-  return (renderShape ?? "rounded-rect") === "rounded-rect"
+  return PROCESS_RADIUS_SHAPES.has(renderShape ?? "rounded-rect")
     ? canvasStyle.processCornerRadiusPx
     : canvasStyle.shapeCornerRadiusPx;
 }
+
+const PROCESS_RADIUS_SHAPES: ReadonlySet<string> = new Set(["rounded-rect", "predefined-process"]);
+
+/**
+ * Width of a predefined process's two inner bars, px: PREDEFINED_PROCESS_BAR_SCALE
+ * of the shape's own border width, so the bars read as a lighter inner line
+ * than the outline, never a heavier one. FigJam keeps its spec's 4px bars.
+ * 4px bars over a 2px border outweighed the perimeter (stage A rounds 8 and
+ * 9: sol and opus on the nodes sheet), and border-width bars still crowded
+ * the label (round 10: opus).
+ */
+export function resolvePredefinedProcessBarWidth(strokeWidth: number, canvasStyle: CanvasStyle): number {
+  return canvasStyle.theme === "figjam" ? FIGJAM_PREDEFINED_PROCESS_BAR_PX : strokeWidth * PREDEFINED_PROCESS_BAR_SCALE;
+}
+
+export const FIGJAM_PREDEFINED_PROCESS_BAR_PX = 4;
+
+/**
+ * Outside FigJam: the gap from each outer edge of a predefined process to
+ * its bar, px. The bars draw in the border color with no tinted end band,
+ * the plain flowchart double line (Ford, stage C round 2: "For the
+ * predefined process, we can do that"). FigJam keeps its ratio inset.
+ */
+export const PREDEFINED_PROCESS_BAR_INSET_PX = 10;
+const PREDEFINED_PROCESS_BAR_SCALE = 0.75;
+
+/**
+ * Stroke width of a true-outline silhouette (ellipse, diamond, octagon,
+ * triangle, block arrow), px: TRUE_OUTLINE_STROKE_SCALE of the border width
+ * outside FigJam. A diagonal or curved stroke antialiases across pixels and
+ * reads lighter than the crisp axis-aligned edge of a rectangle at the same
+ * width, so at one width the diamond and ellipse borders looked thinner
+ * than the rectangles beside them (stage A round 9: opus on the nodes sheet).
+ */
+export function resolveTrueOutlineStrokeWidth(strokeWidth: number, canvasStyle: CanvasStyle): number {
+  return canvasStyle.theme === "figjam" ? strokeWidth : strokeWidth * TRUE_OUTLINE_STROKE_SCALE;
+}
+
+const TRUE_OUTLINE_STROKE_SCALE = 1.25;
 
 // ---------------------------------------------------------------------------
 // Text

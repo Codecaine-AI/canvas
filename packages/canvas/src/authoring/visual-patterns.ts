@@ -12,7 +12,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "fan-out",
     name: "Fan-Out",
-    description: "One source produces or delegates to many recipients. Spread recipients across the reading direction and label the dispatched work. Conditional choices belong to a decision; parallel delegation shows the recipients that actually work.",
+    description: "One source produces or delegates to many recipients. Spread recipients across the reading direction. Conditional choices belong to a decision; parallel delegation shows the recipients that actually work.",
     ascii: `[Source] --+--> [Recipient A]
           +--> [Recipient B]
           +--> [Recipient C]`,
@@ -47,7 +47,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "sequence",
     name: "Sequence",
-    description: "Ordered stages or events form a readable chain with labeled transitions. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects. The line under each stage is its detail: one fact, not a description.",
+    description: "Ordered stages or events form a readable chain. Label a transition only for its condition. Preserve order, conditions, and terminal outcomes. A timeline uses supported steps or event objects.",
     ascii: `[Request] --> [Validate] --> [Process] --> [Respond]
  POST /runs    JSON schema    worker pool   201 Created`,
     useCase: "A request passes through validation, processing, and response delivery.",
@@ -55,7 +55,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "feedback-cycle",
     name: "Feedback Cycle",
-    description: "A result affects later work through a return connection between distinct stages or participants. Label the return trigger and destination. Canvas rejects a self-loop on one object.",
+    description: "A result affects later work through a return connection between distinct stages or participants. Label the return with its trigger. Canvas rejects a self-loop on one object.",
     ascii: `[Act] -----> [Observe]
   ^              |
   |              v
@@ -92,7 +92,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "shared-resource",
     name: "Shared Resource",
-    description: "Several participants use one shared store placed near its consumers. Label read/write relationships and retain one store instead of drawing misleading duplicates.",
+    description: "Several participants use one shared store placed near its consumers. Retain one store instead of drawing misleading duplicates.",
     ascii: `[Writer] --write--> [Shared Store] --read--> [Reader A]
                          |
                          +----------read--> [Reader B]`,
@@ -101,7 +101,7 @@ export const VISUAL_PATTERNS: readonly VisualPattern[] = [
   {
     id: "state-machine",
     name: "State Machine",
-    description: "A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board's node and edge counts equal the chart's. Keep about 20 arrows or fewer. Labels are the reader's words from the chart, never variable or action names. Each node wears its group's color; a state that breaks a rule wears red instead and names the rule in its detail. The start state comes first in reading order.",
+    description: "A checked chart.mmd redrawn as a board: one node per state and one labeled edge per arrow, so the board's node and edge counts equal the chart's. Keep about 20 arrows or fewer. Labels are the reader's words from the chart, never variable or action names. Each node wears its group's color; a state that breaks a rule wears red instead, with a sticky note beside it naming the rule. The start state comes first in reading order.",
     ascii: `[Cart open] --you press pay--> [Paying] --the card clears--> [Paid]
    teal                           yellow    |                 yellow
                                             +--the card is declined--> [Payment failed]

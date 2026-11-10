@@ -4,8 +4,10 @@ import { useCallback, useState, type Dispatch, type SetStateAction } from "react
 import { objectDefFor } from "../../../../objects/object-def";
 import type { CanvasAction } from "../../../../state/actions";
 import type { CanvasPoint } from "../../../../state/geometry";
-import { labelPointFor, routeConnection } from "../../../../connectors/routing";
+import { routeConnection } from "../../../../connectors/routing";
+import { placedLabelPoint } from "../../../../connectors/label-placement";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";
+import { noteTextPatch } from "../../../../objects/sticky/note-fit";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -71,10 +73,12 @@ export function useTextEditing({ document, dispatch }: UseTextEditingArgs): Text
   const labelEditPoint =
     labelEditConnection && labelEditFromObject && labelEditToObject
       // The inline editor opens over the chip, so it reads the same effective
-      // label point the chip is drawn at (S1.1 `labelPosition` pin included).
-      ? labelPointFor(
+      // placed point the chip is drawn at (connectors/label-placement.ts).
+      ? placedLabelPoint(
           routeConnection(labelEditFromObject, labelEditToObject, labelEditConnection, document.objects, canvasStyle),
           labelEditConnection,
+          document,
+          canvasStyle,
         )
       : null;
 
@@ -137,11 +141,12 @@ export function useTextEditing({ document, dispatch }: UseTextEditingArgs): Text
     dispatch({
       type: "canvas.updateObject",
       objectId: objectTextEditId,
-      patch: { text: nextText },
+      // A card note's height follows its text (objects/sticky/note-fit.ts).
+      patch: noteTextPatch(target, nextText, canvasStyle),
     });
     setObjectTextEditId(null);
     setObjectTextEditValue("");
-  }, [objectTextEditId, objectTextEditValue, dispatch, document.objects]);
+  }, [objectTextEditId, objectTextEditValue, dispatch, document.objects, canvasStyle]);
 
   const cancelObjectTextEdit = useCallback(() => {
     setObjectTextEditId(null);

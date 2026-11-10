@@ -38,6 +38,7 @@ import type { ShapeCatalogEntry } from "../../../objects/catalog";
 import {
   ICON_GLYPHS,
   iconGlyphStrokeWidthForViewBox,
+  iconGlyphViewBox,
   resolveIconGlyph,
   type IconGlyphDefinition,
   type IconGlyphElement,
@@ -106,8 +107,8 @@ const ICON_PREVIEW_SIZE_PX = Math.min(iconDefaultGeometry.width, iconDefaultGeom
 const ICON_PREVIEW_TINT_OPACITY = 0.16;
 
 function glyphElementNode(element: IconGlyphElement, key: number) {
-  if (element.kind === "path") return <path key={key} d={element.d} />;
-  if (element.kind === "circle") return <circle key={key} cx={element.cx} cy={element.cy} r={element.r} />;
+  if (element.kind === "path") return <path key={key} d={element.d} fill={element.fill} />;
+  if (element.kind === "circle") return <circle key={key} cx={element.cx} cy={element.cy} r={element.r} fill={element.fill} />;
   return <line key={key} x1={element.x1} y1={element.y1} x2={element.x2} y2={element.y2} />;
 }
 
@@ -159,6 +160,14 @@ function IconGlyphPreview({ glyphId, className }: { glyphId: IconGlyphId; classN
   const maskId = useId();
   const glyph = resolveIconGlyph(glyphId, canvasStyle.iconPack);
   const box = glyph.viewBoxSize;
+  if (glyph.brandColor) {
+    // A brand logo previews as itself: its own colors in its optical box, no tile.
+    return (
+      <svg viewBox={iconGlyphViewBox(glyph)} className={className} aria-hidden="true">
+        <g fill={glyph.brandColor}>{glyph.elements.map(glyphElementNode)}</g>
+      </svg>
+    );
+  }
   if (canvasStyle.iconStyle !== "tile") {
     return (
       <svg viewBox={`0 0 ${box} ${box}`} className={className} fill="none" aria-hidden="true">

@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { CANVAS_COLORS, CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "../../state/schema";
 import { CANVAS_THEME_IDS } from "../../theme/canvas-style";
 import { getCanvasAuthoringGuidance } from "../../authoring";
-import { DETAIL_MAX_CHARS, NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../../board/text-rules";
+import { NAME_MAX_CHARS, NAME_MAX_WORDS, NAME_TARGET_WORDS } from "../../board/text-rules";
 import { OBJECT_PREFERENCES } from "../../objects/registry";
 import { ICON_GLYPH_CATEGORIES, resolveIconGlyph } from "../../objects/shapes/icon/icon-glyphs";
 
@@ -75,18 +75,18 @@ describe("shared Canvas authoring guidance", () => {
     expect(groups.find(group => kindRank(group.entries[0]!) === 2)!.lead).not.toBe("");
   });
 
-  test("the name and detail convention quotes the limits the text lints enforce", () => {
+  test("the name convention quotes the limits in board/text-rules.ts, and no topic teaches a node detail", () => {
     const design = topicText("diagram_design");
     expect(design).toContain(`${NAME_TARGET_WORDS} words`);
-    expect(design).toContain(`${DETAIL_MAX_CHARS} characters`);
+    expect(design).toContain("A node shows its name only; put extra context in a sticky note next to it.");
+    for (const topic of getCanvasAuthoringGuidance().topics) {
+      expect(topic.text, topic.id).not.toMatch(/`detail`|detail line|detail=/);
+    }
 
     const conventions = topicText("canvas_conventions");
     for (const fragment of [
-      "label-is-prose",
-      "detail-too-long",
       `${NAME_MAX_WORDS} words`,
       `${NAME_MAX_CHARS} characters`,
-      `${DETAIL_MAX_CHARS} characters`,
     ]) {
       expect(conventions, fragment).toContain(fragment);
     }

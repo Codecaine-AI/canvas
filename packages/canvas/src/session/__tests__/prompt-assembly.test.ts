@@ -97,13 +97,10 @@ describe("layout-editor prompt contract", () => {
     }
   });
 
-  test("physical diagnostics block both stages; categorical hue does not", () => {
+  test("overlap and integrity are the diagnostics, in both stages; categorical hue is not one", () => {
     for (const rules of [LAYOUT_RULES, FINISHING_RULES]) {
-      const ids = rules.map(rule => rule.id);
-      for (const physical of ["covered-content", "containment", "broken-edges", "unreadable-labels", "clipped-text", "crowding"]) expect(ids).toContain(physical);
-      expect(ids).not.toContain("section-child-color");
+      expect(rules.map(rule => rule.id)).toEqual(["covered-content", "integrity"]);
     }
-    expect(FINISHING_RULES.map(rule => rule.id)).toContain("frame-slack");
     expect(content("node-section-success-criteria")).toContain("edited scope");
   });
 });

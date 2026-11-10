@@ -47,6 +47,12 @@ export type OpOutcome =
       draft: InteractiveCanvasDocument;
       summary: string;
       notes?: string[];
+      /**
+       * Parents this edit keeps (child id to section id, or null for the top
+       * level). Section grow keeps them while it grows the ancestors, and the
+       * edit is refused when the board would still move one.
+       */
+      held?: ReadonlyMap<string, string | null>;
     }
   /** A well-formed, legal operation with nothing to do; this is not an error. */
   | { status: "noop"; note: string };
@@ -207,7 +213,7 @@ const LOCK_RELEASE =
   "a lock is a don't-touch signal; unlock it first if the request requires editing here";
 
 /** What a lock gate found: the frame holding the lock, its mode, and whose it is. */
-interface LockHold {
+export interface LockHold {
   /** The object carrying the `locked` value — the id `unlock` takes. */
   holderId: string;
   mode: "all" | "background";
@@ -227,7 +233,7 @@ interface LockHold {
  * endpoint), so an object's own "background" lock and a background-locked
  * ancestor both read as free.
  */
-function lockHolding(
+export function lockHolding(
   document: InteractiveCanvasDocument,
   id: string,
   scope: "any" | "all" = "any",

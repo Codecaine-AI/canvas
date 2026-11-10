@@ -19,7 +19,7 @@ import { box, connect, makeDocument } from "./synthetic";
 
 /** Every board here needs one section, because the board always keeps one. */
 function boardWith(...objects: ReturnType<typeof box>[]) {
-  return makeDocument([box("page", 0, 0, 1200, 900, "section"), ...objects]);
+  return makeDocument([{ ...box("page", 0, 0, 1200, 900, "section"), color: "white" }, ...objects]);
 }
 
 describe("place gestures", () => {
@@ -59,7 +59,7 @@ describe("place gestures", () => {
       .toEqual({ x: 100, y: 100, width: 320, height: 180 });
   });
 
-  test("place_sticky takes its whole box and color from the defaults", () => {
+  test("place_sticky takes its width and color from the defaults, and its height from its text", () => {
     const session = makeTestSession(boardWith(), ["page"]);
 
     const result = runOp(session, "place_sticky", {
@@ -69,12 +69,13 @@ describe("place gestures", () => {
     });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · place_sticky note 60,60 180×120");
+    // One line on a schematic card note: 14 + 24 + 14, on the grid 60 (objects/sticky/note-fit.ts).
+    expect(result.text).toContain("APPLIED · place_sticky note 60,60 180×60");
     expect(session.draft.objects.find((object) => object.id === "note")).toMatchObject({
       type: "sticky",
       text: "Remember",
       color: CREATION_DEFAULTS.sticky.color,
-      geometry: { x: 60, y: 60, width: 180, height: 120 },
+      geometry: { x: 60, y: 60, width: 180, height: 60 },
     });
   });
 

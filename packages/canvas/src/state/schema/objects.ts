@@ -31,10 +31,9 @@ export type InteractiveCanvasObject = {
    */
   text: string;
   /**
-   * Optional one-line detail under `text` (the name): a short fact such as a port, path, model, or spec —
-   * never prose. Rendered muted on one line (ellipsized), below the name for shapes and icons and inline
-   * after the title in a section's header. Shapes, icons, and sections only; stickies ignore it (their body
-   * is markdown). Absent / empty = no detail line.
+   * A one-line fact older boards stored under `text` (the name). Kept readable so those boards open and
+   * save back unchanged, but it never renders and no tool writes it: a node shows its name only, and extra
+   * context goes in a sticky note next to it. Stickies never carry one.
    */
   detail?: string;
   /**

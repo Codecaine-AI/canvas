@@ -122,7 +122,7 @@ describe("paintedBounds", () => {
     expect(objectPaintedBounds(icon)).toEqual(painted);
   });
 
-  it("includes an icon's detail line under the caption, sized in the style's detail font", () => {
+  it("ignores a stored detail: an icon paints the name caption alone", () => {
     const icon: InteractiveCanvasObject = {
       id: "i",
       type: "icon",
@@ -133,14 +133,10 @@ describe("paintedBounds", () => {
       style: { shape: "icon" },
     };
     const plain = { ...icon, detail: undefined };
-    const light = canvasThemePreset("schematic-light");
-    // Name line (18) + 3px gap + one 14px mono line at 1.3.
-    expect(objectPaintedBounds(icon, light).height).toBe(objectPaintedBounds(plain, light).height + 3 + 14 * 1.3);
-    // The long detail widens the band to its 200px max.
-    expect(objectPaintedBounds(icon, light).width).toBe(200);
-    // Figjam's detail line is 13px sans.
-    expect(objectPaintedBounds(icon, FIGJAM_CANVAS_STYLE).height).toBe(objectPaintedBounds(plain, FIGJAM_CANVAS_STYLE).height + 3 + 13 * 1.3);
-    expect(paintedBounds(makeDocument([icon]), undefined, light)).toEqual(objectPaintedBounds(icon, light));
+    for (const style of [canvasThemePreset("schematic-light"), FIGJAM_CANVAS_STYLE]) {
+      expect(objectPaintedBounds(icon, style)).toEqual(objectPaintedBounds(plain, style));
+      expect(paintedBounds(makeDocument([icon]), undefined, style)).toEqual(objectPaintedBounds(plain, style));
+    }
   });
 
   it("targets a subset: connections touching a target count, unrelated objects do not", () => {

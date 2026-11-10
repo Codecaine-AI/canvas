@@ -1253,16 +1253,16 @@
                                         },
                                         {
                                           "type": "listItem",
-                                          "id": "node-map-concepts-patterns-name-detail",
+                                          "id": "node-map-concepts-patterns-name-only",
                                           "content": [
-                                            "Put at most one short fact, such as a port, path, version, model, or host, in the `detail` of a shape, icon, or section, within 48 characters."
+                                            "A node shows its name only; put extra context in a sticky note next to it. A section carries a title only."
                                           ]
                                         },
                                         {
                                           "type": "listItem",
                                           "id": "node-map-concepts-patterns-name-example",
                                           "content": [
-                                            "Write `Postgres` with the detail `16 · :5432`, not `Postgres database that stores user sessions`."
+                                            "Write `Postgres`, not `Postgres database that stores user sessions`."
                                           ]
                                         }
                                       ]
@@ -3081,7 +3081,7 @@
                           "type": "listItem",
                           "id": "node-checklist-container-discipline-2-detail-2",
                           "content": [
-                            "Is each name a few words on one line, with at most one short fact in its `detail`? The `label-is-prose` and `detail-too-long` warnings report violations."
+                            "Is each name a few words on one line, with extra context in a sticky note next to its node?"
                           ]
                         }
                       ]

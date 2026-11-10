@@ -40,6 +40,9 @@
         "b-ts-ge-arrange-match-16",
         "b-ts-ge-arrange-split-17",
         "b-ts-ge-arrange-refusals-18",
+        "b-ts-ge-arrange-section-57",
+        "b-ts-ge-arrange-section-frame-59",
+        "b-ts-ge-arrange-section-refusals-58",
         "b-ts-ge-content-heading-19",
         "b-ts-ge-content-code-20",
         "b-ts-ge-content-text-21",
@@ -109,7 +112,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Creation is per-kind because the payloads genuinely differ, but each placement carries "
+          "insert": "Each placement carries "
         },
         {
           "insert": "only what the UI's creation gesture carries",
@@ -123,24 +126,20 @@
         {
           "insert": "creation-defaults.ts",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/service/session/tools/creation-defaults.ts"
-            }
+            "code": true
           }
         },
         {
-          "insert": ", and every property beyond the default is its own later gesture: place, then resize, then recolor, then relabel. There is no "
+          "insert": ", and every later property is its own gesture, such as "
         },
         {
-          "insert": "color",
+          "insert": "resize",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " on "
+          "insert": ". The name and the color are the exceptions, because naming and coloring after placement cost the drawer one call per node and left most frames gray. "
         },
         {
           "insert": "place_shape",
@@ -149,28 +148,10 @@
           }
         },
         {
-          "insert": " because recoloring is "
+          "insert": " takes "
         },
         {
-          "insert": "change_color",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". The one-line "
-        },
-        {
-          "insert": "detail",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is the deliberate exception. It is the fact that belongs to the name, so "
-        },
-        {
-          "insert": "place_shape",
+          "insert": "text",
           "attributes": {
             "code": true
           }
@@ -179,16 +160,7 @@
           "insert": " and "
         },
         {
-          "insert": "place_section",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " may carry it the way a frame's title rides on "
-        },
-        {
-          "insert": "place_section",
+          "insert": "color",
           "attributes": {
             "code": true
           }
@@ -197,22 +169,49 @@
           "insert": ". "
         },
         {
-          "insert": "place_shape",
+          "insert": "place_section",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " still arrives untitled, and "
+          "insert": " takes "
         },
         {
-          "insert": "update_text",
+          "insert": "icon",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " writes its name afterwards. "
+          "insert": " and "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". A node shows its name only, so no placement takes a "
+        },
+        {
+          "insert": "detail",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". A placement without "
+        },
+        {
+          "insert": "color",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " takes the creation default for its kind, which is gray for a section. "
         },
         {
           "insert": "at",
@@ -234,7 +233,7 @@
       },
       "text": [
         {
-          "insert": "place_section({ id: Id, text: string, at: Point, size?: Size, detail?: string, icon?: string })\nplace_sticky ({ id: Id, text: string, at: Point })\nplace_shape  ({ id: Id, type: ShapeType | Glyph, at: Point, detail?: string })\n\nclone({ sourceId: Id, id: Id, at?: Point, by?: Point, text?: string, detail?: string })\n\nconnect({ id: Id, from: Endpoint, to: Endpoint,\n          label?: string, style?: LineStyle, arrow?: Arrow, color?: Color })"
+          "insert": "place_section({ id: Id, text: string, at: Point, size?: Size,\n                icon?: string, color?: Color })\nplace_sticky ({ id: Id, text: string, at: Point })\nplace_shape  ({ id: Id, type: ShapeType | Glyph, at: Point,\n                text?: string, color?: Color })\n\nclone({ sourceId: Id, id: Id, at?: Point, by?: Point, text?: string })\n\nconnect({ id: Id, from: Endpoint, to: Endpoint,\n          label?: string, style?: LineStyle, arrow?: Arrow, color?: Color })"
         }
       ],
       "children": []
@@ -429,7 +428,7 @@
           }
         },
         {
-          "insert": " is the make-another-one-of-these shortcut. The copy inherits the source's kind, size, color, shape type, direction, glyph, detail line, and border style, so a row of options matches without a number being re-specified. An icon's glyph and a section's header icon are the same field, so the copy carries either. Exactly one of "
+          "insert": " is the make-another-one-of-these shortcut. The copy inherits the source's kind, size, color, shape type, direction, glyph, and border style, so a row of options matches without a number being re-specified. An icon's glyph and a section's header icon are the same field, so the copy carries either. Exactly one of "
         },
         {
           "insert": "at",
@@ -464,7 +463,7 @@
           }
         },
         {
-          "insert": " and "
+          "insert": " is what a row of peers differs in, so it can be overridden in the same call. Omitting it carries the source's text over. A copy never carries a "
         },
         {
           "insert": "detail",
@@ -473,16 +472,7 @@
           }
         },
         {
-          "insert": " are the two things a row of peers differs in, so each can be overridden in the same call. Omitting either carries the source's value over, and an empty "
-        },
-        {
-          "insert": "detail",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " clears the line. A sticky never carries a detail: one sent with a sticky source is dropped with a note, and the copy still lands. A copy never carries the edges attached to the source or a section's contents, because copying descendants without the edges between them would half-copy the structure. A copy is never locked, whatever the source is, and the source itself is only "
+          "insert": " an older file stored on its source. A copy never carries the edges attached to the source or a section's contents, because copying descendants without the edges between them would half-copy the structure. A copy is never locked, whatever the source is, and the source itself is only "
         },
         {
           "insert": "measured",
@@ -591,7 +581,7 @@
       },
       "text": [
         {
-          "insert": "move_to({ id: Id, x: number, y: number })      // absolute; x,y = new top-left\nmove_by({ id: Id, dx: number, dy: number })    // relative nudge\n\nresize    ({ id: Id, width?: number, height?: number })\nmatch_size({ id: Id, like: Id })\n\nalign    ({ ids: Id[], edge: \"left\" | \"right\" | \"top\" | \"bottom\"\n                             | \"center_h\" | \"center_v\" })\nspace_out({ ids: Id[], axis: \"horizontal\" | \"vertical\", gap: number })"
+          "insert": "move_to({ id: Id, x: number, y: number })      // absolute; x,y = new top-left\nmove_by({ id: Id, dx: number, dy: number })    // relative nudge\n\nresize    ({ id: Id, width?: number, height?: number })\nmatch_size({ id: Id, like: Id })\n\nalign    ({ ids: Id[], edge: \"left\" | \"right\" | \"top\" | \"bottom\"\n                             | \"center_h\" | \"center_v\" })\nspace_out({ ids: Id[], axis: \"horizontal\" | \"vertical\", gap: number })\n\narrange_section({ section: Id, rows: Id[][] })  // rows top to bottom, each left to right"
         }
       ],
       "children": []
@@ -666,7 +656,7 @@
           }
         },
         {
-          "insert": " and "
+          "insert": ", "
         },
         {
           "insert": "match_size",
@@ -675,7 +665,16 @@
           }
         },
         {
-          "insert": " measure the box that landed against its name and detail line. The verdict is the renderer's own wrap and clamp decision ("
+          "insert": ", and "
+        },
+        {
+          "insert": "update_text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " measure the resulting box against its name with the renderer's own wrap and clamp decision ("
         },
         {
           "insert": "text-fit.ts",
@@ -688,16 +687,7 @@
           }
         },
         {
-          "insert": ") rather than a bare minimum constant. Text that would clip, may clip within 1 px of the box edge, or cannot be measured exactly attaches a note naming the size the content needs. The check is report-only, so the size still lands. "
-        },
-        {
-          "insert": "update_text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " runs the mirror image of it from the other direction, so the agent hears about an illegible box at the moment it makes one. It hands the check the name and detail line as the write leaves them."
+          "insert": "). Text that would clip, may clip within 1 px of the box edge, or cannot be measured exactly attaches a note naming the size the content needs, and the size still lands."
         }
       ],
       "children": []
@@ -761,7 +751,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The two spacing gestures divide cleanly: "
+          "insert": "The two spacing gestures divide the axes. "
         },
         {
           "insert": "align",
@@ -770,7 +760,7 @@
           }
         },
         {
-          "insert": " owns the cross axis and never changes spacing along the flow, while "
+          "insert": " owns the cross axis and never changes spacing along the flow. It puts the listed boxes on one shared edge or centerline. "
         },
         {
           "insert": "space_out",
@@ -779,25 +769,7 @@
           }
         },
         {
-          "insert": " owns the flow axis and never touches the cross one. "
-        },
-        {
-          "insert": "align",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " puts the listed boxes on one shared edge or centerline; "
-        },
-        {
-          "insert": "space_out",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " re-pitches them in place, with the first box in positional order holding and every later one sliding so the clear gap between neighbours is exactly "
+          "insert": " owns the flow axis and never touches the cross one. The first box in positional order holds, and every later one slides so the clear gap between neighbours is exactly "
         },
         {
           "insert": "gap",
@@ -806,7 +778,7 @@
           }
         },
         {
-          "insert": ". The run grows or shrinks to suit; sections arrange by their own frame and carry their contents. "
+          "insert": ". The run grows or shrinks to suit, and sections arrange by their own frame and carry their contents. "
         },
         {
           "insert": "space_out",
@@ -815,7 +787,7 @@
           }
         },
         {
-          "insert": " is the corridor-opening fix the crowding finding asks for, as one call instead of N hand-computed moves."
+          "insert": " opens a corridor between boxes in one call instead of N hand-computed moves."
         }
       ],
       "children": []
@@ -853,6 +825,87 @@
       ],
       "children": []
     },
+    "b-ts-ge-arrange-section-57": {
+      "id": "b-ts-ge-arrange-section-57",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "arrange_section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lays out one section's nodes from rows alone, so the call carries no coordinates. Rows run top to bottom, each row runs left to right, and columns line up across rows. A column is as wide as its widest footprint and a row as tall as its tallest. A footprint is the node's hit bounds ("
+        },
+        {
+          "insert": "hitBoundsForObject",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "), so an icon's caption counts. Neighbours in a row sit "
+        },
+        {
+          "insert": "nodeGapRow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (200) apart, and rows sit "
+        },
+        {
+          "insert": "nodeGapColumn",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " (100) apart, both from "
+        },
+        {
+          "insert": "craft-targets.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ge-arrange-section-frame-59": {
+      "id": "b-ts-ge-arrange-section-frame-59",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Each node is centered in its cell, so a row of mixed sizes shares one center line. The frame keeps its top-left corner and closes around the placed footprints with 40 of padding and a 40 title band. A child of the section that the rows leave out stays where it is, and the result names it."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ge-arrange-section-refusals-58": {
+      "id": "b-ts-ge-arrange-section-refusals-58",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "arrange_section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " refuses a rows id that names the section itself, another section, a sticky, a locked node, a node of another section, or nothing on the board. It also refuses an id listed twice, a section id that is not a section, and a section that a lock covers. Each refusal names the id and the call to make instead, and nothing moves."
+        }
+      ],
+      "children": []
+    },
     "b-ts-ge-content-heading-19": {
       "id": "b-ts-ge-content-heading-19",
       "type": "heading",
@@ -874,7 +927,7 @@
       },
       "text": [
         {
-          "insert": "update_text ({ id: Id, text?: string, detail?: string })        // at least one of the two\nchange_color({ id: Id, color: Color })\nchange_shape({ id: Id, patch: { type?: ShapeType | Glyph, direction?: Direction, icon?: string } })"
+          "insert": "update_text ({ id: Id, text?: string, detail?: string })        // detail is dropped with a note\nchange_color({ id: Id, color: Color })\nchange_shape({ id: Id, patch: { type?: ShapeType | Glyph, direction?: Direction, icon?: string } })"
         }
       ],
       "children": []
@@ -909,16 +962,7 @@
           }
         },
         {
-          "insert": " is a shape's, icon's, or section's name, a sticky's markdown body, or an edge's label. "
-        },
-        {
-          "insert": "detail",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is the one-line fact under a name, and only shapes, icons, and sections carry one. A call sends "
+          "insert": " is a shape's, icon's, or section's name, a sticky's markdown body, or an edge's label. A node shows its name only, so no kind has a detail line. A call with neither "
         },
         {
           "insert": "text",
@@ -927,7 +971,7 @@
           }
         },
         {
-          "insert": ", "
+          "insert": " nor "
         },
         {
           "insert": "detail",
@@ -936,7 +980,7 @@
           }
         },
         {
-          "insert": ", or both, and a call with neither is refused. A "
+          "insert": " is refused. A "
         },
         {
           "insert": "detail",
@@ -945,7 +989,16 @@
           }
         },
         {
-          "insert": " sent to a sticky or an edge is dropped with a note while the rest of the call applies, so a detail-only call on either is a no-op. An empty string clears either field, and an emptied edge label is removed rather than left as an empty chip."
+          "insert": " sent to any kind is dropped with a note while the rest of the call applies, so a detail-only call is a no-op, and a detail an older file stored stays as it is. An empty "
+        },
+        {
+          "insert": "text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " clears the name, and an emptied edge label is removed rather than left as an empty chip."
         }
       ],
       "children": []
@@ -965,7 +1018,7 @@
           }
         },
         {
-          "insert": " hands the fit check the name and detail line as the write leaves them, because a detail added under a name that just fitted can push it into clipping. An edge label is the deliberate exception. A chip never truncates, it grows, so the verdict there is a crowding one and belongs to the unreadable-labels finding, which measures the routed corridor."
+          "insert": " hands the fit check the name as the write leaves it. An edge label is the deliberate exception. A chip never truncates, it grows, so the verdict there is a crowding one and belongs to the unreadable-labels finding, which measures the routed corridor."
         }
       ],
       "children": []

@@ -23,11 +23,18 @@ export const CANVAS_GRID_SIZE = 16;
  * drag result stays 16-grid, and an agent-written 20-grid box is not silently
  * re-rounded to 96/112 on update or on commit replay through the reducer.
  *
- * (Gesture-surface plan D1. The agent's own quantizer, AGENT_GRID = 20, lives
- * in session/tools/grid.ts and runs before values reach this layer; whether UI drags
- * move to 20 as well is a separate product call.)
+ * (Gesture-surface plan D1. The agent's own quantizer, AGENT_GRID = 20, is
+ * applied in session/tools/grid.ts before values reach this layer; whether UI
+ * drags move to 20 as well is a separate product call.)
  */
 export const GEOMETRY_NORMALIZATION_GRID = 4;
+
+/**
+ * The AGENT grid: every number the agent writes to board geometry lands on
+ * it (session/tools/grid.ts quantizes to it). Defined here so objects/ can
+ * read it too: a card note's fitted height lands on it (objects/sticky/note-fit.ts).
+ */
+export const AGENT_GRID = 20;
 
 /**
  * The air a fitted frame keeps on its left, right and bottom edges by default
@@ -537,7 +544,7 @@ export function distributeObjects(
 
 /**
  * Gap-based re-pitch along one axis (gesture-surface S2.2) — the corridor
- * opener the crowding lint's suggestions describe, as one operation instead of
+ * opener, as one operation instead of
  * N hand-computed moves.
  *
  * Deliberately NOT distributeObjects. That one is span-based: it equalizes

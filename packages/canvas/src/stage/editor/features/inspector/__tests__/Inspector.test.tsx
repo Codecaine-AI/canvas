@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup, fireEvent, render, within } from "@testing-library/react";
-import { buildSelectionContext, type CanvasAction } from "../../../../../state/actions";
+import {
+  buildSelectionContext,
+  createInteractiveCanvasState,
+  reduceInteractiveCanvasState,
+  type CanvasAction,
+} from "../../../../../state/actions";
+import { noteNeededHeight } from "../../../../../objects/sticky/note-fit";
+import { DEFAULT_CANVAS_STYLE } from "../../../../../theme/canvas-style";
 import type {
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -63,45 +70,14 @@ function pickerGroups(container: HTMLElement) {
   }));
 }
 
-describe("Inspector detail field", () => {
-  it("renders for shapes, icons, and sections, never for stickies", () => {
-    for (const [kind, object] of Object.entries(OBJECTS)) {
-      const { queryByLabelText, unmount } = renderInspector(object);
-      const detail = queryByLabelText("Detail");
-      if (kind === "sticky") expect(detail).toBeNull();
-      else expect(detail).toBeTruthy();
+describe("Inspector has no detail field", () => {
+  it("shows no Detail field for any kind, a shape with a stored detail included", () => {
+    for (const object of Object.values(OBJECTS)) {
+      const { queryByLabelText, queryByDisplayValue, unmount } = renderInspector(object);
+      expect(queryByLabelText("Detail")).toBeNull();
+      expect(queryByDisplayValue("port 8080")).toBeNull();
       unmount();
     }
-  });
-
-  it("writes every edit, including clearing, as an updateObject detail patch", () => {
-    const { getByLabelText, dispatch } = renderInspector(OBJECTS.shape);
-    const detail = getByLabelText("Detail") as HTMLInputElement;
-    expect(detail.value).toBe("port 8080");
-
-    fireEvent.change(detail, { target: { value: "port 5432" } });
-    expect(dispatch).toHaveBeenLastCalledWith(updateObject("api", { detail: "port 5432" }));
-
-    fireEvent.change(detail, { target: { value: "" } });
-    expect(dispatch).toHaveBeenLastCalledWith(updateObject("api", { detail: "" }));
-  });
-
-  it("warns past 48 characters without blocking the edit", () => {
-    const long = "gpt-4o via the regional proxy, cached for ten minutes";
-    expect(long.length).toBeGreaterThan(48);
-    const { getByLabelText, getByRole, queryByText, dispatch, rerenderWith } = renderInspector(
-      OBJECTS.shape,
-    );
-    expect(queryByText(/keep it to one short fact/)).toBeNull();
-
-    fireEvent.change(getByLabelText("Detail"), { target: { value: long } });
-    expect(dispatch).toHaveBeenLastCalledWith(updateObject("api", { detail: long }));
-
-    rerenderWith({ ...OBJECTS.shape, detail: long });
-    expect(getByRole("status").textContent).toBe(`${long.length} / 48 — keep it to one short fact`);
-
-    rerenderWith({ ...OBJECTS.shape, detail: "x".repeat(48) });
-    expect(queryByText(/keep it to one short fact/)).toBeNull();
   });
 });
 
@@ -216,6 +192,52 @@ describe("Inspector keyboard and size fields", () => {
     expect(dispatch).toHaveBeenCalledTimes(1);
     expect(height.value).toBe(String(geometry.height));
   });
+
+  it("keeps a stop-sign octagon square: either typed side drives the other", () => {
+    const stop: InteractiveCanvasObject = {
+      id: "stop",
+      type: "octagon",
+      text: "Cancel",
+      geometry: { x: 100, y: 100, width: 144, height: 144 },
+    };
+    const { getByLabelText, dispatch } = renderInspector(stop);
+    const width = getByLabelText("Object width") as HTMLInputElement;
+    fireEvent.change(width, { target: { value: "288" } });
+    fireEvent.keyDown(width, { key: "Enter" });
+    expect(dispatch).toHaveBeenLastCalledWith({ type: "canvas.resizeObject", objectId: "stop", width: 288, height: 288 });
+
+    const height = getByLabelText("Object height") as HTMLInputElement;
+    fireEvent.change(height, { target: { value: "96" } });
+    fireEvent.keyDown(height, { key: "Enter" });
+    expect(dispatch).toHaveBeenLastCalledWith({ type: "canvas.resizeObject", objectId: "stop", width: 96, height: 96 });
+  });
+});
+
+describe("Inspector size fields on a card note", () => {
+  // Three lines need 14 + 3×24 + 14 = 100px; the reducer's 16px snap alone would store 96.
+  const note: InteractiveCanvasObject = {
+    id: "note",
+    type: "sticky",
+    text: "one\ntwo\nthree",
+    color: "yellow",
+    geometry: { x: 80, y: 80, width: 240, height: 100 },
+    style: { shape: "note" },
+  };
+
+  for (const [field, value] of [["Object height", "20"], ["Object width", "256"]] as const) {
+    it(`${field} keeps the note as tall as its text after the reducer's snap`, () => {
+      let state = createInteractiveCanvasState(documentWith(note));
+      const { getByLabelText } = render(inspectorFor(note, (action) => {
+        state = reduceInteractiveCanvasState(state, action);
+      }));
+      const input = getByLabelText(field);
+      fireEvent.change(input, { target: { value } });
+      fireEvent.keyDown(input, { key: "Enter" });
+      const landed = state.document.objects[0]!;
+      expect(landed.geometry.height).toBe(noteNeededHeight(landed, DEFAULT_CANVAS_STYLE)!);
+      expect(landed.geometry.height).toBe(100);
+    });
+  }
 });
 
 describe("InteractiveCanvasEditor showInspector", () => {

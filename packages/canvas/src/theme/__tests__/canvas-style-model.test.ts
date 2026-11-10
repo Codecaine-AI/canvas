@@ -83,6 +83,7 @@ describe("theme presets", () => {
       headerFont: "sans",
       headerUppercase: false,
       headerFontSizePx: 16,
+      boardTitleFontSizePx: 0,
       headerChipMix: 0.16,
       iconPack: "nucleo",
       iconStyle: "glyph",
@@ -98,6 +99,14 @@ describe("theme presets", () => {
       connectorLabelBackground: "#F5F5F5",
       connectorLabelTextColor: "#000000",
       stickyStyle: "paper",
+      stickyFontSizePx: 24,
+      stickyLineHeightPx: 36,
+      stickyPaddingXPx: 21,
+      stickyPaddingTopPx: 28,
+      stickyPaddingBottomPx: 21,
+      stickyCornerRadiusPx: 0,
+      stickyHeadingScale: 1,
+      stickyRuleWidthPx: 2,
       // The palette.ts inks (connector strokes / shape borders).
       palette: {
         gray: "#757575",
@@ -161,6 +170,13 @@ describe("normalizeCanvasStyle", () => {
     expect("bogusKey" in style).toBe(false);
   });
 
+  it("keeps a sticky to the styles a sticky paints (ink-card is a shape fill only)", () => {
+    const sticky = CANVAS_STYLE_CONTROLS.find((control) => control.key === "stickyStyle");
+    expect(sticky?.options?.map((option) => option.value)).toEqual(["paper", "card"]);
+    expect(normalizeCanvasStyle({ theme: "schematic-light", stickyStyle: "ink-card" }).stickyStyle)
+      .toBe(canvasThemePreset("schematic-light").stickyStyle);
+  });
+
   it("clamps numbers to their control range", () => {
     const style = normalizeCanvasStyle({ sectionBorderOpacity: 4, headerChipMix: -1, connectorLabelHeightPx: 999 });
     expect(style.sectionBorderOpacity).toBe(1);
@@ -214,7 +230,7 @@ describe("settings: normalize, resolve, and diff", () => {
         figjam: { shapeCornerRadiusPx: 2 }, // equals the figjam preset → dropped
         "schematic-light": {
           headerPlacement: "floating",
-          connectorStrokeWidthPx: 2, // equals the preset → dropped
+          connectorStrokeWidthPx: 2.5, // equals the preset → dropped
           palette: { teal: "#0D7164", red: "#aa0000" }, // teal equals the preset → dropped
           theme: "schematic-dark", // not an override
         },

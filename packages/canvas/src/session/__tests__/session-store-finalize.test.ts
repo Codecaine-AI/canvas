@@ -34,134 +34,31 @@ function expectBlocked(result: LayoutToolTextResult, session: LayoutSession, det
   expect(session.events).toHaveLength(0);
 }
 
-describe("finalize committed — lint gate (all scoped diagnostics)", () => {
-  test("blocks a parentId child that escapes its section", () => {
-    const section = { ...box("section", 0, 0, 480, 320, "section"), text: "Section" };
-    const child = { ...box("child", 80, 96, 184, 96, "process"), parentId: "section" };
-    const baseline = makeDocument([section, child]);
-    const session = makeTestSession(baseline, ["section"]);
-    session.draft = makeDocument([
-      section,
-      { ...child, geometry: { ...child.geometry, x: 400 } },
-    ]);
+describe("finalize committed — lint gate (scoped errors)", () => {
+  test("blocks a box laid on another box", () => {
+    const a = box("a", 0, 0, 184, 96, "process");
+    const b = box("b", 400, 0, 184, 96, "process");
+    const session = makeTestSession(makeDocument([a, b]), ["b"]);
+    session.draft = makeDocument([a, { ...b, geometry: { ...b.geometry, x: 40 } }]);
 
-    const result = toolFinalize(session, "committed", "Escaped child should fail", emitSessionEvent);
+    const result = toolFinalize(session, "committed", "Overlap should fail", emitSessionEvent);
 
-    expectBlocked(result, session, "E1 containment: child extends 104px outside its section section");
+    expectBlocked(result, session, "E1 covered-content: a and b overlap by 78% of the smaller box");
   });
 
-  test("blocks overflow beyond the base section", () => {
-    const frame = {
-      ...box("page", 0, 0, 640, 480, "section"),
-    };
-    const card = box("card", 96, 96, 184, 96, "process");
-    const baseline = makeDocument([frame, card]);
-    const session = makeTestSession(baseline, ["card"]);
-    session.draft = makeDocument([
-      frame,
-      { ...card, geometry: { ...card.geometry, x: 600 } },
-    ]);
-
-    const result = toolFinalize(session, "committed", "Overflow should fail", emitSessionEvent);
-
-    expectBlocked(result, session, "card extends 144px past the base section page");
-  });
-
-  test.each(["five", "five 🚀"])("forced sticky rows block finalize whatever the last row holds (%s)", (last) => {
-    // 128px holds two 36px rows: five forced lines clip whatever the rocket's fallback width.
-    const note = { ...box("note", 0, 0, 176, 128, "sticky"), style: { shape: "note" as const }, text: "one" };
-    const session = makeTestSession(makeDocument([note]), ["note"], { canvasStyle: FIGJAM_CANVAS_STYLE });
-    session.draft = makeDocument([{ ...note, text: `one\ntwo\nthree\nfour\n${last}` }]);
-
-    const result = toolFinalize(session, "committed", "Added five rows", emitSessionEvent);
-
-    expectBlocked(result, session, "clipped-text");
-  });
-
-  test("warning-tier findings block until fixed, then the same session commits", () => {
-    const labeled = [{ ...connect("edge", "a", "b"), label: "go" }];
-    const baseline = makeDocument([
-      box("a", 0, 0, 192, 96, "process"),
-      box("b", 416, 0, 192, 96, "process"),  // gap 224 — clean baseline
-    ], labeled);
-    // Figjam chip geometry: the "go" chip is 44×30px ("go" in Inter Bold 16 + 12px a side).
-    const session = makeTestSession(baseline, ["a", "b"], { canvasStyle: FIGJAM_CANVAS_STYLE });
-    session.draft = makeDocument([
-      box("a", 0, 0, 192, 96, "process"),
-      box("b", 240, 0, 192, 96, "process"),  // gap 48 — under the "go" chip's 76px need
-    ], labeled);
-
-    const blocked = toolFinalize(session, "committed", "Tightened the flow", emitSessionEvent);
-
-    expectBlocked(
-      blocked,
-      session,
-      'W1 unreadable-labels: label "go" chip on edge (44×30px) bleeds onto a and b',
-    );
-
-    session.draft = makeDocument([
-      box("a", 0, 0, 192, 96, "process"),
-      box("b", 400, 0, 192, 96, "process"),
-    ], labeled);
-
-    const committed = toolFinalize(
-      session,
-      "committed",
-      "Tightened the flow with a readable label",
-      emitSessionEvent,
-    );
-
-    expect(committed.isError).toBeUndefined();
-    expect(committed.text).toContain("Committed:");
-    expect(session.status).toBe("proposal-ready");
-    expect(session.proposal).not.toBeNull();
-    expect(session.proposal!.summary).toBe("Tightened the flow with a readable label");
-    expect(session.proposal!.lint).toBe("DIAGNOSTICS · clean");
-  });
-
-  test("notes never block: a label the bundled fonts cannot measure commits, and the note rides along", () => {
-    const baseline = makeDocument([box("a", 0, 0, 192, 96, "process")]);
-    const session = makeTestSession(baseline, ["a"], { canvasStyle: FIGJAM_CANVAS_STYLE });
-    // An emoji name: Chromium paints 🚀 in a fallback font, so its fit is an estimate (a note).
-    session.draft = makeDocument([{ ...box("a", 0, 0, 192, 96, "process"), text: "Ship it 🚀" }]);
-
-    const committed = toolFinalize(session, "committed", "Named the launch step", emitSessionEvent);
-
-    expect(committed.isError).toBeUndefined();
-    expect(session.status).toBe("proposal-ready");
-    expect(session.proposal!.lint).toContain("DIAGNOSTICS · 0 errors · 0 warnings · 1 note");
-    expect(session.proposal!.lint).toContain('N1 clipped-text: a: label fits at 192×96');
-    expect(session.proposal!.lint).toContain('the bundled fonts lack "🚀"');
-  });
-
-  test("a person's own prose names never block; prose the agent writes into a name does until fixed", () => {
+  test("names are not linted for wording: a prose name that fits commits", () => {
     const prose = "Compare Generated Intents to Labeled Intents";
     const theirs = { ...box("theirs", 0, 0, 400, 200, "process"), text: prose };
-    // Tall enough that the prose name wraps without clipping: only the prose rule speaks.
+    // Tall enough that the prose name wraps without clipping.
     const task = box("task", 600, 0, 184, 120, "process");
     // Frameless with a long board title: the session's first draft carries an
-    // injected page frame titled with it, which is scaffolding, not the agent's.
+    // injected page frame titled with it, which never blocks either.
     const baseline = { ...makeDocument([theirs, task]), title: "Intent Classifier Example: Support Ticket Classification" };
     const session = makeTestSession(baseline, ["theirs", "task"], { draft: draftWithPageFrame(baseline) });
-
-    // The agent rewrites its neighbour's name into prose: that one is the agent's.
     session.draft = {
       ...session.draft,
       objects: session.draft.objects.map((object) =>
-        object.id === "task" ? { ...object, text: `${prose} twice over` } : object),
-    };
-    expectBlocked(
-      toolFinalize(session, "committed", "Renamed the task", emitSessionEvent),
-      session,
-      "W1 label-is-prose: task's name has",
-    );
-
-    // A short name with its fact in the detail commits — with the person's own
-    // long name and the board-titled page frame both still in scope.
-    session.draft = {
-      ...session.draft,
-      objects: session.draft.objects.map((object) =>
-        object.id === "task" ? { ...object, text: "Compare intents", detail: "labeled set" } : object),
+        object.id === "task" ? { ...object, text: prose } : object),
     };
     const committed = toolFinalize(session, "committed", "Renamed the task", emitSessionEvent);
     expect(committed.isError).toBeUndefined();
@@ -194,19 +91,17 @@ describe("finalize committed — lint gate (all scoped diagnostics)", () => {
     const baseline = makeDocument([
       box("a", 0, 0, 160, 96, "process"),
       box("b", 320, 0, 160, 96, "process"),
-    ], [{ ...connect("edge", "a", "b"), label: "go" }]);
+    ]);
     const session = makeTestSession(baseline, ["a", "b"], { canvasStyle: FIGJAM_CANVAS_STYLE });
 
-    const result = runOp(session, "move_to", { id: "b", x: 200, y: 0 });
+    const result = runOp(session, "move_to", { id: "b", x: 40, y: 0 });
 
     expect(result.isError).not.toBe(true);
     expect(result.text).toContain("APPLIED · move_to b");
     expect(result.text).toContain("DELTA");
-    // Actual label fit still fires even though the boxes have visible separation.
-    expect(result.text).toContain("LINTS · +1 −0");
-    expect(result.text).toContain('label "go" chip on edge (44×30px) bleeds onto a and b');
-    expect(result.text).not.toContain("crowding:");
-    expect(session.draft.objects.find((object) => object.id === "b")?.geometry.x).toBe(200);
+    expect(result.text).toContain("LINTS · +1 error (1 open)");
+    expect(result.text).toContain("a and b overlap by");
+    expect(session.draft.objects.find((object) => object.id === "b")?.geometry.x).toBe(40);
     expect(session.status).toBe("running");
     expect(session.proposal).toBeNull();
   });
@@ -271,22 +166,20 @@ describe("finalize committed — request gate", () => {
   });
 
   test("reports lint blockers and open requests together", () => {
-    const section = { ...box("section", 0, 0, 480, 320, "section"), text: "Section" };
-    const child = { ...box("child", 80, 96, 184, 96, "process"), parentId: "section" };
-    const baseline = makeDocument([section, child]);
+    const section = { ...box("section", 0, 0, 640, 320, "section"), text: "Section" };
+    const one = { ...box("one", 40, 96, 184, 96, "process"), parentId: "section" };
+    const two = { ...box("two", 400, 96, 184, 96, "process"), parentId: "section" };
+    const baseline = makeDocument([section, one, two]);
     const session = makeTestSession(baseline, ["section"], {
       annotations: [requestAnnotation("req-1", "section", "Tighten the layout")],
     });
     syncSessionRequests(session);
-    session.draft = makeDocument([
-      section,
-      { ...child, geometry: { ...child.geometry, x: 400 } },
-    ]);
+    session.draft = makeDocument([section, one, { ...two, geometry: { ...two.geometry, x: 80 } }]);
 
     const result = toolFinalize(session, "committed", "Should fail twice over", emitSessionEvent);
 
     expect(result.isError).toBe(true);
-    expect(result.text).toContain("E1 containment:");
+    expect(result.text).toContain("E1 covered-content:");
     expect(result.text).toContain("R1 open");
   });
 });

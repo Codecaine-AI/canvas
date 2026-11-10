@@ -180,9 +180,8 @@ function objectPatch(
   }
   if (baseline.type !== draft.type) patch.type = draft.type;
   if (baseline.text !== draft.text) patch.text = draft.text;
-  // Every optional channel below spells a clear as `null` (module doc). A
-  // cleared detail reaches the reducer's merge as "no detail line"
-  // (withNormalizedDetail).
+  // Every optional channel below spells a clear as `null` (module doc). The
+  // reducer's merge ignores a `detail` (mergeObjectPatch): no edit writes one.
   if (baseline.detail !== draft.detail) patch.detail = draft.detail ?? null;
   if (baseline.color !== draft.color) patch.color = draft.color ?? null;
   if (!structurallyEqual(baseline.style, draft.style)) {

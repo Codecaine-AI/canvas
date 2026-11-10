@@ -15,7 +15,7 @@ import { rasterizeSvgToPng } from "../rasterize";
  * (objects/section/title-chip-layout.ts): the chip paints exactly the box
  * hit-testing and text-fit reason about, clips its contents the way the live
  * chip's `overflow: hidden` does, and counts as painted whenever it carries a
- * title, an icon, or a detail.
+ * title or an icon. A stored section `detail` (older boards) never paints.
  */
 
 const LIGHT = canvasThemePreset("schematic-light");
@@ -44,7 +44,7 @@ function rectWithFill(svg: string, fill: string): { x: number; width: number } {
 }
 
 describe("static header = the box hits and text-fit use", () => {
-  it("a figjam chip with a detail paints the measured box hit-testing tests against", () => {
+  it("a figjam chip with a stored detail paints the title alone, in the measured box hit-testing tests against", () => {
     const cli = section({ detail: "cli.ts" });
     const svg = renderDocumentToSvg(documentOf([cli]), { background: "transparent", padding: 0, canvasStyle: FIGJAM_CANVAS_STYLE }).svg;
     const chipFill = resolveSectionPaint("teal", 1, FIGJAM_CANVAS_STYLE).chipFill;
@@ -54,7 +54,7 @@ describe("static header = the box hits and text-fit use", () => {
     expect(body.x - 0.75).toBeCloseTo(hit.x, 1);
     expect(body.width + 1.5).toBeCloseTo(hit.width, 1);
     expect(svg).toContain(">CLI</text>");
-    expect(svg).toContain(">cli.ts</text>");
+    expect(svg).not.toContain("cli.ts");
   });
 });
 
@@ -73,11 +73,12 @@ describe("static header clips to the chip", () => {
     const svg = scene();
     // No title run: the 19px chip has no room for even the ellipsis.
     expect(svg).not.toContain("<text");
-    // The icon paints inside a clip to the chip's padding box (inside the 1.5px right/bottom edges of the 25.5px pinned box).
+    // The icon paints inside a clip to the chip's padding box (inside the 1.5px right/bottom edges of the 25px pinned box
+    // in the 2px frame, stage B round 4).
     const clip = /<clipPath id="([^"]+)"><rect x="0" y="0" width="([^"]+)" height="([^"]+)"\/><\/clipPath>/.exec(svg);
     expect(clip).not.toBeNull();
     expect(Number(clip![2])).toBeCloseTo(17.5, 2);
-    expect(Number(clip![3])).toBeCloseTo(24, 2);
+    expect(Number(clip![3])).toBeCloseTo(23.5, 2);
     expect(svg).toContain(`<g clip-path="url(#${clip![1]})">`);
     expect(() => rasterizeSvgToPng(svg)).not.toThrow();
   });
@@ -94,7 +95,7 @@ describe("static header clips to the chip", () => {
   });
 });
 
-describe("headers with an empty title but an icon or detail still count as painted", () => {
+describe("headers with an empty title but an icon still count as painted", () => {
   const headerOnly = section({ text: "", icon: "server", detail: "port 80", geometry: { x: 0, y: 0, width: 1000, height: 20 } });
 
   it("objectPaintedBounds includes the chip", () => {
@@ -115,15 +116,16 @@ describe("headers with an empty title but an icon or detail still count as paint
   });
 });
 
-describe("a cut section detail paints its ellipsis in the title font", () => {
-  it("like CSS text-overflow on the chip: the title's weight and tracking, not the detail's", () => {
-    const zone = section({ text: "Bun services", detail: "127.0.0.1", icon: "brand-bun", geometry: { x: 0, y: 0, width: 200, height: 200 } } as Partial<InteractiveCanvasObject>);
+describe("a cut section title paints its ellipsis in the title font", () => {
+  it("like CSS text-overflow on the chip: the title's weight and tracking", () => {
+    const zone = section({ text: "Bun services", detail: "127.0.0.1", icon: "brand-bun", geometry: { x: 0, y: 0, width: 120, height: 200 } } as Partial<InteractiveCanvasObject>);
     const svg = renderDocumentToSvg(documentOf([zone]), { background: "transparent", canvasStyle: LIGHT }).svg;
     const layout = titleChipLayout(zone, LIGHT);
-    const ellipsis = /<text ([^>]*)>…<\/text>/.exec(svg);
-    expect(ellipsis).not.toBeNull();
-    expect(ellipsis![1]).toContain('font-weight="600"');
     expect(layout.truncated).toBe(true);
-    expect(Number(/letter-spacing="([^"]+)"/.exec(ellipsis![1])![1])).toBeCloseTo(1.12, 8);
+    const title = /<text ([^>]*)>BUN SE…<\/text>/.exec(svg);
+    expect(title).not.toBeNull();
+    expect(title![1]).toContain('font-weight="600"');
+    expect(Number(/letter-spacing="([^"]+)"/.exec(title![1])![1])).toBeCloseTo(1.12, 8);
+    expect(svg).not.toContain("127.0");
   });
 });
