@@ -266,12 +266,13 @@ describe("connector label chip per theme", () => {
     // light beside the node names (stage B round 0: fable on 12).
     expect(text.getAttribute("fill")).toBe("#1F1F1F");
     expect(text.getAttribute("font-size")).toBe("15");
-    expect(text.getAttribute("font-weight")).toBe("600");
+    // Medium, was SemiBold: the bolder mono chip competed with the node names (stage B round 4: astra).
+    expect(text.getAttribute("font-weight")).toBe("500");
 
     const svg = staticSvg("schematic-light");
     const chip = [...svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>HTTP<\/text>/g)][0]!;
     expect(attributesOf(chip[1]!)).toMatchObject({ width: "51", height: "26", fill: "#FDFDFD", stroke: "#8C8B89" });
-    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#1F1F1F", "font-size": "15", "font-weight": "600" });
+    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#1F1F1F", "font-size": "15", "font-weight": "500" });
   });
 
   it("figjam: the 30px sans chip with black text (live now matches static)", () => {

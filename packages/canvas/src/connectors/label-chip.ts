@@ -30,10 +30,14 @@ export const CONNECTION_LABEL_CHIP = {
   /** Narrowest chip = height × 41 / 30 (41px on the 30px figjam chip). */
   minWidthPerHeight: { numerator: 41, denominator: 30 },
   sansFontWeight: 700,
-  // SemiBold: a 14px chip prints near 9px on a board fit to one view, where
-  // Medium strokes thin out. Plex Mono's advance is the same at every weight,
-  // so chip widths (and label placement) do not change.
-  monoFontWeight: 600,
+  // Medium: at SemiBold the 15px mono chip text carried nearly the weight of
+  // the 600 node names and competed with them (stage B round 3: astra on 02,
+  // 05, 07, 10, 12 and h1, "bold monospace chips compete with node labels").
+  // The chip text is the near-black name color (theme/palette.ts
+  // resolveLabelChipText), so it holds 8:1 or more at the lighter weight.
+  // Plex Mono's advance is the same at every weight, so chip widths (and
+  // label placement) do not change.
+  monoFontWeight: 500,
   /** Hairline border (`hairlineColor`). */
   borderWidthPx: 1,
 } as const;
