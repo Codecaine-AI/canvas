@@ -56,7 +56,7 @@ import {
 } from "../objects/geometry";
 import { routeConnection, CONNECTOR_END_GAP_PX } from "../connectors/routing";
 import { placedLabelPoint } from "../connectors/label-placement";
-import { connectorDashArray } from "../connectors/def";
+import { connectorDashArray, sectionDashedFrame } from "../connectors/def";
 import { ARROWHEAD_TIP_OVERSHOOT_RATIO, arrowheadStrokeRatio } from "../connectors/arrowhead";
 import {
   resolveBrandMarkFill,
@@ -1002,7 +1002,9 @@ function renderSectionBackdrop(
   const paint = resolveSectionPaint(section.color ?? FIRST_USE_COLORS.section, depth, canvasStyle);
   const geometry = section.geometry;
   const borderStyle = section.style?.strokeStyle ?? "solid";
-  const strokeWidth = section.style?.strokeWidth ?? canvasStyle.sectionBorderWidthPx;
+  const frameWidth = section.style?.strokeWidth ?? canvasStyle.sectionBorderWidthPx;
+  const dashed = borderStyle === "dashed" ? sectionDashedFrame(frameWidth, canvasStyle) : null;
+  const strokeWidth = dashed?.strokeWidth ?? frameWidth;
   const inset = strokeWidth / 2;
 
   if (borderStyle === "none") {
@@ -1026,9 +1028,7 @@ function renderSectionBackdrop(
     // figjam: the section border IS the title chip's fill color (§3.2).
     stroke: paint.border,
     "stroke-width": strokeWidth,
-    ...(borderStyle === "dashed"
-      ? { "stroke-dasharray": connectorDashArray(canvasStyle) }
-      : null),
+    ...(dashed ? { "stroke-dasharray": dashed.dashArray } : null),
   });
 }
 

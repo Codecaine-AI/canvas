@@ -3,6 +3,7 @@ import { cleanup, render } from "@testing-library/react";
 import { CanvasStage } from "../CanvasStage";
 import { TextEditingOverlay } from "../editor/features/text-editing/TextEditingOverlay";
 import type { TextEditingApi } from "../editor/features/text-editing/use-text-editing";
+import { connectorDashArray } from "../../connectors/def";
 import { renderDocumentToSvg } from "../../render/static-svg";
 import { canvasThemePreset, type CanvasThemeId } from "../../theme/canvas-style";
 import { contrastRatio, parseColor } from "../../theme/color-math";
@@ -113,10 +114,18 @@ describe.each(["schematic-light", "schematic-dark"] as const)("layer-cake sectio
       (id) => container.querySelector<HTMLElement>(`button[data-canvas-object-id="${id}"]`)!.style.background,
     );
     expect(new Set(live).size).toBe(3);
-    // Static: solid frames inset by half their 2px border; the dashed frame too.
-    expect([staticSectionFill(svg, 100, 80, 1), staticSectionFill(svg, 140, 140, 1), staticSectionFill(svg, 180, 200, 1)]).toEqual(
+    // Static: solid frames inset by half their 2px border; the dashed frame by half its 1.5px stroke.
+    expect([staticSectionFill(svg, 100, 80, 1), staticSectionFill(svg, 140, 140, 0.75), staticSectionFill(svg, 180, 200, 1)]).toEqual(
       live.map((background) => background.toUpperCase()),
     );
+  });
+
+  it("draws a dashed frame as a short 5/4 dash at 1.5px, live as static; wires keep their dash", () => {
+    const dash = renderLive(theme).querySelector('button[data-canvas-object-id="middle"] [data-section-border-dash] rect')!;
+    expect([dash.getAttribute("stroke-width"), dash.getAttribute("stroke-dasharray"), dash.getAttribute("x")]).toEqual(["1.5", "5 4", "0.75"]);
+    const frame = attributesOf(staticSvg(theme).match(/<rect [^>]*x="140.75"[^>]*\/>/)![0]);
+    expect([frame["stroke-width"], frame["stroke-dasharray"]]).toEqual(["1.5", "5 4"]);
+    expect(connectorDashArray(canvasThemePreset(theme))).toBe("11.88 4.38");
   });
 });
 

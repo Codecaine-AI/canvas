@@ -2,7 +2,7 @@
 
 import { resolveSectionPaint } from "../../theme/palette";
 import { FIRST_USE_COLORS, objectTypeDefaults } from "../../state/schema/object-defaults";
-import { connectorDashArray } from "../../connectors/def";
+import { sectionDashedFrame } from "../../connectors/def";
 import { BBOX_OUTLINE } from "../geometry";
 import { resolveObjectBorderWidth } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
@@ -57,7 +57,7 @@ function SectionObjectView({
   const borderColor = paint.border;
   const borderStyle = object.style?.strokeStyle ?? "solid";
   const borderWidth = resolveObjectBorderWidth(object, "section", "painted", undefined, canvasStyle);
-  const renderedStrokeWidth = object.style?.strokeWidth ?? canvasStyle.sectionBorderWidthPx;
+  const frame = sectionDashedFrame(object.style?.strokeWidth ?? canvasStyle.sectionBorderWidthPx, canvasStyle);
   const cornerRadius = canvasStyle.sectionCornerRadiusPx;
   const title = object.text;
   return (
@@ -113,16 +113,16 @@ function SectionObjectView({
           }}
         >
           <rect
-            x={renderedStrokeWidth / 2}
-            y={renderedStrokeWidth / 2}
-            width={`calc(100% - ${renderedStrokeWidth}px)`}
-            height={`calc(100% - ${renderedStrokeWidth}px)`}
+            x={frame.strokeWidth / 2}
+            y={frame.strokeWidth / 2}
+            width={`calc(100% - ${frame.strokeWidth}px)`}
+            height={`calc(100% - ${frame.strokeWidth}px)`}
             rx={cornerRadius}
             ry={cornerRadius}
             fill="none"
             stroke={borderColor}
-            strokeWidth={renderedStrokeWidth}
-            strokeDasharray={connectorDashArray(canvasStyle)}
+            strokeWidth={frame.strokeWidth}
+            strokeDasharray={frame.dashArray}
           />
         </svg>
       ) : null}

@@ -25,12 +25,39 @@ const DASH_PATTERN_LINE_WIDTH_PX = 4;
  * The dash pattern under a canvas style, as an SVG `stroke-dasharray`:
  * FigJam's 19/7 scaled with the style's connector line width, so a thin
  * schematic line gets proportionally short dashes (1.5px → 7.13 / 2.63)
- * instead of long FigJam strokes. Dashed connectors and dashed section
- * frames share it. The default style draws exactly "19 7".
+ * instead of long FigJam strokes. Dashed connectors share it, and FigJam's
+ * dashed section frames (sectionDashedFrame). The default style draws
+ * exactly "19 7".
  */
 export function connectorDashArray(canvasStyle: Pick<CanvasStyle, "connectorStrokeWidthPx">): string {
   const scale = canvasStyle.connectorStrokeWidthPx / DASH_PATTERN_LINE_WIDTH_PX;
-  return CONNECTOR_DASH_PATTERN_PX.map((length) => Math.round(length * scale * 100) / 100).join(" ");
+  return dashArray(CONNECTOR_DASH_PATTERN_PX, scale);
+}
+
+/**
+ * A dashed section frame's stroke, for a frame `frameWidthPx` wide. FigJam:
+ * the frame width and the wire dash. Other themes: SECTION_DASH_WIDTH_SCALE
+ * of the frame width with a short SECTION_DASH_PATTERN_PX dash scaled to it
+ * (2px frames draw "5 4" at 1.5px). The wire dash at the frame width read as
+ * a wire around the group (Ford picked "F7 section dash", stage C round 2).
+ * The frame keeps its outer edge, so the header chip does not move.
+ */
+export function sectionDashedFrame(
+  frameWidthPx: number,
+  canvasStyle: Pick<CanvasStyle, "theme" | "connectorStrokeWidthPx">,
+): { strokeWidth: number; dashArray: string } {
+  if (canvasStyle.theme === "figjam") return { strokeWidth: frameWidthPx, dashArray: connectorDashArray(canvasStyle) };
+  const strokeWidth = frameWidthPx * SECTION_DASH_WIDTH_SCALE;
+  return { strokeWidth, dashArray: dashArray(SECTION_DASH_PATTERN_PX, strokeWidth / SECTION_DASH_PATTERN_LINE_WIDTH_PX) };
+}
+
+const SECTION_DASH_WIDTH_SCALE = 0.75;
+/** Dash / gap, logical px, at a SECTION_DASH_PATTERN_LINE_WIDTH_PX stroke. */
+const SECTION_DASH_PATTERN_PX: readonly [number, number] = [5, 4];
+const SECTION_DASH_PATTERN_LINE_WIDTH_PX = 1.5;
+
+function dashArray(pattern: readonly [number, number], scale: number): string {
+  return pattern.map((length) => Math.round(length * scale * 100) / 100).join(" ");
 }
 
 /**
