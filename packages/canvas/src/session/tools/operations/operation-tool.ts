@@ -163,7 +163,7 @@ export function runOperation<TFields extends OperationFields>(
   // edge, but an edit that pushes any child further past that frame is refused.
   // A note whose text fit grew it keeps its frame, which grows to hold it.
   const held = new Map([...fittedNoteParents(before, outcome.draft), ...(outcome.held ?? [])]);
-  const grow = growSectionsToChildren(reconcileHolding(outcome.draft, held), outcome.held);
+  const grow = growSectionsToChildren(reconcileHolding(outcome.draft, held), held);
   const reconciledBefore = reconcileSectionMembership(before);
   const stuck = new Set(growSectionsToChildren(reconciledBefore).blocked.map((entry) => entry.section));
   const worsens = (section: string) => {

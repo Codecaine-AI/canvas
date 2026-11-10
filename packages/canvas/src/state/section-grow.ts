@@ -162,22 +162,27 @@ export function sectionOverflow(document: InteractiveCanvasDocument, id: string)
 
 /**
  * The section parent of each note whose text fit changed only its height
- * (top-left and width held) between `before` and `after`, keyed by note id.
+ * (top-left and width held) between `before` and `after`, keyed by note id,
+ * and the `before` parent of every frame above it (null at the top level).
  * A fitted note that grew past its frame is still that frame's child: the
- * frame grows to hold it rather than lose it (objects/sticky/note-fit.ts).
+ * frame and its ancestors grow together to hold it rather than lose it
+ * (objects/sticky/note-fit.ts).
  */
 export function fittedNoteParents(
   before: InteractiveCanvasDocument,
   after: InteractiveCanvasDocument,
-): Map<string, string> {
+): Map<string, string | null> {
   const prior = new Map(before.objects.map((object) => [object.id, object]));
-  const held = new Map<string, string>();
+  const held = new Map<string, string | null>();
   for (const object of after.objects) {
     const was = prior.get(object.id);
     if (object.style?.shape !== "note" || !was?.parentId) continue;
     const a = was.geometry;
     const b = object.geometry;
-    if (a.x === b.x && a.y === b.y && a.width === b.width && a.height !== b.height) held.set(object.id, was.parentId);
+    if (a.x !== b.x || a.y !== b.y || a.width !== b.width || a.height === b.height) continue;
+    for (let id: string | null = object.id; id !== null && !held.has(id); id = held.get(id)!) {
+      held.set(id, prior.get(id)?.parentId ?? null);
+    }
   }
   return held;
 }
@@ -211,7 +216,7 @@ export function reconcileHolding(
  */
 export function settleSections(
   document: InteractiveCanvasDocument,
-  held?: ReadonlyMap<string, string>,
+  held?: ReadonlyMap<string, string | null>,
 ): InteractiveCanvasDocument {
-  return reconcileSectionMembership(growSectionsToChildren(reconcileHolding(document, held)).document);
+  return reconcileSectionMembership(growSectionsToChildren(reconcileHolding(document, held), held).document);
 }

@@ -148,4 +148,33 @@ describe("a note that outgrows its section keeps it", () => {
     const document = board();
     held(fitNotesToText({ ...document, objects: document.objects.map((o) => (o.id === "n" ? { ...o, text: TWELVE } : o)) }, CARD));
   });
+
+  test("nested: the frame and its parent grow together, on update_text and in Studio", () => {
+    // Grown alone, frame (400×420) would be larger than outer (480×300) and
+    // stop qualifying as its child before outer could grow.
+    const nested = () => makeDocument([
+      { ...box("outer", 0, 0, 480, 300, "section"), text: "Outer" },
+      { ...box("frame", 40, 60, 400, 200, "section"), text: "Frame", color: "blue", parentId: "outer" },
+      { ...note("n", "short", 80, 120, 240, 60), parentId: "frame" },
+    ]);
+    const keeps = (document: InteractiveCanvasDocument) => {
+      held(document);
+      expect(document.objects.find((object) => object.id === "frame")!.parentId).toBe("outer");
+      const outer = geometryOf(document, "outer");
+      const frame = geometryOf(document, "frame");
+      expect(outer.y + outer.height).toBeGreaterThanOrEqual(frame.y + frame.height);
+    };
+
+    const session = makeTestSession(nested(), ["frame"], { canvasStyle: CARD });
+    expect(runOp(session, "update_text", { id: "n", text: TWELVE }).isError).toBeUndefined();
+    keeps(session.draft);
+
+    const state = createInteractiveCanvasState(nested());
+    const object = state.document.objects.find((candidate) => candidate.id === "n");
+    keeps(reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObject",
+      objectId: "n",
+      patch: noteTextPatch(object, TWELVE, CARD),
+    }).document);
+  });
 });
