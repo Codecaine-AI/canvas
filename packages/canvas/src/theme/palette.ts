@@ -416,9 +416,9 @@ const NODE_FILL_HUE_TURN: Partial<Record<CanvasColor, number>> = { yellow: 4, te
 
 /**
  * The ground a node's pushed inks are held against: the yellow gold edge and
- * wire (goldNodeEdge) and the tile glyphs. It is the node fill stage A and B
+ * wire (goldNodeEdge). It is the node fill stage A and B
  * tuned them on (OKLab L 0.829 to 0.867), so the lighter stage C fill leaves
- * every edge and glyph color where it was (Ford: edges, glyphs and text keep
+ * every edge color where it was (Ford: edges, glyphs and text keep
  * their colors). On the lighter fill each still clears its floor by more.
  */
 function nodeInkGround(color: CanvasColor, style: CanvasStyle): string {
@@ -583,10 +583,10 @@ function goldNodeEdge(style: CanvasStyle, fill: string): string {
 
 /**
  * Icon object paint. `glyph` (figjam): the bare glyph in the ink, closed
- * interiors in the shape fill. `tile`: tile = ink (a light anchor's solid,
- * solidTileFill), glyph = iconTileGlyphColor, or the text color where that
- * falls under 4.5:1 on the tile (light yellow and orange: a dark glyph, as
- * the design system's on-solid);
+ * interiors in the shape fill. `tile`: the solid tile, tile = the hue's text
+ * step (solidTileFill), glyph = iconTileGlyphColor (white on the light
+ * board, the board color on the dark one), or the text color where that
+ * falls under 4.5:1 on the tile;
  * `white` on a light board becomes an outlined tile (cardFill, ink border,
  * ink glyph) instead of a solid near-black square.
  */
@@ -608,19 +608,24 @@ function iconPaint(color: CanvasColor, style: CanvasStyle): IconPaint {
 }
 
 /**
- * A solid tile's body: the ink, or in the layer-cake modes the anchor itself
- * where the anchor is a light solid, not a text step (light yellow and
- * orange). The ink is that solid pushed to 3:1 against the node, a darker
- * mustard and rust that judges read as murky behind the dark on-solid glyph
- * (UI climb round 2: yellow on 06, 09, 12, h6 from all three judges; orange
- * on 14, h1, h3, h4, h5). The solid under the text color is the design
- * system's own solid / on-solid pair: 7.8:1 on yellow, 5.0:1 on orange.
+ * A solid tile's body: the ink, or in the layer-cake modes the hue's
+ * design-system text step, the tile main drew (fa16873): the anchor held at
+ * MIN_TEXT_CONTRAST on the board, uncapped in chroma, so the white glyph
+ * reads at 4.5:1 or more. Light orange and yellow anchor on their solids
+ * (SCHEMATIC_LIGHT_PALETTE_TOKENS), so their tiles take the text steps
+ * themselves (LIGHT_TILE_TEXT_STEPS). Ford picked these solid ink tiles over
+ * the stage A node-paint tiles, a pastel fill with an ink glyph (stage C
+ * round 3: "I like the dark ones a lot more ... they pop more and they flow
+ * better").
  */
 function solidTileFill(color: CanvasColor, ink: string, style: CanvasStyle): string {
   if (style.sectionFill !== "layer-cake") return ink;
-  const anchor = paletteColor(color, style);
-  return ensureContrast(anchor, style.boardBackground, MIN_TEXT_CONTRAST) === anchor ? ink : anchor;
+  const textStep = isLightBoard(style) ? LIGHT_TILE_TEXT_STEPS[color] : undefined;
+  return textStep ?? ensureContrast(paletteColor(color, style), style.boardBackground, MIN_TEXT_CONTRAST);
 }
+
+/** The light design-system text steps (color.orange.text, color.yellow.text) of the two hues whose light anchor is the solid. */
+const LIGHT_TILE_TEXT_STEPS: Partial<Record<CanvasColor, string>> = { orange: "#9D530D", yellow: "#805F01" };
 
 /** The tile glyph color on a solid `ink` tile: iconTileGlyphColor, or the text color where that reads better and the glyph would fall under MIN_TEXT_CONTRAST. */
 function tileGlyphOn(ink: string, style: CanvasStyle): string {
@@ -632,8 +637,8 @@ function tileGlyphOn(ink: string, style: CanvasStyle): string {
 /** Ink weight of a tinted icon tile over the card fill. */
 const ICON_TILE_TINT_WEIGHT = 0.16;
 /**
- * A node-paint tile, the outlined `white` tile and a brand tile edge at the
- * node border width (shapeBorderWidthPx). At the 1.5px section frame weight
+ * A tinted tile's outlined `white` tile and a brand tile edge at the node
+ * border width (shapeBorderWidthPx). At the 1.5px section frame weight
  * a tile read thinner and lighter than the nodes beside it, so the node
  * family looked mixed (stage B round 1: fable on 04, 06, 08 and h2).
  */
@@ -663,42 +668,29 @@ export function iconTileModeFor(style: CanvasStyle, sizePx: number): IconTileMod
 
 /**
  * resolveIconPaint for an icon of glyph-box size `sizePx`, with the tile body
- * `iconTileFill` picks (resolveIconPaint itself stays the solid tile the
- * small section header badges draw). `solid`: a small node — the pick's node
- * fill (resolveShapePaint), edged and drawn in its ink, so a tile reads in
- * the same pastel-and-ink system as the nodes beside it. Solid ink tiles
- * shouted next to the pastel nodes, and the outlined `white` tile among them
- * read as a second tile system (stage A round 2: opus on the wires sheet).
- * `tint`: a light ink tint — mix(ink, cardFill, 0.16), opaque — bordered in
- * the ink at the shape border width, with an ink glyph; `white` on a light
- * board keeps its outlined tile there. Glyph style ignores the size.
+ * `iconTileFill` picks. `solid`: resolveIconPaint's solid tile, in a section
+ * of its own hue too (a dark tile still stands off its light section); the
+ * outlined `white` tile keeps a 1px edge. `tint`: a light ink tint —
+ * mix(ink, cardFill, 0.16), opaque — bordered in the ink at the shape border
+ * width, with an ink glyph; `white` on a light board keeps its outlined tile
+ * there. A brand logo keeps its own colors on the white node card
+ * (brandIconPaint) at any size: Ford asked for the custom logos to stay
+ * (stage C round 3, on the solid tiles: "you should still allow for custom
+ * ones"). Glyph style ignores the size.
  */
 export function resolveIconTilePaint(
   color: CanvasColor,
   style: CanvasStyle,
   sizePx: number,
   brandColor?: string | null,
-  container: CanvasColor | null = null,
 ): IconTilePaint {
   if (brandColor) return cachedPaint(style, `brand-icon|${brandColor}`, () => brandIconPaint(brandColor, style));
   const paint = resolveIconPaint(color, style);
   if (paint.tileFill === null) return { ...paint, tileMode: null, tileBorderWidthPx: 0 };
   const tileMode = iconTileModeFor(style, sizePx);
-  const ink = resolveInk(color, style);
-  if (tileMode === "solid") {
-    // A tile in a section of its own hue is the white card with its ink edge and glyph (ownHueShapePaint).
-    const shape = resolveShapePaint(color, style, container);
-    // The glyph is the ink held at MIN_TEXT_CONTRAST on the tile: the yellow
-    // ink sat near 3:1 on its butter tile, the weakest glyph on the sheet
-    // (stage A rounds 9 and 10: sol and opus on 'Agent' and 'Webhook').
-    // A white tile draws in its gray edge, not the near-black ink, which
-    // made it heavier than the tinted tiles (round 9: opus on 'Scheduler', 'Secrets').
-    // The push measures on the ink ground (nodeInkGround), so the lighter stage C tile keeps the glyph color.
-    const ground = onOwnHueSection(color, container, style) ? shape.fill : nodeInkGround(color, style);
-    const glyph = ensureContrast(whiteNodeEdgeAsGray(color, style) ? shape.border : ink, ground, MIN_TEXT_CONTRAST);
-    return { ...paint, tileFill: shape.fill, tileBorder: shape.border, glyph, tileMode, tileBorderWidthPx: iconTileOutlineWidthPx(style) };
-  }
+  if (tileMode === "solid") return { ...paint, tileMode, tileBorderWidthPx: paint.tileBorder === null ? 0 : SOLID_WHITE_TILE_OUTLINE_WIDTH_PX };
   if (paint.tileBorder !== null) return { ...paint, tileMode, tileBorderWidthPx: iconTileOutlineWidthPx(style) };
+  const ink = resolveInk(color, style);
   return {
     ...paint,
     tileFill: style.sectionFill === "layer-cake"
@@ -710,6 +702,9 @@ export function resolveIconTilePaint(
     tileBorderWidthPx: style.shapeBorderWidthPx,
   };
 }
+
+/** Edge of the outlined `white` solid tile, px: main's hairline beside the edgeless solid tiles. */
+const SOLID_WHITE_TILE_OUTLINE_WIDTH_PX = 1;
 
 /**
  * Least contrast a one-color brand mark keeps against its tile or board: the

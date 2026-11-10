@@ -6,7 +6,6 @@ import { useCanvasStyle } from "../../../theme/canvas-style-context";
 import { resolveBrandMarkFill, resolveIconTilePaint } from "../../../theme/palette";
 import { resolveIconGlyph } from "./icon-glyphs";
 import { BBOX_OUTLINE } from "../../geometry";
-import { useContainerColor } from "../../section/section-depth-context";
 import { ObjectShell, ObjectSlotText } from "../../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../../object-def";
 import { BELOW_TEXT_SLOT, iconTileRectPx } from "../../text-slots";
@@ -26,14 +25,12 @@ function IconObjectView(props: ObjectRenderProps) {
   // on a tile — solid ink, or a light ink tint for a large tile
   // (theme/palette.ts resolveIconTilePaint, sized by the capped tile side).
   const canvasStyle = useCanvasStyle();
-  const container = useContainerColor(object.id);
   // A brand logo keeps its own color (resolveIconTilePaint's brand paint).
   const paint = resolveIconTilePaint(
     object.color ?? FIRST_USE_COLORS.shape,
     canvasStyle,
     iconTileRectPx(object.geometry.width, object.geometry.height, canvasStyle.iconTileMaxPx).width,
     resolveIconGlyph(object.icon, canvasStyle.iconPack)?.brandColor,
-    container,
   );
   const markBackground = paint.tileFill ?? canvasStyle.boardBackground;
   const markFill = (fill: string) => resolveBrandMarkFill(fill, markBackground, canvasStyle);

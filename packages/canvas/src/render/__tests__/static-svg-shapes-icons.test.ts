@@ -126,18 +126,17 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     expect(svg).not.toContain("<rect");
   });
 
-  it("schematic draws a rounded tile in the node paint, capped at iconTileMaxPx and centered in the box, the Tabler glyph inset on it", () => {
+  it("schematic draws a solid ink tile with 2px corners, capped at iconTileMaxPx and centered in the box, the Tabler glyph inset on it", () => {
     for (const theme of ["schematic-light", "schematic-dark"] as const) {
       const style = canvasThemePreset(theme);
       const svg = render([icon({ geometry: { x: 0, y: 0, width: 100, height: 64 } })], theme);
-      const shapePaint = resolveShapePaint("violet", style);
+      const tilePaint = resolveIconTilePaint("violet", style, 56);
       const layout = iconTileLayout(100, 64, style.iconTileMaxPx);
-      // min(100, 64, 56) = 56, centered both ways in the 100×64 box; the 2px ink edge (the node border
-      // width since stage B round 4: at 1.5px tiles read thinner than the nodes) paints inside it.
+      // min(100, 64, 56) = 56, centered both ways in the 100×64 box; the solid ink tile has no edge
+      // (Ford picked main's solid tiles in stage C round 3).
       expect(layout.tile).toEqual({ x: 22, y: 4, width: 56, height: 56 });
-      expect(svg).toContain(
-        `<rect x="23" y="5" width="54" height="54" rx="1" fill="${shapePaint.fill}" stroke="${shapePaint.border}" stroke-width="2"/>`,
-      );
+      expect(tilePaint.tileFill).toBe(style.palette.violet);
+      expect(svg).toContain(`<rect x="22" y="4" width="56" height="56" rx="2" fill="${tilePaint.tileFill}"/>`);
       // The caption hangs 6px under the tile (tile bottom 60), centered on it.
       const [caption] = texts(svg);
       expect(tspanYs(caption!.body)).toEqual([60 + 6 + NAME_LINE_PX / 2]);
@@ -149,24 +148,27 @@ describe("static icons: tile vs glyph, packs, brands", () => {
       expect(svg).toContain(
         `<svg x="${Math.round((22 + inset) * 100) / 100}" y="${Math.round((4 + inset) * 100) / 100}" width="${Math.round((56 - inset * 2) * 100) / 100}"`,
       );
-      // The glyph is the ink held at 4.5:1 on the tile.
-      expect(svg).toContain(`viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="none" stroke="${resolveIconTilePaint("violet", style, 56).glyph}" stroke-width="${strokeWidth}"`);
+      // The glyph is the tile glyph color: white on the light board, the board color on the dark one.
+      expect(tilePaint.glyph).toBe(style.iconTileGlyphColor);
+      expect(svg).toContain(`viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="none" stroke="${style.iconTileGlyphColor}" stroke-width="${strokeWidth}"`);
       for (const element of glyph.elements) {
         if (element.kind === "path") expect(svg).toContain(`d="${element.d}"`);
       }
     }
   });
 
-  it("a white tile is the white node: its fill, a 2px edge inside the edge, the tile paint's glyph", () => {
-    for (const theme of ["schematic-light", "schematic-dark"] as const) {
-      const style = canvasThemePreset(theme);
-      const svg = render([icon({ color: "white" })], theme);
-      // The 56px tile centered in the 64px box (4..60), its 2px border (the node border width) inside the edge.
-      expect(svg).toContain(
-        `<rect x="5" y="5" width="54" height="54" rx="1" fill="${resolveShapePaint("white", style).fill}" stroke="${resolveShapePaint("white", style).border}" stroke-width="2"/>`,
-      );
-      expect(svg).toContain(`fill="none" stroke="${resolveIconTilePaint("white", style, 56).glyph}" stroke-width=`);
-    }
+  it("a white tile: the outlined card tile with a 1px ink edge on light, the solid white ink on dark", () => {
+    const light = canvasThemePreset("schematic-light");
+    // The 56px tile centered in the 64px box (4..60), its 1px edge inside the edge.
+    const lightSvg = render([icon({ color: "white" })], "schematic-light");
+    expect(lightSvg).toContain(
+      `<rect x="4.5" y="4.5" width="55" height="55" rx="1.5" fill="${light.cardFill}" stroke="${light.palette.white}" stroke-width="1"/>`,
+    );
+    expect(lightSvg).toContain(`fill="none" stroke="${light.palette.white}" stroke-width=`);
+    const dark = canvasThemePreset("schematic-dark");
+    const darkSvg = render([icon({ color: "white" })], "schematic-dark");
+    expect(darkSvg).toContain(`<rect x="4" y="4" width="56" height="56" rx="2" fill="${dark.palette.white}"/>`);
+    expect(darkSvg).toContain(`fill="none" stroke="${dark.boardBackground}" stroke-width=`);
   });
 
   it("fills a brand logo with its own brand color, never the object's color pick", () => {
@@ -203,9 +205,9 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     expect(svg).toContain(`fill="${dark.textColor}" stroke="none"`);
   });
 
-  it("keeps tinting a generic glyph with its color pick", () => {
+  it("keeps tiling a generic glyph in its color pick", () => {
     const light = canvasThemePreset("schematic-light");
-    expect(render([icon({ icon: "database" })], "schematic-light")).toContain(`stroke="${light.palette.violet}"`);
+    expect(render([icon({ icon: "database" })], "schematic-light")).toContain(`fill="${light.palette.violet}"/>`);
   });
 
   it("the icon pack swaps a generic glyph's geometry", () => {
@@ -229,8 +231,7 @@ describe("static icons: tile vs glyph, packs, brands", () => {
         padding: 0,
       }).svg;
     const ink = style.palette.violet;
-    const pastel = resolveShapePaint("violet", style).fill;
-    expect(renderAt(72)).toContain(`fill="${pastel}" stroke="${ink}" stroke-width="2"/>`);
+    expect(renderAt(72)).toContain(`<rect x="0" y="0" width="72" height="72" rx="2" fill="${ink}"/>`);
     const tinted = renderAt(170);
     const tint = resolveIconTilePaint("violet", style, 170);
     expect(tint.tileFill).toBe(mixColors(ink, style.cardFill, 0.16));
@@ -239,9 +240,9 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     );
     // The glyph viewport: 56px, centered on the 170px tile, stroked in the ink.
     expect(tinted).toContain(`<svg x="57" y="57" width="56" height="56" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="none" stroke="${ink}"`);
-    // Under the preset's 56px cap the same box draws a node-paint 56px tile, centered.
+    // Under the preset's 56px cap the same box draws a solid 56px tile, centered.
     expect(render([icon({ geometry: { x: 0, y: 0, width: 170, height: 170 } })], "schematic-light")).toContain(
-      `<rect x="58" y="58" width="54" height="54" rx="1" fill="${pastel}" stroke="${ink}" stroke-width="2"/>`,
+      `<rect x="57" y="57" width="56" height="56" rx="2" fill="${ink}"/>`,
     );
   });
 
@@ -251,7 +252,7 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     const big = icon({ geometry: { x: 0, y: 0, width: 170, height: 170 } });
     const small = icon();
     const solidSvg = renderDocumentToSvg(documentOf([big]), { canvasStyle: { ...style, iconTileFill: "solid" } }).svg;
-    expect(solidSvg).toContain(`fill="${resolveShapePaint("violet", style).fill}" stroke="${style.palette.violet}" stroke-width="2"/>`);
+    expect(solidSvg).toContain(`width="170" height="170" rx="2" fill="${style.palette.violet}"/>`);
     const tintSvg = renderDocumentToSvg(documentOf([small]), { canvasStyle: { ...style, iconTileFill: "tint" } }).svg;
     expect(tintSvg).toContain(`stroke="${style.palette.violet}" stroke-width="2"/>`);
   });

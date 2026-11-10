@@ -385,7 +385,7 @@ export const SCHEMATIC_PALETTE_TOKENS = {
  * fills it painted khaki (UI climb round 0, on every yellow board). Light
  * yellow takes the yellow solid (#DFAB01) as its anchor instead: the
  * layer-cake paints (theme/palette.ts resolveInk, inkFill) push it to 3:1
- * against its node fill for strokes and tiles (a gold, #A98201), and keep
+ * against its node fill for strokes (a gold, #A98201), and keep
  * its chroma in the fills at the lightness yellow.text gave, so every
  * layer and node lightness guard holds. Amber.text was the other candidate,
  * but at hue 65 it sits 9 degrees from orange.text.
@@ -393,7 +393,9 @@ export const SCHEMATIC_PALETTE_TOKENS = {
  * Orange: orange.text (#9D530D, OKLCH L 0.52) stroked and tiled a mud brown
  * that judges read as "not orange" on every orange board (UI climb round 2:
  * 14, h1, h3, h4, h5). Light orange takes the orange solid (#D9730D) the same
- * way: strokes at 3:1 on the node (#CE6D0C, 3.5:1 on the board).
+ * way: strokes at 3:1 on the node (#CE6D0C, 3.5:1 on the board). Solid
+ * icon tiles keep both text steps under a white glyph: Ford picked main's
+ * ink tiles (stage C round 3; theme/palette.ts solidTileFill).
  */
 export const SCHEMATIC_LIGHT_PALETTE_TOKENS = {
   ...SCHEMATIC_PALETTE_TOKENS,

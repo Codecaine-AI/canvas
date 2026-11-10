@@ -403,18 +403,15 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       // Yellow, not khaki: well above the olive mix, though capped as a section (0.04 at top level).
       expect(chroma(fill)).toBeGreaterThan(1.3 * chroma(olive));
     }
-    // A tile glyph on the yellow solid tile is the dark text color, as the design system's yellow.on-solid.
-    const tile = resolveIconPaint("yellow", LIGHT);
-    expect(tile.glyph).toBe(LIGHT.textColor);
-    expect(contrastRatio(LIGHT.textColor, tile.tileFill!)).toBeGreaterThanOrEqual(4.5);
   });
 
-  it("light yellow and orange: tiles are the design-system solid under a dark glyph, strokes the solid at 3:1", () => {
-    for (const [color, solid] of [["yellow", "#DFAB01"], ["orange", "#D9730D"]] as const) {
+  it("light yellow and orange: strokes the solid at 3:1, tiles the text step under a white glyph", () => {
+    // Ford picked main's solid ink tiles (stage C round 3): the text steps, as main tiled them.
+    for (const [color, solid, textStep] of [["yellow", "#DFAB01", "#805F01"], ["orange", "#D9730D", "#9D530D"]] as const) {
       expect(LIGHT.palette[color]).toBe(solid);
       const tile = resolveIconPaint(color, LIGHT);
-      expect(tile).toMatchObject({ tileFill: solid, tileBorder: null, glyph: LIGHT.textColor });
-      expect(contrastRatio(tile.glyph, solid)).toBeGreaterThanOrEqual(4.5);
+      expect(tile).toMatchObject({ tileFill: textStep, tileBorder: null, glyph: "#FFFFFF" });
+      expect(contrastRatio(tile.glyph, textStep)).toBeGreaterThanOrEqual(4.5);
       expect(contrastRatio(resolveInk(color, LIGHT), resolveShapePaint(color, LIGHT).fill)).toBeGreaterThanOrEqual(3);
     }
     // Orange no longer strokes the brown text step (#9D530D, L 0.52).
@@ -518,7 +515,7 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(contrastRatio(white.border, white.fill)).toBeGreaterThanOrEqual(4.5);
   });
 
-  it("light preset: a node, tile or note in a section of its own hue is the white card edged in its own ink", () => {
+  it("light preset: a node or note in a section of its own hue is the white card edged in its own ink; an icon tile stays solid", () => {
     // A hued node on a tint of its own hue read as a darker patch of the
     // section (stage B round 0: fable on 01, 03, 04, 06 and 14).
     const white = resolveShapePaint("white", LIGHT);
@@ -526,9 +523,10 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       const own = resolveShapePaint(color, LIGHT, color);
       expect(own).toEqual({ fill: white.fill, border: resolveShapePaint(color, LIGHT).border, text: LIGHT.textColor });
       expect(contrastRatio(own.border, own.fill)).toBeGreaterThanOrEqual(3);
-      const tile = resolveIconTilePaint(color, LIGHT, 56, null, color);
-      expect(tile.tileFill).toBe(white.fill);
-      expect(contrastRatio(tile.glyph, white.fill)).toBeGreaterThanOrEqual(4.5);
+      // A solid icon tile stays solid on its own hue: the dark tile still stands off the light section (stage C round 3).
+      const tile = resolveIconTilePaint(color, LIGHT, 56);
+      expect(tile).toMatchObject({ tileFill: resolveIconPaint(color, LIGHT).tileFill, tileBorder: null });
+      expect(contrastRatio(tile.tileFill!, resolveSectionPaint(color, 2, LIGHT).fill)).toBeGreaterThanOrEqual(3);
       // Any other section, and no section, keeps the hued node.
       expect(resolveShapePaint(color, LIGHT, color === "blue" ? "teal" : "blue")).toEqual(resolveShapePaint(color, LIGHT));
     }

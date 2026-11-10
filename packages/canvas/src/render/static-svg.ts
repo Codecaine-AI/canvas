@@ -728,14 +728,13 @@ function renderIconGlyph(
   object: InteractiveCanvasObject,
   viewBox: CanvasBounds,
   canvasStyle: CanvasStyle,
-  container: CanvasColor | null,
 ): string | null {
   const glyph = resolveIconGlyph(object.icon, canvasStyle.iconPack);
   if (!glyph) return null;
   const { geometry } = object;
   const sizePx = Math.min(geometry.width, geometry.height);
   const tileSidePx = iconTileRectPx(geometry.width, geometry.height, canvasStyle.iconTileMaxPx).width;
-  const paint = resolveIconTilePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, tileSidePx, glyph.brandColor, container);
+  const paint = resolveIconTilePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, tileSidePx, glyph.brandColor);
   const markBackground = paint.tileFill ?? canvasStyle.boardBackground;
   const markFill = (fill: string) => resolveBrandMarkFill(fill, markBackground, canvasStyle);
   if (paint.tileFill !== null) {
@@ -943,7 +942,7 @@ function renderShapeBody(
   // outside the viewBox, whose nested <svg> would be rasterizer-unsafe —
   // falls through to the neutral-rect bbox tier.
   if ((renderShape === "icon" || object.type === "icon") && insideViewBox) {
-    const glyphMarkup = renderIconGlyph(object, viewBox, canvasStyle, container);
+    const glyphMarkup = renderIconGlyph(object, viewBox, canvasStyle);
     if (glyphMarkup !== null) return glyphMarkup;
   }
 
