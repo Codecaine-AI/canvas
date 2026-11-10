@@ -633,20 +633,19 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     // Round 4: the note was the page's own color and a shade above a gray
     // section, so it read as a borderless box (UI climb round 4).
     const note = resolveStickyPaint("yellow", LIGHT);
+    // The note as it paints in each top-level section: in its own hue that is the white card.
     for (const sectionColor of CANVAS_COLORS) {
-      const minimum = sectionColor === "yellow" ? 0.018 : 0.023;
-      expect(oklabDistance(note.fill, resolveSectionPaint(sectionColor, 2, LIGHT).fill)).toBeGreaterThanOrEqual(minimum);
+      const painted = resolveStickyPaint("yellow", LIGHT, sectionColor);
+      expect(oklabDistance(painted.fill, resolveSectionPaint(sectionColor, 2, LIGHT).fill)).toBeGreaterThanOrEqual(0.023);
     }
-    // 0.065 (was 0.08): the yellow note now sits at the other washes' tint
-    // step (L 0.962, not the loud L 0.977 lemon; stage A round 9: opus). Every
-    // other note wash sits at L 0.952, 0.06 over the lightest node; yellow
-    // keeps 0.07 over the slate gray node and 0.095 over the yellow node.
-    // Gray left the rule in stage B round 4: the gray node is a near-white
-    // card now, and a note stands 0.04 OKLab off it by its wash's hue.
+    // Stage C (Ford: "can we also make the sticky note background slightly
+    // lighter") lifts every note wash 0.015 L at 80% chroma: yellow at L 0.977,
+    // the others at 0.967. The nodes went lighter too (L 0.915, yellow 0.945),
+    // so the yellow note keeps 0.03 over the yellow node, and 0.04 OKLab off the
+    // near-white gray node card (stage B round 4) by its wash's hue.
     expect(oklabDistance(note.fill, resolveShapePaint("gray", LIGHT).fill)).toBeGreaterThanOrEqual(0.04);
-    // Stage C lightened the nodes (L 0.915, yellow 0.945): the yellow note stays 0.015 over the yellow node.
     for (const nodeColor of CANVAS_COLORS.filter((color) => color !== "white" && color !== "gray")) {
-      expect(oklabLightness(note.fill) - oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill)).toBeGreaterThanOrEqual(0.015);
+      expect(oklabLightness(note.fill) - oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill)).toBeGreaterThanOrEqual(0.03);
     }
     expect(contrastRatio(note.text, note.fill)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(note.border, note.fill)).toBeGreaterThanOrEqual(1.2);

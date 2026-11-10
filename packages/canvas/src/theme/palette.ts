@@ -887,7 +887,7 @@ const CARD_STICKY_CODE_CHIP_ALPHA = 0.045;
 
 /**
  * Beside `ink-card` nodes a card note is a tinted callout in its own color
- * pick: a wash of the pick's ink (OKLab L 0.952, chroma 0.03), a hairline
+ * pick: a wash of the pick's ink (OKLab L 0.967, chroma 0.024), a hairline
  * edge one step deeper in the same hue, a muted mid tone of it (L 0.68,
  * chroma 0.115) as the 4px left rule, and a tight lift. Gray is a faint
  * slate wash; white is a white card. Both take a soft slate rule.
@@ -898,12 +898,14 @@ const CARD_STICKY_CODE_CHIP_ALPHA = 0.045;
  * read as empty boxes beside mint green and teal; yellow still read cream;
  * rules at chroma 0.15 clipped to a loud cyan on teal; the wide lift was
  * louder than a side note. At L 0.952 every hue reaches chroma 0.03, and the
- * wash still sits lighter than every node fill (L 0.85 to 0.93) and differs
- * from the gray sections (L 0.96) by hue. Inline code is a typed chip on a
- * white wash of the note (NOTE_CODE_KIND_TEXT).
+ * wash still sits lighter than every node fill and differs from the gray
+ * sections (L 0.96) by hue. Stage C (Ford: "can we also make the sticky note
+ * background slightly lighter") lifts every wash 0.015 L at 80% of its
+ * chroma; edge, rule and lift keep their colors. Inline code is a typed chip
+ * on a white wash of the note (NOTE_CODE_KIND_TEXT).
  */
-const NOTE_FILL_LIGHTNESS = 0.952;
-const NOTE_FILL_CHROMA = 0.03;
+const NOTE_FILL_LIGHTNESS = 0.967;
+const NOTE_FILL_CHROMA = 0.024;
 const NOTE_EDGE_LIGHTNESS = 0.88;
 const NOTE_EDGE_CHROMA = 0.05;
 const NOTE_RULE_LIGHTNESS = 0.68;
@@ -935,14 +937,14 @@ const NOTE_CODE_KIND_TEXT: Readonly<Record<Exclude<CodeKind, "other">, string>> 
 };
 const NOTE_SHADOW_OPACITY = 0.06;
 /**
- * Neutral notes. Gray is a faint cool slate (chroma 0.008 at the blue
- * anchor's hue) with a slate rule (chroma 0.03): the plain neutral read as
+ * Neutral notes. Gray is a faint cool slate (chroma 0.0064 at the blue
+ * anchor's hue, 0.008 before the stage C lift) with a slate rule (chroma 0.03): the plain neutral read as
  * a disabled box with a dull bar (stage A round 9: opus). White is a white
  * card with a soft slate rule, not the near-charcoal one, which made it read
  * as a white node with a heavy edge (rounds 9 and 10: sol and opus).
  */
 const NOTE_NEUTRAL = {
-  fill: { lightness: NOTE_FILL_LIGHTNESS, chroma: 0.008 },
+  fill: { lightness: NOTE_FILL_LIGHTNESS, chroma: 0.0064 },
   edge: { lightness: 0.875, chroma: 0.012 },
   rule: { lightness: 0.62, chroma: 0.03 },
 } as const;
@@ -951,12 +953,14 @@ const NOTE_NEUTRAL = {
  * whose pale wash is the beige paper Ford turned down. It sits at the other
  * washes' tint level, a touch lighter and more colorful so it reads yellow:
  * the old L 0.977, chroma 0.072 lemon was the loudest card on the sheet
- * (stage A rounds 9 and 10: opus on every yellow note). Its rule is a soft
+ * (stage A rounds 9 and 10: opus on every yellow note). The stage C lift
+ * took it from L 0.962, chroma 0.06 back to L 0.977 at a softer chroma
+ * 0.048, as for every note (NOTE_FILL_LIGHTNESS). Its rule is a soft
  * gold (L 0.76, chroma 0.11): the saturated L 0.78, chroma 0.15 stripe was
  * the loudest accent on the board (stage B round 0: fable on h1, h3, h4).
  */
 const NOTE_YELLOW = {
-  fill: { anchor: "#FFE600", lightness: 0.962, chroma: 0.06, hue: -6 },
+  fill: { anchor: "#FFE600", lightness: 0.977, chroma: 0.048, hue: -6 },
   edge: { anchor: "#FFE600", lightness: 0.885, chroma: 0.075, hue: -6 },
   rule: { anchor: "#FFD000", lightness: 0.76, chroma: 0.11, hue: 0 },
 } as const;
