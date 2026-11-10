@@ -225,4 +225,5 @@ export async function runScore(argv: string[]): Promise<void> {
   const tablePath = resolve(roundDir(climbRoot, round), "pr-table.md");
   writeFileSync(tablePath, prTable(climbRoot, sets, round));
   process.stdout.write(`${JSON.stringify({ ...verdict, prTable: tablePath }, null, 2)}\n`);
+  if (!verdict.pass) process.exitCode = 1;
 }

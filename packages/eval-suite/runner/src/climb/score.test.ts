@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
-import { resolve } from "node:path";
+import { cpSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
 
 import { readSets } from "./paths.ts";
 import { CATEGORIES, gateVerdict, prTable, readRoundScores, tenthsOf, type ScoreFile, type Stage } from "./score.ts";
@@ -86,5 +88,25 @@ describe("climb score gate", () => {
     expect(tenthsOf(10.1)).toBeNull();
     expect(tenthsOf(10.00000001)).toBeNull();
     expect(tenthsOf(8.99999999)).toBeNull();
+  });
+});
+
+describe("climb score command", () => {
+  /** Run `climb score` on a copy of a fixture (the command writes pr-table.md into the round). */
+  function scoreExit(fixture: string): number {
+    const climbRoot = mkdtempSync(join(tmpdir(), "climb-score-"));
+    try {
+      cpSync(resolve(FIXTURES, fixture), climbRoot, { recursive: true });
+      const cli = resolve(import.meta.dir, "..", "cli.ts");
+      const args = ["climb", "score", "--round", "1", "--stage", "1", "--climb-root", climbRoot, "--sets", resolve(FIXTURES, "sets.json")];
+      return Bun.spawnSync([process.execPath, cli, ...args], { stdout: "ignore", stderr: "ignore" }).exitCode;
+    } finally {
+      rmSync(climbRoot, { recursive: true, force: true });
+    }
+  }
+
+  test("exits nonzero when the gate fails and zero when it passes", () => {
+    expect(scoreExit("mean-fail")).toBe(1);
+    expect(scoreExit("pass")).toBe(0);
   });
 });
