@@ -211,12 +211,35 @@ export function reconcileHolding(
 }
 
 /**
+ * Each id in `held` (still on the board, with its held parent) whose parent
+ * in `document` is not the one `held` names.
+ */
+export function heldMoves(
+  document: InteractiveCanvasDocument,
+  held: ReadonlyMap<string, string | null> = new Map(),
+): { id: string; from: string | null; to: string | null }[] {
+  const parents = new Map(document.objects.map((object) => [object.id, object.parentId ?? null]));
+  return [...held].flatMap(([id, from]) => {
+    const to = parents.get(id) ?? null;
+    return parents.has(id) && (from === null || parents.has(from)) && to !== from ? [{ id, from, to }] : [];
+  });
+}
+
+/**
  * Reconcile membership (holding `held`, see reconcileHolding), grow what can
  * grow, reconcile again (an identity on a grown tree).
+ *
+ * Holding judges the grows as if the held tree stayed. When the settled board
+ * still moves a held object (a grown frame lands inside a neighbor), the grows
+ * are judged on bare membership instead, which blocks that grow: the frame
+ * keeps its parent, and a note it could not hold leaves it as before.
  */
 export function settleSections(
   document: InteractiveCanvasDocument,
   held?: ReadonlyMap<string, string | null>,
 ): InteractiveCanvasDocument {
-  return reconcileSectionMembership(growSectionsToChildren(reconcileHolding(document, held), held).document);
+  const reconciled = reconcileHolding(document, held);
+  const settled = reconcileSectionMembership(growSectionsToChildren(reconciled, held).document);
+  if (heldMoves(settled, held).length === 0) return settled;
+  return reconcileSectionMembership(growSectionsToChildren(reconciled).document);
 }

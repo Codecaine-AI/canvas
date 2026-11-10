@@ -149,6 +149,35 @@ describe("a note that outgrows its section keeps it", () => {
     held(fitNotesToText({ ...document, objects: document.objects.map((o) => (o.id === "n" ? { ...o, text: TWELVE } : o)) }, CARD));
   });
 
+  test("a frame whose growth would land it inside a neighbor keeps its parent, on update_text and in Studio", () => {
+    // 24 lines grow frame to 400×720, and big would cover 72% of it.
+    const LINES = Array(24).fill("line").join("\n");
+    const neighbor = () => makeDocument([
+      { ...box("frame", 0, 0, 400, 200, "section"), text: "Frame" },
+      { ...note("n", "short", 40, 60, 240, 60), parentId: "frame" },
+      { ...box("big", -300, 200, 1000, 600, "section"), text: "Big", color: "blue" },
+    ]);
+    const parentOf = (document: InteractiveCanvasDocument, id: string) =>
+      document.objects.find((object) => object.id === id)!.parentId ?? null;
+
+    const session = makeTestSession(neighbor(), ["frame"], { canvasStyle: CARD });
+    const before = session.draft;
+    const result = runOp(session, "update_text", { id: "n", text: LINES });
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("frame would land inside big. Nothing changed.");
+    expect(session.draft).toBe(before);
+
+    const state = createInteractiveCanvasState(neighbor());
+    const object = state.document.objects.find((candidate) => candidate.id === "n");
+    const studio = reduceInteractiveCanvasState(state, {
+      type: "canvas.updateObject",
+      objectId: "n",
+      patch: noteTextPatch(object, LINES, CARD),
+    }).document;
+    expect(parentOf(studio, "frame")).toBeNull();
+    expect(geometryOf(studio, "frame")).toEqual({ x: 0, y: 0, width: 400, height: 200 });
+  });
+
   test("nested: the frame and its parent grow together, on update_text and in Studio", () => {
     // Grown alone, frame (400×420) would be larger than outer (480×300) and
     // stop qualifying as its child before outer could grow.

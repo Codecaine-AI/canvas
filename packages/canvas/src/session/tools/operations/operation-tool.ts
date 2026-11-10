@@ -7,7 +7,7 @@ import { Type, type Static, type TSchema } from "@mariozechner/pi-ai";
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { reconcileConnectionWaypoints } from "../../../state/actions/waypoints";
 import { reconcileSectionMembership } from "../../../state/section-membership";
-import { fittedNoteParents, growSectionsToChildren, reconcileHolding, sectionOverflow } from "../../../state/section-grow";
+import { fittedNoteParents, growSectionsToChildren, heldMoves, reconcileHolding, sectionOverflow } from "../../../state/section-grow";
 
 import { formatNumberedRoute } from "../../../board/edge-route";
 import { formatDiagnostics } from "../../../board/lints/run";
@@ -188,17 +188,15 @@ export function runOperation<TFields extends OperationFields>(
   const next = reconcileSectionMembership(
     reconcileConnectionWaypoints(before, grow.document),
   );
-  // A parent the edit keeps but cannot grow to hold (locked, or stopped at a
-  // locked frame's edge) would release its child: refuse instead.
-  const moved = [...(outcome.held ?? [])].flatMap(([id, parentId]) => {
-    const now = next.objects.find((object) => object.id === id)?.parentId ?? null;
-    if (now === parentId) return [];
-    return [parentId ? `${id} would leave ${parentId}, which cannot grow to hold it` : `${id} would land inside ${now}`];
-  });
+  // The grows were judged with `held` kept. A parent that cannot grow to hold
+  // its child (locked, or stopped at a locked frame's edge), or a grown frame
+  // that lands inside a neighbor, would still move a held object: refuse.
+  const moved = heldMoves(next, held).map(({ id, from, to }) =>
+    from === null ? `${id} would land inside ${to}` : `${id} would leave ${from}, which cannot grow to hold it`);
   if (moved.length > 0) {
     return {
       isError: true,
-      text: `ERROR · ${spec.name} — ${moved.join("; ")}. Nothing changed. Unlock or make room around the frame, or arrange fewer nodes per row.`,
+      text: `ERROR · ${spec.name} — ${moved.join("; ")}. Nothing changed. Move the other section clear, unlock or make room around the frame, or make the edit smaller.`,
       details,
     };
   }
