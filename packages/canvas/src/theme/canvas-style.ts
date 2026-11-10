@@ -444,16 +444,17 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   // Sections are light zones and the nodes carry the weight (UI climb round
   // 4, after Ford: "the section backgrounds are too dark and items are
   // having a hard time showing up"). Top-level sections (depth 2 under the
-  // page) paint 0.085, then 0.13, then the 0.175 cap: OKLab L about 0.955,
-  // 0.935 and 0.915 (0.907, 0.87 and 0.83 at round 3's 0.19, 0.26 and 0.33).
-  // Each level steps about 0.02 L from its parent, so the frame edge (the
-  // ink at 0.75) marks where a group ends as much as the tint does.
+  // page) paint 0.065, then 0.11, then the 0.15 cap: OKLab L about 0.96,
+  // 0.937 and 0.915 (0.907, 0.87 and 0.83 at round 3's 0.19, 0.26 and 0.33),
+  // and each level gains chroma too (theme/palette.ts sectionChroma), so a
+  // nest reads by tone and color, not hue alone (stage A round 4). The cap
+  // keeps every hued node 0.045 L below the deepest level.
   // Picked from three variants on Archon boards 02, 04, 07 and 12 (paler
   // sections at 0.06 to 0.12, which faded into the page; white node cards,
   // which left the kind on the border alone).
-  sectionTintBase: 0.04,
-  sectionTintStep: 0.04,
-  sectionTintMax: 0.16,
+  sectionTintBase: 0.02,
+  sectionTintStep: 0.045,
+  sectionTintMax: 0.15,
   sectionBorderOpacity: 0.75,
   headerPlacement: "pinned",
   headerFont: "mono",

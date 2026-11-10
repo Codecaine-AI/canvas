@@ -888,25 +888,28 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
     // label chip's firmer gray edge: the hairline (1.2:1) on a near-white
     // parent let it vanish (UI climb round 4: boards 07 and 10). The page
     // frame keeps the hairline.
+    // Below the page a white section is a pure white card, a clear tone
+    // above gray and a step above the page, with the gray section's chip, so
+    // one chip system runs through every hue (stage A round 4: a
+    // card-colored white read as an empty gray box beside gray, under a
+    // heavier gray chip).
     const nested = depth > PAGE_SECTION_DEPTH;
     const edge = nested ? nestedWhiteSectionEdge(style) : style.hairlineColor;
-    const fill = nested ? style.cardFill : style.boardBackground;
-    const chipFill = mixColors(edge, fill, 0.5);
+    const fill = nested ? WHITE_SECTION_FILL : style.boardBackground;
+    const chipFill = nested ? mixColors(resolveInk("gray", style), fill, style.headerChipMix) : mixColors(edge, fill, 0.5);
     return {
       fill,
       border: edge,
       chipFill,
-      chipBorder: edge,
+      chipBorder: nested ? withAlpha(resolveInk("gray", style), SECTION_CHIP_BORDER_OPACITY) : edge,
       headerText: style.textColor,
       ...sectionIconPaint("white", chipFill, style),
     };
   }
   const paintColor: CanvasColor = color === "white" ? "gray" : color;
   const ink = resolveInk(paintColor, style);
-  // Gray gains nothing from a deeper step but darkness: past the top-level
-  // tone it reads as a disabled slab, and its chip loses contrast.
   const fill = paintColor === "gray" && style.shapeFill === "ink-card"
-    ? inkFill("gray", style.sectionTintMixBase, Math.min(layerCakeWeight(depth, style), GRAY_SECTION_INK_WEIGHT), style)
+    ? inkFill("gray", style.sectionTintMixBase, graySectionWeight(depth, style), style)
     : layerCakeFill(paintColor, paintColor === "gray" ? Math.min(depth, GRAY_SECTION_MAX_DEPTH) : depth, style);
   const chipFill = mixColors(ink, fill, style.headerChipMix);
   return {
@@ -934,7 +937,29 @@ function nestedWhiteSectionEdge(style: CanvasStyle): string {
 
 const NESTED_WHITE_SECTION_EDGE_INK_WEIGHT = 0.5;
 
-const GRAY_SECTION_INK_WEIGHT = 0.06;
+/** A white section below the page on a light board. */
+const WHITE_SECTION_FILL = "#FFFFFF";
+
+/**
+ * A gray section beside `ink-card` nodes: GRAY_SECTION_INK_WEIGHT at top
+ * level, a clear tone under the white section (stage A round 4: white and
+ * gray read as one fill, so white looked unstyled), then
+ * GRAY_SECTION_STEP_SCALE of each hue's step per level, so a gray child
+ * still sits a tone below its parent (round 4: gray 'Rules' on violet read
+ * near-white) without turning the disabled slab a full step gives, and gray
+ * nodes (L 0.894) keep their ground.
+ */
+function graySectionWeight(depth: number, style: CanvasStyle): number {
+  const top = layerCakeWeight(TOP_LEVEL_SECTION_DEPTH, style);
+  const weight = layerCakeWeight(depth, style);
+  if (top <= 0) return weight;
+  return roundWeight(weight <= top
+    ? (GRAY_SECTION_INK_WEIGHT * weight) / top
+    : GRAY_SECTION_INK_WEIGHT + (weight - top) * GRAY_SECTION_STEP_SCALE);
+}
+
+const GRAY_SECTION_INK_WEIGHT = 0.062;
+const GRAY_SECTION_STEP_SCALE = 0.5;
 
 /** The deepest level a gray layer-cake section deepens to: the top-level section's tone (depth 2 under the page). */
 const GRAY_SECTION_MAX_DEPTH = 2;
@@ -954,7 +979,7 @@ function layerCakeWeight(level: number, style: CanvasStyle): number {
 function layerCakeFill(color: CanvasColor, depth: number, style: CanvasStyle): string {
   const level = Number.isFinite(depth) ? Math.max(1, Math.floor(depth)) : 1;
   const base = style.sectionTintMixBase;
-  const fillAt = (weight: number) => sectionChromaCapped(inkFill(color, base, weight, style), color, weight, style);
+  const fillAt = (weight: number) => sectionChroma(inkFill(color, base, weight, style), color, weight, style);
   // Moving the weight only separates the fill from the cards when the mix
   // base itself stands clear of them (a dark board under raised cards); on a
   // light theme base and card are both white and the guard stays off.
@@ -1028,36 +1053,51 @@ function layerCakeFill(color: CanvasColor, depth: number, style: CanvasStyle): s
 }
 
 /**
- * Most OKLCH chroma a top-level layer-cake section fill keeps beside
- * `ink-card` nodes. Deeper levels may grow with their ink weight
- * (sectionChromaCapped), as a mix's chroma does, so a nested level still
- * steps off its parent when both would sit at the cap. A section is ground
- * and its nodes the figure, so a big field must never be the most colorful
- * thing in it: uncapped, a yellow field painted a butter judges called the
- * loudest fill on board 12 (UI climb round 2). The title chip and the frame
- * still carry the full hue, and the lightness is kept.
+ * OKLCH chroma of a top-level layer-cake section fill beside `ink-card`
+ * nodes. Deeper levels grow with their ink weight (sectionChroma), so each
+ * level steps off its parent in tone AND color, not hue alone. A section is
+ * ground and its nodes the figure (chroma 0.065 to 0.11), so a big field is
+ * never the most colorful thing in it: uncapped, a yellow field painted a
+ * butter judges called the loudest fill on board 12 (UI climb round 2). Set,
+ * not only capped: a mix gave blue, green, teal and violet 0.008 at top
+ * level, a gray that told siblings apart by the frame alone (stage A round 4).
  */
-const SECTION_CHROMA_MAX = 0.02;
+const SECTION_CHROMA = 0.02;
 
 /**
- * Hues whose section cap differs. Yellow needs about twice the chroma to read
- * as its hue at section lightness: at 0.02 it is greige, the khaki of UI
- * climb round 0.
+ * How section chroma grows with the ink weight: (weight / top-level weight)
+ * to this power. Slower than the mix, so the deepest level stays 0.065
+ * OKLab from a node of its own hue.
  */
-const SECTION_CHROMA_MAX_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: 0.04 };
+const SECTION_CHROMA_GROWTH = 0.75;
 
 /**
- * `fill` (a section level at ink `weight`) with its chroma cut, at the same
- * lightness and hue, to the cap for `color` scaled by `weight` over the
- * top-level weight.
- * Only beside `ink-card` nodes; other shape modes keep the fill.
+ * Hues whose section chroma differs. Yellow needs more chroma to read as its
+ * hue at section lightness: below about 0.03 it is greige or cream.
  */
-function sectionChromaCapped(fill: string, color: CanvasColor, weight: number, style: CanvasStyle): string {
-  if (style.shapeFill !== "ink-card") return fill;
+const SECTION_CHROMA_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: 0.03 };
+
+/**
+ * Hue turn (OKLCH degrees) of a section fill from its ink. Red (h 18) and
+ * pink (h 341) washes sat 37 degrees apart, so a red section in a pink one
+ * read as its parent (stage A round 4: 'Labels' in 'Carriers', 'Offers' in
+ * 'Growth'). Red turns warm and pink cool, each still clear of orange (h 67)
+ * and violet (h 303).
+ */
+const SECTION_HUE_SHIFT_BY_COLOR: Partial<Record<CanvasColor, number>> = { red: 6, pink: -8, blue: 8 };
+
+/**
+ * `fill` (a section level at ink `weight`) at the same lightness, its hue
+ * turned by SECTION_HUE_SHIFT_BY_COLOR, at the chroma for `color` scaled by
+ * `weight` over the top-level weight. Only beside `ink-card` nodes; other
+ * shape modes keep the fill.
+ */
+function sectionChroma(fill: string, color: CanvasColor, weight: number, style: CanvasStyle): string {
+  if (style.shapeFill !== "ink-card" || color === "gray") return fill;
   const topLevelWeight = layerCakeWeight(TOP_LEVEL_SECTION_DEPTH, style);
-  const cap = ((SECTION_CHROMA_MAX_BY_COLOR[color] ?? SECTION_CHROMA_MAX) * weight) / topLevelWeight;
-  if (oklabChroma(fill) <= cap) return fill;
-  return withLightnessChroma(fill, oklabLightness(fill), cap);
+  if (topLevelWeight <= 0) return fill;
+  const chroma = (SECTION_CHROMA_BY_COLOR[color] ?? SECTION_CHROMA) * (weight / topLevelWeight) ** SECTION_CHROMA_GROWTH;
+  return withLightnessChroma(fill, oklabLightness(fill), chroma, SECTION_HUE_SHIFT_BY_COLOR[color] ?? 0);
 }
 
 /** Nesting depth of a top-level section under the board's page section (state/section-depth.ts). */

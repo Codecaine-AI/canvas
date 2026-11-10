@@ -156,17 +156,25 @@ function oklabToLinear(L: number, a: number, b: number): [number, number, number
 const GAMUT_SEARCH_STEPS = 24;
 
 /**
- * `color`'s OKLCH hue at OKLab lightness `lightness` and chroma `chroma`, as
- * opaque `#RRGGBB`. Where that point falls outside sRGB the chroma drops to
+ * `color`'s OKLCH hue (turned by `hueShiftDegrees`) at OKLab lightness
+ * `lightness` and chroma `chroma`, as opaque `#RRGGBB`. Where that point falls outside sRGB the chroma drops to
  * the most the gamut holds at that lightness and hue (lightness and hue are
  * kept). A neutral `color` has no hue: the result is the neutral at
  * `lightness`.
  */
-export function withLightnessChroma(color: string | RgbaColor, lightness: number, chroma: number): string {
+export function withLightnessChroma(
+  color: string | RgbaColor,
+  lightness: number,
+  chroma: number,
+  hueShiftDegrees = 0,
+): string {
   const { a, b } = oklab(color);
   const radius = Math.hypot(a, b);
-  const hueA = radius > 1e-6 ? a / radius : 0;
-  const hueB = radius > 1e-6 ? b / radius : 0;
+  const turn = (hueShiftDegrees * Math.PI) / 180;
+  const unitA = radius > 1e-6 ? a / radius : 0;
+  const unitB = radius > 1e-6 ? b / radius : 0;
+  const hueA = unitA * Math.cos(turn) - unitB * Math.sin(turn);
+  const hueB = unitA * Math.sin(turn) + unitB * Math.cos(turn);
   const inGamut = (c: number) => oklabToLinear(lightness, hueA * c, hueB * c).every((v) => v >= -1e-6 && v <= 1 + 1e-6);
   let reach = Math.max(0, radius > 1e-6 ? chroma : 0);
   if (!inGamut(reach)) {

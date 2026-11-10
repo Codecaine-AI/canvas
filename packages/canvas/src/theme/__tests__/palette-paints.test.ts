@@ -94,26 +94,27 @@ describe("figjam paints equal the role tables", () => {
 
 describe("layer-cake sections", () => {
   it("mixes the ink into the base by depth: t0, t0 + step, …, capped at tmax", () => {
-    // The lightness is the mix's at t(d); the chroma is the mix's, cut to the section cap.
-    for (const [depth, weight] of [[1, 0.04], [2, 0.08], [3, 0.12], [4, 0.16], [9, 0.16]] as const) {
+    // The lightness is the mix's at t(d); the chroma is set per level (see below).
+    for (const [depth, weight] of [[1, 0.02], [2, 0.065], [3, 0.11], [4, 0.15], [9, 0.15]] as const) {
       const fill = resolveSectionPaint("teal", depth, LIGHT).fill;
       const mix = mixColors("#0D7164", "#FDFDFD", weight);
       expect(Math.abs(oklabLightness(fill) - oklabLightness(mix))).toBeLessThan(0.002);
-      expect(oklabChroma(fill)).toBeLessThanOrEqual(oklabChroma(mix) + 0.001);
     }
-    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe("#EAF2F1");
+    expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe("#E4F7F4");
   });
 
-  it("light preset: a section never outweighs its nodes, at top level chroma 0.02 (yellow 0.04), growing with the ink weight", () => {
+  it("light preset: a section never outweighs its nodes, at top level chroma 0.02 (yellow 0.03), growing with the ink weight", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
-      const cap = color === "yellow" ? 0.04 : 0.02;
-      for (const [depth, weight] of [[2, 0.08], [3, 0.12], [4, 0.16]] as const) {
-        expect(oklabChroma(resolveSectionPaint(color, depth, LIGHT).fill)).toBeLessThanOrEqual((cap * weight) / 0.08 + 0.0015);
+      const top = color === "yellow" ? 0.03 : 0.02;
+      for (const [depth, weight] of [[2, 0.065], [3, 0.11], [4, 0.15]] as const) {
+        const chroma = oklabChroma(resolveSectionPaint(color, depth, LIGHT).fill);
+        // Set, not only capped: blue, green, teal and violet mixed to 0.008 at top level and told siblings apart by the frame alone.
+        expect(Math.abs(chroma - top * (weight / 0.065) ** 0.75)).toBeLessThan(0.0025);
+        expect(chroma).toBeLessThan(oklabChroma(resolveShapePaint(color, LIGHT).fill) - 0.02);
       }
-      expect(oklabChroma(resolveSectionPaint(color, 2, LIGHT).fill)).toBeLessThanOrEqual(oklabChroma(resolveShapePaint(color, LIGHT).fill) + 0.001);
     }
-    // The butter field on board 12 (chroma 0.076) is now a pale cream.
-    expect(resolveSectionPaint("yellow", 2, LIGHT).fill).toBe("#F9F1DA");
+    // The butter field on board 12 (chroma 0.076) is now a pale yellow.
+    expect(resolveSectionPaint("yellow", 2, LIGHT).fill).toBe("#FBF4DE");
     // Dark boards (card shapes) keep the uncapped mix.
     expect(oklabChroma(resolveSectionPaint("violet", 3, DARK).fill)).toBeGreaterThan(0.045);
   });
@@ -145,11 +146,30 @@ describe("layer-cake sections", () => {
     ["schematic-light", LIGHT],
     ["schematic-dark", DARK],
   ] as const)("gray stops deepening at the top-level tone, so a deep gray never reads as a disabled slab (%s)", (_id, style) => {
+    if (style === LIGHT) return; // Beside ink-card nodes gray steps at half a hue's step: see below.
     const top = resolveSectionPaint("gray", 2, style).fill;
     expect(resolveSectionPaint("gray", 1, style).fill).not.toBe(top);
     for (const depth of [3, 4, 7]) expect(resolveSectionPaint("gray", depth, style).fill).toBe(top);
     // Chromatic hues keep stepping.
     expect(resolveSectionPaint("blue", 4, style).fill).not.toBe(resolveSectionPaint("blue", 2, style).fill);
+  });
+
+  it("light preset: gray sits a clear tone under white and steps at half a hue's step, so a gray child still deepens yet stays lighter than a gray node", () => {
+    const gray = [2, 3, 4, 5].map((depth) => oklabLightness(resolveSectionPaint("gray", depth, LIGHT).fill));
+    expect(oklabLightness(resolveSectionPaint("white", 2, LIGHT).fill) - gray[0]!).toBeGreaterThanOrEqual(0.03);
+    expect(gray[0]! - gray[1]!).toBeGreaterThanOrEqual(0.008);
+    expect(gray[1]! - gray[2]!).toBeGreaterThanOrEqual(0.006);
+    expect(gray[3]).toBe(gray[2]);
+    expect(gray[2]! - oklabLightness(resolveShapePaint("gray", LIGHT).fill)).toBeGreaterThanOrEqual(0.04);
+  });
+
+  it("light preset: red and pink washes stand apart in hue at every level (round 4: a red child read as its pink parent)", () => {
+    const hue = (color: string) => (Math.atan2(oklab(color).b, oklab(color).a) * 180) / Math.PI;
+    for (const depth of [2, 3, 4]) {
+      const red = hue(resolveSectionPaint("red", depth, LIGHT).fill);
+      const pink = hue(resolveSectionPaint("pink", depth, LIGHT).fill) - 360;
+      expect(red - pink).toBeGreaterThanOrEqual(45);
+    }
   });
 
   it("derives border, chip, and chip border from the ink", () => {
@@ -179,7 +199,7 @@ describe("layer-cake sections", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
       expect(oklabDistance(resolveSectionPaint(color, 2, LIGHT).fill, LIGHT.boardBackground)).toBeGreaterThanOrEqual(0.035);
     }
-    expect(LIGHT.sectionTintBase).toBe(0.04);
+    expect(LIGHT.sectionTintBase).toBe(0.02);
     expect(DARK.sectionTintBase).toBe(0.1);
   });
 
@@ -259,7 +279,7 @@ describe("layer-cake sections", () => {
   it("the light theme never applies the guard (base and card are both near-white)", () => {
     // Yellow's and orange's anchors are not text steps: their fills follow their own rule (see "light yellow" below).
     for (const color of CANVAS_COLORS.filter((candidate) => !["white", "gray", "yellow", "orange"].includes(candidate))) {
-      const mix = mixColors(LIGHT.palette[color], "#FDFDFD", 0.04);
+      const mix = mixColors(LIGHT.palette[color], "#FDFDFD", 0.02);
       expect(Math.abs(oklabLightness(resolveSectionPaint(color, 1, LIGHT).fill) - oklabLightness(mix))).toBeLessThan(0.002);
     }
   });
@@ -273,7 +293,10 @@ describe("layer-cake sections", () => {
     });
     for (const depth of [2, 3, 4]) {
       const paint = resolveSectionPaint("white", depth, LIGHT);
-      expect(paint.fill).toBe(LIGHT.cardFill);
+      // A pure white card with the gray section's chip system.
+      expect(paint.fill).toBe("#FFFFFF");
+      expect(paint.chipFill).toBe(mixColors(resolveInk("gray", LIGHT), "#FFFFFF", LIGHT.headerChipMix));
+      expect(paint.chipBorder).toBe(resolveSectionPaint("gray", depth, LIGHT).chipBorder);
       expect(contrastRatio(paint.border, resolveSectionPaint("gray", 2, LIGHT).fill)).toBeGreaterThanOrEqual(2);
       expect(contrastRatio(paint.headerText, paint.chipFill)).toBeGreaterThanOrEqual(4.5);
     }
@@ -334,7 +357,7 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     const chroma = (color: string) => Math.hypot(oklab(color).a, oklab(color).b);
     const paints: [string, string][] = [2, 3, 4].map((depth): [string, string] => [
       resolveSectionPaint("yellow", depth, LIGHT).fill,
-      mixColors(textStep, LIGHT.boardBackground, Math.min(0.16, 0.04 + 0.04 * (depth - 1))),
+      mixColors(textStep, LIGHT.boardBackground, Math.min(0.15, 0.02 + 0.045 * (depth - 1))),
     ]);
     for (const [fill, olive] of paints) {
       expect(Math.abs(oklabLightness(fill) - oklabLightness(olive))).toBeLessThan(0.002);
@@ -426,15 +449,17 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     }
     expect(oklabLightness(resolveSectionPaint("gray", 2, LIGHT).fill) - oklabLightness(gray.fill)).toBeGreaterThanOrEqual(0.07);
     expect(contrastRatio(gray.border, gray.fill)).toBeGreaterThanOrEqual(3);
-    // A white node is the board surface: lighter than every section, and at
-    // least 0.035 from any colored one. On a white section (the card) both
-    // are the uncolored pick, 0.015 apart, and the node's full-ink border
-    // carries it.
+    // A white node is the board surface: lighter than every colored or gray
+    // section, and at least 0.035 from any colored one. On a white section
+    // (pure white, so it sits a clear tone above gray: stage A round 4) both
+    // are the uncolored pick, under 0.01 apart, and the node's full-ink
+    // border carries it, as it did at round 4's 0.015.
     const white = resolveShapePaint("white", LIGHT);
     for (const sectionColor of CANVAS_COLORS) {
       for (const depth of [2, 3, 4]) {
         const section = resolveSectionPaint(sectionColor, depth, LIGHT).fill;
-        expect(oklabLightness(white.fill)).toBeGreaterThan(oklabLightness(section));
+        if (sectionColor === "white") expect(oklabDistance(white.fill, section)).toBeLessThan(0.01);
+        else expect(oklabLightness(white.fill)).toBeGreaterThan(oklabLightness(section));
         if (sectionColor !== "white") expect(oklabDistance(white.fill, section)).toBeGreaterThanOrEqual(sectionColor === "gray" ? 0.025 : 0.035);
       }
     }
