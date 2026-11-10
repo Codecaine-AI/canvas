@@ -12,6 +12,9 @@ import { describe, expect, test } from "bun:test";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
 
 import { CRAFT_TARGETS } from "../../authoring/style-guide/craft-targets";
+import { diffDocuments } from "../../board/doc-diff";
+import { runDiagnostics } from "../../board/lints/run";
+import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../../state/actions";
 import { hitBoundsForObject } from "../../objects/geometry";
 import { makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
@@ -120,6 +123,33 @@ describe("arrange_section — rows in, coordinates out", () => {
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain("not arranged: api");
     expect(objectOf(session.draft, "api").geometry).toMatchObject({ x: 700, y: 180 });
+  });
+
+  test("a nested frame wider than its parent stays its child, and the parent grows to hold it", () => {
+    const baseline = makeDocument([
+      { ...box("outer", 0, 0, 600, 400, "section"), text: "Outer" },
+      { ...box("inner", 40, 80, 520, 280, "section"), text: "Inner", color: "blue" as const, parentId: "outer" },
+      ...["a", "b", "c"].map((id) => ({ ...box(id, 80, 160, 280, 100, "process"), parentId: "inner" })),
+    ]);
+    const session = makeTestSession(baseline, ["inner"]);
+
+    const result = runOp(session, "arrange_section", { section: "inner", rows: [["a", "b", "c"]] });
+
+    expect(result.isError).toBeUndefined();
+    // The row of three makes inner wider than outer was; the accepted board
+    // keeps the tree and has no overlapping frames.
+    const accepted = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
+      type: "canvas.applyAgentPatch",
+      operations: diffDocuments(baseline, session.draft),
+      summary: "accept",
+    }).document;
+    for (const doc of [session.draft, accepted]) {
+      expect(objectOf(doc, "inner").geometry.width).toBeGreaterThan(600);
+      expect(objectOf(doc, "inner").parentId).toBe("outer");
+      for (const id of ["a", "b", "c"]) expect(objectOf(doc, id).parentId, id).toBe("inner");
+      const overlaps = runDiagnostics(doc).filter((finding) => finding.rule === "covered-content");
+      expect(overlaps.map((finding) => finding.message)).toEqual([]);
+    }
   });
 });
 
