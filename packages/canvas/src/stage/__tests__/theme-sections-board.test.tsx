@@ -128,7 +128,7 @@ describe("pinned title chip with icon (a stored detail never paints)", () => {
     // 27px outer extent from the section's top edge, less the 1.5px frame.
     expect(chip.style.height).toBe("25.5px");
     expect(chip.style.borderWidth).toBe("0px 1.5px 1.5px 0px");
-    expect(chip.style.borderTopLeftRadius).toBe("4.5px");
+    expect(chip.style.borderTopLeftRadius).toBe("0.5px");
     expect(chip.style.borderTopRightRadius).toBe("0px");
     expect(chip.style.borderBottomRightRadius).toBe("2px");
     expect(chip.style.borderBottomLeftRadius).toBe("0px");
@@ -143,8 +143,8 @@ describe("pinned title chip with icon (a stored detail never paints)", () => {
 
   it("static: the same box at the same origin, edges, icon, and title", () => {
     const svg = staticSvg("schematic-light");
-    // Fill path from the frame's inner corner (4.5px radius: the 6px frame corner less its 1.5px border) at (101.5, 81.5).
-    expect(svg).toContain('<path d="M106 81.5H');
+    // Fill path from the frame's inner corner (0.5px radius: the 2px frame corner less its 1.5px border) at (101.5, 81.5).
+    expect(svg).toContain('<path d="M102 81.5H');
     // Title at box x + 28 (6 lead + 16 tile + 6 gap), centered in the 25.5px box less its bottom edge.
     expect(svg).toContain('x="129.5" y="93.5" fill="#1F1F1F" font-size="14" font-weight="600"');
     expect(svg).toMatch(/>BUN SERVICES<\/text>/);
@@ -294,7 +294,7 @@ describe("card stickies", () => {
     );
   });
 
-  it("static: the same callout with 6px corners, the rule, the edge and the two-layer lift filter", () => {
+  it("static: the same callout with 2px corners, the rule, the edge and the two-layer lift filter", () => {
     const svg = staticSvg("schematic-light");
     const style = canvasThemePreset("schematic-light");
     const paint = resolveStickyPaint("yellow", style);
@@ -304,10 +304,10 @@ describe("card stickies", () => {
     );
     expect(svg).toContain('<feGaussianBlur in="SourceAlpha" stdDeviation="3" result="b1"/><feOffset in="b1" dy="2" result="o1"/>');
     expect(svg).toContain(
-      `<rect x="900" y="80" width="240" height="160" rx="6" fill="${paint.fill}" filter="url(#theme-board-card-sticky-shadow)"/>`,
+      `<rect x="900" y="80" width="240" height="160" rx="2" fill="${paint.fill}" filter="url(#theme-board-card-sticky-shadow)"/>`,
     );
     expect(svg).toContain(
-      `<path d="M901 82.68A6 6 0 0 1 905 80.08V239.92A6 6 0 0 1 901 237.32Z" fill="${paint.rule}"/><rect x="900.5" y="80.5" width="239" height="159" rx="5.5" fill="none" stroke="${paint.border}" stroke-width="1"/>`,
+      `<path d="M901 80.27A2 2 0 0 1 902 80H905V240H902A2 2 0 0 1 901 239.73Z" fill="${paint.rule}"/><rect x="900.5" y="80.5" width="239" height="159" rx="1.5" fill="none" stroke="${paint.border}" stroke-width="1"/>`,
     );
   });
 
@@ -320,7 +320,7 @@ describe("card stickies", () => {
     // x 901 to 904: only its ends follow the corner arcs, its inner edge is one straight line,
     // and it paints before the hairline, as the live background strip sits under the inset shadow.
     expect(staticSvg("schematic-dark")).toContain(
-      '<path d="M901 82.68A6 6 0 0 1 905 80.08V239.92A6 6 0 0 1 901 237.32Z" fill="#9198A1"/><rect x="900.5" y="80.5"',
+      '<path d="M901 80.27A2 2 0 0 1 902 80H905V240H902A2 2 0 0 1 901 239.73Z" fill="#9198A1"/><rect x="900.5" y="80.5"',
     );
   });
 

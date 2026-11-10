@@ -74,6 +74,7 @@ export function resolveObjectStrokeWidth(
  * style's `processCornerRadiusPx`, every other rect-family silhouette
  * `shapeCornerRadiusPx`. A square-cornered predefined process broke from the
  * rounded nodes beside it (stage A round 8: sol and opus on the nodes sheet).
+ * Every preset sets both radii to 2px.
  */
 export function resolveShapeCornerRadius(
   renderShape: string | undefined,

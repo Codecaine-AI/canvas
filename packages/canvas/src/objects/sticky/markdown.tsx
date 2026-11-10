@@ -76,11 +76,11 @@ export const STICKY_CODE_CHIP_ALPHA = 0.08;
 export const STICKY_CODE_CHIP_BACKGROUND = withAlpha(FIGJAM_CANVAS_STYLE.textColor, STICKY_CODE_CHIP_ALPHA);
 
 /**
- * Inline `code` chip corner radius: FigJam board art, shared by the at-rest
+ * Inline `code` chip corner radius: 2px like every board corner, shared by the at-rest
  * chip here and the live editor's chip (MarkdownSlotTextEditor) so both
  * draw the same box.
  */
-export const STICKY_CODE_CHIP_RADIUS = "3px";
+export const STICKY_CODE_CHIP_RADIUS = "2px";
 
 /** Inline pass: `**bold**` and `` `code` `` (no nesting), from the shared D18 tokens. */
 function renderInline(

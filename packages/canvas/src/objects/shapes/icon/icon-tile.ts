@@ -30,7 +30,7 @@ import { iconTileRectPx, type LocalRect } from "../../text-slots";
 
 export const ICON_TILE = {
   /** Tile corner radius, px. */
-  cornerRadiusPx: 3,
+  cornerRadiusPx: 2,
   /**
    * Glyph inset from each tile edge, as a fraction of the tile side: 0.2
    * (11px on the 56px tile). At 0.22 the line glyphs read small inside their

@@ -87,9 +87,9 @@ describe("renderDocumentToSvg canvasStyle", () => {
     }).svg;
     expect(svg).toBe(schematic);
     // Layer-cake section frame (1.5px border at half opacity) and a gray node (a faint cool slate) with a 2px ink border,
-    // rounded at the process radius (rx = 12 − 1).
+    // rounded at the process radius (rx = 2 − 1).
     expect(svg).toContain('stroke="rgba(102, 101, 98, 0.5)" stroke-width="1.5"');
-    expect(svg).toContain('rx="11" fill="#D7DCDF" stroke="#666562" stroke-width="2"');
+    expect(svg).toContain('rx="1" fill="#D7DCDF" stroke="#666562" stroke-width="2"');
     expect(svg).not.toBe(
       renderDocumentToSvg(styleFixture(), { background: "transparent", canvasStyle: FIGJAM_CANVAS_STYLE }).svg,
     );
@@ -265,7 +265,7 @@ describe("CanvasStyleProvider / CanvasStage canvasStyle", () => {
 describe("canvasStyleCssVariables / canvasStyleCssVar", () => {
   it("emits the original six variables plus one per color/number token and one per ink", () => {
     const variables = canvasStyleCssVariables(canvasThemePreset("schematic-dark"));
-    expect(variables["--canvas-section-radius"]).toBe("6px");
+    expect(variables["--canvas-section-radius"]).toBe("2px");
     expect(variables["--canvas-title-chip-border"]).toBe("1.5px");
     expect(variables["--canvas-board-background"]).toBe("#0D1117");
     expect(variables["--canvas-grid-dot-color"]).toBe("#3D444D");

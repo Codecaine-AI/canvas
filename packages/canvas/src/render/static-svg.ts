@@ -550,7 +550,7 @@ function renderStickyBody(
   }
   return parts.join("");
 }
-const STICKY_CODE_CHIP_RADIUS_PX = 3;
+const STICKY_CODE_CHIP_RADIUS_PX = 2;
 /** Chip height in em of the code font size (approximates the inline box's height). */
 const STICKY_CODE_CHIP_HEIGHT_EM = 1.3;
 

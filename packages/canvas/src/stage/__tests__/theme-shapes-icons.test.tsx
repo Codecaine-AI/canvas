@@ -103,10 +103,11 @@ describe("live shape paint", () => {
     const card = objectNode(stage([shape()], "schematic-dark"), "s1");
     expect(card.style.background).toBe(dark.cardFill);
     expect(card.style.color).toBe(dark.textColor);
-    // A whole-px border stays a CSS border; the rounded rect takes the
-    // process radius (12px) inline, since it differs from shapeCornerRadiusPx.
+    // A whole-px border stays a CSS border; the process radius equals
+    // shapeCornerRadiusPx (2px), so the rounded rect takes no inline radius.
     expect(card.style.borderWidth).toBe("2px");
-    expect(card.style.borderRadius).toBe(`${dark.processCornerRadiusPx}px`);
+    expect(dark.processCornerRadiusPx).toBe(dark.shapeCornerRadiusPx);
+    expect(card.style.borderRadius).toBe("");
     expect(card.querySelector("[data-canvas-shape-silhouette]")).toBeNull();
     cleanup();
     const tint = objectNode(stage([shape()]), "s1");
@@ -130,8 +131,8 @@ describe("live shape paint", () => {
     expect(border.getAttribute("stroke-width")).toBe("1.5");
     expect(border.getAttribute("x")).toBe("0.75");
     expect(border.getAttribute("width")).toBe("238.5");
-    // The rounded rect's 12px process radius, less half the stroke.
-    expect(border.getAttribute("rx")).toBe("11.25");
+    // The rounded rect's 2px process radius, less half the stroke.
+    expect(border.getAttribute("rx")).toBe("1.25");
     // The slot text no longer offsets by a CSS border.
     const slot = node.querySelector("[data-canvas-text-slot]") as HTMLElement;
     expect(slot.style.left).toBe("14px");
@@ -189,7 +190,7 @@ describe("live icons", () => {
     expect(tile.getAttribute("height")).toBe("54.5");
     expect(tile.getAttribute("x")).toBe("4.75");
     expect(tile.getAttribute("y")).toBe("4.75");
-    expect(tile.getAttribute("rx")).toBe("2.25");
+    expect(tile.getAttribute("rx")).toBe("1.25");
     const glyph = node.querySelector('[data-canvas-icon-glyph="database"]') as SVGSVGElement;
     expect(glyph.getAttribute("viewBox")).toBe("0 0 24 24");
     // The ink held at 4.5:1 on the tile.

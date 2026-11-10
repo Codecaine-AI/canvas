@@ -135,7 +135,7 @@ describe("static icons: tile vs glyph, packs, brands", () => {
       // min(100, 64, 56) = 56, centered both ways in the 100×64 box; the 1.5px ink edge paints inside it.
       expect(layout.tile).toEqual({ x: 22, y: 4, width: 56, height: 56 });
       expect(svg).toContain(
-        `<rect x="22.75" y="4.75" width="54.5" height="54.5" rx="2.25" fill="${shapePaint.fill}" stroke="${shapePaint.border}" stroke-width="1.5"/>`,
+        `<rect x="22.75" y="4.75" width="54.5" height="54.5" rx="1.25" fill="${shapePaint.fill}" stroke="${shapePaint.border}" stroke-width="1.5"/>`,
       );
       // The caption hangs 6px under the tile (tile bottom 60), centered on it.
       const [caption] = texts(svg);
@@ -162,7 +162,7 @@ describe("static icons: tile vs glyph, packs, brands", () => {
       const svg = render([icon({ color: "white" })], theme);
       // The 56px tile centered in the 64px box (4..60), its 1.5px border inside the edge.
       expect(svg).toContain(
-        `<rect x="4.75" y="4.75" width="54.5" height="54.5" rx="2.25" fill="${resolveShapePaint("white", style).fill}" stroke="${resolveShapePaint("white", style).border}" stroke-width="1.5"/>`,
+        `<rect x="4.75" y="4.75" width="54.5" height="54.5" rx="1.25" fill="${resolveShapePaint("white", style).fill}" stroke="${resolveShapePaint("white", style).border}" stroke-width="1.5"/>`,
       );
       expect(svg).toContain(`fill="none" stroke="${resolveIconTilePaint("white", style, 56).glyph}" stroke-width=`);
     }
@@ -234,13 +234,13 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     const tint = resolveIconTilePaint("violet", style, 170);
     expect(tint.tileFill).toBe(mixColors(ink, style.cardFill, 0.16));
     expect(tinted).toContain(
-      `<rect x="1" y="1" width="168" height="168" rx="2" fill="${tint.tileFill}" stroke="${ink}" stroke-width="2"/>`,
+      `<rect x="1" y="1" width="168" height="168" rx="1" fill="${tint.tileFill}" stroke="${ink}" stroke-width="2"/>`,
     );
     // The glyph viewport: 56px, centered on the 170px tile, stroked in the ink.
     expect(tinted).toContain(`<svg x="57" y="57" width="56" height="56" viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="none" stroke="${ink}"`);
     // Under the preset's 56px cap the same box draws a node-paint 56px tile, centered.
     expect(render([icon({ geometry: { x: 0, y: 0, width: 170, height: 170 } })], "schematic-light")).toContain(
-      `<rect x="57.75" y="57.75" width="54.5" height="54.5" rx="2.25" fill="${pastel}" stroke="${ink}" stroke-width="1.5"/>`,
+      `<rect x="57.75" y="57.75" width="54.5" height="54.5" rx="1.25" fill="${pastel}" stroke="${ink}" stroke-width="1.5"/>`,
     );
   });
 

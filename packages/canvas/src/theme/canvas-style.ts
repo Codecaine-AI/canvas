@@ -425,10 +425,12 @@ function inPresetKeyOrder(style: CanvasStyle): CanvasStyle {
 /** Thin lines, mono metadata, card shapes and stacked section tints on the light page surface. */
 const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   theme: "schematic-light",
+  // 2px corners on every node, section, note, chip and tile, as in figjam
+  // (Ford: "2px everywhere").
   shapeCornerRadiusPx: 2,
-  processCornerRadiusPx: 12,
+  processCornerRadiusPx: 2,
   shapeBorderWidthPx: 2,
-  sectionCornerRadiusPx: 6,
+  sectionCornerRadiusPx: 2,
   sectionBorderWidthPx: 1.5,
   titleChipCornerRadiusPx: 2,
   titleChipBorderWidthPx: 1.5,
@@ -479,18 +481,17 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   // A note is a secondary annotation: body text under the 17.5px names, a
   // 1.5 line pitch, headings at about the body size (bold carries them), a
   // 4px rule, a soft lift off the board (theme/palette.ts
-  // resolveStickyPaint) and the sections' 6px corners. Picked from three
+  // resolveStickyPaint) and the board's 2px corners. Picked from three
   // variants on Archon boards 01 and 03 (callout card, tinted note, margin
   // note): the card keeps ink on panel for contrast, and its hairline edge,
-  // rule and lift read as a note, never a node (2px ink border, 12px
-  // corners) or a section. UI climb round 1: 4px note corners next to 2px
-  // section corners read as sharp; notes and sections now share 6px.
+  // rule and lift read as a note, never a node (2px ink border) or a
+  // section.
   stickyFontSizePx: 16,
   stickyLineHeightPx: 24,
   stickyPaddingXPx: 18,
   stickyPaddingTopPx: 14,
   stickyPaddingBottomPx: 14,
-  stickyCornerRadiusPx: 6,
+  stickyCornerRadiusPx: 2,
   stickyHeadingScale: 0.3,
   // A 4px rule: at 3px the accent bar read thin against its pale wash
   // (stage A round 9: opus on the red, pink, green, teal and blue notes).

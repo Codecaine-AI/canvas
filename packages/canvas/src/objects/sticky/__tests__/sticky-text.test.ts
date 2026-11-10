@@ -179,7 +179,7 @@ describe("sticky markdown static rendering", () => {
     const { svg } = renderFigjam(stickyDocument("run `deploy` now"), {
       background: "transparent",
     });
-    expect(svg).toContain('rx="3"');
+    expect(svg).toContain('rx="2"');
     expect(svg).toContain('fill-opacity="0.08"');
     expect(svg).toContain(">deploy</tspan>");
     // The chip rect paints before (under) the text element.
