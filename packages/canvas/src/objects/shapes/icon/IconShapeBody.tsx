@@ -1,6 +1,12 @@
 "use client";
 
-import { resolveIconGlyph, type IconGlyphDefinition, type IconGlyphElement, type IconPackId } from "./icon-glyphs";
+import {
+  iconGlyphViewBox,
+  resolveIconGlyph,
+  type IconGlyphDefinition,
+  type IconGlyphElement,
+  type IconPackId,
+} from "./icon-glyphs";
 import {
   ICON_TILE,
   glyphHasClosedInterior,
@@ -34,14 +40,17 @@ export type IconShapeBodyColors = {
   tileBorder?: string;
   /** Tile style: the outline's width, px, painted inside the tile edge (1 when omitted). */
   tileBorderWidthPx?: number;
+  /** A full-color brand mark: the paint for a shape's own `fill` (theme/palette.ts resolveBrandMarkFill); the raw fill when omitted. */
+  markFill?: (fill: string) => string;
 };
 
-function renderGlyphElement(element: IconGlyphElement, key: number) {
+function renderGlyphElement(element: IconGlyphElement, key: number, markFill?: (fill: string) => string) {
+  const fill = element.kind !== "line" && element.fill ? (markFill?.(element.fill) ?? element.fill) : undefined;
   if (element.kind === "path") {
-    return <path key={key} d={element.d} />;
+    return <path key={key} d={element.d} fill={fill} />;
   }
   if (element.kind === "circle") {
-    return <circle key={key} cx={element.cx} cy={element.cy} r={element.r} />;
+    return <circle key={key} cx={element.cx} cy={element.cy} r={element.r} fill={fill} />;
   }
   return <line key={key} x1={element.x1} y1={element.y1} x2={element.x2} y2={element.y2} />;
 }
@@ -94,6 +103,7 @@ export function IconShapeBody({
         tileFill={colors.tileFill}
         tileBorder={colors.tileBorder}
         tileBorderWidthPx={colors.tileBorderWidthPx ?? 1}
+        markFill={colors.markFill}
         tileMaxPx={tileMaxPx}
       />
     );
@@ -123,7 +133,7 @@ export function IconShapeBody({
       }}
     >
       <svg
-        viewBox={glyph ? `0 0 ${glyph.viewBoxSize} ${glyph.viewBoxSize}` : "0 0 18 18"}
+        viewBox={glyph ? iconGlyphViewBox(glyph) : "0 0 18 18"}
         style={{ width: "100%", height: "100%" }}
         {...(filledGlyph
           ? { fill: stroke, stroke: "none" }
@@ -143,7 +153,7 @@ export function IconShapeBody({
           </g>
         ) : null}
         <g data-canvas-icon-ink-layer="">
-          {glyph?.elements.map((element, index) => renderGlyphElement(element, index))}
+          {glyph?.elements.map((element, index) => renderGlyphElement(element, index, colors?.markFill))}
         </g>
       </svg>
     </div>
@@ -161,6 +171,7 @@ function IconTileBody({
   tileFill,
   tileBorder,
   tileBorderWidthPx,
+  markFill,
   tileMaxPx,
 }: {
   object: IconShapeBodyObject;
@@ -169,10 +180,11 @@ function IconTileBody({
   tileFill: string;
   tileBorder: string | undefined;
   tileBorderWidthPx: number;
+  markFill: ((fill: string) => string) | undefined;
   tileMaxPx: number | undefined;
 }) {
   const { width, height } = object.geometry;
-  const layout = iconTileLayout(width, height, tileMaxPx);
+  const layout = iconTileLayout(width, height, tileMaxPx, glyph);
   const border = tileBorder ? tileBorderWidthPx : 0;
   const filledGlyph = glyph?.paint === "fill";
   return (
@@ -203,7 +215,7 @@ function IconTileBody({
             y={layout.glyph.y}
             width={layout.glyph.width}
             height={layout.glyph.height}
-            viewBox={`0 0 ${glyph.viewBoxSize} ${glyph.viewBoxSize}`}
+            viewBox={iconGlyphViewBox(glyph)}
             {...(filledGlyph
               ? { fill: glyphColor, stroke: "none" }
               : {
@@ -216,7 +228,7 @@ function IconTileBody({
             data-canvas-icon-glyph={glyph.id}
           >
             <g data-canvas-icon-ink-layer="">
-              {glyph.elements.map((element, index) => renderGlyphElement(element, index))}
+              {glyph.elements.map((element, index) => renderGlyphElement(element, index, markFill))}
             </g>
           </svg>
         ) : null}

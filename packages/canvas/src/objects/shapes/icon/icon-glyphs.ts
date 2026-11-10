@@ -165,8 +165,14 @@ export type IconGlyphDefinition = {
   source: IconGlyphSource;
   /** Outline (`stroke`) or solid silhouette (`fill`). */
   paint: IconGlyphPaint;
-  /** viewBox width/height — 18 for Nucleo glyphs, 24 for Tabler and Simple Icons. */
+  /** The art grid — 18 for Nucleo glyphs, 24 for Tabler and Simple Icons; sets the stroke width of outline glyphs. */
   viewBoxSize: number;
+  /**
+   * The square box renderers map onto the glyph's box (x, y, side, side):
+   * `0 0 viewBoxSize viewBoxSize`, or for a brand mark the optical box the
+   * generator sets around its ink, so every logo reads at one size.
+   */
+  viewBox: readonly [number, number, number, number];
   /**
    * A brand logo's own color (the Simple Icons `hex`, tools/dev-icons); the
    * renderers paint the mark in it instead of the object's color pick
@@ -181,9 +187,14 @@ export type IconGlyphDefinition = {
   elements: readonly IconGlyphElement[];
 };
 
+/**
+ * A glyph shape. `fill` is a full-color brand mark's own paint for that shape
+ * (tools/dev-icons/brand-art); renderers pass it through
+ * theme/palette.ts resolveBrandMarkFill. Shapes without one take the glyph color.
+ */
 export type IconGlyphElement =
-  | { kind: "path"; d: string }
-  | { kind: "circle"; cx: number; cy: number; r: number }
+  | { kind: "path"; d: string; fill?: string }
+  | { kind: "circle"; cx: number; cy: number; r: number; fill?: string }
   | { kind: "line"; x1: number; y1: number; x2: number; y2: number };
 
 /** Picker label + group per generic id — the hand-authored half of a glyph. */
@@ -292,7 +303,11 @@ const BRAND_GLYPH_LABELS: Record<BrandIconGlyphId, string> = {
   "brand-figma": "Figma",
 };
 
-type GeneratedGlyph = { viewBoxSize: number; elements: readonly IconGlyphElement[] };
+type GeneratedGlyph = {
+  viewBoxSize: number;
+  viewBox?: readonly [number, number, number, number];
+  elements: readonly IconGlyphElement[];
+};
 
 function isBrandIconGlyphId(id: IconGlyphId): id is BrandIconGlyphId {
   return id.startsWith("brand-");
@@ -336,6 +351,7 @@ function glyphDefinition(id: IconGlyphId, source: IconGlyphSource, generated: Ge
     source,
     paint: source === "simple-icons" ? "fill" : "stroke",
     viewBoxSize: generated.viewBoxSize,
+    viewBox: generated.viewBox ?? [0, 0, generated.viewBoxSize, generated.viewBoxSize],
     ...(brandColor ? { brandColor } : null),
     elements: generated.elements,
   };
@@ -385,3 +401,15 @@ export function resolveIconGlyph(id: string | undefined, pack: IconPackId): Icon
  * Theme-aware renderers use resolveIconGlyph(id, style.iconPack) instead.
  */
 export const ICON_GLYPHS: Record<IconGlyphId, IconGlyphDefinition> = NUCLEO_PACK;
+
+/** The glyph's `viewBox` attribute (IconGlyphDefinition.viewBox). */
+export function iconGlyphViewBox(glyph: Pick<IconGlyphDefinition, "viewBox">): string {
+  return glyph.viewBox.join(" ");
+}
+
+/** The SVG transform that draws the glyph's viewBox into a `sizePx` square at (x, y). */
+export function iconGlyphTransform(glyph: Pick<IconGlyphDefinition, "viewBox">, x: number, y: number, sizePx: number): string {
+  const [boxX, boxY, side] = glyph.viewBox;
+  const place = `translate(${x} ${y}) scale(${sizePx / side})`;
+  return boxX === 0 && boxY === 0 ? place : `${place} translate(${-boxX} ${-boxY})`;
+}

@@ -86,9 +86,9 @@
     { "id": "filter", "source": "filter" }
   ],
   "brands": [
-    { "id": "brand-postgres", "source": "postgresql", "hex": "#4169E1" },
+    { "id": "brand-postgres", "source": "postgresql", "hex": "#4169E1", "art": "postgres" },
     { "id": "brand-sqlite", "source": "sqlite", "hex": "#003B57" },
-    { "id": "brand-redis", "source": "redis", "hex": "#FF4438" },
+    { "id": "brand-redis", "source": "redis", "hex": "#FF4438", "art": "redis" },
     { "id": "brand-mongodb", "source": "mongodb", "hex": "#47A248" },
     { "id": "brand-docker", "source": "docker", "hex": "#2496ED" },
     { "id": "brand-kubernetes", "source": "kubernetes", "hex": "#326CE5" },
@@ -96,12 +96,12 @@
     { "id": "brand-git", "source": "git", "license": "CC-BY-3.0", "hex": "#F03C2E" },
     { "id": "brand-anthropic", "source": "anthropic", "hex": "#191919" },
     { "id": "brand-claude", "source": "claude", "hex": "#D97757" },
-    { "id": "brand-huggingface", "source": "huggingface", "hex": "#FFD21E" },
+    { "id": "brand-huggingface", "source": "huggingface", "hex": "#FFD21E", "art": "huggingface" },
     { "id": "brand-ollama", "source": "ollama", "hex": "#000000" },
-    { "id": "brand-bun", "source": "bun", "hex": "#000000" },
+    { "id": "brand-bun", "source": "bun", "hex": "#000000", "art": "bun" },
     { "id": "brand-node", "source": "nodedotjs", "hex": "#5FA04E" },
     { "id": "brand-typescript", "source": "typescript", "hex": "#3178C6" },
-    { "id": "brand-python", "source": "python", "hex": "#3776AB" },
+    { "id": "brand-python", "source": "python", "hex": "#3776AB", "art": "python" },
     { "id": "brand-go", "source": "go", "hex": "#00ADD8" },
     { "id": "brand-rust", "source": "rust", "license": "CC-BY-SA-4.0", "hex": "#000000" },
     { "id": "brand-react", "source": "react", "hex": "#61DAFB" },
@@ -109,11 +109,11 @@
     { "id": "brand-vite", "source": "vite", "hex": "#9135FF" },
     { "id": "brand-electron", "source": "electron", "hex": "#47848F" },
     { "id": "brand-vercel", "source": "vercel", "hex": "#000000" },
-    { "id": "brand-cloudflare", "source": "cloudflare", "hex": "#F38020" },
-    { "id": "brand-supabase", "source": "supabase", "hex": "#3FCF8E" },
-    { "id": "brand-terraform", "source": "terraform", "hex": "#844FBA" },
+    { "id": "brand-cloudflare", "source": "cloudflare", "hex": "#F38020", "art": "cloudflare" },
+    { "id": "brand-supabase", "source": "supabase", "hex": "#3FCF8E", "art": "supabase" },
+    { "id": "brand-terraform", "source": "terraform", "hex": "#844FBA", "art": "terraform" },
     { "id": "brand-kafka", "source": "apachekafka", "license": "Apache-2.0", "hex": "#231F20" },
     { "id": "brand-linear", "source": "linear", "hex": "#5E6AD2" },
-    { "id": "brand-figma", "source": "figma", "hex": "#F24E1E" }
+    { "id": "brand-figma", "source": "figma", "hex": "#F24E1E", "art": "figma" }
   ]
 }

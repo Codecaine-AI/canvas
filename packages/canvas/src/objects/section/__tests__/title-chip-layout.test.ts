@@ -11,7 +11,7 @@ import {
   titleChipScale,
   titleChipVisibleTitle,
 } from "../title-chip-layout";
-import { resolveSectionPaint } from "../../../theme/palette";
+import { resolveIconTilePaint, resolveSectionPaint } from "../../../theme/palette";
 
 /**
  * The section header chip layout (contract §4): floating vs pinned geometry,
@@ -206,8 +206,13 @@ describe("header brand logo", () => {
     for (const theme of ["figjam", "schematic-light", "schematic-dark"] as const) {
       const style = canvasThemePreset(theme);
       const header = titleChipIconDrawing("brand-typescript", resolveSectionPaint("blue", 0, style), style);
-      expect(header?.glyph.color).toBe("#3178C6");
-      if (style.iconStyle === "tile") expect(header?.tile?.fill).toBe(style.cardFill);
+      // TypeScript blue reads at 3:1 on the light tiles; the dark card lifts it there at its own hue.
+      if (theme !== "schematic-dark") expect(header?.glyph.color).toBe("#3178C6");
+      if (style.iconStyle === "tile") {
+        const object = resolveIconTilePaint("blue", style, 56, "#3178C6");
+        expect(header?.glyph.color).toBe(object.glyph);
+        expect(header?.tile?.fill).toBe(object.tileFill!);
+      }
     }
   });
 

@@ -33,6 +33,13 @@ export const ICON_TILE = {
   cornerRadiusPx: 3,
   /** Glyph inset from each tile edge, as a fraction of the tile side (≈ the mockups' 10px on a 44px tile). */
   glyphInsetRatio: 0.22,
+  /**
+   * A brand mark's inset. Its glyph box is larger because a brand viewBox
+   * already pads the mark to one optical size (tools/dev-icons/generate.ts
+   * brandViewBox): a square logo lands near an outline glyph's size, and a
+   * wide one (Go) gets the room to match it.
+   */
+  brandGlyphInsetRatio: 0.14,
   /** Largest glyph a tile carries, px: beyond it the glyph stays this size, centered. */
   maxGlyphPx: 56,
   /**
@@ -53,13 +60,20 @@ export interface IconTileLayout {
 /**
  * The tile square (min(width, height, maxSidePx), centered — the style's
  * `iconTileMaxPx`; uncapped when omitted) and the glyph box centered inside
- * it: min(side × (1 − 2 × glyphInsetRatio), maxGlyphPx). Tile borders paint
+ * it: min(side × (1 − 2 × inset), maxGlyphPx), the inset being
+ * brandGlyphInsetRatio for a brand `glyph`, else glyphInsetRatio. Tile borders paint
  * inside the tile edge, so they never move the glyph.
  */
-export function iconTileLayout(width: number, height: number, maxSidePx?: number): IconTileLayout {
+export function iconTileLayout(
+  width: number,
+  height: number,
+  maxSidePx?: number,
+  glyph?: Pick<IconGlyphDefinition, "brandColor">,
+): IconTileLayout {
   const tile = iconTileRectPx(width, height, maxSidePx);
   const side = tile.width;
-  const glyphSide = Math.min(Math.max(0, side * (1 - ICON_TILE.glyphInsetRatio * 2)), ICON_TILE.maxGlyphPx);
+  const insetRatio = glyph?.brandColor ? ICON_TILE.brandGlyphInsetRatio : ICON_TILE.glyphInsetRatio;
+  const glyphSide = Math.min(Math.max(0, side * (1 - insetRatio * 2)), ICON_TILE.maxGlyphPx);
   const inset = (side - glyphSide) / 2;
   return {
     tile,

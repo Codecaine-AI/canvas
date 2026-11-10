@@ -175,21 +175,24 @@ describe("live icons", () => {
     expect(node.querySelector("[data-canvas-icon-tile]")).toBeNull();
   });
 
-  it("tile style: an ink tile, capped at iconTileMaxPx and centered, with the Tabler glyph inset in the tile glyph color", () => {
+  it("tile style: a node-paint tile, capped at iconTileMaxPx and centered, with the Tabler glyph inset in the ink", () => {
     const node = objectNode(stage([icon()], "schematic-light"), "i1");
     const body = node.querySelector("[data-canvas-icon-shape-body]") as HTMLElement;
     expect(body.getAttribute("data-canvas-icon-style")).toBe("tile");
     const tile = node.querySelector("[data-canvas-icon-tile]") as SVGRectElement;
-    expect(tile.getAttribute("fill")).toBe("#6940A5");
-    // The 64px box carries the 56px (iconTileMaxPx) tile, centered: 4px in on every side.
-    expect(tile.getAttribute("width")).toBe("56");
-    expect(tile.getAttribute("height")).toBe("56");
-    expect(tile.getAttribute("x")).toBe("4");
-    expect(tile.getAttribute("y")).toBe("4");
-    expect(tile.getAttribute("rx")).toBe("3");
+    // The violet node's pastel fill, edged in its ink.
+    expect(tile.getAttribute("fill")).toBe("#D7C6FF");
+    expect(tile.getAttribute("stroke")).toBe("#6940A5");
+    expect(tile.getAttribute("stroke-width")).toBe("1.5");
+    // The 64px box carries the 56px (iconTileMaxPx) tile, centered: 4px in on every side, the edge inside it.
+    expect(tile.getAttribute("width")).toBe("54.5");
+    expect(tile.getAttribute("height")).toBe("54.5");
+    expect(tile.getAttribute("x")).toBe("4.75");
+    expect(tile.getAttribute("y")).toBe("4.75");
+    expect(tile.getAttribute("rx")).toBe("2.25");
     const glyph = node.querySelector('[data-canvas-icon-glyph="database"]') as SVGSVGElement;
     expect(glyph.getAttribute("viewBox")).toBe("0 0 24 24");
-    expect(glyph.getAttribute("stroke")).toBe("#FFFFFF");
+    expect(glyph.getAttribute("stroke")).toBe("#6940A5");
     expect(Number(glyph.getAttribute("stroke-width"))).toBeCloseTo(iconTileGlyphStrokeWidth(24), 10);
     expect(Number(glyph.getAttribute("x"))).toBeCloseTo(4 + 56 * 0.22, 10);
     const tabler = resolveIconGlyph("database", "tabler");
@@ -217,19 +220,20 @@ describe("live icons", () => {
     expect(glyph.getAttribute("stroke")).toBe(style.palette.violet);
   });
 
-  it("outlines a white tile on a light board and fills brand glyphs in their brand color", () => {
+  it("draws a white tile as the white node and fills brand glyphs in their brand color", () => {
     const container = stage([icon({ color: "white" }), icon({ id: "i2", icon: "brand-docker", geometry: { x: 200, y: 0, width: 64, height: 64 } })], "schematic-light");
     const white = objectNode(container, "i1").querySelector("[data-canvas-icon-tile]") as SVGRectElement;
-    expect(white.getAttribute("fill")).toBe("#F8F8F7");
+    expect(white.getAttribute("fill")).toBe("#FDFDFD");
     expect(white.getAttribute("stroke")).toBe("#1F1F1F");
-    expect(white.getAttribute("stroke-width")).toBe("1");
+    expect(white.getAttribute("stroke-width")).toBe("1.5");
     const brand = objectNode(container, "i2").querySelector('[data-canvas-icon-glyph="brand-docker"]') as SVGSVGElement;
-    // Docker's Simple Icons color on a neutral card tile, not white on the violet ink tile.
+    // Docker's Simple Icons color in its optical box on the neutral brand tile, not on the violet tile.
     expect(brand.getAttribute("fill")).toBe("#2496ED");
     expect(brand.getAttribute("stroke")).toBe("none");
+    expect(brand.getAttribute("viewBox")).toBe(resolveIconGlyph("brand-docker", "tabler").viewBox.join(" "));
     const brandTile = objectNode(container, "i2").querySelector("[data-canvas-icon-tile]") as SVGRectElement;
-    expect(brandTile.getAttribute("fill")).toBe("#F8F8F7");
-    expect(brandTile.getAttribute("stroke")).toBe("#E6E5E3");
+    expect(brandTile.getAttribute("fill")).toBe("#FDFDFD");
+    expect(brandTile.getAttribute("stroke")).toBe("#AAA9A8");
   });
 });
 

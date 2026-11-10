@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { canvasThemePreset, FIGJAM_CANVAS_STYLE } from "../../../../theme/canvas-style";
 import { mixColors } from "../../../../theme/color-math";
-import { iconTileModeFor, resolveIconPaint, resolveIconTilePaint } from "../../../../theme/palette";
+import { iconTileModeFor, resolveIconPaint, resolveIconTilePaint, resolveShapePaint } from "../../../../theme/palette";
 import { iconGlyphStrokeWidthForViewBox } from "../icon-glyphs";
 import { ICON_TILE, iconBareGlyphStrokeWidth, iconTileGlyphStrokeWidth, iconTileLayout } from "../icon-tile";
 
@@ -46,12 +46,16 @@ describe("icon tile paint by size", () => {
     expect(iconTileModeFor({ ...LIGHT, iconTileFill: "tint" }, 10)).toBe("tint");
   });
 
-  it("solid tiles are resolveIconPaint's: the ink tile under the tile glyph color", () => {
+  it("solid tiles are small nodes: the node fill, edged and drawn in the ink", () => {
     for (const style of [LIGHT, DARK]) {
+      const node = resolveShapePaint("violet", style);
       expect(resolveIconTilePaint("violet", style, 64)).toEqual({
         ...resolveIconPaint("violet", style),
+        tileFill: node.fill,
+        tileBorder: node.border,
+        glyph: node.border,
         tileMode: "solid",
-        tileBorderWidthPx: 0,
+        tileBorderWidthPx: 1.5,
       });
     }
   });
@@ -71,15 +75,19 @@ describe("icon tile paint by size", () => {
     }
   });
 
-  it("white on a light board keeps its outlined tile at every size; dark boards tint the white ink", () => {
-    for (const size of [48, 160]) {
-      expect(resolveIconTilePaint("white", LIGHT, size)).toMatchObject({
-        tileFill: LIGHT.cardFill,
-        tileBorder: LIGHT.palette.white,
-        glyph: LIGHT.palette.white,
-        tileBorderWidthPx: 1,
-      });
-    }
+  it("white is the white node when solid; tinted, a light board keeps the outlined card tile and a dark one tints the white ink", () => {
+    expect(resolveIconTilePaint("white", LIGHT, 48)).toMatchObject({
+      tileFill: resolveShapePaint("white", LIGHT).fill,
+      tileBorder: LIGHT.palette.white,
+      glyph: LIGHT.palette.white,
+      tileBorderWidthPx: 1.5,
+    });
+    expect(resolveIconTilePaint("white", LIGHT, 160)).toMatchObject({
+      tileFill: LIGHT.cardFill,
+      tileBorder: LIGHT.palette.white,
+      glyph: LIGHT.palette.white,
+      tileBorderWidthPx: 1.5,
+    });
     expect(resolveIconTilePaint("white", DARK, 160).tileFill).toBe(mixColors(DARK.palette.white, DARK.cardFill, 0.16));
   });
 

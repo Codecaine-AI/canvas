@@ -59,6 +59,7 @@ import { placedLabelPoint } from "../connectors/label-placement";
 import { connectorDashArray } from "../connectors/def";
 import { ARROWHEAD_TIP_OVERSHOOT_RATIO, arrowheadStrokeRatio } from "../connectors/arrowhead";
 import {
+  resolveBrandMarkFill,
   resolveConnectorPaint,
   resolveIconPaint,
   resolveIconTilePaint,
@@ -662,12 +663,19 @@ function renderStickyMarkdownText(object: InteractiveCanvasObject, canvasStyle: 
 // glyph registry (icon-glyphs.ts, React-free data).
 // ---------------------------------------------------------------------------
 
-function glyphElementMarkup(element: IconGlyphElement): string {
-  if (element.kind === "path") return tag("path", { d: element.d });
+/** One glyph shape; a full-color brand mark's shape carries its own fill, painted through `markFill` (raw when omitted). */
+function glyphElementMarkup(element: IconGlyphElement, markFill?: (fill: string) => string): string {
+  const fill = element.kind !== "line" && element.fill ? (markFill?.(element.fill) ?? element.fill) : undefined;
+  if (element.kind === "path") return tag("path", { d: element.d, fill });
   if (element.kind === "circle") {
-    return tag("circle", { cx: element.cx, cy: element.cy, r: element.r });
+    return tag("circle", { cx: element.cx, cy: element.cy, r: element.r, fill });
   }
   return tag("line", { x1: element.x1, y1: element.y1, x2: element.x2, y2: element.y2 });
+}
+
+/** A glyph `<svg>`'s viewBox (IconGlyphDefinition.viewBox: a brand mark's optical box, else its grid). */
+function glyphViewBox(glyph: IconGlyphDefinition): string {
+  return glyph.viewBox.map(fmtScale).join(" ");
 }
 
 function isFillGlyphElement(element: IconGlyphElement): boolean {
@@ -716,8 +724,10 @@ function renderIconGlyph(
   const sizePx = Math.min(geometry.width, geometry.height);
   const tileSidePx = iconTileRectPx(geometry.width, geometry.height, canvasStyle.iconTileMaxPx).width;
   const paint = resolveIconTilePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, tileSidePx, glyph.brandColor);
+  const markBackground = paint.tileFill ?? canvasStyle.boardBackground;
+  const markFill = (fill: string) => resolveBrandMarkFill(fill, markBackground, canvasStyle);
   if (paint.tileFill !== null) {
-    return renderIconTile(object, glyph, paint, viewBox, canvasStyle.iconTileMaxPx);
+    return renderIconTile(object, glyph, paint, viewBox, canvasStyle.iconTileMaxPx, markFill);
   }
 
   const fill = paint.glyphFill;
@@ -728,11 +738,11 @@ function renderIconGlyph(
         { fill: fill ?? undefined, stroke: "none" },
         glyph.elements
           .filter(isFillGlyphElement)
-          .map(glyphElementMarkup)
+          .map((element) => glyphElementMarkup(element))
           .join(""),
       )
     : "";
-  const inkLayer = tag("g", {}, glyph.elements.map(glyphElementMarkup).join(""));
+  const inkLayer = tag("g", {}, glyph.elements.map((element) => glyphElementMarkup(element, markFill)).join(""));
 
   return tag(
     "svg",
@@ -741,7 +751,7 @@ function renderIconGlyph(
       y: geometry.y,
       width: Math.max(0, geometry.width),
       height: Math.max(0, geometry.height),
-      viewBox: `0 0 ${fmt(glyph.viewBoxSize)} ${fmt(glyph.viewBoxSize)}`,
+      viewBox: glyphViewBox(glyph),
       preserveAspectRatio: "xMidYMid meet",
       ...glyphPaintAttributes(glyph, paint.glyph, iconBareGlyphStrokeWidth(sizePx, glyph)),
     },
@@ -764,9 +774,10 @@ function renderIconTile(
   paint: IconTilePaint,
   viewBox: CanvasBounds,
   tileMaxPx: number,
+  markFill: (fill: string) => string,
 ): string {
   const { geometry } = object;
-  const layout = iconTileLayout(geometry.width, geometry.height, tileMaxPx);
+  const layout = iconTileLayout(geometry.width, geometry.height, tileMaxPx, glyph);
   const border = paint.tileBorder ? paint.tileBorderWidthPx : 0;
   const tile = tag("rect", {
     x: geometry.x + layout.tile.x + border / 2,
@@ -790,11 +801,11 @@ function renderIconTile(
       "svg",
       {
         ...glyphRect,
-        viewBox: `0 0 ${fmt(glyph.viewBoxSize)} ${fmt(glyph.viewBoxSize)}`,
+        viewBox: glyphViewBox(glyph),
         preserveAspectRatio: "xMidYMid meet",
         ...glyphPaintAttributes(glyph, paint.glyph, iconTileGlyphStrokeWidth(glyph.viewBoxSize)),
       },
-      tag("g", {}, glyph.elements.map(glyphElementMarkup).join("")),
+      tag("g", {}, glyph.elements.map((element) => glyphElementMarkup(element, markFill)).join("")),
     )
   );
 }
@@ -1046,15 +1057,15 @@ function renderTitleChipIcon(drawing: TitleChipIconDrawing, x: number, y: number
       "g",
       {
         transform: `translate(${fmt(x + glyph.offsetPx)} ${fmt(y + glyph.offsetPx)}) scale(${fmtScale(
-          glyph.sizePx / glyph.viewBoxSize,
-        )})`,
+          glyph.sizePx / glyph.viewBox[2],
+        )})${glyph.viewBox[0] === 0 && glyph.viewBox[1] === 0 ? "" : ` translate(${fmtScale(-glyph.viewBox[0])} ${fmtScale(-glyph.viewBox[1])})`}`,
         fill: stroked ? "none" : glyph.color,
         stroke: stroked ? glyph.color : "none",
         "stroke-width": stroked ? fmtScale(glyph.strokeWidth) : undefined,
         "stroke-linecap": "round",
         "stroke-linejoin": "round",
       },
-      glyph.elements.map(glyphElementMarkup).join(""),
+      glyph.elements.map((element) => glyphElementMarkup(element)).join(""),
     ),
   );
   return parts.join("");

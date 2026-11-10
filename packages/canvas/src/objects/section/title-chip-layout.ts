@@ -52,8 +52,8 @@ import {
   type FontSpec,
 } from "../../theme/text-measure";
 import type { InteractiveCanvasObject } from "../../state/schema";
-import { brandHeaderIconColors } from "../../theme/palette";
-import { resolveIconGlyph, type IconGlyphElement } from "../shapes/icon/icon-glyphs";
+import { brandHeaderIconColors, resolveBrandMarkFill } from "../../theme/palette";
+import { resolveIconGlyph, type IconGlyphDefinition, type IconGlyphElement } from "../shapes/icon/icon-glyphs";
 import type { LocalRect } from "../text-slots";
 
 // ---------------------------------------------------------------------------
@@ -424,7 +424,8 @@ export interface TitleChipIconDrawing {
     /** Glyph box offset inside the icon box, and its size. */
     offsetPx: number;
     sizePx: number;
-    viewBoxSize: number;
+    /** The glyph's square viewBox (IconGlyphDefinition.viewBox), mapped onto the glyph box. */
+    viewBox: IconGlyphDefinition["viewBox"];
     paint: "stroke" | "fill";
     color: string;
     /** Stroke width in the glyph's own viewBox units (stroke paint only). */
@@ -458,11 +459,16 @@ export function titleChipIconDrawing(
     glyph: {
       offsetPx: (TITLE_CHIP_ICON.sizePx - glyphSize) / 2,
       sizePx: glyphSize,
-      viewBoxSize: glyph.viewBoxSize,
+      viewBox: glyph.viewBox,
       paint: glyph.paint,
       color: colors.iconGlyph,
       strokeWidth: TITLE_CHIP_ICON.strokePerGlyphPx * glyph.viewBoxSize,
-      elements: glyph.elements,
+      // A full-color brand mark's shapes keep their own colors, resolved on the tile (or chip) behind them.
+      elements: glyph.elements.map((element) =>
+        element.kind !== "line" && element.fill
+          ? { ...element, fill: resolveBrandMarkFill(element.fill, colors.iconTile, canvasStyle) }
+          : element,
+      ),
     },
   };
 }

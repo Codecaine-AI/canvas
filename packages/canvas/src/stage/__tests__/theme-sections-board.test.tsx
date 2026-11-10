@@ -153,10 +153,11 @@ describe("pinned title chip with icon (a stored detail never paints)", () => {
     expect(titleWidth).toBe(114.25);
     expect(svg).not.toContain("127.0.0.1");
     // The 16px tile sits 6px in, centered on the content line (93.5); the glyph is 11px inside it.
-    // Bun is a brand logo: its own black mark on the neutral card tile, edged by a hairline.
-    expect(svg).toContain('<rect x="108" y="86" width="15" height="15" rx="1.5" fill="#F8F8F7" stroke="#E6E5E3" stroke-width="1"/>');
-    expect(svg).toContain('transform="translate(110 88) scale(0.4583)" fill="#000000"');
-    expect(svg).toContain('transform="translate(110 88) scale(0.4583)"');
+    // Bun is a brand logo: its full-color mark, set in its optical box, on the neutral brand tile (a
+    // white node's fill, edged in soft gray).
+    expect(svg).toContain('<rect x="108" y="86" width="15" height="15" rx="1.5" fill="#FDFDFD" stroke="#AAA9A8" stroke-width="1"/>');
+    expect(svg).toContain('transform="translate(110 88) scale(0.0358) translate(25.6426 41.4401)" fill="#000000"');
+    expect(svg).toContain('fill="#FBF0DF"');
     // Only the right and bottom edges are stroked, inside the box like a CSS border
     // (box: 6 lead + 22 icon + 114.25 title + 10 + 1.5 edge).
     expect(svg).toMatch(/<path d="M254\.5 81\.5V105A1\.25 1\.25 0 0 1 253\.25 106\.25H101\.5" fill="none" stroke="rgba\(13, 113, 100, 0\.5\)" stroke-width="1\.5"/);

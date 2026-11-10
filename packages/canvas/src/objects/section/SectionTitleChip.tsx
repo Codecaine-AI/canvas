@@ -7,7 +7,7 @@ import type { CanvasBounds } from "../../state/geometry";
 import type { InteractiveCanvasObject } from "../../state/schema";
 import { CANVAS_MONO_FONT_STACK } from "../../theme/fonts";
 import { useCanvasStyle } from "../../theme/canvas-style-context";
-import type { IconGlyphElement } from "../shapes/icon/icon-glyphs";
+import { iconGlyphTransform, type IconGlyphElement } from "../shapes/icon/icon-glyphs";
 import {
   TITLE_CHIP,
   TITLE_CHIP_ICON,
@@ -60,8 +60,8 @@ function chipThemeStyle(layout: TitleChipLayout, headerText: string): CSSPropert
 }
 
 function glyphElement(element: IconGlyphElement, key: number) {
-  if (element.kind === "path") return <path key={key} d={element.d} />;
-  if (element.kind === "circle") return <circle key={key} cx={element.cx} cy={element.cy} r={element.r} />;
+  if (element.kind === "path") return <path key={key} d={element.d} fill={element.fill} />;
+  if (element.kind === "circle") return <circle key={key} cx={element.cx} cy={element.cy} r={element.r} fill={element.fill} />;
   return <line key={key} x1={element.x1} y1={element.y1} x2={element.x2} y2={element.y2} />;
 }
 
@@ -92,7 +92,7 @@ export function TitleChipIcon({ id, drawing }: { id: string; drawing: TitleChipI
         />
       ) : null}
       <g
-        transform={`translate(${glyph.offsetPx} ${glyph.offsetPx}) scale(${glyph.sizePx / glyph.viewBoxSize})`}
+        transform={iconGlyphTransform(glyph, glyph.offsetPx, glyph.offsetPx, glyph.sizePx)}
         fill={stroked ? "none" : glyph.color}
         stroke={stroked ? glyph.color : "none"}
         strokeWidth={stroked ? glyph.strokeWidth : undefined}

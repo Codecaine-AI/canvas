@@ -28,3 +28,13 @@ each one, and `generate.ts --vendor` checks the declarations against the package
 | `brand-git` | Git logo by Jason Long | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | <https://git-scm.com/community/logos> |
 | `brand-rust` | Rust logo, Rust Foundation | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | <https://www.rust-lang.org/policies/media-guide> |
 | `brand-kafka` | Apache Kafka logo, The Apache Software Foundation | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | <https://apache.org/logos> |
+
+## Full-color brand marks (CC0 1.0)
+
+`brand-art/*.svg` are nine full-color marks (PostgreSQL, Redis, Bun, Python, Supabase, Cloudflare,
+Hugging Face, Figma, Terraform) taken from the `logos` set by Gil Barbara
+(<https://github.com/gilbarbara/logos>, CC0 1.0), via `@iconify-json/logos` 1.2.4. Each file keeps
+the upstream shapes and colors with the transforms baked in. Gradients are flattened to the mean of
+their stops (Python's yellow takes the deeper stop, `#FFC331`), and translucent shading overlays are
+dropped. A brand entry's `art` in `manifest.json` draws its mark instead of the one-color Simple Icons
+logo. The trademark note above applies to these marks too.

@@ -506,8 +506,8 @@ function tileGlyphOn(ink: string, style: CanvasStyle): string {
 
 /** Ink weight of a tinted icon tile over the card fill. */
 const ICON_TILE_TINT_WEIGHT = 0.16;
-/** Border width of the outlined `white` tile (light boards), px. */
-const ICON_TILE_OUTLINE_WIDTH_PX = 1;
+/** Border width of a node-paint tile, the outlined `white` tile and a brand tile, px (the section frame weight). */
+const ICON_TILE_OUTLINE_WIDTH_PX = 1.5;
 
 /** The tile body an icon gets in the tile style. */
 export type IconTileMode = "solid" | "tint";
@@ -531,12 +531,15 @@ export function iconTileModeFor(style: CanvasStyle, sizePx: number): IconTileMod
 
 /**
  * resolveIconPaint for an icon of glyph-box size `sizePx`, with the tile body
- * `iconTileFill` picks (resolveIconPaint itself is unchanged: it is the solid
- * tile). `solid`: the ink tile under the tile glyph color. `tint`: a light
- * ink tint — mix(ink, cardFill, 0.16), opaque — bordered in the ink at the
- * shape border width, with an ink glyph. `white` on a light board keeps its
- * outlined tile (card fill, 1px ink border, ink glyph) at every size. Glyph
- * style ignores the size.
+ * `iconTileFill` picks (resolveIconPaint itself stays the solid tile the
+ * small section header badges draw). `solid`: a small node — the pick's node
+ * fill (resolveShapePaint), edged and drawn in its ink, so a tile reads in
+ * the same pastel-and-ink system as the nodes beside it. Solid ink tiles
+ * shouted next to the pastel nodes, and the outlined `white` tile among them
+ * read as a second tile system (stage A round 2: opus on the wires sheet).
+ * `tint`: a light ink tint — mix(ink, cardFill, 0.16), opaque — bordered in
+ * the ink at the shape border width, with an ink glyph; `white` on a light
+ * board keeps its outlined tile there. Glyph style ignores the size.
  */
 export function resolveIconTilePaint(
   color: CanvasColor,
@@ -548,9 +551,12 @@ export function resolveIconTilePaint(
   const paint = resolveIconPaint(color, style);
   if (paint.tileFill === null) return { ...paint, tileMode: null, tileBorderWidthPx: 0 };
   const tileMode = iconTileModeFor(style, sizePx);
-  if (paint.tileBorder !== null) return { ...paint, tileMode, tileBorderWidthPx: ICON_TILE_OUTLINE_WIDTH_PX };
-  if (tileMode === "solid") return { ...paint, tileMode, tileBorderWidthPx: 0 };
   const ink = resolveInk(color, style);
+  if (tileMode === "solid") {
+    const shape = resolveShapePaint(color, style);
+    return { ...paint, tileFill: shape.fill, tileBorder: shape.border, glyph: ink, tileMode, tileBorderWidthPx: ICON_TILE_OUTLINE_WIDTH_PX };
+  }
+  if (paint.tileBorder !== null) return { ...paint, tileMode, tileBorderWidthPx: ICON_TILE_OUTLINE_WIDTH_PX };
   return {
     ...paint,
     tileFill: style.sectionFill === "layer-cake"
@@ -564,39 +570,89 @@ export function resolveIconTilePaint(
 }
 
 /**
- * Least contrast a brand mark keeps against what it sits on before it falls
- * back to the ink. Logos are exempt from WCAG 1.4.11's 3:1 for graphics, and
- * a 3:1 floor would drop real brand colors (Claude's #D97757 is 2.9:1 on the
- * light card); 2:1 still keeps the mark visible, and catches the brands that
- * vanish: black marks on the dark card, Hugging Face yellow, React and
- * Supabase on the light card. Canvas-owned: no token names this.
+ * Least contrast a one-color brand mark keeps against its tile or board: the
+ * WCAG 1.4.11 floor for graphics. A brand color that falls short is pushed
+ * there at its own hue and chroma (brandMarkColor), so React stays a cyan and
+ * Supabase a green instead of turning into the monochrome logo, which judges
+ * read as off-brand (stage A round 2: React, Supabase, Bun).
  */
-export const BRAND_MARK_MIN_CONTRAST = 2;
+export const BRAND_MARK_MIN_CONTRAST = 3;
+/**
+ * The floor for one shape of a full-color brand mark on a dark tile
+ * (resolveBrandMarkFill). The marks are drawn for light pages, so on a dark
+ * tile their deep shapes (the Redis reds, the PostgreSQL blue) move up to stay
+ * visible; on a light tile every shape keeps its own color, since the light
+ * ones (the Python yellow, the Bun face) are part of the mark. Neutral shapes
+ * never move.
+ */
+const BRAND_SHAPE_MIN_CONTRAST = 2;
+/** Bisection steps for the brand color lightness search: far below one 8-bit channel step. */
+const BRAND_LIGHTNESS_STEPS = 24;
+/** OKLCH chroma under which a brand color counts as neutral (black, white, near-gray). */
+const BRAND_NEUTRAL_CHROMA = 0.03;
 
-/** The brand color where it keeps BRAND_MARK_MIN_CONTRAST on `background`, else the ink (the monochrome logo). */
-function visibleBrandColor(brandColor: string, background: string, ink: string): string {
-  return contrastRatio(brandColor, background) >= BRAND_MARK_MIN_CONTRAST ? brandColor : ink;
+/**
+ * `color` on `background` with at least `floor` contrast. A chromatic color
+ * that falls short moves toward a deep (or, on a dark board, light) shade of
+ * its own hue and chroma. A dark neutral on a dark background (a black logo
+ * on the dark card) takes the text color; a light neutral keeps its color (it
+ * is a detail drawn over the mark's own colors).
+ */
+function brandMarkColor(color: string, background: string, floor: number, style: CanvasStyle): string {
+  if (contrastRatio(color, background) >= floor) return color;
+  if (oklabChroma(color) < BRAND_NEUTRAL_CHROMA) {
+    return oklabLightness(color) < 0.5 && oklabLightness(background) < 0.5 ? style.textColor : color;
+  }
+  // The lightness nearest the color's own that reaches the floor, at its hue and chroma (clipped to sRGB).
+  const darker = oklabLightness(background) >= 0.5;
+  const chroma = oklabChroma(color);
+  let near = oklabLightness(color);
+  let far = darker ? 0 : 1;
+  for (let step = 0; step < BRAND_LIGHTNESS_STEPS; step += 1) {
+    const middle = (near + far) / 2;
+    if (contrastRatio(withLightnessChroma(color, middle, chroma), background) >= floor) far = middle;
+    else near = middle;
+  }
+  return withLightnessChroma(color, far, chroma);
 }
 
 /**
+ * A full-color brand mark's own color for one shape (an IconGlyphElement
+ * `fill`), as drawn on `background` (its tile, chip or the board).
+ */
+export function resolveBrandMarkFill(fill: string, background: string, style: CanvasStyle): string {
+  // Neutral shapes keep their color too: a black outline or eye sits against the mark's own light fills (the Bun face).
+  if (oklabLightness(background) >= 0.5 || oklabChroma(fill) < BRAND_NEUTRAL_CHROMA) return fill;
+  return cachedPaint(style, `brand-fill|${fill}|${background}`, () => ({
+    fill: brandMarkColor(fill, background, BRAND_SHAPE_MIN_CONTRAST, style),
+  })).fill;
+}
+
+/** Share of the gray ink in a brand tile's edge (the rest is the tile fill). */
+const BRAND_TILE_EDGE_INK_WEIGHT = 0.55;
+
+/**
  * A brand logo's paint (a `brand-*` glyph, objects/shapes/icon/icon-glyphs.ts):
- * the mark keeps its own brand color (the Simple Icons `hex`), never the
- * object's color pick, which would tint every logo one hue. Glyph style: the
- * bare mark on the board. Tile style: the mark on a neutral card tile edged by
- * a hairline, so it reads as a badge beside the ink tiles without taking a
- * hue that is not its own. Either way the mark falls back to the ink where its
- * color would vanish (BRAND_MARK_MIN_CONTRAST).
+ * the mark keeps its own brand color (the Simple Icons `hex`, or a full-color
+ * mark's per-shape colors), never the object's color pick, which would tint
+ * every logo one hue. Glyph style: the bare mark on the board. Tile style: the
+ * mark on a `white` node's fill, edged in a soft gray (the gray ink at
+ * BRAND_TILE_EDGE_INK_WEIGHT) at the node-tile edge width, so a logo sits in
+ * the same tile system as the pastel tiles without taking a hue that is not
+ * its own. The card hairline it had (1.24:1) left the tile edge nearly gone
+ * on the page (stage A round 2).
  */
 function brandIconPaint(brandColor: string, style: CanvasStyle): IconTilePaint {
   const label = style.textColor;
   if (style.iconStyle !== "tile") {
-    const glyph = visibleBrandColor(brandColor, style.boardBackground, style.textColor);
+    const glyph = brandMarkColor(brandColor, style.boardBackground, BRAND_MARK_MIN_CONTRAST, style);
     return { tileFill: null, tileBorder: null, glyph, glyphFill: null, label, tileMode: null, tileBorderWidthPx: 0 };
   }
+  const tileFill = resolveShapePaint("white", style).fill;
   return {
-    tileFill: style.cardFill,
-    tileBorder: style.hairlineColor,
-    glyph: visibleBrandColor(brandColor, style.cardFill, style.textColor),
+    tileFill,
+    tileBorder: mixColors(resolveInk("gray", style), tileFill, BRAND_TILE_EDGE_INK_WEIGHT),
+    glyph: brandMarkColor(brandColor, tileFill, BRAND_MARK_MIN_CONTRAST, style),
     glyphFill: null,
     label,
     tileMode: "tint",
@@ -607,9 +663,8 @@ function brandIconPaint(brandColor: string, style: CanvasStyle): IconTilePaint {
 /**
  * A section header's brand logo (objects/section/title-chip-layout.ts):
  * the same brand policy as an icon object (brandIconPaint). Tile style: the
- * mark on the neutral card tile. Glyph style: the bare mark on the header
- * chip (`colors.iconTile` is the chip fill there), falling back to the
- * section's own glyph ink where the brand color would vanish.
+ * mark on the neutral brand tile. Glyph style: the bare mark on the header
+ * chip (`colors.iconTile` is the chip fill there).
  */
 export function brandHeaderIconColors(
   brandColor: string,
@@ -617,7 +672,7 @@ export function brandHeaderIconColors(
   style: CanvasStyle,
 ): Pick<SectionPaint, "iconTile" | "iconTileBorder" | "iconGlyph"> {
   if (style.iconStyle !== "tile") {
-    return { ...colors, iconGlyph: visibleBrandColor(brandColor, colors.iconTile, colors.iconGlyph) };
+    return { ...colors, iconGlyph: brandMarkColor(brandColor, colors.iconTile, BRAND_MARK_MIN_CONTRAST, style) };
   }
   const paint = brandIconPaint(brandColor, style);
   return { iconTile: paint.tileFill ?? colors.iconTile, iconTileBorder: paint.tileBorder, iconGlyph: paint.glyph };
@@ -750,9 +805,32 @@ export function resolveLabelChipBorder(style: CanvasStyle, wireStroke: string): 
 /** Wire stroke weight in a layer-cake label chip edge (resolveLabelChipBorder). */
 const LABEL_CHIP_BORDER_INK_WEIGHT = 0.4;
 
-/** Connector stroke = the ink. */
+/**
+ * Connector stroke = the ink. In the layer-cake modes `white` (whose ink is
+ * the text color, the loudest line on a board) strokes a quiet neutral
+ * instead: the gray ink moved WHITE_WIRE_BOARD_WEIGHT toward the board, kept
+ * at NON_TEXT_CONTRAST on the darkest section fill it can cross.
+ */
 export function resolveConnectorPaint(color: CanvasColor, style: CanvasStyle): ConnectorPaint {
-  return cachedPaint(style, `connector|${color}`, () => ({ stroke: resolveInk(color, style) }));
+  return cachedPaint(style, `connector|${color}`, () => ({
+    stroke: color === "white" && style.sectionFill === "layer-cake" ? quietWireStroke(style) : resolveInk(color, style),
+  }));
+}
+
+/** How far the `white` wire moves from the gray ink toward the board. */
+const WHITE_WIRE_BOARD_WEIGHT = 0.3;
+/** Deepest section nesting the `white` wire's contrast floor is checked against (the tint caps well before it). */
+const WHITE_WIRE_MAX_DEPTH = 6;
+
+function quietWireStroke(style: CanvasStyle): string {
+  const quiet = mixColors(resolveInk("gray", style), style.boardBackground, 1 - WHITE_WIRE_BOARD_WEIGHT);
+  let stroke = ensureContrast(quiet, style.boardBackground, NON_TEXT_CONTRAST);
+  for (const color of CANVAS_COLORS) {
+    for (let depth = PAGE_SECTION_DEPTH; depth <= WHITE_WIRE_MAX_DEPTH; depth += 1) {
+      stroke = ensureContrast(stroke, resolveSectionPaint(color, depth, style).fill, NON_TEXT_CONTRAST);
+    }
+  }
+  return stroke;
 }
 
 /**
