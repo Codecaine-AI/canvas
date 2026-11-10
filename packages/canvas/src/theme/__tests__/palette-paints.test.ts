@@ -332,12 +332,17 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     const hues = CANVAS_COLORS.filter((candidate) => !["white", "gray"].includes(candidate));
     for (const color of hues) {
       const paint = resolveShapePaint(color, LIGHT);
-      expect(paint.border).toBe(resolveInk(color, LIGHT));
-      expect(Math.abs(oklabLightness(paint.fill) - (oklabLightness(LIGHT.cardFill) - 0.12))).toBeLessThan(0.003);
-      // The kind reads from the fill, not only the border: chroma 0.08 (yellow 0.11, orange the most sRGB holds).
-      expect(chroma(paint.fill)).toBeGreaterThanOrEqual(color === "blue" ? 0.06 : 0.075);
+      // Yellow edges in its own amber gold (the next test), every other hue in its ink.
+      if (color !== "yellow") expect(paint.border).toBe(resolveInk(color, LIGHT));
+      // Hued nodes sit 0.135 under the card; violet one step deeper (0.15); the light hues stand lighter: orange 0.12, yellow 0.112 (stage A rounds 9 and 11).
+      const drop = color === "orange" ? 0.12 : color === "yellow" ? 0.112 : color === "violet" ? 0.15 : 0.135;
+      expect(Math.abs(oklabLightness(paint.fill) - (oklabLightness(LIGHT.cardFill) - drop))).toBeLessThan(0.003);
+      // The kind reads from the fill, not only the border: chroma 0.08 (red and pink 0.072, yellow 0.125, violet 0.09, orange the most sRGB holds).
+      // Red and pink sit at 0.072 (floor 0.07, was 0.075): their salmon and pink read loud beside the softer fills (stage A round 9: opus).
+      expect(chroma(paint.fill)).toBeGreaterThanOrEqual(color === "blue" ? 0.06 : color === "red" || color === "pink" ? 0.07 : 0.075);
       if (color === "blue") expect(chroma(paint.fill)).toBeLessThan(0.07);
-      expect(chroma(paint.fill)).toBeLessThan(color === "yellow" ? 0.113 : 0.091);
+      // Yellow's cap is 0.13 (was 0.095): at its node lightness a less colorful yellow reads as a muddy mustard (stage A rounds 9 and 10).
+      expect(chroma(paint.fill)).toBeLessThan(color === "yellow" ? 0.13 : 0.091);
       expect(Math.abs(hue(paint.fill) - hue(LIGHT.palette[color]))).toBeLessThan(0.12);
     }
     // Green and teal (and teal and blue) were 0.003 / 0.005 apart at the 0.08 mix.
@@ -350,8 +355,9 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     // The anchor is the yellow solid; the olive text step is only the lightness reference.
     const textStep = ensureContrast(LIGHT.palette.yellow, LIGHT.boardBackground, 4.5);
     const node = resolveShapePaint("yellow", LIGHT);
-    expect(node.border).toBe(resolveInk("yellow", LIGHT));
+    // The node edge is an amber gold, warmer than the olive-leaning ink, at 3:1 on its node (stage A round 11).
     expect(contrastRatio(node.border, node.fill)).toBeGreaterThanOrEqual(3);
+    expect(contrastRatio(resolveInk("yellow", LIGHT), resolveShapePaint("yellow", LIGHT).fill)).toBeGreaterThanOrEqual(3);
     // Lighter than the olive yellow.text (#805F01, L 0.51), though the stronger node fill pushes it darker than round 3's gold.
     expect(oklabLightness(node.border)).toBeGreaterThan(oklabLightness("#805F01") + 0.04);
     const chroma = (color: string) => Math.hypot(oklab(color).a, oklab(color).b);
@@ -463,16 +469,27 @@ describe("schematic shapes, icons, stickies, connectors", () => {
         if (sectionColor !== "white") expect(oklabDistance(white.fill, section)).toBeGreaterThanOrEqual(sectionColor === "gray" ? 0.025 : 0.035);
       }
     }
-    expect(contrastRatio(white.border, white.fill)).toBeGreaterThanOrEqual(10);
+    // The white node edges in the gray ink (stage A round 9: its near-black
+    // edge outweighed every tinted border), which still holds 4.5:1 on its
+    // own fill, so a white node on a white section keeps a clear edge.
+    expect(white.border).toBe(resolveInk("gray", LIGHT));
+    expect(contrastRatio(white.border, white.fill)).toBeGreaterThanOrEqual(4.5);
   });
 
-  it("light ink-card shapes: gray is a neutral lighter than the hued nodes, white the board surface", () => {
-    // Round 4's #D0D0D0 at the hued node lightness read as the heaviest fill (UI climb round 4).
-    expect(resolveShapePaint("gray", LIGHT)).toEqual({ fill: "#DCDCDC", border: "#666562", text: "#1F1F1F" });
+  it("light ink-card shapes: gray is a faint cool slate lighter than the hued nodes, white the board surface", () => {
+    // Round 4's #D0D0D0 at the hued node lightness read as the heaviest fill
+    // (UI climb round 4); the neutral #DCDCDC read dull beside the clear hues,
+    // so gray takes a faint cool slate (stage A round 11).
+    const gray = resolveShapePaint("gray", LIGHT);
+    expect(gray).toEqual({ fill: "#D7DCDF", border: "#666562", text: "#1F1F1F" });
+    expect(Math.hypot(oklab(gray.fill).a, oklab(gray.fill).b)).toBeLessThan(0.01);
+    // Yellow, a light hue that read as a heavy mustard at the shared lightness,
+    // stands lighter (stage A round 9), so it keeps a smaller 0.02 step (was
+    // 0.025: the slate gray sits 0.006 under the neutral); it differs from gray by chroma 0.125.
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
-      expect(oklabLightness("#DCDCDC") - oklabLightness(resolveShapePaint(color, LIGHT).fill)).toBeGreaterThanOrEqual(0.03);
+      expect(oklabLightness(gray.fill) - oklabLightness(resolveShapePaint(color, LIGHT).fill)).toBeGreaterThanOrEqual(color === "yellow" ? 0.02 : 0.03);
     }
-    expect(resolveShapePaint("white", LIGHT)).toEqual({ fill: "#FDFDFD", border: "#1F1F1F", text: "#1F1F1F" });
+    expect(resolveShapePaint("white", LIGHT)).toEqual({ fill: "#FDFDFD", border: "#666562", text: "#1F1F1F" });
   });
 
   it.each([

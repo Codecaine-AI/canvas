@@ -4,6 +4,7 @@ import type { CanvasPoint } from "../../../state/geometry";
 import { TRIANGLE_OUTLINE, trianglePoints } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+import { resolveTrueOutlineStrokeWidth } from "../../../theme/tokens";
 
 function pointsAttribute(points: CanvasPoint[]): string {
   return points.map((point) => `${point.x},${point.y}`).join(" ");
@@ -24,7 +25,7 @@ export const triangleShapeDef: ShapeDef = {
   outline: TRIANGLE_OUTLINE,
   silhouette: {
     className: "interactive-canvas-object-triangle",
-    silhouette: ({ object, colors, strokeWidth }) => {
+    silhouette: ({ object, colors, strokeWidth, canvasStyle }) => {
       const direction: "up" | "down" = object.direction === "down" ? "down" : "up";
       const localBounds = { x: 0, y: 0, width: object.geometry.width, height: object.geometry.height };
       const points = pointsAttribute(trianglePoints(localBounds, direction));
@@ -41,7 +42,7 @@ export const triangleShapeDef: ShapeDef = {
             points={points}
             fill={colors.fill}
             stroke={colors.border}
-            strokeWidth={strokeWidth}
+            strokeWidth={resolveTrueOutlineStrokeWidth(strokeWidth, canvasStyle)}
             strokeLinejoin="round"
           />
         </svg>

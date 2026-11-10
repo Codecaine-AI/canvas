@@ -78,7 +78,7 @@ describe("icon tile paint by size", () => {
   it("white is the white node when solid; tinted, a light board keeps the outlined card tile and a dark one tints the white ink", () => {
     expect(resolveIconTilePaint("white", LIGHT, 48)).toMatchObject({
       tileFill: resolveShapePaint("white", LIGHT).fill,
-      tileBorder: LIGHT.palette.white,
+      tileBorder: resolveShapePaint("white", LIGHT).border,
       glyph: LIGHT.palette.white,
       tileBorderWidthPx: 1.5,
     });

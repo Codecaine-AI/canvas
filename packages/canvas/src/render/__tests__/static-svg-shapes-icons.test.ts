@@ -155,13 +155,13 @@ describe("static icons: tile vs glyph, packs, brands", () => {
     }
   });
 
-  it("a white tile is the white node: its fill, a 1.5px ink border inside the edge, ink glyph", () => {
+  it("a white tile is the white node: its fill, a 1.5px edge inside the edge, ink glyph", () => {
     for (const theme of ["schematic-light", "schematic-dark"] as const) {
       const style = canvasThemePreset(theme);
       const svg = render([icon({ color: "white" })], theme);
       // The 56px tile centered in the 64px box (4..60), its 1.5px border inside the edge.
       expect(svg).toContain(
-        `<rect x="4.75" y="4.75" width="54.5" height="54.5" rx="2.25" fill="${resolveShapePaint("white", style).fill}" stroke="${style.palette.white}" stroke-width="1.5"/>`,
+        `<rect x="4.75" y="4.75" width="54.5" height="54.5" rx="2.25" fill="${resolveShapePaint("white", style).fill}" stroke="${resolveShapePaint("white", style).border}" stroke-width="1.5"/>`,
       );
       expect(svg).toContain(`fill="none" stroke="${style.palette.white}" stroke-width=`);
     }

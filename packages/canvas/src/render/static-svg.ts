@@ -86,7 +86,12 @@ import {
   connectionLabelChipRect as labelChipRect,
 } from "../connectors/label-chip";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
-import { resolveObjectStrokeWidth, resolveShapeCornerRadius } from "../theme/tokens";
+import {
+  resolveObjectStrokeWidth,
+  resolvePredefinedProcessBarWidth,
+  resolveShapeCornerRadius,
+  resolveTrueOutlineStrokeWidth,
+} from "../theme/tokens";
 import { DEFAULT_CANVAS_STYLE, normalizeCanvasStyle, type CanvasStyle } from "../theme/canvas-style";
 import { formatHex, parseColor } from "../theme/color-math";
 import { CANVAS_MONO_FONT_STACK_SVG, CANVAS_SANS_FONT_STACK_SVG } from "../theme/fonts";
@@ -826,10 +831,9 @@ type WorldRect = { x: number; y: number; width: number; height: number };
 
 /**
  * Mirrors PREDEFINED_PROCESS_GEOMETRY in objects/shapes/flowchart/predefined-process.tsx
- * (its corner radius is the canvas style's shape radius, like every bbox shape).
+ * (its corner radius and bar width come from theme/tokens.ts, like every bbox shape).
  */
 const PREDEFINED_PROCESS_GEOMETRY = {
-  barWidthPx: 4,
   barInsetRatio: 0.047,
 } as const;
 
@@ -855,15 +859,16 @@ function bboxRoundedRect(
 
 /**
  * Rounded rect + two inner vertical bars (objects/shapes/flowchart/
- * predefined-process.tsx): border-colored 4px bars inset barInsetRatio of the
+ * predefined-process.tsx): border-colored bars inset barInsetRatio of the
  * padding-box width from each side, spanning the padding box's height.
  */
 function renderPredefinedProcessSilhouette(
   rect: WorldRect,
   paint: ShapePaint,
   strokeWidth: number,
-  cornerRadiusPx: number,
+  canvasStyle: CanvasStyle,
 ): string {
+  const barWidth = resolvePredefinedProcessBarWidth(strokeWidth, canvasStyle);
   const innerX = rect.x + strokeWidth;
   const innerY = rect.y + strokeWidth;
   const innerWidth = Math.max(0, rect.width - strokeWidth * 2);
@@ -873,14 +878,14 @@ function renderPredefinedProcessSilhouette(
     tag("rect", {
       x,
       y: innerY,
-      width: PREDEFINED_PROCESS_GEOMETRY.barWidthPx,
+      width: barWidth,
       height: innerHeight,
       fill: paint.border,
     });
   return (
-    bboxRoundedRect(rect, paint, strokeWidth, cornerRadiusPx) +
+    bboxRoundedRect(rect, paint, strokeWidth, resolveShapeCornerRadius("predefined-process", canvasStyle)) +
     bar(innerX + barInset) +
-    bar(innerX + innerWidth - barInset - PREDEFINED_PROCESS_GEOMETRY.barWidthPx)
+    bar(innerX + innerWidth - barInset - barWidth)
   );
 }
 
@@ -894,7 +899,7 @@ function renderCustomSilhouette(
 ): string | null {
   switch (renderShape) {
     case "predefined-process":
-      return renderPredefinedProcessSilhouette(rect, paint, strokeWidth, canvasStyle.shapeCornerRadiusPx);
+      return renderPredefinedProcessSilhouette(rect, paint, strokeWidth, canvasStyle);
     default:
       return null;
   }
@@ -903,7 +908,7 @@ function renderCustomSilhouette(
 /**
  * The shape body silhouette. Polygon/ellipse outline kinds stroke the true
  * outline exactly like the app's SVG silhouettes (stroke centered on the
- * path). Bbox kinds mimic the CSS border-box border by insetting the rect by
+ * path, at the true-outline width). Bbox kinds mimic the CSS border-box border by insetting the rect by
  * half the stroke width.
  */
 function renderShapeBody(
@@ -953,7 +958,7 @@ function renderShapeBody(
       ry: geometry.height / 2,
       fill: colors.fill,
       stroke: colors.border,
-      "stroke-width": strokeWidth,
+      "stroke-width": resolveTrueOutlineStrokeWidth(strokeWidth, canvasStyle),
     });
   }
 
@@ -965,7 +970,7 @@ function renderShapeBody(
       points: polygonPointsAttribute(points),
       fill: colors.fill,
       stroke: colors.border,
-      "stroke-width": strokeWidth,
+      "stroke-width": resolveTrueOutlineStrokeWidth(strokeWidth, canvasStyle),
       ...(roundJoin ? { "stroke-linejoin": "round" } : null),
     });
   }

@@ -4,6 +4,7 @@ import type { CanvasStyle } from "../../../theme/canvas-style";
 import { DIAMOND_OUTLINE, outlinePolygonForSpec } from "../../geometry";
 import { shapeObjectDef } from "../base";
 import type { ShapeDef } from "../shape-def";
+import { resolveTrueOutlineStrokeWidth } from "../../../theme/tokens";
 
 /**
  * Whether the diamond draws its true outline. The figjam tint mode keeps the
@@ -47,7 +48,7 @@ export const decisionShapeDef: ShapeDef = {
           preserveAspectRatio="none"
           style={{ position: "absolute", inset: 0, width: "100%", height: "100%", overflow: "visible" }}
         >
-          <polygon points={points} fill={colors.fill} stroke={colors.border} strokeWidth={strokeWidth} />
+          <polygon points={points} fill={colors.fill} stroke={colors.border} strokeWidth={resolveTrueOutlineStrokeWidth(strokeWidth, canvasStyle)} />
         </svg>
       );
     },

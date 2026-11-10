@@ -378,6 +378,70 @@ function shapeFillBase(color: CanvasColor, style: CanvasStyle): string {
   return withLightnessChroma(paletteColor(color, style), lightness, SHAPE_CARD_CHROMA_BY_COLOR[color] ?? SHAPE_CARD_CHROMA);
 }
 
+/**
+ * The painted `ink-card` node fill: shapeFillBase, the tone the inks are set
+ * against, moved by NODE_FILL_RETONE, so retuning the node fills leaves every
+ * ink line (borders, wires, section edges, note stripes) where it was.
+ */
+function retonedNodeFill(color: CanvasColor, base: string, style: CanvasStyle): string {
+  if (color === "white") return base;
+  if (color === "gray") return withLightnessChroma(paletteColor("blue", style), oklabLightness(base) + GRAY_NODE_RETONE.lightness, GRAY_NODE_RETONE.chroma);
+  const { lightness = -NODE_FILL_DEEPER_STEP, chroma, hue = 0 } = NODE_FILL_RETONE[color] ?? {};
+  return withLightnessChroma(base, oklabLightness(base) + lightness, chroma ?? oklabChroma(base), hue);
+}
+
+/**
+ * How far a hued node fill sits under its ink ground, OKLab L (0.859 to
+ * 0.844). A violet node in the violet 'Agents' section stood out by tone
+ * alone and sank (stage A round 8: sol and opus on the nodes sheet); the
+ * deeper step lifts every node off its section and leaves sections as they
+ * were. Text holds 9.9:1 or more.
+ */
+const NODE_FILL_DEEPER_STEP = 0.015;
+/**
+ * Hues that leave the deeper step. Yellow at L 0.859 read as a muddy
+ * mustard or ochre (stage A rounds 8 to 10: sol and opus on every yellow
+ * node): a clean yellow sits near its own peak lightness, so it stands as
+ * light as the node-on-section guard allows (0.045 L under the deepest
+ * section), a touch toward lemon and more colorful, a butter yellow
+ * (#F3D06D, L 0.867, chroma 0.125). Orange, the other light hue, keeps its
+ * #FFC298. Violet takes chroma 0.09, more colorful than its own pale
+ * section (0.02 to 0.036), and one step deeper
+ * again, so a violet node in a violet section stands out by color as well
+ * as tone (round 10: opus on 'Agents'). Red and pink drop to chroma 0.072:
+ * the salmon and pink read a touch loud beside the softer fills (round 9:
+ * opus). Teal turns 6 degrees toward cyan, clear of the green beside it
+ * (round 9: opus on 'Worker', 'Indexer' and 'Usage').
+ */
+const NODE_FILL_RETONE: Partial<Record<CanvasColor, { lightness?: number; chroma?: number; hue?: number }>> = {
+  yellow: { lightness: 0.008, chroma: 0.125, hue: 4 },
+  orange: { lightness: 0 },
+  violet: { lightness: -2 * NODE_FILL_DEEPER_STEP, chroma: 0.09 },
+  red: { chroma: 0.072 },
+  pink: { chroma: 0.072 },
+  teal: { hue: 6 },
+};
+
+/**
+ * The gray node: a faint cool slate (chroma 0.007 at the blue anchor's hue),
+ * a touch under the neutral #DCDCDC. The neutral read dull and flat beside
+ * the clear hues and on mint and blue sections (stage A round 9: opus on
+ * 'Scheduler', 'Queue', 'Archive' and the 'In stock?' diamond); a cool
+ * gray reads clean where a warm one read greige (UI climb round 4).
+ */
+const GRAY_NODE_RETONE = { lightness: -0.004, chroma: 0.007 } as const;
+
+/**
+ * A light-board `ink-card` white node edges in the gray ink, not its own ink
+ * (the text color): the near-black edge was far heavier than the hued nodes'
+ * mid-tone inks (stage A round 8: opus on the nodes sheet). The gray ink sits
+ * at the hued inks' lightness and holds 3:1 on every section fill. On a dark
+ * board white and gray nodes share the card fill, so white keeps its own ink.
+ */
+function whiteNodeEdgeAsGray(color: CanvasColor, style: CanvasStyle): boolean {
+  return color === "white" && style.shapeFill === "ink-card" && isLightBoard(style);
+}
+
 /** Light vs dark theme, judged by the board surface. */
 export function isLightBoard(style: CanvasStyle): boolean {
   return oklabLightness(style.boardBackground) >= 0.5;
@@ -444,16 +508,27 @@ export function resolveShapePaint(color: CanvasColor, style: CanvasStyle): Shape
 }
 
 function shapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
-  const border = resolveInk(color, style);
+  const border = resolveInk(whiteNodeEdgeAsGray(color, style) ? "gray" : color, style);
   if (style.shapeFill === "card") {
     return { fill: style.cardFill, border, text: style.textColor };
   }
   if (style.shapeFill === "ink-card") {
-    const fill = shapeFillBase(color, style);
-    return { fill, border, text: readableOn(style.textColor, fill) };
+    const fill = retonedNodeFill(color, shapeFillBase(color, style), style);
+    return { fill, border: color === "yellow" ? goldNodeEdge(style, fill) : border, text: readableOn(style.textColor, fill) };
   }
   const fill = swatchFor(color).shape.fill;
   return { fill, border, text: readableOn(style.textColor, fill) };
+}
+
+/**
+ * The yellow node's edge: an amber gold (OKLCH L 0.59, chroma 0.13, the
+ * anchor's hue turned 8 degrees warm) held at NON_TEXT_CONTRAST on the
+ * butter fill, not the yellow ink. The ink is the anchor darkened toward
+ * olive (#916F01), and that brown edge made the yellow fill read dull and
+ * muddy (stage A rounds 9 and 10: sol on 'Review', 'Approval' and 'Valid?').
+ */
+function goldNodeEdge(style: CanvasStyle, fill: string): string {
+  return ensureContrast(withLightnessChroma(paletteColor("yellow", style), 0.59, 0.13, -8), fill, NON_TEXT_CONTRAST);
 }
 
 /**

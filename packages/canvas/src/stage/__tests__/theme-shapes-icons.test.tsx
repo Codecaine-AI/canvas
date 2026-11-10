@@ -181,7 +181,7 @@ describe("live icons", () => {
     expect(body.getAttribute("data-canvas-icon-style")).toBe("tile");
     const tile = node.querySelector("[data-canvas-icon-tile]") as SVGRectElement;
     // The violet node's pastel fill, edged in its ink.
-    expect(tile.getAttribute("fill")).toBe("#D7C6FF");
+    expect(tile.getAttribute("fill")).toBe("#CEBBFA");
     expect(tile.getAttribute("stroke")).toBe("#6940A5");
     expect(tile.getAttribute("stroke-width")).toBe("1.5");
     // The 64px box carries the 56px (iconTileMaxPx) tile, centered: 4px in on every side, the edge inside it.
@@ -224,7 +224,7 @@ describe("live icons", () => {
     const container = stage([icon({ color: "white" }), icon({ id: "i2", icon: "brand-docker", geometry: { x: 200, y: 0, width: 64, height: 64 } })], "schematic-light");
     const white = objectNode(container, "i1").querySelector("[data-canvas-icon-tile]") as SVGRectElement;
     expect(white.getAttribute("fill")).toBe("#FDFDFD");
-    expect(white.getAttribute("stroke")).toBe("#1F1F1F");
+    expect(white.getAttribute("stroke")).toBe("#666562");
     expect(white.getAttribute("stroke-width")).toBe("1.5");
     const brand = objectNode(container, "i2").querySelector('[data-canvas-icon-glyph="brand-docker"]') as SVGSVGElement;
     // Docker's Simple Icons color in its optical box on the neutral brand tile, not on the violet tile.
