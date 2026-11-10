@@ -269,7 +269,7 @@ describe("connector label chip per theme", () => {
     expect(Number(rect.getAttribute("width"))).toBe(width);
     expect(rect.getAttribute("height")).toBe("26");
     expect(rect.getAttribute("fill")).toBe("#FDFDFD");
-    expect(rect.getAttribute("stroke")).toBe("#8C8B89"); // the hairline 70% toward the gray wire's stroke
+    expect(rect.getAttribute("stroke")).toBe("#7C7B79"); // the hairline 70% toward the gray wire's stroke
     const text = container.querySelector('[data-canvas-connection-label="edge"] text')!;
     expect(text.getAttribute("font-family")).toContain("IBM Plex Mono");
     // A neutral wire's chip text is the name color, not the body gray: the body gray read thin and
@@ -281,7 +281,7 @@ describe("connector label chip per theme", () => {
 
     const svg = staticSvg("schematic-light");
     const chip = [...svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>HTTP<\/text>/g)][0]!;
-    expect(attributesOf(chip[1]!)).toMatchObject({ width: "51", height: "26", fill: "#FDFDFD", stroke: "#8C8B89" });
+    expect(attributesOf(chip[1]!)).toMatchObject({ width: "51", height: "26", fill: "#FDFDFD", stroke: "#7C7B79" });
     expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#1F1F1F", "font-size": "15", "font-weight": "500" });
   });
 

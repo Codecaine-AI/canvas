@@ -1032,6 +1032,7 @@ export function resolveConnectorPaint(color: CanvasColor, style: CanvasStyle): C
 function connectorStroke(color: CanvasColor, style: CanvasStyle): string {
   if (style.sectionFill !== "layer-cake") return resolveInk(color, style);
   if (color === "white") return lineSafeOnSections(slateWireStroke(style), style);
+  if (color === "gray") return lineSafeOnSections(grayWireStroke(style), style);
   if (style.shapeFill !== "ink-card") return resolveInk(color, style);
   if (color === "yellow") return lineSafeOnSections(goldNodeEdge(style, nodeInkGround("yellow", style)), style);
   if (color === "teal") return lineSafeOnSections(withLightnessChroma(resolveInk("teal", style), oklabLightness(resolveInk("teal", style)), oklabChroma(resolveInk("teal", style)), TEAL_WIRE_HUE_TURN), style);
@@ -1051,6 +1052,23 @@ function slateWireStroke(style: CanvasStyle): string {
   return withLightnessChroma(paletteColor("blue", style), SLATE_WIRE_LIGHTNESS, SLATE_WIRE_CHROMA);
 }
 
+/**
+ * The `gray` wire in the layer-cake modes: the gray ink moved
+ * GRAY_WIRE_LIGHTNESS_STEP in OKLab lightness away from the board (darker on
+ * a light board, lighter on a dark one), at the ink's own hue and chroma. The
+ * plain ink was the gray node border's color and next to the gray section
+ * frame, so wires and borders read as one thing (Ford, stage C round 3: "a
+ * darker color than the gray borders ... so that you can tell that it's
+ * separate"). The label chip edge follows the wire (resolveLabelChipBorder).
+ */
+function grayWireStroke(style: CanvasStyle): string {
+  const ink = resolveInk("gray", style);
+  const step = isLightBoard(style) ? -GRAY_WIRE_LIGHTNESS_STEP : GRAY_WIRE_LIGHTNESS_STEP;
+  return withLightnessChroma(ink, oklabLightness(ink) + step, oklabChroma(ink));
+}
+
+/** OKLab lightness between the gray wire and the gray ink: #666562 to #4F4E4B on the light board. */
+const GRAY_WIRE_LIGHTNESS_STEP = 0.083;
 const SLATE_WIRE_LIGHTNESS = 0.58;
 const SLATE_WIRE_CHROMA = 0.03;
 /** How far the dark-board `white` wire moves from the gray ink toward the board. */
