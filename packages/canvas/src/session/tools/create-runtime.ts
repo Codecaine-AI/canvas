@@ -13,11 +13,10 @@ import { findOperationTool } from "./operations";
 import { createOpContext } from "./operations/op-context";
 import type { OperationHost } from "./operations/operation-tool";
 import type { LayoutToolRenderResult, LayoutToolRuntime } from "./runtime";
-import { toolAddAnnotation } from "./workflow/add-annotation";
+import { toolAnnotate } from "./workflow/annotate";
 import { toolDescribeBoard } from "./workflow/describe-board";
 import { toolFinalize } from "./workflow/finalize";
 import { toolLook } from "./workflow/look";
-import { toolReplyAnnotation } from "./workflow/reply-annotation";
 import { toolResolveRequest } from "./workflow/resolve-request";
 
 export interface LayoutToolState {
@@ -77,14 +76,8 @@ export function createToolRuntime(host: LayoutToolHost): LayoutToolRuntime {
     },
     describeBoard: (fields) =>
       toolDescribeBoard(host.currentSession(), fields, host.emit),
-    addAnnotation: (objectId, body) => {
-      const session = host.currentSession();
-      return toolAddAnnotation(session, objectId, body, host.emit);
-    },
-    replyAnnotation: (id, body) => {
-      const session = host.currentSession();
-      return toolReplyAnnotation(session, id, body, host.emit);
-    },
+    annotate: (fields) =>
+      toolAnnotate(host.currentSession(), fields, host.emit),
     resolveRequest: (id, status, note) =>
       toolResolveRequest(host.currentSession(), id, status, note, host.emit),
     finalize: (outcome, message) =>

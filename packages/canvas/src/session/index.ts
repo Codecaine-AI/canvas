@@ -61,12 +61,11 @@ export {
 export {
   createLayoutToolState,
   createToolRuntime,
-  toolAddAnnotation,
+  toolAnnotate,
   toolDescribeBoard,
   toolFinalize,
   toolLook,
   toolOperation,
-  toolReplyAnnotation,
   toolResolveRequest,
   type LayoutToolHost,
   type LayoutToolState,

@@ -12,7 +12,7 @@ import { commitDraft } from "../../perception/live-draft-view";
 import type { SessionEventSink } from "../../perception/perception";
 import type { LayoutSession } from "../../session";
 import type { LayoutToolTextResult } from "../runtime";
-import { emitAnnotations } from "./add-annotation";
+import { emitAnnotations } from "./annotate";
 import { defineWorkflowTool } from "./workflow-tool";
 
 /** The document status a disposition closes its thread with. */
@@ -107,7 +107,7 @@ export const resolveRequest = defineWorkflowTool({
   name: "resolve_request",
   label: "Resolve user request",
   description:
-    "Dispose one entry of the request queue (the REQUESTS block / user_requests context). Use status \"done\" after you have answered the request by editing board content, or \"declined\" when you will not — the note says what you did or why not. The note is posted into the thread as your reply and closes it on the board, so the operator reads it there. Every user-authored request must be disposed before finalize can commit; a thread you opened yourself does not need disposing. Returns the updated REQUESTS block only; the id must name an open entry (e.g. \"R1\").",
+    "Dispose one entry of the request queue (the REQUESTS block / user_requests context). Use status \"done\" after you have answered the request by editing board content, or \"declined\" when you will not — the note says what you did or why not. The note is posted into the thread as your reply and closes it on the board, so the operator reads it there. Every user-authored request needs a disposition; a thread you opened yourself does not need disposing. Returns the updated REQUESTS block only; the id must name an open entry (e.g. \"R1\").",
   fields: {
     id: Type.String({ description: "The queue id of an open request, e.g. \"R1\"." }),
     status: Type.Union([Type.Literal("done"), Type.Literal("declined")], {

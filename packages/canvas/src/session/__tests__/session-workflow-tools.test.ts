@@ -1,10 +1,10 @@
 /**
- * Two workflow paths of S3.7 — the `reply_annotation` reply and the
- * `describe_board` rename.
+ * Two workflow paths of S3.7 — the `annotate` reply and the `describe_board`
+ * rename.
  *
  * They are hand-written rather than operation descriptors because neither one
- * edits board geometry, so what has to be pinned is different: for
- * reply_annotation, that saying something is NOT disposing something; for the
+ * edits board geometry, so what has to be pinned is different: for the annotate
+ * reply, that saying something is NOT disposing something; for the
  * describe_board title, that the rename survives the whole commit path — draft →
  * diff → patch op → the live reducer — since before this slice there was no
  * patch op for a title at all and the change died at finalize.
@@ -22,9 +22,9 @@ import {
   describePatchOperation,
   emitSessionEvent,
   syncSessionRequests,
-  toolFinalize,
-  toolReplyAnnotation,
+  toolAnnotate,
   toolDescribeBoard,
+  toolFinalize,
   toolResolveRequest,
   type LayoutSession,
 } from "..";
@@ -55,19 +55,18 @@ function threadOf(session: LayoutSession, id: string): InteractiveCanvasAnnotati
   return found;
 }
 
-describe("reply_annotation", () => {
+describe("annotate thread", () => {
   test("appends an agent reply and leaves the thread open", () => {
     const session = sessionWithThread();
 
-    const result = toolReplyAnnotation(
+    const result = toolAnnotate(
       session,
-      "R1",
-      "Splitting it now — the second step lands next.",
+      { thread: "R1", body: "Splitting it now — the second step lands next." },
       emitSessionEvent,
     );
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · reply_annotation doc-1");
+    expect(result.text).toContain("APPLIED · annotate doc-1");
     const thread = threadOf(session, "doc-1");
     expect(thread.replies).toHaveLength(1);
     expect(thread.replies[0]!.author).toBe("agent");
@@ -81,7 +80,7 @@ describe("reply_annotation", () => {
   test("the reply shows in the REQUESTS block the result returns", () => {
     const session = sessionWithThread();
 
-    const result = toolReplyAnnotation(session, "doc-1", "On it.", emitSessionEvent);
+    const result = toolAnnotate(session, { thread: "doc-1", body: "On it." }, emitSessionEvent);
 
     expect(result.text).toContain("REQUESTS · 0/1 disposed");
     expect(result.text).toContain('↳ agent — "On it."');
@@ -92,8 +91,8 @@ describe("reply_annotation", () => {
   test("replies stack, and resolve_request still closes the thread afterwards", () => {
     const session = sessionWithThread();
 
-    toolReplyAnnotation(session, "R1", "First", emitSessionEvent);
-    toolReplyAnnotation(session, "R1", "Second", emitSessionEvent);
+    toolAnnotate(session, { thread: "R1", body: "First" }, emitSessionEvent);
+    toolAnnotate(session, { thread: "R1", body: "Second" }, emitSessionEvent);
     expect(threadOf(session, "doc-1").replies.map((reply) => reply.body))
       .toEqual(["First", "Second"]);
     // Reply ids are minted against the thread's own replies, so they are unique.
@@ -109,17 +108,41 @@ describe("reply_annotation", () => {
     const session = sessionWithThread();
     const before = session.draft;
 
-    expect(toolReplyAnnotation(session, "R1", "   ", emitSessionEvent).isError).toBe(true);
-    const missing = toolReplyAnnotation(session, "R9", "hello", emitSessionEvent);
+    expect(toolAnnotate(session, { thread: "R1", body: "   " }, emitSessionEvent).isError).toBe(true);
+    const missing = toolAnnotate(session, { thread: "R9", body: "hello" }, emitSessionEvent);
     expect(missing.isError).toBe(true);
     expect(missing.text).toContain('no thread "R9"');
     expect(missing.text).toContain("REQUESTS ·");
     expect(session.draft).toBe(before);
   });
 
+  test("a null objectId counts as absent, and the call must name exactly one target", () => {
+    const session = sessionWithThread();
+    const before = session.draft;
+
+    const neither = toolAnnotate(session, { body: "hello" }, emitSessionEvent);
+    const nulls = toolAnnotate(session, { objectId: null, thread: null, body: "hello" }, emitSessionEvent);
+    const both = toolAnnotate(session, { objectId: "task", thread: "R1", body: "hello" }, emitSessionEvent);
+    expect(neither).toEqual({
+      isError: true,
+      text: "annotate rejected: send exactly one of objectId or thread.",
+    });
+    expect(nulls).toEqual(neither);
+    expect(both).toEqual({
+      isError: true,
+      text: "annotate rejected: send exactly one of objectId or thread, not both.",
+    });
+    expect(session.draft).toBe(before);
+
+    const replied = toolAnnotate(session, { objectId: null, thread: "R1", body: "On it." }, emitSessionEvent);
+    expect(replied.text).toContain("APPLIED · annotate doc-1");
+    expect(session.draft.annotations).toHaveLength(1);
+    expect(threadOf(session, "doc-1").replies.map((reply) => reply.body)).toEqual(["On it."]);
+  });
+
   test("the appended reply commits as an appendAnnotationReply op", () => {
     const session = sessionWithThread();
-    toolReplyAnnotation(session, "R1", "Noted", emitSessionEvent);
+    toolAnnotate(session, { thread: "R1", body: "Noted" }, emitSessionEvent);
 
     const operations = diffDocuments(session.baseline, session.draft);
 

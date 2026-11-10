@@ -20,8 +20,7 @@ export { workflowTools } from "./workflow";
 
 export { toolLook } from "./workflow/look";
 export { toolDescribeBoard, type DescribeBoardFields } from "./workflow/describe-board";
-export { toolAddAnnotation } from "./workflow/add-annotation";
-export { toolReplyAnnotation } from "./workflow/reply-annotation";
+export { toolAnnotate, type AnnotateFields } from "./workflow/annotate";
 export { toolResolveRequest } from "./workflow/resolve-request";
 export { toolFinalize } from "./workflow/finalize";
 

@@ -5,7 +5,7 @@ import type { InteractiveCanvasAnnotation } from "../../state/schema";
 import {
   emitSessionEvent,
   syncSessionRequests,
-  toolAddAnnotation,
+  toolAnnotate,
   toolFinalize,
   toolResolveRequest,
   userRequestsSnapshot,
@@ -216,7 +216,7 @@ describe("the queue in operation results", () => {
   // The queue is re-rendered into section ③ on every request, so an operation
   // result restating it would put the same list in the window twice. It stays
   // on the tools whose whole answer IS the queue: resolve_request and
-  // add_annotation (covered above and below).
+  // annotate (covered above and below).
   test("an applied operation reports its own change, not the standing queue", () => {
     const session = sessionWithQueue();
     toolResolveRequest(session, "R1", "done", "split it", emitSessionEvent);
@@ -241,27 +241,26 @@ describe("the queue in operation results", () => {
   });
 });
 
-describe("add_annotation", () => {
+describe("annotate objectId", () => {
   test("opens an agent-authored thread on the object and queues it", () => {
     const session = makeTestSession(makeDocument([box("task", 0, 0)]), ["task"]);
     syncSessionRequests(session);
 
-    const result = toolAddAnnotation(
+    const result = toolAnnotate(
       session,
-      "task",
-      "Is this the retry path, or the happy path?",
+      { objectId: "task", body: "Is this the retry path, or the happy path?" },
       emitSessionEvent,
     );
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · add_annotation annotation-1");
+    expect(result.text).toContain("APPLIED · annotate annotation-1");
     expect(result.text).toContain(
       'DELTA · thread annotation-1 opened on object:task  agent'
       + ' — "Is this the retry path, or the happy path?"',
     );
     expect(result.text).toContain("REQUESTS · 0/1 disposed");
     expect(result.details).toEqual({
-      operation: "add_annotation",
+      operation: "annotate",
       annotationId: "annotation-1",
     });
     expect(session.draft.annotations).toMatchObject([
@@ -283,8 +282,8 @@ describe("add_annotation", () => {
   test("rejects an unknown object and an empty body without touching the draft", () => {
     const session = makeTestSession(makeDocument([box("task", 0, 0)]), ["task"]);
 
-    const unknown = toolAddAnnotation(session, "missing", "Why?", emitSessionEvent);
-    const blank = toolAddAnnotation(session, "task", "  ", emitSessionEvent);
+    const unknown = toolAnnotate(session, { objectId: "missing", body: "Why?" }, emitSessionEvent);
+    const blank = toolAnnotate(session, { objectId: "task", body: "  " }, emitSessionEvent);
 
     expect(unknown.isError).toBe(true);
     expect(unknown.text).toContain('no object "missing"');
@@ -292,6 +291,23 @@ describe("add_annotation", () => {
     expect(blank.text).toContain("body must be a non-empty question");
     expect(session.draft.annotations ?? []).toEqual([]);
     expect(session.events).toEqual([]);
+  });
+
+  test("a null thread counts as absent, so objectId alone opens the thread", () => {
+    const session = makeTestSession(makeDocument([box("task", 0, 0)]), ["task"]);
+    syncSessionRequests(session);
+
+    const result = toolAnnotate(
+      session,
+      { objectId: "task", thread: null, body: "Is this the retry path?" },
+      emitSessionEvent,
+    );
+
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toContain("APPLIED · annotate annotation-1");
+    expect(session.draft.annotations).toMatchObject([
+      { id: "annotation-1", target: { kind: "object", objectId: "task" }, createdBy: "agent" },
+    ]);
   });
 });
 
@@ -313,7 +329,7 @@ describe("finalize request gate", () => {
   test("lets a commit through with only an agent-authored thread open", () => {
     const session = makeTestSession(makeDocument([box("task", 0, 0)]), ["task"]);
     syncSessionRequests(session);
-    toolAddAnnotation(session, "task", "Is this the retry path?", emitSessionEvent);
+    toolAnnotate(session, { objectId: "task", body: "Is this the retry path?" }, emitSessionEvent);
     session.draft = {
       ...session.draft,
       objects: [{ ...box("task", 0, 0), text: "renamed" }],

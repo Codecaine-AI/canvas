@@ -1,6 +1,6 @@
 /**
  * Shared construction for the workflow tools — the non-gesture calls (`look`,
- * the description/title/annotation family, `finalize`). A descriptor binds the
+ * `describe_board`, the annotation-thread family, `finalize`). A descriptor binds the
  * model-facing declaration (name, label, description, sealed parameters) to a
  * dispatch into the layout tool runtime; implementations live beside their
  * descriptors, one file per tool.

@@ -60,7 +60,7 @@ describe("canvas MCP server", () => {
     }
     expect(byName.has("finalize")).toBe(false);
     expect(tools.slice(0, 3).map((tool) => tool.name)).toEqual(["canvas_list", "canvas_open", "canvas_guidance"]);
-    expect(tools).toHaveLength(5 + 26 + 5);
+    expect(tools).toHaveLength(5 + 26 + 4);
   });
 
   test("tools/list carries the name fields and the section header glyph; no placement or copy takes a detail", async () => {

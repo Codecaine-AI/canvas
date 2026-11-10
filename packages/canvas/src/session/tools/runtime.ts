@@ -14,6 +14,7 @@
  * kernel run context (containerId → session), so the tool sidecar stays a
  * thin schema + dispatch layer.
  */
+import type { AnnotateFields } from "./workflow/annotate";
 import type { DescribeBoardFields } from "./workflow/describe-board";
 
 /**
@@ -62,15 +63,12 @@ export interface LayoutToolRuntime {
    */
   describeBoard(fields: DescribeBoardFields): LayoutToolTextResult;
   /**
-   * Open an agent-authored annotation thread on one object: a question left
-   * for the user, which never blocks the run.
+   * Write in an annotation thread. `objectId` opens an agent-authored thread on
+   * one object: a question left for the user, which never blocks the run.
+   * `thread` appends a reply to an existing thread, leaving its status alone —
+   * the conversational move; resolve_request is still the closing one.
    */
-  addAnnotation(objectId: string, body: string): LayoutToolTextResult;
-  /**
-   * Append a reply to an existing thread, leaving its status alone — the
-   * conversational move; resolve_request is still the closing one.
-   */
-  replyAnnotation(id: string, body: string): LayoutToolTextResult;
+  annotate(fields: AnnotateFields): LayoutToolTextResult;
   /** Dispose one user-request queue entry (done/declined + note). */
   resolveRequest(
     id: string,
