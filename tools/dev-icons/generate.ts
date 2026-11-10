@@ -384,7 +384,7 @@ function brandGlyph(entry: GlyphEntry, text: string, errors: string[]): GlyphBlo
         id: entry.id,
         comment: `simple-icons: ${entry.source} (${svg.title})${license}`,
         viewBoxSize: 24,
-        viewBox: brandViewBox([out]),
+        viewBox: brandViewBox([out], entry.id),
         elements: [out],
       }
     : null;
@@ -418,7 +418,7 @@ function brandArtGlyph(entry: GlyphEntry, text: string, errors: string[]): Glyph
     elements.push({ ...out, fill });
   }
   const size = Math.max(vb[2]!, vb[3]!);
-  return { id: entry.id, comment: `brand-art: ${entry.art} (${title})`, viewBoxSize: size, viewBox: brandViewBox(elements), elements };
+  return { id: entry.id, comment: `brand-art: ${entry.art} (${title})`, viewBoxSize: size, viewBox: brandViewBox(elements, entry.id), elements };
 }
 
 // ---------------------------------------------------------------------------
@@ -432,7 +432,7 @@ function brandArtGlyph(entry: GlyphEntry, text: string, errors: string[]): Glyph
  * tall one (Figma) is not drawn smaller than a square mark, while its long
  * side never passes BRAND_MAX_EXTENT of the box.
  */
-function brandViewBox(elements: readonly GlyphElementOut[]): readonly [number, number, number, number] {
+function brandViewBox(elements: readonly GlyphElementOut[], id: string): readonly [number, number, number, number] {
   const box = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity };
   const add = (x: number, y: number) => {
     box.minX = Math.min(box.minX, x);
@@ -449,7 +449,11 @@ function brandViewBox(elements: readonly GlyphElementOut[]): readonly [number, n
   }
   const w = box.maxX - box.minX;
   const h = box.maxY - box.minY;
-  const side = Math.max(Math.max(w, h) / BRAND_MAX_EXTENT, Math.sqrt(w * h) / BRAND_OPTICAL_AREA);
+  const scale = BRAND_OPTICAL_SCALE[id] ?? 1;
+  const side = Math.max(
+    Math.max(Math.max(w, h) / BRAND_MAX_EXTENT, Math.sqrt(w * h) / BRAND_OPTICAL_AREA) / scale,
+    Math.max(w, h) / BRAND_SCALED_MAX_EXTENT,
+  );
   const fix = (n: number) => Number(fmtNum(n));
   return [fix((box.minX + box.maxX - side) / 2), fix((box.minY + box.maxY - side) / 2), fix(side), fix(side)];
 }
@@ -458,6 +462,38 @@ function brandViewBox(elements: readonly GlyphElementOut[]): readonly [number, n
 const BRAND_OPTICAL_AREA = 0.78;
 /** Most of the viewBox side a brand mark's long side takes. */
 const BRAND_MAX_EXTENT = 0.92;
+/** Most of the viewBox side a mark's long side takes after its BRAND_OPTICAL_SCALE: never past the box. */
+const BRAND_SCALED_MAX_EXTENT = 1;
+
+/**
+ * Per-mark optical correction over the shared box: equal bounds are not
+ * equal weight. Fine, detailed marks (the PostgreSQL elephant, the
+ * Kubernetes wheel, the Rust gear, the Redis stack, the Bun face) read
+ * small and soft at tile size, so they grow; solid, heavy marks (the Vercel
+ * triangle, the TypeScript badge, the Supabase bolt, GitHub) fill or
+ * overflow the tile, so they shrink (stage A rounds 9 and 10: sol and opus
+ * on the wires sheet). Read by eye on the specimen sheet at 1:1.
+ */
+const BRAND_OPTICAL_SCALE: Readonly<Record<string, number>> = {
+  "brand-postgres": 1.16,
+  "brand-kubernetes": 1.16,
+  "brand-rust": 1.12,
+  "brand-redis": 1.1,
+  "brand-bun": 1.1,
+  "brand-cloudflare": 1.12,
+  "brand-claude": 1.08,
+  "brand-python": 1.05,
+  "brand-go": 1.08,
+  "brand-vercel": 0.82,
+  "brand-typescript": 0.86,
+  "brand-supabase": 0.88,
+  "brand-sqlite": 0.9,
+  "brand-anthropic": 0.9,
+  "brand-github": 0.92,
+  "brand-kafka": 0.92,
+  "brand-node": 0.95,
+  "brand-linear": 0.95,
+};
 
 /** Points along SVG path data (curves and arcs sampled), each passed to `add`: enough for its bounds. */
 function flattenPath(d: string, add: (x: number, y: number) => void): void {

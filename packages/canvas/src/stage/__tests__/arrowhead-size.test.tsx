@@ -68,16 +68,16 @@ function staticHead(style: CanvasStyle): { length: number; width: number } {
 }
 
 describe("arrowhead size", () => {
-  it("schematic-light's 2px stroke gets a 14px head in the stage and the PNG renderer alike", () => {
-    expect(DEFAULT_CANVAS_STYLE.connectorStrokeWidthPx).toBe(2);
+  it("schematic-light's 2.5px stroke gets a 16px head in the stage and the PNG renderer alike", () => {
+    expect(DEFAULT_CANVAS_STYLE.connectorStrokeWidthPx).toBe(2.5);
     const stage = stageHead(DEFAULT_CANVAS_STYLE);
     const png = staticHead(DEFAULT_CANVAS_STYLE);
-    expect(stage).toEqual({ length: 14, width: 14 });
-    expect(png.length).toBeCloseTo(14, 1);
-    expect(png.width).toBeCloseTo(14, 1);
+    expect(stage).toEqual({ length: 16, width: 16 });
+    expect(png.length).toBeCloseTo(16, 1);
+    expect(png.width).toBeCloseTo(16, 1);
   });
 
-  it("a stroke whose 5x head already clears 14px keeps 5x (figjam's 4px stroke: 20px)", () => {
+  it("a stroke whose 5x head already clears 16px keeps 5x (figjam's 4px stroke: 20px)", () => {
     const stage = stageHead(FIGJAM_CANVAS_STYLE);
     const png = staticHead(FIGJAM_CANVAS_STYLE);
     expect(stage).toEqual({ length: 20, width: 20 });
@@ -85,9 +85,9 @@ describe("arrowhead size", () => {
     expect(png.width).toBeCloseTo(20, 1);
   });
 
-  it("a thin custom stroke is floored at 14px too", () => {
+  it("a thin custom stroke is floored at 16px too", () => {
     const thin = { ...DEFAULT_CANVAS_STYLE, connectorStrokeWidthPx: 1 };
-    expect(stageHead(thin)).toEqual({ length: 14, width: 14 });
-    expect(staticHead(thin).width).toBeCloseTo(14, 1);
+    expect(stageHead(thin)).toEqual({ length: 16, width: 16 });
+    expect(staticHead(thin).width).toBeCloseTo(16, 1);
   });
 });

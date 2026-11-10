@@ -9,11 +9,12 @@
 const ARROWHEAD_TO_STROKE_RATIO = 5;
 
 /**
- * Least head length and base width, in world px. A 2px schematic stroke at
- * 5x gives a 10px head, which a whole-board PNG prints too small to read the
- * direction; 14px reads at 1:1.
+ * Least head length and base width, in world px. A 2.5px schematic stroke
+ * at 5x gives a 12.5px head, which a whole-board PNG prints too small to
+ * read the direction; 14px read at 1:1 but looked small for the stroke
+ * (stage A round 9: opus on the wires sheet), so the head is 16px.
  */
-export const ARROWHEAD_MIN_SIZE_PX = 14;
+export const ARROWHEAD_MIN_SIZE_PX = 16;
 
 /** The tip overshoots the path end by this many stroke widths (marker refX = length − 0.5). */
 export const ARROWHEAD_TIP_OVERSHOOT_RATIO = 0.5;

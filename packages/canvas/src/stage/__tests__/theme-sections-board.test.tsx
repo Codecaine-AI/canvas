@@ -156,7 +156,7 @@ describe("pinned title chip with icon (a stored detail never paints)", () => {
     // Bun is a brand logo: its full-color mark, set in its optical box, on the neutral brand tile (a
     // white node's fill, edged in soft gray).
     expect(svg).toContain('<rect x="108" y="86" width="15" height="15" rx="1.5" fill="#FDFDFD" stroke="#AAA9A8" stroke-width="1"/>');
-    expect(svg).toContain('transform="translate(110 88) scale(0.0358) translate(25.6426 41.4401)" fill="#000000"');
+    expect(svg).toContain('transform="translate(110 88) scale(0.0394) translate(11.6751 27.4726)" fill="#000000"');
     expect(svg).toContain('fill="#FBF0DF"');
     // Only the right and bottom edges are stroked, inside the box like a CSS border
     // (box: 6 lead + 22 icon + 114.25 title + 10 + 1.5 edge).

@@ -148,14 +148,15 @@ describe("static icons: tile vs glyph, packs, brands", () => {
       expect(svg).toContain(
         `<svg x="${Math.round((22 + inset) * 100) / 100}" y="${Math.round((4 + inset) * 100) / 100}" width="${Math.round((56 - inset * 2) * 100) / 100}"`,
       );
-      expect(svg).toContain(`viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="none" stroke="${shapePaint.border}" stroke-width="${strokeWidth}"`);
+      // The glyph is the ink held at 4.5:1 on the tile.
+      expect(svg).toContain(`viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" fill="none" stroke="${resolveIconTilePaint("violet", style, 56).glyph}" stroke-width="${strokeWidth}"`);
       for (const element of glyph.elements) {
         if (element.kind === "path") expect(svg).toContain(`d="${element.d}"`);
       }
     }
   });
 
-  it("a white tile is the white node: its fill, a 1.5px edge inside the edge, ink glyph", () => {
+  it("a white tile is the white node: its fill, a 1.5px edge inside the edge, the tile paint's glyph", () => {
     for (const theme of ["schematic-light", "schematic-dark"] as const) {
       const style = canvasThemePreset(theme);
       const svg = render([icon({ color: "white" })], theme);
@@ -163,7 +164,7 @@ describe("static icons: tile vs glyph, packs, brands", () => {
       expect(svg).toContain(
         `<rect x="4.75" y="4.75" width="54.5" height="54.5" rx="2.25" fill="${resolveShapePaint("white", style).fill}" stroke="${resolveShapePaint("white", style).border}" stroke-width="1.5"/>`,
       );
-      expect(svg).toContain(`fill="none" stroke="${style.palette.white}" stroke-width=`);
+      expect(svg).toContain(`fill="none" stroke="${resolveIconTilePaint("white", style, 56).glyph}" stroke-width=`);
     }
   });
 

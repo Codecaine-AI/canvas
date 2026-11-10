@@ -31,8 +31,12 @@ import { iconTileRectPx, type LocalRect } from "../../text-slots";
 export const ICON_TILE = {
   /** Tile corner radius, px. */
   cornerRadiusPx: 3,
-  /** Glyph inset from each tile edge, as a fraction of the tile side (≈ the mockups' 10px on a 44px tile). */
-  glyphInsetRatio: 0.22,
+  /**
+   * Glyph inset from each tile edge, as a fraction of the tile side: 0.2
+   * (11px on the 56px tile). At 0.22 the line glyphs read small inside their
+   * tiles (stage A round 9: opus on 'CLI', 'Grader' and 'Branch').
+   */
+  glyphInsetRatio: 0.2,
   /**
    * A brand mark's inset. Its glyph box is larger because a brand viewBox
    * already pads the mark to one optical size (tools/dev-icons/generate.ts
@@ -44,10 +48,11 @@ export const ICON_TILE = {
   maxGlyphPx: 56,
   /**
    * The box size whose `iconGlyphStrokeWidthForViewBox` weight every tile
-   * glyph strokes with, in its own glyph units: ≈1.76 units on Tabler's
-   * 24-unit grid (the mockups' 1.75), 1.32 on Nucleo's 18-unit grid.
+   * glyph strokes with, in its own glyph units. 56 (was 64, the mockups'
+   * 1.75 units on Tabler's 24-unit grid): the thinner line glyphs read thin
+   * on their pastel tiles (stage A round 9: opus on ten line icons).
    */
-  strokeReferencePx: 64,
+  strokeReferencePx: 56,
 } as const;
 
 export interface IconTileLayout {

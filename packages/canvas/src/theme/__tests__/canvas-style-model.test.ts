@@ -229,7 +229,7 @@ describe("settings: normalize, resolve, and diff", () => {
         figjam: { shapeCornerRadiusPx: 2 }, // equals the figjam preset → dropped
         "schematic-light": {
           headerPlacement: "floating",
-          connectorStrokeWidthPx: 2, // equals the preset → dropped
+          connectorStrokeWidthPx: 2.5, // equals the preset → dropped
           palette: { teal: "#0D7164", red: "#aa0000" }, // teal equals the preset → dropped
           theme: "schematic-dark", // not an override
         },

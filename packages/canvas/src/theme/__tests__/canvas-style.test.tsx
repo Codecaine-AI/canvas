@@ -269,7 +269,7 @@ describe("canvasStyleCssVariables / canvasStyleCssVar", () => {
     expect(variables["--canvas-title-chip-border"]).toBe("1.5px");
     expect(variables["--canvas-board-background"]).toBe("#0D1117");
     expect(variables["--canvas-grid-dot-color"]).toBe("#3D444D");
-    expect(variables["--canvas-connector-stroke-width-px"]).toBe("2px");
+    expect(variables["--canvas-connector-stroke-width-px"]).toBe("2.5px");
     expect(variables["--canvas-section-border-opacity"]).toBe("0.5");
     expect(variables["--canvas-text-font-weight"]).toBe("600");
     expect(variables["--canvas-ink-teal"]).toBe("#39C5CF");

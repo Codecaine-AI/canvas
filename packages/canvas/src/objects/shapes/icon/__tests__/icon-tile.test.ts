@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { canvasThemePreset, FIGJAM_CANVAS_STYLE } from "../../../../theme/canvas-style";
-import { mixColors } from "../../../../theme/color-math";
-import { iconTileModeFor, resolveIconPaint, resolveIconTilePaint, resolveShapePaint } from "../../../../theme/palette";
+import { contrastRatio, ensureContrast, mixColors } from "../../../../theme/color-math";
+import { iconTileModeFor, resolveIconPaint, resolveIconTilePaint, resolveInk, resolveShapePaint } from "../../../../theme/palette";
 import { iconGlyphStrokeWidthForViewBox } from "../icon-glyphs";
 import { ICON_TILE, iconBareGlyphStrokeWidth, iconTileGlyphStrokeWidth, iconTileLayout } from "../icon-tile";
 
@@ -22,14 +22,15 @@ describe("icon tile layout", () => {
     const layout = iconTileLayout(192, 160);
     expect(layout.tile).toEqual({ x: 16, y: 0, width: 160, height: 160 });
     expect(layout.glyph).toEqual({ x: 16 + 52, y: 52, width: ICON_TILE.maxGlyphPx, height: ICON_TILE.maxGlyphPx });
-    // The cap binds from 100px (100 × 0.56 = 56) up.
-    expect(iconTileLayout(100, 100).glyph.width).toBeCloseTo(56, 10);
-    expect(iconTileLayout(99, 99).glyph.width).toBeLessThan(56);
+    // The cap binds from 93.3px (93.3 × 0.6 = 56) up.
+    expect(iconTileLayout(94, 94).glyph.width).toBeCloseTo(56, 10);
+    expect(iconTileLayout(93, 93).glyph.width).toBeLessThan(56);
   });
 
   it("strokes tile glyphs at a fixed weight in their own units, bare glyphs at the size-normalized weight", () => {
-    expect(iconTileGlyphStrokeWidth(24)).toBeCloseTo(1.76, 2);
-    expect(iconTileGlyphStrokeWidth(18)).toBeCloseTo(1.32, 2);
+    // Referenced to a 56px box (was 64): about 2 units on Tabler's 24-unit grid.
+    expect(iconTileGlyphStrokeWidth(24)).toBeCloseTo(2.01, 2);
+    expect(iconTileGlyphStrokeWidth(18)).toBeCloseTo(1.51, 2);
     expect(iconBareGlyphStrokeWidth(120, { viewBoxSize: 24 })).toBe(iconGlyphStrokeWidthForViewBox(120, 24));
     expect(iconBareGlyphStrokeWidth(120, undefined)).toBe(iconGlyphStrokeWidthForViewBox(120, 18));
   });
@@ -46,17 +47,21 @@ describe("icon tile paint by size", () => {
     expect(iconTileModeFor({ ...LIGHT, iconTileFill: "tint" }, 10)).toBe("tint");
   });
 
-  it("solid tiles are small nodes: the node fill, edged and drawn in the ink", () => {
+  it("solid tiles are small nodes: the node fill and ink edge, the glyph the ink held at 4.5:1 on the tile", () => {
     for (const style of [LIGHT, DARK]) {
-      const node = resolveShapePaint("violet", style);
-      expect(resolveIconTilePaint("violet", style, 64)).toEqual({
-        ...resolveIconPaint("violet", style),
-        tileFill: node.fill,
-        tileBorder: node.border,
-        glyph: node.border,
-        tileMode: "solid",
-        tileBorderWidthPx: 1.5,
-      });
+      for (const color of ["violet", "yellow", "orange"] as const) {
+        const node = resolveShapePaint(color, style);
+        const tile = resolveIconTilePaint(color, style, 64);
+        expect(tile).toEqual({
+          ...resolveIconPaint(color, style),
+          tileFill: node.fill,
+          tileBorder: node.border,
+          glyph: ensureContrast(resolveInk(color, style), node.fill, 4.5),
+          tileMode: "solid",
+          tileBorderWidthPx: 1.5,
+        });
+        expect(contrastRatio(tile.glyph, node.fill)).toBeGreaterThanOrEqual(4.5);
+      }
     }
   });
 
@@ -76,10 +81,11 @@ describe("icon tile paint by size", () => {
   });
 
   it("white is the white node when solid; tinted, a light board keeps the outlined card tile and a dark one tints the white ink", () => {
+    // The solid white tile draws in its gray edge, as light as the tinted tiles' glyphs (stage A round 11).
     expect(resolveIconTilePaint("white", LIGHT, 48)).toMatchObject({
       tileFill: resolveShapePaint("white", LIGHT).fill,
       tileBorder: resolveShapePaint("white", LIGHT).border,
-      glyph: LIGHT.palette.white,
+      glyph: resolveShapePaint("white", LIGHT).border,
       tileBorderWidthPx: 1.5,
     });
     expect(resolveIconTilePaint("white", LIGHT, 160)).toMatchObject({

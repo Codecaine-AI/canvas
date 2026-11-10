@@ -192,9 +192,10 @@ describe("live icons", () => {
     expect(tile.getAttribute("rx")).toBe("2.25");
     const glyph = node.querySelector('[data-canvas-icon-glyph="database"]') as SVGSVGElement;
     expect(glyph.getAttribute("viewBox")).toBe("0 0 24 24");
-    expect(glyph.getAttribute("stroke")).toBe("#6940A5");
+    // The ink held at 4.5:1 on the tile.
+    expect(glyph.getAttribute("stroke")).toBe("#633C9B");
     expect(Number(glyph.getAttribute("stroke-width"))).toBeCloseTo(iconTileGlyphStrokeWidth(24), 10);
-    expect(Number(glyph.getAttribute("x"))).toBeCloseTo(4 + 56 * 0.22, 10);
+    expect(Number(glyph.getAttribute("x"))).toBeCloseTo(4 + 56 * 0.2, 10);
     const tabler = resolveIconGlyph("database", "tabler");
     expect(glyph.querySelectorAll("path").length).toBe(tabler.elements.filter((element) => element.kind === "path").length);
     // The caption band hangs 6px under the TILE (not the box), centered on it.

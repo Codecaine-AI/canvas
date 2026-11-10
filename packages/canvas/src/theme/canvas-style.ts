@@ -433,7 +433,9 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   titleChipCornerRadiusPx: 2,
   titleChipBorderWidthPx: 1.5,
   labelChipCornerRadiusPx: 2,
-  connectorStrokeWidthPx: 2,
+  // Wires at 2.5px over the 2px node borders: at 2px the dashed wires read
+  // thin and faint on section fills (stage A round 9: sol and opus).
+  connectorStrokeWidthPx: 2.5,
   connectorCornerRadiusPx: 8,
   textFontWeight: 600,
   textFontSizePx: 17.5,

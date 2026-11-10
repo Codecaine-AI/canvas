@@ -629,7 +629,13 @@ export function resolveIconTilePaint(
   const ink = resolveInk(color, style);
   if (tileMode === "solid") {
     const shape = resolveShapePaint(color, style);
-    return { ...paint, tileFill: shape.fill, tileBorder: shape.border, glyph: ink, tileMode, tileBorderWidthPx: ICON_TILE_OUTLINE_WIDTH_PX };
+    // The glyph is the ink held at MIN_TEXT_CONTRAST on the tile: the yellow
+    // ink sat near 3:1 on its butter tile, the weakest glyph on the sheet
+    // (stage A rounds 9 and 10: sol and opus on 'Agent' and 'Webhook').
+    // A white tile draws in its gray edge, not the near-black ink, which
+    // made it heavier than the tinted tiles (round 9: opus on 'Scheduler', 'Secrets').
+    const glyph = ensureContrast(whiteNodeEdgeAsGray(color, style) ? shape.border : ink, shape.fill, MIN_TEXT_CONTRAST);
+    return { ...paint, tileFill: shape.fill, tileBorder: shape.border, glyph, tileMode, tileBorderWidthPx: ICON_TILE_OUTLINE_WIDTH_PX };
   }
   if (paint.tileBorder !== null) return { ...paint, tileMode, tileBorderWidthPx: ICON_TILE_OUTLINE_WIDTH_PX };
   return {
@@ -919,30 +925,60 @@ const LABEL_CHIP_TEXT_MIN_WIRE_CHROMA = 0.04;
 
 /**
  * Connector stroke = the ink. In the layer-cake modes `white` (whose ink is
- * the text color, the loudest line on a board) strokes a quiet neutral
- * instead: the gray ink moved WHITE_WIRE_BOARD_WEIGHT toward the board, kept
- * at NON_TEXT_CONTRAST on the darkest section fill it can cross.
+ * the text color, the loudest line on a board) strokes a slate neutral
+ * instead (slateWireStroke); beside `ink-card` nodes yellow strokes the
+ * yellow node's amber gold edge, not the olive ink (stage A rounds 9 and 10:
+ * the ochre dashes faded on gray sections), and teal turns toward cyan.
+ * Each of these is kept at NON_TEXT_CONTRAST on the board and on the
+ * darkest section fill it can cross.
  */
 export function resolveConnectorPaint(color: CanvasColor, style: CanvasStyle): ConnectorPaint {
-  return cachedPaint(style, `connector|${color}`, () => ({
-    stroke: color === "white" && style.sectionFill === "layer-cake" ? quietWireStroke(style) : resolveInk(color, style),
-  }));
+  return cachedPaint(style, `connector|${color}`, () => ({ stroke: connectorStroke(color, style) }));
 }
 
-/** How far the `white` wire moves from the gray ink toward the board. */
-const WHITE_WIRE_BOARD_WEIGHT = 0.3;
-/** Deepest section nesting the `white` wire's contrast floor is checked against (the tint caps well before it). */
-const WHITE_WIRE_MAX_DEPTH = 6;
+function connectorStroke(color: CanvasColor, style: CanvasStyle): string {
+  if (style.sectionFill !== "layer-cake") return resolveInk(color, style);
+  if (color === "white") return lineSafeOnSections(slateWireStroke(style), style);
+  if (style.shapeFill !== "ink-card") return resolveInk(color, style);
+  if (color === "yellow") return lineSafeOnSections(goldNodeEdge(style, resolveShapePaint("yellow", style).fill), style);
+  if (color === "teal") return lineSafeOnSections(withLightnessChroma(resolveInk("teal", style), oklabLightness(resolveInk("teal", style)), oklabChroma(resolveInk("teal", style)), TEAL_WIRE_HUE_TURN), style);
+  return resolveInk(color, style);
+}
 
-function quietWireStroke(style: CanvasStyle): string {
-  const quiet = mixColors(resolveInk("gray", style), style.boardBackground, 1 - WHITE_WIRE_BOARD_WEIGHT);
-  let stroke = ensureContrast(quiet, style.boardBackground, NON_TEXT_CONTRAST);
+/**
+ * The `white` wire in the layer-cake modes: one plain slate stroke (OKLCH L
+ * 0.58, chroma 0.03 at the blue anchor's hue), a cool neutral that reads
+ * apart from the warm gray wire. White's own ink (the text color) was the
+ * loudest line on a board (round 10: opus); the gray ink moved toward the
+ * board was a pale gray, the weakest stroke on gray sections (round 9: sol
+ * and opus). A cased white wire was turned down in round 8.
+ */
+function slateWireStroke(style: CanvasStyle): string {
+  if (!isLightBoard(style)) return mixColors(resolveInk("gray", style), style.boardBackground, 1 - WHITE_WIRE_BOARD_WEIGHT);
+  return withLightnessChroma(paletteColor("blue", style), SLATE_WIRE_LIGHTNESS, SLATE_WIRE_CHROMA);
+}
+
+const SLATE_WIRE_LIGHTNESS = 0.58;
+const SLATE_WIRE_CHROMA = 0.03;
+/** How far the dark-board `white` wire moves from the gray ink toward the board. */
+const WHITE_WIRE_BOARD_WEIGHT = 0.3;
+/**
+ * The teal wire turns this far (OKLCH degrees) toward cyan, clear of the
+ * green wire beside it (stage A round 9: opus on 'Route' and 'Stage 6').
+ */
+const TEAL_WIRE_HUE_TURN = 14;
+/** Deepest section nesting a wire's contrast floor is checked against (the tint caps well before it). */
+const WIRE_MAX_DEPTH = 6;
+
+/** `stroke` pushed to NON_TEXT_CONTRAST on the board and on every section fill it can cross. */
+function lineSafeOnSections(stroke: string, style: CanvasStyle): string {
+  let safe = ensureContrast(stroke, style.boardBackground, NON_TEXT_CONTRAST);
   for (const color of CANVAS_COLORS) {
-    for (let depth = PAGE_SECTION_DEPTH; depth <= WHITE_WIRE_MAX_DEPTH; depth += 1) {
-      stroke = ensureContrast(stroke, resolveSectionPaint(color, depth, style).fill, NON_TEXT_CONTRAST);
+    for (let depth = PAGE_SECTION_DEPTH; depth <= WIRE_MAX_DEPTH; depth += 1) {
+      safe = ensureContrast(safe, resolveSectionPaint(color, depth, style).fill, NON_TEXT_CONTRAST);
     }
   }
-  return stroke;
+  return safe;
 }
 
 /**
