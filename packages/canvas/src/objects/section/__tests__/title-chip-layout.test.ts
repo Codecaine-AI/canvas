@@ -50,17 +50,19 @@ const MONO_TITLE = { family: "IBM Plex Mono", size: 14, weight: 600, letterSpaci
 const ELLIPSIS_WIDTH = layoutUnits(0.68 * 14);
 
 describe("pinned title chip (schematic)", () => {
-  it("sits right inside the 1.5px frame: 25.5px box, right + bottom edges only, frame-following top-left corner", () => {
+  it("sits right inside the 2px frame: 25px box, right + bottom edges only, frame-following top-left corner", () => {
+    // The schematic section frame is 2px since stage B round 4 (at 1.5px
+    // sibling sections parted by a thin line), so the chip sits 2px in.
     const layout = titleChipLayout(section(), LIGHT);
     expect(layout.placement).toBe("pinned");
-    expect(layout.box.x).toBe(1.5);
-    expect(layout.box.y).toBe(1.5);
-    expect(layout.box.height).toBe(25.5);
+    expect(layout.box.x).toBe(2);
+    expect(layout.box.y).toBe(2);
+    expect(layout.box.height).toBe(25);
     expect(layout.border).toEqual({ top: 0, right: 1.5, bottom: 1.5, left: 0 });
-    // Inner frame corner (2px radius − 1.5px frame), the chip radius bottom-right.
-    expect(layout.radius).toEqual({ topLeft: 0.5, topRight: 0, bottomRight: 2, bottomLeft: 0 });
+    // Inner frame corner (2px radius − 2px frame), the chip radius bottom-right.
+    expect(layout.radius).toEqual({ topLeft: 0, topRight: 0, bottomRight: 2, bottomLeft: 0 });
     // Content centers in the band between the frame line and the bottom edge.
-    expect(layout.box.y + layout.centerY).toBe(13.5);
+    expect(layout.box.y + layout.centerY).toBe(13.75);
   });
 
   it("lays out [icon] TITLE: 6px icon lead, 16px tile + 6px gap, and no stored detail", () => {
@@ -79,14 +81,14 @@ describe("pinned title chip (schematic)", () => {
   it("its world rect starts at the section origin and stays anchored to the frame's inner corner when zoomed out", () => {
     // 600px wide so the zoomed-out chip (scale ≈ 2.3) still fits uncapped: (600 − 6) / 2.3 > its natural width.
     const wide = section({ geometry: { x: 100, y: 80, width: 600, height: 360 } });
-    const width = 1.5 + titleChipLayout(wide, LIGHT).box.width;
+    const width = 2 + titleChipLayout(wide, LIGHT).box.width;
     expect(sectionTitleChipWorldRect(wide, 1, LIGHT)).toEqual({ x: 100, y: 80, width, height: 27 });
     const scale = titleChipScale(0.25);
     const zoomed = sectionTitleChipWorldRect(wide, 0.25, LIGHT);
     expect(zoomed.x).toBe(100);
     expect(zoomed.y).toBe(80);
-    expect(zoomed.height).toBeCloseTo(1.5 + 25.5 * scale, 9);
-    expect(zoomed.width).toBeCloseTo(1.5 + (width - 1.5) * scale, 9);
+    expect(zoomed.height).toBeCloseTo(2 + 25 * scale, 9);
+    expect(zoomed.width).toBeCloseTo(2 + (width - 2) * scale, 9);
   });
 
   it("flush in a borderless section's corner, and inside a thicker per-section frame", () => {

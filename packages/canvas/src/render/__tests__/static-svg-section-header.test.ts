@@ -73,11 +73,12 @@ describe("static header clips to the chip", () => {
     const svg = scene();
     // No title run: the 19px chip has no room for even the ellipsis.
     expect(svg).not.toContain("<text");
-    // The icon paints inside a clip to the chip's padding box (inside the 1.5px right/bottom edges of the 25.5px pinned box).
+    // The icon paints inside a clip to the chip's padding box (inside the 1.5px right/bottom edges of the 25px pinned box
+    // in the 2px frame, stage B round 4).
     const clip = /<clipPath id="([^"]+)"><rect x="0" y="0" width="([^"]+)" height="([^"]+)"\/><\/clipPath>/.exec(svg);
     expect(clip).not.toBeNull();
     expect(Number(clip![2])).toBeCloseTo(17.5, 2);
-    expect(Number(clip![3])).toBeCloseTo(24, 2);
+    expect(Number(clip![3])).toBeCloseTo(23.5, 2);
     expect(svg).toContain(`<g clip-path="url(#${clip![1]})">`);
     expect(() => rasterizeSvgToPng(svg)).not.toThrow();
   });

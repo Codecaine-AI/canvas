@@ -438,7 +438,12 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   processCornerRadiusPx: 2,
   shapeBorderWidthPx: 2,
   sectionCornerRadiusPx: 2,
-  sectionBorderWidthPx: 1.5,
+  // Section frames at the node border width: at 1.5px sibling sections of one
+  // light fill parted by a thin, soft line and the board read as one flat
+  // field (stage B round 3: fable on 06, 08, 09, 11, 12 and 14). The fills
+  // stay light (Ford: "the section backgrounds are too dark"), so the frame
+  // carries the split.
+  sectionBorderWidthPx: 2,
   titleChipCornerRadiusPx: 2,
   titleChipBorderWidthPx: 1.5,
   labelChipCornerRadiusPx: 2,

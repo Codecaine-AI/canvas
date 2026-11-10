@@ -113,22 +113,25 @@ describe.each(["schematic-light", "schematic-dark"] as const)("layer-cake sectio
       (id) => container.querySelector<HTMLElement>(`button[data-canvas-object-id="${id}"]`)!.style.background,
     );
     expect(new Set(live).size).toBe(3);
-    // Static: solid frames inset by half their 1.5px border; the dashed frame too.
-    expect([staticSectionFill(svg, 100, 80, 0.75), staticSectionFill(svg, 140, 140, 0.75), staticSectionFill(svg, 180, 200, 0.75)]).toEqual(
+    // Static: solid frames inset by half their 2px border; the dashed frame too.
+    expect([staticSectionFill(svg, 100, 80, 1), staticSectionFill(svg, 140, 140, 1), staticSectionFill(svg, 180, 200, 1)]).toEqual(
       live.map((background) => background.toUpperCase()),
     );
   });
 });
 
 describe("pinned title chip with icon (a stored detail never paints)", () => {
-  it("live: flush inside the 1.5px frame, right + bottom edges, the icon tile, the uppercased title alone", () => {
+  it("live: flush inside the 2px frame, right + bottom edges, the icon tile, the uppercased title alone", () => {
     const chip = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-section-title-chip="outer"]')!;
-    expect(chip.style.left).toBe("101.5px");
-    expect(chip.style.top).toBe("81.5px");
-    // 27px outer extent from the section's top edge, less the 1.5px frame.
-    expect(chip.style.height).toBe("25.5px");
+    // The schematic section frame is 2px since stage B round 4 (at 1.5px
+    // sibling sections parted by a thin line), so the chip sits 2px in.
+    expect(chip.style.left).toBe("102px");
+    expect(chip.style.top).toBe("82px");
+    // 27px outer extent from the section's top edge, less the 2px frame.
+    expect(chip.style.height).toBe("25px");
     expect(chip.style.borderWidth).toBe("0px 1.5px 1.5px 0px");
-    expect(chip.style.borderTopLeftRadius).toBe("0.5px");
+    // The frame's inner corner: the 2px frame corner less its 2px border.
+    expect(chip.style.borderTopLeftRadius).toBe("0px");
     expect(chip.style.borderTopRightRadius).toBe("0px");
     expect(chip.style.borderBottomRightRadius).toBe("2px");
     expect(chip.style.borderBottomLeftRadius).toBe("0px");
@@ -143,24 +146,24 @@ describe("pinned title chip with icon (a stored detail never paints)", () => {
 
   it("static: the same box at the same origin, edges, icon, and title", () => {
     const svg = staticSvg("schematic-light");
-    // Fill path from the frame's inner corner (0.5px radius: the 2px frame corner less its 1.5px border) at (101.5, 81.5).
-    expect(svg).toContain('<path d="M102 81.5H');
-    // Title at box x + 28 (6 lead + 16 tile + 6 gap), centered in the 25.5px box less its bottom edge.
-    expect(svg).toContain('x="129.5" y="93.5" fill="#1F1F1F" font-size="14" font-weight="600"');
+    // Fill path from the frame's inner corner (square: the 2px frame corner less its 2px border) at (102, 82).
+    expect(svg).toContain('<path d="M102 82H');
+    // Title at box x + 28 (6 lead + 16 tile + 6 gap), centered in the 25px box less its bottom edge.
+    expect(svg).toContain('x="130" y="93.75" fill="#1F1F1F" font-size="14" font-weight="600"');
     expect(svg).toMatch(/>BUN SERVICES<\/text>/);
     // 12 tracked Plex Mono cells, 114.24px → 114.25 in layout units; the stored detail paints nothing.
     const titleWidth = measureWidth("BUN SERVICES", { family: "IBM Plex Mono", size: 14, weight: 600, letterSpacing: 1.12 });
     expect(titleWidth).toBe(114.25);
     expect(svg).not.toContain("127.0.0.1");
-    // The 16px icon box sits 6px in, centered on the content line (93.5). Bun is a brand logo: its
+    // The 16px icon box sits 6px in, centered on the content line (93.75). Bun is a brand logo: its
     // full-color mark, set in its optical box, drawn bare and filling the box. The header tile and its
     // 11px glyph read as a smudge at 1:1 (stage B round 0: fable on 11 and 13), so no tile is drawn.
     expect(svg).not.toContain('<rect x="108" y="86" width="15" height="15"');
-    expect(svg).toContain('transform="translate(107.5 85.5) scale(0.0573) translate(11.6751 27.4726)" fill="#000000"');
+    expect(svg).toContain('transform="translate(108 85.75) scale(0.0573) translate(11.6751 27.4726)" fill="#000000"');
     expect(svg).toContain('fill="#FBF0DF"');
     // Only the right and bottom edges are stroked, inside the box like a CSS border
     // (box: 6 lead + 22 icon + 114.25 title + 10 + 1.5 edge).
-    expect(svg).toMatch(/<path d="M254\.5 81\.5V105A1\.25 1\.25 0 0 1 253\.25 106\.25H101\.5" fill="none" stroke="rgba\(13, 113, 100, 0\.5\)" stroke-width="1\.5"/);
+    expect(svg).toMatch(/<path d="M255 82V105A1\.25 1\.25 0 0 1 253\.75 106\.25H102" fill="none" stroke="rgba\(13, 113, 100, 0\.5\)" stroke-width="1\.5"/);
   });
 
   it("figjam keeps the floating chip markup for a plain title (live and static)", () => {
@@ -224,9 +227,9 @@ describe("in-place section title editor", () => {
 
   it("pinned: the input takes the chip's box and edges, and its text starts where the title does (past the icon)", () => {
     const input = editing("schematic-light");
-    expect(input.style.left).toBe("101.5px");
-    expect(input.style.top).toBe("81.5px");
-    expect(input.style.height).toBe("25.5px");
+    expect(input.style.left).toBe("102px");
+    expect(input.style.top).toBe("82px");
+    expect(input.style.height).toBe("25px");
     expect(input.style.borderWidth).toBe("0px 1.5px 1.5px 0px");
     expect(input.style.padding).toBe("0px 10px 0px 28px");
     expect(input.style.fontFamily).toContain("IBM Plex Mono");
