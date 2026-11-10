@@ -8,8 +8,7 @@
  * chip lines up the same way everywhere.
  *
  * Anatomy, left to right: `[icon] TITLE`.
- *  - icon: the section's optional `icon` glyph in a 16px box — a solid ink
- *    tile in the theme's `tile` icon style, the bare glyph in `glyph` style.
+ *  - icon: the section's optional `icon` glyph, bare, filling a 16px box.
  *  - title: the section's `text` in the header font (`headerFont` /
  *    `headerFontSizePx` / `textFontWeight`, uppercased with 0.08em tracking
  *    for mono when `headerUppercase`).
@@ -88,23 +87,23 @@ export const TITLE_CHIP = {
   zoomOutGrowth: 0.6,
 } as const;
 
-/** The header icon (a section's `icon`): its box, gap, tile, and glyph sizes, px. */
+/** The header icon (a section's `icon`): its box, gap, and glyph sizes, px. */
 export const TITLE_CHIP_ICON = {
-  /** Icon box: the tile, or the bare glyph in glyph mode. */
+  /** Icon box: the bare glyph fills it. */
   sizePx: 16,
   /** Gap between the icon and the title. */
   gapPx: 6,
-  /** Left padding when the icon leads — a tile fills its own box, so it sits nearer the edge than text does. */
+  /** Left padding when the icon leads — the glyph fills its own box, so it sits nearer the edge than text does. */
   leadPaddingPx: 6,
-  tileRadiusPx: 2,
-  /** Glyph box on a tile (centered, ~15% inset). */
-  tileGlyphPx: 11,
-  /** Glyph box without a tile. */
+  /** Glyph box. */
   bareGlyphPx: 16,
   /** Glyph stroke per px of glyph box: Tabler's 1.75 on its 24-unit grid, at any grid. */
   strokePerGlyphPx: 1.75 / 24,
-  /** Outlined tile border (white tiles on a light board). */
-  tileBorderPx: 1,
+  /**
+   * Glyph stroke per px of glyph box in the `tile` icon style, where the
+   * header draws the bare glyph: 2.25 on the 24-unit grid (1.5px at 16px).
+   */
+  tileStyleStrokePerGlyphPx: 2.25 / 24,
 } as const;
 
 /** Tracking for uppercase mono titles. */
@@ -438,18 +437,15 @@ export function titleChipVisibleTitle(layout: TitleChipLayout): string {
 // Header icon drawing (shared by the live chip and the static renderer)
 // ---------------------------------------------------------------------------
 
-/** The icon colors a section paint resolves (theme/palette.ts SectionPaint). */
+/** The chip and icon colors a section paint resolves (theme/palette.ts SectionPaint). */
 export interface TitleChipIconColors {
-  iconTile: string;
-  iconTileBorder: string | null;
+  chipFill: string;
   iconGlyph: string;
 }
 
 /** The header icon as primitives, in the icon's own 16px box (origin at its top-left). */
 export interface TitleChipIconDrawing {
   sizePx: number;
-  /** The solid (or outlined) tile; null in glyph mode. */
-  tile: { fill: string; border: string | null; borderWidthPx: number; radiusPx: number } | null;
   glyph: {
     /** Glyph box offset inside the icon box, and its size. */
     offsetPx: number;
@@ -474,29 +470,24 @@ export function titleChipIconDrawing(
   if (!glyph) return null;
   // A brand logo keeps its brand color, as on an icon object (theme/palette.ts).
   if (glyph.brandColor) colors = brandHeaderIconColors(glyph.brandColor, colors, canvasStyle);
-  const tiled = canvasStyle.iconStyle === "tile";
-  const glyphSize = tiled ? TITLE_CHIP_ICON.tileGlyphPx : TITLE_CHIP_ICON.bareGlyphPx;
+  // Every header draws the bare glyph, filling its 16px box: an 11px glyph
+  // on a 16px tile read as a dark smudge at 1:1 (stage B round 0: fable on
+  // 11 and 13). The tile style draws it heavier, as its tiles' line glyphs.
+  const tileStyle = canvasStyle.iconStyle === "tile";
+  const glyphSize = TITLE_CHIP_ICON.bareGlyphPx;
   return {
     sizePx: TITLE_CHIP_ICON.sizePx,
-    tile: tiled
-      ? {
-          fill: colors.iconTile,
-          border: colors.iconTileBorder,
-          borderWidthPx: TITLE_CHIP_ICON.tileBorderPx,
-          radiusPx: TITLE_CHIP_ICON.tileRadiusPx,
-        }
-      : null,
     glyph: {
       offsetPx: (TITLE_CHIP_ICON.sizePx - glyphSize) / 2,
       sizePx: glyphSize,
       viewBox: glyph.viewBox,
       paint: glyph.paint,
       color: colors.iconGlyph,
-      strokeWidth: TITLE_CHIP_ICON.strokePerGlyphPx * glyph.viewBoxSize,
+      strokeWidth: (tileStyle ? TITLE_CHIP_ICON.tileStyleStrokePerGlyphPx : TITLE_CHIP_ICON.strokePerGlyphPx) * glyph.viewBoxSize,
       // A full-color brand mark's shapes keep their own colors, resolved on the tile (or chip) behind them.
       elements: glyph.elements.map((element) =>
         element.kind !== "line" && element.fill
-          ? { ...element, fill: resolveBrandMarkFill(element.fill, colors.iconTile, canvasStyle) }
+          ? { ...element, fill: resolveBrandMarkFill(element.fill, colors.chipFill, canvasStyle) }
           : element,
       ),
     },

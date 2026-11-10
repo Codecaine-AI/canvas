@@ -66,10 +66,9 @@ function glyphElement(element: IconGlyphElement, key: number) {
   return <line key={key} x1={element.x1} y1={element.y1} x2={element.x2} y2={element.y2} />;
 }
 
-/** The header icon: a 16px tile (or bare glyph) leading the chip — same primitives the static renderer draws. */
+/** The header icon: a 16px bare glyph leading the chip — same primitives the static renderer draws. */
 export function TitleChipIcon({ id, drawing }: { id: string; drawing: TitleChipIconDrawing }) {
-  const { tile, glyph } = drawing;
-  const tileInset = tile?.border ? tile.borderWidthPx / 2 : 0;
+  const { glyph } = drawing;
   const stroked = glyph.paint === "stroke";
   return (
     <svg
@@ -80,18 +79,6 @@ export function TitleChipIcon({ id, drawing }: { id: string; drawing: TitleChipI
       viewBox={`0 0 ${drawing.sizePx} ${drawing.sizePx}`}
       style={{ display: "block", flexShrink: 0, marginRight: `${TITLE_CHIP_ICON.gapPx}px`, overflow: "visible" }}
     >
-      {tile ? (
-        <rect
-          x={tileInset}
-          y={tileInset}
-          width={drawing.sizePx - tileInset * 2}
-          height={drawing.sizePx - tileInset * 2}
-          rx={Math.max(0, tile.radiusPx - tileInset)}
-          fill={tile.fill}
-          stroke={tile.border ?? undefined}
-          strokeWidth={tile.border ? tile.borderWidthPx : undefined}
-        />
-      ) : null}
       <g
         transform={iconGlyphTransform(glyph, glyph.offsetPx, glyph.offsetPx, glyph.sizePx)}
         fill={stroked ? "none" : glyph.color}

@@ -267,11 +267,7 @@ export type SectionPaint = {
   chipBorder: string;
   /** Header title. */
   headerText: string;
-  /** Header icon tile. In glyph mode there is no tile: this is the chip fill, so even a drawn tile is invisible. */
-  iconTile: string;
-  /** Header icon tile border — only the outlined white tile has one. */
-  iconTileBorder: string | null;
-  /** Header icon glyph. */
+  /** Header icon glyph, drawn bare on the chip (objects/section/title-chip-layout.ts titleChipIconDrawing). */
   iconGlyph: string;
 };
 
@@ -801,20 +797,15 @@ function brandIconPaint(brandColor: string, style: CanvasStyle): IconTilePaint {
 
 /**
  * A section header's brand logo (objects/section/title-chip-layout.ts):
- * the same brand policy as an icon object (brandIconPaint). Tile style: the
- * mark on the neutral brand tile. Glyph style: the bare mark on the header
- * chip (`colors.iconTile` is the chip fill there).
+ * the bare mark on the header chip in its brand color, held at
+ * BRAND_MARK_MIN_CONTRAST on the chip.
  */
 export function brandHeaderIconColors(
   brandColor: string,
-  colors: Pick<SectionPaint, "iconTile" | "iconTileBorder" | "iconGlyph">,
+  colors: Pick<SectionPaint, "chipFill" | "iconGlyph">,
   style: CanvasStyle,
-): Pick<SectionPaint, "iconTile" | "iconTileBorder" | "iconGlyph"> {
-  if (style.iconStyle !== "tile") {
-    return { ...colors, iconGlyph: brandMarkColor(brandColor, colors.iconTile, BRAND_MARK_MIN_CONTRAST, style) };
-  }
-  const paint = brandIconPaint(brandColor, style);
-  return { iconTile: paint.tileFill ?? colors.iconTile, iconTileBorder: paint.tileBorder, iconGlyph: paint.glyph };
+): Pick<SectionPaint, "chipFill" | "iconGlyph"> {
+  return { ...colors, iconGlyph: brandMarkColor(brandColor, colors.chipFill, BRAND_MARK_MIN_CONTRAST, style) };
 }
 
 /**
@@ -983,17 +974,24 @@ const LABEL_CHIP_BORDER_INK_WEIGHT = 0.7;
 
 /**
  * A connector label chip's text. Figjam: connectorLabelTextColor. Layer-cake
- * modes: on a colored wire, the wire's own stroke held at MIN_TEXT_CONTRAST
- * on the chip, so the label echoes its line; on a neutral wire the label
- * text color. Dark gray text on a red or blue chip read as loosely tied to
- * its line (stage A round 10: opus on 'retry later' and 'card token').
+ * modes: on a colored wire, a deep shade of the wire's own stroke held at
+ * LABEL_CHIP_TEXT_CONTRAST on the chip, so the label echoes its line; on a
+ * neutral wire the name color (textColor). Dark gray text on a red or blue
+ * chip read as loosely tied to its line (stage A round 10: opus on 'retry
+ * later' and 'card token'). The wire color at 4.5:1 and the body gray read
+ * thin and a step lighter than the node names beside them (stage B round
+ * 0: kimi and fable on h2, 09 and 12).
  */
 export function resolveLabelChipText(style: CanvasStyle, wireStroke: string): string {
-  if (style.sectionFill !== "layer-cake" || oklabChroma(wireStroke) < LABEL_CHIP_TEXT_MIN_WIRE_CHROMA) return style.connectorLabelTextColor;
+  if (style.sectionFill !== "layer-cake") return style.connectorLabelTextColor;
+  if (oklabChroma(wireStroke) < LABEL_CHIP_TEXT_MIN_WIRE_CHROMA) return style.textColor;
   return cachedPaint(style, `label-chip-text|${wireStroke}`, () => ({
-    text: ensureContrast(wireStroke, style.connectorLabelBackground, MIN_TEXT_CONTRAST),
+    text: ensureContrast(wireStroke, style.connectorLabelBackground, LABEL_CHIP_TEXT_CONTRAST),
   })).text;
 }
+
+/** Contrast a colored label chip's text holds on the chip: the body-text floor of 7:1, a step over it. */
+const LABEL_CHIP_TEXT_CONTRAST = 8;
 
 /** A wire under this OKLCH chroma is neutral: its chip keeps the label text color. */
 const LABEL_CHIP_TEXT_MIN_WIRE_CHROMA = 0.04;
@@ -1365,12 +1363,18 @@ const TOP_LEVEL_SECTION_DEPTH = 2;
 /** Nesting depth of the board's page section itself. */
 const PAGE_SECTION_DEPTH = 1;
 
-/** The header icon follows the icon objects' tile/glyph paint; glyph mode has no tile. */
+/** A tile-style header glyph's contrast on its chip: the body-text floor, so it reads at the title's weight. */
+const HEADER_GLYPH_CONTRAST = 7;
+
+/** The header icon: the bare glyph on the chip (objects/section/title-chip-layout.ts titleChipIconDrawing). */
 function sectionIconPaint(
   color: CanvasColor,
   chipFill: string,
   style: CanvasStyle,
-): Pick<SectionPaint, "iconTile" | "iconTileBorder" | "iconGlyph"> {
+): Pick<SectionPaint, "iconGlyph"> {
+  // Glyph style: the icon objects' glyph ink. Tile style: the header draws
+  // no tile, so the glyph is the ink held at HEADER_GLYPH_CONTRAST on the
+  // chip, as dark as the title beside it.
   const icon = resolveIconPaint(color, style);
-  return { iconTile: icon.tileFill ?? chipFill, iconTileBorder: icon.tileBorder, iconGlyph: icon.glyph };
+  return { iconGlyph: icon.tileFill === null ? icon.glyph : ensureContrast(resolveInk(color, style), chipFill, HEADER_GLYPH_CONTRAST) };
 }

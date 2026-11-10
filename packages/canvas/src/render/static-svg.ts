@@ -1041,45 +1041,27 @@ function fmtScale(value: number): string {
 
 /**
  * The header icon (objects/section/title-chip-layout.ts titleChipIconDrawing
- * — the same primitives SectionTitleChip.tsx draws): the tile, then the
- * glyph scaled into its box. A transformed group, not a nested <svg>, so it
- * is rasterizer-safe wherever the camera crops.
+ * — the same primitives SectionTitleChip.tsx draws): the bare glyph scaled
+ * into its box. A transformed group, not a nested <svg>, so it is
+ * rasterizer-safe wherever the camera crops.
  */
 function renderTitleChipIcon(drawing: TitleChipIconDrawing, x: number, y: number): string {
-  const parts: string[] = [];
-  const { tile, glyph } = drawing;
-  if (tile) {
-    const inset = tile.border ? tile.borderWidthPx / 2 : 0;
-    parts.push(
-      tag("rect", {
-        x: x + inset,
-        y: y + inset,
-        width: drawing.sizePx - inset * 2,
-        height: drawing.sizePx - inset * 2,
-        rx: Math.max(0, tile.radiusPx - inset),
-        fill: tile.fill,
-        ...(tile.border ? { stroke: tile.border, "stroke-width": tile.borderWidthPx } : null),
-      }),
-    );
-  }
+  const { glyph } = drawing;
   const stroked = glyph.paint === "stroke";
-  parts.push(
-    tag(
-      "g",
-      {
-        transform: `translate(${fmt(x + glyph.offsetPx)} ${fmt(y + glyph.offsetPx)}) scale(${fmtScale(
-          glyph.sizePx / glyph.viewBox[2],
-        )})${glyph.viewBox[0] === 0 && glyph.viewBox[1] === 0 ? "" : ` translate(${fmtScale(-glyph.viewBox[0])} ${fmtScale(-glyph.viewBox[1])})`}`,
-        fill: stroked ? "none" : glyph.color,
-        stroke: stroked ? glyph.color : "none",
-        "stroke-width": stroked ? fmtScale(glyph.strokeWidth) : undefined,
-        "stroke-linecap": "round",
-        "stroke-linejoin": "round",
-      },
-      glyph.elements.map((element) => glyphElementMarkup(element)).join(""),
-    ),
+  return tag(
+    "g",
+    {
+      transform: `translate(${fmt(x + glyph.offsetPx)} ${fmt(y + glyph.offsetPx)}) scale(${fmtScale(
+        glyph.sizePx / glyph.viewBox[2],
+      )})${glyph.viewBox[0] === 0 && glyph.viewBox[1] === 0 ? "" : ` translate(${fmtScale(-glyph.viewBox[0])} ${fmtScale(-glyph.viewBox[1])})`}`,
+      fill: stroked ? "none" : glyph.color,
+      stroke: stroked ? glyph.color : "none",
+      "stroke-width": stroked ? fmtScale(glyph.strokeWidth) : undefined,
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+    },
+    glyph.elements.map((element) => glyphElementMarkup(element)).join(""),
   );
-  return parts.join("");
 }
 
 /** A chip text run's `<text>` attributes (the header font; tracking in px). */

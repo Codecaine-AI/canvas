@@ -11,7 +11,8 @@ import {
   titleChipScale,
   titleChipVisibleTitle,
 } from "../title-chip-layout";
-import { resolveIconTilePaint, resolveSectionPaint } from "../../../theme/palette";
+import { resolveSectionPaint } from "../../../theme/palette";
+import { contrastRatio } from "../../../theme/color-math";
 
 /**
  * The section header chip layout (contract §4): floating vs pinned geometry,
@@ -202,17 +203,15 @@ describe("titleChipHasContent", () => {
 });
 
 describe("header brand logo", () => {
-  it("keeps its brand color on a neutral tile, as the same logo does on an icon object", () => {
+  it("keeps its brand color, drawn bare on the chip at 3:1", () => {
     for (const theme of ["figjam", "schematic-light", "schematic-dark"] as const) {
       const style = canvasThemePreset(theme);
-      const header = titleChipIconDrawing("brand-typescript", resolveSectionPaint("blue", 0, style), style);
-      // TypeScript blue reads at 3:1 on the light tiles; the dark card lifts it there at its own hue.
+      const paint = resolveSectionPaint("blue", 0, style);
+      const header = titleChipIconDrawing("brand-typescript", paint, style);
+      // TypeScript blue reads at 3:1 on the light chips; the dark chip lifts it at its own hue.
       if (theme !== "schematic-dark") expect(header?.glyph.color).toBe("#3178C6");
-      if (style.iconStyle === "tile") {
-        const object = resolveIconTilePaint("blue", style, 56, "#3178C6");
-        expect(header?.glyph.color).toBe(object.glyph);
-        expect(header?.tile?.fill).toBe(object.tileFill!);
-      }
+      expect(contrastRatio(header!.glyph.color, paint.chipFill)).toBeGreaterThanOrEqual(3);
+      expect(header?.glyph.sizePx).toBe(16);
     }
   });
 

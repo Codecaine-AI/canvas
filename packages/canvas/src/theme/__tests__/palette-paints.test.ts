@@ -317,21 +317,21 @@ describe("layer-cake sections", () => {
     }
   });
 
-  it("header icon: tile = ink with the tile glyph color; the white tile is outlined on light boards", () => {
-    expect(resolveSectionPaint("teal", 1, LIGHT)).toMatchObject({
-      iconTile: "#0D7164",
-      iconTileBorder: null,
-      iconGlyph: "#FFFFFF",
-    });
-    expect(resolveSectionPaint("white", 1, LIGHT)).toMatchObject({
-      iconTile: "#F8F8F7",
-      iconTileBorder: "#1F1F1F",
-      iconGlyph: "#1F1F1F",
-    });
-    // Glyph mode has no tile: the "tile" is the chip itself.
+  it("header icon: the bare glyph on the chip, in its ink held at 7:1 in the tile style", () => {
+    // The header draws no tile: an 11px glyph on a 16px tile read as a smudge at 1:1 (stage B round
+    // 0: fable on 11 and 13). The glyph keeps its section's hue at the title's contrast.
+    for (const style of [LIGHT, DARK]) {
+      for (const color of CANVAS_COLORS) {
+        for (const depth of [1, 2, 3, 4]) {
+          const paint = resolveSectionPaint(color, depth, style);
+          expect(contrastRatio(paint.iconGlyph, paint.chipFill)).toBeGreaterThanOrEqual(7);
+        }
+      }
+    }
+    expect(oklabChroma(resolveSectionPaint("teal", 2, LIGHT).iconGlyph)).toBeGreaterThan(0.05);
+    // Glyph mode: the icon objects' glyph ink.
     const glyphMode = { ...LIGHT, iconStyle: "glyph" as const };
-    const paint = resolveSectionPaint("teal", 1, glyphMode);
-    expect(paint).toMatchObject({ iconTile: paint.chipFill, iconTileBorder: null, iconGlyph: "#0D7164" });
+    expect(resolveSectionPaint("teal", 1, glyphMode).iconGlyph).toBe("#0D7164");
   });
 });
 

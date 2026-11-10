@@ -152,11 +152,11 @@ describe("pinned title chip with icon (a stored detail never paints)", () => {
     const titleWidth = measureWidth("BUN SERVICES", { family: "IBM Plex Mono", size: 14, weight: 600, letterSpacing: 1.12 });
     expect(titleWidth).toBe(114.25);
     expect(svg).not.toContain("127.0.0.1");
-    // The 16px tile sits 6px in, centered on the content line (93.5); the glyph is 11px inside it.
-    // Bun is a brand logo: its full-color mark, set in its optical box, on the neutral brand tile (a
-    // white node's fill, edged in soft gray).
-    expect(svg).toContain('<rect x="108" y="86" width="15" height="15" rx="1.5" fill="#FDFDFD" stroke="#AAA9A8" stroke-width="1"/>');
-    expect(svg).toContain('transform="translate(110 88) scale(0.0394) translate(11.6751 27.4726)" fill="#000000"');
+    // The 16px icon box sits 6px in, centered on the content line (93.5). Bun is a brand logo: its
+    // full-color mark, set in its optical box, drawn bare and filling the box. The header tile and its
+    // 11px glyph read as a smudge at 1:1 (stage B round 0: fable on 11 and 13), so no tile is drawn.
+    expect(svg).not.toContain('<rect x="108" y="86" width="15" height="15"');
+    expect(svg).toContain('transform="translate(107.5 85.5) scale(0.0573) translate(11.6751 27.4726)" fill="#000000"');
     expect(svg).toContain('fill="#FBF0DF"');
     // Only the right and bottom edges are stroked, inside the box like a CSS border
     // (box: 6 lead + 22 icon + 114.25 title + 10 + 1.5 edge).
@@ -259,14 +259,16 @@ describe("connector label chip per theme", () => {
     expect(rect.getAttribute("stroke")).toBe("#8C8B89"); // the hairline 70% toward the gray wire's stroke
     const text = container.querySelector('[data-canvas-connection-label="edge"] text')!;
     expect(text.getAttribute("font-family")).toContain("IBM Plex Mono");
-    expect(text.getAttribute("fill")).toBe("#2A2A2A");
+    // A neutral wire's chip text is the name color, not the body gray: the body gray read thin and
+    // light beside the node names (stage B round 0: fable on 12).
+    expect(text.getAttribute("fill")).toBe("#1F1F1F");
     expect(text.getAttribute("font-size")).toBe("15");
     expect(text.getAttribute("font-weight")).toBe("600");
 
     const svg = staticSvg("schematic-light");
     const chip = [...svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>HTTP<\/text>/g)][0]!;
     expect(attributesOf(chip[1]!)).toMatchObject({ width: "51", height: "26", fill: "#FDFDFD", stroke: "#8C8B89" });
-    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#2A2A2A", "font-size": "15", "font-weight": "600" });
+    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#1F1F1F", "font-size": "15", "font-weight": "600" });
   });
 
   it("figjam: the 30px sans chip with black text (live now matches static)", () => {
