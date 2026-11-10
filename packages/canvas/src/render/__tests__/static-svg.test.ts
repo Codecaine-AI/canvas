@@ -167,6 +167,34 @@ describe("renderDocumentToSvg", () => {
     expect(svg).toContain(">Outside</tspan>");
   });
 
+  it("a section crop draws a wire and its label where the whole board does", () => {
+    // "across" straddles the frame's right edge without belonging to it, so
+    // the crop omits it, but the wire from a to b still detours around it.
+    const node = (id: string, x: number, width: number, parentId?: string) =>
+      ({ id, type: "process", text: id, parentId, geometry: { x, y: 150, width, height: 100 } }) as const;
+    const document: InteractiveCanvasDocument = {
+      schemaVersion: 1,
+      id: "detour",
+      mode: "diagram",
+      objects: [
+        { id: "frame", type: "section", text: "Frame", geometry: { x: 0, y: 0, width: 800, height: 400 } },
+        node("a", 40, 160, "frame"),
+        { ...node("across", 680, 400), geometry: { x: 680, y: 120, width: 400, height: 160 } },
+        node("b", 1400, 160),
+      ],
+      connections: [{ id: "w", from: { objectId: "a" }, to: { objectId: "b" }, label: "calls" }],
+    } as InteractiveCanvasDocument;
+    const wire = (svg: string) => svg.match(/<path d="([^"]*)" fill="none"/)?.[1];
+    const label = (svg: string) => svg.match(/<text x="([^"]*)" y="([^"]*)"[^>]*>calls/)?.slice(1);
+
+    const whole = renderDocumentToSvg(document).svg;
+    const crop = renderDocumentToSvg(document, { sectionId: "frame" }).svg;
+
+    expect(wire(whole)).toBeDefined();
+    expect(wire(crop)).toBe(wire(whole));
+    expect(label(crop)).toEqual(label(whole));
+  });
+
   it("fit: 'content' crops to the members' bounds and omits the section frame", () => {
     const { svg } = renderDocumentToSvg(fixtureDocument(), {
       sectionId: "sec-1",

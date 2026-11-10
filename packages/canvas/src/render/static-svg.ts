@@ -1660,9 +1660,10 @@ export const renderDocumentToSvg: RenderDocumentToSvg = (
   const content = selectContent(document, options);
   return renderSceneToSvg(
     document,
-    // Option-driven renders route against the selected content only and draw
-    // title chips at their natural document size (chip scale 1).
-    { ...content, obstacles: content.objects, chipZoom: 1 },
+    // Option-driven renders route against the whole board, as label placement
+    // does, so a crop draws the board's own wires. Title chips draw at their
+    // natural document size (chip scale 1).
+    { ...content, obstacles: document.objects, chipZoom: 1 },
     options,
   );
 };
