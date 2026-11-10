@@ -64,6 +64,7 @@ import {
   resolveIconPaint,
   resolveIconTilePaint,
   resolveLabelChipBorder,
+  resolveLabelChipText,
   resolveSectionPaint,
   resolveShapePaint,
   resolveStickyPaint,
@@ -1373,7 +1374,7 @@ function renderConnector(
         {
           x,
           y,
-          fill: canvasStyle.connectorLabelTextColor,
+          fill: resolveLabelChipText(canvasStyle, stroke),
           "font-size": metrics.fontSizePx,
           "font-weight": metrics.fontWeight,
           "text-anchor": "middle",

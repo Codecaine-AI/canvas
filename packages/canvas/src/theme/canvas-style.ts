@@ -469,12 +469,14 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   iconTileSolidMaxPx: 152,
   iconTileMaxPx: 56,
   connectorLabelFont: "mono",
-  connectorLabelFontSizePx: 14,
+  // 15px: the 14px mono label read small for a tag (stage A round 9: opus
+  // on 'HTTPS', 'enqueue' and 'pull batch'); the chip keeps its 26px height.
+  connectorLabelFontSizePx: 15,
   connectorLabelHeightPx: 26,
   stickyStyle: "card",
   // A note is a secondary annotation: body text under the 17.5px names, a
   // 1.5 line pitch, headings at about the body size (bold carries them), a
-  // 3px neutral rule, a soft lift off the board (theme/palette.ts
+  // 4px rule, a soft lift off the board (theme/palette.ts
   // resolveStickyPaint) and the sections' 6px corners. Picked from three
   // variants on Archon boards 01 and 03 (callout card, tinted note, margin
   // note): the card keeps ink on panel for contrast, and its hairline edge,
@@ -488,7 +490,9 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   stickyPaddingBottomPx: 14,
   stickyCornerRadiusPx: 6,
   stickyHeadingScale: 0.3,
-  stickyRuleWidthPx: 3,
+  // A 4px rule: at 3px the accent bar read thin against its pale wash
+  // (stage A round 9: opus on the red, pink, green, teal and blue notes).
+  stickyRuleWidthPx: 4,
   ...schematicColors("light"),
 });
 

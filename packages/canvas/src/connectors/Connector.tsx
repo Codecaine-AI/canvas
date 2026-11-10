@@ -13,7 +13,7 @@ import { connectorBendSegments } from "./bend-editing";
 import { placedLabelPoint, routedConnectionIn } from "./label-placement";
 import { connectorDashArray } from "./def";
 import { CONNECTION_LABEL_CHIP, connectionLabelChipMetrics } from "./label-chip";
-import { resolveConnectorPaint, resolveLabelChipBorder } from "../theme/palette";
+import { resolveConnectorPaint, resolveLabelChipBorder, resolveLabelChipText } from "../theme/palette";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import { CANVAS_MONO_FONT_STACK } from "../theme/fonts";
 import { stageMarkColors } from "../theme/canvas-style";
@@ -134,7 +134,7 @@ export function Connector({
           <text
             textAnchor="middle"
             dominantBaseline="central"
-            fill={canvasStyle.connectorLabelTextColor}
+            fill={resolveLabelChipText(canvasStyle, stroke)}
             fontSize={chip.fontSizePx}
             fontWeight={chip.fontWeight}
             fontFamily={chip.font === "mono" ? CANVAS_MONO_FONT_STACK : undefined}

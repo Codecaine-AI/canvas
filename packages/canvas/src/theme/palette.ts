@@ -779,8 +779,8 @@ const CARD_STICKY_CODE_CHIP_ALPHA = 0.045;
  * Beside `ink-card` nodes a card note is a tinted callout in its own color
  * pick: a wash of the pick's ink (OKLab L 0.952, chroma 0.03), a hairline
  * edge one step deeper in the same hue, a muted mid tone of it (L 0.68,
- * chroma 0.115) as the 3px left rule, and a tight lift. Gray is a neutral
- * wash; white is a white card. Both take a slate rule.
+ * chroma 0.115) as the 4px left rule, and a tight lift. Gray is a faint
+ * slate wash; white is a white card. Both take a soft slate rule.
  *
  * Stage A round 0 (notes sheet 7.49): every pick painted one cream card with
  * a tan edge, the look Ford had turned down. Round 1 (7.75): washes at L 0.98
@@ -789,8 +789,8 @@ const CARD_STICKY_CODE_CHIP_ALPHA = 0.045;
  * rules at chroma 0.15 clipped to a loud cyan on teal; the wide lift was
  * louder than a side note. At L 0.952 every hue reaches chroma 0.03, and the
  * wash still sits lighter than every node fill (L 0.85 to 0.93) and differs
- * from the gray sections (L 0.96) by hue. Inline code takes a deeper step of
- * the same wash so it separates from the note body.
+ * from the gray sections (L 0.96) by hue. Inline code takes a deeper, more
+ * colorful step of the same wash so it separates from the note body.
  */
 const NOTE_FILL_LIGHTNESS = 0.952;
 const NOTE_FILL_CHROMA = 0.03;
@@ -798,22 +798,40 @@ const NOTE_EDGE_LIGHTNESS = 0.88;
 const NOTE_EDGE_CHROMA = 0.05;
 const NOTE_RULE_LIGHTNESS = 0.68;
 const NOTE_RULE_CHROMA = 0.115;
-/** Neutral rules: slate on the gray wash, near charcoal on the white card, which has no wash to carry it. */
-const NOTE_GRAY_RULE_LIGHTNESS = 0.62;
-const NOTE_WHITE_RULE_LIGHTNESS = 0.45;
+/**
+ * Inline code: a deeper, MORE colorful step of the note's own wash (L 0.9,
+ * chroma 0.055). At the wash's chroma (0.03) the darker step read as a gray
+ * smudge laid on the note (stage A rounds 9 and 10: opus on 'Token check',
+ * 'Idempotent writes' and 'Prompt in prompts/plan.md').
+ */
 const NOTE_CODE_CHIP_LIGHTNESS = 0.9;
-const NOTE_CODE_CHIP_CHROMA = 0.03;
+const NOTE_CODE_CHIP_CHROMA = 0.055;
 const NOTE_SHADOW_OPACITY = 0.06;
 /**
- * The yellow note: a clean lemon wash (OKLCH hue 102, chroma 0.065), not the
- * hue-87 ink, whose pale wash is the beige paper Ford turned down. Yellow
- * reads weak at the other hues' chroma, so its wash and gold rule run deeper.
+ * Neutral notes. Gray is a faint cool slate (chroma 0.008 at the blue
+ * anchor's hue) with a slate rule (chroma 0.03): the plain neutral read as
+ * a disabled box with a dull bar (stage A round 9: opus). White is a white
+ * card with a soft slate rule, not the near-charcoal one, which made it read
+ * as a white node with a heavy edge (rounds 9 and 10: sol and opus).
+ */
+const NOTE_NEUTRAL = {
+  fill: { lightness: NOTE_FILL_LIGHTNESS, chroma: 0.008 },
+  edge: { lightness: 0.875, chroma: 0.012 },
+  rule: { lightness: 0.62, chroma: 0.03 },
+  codeChip: { lightness: NOTE_CODE_CHIP_LIGHTNESS, chroma: 0.014 },
+} as const;
+/**
+ * The yellow note: a pale butter wash (OKLCH hue 95), not the hue-87 ink,
+ * whose pale wash is the beige paper Ford turned down. It sits at the other
+ * washes' tint level, a touch lighter and more colorful so it reads yellow:
+ * the old L 0.977, chroma 0.072 lemon was the loudest card on the sheet
+ * (stage A rounds 9 and 10: opus on every yellow note).
  */
 const NOTE_YELLOW = {
-  fill: { anchor: "#FFEE00", lightness: 0.977, chroma: 0.072 },
-  edge: { anchor: "#FFE600", lightness: 0.9, chroma: 0.09 },
-  rule: { anchor: "#FFD000", lightness: 0.8, chroma: 0.16 },
-  codeChip: { anchor: "#FFE600", lightness: 0.92, chroma: 0.07 },
+  fill: { anchor: "#FFE600", lightness: 0.962, chroma: 0.06, hue: -6 },
+  edge: { anchor: "#FFE600", lightness: 0.885, chroma: 0.075, hue: -6 },
+  rule: { anchor: "#FFD000", lightness: 0.78, chroma: 0.15, hue: 0 },
+  codeChip: { anchor: "#FFE600", lightness: 0.905, chroma: 0.085, hue: -6 },
 } as const;
 
 function noteCardStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
@@ -822,19 +840,16 @@ function noteCardStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPain
   const tone = (part: keyof typeof NOTE_YELLOW, lightness: number, chroma: number) => {
     if (color === "yellow") {
       const yellow = NOTE_YELLOW[part];
-      return withLightnessChroma(yellow.anchor, yellow.lightness, yellow.chroma);
+      return withLightnessChroma(yellow.anchor, yellow.lightness, yellow.chroma, yellow.hue);
     }
-    return withLightnessChroma(ink, lightness, neutral ? 0 : chroma);
+    if (neutral) return withLightnessChroma(paletteColor("blue", style), NOTE_NEUTRAL[part].lightness, NOTE_NEUTRAL[part].chroma);
+    return withLightnessChroma(ink, lightness, chroma);
   };
   const fill = color === "white" ? "#FFFFFF" : tone("fill", NOTE_FILL_LIGHTNESS, NOTE_FILL_CHROMA);
   return {
     fill,
     border: tone("edge", NOTE_EDGE_LIGHTNESS, NOTE_EDGE_CHROMA),
-    rule: tone(
-      "rule",
-      color === "white" ? NOTE_WHITE_RULE_LIGHTNESS : color === "gray" ? NOTE_GRAY_RULE_LIGHTNESS : NOTE_RULE_LIGHTNESS,
-      NOTE_RULE_CHROMA,
-    ),
+    rule: tone("rule", NOTE_RULE_LIGHTNESS, NOTE_RULE_CHROMA),
     text: readableOn(style.textColor, fill),
     shadow: false,
     cardShadow: withAlpha(style.textColor, NOTE_SHADOW_OPACITY),
@@ -877,8 +892,30 @@ export function resolveLabelChipBorder(style: CanvasStyle, wireStroke: string): 
   })).border;
 }
 
-/** Wire stroke weight in a layer-cake label chip edge (resolveLabelChipBorder). */
-const LABEL_CHIP_BORDER_INK_WEIGHT = 0.4;
+/**
+ * Wire stroke weight in a layer-cake label chip edge (resolveLabelChipBorder):
+ * 0.7, so the edge reads as a firm tag edge in the wire's hue. At 0.4 the
+ * edge was faint and loosely tied to its wire (stage A rounds 9 and 10: sol
+ * and opus on 'HTTPS', 'enqueue', 'retry later' and 'card token').
+ */
+const LABEL_CHIP_BORDER_INK_WEIGHT = 0.7;
+
+/**
+ * A connector label chip's text. Figjam: connectorLabelTextColor. Layer-cake
+ * modes: on a colored wire, the wire's own stroke held at MIN_TEXT_CONTRAST
+ * on the chip, so the label echoes its line; on a neutral wire the label
+ * text color. Dark gray text on a red or blue chip read as loosely tied to
+ * its line (stage A round 10: opus on 'retry later' and 'card token').
+ */
+export function resolveLabelChipText(style: CanvasStyle, wireStroke: string): string {
+  if (style.sectionFill !== "layer-cake" || oklabChroma(wireStroke) < LABEL_CHIP_TEXT_MIN_WIRE_CHROMA) return style.connectorLabelTextColor;
+  return cachedPaint(style, `label-chip-text|${wireStroke}`, () => ({
+    text: ensureContrast(wireStroke, style.connectorLabelBackground, MIN_TEXT_CONTRAST),
+  })).text;
+}
+
+/** A wire under this OKLCH chroma is neutral: its chip keeps the label text color. */
+const LABEL_CHIP_TEXT_MIN_WIRE_CHROMA = 0.04;
 
 /**
  * Connector stroke = the ink. In the layer-cake modes `white` (whose ink is

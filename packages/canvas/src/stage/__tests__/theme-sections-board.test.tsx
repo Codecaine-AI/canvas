@@ -248,25 +248,25 @@ describe("in-place section title editor", () => {
 
 describe("connector label chip per theme", () => {
   it("schematic: a 26px mono chip sized to the measured label + 0.5em padding a side, live == static", () => {
-    // "HTTP" at 14px: 4 Plex Mono cells (33.6px → 33.609375 in layout units) + 2 × 7.
-    const width = measureWidth("HTTP", { family: "IBM Plex Mono", size: 14, weight: 600 }) + 2 * 7;
-    expect(width).toBe(47.609375);
+    // "HTTP" at 15px: 4 Plex Mono cells (36px) + 2 × 7.5.
+    const width = measureWidth("HTTP", { family: "IBM Plex Mono", size: 15, weight: 600 }) + 2 * 7.5;
+    expect(width).toBe(51);
     const container = renderLive("schematic-light");
     const rect = container.querySelector('[data-canvas-connection-label="edge"] rect')!;
     expect(Number(rect.getAttribute("width"))).toBe(width);
     expect(rect.getAttribute("height")).toBe("26");
     expect(rect.getAttribute("fill")).toBe("#FDFDFD");
-    expect(rect.getAttribute("stroke")).toBe("#B3B2AF"); // the hairline 40% toward the gray wire's stroke
+    expect(rect.getAttribute("stroke")).toBe("#8C8B89"); // the hairline 70% toward the gray wire's stroke
     const text = container.querySelector('[data-canvas-connection-label="edge"] text')!;
     expect(text.getAttribute("font-family")).toContain("IBM Plex Mono");
     expect(text.getAttribute("fill")).toBe("#2A2A2A");
-    expect(text.getAttribute("font-size")).toBe("14");
+    expect(text.getAttribute("font-size")).toBe("15");
     expect(text.getAttribute("font-weight")).toBe("600");
 
     const svg = staticSvg("schematic-light");
     const chip = [...svg.matchAll(/<rect ([^>]*?)\/><text ([^>]*)>HTTP<\/text>/g)][0]!;
-    expect(attributesOf(chip[1]!)).toMatchObject({ width: "47.61", height: "26", fill: "#FDFDFD", stroke: "#B3B2AF" });
-    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#2A2A2A", "font-size": "14", "font-weight": "600" });
+    expect(attributesOf(chip[1]!)).toMatchObject({ width: "51", height: "26", fill: "#FDFDFD", stroke: "#8C8B89" });
+    expect(attributesOf(chip[2]!)).toMatchObject({ fill: "#2A2A2A", "font-size": "15", "font-weight": "600" });
   });
 
   it("figjam: the 30px sans chip with black text (live now matches static)", () => {
@@ -287,7 +287,7 @@ describe("card stickies", () => {
     const note = renderLive("schematic-light").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
     const paint = resolveStickyPaint("yellow", canvasThemePreset("schematic-light"));
     expect(note.style.background).toBe(
-      `linear-gradient(to right, transparent 1px, ${paint.rule} 1px, ${paint.rule} 4px, transparent 4px) ${paint.fill}`,
+      `linear-gradient(to right, transparent 1px, ${paint.rule} 1px, ${paint.rule} 5px, transparent 5px) ${paint.fill}`,
     );
     expect(note.style.boxShadow).toBe(
       `inset 0 0 0 1px ${paint.border}, 0 1px 2px ${paint.cardShadow}, 0 2px 6px ${paint.cardShadow}`,
@@ -307,20 +307,20 @@ describe("card stickies", () => {
       `<rect x="900" y="80" width="240" height="160" rx="6" fill="${paint.fill}" filter="url(#theme-board-card-sticky-shadow)"/>`,
     );
     expect(svg).toContain(
-      `<path d="M901 82.68A6 6 0 0 1 904 80.34V239.66A6 6 0 0 1 901 237.32Z" fill="${paint.rule}"/><rect x="900.5" y="80.5" width="239" height="159" rx="5.5" fill="none" stroke="${paint.border}" stroke-width="1"/>`,
+      `<path d="M901 82.68A6 6 0 0 1 905 80.08V239.92A6 6 0 0 1 901 237.32Z" fill="${paint.rule}"/><rect x="900.5" y="80.5" width="239" height="159" rx="5.5" fill="none" stroke="${paint.border}" stroke-width="1"/>`,
     );
   });
 
-  it("dark boards: a straight 3px neutral rule inside the hairline, live and static", () => {
+  it("dark boards: a straight 4px neutral rule inside the hairline, live and static", () => {
     const note = renderLive("schematic-dark").querySelector<HTMLElement>('[data-canvas-object-id="note"]')!;
     // The rule is a background strip the corner radius clips, so its inner edge never curls into a hook.
     expect(note.style.background).toBe(
-      "linear-gradient(to right, transparent 1px, #9198A1 1px, #9198A1 4px, transparent 4px) #32363E",
+      "linear-gradient(to right, transparent 1px, #9198A1 1px, #9198A1 5px, transparent 5px) #32363E",
     );
     // x 901 to 904: only its ends follow the corner arcs, its inner edge is one straight line,
     // and it paints before the hairline, as the live background strip sits under the inset shadow.
     expect(staticSvg("schematic-dark")).toContain(
-      '<path d="M901 82.68A6 6 0 0 1 904 80.34V239.66A6 6 0 0 1 901 237.32Z" fill="#9198A1"/><rect x="900.5" y="80.5"',
+      '<path d="M901 82.68A6 6 0 0 1 905 80.08V239.92A6 6 0 0 1 901 237.32Z" fill="#9198A1"/><rect x="900.5" y="80.5"',
     );
   });
 

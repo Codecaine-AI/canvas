@@ -568,8 +568,12 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       const minimum = sectionColor === "yellow" ? 0.018 : 0.023;
       expect(oklabDistance(note.fill, resolveSectionPaint(sectionColor, 2, LIGHT).fill)).toBeGreaterThanOrEqual(minimum);
     }
+    // 0.065 (was 0.08): the yellow note now sits at the other washes' tint
+    // step (L 0.962, not the loud L 0.977 lemon; stage A round 9: opus). Every
+    // other note wash sits at L 0.952, 0.06 over the lightest node; yellow
+    // keeps 0.07 over the slate gray node and 0.095 over the yellow node.
     for (const nodeColor of CANVAS_COLORS.filter((color) => color !== "white")) {
-      expect(oklabLightness(note.fill) - oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill)).toBeGreaterThanOrEqual(0.08);
+      expect(oklabLightness(note.fill) - oklabLightness(resolveShapePaint(nodeColor, LIGHT).fill)).toBeGreaterThanOrEqual(0.065);
     }
     expect(contrastRatio(note.text, note.fill)).toBeGreaterThanOrEqual(4.5);
     expect(contrastRatio(note.border, note.fill)).toBeGreaterThanOrEqual(1.2);

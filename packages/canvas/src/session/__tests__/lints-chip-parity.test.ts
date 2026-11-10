@@ -142,8 +142,8 @@ describe("lint chip / static renderer parity", () => {
     );
     const chip = chipFor(document.connections[1]!, document, style)!;
     expect(chip.rect.height).toBe(26);
-    // 19 Plex Mono cells (159.6px, rounded up to the 1/64px layout unit) + 7px a side.
-    expect(chip.rect.width).toBe(Math.ceil(19 * 8.4 * 64) / 64 + 2 * 7);
+    // 19 Plex Mono cells at 15px (171px) + 7.5px a side.
+    expect(chip.rect.width).toBe(Math.ceil(19 * 9 * 64) / 64 + 2 * 7.5);
     expectRendererParity(document, style);
   });
 

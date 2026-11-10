@@ -75,7 +75,7 @@ describe("text-fit — edge-label chips at the style's size", () => {
     // Needed = the measured chip + 16px clearance a side + the 1px measuring band.
     const bold16 = measureWidth("read/write", { family: "Inter", size: 16, weight: 700 });
     expect(figjam.neededSize).toEqual({ width: Math.ceil(bold16 + 24 + 32 + 1), height: 30 + 32 });
-    expect(light.neededSize).toEqual({ width: Math.ceil(10 * 0.6 * 14 + 14 + 32 + 1), height: 26 + 32 });
+    expect(light.neededSize).toEqual({ width: Math.ceil(10 * 0.6 * 15 + 15 + 32 + 1), height: 26 + 32 });
     expect(textFitReport(EDGE, roomy, "read/write", LIGHT).fits).toBe(true);
     // A corridor that holds the smaller mono chip (~130×58) but not the figjam one (~30px taller chip, 62 high).
     const corridor = { width: 200, height: 60 };
