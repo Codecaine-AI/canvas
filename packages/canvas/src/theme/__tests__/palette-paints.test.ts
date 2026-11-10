@@ -103,9 +103,10 @@ describe("layer-cake sections", () => {
     expect(resolveSectionPaint("teal", 2, LIGHT).fill).toBe("#E4F7F4");
   });
 
-  it("light preset: a section never outweighs its nodes, at top level chroma 0.02 (yellow 0.03), growing with the ink weight", () => {
+  it("light preset: a section never outweighs its nodes, at top level chroma 0.02 (yellow 0.038), growing with the ink weight", () => {
     for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
-      const top = color === "yellow" ? 0.03 : 0.02;
+      // Yellow at 0.03 read cream and tan (stage A round 9: opus on 'Ledger' and 'Messaging').
+      const top = color === "yellow" ? 0.038 : 0.02;
       for (const [depth, weight] of [[2, 0.065], [3, 0.11], [4, 0.15]] as const) {
         const chroma = oklabChroma(resolveSectionPaint(color, depth, LIGHT).fill);
         // Set, not only capped: blue, green, teal and violet mixed to 0.008 at top level and told siblings apart by the frame alone.
@@ -114,7 +115,7 @@ describe("layer-cake sections", () => {
       }
     }
     // The butter field on board 12 (chroma 0.076) is now a pale yellow.
-    expect(resolveSectionPaint("yellow", 2, LIGHT).fill).toBe("#FBF4DE");
+    expect(resolveSectionPaint("yellow", 2, LIGHT).fill).toBe("#FAF5D8");
     // Dark boards (card shapes) keep the uncapped mix.
     expect(oklabChroma(resolveSectionPaint("violet", 3, DARK).fill)).toBeGreaterThan(0.045);
   });
@@ -172,10 +173,17 @@ describe("layer-cake sections", () => {
     }
   });
 
-  it("derives border, chip, and chip border from the ink", () => {
+  it("derives border and chip border from the ink, and the chip one clear step under its fill", () => {
     const paint = resolveSectionPaint("teal", 1, LIGHT);
-    expect(paint.border).toBe("rgba(13, 113, 100, 0.75)");
-    expect(paint.chipFill).toBe(mixColors("#0D7164", paint.fill, 0.16));
+    expect(paint.border).toBe("rgba(13, 113, 100, 0.9)");
+    // Beside ink-card nodes the chip is its fill 0.095 L deeper and 0.03 more colorful in OKLCH (stage A round 11).
+    for (const color of ["teal", "yellow", "red"] as const) {
+      for (const depth of [2, 3, 4]) {
+        const { fill, chipFill } = resolveSectionPaint(color, depth, LIGHT);
+        expect(Math.abs(oklabLightness(fill) - oklabLightness(chipFill) - 0.095)).toBeLessThan(0.004);
+        expect(Math.abs(oklabChroma(chipFill) - oklabChroma(fill) - 0.03)).toBeLessThan(0.004);
+      }
+    }
     expect(paint.chipBorder).toBe("rgba(13, 113, 100, 0.5)");
     expect(paint.headerText).toBe("#1F1F1F");
     expect(resolveSectionPaint("teal", 1, DARK).chipFill).toBe(
@@ -293,9 +301,11 @@ describe("layer-cake sections", () => {
     });
     for (const depth of [2, 3, 4]) {
       const paint = resolveSectionPaint("white", depth, LIGHT);
-      // A pure white card with the gray section's chip system.
-      expect(paint.fill).toBe("#FFFFFF");
-      expect(paint.chipFill).toBe(mixColors(resolveInk("gray", LIGHT), "#FFFFFF", LIGHT.headerChipMix));
+      // A faint warm paper, not pure white, which matched the page and read
+      // as a hole in a hued parent (stage A round 9: opus), with a neutral chip one step under it.
+      expect(paint.fill).toBe("#FFFDF9");
+      expect(oklabChroma(paint.fill)).toBeLessThan(0.008);
+      expect(Math.abs(oklabLightness(paint.fill) - oklabLightness(paint.chipFill) - 0.095)).toBeLessThan(0.004);
       expect(paint.chipBorder).toBe(resolveSectionPaint("gray", depth, LIGHT).chipBorder);
       expect(contrastRatio(paint.border, resolveSectionPaint("gray", 2, LIGHT).fill)).toBeGreaterThanOrEqual(2);
       expect(contrastRatio(paint.headerText, paint.chipFill)).toBeGreaterThanOrEqual(4.5);

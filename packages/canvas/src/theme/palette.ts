@@ -970,8 +970,8 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
     // heavier gray chip).
     const nested = depth > PAGE_SECTION_DEPTH;
     const edge = nested ? nestedWhiteSectionEdge(style) : style.hairlineColor;
-    const fill = nested ? WHITE_SECTION_FILL : style.boardBackground;
-    const chipFill = nested ? mixColors(resolveInk("gray", style), fill, style.headerChipMix) : mixColors(edge, fill, 0.5);
+    const fill = nested ? whiteSectionFill(style) : style.boardBackground;
+    const chipFill = nested ? sectionChipFill(resolveInk("gray", style), fill, true, style) : mixColors(edge, fill, 0.5);
     return {
       fill,
       border: edge,
@@ -986,7 +986,7 @@ function layerCakeSectionPaint(color: CanvasColor, depth: number, style: CanvasS
   const fill = paintColor === "gray" && style.shapeFill === "ink-card"
     ? inkFill("gray", style.sectionTintMixBase, graySectionWeight(depth, style), style)
     : layerCakeFill(paintColor, paintColor === "gray" ? Math.min(depth, GRAY_SECTION_MAX_DEPTH) : depth, style);
-  const chipFill = mixColors(ink, fill, style.headerChipMix);
+  const chipFill = sectionChipFill(ink, fill, paintColor === "gray", style);
   return {
     fill,
     border: withAlpha(ink, style.sectionBorderOpacity),
@@ -1012,12 +1012,44 @@ function nestedWhiteSectionEdge(style: CanvasStyle): string {
 
 const NESTED_WHITE_SECTION_EDGE_INK_WEIGHT = 0.5;
 
-/** A white section below the page on a light board. */
-const WHITE_SECTION_FILL = "#FFFFFF";
+/**
+ * A white section below the page on a light board: a faint warm paper
+ * (OKLCH L 0.994, chroma 0.006, the yellow anchor's hue), not pure white.
+ * Pure white matched the near-white page and read as a hole cut in a hued
+ * parent rather than a layer on it (stage A rounds 9 and 10: opus on
+ * 'Admin', 'Reports' and 'Retries'). Beside `ink-card` nodes only.
+ */
+function whiteSectionFill(style: CanvasStyle): string {
+  if (style.shapeFill !== "ink-card") return "#FFFFFF";
+  return withLightnessChroma(paletteColor("yellow", style), WHITE_SECTION_LIGHTNESS, WHITE_SECTION_CHROMA);
+}
+
+const WHITE_SECTION_LIGHTNESS = 0.994;
+const WHITE_SECTION_CHROMA = 0.006;
+
+/**
+ * A header chip's body. Beside `ink-card` nodes: its section fill one clear
+ * step deeper and more colorful in OKLCH (SECTION_CHIP_LIGHTNESS_STEP,
+ * SECTION_CHIP_CHROMA_STEP; a gray or white chip keeps its fill's chroma), so every chip
+ * stands off its own fill in that fill's hue. The 16% ink mix sat 0.07 L
+ * under the fill, so the chip edge carried the title, and the olive yellow
+ * ink muddied the yellow chips (stage A round 9: opus on 'Messaging',
+ * 'Identity' and 'Payments'). Other modes: mix(ink, fill, headerChipMix).
+ */
+function sectionChipFill(ink: string, fill: string, neutral: boolean, style: CanvasStyle): string {
+  if (style.shapeFill !== "ink-card") return mixColors(ink, fill, style.headerChipMix);
+  const chroma = oklabChroma(fill);
+  return withLightnessChroma(fill, oklabLightness(fill) - SECTION_CHIP_LIGHTNESS_STEP, neutral ? chroma : chroma + SECTION_CHIP_CHROMA_STEP);
+}
+
+const SECTION_CHIP_LIGHTNESS_STEP = 0.095;
+const SECTION_CHIP_CHROMA_STEP = 0.03;
 
 /**
  * A gray section beside `ink-card` nodes: GRAY_SECTION_INK_WEIGHT at top
- * level, a clear tone under the white section (stage A round 4: white and
+ * level (0.068, up from 0.062: the lighter gray sat too close to the page
+ * and read by its edge alone, stage A round 9: opus on 'Payments' and
+ * 'Shared platform'), a clear tone under the white section (stage A round 4: white and
  * gray read as one fill, so white looked unstyled), then
  * GRAY_SECTION_STEP_SCALE of each hue's step per level, so a gray child
  * still sits a tone below its parent (round 4: gray 'Rules' on violet read
@@ -1033,7 +1065,7 @@ function graySectionWeight(depth: number, style: CanvasStyle): number {
     : GRAY_SECTION_INK_WEIGHT + (weight - top) * GRAY_SECTION_STEP_SCALE);
 }
 
-const GRAY_SECTION_INK_WEIGHT = 0.062;
+const GRAY_SECTION_INK_WEIGHT = 0.068;
 const GRAY_SECTION_STEP_SCALE = 0.5;
 
 /** The deepest level a gray layer-cake section deepens to: the top-level section's tone (depth 2 under the page). */
@@ -1148,18 +1180,23 @@ const SECTION_CHROMA_GROWTH = 0.75;
 
 /**
  * Hues whose section chroma differs. Yellow needs more chroma to read as its
- * hue at section lightness: below about 0.03 it is greige or cream.
+ * hue at section lightness: below about 0.03 it is greige or cream, and at
+ * 0.03 it still read cream and tan (stage A round 9: opus on 'Messaging',
+ * 'Ledger' and 'Escalation'), so it takes 0.038.
  */
-const SECTION_CHROMA_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: 0.03 };
+const SECTION_CHROMA_BY_COLOR: Partial<Record<CanvasColor, number>> = { yellow: 0.038 };
 
 /**
  * Hue turn (OKLCH degrees) of a section fill from its ink. Red (h 18) and
  * pink (h 341) washes sat 37 degrees apart, so a red section in a pink one
  * read as its parent (stage A round 4: 'Labels' in 'Carriers', 'Offers' in
  * 'Growth'). Red turns warm and pink cool, each still clear of orange (h 67)
- * and violet (h 303).
+ * and violet (h 303). At 6 and 8 degrees the pair still sat one small step
+ * apart (stage A rounds 9 and 10: sol and opus on 'Labels' and 'Offers'),
+ * so red turns 14 and pink 12. Yellow turns 8 toward lemon, off the tan of
+ * its ochre ink.
  */
-const SECTION_HUE_SHIFT_BY_COLOR: Partial<Record<CanvasColor, number>> = { red: 6, pink: -8, blue: 8 };
+const SECTION_HUE_SHIFT_BY_COLOR: Partial<Record<CanvasColor, number>> = { red: 14, pink: -12, blue: 8, yellow: 8 };
 
 /**
  * `fill` (a section level at ink `weight`) at the same lightness, its hue

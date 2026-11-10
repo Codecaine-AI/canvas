@@ -455,7 +455,9 @@ const SCHEMATIC_LIGHT_PRESET: CanvasStyle = inPresetKeyOrder({
   sectionTintBase: 0.02,
   sectionTintStep: 0.045,
   sectionTintMax: 0.15,
-  sectionBorderOpacity: 0.75,
+  // Section edges at 0.9 of the ink: at 0.75 every 1.5px frame read a
+  // little thin and light (stage A round 9: opus on most sections).
+  sectionBorderOpacity: 0.9,
   headerPlacement: "pinned",
   headerFont: "mono",
   headerUppercase: true,
