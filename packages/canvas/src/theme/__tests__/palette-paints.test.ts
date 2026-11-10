@@ -22,6 +22,7 @@ import {
   resolveConnectorPaint,
   resolveConnectorStroke,
   resolveIconPaint,
+  resolveIconTilePaint,
   resolveInk,
   resolveLabelChipBorder,
   resolveSectionColors,
@@ -484,6 +485,25 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     // own fill, so a white node on a white section keeps a clear edge.
     expect(white.border).toBe(resolveInk("gray", LIGHT));
     expect(contrastRatio(white.border, white.fill)).toBeGreaterThanOrEqual(4.5);
+  });
+
+  it("light preset: a node or tile in a section of its own hue is the white card edged in its own ink", () => {
+    // A hued node on a tint of its own hue read as a darker patch of the
+    // section (stage B round 0: fable on 01, 03, 04, 06 and 14).
+    const white = resolveShapePaint("white", LIGHT);
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white" && candidate !== "gray")) {
+      const own = resolveShapePaint(color, LIGHT, color);
+      expect(own).toEqual({ fill: white.fill, border: resolveShapePaint(color, LIGHT).border, text: LIGHT.textColor });
+      expect(contrastRatio(own.border, own.fill)).toBeGreaterThanOrEqual(3);
+      const tile = resolveIconTilePaint(color, LIGHT, 56, null, color);
+      expect(tile.tileFill).toBe(white.fill);
+      expect(contrastRatio(tile.glyph, white.fill)).toBeGreaterThanOrEqual(4.5);
+      // Any other section, and no section, keeps the hued node.
+      expect(resolveShapePaint(color, LIGHT, color === "blue" ? "teal" : "blue")).toEqual(resolveShapePaint(color, LIGHT));
+    }
+    // Gray and white keep their own paint; the dark preset's card nodes ignore the section.
+    expect(resolveShapePaint("gray", LIGHT, "gray")).toEqual(resolveShapePaint("gray", LIGHT));
+    expect(resolveShapePaint("violet", DARK, "violet")).toEqual(resolveShapePaint("violet", DARK));
   });
 
   it("light ink-card shapes: gray is a faint cool slate lighter than the hued nodes, white the board surface", () => {

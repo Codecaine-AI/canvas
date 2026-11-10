@@ -503,8 +503,32 @@ const SHAPE_CARD_GRAY_LIGHTNESS_LIFT = 0.036;
  * `ink-card`: fill = the anchor hue in OKLCH (shapeFillBase; gray a neutral,
  * white the board), border = ink, text = textColor kept at 4.5:1.
  */
-export function resolveShapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
+export function resolveShapePaint(color: CanvasColor, style: CanvasStyle, container: CanvasColor | null = null): ShapePaint {
+  if (onOwnHueSection(color, container, style)) return cachedPaint(style, `shape-own-hue|${color}`, () => ownHueShapePaint(color, style));
   return cachedPaint(style, `shape|${color}`, () => shapePaint(color, style));
+}
+
+/**
+ * Whether a node or tile of `color` sits in a section of the same hue
+ * (`container`, state/section-depth.ts sectionContainerColorMap) beside
+ * `ink-card` nodes. Gray and white keep their paint: gray nodes carry their
+ * own tone step, and white is already the plain card.
+ */
+function onOwnHueSection(color: CanvasColor, container: CanvasColor | null, style: CanvasStyle): boolean {
+  return container === color && style.shapeFill === "ink-card" && color !== "gray" && color !== "white";
+}
+
+/**
+ * A node in a section of its own hue: a white card (the white node's fill)
+ * edged in the node's own ink. The section already names the hue, and a
+ * hued node on a tint of that hue read as a darker patch of its container,
+ * not an object on it (stage B round 0: fable on 01, 03, 04, 06 and 14;
+ * Ford: "Nested cards. Need to have different colors.").
+ */
+function ownHueShapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
+  const hued = shapePaint(color, style);
+  const fill = shapePaint("white", style).fill;
+  return { fill, border: hued.border, text: readableOn(style.textColor, fill) };
 }
 
 function shapePaint(color: CanvasColor, style: CanvasStyle): ShapePaint {
@@ -621,6 +645,7 @@ export function resolveIconTilePaint(
   style: CanvasStyle,
   sizePx: number,
   brandColor?: string | null,
+  container: CanvasColor | null = null,
 ): IconTilePaint {
   if (brandColor) return cachedPaint(style, `brand-icon|${brandColor}`, () => brandIconPaint(brandColor, style));
   const paint = resolveIconPaint(color, style);
@@ -628,7 +653,8 @@ export function resolveIconTilePaint(
   const tileMode = iconTileModeFor(style, sizePx);
   const ink = resolveInk(color, style);
   if (tileMode === "solid") {
-    const shape = resolveShapePaint(color, style);
+    // A tile in a section of its own hue is the white card with its ink edge and glyph (ownHueShapePaint).
+    const shape = resolveShapePaint(color, style, container);
     // The glyph is the ink held at MIN_TEXT_CONTRAST on the tile: the yellow
     // ink sat near 3:1 on its butter tile, the weakest glyph on the sheet
     // (stage A rounds 9 and 10: sol and opus on 'Agent' and 'Webhook').

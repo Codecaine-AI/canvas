@@ -19,7 +19,7 @@ import {
   objectById,
   type CanvasBounds,
 } from "../state/geometry";
-import { sectionDepthMap } from "../state/section-depth";
+import { sectionContainerColorMap, sectionDepthMap } from "../state/section-depth";
 import { gridBackground } from "./grid";
 import { canvasSurfaceStyle } from "../theme/tokens";
 import { CANVAS_SANS_FONT_STACK } from "../theme/fonts";
@@ -36,7 +36,7 @@ import { Connector, ConnectorSelectionTrim } from "../connectors/Connector";
 import { ArrowMarkerScopeProvider, arrowMarkerId, arrowMarkerScope } from "../connectors/arrow-markers";
 import { ARROWHEAD_TIP_OVERSHOOT_RATIO, arrowheadStrokeRatio } from "../connectors/arrowhead";
 import { SectionTitleChip } from "../objects/section/SectionTitleChip";
-import { SectionDepthProvider } from "../objects/section/section-depth-context";
+import { SectionContainerColorProvider, SectionDepthProvider } from "../objects/section/section-depth-context";
 import type { CanvasTool } from "../state/actions";
 
 // ---------------------------------------------------------------------------
@@ -299,6 +299,9 @@ function CanvasStageSurface({
   // once per document: handed to each section body and title chip, and
   // provided to overlays (the in-place title editor) via context.
   const sectionDepths = useMemo(() => sectionDepthMap(document.objects), [document.objects]);
+  // Each object's nearest section color: a node or tile of its section's own
+  // hue paints apart from it (theme/palette.ts resolveShapePaint).
+  const sectionContainers = useMemo(() => sectionContainerColorMap(document.objects), [document.objects]);
   // Marker ids are page-global; scope them per stage instance (arrow-markers.ts).
   const markerScope = arrowMarkerScope(document.id, useId());
 
@@ -518,23 +521,25 @@ function CanvasStageSurface({
             onCanvasContextMenu(event, bounds);
           }}
         >
-          {orderedObjects.map((object) => (
-            <ObjectShape
-              key={object.id}
-              object={object}
-              selected={selected.has(object.id)}
-              changed={changed.has(object.id)}
-              dropTarget={dropTargetId === object.id}
-              compact={compact}
-              bounds={bounds}
-              editable={Boolean(onObjectSelect || onStagePointerEvent)}
-              zoom={zoom}
-              hideText={editingTextObjectId === object.id}
-              sectionDepth={object.type === "section" ? sectionDepths.get(object.id) : undefined}
-              onObjectSelect={onObjectSelect}
-              onObjectContextMenu={onObjectContextMenu}
-            />
-          ))}
+          <SectionContainerColorProvider containers={sectionContainers}>
+            {orderedObjects.map((object) => (
+              <ObjectShape
+                key={object.id}
+                object={object}
+                selected={selected.has(object.id)}
+                changed={changed.has(object.id)}
+                dropTarget={dropTargetId === object.id}
+                compact={compact}
+                bounds={bounds}
+                editable={Boolean(onObjectSelect || onStagePointerEvent)}
+                zoom={zoom}
+                hideText={editingTextObjectId === object.id}
+                sectionDepth={object.type === "section" ? sectionDepths.get(object.id) : undefined}
+                onObjectSelect={onObjectSelect}
+                onObjectContextMenu={onObjectContextMenu}
+              />
+            ))}
+          </SectionContainerColorProvider>
         </div>
         {/* Selected-connection trim (endpoint rings + bend pills) in its own
             SVG layer ABOVE the object layer (z2) and below section headers:

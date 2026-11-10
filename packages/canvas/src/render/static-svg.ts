@@ -71,7 +71,7 @@ import {
   type IconTilePaint,
   type SectionPaint,
 } from "../theme/palette";
-import { sectionDepthMap } from "../state/section-depth";
+import { sectionContainerColorMap, sectionDepthMap } from "../state/section-depth";
 import {
   titleChipHasContent,
   titleChipIconDrawing,
@@ -124,6 +124,7 @@ import {
   iconTileLayout,
 } from "../objects/shapes/icon/icon-tile";
 import type {
+  CanvasColor,
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,
   InteractiveCanvasObject,
@@ -723,13 +724,14 @@ function renderIconGlyph(
   object: InteractiveCanvasObject,
   viewBox: CanvasBounds,
   canvasStyle: CanvasStyle,
+  container: CanvasColor | null,
 ): string | null {
   const glyph = resolveIconGlyph(object.icon, canvasStyle.iconPack);
   if (!glyph) return null;
   const { geometry } = object;
   const sizePx = Math.min(geometry.width, geometry.height);
   const tileSidePx = iconTileRectPx(geometry.width, geometry.height, canvasStyle.iconTileMaxPx).width;
-  const paint = resolveIconTilePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, tileSidePx, glyph.brandColor);
+  const paint = resolveIconTilePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, tileSidePx, glyph.brandColor, container);
   const markBackground = paint.tileFill ?? canvasStyle.boardBackground;
   const markFill = (fill: string) => resolveBrandMarkFill(fill, markBackground, canvasStyle);
   if (paint.tileFill !== null) {
@@ -917,6 +919,8 @@ function renderShapeBody(
   stickyShadowFilters: StickyShadowFilterIds,
   viewBox: CanvasBounds,
   canvasStyle: CanvasStyle,
+  /** The color of the section the object sits in (state/section-depth.ts sectionContainerColorMap). */
+  container: CanvasColor | null,
 ): string {
   const geometry = object.geometry;
   const renderShape = effectiveRenderShape(object);
@@ -931,7 +935,7 @@ function renderShapeBody(
 
   // The style's shape fill mode: `tint` (pastel fill + ink border) or `card`
   // (card fill + ink border) — theme/palette.ts resolveShapePaint.
-  const colors = resolveShapePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle);
+  const colors = resolveShapePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, container);
   const strokeWidth = resolveObjectStrokeWidth(object.style, canvasStyle);
 
   // Icon glyph family: render the real glyph from the style's icon pack via
@@ -940,7 +944,7 @@ function renderShapeBody(
   // outside the viewBox, whose nested <svg> would be rasterizer-unsafe —
   // falls through to the neutral-rect bbox tier.
   if ((renderShape === "icon" || object.type === "icon") && insideViewBox) {
-    const glyphMarkup = renderIconGlyph(object, viewBox, canvasStyle);
+    const glyphMarkup = renderIconGlyph(object, viewBox, canvasStyle, container);
     if (glyphMarkup !== null) return glyphMarkup;
   }
 
@@ -1571,6 +1575,7 @@ export function renderSceneToSvg(
   // paints each section at its true depth) — the layer-cake fill deepens
   // with it.
   const sectionDepths = sectionDepthMap(document.objects);
+  const sectionContainers = sectionContainerColorMap(document.objects);
 
   // The stage's five-tier layer cake, minus interactive tiers: section
   // backdrops → connectors → non-section objects → section title chips.
@@ -1641,7 +1646,7 @@ export function renderSceneToSvg(
     parts.push(renderConnector(document, connection, objectsById, scene.obstacles, canvasStyle));
   }
   for (const object of nonSections) {
-    parts.push(renderShapeBody(object, stickyShadowFilters, bounds, canvasStyle));
+    parts.push(renderShapeBody(object, stickyShadowFilters, bounds, canvasStyle, sectionContainers.get(object.id) ?? null));
     parts.push(renderObjectText(object, canvasStyle));
   }
   for (const section of sections) {

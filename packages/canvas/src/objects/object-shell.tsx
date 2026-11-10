@@ -6,7 +6,8 @@ import { resolveObjectStrokeWidth } from "../theme/tokens";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { useCanvasStyle } from "../theme/canvas-style-context";
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
-import type { InteractiveCanvasObject } from "../state/schema";
+import type { CanvasColor, InteractiveCanvasObject } from "../state/schema";
+import { useContainerColor } from "./section/section-depth-context";
 import type {
   ObjectButtonBorderPolicy,
   ObjectColorRole,
@@ -65,6 +66,8 @@ export function resolveObjectRoleColors(
   object: Pick<InteractiveCanvasObject, "color">,
   role: ObjectColorRole,
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+  /** The color of the section the object sits in (state/section-depth.ts sectionContainerColorMap). */
+  container: CanvasColor | null = null,
 ): ResolvedObjectColors {
   if (role === "sticky") {
     return {
@@ -77,7 +80,7 @@ export function resolveObjectRoleColors(
     const section = resolveSectionColors(object.color ?? FIRST_USE_COLORS.section);
     return { fill: section.tint, border: section.chip.fill, text: OBJECT_TEXT_COLOR };
   }
-  const shape = resolveShapePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle);
+  const shape = resolveShapePaint(object.color ?? FIRST_USE_COLORS.shape, canvasStyle, container);
   return { fill: shape.fill, border: shape.border, text: shape.text };
 }
 
@@ -114,8 +117,9 @@ export function objectStyle(
   colorRole: ObjectColorRole = "shape",
   buttonBorder: ObjectButtonBorderPolicy = "painted",
   canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+  container: CanvasColor | null = null,
 ): CSSProperties {
-  const colors = resolveObjectRoleColors(object, colorRole, canvasStyle);
+  const colors = resolveObjectRoleColors(object, colorRole, canvasStyle, container);
   const borderWidth = resolveObjectBorderWidth(object, colorRole, buttonBorder, undefined, canvasStyle);
   return {
     left: `${object.geometry.x}px`,
@@ -178,6 +182,7 @@ export function ObjectShell({
   style?: CSSProperties;
 }) {
   const canvasStyle = useCanvasStyle();
+  const container = useContainerColor(object.id);
   return (
     <button
       type="button"
@@ -196,8 +201,8 @@ export function ObjectShell({
       aria-label={object.text || object.type}
       style={
         style
-          ? { ...objectStyle(object, colorRole, buttonBorder, canvasStyle), ...style }
-          : objectStyle(object, colorRole, buttonBorder, canvasStyle)
+          ? { ...objectStyle(object, colorRole, buttonBorder, canvasStyle, container), ...style }
+          : objectStyle(object, colorRole, buttonBorder, canvasStyle, container)
       }
       onClick={(event) => {
         event.stopPropagation();
