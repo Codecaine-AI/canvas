@@ -146,8 +146,31 @@ describe("live shape paint", () => {
     const bars = [...node.querySelectorAll(".interactive-canvas-predefined-process-bar")] as HTMLElement[];
     expect(bars).toHaveLength(2);
     expect(bars[0]!.style.top).toBe("1.5px");
-    expect(bars[0]!.style.left).toContain("calc(");
-    expect(bars[1]!.style.right).toContain("calc(");
+    // The stroked border leaves the padding box at the outer edge: the bars sit 10px in.
+    expect(bars[0]!.style.left).toBe("10px");
+    expect(bars[1]!.style.right).toBe("10px");
+    expect(bars[0]!.style.background).toBe(bars[1]!.style.background);
+  });
+
+  it("draws predefined-process bars as a plain double line in the border color, live as static", () => {
+    const object = shape({ type: "predefined-process", style: { shape: "predefined-process" }, color: "gray", geometry: { x: 0, y: 0, width: 400, height: 64 } });
+    const style = canvasThemePreset("schematic-light");
+    const border = resolveShapePaint("gray", style).border;
+    const node = objectNode(stage([object], style), "s1");
+    const bars = [...node.querySelectorAll(".interactive-canvas-predefined-process-bar")] as HTMLElement[];
+    // No tinted end bands: only the two bars, 10px from each outer edge (less the 2px CSS border).
+    expect(node.querySelectorAll("[aria-hidden='true']")).toHaveLength(2);
+    expect(bars.map((bar) => [bar.style.left, bar.style.right, bar.style.width])).toEqual([
+      ["8px", "", "1.5px"],
+      ["auto", "8px", "1.5px"],
+    ]);
+    for (const bar of bars) expect(formatHex(parseColor(bar.style.background)!)).toBe(border);
+    const svg = renderDocumentToSvg(
+      { schemaVersion: 1, id: "pp", mode: "diagram", objects: [object], connections: [] },
+      { background: "transparent", canvasStyle: style },
+    ).svg;
+    expect(svg).toContain(`x="10" y="2" width="1.5" height="60" fill="${border}"`);
+    expect(svg).toContain(`x="388.5" y="2" width="1.5" height="60" fill="${border}"`);
   });
 
   it("the decision diamond draws its true outline outside the figjam tint mode", () => {

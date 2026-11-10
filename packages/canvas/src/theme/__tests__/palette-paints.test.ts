@@ -24,7 +24,6 @@ import {
   resolveIconPaint,
   resolveIconTilePaint,
   resolveInk,
-  resolvePredefinedProcessPaint,
   resolveLabelChipBorder,
   resolveSectionColors,
   resolveSectionPaint,
@@ -537,15 +536,6 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     // Gray and white keep their own paint; the dark preset's card nodes ignore the section.
     expect(resolveShapePaint("gray", LIGHT, "gray")).toEqual(resolveShapePaint("gray", LIGHT));
     expect(resolveShapePaint("violet", DARK, "violet")).toEqual(resolveShapePaint("violet", DARK));
-  });
-
-  it("predefined process: figjam bars in the border color; schematic end bands and a softer bar", () => {
-    const colors = resolveShapePaint("teal", LIGHT);
-    expect(resolvePredefinedProcessPaint(colors, FIGJAM_CANVAS_STYLE)).toEqual({ bar: colors.border, band: null });
-    // Full-border bars read as a second, inner border at 1:1 (stage B round 0: kimi and fable on 01, 04 and 05).
-    const inner = resolvePredefinedProcessPaint(colors, LIGHT);
-    expect(inner).toEqual({ bar: mixColors(colors.border, colors.fill, 0.5), band: mixColors(colors.border, colors.fill, 0.12) });
-    expect(oklabDistance(inner.bar, colors.border)).toBeGreaterThanOrEqual(0.1);
   });
 
   it("light ink-card shapes: gray is a near-white cool card, white the board surface", () => {

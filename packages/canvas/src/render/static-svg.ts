@@ -63,7 +63,6 @@ import {
   resolveConnectorPaint,
   resolveIconPaint,
   resolveIconTilePaint,
-  resolvePredefinedProcessPaint,
   resolveLabelChipBorder,
   resolveLabelChipText,
   resolveSectionPaint,
@@ -90,6 +89,7 @@ import {
 import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import {
   resolveObjectStrokeWidth,
+  PREDEFINED_PROCESS_BAR_INSET_PX,
   resolvePredefinedProcessBarWidth,
   resolveShapeCornerRadius,
   resolveTrueOutlineStrokeWidth,
@@ -866,8 +866,9 @@ function bboxRoundedRect(
 
 /**
  * Rounded rect + two inner vertical bars (objects/shapes/flowchart/
- * predefined-process.tsx): border-colored bars inset barInsetRatio of the
- * padding-box width from each side, spanning the padding box's height.
+ * predefined-process.tsx): border-colored bars spanning the padding box's
+ * height, inset barInsetRatio of the padding-box width from each side in
+ * FigJam and PREDEFINED_PROCESS_BAR_INSET_PX from each outer edge elsewhere.
  */
 function renderPredefinedProcessSilhouette(
   rect: WorldRect,
@@ -876,22 +877,17 @@ function renderPredefinedProcessSilhouette(
   canvasStyle: CanvasStyle,
 ): string {
   const barWidth = resolvePredefinedProcessBarWidth(strokeWidth, canvasStyle);
-  const innerX = rect.x + strokeWidth;
   const innerY = rect.y + strokeWidth;
-  const innerWidth = Math.max(0, rect.width - strokeWidth * 2);
   const innerHeight = Math.max(0, rect.height - strokeWidth * 2);
-  const barInset = innerWidth * PREDEFINED_PROCESS_GEOMETRY.barInsetRatio;
-  const inner = resolvePredefinedProcessPaint(paint, canvasStyle);
-  const strip = (x: number, width: number, fill: string) =>
-    tag("rect", { x, y: innerY, width, height: innerHeight, fill });
-  const bands = inner.band
-    ? strip(innerX, barInset + barWidth, inner.band) + strip(innerX + innerWidth - barInset - barWidth, barInset + barWidth, inner.band)
-    : "";
+  const edgeInset =
+    canvasStyle.theme === "figjam"
+      ? strokeWidth + Math.max(0, rect.width - strokeWidth * 2) * PREDEFINED_PROCESS_GEOMETRY.barInsetRatio
+      : PREDEFINED_PROCESS_BAR_INSET_PX;
+  const bar = (x: number) => tag("rect", { x, y: innerY, width: barWidth, height: innerHeight, fill: paint.border });
   return (
     bboxRoundedRect(rect, paint, strokeWidth, resolveShapeCornerRadius("predefined-process", canvasStyle)) +
-    bands +
-    strip(innerX + barInset, barWidth, inner.bar) +
-    strip(innerX + innerWidth - barInset - barWidth, barWidth, inner.bar)
+    bar(rect.x + edgeInset) +
+    bar(rect.x + rect.width - edgeInset - barWidth)
   );
 }
 

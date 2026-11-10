@@ -100,6 +100,14 @@ export function resolvePredefinedProcessBarWidth(strokeWidth: number, canvasStyl
 }
 
 export const FIGJAM_PREDEFINED_PROCESS_BAR_PX = 4;
+
+/**
+ * Outside FigJam: the gap from each outer edge of a predefined process to
+ * its bar, px. The bars draw in the border color with no tinted end band,
+ * the plain flowchart double line (Ford, stage C round 2: "For the
+ * predefined process, we can do that"). FigJam keeps its ratio inset.
+ */
+export const PREDEFINED_PROCESS_BAR_INSET_PX = 10;
 const PREDEFINED_PROCESS_BAR_SCALE = 0.75;
 
 /**
