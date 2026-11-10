@@ -1067,8 +1067,8 @@ function grayWireStroke(style: CanvasStyle): string {
   return withLightnessChroma(ink, oklabLightness(ink) + step, oklabChroma(ink));
 }
 
-/** OKLab lightness between the gray wire and the gray ink: #666562 to #4F4E4B on the light board. */
-const GRAY_WIRE_LIGHTNESS_STEP = 0.083;
+/** OKLab lightness between the gray wire and the gray ink: #666562 to #595855 on the light board, about halfway to the 0.083 step Ford found slightly too dark (stage C round 3). */
+const GRAY_WIRE_LIGHTNESS_STEP = 0.045;
 const SLATE_WIRE_LIGHTNESS = 0.58;
 const SLATE_WIRE_CHROMA = 0.03;
 /** How far the dark-board `white` wire moves from the gray ink toward the board. */

@@ -653,8 +653,8 @@ describe("schematic shapes, icons, stickies, connectors", () => {
 
   it("the gray wire steps off the gray ink, away from the board", () => {
     // Darker than the gray borders on light, lighter on dark (Ford, stage C round 3).
-    expect(resolveConnectorPaint("gray", LIGHT)).toEqual({ stroke: "#4F4E4B" });
-    expect(resolveConnectorPaint("gray", DARK)).toEqual({ stroke: "#ABB2BB" });
+    expect(resolveConnectorPaint("gray", LIGHT)).toEqual({ stroke: "#595855" });
+    expect(resolveConnectorPaint("gray", DARK)).toEqual({ stroke: "#9FA6AF" });
     expect(resolveShapePaint("gray", LIGHT).border).toBe("#666562");
     expect(resolveShapePaint("gray", DARK).border).toBe("#9198A1");
   });
