@@ -162,7 +162,8 @@ export function runOperation<TFields extends OperationFields>(
   // does not block an edit that leaves every child's overflow no worse on every
   // edge, but an edit that pushes any child further past that frame is refused.
   // A note whose text fit grew it keeps its frame, which grows to hold it.
-  const grow = growSectionsToChildren(reconcileHolding(outcome.draft, fittedNoteParents(before, outcome.draft)));
+  const held = new Map([...fittedNoteParents(before, outcome.draft), ...(outcome.held ?? [])]);
+  const grow = growSectionsToChildren(reconcileHolding(outcome.draft, held), outcome.held);
   const reconciledBefore = reconcileSectionMembership(before);
   const stuck = new Set(growSectionsToChildren(reconciledBefore).blocked.map((entry) => entry.section));
   const worsens = (section: string) => {
@@ -187,6 +188,20 @@ export function runOperation<TFields extends OperationFields>(
   const next = reconcileSectionMembership(
     reconcileConnectionWaypoints(before, grow.document),
   );
+  // A parent the edit keeps but cannot grow to hold (locked, or stopped at a
+  // locked frame's edge) would release its child: refuse instead.
+  const moved = [...(outcome.held ?? [])].flatMap(([id, parentId]) => {
+    const now = next.objects.find((object) => object.id === id)?.parentId ?? null;
+    if (now === parentId) return [];
+    return [parentId ? `${id} would leave ${parentId}, which cannot grow to hold it` : `${id} would land inside ${now}`];
+  });
+  if (moved.length > 0) {
+    return {
+      isError: true,
+      text: `ERROR · ${spec.name} — ${moved.join("; ")}. Nothing changed. Unlock or make room around the frame, or arrange fewer nodes per row.`,
+      details,
+    };
+  }
   const notes = grow.grown.length === 0
     ? outcome.notes
     : [...(outcome.notes ?? []), `grew ${grow.grown.join(", ")} to hold ${grow.grown.length === 1 ? "its" : "their"} children`];

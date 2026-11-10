@@ -65,7 +65,6 @@ import {
   type CanvasAlignEdge,
 } from "../../../state/geometry";
 
-import { growSectionsToChildren, reconcileHolding } from "../../../state/section-grow";
 import { textFitReport } from "../../../board/text-fit";
 import { autoSizeObjects } from "./auto-size";
 import { CRAFT_TARGETS } from "../../../authoring/style-guide/craft-targets";
@@ -781,17 +780,17 @@ export const arrangeSection = defineOperationTool({
       height: maxY - minY + top + padding,
     });
 
-    const { document: arranged } = lowerGeometry(ctx.draft, [
+    const { document } = lowerGeometry(ctx.draft, [
       ...placed,
       { ...section, geometry: frame },
     ]);
     const listed = new Set(cells.map((cell) => cell.id));
-    // The refit frame can outgrow its parent, and membership derived from that
-    // geometry would release it. Hold the tree while the ancestors grow around
-    // the frame; the pipeline's reconcile then agrees with it.
-    const held = new Map([...listed].map((id) => [id, p.section]));
-    if (section.parentId) held.set(p.section, section.parentId);
-    const { document } = growSectionsToChildren(reconcileHolding(arranged, held));
+    // The refit frame can outgrow its parent. The nodes, the frame and every
+    // ancestor keep their parents, so the ancestors grow around it together.
+    const held = new Map<string, string | null>([...listed].map((id) => [id, p.section]));
+    for (let frameId: string | null = p.section; frameId; frameId = held.get(frameId)!) {
+      held.set(frameId, objectOf(ctx, frameId).parentId ?? null);
+    }
 
     const leftOut = ctx.draft.objects
       .filter((object) => object.parentId === p.section && !listed.has(object.id))
@@ -806,6 +805,7 @@ export const arrangeSection = defineOperationTool({
     return {
       status: "applied",
       draft: document,
+      held,
       summary: `arrange_section ${p.section} → frame ${num(box.x)},${num(box.y)} `
         + `${num(box.width)}×${num(box.height)} · ${rowsLine}`,
       ...(leftOut.length > 0

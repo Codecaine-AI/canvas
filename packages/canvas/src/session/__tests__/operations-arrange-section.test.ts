@@ -125,31 +125,50 @@ describe("arrange_section — rows in, coordinates out", () => {
     expect(objectOf(session.draft, "api").geometry).toMatchObject({ x: 700, y: 180 });
   });
 
-  test("a nested frame wider than its parent stays its child, and the parent grows to hold it", () => {
-    const baseline = makeDocument([
-      { ...box("outer", 0, 0, 600, 400, "section"), text: "Outer" },
-      { ...box("inner", 40, 80, 520, 280, "section"), text: "Inner", color: "blue" as const, parentId: "outer" },
-      ...["a", "b", "c"].map((id) => ({ ...box(id, 80, 160, 280, 100, "process"), parentId: "inner" })),
+  // root > outer > inner, lint-clean, with inner's three nodes in a column.
+  // A row of three makes inner 1320px wide, past both of its ancestors.
+  function nestedBoard(outerLock?: "background"): InteractiveCanvasDocument {
+    return makeDocument([
+      { ...box("root", 0, 0, 800, 800, "section"), text: "Root" },
+      { ...box("outer", 40, 80, 720, 680, "section"), text: "Outer", color: "blue" as const, parentId: "root", locked: outerLock },
+      { ...box("inner", 80, 160, 640, 560, "section"), text: "Inner", color: "green" as const, parentId: "outer" },
+      ...["a", "b", "c"].map((id, row) => ({ ...box(id, 120, 240 + row * 140, 280, 100, "process"), parentId: "inner" })),
     ]);
+  }
+
+  test("a nested frame wider than its ancestors stays their child, and every ancestor grows to hold it", () => {
+    const baseline = nestedBoard();
     const session = makeTestSession(baseline, ["inner"]);
 
     const result = runOp(session, "arrange_section", { section: "inner", rows: [["a", "b", "c"]] });
 
     expect(result.isError).toBeUndefined();
-    // The row of three makes inner wider than outer was; the accepted board
-    // keeps the tree and has no overlapping frames.
+    // The draft and the accepted board keep the tree and have no overlapping frames.
     const accepted = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
       type: "canvas.applyAgentPatch",
       operations: diffDocuments(baseline, session.draft),
       summary: "accept",
     }).document;
     for (const doc of [session.draft, accepted]) {
-      expect(objectOf(doc, "inner").geometry.width).toBeGreaterThan(600);
+      expect(objectOf(doc, "inner").geometry.width).toBeGreaterThan(800);
+      expect(objectOf(doc, "root").parentId ?? null).toBeNull();
+      expect(objectOf(doc, "outer").parentId).toBe("root");
       expect(objectOf(doc, "inner").parentId).toBe("outer");
       for (const id of ["a", "b", "c"]) expect(objectOf(doc, id).parentId, id).toBe("inner");
       const overlaps = runDiagnostics(doc).filter((finding) => finding.rule === "covered-content");
       expect(overlaps.map((finding) => finding.message)).toEqual([]);
     }
+  });
+
+  test("a nested frame whose parent cannot grow is refused, and nothing moves", () => {
+    const session = makeTestSession(nestedBoard("background"), ["inner"]);
+    const before = session.draft;
+
+    const result = runOp(session, "arrange_section", { section: "inner", rows: [["a", "b", "c"]] });
+
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("inner would leave outer, which cannot grow to hold it");
+    expect(session.draft).toBe(before);
   });
 });
 

@@ -59,10 +59,12 @@ export type BlockedGrow = { section: string; captures: string[] };
  * neighbor (or reparent anything) is not made and comes back in `blocked`
  * with the objects it would move. The caller decides: the agent path refuses
  * the edit, Studio keeps the human's drop. `document` must already have
- * reconciled membership.
+ * reconciled membership. Each id in `held` keeps the parent it names while
+ * the grows are judged, so a frame and its ancestors can grow together.
  */
 export function growSectionsToChildren(
   document: InteractiveCanvasDocument,
+  held?: ReadonlyMap<string, string | null>,
 ): { document: InteractiveCanvasDocument; grown: string[]; blocked: BlockedGrow[] } {
   const sections = document.objects
     .filter((object) => object.type === "section")
@@ -124,7 +126,7 @@ export function growSectionsToChildren(
       objects: current.objects.map((object) => object.id === id ? { ...object, geometry } : object),
     };
     const parents = new Map(current.objects.map((object) => [object.id, object.parentId ?? null]));
-    const captures = reconcileSectionMembership(candidate).objects
+    const captures = reconcileHolding(candidate, held).objects
       .filter((object) => parents.get(object.id) !== (object.parentId ?? null))
       .map((object) => object.id);
     if (captures.length > 0) {
@@ -182,12 +184,13 @@ export function fittedNoteParents(
 
 /**
  * Membership reconciled from geometry, except each id in `held` keeps the
- * parent it names (while that parent is still on the board), so a section
- * grow can catch up with it. The grow's last reconcile then confirms it.
+ * parent it names (while that parent is still on the board; null keeps it at
+ * the top level), so a section grow can catch up with it. The grow's last
+ * reconcile then confirms it.
  */
 export function reconcileHolding(
   document: InteractiveCanvasDocument,
-  held: ReadonlyMap<string, string> = new Map(),
+  held: ReadonlyMap<string, string | null> = new Map(),
 ): InteractiveCanvasDocument {
   const reconciled = reconcileSectionMembership(document);
   if (held.size === 0) return reconciled;
@@ -196,7 +199,8 @@ export function reconcileHolding(
     ...reconciled,
     objects: reconciled.objects.map((object) => {
       const parentId = held.get(object.id);
-      return parentId && ids.has(parentId) && object.parentId !== parentId ? { ...object, parentId } : object;
+      if (parentId === undefined || (parentId !== null && !ids.has(parentId)) || object.parentId === parentId) return object;
+      return { ...object, parentId };
     }),
   };
 }

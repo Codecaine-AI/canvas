@@ -47,6 +47,12 @@ export type OpOutcome =
       draft: InteractiveCanvasDocument;
       summary: string;
       notes?: string[];
+      /**
+       * Parents this edit keeps (child id to section id, or null for the top
+       * level). Section grow keeps them while it grows the ancestors, and the
+       * edit is refused when the board would still move one.
+       */
+      held?: ReadonlyMap<string, string | null>;
     }
   /** A well-formed, legal operation with nothing to do; this is not an error. */
   | { status: "noop"; note: string };
