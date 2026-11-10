@@ -487,7 +487,7 @@ describe("schematic shapes, icons, stickies, connectors", () => {
     expect(contrastRatio(white.border, white.fill)).toBeGreaterThanOrEqual(4.5);
   });
 
-  it("light preset: a node or tile in a section of its own hue is the white card edged in its own ink", () => {
+  it("light preset: a node, tile or note in a section of its own hue is the white card edged in its own ink", () => {
     // A hued node on a tint of its own hue read as a darker patch of the
     // section (stage B round 0: fable on 01, 03, 04, 06 and 14).
     const white = resolveShapePaint("white", LIGHT);
@@ -501,6 +501,15 @@ describe("schematic shapes, icons, stickies, connectors", () => {
       // Any other section, and no section, keeps the hued node.
       expect(resolveShapePaint(color, LIGHT, color === "blue" ? "teal" : "blue")).toEqual(resolveShapePaint(color, LIGHT));
     }
+    // A note in a section of its own color is the white card, with its own edge, rule and code chips
+    // (stage B round 0: a yellow note melted into its yellow section on 12).
+    for (const color of CANVAS_COLORS.filter((candidate) => candidate !== "white")) {
+      const own = resolveStickyPaint(color, LIGHT, color);
+      expect(own).toEqual({ ...resolveStickyPaint(color, LIGHT), fill: resolveStickyPaint("white", LIGHT).fill });
+      expect(contrastRatio(own.text, own.fill)).toBeGreaterThanOrEqual(7);
+    }
+    expect(resolveStickyPaint("yellow", LIGHT, "gray")).toEqual(resolveStickyPaint("yellow", LIGHT));
+    expect(resolveStickyPaint("yellow", DARK, "yellow")).toEqual(resolveStickyPaint("yellow", DARK));
     // Gray and white keep their own paint; the dark preset's card nodes ignore the section.
     expect(resolveShapePaint("gray", LIGHT, "gray")).toEqual(resolveShapePaint("gray", LIGHT));
     expect(resolveShapePaint("violet", DARK, "violet")).toEqual(resolveShapePaint("violet", DARK));

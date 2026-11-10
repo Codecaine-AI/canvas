@@ -113,13 +113,18 @@ const NBSP = "\u00A0";
 
 /**
  * Inline `code` paints in the canvas's bundled mono face — IBM Plex Mono at
- * regular weight, whatever the row's weight (headings, bold runs) — so the
+ * medium weight, whatever the row's weight (headings, bold runs) — so the
  * live sticky, its editor, the static render, and the measurement that wraps
  * it all use one face (theme/fonts.ts, theme/text-measure.ts).
  */
 export const STICKY_MARKDOWN_MONO_FONT = CANVAS_MONO_FONT_STACK;
-/** Inline `code` weight: Plex Mono Regular at every row weight. */
-export const STICKY_MARKDOWN_MONO_FONT_WEIGHT = 400;
+/**
+ * Inline `code` weight: Plex Mono Medium at every row weight. Regular read
+ * thin and lighter than the note body at 1:1 (stage B round 0: kimi on the
+ * source line of 06, fable on the code chips of 12). Plex Mono keeps one
+ * advance at every weight, so no line wraps differently.
+ */
+export const STICKY_MARKDOWN_MONO_FONT_WEIGHT = 500;
 
 /** Full-scale heading sizes in em of the body size (H1 / H2 / H3). */
 const STICKY_HEADING_FULL_EM: Record<1 | 2 | 3, number> = { 1: 1.5, 2: 1.25, 3: 1.1 };

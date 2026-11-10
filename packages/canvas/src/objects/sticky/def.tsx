@@ -6,6 +6,7 @@ import { resolveStickyPaint, type StickyPaint } from "../../theme/palette";
 import { canvasStyleCssVar, useCanvasStyle } from "../../theme/canvas-style-context";
 import type { CanvasStyle } from "../../theme/canvas-style";
 import { BBOX_OUTLINE } from "../geometry";
+import { useContainerColor } from "../section/section-depth-context";
 import { ObjectShell, ObjectSlotText } from "../object-shell";
 import type { ObjectDef, ObjectRenderProps } from "../object-def";
 import { INSET_BODY_TEXT_SLOT } from "../text-slots";
@@ -86,7 +87,8 @@ function cardStickyTrim(paint: StickyPaint, changed: boolean, canvasStyle: Canva
 function StickyObjectView(props: ObjectRenderProps) {
   const { object, hideText } = props;
   const canvasStyle = useCanvasStyle();
-  const paint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle);
+  const container = useContainerColor(object.id);
+  const paint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle, container);
   return (
     <ObjectShell
       object={object}

@@ -98,7 +98,7 @@ describe("layoutStickyText", () => {
     expect(rows.flatMap((row) => row.segments.map((s) => s.text)).join("")).toBe(word);
   });
 
-  it("measures bold runs in Inter Bold and inline code in IBM Plex Mono 400 with its padding", () => {
+  it("measures bold runs in Inter Bold and inline code in IBM Plex Mono 500 with its padding", () => {
     const rows = layoutStickyText("**bold** and `code`", SLOT_WIDTH_PX, BODY_FONT_SIZE_PX);
     const [row] = rows;
     const strong = row!.segments.find((segment) => segment.style === "strong")!;
@@ -109,12 +109,12 @@ describe("layoutStickyText", () => {
     const code = row!.segments.find((segment) => segment.style === "code")!;
     const codeFontSize = 24 * STICKY_CODE_FONT_EM;
     expect(code.fontSizePx).toBeCloseTo(codeFontSize, 10);
-    expect(code.fontWeight).toBe(400);
+    expect(code.fontWeight).toBe(500);
     // Four Plex Mono cells plus 0.15em padding each side (each kept in 1/64px layout units).
     const padding = Math.floor(codeFontSize * STICKY_CODE_PADDING_X_EM * 64) / 64;
     expect(code.textOffsetPx).toBe(padding);
     expect(code.widthPx).toBeCloseTo(
-      measureWidth("code", { family: "IBM Plex Mono", size: codeFontSize, weight: 400 }) + 2 * padding,
+      measureWidth("code", { family: "IBM Plex Mono", size: codeFontSize, weight: 500 }) + 2 * padding,
       1,
     );
     // The code chip starts where the plain run before it ends.

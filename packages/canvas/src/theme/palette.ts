@@ -801,8 +801,23 @@ export function brandHeaderIconColors(
  * Beside `ink-card` nodes (the light schematic preset) the card is a tinted
  * callout in the pick's own hue (noteCardStickyPaint).
  */
-export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle): StickyPaint {
+export function resolveStickyPaint(color: CanvasColor, style: CanvasStyle, container: CanvasColor | null = null): StickyPaint {
+  if (noteOnOwnHueSection(color, container, style)) {
+    return cachedPaint(style, `sticky-own-hue|${color}`, () => ({ ...stickyPaint(color, style), fill: stickyPaint("white", style).fill }));
+  }
   return cachedPaint(style, `sticky|${color}`, () => stickyPaint(color, style));
+}
+
+/**
+ * Whether a tinted card note sits in a section of its own color (`container`,
+ * state/section-depth.ts sectionContainerColorMap). There it is the white
+ * card with its own edge, rule and code chips: a yellow note on a yellow
+ * section melted into it (stage B round 0: astra, kimi and fable on 12), the
+ * note twin of the white node card (onOwnHueSection). Gray takes it too: its
+ * slate wash sits a hair off a gray section.
+ */
+function noteOnOwnHueSection(color: CanvasColor, container: CanvasColor | null, style: CanvasStyle): boolean {
+  return container === color && color !== "white" && style.stickyStyle === "card" && style.shapeFill === "ink-card";
 }
 
 /** Card sticky lift: the text color at this opacity (light boards only). */
@@ -860,12 +875,14 @@ const NOTE_NEUTRAL = {
  * whose pale wash is the beige paper Ford turned down. It sits at the other
  * washes' tint level, a touch lighter and more colorful so it reads yellow:
  * the old L 0.977, chroma 0.072 lemon was the loudest card on the sheet
- * (stage A rounds 9 and 10: opus on every yellow note).
+ * (stage A rounds 9 and 10: opus on every yellow note). Its rule is a soft
+ * gold (L 0.76, chroma 0.11): the saturated L 0.78, chroma 0.15 stripe was
+ * the loudest accent on the board (stage B round 0: fable on h1, h3, h4).
  */
 const NOTE_YELLOW = {
   fill: { anchor: "#FFE600", lightness: 0.962, chroma: 0.06, hue: -6 },
   edge: { anchor: "#FFE600", lightness: 0.885, chroma: 0.075, hue: -6 },
-  rule: { anchor: "#FFD000", lightness: 0.78, chroma: 0.15, hue: 0 },
+  rule: { anchor: "#FFD000", lightness: 0.76, chroma: 0.11, hue: 0 },
   codeChip: { anchor: "#FFE600", lightness: 0.905, chroma: 0.085, hue: -6 },
 } as const;
 

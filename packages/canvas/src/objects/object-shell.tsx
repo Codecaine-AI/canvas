@@ -71,7 +71,7 @@ export function resolveObjectRoleColors(
 ): ResolvedObjectColors {
   if (role === "sticky") {
     return {
-      fill: resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle).fill,
+      fill: resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle, container).fill,
       border: null,
       text: canvasStyle.textColor,
     };

@@ -498,9 +498,10 @@ function renderStickyBody(
   shadowFilters: StickyShadowFilterIds,
   insideViewBox: boolean,
   canvasStyle: CanvasStyle,
+  container: CanvasColor | null,
 ): string {
   const { geometry } = object;
-  const paint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle);
+  const paint = resolveStickyPaint(object.color ?? FIRST_USE_COLORS.sticky, canvasStyle, container);
   const radius = Math.min(canvasStyle.stickyCornerRadiusPx, geometry.width / 2, geometry.height / 2);
   const rounded = radius > 0 ? { rx: radius } : null;
   if (paint.shadow) {
@@ -930,7 +931,7 @@ function renderShapeBody(
 
   // Sticky note ("note" render shape): the sticky paint's body (renderStickyBody).
   if (renderShape === "note") {
-    return renderStickyBody(object, stickyShadowFilters, insideViewBox, canvasStyle);
+    return renderStickyBody(object, stickyShadowFilters, insideViewBox, canvasStyle, container);
   }
 
   // The style's shape fill mode: `tint` (pastel fill + ink border) or `card`
