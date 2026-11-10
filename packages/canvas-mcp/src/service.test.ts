@@ -186,7 +186,7 @@ describe("canvas service", () => {
     expect(readFileSync(path, "utf8")).toBe(before);
   });
 
-  test("workflow tools: look returns renders; set_board_title and add_annotation persist", async () => {
+  test("workflow tools: look returns renders; describe_board and add_annotation persist", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
     const service = createCanvasService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
@@ -196,7 +196,7 @@ describe("canvas service", () => {
     expect(looked.content.some((item) => item.type === "image" && item.mimeType === "image/png")).toBe(true);
     expect(textOf(looked)).not.toContain("SAVED");
 
-    await service.call("set_board_title", { title: "Retitled by MCP" });
+    await service.call("describe_board", { title: "Retitled by MCP" });
     const target = readDoc(path).objects.find((object: any) => object.id !== "page-frame").id;
     const asked = await service.call("add_annotation", { objectId: target, body: "Is this step still needed?" });
     expect(asked.isError).toBeUndefined();
@@ -208,7 +208,7 @@ describe("canvas service", () => {
 
     const names = service.listTools().map((tool) => tool.name);
     expect(names).not.toContain("finalize");
-    expect(names).toEqual(expect.arrayContaining(["look", "update_description", "set_board_title", "add_annotation", "reply_annotation", "resolve_request"]));
+    expect(names).toEqual(expect.arrayContaining(["look", "describe_board", "add_annotation", "reply_annotation", "resolve_request"]));
   });
 
   test("canvas_open reads canvases/canvas-style.json, and look renders with it", async () => {

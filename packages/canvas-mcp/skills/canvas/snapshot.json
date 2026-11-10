@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:6dcbbb4097a3e7d01e66f3ed4bb6a8be4225793993d904b4ff3ec5d981703657",
+  "snapshotId": "sha256:e95afa5dcb7e99430e67c0302cb66d260b823134a02c6a5ca496bbe27091ff61",
   "sources": [
     {
       "id": "prompt",
@@ -10,7 +10,7 @@
     {
       "id": "state_grammar",
       "path": "packages/canvas/src/authoring/state-grammar.ts",
-      "sha256": "d7a7521abdd21cf55a7af9c23195b950798f0c8e39f7de395d5bd6d5fe4c2a62"
+      "sha256": "fd7b1c611570d189586c3484f6cbc9846d7f6b5b0fab260f472b8a81eed5fe3f"
     },
     {
       "id": "aesthetic",

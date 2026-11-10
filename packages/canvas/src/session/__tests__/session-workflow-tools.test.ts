@@ -1,10 +1,11 @@
 /**
- * The two workflow tools of S3.7 — `reply_annotation` and `set_board_title`.
+ * Two workflow paths of S3.7 — the `reply_annotation` reply and the
+ * `describe_board` rename.
  *
  * They are hand-written rather than operation descriptors because neither one
  * edits board geometry, so what has to be pinned is different: for
- * reply_annotation, that saying something is NOT disposing something; for
- * set_board_title, that the rename survives the whole commit path — draft →
+ * reply_annotation, that saying something is NOT disposing something; for the
+ * describe_board title, that the rename survives the whole commit path — draft →
  * diff → patch op → the live reducer — since before this slice there was no
  * patch op for a title at all and the change died at finalize.
  */
@@ -23,8 +24,8 @@ import {
   syncSessionRequests,
   toolFinalize,
   toolReplyAnnotation,
+  toolDescribeBoard,
   toolResolveRequest,
-  toolSetBoardTitle,
   type LayoutSession,
 } from "..";
 import { makeTestSession } from "./helpers";
@@ -129,14 +130,14 @@ describe("reply_annotation", () => {
   });
 });
 
-describe("set_board_title", () => {
+describe("describe_board title", () => {
   test("renames the draft and reports the delta", () => {
     const session = makeTestSession(makeDocument([box("a", 0, 0)]), ["a"]);
 
-    const result = toolSetBoardTitle(session, "  Onboarding flow  ", emitSessionEvent);
+    const result = toolDescribeBoard(session, { title: "  Onboarding flow  " }, emitSessionEvent);
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · set_board_title");
+    expect(result.text).toContain("APPLIED · describe_board");
     expect(result.text).toContain('DELTA · title "Synthetic" → "Onboarding flow"');
     // Every edit result carries its lint delta. A rename moves no lint.
     expect(result.text.split("\n").at(-1)).toMatch(/^LINTS · (clean|\+0 −0 \(\d+ open\))$/);
@@ -148,13 +149,13 @@ describe("set_board_title", () => {
   test("an empty title is rejected and an identical one is a no-op", () => {
     const session = makeTestSession(makeDocument([box("a", 0, 0)]), ["a"]);
 
-    const empty = toolSetBoardTitle(session, "   ", emitSessionEvent);
+    const empty = toolDescribeBoard(session, { title: "   " }, emitSessionEvent);
     expect(empty.isError).toBe(true);
     expect(empty.text).toContain("never left nameless");
 
-    const same = toolSetBoardTitle(session, "Synthetic", emitSessionEvent);
+    const same = toolDescribeBoard(session, { title: "Synthetic" }, emitSessionEvent);
     expect(same.isError).toBeUndefined();
-    expect(same.text).toContain("NO-OP · set_board_title");
+    expect(same.text).toBe("NO-OP · describe_board — the board is already called that.");
     expect(session.events).toEqual([]);
   });
 
@@ -170,7 +171,7 @@ describe("set_board_title", () => {
 
   test("the diff block and the commit delta both name the rename", () => {
     const session = makeTestSession(makeDocument([box("a", 0, 0)]), ["a"]);
-    toolSetBoardTitle(session, "Renamed", emitSessionEvent);
+    toolDescribeBoard(session, { title: "Renamed" }, emitSessionEvent);
 
     expect(boardDiffBlock(session)).toContain('updateTitle  "Renamed"');
     expect(describePatchOperation({ type: "updateTitle", title: "Renamed" }))
@@ -179,7 +180,7 @@ describe("set_board_title", () => {
 
   test("the rename survives a commit replay through canvas.applyAgentPatch", () => {
     const session = makeTestSession(makeDocument([box("a", 0, 0)]), ["a"]);
-    toolSetBoardTitle(session, "Onboarding flow", emitSessionEvent);
+    toolDescribeBoard(session, { title: "Onboarding flow" }, emitSessionEvent);
 
     const committed = toolFinalize(session, "committed", "Renamed the board", emitSessionEvent);
     expect(committed.isError).toBeUndefined();

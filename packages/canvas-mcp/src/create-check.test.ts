@@ -260,7 +260,7 @@ describe("canvas_create and canvas_check", () => {
     }
     // Nothing opened, so no edit can reach the outside file.
     expect(service.activeCanvas()).toBeNull();
-    expect((await service.call("set_board_title", { title: "Hijacked" })).isError).toBe(true);
+    expect((await service.call("describe_board", { title: "Hijacked" })).isError).toBe(true);
     expect(readFileSync(outside)).toEqual(board);
 
     // A sidecar in any folder under the root opens.

@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/state-grammar.ts (sha256 d7a7521abdd21cf55a7af9c23195b950798f0c8e39f7de395d5bd6d5fe4c2a62), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/state-grammar.ts (sha256 fd7b1c611570d189586c3484f6cbc9846d7f6b5b0fab260f472b8a81eed5fe3f), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Operating Context
 
@@ -45,8 +45,8 @@ The reading key for MCP results, and the house style.
             - whitespace collapses to single spaces, but every word is there
         - <description> is the board's own markdown account
             - the board shows what is there, the description says what it means
-            - update_description replaces it
-            - set_board_title renames the board
+            - describe_board with description replaces it
+            - describe_board with title renames the board
         - annotation threads never appear in the digest
             - they are the <requests> queue
     </board>
