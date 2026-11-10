@@ -1,8 +1,8 @@
 /**
- * The Sections group — `fit_section`, `change_section_border`, `lock`,
- * `unlock` (docs/10-system-design/70-agent-tool-surface/20-gestures §Sections).
+ * The Sections group — `fit_section`, `change_section_border`, `lock`
+ * (docs/10-system-design/70-agent-tool-surface/20-gestures §Sections).
  *
- * Four gestures that act on a frame AS a frame: close it around what it holds,
+ * Three gestures that act on a frame AS a frame: close it around what it holds,
  * restroke its border, and protect or release its region. Everything a section
  * shares with the other kinds lives elsewhere — its title is `update_text`, its
  * fill is `change_color`, its box is the Arrange group, and opening a new frame
@@ -12,9 +12,9 @@
  * descriptors, including containment reconciliation, diffing, linting,
  * rendering, and event emission.
  *
- * LOCK MANAGEMENT IS EXEMPT FROM THE LOCK GATE. `lock` and `unlock` are the two
- * gestures a lock does not gate: changing the mode of a frame's own lock, or
- * lifting it, is the management of the lock rather than an edit under it.
+ * LOCK MANAGEMENT IS EXEMPT FROM THE LOCK GATE. `lock` is the one gesture a
+ * lock does not gate: changing the mode of a frame's own lock, or lifting it
+ * with mode "none", is the management of the lock rather than an edit under it.
  * Everything else here — fitting a frame, restroking it — runs
  * `requireUnlocked` like every other mutator on the roster.
  */
@@ -23,7 +23,6 @@ import {
   ChangeSectionBorderParams,
   Id,
   LockParams,
-  UnlockParams,
 } from "../schemas";
 
 export const fitSection = defineOperationTool({
@@ -40,18 +39,18 @@ export const fitSection = defineOperationTool({
 });
 
 // ---------------------------------------------------------------------------
-// Lock, unlock, and the border stroke
+// Lock and the border stroke
 // ---------------------------------------------------------------------------
 //
-// All four gate on `requireSection`, and that gate is load-bearing: the
+// All three gate on `requireSection`, and that gate is load-bearing: the
 // document schema and the studio validator both accept `locked` on any object,
 // so nothing below the tool boundary would stop a shape from being locked.
 // Locking is a section-level idea — you protect a region of the board, not one
 // box — and the agent-side check is where that intent is enforced on this path,
 // alongside the context menu's own section gate on the UI path.
 //
-// None of these three touch geometry, so none of them need the agent grid; and
-// membership reconciliation still runs after every one of them, in the shared
+// Neither of these two touches geometry, so neither needs the agent grid; and
+// membership reconciliation still runs after both of them, in the shared
 // factory stage (operation-tool.ts), which is why no descriptor here mentions
 // it. A border restroke or a lock cannot move an edge, so reconciliation is a
 // no-op on this path by construction rather than by omission.
@@ -105,24 +104,5 @@ export const lock = defineOperationTool({
       patch: { locked: p.mode === "none" ? undefined : p.mode },
     },
     `lock ${p.id} ${p.mode}`,
-  ),
-});
-
-export const unlock = defineOperationTool({
-  name: "unlock",
-  description:
-    "Release a section's lock, restoring normal editing to the frame and its "
-    + "contents. A lock a person set is a don't-touch signal: lift one only "
-    + "when the request cannot be carried out otherwise, and say that you did.",
-  fields: UnlockParams.properties,
-  // Never lock-gated, by definition: this is the one call that lifts a lock, so
-  // gating it on the lock it lifts would make every lock permanent.
-  validate: (ctx, p) => ctx.requireSection(p.id),
-  apply: (ctx, p) => ctx.applyLowered(
-    // `undefined` in an object patch deletes the key on the way down, and an
-    // already-unlocked frame therefore produces an identical document — which
-    // the factory reports as a no-op rather than an empty APPLIED line.
-    { type: "updateObject", objectId: p.id, patch: { locked: undefined } },
-    `unlock ${p.id}`,
   ),
 });

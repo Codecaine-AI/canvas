@@ -5,7 +5,7 @@
  * finalize.
  *
  * `workflowTools` is the roster, in registration order — the order the model
- * meets these tools, after the 25 gestures: `look` first, `finalize` last and
+ * meets these tools, after the 24 gestures: `look` first, `finalize` last and
  * alone in carrying `terminate`.
  */
 import { addAnnotation } from "./add-annotation";

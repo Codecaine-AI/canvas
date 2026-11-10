@@ -496,12 +496,6 @@ export const LockParams = Type.Object(
 );
 export type LockParams = Static<typeof LockParams>;
 
-export const UnlockParams = Type.Object(
-  { id: Id },
-  { ...Seal, description: "Release a section's lock." },
-);
-export type UnlockParams = Static<typeof UnlockParams>;
-
 // ---------------------------------------------------------------------------
 // Gesture payloads — Delete
 // ---------------------------------------------------------------------------

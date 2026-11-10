@@ -19,9 +19,9 @@
  *
  * A LOCK GATE OWES ITS RELEASE. The lock gates below are the second family of
  * refusal, and they name both the lock that stopped the gesture and the one
- * call that lifts it (`unlock`), because a lock is a person's mark on a region
- * and the model has to decide whether the request really requires editing
- * there — see `requireUnlocked` for the full rule.
+ * call that lifts it (`lock` mode "none"), because a lock is a person's mark
+ * on a region and the model has to decide whether the request really requires
+ * editing there — see `requireUnlocked` for the full rule.
  */
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../../theme/canvas-style";
@@ -92,12 +92,12 @@ export interface OpContext {
   requirePositionable(id: string, field?: string): string[];
   /**
    * Require a section — the gate for the Sections group (`fit_section`,
-   * `change_section_border`, `lock`, `unlock`), all four of which act on a
+   * `change_section_border`, `lock`), all three of which act on a
    * frame AS a frame. Other kinds are redirected to the gesture that does the
    * comparable thing to them, or to `place_section` when what was wanted was a
    * frame there is none of.
    *
-   * `field` names the parameter in the diagnostic. All four take a plain `id`,
+   * `field` names the parameter in the diagnostic. All three take a plain `id`,
    * so the default is almost always right; the parameter stays because the
    * arrange gestures reach for the same wording under other names.
    */
@@ -206,15 +206,15 @@ export interface OpContext {
 /**
  * The half-sentence every lock refusal ends with. It has to carry two things:
  * that the lock is a person's don't-touch mark (not an accident of state), and
- * the one call that lifts it, so the model can weigh unlocking against the
+ * the one call that lifts it, so the model can weigh releasing it against the
  * request instead of hunting for a way around the refusal.
  */
 const LOCK_RELEASE =
-  "a lock is a don't-touch signal; unlock it first if the request requires editing here";
+  "a lock is a don't-touch signal; release it first with lock mode \"none\" if the request requires editing here";
 
 /** What a lock gate found: the frame holding the lock, its mode, and whose it is. */
 export interface LockHold {
-  /** The object carrying the `locked` value — the id `unlock` takes. */
+  /** The object carrying the `locked` value — the id `lock` mode "none" takes. */
   holderId: string;
   mode: "all" | "background";
   /** True when the gated object IS the holder (its own lock, either mode). */
@@ -334,7 +334,7 @@ export function createOpContext(
       if (kind === "section") return [];
       return [
         `${field} "${id}" is ${kind === "sticky" ? "a sticky" : `a ${target.type}`},`
-        + " not a frame — fit_section, change_section_border, lock and unlock act on"
+        + " not a frame — fit_section, change_section_border and lock act on"
         + " sections; place_section opens one.",
       ];
     },

@@ -196,7 +196,7 @@ export function runOperation<TFields extends OperationFields>(
   if (moved.length > 0) {
     return {
       isError: true,
-      text: `ERROR · ${spec.name} — ${moved.join("; ")}. Nothing changed. Move the other section clear, unlock or make room around the frame, or make the edit smaller.`,
+      text: `ERROR · ${spec.name} — ${moved.join("; ")}. Nothing changed. Move the other section clear, release the lock with lock mode "none" or make room around the frame, or make the edit smaller.`,
       details,
     };
   }

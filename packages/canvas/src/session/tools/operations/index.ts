@@ -6,7 +6,7 @@
  *   Arrange   move_to, move_by, resize, match_size, align, space_out,
  *             arrange_section, tighten_wires
  *   Content   update_text, change_color, change_shape
- *   Sections  fit_section, change_section_border, lock, unlock
+ *   Sections  fit_section, change_section_border, lock
  *   Edges     style_edge, change_connection, reroute, shift_segment,
  *             reset_route, move_label
  *   Delete    delete
@@ -62,7 +62,6 @@ import {
   changeSectionBorder,
   fitSection,
   lock,
-  unlock,
 } from "./sections";
 
 export interface OperationTool {
@@ -103,7 +102,6 @@ export {
   spaceOut,
   styleEdge,
   tightenWiresTool,
-  unlock,
   updateText,
 };
 
@@ -139,7 +137,6 @@ export const operationTools: readonly OperationTool[] = [
   fitSection,
   changeSectionBorder,
   lock,
-  unlock,
   // Edges (./edges.ts). Restyle, repoint, and the three routing instruments
   // plus the label pin. Every one of them returns the edge's fresh numbered
   // polyline, which is what lets a second shift in the same turn chain off the

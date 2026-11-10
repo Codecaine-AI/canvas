@@ -5,9 +5,10 @@
  *
  * A lock is stored as one field on a section, but it is enforced everywhere:
  * these cases pin the two modes apart ("background" pins the frame alone,
- * "all" freezes the frame and everything under it), pin the two exemptions
- * (`lock` and `unlock` are lock MANAGEMENT, not edits under a lock), and pin
- * the regional rule edges are judged by — an edge into a locked-all closure is
+ * "all" freezes the frame and everything under it), pin the exemption
+ * (`lock` changes a lock's mode or deletes it with mode "none", which is lock
+ * MANAGEMENT, not an edit under a lock), and pin the regional rule edges are
+ * judged by — an edge into a locked-all closure is
  * part of that closure, while a background lock never gates the wires between
  * the children it holds.
  */
@@ -66,7 +67,7 @@ function expectLockRefusal(
   expect(result.isError).toBe(true);
   expect(result.text).toContain(clause);
   expect(result.text).toContain(
-    "a lock is a don't-touch signal; unlock it first if the request requires editing here",
+    "a lock is a don't-touch signal; release it first with lock mode \"none\" if the request requires editing here",
   );
 }
 

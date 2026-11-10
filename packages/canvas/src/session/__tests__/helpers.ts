@@ -52,7 +52,6 @@ export type OperationToolName =
   | "fit_section"
   | "change_section_border"
   | "lock"
-  | "unlock"
   // Edges
   | "style_edge"
   | "change_connection"
