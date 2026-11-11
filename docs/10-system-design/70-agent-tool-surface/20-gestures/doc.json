@@ -77,6 +77,7 @@
         "b-ts-ge-finish-look-refusal-47",
         "b-ts-ge-finish-look-board-48",
         "b-ts-ge-finish-annotations-49",
+        "b-ts-ge-finish-resolve-49b",
         "b-ts-ge-finish-standing-50",
         "b-ts-ge-finish-finalize-51",
         "b-ts-ge-finish-assumption-52"
@@ -1918,7 +1919,7 @@
       },
       "text": [
         {
-          "insert": "look({ view?: Id, at?: Rect })       // exactly one knob\n\nadd_annotation  ({ objectId: Id, body: string })\nreply_annotation({ id: string, body: string })\nresolve_request ({ id: string, status: \"done\" | \"declined\", note: string })\n\nupdate_description({ description: string })\nset_board_title   ({ title: string })\n\nfinalize({ outcome: \"committed\" | \"none\", message: string })"
+          "insert": "look({ view?: Id, at?: Rect })       // exactly one knob\n\nannotate       ({ objectId?: Id | null, thread?: string | null, body: string })   // exactly one of objectId or thread\nresolve_request({ id: string, status: \"done\" | \"declined\", note: string })\n\ndescribe_board({ title?: string | null, description?: string | null })   // title, description or both\n\nfinalize({ outcome: \"committed\" | \"none\", message: string })"
         }
       ],
       "children": []
@@ -2042,23 +2043,58 @@
       "props": {},
       "text": [
         {
-          "insert": "add_annotation",
+          "insert": "annotate",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " anchors a question to one object as a thread the user answers on their own time. It never waits: leave the question, proceed on the best reading, and name any open thread in the finalize message. Use it only where the answer would genuinely change the diagram (one or two per run at most). "
+          "insert": " writes in an annotation thread, and each call sends exactly one of "
         },
         {
-          "insert": "reply_annotation",
+          "insert": "objectId",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " posts into an existing thread without moving its status, addressed by the thread's queue alias or its annotation id. "
+          "insert": " or "
         },
+        {
+          "insert": "thread",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". A null one counts as absent. With "
+        },
+        {
+          "insert": "objectId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", it anchors a question to one object as a thread the user answers on their own time. A new thread never waits: leave the question and proceed on the best reading. Use it only where the answer would genuinely change the diagram (one or two per run at most). With "
+        },
+        {
+          "insert": "thread",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", it posts into an existing thread without moving its status, addressed by the thread's queue alias or its annotation id."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ge-finish-resolve-49b": {
+      "id": "b-ts-ge-finish-resolve-49b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
         {
           "insert": "resolve_request",
           "attributes": {
@@ -2066,7 +2102,7 @@
           }
         },
         {
-          "insert": " is the closing move: it disposes one open queue entry as done or declined, and the note is required (one line for the operator saying what was done, or why it was declined)."
+          "insert": " is the closing move: it disposes one open queue entry as done or declined. Its note is required: one line for the operator that says what was done, or why it was declined."
         }
       ],
       "children": []
@@ -2077,7 +2113,34 @@
       "props": {},
       "text": [
         {
-          "insert": "update_description",
+          "insert": "describe_board",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " renames the board, replaces its standing account, or both, in one save. Send "
+        },
+        {
+          "insert": "title",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "description",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or both. A call with neither is refused, and a null field counts as absent. "
+        },
+        {
+          "insert": "description",
           "attributes": {
             "code": true
           }
@@ -2086,13 +2149,13 @@
           "insert": " replaces the board's standing account wholesale: the full replacement markdown, not a patch. "
         },
         {
-          "insert": "set_board_title",
+          "insert": "title",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " renames the board: the name shown above it, short, and what a person would call it. The pair goes together when the diagram's subject has moved on from the name it was created with."
+          "insert": " renames the board: the name shown above it, short, and what a person would call it. The tool checks both fields before it saves, so a bad field leaves the board unchanged."
         }
       ],
       "children": []

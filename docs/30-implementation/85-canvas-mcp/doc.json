@@ -214,7 +214,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The server lists 37 tools: five of its own, then the 32 toolkit tools in the agent's registration order. The toolkit is the agent's 26 operation tools plus six of its seven workflow tools. "
+          "insert": "The server lists 35 tools: five of its own, then the 30 toolkit tools in the agent's registration order. The toolkit is the agent's 26 operation tools plus four of its five workflow tools. "
         },
         {
           "insert": "finalize",
@@ -569,37 +569,19 @@
           [
             [
               {
-                "insert": "update_description",
-                "attributes": {
-                  "code": true
-                }
-              },
-              {
-                "insert": ", "
-              },
-              {
-                "insert": "set_board_title",
+                "insert": "describe_board",
                 "attributes": {
                   "code": true
                 }
               }
             ],
             "Toolkit workflow",
-            "Edit the board description and title. Both save like any edit."
+            "Renames the board, replaces its description, or both, and saves once like any edit."
           ],
           [
             [
               {
-                "insert": "add_annotation",
-                "attributes": {
-                  "code": true
-                }
-              },
-              {
-                "insert": ", "
-              },
-              {
-                "insert": "reply_annotation",
+                "insert": "annotate",
                 "attributes": {
                   "code": true
                 }
@@ -1940,8 +1922,8 @@
           ],
           [
             "Tools",
-            "33: the 26 gestures and 7 workflow tools.",
-            "37: 5 server tools, the 26 gestures, and 6 workflow tools.",
+            "31: the 26 gestures and 5 workflow tools.",
+            "35: 5 server tools, the 26 gestures, and 4 workflow tools.",
             [
               {
                 "insert": "The "
@@ -2254,34 +2236,7 @@
           }
         },
         {
-          "insert": " block, and "
-        },
-        {
-          "insert": "add_annotation",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " and "
-        },
-        {
-          "insert": "resolve_request",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " refer to "
-        },
-        {
-          "insert": "finalize",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ". This host has neither."
+          "insert": " block, and this host has no such block."
         }
       ],
       "children": []

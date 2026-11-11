@@ -158,7 +158,7 @@
       },
       "text": [
         {
-          "insert": "createSession\n  → read + hash baseline\n  → resolve selected object ids\n  → create draft and inject a page frame when needed\n  → merge annotations into the request queue\n  → boot current text context + images\n  → run model against the thirty-three tools\n  → proposal-ready | abandoned | error\n  → operator accepts or rejects a proposal"
+          "insert": "createSession\n  → read + hash baseline\n  → resolve selected object ids\n  → create draft and inject a page frame when needed\n  → merge annotations into the request queue\n  → boot current text context + images\n  → run model against the thirty-one tools\n  → proposal-ready | abandoned | error\n  → operator accepts or rejects a proposal"
         }
       ],
       "children": []
@@ -571,7 +571,7 @@
       },
       "text": [
         {
-          "insert": "The Thirty-Three-Tool Runtime"
+          "insert": "The Thirty-One-Tool Runtime"
         }
       ],
       "children": []
@@ -582,7 +582,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The model has exactly thirty-three tools, factored by editing gesture rather than by kind. Twenty-six board mutators (place, arrange, content and appearance, sections, edges, delete) are built from one shared operation factory. look, add_annotation, reply_annotation, resolve_request, update_description, set_board_title, and finalize complete the surface. The per-gesture contracts are documented in "
+          "insert": "The model has exactly thirty-one tools, factored by editing gesture rather than by kind. Twenty-six board mutators (place, arrange, content and appearance, sections, edges, delete) are built from one shared operation factory. look, describe_board, annotate, resolve_request, and finalize complete the surface. The per-gesture contracts are documented in "
         },
         {
           "insert": "The agent tool surface",

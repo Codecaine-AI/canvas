@@ -319,7 +319,7 @@
       "props": {},
       "text": [
         {
-          "insert": "There are exactly thirty-three tools, factored by editing gesture rather than by kind. Twenty-six are board mutators across place, arrange, content, sections, edges, and delete. The other seven are look, add_annotation, reply_annotation, resolve_request, update_description, set_board_title, and finalize. The full roster is below."
+          "insert": "There are exactly thirty-one tools, factored by editing gesture rather than by kind. Twenty-six are board mutators across place, arrange, content, sections, edges, and delete. The other five are look, describe_board, annotate, resolve_request, and finalize. The full roster is below."
         }
       ],
       "children": []
@@ -774,7 +774,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The surface is thirty-three tools: twenty-six board-mutating gestures in six groups, listed by "
+          "insert": "The surface is thirty-one tools: twenty-six board-mutating gestures in six groups, listed by "
         },
         {
           "insert": "operationTools",
@@ -788,7 +788,7 @@
           }
         },
         {
-          "insert": ", plus seven workflow calls listed by "
+          "insert": ", plus five workflow calls listed by "
         },
         {
           "insert": "workflowTools",
@@ -975,24 +975,14 @@
             "study one framed region close up, rendered and measured"
           ],
           [
-            "update_description",
+            "describe_board",
             "Perceive, ask, finish",
-            "replace the board's standing account wholesale"
+            "rename the board, replace its standing account wholesale, or both, in one save"
           ],
           [
-            "set_board_title",
+            "annotate",
             "Perceive, ask, finish",
-            "rename the board"
-          ],
-          [
-            "add_annotation",
-            "Perceive, ask, finish",
-            "anchor a question to one object as a thread the user answers later"
-          ],
-          [
-            "reply_annotation",
-            "Perceive, ask, finish",
-            "post a reply into a thread without moving its status"
+            "anchor a question to one object as a thread the user answers later, or post a reply into a thread without moving its status"
           ],
           [
             "resolve_request",
@@ -1299,19 +1289,49 @@
           "attributes": {
             "bold": true
           }
-        },
+        }
+      ],
+      "children": [
+        "b-ts-ov-scope-annotation-18-a",
+        "b-ts-ov-scope-annotation-18-b",
+        "b-ts-ov-scope-annotation-18-c"
+      ]
+    },
+    "b-ts-ov-scope-annotation-18-a": {
+      "id": "b-ts-ov-scope-annotation-18-a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
-          "insert": " "
-        },
-        {
-          "insert": "add_annotation",
+          "insert": "annotate",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " anchors a thread to exactly one object (there are no intent or region targets). "
+          "insert": " with "
         },
+        {
+          "insert": "objectId",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " anchors a thread to exactly one object. There are no intent or region targets."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-scope-annotation-18-b": {
+      "id": "b-ts-ov-scope-annotation-18-b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
           "insert": "delete",
           "attributes": {
@@ -1319,7 +1339,20 @@
           }
         },
         {
-          "insert": " takes board ids only, never an annotation id. A thread is disposed with "
+          "insert": " takes board ids only, never an annotation id."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-scope-annotation-18-c": {
+      "id": "b-ts-ov-scope-annotation-18-c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A thread is disposed with "
         },
         {
           "insert": "resolve_request",
@@ -1401,7 +1434,7 @@
       },
       "text": [
         {
-          "insert": "The file host carries thirty-two of the thirty-three tools. "
+          "insert": "The file host carries thirty of the thirty-one tools. "
         },
         {
           "insert": "finalize",

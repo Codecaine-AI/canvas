@@ -22,6 +22,7 @@
       },
       "children": [
         "b-language-intro-2",
+        "b-language-style-guide-2a",
         "b-language-clarity-decision-3",
         "b-language-shape-heading-4",
         "b-language-shape-body-5",
@@ -57,7 +58,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The board layout vocabulary is a compact descriptive notation for the board's composition patterns. It describes arrangements for people. It is not a machine interface, and the agent neither reads nor writes it. The agent edits sections, stickies, objects, and connections directly through the twenty-five editing gestures exposed as "
+          "insert": "The board layout vocabulary is a compact descriptive notation for the board's composition patterns. It describes arrangements for people, and it is not a machine interface. The agent neither reads nor writes it: the agent edits sections, stickies, objects, and connections directly through the twenty-six editing gestures exposed as "
         },
         {
           "insert": "the operation surface",
@@ -71,7 +72,18 @@
           }
         },
         {
-          "insert": ". The "
+          "insert": ". Read a description in three passes: the indented tree first, then the alignment facts, then the arrows."
+        }
+      ],
+      "children": []
+    },
+    "b-language-style-guide-2a": {
+      "id": "b-language-style-guide-2a",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The "
         },
         {
           "insert": "style_guide",
@@ -80,7 +92,7 @@
           }
         },
         {
-          "insert": " context renders one nested aesthetic topic: calm and uniform, with content-first sizing, one repeated gap per group, peer geometry copied from the digest, air around content and labels, sections as homes and addressable units, restrained semantic color, and direct edge labels. Read a description in three passes: the indented tree first, then the alignment facts, then the arrows."
+          "insert": " context renders one nested aesthetic topic, calm and uniform. The topic covers content-first sizing, one repeated gap per group, and peer geometry copied from the digest. It also covers air around content and labels, sections as homes and addressable units, restrained semantic color, and direct edge labels."
         }
       ],
       "children": []
