@@ -16,9 +16,19 @@
         "b-cmcp-gov-persist-5",
         "b-cmcp-tools-heading-6",
         "b-cmcp-tools-lede-7",
+        "b-cmcp-tools-index-7a",
+        "b-cmcp-tools-index-7b",
+        "b-cmcp-tools-index-7c",
+        "b-cmcp-tools-index-7d",
         "b-cmcp-tools-table-8",
         "b-cmcp-tools-verbatim-9",
         "b-cmcp-tools-tuples-10",
+        "b-cmcp-gate-heading-10a",
+        "b-cmcp-gate-lede-10b",
+        "b-cmcp-gate-gated-10c",
+        "b-cmcp-gate-open-10d",
+        "b-cmcp-gate-refusal-10e",
+        "b-cmcp-gate-process-10f",
         "b-cmcp-life-heading-11",
         "b-cmcp-life-lede-12",
         "b-cmcp-life-outline-13",
@@ -35,7 +45,9 @@
         "b-cmcp-context-heading-24",
         "b-cmcp-context-lede-25",
         "b-cmcp-context-schemas-26",
+        "b-cmcp-context-index-26a",
         "b-cmcp-context-open-27",
+        "b-cmcp-context-sheet-28a",
         "b-cmcp-context-guidance-28",
         "b-cmcp-workspace-heading-29",
         "b-cmcp-workspace-lede-30",
@@ -72,11 +84,9 @@
         "b-cmcp-gaps-requests-54",
         "b-cmcp-gaps-install-55",
         "b-cmcp-files-heading-56",
-        "b-cmcp-files-cli-57",
-        "b-cmcp-files-mcp-58",
-        "b-cmcp-files-service-59",
-        "b-cmcp-files-toolkit-60",
-        "b-cmcp-files-authoring-61"
+        "b-cmcp-files-lede-56a",
+        "b-cmcp-files-server-group",
+        "b-cmcp-files-canvas-group"
       ]
     },
     "b-cmcp-role-1": {
@@ -214,7 +224,16 @@
       "props": {},
       "text": [
         {
-          "insert": "The server lists 29 tools: five of its own, then the 24 toolkit tools in the agent's registration order. The toolkit is the agent's 20 operation tools plus four of its five workflow tools. "
+          "insert": "The server lists 30 tools: six of its own, then the 24 toolkit tools in the agent's registration order. "
+        },
+        {
+          "insert": "canvas_capabilities",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is the new tool of its own, and a client calls it first in a thread. The toolkit is the agent's 20 operation tools plus four of its five workflow tools. "
         },
         {
           "insert": "finalize",
@@ -224,6 +243,100 @@
         },
         {
           "insert": " is left out because a file session has no run to end and no proposal to commit."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-tools-index-7a": {
+      "id": "b-cmcp-tools-index-7a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "canvas_capabilities",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " returns the capabilities index in one page of 4,096 bytes or less."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-tools-index-7b": {
+      "id": "b-cmcp-tools-index-7b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The index lists each guidance topic with its size in bytes and, in "
+        },
+        {
+          "insert": "required_for",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the edit tools that the topic unlocks."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-tools-index-7c": {
+      "id": "b-cmcp-tools-index-7c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The index names "
+        },
+        {
+          "insert": "canvas_list",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as the discovery tool for boards, with the board count in its purpose, and holds no board list of its own."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-tools-index-7d": {
+      "id": "b-cmcp-tools-index-7d",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The index lists the contact-sheet resource "
+        },
+        {
+          "insert": "codecaine://canvas/contact-sheet",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " under "
+        },
+        {
+          "insert": "features",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -238,6 +351,18 @@
           "Role"
         ],
         "rows": [
+          [
+            [
+              {
+                "insert": "canvas_capabilities",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Server",
+            "Returns the capabilities index: the versions, the tool order, each guidance topic with its size and gate, the board count and the contact-sheet resource."
+          ],
           [
             [
               {
@@ -306,7 +431,20 @@
               }
             ],
             "Server",
-            "Lists the authoring topics, or returns one topic in full."
+            [
+              {
+                "insert": "Lists the 10 guidance topics, or returns one topic in full. Reading topic "
+              },
+              {
+                "insert": "workflow",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " opens the edit tools."
+              }
+            ]
           ],
           [
             [
@@ -749,6 +887,190 @@
       ],
       "children": []
     },
+    "b-cmcp-gate-heading-10a": {
+      "id": "b-cmcp-gate-heading-10a",
+      "type": "heading",
+      "props": {
+        "level": 2
+      },
+      "text": [
+        {
+          "insert": "Edit Gate"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gate-lede-10b": {
+      "id": "b-cmcp-gate-lede-10b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "An edit tool refuses until this server process reads topic "
+        },
+        {
+          "insert": "workflow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " at the current guidance snapshot. Canvas has no task id, so the gate is per server process, as the open board is. The read tools stay open."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gate-gated-10c": {
+      "id": "b-cmcp-gate-gated-10c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The gated tools are the placement, connection, update and delete tools, such as "
+        },
+        {
+          "insert": "place_shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "connect",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "delete",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", together with the workflow tools and "
+        },
+        {
+          "insert": "canvas_create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gate-open-10d": {
+      "id": "b-cmcp-gate-open-10d",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The open tools are "
+        },
+        {
+          "insert": "canvas_capabilities",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "canvas_list",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "canvas_open",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "canvas_guidance",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "look",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "canvas_check",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gate-refusal-10e": {
+      "id": "b-cmcp-gate-refusal-10e",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A refusal is an error whose text names its recovery call, "
+        },
+        {
+          "insert": "canvas_guidance('workflow')",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-gate-process-10f": {
+      "id": "b-cmcp-gate-process-10f",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A new server process starts gated again."
+        }
+      ],
+      "children": []
+    },
     "b-cmcp-life-heading-11": {
       "id": "b-cmcp-life-heading-11",
       "type": "heading",
@@ -1160,7 +1482,7 @@
       "props": {},
       "text": [
         {
-          "insert": "A client receives context in three layers, and only the first arrives without a call. The server declares the tools capability only. It sends no system prompt, no boot images, and no per-turn state block."
+          "insert": "A client receives context in four layers, and only the first arrives without a call. The server declares the tools and resources capabilities. It sends no system prompt, no boot images, and no per-turn state block."
         }
       ],
       "children": []
@@ -1173,7 +1495,7 @@
       },
       "text": [
         {
-          "insert": "The tool schemas and descriptions arrive with a three-sentence "
+          "insert": "The tool schemas and descriptions arrive with the "
         },
         {
           "insert": "instructions",
@@ -1185,7 +1507,7 @@
           "insert": " string, "
         },
         {
-          "insert": "MCP_INSTRUCTIONS",
+          "insert": "INSTRUCTIONS",
           "attributes": {
             "code": true
           }
@@ -1200,7 +1522,73 @@
           }
         },
         {
-          "insert": ". The string stays short because clients inline it into every session."
+          "insert": "."
+        }
+      ],
+      "children": [
+        "b-cmcp-context-schemas-26-a",
+        "b-cmcp-context-schemas-26-b"
+      ]
+    },
+    "b-cmcp-context-schemas-26-a": {
+      "id": "b-cmcp-context-schemas-26-a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "It holds at most 12 lines and 800 bytes, and "
+        },
+        {
+          "insert": "cli.ts instructions",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " prints it."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-schemas-26-b": {
+      "id": "b-cmcp-context-schemas-26-b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "It says to call "
+        },
+        {
+          "insert": "canvas_capabilities",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " once per thread before the first canvas tool, and again after an error, compaction or a stale result."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-index-26a": {
+      "id": "b-cmcp-context-index-26a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "canvas_capabilities",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " returns the index."
         }
       ],
       "children": []
@@ -1219,7 +1607,7 @@
           }
         },
         {
-          "insert": " returns an "
+          "insert": " returns the "
         },
         {
           "insert": "OPENED",
@@ -1228,7 +1616,7 @@
           }
         },
         {
-          "insert": " line with the file hash, a "
+          "insert": " line with the file hash, the "
         },
         {
           "insert": "STYLE",
@@ -1237,7 +1625,7 @@
           }
         },
         {
-          "insert": " line, and "
+          "insert": " line, and the board state from "
         },
         {
           "insert": "boardStateSnapshot",
@@ -1246,7 +1634,24 @@
           }
         },
         {
-          "insert": ", the board description, full digest, and current lint report that the kernel path sends as its "
+          "insert": "."
+        }
+      ],
+      "children": [
+        "b-cmcp-context-open-27-c",
+        "b-cmcp-context-open-27-a",
+        "b-cmcp-context-open-27-b"
+      ]
+    },
+    "b-cmcp-context-open-27-c": {
+      "id": "b-cmcp-context-open-27-c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The board state is the board description, the full digest and the current lint report, as the kernel path sends them in its "
         },
         {
           "insert": "board_state",
@@ -1255,7 +1660,33 @@
           }
         },
         {
-          "insert": " block. The "
+          "insert": " block."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-open-27-a": {
+      "id": "b-cmcp-context-open-27-a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "It carries no workflow text."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-open-27-b": {
+      "id": "b-cmcp-context-open-27-b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The "
         },
         {
           "insert": "STYLE",
@@ -1286,7 +1717,7 @@
           }
         },
         {
-          "insert": " and appends "
+          "insert": ", and appends "
         },
         {
           "insert": "· workspace overrides: key=value, …, palette.<color>=<ink>",
@@ -1295,19 +1726,32 @@
           }
         },
         {
-          "insert": " when that theme has overrides, and the structured content carries "
+          "insert": " when that theme has overrides."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-sheet-28a": {
+      "id": "b-cmcp-context-sheet-28a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The contact sheet is the resource "
         },
         {
-          "insert": "theme",
+          "insert": "codecaine://canvas/contact-sheet",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " and the resolved "
+          "insert": ": a PNG of every glyph in the default style, read with "
         },
         {
-          "insert": "canvasStyle",
+          "insert": "resources/read",
           "attributes": {
             "code": true
           }
@@ -1332,16 +1776,91 @@
           }
         },
         {
-          "insert": " lists each "
+          "insert": " with no topic lists the 10 topics with their ids, titles and approximate token sizes, and the snapshot id."
+        }
+      ],
+      "children": [
+        "b-cmcp-context-guidance-28-c",
+        "b-cmcp-context-guidance-28-a",
+        "b-cmcp-context-guidance-28-b"
+      ]
+    },
+    "b-cmcp-context-guidance-28-c": {
+      "id": "b-cmcp-context-guidance-28-c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "With a topic id, it returns that topic in full."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-guidance-28-a": {
+      "id": "b-cmcp-context-guidance-28-a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The topics are "
         },
         {
-          "insert": "getCanvasAuthoringGuidance()",
+          "insert": "workflow",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " topic's id, title, and approximate token size with the snapshot id when called with no argument, and returns one topic in full when given its id. The topics are "
+          "insert": ", "
+        },
+        {
+          "insert": "rules",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "operating_context",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "state_grammar",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "aesthetic",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "visual_patterns",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
         },
         {
           "insert": "diagram_design",
@@ -1377,7 +1896,29 @@
           }
         },
         {
-          "insert": ", and together they carry the name and detail convention, the glyph vocabulary grouped by category, and the theme rule."
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-guidance-28-b": {
+      "id": "b-cmcp-context-guidance-28-b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Each topic reads its text from the sources in "
+        },
+        {
+          "insert": "canvas/src/authoring/sources.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
@@ -1887,7 +2428,7 @@
           [
             "Tools",
             "25: the 20 gestures and 5 workflow tools.",
-            "29: 5 server tools, the 20 gestures, and 4 workflow tools.",
+            "30: 6 server tools, the 20 gestures, and 4 workflow tools.",
             [
               {
                 "insert": "The "
@@ -2272,6 +2813,38 @@
       ],
       "children": []
     },
+    "b-cmcp-files-lede-56a": {
+      "id": "b-cmcp-files-lede-56a",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Seven files carry this server: four in the server package and three in the canvas package."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-files-server-group": {
+      "id": "b-cmcp-files-server-group",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The server package",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-cmcp-files-cli-57",
+        "b-cmcp-files-mcp-58",
+        "b-cmcp-files-service-59",
+        "b-cmcp-files-manifest-59a"
+      ]
+    },
     "b-cmcp-files-cli-57": {
       "id": "b-cmcp-files-cli-57",
       "type": "list-item",
@@ -2341,6 +2914,39 @@
       ],
       "children": []
     },
+    "b-cmcp-files-manifest-59a": {
+      "id": "b-cmcp-files-manifest-59a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas-mcp/src/guidance-manifest.ts holds the rule-unit manifest of the canvas skill, the gate map, and the fixed index fields."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-files-canvas-group": {
+      "id": "b-cmcp-files-canvas-group",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The canvas package",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-cmcp-files-toolkit-60",
+        "b-cmcp-files-authoring-61",
+        "b-cmcp-files-sources-59b"
+      ]
+    },
     "b-cmcp-files-toolkit-60": {
       "id": "b-cmcp-files-toolkit-60",
       "type": "list-item",
@@ -2392,6 +2998,19 @@
         },
         {
           "insert": " serves."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-files-sources-59b": {
+      "id": "b-cmcp-files-sources-59b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas/src/authoring/sources.ts builds the 10 topics, and workflow.ts and rules.ts beside it hold the two hand-written ones."
         }
       ],
       "children": []
