@@ -156,8 +156,8 @@ describe("lanes on a board", () => {
     const sink = box("sink", 600, 300);
     const objects = [left, right, sink];
     const connections = [
-      wire("solid", { objectId: "left", anchor: "bottom" }, { objectId: "sink", anchor: "left" }, { waypoints: [[50, 330]] }),
-      wire("dashed", { objectId: "right", anchor: "bottom" }, { objectId: "sink", anchor: "left" }, { style: "dashed", waypoints: [[350, 330]] }),
+      wire("solid", { objectId: "left", anchor: "bottom" }, { objectId: "sink", anchor: "left" }, { color: "blue", waypoints: [[50, 330]] }),
+      wire("dashed", { objectId: "right", anchor: "bottom" }, { objectId: "sink", anchor: "left" }, { color: "red", style: "dashed", waypoints: [[350, 330]] }),
     ];
     const routes = drawn(objects, connections);
     const solid = routes.get("solid")!;
@@ -226,5 +226,136 @@ describe("lanes on a board", () => {
     }
     // The dashed wire moved, so the route it had alone is not painted.
     expect(svg).not.toContain(`d="${routeConnection(source, lower, connections[1]!, objects).path}"`);
+  });
+});
+
+describe("ports on a board", () => {
+  const tip = (points: ReadonlyArray<CanvasPoint>) => points[points.length - 1]!;
+
+  it("centres a lone arrowhead on its side, even one the author pinned off centre", () => {
+    const a = box("a", 0, 0);
+    const b = box("b", 300, 300, 200);
+    const pinned = wire("w", { objectId: "a", anchor: "right" }, { objectId: "b", anchor: "top", position: [0.2, 0] });
+    expect(tip(drawn([a, b], [pinned]).get("w")!)).toEqual({ x: 400, y: 300 });
+    // Alone, the wire still ends on the pin.
+    expect(tip(routeConnection(a, b, pinned, [a, b]).points!)).toEqual({ x: 340, y: 300 });
+  });
+
+  it("runs a wire straight into the centre its arrowhead sits on", () => {
+    // Boxes 4px out of line: the end without the arrowhead slides.
+    const nearly = drawn([box("a", 0, 230), box("b", 240, 234)], [wire("w", { objectId: "a" }, { objectId: "b" })]);
+    expect(nearly.get("w")).toEqual([{ x: 100, y: 264 }, { x: 240, y: 264 }]);
+    // A pinned tail slides too, any distance along its side.
+    const pinned = wire("w", { objectId: "wide", anchor: "bottom", position: [0.2, 1] }, { objectId: "below", anchor: "top" });
+    expect(drawn([box("wide", 0, 0, 400), box("below", 250, 200)], [pinned]).get("w")).toEqual([{ x: 300, y: 60 }, { x: 300, y: 200 }]);
+  });
+
+  it("holds a pin that saves a bend", () => {
+    // The centre of the wide side is out of reach of the box above: only the pin gives a straight wire.
+    const pinned = wire("w", { objectId: "a", anchor: "bottom" }, { objectId: "b", anchor: "top", position: [0.125, 0] });
+    expect(drawn([box("a", 0, 0), box("b", 0, 200, 400)], [pinned]).get("w")).toEqual([{ x: 50, y: 60 }, { x: 50, y: 200 }]);
+  });
+
+  describe("arrowheads on one side of one target", () => {
+    const sink = box("sink", 400, 200);
+    const loose = [sink, box("top", 0, 0), box("bottom", 0, 400)];
+    const tips = (
+      objects: InteractiveCanvasObject[],
+      a: Partial<InteractiveCanvasConnection>,
+      b: Partial<InteractiveCanvasConnection>,
+      to: [InteractiveCanvasConnection["to"], InteractiveCanvasConnection["to"]] = [{ objectId: "sink", anchor: "left" }, { objectId: "sink", anchor: "left" }],
+    ) => {
+      const routes = drawn(objects, [
+        wire("a", { objectId: "top", anchor: "right" }, to[0], a),
+        wire("b", { objectId: "bottom", anchor: "right" }, to[1], b),
+      ]);
+      return [tip(routes.get("a")!), tip(routes.get("b")!)] as const;
+    };
+
+    it("join when the wires share a colour", () => {
+      const [a, b] = tips(loose, { color: "red" }, { color: "red", style: "dashed" });
+      expect(a).toEqual(b);
+    });
+
+    it("join when the sources sit in one section", () => {
+      const grouped: InteractiveCanvasObject[] = [
+        sink,
+        { id: "group", type: "section", text: "group", geometry: { x: -40, y: -60, width: 200, height: 560 } },
+        { ...box("top", 0, 0), parentId: "group" },
+        { ...box("bottom", 0, 400), parentId: "group" },
+      ];
+      const [a, b] = tips(grouped, { color: "red" }, { color: "blue", style: "dashed" });
+      expect(a).toEqual(b);
+    });
+
+    it("join when the author pinned them a few pixels apart", () => {
+      const [a, b] = tips(loose, { color: "red" }, { color: "red" }, [
+        { objectId: "sink", anchor: "left", position: [0, 0.4] },
+        { objectId: "sink", anchor: "left", position: [0, 0.6] },
+      ]);
+      expect(a).toEqual({ x: 400, y: 230 });
+      expect(b).toEqual(a);
+    });
+
+    it("stay apart when the wires share no dash, colour, source or section", () => {
+      const [a, b] = tips(loose, { color: "red" }, { color: "blue", style: "dashed" });
+      expect(Math.abs(a.y - b.y)).toBeCloseTo(16, 5);
+    });
+  });
+
+  it("keeps a junction on its own side of a wire that leaves between", () => {
+    const objects = [box("pool", 400, 0, 200), box("mid", 450, 300), box("left", 0, 300), box("right", 900, 300)];
+    const routes = drawn(objects, [
+      wire("out", { objectId: "pool", anchor: "bottom" }, { objectId: "mid", anchor: "top" }),
+      wire("l", { objectId: "left", anchor: "top" }, { objectId: "pool", anchor: "bottom" }, { style: "dashed" }),
+      wire("r", { objectId: "right", anchor: "top" }, { objectId: "pool", anchor: "bottom" }, { style: "dashed" }),
+    ]);
+    const [out, l, r] = [routes.get("out")!, routes.get("l")!, routes.get("r")!];
+    expect(out).toEqual([{ x: 500, y: 60 }, { x: 500, y: 300 }]);
+    expect(tip(l).x).toBeLessThan(500);
+    expect(tip(r).x).toBeGreaterThan(500);
+    expect(crossings(out, l) + crossings(out, r)).toBe(0);
+  });
+
+  it("trades the sides two wires enter where that stops them crossing", () => {
+    const objects = [box("t", 400, 200, 200, 100), box("p", 0, 400), box("q", 250, 560)];
+    const q = wire("q", { objectId: "q" }, { objectId: "t", anchor: "left" }, { color: "gray" });
+    const free = drawn(objects, [wire("p", { objectId: "p" }, { objectId: "t", anchor: "bottom" }, { color: "orange" }), q]);
+    expect(crossings(free.get("p")!, free.get("q")!)).toBe(0);
+    expect(tip(free.get("p")!)).toEqual({ x: 400, y: 250 });
+    expect(tip(free.get("q")!)).toEqual({ x: 500, y: 300 });
+    // A pinned end is the author's choice of side: it stays, and so does the crossing.
+    const held = drawn(objects, [wire("p", { objectId: "p" }, { objectId: "t", anchor: "bottom", position: [0.5, 1] }, { color: "orange" }), q]);
+    expect(tip(held.get("p")!)).toEqual({ x: 500, y: 300 });
+    expect(crossings(held.get("p")!, held.get("q")!)).toBe(1);
+  });
+
+  it("lines up the elbows of wires that travel side by side", () => {
+    const from = { objectId: "s", anchor: "right" } as const;
+    const pair = (second: InteractiveCanvasObject) => {
+      const routes = drawn([box("s", 0, 200), box("t1", 400, 0), second], [
+        wire("a", from, { objectId: "t1", anchor: "left" }, { color: "blue" }),
+        wire("b", from, { objectId: second.id, anchor: "left" }, { color: "red" }),
+      ]);
+      return [routes.get("a")![1]!, routes.get("b")![1]!] as const;
+    };
+    // Two that turn apart turn on one line.
+    const [up, down] = pair(box("t2", 500, 400));
+    expect(up.x).toBeCloseTo(down.x, 5);
+    // Two that turn the same way stay as far apart after the bend as before it.
+    const [inner, outer] = pair(box("t2", 500, -150));
+    expect(outer.y - inner.y).toBeCloseTo(16, 5);
+    expect(outer.x - inner.x).toBeCloseTo(16, 5);
+  });
+
+  it("moves a run off a section border", () => {
+    const objects: InteractiveCanvasObject[] = [
+      { id: "group", type: "section", text: "group", geometry: { x: 0, y: 0, width: 400, height: 300 } },
+      { ...box("a", 260, 100), parentId: "group" },
+      box("b", 440, 400),
+    ];
+    const route = drawn(objects, [wire("w", { objectId: "a", anchor: "right" }, { objectId: "b", anchor: "left" })]).get("w")!;
+    // Alone the wire turns halfway, on the section's right border at x 400.
+    expect(route).toEqual([{ x: 360, y: 130 }, { x: 416, y: 130 }, { x: 416, y: 430 }, { x: 440, y: 430 }]);
   });
 });

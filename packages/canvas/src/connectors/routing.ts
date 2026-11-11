@@ -17,7 +17,7 @@ import {
 import { PathGenerator, type OrthogonalObstacle } from "./pathfinding/path-generator";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { onBackendChange } from "../theme/text-measure";
-import { assignLanes, LANE_GAP_PX, type LaneSpan, type LaneWire } from "./lanes";
+import { assignLanes, crossingsBetween, LANE_GAP_PX, simplified, type LaneBorder, type LaneSpan, type LaneWire } from "./lanes";
 // Connector routing figures (moved from theme/tokens.ts in the theme
 // dispersal — this router is their consumer; the routing tests import them
 // from here). Logical px.
@@ -247,11 +247,16 @@ function routeBoard(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes 
   const routes: BoardRoutes = new Map();
   const wires: LaneWire[] = [];
   const byWireId = new Map<string, InteractiveCanvasConnection>();
+  const drawn: DrawnWire[] = [];
   for (const connection of board.connections) {
     const fromObject = byId.get(connection.from.objectId);
     const toObject = byId.get(connection.to.objectId);
     if (!fromObject || !toObject) continue;
-    const routed = routeConnection(fromObject, toObject, connection, board.objects, canvasStyle);
+    drawn.push({ connection, fromObject, toObject, routed: routeOnBoard(fromObject, toObject, connection, board.objects, canvasStyle) });
+  }
+  tradeCrossedSides(drawn, board.objects, canvasStyle);
+  for (const { connection, fromObject, toObject, routed: solo } of drawn) {
+    const routed = withCornerRadius(solo, canvasStyle.connectorCornerRadiusPx);
     routes.set(connection, { fromObject, toObject, routed });
     const points = routed.points;
     if (!points || points.length < 2 || byWireId.has(connection.id)) continue;
@@ -262,6 +267,7 @@ function routeBoard(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes 
       id: connection.id,
       from: fromObject.id,
       to: toObject.id,
+      fromSection: sourceSection(fromObject, toObject, byId),
       color: connection.color ?? "",
       dash: connection.style ?? "solid",
       headAtStart: arrow === "back" || arrow === "both",
@@ -276,13 +282,156 @@ function routeBoard(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes 
       },
     });
   }
-  for (const [id, points] of assignLanes(wires)) {
+  const borders = board.objects.filter((object) => object.type === "section").flatMap(({ geometry: frame }): LaneBorder[] => [
+    { axis: "h", at: frame.y, lo: frame.x, hi: frame.x + frame.width },
+    { axis: "h", at: frame.y + frame.height, lo: frame.x, hi: frame.x + frame.width },
+    { axis: "v", at: frame.x, lo: frame.y, hi: frame.y + frame.height },
+    { axis: "v", at: frame.x + frame.width, lo: frame.y, hi: frame.y + frame.height },
+  ]);
+  for (const [id, points] of assignLanes(wires, borders)) {
     const connection = byWireId.get(id)!;
     const solo = routes.get(connection)!;
     const laned = routedConnectionFromPoints(points, points[0]!, points[points.length - 1]!, solo.routed.startAnchor, solo.routed.endAnchor);
     routes.set(connection, { ...solo, routed: withCornerRadius(laned, canvasStyle.connectorCornerRadiusPx) });
   }
   return routes;
+}
+
+type DrawnWire = {
+  connection: InteractiveCanvasConnection;
+  fromObject: InteractiveCanvasObject;
+  toObject: InteractiveCanvasObject;
+  routed: RoutedConnection;
+};
+
+/**
+ * Two wires that enter one box on two sides and cross on the way in trade
+ * sides: each enters where the other did. The trade must remove a crossing,
+ * add no blocker and leave no side with more colours than before. The sides
+ * in use stay the same. A pinned end and a wire on stored lanes stay.
+ */
+function tradeCrossedSides(
+  drawn: ReadonlyArray<DrawnWire>,
+  obstacles: ReadonlyArray<InteractiveCanvasObject>,
+  canvasStyle: CanvasStyle,
+): void {
+  const pathOf = (routed: RoutedConnection) => simplified(routed.points ?? []);
+  const blockersOf = ({ fromObject, toObject }: DrawnWire, routed: RoutedConnection) =>
+    routeBlockers(pathOf(routed), {
+      ...withoutSections(routeKeepOut(fromObject, toObject, routed.start, routed.end, obstacles, canvasStyle)),
+      selves: [],
+    }).length;
+  const byTarget = new Map<string, DrawnWire[]>();
+  for (const wire of drawn) {
+    if (wire.fromObject === wire.toObject) continue;
+    byTarget.set(wire.toObject.id, [...(byTarget.get(wire.toObject.id) ?? []), wire]);
+  }
+  for (const group of byTarget.values()) {
+    const free = group.filter(({ connection }) => !connection.to.position && !validWaypoints(connection.waypoints));
+    for (let i = 0; i < free.length; i += 1) {
+      for (let j = i + 1; j < free.length; j += 1) {
+        const a = free[i]!;
+        const b = free[j]!;
+        if (a.routed.endAnchor === b.routed.endAnchor || crossingsBetween(pathOf(a.routed), pathOf(b.routed)) === 0) continue;
+        const enter = (wire: DrawnWire, side: Anchor) =>
+          routeOnBoard(
+            wire.fromObject,
+            wire.toObject,
+            { ...wire.connection, to: { objectId: wire.connection.to.objectId, anchor: side } },
+            obstacles,
+            canvasStyle,
+          );
+        const tradedA = enter(a, b.routed.endAnchor);
+        const tradedB = enter(b, a.routed.endAnchor);
+        const others = drawn.filter((wire) => wire !== a && wire !== b).map((wire) => pathOf(wire.routed));
+        const crossings = (first: RoutedConnection, second: RoutedConnection) =>
+          [pathOf(first), pathOf(second)].reduce(
+            (sum, path) => sum + others.reduce((count, other) => count + crossingsBetween(path, other), 0),
+            crossingsBetween(pathOf(first), pathOf(second)),
+          );
+        if (crossings(tradedA, tradedB) >= crossings(a.routed, b.routed)) continue;
+        if (blockersOf(a, tradedA) > blockersOf(a, a.routed) || blockersOf(b, tradedB) > blockersOf(b, b.routed)) continue;
+        const mixedSides = (routeOf: (wire: DrawnWire) => RoutedConnection) => {
+          const colors = new Map<Anchor, Set<string>>();
+          for (const wire of group) {
+            const side = routeOf(wire).endAnchor;
+            colors.set(side, (colors.get(side) ?? new Set()).add(wire.connection.color ?? ""));
+          }
+          return [...colors.values()].filter((onSide) => onSide.size > 1).length;
+        };
+        const traded = (wire: DrawnWire) => (wire === a ? tradedA : wire === b ? tradedB : wire.routed);
+        if (mixedSides(traded) > mixedSides((wire) => wire.routed)) continue;
+        a.routed = tradedA;
+        b.routed = tradedB;
+      }
+    }
+  }
+}
+
+/**
+ * The nearest section that holds `source`, unless it holds `target` too: the
+ * place a wire comes from, as its target sees it. The page holds both ends of
+ * every wire, so it is never that place.
+ */
+function sourceSection(
+  source: InteractiveCanvasObject,
+  target: InteractiveCanvasObject,
+  byId: ReadonlyMap<string, InteractiveCanvasObject>,
+): string | null {
+  const ancestors = (object: InteractiveCanvasObject) => {
+    const ids: string[] = [];
+    let parent = byId.get(object.parentId ?? "");
+    while (parent && !ids.includes(parent.id)) {
+      ids.push(parent.id);
+      parent = byId.get(parent.parentId ?? "");
+    }
+    return ids;
+  };
+  const section = ancestors(source).find((id) => byId.get(id)!.type === "section");
+  return section === undefined || ancestors(target).includes(section) ? null : section;
+}
+
+/**
+ * `connection` as its board draws it before the lane pass. An end meets its
+ * side at the centre: the lane pass spreads the ends that must not share it.
+ * A pin on a side holds only where it keeps the wire simpler: on stored lanes
+ * that the centre cannot reach, or with fewer bends. Elsewhere it lets the end
+ * without the arrowhead slide any distance, so the wire runs straight into the
+ * centre the arrowhead sits on.
+ */
+function routeOnBoard(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  connection: InteractiveCanvasConnection,
+  obstacles: ReadonlyArray<InteractiveCanvasObject>,
+  canvasStyle: CanvasStyle,
+): RoutedConnection {
+  const centred = withoutSidePins(connection);
+  const stored =
+    routeStoredLanes(fromObject, toObject, centred, obstacles, canvasStyle, false) ??
+    routeStoredLanes(fromObject, toObject, connection, obstacles, canvasStyle, true);
+  if (stored) return stored;
+  const free = (ends: InteractiveCanvasConnection, tailSlidePx: number) =>
+    routeFreely(fromObject, toObject, ends, obstacles, canvasStyle, tailSlidePx);
+  if (centred === connection) return free(connection, AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX);
+  const bends = (route: RoutedConnection) => simplified(route.points ?? []).length - 2;
+  const atCentre = free(centred, Infinity);
+  const asPinned = free(connection, AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX);
+  return bends(asPinned) < bends(atCentre) ? asPinned : atCentre;
+}
+
+/** `connection` without the pins that sit on a side of their object. A pin inside the body stays: it is not a port. */
+function withoutSidePins(connection: InteractiveCanvasConnection): InteractiveCanvasConnection {
+  const onSide = (position: [number, number] | undefined) =>
+    position !== undefined && position.some((ratio) => ratio <= 0 || ratio >= 1);
+  const unpinned = (end: InteractiveCanvasConnection["from"]) => {
+    if (!onSide(end.position)) return end;
+    const { position: _position, ...rest } = end;
+    return rest;
+  };
+  const from = unpinned(connection.from);
+  const to = unpinned(connection.to);
+  return from === connection.from && to === connection.to ? connection : { ...connection, from, to };
 }
 
 /** Room for a port on the side of `object` that the end run `tip -> corner` leaves, along that side. */
@@ -362,40 +511,73 @@ function routeConnectionPolyline(
   obstacles: ReadonlyArray<InteractiveCanvasObject> | undefined,
   canvasStyle: CanvasStyle,
 ): RoutedConnection {
+  return (
+    routeStoredLanes(fromObject, toObject, connection, obstacles, canvasStyle, true) ??
+    routeFreely(fromObject, toObject, connection, obstacles, canvasStyle, null)
+  );
+}
+
+/**
+ * The route through the corners `connection` stores, or null when it stores
+ * none or they no longer give a clear route. With `endsSlide`, an end without
+ * a pin slides along its side to meet its stored corner.
+ */
+function routeStoredLanes(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  connection: InteractiveCanvasConnection,
+  obstacles: ReadonlyArray<InteractiveCanvasObject> | undefined,
+  canvasStyle: CanvasStyle,
+  endsSlide: boolean,
+): RoutedConnection | null {
+  const explicitWaypoints = validWaypoints(connection.waypoints);
+  if (!explicitWaypoints) return null;
+  const { startAnchor, endAnchor, start, end } = routeEnds(fromObject, toObject, connection, canvasStyle);
+  // Stored bends are drawn only while they stay clear of boxes and the ends'
+  // own captions: a move that puts one under them hands the edge back to the
+  // router. Crossing an unrelated section's frame is allowed, as on stage.
+  const boxesOnly = withoutSections({
+    ...routeKeepOut(fromObject, toObject, start, end, obstacles ?? [], canvasStyle),
+    selves: [],
+  });
+  const endpointContext = endsSlide
+    ? { fromObject, toObject, canSlideStart: !connection.from.position, canSlideEnd: !connection.to.position, canvasStyle }
+    : undefined;
+  const accept = (route: RoutedConnection) => isClear(route, boxesOnly);
+  const waypointRoute = routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor, endpointContext, accept);
+  if (waypointRoute) return waypointRoute;
+  // A port that moved off its stored corner keeps the stored lanes: only
+  // the two end runs follow the ports.
+  const slid = slideEndCorners(
+    start,
+    end,
+    explicitWaypoints,
+    connectionBoundsForObject(fromObject, canvasStyle),
+    connectionBoundsForObject(toObject, canvasStyle),
+  );
+  return (slid && routeWaypoints(start, end, slid, startAnchor, endAnchor, endpointContext, accept)) || null;
+}
+
+/** The route the router picks for `connection`: straight, an elbow, or a detour round what is in the way. */
+function routeFreely(
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  connection: InteractiveCanvasConnection,
+  obstacles: ReadonlyArray<InteractiveCanvasObject> | undefined,
+  canvasStyle: CanvasStyle,
+  /**
+   * On a board: how far out of line two facing ends may be and still join in
+   * a straight line. The arrowhead keeps its place and the other end slides.
+   * Null for a wire routed alone, where the two ends meet halfway.
+   */
+  tailSlidePx: number | null,
+): RoutedConnection {
   const { startAnchor, endAnchor, start, end } = routeEnds(fromObject, toObject, connection, canvasStyle);
 
   const withSelves = routeKeepOut(fromObject, toObject, start, end, obstacles ?? [], canvasStyle);
   const keepOut = { ...withSelves, selves: [] };
   const boxesOnly = withoutSections(keepOut);
   const detourKeepOut = withoutSections(withSelves);
-
-  // Stored bends are drawn only while they stay clear of boxes and the ends'
-  // own captions: a move that puts one under them hands the edge back to the
-  // router. Crossing an unrelated section's frame is allowed, as on stage.
-  const explicitWaypoints = validWaypoints(connection.waypoints);
-  if (explicitWaypoints) {
-    const endpointContext = {
-      fromObject,
-      toObject,
-      canSlideStart: !connection.from.position,
-      canSlideEnd: !connection.to.position,
-      canvasStyle,
-    };
-    const accept = (route: RoutedConnection) => isClear(route, boxesOnly);
-    const waypointRoute = routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor, endpointContext, accept);
-    if (waypointRoute) return waypointRoute;
-    // A port that moved off its stored corner keeps the stored lanes: only
-    // the two end runs follow the ports.
-    const slid = slideEndCorners(
-      start,
-      end,
-      explicitWaypoints,
-      connectionBoundsForObject(fromObject, canvasStyle),
-      connectionBoundsForObject(toObject, canvasStyle),
-    );
-    const slidRoute = slid && routeWaypoints(start, end, slid, startAnchor, endAnchor, endpointContext, accept);
-    if (slidRoute) return slidRoute;
-  }
 
   const straight = routeStraightIfAligned(
     fromObject,
@@ -405,6 +587,8 @@ function routeConnectionPolyline(
     startAnchor,
     endAnchor,
     canvasStyle,
+    tailSlidePx ?? AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX,
+    tailSlidePx === null ? null : connection.arrow === "back" ? "start" : "end",
   );
   const elbow = routeElbow(start, end, startAnchor, endAnchor, canvasStyle.connectorCornerRadiusPx);
   const tried: Array<RoutedConnection | null> = [straight, elbow];
@@ -1113,6 +1297,8 @@ function routeStraightIfAligned(
   startAnchor: Anchor,
   endAnchor: Anchor,
   canvasStyle: CanvasStyle,
+  tolerance: number,
+  lead: "start" | "end" | null,
 ): RoutedConnection | null {
   const points = exactStraightAnchoredPoints(
     fromObject,
@@ -1121,13 +1307,20 @@ function routeStraightIfAligned(
     end,
     startAnchor,
     endAnchor,
-    AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX,
+    tolerance,
     canvasStyle,
+    lead,
   );
   if (!points) return null;
   return routedConnectionFromPoints(points, points[0], points[1], startAnchor, endAnchor);
 }
 
+/**
+ * The straight line between two ends that face each other no more than
+ * `tolerance` out of line. The two ends meet halfway. With a `lead` end (the
+ * one that carries the arrowhead) the line runs through that end's own point,
+ * and only the other end slides along its side.
+ */
 function exactStraightAnchoredPoints(
   fromObject: InteractiveCanvasObject,
   toObject: InteractiveCanvasObject,
@@ -1137,8 +1330,9 @@ function exactStraightAnchoredPoints(
   endAnchor: Anchor,
   tolerance: number,
   canvasStyle: CanvasStyle,
+  lead: "start" | "end" | null = null,
 ): [CanvasPoint, CanvasPoint] | null {
-  const axis = straightRouteAxis(start, end, tolerance);
+  const axis = straightRouteAxis(start, end, tolerance, startAnchor);
   if (!axis || !anchorsFaceAlongAxis(start, end, startAnchor, endAnchor, axis)) return null;
 
   const startSpan = edgeSlideSpan(fromObject, startAnchor, canvasStyle);
@@ -1148,18 +1342,20 @@ function exactStraightAnchoredPoints(
   const overlapMin = Math.max(startSpan.min, endSpan.min);
   const overlapMax = Math.min(startSpan.max, endSpan.max);
   if (overlapMin > overlapMax + ROUTE_EPSILON) return null;
+  const along = (point: CanvasPoint) => (axis === "horizontal" ? point.y : point.x);
+  const lineAt = lead === null ? (along(start) + along(end)) / 2 : along(lead === "start" ? start : end);
+  // Past the usual tolerance the lead end stays on its point: only the other end slides.
+  if (tolerance > AUTO_ROUTE_ALIGNMENT_TOLERANCE_PX && (lineAt < overlapMin - ROUTE_EPSILON || lineAt > overlapMax + ROUTE_EPSILON)) return null;
 
   if (axis === "horizontal") {
-    const averageY = (start.y + end.y) / 2;
-    const y = clamp(averageY, overlapMin, overlapMax);
+    const y = clamp(lineAt, overlapMin, overlapMax);
     return [
       { x: startSpan.fixed, y },
       { x: endSpan.fixed, y },
     ];
   }
 
-  const averageX = (start.x + end.x) / 2;
-  const x = clamp(averageX, overlapMin, overlapMax);
+  const x = clamp(lineAt, overlapMin, overlapMax);
   return [
     { x, y: startSpan.fixed },
     { x, y: endSpan.fixed },
@@ -1238,11 +1434,15 @@ function straightRouteAxis(
   start: CanvasPoint,
   end: CanvasPoint,
   tolerance: number,
+  startAnchor: Anchor,
 ): "horizontal" | "vertical" | null {
   const dx = Math.abs(end.x - start.x);
   const dy = Math.abs(end.y - start.y);
-  if (dy <= tolerance && dx > ROUTE_EPSILON) return "horizontal";
-  if (dx <= tolerance && dy > ROUTE_EPSILON) return "vertical";
+  // Any two points pass a tolerance without limit: the side the wire leaves from names the axis.
+  const horizontal = Number.isFinite(tolerance) || isHorizontalAnchor(startAnchor);
+  const vertical = Number.isFinite(tolerance) || !isHorizontalAnchor(startAnchor);
+  if (horizontal && dy <= tolerance && dx > ROUTE_EPSILON) return "horizontal";
+  if (vertical && dx <= tolerance && dy > ROUTE_EPSILON) return "vertical";
   return null;
 }
 
