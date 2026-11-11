@@ -1676,10 +1676,19 @@
       },
       "text": [
         {
-          "insert": "The gated tools are the placement, connection, update and delete tools, such as "
+          "insert": "The 24 gated tools are "
         },
         {
-          "insert": "place_shape",
+          "insert": "canvas_create",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", the 20 operation tools, and the workflow tools "
+        },
+        {
+          "insert": "describe_board",
           "attributes": {
             "code": true
           }
@@ -1688,25 +1697,16 @@
           "insert": ", "
         },
         {
-          "insert": "connect",
+          "insert": "annotate",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " and "
+          "insert": ", and "
         },
         {
-          "insert": "delete",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", together with the workflow tools and "
-        },
-        {
-          "insert": "canvas_create",
+          "insert": "resolve_request",
           "attributes": {
             "code": true
           }
