@@ -37,6 +37,7 @@
         "b-ts-ge-arrange-move-13",
         "b-ts-ge-arrange-resize-14",
         "b-ts-ge-arrange-sizerules-15",
+        "b-ts-ge-arrange-sizerules-15b",
         "b-ts-ge-arrange-match-16",
         "b-ts-ge-arrange-split-17",
         "b-ts-ge-arrange-refusals-18",
@@ -582,7 +583,7 @@
       },
       "text": [
         {
-          "insert": "move_to({ id: Id, x: number, y: number })      // absolute; x,y = new top-left\nmove_by({ id: Id, dx: number, dy: number })    // relative nudge\n\nresize    ({ id: Id, width?: number, height?: number })\nmatch_size({ id: Id, like: Id })\n\nalign    ({ ids: Id[], edge: \"left\" | \"right\" | \"top\" | \"bottom\"\n                             | \"center_h\" | \"center_v\" })\nspace_out({ ids: Id[], axis: \"horizontal\" | \"vertical\", gap: number })\n\narrange_section({ section: Id, rows: Id[][] })  // rows top to bottom, each left to right"
+          "insert": "move  ({ id: Id, to?: { x: number, y: number } | null,\n                 by?: { dx: number, dy: number } | null })   // exactly one of to or by\n\nresize({ id: Id, width?: number | null, height?: number | null,\n                 like?: Id | null })                         // like, or width and height\n\nalign    ({ ids: Id[], edge: \"left\" | \"right\" | \"top\" | \"bottom\"\n                             | \"center_h\" | \"center_v\" })\nspace_out({ ids: Id[], axis: \"horizontal\" | \"vertical\", gap: number })\n\narrange_section({ section: Id, rows: Id[][] })  // rows top to bottom, each left to right"
         }
       ],
       "children": []
@@ -593,16 +594,43 @@
       "props": {},
       "text": [
         {
-          "insert": "move_to",
+          "insert": "move",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " sets a box's top-left corner. "
+          "insert": " takes exactly one of "
         },
         {
-          "insert": "move_by",
+          "insert": "to",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "by",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and a null one counts as absent. "
+        },
+        {
+          "insert": "to",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sets a box's top-left corner, and "
+        },
+        {
+          "insert": "by",
           "attributes": {
             "code": true
           }
@@ -617,7 +645,7 @@
           }
         },
         {
-          "insert": " (the frame and its contents travel as one, matching what dragging a frame does in the UI), so containment never changes on a move, and the result reports how many boxes the frame carried."
+          "insert": ": the frame and its contents travel as one, as a frame does when you drag it in the UI. Containment therefore never changes on a move, and the result reports how many boxes the frame carried."
         }
       ],
       "children": []
@@ -634,7 +662,61 @@
           }
         },
         {
-          "insert": " owns explicit dimensions. The top-left corner stays fixed so the box grows or shrinks toward its bottom-right, and at least one dimension is required: a call with neither is refused as asking for no change. The dimension a call does not name is left exactly where it was. Resizing a section keeps the adopt-and-release semantics: the frame's new edges decide what it contains."
+          "insert": " owns a box's size. The top-left corner stays fixed so the box grows or shrinks toward its bottom-right. A call sends "
+        },
+        {
+          "insert": "width",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "height",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or both, or it sends "
+        },
+        {
+          "insert": "like",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and a null field counts as absent. A call with none of them is refused as asking for no change, and "
+        },
+        {
+          "insert": "like",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " beside "
+        },
+        {
+          "insert": "width",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "height",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " is refused too. The dimension a call does not name is left exactly where it was. Resizing a section keeps the adopt-and-release semantics: the frame's new edges decide what it contains."
         }
       ],
       "children": []
@@ -648,25 +730,13 @@
       },
       "text": [
         {
-          "insert": "A box exists to make its text readable, so "
-        },
-        {
           "insert": "resize",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ", "
-        },
-        {
-          "insert": "match_size",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and "
+          "insert": ", in either mode, and "
         },
         {
           "insert": "update_text",
@@ -688,7 +758,40 @@
           }
         },
         {
-          "insert": "). Text that would clip, may clip within 1 px of the box edge, or cannot be measured exactly attaches a note naming the size the content needs, and the size still lands."
+          "insert": "). A note names the needed size when the text clips, may clip within 1 px, or cannot be measured exactly, and the size still lands."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ge-arrange-sizerules-15b": {
+      "id": "b-ts-ge-arrange-sizerules-15b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The verdict is the renderer's own wrap and clamp decision ("
+        },
+        {
+          "insert": "text-fit.ts",
+          "attributes": {
+            "code": true,
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/board/text-fit.ts"
+            }
+          }
+        },
+        {
+          "insert": ") rather than a bare minimum constant. Text that would clip, may clip within 1 px of the box edge, or cannot be measured exactly attaches a note naming the size the content needs. "
+        },
+        {
+          "insert": "update_text",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " runs the mirror image of it from the other direction, so the agent hears about an illegible box at the moment it makes one. It hands the check the name and detail line as the write leaves them."
         }
       ],
       "children": []
@@ -699,7 +802,16 @@
       "props": {},
       "text": [
         {
-          "insert": "match_size",
+          "insert": "resize",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "like",
           "attributes": {
             "code": true
           }
@@ -732,10 +844,19 @@
           }
         },
         {
-          "insert": ". The gate falls on the target instead. A box cannot be its own size source. That call is refused and redirected to "
+          "insert": ". The gate falls on the target instead. A box cannot be its own size source. That call is refused and redirected to explicit "
         },
         {
-          "insert": "resize",
+          "insert": "width",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "height",
           "attributes": {
             "code": true
           }
@@ -1387,7 +1508,7 @@
             "either endpoint object sits in a locked-all closure. \"background\" never gates an edge: it pins one frame's box, not the region"
           ],
           [
-            "a box it only measures (match_size's like, clone's source)",
+            "a box it only measures (resize's like, clone's source)",
             "never. Reading a box writes nothing, so a locked box is a valid source. The gate falls on the target"
           ],
           [

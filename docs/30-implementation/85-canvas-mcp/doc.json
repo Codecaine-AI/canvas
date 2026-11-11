@@ -214,7 +214,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The server lists 35 tools: five of its own, then the 30 toolkit tools in the agent's registration order. The toolkit is the agent's 26 operation tools plus four of its five workflow tools. "
+          "insert": "The server lists 33 tools: five of its own, then the 28 toolkit tools in the agent's registration order. The toolkit is the agent's 24 operation tools plus four of its five workflow tools. "
         },
         {
           "insert": "finalize",
@@ -371,16 +371,7 @@
           [
             [
               {
-                "insert": "move_to",
-                "attributes": {
-                  "code": true
-                }
-              },
-              {
-                "insert": ", "
-              },
-              {
-                "insert": "move_by",
+                "insert": "move",
                 "attributes": {
                   "code": true
                 }
@@ -390,15 +381,6 @@
               },
               {
                 "insert": "resize",
-                "attributes": {
-                  "code": true
-                }
-              },
-              {
-                "insert": ", "
-              },
-              {
-                "insert": "match_size",
                 "attributes": {
                   "code": true
                 }
@@ -417,6 +399,24 @@
               },
               {
                 "insert": "space_out",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "arrange_section",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "tighten_wires",
                 "attributes": {
                   "code": true
                 }
@@ -1922,8 +1922,8 @@
           ],
           [
             "Tools",
-            "31: the 26 gestures and 5 workflow tools.",
-            "35: 5 server tools, the 26 gestures, and 4 workflow tools.",
+            "29: the 24 gestures and 5 workflow tools.",
+            "33: 5 server tools, the 24 gestures, and 4 workflow tools.",
             [
               {
                 "insert": "The "

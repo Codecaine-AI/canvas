@@ -217,7 +217,7 @@
       },
       "text": [
         {
-          "insert": "Twenty-six typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool."
+          "insert": "Twenty-four typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool."
         }
       ],
       "children": []
@@ -319,7 +319,7 @@
       "props": {},
       "text": [
         {
-          "insert": "There are exactly thirty-one tools, factored by editing gesture rather than by kind. Twenty-six are board mutators across place, arrange, content, sections, edges, and delete. The other five are look, describe_board, annotate, resolve_request, and finalize. The full roster is below."
+          "insert": "There are exactly twenty-nine tools, factored by editing gesture rather than by kind. Twenty-four are board mutators across place, arrange, content, sections, edges, and delete. The other five are look, describe_board, annotate, resolve_request, and finalize. The full roster is below."
         }
       ],
       "children": []
@@ -473,7 +473,7 @@
       },
       "text": [
         {
-          "insert": "The model writes twenty-six editing gestures."
+          "insert": "The model writes twenty-four editing gestures."
         }
       ],
       "children": []
@@ -744,7 +744,7 @@
           "insert": "A run's tool calls read as "
         },
         {
-          "insert": "place, place, connect, move_by, resize, change_color",
+          "insert": "place, place, connect, move, resize, change_color",
           "attributes": {
             "code": true
           }
@@ -774,7 +774,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The surface is thirty-one tools: twenty-six board-mutating gestures in six groups, listed by "
+          "insert": "The surface is twenty-nine tools: twenty-four board-mutating gestures in six groups, listed by "
         },
         {
           "insert": "operationTools",
@@ -865,24 +865,14 @@
             "route an edge between two objects"
           ],
           [
-            "move_to",
+            "move",
             "Arrange",
-            "put a box's top-left corner at a point on the board"
-          ],
-          [
-            "move_by",
-            "Arrange",
-            "nudge a box by an offset from where it already is"
+            "put a box's top-left corner at a point, or nudge it by an offset from where it already is"
           ],
           [
             "resize",
             "Arrange",
-            "re-size a box to explicit dimensions, holding its top-left corner"
-          ],
-          [
-            "match_size",
-            "Arrange",
-            "copy another box's width and height onto this one"
+            "re-size a box to explicit dimensions, or copy another box's width and height with like, holding its top-left corner"
           ],
           [
             "align",
@@ -1018,16 +1008,25 @@
       "props": {},
       "text": [
         {
-          "insert": "Three calls a gesture surface might be expected to carry are not tools, because an existing tool already answers what they would ask. "
+          "insert": "Three calls a gesture surface might be expected to carry are not tools, because an existing tool already answers what they would ask. Peer sizing is not a tool either: it is "
         },
         {
-          "insert": "match_size",
+          "insert": "resize",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " is the counterexample and is a real gesture on the roster: peer sizing is its own motion, and it earns its own verb."
+          "insert": " with "
+        },
+        {
+          "insert": "like",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", which copies another box's width and height."
         }
       ],
       "children": []
@@ -1175,16 +1174,7 @@
           "insert": " of "
         },
         {
-          "insert": "move_to",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", "
-        },
-        {
-          "insert": "move_by",
+          "insert": "move",
           "attributes": {
             "code": true
           }
@@ -1208,7 +1198,37 @@
           }
         },
         {
-          "insert": " (the UI's selection grammar). Batching would speed a run but cuts against one gesture, one operation. The two multi-id gestures that do exist, "
+          "insert": " (the UI's selection grammar)."
+        }
+      ],
+      "children": [
+        "b-ts-ov-scope-multi-16-a",
+        "b-ts-ov-scope-multi-16-b",
+        "b-ts-ov-scope-multi-16-c"
+      ]
+    },
+    "b-ts-ov-scope-multi-16-a": {
+      "id": "b-ts-ov-scope-multi-16-a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Batching would speed a run but cuts against one gesture, one operation."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-scope-multi-16-b": {
+      "id": "b-ts-ov-scope-multi-16-b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The two multi-id gestures that do exist, "
         },
         {
           "insert": "align",
@@ -1226,7 +1246,20 @@
           }
         },
         {
-          "insert": ", take a list because the arrangement itself is the gesture. Revisit once single-id traces show where batching earns its keep."
+          "insert": ", take a list because the arrangement itself is the gesture."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-scope-multi-16-c": {
+      "id": "b-ts-ov-scope-multi-16-c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Revisit once single-id traces show where batching earns its keep."
         }
       ],
       "children": []
@@ -1375,7 +1408,7 @@
       },
       "text": [
         {
-          "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty-six gestures are the only way the draft changes."
+          "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty-four gestures are the only way the draft changes."
         }
       ],
       "children": []
@@ -1434,7 +1467,7 @@
       },
       "text": [
         {
-          "insert": "The file host carries thirty of the thirty-one tools. "
+          "insert": "The file host carries twenty-eight of the twenty-nine tools. "
         },
         {
           "insert": "finalize",

@@ -59,13 +59,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Mechanism:",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " the "
+          "insert": "The mechanism is the "
         },
         {
           "insert": "aesthetic",
@@ -78,7 +72,7 @@
           }
         },
         {
-          "insert": " says same size plus same gap means peers. Size for content first, then match_size every peer to the largest member and read exact digest geometry for the rest instead of estimating a near match. The agent's 20 grid quantizes the resulting rectangles. It does not choose the gap."
+          "insert": ", which says same size plus same gap means peers. Size for content first. Then resize every peer like the largest member, and read exact digest geometry for the rest instead of estimating a near match. The agent's 20 grid quantizes the resulting rectangles. It does not choose the gap."
         }
       ],
       "children": []

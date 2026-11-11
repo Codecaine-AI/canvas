@@ -26,6 +26,7 @@
         "b-ts-gr-snap-body-4",
         "b-ts-gr-snap-degenerate-5",
         "b-ts-gr-lands-6",
+        "b-ts-gr-lands-6b",
         "b-ts-gr-lands-corollary-7",
         "b-ts-gr-table-heading-8",
         "b-ts-gr-table-9",
@@ -114,16 +115,27 @@
       },
       "text": [
         {
-          "insert": "The rule is not \"arguments are rounded\" but \"every number that reaches board geometry is a multiple of 20\". For an absolute argument the two are the same thing. For a relative one they are not, and the result is what counts. "
+          "insert": "The rule is not \"arguments are rounded\" but \"every number that reaches board geometry is a multiple of 20\". For an absolute argument the two are the same thing, and for a relative one the result is what counts."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-gr-lands-6b": {
+      "id": "b-ts-gr-lands-6b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A "
         },
         {
-          "insert": "move_by 20",
+          "insert": "move",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " off a box at x=16 lands it at 40, not at 36, and "
+          "insert": " by 20 off a box at x=16 lands it at 40, not at 36. The "
         },
         {
           "insert": "align",
@@ -132,7 +144,7 @@
           }
         },
         {
-          "insert": " snaps the shared coordinate the row agrees on rather than the deltas that get each box there. A quantizer that snapped only its inputs would leave every hand-drawn box permanently off-grid, which is precisely the board the grid exists to clean up."
+          "insert": " gesture snaps the shared coordinate the row agrees on rather than the deltas that get each box there. A quantizer that snapped only its inputs would leave every hand-drawn box permanently off-grid, which is precisely the board the grid exists to clean up."
         }
       ],
       "children": []
@@ -215,13 +227,13 @@
           ],
           [
             "the corner a move lands on",
-            "move_to's target, move_by's destination (position plus delta)",
+            "move's to target, and move's by destination (position plus delta)",
             "snapPoint"
           ],
           [
             "the size a box ends up with",
-            "size on place_section, width / height on resize, both dimensions match_size copies, the size clone copies",
-            "snapSize — clamped to at least one grid unit per side"
+            "size on place_section, width / height on resize, both dimensions resize's like copies, the size clone copies",
+            "snapSize, clamped to at least one grid unit per side"
           ],
           [
             "the shared coordinate a row agrees on, and each computed position",
@@ -231,7 +243,7 @@
           [
             "the clear gap between neighbours",
             "gap on space_out",
-            "snapGap — clamped at 0, since flush is a real request"
+            "snapGap, clamped at 0, since flush is a real request"
           ],
           [
             "routing corners",
@@ -246,22 +258,22 @@
           [
             "where an edge meets an object's side",
             "Endpoint.position",
-            "exempt — a 0..1 fraction of a side, not a world distance"
+            "exempt, as a 0..1 fraction of a side and not a world distance"
           ],
           [
             "how far along its route a label chip sits",
             "along on move_label",
-            "exempt — a 0..1 fraction of arc length; the chip sizes itself to its text, so there is no box edge to land on"
+            "exempt, as a 0..1 fraction of arc length. The chip sizes itself to its text, so there is no box edge to land on"
           ],
           [
             "text-fit measurements",
-            "the readability checks on resize / match_size / update_text",
-            "exempt — these measure real glyph runs, not grid units"
+            "the readability checks on resize / update_text",
+            "exempt, because these measure real glyph runs, not grid units"
           ],
           [
             "geometry the gesture does not write",
             "the untouched dimension of a width-only resize, the first box of a space_out run, the descendants a frame carries",
-            "exempt — untouched values keep their exact relative geometry"
+            "exempt, because untouched values keep their exact relative geometry"
           ]
         ],
         "title": "The quantized and exempt fields"
