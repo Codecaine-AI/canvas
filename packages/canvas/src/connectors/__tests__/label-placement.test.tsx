@@ -19,7 +19,7 @@ import { connectionPaintedBounds } from "../../render/painted-bounds";
 import { renderDocumentToSvg } from "../../render/static-svg";
 import { Connector } from "../Connector";
 import { connectionLabelChipMetrics } from "../label-chip";
-import { blockedLabelIds, placeConnectionLabels } from "../label-placement";
+import { ARROW_KEEP_OUT_PX, blockedLabelIds, placeConnectionLabels, routedConnectionIn } from "../label-placement";
 import { FIGJAM_CANVAS_STYLE } from "../../theme/canvas-style";
 
 function box(id: string, x: number, y: number, width = 100, height = 60): InteractiveCanvasObject {
@@ -179,6 +179,82 @@ describe("placeConnectionLabels", () => {
       [wire("ab", "a", "b", "request", { labelPosition: { along: 0.25 } })],
     );
     expect(placeConnectionLabels(document).get("ab")).toEqual({ x: 110, y: 30 });
+  });
+});
+
+function section(id: string, x: number, y: number, width: number, height: number): InteractiveCanvasObject {
+  return { id, type: "section", text: id, geometry: { x, y, width, height } };
+}
+
+/** Whether the chip for `label` centered on `point` has `x` strictly inside its width. */
+function straddlesX(label: string, point: { x: number }, x: number): boolean {
+  const { width } = connectionLabelChipMetrics(label);
+  return point.x - width / 2 < x && x < point.x + width / 2;
+}
+
+describe("placeConnectionLabels keep-out", () => {
+  it("moves a chip off a section frame edge its wire crosses", () => {
+    // The frame's right edge, x = 300, runs through the a → b midpoint.
+    const document = doc([section("s", -40, -80, 340, 200), A, B], [wire("ab", "a", "b", "request")]);
+    const point = placeConnectionLabels(document).get("ab")!;
+    expect(point.y).toBe(30);
+    expect(straddlesX("request", point, 300)).toBe(false);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("moves a pinned chip off a frame edge to the clear spot nearest its pin", () => {
+    const document = doc(
+      [section("s", -40, -80, 340, 200), A, B],
+      [wire("ab", "a", "b", "request", { labelPosition: { along: 0.5 } })],
+    );
+    const point = placeConnectionLabels(document).get("ab")!;
+    expect(straddlesX("request", point, 300)).toBe(false);
+    // Just off the edge, with a few px of air: not slid away along the wire.
+    const { width } = connectionLabelChipMetrics("request");
+    expect(Math.abs(point.x - 300)).toBeLessThan(width / 2 + 16);
+  });
+
+  it("moves a chip off a sticky", () => {
+    const note: InteractiveCanvasObject = { id: "n", type: "sticky", text: "note", geometry: { x: 260, y: 40, width: 80, height: 80 } };
+    const document = doc([A, B, note], [wire("ab", "a", "b", "request")]);
+    const point = placeConnectionLabels(document).get("ab")!;
+    expect(straddlesX("request", point, 260) || straddlesX("request", point, 340) || straddlesX("request", point, 300)).toBe(false);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("keeps a chip off the arrowhead end of a short wire", () => {
+    // a → b leaves a short run; the centered chip would reach into its last 24px.
+    const near = box("b", 200, 0);
+    const document = doc([A, near], [wire("ab", "a", "b", "brief")]);
+    const routed = routedConnectionIn(document, document.connections[0]!, A, near);
+    const end = routed.points!.at(-1)!;
+    const point = placeConnectionLabels(document).get("ab")!;
+    const { width } = connectionLabelChipMetrics("brief");
+    expect(point.x + width / 2).toBeLessThanOrEqual(end.x - ARROW_KEEP_OUT_PX);
+    expect(point.x - width / 2).toBeGreaterThanOrEqual(100);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("keeps a chip centered on a short wire with no arrowhead", () => {
+    const near = box("b", 200, 0);
+    const document = doc([A, near], [wire("ab", "a", "b", "brief", { arrow: "none" })]);
+    expect(placeConnectionLabels(document).get("ab")!.x).toBe(150);
+  });
+
+  it("slides a wide chip sideways off a frame edge its vertical wire hugs", () => {
+    // c → d runs down x = 150, 30px inside the frame's left edge at x = 120:
+    // a chip centered on the wire crosses that edge all the way down.
+    const label = "a label wider than the gap";
+    const document = doc(
+      [section("s", 120, -100, 400, 700), box("c", 100, 0), box("d", 100, 400)],
+      [wire("cd", "c", "d", label)],
+    );
+    const point = placeConnectionLabels(document).get("cd")!;
+    const { width } = connectionLabelChipMetrics(label);
+    expect(point.x - width / 2).toBeGreaterThanOrEqual(120);
+    // The wire still runs through the chip, inside its edge.
+    expect(point.x - width / 2).toBeLessThan(150);
+    expect(blockedLabelIds(document)).toEqual([]);
   });
 });
 

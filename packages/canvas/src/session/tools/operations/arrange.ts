@@ -68,6 +68,9 @@ import { textFitReport } from "../../../board/text-fit";
 import { autoSizeObjects } from "./auto-size";
 import { CRAFT_TARGETS } from "../../../authoring/style-guide/craft-targets";
 import { hitBoundsForObject } from "../../../objects/geometry";
+import { connectionLabelChipMetrics } from "../../../connectors/label-chip";
+import { ARROW_KEEP_OUT_PX, drawnRectOf, paintedRects } from "../../../connectors/label-placement";
+import { CONNECTOR_END_GAP_PX } from "../../../connectors/routing";
 import { entityKindOf } from "../../perception/op-surface";
 import {
   SECTION_FIT_PADDING,
@@ -672,9 +675,10 @@ function rowIdErrors(ctx: OpContext, sectionId: string, id: string): string[] {
 }
 
 /**
- * The cells of the arrangement: each node's painted footprint (its hit
- * bounds, so an icon's caption band counts) and the offset from that footprint
- * to the box the document stores.
+ * The cells of the arrangement: each node's painted footprint (what a reader
+ * sees: a shape's box, an icon's tile and caption, not its whole stored box),
+ * its hit bounds relative to that footprint (the stored box and caption, which
+ * the frame must still hold), and the offset from footprint to stored box.
  */
 interface Cell {
   readonly id: string;
@@ -683,55 +687,155 @@ interface Cell {
   /** Stored corner minus footprint corner: how far the box sits inside its footprint. */
   readonly inset: { x: number; y: number };
   readonly footprint: { width: number; height: number };
+  /** How far below the footprint's top its side wires attach: the center of its drawn rect (an icon's tile). */
+  readonly anchorY: number;
+  /** Hit bounds minus footprint, as the overhang on each side (0 or more). */
+  readonly overhang: { left: number; top: number; right: number; bottom: number };
 }
 
 /**
- * Pitch the rows and columns and return each node's new top-left corner.
+ * The air a stored box keeps inside the frame on each side, and above it (the
+ * title band too). Section auto-grow (state/section-grow.ts) grows a frame
+ * whose child keeps less, one side at a time, which would undo the centring.
+ */
+const STORED_BOX_AIR = { side: 20, top: 40 } as const;
+
+/**
+ * The gap a labelled wire needs past its chip's length: 24px of air before the
+ * chip, ARROW_KEEP_OUT_PX after it for the arrowhead, and the end gap the
+ * wire leaves at each box. 68px at the default end gap.
+ */
+const LABELLED_GAP_AIR_PX = 24 + ARROW_KEEP_OUT_PX + 2 * CONNECTOR_END_GAP_PX;
+
+/** Each gap a labelled wire crosses, keyed by its two cell ids, and the length along the wire its chip needs. */
+type LabelledGaps = (a: string, b: string, axis: "across" | "down") => number;
+
+/**
+ * Pitch the rows and return each node's new top-left corner and the frame.
  *
- * A column is as wide as its widest footprint and a row as tall as its
- * tallest, both rounded up to the grid; neighbours in a row sit
- * `nodeGapRow` apart, and rows sit `nodeGapColumn` apart. Every cell edge is
- * on the agent grid.
+ * Rows of the same length share a column grid: a column is as wide as its
+ * widest footprint, rounded up to the grid. Neighbours in a row sit
+ * `nodeGapRow` apart and rows `nodeGapColumn` apart, or further when a
+ * labelled wire crosses the gap: its chip's length plus LABELLED_GAP_AIR_PX,
+ * so the chip clears both ends and the arrowhead.
  *
- * Each footprint is centered in its cell, so a row of mixed sizes shares one
- * center line and its wires run straight. That shared center is the gesture,
- * as it is for `arrange`'s `align` center: a corner falls half an extent from it and is
- * not snapped to the agent grid (the write path still puts it on its own grid
- * of 4).
+ * Each row is centred in the frame, and each footprint in its column. Down a
+ * row, every node's side anchor (a box's middle, an icon's tile middle, with
+ * its caption hanging below) sits on one line, so its wires run straight.
+ * That shared line is the gesture, as it is for `arrange`'s `align` center: a
+ * corner falls half an extent from it and is not snapped to the agent grid
+ * (the write path still puts it on its own grid of 4).
+ *
+ * The frame keeps its top-left corner and the same air on the left and right
+ * of what paints: the frame padding, or more when a stored box (an icon's is
+ * wider than its tile and caption) would otherwise keep less than
+ * STORED_BOX_AIR inside the frame.
  */
 function pitchCells(
   cells: readonly Cell[],
-  origin: { x: number; y: number },
-): Map<string, { x: number; y: number }> {
-  const columnWidth: number[] = [];
-  const rowHeight: number[] = [];
+  corner: { x: number; y: number },
+  labelledGap: LabelledGaps,
+): { corners: Map<string, { x: number; y: number }>; frame: { x: number; y: number; width: number; height: number } } {
+  const rows: Cell[][] = [];
+  for (const cell of cells) (rows[cell.row] ??= [])[cell.column] = cell;
+
+  // Column widths and gaps per row length.
+  const grids = new Map<number, { widths: number[]; gaps: number[] }>();
+  for (const row of rows) {
+    const grid = grids.get(row.length) ?? { widths: [], gaps: [] };
+    grids.set(row.length, grid);
+    row.forEach((cell, column) => {
+      grid.widths[column] = Math.max(grid.widths[column] ?? 0, ceilToGrid(cell.footprint.width));
+      if (column > 0) {
+        const need = ceilToGrid(labelledGap(row[column - 1]!.id, cell.id, "across"));
+        grid.gaps[column - 1] = Math.max(grid.gaps[column - 1] ?? CRAFT_TARGETS.nodeGapRow, need);
+      }
+    });
+  }
+  const rowWidth = (row: readonly Cell[]): number => {
+    const { widths, gaps } = grids.get(row.length)!;
+    return widths.reduce((sum, width) => sum + width, 0) + gaps.reduce((sum, gap) => sum + gap, 0);
+  };
+  const contentWidth = Math.max(...rows.map(rowWidth));
+
+  // Each row's anchor line: as far down as its tallest part above an anchor.
+  const above = rows.map((row) => Math.max(...row.map((cell) => cell.anchorY)));
+  const below = rows.map((row) => Math.max(...row.map((cell) => cell.footprint.height - cell.anchorY)));
+  const rowHeight = rows.map((_, index) => ceilToGrid(above[index]! + below[index]!));
+  const rowY: number[] = [0];
+  for (let index = 1; index < rows.length; index += 1) {
+    let gap: number = CRAFT_TARGETS.nodeGapColumn;
+    for (const above of rows[index - 1]!) {
+      for (const below of rows[index]!) gap = Math.max(gap, ceilToGrid(labelledGap(above.id, below.id, "down")));
+    }
+    rowY[index] = rowY[index - 1]! + rowHeight[index - 1]! + gap;
+  }
+  const contentHeight = rowY.at(-1)! + rowHeight.at(-1)!;
+
+  // Footprint corners relative to the content's top-left.
+  const placed = new Map<string, { x: number; y: number }>();
+  for (const [index, row] of rows.entries()) {
+    const { widths, gaps } = grids.get(row.length)!;
+    let x = (contentWidth - rowWidth(row)) / 2;
+    row.forEach((cell, column) => {
+      placed.set(cell.id, {
+        x: x + (widths[column]! - cell.footprint.width) / 2,
+        y: rowY[index]! + (rowHeight[index]! - above[index]! - below[index]!) / 2 + above[index]! - cell.anchorY,
+      });
+      x += widths[column]! + (gaps[column] ?? 0);
+    });
+  }
+
+  // The air around the content: the frame padding, or what holds every stored box.
+  let side: number = CRAFT_TARGETS.framePadding;
+  let top: number = CRAFT_TARGETS.framePadding + SECTION_FIT_PADDING.titleClearance;
+  let bottom: number = CRAFT_TARGETS.framePadding;
   for (const cell of cells) {
-    columnWidth[cell.column] = Math.max(columnWidth[cell.column] ?? 0, ceilToGrid(cell.footprint.width));
-    rowHeight[cell.row] = Math.max(rowHeight[cell.row] ?? 0, ceilToGrid(cell.footprint.height));
+    const at = placed.get(cell.id)!;
+    side = Math.max(
+      side,
+      cell.overhang.left - at.x + STORED_BOX_AIR.side,
+      at.x + cell.footprint.width + cell.overhang.right - contentWidth + STORED_BOX_AIR.side,
+    );
+    top = Math.max(top, cell.overhang.top - at.y + STORED_BOX_AIR.top);
+    bottom = Math.max(bottom, at.y + cell.footprint.height + cell.overhang.bottom - contentHeight + STORED_BOX_AIR.side);
   }
-  const columnX: number[] = [origin.x];
-  for (let column = 1; column < columnWidth.length; column += 1) {
-    columnX[column] = columnX[column - 1]! + columnWidth[column - 1]! + CRAFT_TARGETS.nodeGapRow;
-  }
-  const rowY: number[] = [origin.y];
-  for (let row = 1; row < rowHeight.length; row += 1) {
-    rowY[row] = rowY[row - 1]! + rowHeight[row - 1]! + CRAFT_TARGETS.nodeGapColumn;
-  }
+  const frame = {
+    x: corner.x,
+    y: corner.y,
+    width: ceilToGrid(contentWidth + side * 2),
+    height: ceilToGrid(top + contentHeight + bottom),
+  };
+  const left = frame.x + (frame.width - contentWidth) / 2;
   const corners = new Map<string, { x: number; y: number }>();
   for (const cell of cells) {
-    const left = columnX[cell.column]! + (columnWidth[cell.column]! - cell.footprint.width) / 2;
-    const top = rowY[cell.row]! + (rowHeight[cell.row]! - cell.footprint.height) / 2;
-    corners.set(cell.id, { x: left + cell.inset.x, y: top + cell.inset.y });
+    const at = placed.get(cell.id)!;
+    corners.set(cell.id, { x: left + at.x + cell.inset.x, y: frame.y + top + at.y + cell.inset.y });
   }
-  return corners;
+  return { corners, frame };
+}
+
+/** The union of a box's painted rects: what a reader sees of it. */
+function paintedFootprint(object: InteractiveCanvasObject, canvasStyle: OpContext["canvasStyle"]) {
+  const rects = paintedRects(object, canvasStyle);
+  const x = Math.min(...rects.map((rect) => rect.x));
+  const y = Math.min(...rects.map((rect) => rect.y));
+  return {
+    x,
+    y,
+    width: Math.max(...rects.map((rect) => rect.x + rect.width)) - x,
+    height: Math.max(...rects.map((rect) => rect.y + rect.height)) - y,
+  };
 }
 
 export const arrangeSection = defineOperationTool({
   name: "arrange_section",
   description:
     "Lay a section's nodes out in the rows you name, then fit the frame around them. "
-    + "Rows run top to bottom and each row left to right; columns line up across rows. "
-    + "The gaps come from the craft targets and each node's painted size, captions included, "
+    + "Rows run top to bottom and each row left to right. Each row is centred in the frame, "
+    + "and rows of the same length line up column by column. "
+    + "The gaps come from the craft targets and each node's painted size (an icon's tile and caption), "
+    + "and a gap a labelled wire crosses widens to fit its label, "
     + "so the call carries no coordinates. The frame keeps its top-left corner. "
     + "Children of the section you leave out stay where they are.",
   fields: ArrangeSectionParams.properties,
@@ -755,38 +859,42 @@ export const arrangeSection = defineOperationTool({
     const cells: Cell[] = p.rows.flatMap((row, rowIndex) =>
       row.map((id, column) => {
         const object = objectOf(ctx, id);
-        const bounds = hitBoundsForObject(object, ctx.canvasStyle);
+        const painted = paintedFootprint(object, ctx.canvasStyle);
+        const hit = hitBoundsForObject(object, ctx.canvasStyle);
+        const drawn = drawnRectOf(object, ctx.canvasStyle);
         return {
           id,
           row: rowIndex,
           column,
-          inset: { x: object.geometry.x - bounds.x, y: object.geometry.y - bounds.y },
-          footprint: { width: bounds.width, height: bounds.height },
+          inset: { x: object.geometry.x - painted.x, y: object.geometry.y - painted.y },
+          footprint: { width: painted.width, height: painted.height },
+          anchorY: drawn.y + drawn.height / 2 - painted.y,
+          overhang: {
+            left: Math.max(0, painted.x - hit.x),
+            top: Math.max(0, painted.y - hit.y),
+            right: Math.max(0, hit.x + hit.width - (painted.x + painted.width)),
+            bottom: Math.max(0, hit.y + hit.height - (painted.y + painted.height)),
+          },
         };
       }));
-    const padding = CRAFT_TARGETS.framePadding;
-    const corners = pitchCells(cells, {
-      x: section.geometry.x + padding,
-      y: section.geometry.y + padding + SECTION_FIT_PADDING.titleClearance,
-    });
+    // A labelled wire between two cells needs its chip's length along the
+    // wire: its width across a row, its height down a column.
+    const labelledGap: LabelledGaps = (a, b, axis) => {
+      let need = 0;
+      for (const connection of ctx.draft.connections) {
+        const ends = [connection.from.objectId, connection.to.objectId];
+        if (!connection.label?.trim() || !ends.includes(a) || !ends.includes(b) || a === b) continue;
+        const chip = connectionLabelChipMetrics(connection.label, ctx.canvasStyle);
+        need = Math.max(need, (axis === "across" ? chip.width : chip.height) + LABELLED_GAP_AIR_PX);
+      }
+      return need;
+    };
+    // The frame keeps its top-left corner, on the agent grid.
+    const { corners, frame } = pitchCells(cells, snapRectOutward(section.geometry), labelledGap);
 
     const placed = cells.map((cell) => {
       const object = objectOf(ctx, cell.id);
       return { ...object, geometry: { ...object.geometry, ...corners.get(cell.id)! } };
-    });
-    // The frame closes around the footprints that landed, so a caption hanging
-    // below an icon stays inside the frame.
-    const footprints = placed.map((object) => hitBoundsForObject(object, ctx.canvasStyle));
-    const minX = Math.min(...footprints.map((bounds) => bounds.x));
-    const minY = Math.min(...footprints.map((bounds) => bounds.y));
-    const maxX = Math.max(...footprints.map((bounds) => bounds.x + bounds.width));
-    const maxY = Math.max(...footprints.map((bounds) => bounds.y + bounds.height));
-    const top = padding + SECTION_FIT_PADDING.titleClearance;
-    const frame = snapRectOutward({
-      x: minX - padding,
-      y: minY - top,
-      width: maxX - minX + padding * 2,
-      height: maxY - minY + top + padding,
     });
 
     const { document } = lowerGeometry(ctx.draft, [

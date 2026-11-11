@@ -12,9 +12,12 @@
  *
  * 1. blocked: 1 when it hits anything — a box's painted face (an icon's tile
  *    and caption, else the box; its own endpoints too, except on a
- *    self-loop), a chip already placed, or another wire running through it
- *    for more than EDGE_RUN_TOLERANCE_PX;
- * 2. covered: how much it covers (overlap area, a wire run as an 8px band),
+ *    self-loop), a sticky, a section's title chip, a chip already placed,
+ *    another wire running through it for more than EDGE_RUN_TOLERANCE_PX, a
+ *    section frame edge, or the last ARROW_KEEP_OUT_PX of any wire's arrowed
+ *    end (its own too);
+ * 2. covered: how much it covers (overlap area, a wire run, frame edge or
+ *    arrow zone as an 8px band),
  *    so with no clear spot the least-bad one wins — a chip squeezed between
  *    its endpoints keeps bridging both rather than sliding onto one;
  * 3. near misses (clear chips only): the hit count for the chip grown
@@ -30,7 +33,12 @@
  * not. A pinned chip that hits something moves only to a clear spot, the
  * one nearest the pin; with no clear spot it keeps its pin.
  *
- * When no candidate is clear (dense boards), an unpinned chip takes the
+ * When no candidate is clear, a chip on a vertical run may also slide
+ * sideways, as long as its wire stays SIDE_WIRE_INSET_PX inside its edge: a
+ * wide chip on a wire that hugs a frame edge or a column of boxes clears
+ * them that way. Only a clear sideways spot is taken.
+ *
+ * When still no candidate is clear (dense boards), an unpinned chip takes the
  * least-bad one; `blockedLabelIds` counts what is left (canvas_check's
  * LAYOUT block). No lint judges chips.
  *
@@ -47,6 +55,7 @@
 import type { CanvasPoint } from "../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasDocument, InteractiveCanvasObject } from "../state/schema";
 import { captionBandBounds } from "../objects/geometry";
+import { sectionTitleChipWorldRect } from "../objects/section/title-chip-geometry";
 import { iconGlyphBoxPx } from "../objects/text-slots";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { onBackendChange } from "../theme/text-measure";
@@ -63,6 +72,10 @@ const WIRE_BAND_PX = 8;
 const NEAR_MISS_PX = 4;
 /** Another wire may cross a chip for this long before it counts. */
 export const EDGE_RUN_TOLERANCE_PX = 8;
+/** A chip keeps off this much of a wire's arrowed end, so the head always shows. */
+export const ARROW_KEEP_OUT_PX = 24;
+/** How far inside a chip's edge its own wire stays when the chip slides sideways off a vertical run. */
+const SIDE_WIRE_INSET_PX = 12;
 
 /**
  * Where an object's box paints: its geometry, except a tile-style icon,
@@ -165,6 +178,8 @@ interface Candidate { point: CanvasPoint; bend: 0 | 1 }
 
 /** How far past an obstacle's edge a boundary candidate sits, so float error never reads as overlap. */
 const BOUNDARY_EPSILON_PX = 0.01;
+/** A segment this close to vertical counts as a vertical run. */
+const ROUTE_EPSILON_PX = 0.5;
 
 /**
  * Points along the wire, with whether the chip fits there on one straight
@@ -216,6 +231,36 @@ function candidatesAlong(points: readonly CanvasPoint[], width: number, height: 
       for (const d of edges) {
         if (d >= 0 && d <= length) out.push(at(d));
       }
+    }
+  }
+  return out;
+}
+
+/**
+ * Chip centers slid sideways off each vertical run of `points`, the wire
+ * kept SIDE_WIRE_INSET_PX inside the chip: every SAMPLE_STEP_PX of slide,
+ * plus the slides where the chip's side just clears an obstacle, at each
+ * point `candidatesAlong` finds for a chip that wide.
+ */
+function sidewaysCandidates(points: readonly CanvasPoint[], width: number, height: number, obstacles: readonly Obstacle[]): Candidate[] {
+  const reach = width / 2 - SIDE_WIRE_INSET_PX;
+  if (reach <= 0) return [];
+  const out: Candidate[] = [];
+  for (let i = 1; i < points.length; i += 1) {
+    const a = points[i - 1]!;
+    const b = points[i]!;
+    if (Math.abs(a.x - b.x) > ROUTE_EPSILON_PX || a.y === b.y) continue;
+    const slides: number[] = [];
+    for (let slide = SAMPLE_STEP_PX; slide <= reach; slide += SAMPLE_STEP_PX) slides.push(slide, -slide);
+    for (const { rect } of obstacles) {
+      slides.push(
+        rect.x - width / 2 - BOUNDARY_EPSILON_PX - a.x,
+        rect.x + rect.width + width / 2 + BOUNDARY_EPSILON_PX - a.x,
+      );
+    }
+    const inReach = slides.filter((slide) => slide !== 0 && Math.abs(slide) <= reach);
+    for (const along of candidatesAlong([a, b], width + reach * 2, height, obstacles)) {
+      for (const slide of inReach) out.push({ point: { x: along.point.x + slide, y: along.point.y }, bend: along.bend });
     }
   }
   return out;
@@ -354,9 +399,40 @@ function computePlacements(
     const points = routed.points ?? [routed.start, routed.end];
     if (points.length >= 2) wires.push({ id: connection.id, points, bounds: boundsOf(points) });
   }
-  const faces = document.objects
-    .filter(isBox)
-    .map((object) => ({ id: object.id, rects: paintedRects(object, canvasStyle) }));
+  // A sticky paints its whole note and a section its title chip; chips keep off both.
+  const faces = document.objects.map((object) => ({
+    id: object.id,
+    rects: object.type === "section"
+      ? [sectionTitleChipWorldRect(object, 1, canvasStyle)]
+      : object.type === "sticky" ? [object.geometry] : paintedRects(object, canvasStyle),
+  }));
+  // Lines no chip may cross at all: every frame edge (a chip across one
+  // reads as in neither section — Ford: "for the Text Bobs on lines to make
+  // it so that they aren't, like, ideally on borders and such"), and each
+  // wire's arrowed ends.
+  const lines: Wire[] = [];
+  for (const object of document.objects) {
+    if (object.type !== "section") continue;
+    const { x, y, width, height } = object.geometry;
+    const frame = [
+      { x, y }, { x: x + width, y }, { x: x + width, y: y + height }, { x, y: y + height }, { x, y },
+    ];
+    lines.push({ id: object.id, points: frame, bounds: boundsOf(frame) });
+  }
+  for (const connection of document.connections) {
+    const routed = routes.get(connection.id);
+    if (!routed) continue;
+    const points = routed.points ?? [routed.start, routed.end];
+    const arrow = connection.arrow ?? "forward";
+    const ends = [
+      ...(arrow === "forward" || arrow === "both" ? [points] : []),
+      ...(arrow === "back" || arrow === "both" ? [[...points].reverse()] : []),
+    ];
+    for (const end of ends) {
+      const zone = lastRun(end, ARROW_KEEP_OUT_PX);
+      if (zone.length >= 2) lines.push({ id: connection.id, points: zone, bounds: boundsOf(zone) });
+    }
+  }
 
   const chips: Rect[] = [];
   for (const connection of document.connections) {
@@ -403,6 +479,13 @@ function computePlacements(
           covered += run * WIRE_BAND_PX;
         }
       }
+      for (const line of lines) {
+        const run = wireRunInRect(line, rect);
+        if (run > 0) {
+          count += 1;
+          covered += run * WIRE_BAND_PX;
+        }
+      }
       return { count, covered };
     };
     const scoreAt = (point: CanvasPoint, bend: number): Score => {
@@ -431,11 +514,23 @@ function computePlacements(
         if (other.id === connection.id) continue;
         for (const rect of segmentBoxes(other.points)) obstacles.push({ rect, slack: EDGE_RUN_TOLERANCE_PX });
       }
+      for (const line of lines) {
+        for (const rect of segmentBoxes(line.points)) obstacles.push({ rect, slack: 0 });
+      }
       for (const candidate of candidatesAlong(points, width, height, obstacles)) {
         const score = scoreAt(candidate.point, candidate.bend);
         if (lexLess(score, bestScore)) {
           bestScore = score;
           best = candidate.point;
+        }
+      }
+      if (bestScore[0] !== 0) {
+        for (const candidate of sidewaysCandidates(points, width, height, obstacles)) {
+          const score = scoreAt(candidate.point, candidate.bend);
+          if (score[0] === 0 && lexLess(score, bestScore)) {
+            bestScore = score;
+            best = candidate.point;
+          }
         }
       }
       // A pin moves only to a clear spot: never to leave a bend, never to a
@@ -450,6 +545,24 @@ function computePlacements(
     chips.push(rectAt(best, 0));
   }
   return { points: result, blocked };
+}
+
+/** The last `length` px of `points`, from its end back: the stretch an arrowhead paints over. */
+function lastRun(points: readonly CanvasPoint[], length: number): CanvasPoint[] {
+  const out: CanvasPoint[] = [points[points.length - 1]!];
+  let left = length;
+  for (let i = points.length - 1; i > 0 && left > 0; i -= 1) {
+    const a = points[i]!;
+    const b = points[i - 1]!;
+    const run = Math.hypot(b.x - a.x, b.y - a.y);
+    if (run >= left) {
+      out.push({ x: a.x + ((b.x - a.x) * left) / run, y: a.y + ((b.y - a.y) * left) / run });
+      break;
+    }
+    out.push(b);
+    left -= run;
+  }
+  return out;
 }
 
 /** Each segment's bounding box. */
