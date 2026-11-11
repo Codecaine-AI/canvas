@@ -17,7 +17,7 @@ import {
   type InteractiveCanvasDocument,
   type InteractiveCanvasObject,
 } from "../../state/schema";
-import { routeConnection } from "../../connectors/routing";
+import { routeConnectionOnBoard } from "../../connectors/routing";
 // Relative imports so the harness never loads the package's React surface.
 import {
   connectionPaintedBounds,
@@ -501,7 +501,7 @@ function connectionRouteRow(
     const plural = missing.length === 1 ? "" : "s";
     return `  ${connection.id}  unroutable (missing endpoint${plural} ${missing.join(", ")})`;
   }
-  const routed = routeConnection(from, to, connection, document.objects, canvasStyle);
+  const routed = routeConnectionOnBoard(document, connection, from, to, canvasStyle);
   const points = routed.points ?? [routed.start, routed.end];
   const violations = connection.from.objectId === connection.to.objectId
     ? []

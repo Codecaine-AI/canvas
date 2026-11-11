@@ -60,7 +60,7 @@ import { iconGlyphBoxPx } from "../objects/text-slots";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { onBackendChange } from "../theme/text-measure";
 import { connectionLabelChipMetrics } from "./label-chip";
-import { labelPointFor, routeConnection, type RoutedConnection } from "./routing";
+import { labelPointFor, routeConnection, routeConnectionOnBoard, type RoutedConnection } from "./routing";
 
 interface Rect { x: number; y: number; width: number; height: number }
 
@@ -340,13 +340,13 @@ function cachedRoute(
   from: InteractiveCanvasObject, to: InteractiveCanvasObject, canvasStyle: CanvasStyle,
 ): RoutedConnection {
   let routed = entry.routes.get(connection.id);
-  if (!routed) entry.routes.set(connection.id, (routed = routeConnection(from, to, connection, document.objects, canvasStyle)));
+  if (!routed) entry.routes.set(connection.id, (routed = routeConnectionOnBoard(document, connection, from, to, canvasStyle)));
   return routed;
 }
 
 /**
- * `routeConnection(fromObject, toObject, connection, document.objects,
- * canvasStyle)`, shared with the placement through the board cache. A
+ * The wire as the board paints it (`routeConnectionOnBoard`, in its lane),
+ * shared with the placement through the board cache. A
  * connection or endpoint that is not the document's own (a drag preview's
  * stand-in) is routed afresh.
  */

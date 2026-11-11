@@ -24,7 +24,7 @@
  * Label placement keeps chips clear; the check-only wire rules
  * (rules/wires.ts) and tighten_wires read chips through chipFor.
  */
-import { routeConnection } from "../../connectors/routing.ts";
+import { routeConnectionOnBoard } from "../../connectors/routing.ts";
 import { connectionLabelChipMetrics } from "../../connectors/label-chip.ts";
 
 import type {
@@ -107,7 +107,7 @@ export function routedPolyline(
   const to = byId.get(toId);
   if (!from || !to) return [];
   // The workspace style sizes icon captions, which set where edges attach.
-  const routed = routeConnection(from, to, edge, document.objects, canvasStyle);
+  const routed = routeConnectionOnBoard(document, edge, from, to, canvasStyle);
   return (routed.points ?? [routed.start, routed.end])
     .map((point) => ({ x: point.x, y: point.y }));
 }
