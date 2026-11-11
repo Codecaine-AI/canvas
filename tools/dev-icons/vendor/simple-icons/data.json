@@ -412,6 +412,13 @@
     "guidelines": "https://coder.com/brand"
   },
   {
+    "title": "CodeRabbit",
+    "slug": "coderabbit",
+    "hex": "FF570A",
+    "source": "https://www.coderabbit.ai/brand",
+    "guidelines": "https://www.coderabbit.ai/brand"
+  },
+  {
     "title": "CodeSandbox",
     "slug": "codesandbox",
     "hex": "151515",

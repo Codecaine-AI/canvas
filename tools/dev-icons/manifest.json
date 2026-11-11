@@ -97,6 +97,7 @@
     { "id": "brand-anthropic", "source": "anthropic" },
     { "id": "brand-claude", "source": "claude", "aliases": ["claude ai"] },
     { "id": "brand-claude-code", "source": "claudecode" },
+    { "source": "coderabbit" },
     { "source": "pi", "aliases": ["pi agent", "pi coding agent"] },
     { "id": "brand-huggingface", "source": "huggingface", "art": "huggingface", "aliases": ["hf"] },
     { "id": "brand-ollama", "source": "ollama" },
@@ -430,6 +431,7 @@
     { "id": "brand-groq", "title": "Groq", "glyph": "cpu", "why": "Not in Simple Icons 16.33.0." },
     { "id": "brand-dbt", "title": "dbt", "glyph": "table", "aliases": ["data build tool"], "why": "Not in Simple Icons 16.33.0." },
     { "id": "brand-heroku", "title": "Heroku", "glyph": "cloud", "why": "Not in Simple Icons 16.33.0." },
+    { "id": "brand-greptile", "title": "Greptile", "glyph": "search", "why": "Not in Simple Icons 16.33.0." },
     { "id": "brand-twilio", "title": "Twilio", "glyph": "message", "why": "Not in Simple Icons 16.33.0." }
   ]
 }

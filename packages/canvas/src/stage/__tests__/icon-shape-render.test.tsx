@@ -3,6 +3,7 @@ import { cleanup, render } from "@testing-library/react";
 import { InteractiveCanvasViewer } from "../viewer/InteractiveCanvasViewer";
 import { renderFigjam } from "../../theme/__tests__/figjam";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
+import { BRAND_ICON_GLYPH_ELEMENTS } from "../../objects/shapes/icon/icon-glyph-data-brands.generated";
 
 afterEach(() => {
   cleanup();
@@ -180,6 +181,31 @@ describe("Wave C render smoke: the `icon` object type", () => {
       expect(closedSvg).toBeTruthy();
       expect(closedSvg?.querySelector("[data-canvas-icon-fill-layer]")).toBeTruthy();
       expect(closedSvg?.querySelector("[data-canvas-icon-ink-layer]")).toBeTruthy();
+    });
+  });
+
+  it("draws a catalog logo outside the core roster as its own filled mark, and a logo-less brand as its fallback glyph", () => {
+    withMeasuredShell(SCREEN.width, SCREEN.height, () => {
+      const { container } = renderFigjam(
+        <InteractiveCanvasViewer
+          document={iconDocument([
+            iconObject("icon-stripe", "brand-stripe", 0),
+            iconObject("icon-aws", "brand-aws", 1),
+            iconObject("icon-cloud", "cloud", 2),
+          ])}
+        />,
+      );
+      const stripe = container.querySelector('[data-canvas-object-id="icon-stripe"] [data-canvas-icon-glyph="brand-stripe"]');
+      expect(stripe).toBeTruthy();
+      expect(stripe?.getAttribute("fill")).toMatch(/^#[0-9A-F]{6}$/i);
+      const mark = BRAND_ICON_GLYPH_ELEMENTS["brand-stripe"]!.elements[0]!;
+      expect([...stripe!.querySelectorAll("path")].map((path) => path.getAttribute("d"))).toContain(
+        mark.kind === "path" ? mark.d : "",
+      );
+      const aws = container.querySelector('[data-canvas-object-id="icon-aws"] [data-canvas-icon-glyph="brand-aws"]');
+      const cloud = container.querySelector('[data-canvas-object-id="icon-cloud"] [data-canvas-icon-glyph="cloud"]');
+      expect(aws?.querySelector("[data-canvas-icon-ink-layer]")).toBeTruthy();
+      expect(aws?.innerHTML).toBe(cloud?.innerHTML);
     });
   });
 });

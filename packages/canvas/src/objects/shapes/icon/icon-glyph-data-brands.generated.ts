@@ -327,7 +327,7 @@ export const BRAND_ICON_GLYPH_ELEMENTS: Record<
   // simple-icons: claudecode (Claude Code)
   "brand-claude-code": {
     viewBoxSize: 24,
-    viewBox: [-1.0435, -1.0435, 26.087, 26.087],
+    viewBox: [0, 0, 24, 24],
     elements: [
       { kind: "path", d: "M21 10.5h3v3h-3v3h-1.5v3H18v-3h-1.5v3H15v-3H9v3H7.5v-3H6v3H4.5v-3H3v-3H0v-3h3v-6h18Zm-15 0h1.5v-3H6Zm10.5 0H18v-3h-1.5z" },
     ],
@@ -427,6 +427,14 @@ export const BRAND_ICON_GLYPH_ELEMENTS: Record<
     viewBox: [-1.0435, -1.0435, 26.087, 26.087],
     elements: [
       { kind: "path", d: "M14.862 6.67H24v10.663h-9.138zM6.945 15.304c-1.934 0-3.366-1.264-3.366-3.305s1.432-3.323 3.366-3.365c1.411-.03 2.787.99 2.878 2.543l3.472-.106c-.076-2.802-2.33-4.706-6.35-4.706S0 8.558 0 12c0 3.426 3.046 5.635 6.945 5.635 3.898 0 6.29-1.935 6.38-4.782l-3.472-.077c-.152 1.553-1.497 2.528-2.908 2.528Z" },
+    ],
+  },
+  // simple-icons: coderabbit (CodeRabbit)
+  "brand-coderabbit": {
+    viewBoxSize: 24,
+    viewBox: [-2.3707, -2.3652, 28.7413, 28.7413],
+    elements: [
+      { kind: "path", d: "M23.9913 13.0494C23.7481 6.864 18.747 1.8204 12.5667 1.535 5.678 1.2229 0 6.7106 0 13.5252c0 2.6011.8247 5.0066 2.231 6.968.8089 1.1314 2.0724 1.8451 3.4417 1.9614-2.0143-2.284-.3013-4.1924-.3013-4.1924-.7983.386-1.1261 1.6865-1.1261 1.6865-1.512-.9305-1.1631-2.0407-1.1631-2.0407.0951-.2326.3119-.8723 1.475-.6397 2.2522-7.4173 9.6695-3.5527 9.6695-3.5527-.1163-.2327-.5023-1.5544-.5023-1.5544-4.8162-.6978-6.4445-4.113-6.4445-4.113 4.4673-1.3587 7.1847 2.3314 7.1847 2.3314-1.2424-3.0293-4.2294-1.824-5.0066-6.7935 5.1864.8618 5.937 4.9273 6.0428 5.8049.074-.1692.4864-.3965 2.1887-.296 2.6381.1532 4.737 2.8337 4.737 2.8337 0 5.4347-6.6402 4.1236-6.6402 8.2314 0 .9623 1.0468.9041 1.3957 1.3693.2855.3807.164.8036.1057.941h.6292c1.4909 0 2.9077-.6872 3.7853-1.8926 1.5279-2.0988 2.3949-4.7105 2.2891-7.5337zm-8.3953 9.4264c-1.1525-.3806-2.268-2.9817-3.6532-2.9817 1.9403 1.1683 1.1156 2.7174.957 2.9817h2.7015z" },
     ],
   },
   // simple-icons: codesandbox (CodeSandbox)
@@ -1777,7 +1785,7 @@ export const BRAND_ICON_GLYPH_ELEMENTS: Record<
   // simple-icons: pi (Pi)
   "brand-pi": {
     viewBoxSize: 24,
-    viewBox: [-3.3846, -3.3846, 30.7692, 30.7692],
+    viewBox: [-7.2308, -7.2308, 38.4615, 38.4615],
     elements: [
       { kind: "path", d: "M0 0v24h6v-6h6v-6H6V6h6v6h6V0Zm18 12v12h6V12Z" },
     ],
@@ -2730,6 +2738,7 @@ export const BRAND_ICON_COLORS: Record<string, string> = {
   "brand-codeberg": "#2185D0",
   "brand-codecov": "#F01F7A",
   "brand-coder": "#090B0B",
+  "brand-coderabbit": "#FF570A",
   "brand-codesandbox": "#151515",
   "brand-colab": "#F9AB00",
   "brand-confluence": "#172B4D",
@@ -3072,6 +3081,7 @@ export const BRAND_ICON_CATALOG: Record<
   "brand-codeberg": { title: "Codeberg", aliases: [], hex: "#2185D0" },
   "brand-codecov": { title: "Codecov", aliases: [], hex: "#F01F7A" },
   "brand-coder": { title: "Coder", aliases: [], hex: "#090B0B" },
+  "brand-coderabbit": { title: "CodeRabbit", aliases: [], hex: "#FF570A" },
   "brand-codesandbox": { title: "CodeSandbox", aliases: [], hex: "#151515" },
   "brand-codex": { title: "Codex", aliases: ["openai codex","codex cli"], glyph: "terminal" },
   "brand-colab": { title: "Google Colab", aliases: [], hex: "#F9AB00" },
@@ -3143,6 +3153,7 @@ export const BRAND_ICON_CATALOG: Record<
   "brand-gradio": { title: "Gradio", aliases: [], hex: "#F97316" },
   "brand-grafana": { title: "Grafana", aliases: [], hex: "#F46800" },
   "brand-graphql": { title: "GraphQL", aliases: [], hex: "#E10098" },
+  "brand-greptile": { title: "Greptile", aliases: [], glyph: "search" },
   "brand-groq": { title: "Groq", aliases: [], glyph: "cpu" },
   "brand-hadoop": { title: "Apache Hadoop", aliases: [], hex: "#66CCFF" },
   "brand-hashicorp": { title: "HashiCorp", aliases: [], hex: "#000000" },

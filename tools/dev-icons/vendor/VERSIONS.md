@@ -8,7 +8,7 @@ records out of the package's `data/simple-icons.json`, each record verbatim, in 
 | dir | npm package | version | license | vendored |
 |---|---|---|---|---|
 | `tabler/` | `@tabler/icons` | 3.48.0 | MIT (`tabler/LICENSE`) | 65 SVGs for 66 glyph ids, from `icons/outline/` |
-| `simple-icons/` | `simple-icons` | 16.33.0 | CC0-1.0 (`simple-icons/LICENSE.md`) | 328 SVGs for 328 glyph ids, from `icons/` |
+| `simple-icons/` | `simple-icons` | 16.33.0 | CC0-1.0 (`simple-icons/LICENSE.md`) | 329 SVGs for 329 glyph ids, from `icons/` |
 
 Each logo's title, brand color (`hex`), aliases and per-logo license come from those records. A logo whose
 license is outside `ALLOWED_LOGO_LICENSES` in `../generate.ts` is refused. These logos carry their own license:
