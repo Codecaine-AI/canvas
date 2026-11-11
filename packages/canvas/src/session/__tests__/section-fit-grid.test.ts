@@ -204,6 +204,19 @@ describe("fit_section evens a row", () => {
     expect(runOp(session, "fit_section", { id: "frame" }).text).toContain("NO-OP");
   });
 
+  test("a row holds when its node shares a centerline with the end of another row", () => {
+    const { session, text, geometry, gap } = fit([
+      node("a", 200), node("b", 380), node("c", 720),
+      node("d", 380, 400), node("e", 800, 400), node("f", 1100, 400),
+    ], [], 1600);
+
+    expect(geometry("d").x).toBe(380);
+    expect(geometry("b").x).toBe(380);
+    expect(gap("d", "e")).toBe(gap("e", "f"));
+    expect(text).toContain("row a, b, c keeps uneven gaps: it shares a centerline with the end of another row.");
+    expect(runOp(session, "fit_section", { id: "frame" }).text).toContain("NO-OP");
+  });
+
   test("the end nodes of a long row hold to the pixel", () => {
     const { geometry, gap } = fit([node("a", 200), node("b", 380), node("c", 720), node("d", 1000)]);
 

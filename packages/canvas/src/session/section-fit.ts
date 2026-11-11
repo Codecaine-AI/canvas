@@ -142,7 +142,8 @@ function rowsOf(nodes: readonly Box[]): Box[][] {
  * straight down a column stays straight. The longest row goes first.
  *
  * A row is left as it is when it needs a column somewhere else than a row
- * placed before it, or when evening it would narrow a gap in any row below
+ * placed before it, when it would move the end node of another row, or when
+ * evening it would narrow a gap in any row below
  * what its wire label needs (or below what it is now, when that is less),
  * make another row less even, put a box on a neighbour it did not touch
  * before, or `refuse` names a reason.
@@ -196,6 +197,7 @@ function evenRows(
     new Map(nodes.flatMap((node) => (shifts.get(node.column) ? [[node.id, shifts.get(node.column)!]] : [])));
   const everyRow = rowsOf(nodes);
   const rows = everyRow.filter((row) => row.length >= 3);
+  const ends = new Set(rows.flatMap((row) => [row[0]!.column, row.at(-1)!.column]));
   let placed: Shifts = none;
   const harm = (shifts: Shifts): string | null => {
     const squeezed = everyRow.some((row) => {
@@ -231,7 +233,9 @@ function evenRows(
     const reason = gap <= 0 ? "its nodes overlap"
       : row.some((node) => placed.has(node.column) && placed.get(node.column) !== trial.get(node.column))
         ? "it shares a centerline with a row that moved"
-        : harm(trial);
+        : [...trial].some(([column, shift]) => shift !== 0 && ends.has(column))
+          ? "it shares a centerline with the end of another row"
+          : harm(trial);
     if (reason) {
       why.set(row, reason);
       continue;
