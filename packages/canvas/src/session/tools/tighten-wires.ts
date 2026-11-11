@@ -92,7 +92,7 @@ const WIRED_GAP = CRAFT_TARGETS.nodeGapColumn;
 /** Air a moved box keeps from a wire it is not on, so the wire need not bend round it. */
 const WIRE_CLEARANCE = 16;
 /** Air inside a frame: the craft padding, and the title band on top. */
-const FRAME_PADDING = CRAFT_TARGETS.framePadding;
+export const FRAME_PADDING = CRAFT_TARGETS.framePadding;
 const FRAME_TOP_PADDING = FRAME_PADDING + 40;
 /** Air between top-level sections. */
 export const SECTION_GAP = 80;
@@ -166,15 +166,20 @@ function crossingsOf(edgeId: string, routes: Routes): number {
   return count;
 }
 
-export function totalCrossings(routes: Routes): number {
+/** The pairs of wires that cross, each pair named once. */
+export function crossingPairs(routes: Routes): Set<string> {
   const ids = [...routes.keys()];
-  let count = 0;
+  const pairs = new Set<string>();
   for (let i = 0; i < ids.length; i += 1) {
     for (let j = i + 1; j < ids.length; j += 1) {
-      if (polylinesCross(routes.get(ids[i]!)!, routes.get(ids[j]!)!)) count += 1;
+      if (polylinesCross(routes.get(ids[i]!)!, routes.get(ids[j]!)!)) pairs.add([ids[i]!, ids[j]!].sort().join(" × "));
     }
   }
-  return count;
+  return pairs;
+}
+
+export function totalCrossings(routes: Routes): number {
+  return crossingPairs(routes).size;
 }
 
 export function totalLength(routes: Routes): number {

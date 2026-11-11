@@ -6,6 +6,7 @@
 import { describe, expect, test } from "bun:test";
 
 import { routedPolyline } from "../../board/lints/geometry";
+import { crossingPairs, routeAll } from "../tools/tighten-wires";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../../state/schema";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
@@ -109,11 +110,27 @@ describe("straighten · on every edit", () => {
     expect(at(session, "b")).toMatchObject({ x: 800, y: 320 });
   });
 
-  test("a jog stays when each end has a straight wire the move would bend", () => {
-    const session = board(
-      [box("w", 100, 300, 280, 100), box("a", 500, 300, 280, 100), box("b", 1000, 312, 280, 100), box("x", 1400, 312, 280, 100)],
+  /** Two straight pairs, w-a and b-x, 12px off one axis. */
+  function twoPairs(lock: readonly string[] = []): Session {
+    return board(
+      [box("w", 100, 300, 280, 100), box("a", 500, 300, 280, 100), box("b", 1000, 312, 280, 100), box("x", 1400, 312, 280, 100)]
+        .map((object) => (lock.includes(object.id) ? { ...object, locked: "all" as const } : object)),
       [connect("w-a", "w", "a"), connect("b-x", "b", "x")],
     );
+  }
+
+  test("an end with a straight wire moves with the box on that wire, so the wire stays straight", () => {
+    const session = twoPairs();
+
+    const result = runOp(session, "connect", { id: "a-b", from: { objectId: "a" }, to: { objectId: "b" } });
+
+    expect(result.text).toMatch(/straightened a-b: moved (a 12px down, which also moved or grew w|b 12px up, which also moved or grew x)/);
+    expect(new Set(["w", "a", "b", "x"].map((id) => at(session, id).y)).size).toBe(1);
+    expect(["w-a", "a-b", "b-x"].every((id) => straight(session, id))).toBe(true);
+  });
+
+  test("a jog stays when the only moves would bend a straight wire: it would only change wires", () => {
+    const session = twoPairs(["w", "x"]);
     const before = session.draft.objects;
 
     const result = runOp(session, "connect", { id: "a-b", from: { objectId: "a" }, to: { objectId: "b" } });
@@ -124,11 +141,72 @@ describe("straighten · on every edit", () => {
     expect(straight(session, "b-x")).toBe(true);
   });
 
+  test("a box the edit placed never goes back where it stood, also when the edit placed others", () => {
+    const session = board(
+      [
+        { ...box("w", 200, 320, 280, 100), locked: "all" },
+        box("a", 800, 320, 280, 100),
+        box("b", 1400, 340, 280, 100),
+        box("ref", 2000, 300, 280, 100),
+      ],
+      [connect("w-a", "w", "a")],
+    );
+
+    const result = runOp(session, "arrange", { ids: ["a", "b", "ref"], align: "top" });
+
+    expect(result.text).toContain("APPLIED · arrange align top");
+    expect(result.text).not.toContain("straightened");
+    expect(["a", "b", "ref"].map((id) => at(session, id).y)).toEqual([300, 300, 300]);
+  });
+
+  test("a box with a new shape has its wires looked at", () => {
+    const session = board([box("a", 200, 300, 280, 280), box("b", 800, 304, 280, 280)], [connect("a-b", "a", "b")]);
+    expect(straight(session, "a-b")).toBe(true);
+
+    const result = runOp(session, "change_shape", { id: "a", patch: { type: "octagon" } });
+
+    expect(result.text).toMatch(/straightened a-b: moved (a 4px down|b 4px up)/);
+    expect(straight(session, "a-b")).toBe(true);
+  });
+
+  test("no move makes two wires cross that did not cross, also when another crossing goes", () => {
+    // Moved 20px up, b would take a-b off c-d and push c-d across e-f.
+    const session = board(
+      ([["a", 600, 700], ["b", 1200, 720], ["obstacle", 1400, 700], ["c", 400, 120], ["d", 1320, 1380], ["e", 160, 600], ["f", 760, 940]] as const)
+        .map(([id, x, y]) => box(id, x, y, 160, 96)),
+      [connect("c-d", "c", "d"), connect("e-f", "e", "f")],
+    );
+    const crossings = () => crossingPairs(routeAll(session.draft, session.canvasStyle));
+
+    runOp(session, "connect", { id: "a-b", from: { objectId: "a" }, to: { objectId: "b" } });
+
+    expect(at(session, "b")).toMatchObject({ x: 1200, y: 720 });
+    expect([...crossings()]).toEqual(["a-b × c-d"]);
+  });
+
   test("a jog stays when either move would crowd a neighbour", () => {
     const session = board([
       box("a", 200, 300, 280, 100), box("over-a", 200, 160, 280, 100), box("under-a", 200, 440, 280, 100),
       box("b", 800, 312, 280, 100), box("over-b", 800, 172, 280, 100), box("under-b", 800, 452, 280, 100),
     ]);
+    const before = session.draft.objects;
+
+    const result = runOp(session, "connect", { id: "a-b", from: { objectId: "a" }, to: { objectId: "b" } });
+
+    expect(result.text).not.toContain("straightened");
+    expect(session.draft.objects).toEqual(before);
+  });
+
+  test("a jog stays when the only move would take a row into its frame's padding", () => {
+    // w is locked and w-a holds a, 20px from the frame's border. Only the row b, x can move: 36px down, to that border.
+    const session = board(
+      [
+        { ...box("frame", 100, 100, 1700, 236, "section"), text: "Frame" },
+        ...[{ ...box("w", 140, 216, 280, 100), locked: "all" as const }, box("a", 560, 216, 280, 100), box("b", 980, 180, 280, 100), box("x", 1400, 180, 280, 100)]
+          .map((object) => ({ ...object, parentId: "frame" })),
+      ],
+      [connect("w-a", "w", "a"), connect("b-x", "b", "x")],
+    );
     const before = session.draft.objects;
 
     const result = runOp(session, "connect", { id: "a-b", from: { objectId: "a" }, to: { objectId: "b" } });
@@ -198,10 +276,10 @@ describe("straighten · wires routed by hand", () => {
     expect(straight(session, "a-b")).toBe(true);
   });
 
-  /** w-a holds a in place, so only b can move for the new wire a-b; b-c is routed by hand. */
+  /** w is locked and w-a holds a on its axis, so only b can move for the new wire a-b; b-c is routed by hand. */
   function handRouted(c: InteractiveCanvasObject, points: [number, number][]): Session {
     const session = board(
-      [box("w", 100, 300, 280, 100), box("a", 500, 300, 280, 100), box("b", 1000, 320, 280, 100), c],
+      [{ ...box("w", 100, 300, 280, 100), locked: "all" }, box("a", 500, 300, 280, 100), box("b", 1000, 320, 280, 100), c],
       [connect("w-a", "w", "a"), connect("b-c", "b", "c")],
     );
     expect(runOp(session, "route", { id: "b-c", points }).text).toContain("APPLIED · route b-c");

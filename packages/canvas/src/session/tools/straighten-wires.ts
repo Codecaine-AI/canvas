@@ -28,21 +28,24 @@
  *   with its ends under JOG_REACH apart across them.
  * - The candidates are each end, and each section above an end up to the
  *   section that holds both, slid across the wire by the offset. A section
- *   moves with what it holds.
+ *   moves with what it holds. An end with a straight wire the slide would
+ *   bend is also tried with its row: the boxes those wires join to it.
  * - Each candidate is settled the way an edit is (a section grows to hold a
  *   moved child and makes room), then judged on the real routes. It is legal
  *   when the wire loses its jog and has fewer corners (none, unless it also
  *   goes round a box), nothing locked moves, nothing changes section, no box
- *   comes closer to another than tighten_wires allows, no wire breaks, no
- *   other wire loses a route drawn by hand, the board has fewer corners, and
- *   it has no more crossings, wire length, wire faults or findings of any
- *   check rule than before.
+ *   comes closer to another box or to its frame's border than tighten_wires
+ *   allows (the frame moves with its box, not the box inside its frame), no
+ *   wire breaks, no other wire loses a route drawn by hand, the board has
+ *   fewer corners (so a jog never just moves to another wire), no two wires
+ *   cross that did not cross before, and it has no more wire length, wire
+ *   faults or findings of any check rule than before. After an edit, no box
+ *   that edit placed goes back where it stood.
  * - Of the legal candidates, the one that bends the fewest other wires wins.
  *   Ties go to the one that leaves a box the edit just placed where it is,
- *   then keeps its box clear of its frame's border (the frame moves with its
- *   box, not the box inside its frame), then breaks the fewest rows and
- *   columns, then moves the fewest other boxes, then touches the fewest
- *   other wires, then the larger unit.
+ *   then moves no row, then takes no grid step out of its frame's padding,
+ *   then breaks the fewest rows and columns, then moves the fewest other
+ *   boxes, then touches the fewest other wires, then the larger unit.
  *
  * Pure over the document: a settled document in, a settled document out.
  */
@@ -69,12 +72,13 @@ import { growSectionsToChildren, reconcileHolding } from "../../state/section-gr
 import { reconcileSectionMembership } from "../../state/section-membership";
 import { lockHolding } from "./operations/op-context";
 import {
+  FRAME_PADDING,
   SECTION_GAP,
   SIBLING_GAP,
   boardFaults,
+  crossingPairs,
   manhattan,
   routeAll,
-  totalCrossings,
   totalLength,
   type Routes,
 } from "./tighten-wires";
@@ -85,8 +89,8 @@ export interface StraightenOptions {
    * The board before the edit that made `document`. With it the pass works
    * only on the wires that edit touched, a box the edit placed moves only
    * when no other move straightens the wire as well (the other end comes to
-   * the box the drawer just placed), and no move puts the board back where
-   * it stood: the edit is never undone.
+   * the box the drawer just placed), and no move puts a box the edit placed
+   * back where it stood: the edit is never undone.
    */
   since?: InteractiveCanvasDocument;
 }
@@ -102,7 +106,7 @@ export interface StraightenMove {
   dy: number;
   /** The side that grew one grid step, when the box grew. */
   grew?: "width" | "height";
-  /** Sections that grew to hold the move, and boxes they pushed clear. */
+  /** The row that moved with the box, sections that grew to hold the move, and boxes they pushed clear. */
   alsoMoved: string[];
 }
 
@@ -137,6 +141,8 @@ interface Candidate {
   slide: number;
   /** The unit also grows one grid step across the wire. */
   grows: boolean;
+  /** The boxes that slide with the unit, so the straight wires that join them stay straight. */
+  row: string[];
 }
 
 /** What the wires of a board cost a reader. */
@@ -144,7 +150,8 @@ interface Standing {
   routes: Routes;
   corners: Map<string, number>;
   cornerSum: number;
-  crossings: number;
+  /** The pairs of wires that cross. */
+  crossings: ReadonlySet<string>;
   length: number;
 }
 
@@ -214,7 +221,7 @@ function standingOf(document: InteractiveCanvasDocument, canvasStyle: CanvasStyl
   const corners = new Map([...routes].map(([id, points]) => [id, cornersOf(points)]));
   let cornerSum = 0;
   for (const count of corners.values()) cornerSum += count;
-  return { routes, corners, cornerSum, crossings: totalCrossings(routes), length: totalLength(routes) };
+  return { routes, corners, cornerSum, crossings: crossingPairs(routes), length: totalLength(routes) };
 }
 
 function sameGeometry(a: Rect, b: Rect): boolean {
@@ -226,7 +233,28 @@ function gapBetween(a: Rect, b: Rect): number {
   return Math.max(a.x - (b.x + b.width), b.x - (a.x + a.width), a.y - (b.y + b.height), b.y - (a.y + a.height));
 }
 
-function candidatesFor(jog: Jog, byId: ReadonlyMap<string, InteractiveCanvasObject>): Candidate[] {
+/**
+ * The boxes that slide with an end so that no straight wire bends: each box
+ * joined to it, one after another, by a wire that runs straight the way the
+ * jog's wire does.
+ */
+function rowOf(end: string, jog: Jog, current: InteractiveCanvasDocument, now: Standing): string[] {
+  const row = new Set([end]);
+  for (const member of row) {
+    for (const edge of current.connections) {
+      if (edge.id === jog.edge.id || now.corners.get(edge.id) !== 0) continue;
+      const other = edge.from.objectId === member ? edge.to.objectId : edge.to.objectId === member ? edge.from.objectId : null;
+      const points = now.routes.get(edge.id) ?? [];
+      if (other === null || points.length < 2) continue;
+      if (Math.abs(points[0]![jog.axis] - points[points.length - 1]![jog.axis]) < ON_AXIS) row.add(other);
+    }
+  }
+  row.delete(end);
+  return [...row];
+}
+
+function candidatesFor(jog: Jog, current: InteractiveCanvasDocument, now: Standing): Candidate[] {
+  const byId = new Map(current.objects.map((object) => [object.id, object]));
   const chainOf = (id: string) => {
     const chain: InteractiveCanvasObject[] = [];
     for (
@@ -244,14 +272,19 @@ function candidatesFor(jog: Jog, byId: ReadonlyMap<string, InteractiveCanvasObje
       // A section that holds both ends carries the jog with it.
       if (other.includes(unit)) break;
       const whole = snapCanvasNumber(slide, GRID);
-      if (whole !== 0) out.push({ unit, depth, slide: whole, grows: false });
+      if (whole !== 0) {
+        out.push({ unit, depth, slide: whole, grows: false, row: [] });
+        const row = depth === 0 ? rowOf(unit.id, jog, current, now) : [];
+        // A row that reaches the other end carries the jog with it.
+        if (row.length > 0 && !row.includes(other[0]!.id)) out.push({ unit, depth, slide: whole, grows: false, row });
+      }
       // A node whose centre sits half a grid step off the other end's: one
       // grid step of size moves the centre that half step.
       const half = snapCanvasNumber(slide - GRID / 2, GRID);
       if (
         depth === 0 && kindOf(unit) === "node"
         && Math.abs(slide - whole) >= ON_AXIS && Math.abs(slide - GRID / 2 - half) < ON_AXIS
-      ) out.push({ unit, depth, slide: half, grows: true });
+      ) out.push({ unit, depth, slide: half, grows: true, row: [] });
     }
   }
   return out;
@@ -323,16 +356,17 @@ function settled(
   stuck: ReadonlySet<string>,
 ): InteractiveCanvasDocument | null {
   const { axis } = jog;
-  const { unit, slide, grows } = candidate;
+  const { unit, slide, grows, row } = candidate;
   const size = axis === "x" ? "width" : "height";
-  const objects = translateWithDescendants(current, [unit.id], axis === "x" ? { dx: slide, dy: 0 } : { dx: 0, dy: slide })
+  const sliding = [unit.id, ...row];
+  const objects = translateWithDescendants(current, sliding, axis === "x" ? { dx: slide, dy: 0 } : { dx: 0, dy: slide })
     .map((object) => (grows && object.id === unit.id
       ? { ...object, geometry: { ...object.geometry, [size]: object.geometry[size] + GRID } }
       : object));
-  const held = new Map([[unit.id, unit.parentId ?? null]]);
+  const was = new Map(current.objects.map((object) => [object.id, object]));
+  const held = new Map(sliding.map((id) => [id, was.get(id)?.parentId ?? null]));
   const grow = growSectionsToChildren(reconcileHolding({ ...current, objects }, held), held, { makeRoom: true });
   if (grow.blocked.some((entry) => !stuck.has(entry.section))) return null;
-  const was = new Map(current.objects.map((object) => [object.id, object]));
   // Every changed box lands on the write grid, so a replay of the board keeps it.
   const onGrid = {
     ...grow.document,
@@ -382,34 +416,35 @@ function crowds(
   return false;
 }
 
-/** Siblings that share an edge or a centre line with the box on the axis it slides along: a row or column the slide breaks. */
-function sharedLines(document: InteractiveCanvasDocument, unit: InteractiveCanvasObject, axis: Axis): number {
+/** Siblings left behind that share an edge or a centre line with the box on the axis it slides along: a row or column the slide breaks. */
+function sharedLines(document: InteractiveCanvasDocument, { unit, row }: Candidate, axis: Axis): number {
   const size = axis === "x" ? "width" : "height";
   const lines = (rect: Rect) => [rect[axis], rect[axis] + rect[size] / 2, rect[axis] + rect[size]];
   const own = lines(unit.geometry);
   return document.objects.filter((object) =>
     object.id !== unit.id
+    && !row.includes(object.id)
     && (object.parentId ?? null) === (unit.parentId ?? null)
     && lines(object.geometry).some((line, index) => Math.abs(line - own[index]!) < ON_AXIS)).length;
 }
 
 /**
- * Whether the slide leaves the box closer to its section's border than it
- * stood, inside the padding a section keeps: the box no longer sits where its
- * frame was drawn round it.
+ * How far the slide takes a box toward its section's border, inside the
+ * padding tighten_wires keeps there: the box no longer sits where its frame
+ * was drawn round it, and the wires that leave it lose their room.
  */
-function squeezed(current: InteractiveCanvasDocument, next: InteractiveCanvasDocument, unit: InteractiveCanvasObject): boolean {
-  if (!unit.parentId) return false;
-  const margin = (document: InteractiveCanvasDocument) => {
-    const box = document.objects.find((object) => object.id === unit.id)!.geometry;
-    const frame = document.objects.find((object) => object.id === unit.parentId)!.geometry;
-    return Math.min(
-      box.x - frame.x, frame.x + frame.width - (box.x + box.width),
-      box.y - frame.y, frame.y + frame.height - (box.y + box.height),
-    );
+function squeeze(current: InteractiveCanvasDocument, next: InteractiveCanvasDocument, { unit, row }: Candidate): number {
+  const margin = (document: InteractiveCanvasDocument, id: string) => {
+    const box = document.objects.find((object) => object.id === id)!;
+    const frame = document.objects.find((object) => object.id === box.parentId)?.geometry;
+    if (!frame) return Infinity;
+    const { x, y, width, height } = box.geometry;
+    return Math.min(x - frame.x, frame.x + frame.width - (x + width), y - frame.y, frame.y + frame.height - (y + height));
   };
-  const after = margin(next);
-  return after < SIBLING_GAP && after < margin(current);
+  return Math.max(0, ...[unit.id, ...row].map((id) => {
+    const after = margin(next, id);
+    return after < FRAME_PADDING ? margin(current, id) - after : 0;
+  }));
 }
 
 /**
@@ -436,10 +471,10 @@ function judge(
 ): Verdict | null {
   const next = settled(current, now.routes, jog, candidate, stuck);
   if (!next) return null;
-  // A move that puts every box back where it stood before the edit undoes the edit.
-  if (edit && next.objects.every((object) => {
+  // A move that puts a box the edit placed back where it stood takes the edit back.
+  if (edit && next.objects.some((object) => {
     const stood = edit.stood.get(object.id);
-    return stood !== undefined && sameGeometry(stood, object.geometry);
+    return edit.boxes.has(object.id) && stood !== undefined && sameGeometry(stood, object.geometry);
   })) return null;
   const was = new Map(current.objects.map((object) => [object.id, object]));
   const changed = new Set(next.objects
@@ -447,6 +482,9 @@ function judge(
     .map((object) => object.id));
   for (const id of changed) if (lockHolding(current, id)) return null;
   if (crowds(current, next, changed, candidate.grows ? candidate.unit.id : null)) return null;
+  // A box that grows a grid step can take that step out of its frame's padding, and no more.
+  const squeezed = squeeze(current, next, candidate);
+  if (squeezed > (candidate.grows ? GRID : 0)) return null;
   if (newBrokenWires(current, next).length > 0) return null;
 
   const standing = standingOf(next, canvasStyle);
@@ -454,8 +492,8 @@ function judge(
   // also goes round a box keeps the corners of that detour.
   const kept = standing.corners.get(jog.edge.id) ?? 0;
   if (jogOf(jog.edge, standing.routes.get(jog.edge.id) ?? []) || kept >= (now.corners.get(jog.edge.id) ?? 0)) return null;
-  if (standing.cornerSum >= now.cornerSum || standing.crossings > now.crossings) return null;
-  if (standing.length > now.length + ON_AXIS) return null;
+  if (standing.cornerSum >= now.cornerSum || standing.length > now.length + ON_AXIS) return null;
+  for (const pair of standing.crossings) if (!now.crossings.has(pair)) return null;
 
   let bent = 0;
   let touched = 0;
@@ -466,8 +504,9 @@ function judge(
     if (corners > before) bent += 1;
     if (corners !== before || Math.abs(manhattan(points) - manhattan(now.routes.get(id) ?? [])) >= ON_AXIS) touched += 1;
   }
-  const carried = moveClosureIds(current, [candidate.unit.id]);
-  const alsoMoved = [...changed].filter((id) => !carried.has(id));
+  const unit = moveClosureIds(current, [candidate.unit.id]);
+  const alsoMoved = [...changed].filter((id) => !unit.has(id));
+  const carried = moveClosureIds(current, [candidate.unit.id, ...candidate.row]);
   return {
     candidate,
     document: next,
@@ -478,8 +517,9 @@ function judge(
       bent,
       kept,
       edit && [...carried].some((id) => edit.boxes.has(id)) ? 1 : 0,
-      squeezed(current, next, candidate.unit) ? 1 : 0,
-      candidate.slide === 0 ? 0 : sharedLines(current, candidate.unit, jog.axis),
+      candidate.row.length,
+      squeezed > 0 ? 1 : 0,
+      candidate.slide === 0 ? 0 : sharedLines(current, candidate, jog.axis),
       alsoMoved.length,
       touched,
       -candidate.depth,
@@ -504,10 +544,9 @@ function straightenOne(
   edit: Edit | null,
   canvasStyle: CanvasStyle,
 ): Verdict | null {
-  const byId = new Map(current.objects.map((object) => [object.id, object]));
   // A section that could not grow before the move does not block it.
   const stuck = new Set(growSectionsToChildren(current, undefined, { makeRoom: true }).blocked.map((entry) => entry.section));
-  const verdicts = candidatesFor(jog, byId)
+  const verdicts = candidatesFor(jog, current, now)
     .map((candidate) => judge(current, now, jog, candidate, stuck, edit, canvasStyle))
     .filter((verdict): verdict is Verdict => verdict !== null)
     .sort(better);
@@ -561,25 +600,28 @@ export function straightenWires(document: InteractiveCanvasDocument, options: St
 
 /**
  * The wires an edit hands to the pass are each wire it added or changed, and
- * each wire on a box it placed, moved or sized. A wire routed by hand is not
- * one of them: its corners are the drawer's own line, and only a
- * tighten_wires call replaces that line.
+ * each wire on a box it placed, moved, sized or gave a new shape. A wire
+ * routed by hand is not one of them: its corners are the drawer's own line,
+ * and only a tighten_wires call replaces that line.
  */
 function editOf(before: InteractiveCanvasDocument, after: InteractiveCanvasDocument): Edit {
-  const stood = new Map(before.objects.map((object) => [object.id, object.geometry]));
+  const was = new Map(before.objects.map((object) => [object.id, object]));
   const drawn = new Map(before.connections.map((edge) => [edge.id, edge]));
-  const boxes = new Set(after.objects
-    .filter((object) => {
-      const was = stood.get(object.id);
-      return !was || !sameGeometry(was, object.geometry);
-    })
-    .map((object) => object.id));
+  const boxes = new Set<string>();
+  // A new shape has its ports in new places.
+  const ends = new Set<string>();
+  for (const object of after.objects) {
+    const old = was.get(object.id);
+    const placed = !old || !sameGeometry(old.geometry, object.geometry);
+    if (placed) boxes.add(object.id);
+    if (placed || old.type !== object.type) ends.add(object.id);
+  }
   const wires = new Set(after.connections
     .filter((edge) => !edge.waypoints?.length
-      && (boxes.has(edge.from.objectId) || boxes.has(edge.to.objectId)
+      && (ends.has(edge.from.objectId) || ends.has(edge.to.objectId)
         || JSON.stringify(drawn.get(edge.id)) !== JSON.stringify(edge)))
     .map((edge) => edge.id));
-  return { stood, boxes, wires };
+  return { stood: new Map(before.objects.map((object) => [object.id, object.geometry])), boxes, wires };
 }
 
 /** One line for the tool result: which wire went straight and what moved for it. */
