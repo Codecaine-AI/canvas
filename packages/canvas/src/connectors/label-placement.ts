@@ -757,7 +757,8 @@ function computePlacements(
         for (const run of runs) {
           const center = centerOn(run, line);
           taste(run.label, center, others).forEach((value, index) => (score[index]! += value));
-          score[3]! += (center.x - run.label.preferred.x) ** 2 + (center.y - run.label.preferred.y) ** 2;
+          // Counted in run lengths: a chip on a short run has little room, so the chips of long runs come to it.
+          score[3]! += ((center.x - run.label.preferred.x) ** 2 + (center.y - run.label.preferred.y) ** 2) / runLength(run) ** 2;
         }
         if (best === null || lexLess(score, bestScore)) {
           best = line;
@@ -813,6 +814,10 @@ function labelRuns(label: Label): Run[] {
     runs.push({ label, horizontal, at: horizontal ? a.y : a.x, lo, hi, across: horizontal ? label.height : label.width });
   }
   return runs;
+}
+
+function runLength(run: Run): number {
+  return run.hi - run.lo + (run.horizontal ? run.label.width : run.label.height);
 }
 
 function centerOn(run: Run, line: number): CanvasPoint {

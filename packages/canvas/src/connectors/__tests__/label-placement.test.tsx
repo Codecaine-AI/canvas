@@ -276,6 +276,23 @@ describe("placeConnectionLabels tags in line", () => {
     expect(blockedLabelIds(document)).toEqual([]);
   });
 
+  it("brings the chips of long runs to the chip of a short run", () => {
+    // The short run is x 200..500; the two long runs are x 200..2000, with their middles at x = 1100.
+    const document = doc(
+      [box("a", 0, 0), box("b", 500, 0), box("c", 0, 100), box("d", 2000, 100), box("e", 0, 200), box("f", 2000, 200)],
+      [
+        wire("ab", "a", "b", "short"),
+        wire("cd", "a", "b", "long", { from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "left" } }),
+        wire("ef", "a", "b", "long", { from: { objectId: "e", anchor: "right" }, to: { objectId: "f", anchor: "left" } }),
+      ],
+    );
+    const placed = placeConnectionLabels(document);
+    const column = placed.get("ab")!.x;
+    expect([placed.get("cd")!.x, placed.get("ef")!.x]).toEqual([column, column]);
+    // Nearer the middle of the short run than its arrowhead.
+    expect(column - 350).toBeLessThan(500 - column);
+  });
+
   it("leaves a pinned chip out of the column", () => {
     const document = doc(
       [box("a", 0, 0), box("b", 500, 0), box("c", 0, 100), box("d", 700, 100)],
