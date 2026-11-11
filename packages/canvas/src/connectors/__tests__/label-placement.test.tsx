@@ -291,6 +291,24 @@ describe("placeConnectionLabels tags in line", () => {
     expect(blockedLabelIds(document)).toEqual([]);
   });
 
+  it("keeps a row of chips clear of the bend one of their wires makes", () => {
+    // Both wires leave the bottom of p. pq runs straight down; pr turns left at y = 182.5, then drops into r at x = 70.
+    const down = (id: string, to: string) =>
+      wire(id, "p", to, "request", { from: { objectId: "p", anchor: "bottom" }, to: { objectId: to, anchor: "top" } });
+    const document = doc(
+      [box("p", 220, 0, 280, 120), box("q", 220, 240, 280, 100), box("r", 0, 245, 140, 140)],
+      [down("pq", "q"), down("pr", "r")],
+    );
+    const placed = placeConnectionLabels(document);
+    const points = routedConnectionIn(document, document.connections[1]!, document.objects[0]!, document.objects[2]!).points!;
+    const corner = points.find((point) => point.x === 70)!;
+    const top = placed.get("pr")!.y - connectionLabelChipMetrics("request").height / 2;
+    expect(placed.get("pr")!.x).toBe(70);
+    expect(placed.get("pq")!.y).toBe(placed.get("pr")!.y);
+    expect(top - corner.y).toBeGreaterThanOrEqual(4);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
   it("brings the chips of long runs to the chip of a short run", () => {
     // The short run is x 200..500; the two long runs are x 200..2000, with their middles at x = 1100.
     const document = doc(

@@ -49,8 +49,9 @@
  * group while one line still holds every chip clear; a wire with runs in two
  * groups stays in the larger. A group's chips all take one line, clear of
  * every chip outside the group (those do not move): the one with the fewest
- * foreign, then crowded, then near-miss chips, then the least total move
- * from each wire's preferred point. A line never takes a chip out of the
+ * chips against a corner of their own wire, then the fewest foreign, then
+ * crowded, then near-miss chips, then the least total move from each wire's
+ * preferred point. A line never takes a chip out of the
  * white space into a section its wire only passes, unless a chip of the
  * group has no place in the white space and the line holds them all inside
  * such sections. Pinned chips join no group.
@@ -607,9 +608,9 @@ function computePlacements(
     }
     return { count, covered };
   };
-  /** Whether a corner of the chip's own wire is in the chip or within BEND_AIR_PX of it. */
-  const tightToCorner = (label: Label, center: CanvasPoint): boolean => {
-    const turn = rectAt(label, center, BEND_AIR_PX);
+  /** Whether a corner of the chip's own wire is in the chip or within `air` of it. */
+  const tightToCorner = (label: Label, center: CanvasPoint, air = BEND_AIR_PX): boolean => {
+    const turn = rectAt(label, center, air);
     return label.corners.some((corner) =>
       corner.x > turn.x && corner.x < turn.x + turn.width && corner.y > turn.y && corner.y < turn.y + turn.height);
   };
@@ -770,12 +771,14 @@ function computePlacements(
         if (runs.some((run) => !clearLines.get(run)!.includes(line) || hits(run.label, centerOn(run, line), 0, others).count > 0)) continue;
         const inside = runs.filter((run) => passingThrough(run.label, centerOn(run, line)));
         if (white.some((run) => inside.includes(run)) && (inside.length < runs.length || white.length === runs.length)) continue;
-        const score = [0, 0, 0, 0];
+        const score = [0, 0, 0, 0, 0];
         for (const run of runs) {
           const center = centerOn(run, line);
-          taste(run.label, center, others).forEach((value, index) => (score[index]! += value));
+          // First, the chips that sit against a corner of their own wire: a line clear of the bends wins.
+          if (tightToCorner(run.label, center, NEAR_MISS_PX)) score[0]! += 1;
+          taste(run.label, center, others).forEach((value, index) => (score[index + 1]! += value));
           // Counted in run lengths: a chip on a short run has little room, so the chips of long runs come to it.
-          score[3]! += ((center.x - run.label.preferred.x) ** 2 + (center.y - run.label.preferred.y) ** 2) / runLength(run) ** 2;
+          score[4]! += ((center.x - run.label.preferred.x) ** 2 + (center.y - run.label.preferred.y) ** 2) / runLength(run) ** 2;
         }
         if (best === null || lexLess(score, bestScore)) {
           best = line;
