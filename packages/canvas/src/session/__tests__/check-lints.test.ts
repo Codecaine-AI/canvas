@@ -62,8 +62,8 @@ describe("check-only lints", () => {
       { ...box("frame", 40, 40, 400, 400, "section"), color: "blue", parentId: "page" },
       { ...box("inner", 200, 200), parentId: "frame" },
       box("outer", outerX, 200),
-    ], [{ ...connect("cross", "inner", "outer"), label: "crosses" }]);
-    // The chip centers on the wire's midpoint, x 440: the frame's right edge.
+    ], [{ ...connect("cross", "inner", "outer"), label: "crosses the frame line" }]);
+    // The chip is wider than either side of the frame edge at x 440, so no clear spot exists.
     expect(found(board(520), "chip-on-border")).toEqual(["cross's chip is on frame's border (move_label it off)"]);
     expect(found(board(1200), "chip-on-border")).toEqual([]);
   });

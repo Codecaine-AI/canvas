@@ -102,7 +102,7 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
         box("near-a", 1000, 600, 160, 96, "process"),
         box("near-b", 1240, 600, 160, 96, "process"),
       ], [
-        { ...connect("cross", "inner", "outer"), label: "crosses" },
+        { ...connect("cross", "inner", "outer"), label: "crosses the frame line" },
         connect("there", "ask", "answer"),
         connect("back", "answer", "ask"),
         { ...connect("tight", "near-a", "near-b"), label: "a label far longer than its wire" },

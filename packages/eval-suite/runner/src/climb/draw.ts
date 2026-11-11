@@ -214,6 +214,8 @@ async function drawOne(options: {
   climbRoot: string;
   settingsPath: string;
   timeoutMs: number;
+  /** A brief folder (index.json and <brief>.md), or undefined for the frozen scenario briefs. */
+  briefDir?: string;
   /** The critic's settings and the canvas modules it renders with, or undefined when the critic is off. */
   critic?: { options: CriticOptions; canvas: CanvasModules };
 }): Promise<DrawRecord> {
@@ -232,7 +234,7 @@ async function drawOne(options: {
   const canvasesDir = resolve(dir, "canvases");
   mkdirSync(canvasesDir, { recursive: true });
 
-  const prompt = drawerPrompt(brief, readFileSync(briefPath(brief), "utf8"));
+  const prompt = drawerPrompt(brief, readFileSync(briefPath(brief, options.briefDir), "utf8"));
   const startedAt = new Date();
   const args = drawerArgs(dir, prompt, options.settingsPath, { persist: options.critic !== undefined });
   const { exitCode, signal, timedOut } = await runDrawer(dir, args, resolve(dir, "transcript.jsonl"), options.timeoutMs);
@@ -279,9 +281,10 @@ async function drawOne(options: {
 }
 
 export async function runDraw(argv: string[]): Promise<void> {
-  const flags = parseFlags(argv, ["--round", "--set", "--briefs", "--climb-root", "--settings", "--timeout-min", "--critic", "--critic-grid", "--critic-count"]);
+  const flags = parseFlags(argv, ["--round", "--set", "--briefs", "--climb-root", "--brief-dir", "--settings", "--timeout-min", "--critic", "--critic-grid", "--critic-count"]);
   const round = roundNumber(flags.get("--round"));
-  const sets = readSets();
+  const briefDir = flags.has("--brief-dir") ? resolve(flags.get("--brief-dir")!) : undefined;
+  const sets = briefDir ? readSets(resolve(briefDir, "index.json")) : readSets();
   const setName = flags.get("--set") ?? (flags.has("--briefs") ? undefined : "climb");
   let briefs: string[];
   if (setName === "climb" || setName === "heldOut") briefs = sets[setName];
@@ -293,7 +296,7 @@ export async function runDraw(argv: string[]): Promise<void> {
     briefs = setName === undefined ? picked : briefs.filter((id) => picked.includes(id));
   }
   if (briefs.length === 0) throw new Error("No briefs to draw");
-  for (const brief of briefs) briefPath(brief);
+  for (const brief of briefs) briefPath(brief, briefDir);
 
   const timeoutMinutes = Number(flags.get("--timeout-min") ?? DEFAULT_TIMEOUT_MINUTES);
   if (!(timeoutMinutes > 0)) throw new Error("--timeout-min must be a positive number");
@@ -307,7 +310,7 @@ export async function runDraw(argv: string[]): Promise<void> {
 
   const gate = new Semaphore(MAX_PARALLEL);
   const records = await Promise.all(briefs.map((brief) => gate.run(() =>
-    drawOne({ brief, round, climbRoot, settingsPath, timeoutMs: timeoutMinutes * 60_000, critic }))));
+    drawOne({ brief, round, climbRoot, settingsPath, timeoutMs: timeoutMinutes * 60_000, briefDir, critic }))));
   const failed = records.filter((record) => record.exitCode !== 0 || !record.board);
   if (failed.length > 0) {
     process.stderr.write(`${failed.length} of ${records.length} drawers failed: ${failed.map((record) => record.brief).join(", ")}\n`);

@@ -28,7 +28,9 @@ export function roundDir(climbRoot: string, round: number): string {
 }
 
 export function readSets(path = DEFAULT_SETS_PATH): BriefSets {
-  const value = JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
+  const raw = JSON.parse(readFileSync(path, "utf8")) as Record<string, unknown>;
+  // A brief folder's index.json nests the sets under "sets".
+  const value = (raw.sets ?? raw) as Record<string, unknown>;
   const sets = {} as BriefSets;
   for (const name of SET_NAMES) {
     const ids = value[name];
@@ -48,8 +50,9 @@ export function setOf(sets: BriefSets, brief: string): SetName | undefined {
   return SET_NAMES.find((name) => sets[name].includes(brief));
 }
 
-export function briefPath(brief: string): string {
-  const path = resolve(SCENARIOS_ROOT, brief, "brief.md");
+/** A brief's text file: `<briefDir>/<brief>.md` when a brief folder is given, else the frozen scenario brief. */
+export function briefPath(brief: string, briefDir?: string): string {
+  const path = briefDir ? resolve(briefDir, `${brief}.md`) : resolve(SCENARIOS_ROOT, brief, "brief.md");
   if (!existsSync(path)) throw new Error(`No brief for ${brief}: ${path}`);
   return path;
 }

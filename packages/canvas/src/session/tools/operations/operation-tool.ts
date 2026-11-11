@@ -266,7 +266,7 @@ export function runOperation<TFields extends OperationFields>(
     const rules = [
       ...(newNests.length > 0 ? ["a nested section never shares its parent's color"] : []),
       ...(newClashes.length > 0 ? ["touching sibling sections never share a color"] : []),
-      ...(newGrounds.length > 0 ? ["a section holding nodes of several colors never paints one of them"] : []),
+      ...(newGrounds.length > 0 ? ["a section never paints the color of a node or note it holds"] : []),
     ];
     return {
       isError: true,
