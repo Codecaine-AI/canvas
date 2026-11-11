@@ -4,8 +4,10 @@
  * the frame closed around what landed.
  *
  * What these pin: the gaps a reader sees (footprint to footprint, so an icon's
- * caption counts), the shared center line of a mixed-size row, the frame that
- * contains every footprint, and each refusal naming why and what to do.
+ * caption counts and its empty box sides do not), a gap widened for a
+ * labelled wire, the shared center line of a mixed-size row, each row centred
+ * in the frame, the frame that contains every footprint, and each refusal
+ * naming why and what to do.
  */
 import { describe, expect, test } from "bun:test";
 
@@ -16,6 +18,8 @@ import { diffDocuments } from "../../board/doc-diff";
 import { runDiagnostics } from "../../board/lints/run";
 import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../../state/actions";
 import { hitBoundsForObject } from "../../objects/geometry";
+import { connectionLabelChipMetrics } from "../../connectors/label-chip";
+import { ARROW_KEEP_OUT_PX, blockedLabelIds, paintedRects, placeConnectionLabels, routedConnectionIn } from "../../connectors/label-placement";
 import { makeTestSession, runOp } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 
@@ -69,8 +73,8 @@ describe("arrange_section — rows in, coordinates out", () => {
     expect(tall!.x - (wide!.x + wide!.width)).toBeLessThanOrEqual(CRAFT_TARGETS.nodeGapRow + 4);
     expect(small!.y - (tall!.y + tall!.height)).toBeGreaterThanOrEqual(CRAFT_TARGETS.nodeGapColumn);
     expect(small!.y - (tall!.y + tall!.height)).toBeLessThanOrEqual(CRAFT_TARGETS.nodeGapColumn + 4);
-    // Columns line up across rows.
-    expect(Math.abs(small!.x + small!.width / 2 - (wide!.x + wide!.width / 2))).toBeLessThanOrEqual(2);
+    // A shorter row is centred in the frame.
+    expect(Math.abs(small!.x + small!.width / 2 - (frame!.x + frame!.width / 2))).toBeLessThanOrEqual(2);
     // One center line per row, so a side-to-side wire runs straight (within
     // the write path's grid of 4).
     expect(Math.abs(wide!.y + wide!.height / 2 - (tall!.y + tall!.height / 2))).toBeLessThanOrEqual(2);
@@ -78,7 +82,7 @@ describe("arrange_section — rows in, coordinates out", () => {
     // The frame holds every footprint with the frame padding, title band above.
     const pad = CRAFT_TARGETS.framePadding;
     expect(wide!.x - frame!.x).toBe(pad);
-    expect(frame!.x + frame!.width - (tall!.x + tall!.width)).toBeGreaterThanOrEqual(pad);
+    expect(frame!.x + frame!.width - (tall!.x + tall!.width)).toBe(pad);
     expect(frame!.y + frame!.height - (small!.y + small!.height)).toBeGreaterThanOrEqual(pad);
     expect(Math.min(wide!.y, tall!.y) - frame!.y).toBeGreaterThanOrEqual(pad + 40);
     // The frame keeps its corner, and adopts the nodes it now covers.
@@ -113,6 +117,85 @@ describe("arrange_section — rows in, coordinates out", () => {
     for (const id of ["db", "model", "api"]) {
       expect(objectOf(doc, id).parentId, id).toBe("frame");
     }
+  });
+
+  /** Where a box paints: an icon's tile and caption, else its box. */
+  function painted(document: InteractiveCanvasDocument, id: string) {
+    const rects = paintedRects(objectOf(document, id));
+    const x = Math.min(...rects.map((rect) => rect.x));
+    const right = Math.max(...rects.map((rect) => rect.x + rect.width));
+    const y = Math.min(...rects.map((rect) => rect.y));
+    const bottom = Math.max(...rects.map((rect) => rect.y + rect.height));
+    return { x, y, right, bottom, centerY: (y + bottom) / 2 };
+  }
+
+  test("an icon is measured by its tile and caption: the row sits centred, its gap is the craft gap, and its wire runs straight", () => {
+    // Board 12's row: a 300×120 icon (it paints a 56px tile and a caption)
+    // beside a 300×120 process.
+    const session = makeTestSession(makeDocument(
+      [
+        { ...box("frame", 40, 360, 900, 260, "section"), text: "Frame" },
+        { ...box("files", 80, 460, 300, 120, "icon"), text: "Harness folders", icon: "folder" as const, parentId: "frame" },
+        { ...box("collector", 600, 460, 300, 120, "process"), text: "trace-collector", parentId: "frame" },
+      ],
+      [{ id: "tail", from: { objectId: "files", anchor: "right" }, to: { objectId: "collector", anchor: "left" }, label: "slow tail" }],
+    ), ["frame"]);
+
+    const result = runOp(session, "arrange_section", { section: "frame", rows: [["files", "collector"]] });
+
+    expect(result.isError).toBeUndefined();
+    const doc = session.draft;
+    const frame = objectOf(doc, "frame").geometry;
+    const files = painted(doc, "files");
+    const collector = painted(doc, "collector");
+    // The same air left and right of what paints (within the grid a cell rounds up to).
+    expect(Math.abs((files.x - frame.x) - (frame.x + frame.width - collector.right))).toBeLessThanOrEqual(4);
+    // The gap a reader sees is the craft gap, not the craft gap plus the icon's empty box side.
+    expect(collector.x - files.right).toBeGreaterThanOrEqual(CRAFT_TARGETS.nodeGapRow);
+    expect(collector.x - files.right).toBeLessThanOrEqual(CRAFT_TARGETS.nodeGapRow + 20);
+    // The icon's stored box still sits inside the frame with air.
+    const stored = objectOf(doc, "files").geometry;
+    expect(stored.x - frame.x).toBeGreaterThanOrEqual(20);
+    expect(objectOf(doc, "files").parentId).toBe("frame");
+    // The tile's middle and the box's middle share one line, so the wire between them is straight.
+    const wire = doc.connections[0]!;
+    const route = routedConnectionIn(doc, wire, objectOf(doc, "files"), objectOf(doc, "collector")).points!;
+    expect(new Set(route.map((point) => Math.round(point.y))).size).toBe(1);
+  });
+
+  test("a gap a labelled wire crosses widens to its chip plus the air for both ends", () => {
+    const label = "retry with the next provider";
+    const session = makeTestSession(makeDocument(
+      [
+        { ...box("frame", 0, 0, 960, 400, "section"), text: "Frame" },
+        { ...box("a", 40, 80, 240, 100, "process"), parentId: "frame" },
+        { ...box("b", 480, 80, 240, 100, "process"), parentId: "frame" },
+        { ...box("c", 40, 280, 240, 100, "process"), parentId: "frame" },
+        { ...box("d", 480, 280, 240, 100, "process"), parentId: "frame" },
+      ],
+      [
+        { id: "ab", from: { objectId: "a", anchor: "right" }, to: { objectId: "b", anchor: "left" }, label },
+        { id: "cd", from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "left" } },
+      ],
+    ), ["frame"]);
+    const chip = connectionLabelChipMetrics(label);
+    // The fixture is only meaningful if the craft gap is too short for the chip.
+    expect(chip.width + 68).toBeGreaterThan(CRAFT_TARGETS.nodeGapRow);
+
+    const result = runOp(session, "arrange_section", { section: "frame", rows: [["a", "b"], ["c", "d"]] });
+
+    expect(result.isError).toBeUndefined();
+    const doc = session.draft;
+    const [a, b, c, d] = ["a", "b", "c", "d"].map((id) => objectOf(doc, id).geometry);
+    expect(b!.x - (a!.x + a!.width)).toBeGreaterThanOrEqual(chip.width + 68);
+    // Rows of one length share columns, so the unlabelled row widens with it.
+    expect(c!.x).toBe(a!.x);
+    expect(d!.x).toBe(b!.x);
+    // The chip lands clear, short of the arrowhead.
+    const route = routedConnectionIn(doc, doc.connections[0]!, objectOf(doc, "a"), objectOf(doc, "b")).points!;
+    const center = placeConnectionLabels(doc).get("ab")!;
+    expect(center.x + chip.width / 2).toBeLessThanOrEqual(route.at(-1)!.x - ARROW_KEEP_OUT_PX);
+    expect(blockedLabelIds(doc)).toEqual([]);
   });
 
   test("a child left out of rows stays put and the result says so", () => {
