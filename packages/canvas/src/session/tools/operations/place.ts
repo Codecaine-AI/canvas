@@ -51,7 +51,7 @@ import { snapPoint, snapSize } from "../grid";
 import { withAutoSize } from "./auto-size";
 import type { OpContext, OpOutcome } from "./op-context";
 import { defineOperationTool } from "./operation-tool";
-import { toDocumentFields } from "../placeable-types";
+import { toDocumentFields, unknownPlaceableTypeMessage } from "../placeable-types";
 import {
   CloneParams,
   ConnectParams,
@@ -185,7 +185,11 @@ export const placeShape = defineOperationTool({
     + "Containment follows geometry: a shape outside every frame belongs to no "
     + "section.",
   fields: PlaceShapeParams.properties,
-  validate: (ctx, p) => ctx.requireFreeId(p.id),
+  validate: (ctx, p) => {
+    // The schema admits any brand-shaped id; the catalog decides which exist.
+    const unknown = unknownPlaceableTypeMessage("type", p.type);
+    return [...ctx.requireFreeId(p.id), ...(unknown ? [unknown] : [])];
+  },
   apply: (ctx, p) => {
     const [x, y] = snapPoint(p.at);
     // The folded name decides BOTH the document fields and which defaults row

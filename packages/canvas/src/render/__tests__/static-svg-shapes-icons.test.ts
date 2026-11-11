@@ -198,6 +198,22 @@ describe("static icons: tile vs glyph, packs, brands", () => {
       .toContain(`fill="#D97757" stroke="none"`);
   });
 
+  it("draws a catalog logo outside the core roster like any brand: its own mark, in its own color", () => {
+    const stripe = resolveIconGlyph("brand-stripe", "nucleo");
+    expect(stripe.paint).toBe("fill");
+    expect(stripe.brandColor).toBe("#635BFF");
+    expect(render([icon({ icon: "brand-stripe", text: "Stripe" })], "schematic-light"))
+      .toContain(`viewBox="${stripe.viewBox.join(" ")}" preserveAspectRatio="xMidYMid meet" fill="#635BFF" stroke="none"`);
+  });
+
+  it("draws a brand with no logo as its fallback glyph on the color-pick tile, exactly as that glyph draws", () => {
+    const light = canvasThemePreset("schematic-light");
+    const aws = render([icon({ icon: "brand-aws", text: "AWS" })], "schematic-light");
+    const cloud = render([icon({ icon: "cloud", text: "AWS" })], "schematic-light");
+    expect(aws).toContain(`fill="${light.palette.violet}"/>`);
+    expect(aws).toBe(cloud);
+  });
+
   it("falls back to the ink where a brand color would vanish: a black logo on the dark card", () => {
     const dark = canvasThemePreset("schematic-dark");
     const svg = render([icon({ icon: "brand-github" })], "schematic-dark");

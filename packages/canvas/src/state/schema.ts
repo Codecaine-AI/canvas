@@ -21,11 +21,13 @@
  */
 export type {
   CanvasArrowShapeDirection,
+  CanvasBrandIcon,
+  CanvasCoreIconGlyph,
   CanvasIconGlyph,
   CanvasShapeDirection,
   InteractiveCanvasObjectType,
 } from "./schema/object-types";
-export { CANVAS_ICON_GLYPHS } from "./schema/object-types";
+export { CANVAS_ICON_GLYPHS, CANVAS_ICON_IDS } from "./schema/object-types";
 export { CANVAS_COLORS, CANVAS_HUES, isCanvasColor } from "./schema/colors";
 export type { CanvasColor, CanvasHue } from "./schema/colors";
 export type { CanvasObjectStyle, CanvasSectionStrokeStyle } from "./schema/style";

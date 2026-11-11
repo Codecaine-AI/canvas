@@ -1,7 +1,7 @@
 "use client";
 
-import { CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "../../../state/schema/object-types";
-import { BRAND_ICON_COLORS, BRAND_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data-brands.generated";
+import { CANVAS_ICON_IDS, type CanvasIconGlyph } from "../../../state/schema/object-types";
+import { BRAND_ICON_CATALOG, BRAND_ICON_COLORS, BRAND_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data-brands.generated";
 import { TABLER_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data-tabler.generated";
 import { GENERATED_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data.generated";
 
@@ -22,14 +22,17 @@ import { GENERATED_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data.generated";
  *     outline SVGs via tools/dev-icons/generate.ts): every generic id on the
  *     24-unit grid, stroke-outline, round caps/joins.
  *   - Simple Icons (./icon-glyph-data-brands.generated — same tool): the
- *     `brand-*` logos on the 24-unit grid, FILLED silhouettes.
+ *     brand catalog. Each `brand-*` id has its title and search aliases, and
+ *     either its logo on the 24-unit grid, a FILLED silhouette, or (when
+ *     Simple Icons has no logo for the product) the generic glyph it draws.
  * It lives HERE, beside the icon object def, because these glyphs are canvas
  * CONTENT (what an `icon` object draws), not interface icons (co-location
  * alignment).
  *
  * Packs (the theme's `iconPack`): `nucleo` draws the Nucleo glyph where one
  * exists and the Tabler glyph otherwise; `tabler` draws Tabler for every
- * generic id. Brand ids draw their Simple Icons logo in both packs.
+ * generic id. Brand ids draw their Simple Icons logo in both packs; a brand
+ * with no logo draws its fallback glyph as that pack draws it.
  * `resolveIconGlyph(id, pack)` is the theme-aware entry point; `ICON_GLYPHS`
  * stays the nucleo pack, which is what the default theme draws.
  *
@@ -43,15 +46,16 @@ import { GENERATED_ICON_GLYPH_ELEMENTS } from "./icon-glyph-data.generated";
  */
 
 /**
- * Every glyph id, in roster order: the schema's CANVAS_ICON_GLYPHS (the single
+ * Every glyph id, in roster order: the schema's CANVAS_ICON_IDS (the single
  * source of truth) — the 30 operational-map ids first, then the generic
- * additions, then the `brand-*` logos.
+ * additions, then the featured `brand-*` logos, then the rest of the brand
+ * catalog, sorted.
  */
-export const ICON_GLYPH_IDS: typeof CANVAS_ICON_GLYPHS = CANVAS_ICON_GLYPHS;
+export const ICON_GLYPH_IDS: readonly IconGlyphId[] = CANVAS_ICON_IDS;
 
 export type IconGlyphId = CanvasIconGlyph;
 
-/** A `brand-*` id: always the Simple Icons logo, fill paint. */
+/** A `brand-*` id: a brand catalog row — its Simple Icons logo (fill paint), or its fallback glyph. */
 export type BrandIconGlyphId = Extract<IconGlyphId, `brand-${string}`>;
 
 /** A generic (non-brand) id: the pack's outline glyph, stroke paint. */
@@ -62,7 +66,7 @@ export const ICON_PACK_IDS = ["nucleo", "tabler"] as const;
 
 export type IconPackId = (typeof ICON_PACK_IDS)[number];
 
-/** Which corpus a resolved glyph's geometry came from. */
+/** Which corpus a resolved glyph's geometry came from (a logo-less brand reports its fallback glyph's corpus). */
 export type IconGlyphSource = "nucleo" | "tabler" | "simple-icons";
 
 /**
@@ -270,39 +274,6 @@ const GENERIC_GLYPH_META: Record<
   filter: { label: "Filter", category: "data" },
 };
 
-/** Picker label per brand id — the product's own name. Every brand groups under "brands". */
-const BRAND_GLYPH_LABELS: Record<BrandIconGlyphId, string> = {
-  "brand-postgres": "PostgreSQL",
-  "brand-sqlite": "SQLite",
-  "brand-redis": "Redis",
-  "brand-mongodb": "MongoDB",
-  "brand-docker": "Docker",
-  "brand-kubernetes": "Kubernetes",
-  "brand-github": "GitHub",
-  "brand-git": "Git",
-  "brand-anthropic": "Anthropic",
-  "brand-claude": "Claude",
-  "brand-huggingface": "Hugging Face",
-  "brand-ollama": "Ollama",
-  "brand-bun": "Bun",
-  "brand-node": "Node.js",
-  "brand-typescript": "TypeScript",
-  "brand-python": "Python",
-  "brand-go": "Go",
-  "brand-rust": "Rust",
-  "brand-react": "React",
-  "brand-nextjs": "Next.js",
-  "brand-vite": "Vite",
-  "brand-electron": "Electron",
-  "brand-vercel": "Vercel",
-  "brand-cloudflare": "Cloudflare",
-  "brand-supabase": "Supabase",
-  "brand-terraform": "Terraform",
-  "brand-kafka": "Kafka",
-  "brand-linear": "Linear",
-  "brand-figma": "Figma",
-};
-
 type GeneratedGlyph = {
   viewBoxSize: number;
   viewBox?: readonly [number, number, number, number];
@@ -315,7 +286,7 @@ function isBrandIconGlyphId(id: IconGlyphId): id is BrandIconGlyphId {
 
 /**
  * The generated geometry for `id`. Exhaustiveness guarantee: every id in
- * ICON_GLYPH_IDS must have Tabler (generic) or Simple Icons (brand) geometry.
+ * ICON_GLYPH_IDS must have Tabler (generic) or Simple Icons (brand logo) geometry.
  * Throws at module init (i.e. at build/test time for anything that touches
  * the registry) so a stale *.generated.ts is caught immediately.
  */
@@ -329,19 +300,35 @@ function generatedGlyph(table: Record<string, GeneratedGlyph>, id: IconGlyphId):
   return generated;
 }
 
+/** The catalog row for a brand id: its title, and its logo color or fallback glyph. */
+function brandRow(id: BrandIconGlyphId): (typeof BRAND_ICON_CATALOG)[string] {
+  const row = BRAND_ICON_CATALOG[id];
+  if (!row) {
+    throw new Error(
+      `icon-glyphs: no brand catalog row for "${id}" — add it to tools/dev-icons/manifest.json and re-run \`bun tools/dev-icons/generate.ts\``,
+    );
+  }
+  return row;
+}
+
+/** The generic glyph a logo-less brand draws, or undefined for a brand with a logo. */
+function brandFallback(id: BrandIconGlyphId): GenericIconGlyphId | undefined {
+  return brandRow(id).glyph as GenericIconGlyphId | undefined;
+}
+
 function glyphDefinition(id: IconGlyphId, source: IconGlyphSource, generated: GeneratedGlyph): IconGlyphDefinition {
   let label: string;
   let category: IconGlyphCategory;
   if (isBrandIconGlyphId(id)) {
-    label = BRAND_GLYPH_LABELS[id];
+    label = brandRow(id).title;
     category = "brands";
   } else {
     ({ label, category } = GENERIC_GLYPH_META[id]);
   }
   const brandColor = isBrandIconGlyphId(id) ? BRAND_ICON_COLORS[id] : undefined;
-  if (isBrandIconGlyphId(id) && !brandColor) {
+  if (source === "simple-icons" && !brandColor) {
     throw new Error(
-      `icon-glyphs: no brand color for "${id}" — add its Simple Icons "hex" to tools/dev-icons/manifest.json and re-run \`bun tools/dev-icons/generate.ts\``,
+      `icon-glyphs: no brand color for "${id}" — re-run \`bun tools/dev-icons/generate.ts --vendor\``,
     );
   }
   return {
@@ -365,17 +352,30 @@ function buildPack(pick: (id: IconGlyphId) => IconGlyphDefinition): Record<IconG
   return registry;
 }
 
-/** The `tabler` pack: Tabler for every generic id, Simple Icons for brands. */
-const TABLER_PACK = buildPack((id) =>
-  isBrandIconGlyphId(id)
-    ? glyphDefinition(id, "simple-icons", generatedGlyph(BRAND_ICON_GLYPH_ELEMENTS, id))
-    : glyphDefinition(id, "tabler", generatedGlyph(TABLER_ICON_GLYPH_ELEMENTS, id)),
-);
+/**
+ * A logo-less brand in `pack`: the pack's drawing of its fallback glyph,
+ * under the brand's own id, title and group.
+ */
+function fallbackBrand(id: BrandIconGlyphId, glyph: IconGlyphDefinition): IconGlyphDefinition {
+  return { ...glyph, id, label: brandRow(id).title, category: "brands" };
+}
+
+/** The `tabler` pack: Tabler for every generic id, Simple Icons for brand logos. */
+const TABLER_PACK = buildPack((id) => {
+  if (!isBrandIconGlyphId(id)) return glyphDefinition(id, "tabler", generatedGlyph(TABLER_ICON_GLYPH_ELEMENTS, id));
+  const fallback = brandFallback(id);
+  return fallback
+    ? fallbackBrand(id, glyphDefinition(fallback, "tabler", generatedGlyph(TABLER_ICON_GLYPH_ELEMENTS, fallback)))
+    : glyphDefinition(id, "simple-icons", generatedGlyph(BRAND_ICON_GLYPH_ELEMENTS, id));
+});
 
 /** The `nucleo` pack: the Nucleo glyph where one exists, else the tabler pack's definition. */
 const NUCLEO_PACK = buildPack((id) => {
-  const nucleo = isBrandIconGlyphId(id) ? undefined : GENERATED_ICON_GLYPH_ELEMENTS[id];
-  return nucleo ? glyphDefinition(id, "nucleo", nucleo) : TABLER_PACK[id];
+  const generic = isBrandIconGlyphId(id) ? brandFallback(id) : id;
+  const nucleo = generic === undefined ? undefined : GENERATED_ICON_GLYPH_ELEMENTS[generic];
+  if (!nucleo) return TABLER_PACK[id];
+  const glyph = glyphDefinition(generic!, "nucleo", nucleo);
+  return isBrandIconGlyphId(id) ? fallbackBrand(id, glyph) : glyph;
 });
 
 /**

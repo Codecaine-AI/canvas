@@ -60,6 +60,7 @@ import {
   fromDocumentFields,
   toDocumentFields,
   type FoldedTypeName,
+  unknownPlaceableTypeMessage,
 } from "../placeable-types";
 import { Color, Id, NAME_RULE, ShapeSwapPatch } from "../schemas";
 import type { ConnectionPatch, ObjectPatch, ShapeSwapPatch as ShapeSwap } from "../schemas";
@@ -294,7 +295,9 @@ function requireSwapTarget(ctx: OpContext, id: string, patch: ShapeSwap): string
   if (patch.type === undefined && patch.direction === undefined) {
     return ["patch names nothing to change — send type or direction for a shape."];
   }
-  return [];
+  // The schema admits any brand-shaped id; the catalog decides which exist.
+  const unknown = patch.type === undefined ? null : unknownPlaceableTypeMessage("patch.type", patch.type);
+  return unknown ? [unknown] : [];
 }
 
 export const changeShape = defineOperationTool({

@@ -1,4 +1,4 @@
-import { CANVAS_COLORS } from "../../state/schema";
+import { CANVAS_COLORS, CANVAS_ICON_GLYPHS } from "../../state/schema";
 import type {
   CanvasArrowDirection,
   InteractiveCanvasDocument,
@@ -7,7 +7,6 @@ import type {
 
 // Relative imports keep the session harness away from the canvas React surface.
 import { preferredObjectColor } from "../../objects/registry";
-import { ICON_GLYPH_IDS } from "../../objects/shapes/icon/icon-glyphs";
 import { renderDocumentToSvg } from "../../render/static-svg";
 import { CENTER_TEXT_INSET_PX } from "../../objects/text-slots";
 import { CANVAS_SANS_FONT_STACK } from "../../theme/fonts";
@@ -255,12 +254,14 @@ export function buildVocabularyDocument(canvasStyle: CanvasStyle): InteractiveCa
     );
   };
 
-  // ICONS — every glyph in the roster, its id rendered as the built-in caption.
+  // ICONS — every glyph in the core roster, its id rendered as the built-in
+  // caption. The brand catalog's hundreds of logos are found by name with
+  // find_icon, not shown here.
   bandLabel("band-icons", "ICONS");
   const iconSize = positiveDefaultSize("icon");
   const iconCellWidth = iconSize.width + CELL_GAP_X;
   const iconCellHeight = iconSize.height + caption.height + ROW_GAP_Y;
-  for (const [index, glyph] of ICON_GLYPH_IDS.entries()) {
+  for (const [index, glyph] of CANVAS_ICON_GLYPHS.entries()) {
     objects.push(
       draftPlacedObject(
         "icon",
@@ -274,7 +275,7 @@ export function buildVocabularyDocument(canvasStyle: CanvasStyle): InteractiveCa
       ),
     );
   }
-  nextBandY += Math.ceil(ICON_GLYPH_IDS.length / ICON_COLUMNS) * iconCellHeight + BAND_GAP_Y;
+  nextBandY += Math.ceil(CANVAS_ICON_GLYPHS.length / ICON_COLUMNS) * iconCellHeight + BAND_GAP_Y;
 
   // COLORS — every roster color as a labeled swatch.
   bandLabel("band-colors", "COLORS");
