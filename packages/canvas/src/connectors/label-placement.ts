@@ -45,13 +45,15 @@
  * its horizontal and vertical segments that fit its chip. Two runs sit side
  * by side when they point the same way, leave between GROUP_CHIP_AIR_PX and
  * GROUP_MAX_APART_PX between their chips, and one line across them holds
- * both chips clear (a chip in the white space takes no line inside a section
- * its wire only passes). A sweep across the runs chains neighbours into a
+ * both chips clear. A sweep across the runs chains neighbours into a
  * group while one line still holds every chip clear; a wire with runs in two
  * groups stays in the larger. A group's chips all take one line, clear of
  * every chip outside the group (those do not move): the one with the fewest
  * foreign, then crowded, then near-miss chips, then the least total move
- * from each wire's preferred point. Pinned chips join no group.
+ * from each wire's preferred point. A line never takes a chip out of the
+ * white space into a section its wire only passes, unless a chip of the
+ * group has no place in the white space and the line holds them all inside
+ * such sections. Pinned chips join no group.
  *
  * Pin rule: a pinned chip with no hits stays exactly at its pin, unless it
  * lies on its wire across a bend: then it moves to the nearest clear spot on
@@ -716,12 +718,9 @@ function computePlacements(
       .sort((a, b) => a.at - b.at || a.lo - b.lo);
     const open: typeof groups = [];
     for (const run of runs) {
-      // A chip in the white space stays there: its runs offer no line inside a section the wire only passes.
-      const white = !passingThrough(run.label, result.get(run.label.connection.id)!);
       const clear: number[] = [];
       for (let line = Math.ceil(run.lo / GROUP_LINE_STEP_PX) * GROUP_LINE_STEP_PX; line <= run.hi; line += GROUP_LINE_STEP_PX) {
-        const center = centerOn(run, line);
-        if (hits(run.label, center, 0, []).count === 0 && !(white && passingThrough(run.label, center))) clear.push(line);
+        if (hits(run.label, centerOn(run, line), 0, []).count === 0) clear.push(line);
       }
       clearLines.set(run, clear);
       let join: { group: (typeof groups)[number]; lines: Set<number> } | null = null;
@@ -761,10 +760,16 @@ function computePlacements(
       if (runs.length < 2) continue;
       const members = new Set(runs.map((run) => run.label));
       const others = [...chips].flatMap(([label, rect]) => (members.has(label) ? [] : [rect]));
+      // A chip in the white space stays there. One exception: when a chip of the group has no
+      // place in the white space, a line may hold them all inside sections their wires only
+      // pass. Ford asked for "a consistent tag location", so the one place for them all wins.
+      const white = runs.filter((run) => !passingThrough(run.label, result.get(run.label.connection.id)!));
       let best: number | null = null;
       let bestScore: number[] = [];
       for (const line of clearLines.get(runs[0]!)!) {
         if (runs.some((run) => !clearLines.get(run)!.includes(line) || hits(run.label, centerOn(run, line), 0, others).count > 0)) continue;
+        const inside = runs.filter((run) => passingThrough(run.label, centerOn(run, line)));
+        if (white.some((run) => inside.includes(run)) && (inside.length < runs.length || white.length === runs.length)) continue;
         const score = [0, 0, 0, 0];
         for (const run of runs) {
           const center = centerOn(run, line);

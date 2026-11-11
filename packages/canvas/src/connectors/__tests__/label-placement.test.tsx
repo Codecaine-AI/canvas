@@ -364,6 +364,18 @@ describe("placeConnectionLabels tags in line", () => {
     expect(placed.get("cd")!.x + width / 2).toBeLessThan(800);
   });
 
+  it("lines the chips up inside the section when one of them has no place in the white space", () => {
+    // Both wires leave section s at x = 600. The top one ends 40px on, at b: no room for its chip outside s.
+    // The bottom one runs on to x = 810 and down to d, so on its own its chip sits in the white space.
+    const objects = [section("s", -40, -80, 640, 400), box("a", 0, 0), box("b", 640, 0), box("c", 0, 200), box("d", 760, 400)];
+    const top = wire("ab", "a", "b", "request");
+    const bottom = wire("cd", "a", "b", "request", { from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "top" } });
+    expect(placeConnectionLabels(doc(objects, [bottom])).get("cd")!.x).toBeGreaterThan(600);
+    const placed = placeConnectionLabels(doc(objects, [top, bottom]));
+    expect(placed.get("cd")).toEqual({ x: placed.get("ab")!.x, y: 230 });
+    expect(placed.get("ab")!.x).toBeLessThan(600);
+  });
+
   // a's right side to c's top: across to x = 450, then down. The middle of the wire is the corner.
   const elbow = (labelPosition?: InteractiveCanvasConnection["labelPosition"]) =>
     doc([A, box("c", 400, 380)], [wire("ac", "a", "c", "request", { to: { objectId: "c", anchor: "top" }, labelPosition })]);
