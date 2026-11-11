@@ -77,6 +77,9 @@
         "b-cmcp-verbatim-decision-47",
         "b-cmcp-verbatim-why-48",
         "b-cmcp-verbatim-applies-49",
+        "b-cmcp-served-decision-49a",
+        "b-cmcp-served-why-49d",
+        "b-cmcp-served-applies-49h",
         "b-cmcp-gaps-heading-50",
         "b-cmcp-gaps-lede-51",
         "b-cmcp-gaps-descriptions-52",
@@ -115,7 +118,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Sources: "
+          "insert": "The code of this page is in "
         },
         {
           "insert": "packages/canvas-mcp",
@@ -131,12 +134,12 @@
           "insert": " and "
         },
         {
-          "insert": "packages/canvas-agent/src/toolkit/index.ts",
+          "insert": "packages/canvas/src/toolkit/index.ts",
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/toolkit/index.ts",
-              "label": "packages/canvas-agent/src/toolkit/index.ts"
+              "path": "packages/canvas/src/toolkit/index.ts",
+              "label": "packages/canvas/src/toolkit/index.ts"
             }
           }
         },
@@ -2691,6 +2694,189 @@
       ],
       "children": []
     },
+    "b-cmcp-served-decision-49a": {
+      "id": "b-cmcp-served-decision-49a",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Canvas guidance lives in served topics, not in a skill, so each rule has one owner. "
+        },
+        {
+          "insert": "canvas_capabilities",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " lists the topics, "
+        },
+        {
+          "insert": "canvas_guidance",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " serves them, and every edit tool refuses until the process reads topic "
+        },
+        {
+          "insert": "workflow",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-served-why-49d": {
+      "id": "b-cmcp-served-why-49d",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Why",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-cmcp-served-why-change-49e",
+        "b-cmcp-served-why-manifest-49f",
+        "b-cmcp-served-why-test-49g"
+      ]
+    },
+    "b-cmcp-served-why-change-49e": {
+      "id": "b-cmcp-served-why-change-49e",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A server change then needs no skill edit, and no second copy of a rule can drift from the code."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-served-why-manifest-49f": {
+      "id": "b-cmcp-served-why-manifest-49f",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The manifest in "
+        },
+        {
+          "insert": "guidance-manifest.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " maps each rule of the skill text to a served sentence or a named drop."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-served-why-test-49g": {
+      "id": "b-cmcp-served-why-test-49g",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "capabilities.test.ts",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " fails when a served topic loses the anchor phrases of a unit."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-served-applies-49h": {
+      "id": "b-cmcp-served-applies-49h",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Applies To",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-cmcp-served-applies-files-49i",
+        "b-cmcp-served-applies-folder-49j"
+      ]
+    },
+    "b-cmcp-served-applies-files-49i": {
+      "id": "b-cmcp-served-applies-files-49i",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The decision covers "
+        },
+        {
+          "insert": "packages/canvas/src/authoring/sources.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/authoring/sources.ts",
+              "label": "packages/canvas/src/authoring/sources.ts"
+            }
+          }
+        },
+        {
+          "insert": " and every topic it builds, and "
+        },
+        {
+          "insert": "packages/canvas-mcp/src/guidance-manifest.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp/src/guidance-manifest.ts",
+              "label": "packages/canvas-mcp/src/guidance-manifest.ts"
+            }
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-served-applies-folder-49j": {
+      "id": "b-cmcp-served-applies-folder-49j",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The generated skill folder is deleted after the migration gate passes."
+        }
+      ],
+      "children": []
+    },
     "b-cmcp-gaps-heading-50": {
       "id": "b-cmcp-gaps-heading-50",
       "type": "heading",
@@ -2819,7 +3005,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Seven files carry this server: four in the server package and three in the canvas package."
+          "insert": "Eight files carry this server: five in the server package and three in the canvas package."
         }
       ],
       "children": []
@@ -2842,7 +3028,8 @@
         "b-cmcp-files-cli-57",
         "b-cmcp-files-mcp-58",
         "b-cmcp-files-service-59",
-        "b-cmcp-files-manifest-59a"
+        "b-cmcp-files-manifest-59a",
+        "b-cmcp-files-captest-59c"
       ]
     },
     "b-cmcp-files-cli-57": {
@@ -2922,7 +3109,40 @@
       },
       "text": [
         {
-          "insert": "packages/canvas-mcp/src/guidance-manifest.ts holds the rule-unit manifest of the canvas skill, the gate map, and the fixed index fields."
+          "insert": "packages/canvas-mcp/src/guidance-manifest.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp/src/guidance-manifest.ts",
+              "label": "packages/canvas-mcp/src/guidance-manifest.ts"
+            }
+          }
+        },
+        {
+          "insert": " maps each skill rule to the topic that serves it, and holds the gate map and the fixed index fields."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-files-captest-59c": {
+      "id": "b-cmcp-files-captest-59c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "packages/canvas-mcp/src/capabilities.test.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas-mcp/src/capabilities.test.ts",
+              "label": "packages/canvas-mcp/src/capabilities.test.ts"
+            }
+          }
+        },
+        {
+          "insert": " tests the manifest against the served topics, and tests the index, the edit gate and the contact-sheet resource."
         }
       ],
       "children": []
@@ -2955,12 +3175,12 @@
       },
       "text": [
         {
-          "insert": "packages/canvas-agent/src/toolkit/index.ts",
+          "insert": "packages/canvas/src/toolkit/index.ts",
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/toolkit/index.ts",
-              "label": "packages/canvas-agent/src/toolkit/index.ts"
+              "path": "packages/canvas/src/toolkit/index.ts",
+              "label": "packages/canvas/src/toolkit/index.ts"
             }
           }
         },
@@ -2978,12 +3198,12 @@
       },
       "text": [
         {
-          "insert": "packages/canvas-agent/src/authoring/index.ts",
+          "insert": "packages/canvas/src/authoring/index.ts",
           "attributes": {
             "reference": {
               "kind": "source",
-              "path": "packages/canvas-agent/src/authoring/index.ts",
-              "label": "packages/canvas-agent/src/authoring/index.ts"
+              "path": "packages/canvas/src/authoring/index.ts",
+              "label": "packages/canvas/src/authoring/index.ts"
             }
           }
         },
@@ -3010,7 +3230,17 @@
       },
       "text": [
         {
-          "insert": "packages/canvas/src/authoring/sources.ts builds the 10 topics, and workflow.ts and rules.ts beside it hold the two hand-written ones."
+          "insert": "packages/canvas/src/authoring/sources.ts",
+          "attributes": {
+            "reference": {
+              "kind": "source",
+              "path": "packages/canvas/src/authoring/sources.ts",
+              "label": "packages/canvas/src/authoring/sources.ts"
+            }
+          }
+        },
+        {
+          "insert": " builds the 10 topics, and workflow.ts and rules.ts beside it hold the two hand-written ones."
         }
       ],
       "children": []
