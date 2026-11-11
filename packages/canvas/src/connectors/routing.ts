@@ -221,14 +221,27 @@ function routeConnectionPolyline(
   // router. Crossing an unrelated section's frame is allowed, as on stage.
   const explicitWaypoints = validWaypoints(connection.waypoints);
   if (explicitWaypoints) {
-    const waypointRoute = routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor, {
+    const endpointContext = {
       fromObject,
       toObject,
       canSlideStart: !connection.from.position,
       canSlideEnd: !connection.to.position,
       canvasStyle,
-    }, (route) => isClear(route, boxesOnly));
+    };
+    const accept = (route: RoutedConnection) => isClear(route, boxesOnly);
+    const waypointRoute = routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor, endpointContext, accept);
     if (waypointRoute) return waypointRoute;
+    // A port that moved off its stored corner keeps the stored lanes: only
+    // the two end runs follow the ports.
+    const slid = slideEndCorners(
+      start,
+      end,
+      explicitWaypoints,
+      connectionBoundsForObject(fromObject, canvasStyle),
+      connectionBoundsForObject(toObject, canvasStyle),
+    );
+    const slidRoute = slid && routeWaypoints(start, end, slid, startAnchor, endAnchor, endpointContext, accept);
+    if (slidRoute) return slidRoute;
   }
 
   const straight = routeStraightIfAligned(
@@ -671,6 +684,75 @@ function routeWaypoints(
     if (accept(route)) return route;
   }
   return null;
+}
+
+/**
+ * Stored corners moved to meet ends that no longer line up with them (a
+ * pinned port that moved, an icon whose tile is smaller than its slot). The
+ * first corner slides along its lane, the run to the second corner, until the
+ * start meets it squarely, and the last corner slides along its lane to meet
+ * the end. Every lane the author placed stays where it was put: only the two
+ * end runs follow their ports. Null when nothing moves, when a corner would
+ * slide past its neighbour (the lane would reverse), or when an end run would
+ * cut back through its own object or run along its edge.
+ */
+function slideEndCorners(
+  start: CanvasPoint,
+  end: CanvasPoint,
+  waypoints: ReadonlyArray<CanvasPoint>,
+  fromBounds: CanvasBounds,
+  toBounds: CanvasBounds,
+): CanvasPoint[] | null {
+  const corners = waypoints.map((point) => ({ ...point }));
+  const last = corners.length - 1;
+  const first = corners[0];
+  const final = corners[last];
+  if (!first || !final) return null;
+  const epsilon = WAYPOINT_ORTHOGONAL_EPSILON_PX;
+  if (isOrthogonalSegment(start, first, epsilon) && isOrthogonalSegment(final, end, epsilon)) return null;
+
+  if (last === 0) {
+    // One corner has no lane: it keeps the order of its two runs.
+    const horizontalFirst = Math.abs(first.y - start.y) <= Math.abs(first.x - start.x);
+    corners[0] = horizontalFirst ? { x: end.x, y: start.y } : { x: start.x, y: end.y };
+  } else {
+    const slidFirst = slideAlongLane(first, corners[1]!, start);
+    const slidFinal = slideAlongLane(final, corners[last - 1]!, end);
+    if (!slidFirst || !slidFinal) return null;
+    corners[0] = slidFirst;
+    corners[last] = slidFinal;
+    // Two corners share one lane: they must not slide past each other.
+    if (last === 1 && !sameHeading(first, final, slidFirst, slidFinal)) return null;
+  }
+
+  const leavesBody = (inner: CanvasPoint, outer: CanvasPoint, bounds: CanvasBounds) =>
+    boundsStrictlyContain(bounds, inner) || (!segmentCrossesInterior(inner, outer, bounds) && !runsAlongEdge(inner, outer, bounds));
+  if (!leavesBody(start, corners[0]!, fromBounds) || !leavesBody(end, corners[last]!, toBounds)) return null;
+  return corners;
+}
+
+/** Whether the axis-aligned run `a -> b` lies on the edge of `bounds` that `a` sits on. */
+function runsAlongEdge(a: CanvasPoint, b: CanvasPoint, bounds: CanvasBounds): boolean {
+  const epsilon = WAYPOINT_ORTHOGONAL_EPSILON_PX;
+  const onEdge = (value: number, low: number, size: number) => Math.abs(value - low) <= epsilon || Math.abs(value - low - size) <= epsilon;
+  return Math.abs(a.x - b.x) <= epsilon ? onEdge(a.x, bounds.x, bounds.width) : onEdge(a.y, bounds.y, bounds.height);
+}
+
+/** `corner` moved along its lane to `neighbour` until `endpoint` meets it squarely, or null when it would pass `neighbour`. */
+function slideAlongLane(corner: CanvasPoint, neighbour: CanvasPoint, endpoint: CanvasPoint): CanvasPoint | null {
+  const epsilon = WAYPOINT_ORTHOGONAL_EPSILON_PX;
+  if (isOrthogonalSegment(endpoint, corner, epsilon)) return corner;
+  const vertical = Math.abs(corner.x - neighbour.x) <= epsilon;
+  if (!vertical && Math.abs(corner.y - neighbour.y) > epsilon) return null;
+  const slid = vertical ? { x: corner.x, y: endpoint.y } : { x: endpoint.x, y: corner.y };
+  return sameHeading(corner, neighbour, slid, neighbour) ? slid : null;
+}
+
+/** Whether the run `c -> d` still heads the way the axis-aligned run `a -> b` does. */
+function sameHeading(a: CanvasPoint, b: CanvasPoint, c: CanvasPoint, d: CanvasPoint): boolean {
+  const before = Math.abs(b.x - a.x) > Math.abs(b.y - a.y) ? b.x - a.x : b.y - a.y;
+  const after = Math.abs(b.x - a.x) > Math.abs(b.y - a.y) ? d.x - c.x : d.y - c.y;
+  return Math.abs(before) > ROUTE_EPSILON && Math.abs(after) > ROUTE_EPSILON && Math.sign(before) === Math.sign(after);
 }
 
 type WaypointEndpointContext = {
