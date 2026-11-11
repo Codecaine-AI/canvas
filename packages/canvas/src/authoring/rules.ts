@@ -60,6 +60,7 @@ export function canvasRules(): AuthoringTopic {
       "## Text",
       "",
       `- A name is ${NAME_TARGET_WORDS} words or fewer.`,
+      "- A node shows its name only. Put extra context in a sticky note next to it.",
       "- A section has a title only.",
       "- A node draws no text beyond its name. Put a fact a reader needs (a size, a tool name) in the name, a wire label or a sticky.",
       "- Put each sticky beside the node it explains.",

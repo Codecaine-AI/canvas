@@ -138,11 +138,10 @@ describe("canvas_create and canvas_check", () => {
     await call(service, "connect", { id: "e1", from: { objectId: "client" }, to: { objectId: "api" } });
     await call(service, "connect", { id: "e2", from: { objectId: "api" }, to: { objectId: "db" } });
 
-    // Three kinds of shape placed at one y have two heights, so a wire between them bends.
-    // The check names the call that puts them on one line.
-    const offLine = checked(await call(service, "canvas_check", {}));
-    expect(offLine.text).toContain("W1 near-miss: api is 10px off client's center line, so e1 bends (arrange api, client align center_v)");
-    await call(service, "arrange", { ids: ["api", "client"], align: "center_v" });
+    // Three kinds of shape placed at one y have two heights, so a wire between them
+    // would bend. The straighten pass puts them on one line as each wire is drawn.
+    const straightened = checked(await call(service, "canvas_check", {}));
+    expect(straightened.text).not.toContain("near-miss");
 
     // The row ran past the page, and the page grew to hold it: no fit_section call.
     const result = await call(service, "canvas_check", {});
