@@ -69,6 +69,16 @@ describe("snapping", () => {
       expect(snap.guides).toEqual([]);
     });
 
+    it("pairs any two lines in a drag, and only like lines when a check asks", () => {
+      // Lines on x: the moving box 103, 123, 143; the other 60, 90, 120.
+      const moving = bounds(103, 500);
+      const other = bounds(60, 0, 60, 40);
+
+      expectClose(computeSnapGuides(moving, [other], 50).dx, -3); // center to right edge
+      expectClose(computeSnapGuides(moving, [other], 50, "matching").dx, -23); // right edge to right edge
+      expectClose(computeSnapGuides(moving, [other], 50, "center").dx, -33); // center to center
+    });
+
     it("caps candidates while preserving nearby matches", () => {
       const moving = bounds(103, 0);
       const farCandidates = Array.from({ length: 150 }, (_, index) => bounds(10_000 + index * 100, 10_000));
