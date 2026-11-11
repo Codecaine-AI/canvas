@@ -43,17 +43,19 @@ describe("check-only lints", () => {
     expect(found(board(2), "gray-share")).toEqual(["gray is 3 of 4 sections and nodes (75%) (change_color frame violet)"]);
   });
 
-  test("shared-wire: two colours joined on one line into one port, but not one stroke", () => {
-    // The lane pass moves a reply and a fan of two strokes 16px apart. It keeps
-    // wires that end on one port with one dash as one junction, whatever their colour.
+  test("shared-wire: two end runs the lane pass cannot move, but never a junction or a reply", () => {
+    // End runs hold their lanes, so two wires that leave and enter two
+    // different nodes on one row stay on one line.
+    const row = [page(), box("a", 200, 600), box("b", 1000, 1000), box("c", 200, 1000), box("d", 1400, 600)];
+    expect(found(makeDocument(row, [{ ...connect("down", "a", "b"), color: "red" }, { ...connect("up", "c", "d"), color: "red" }]), "shared-wire"))
+      .toEqual([expect.stringMatching(/^down and up share 200px at \d+,1048 \(route up 16px aside\)$/)]);
+    // The lane pass joins wires of one dash into one port as one junction, whatever their colour.
     const nodes = [page(), box("a", 200, 200), box("b", 200, 600), box("target", 800, 400)];
-    const into = (color?: "red") => [
+    const junction = [
       { ...connect("solid", "a", "target"), to: { objectId: "target", anchor: "left" as const } },
-      { ...connect("other", "b", "target"), to: { objectId: "target", anchor: "left" as const }, ...(color ? { color } : {}) },
+      { ...connect("other", "b", "target"), to: { objectId: "target", anchor: "left" as const }, color: "red" as const },
     ];
-    expect(found(makeDocument(nodes, into("red")), "shared-wire")).toEqual(["solid and other share 220px at 580,448 (route other 16px aside)"]);
-    // One stroke into one node is one junction.
-    expect(found(makeDocument(nodes, into()), "shared-wire")).toEqual([]);
+    expect(found(makeDocument(nodes, junction), "shared-wire")).toEqual([]);
     // A wire and its reply paint in two lanes.
     expect(found(makeDocument(nodes, [connect("there", "a", "target"), connect("back", "target", "a")]), "shared-wire")).toEqual([]);
   });
@@ -79,15 +81,19 @@ describe("check-only lints", () => {
     expect(found(board(800), "hidden-arrowhead")).toEqual([]);
   });
 
-  test("hidden-arrowhead: two heads of two strokes on one spot", () => {
-    // The lane pass gives a dashed wire its own port, but joins two colours of one dash into one head.
-    const nodes = [page(), box("a", 200, 200), box("b", 200, 600), box("target", 800, 400)];
-    const into = (color?: "red") => [
-      { ...connect("solid", "a", "target"), to: { objectId: "target", anchor: "left" as const } },
-      { ...connect("other", "b", "target"), to: { objectId: "target", anchor: "left" as const }, ...(color ? { color } : {}) },
+  test("hidden-arrowhead: two dashes into one port with no room for a second, but never a junction", () => {
+    // Two wires and a reply hold the row, so a dashed and a solid wire from
+    // past it end on one port.
+    const row = [page(), box("a", 200, 1000), box("b", 600, 1000), box("c", 1000, 1000)];
+    const wires = (style?: "dashed") => [
+      { ...connect("ask", "a", "b"), style: "dashed" as const },
+      connect("reply", "b", "a"),
+      { ...connect("far", "c", "a"), ...(style ? { style } : {}) },
+      { ...connect("near", "c", "a"), color: "red" as const },
     ];
-    expect(found(makeDocument(nodes, into("red")), "hidden-arrowhead")).toEqual(["other's arrowhead is on solid's (end it at another point)"]);
-    // One stroke into one node is one trunk with one head.
-    expect(found(makeDocument(nodes, into()), "hidden-arrowhead")).toEqual([]);
+    const stacked = (style?: "dashed") => found(makeDocument(row, wires(style)), "hidden-arrowhead").filter((text) => text.includes(" is on "));
+    expect(stacked("dashed")).toEqual(["near's arrowhead is on far's (end it at another point)"]);
+    // In one dash the two join as one junction with one head.
+    expect(stacked()).toEqual([]);
   });
 });

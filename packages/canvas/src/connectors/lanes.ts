@@ -88,7 +88,7 @@ export function assignLanes(laneWires: ReadonlyArray<LaneWire>): Map<string, Can
 }
 
 /** `points` without repeats and without the points a straight run passes through. */
-function simplified(points: ReadonlyArray<CanvasPoint>): CanvasPoint[] {
+export function simplified(points: ReadonlyArray<CanvasPoint>): CanvasPoint[] {
   const result: CanvasPoint[] = [];
   for (const point of points) {
     const last = result[result.length - 1];
@@ -335,30 +335,41 @@ function segmentsOn(wires: ReadonlyArray<Wire>, axis: Axis): Segment[] {
 const overlap = (a: Segment, b: Segment): number => Math.min(a.hi, b.hi) - Math.max(a.lo, b.lo);
 const near = (a: CanvasPoint, b: CanvasPoint, by: number): boolean => Math.abs(a.x - b.x) < by && Math.abs(a.y - b.y) < by;
 
+/** What decides whether two wires may share a line: their ends and their meaning. */
+export type LaneMeaning = Pick<LaneWire, "from" | "to" | "color" | "dash" | "headAtStart" | "headAtEnd">;
+
+const areMates = (a: Segment, b: Segment): boolean =>
+  runsAreMates(a.wire.wire, a.wire.points, a.index, b.wire.wire, b.wire.points, b.index);
+
 /**
- * Whether two runs belong to one trunk (one meaning, one start, the same way
- * so far) or one junction (one dash, one end, the same way from here on).
+ * Whether run `a` of `p` and run `b` of `q` belong to one trunk (one meaning,
+ * one start, the same way so far) or one junction (one dash, one end, the same
+ * way from here on). The lane pass paints mates on one line on purpose.
+ * `p` and `q` hold no repeats and no points inside a straight run (`simplified`).
  */
-function areMates(a: Segment, b: Segment): boolean {
-  const first = a.wire.wire;
-  const second = b.wire.wire;
-  const p = a.wire.points;
-  const q = b.wire.points;
+export function runsAreMates(
+  first: LaneMeaning,
+  p: ReadonlyArray<CanvasPoint>,
+  a: number,
+  second: LaneMeaning,
+  q: ReadonlyArray<CanvasPoint>,
+  b: number,
+): boolean {
   if (
-    a.index === b.index && first.from === second.from && first.color === second.color &&
+    a === b && first.from === second.from && first.color === second.color &&
     first.dash === second.dash && first.headAtStart === second.headAtStart
   ) {
-    let same = near(p[a.index]!, q[b.index]!, CONFLICT_GAP_PX);
-    for (let index = 0; same && index < a.index; index += 1) same = near(p[index]!, q[index]!, SAME_PX);
+    let same = near(p[a]!, q[b]!, CONFLICT_GAP_PX);
+    for (let index = 0; same && index < a; index += 1) same = near(p[index]!, q[index]!, SAME_PX);
     if (same) return true;
   }
-  const fromEndA = p.length - 2 - a.index;
-  const fromEndB = q.length - 2 - b.index;
+  const fromEndA = p.length - 2 - a;
+  const fromEndB = q.length - 2 - b;
   if (
     fromEndA === fromEndB && first.to === second.to && first.dash === second.dash &&
     first.headAtEnd === second.headAtEnd && (JUNCTION_MERGES_COLOURS || first.color === second.color)
   ) {
-    let same = near(p[a.index + 1]!, q[b.index + 1]!, CONFLICT_GAP_PX);
+    let same = near(p[a + 1]!, q[b + 1]!, CONFLICT_GAP_PX);
     for (let back = 0; same && back < fromEndA; back += 1) same = near(p[p.length - 1 - back]!, q[q.length - 1 - back]!, SAME_PX);
     if (same) return true;
   }

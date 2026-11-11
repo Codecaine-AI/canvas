@@ -4,19 +4,20 @@
  * or chip placement. Run only at canvas_check and finalize (FINISHING_RULES),
  * never on each edit (warning tier, never blocks):
  * - shared-wire: two wires run within SHARED_GAP_PX of each other on one
- *   axis for more than SHARED_MIN_RUN_PX in total. Wires that share an end
- *   in the same role (both leave one node, or both enter one) and paint one
- *   stroke are one trunk, which is fine;
+ *   axis for more than SHARED_MIN_RUN_PX in total. Runs the lane pass merges
+ *   on purpose (connectors/lanes.ts runsAreMates: a trunk of one meaning, or a
+ *   junction of one dash into one port) are fine. The pass leaves the rest
+ *   where it finds no free lane: two end runs, or a run boxes hem in;
  * - chip-on-border: a label chip that a section's frame line runs through;
  * - short-wire: a labelled wire shorter than its chip (along the segment it
  *   sits on) plus SHORT_WIRE_SLACK_PX: two 24px stubs and an arrowhead;
  * - hidden-arrowhead: an arrowhead under a label chip, on a last run too
  *   short to show a shaft before it, or on the same spot as another wire's
- *   head of another stroke.
+ *   head where the two are not one junction.
  */
 import { CONNECTOR_END_GAP_PX } from "../../../connectors/routing";
 import { ARROWHEAD_TIP_OVERSHOOT_RATIO, arrowheadStrokeRatio } from "../../../connectors/arrowhead";
-import { FIRST_USE_COLORS } from "../../../state/schema/object-defaults";
+import { runsAreMates, simplified, type LaneMeaning } from "../../../connectors/lanes";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../../theme/canvas-style";
 import { kindOf } from "../../helpers";
 import { isPageSection } from "../../section-colors";
@@ -38,11 +39,15 @@ const STACKED_TIP_PX = 8;
 
 interface Wire {
   edge: InteractiveCanvasConnection;
+  /** The painted polyline, simplified as the lane pass reads it. */
   points: Point[];
+  meaning: LaneMeaning;
 }
 
 interface Head {
   wire: Wire;
+  /** The index of the run the head ends. */
+  run: number;
   tip: Point;
   /** The head's bounding box. */
   box: Rect;
@@ -52,18 +57,25 @@ interface Head {
 
 const round = (value: number) => Math.round(value);
 
-function sameStroke(a: InteractiveCanvasConnection, b: InteractiveCanvasConnection): boolean {
-  return (a.color ?? FIRST_USE_COLORS.connector) === (b.color ?? FIRST_USE_COLORS.connector)
-    && (a.style ?? "solid") === (b.style ?? "solid");
+/** The wire as the lane pass reads it (connectors/routing.ts routeBoard). */
+function meaningOf(edge: InteractiveCanvasConnection): LaneMeaning {
+  const arrow = edge.arrow ?? "forward";
+  return {
+    from: edge.from.objectId,
+    to: edge.to.objectId,
+    color: edge.color ?? "",
+    dash: edge.style ?? "solid",
+    headAtStart: arrow === "back" || arrow === "both",
+    headAtEnd: arrow === "forward" || arrow === "both",
+  };
 }
 
-/** One trunk: both leave one node or both enter one, in one stroke. */
-function oneTrunk(a: InteractiveCanvasConnection, b: InteractiveCanvasConnection): boolean {
-  return sameStroke(a, b) && (a.from.objectId === b.from.objectId || a.to.objectId === b.to.objectId);
-}
+/** Run `i` of `a` and run `j` of `b` are a trunk or a junction the lane pass merges on purpose. */
+const mates = (a: Wire, i: number, b: Wire, j: number) => runsAreMates(a.meaning, a.points, i, b.meaning, b.points, j);
 
-/** How much of two polylines runs on one line, and where the longest such run starts. */
-function sharedRun(a: readonly Point[], b: readonly Point[]): { length: number; at: Point } {
+/** How much of two wires runs on one line apart from mate runs, and where the longest such run starts. */
+function sharedRun(wireA: Wire, wireB: Wire): { length: number; at: Point } {
+  const [a, b] = [wireA.points, wireB.points];
   let length = 0;
   let longest = 0;
   let at: Point = a[0]!;
@@ -72,6 +84,7 @@ function sharedRun(a: readonly Point[], b: readonly Point[]): { length: number; 
     const horizontal = p.y === q.y;
     if (!horizontal && p.x !== q.x) continue;
     for (let j = 1; j < b.length; j += 1) {
+      if (mates(wireA, i - 1, wireB, j - 1)) continue;
       const [r, s] = [b[j - 1]!, b[j]!];
       if (horizontal ? r.y !== s.y : r.x !== s.x) continue;
       if (horizontal ? r.x === s.x : r.y === s.y) continue;
@@ -93,12 +106,12 @@ function sharedRun(a: readonly Point[], b: readonly Point[]): { length: number; 
 /** The arrowheads a wire paints, as the static renderer draws them. */
 function headsOf(wire: Wire, strokeWidth: number): Head[] {
   const arrow = wire.edge.arrow ?? "forward";
-  const ends: [Point, Point][] = [];
+  const ends: [Point, Point, number][] = [];
   const { points } = wire;
-  if (arrow === "forward" || arrow === "both") ends.push([points[points.length - 1]!, points[points.length - 2]!]);
-  if (arrow === "back" || arrow === "both") ends.push([points[0]!, points[1]!]);
+  if (arrow === "forward" || arrow === "both") ends.push([points[points.length - 1]!, points[points.length - 2]!, points.length - 2]);
+  if (arrow === "back" || arrow === "both") ends.push([points[0]!, points[1]!, 0]);
   const length = arrowheadStrokeRatio(strokeWidth) * strokeWidth;
-  return ends.flatMap(([end, neighbor]) => {
+  return ends.flatMap(([end, neighbor, index]) => {
     const step = Math.hypot(end.x - neighbor.x, end.y - neighbor.y);
     if (step === 0) return [];
     const ux = (end.x - neighbor.x) / step;
@@ -115,7 +128,7 @@ function headsOf(wire: Wire, strokeWidth: number): Head[] {
       width: Math.abs(tip.x - base.x) + Math.abs(uy) * length,
       height: Math.abs(tip.y - base.y) + Math.abs(ux) * length,
     };
-    return [{ wire, tip, box, shaft: run + tipFromEnd - length }];
+    return [{ wire, run: index, tip, box, shaft: run + tipFromEnd - length }];
   });
 }
 
@@ -179,7 +192,7 @@ function measure(document: InteractiveCanvasDocument, context?: LintContext): Me
   const cached = measured.get(document);
   if (cached?.style === style) return cached;
   const wires: Wire[] = document.connections
-    .map((edge) => ({ edge, points: routedPolyline(edge, document, style) }))
+    .map((edge) => ({ edge, points: simplified(routedPolyline(edge, document, style)), meaning: meaningOf(edge) }))
     .filter((wire) => wire.points.length >= 2);
   const chips = new Map<string, Chip>();
   for (const wire of wires) {
@@ -198,15 +211,14 @@ export const sharedWire: LayoutRule = {
   title: "Wires on one line",
   tier: "warning",
   guidance: `${ONLY_AT_CHECK} two wires run on one line, so a reader cannot follow either.
-Fix: route one of them 16px aside, or end both on one node in one stroke so they read as one trunk.`,
+Fix: route one of them 16px aside, or give both one start and one stroke (a trunk) or one end and one dash (a junction).`,
   check(document, context) {
     const { wires } = measure(document, context);
     const findings: ReturnType<LayoutRule["check"]> = [];
     for (let i = 0; i < wires.length; i += 1) {
       for (let j = i + 1; j < wires.length; j += 1) {
         const [a, b] = [wires[i]!, wires[j]!];
-        if (oneTrunk(a.edge, b.edge)) continue;
-        const shared = sharedRun(a.points, b.points);
+        const shared = sharedRun(a, b);
         if (shared.length <= SHARED_MIN_RUN_PX) continue;
         findings.push({
           rule: "shared-wire",
@@ -288,7 +300,7 @@ Fix: move_label the chip away, route the wire with a longer last leg, or end it 
       const under = [...chips.values()].find((chip) => intersects(chip.rect, head.box));
       const stacked = heads.slice(0, index).find((other) =>
         other.wire !== head.wire
-        && !oneTrunk(other.wire.edge, head.wire.edge)
+        && !mates(other.wire, other.run, head.wire, head.run)
         && Math.hypot(other.tip.x - head.tip.x, other.tip.y - head.tip.y) < STACKED_TIP_PX);
       const crushed = head.shaft < MIN_SHAFT_PX;
       if (!under && !crushed && !stacked) continue;
