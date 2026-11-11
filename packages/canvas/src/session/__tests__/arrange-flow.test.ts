@@ -10,6 +10,8 @@ import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../s
 
 import { createInteractiveCanvasState, reduceInteractiveCanvasState } from "../../state/actions";
 import { diffDocuments } from "../../board/doc-diff";
+import { connectionLabelChipMetrics } from "../../connectors/label-chip";
+import { AGENT_GRID } from "../tools/grid";
 import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 
@@ -71,6 +73,38 @@ describe("arrange flow", () => {
     // Row two: 100 under b, the lowest box of row one. solo keeps its 60px drop.
     expect(at(session.draft, "d")).toEqual([0, 440]);
     expect(at(session.draft, "solo")).toEqual([500, 500]);
+  });
+
+  test("a gutter that a labelled wire crosses is as wide as its chip needs", () => {
+    const label = "the reply with every field the caller asked for";
+    const document = ragged();
+    const labelled = { ...document, connections: [...document.connections, { ...connect("a-to-b", "a-one", "b-one"), label }] };
+    const session = makeTestSession(labelled, ["page"]);
+
+    const result = runOp(session, "arrange", { ids: ALL, flow: { axis: "x", gap: 100 } });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toContain("arrange flow x gap 100 (1 wider for its label chip) · rows a | b | c // d | solo");
+    // The chip, an arrowhead, the wire ends and clear line each side of the chip: 68 on top of the chip.
+    const room = connectionLabelChipMetrics(label).width + 68;
+    expect(room).toBeGreaterThan(100);
+    const gutter = at(session.draft, "b")[0]! - 400;
+    expect(gutter).toBeGreaterThanOrEqual(room);
+    expect(gutter).toBeLessThan(room + AGENT_GRID);
+    // The unlabelled gutters keep the gap.
+    expect(at(session.draft, "c")[0]! - at(session.draft, "b")[0]!).toBe(500);
+    expect(at(session.draft, "d")).toEqual([0, 440]);
+  });
+
+  test("a gap with room for the chip stays the gap", () => {
+    const document = ragged();
+    const labelled = { ...document, connections: [...document.connections, { ...connect("a-to-b", "a-one", "b-one"), label: "ok" }] };
+    const session = makeTestSession(labelled, ["page"]);
+
+    const result = runOp(session, "arrange", { ids: ALL, flow: { axis: "x", gap: 200 } });
+
+    expect(result.text).toContain("arrange flow x gap 200 · rows");
+    expect(at(session.draft, "b")).toEqual([600, 40]);
   });
 
   test("a section carries what it holds, and nothing changes parent", () => {

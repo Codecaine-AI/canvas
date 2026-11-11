@@ -69,8 +69,7 @@ import { autoSizeObjects } from "./auto-size";
 import { CRAFT_TARGETS } from "../../../authoring/style-guide/craft-targets";
 import { hitBoundsForObject } from "../../../objects/geometry";
 import { connectionLabelChipMetrics } from "../../../connectors/label-chip";
-import { ARROW_KEEP_OUT_PX, drawnRectOf, paintedRects } from "../../../connectors/label-placement";
-import { CONNECTOR_END_GAP_PX } from "../../../connectors/routing";
+import { LABELLED_GAP_AIR_PX, drawnRectOf, paintedRects } from "../../../connectors/label-placement";
 import { entityKindOf } from "../../perception/op-surface";
 import {
   SECTION_FIT_PADDING,
@@ -706,13 +705,6 @@ interface Cell {
  * whose child keeps less, one side at a time, which would undo the centring.
  */
 const STORED_BOX_AIR = { side: 20, top: 40 } as const;
-
-/**
- * The gap a labelled wire needs past its chip's length: 24px of air before the
- * chip, ARROW_KEEP_OUT_PX after it for the arrowhead, and the end gap the
- * wire leaves at each box. 68px at the default end gap.
- */
-const LABELLED_GAP_AIR_PX = 24 + ARROW_KEEP_OUT_PX + 2 * CONNECTOR_END_GAP_PX;
 
 /** Each gap a labelled wire crosses, keyed by its two cell ids, and the length along the wire its chip needs. */
 type LabelledGaps = (a: string, b: string, axis: "across" | "down") => number;
