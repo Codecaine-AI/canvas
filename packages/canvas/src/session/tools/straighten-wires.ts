@@ -162,6 +162,8 @@ interface Edit {
   stood: ReadonlyMap<string, Rect>;
   /** The boxes the edit placed, moved or sized. */
   boxes: ReadonlySet<string>;
+  /** The boxes the edit gave a new size: the pass never changes that size. */
+  sized: ReadonlySet<string>;
   /** The wires the edit hands to the pass. */
   wires: ReadonlySet<string>;
 }
@@ -485,6 +487,11 @@ function judge(
     .map((object) => object.id));
   // A move that takes a box the edit moved back where it stood takes the edit back.
   if (edit && next.objects.some((object) => backWhereItStood(edit.stood.get(object.id), object.geometry))) return null;
+  // A size the edit just set is the drawer's: a candidate that changes it takes the edit back.
+  if (edit && next.objects.some((object) => {
+    const before = was.get(object.id)!.geometry;
+    return edit.sized.has(object.id) && (object.geometry.width !== before.width || object.geometry.height !== before.height);
+  })) return null;
   for (const id of changed) if (lockHolding(current, id)) return null;
   if (crowds(current, next, changed, new Set(candidate.grows ? [candidate.unit.id, ...candidate.row] : []))) return null;
   // A box that grows a grid step can take that step out of its frame's padding, and no more.
@@ -614,6 +621,7 @@ function editOf(before: InteractiveCanvasDocument, after: InteractiveCanvasDocum
   const drawn = new Map(before.connections.map((edge) => [edge.id, edge]));
   const boxes = new Set<string>();
   const stood = new Map<string, Rect>();
+  const sized = new Set<string>();
   // A new shape has its ports in new places.
   const ends = new Set<string>();
   for (const object of after.objects) {
@@ -622,6 +630,8 @@ function editOf(before: InteractiveCanvasDocument, after: InteractiveCanvasDocum
     if (placed) boxes.add(object.id);
     if (placed && old && old.geometry.width === object.geometry.width && old.geometry.height === object.geometry.height) {
       stood.set(object.id, old.geometry);
+    } else if (placed && old) {
+      sized.add(object.id);
     }
     if (placed || old.type !== object.type) ends.add(object.id);
   }
@@ -630,7 +640,7 @@ function editOf(before: InteractiveCanvasDocument, after: InteractiveCanvasDocum
       && (ends.has(edge.from.objectId) || ends.has(edge.to.objectId)
         || JSON.stringify(drawn.get(edge.id)) !== JSON.stringify(edge)))
     .map((edge) => edge.id));
-  return { stood, boxes, wires };
+  return { stood, boxes, sized, wires };
 }
 
 /** One line for the tool result: which wire went straight and what moved for it. */

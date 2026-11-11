@@ -117,6 +117,17 @@ describe("straighten · on every edit", () => {
     expect(at(session, "b")).toMatchObject({ x: 900, y: 300 });
   });
 
+  test("the pass never undoes a resize: the size the drawer set stays", () => {
+    const session = board(
+      [box("pick", 200, 200, 284, 120, "decision"), { ...box("stop", 192, 500, 300, 140, "octagon"), locked: "all" }],
+      [connect("pick-stop", "pick", "stop")],
+    );
+
+    runOp(session, "resize", { id: "pick", width: 280 });
+
+    expect(at(session, "pick").width).toBe(280);
+  });
+
   test("the pass never undoes the edit: a move it could only take back keeps its jog", () => {
     const session = board(
       [{ ...box("a", 200, 300, 280, 100), locked: "all" }, box("b", 800, 300, 280, 100)],
