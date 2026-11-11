@@ -29,7 +29,7 @@ import type {
   SnapCorrection,
   SnapGuide,
   SpacingHint,
-} from "../features/snapping/snapping";
+} from "../../../board/smart-guides/snapping";
 
 export type {
   ConnectorBendDragGesture,

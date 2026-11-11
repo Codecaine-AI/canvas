@@ -309,7 +309,7 @@ describe("import boundaries", () => {
         incomingPathfindingEdges.filter((edge) => {
           if (edge.importer.startsWith("connectors/")) return false;
           return !(
-            edge.importer === "stage/editor/features/snapping/snap-distribution.ts" &&
+            edge.importer === "board/smart-guides/snap-distribution.ts" &&
             edge.target === "connectors/pathfinding/gfx-types.ts"
           );
         }),
@@ -317,7 +317,7 @@ describe("import boundaries", () => {
     ).toEqual([]);
   });
 
-  test("features/snapping/snap-distribution.ts reaches only pathfinding gfx types", () => {
+  test("board/smart-guides/snap-distribution.ts reaches only pathfinding gfx types", () => {
     const incomingPathfindingEdges = firstPartyEdges().filter(
       (edge) =>
         edge.target?.startsWith("connectors/pathfinding/") &&
@@ -327,11 +327,11 @@ describe("import boundaries", () => {
     expect(
       formatEdges(
         incomingPathfindingEdges.filter(
-          (edge) => edge.importer === "stage/editor/features/snapping/snap-distribution.ts",
+          (edge) => edge.importer === "board/smart-guides/snap-distribution.ts",
         ),
       ),
     ).toEqual([
-      "stage/editor/features/snapping/snap-distribution.ts -> ../../../../connectors/pathfinding/gfx-types",
+      "board/smart-guides/snap-distribution.ts -> ../../connectors/pathfinding/gfx-types",
     ]);
   });
 

@@ -138,6 +138,12 @@ describe("canvas_create and canvas_check", () => {
     await call(service, "connect", { id: "e1", from: { objectId: "client" }, to: { objectId: "api" } });
     await call(service, "connect", { id: "e2", from: { objectId: "api" }, to: { objectId: "db" } });
 
+    // Three kinds of shape placed at one y have two heights, so a wire between them bends.
+    // The check names the call that puts them on one line.
+    const offLine = checked(await call(service, "canvas_check", {}));
+    expect(offLine.text).toContain("W1 near-miss: api is 10px off client's center line, so e1 bends (arrange api, client align center_v)");
+    await call(service, "arrange", { ids: ["api", "client"], align: "center_v" });
+
     // The row ran past the page, and the page grew to hold it: no fit_section call.
     const result = await call(service, "canvas_check", {});
     const check = checked(result);
@@ -181,7 +187,7 @@ describe("canvas_create and canvas_check", () => {
     const placed = await call(service, "place_shape", { id: "planner", type: "process", at: [120, 160], color: "blue" });
     await call(service, "place_shape", { id: "store", type: "process", at: [1000, 160] });
     const wired = await call(service, "connect", { id: "e1", from: { objectId: "planner" }, to: { objectId: "store" }, label: "plan" });
-    for (const edit of [placed, wired]) expect(textOf(edit)).not.toMatch(/same-color|shared-wire|chip-on-border|short-wire|hidden-arrowhead/);
+    for (const edit of [placed, wired]) expect(textOf(edit)).not.toMatch(/same-color|shared-wire|chip-on-border|short-wire|hidden-arrowhead|near-miss/);
 
     const check = checked(await call(service, "canvas_check", {}));
     expect(check.errors).toBe(0);

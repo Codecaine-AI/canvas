@@ -1,7 +1,9 @@
 /**
- * Pure snap math and spacing-guide helpers used by editor gesture slices.
+ * Pure snap math and spacing-guide helpers: the smart guides. The editor's
+ * gesture slices snap a dragged box with them, and the whole-board check
+ * (near-misses.ts) asks them the same question about a box that stands still.
  */
-import { CANVAS_GRID_SIZE, type CanvasBounds } from "../../../../state/geometry";
+import { CANVAS_GRID_SIZE, type CanvasBounds } from "../../state/geometry";
 import {
   alignDistributeHorizontally,
   alignDistributeVertically,
@@ -9,8 +11,8 @@ import {
 } from "./snap-distribution";
 
 // Re-exported for snapping visuals: the MPL-sourced implementation lives in
-// this slice's snap-distribution.ts, so stage code keeps importing the visual
-// constants from this local snapping boundary.
+// snap-distribution.ts next to this file, so stage code keeps importing the
+// visual constants from this one snapping boundary.
 export {
   DISTRIBUTION_GUIDE_COLOR,
   DISTRIBUTION_TICK_BAR,
@@ -38,6 +40,14 @@ export type SnapCorrection = {
   dy: number;
   guides: SnapGuide[];
 };
+
+/**
+ * Which of a box's three lines per axis (near edge, center, far edge) can pair
+ * with a candidate's. A drag pairs any two, so a center can snap to an edge.
+ * A check of a board at rest pairs like with like ("matching"), or the two
+ * center lines alone ("center").
+ */
+export type SnapLinePairing = "any" | "matching" | "center";
 
 type Axis = "x" | "y";
 
@@ -78,13 +88,16 @@ function computeAxisSnap(
   others: CanvasBounds[],
   threshold: number,
   axis: Axis,
+  pairing: SnapLinePairing,
 ): { delta: number; guide: SnapGuide | null } {
   const movingLines = axisLines(moving, axis);
   const matches: LineMatch[] = [];
 
   for (const candidate of others) {
-    for (const movingLine of movingLines) {
-      for (const candidateLine of axisLines(candidate, axis)) {
+    for (const [movingIndex, movingLine] of movingLines.entries()) {
+      for (const [candidateIndex, candidateLine] of axisLines(candidate, axis).entries()) {
+        if (pairing !== "any" && movingIndex !== candidateIndex) continue;
+        if (pairing === "center" && movingIndex !== 1) continue;
         const delta = candidateLine - movingLine;
         const distance = Math.abs(delta);
         if (distance <= threshold) {
@@ -121,10 +134,11 @@ export function computeSnapGuides(
   moving: CanvasBounds,
   others: CanvasBounds[],
   threshold: number,
+  pairing: SnapLinePairing = "any",
 ): SnapCorrection {
   const candidates = nearestCandidates(moving, others);
-  const xSnap = computeAxisSnap(moving, candidates, threshold, "x");
-  const ySnap = computeAxisSnap(moving, candidates, threshold, "y");
+  const xSnap = computeAxisSnap(moving, candidates, threshold, "x", pairing);
+  const ySnap = computeAxisSnap(moving, candidates, threshold, "y", pairing);
   const guides = [xSnap.guide, ySnap.guide].filter((guide): guide is SnapGuide => guide !== null);
   return { dx: xSnap.delta, dy: ySnap.delta, guides };
 }
