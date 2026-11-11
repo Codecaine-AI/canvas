@@ -55,7 +55,8 @@
  * a straight run, when the wire has one. A pinned chip that hits something
  * moves only to a clear spot, the one nearest the pin; with no clear spot it
  * keeps its pin. A pin is not scored for a frame edge or foreign, but one
- * that moves keeps BEND_AIR_PX from the corners of its wire when it can.
+ * that moves keeps its air: NEAR_MISS_PX to what it must not cover and
+ * BEND_AIR_PX to the corners of its wire, when it can.
  *
  * When no candidate is clear, a chip on a vertical run may also slide
  * sideways, as long as its wire stays SIDE_WIRE_INSET_PX inside its edge: a
@@ -629,10 +630,10 @@ function computePlacements(
     const scoreAt = (point: CanvasPoint, bend: number): Score => {
       const { count, covered } = hits(label, point);
       // Taste matters only once a chip is clear; a blocked chip's ties go to the preferred point.
-      // A pin has no taste but air to the corner it moves off.
+      // A pin that moves wants air, to the corner it moves off too, but has no say on frames and sections.
       const [crowded, foreign, nearMisses] = count > 0
         ? [0, 0, 0]
-        : pinned ? [tightToCorner(label, point) ? 1 : 0, 0, 0] : taste(label, point);
+        : pinned ? [tightToCorner(label, point) ? 1 : 0, 0, hits(label, point, NEAR_MISS_PX).count] : taste(label, point);
       return [
         count > 0 ? 1 : 0,
         covered,
