@@ -217,6 +217,16 @@ describe("fit_section evens a row", () => {
     expect(runOp(session, "fit_section", { id: "frame" }).text).toContain("NO-OP");
   });
 
+  test("evening a row never moves the end of a two-node row", () => {
+    const { geometry } = fit([
+      node("a", 200), node("b", 380), node("c", 720),
+      node("d", 380, 400), node("e", 800, 400),
+    ], [connect("w", "d", "e")], 1600);
+
+    expect(geometry("d").x).toBe(380);
+    expect(geometry("e").x).toBe(800);
+  });
+
   test("the end nodes of a long row hold to the pixel", () => {
     const { geometry, gap } = fit([node("a", 200), node("b", 380), node("c", 720), node("d", 1000)]);
 

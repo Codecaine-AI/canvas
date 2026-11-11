@@ -197,7 +197,7 @@ function evenRows(
     new Map(nodes.flatMap((node) => (shifts.get(node.column) ? [[node.id, shifts.get(node.column)!]] : [])));
   const everyRow = rowsOf(nodes);
   const rows = everyRow.filter((row) => row.length >= 3);
-  const ends = new Set(rows.flatMap((row) => [row[0]!.column, row.at(-1)!.column]));
+  const ends = new Set(everyRow.filter((row) => row.length >= 2).flatMap((row) => [row[0]!.column, row.at(-1)!.column]));
   let placed: Shifts = none;
   const harm = (shifts: Shifts): string | null => {
     const squeezed = everyRow.some((row) => {
