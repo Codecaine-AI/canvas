@@ -333,6 +333,37 @@ describe("placeConnectionLabels tags in line", () => {
     expect(blockedLabelIds(document)).toEqual([]);
   });
 
+  it("lines up the chips of downward wires whose chips sit near each other, in one row", () => {
+    // Two wires down, 300 apart: further than 240, but their chips on one row leave less than 240 between them.
+    const down = (id: string, from: string, to: string) =>
+      wire(id, "a", "b", "request", { from: { objectId: from, anchor: "bottom" }, to: { objectId: to, anchor: "top" } });
+    const document = doc(
+      [box("p", 0, 0), box("q", 0, 360), box("r", 300, 0), box("s", 300, 560)],
+      [down("pq", "p", "q"), down("rs", "r", "s")],
+    );
+    const placed = placeConnectionLabels(document);
+    expect(300 - connectionLabelChipMetrics("request").width).toBeLessThan(240);
+    expect(placed.get("pq")!.y).toBe(placed.get("rs")!.y);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
+  it("leaves side-by-side chips in their own gaps when one line would put one inside a section", () => {
+    // Two rows 220 apart. The top wire crosses a gap at x 300..400, the bottom one a gap at x 700..800.
+    const document = doc(
+      [
+        section("s", -40, -80, 340, 200), section("t", 400, -80, 640, 200), box("a", 180, 0), box("b", 880, 0),
+        section("u", -40, 140, 740, 200), section("v", 800, 140, 240, 200), box("c", 180, 220), box("d", 880, 220),
+      ],
+      [wire("ab", "a", "b", "request"), wire("cd", "c", "d", "request")],
+    );
+    const placed = placeConnectionLabels(document);
+    const { width } = connectionLabelChipMetrics("request");
+    expect(placed.get("ab")!.x - width / 2).toBeGreaterThan(300);
+    expect(placed.get("ab")!.x + width / 2).toBeLessThan(400);
+    expect(placed.get("cd")!.x - width / 2).toBeGreaterThan(700);
+    expect(placed.get("cd")!.x + width / 2).toBeLessThan(800);
+  });
+
   // a's right side to c's top: across to x = 450, then down. The middle of the wire is the corner.
   const elbow = (labelPosition?: InteractiveCanvasConnection["labelPosition"]) =>
     doc([A, box("c", 400, 380)], [wire("ac", "a", "c", "request", { to: { objectId: "c", anchor: "top" }, labelPosition })]);

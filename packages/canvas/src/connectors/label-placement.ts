@@ -43,9 +43,10 @@
  * Side-by-side runs. Ford: "making sure that there is enough space for the,
  * like, tags, making sure the tags line up in line." A wire's label runs are
  * its horizontal and vertical segments that fit its chip. Two runs sit side
- * by side when they point the same way, lie between one chip (plus
- * GROUP_CHIP_AIR_PX) and GROUP_MAX_APART_PX apart, and one line across them
- * holds both chips clear. A sweep across the runs chains neighbours into a
+ * by side when they point the same way, leave between GROUP_CHIP_AIR_PX and
+ * GROUP_MAX_APART_PX between their chips, and one line across them holds
+ * both chips clear (a chip in the white space takes no line inside a section
+ * its wire only passes). A sweep across the runs chains neighbours into a
  * group while one line still holds every chip clear; a wire with runs in two
  * groups stays in the larger. A group's chips all take one line, clear of
  * every chip outside the group (those do not move): the one with the fewest
@@ -118,7 +119,7 @@ const SIDE_WIRE_INSET_PX = 12;
 const FRAME_AIR_PX = 16;
 /** The line a chip prefers to show between itself and a corner of its own wire. */
 const BEND_AIR_PX = 12;
-/** Two label runs further apart than this are not side by side. */
+/** Two label runs whose chips on one line leave more than this between them are not side by side. */
 const GROUP_MAX_APART_PX = 240;
 /** The air two chips on one line across their runs keep between them. */
 const GROUP_CHIP_AIR_PX = 8;
@@ -610,14 +611,18 @@ function computePlacements(
     return label.corners.some((corner) =>
       corner.x > turn.x && corner.x < turn.x + turn.width && corner.y > turn.y && corner.y < turn.y + turn.height);
   };
+  /** Whether the chip is inside a section its wire only passes. */
+  const passingThrough = (label: Label, center: CanvasPoint): boolean => {
+    const rect = rectAt(label, center);
+    return sections.some((section) => !label.home.has(section.id) && intersects(rect, section.geometry));
+  };
   /** Where a clear chip would rather not sit: inside a section its wire only passes, tight to a frame edge or a corner of its wire, short of air. */
   const taste = (
     label: Label, center: CanvasPoint, others?: Iterable<Rect>,
   ): [foreign: number, crowded: number, nearMisses: number] => {
     const aired = rectAt(label, center, FRAME_AIR_PX);
-    const rect = rectAt(label, center);
     return [
-      sections.some((section) => !label.home.has(section.id) && intersects(rect, section.geometry)) ? 1 : 0,
+      passingThrough(label, center) ? 1 : 0,
       frames.some((frame) => wireRunInRect(frame, aired) > 0) || tightToCorner(label, center) ? 1 : 0,
       hits(label, center, NEAR_MISS_PX, others).count,
     ];
@@ -711,16 +716,19 @@ function computePlacements(
       .sort((a, b) => a.at - b.at || a.lo - b.lo);
     const open: typeof groups = [];
     for (const run of runs) {
+      // A chip in the white space stays there: its runs offer no line inside a section the wire only passes.
+      const white = !passingThrough(run.label, result.get(run.label.connection.id)!);
       const clear: number[] = [];
       for (let line = Math.ceil(run.lo / GROUP_LINE_STEP_PX) * GROUP_LINE_STEP_PX; line <= run.hi; line += GROUP_LINE_STEP_PX) {
-        if (hits(run.label, centerOn(run, line), 0, []).count === 0) clear.push(line);
+        const center = centerOn(run, line);
+        if (hits(run.label, center, 0, []).count === 0 && !(white && passingThrough(run.label, center))) clear.push(line);
       }
       clearLines.set(run, clear);
       let join: { group: (typeof groups)[number]; lines: Set<number> } | null = null;
       for (const group of open) {
         const last = group.runs[group.runs.length - 1]!;
-        const apart = run.at - last.at;
-        if (apart < (run.across + last.across) / 2 + GROUP_CHIP_AIR_PX || apart > GROUP_MAX_APART_PX) continue;
+        const between = run.at - last.at - (run.across + last.across) / 2;
+        if (between < GROUP_CHIP_AIR_PX || between > GROUP_MAX_APART_PX) continue;
         if (group.runs.some((member) => member.label === run.label)) continue;
         const shared = new Set(clear.filter((line) => group.lines.has(line)));
         if (shared.size > 0 && (!join || shared.size > join.lines.size)) join = { group, lines: shared };
@@ -737,14 +745,16 @@ function computePlacements(
   // A group's chips move to one line, clear of every chip outside the group
   // (those stay where they are). The larger group first, so a wire with runs
   // in two stays in the larger; the smaller keeps the runs that still sit
-  // side by side without it.
+  // side by side without it. Twice, so a group with no line the first time
+  // gets one more try with the runs the other groups left it.
   const grouped = new Set<Label>();
-  for (const group of groups.filter(({ runs }) => runs.length >= 2).sort((a, b) => b.runs.length - a.runs.length)) {
+  const bySize = groups.filter(({ runs }) => runs.length >= 2).sort((a, b) => b.runs.length - a.runs.length);
+  for (const group of [...bySize, ...bySize]) {
     const chains: Run[][] = [[]];
     for (const run of group.runs) {
       if (grouped.has(run.label)) continue;
       const chain = chains[chains.length - 1]!;
-      if (chain.length > 0 && run.at - chain[chain.length - 1]!.at > GROUP_MAX_APART_PX) chains.push([run]);
+      if (chain.length > 0 && run.at - chain[chain.length - 1]!.at - (run.across + chain[chain.length - 1]!.across) / 2 > GROUP_MAX_APART_PX) chains.push([run]);
       else chain.push(run);
     }
     for (const runs of chains) {
