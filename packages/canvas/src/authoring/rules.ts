@@ -1,6 +1,6 @@
 /**
  * The `rules` topic: the board rules every canvas edit keeps. It carries the
- * canvas skill's Rules section and the theme rules that the `canvas_open`
+ * Rules section of the former skill and the theme rules that the `canvas_open`
  * description used to hold. Every number comes from the code that enforces or
  * aims at it, so the topic cannot quote a limit the tools disagree with.
  */

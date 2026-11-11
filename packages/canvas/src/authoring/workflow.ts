@@ -1,6 +1,6 @@
 /**
  * The `workflow` topic: how an agent works a board through the canvas MCP. It
- * carries the canvas skill's description, intro, Workflow and References, and
+ * carries the former skill's description, intro, Workflow and References, and
  * the open-save-check rules the MCP instructions and the `canvas_open`
  * description used to hold. Every edit tool refuses until the server process
  * reads this topic, so the edit rules sit here and nowhere else.

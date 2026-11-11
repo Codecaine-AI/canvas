@@ -1,8 +1,7 @@
 /**
- * The canvas guidance source manifest: every text the canvas skill is
- * generated from and `canvas_guidance` serves, in one list. `canvas_guidance`
- * and the skill's snapshot.json both hash this list, so a skill whose snapshot
- * id differs from the server's was generated from other sources and is stale.
+ * The canvas guidance source manifest: every text `canvas_guidance` serves,
+ * in one list. The guidance snapshot id hashes this list, so
+ * `canvas_capabilities` and the action log name the guidance a process served.
  * `canvasGuidanceTopics` builds the ten served topics from these sources.
  */
 import { createHash } from "node:crypto";

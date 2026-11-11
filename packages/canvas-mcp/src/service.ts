@@ -589,7 +589,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
     /** One resource's contents for resources/read, or null for an unknown uri. */
     async readResource(uri: string): Promise<{ uri: string; mimeType: string; blob: string } | null> {
       if (uri !== CONTACT_SHEET_URI) return null;
-      // The contact sheet measures its captions; measure exactly, as the guidance generator does.
+      // The contact sheet measures its captions, so it measures through the exact HarfBuzz backend.
       await useHarfBuzz();
       const sheet = vocabularyContactSheet();
       if (!sheet) throw new Error("vocabularyContactSheet could not render the default-style contact sheet");

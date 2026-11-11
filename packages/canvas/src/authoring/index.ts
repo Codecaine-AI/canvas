@@ -22,7 +22,7 @@ export function formatAuthoringTopic(topic: AuthoringTopic): string {
 
 /**
  * No kernel boot, session creation, or agent spawn is needed to read guidance.
- * The snapshot id covers every source the canvas skill is generated from, and
+ * The snapshot id covers every source the served guidance is built from, and
  * `topics` are the ten topics `canvas_guidance` serves, the gated workflow first.
  */
 export function getCanvasAuthoringGuidance() {
