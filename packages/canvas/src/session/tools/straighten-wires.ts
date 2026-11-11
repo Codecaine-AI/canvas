@@ -41,8 +41,7 @@
  *   fewer corners (so a jog never just moves to another wire), no two wires
  *   cross that did not cross before, and it has no more wire length, wire
  *   faults or findings of any check rule than before. After an edit, no box
- *   that edit placed goes back where it stood, or a grid step of growth off
- *   it.
+ *   that edit moved goes back where it stood, also when it grows on the way.
  * - Of the legal candidates, the one that bends the fewest other wires wins.
  *   Ties go to the one that leaves a box the edit just placed where it is,
  *   then moves no row, then takes no grid step out of its frame's padding,
@@ -91,7 +90,7 @@ export interface StraightenOptions {
    * The board before the edit that made `document`. With it the pass works
    * only on the wires that edit touched, a box the edit placed moves only
    * when no other move straightens the wire as well (the other end comes to
-   * the box the drawer just placed), and no move puts a box the edit placed
+   * the box the drawer just placed), and no move puts a box the edit moved
    * back where it stood: the edit is never undone.
    */
   since?: InteractiveCanvasDocument;
@@ -159,7 +158,7 @@ interface Standing {
 
 /** What an edit did, as the pass sees it. */
 interface Edit {
-  /** Where each box stood before the edit. */
+  /** Where each box the edit moved, and did not size, stood before it. */
   stood: ReadonlyMap<string, Rect>;
   /** The boxes the edit placed, moved or sized. */
   boxes: ReadonlySet<string>;
@@ -230,10 +229,11 @@ function sameGeometry(a: Rect, b: Rect): boolean {
   return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
 
-/** Whether a box is back where it stood: in the same place, or a grid step of growth off it. */
+/** Whether a box covers the place where it stood: it is back there, however many grid steps it grew on the way. */
 function backWhereItStood(stood: Rect | undefined, now: Rect): boolean {
   return stood !== undefined
-    && (["x", "y", "width", "height"] as const).every((side) => Math.abs(now[side] - stood[side]) <= GRID);
+    && now.x <= stood.x && now.x + now.width >= stood.x + stood.width
+    && now.y <= stood.y && now.y + now.height >= stood.y + stood.height;
 }
 
 /** The clear space between two boxes; negative when they overlap, by how deep. */
@@ -483,9 +483,8 @@ function judge(
   const changed = new Set(next.objects
     .filter((object) => !sameGeometry(was.get(object.id)!.geometry, object.geometry))
     .map((object) => object.id));
-  // A move that takes a box the edit placed back where it stood takes the edit back.
-  if (edit && next.objects.some((object) => changed.has(object.id) && edit.boxes.has(object.id)
-    && backWhereItStood(edit.stood.get(object.id), object.geometry))) return null;
+  // A move that takes a box the edit moved back where it stood takes the edit back.
+  if (edit && next.objects.some((object) => backWhereItStood(edit.stood.get(object.id), object.geometry))) return null;
   for (const id of changed) if (lockHolding(current, id)) return null;
   if (crowds(current, next, changed, new Set(candidate.grows ? [candidate.unit.id, ...candidate.row] : []))) return null;
   // A box that grows a grid step can take that step out of its frame's padding, and no more.
@@ -614,12 +613,16 @@ function editOf(before: InteractiveCanvasDocument, after: InteractiveCanvasDocum
   const was = new Map(before.objects.map((object) => [object.id, object]));
   const drawn = new Map(before.connections.map((edge) => [edge.id, edge]));
   const boxes = new Set<string>();
+  const stood = new Map<string, Rect>();
   // A new shape has its ports in new places.
   const ends = new Set<string>();
   for (const object of after.objects) {
     const old = was.get(object.id);
     const placed = !old || !sameGeometry(old.geometry, object.geometry);
     if (placed) boxes.add(object.id);
+    if (placed && old && old.geometry.width === object.geometry.width && old.geometry.height === object.geometry.height) {
+      stood.set(object.id, old.geometry);
+    }
     if (placed || old.type !== object.type) ends.add(object.id);
   }
   const wires = new Set(after.connections
@@ -627,7 +630,7 @@ function editOf(before: InteractiveCanvasDocument, after: InteractiveCanvasDocum
       && (ends.has(edge.from.objectId) || ends.has(edge.to.objectId)
         || JSON.stringify(drawn.get(edge.id)) !== JSON.stringify(edge)))
     .map((edge) => edge.id));
-  return { stood: new Map(before.objects.map((object) => [object.id, object.geometry])), boxes, wires };
+  return { stood, boxes, wires };
 }
 
 /** One line for the tool result: which wire went straight and what moved for it. */

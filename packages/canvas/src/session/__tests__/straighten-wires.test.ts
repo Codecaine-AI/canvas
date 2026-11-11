@@ -145,6 +145,25 @@ describe("straighten · on every edit", () => {
     }
   });
 
+  test("two moves that each grow the box do not add up to the way back", () => {
+    // stop holds a. pick can come 12px up to a's axis. 8px more, to b's axis, is where it stood.
+    const session = board(
+      [
+        box("a", 100, 308, 300, 104, "octagon"),
+        box("pick", 800, 300, 280, 100, "decision"),
+        { ...box("b", 1500, 304, 300, 100, "octagon"), locked: "all" as const },
+        { ...box("stop", 100, 452, 300, 100), locked: "all" as const },
+      ],
+      [connect("a-p", "a", "pick"), connect("p-b", "pick", "b")],
+    );
+
+    const result = runOp(session, "move", { id: "pick", by: { dx: 0, dy: 20 } });
+
+    expect(result.text).toContain("straightened a-p: moved pick 12px up and made pick 4px taller");
+    expect(result.text).not.toContain("straightened p-b");
+    expect(at(session, "pick")).toEqual({ x: 800, y: 308, width: 280, height: 104 });
+  });
+
   /** Two straight pairs, w-a and b-x, 12px off one axis. */
   function twoPairs(lock: readonly string[] = []): Session {
     return board(
