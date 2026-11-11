@@ -81,6 +81,11 @@ const BOARDS: { name: string; document: InteractiveCanvasDocument; finding: stri
     ], [{ ...connect("w", "t", "b"), waypoints: [[700, 260]] }]),
     finding: "w's arrowhead is 10px off the center of b's left side (arrange t, b align center_v)",
   },
+  {
+    name: "a straight wire whose stored corner holds it off the line its two boxes share",
+    document: makeDocument([page(), node("a", 200, 220), node("b", 840, 220)], [{ ...connect("w", "a", "b"), waypoints: [[700, 260]] }]),
+    finding: "w's arrowhead is 10px off the center of b's left side (route w reset)",
+  },
   // Boxes a hand put off the agent's grid: `move` and `resize` land on it, so the call named must still reach the line.
   {
     name: "a row whose last box sits off the grid, with gaps of 120 and 128",

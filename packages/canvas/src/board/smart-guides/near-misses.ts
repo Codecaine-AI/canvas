@@ -53,7 +53,7 @@ export interface GuideSegment { x1: number; y1: number; x2: number; y2: number }
 
 /** One call of a board tool, with the arguments the tool takes. */
 export interface GuideFix {
-  tool: "move" | "arrange" | "resize";
+  tool: "move" | "arrange" | "resize" | "route";
   args: Record<string, unknown>;
 }
 
@@ -129,6 +129,7 @@ export function fixText(steps: readonly GuideFix[]): string {
     if (space) words.push(`space ${space.axis} gap ${space.gap}`);
     if (args.width !== undefined) words.push(`width ${String(args.width)}`);
     if (args.height !== undefined) words.push(`height ${String(args.height)}`);
+    if (args.reset) words.push("reset");
     return `${tool} ${target} ${words.join(" ")}`;
   }).join(", then ");
 }
@@ -476,17 +477,23 @@ export function findBoardGuides(
     const [from, to] = portsOfWire.get(holder.wire.id)!;
     const partner = from.box === port.box ? to.box : from.box;
     // Its two boxes go onto one line, when they sit a snap apart. Two boxes may already carry that move.
-    if (isFrame(partner) || !snapOn(partner.rect, [port.box.rect], NEAR_MISS_PX, "center", axis)) continue;
+    const apart = isFrame(partner) ? null : snapOn(partner.rect, [port.box.rect], NEAR_MISS_PX, "center", axis);
+    if (!apart) continue;
     if (heads.has(key) || settled.has(`${from.box.object.id}:${axis}`) || settled.has(`${to.box.object.id}:${axis}`)) continue;
+    // On one line already, the wire's own stored corner holds it off: the router runs it down the line.
+    const { wire } = holder;
+    const fix: GuideFix = Math.abs(apart.delta) <= ON_LINE_PX
+      ? { tool: "route", args: { id: wire.id, reset: true } }
+      : arrangeFix(partner, port.box, axis, 1);
     heads.add(key);
     const center = { x: port.box.rect.x + port.box.rect.width / 2, y: port.box.rect.y + port.box.rect.height / 2 };
     const out = AGENT_GRID * 4;
     nearMisses.push({
       kind: "arrow-off-center",
-      at: [holder.wire.id, port.box.object.id],
+      at: [wire.id, port.box.object.id],
       offBy: Math.abs(snap.delta),
-      message: `${holder.wire.id}'s arrowhead is ${px(snap.delta)} off the center of ${port.box.object.id}'s ${port.side} side`,
-      fix: [arrangeFix(partner, port.box, axis, 1)],
+      message: `${wire.id}'s arrowhead is ${px(snap.delta)} off the center of ${port.box.object.id}'s ${port.side} side`,
+      fix: [fix],
       guides: [{
         x1: center.x - (port.side === "left" ? port.box.rect.width / 2 + out : 0),
         y1: center.y - (port.side === "top" ? port.box.rect.height / 2 + out : 0),
