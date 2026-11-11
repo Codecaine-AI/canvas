@@ -214,7 +214,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The server lists 30 tools: five of its own, then the 25 toolkit tools in the agent's registration order. The toolkit is the agent's 21 operation tools plus four of its five workflow tools. "
+          "insert": "The server lists 29 tools: five of its own, then the 24 toolkit tools in the agent's registration order. The toolkit is the agent's 20 operation tools plus four of its five workflow tools. "
         },
         {
           "insert": "finalize",
@@ -450,15 +450,6 @@
             [
               {
                 "insert": "fit_section",
-                "attributes": {
-                  "code": true
-                }
-              },
-              {
-                "insert": ", "
-              },
-              {
-                "insert": "change_section_border",
                 "attributes": {
                   "code": true
                 }
@@ -1895,8 +1886,8 @@
           ],
           [
             "Tools",
-            "26: the 21 gestures and 5 workflow tools.",
-            "30: 5 server tools, the 21 gestures, and 4 workflow tools.",
+            "25: the 20 gestures and 5 workflow tools.",
+            "29: 5 server tools, the 20 gestures, and 4 workflow tools.",
             [
               {
                 "insert": "The "

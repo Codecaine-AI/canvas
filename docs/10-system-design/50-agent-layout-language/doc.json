@@ -58,7 +58,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The board layout vocabulary is a compact descriptive notation for the board's composition patterns. It describes arrangements for people, and it is not a machine interface. The agent neither reads nor writes it: the agent edits sections, stickies, objects, and connections directly through the twenty-one editing gestures exposed as "
+          "insert": "The board layout vocabulary is a compact descriptive notation for the board's composition patterns. It describes arrangements for people, and it is not a machine interface. The agent neither reads nor writes it: the agent edits sections, stickies, objects, and connections directly through the twenty editing gestures exposed as "
         },
         {
           "insert": "the operation surface",

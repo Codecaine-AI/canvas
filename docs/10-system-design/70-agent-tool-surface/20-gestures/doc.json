@@ -1246,7 +1246,7 @@
           }
         },
         {
-          "insert": " sets only the header icon, because picking a glyph is one gesture whatever it lands on. "
+          "insert": " sets only the header icon and the border. The icon is here because picking a glyph is one gesture whatever it lands on. "
         },
         {
           "insert": "patch.icon",
@@ -1291,16 +1291,7 @@
           }
         },
         {
-          "insert": " on a section is refused, since a frame is not a shape and "
-        },
-        {
-          "insert": "change_section_border",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " is what restrokes it. On a shape or icon, "
+          "insert": " on a section is refused, since a frame is not a shape. On a shape or icon, "
         },
         {
           "insert": "patch.icon",
@@ -1318,7 +1309,16 @@
           }
         },
         {
-          "insert": ", because a shape's glyph is its type."
+          "insert": ", because a shape's glyph is its type. A shape refuses "
+        },
+        {
+          "insert": "patch.border",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " as well, because it has no frame."
         }
       ],
       "children": []
@@ -1344,7 +1344,7 @@
       },
       "text": [
         {
-          "insert": "fit_section          ({ id: Id })\nchange_section_border({ id: Id, border: \"solid\" | \"dashed\" | \"none\" })\n\nlock({ id: Id, mode: \"all\" | \"background\" | \"none\" })   // sections only"
+          "insert": "fit_section({ id: Id })\n\nlock({ id: Id, mode: \"all\" | \"background\" | \"none\" })   // sections only"
         }
       ],
       "children": []
@@ -1355,7 +1355,16 @@
       "props": {},
       "text": [
         {
-          "insert": "change_section_border",
+          "insert": "change_shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s "
+        },
+        {
+          "insert": "patch.border",
           "attributes": {
             "code": true
           }
@@ -1379,21 +1388,16 @@
           }
         },
         {
-          "insert": " even though the UI flyout offers only solid and dashed ("
+          "insert": " even though the UI flyout offers only solid and dashed, and a null "
         },
         {
-          "insert": "SectionBorder",
+          "insert": "border",
           "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas-agent/src/service/session/tools/schemas.ts",
-              "symbol": "SectionBorder"
-            }
+            "code": true
           }
         },
         {
-          "insert": "). A frame with no border is invisible but fully real: it still owns its region, and membership is geometric, so nothing inside it changes hands. The patch names "
+          "insert": " counts as absent. A frame with no border is invisible but fully real: it still owns its region, and membership is geometric, so nothing inside it changes hands. The patch names "
         },
         {
           "insert": "strokeStyle",

@@ -217,7 +217,7 @@
       },
       "text": [
         {
-          "insert": "Twenty-one typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool."
+          "insert": "Twenty typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool."
         }
       ],
       "children": []
@@ -319,7 +319,7 @@
       "props": {},
       "text": [
         {
-          "insert": "There are exactly twenty-six tools, factored by editing gesture rather than by kind. Twenty-one are board mutators across place, arrange, content, sections, edges, and delete. The other five are look, describe_board, annotate, resolve_request, and finalize. The full roster is below."
+          "insert": "There are exactly twenty-five tools, factored by editing gesture rather than by kind. Twenty are board mutators across place, arrange, content, sections, edges, and delete. The other five are look, describe_board, annotate, resolve_request, and finalize. The full roster is below."
         }
       ],
       "children": []
@@ -473,7 +473,7 @@
       },
       "text": [
         {
-          "insert": "The model writes twenty-one editing gestures."
+          "insert": "The model writes twenty editing gestures."
         }
       ],
       "children": []
@@ -699,16 +699,25 @@
           }
         },
         {
-          "insert": " \"Can a section's border change?\" is answered by "
+          "insert": " \"Can a section's border change?\" is answered by the typed "
         },
         {
-          "insert": "change_section_border",
+          "insert": "border",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " existing and its schema naming its target kind, not by prose inside a catch-all patch."
+          "insert": " field in "
+        },
+        {
+          "insert": "change_shape",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "'s patch, whose schema names its target kind, not by prose in a catch-all."
         }
       ],
       "children": []
@@ -774,7 +783,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The surface is twenty-six tools: twenty-one board-mutating gestures in six groups, listed by "
+          "insert": "The surface is twenty-five tools: twenty board-mutating gestures in six groups, listed by "
         },
         {
           "insert": "operationTools",
@@ -902,17 +911,12 @@
           [
             "change_shape",
             "Content & appearance",
-            "swap what a shape is and which way it points, or set a section's header icon"
+            "swap what a shape is and which way it points, or set a section's header icon and its border"
           ],
           [
             "fit_section",
             "Sections",
             "close a section around the children already inside it"
-          ],
-          [
-            "change_section_border",
-            "Sections",
-            "restroke a frame's border"
           ],
           [
             "lock",
@@ -1440,7 +1444,7 @@
       },
       "text": [
         {
-          "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty-one gestures are the only way the draft changes."
+          "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty gestures are the only way the draft changes."
         }
       ],
       "children": []
@@ -1499,7 +1503,7 @@
       },
       "text": [
         {
-          "insert": "The file host carries twenty-five of the twenty-six tools. "
+          "insert": "The file host carries twenty-four of the twenty-five tools. "
         },
         {
           "insert": "finalize",
