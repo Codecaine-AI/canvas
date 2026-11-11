@@ -217,7 +217,7 @@
       },
       "text": [
         {
-          "insert": "Twenty-four typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool."
+          "insert": "Twenty-one typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool."
         }
       ],
       "children": []
@@ -319,7 +319,7 @@
       "props": {},
       "text": [
         {
-          "insert": "There are exactly twenty-nine tools, factored by editing gesture rather than by kind. Twenty-four are board mutators across place, arrange, content, sections, edges, and delete. The other five are look, describe_board, annotate, resolve_request, and finalize. The full roster is below."
+          "insert": "There are exactly twenty-six tools, factored by editing gesture rather than by kind. Twenty-one are board mutators across place, arrange, content, sections, edges, and delete. The other five are look, describe_board, annotate, resolve_request, and finalize. The full roster is below."
         }
       ],
       "children": []
@@ -473,7 +473,7 @@
       },
       "text": [
         {
-          "insert": "The model writes twenty-four editing gestures."
+          "insert": "The model writes twenty-one editing gestures."
         }
       ],
       "children": []
@@ -774,7 +774,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The surface is twenty-nine tools: twenty-four board-mutating gestures in six groups, listed by "
+          "insert": "The surface is twenty-six tools: twenty-one board-mutating gestures in six groups, listed by "
         },
         {
           "insert": "operationTools",
@@ -875,14 +875,9 @@
             "re-size a box to explicit dimensions, or copy another box's width and height with like, holding its top-left corner"
           ],
           [
-            "align",
+            "arrange",
             "Arrange",
-            "put a row or column of boxes on one shared edge or centerline"
-          ],
-          [
-            "space_out",
-            "Arrange",
-            "re-pitch a run so the clear gap between neighbours is exactly what you ask for"
+            "put a row or column of boxes on one shared edge or centerline, or re-pitch the run so the clear gap between neighbours is exactly what you ask for"
           ],
           [
             "arrange_section",
@@ -935,19 +930,9 @@
             "repoint one end of an edge, leaving both endpoint objects unchanged"
           ],
           [
-            "reroute",
+            "route",
             "Edges",
-            "replace an edge's interior corners wholesale"
-          ],
-          [
-            "shift_segment",
-            "Edges",
-            "slide one numbered segment of the route sideways"
-          ],
-          [
-            "reset_route",
-            "Edges",
-            "hand an edge back to the auto-router"
+            "replace an edge's interior corners, slide one numbered segment sideways, or hand the edge back to the auto-router"
           ],
           [
             "move_label",
@@ -1085,13 +1070,51 @@
           "insert": " is subsumed by "
         },
         {
-          "insert": "space_out",
+          "insert": "arrange",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": ". Equalizing inside a fixed span can never open a gap, and the agent always knows its target gap from the craft targets, so the gesture that sets the pitch covers both jobs."
+          "insert": " with "
+        },
+        {
+          "insert": "space",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": [
+        "b-ts-ov-absorbed-distribute-12-a",
+        "b-ts-ov-absorbed-distribute-12-b"
+      ]
+    },
+    "b-ts-ov-absorbed-distribute-12-a": {
+      "id": "b-ts-ov-absorbed-distribute-12-a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Equalizing inside a fixed span can never open a gap."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ov-absorbed-distribute-12-b": {
+      "id": "b-ts-ov-absorbed-distribute-12-b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The agent always knows its target gap from the craft targets, so the mode that sets the pitch covers both jobs."
         }
       ],
       "children": []
@@ -1113,7 +1136,16 @@
           "insert": " is not on the surface. Route cleanup is deliberate elbow work ("
         },
         {
-          "insert": "shift_segment",
+          "insert": "route",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "shift",
           "attributes": {
             "code": true
           }
@@ -1122,7 +1154,16 @@
           "insert": " for one segment, "
         },
         {
-          "insert": "reroute",
+          "insert": "route",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "points",
           "attributes": {
             "code": true
           }
@@ -1228,25 +1269,16 @@
       },
       "text": [
         {
-          "insert": "The two multi-id gestures that do exist, "
+          "insert": "The one multi-id gesture that does exist, "
         },
         {
-          "insert": "align",
+          "insert": "arrange",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " and "
-        },
-        {
-          "insert": "space_out",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", take a list because the arrangement itself is the gesture."
+          "insert": ", takes a list because the arrangement itself is the gesture."
         }
       ],
       "children": []
@@ -1408,7 +1440,7 @@
       },
       "text": [
         {
-          "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty-four gestures are the only way the draft changes."
+          "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty-one gestures are the only way the draft changes."
         }
       ],
       "children": []
@@ -1467,7 +1499,7 @@
       },
       "text": [
         {
-          "insert": "The file host carries twenty-eight of the twenty-nine tools. "
+          "insert": "The file host carries twenty-five of the twenty-six tools. "
         },
         {
           "insert": "finalize",

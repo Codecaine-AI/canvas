@@ -214,7 +214,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The server lists 33 tools: five of its own, then the 28 toolkit tools in the agent's registration order. The toolkit is the agent's 24 operation tools plus four of its five workflow tools. "
+          "insert": "The server lists 30 tools: five of its own, then the 25 toolkit tools in the agent's registration order. The toolkit is the agent's 21 operation tools plus four of its five workflow tools. "
         },
         {
           "insert": "finalize",
@@ -389,16 +389,7 @@
                 "insert": ", "
               },
               {
-                "insert": "align",
-                "attributes": {
-                  "code": true
-                }
-              },
-              {
-                "insert": ", "
-              },
-              {
-                "insert": "space_out",
+                "insert": "arrange",
                 "attributes": {
                   "code": true
                 }
@@ -506,25 +497,7 @@
                 "insert": ", "
               },
               {
-                "insert": "reroute",
-                "attributes": {
-                  "code": true
-                }
-              },
-              {
-                "insert": ", "
-              },
-              {
-                "insert": "shift_segment",
-                "attributes": {
-                  "code": true
-                }
-              },
-              {
-                "insert": ", "
-              },
-              {
-                "insert": "reset_route",
+                "insert": "route",
                 "attributes": {
                   "code": true
                 }
@@ -1922,8 +1895,8 @@
           ],
           [
             "Tools",
-            "29: the 24 gestures and 5 workflow tools.",
-            "33: 5 server tools, the 24 gestures, and 4 workflow tools.",
+            "26: the 21 gestures and 5 workflow tools.",
+            "30: 5 server tools, the 21 gestures, and 4 workflow tools.",
             [
               {
                 "insert": "The "

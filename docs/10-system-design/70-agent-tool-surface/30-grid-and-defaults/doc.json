@@ -144,7 +144,16 @@
           }
         },
         {
-          "insert": " gesture snaps the shared coordinate the row agrees on rather than the deltas that get each box there. A quantizer that snapped only its inputs would leave every hand-drawn box permanently off-grid, which is precisely the board the grid exists to clean up."
+          "insert": " mode of "
+        },
+        {
+          "insert": "arrange",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " snaps the shared coordinate the row agrees on rather than the deltas that get each box there. A quantizer that snapped only its inputs would leave every hand-drawn box permanently off-grid, which is precisely the board the grid exists to clean up."
         }
       ],
       "children": []
@@ -237,17 +246,17 @@
           ],
           [
             "the shared coordinate a row agrees on, and each computed position",
-            "align, space_out",
+            "arrange's align and space",
             "snapCoordinate"
           ],
           [
             "the clear gap between neighbours",
-            "gap on space_out",
+            "gap in arrange's space",
             "snapGap, clamped at 0, since flush is a real request"
           ],
           [
             "routing corners",
-            "points on reroute, the to target of shift_segment",
+            "route's points, and the to target of route's shift",
             "snapPoint / snapCoordinate"
           ],
           [
@@ -272,7 +281,7 @@
           ],
           [
             "geometry the gesture does not write",
-            "the untouched dimension of a width-only resize, the first box of a space_out run, the descendants a frame carries",
+            "the untouched dimension of a width-only resize, the first box of an arrange space run, the descendants a frame carries",
             "exempt, because untouched values keep their exact relative geometry"
           ]
         ],
