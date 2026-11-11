@@ -29,10 +29,11 @@ const RETIRED_OP = /\b(add|update|remove|fit)(Section|Object|Sticky|Connection)\
 const GESTURES = new Set(operationTools.map((tool) => tool.name));
 
 /**
- * snake_case words in prose that are not tool calls: schema field paths and
- * board vocabulary. Anything else with an underscore is read as a tool name.
+ * snake_case words in prose that are not tool calls: schema field paths,
+ * board vocabulary and `arrange`'s align values. Anything else with an
+ * underscore is read as a tool name.
  */
-const NON_TOOL_TERMS = new Set<string>([]);
+const NON_TOOL_TERMS = new Set<string>(["center_h", "center_v"]);
 
 function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
   return [
@@ -113,6 +114,15 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
         { ...connect("cross", "inner", "outer"), label: "crosses the frame line" },
         { ...connect("tight", "near-a", "near-b"), label: "a label far longer than its wire" },
       ]),
+    },
+    {
+      // near-miss: an icon tile half a grid step off the box its wire runs to.
+      name: "near-miss",
+      document: makeDocument([
+        { ...box("page", 0, 0, 2400, 1600, "section"), color: "white" },
+        box("registry", 640, 460, 280, 100, "process"),
+        { ...box("plugins", 1200, 460, 300, 120, "icon"), icon: "database" },
+      ], [connect("load", "plugins", "registry")]),
     },
   ];
 }
