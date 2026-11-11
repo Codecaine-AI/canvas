@@ -213,7 +213,7 @@ Fix: route one of them 16px aside, or end both on one node in one stroke so they
           severity: "warning",
           at: [a.edge.id, b.edge.id],
           where: { x: shared.at.x - 20, y: shared.at.y - 20, width: 40, height: 40 },
-          message: `${a.edge.id} and ${b.edge.id} share ${round(shared.length)}px of line at (${round(shared.at.x)}, ${round(shared.at.y)})`,
+          message: `${a.edge.id} and ${b.edge.id} share ${round(shared.length)}px at ${round(shared.at.x)},${round(shared.at.y)}`,
           suggestion: `route ${b.edge.id} 16px aside`,
         });
       }
@@ -240,8 +240,8 @@ Fix: move_label the wire so its chip sits clear of the frame.`,
         severity: "warning" as const,
         at: [wire.edge.id, ...crossed],
         where: chip.rect,
-        message: `${wire.edge.id}'s chip sits on the border of ${crossed.join(", ")}`,
-        suggestion: `move_label ${wire.edge.id} off the border`,
+        message: `${wire.edge.id}'s chip is on ${crossed.join(", ")}'s border`,
+        suggestion: "move_label it off",
       }];
     });
   },
@@ -267,7 +267,7 @@ Fix: move its two ends apart to the length named, or shorten the label.`,
         at: [wire.edge.id, wire.edge.from.objectId, wire.edge.to.objectId],
         where: chip.rect,
         message: `${wire.edge.id} is ${round(length)}px, short for its chip`,
-        suggestion: `move ${wire.edge.from.objectId} and ${wire.edge.to.objectId} apart to ≥${Math.ceil(needed)}px`,
+        suggestion: `move its ends apart to ≥${Math.ceil(needed)}px`,
       }];
     });
   },
@@ -301,13 +301,13 @@ Fix: move_label the chip away, route the wire with a longer last leg, or end it 
         message: under
           ? `${id}'s arrowhead is under ${under.edge.id === id ? "its own" : `${under.edge.id}'s`} chip`
           : crushed
-            ? `${id}'s arrowhead is crushed against a bend (${Math.max(0, round(head.shaft))}px shaft)`
-            : `${id}'s arrowhead sits on ${stacked!.wire.edge.id}'s`,
+            ? `${id}'s arrowhead is crushed at a bend`
+            : `${id}'s arrowhead is on ${stacked!.wire.edge.id}'s`,
         suggestion: under
-          ? `move_label ${under.edge.id} away from the head`
+          ? `move_label ${under.edge.id === id ? "it" : under.edge.id} away`
           : crushed
-            ? `route ${id} with a longer last leg`
-            : `end ${id} at another point`,
+            ? "route it with a longer last leg"
+            : "end it at another point",
       });
     }
     return findings;

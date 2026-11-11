@@ -185,7 +185,7 @@ describe("canvas_create and canvas_check", () => {
 
     const check = checked(await call(service, "canvas_check", {}));
     expect(check.errors).toBe(0);
-    expect(check.text).toMatch(/^ {4}W\d+ same-color: agents is blue, as is planner inside it \(change_color agents \w+\)$/m);
+    expect(check.text).toMatch(/^ {4}W\d+ same-color: agents is blue, as is planner in it \(change_color agents \w+\)$/m);
   });
 
   test("a chart.mmd redraws on a board with equal node and edge counts", async () => {

@@ -40,7 +40,7 @@ Fix: change_color the section to the color the finding names.`,
       severity: "warning",
       at: [clash.section, ...clash.held],
       where: rectOf(byId.get(clash.section)!),
-      message: `${clash.section} is ${clash.color}, as is ${named(clash.held)} inside it`,
+      message: `${clash.section} is ${clash.color}, as is ${named(clash.held)} in it`,
       suggestion: `change_color ${clash.section} ${clash.suggestion}`,
     }));
   },

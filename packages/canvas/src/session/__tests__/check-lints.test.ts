@@ -46,14 +46,14 @@ describe("check-only lints", () => {
   test("shared-wire: a wire and its reply on one line, but not one trunk in one stroke", () => {
     const nodes = [page(), box("ask", 200, 200), box("answer", 800, 200), box("other", 800, 600)];
     expect(found(makeDocument(nodes, [connect("there", "ask", "answer"), connect("back", "answer", "ask")]), "shared-wire"))
-      .toEqual([expect.stringMatching(/^there and back share \d+px of line at \(\d+, \d+\) \(route back 16px aside\)$/)]);
+      .toEqual([expect.stringMatching(/^there and back share \d+px at \d+,\d+ \(route back 16px aside\)$/)]);
     // Two wires that leave one node in one stroke read as one trunk.
     const fan = [connect("a", "ask", "answer"), connect("b", "ask", "other")];
     const trunk = makeDocument(nodes, fan);
     expect(found(trunk, "shared-wire")).toEqual([]);
     // In two strokes they are two meanings on one line.
     const mixed = makeDocument(nodes, [fan[0]!, { ...fan[1]!, style: "dashed" }]);
-    expect(found(mixed, "shared-wire")).toEqual(["a and b share 220px of line at (384, 248) (route b 16px aside)"]);
+    expect(found(mixed, "shared-wire")).toEqual(["a and b share 220px at 384,248 (route b 16px aside)"]);
   });
 
   test("chip-on-border: a chip across a frame line, and none once the chip sits clear", () => {
@@ -64,15 +64,15 @@ describe("check-only lints", () => {
       box("outer", outerX, 200),
     ], [{ ...connect("cross", "inner", "outer"), label: "crosses" }]);
     // The chip centers on the wire's midpoint, x 440: the frame's right edge.
-    expect(found(board(520), "chip-on-border")).toEqual(["cross's chip sits on the border of frame (move_label cross off the border)"]);
+    expect(found(board(520), "chip-on-border")).toEqual(["cross's chip is on frame's border (move_label it off)"]);
     expect(found(board(1200), "chip-on-border")).toEqual([]);
   });
 
   test("short-wire and hidden-arrowhead: a long label on a short wire hides the line and the head", () => {
     const board = (gap: number) => makeDocument([page(), box("a", 200, 600), box("b", 360 + gap, 600)],
       [{ ...connect("tight", "a", "b"), label: "a label far longer than its wire" }]);
-    expect(found(board(80), "short-wire")).toEqual([expect.stringMatching(/^tight is \d+px, short for its chip \(move a and b apart to ≥\d+px\)$/)]);
-    expect(found(board(80), "hidden-arrowhead")).toEqual(["tight's arrowhead is under its own chip (move_label tight away from the head)"]);
+    expect(found(board(80), "short-wire")).toEqual([expect.stringMatching(/^tight is \d+px, short for its chip \(move its ends apart to ≥\d+px\)$/)]);
+    expect(found(board(80), "hidden-arrowhead")).toEqual(["tight's arrowhead is under its own chip (move_label it away)"]);
     expect(found(board(800), "short-wire")).toEqual([]);
     expect(found(board(800), "hidden-arrowhead")).toEqual([]);
   });
@@ -83,7 +83,7 @@ describe("check-only lints", () => {
       { ...connect("solid", "a", "target"), to: { objectId: "target", anchor: "left" as const } },
       { ...connect("other", "b", "target"), to: { objectId: "target", anchor: "left" as const }, ...(style ? { style } : {}) },
     ];
-    expect(found(makeDocument(nodes, into("dashed")), "hidden-arrowhead")).toEqual(["other's arrowhead sits on solid's (end other at another point)"]);
+    expect(found(makeDocument(nodes, into("dashed")), "hidden-arrowhead")).toEqual(["other's arrowhead is on solid's (end it at another point)"]);
     // One stroke into one node is one trunk with one head.
     expect(found(makeDocument(nodes, into()), "hidden-arrowhead")).toEqual([]);
   });

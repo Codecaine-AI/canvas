@@ -467,7 +467,7 @@ describe("the chooser keeps the board's meaning", () => {
     expect(integrity(doc)).toEqual([]);
     const findings = sameColor(doc);
     expect(findings.map((finding) => [finding.at, finding.message, finding.suggestion])).toEqual([
-      [["outside", "agent"], "outside is teal, as is agent inside it", "change_color outside blue"],
+      [["outside", "agent"], "outside is teal, as is agent in it", "change_color outside blue"],
     ]);
   });
 
@@ -484,9 +484,9 @@ describe("the chooser keeps the board's meaning", () => {
     ]);
     // Ford: "Don't use orange instead of an orange area." Nor gray, which it holds too.
     expect(pickSectionColor(doc, "pause", style)).toBe("blue");
-    expect(sameColor(doc).map((finding) => finding.message)).toEqual(["pause is gray, as is label inside it"]);
+    expect(sameColor(doc).map((finding) => finding.message)).toEqual(["pause is gray, as is label in it"]);
     doc.objects[4] = { ...doc.objects[4]!, color: "orange" };
-    expect(sameColor(doc).map((finding) => finding.message)).toEqual(["pause is orange, as is wait, approve inside it"]);
+    expect(sameColor(doc).map((finding) => finding.message)).toEqual(["pause is orange, as is wait, approve in it"]);
   });
 
   test("a sticky counts: a section never takes the color of a note it holds", () => {
