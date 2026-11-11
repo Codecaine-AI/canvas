@@ -70,8 +70,6 @@ export interface RoundRecord {
   unparsed: number;
   /** This round's findings, most severe first, each with the drawer's answer once it revised. */
   findings: LoopFinding[];
-  /** Lints of an earlier round that are still on the board and that the drawer chose to leave: not raised again. */
-  settled: string[];
   /** The drawer's revise pass and how many findings its reply answered, or null when the round had none. */
   revise: (DrawerRun & { answered: number }) | null;
 }
@@ -97,26 +95,22 @@ const isOpen = (finding: { severity: Severity }) => finding.severity !== "nit";
  * One round's findings: the lints, then the critics', most severe first.
  * `ledger` holds every earlier round's findings with the drawer's answers.
  *
- * A lint an earlier round raised keeps its id. A warning or a note the drawer
- * answered "disagree" or "declined" is settled: nothing can argue the lint's
- * side, so it is not raised again. An error is raised until it is gone. The
- * critics read the earlier findings and answers themselves, so each finding
- * they return is new.
+ * A lint an earlier round raised keeps its id, and is raised again each round
+ * until it is off the board, whatever the drawer answered: a round counts
+ * what the board still has. The critics read the earlier findings and answers
+ * themselves, so each finding they return is new.
  */
-export function roundFindings(ledger: LoopFinding[], review: Pick<Review, "lints" | "findings">): { findings: LoopFinding[]; settled: string[] } {
+export function roundFindings(ledger: LoopFinding[], review: Pick<Review, "lints" | "findings">): LoopFinding[] {
   const key = (finding: Pick<LoopFinding, "kind" | "ids" | "problem">) => JSON.stringify([finding.kind, finding.ids, finding.problem]);
-  const raised = new Map(ledger.filter((finding) => finding.source === "check").map((finding) => [key(finding), finding]));
+  const raised = new Map(ledger.filter((finding) => finding.source === "check").map((finding) => [key(finding), finding.id]));
   let next = 1 + Math.max(0, ...ledger.map((finding) => Number(finding.id.slice(1))));
   const findings: LoopFinding[] = [];
-  const settled: string[] = [];
   for (const lint of review.lints) {
     const fresh = {
       source: "check" as const, severity: LINT_SEVERITY[lint.severity] ?? "should", kind: lint.rule,
       ids: lint.at, labels: [], problem: lint.message, fix: lint.suggestion ?? "", regions: [], answer: null,
     };
-    const before = raised.get(key(fresh));
-    if (before && before.severity !== "blocker" && before.answer && before.answer.verdict !== "fixed") settled.push(before.id);
-    else findings.push({ id: before?.id ?? `F${next++}`, ...fresh });
+    findings.push({ id: raised.get(key(fresh)) ?? `F${next++}`, ...fresh });
   }
   for (const finding of review.findings) {
     findings.push({
@@ -125,7 +119,7 @@ export function roundFindings(ledger: LoopFinding[], review: Pick<Review, "lints
     });
   }
   // The sort is stable: a lint stays ahead of the critics' findings of its severity.
-  return { findings: findings.sort((a, b) => rank(a) - rank(b)), settled };
+  return findings.sort((a, b) => rank(a) - rank(b));
 }
 
 const names = (finding: LoopFinding) => [...finding.ids, ...finding.labels.map((label) => JSON.stringify(label))].join(", ");
@@ -200,10 +194,10 @@ export async function reviewLoop(options: {
   try {
     for (let round = 1; round <= options.budget; round += 1) {
       const review = await options.review(round, ledger().filter((finding) => finding.source === "reviewer").map(earlierFinding));
-      const { findings, settled } = roundFindings(ledger(), review);
+      const findings = roundFindings(ledger(), review);
       const record: RoundRecord = {
         round, reviewMs: review.reviewMs, renderMs: review.renderMs, regions: review.regions, unparsed: review.unparsed,
-        findings, settled, revise: null,
+        findings, revise: null,
       };
       rounds.push(record);
       if (!findings.some(isOpen)) {
@@ -235,7 +229,6 @@ export function ledgerText(record: LoopRecord): string {
       findingLine(finding),
       ...(finding.answer ? [`  → ${finding.answer.verdict}${finding.answer.reason ? `: ${finding.answer.reason}` : ""}`] : round.revise ? ["  → no answer"] : []),
     ]),
-    ...(round.settled.length ? [`Left as the drawer answered: ${round.settled.join(", ")}`] : []),
     "",
   ]);
   return `${lines.join("\n")}Stop: ${record.stop}${record.error ? ` (${record.error})` : ""}\n`;

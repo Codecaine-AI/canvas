@@ -20,7 +20,7 @@ const answered = (findings: LoopFinding[], verdict: string) => findings.map((fin
 
 describe("critic loop findings", () => {
   test("a round's findings are the lints and the critics', most severe first, each with an id", () => {
-    const { findings } = roundFindings([], {
+    const findings = roundFindings([], {
       lints: [lint(), lint({ rule: "tangent-wires", severity: "error", at: ["w"], message: "w runs along b", suggestion: undefined })],
       findings: [seen({ severity: "blocker" }), seen({ severity: "nit", kind: "colour", ids: ["a"], labels: [] })],
     });
@@ -38,21 +38,17 @@ describe("critic loop findings", () => {
     ]);
   });
 
-  test("a lint keeps its id across rounds, and one the drawer chose to leave is not raised again", () => {
+  test("a lint still on the board keeps its id and is raised again, whatever the drawer answered", () => {
     const error = lint({ rule: "tangent-wires", severity: "error", at: ["w"], message: "w runs along b" });
     const gap = lint({ at: ["c"], message: "c sits 120px from b and 140px from d" });
-    const lints = [lint(), gap, error];
-    const first = roundFindings([], { lints, findings: [seen()] }).findings;
+    const first = roundFindings([], { lints: [lint(), gap, error], findings: [seen()] });
     const answers = parseAnswers("F1 fixed\nF2 declined: the gap holds a label\nF3 disagree: it does not\nF4 fixed");
     for (const finding of first) finding.answer = answers.get(finding.id) ?? null;
 
-    const second = roundFindings(first, { lints, findings: [seen()] });
-    // F1 was not fixed after all, the error stands whatever the drawer says, and the critics' finding is a new one.
-    expect(second.findings.map((finding) => finding.id)).toEqual(["F3", "F1", "F5"]);
-    expect(second.findings.every((finding) => finding.answer === null)).toBe(true);
-    expect(second.settled).toEqual(["F2"]);
-    // A third round still leaves it.
-    expect(roundFindings([...first, ...second.findings], { lints: [gap], findings: [] })).toEqual({ findings: [], settled: ["F2"] });
+    // The first lint is gone. The two the drawer left stand, and the critics' finding is a new one.
+    const second = roundFindings(first, { lints: [gap, error], findings: [seen()] });
+    expect(second.map((finding) => [finding.id, finding.severity])).toEqual([["F3", "blocker"], ["F2", "should"], ["F5", "should"]]);
+    expect(second.every((finding) => finding.answer === null)).toBe(true);
   });
 
   test("the drawer's closing lines are its answers, however it marks them up", () => {
@@ -76,7 +72,7 @@ describe("critic loop findings", () => {
   });
 
   test("the revise prompt lists the findings by id and asks for one answer line each", () => {
-    const prompt = revisePrompt("b1", roundFindings([], { lints: [lint()], findings: [] }).findings);
+    const prompt = revisePrompt("b1", roundFindings([], { lints: [lint()], findings: [] }));
     expect(prompt).toContain(`canvas_open, canvas id "b1"`);
     expect(prompt).toContain("<findings>\nF1 [should, check near-miss] b is 20px off a's center line, so w bends. Fix: move b by dy -20\n</findings>");
     expect(prompt).toContain("<id> declined: <why you left it>");
@@ -122,6 +118,17 @@ describe("critic loop stop rule", () => {
     });
     expect([record.stop, record.rounds.length, revises]).toEqual(["budget", 2, 2]);
     expect(record.rounds.map((round) => round.findings[0]!.id)).toEqual(["F1", "F2"]);
+  });
+
+  test("a lint the drawer declines is still on the board: the loop does not call it clean", async () => {
+    const record = await reviewLoop({
+      budget: 3,
+      review: async () => review({ lints: [lint()] }),
+      revise: async (_round, findings) => ran(answered(findings, "declined: the bend clears a label")),
+    });
+    expect([record.stop, record.rounds.length]).toEqual(["budget", 3]);
+    expect(record.rounds.map((round) => round.findings.map((finding) => finding.id))).toEqual([["F1"], ["F1"], ["F1"]]);
+    expect(record.rounds.map((round) => round.findings[0]!.answer?.verdict)).toEqual(["declined", "declined", "declined"]);
   });
 
   test("a critic that gave no answer did not approve", async () => {
