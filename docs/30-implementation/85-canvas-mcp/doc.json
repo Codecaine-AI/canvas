@@ -54,8 +54,8 @@
         "b-cmcp-context-schemas-26",
         "b-cmcp-context-index-26a",
         "b-cmcp-context-open-27",
-        "b-cmcp-context-sheet-28a",
         "b-cmcp-context-guidance-28",
+        "b-cmcp-context-sheet-28b",
         "b-cmcp-workspace-heading-29",
         "b-cmcp-workspace-lede-30",
         "b-cmcp-workspace-flag-31",
@@ -2479,37 +2479,6 @@
       ],
       "children": []
     },
-    "b-cmcp-context-sheet-28a": {
-      "id": "b-cmcp-context-sheet-28a",
-      "type": "list-item",
-      "props": {
-        "ordered": false
-      },
-      "text": [
-        {
-          "insert": "The contact sheet is the resource "
-        },
-        {
-          "insert": "codecaine://canvas/contact-sheet",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ": a PNG of every glyph in the default style, read with "
-        },
-        {
-          "insert": "resources/read",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": "."
-        }
-      ],
-      "children": []
-    },
     "b-cmcp-context-guidance-28": {
       "id": "b-cmcp-context-guidance-28",
       "type": "list-item",
@@ -2667,6 +2636,35 @@
         },
         {
           "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-context-sheet-28b": {
+      "id": "b-cmcp-context-sheet-28b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The server also serves the contact sheet, as a resource and not as a tool result. A client reads "
+        },
+        {
+          "insert": "codecaine://canvas/contact-sheet",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with "
+        },
+        {
+          "insert": "resources/read",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and gets a PNG of every glyph in the default style."
         }
       ],
       "children": []
