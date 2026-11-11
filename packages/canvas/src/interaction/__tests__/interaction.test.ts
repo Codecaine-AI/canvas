@@ -489,34 +489,35 @@ describe("interaction: connector-bend-drag", () => {
     const document = slidStraightBendDoc();
     const ctx = makeContext(document);
     const hit = { kind: "bend-segment" as const, connectionId: "c1", segmentIndex: 0 };
+    // The board draws the line through the centre the arrowhead sits on (y 264): the other end slides.
 
-    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 170, y: 262 }, hit), ctx);
+    let result = stepInteraction(IDLE_INTERACTION_STATE, down({ x: 170, y: 264 }, hit), ctx);
     expect(result.state.kind).toBe("connector-bend-drag");
 
-    result = stepInteraction(result.state, move({ x: 170, y: 302 }), ctx);
+    result = stepInteraction(result.state, move({ x: 170, y: 304 }), ctx);
     const draggedPoints = [
-      { x: 100, y: 262 },
-      { x: 100, y: 302 },
-      { x: 240, y: 302 },
-      { x: 240, y: 262 },
+      { x: 100, y: 264 },
+      { x: 100, y: 304 },
+      { x: 240, y: 304 },
+      { x: 240, y: 264 },
     ];
     expect(result.dispatch).toEqual([]);
     expect(result.overlay.connectorDrag?.points).toEqual(draggedPoints);
 
-    result = stepInteraction(result.state, up({ x: 170, y: 302 }), ctx);
+    result = stepInteraction(result.state, up({ x: 170, y: 304 }), ctx);
     expect(result.state.kind).toBe("idle");
     const action = result.dispatch[0];
     expect(action?.type).toBe("canvas.updateConnection");
     if (action?.type !== "canvas.updateConnection") throw new Error("expected updateConnection");
 
     expect(action.patch.waypoints).toEqual([
-      [100, 302],
-      [240, 302],
+      [100, 304],
+      [240, 304],
     ]);
     expect(action.patch.from?.position?.[0]).toBeCloseTo(1, 6);
-    expect(action.patch.from?.position?.[1]).toBeCloseTo(32 / 60, 6);
-    expect(action.patch.to?.position?.[0]).toBeCloseTo(0, 6);
-    expect(action.patch.to?.position?.[1]).toBeCloseTo(28 / 60, 6);
+    expect(action.patch.from?.position?.[1]).toBeCloseTo(34 / 60, 6);
+    // The arrowhead already sits on its side centre, so that end needs no pin.
+    expect(action.patch.to).toBeUndefined();
 
     const connection = document.connections[0]!;
     const committedConnection: InteractiveCanvasConnection = {

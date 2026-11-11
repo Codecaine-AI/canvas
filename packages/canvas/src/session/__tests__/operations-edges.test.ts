@@ -353,19 +353,19 @@ describe("route shift", () => {
   });
 
   test("a segment with no bend handle is refused rather than dragged", () => {
-    // An endpoint pin 0.1px off the first corner: the router still calls the
+    // A side centre 0.1px off the first corner: the router still calls the
     // polyline orthogonal (0.5px tolerance) but the bend machinery does not
     // (0.01px), so s0 prints under its dominant axis and has no handle.
     const document = makeDocument(
       [
         { ...box("frame", 0, 0, 900, 700, "section"), text: "Frame" },
-        { ...box("a", 100, 100, 200, 100), parentId: "frame" },
+        { ...box("a", 100, 100, 200, 100.2), parentId: "frame" },
         { ...box("b", 600, 300, 200, 100), parentId: "frame" },
       ],
       [
         {
           id: "e1",
-          from: { objectId: "a", anchor: "right", position: [1, 0.501] },
+          from: { objectId: "a", anchor: "right" },
           to: { objectId: "b", anchor: "left" },
           waypoints: [[400, 150], [400, 350]],
         },

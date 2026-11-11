@@ -83,12 +83,12 @@ describe("check-only lints", () => {
 
   test("hidden-arrowhead: two dashes into one port with no room for a second, but never a junction", () => {
     // Two wires and a reply hold the row, so a dashed and a solid wire from
-    // past it end on one port.
-    const row = [page(), box("a", 200, 1000), box("b", 600, 1000), box("c", 1000, 1000)];
+    // past it end on one port. The two share no dash, colour or source.
+    const row = [page(), box("a", 200, 1000), box("b", 600, 1000), box("c", 1000, 1000), box("d", 1400, 1000)];
     const wires = (style?: "dashed") => [
       { ...connect("ask", "a", "b"), style: "dashed" as const },
       connect("reply", "b", "a"),
-      { ...connect("far", "c", "a"), ...(style ? { style } : {}) },
+      { ...connect("far", "d", "a"), color: "blue" as const, ...(style ? { style } : {}) },
       { ...connect("near", "c", "a"), color: "red" as const },
     ];
     const stacked = (style?: "dashed") => found(makeDocument(row, wires(style)), "hidden-arrowhead").filter((text) => text.includes(" is on "));
