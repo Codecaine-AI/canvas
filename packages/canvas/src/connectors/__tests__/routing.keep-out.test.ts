@@ -219,3 +219,29 @@ describe("routeConnection: every exit pair is searched before a crossing route",
     for (const wall of walls) expect([wall.id, crossesInterior(drawn, hitBoundsForObject(wall))]).toEqual([wall.id, false]);
   });
 });
+
+describe("routeConnection: a wire never lies on the edge of its own box", () => {
+  /** Whether the run `port -> next` lies along the side of `object` that `port` sits on. */
+  function alongOwnSide(port: CanvasPoint, next: CanvasPoint, object: InteractiveCanvasObject): boolean {
+    const { x, y, width, height } = hitBoundsForObject(object);
+    const onTopOrBottom = Math.abs(port.y - y) < 0.01 || Math.abs(port.y - y - height) < 0.01;
+    const onLeftOrRight = Math.abs(port.x - x) < 0.01 || Math.abs(port.x - x - width) < 0.01;
+    const horizontal = Math.abs(next.y - port.y) < 0.01;
+    return horizontal ? onTopOrBottom && !onLeftOrRight : onLeftOrRight && !onTopOrBottom;
+  }
+
+  it("leaves and enters squarely when the two facing sides stand level", () => {
+    // The source's bottom and the target's top are both at y = 220, so the two 24px stubs meet head on.
+    const source = box("source", 0, 100);
+    const target = box("target", 600, 220);
+    const routed = routeConnection(
+      source,
+      target,
+      edge({ objectId: "source", anchor: "bottom" }, { objectId: "target", anchor: "top" }),
+      [source, target],
+    );
+    const points = routed.points!;
+    expect(alongOwnSide(points[0]!, points[1]!, source)).toBe(false);
+    expect(alongOwnSide(points[points.length - 1]!, points[points.length - 2]!, target)).toBe(false);
+  });
+});

@@ -408,11 +408,14 @@ function routeConnectionPolyline(
   );
   const elbow = routeElbow(start, end, startAnchor, endAnchor, canvasStyle.connectorCornerRadiusPx);
   const tried: Array<RoutedConnection | null> = [straight, elbow];
+  // Two stubs that meet head on collapse into one run along the boxes' edges:
+  // that elbow is a last resort, not a route.
+  const elbowLeaves = leavesAlongSides(elbow, startAnchor, endAnchor);
 
   // Unrelated sections are kept out first, so a wire goes around a group it
   // does not belong to.
   if (straight && isClear(straight, keepOut)) return straight;
-  if (isClear(elbow, keepOut)) return elbow;
+  if (elbowLeaves && isClear(elbow, keepOut)) return elbow;
   const aStar = (level: KeepOut) =>
     exitsClear(start, startAnchor, end, endAnchor, level)
       ? routeOrthogonalAStar(fromObject, toObject, start, end, startAnchor, endAnchor, aStarObstacles(level), canvasStyle)
@@ -422,7 +425,7 @@ function routeConnectionPolyline(
   tried.push(strict);
   // When sections wall the route in, only boxes count.
   if (straight && isClear(straight, detourKeepOut)) return straight;
-  if (isClear(elbow, detourKeepOut)) return elbow;
+  if (elbowLeaves && isClear(elbow, detourKeepOut)) return elbow;
 
   // The facing sides are walled in. Cheapest first: an elbow from the other
   // sides an unpinned end may leave from; then A* with only boxes (a failed
