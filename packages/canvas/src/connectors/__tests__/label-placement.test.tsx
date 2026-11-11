@@ -397,6 +397,26 @@ describe("placeConnectionLabels tags in line", () => {
     expect(placed.get("cd")!.x + width / 2).toBeLessThan(800);
   });
 
+  it("lines up each pair of chips in its own gap when two pairs sit side by side", () => {
+    // Four level runs. The top two cross a gap at x 400..600, the bottom two a gap at x 800..1000.
+    const row = (index: number, y: number) => [box(`a${index}`, 180, y), box(`b${index}`, 1180, y)];
+    const document = doc(
+      [
+        section("s", -40, -80, 440, 300), section("t", 600, -80, 800, 300), ...row(0, 0), ...row(1, 100),
+        section("u", -40, 240, 840, 340), section("v", 1000, 240, 400, 340), ...row(2, 320), ...row(3, 420),
+      ],
+      [0, 1, 2, 3].map((index) =>
+        wire(`e${index}`, "a", "b", index % 2 ? "longer request" : "request", {
+          from: { objectId: `a${index}`, anchor: "right" }, to: { objectId: `b${index}`, anchor: "left" },
+        })),
+    );
+    const placed = placeConnectionLabels(document);
+    expect(placed.get("e0")!.x).toBe(placed.get("e1")!.x);
+    expect(placed.get("e2")!.x).toBe(placed.get("e3")!.x);
+    expect(Math.abs(placed.get("e0")!.x - 500)).toBeLessThan(20);
+    expect(Math.abs(placed.get("e2")!.x - 900)).toBeLessThan(20);
+  });
+
   it("lines the chips up inside the section when one of them has no place in the white space", () => {
     // Both wires leave section s at x = 600. The top one ends 40px on, at b: no room for its chip outside s.
     // The bottom one runs on to x = 810 and down to d, so on its own its chip sits in the white space.

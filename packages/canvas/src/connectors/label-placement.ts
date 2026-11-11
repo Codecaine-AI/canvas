@@ -54,7 +54,9 @@
  * preferred point. A line never takes a chip out of the
  * white space into a section its wire only passes, unless a chip of the
  * group has no place in the white space and the line holds them all inside
- * such sections. Pinned chips join no group.
+ * such sections. Last, a group left with no such line (its runs cross two
+ * white gaps) is cut into the stretches that have one. Pinned chips join no
+ * group.
  *
  * Pin rule: a pinned chip with no hits stays exactly at its pin, unless it
  * lies on its wire across a bend: then it moves to the nearest clear spot on
@@ -746,10 +748,52 @@ function computePlacements(
   // (those stay where they are). The larger group first, so a wire with runs
   // in two stays in the larger; the smaller keeps the runs that still sit
   // side by side without it. Twice, so a group with no line the first time
-  // gets one more try with the runs the other groups left it.
+  // gets one more try with the runs the other groups left it. Then once
+  // more, with a chain that still has no line cut into its stretches.
   const grouped = new Set<Label>();
+  /** The best line across `runs` that holds all their chips, or null when no line does. */
+  const lineFor = (runs: Run[]): number | null => {
+    const members = new Set(runs.map((run) => run.label));
+    const others = [...chips].flatMap(([label, rect]) => (members.has(label) ? [] : [rect]));
+    // A chip in the white space stays there. One exception: when a chip of the group has no
+    // place in the white space, a line may hold them all inside sections their wires only
+    // pass. Ford asked for "a consistent tag location", so the one place for them all wins.
+    const white = runs.filter((run) => !passingThrough(run.label, result.get(run.label.connection.id)!));
+    let best: number | null = null;
+    let bestScore: number[] = [];
+    for (const line of clearLines.get(runs[0]!)!) {
+      if (runs.some((run) => !clearLines.get(run)!.includes(line) || hits(run.label, centerOn(run, line), 0, others).count > 0)) continue;
+      const inside = runs.filter((run) => passingThrough(run.label, centerOn(run, line)));
+      if (white.some((run) => inside.includes(run)) && (inside.length < runs.length || white.length === runs.length)) continue;
+      const score = [0, 0, 0, 0, 0];
+      for (const run of runs) {
+        const center = centerOn(run, line);
+        // First, the chips that sit against a corner of their own wire: a line clear of the bends wins.
+        if (tightToCorner(run.label, center, NEAR_MISS_PX)) score[0]! += 1;
+        taste(run.label, center, others).forEach((value, index) => (score[index + 1]! += value));
+        // Counted in run lengths: a chip on a short run has little room, so the chips of long runs come to it.
+        score[4]! += ((center.x - run.label.preferred.x) ** 2 + (center.y - run.label.preferred.y) ** 2) / runLength(run) ** 2;
+      }
+      if (best === null || lexLess(score, bestScore)) {
+        best = line;
+        bestScore = score;
+      }
+    }
+    return best;
+  };
+  /** A chain with no line of its own (its runs cross two white gaps), cut into the stretches that have one. */
+  const stretches = (chain: Run[]): Run[][] => {
+    if (chain.length < 3 || lineFor(chain) !== null) return [chain];
+    const cut: Run[][] = [[]];
+    for (const run of chain) {
+      const stretch = cut[cut.length - 1]!;
+      if (stretch.length === 0 || lineFor([...stretch, run]) !== null) stretch.push(run);
+      else cut.push([run]);
+    }
+    return cut;
+  };
   const bySize = groups.filter(({ runs }) => runs.length >= 2).sort((a, b) => b.runs.length - a.runs.length);
-  for (const group of [...bySize, ...bySize]) {
+  for (const [turn, group] of [...bySize, ...bySize, ...bySize].entries()) {
     const chains: Run[][] = [[]];
     for (const run of group.runs) {
       if (grouped.has(run.label)) continue;
@@ -757,38 +801,12 @@ function computePlacements(
       if (chain.length > 0 && run.at - chain[chain.length - 1]!.at - (run.across + chain[chain.length - 1]!.across) / 2 > GROUP_MAX_APART_PX) chains.push([run]);
       else chain.push(run);
     }
-    for (const runs of chains) {
-      if (runs.length < 2) continue;
-      const members = new Set(runs.map((run) => run.label));
-      const others = [...chips].flatMap(([label, rect]) => (members.has(label) ? [] : [rect]));
-      // A chip in the white space stays there. One exception: when a chip of the group has no
-      // place in the white space, a line may hold them all inside sections their wires only
-      // pass. Ford asked for "a consistent tag location", so the one place for them all wins.
-      const white = runs.filter((run) => !passingThrough(run.label, result.get(run.label.connection.id)!));
-      let best: number | null = null;
-      let bestScore: number[] = [];
-      for (const line of clearLines.get(runs[0]!)!) {
-        if (runs.some((run) => !clearLines.get(run)!.includes(line) || hits(run.label, centerOn(run, line), 0, others).count > 0)) continue;
-        const inside = runs.filter((run) => passingThrough(run.label, centerOn(run, line)));
-        if (white.some((run) => inside.includes(run)) && (inside.length < runs.length || white.length === runs.length)) continue;
-        const score = [0, 0, 0, 0, 0];
-        for (const run of runs) {
-          const center = centerOn(run, line);
-          // First, the chips that sit against a corner of their own wire: a line clear of the bends wins.
-          if (tightToCorner(run.label, center, NEAR_MISS_PX)) score[0]! += 1;
-          taste(run.label, center, others).forEach((value, index) => (score[index + 1]! += value));
-          // Counted in run lengths: a chip on a short run has little room, so the chips of long runs come to it.
-          score[4]! += ((center.x - run.label.preferred.x) ** 2 + (center.y - run.label.preferred.y) ** 2) / runLength(run) ** 2;
-        }
-        if (best === null || lexLess(score, bestScore)) {
-          best = line;
-          bestScore = score;
-        }
-      }
-      if (best === null) continue;
+    for (const runs of turn < 2 * bySize.length ? chains : chains.flatMap(stretches)) {
+      const line = runs.length < 2 ? null : lineFor(runs);
+      if (line === null) continue;
       for (const run of runs) {
         grouped.add(run.label);
-        take(run.label, centerOn(run, best));
+        take(run.label, centerOn(run, line));
       }
     }
   }
