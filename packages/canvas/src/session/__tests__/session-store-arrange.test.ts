@@ -519,12 +519,12 @@ describe("arrange · modes", () => {
     );
   }
 
-  test("a call with neither align nor space, or with both, is refused and moves nothing", () => {
+  test("a call with no mode, or with more than one, is refused and moves nothing", () => {
     const session = row();
     const draftBefore = session.draft;
 
     const neither = runOp(session, "arrange", { ids: ["a", "b"] });
-    const nulls = runOp(session, "arrange", { ids: ["a", "b"], align: null, space: null });
+    const nulls = runOp(session, "arrange", { ids: ["a", "b"], align: null, space: null, flow: null });
     const both = runOp(session, "arrange", {
       ids: ["a", "b"],
       align: "top",
@@ -532,11 +532,11 @@ describe("arrange · modes", () => {
     });
 
     expect(neither.text).toBe(
-      "ERROR · arrange — send exactly one of align or space — align puts the boxes on one"
-      + " shared edge, space sets one clear gap between them.",
+      "ERROR · arrange — send exactly one of align, space or flow — align puts the boxes on one"
+      + " shared edge, space sets one clear gap along a run, flow lays the boxes out again in reading order.",
     );
     expect(nulls.text).toBe(neither.text);
-    expect(both.text).toBe("ERROR · arrange — send exactly one of align or space, not both.");
+    expect(both.text).toBe("ERROR · arrange — send exactly one of align, space or flow, not several.");
     expect(session.draft).toBe(draftBefore);
   });
 

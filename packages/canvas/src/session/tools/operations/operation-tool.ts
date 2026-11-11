@@ -163,16 +163,20 @@ export function runOperation<TFields extends OperationFields>(
   // Section auto-grow runs on the reconciled tree and before the waypoint
   // pass, so a grown frame is an ordinary resize that pass judges like any
   // other. It never changes membership, so the last reconcile agrees with it.
-  // A grow this edit needs but cannot make (it would capture a neighbor)
-  // refuses the edit: a child never stays outside its frame, and nothing the
-  // drawer did not touch changes parent. A grow already stuck before the edit
+  // A grow into a neighbor makes room first: the neighbor moves away along the
+  // grow direction with what it holds, pushing its own neighbors in turn
+  // (state/section-grow.ts, makeRoom). A grow this edit needs and still cannot
+  // make (a lock pins a neighbor in the way) refuses the edit: a child never
+  // stays outside its frame, and nothing changes parent. A grow already stuck before the edit
   // does not block an edit that leaves every child's overflow no worse on every
   // edge, but an edit that pushes any child further past that frame is refused.
   // A note whose text fit grew it keeps its frame, which grows to hold it.
   const held = new Map([...fittedNoteParents(before, outcome.draft), ...(outcome.held ?? [])]);
-  const grow = growSectionsToChildren(reconcileHolding(outcome.draft, held), held);
+  const grow = growSectionsToChildren(reconcileHolding(outcome.draft, held), held, { makeRoom: true });
   const reconciledBefore = reconcileSectionMembership(before);
-  const stuck = new Set(growSectionsToChildren(reconciledBefore).blocked.map((entry) => entry.section));
+  const stuck = new Set(
+    growSectionsToChildren(reconciledBefore, undefined, { makeRoom: true }).blocked.map((entry) => entry.section),
+  );
   const worsens = (section: string) => {
     const was = sectionOverflow(reconciledBefore, section);
     const now = sectionOverflow(grow.document, section);
@@ -184,11 +188,13 @@ export function runOperation<TFields extends OperationFields>(
   };
   const newlyBlocked = grow.blocked.filter((entry) => !stuck.has(entry.section) || worsens(entry.section));
   if (newlyBlocked.length > 0) {
-    const reasons = newlyBlocked.map(({ section, captures }) =>
-      `${section} must grow to hold its children, and growing would pull ${captures.join(", ")} into it`);
+    const reasons = newlyBlocked.map(({ section, captures, pinned }) =>
+      `${section} must grow to hold its children, and growing would pull ${captures.join(", ")} into it${pinned ? ` (the lock on ${pinned.join(", ")} keeps it from being pushed clear)` : ""}`);
+    const pinned = [...new Set(newlyBlocked.flatMap((entry) => entry.pinned ?? []))];
+    const release = pinned.length > 0 ? `Release the lock on ${pinned.join(", ")} with lock mode "none", move` : "Move";
     return {
       isError: true,
-      text: `ERROR · ${spec.name} — ${reasons.join("; ")}. Nothing changed. Move ${newlyBlocked.flatMap((entry) => entry.captures).join(", ")} clear first, or place the child where ${newlyBlocked.map((entry) => entry.section).join(", ")} has room.`,
+      text: `ERROR · ${spec.name} — ${reasons.join("; ")}. Nothing changed. ${release} ${newlyBlocked.flatMap((entry) => entry.captures).join(", ")} clear first, or place the child where ${newlyBlocked.map((entry) => entry.section).join(", ")} has room.`,
       details,
     };
   }
@@ -198,7 +204,7 @@ export function runOperation<TFields extends OperationFields>(
   // The grows were judged with `held` kept. A parent that cannot grow to hold
   // its child (locked, or stopped at a locked frame's edge), or a grown frame
   // that lands inside a neighbor, would still move a held object: refuse.
-  const moved = heldMoves(next, held).map(({ id, from, to }) =>
+  const moved = heldMoves(next, grow.held).map(({ id, from, to }) =>
     from === null ? `${id} would land inside ${to}` : `${id} would leave ${from}, which cannot grow to hold it`);
   if (moved.length > 0) {
     return {
@@ -207,9 +213,13 @@ export function runOperation<TFields extends OperationFields>(
       details,
     };
   }
-  const notes = grow.grown.length === 0
-    ? outcome.notes
-    : [...(outcome.notes ?? []), `grew ${grow.grown.join(", ")} to hold ${grow.grown.length === 1 ? "its" : "their"} children`];
+  const grewNotes = grow.grown.length === 0
+    ? []
+    : [
+        `grew ${grow.grown.join(", ")} to hold ${grow.grown.length === 1 ? "its" : "their"} children`,
+        ...grow.pushed.map(({ section, pushed }) => `made room for ${section}: pushed ${pushed.join(", ")} clear of it`),
+      ];
+  const notes = grewNotes.length === 0 ? outcome.notes : [...(outcome.notes ?? []), ...grewNotes];
   // A patch that asks for what the board already holds is legal and did
   // nothing, which is the no-op class rather than an APPLIED line over an
   // empty delta.
