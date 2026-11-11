@@ -51,6 +51,13 @@ export type OpOutcome =
        * edit is refused when the board would still move one.
        */
       held?: ReadonlyMap<string, string | null>;
+      /**
+       * The draft already went through the straighten pass over every wire
+       * (tighten_wires), and its hand routes are settled for its geometry.
+       * The pipeline does not straighten it again, and reconciles hand routes
+       * against this draft, not against the board before the edit.
+       */
+      straightened?: true;
     }
   /** A well-formed, legal operation with nothing to do; this is not an error. */
   | { status: "noop"; note: string };

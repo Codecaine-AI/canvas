@@ -146,8 +146,13 @@ describe("arrange · tighten_wires", () => {
     // Each section moved as one body.
     const records = objectOf(session.draft, "records").geometry;
     expect(event.y - records.y).toBe(300);
-    expect(objectOf(session.draft, "row").geometry.y - records.y).toBe(80);
     expect(kernel.y - objectOf(session.draft, "providers").geometry.y).toBe(100);
+    // The slide leaves row 20px off engine: under the gain it keeps a move for.
+    // The straighten pass lines them up, row in its section.
+    const engine = objectOf(session.draft, "engine").geometry;
+    const row = objectOf(session.draft, "row").geometry;
+    expect(row.y + row.height / 2).toBe(engine.y + engine.height / 2);
+    expect(row.x - records.x).toBe(40);
   });
 
   test("counts a corner that merged wires share as one corner", () => {
