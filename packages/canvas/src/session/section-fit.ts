@@ -134,16 +134,15 @@ function rowsOf(nodes: readonly Box[]): Box[][] {
  * the rows that changed, and the rows left uneven with the reason.
  *
  * A node is a shape or an icon with no lock: notes and child sections stay.
- * A row is spread between its two end nodes, which hold their place. A gap a
- * labelled wire crosses never gets narrower than its label needs (or than it
- * is now, when that is less): the row then grows from its centre. Nodes that
- * share a centre line (a column) move together, so a wire that runs straight
- * down a column stays straight. The longest row goes first, and a row that
+ * A row is spread between its two end nodes, which hold their place. Nodes
+ * that share a centre line (a column) move together, so a wire that runs
+ * straight down a column stays straight. The longest row goes first, and a row that
  * shares a column with a row placed before it is left as it is.
  *
- * A row is left as it is when evening it would make another row less even,
- * put a box on a neighbour it did not touch before, or `refuse` names a
- * reason.
+ * A row is left as it is when evening it would narrow a gap below what its
+ * wire label needs (or below what it is now, when that is less), make another
+ * row less even, put a box on a neighbour it did not touch before, or
+ * `refuse` names a reason.
  */
 function evenRows(
   children: readonly InteractiveCanvasObject[],
@@ -215,19 +214,18 @@ function evenRows(
       continue;
     }
     const gaps = gapsOf(row, none);
-    const free = gaps.reduce((sum, value) => sum + value, 0);
-    let gap = free / gaps.length;
-    gaps.forEach((value, index) => {
-      gap = Math.max(gap, Math.min(value, labelled.get(`${row[index]!.id}>${row[index + 1]!.id}`) ?? 0));
-    });
+    const gap = gaps.reduce((sum, value) => sum + value, 0) / gaps.length;
+    const squeezed = gaps.some((value, index) =>
+      gap < Math.min(value, labelled.get(`${row[index]!.id}>${row[index + 1]!.id}`) ?? 0));
     const trial = new Map(placed);
-    let x = row[0]!.rect.x - (gap * gaps.length - free) / 2;
+    let x = row[0]!.rect.x;
     for (const node of row) {
-      const shift = roundToWriteGrid(x - node.rect.x);
-      trial.set(node.column, shift);
-      x = node.rect.x + shift + node.rect.width + gap;
+      trial.set(node.column, roundToWriteGrid(x - node.rect.x));
+      x += node.rect.width + gap;
     }
-    const reason = gap <= 0 ? "its nodes overlap" : harm(trial);
+    const reason = gap <= 0 ? "its nodes overlap"
+      : squeezed ? "a wire label would lose its room"
+      : harm(trial);
     if (reason) {
       why.set(row, reason);
       continue;
@@ -270,7 +268,6 @@ export function resolveFitSection(
   }
 
   const inside = sectionDescendantIds(members, sectionId);
-  const own = document.connections.filter(({ from, to }) => inside.has(from.objectId) && inside.has(to.objectId));
   const boardWith = (moves: readonly Move[]): InteractiveCanvasDocument => {
     const geometry = new Map(moves.map((move) => [move.id, move.geometry]));
     return reconcileConnectionWaypoints(document, {
@@ -283,8 +280,10 @@ export function resolveFitSection(
     const nodes = children.flatMap(({ id, geometry }) =>
       shifts.get(id) ? [{ id, geometry: { ...geometry, x: geometry.x + shifts.get(id)! } }] : []);
     const board = boardWith(nodes);
-    const wires = own.flatMap((connection) =>
-      routedPolyline(connection, board, canvasStyle).map((point) => ({ ...point, width: 0, height: 0 })));
+    const wires = board.connections
+      .filter(({ from, to }) => inside.has(from.objectId) && inside.has(to.objectId))
+      .flatMap((connection) =>
+        routedPolyline(connection, board, canvasStyle).map((point) => ({ ...point, width: 0, height: 0 })));
     const placed = board.objects.filter((object) => children.some((child) => child.id === object.id));
     return [...nodes, { id: sectionId, geometry: frameAround(placed, wires, canvasStyle) }];
   };

@@ -5,6 +5,7 @@
  */
 import { describe, expect, test } from "bun:test";
 
+import { routedPolyline } from "../../board/lints/geometry";
 import { paintedRects } from "../../connectors/label-placement";
 import type { CanvasGeometry, InteractiveCanvasObject } from "../../state/schema";
 
@@ -33,8 +34,8 @@ function node(id: string, x: number, y = 200): InteractiveCanvasObject {
 }
 
 /** Run fit_section on "frame" and read the board back. */
-function fit(objects: InteractiveCanvasObject[], connections = [] as ReturnType<typeof connect>[]) {
-  const session = makeTestSession(makeDocument([frame("frame", 0, 0, 1400, 700), ...objects], connections), ["frame"]);
+function fit(objects: InteractiveCanvasObject[], connections = [] as ReturnType<typeof connect>[], width = 1400) {
+  const session = makeTestSession(makeDocument([frame("frame", 0, 0, width, 700), ...objects], connections), ["frame"]);
   const result = runOp(session, "fit_section", { id: "frame" });
   expect(result.isError).toBeUndefined();
   const geometry = (id: string) => session.draft.objects.find((object) => object.id === id)!.geometry;
@@ -135,6 +136,26 @@ describe("fit_section centres what the frame holds", () => {
 });
 
 describe("fit_section evens a row", () => {
+  test("a loop wire that moves with its nodes stays inside the frame", () => {
+    const loop = {
+      id: "loop",
+      from: { objectId: "b", position: [0.5, 0] as [number, number] },
+      to: { objectId: "under-b", position: [1, 0.5] as [number, number] },
+      waypoints: [[860, 100], [1600, 100], [1600, 440]] as [number, number][],
+    };
+    const { session, geometry } = fit(
+      [node("a", 600), node("b", 780), node("c", 1120), node("under-b", 780, 400)],
+      [loop],
+      2000,
+    );
+
+    expect(geometry("b").x).toBe(860);
+    const frame = geometry("frame");
+    const reach = Math.max(...routedPolyline(session.draft.connections[0]!, session.draft).map((point) => point.x));
+    expect(reach).toBe(1680);
+    expect(frame.x + frame.width).toBeGreaterThanOrEqual(reach + 20);
+  });
+
   test("a row of three gets equal gaps between its end nodes, and a second fit changes nothing", () => {
     const { session, text, geometry, gap } = fit([node("a", 200), node("b", 380), node("c", 720)]);
 
@@ -147,13 +168,22 @@ describe("fit_section evens a row", () => {
     expect(runOp(session, "fit_section", { id: "frame" }).text).toContain("NO-OP");
   });
 
-  test("a gap a labelled wire crosses keeps the room its label needs", () => {
+  test("a row keeps its gaps, with the reason, when evening would squeeze a wire label", () => {
     const wire = { ...connect("w", "a", "b"), label: "returns the parsed findings list" };
-    const { gap } = fit([node("a", 400), node("b", 760), node("c", 940)], [wire]);
+    const { text, gap } = fit([node("a", 400), node("b", 760), node("c", 940)], [wire]);
 
     // Unlabelled, the 200px gap would shrink to the average, 110px.
-    expect(gap("a", "b")).toBeGreaterThanOrEqual(200);
-    expect(Math.abs(gap("a", "b") - gap("b", "c"))).toBeLessThanOrEqual(8);
+    expect(text).toContain("row a, b, c keeps uneven gaps: a wire label would lose its room");
+    expect(gap("a", "b")).toBe(200);
+  });
+
+  test("the end nodes of a long row hold to the pixel", () => {
+    const { geometry, gap } = fit([node("a", 200), node("b", 380), node("c", 720), node("d", 1000)]);
+
+    expect(geometry("a").x).toBe(200);
+    expect(geometry("d").x).toBe(1000);
+    const gaps = [gap("a", "b"), gap("b", "c"), gap("c", "d")];
+    expect(Math.max(...gaps) - Math.min(...gaps)).toBeLessThanOrEqual(4);
   });
 
   test("a node under a moved node keeps its centre line", () => {
