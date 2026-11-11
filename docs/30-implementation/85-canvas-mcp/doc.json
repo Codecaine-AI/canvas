@@ -23,6 +23,13 @@
         "b-cmcp-tools-table-8",
         "b-cmcp-tools-verbatim-9",
         "b-cmcp-tools-tuples-10",
+        "b-cmcp-merged-heading-13a",
+        "b-cmcp-merged-lede-13b",
+        "b-cmcp-merged-table-13c",
+        "b-cmcp-merged-separate-13d",
+        "b-cmcp-merged-rules-13e",
+        "b-cmcp-merged-fields-13f",
+        "b-cmcp-merged-checks-13g",
         "b-cmcp-gate-heading-10a",
         "b-cmcp-gate-lede-10b",
         "b-cmcp-gate-gated-10c",
@@ -236,7 +243,7 @@
           }
         },
         {
-          "insert": " is the new tool of its own, and a client calls it first in a thread. The toolkit is the agent's 20 operation tools plus four of its five workflow tools. "
+          "insert": " comes first in the list, and a client calls it first in a thread. The toolkit is the agent's 20 operation tools plus four of its five workflow tools. "
         },
         {
           "insert": "finalize",
@@ -381,18 +388,6 @@
           [
             [
               {
-                "insert": "canvas_create",
-                "attributes": {
-                  "code": true
-                }
-              }
-            ],
-            "Server",
-            "Creates a new board file in the boards folder and opens it as the active board."
-          ],
-          [
-            [
-              {
                 "insert": "canvas_open",
                 "attributes": {
                   "code": true
@@ -448,6 +443,18 @@
                 "insert": " opens the edit tools."
               }
             ]
+          ],
+          [
+            [
+              {
+                "insert": "canvas_create",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            "Server",
+            "Creates a new board file in the boards folder and opens it as the active board."
           ],
           [
             [
@@ -886,6 +893,744 @@
         },
         {
           "insert": ". Both forms accept the same values as the original, and the server still validates against the original."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-merged-heading-13a": {
+      "id": "b-cmcp-merged-heading-13a",
+      "type": "heading",
+      "props": {
+        "level": 3
+      },
+      "text": [
+        {
+          "insert": "Merged Tools"
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-merged-lede-13b": {
+      "id": "b-cmcp-merged-lede-13b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Eight toolkit tools are merged tools, and together they replace 17 former tools. A mode is one job of a merged tool, and a call picks the mode through the fields it sends. The merged tools are in the shared toolkit, so the kernel agent path lists the same tools. The table lists the merged tools in registration order."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-merged-table-13c": {
+      "id": "b-cmcp-merged-table-13c",
+      "type": "structured-table",
+      "props": {
+        "columns": [
+          "Tool",
+          "Mode fields",
+          "Former tools"
+        ],
+        "rows": [
+          [
+            [
+              {
+                "insert": "move",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "to",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " or "
+              },
+              {
+                "insert": "by",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "move_to",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "move_by",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ]
+          ],
+          [
+            [
+              {
+                "insert": "resize",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "width",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " and "
+              },
+              {
+                "insert": "height",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", or "
+              },
+              {
+                "insert": "like",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "resize",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "match_size",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ]
+          ],
+          [
+            [
+              {
+                "insert": "arrange",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "align",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " or "
+              },
+              {
+                "insert": "space",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "align",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "space_out",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ]
+          ],
+          [
+            [
+              {
+                "insert": "change_shape",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "patch.border",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " on a section"
+              }
+            ],
+            [
+              {
+                "insert": "change_shape",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "change_section_border",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ]
+          ],
+          [
+            [
+              {
+                "insert": "lock",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "mode",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " of "
+              },
+              {
+                "insert": "background",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "all",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", or "
+              },
+              {
+                "insert": "none",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "lock",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "unlock",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ]
+          ],
+          [
+            [
+              {
+                "insert": "route",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "points",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "shift",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", or "
+              },
+              {
+                "insert": "reset",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "reroute",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "shift_segment",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "reset_route",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ]
+          ],
+          [
+            [
+              {
+                "insert": "describe_board",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "title",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "description",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", or both"
+              }
+            ],
+            [
+              {
+                "insert": "set_board_title",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "update_description",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ]
+          ],
+          [
+            [
+              {
+                "insert": "annotate",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "objectId",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": " or "
+              },
+              {
+                "insert": "thread",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", with "
+              },
+              {
+                "insert": "body",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ],
+            [
+              {
+                "insert": "add_annotation",
+                "attributes": {
+                  "code": true
+                }
+              },
+              {
+                "insert": ", "
+              },
+              {
+                "insert": "reply_annotation",
+                "attributes": {
+                  "code": true
+                }
+              }
+            ]
+          ]
+        ],
+        "title": "Merged toolkit tools in registration order"
+      },
+      "children": []
+    },
+    "b-cmcp-merged-separate-13d": {
+      "id": "b-cmcp-merged-separate-13d",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "fit_section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "move_label",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", "
+        },
+        {
+          "insert": "arrange_section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", and "
+        },
+        {
+          "insert": "tighten_wires",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " are separate tools, not modes of a merged tool."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-merged-rules-13e": {
+      "id": "b-cmcp-merged-rules-13e",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Every merged tool except "
+        },
+        {
+          "insert": "lock",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " follows the same mode rules. "
+        },
+        {
+          "insert": "lock",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " takes its mode in one required "
+        },
+        {
+          "insert": "mode",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " field instead."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-merged-fields-13f": {
+      "id": "b-cmcp-merged-fields-13f",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Mode Fields",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-cmcp-merged-fields-one-13f1",
+        "b-cmcp-merged-fields-null-13f2",
+        "b-cmcp-merged-fields-type-13f3"
+      ]
+    },
+    "b-cmcp-merged-fields-one-13f1": {
+      "id": "b-cmcp-merged-fields-one-13f1",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Each mode is one optional field or sub-object, such as "
+        },
+        {
+          "insert": "to",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " or "
+        },
+        {
+          "insert": "by",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " on "
+        },
+        {
+          "insert": "move",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-merged-fields-null-13f2": {
+      "id": "b-cmcp-merged-fields-null-13f2",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Only an omitted mode or a null mode counts as absent."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-merged-fields-type-13f3": {
+      "id": "b-cmcp-merged-fields-type-13f3",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "callToolkitTool",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " refuses a mode of the wrong type, such as "
+        },
+        {
+          "insert": "points: \"\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", before pi-ai converts the arguments."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-merged-checks-13g": {
+      "id": "b-cmcp-merged-checks-13g",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Mode Checks",
+          "attributes": {
+            "bold": true
+          }
+        }
+      ],
+      "children": [
+        "b-cmcp-merged-checks-oneof-13g1",
+        "b-cmcp-merged-checks-desc-13g2",
+        "b-cmcp-merged-checks-validator-13g3"
+      ]
+    },
+    "b-cmcp-merged-checks-oneof-13g1": {
+      "id": "b-cmcp-merged-checks-oneof-13g1",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A schema has no root "
+        },
+        {
+          "insert": "oneOf",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", because a provider can rebuild a tool schema from "
+        },
+        {
+          "insert": "properties",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "required",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " alone."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-merged-checks-desc-13g2": {
+      "id": "b-cmcp-merged-checks-desc-13g2",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The tool description says which modes a call can send together."
+        }
+      ],
+      "children": []
+    },
+    "b-cmcp-merged-checks-validator-13g3": {
+      "id": "b-cmcp-merged-checks-validator-13g3",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The tool's own validator refuses a call that breaks that rule, such as "
+        },
+        {
+          "insert": "move",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " with both "
+        },
+        {
+          "insert": "to",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " and "
+        },
+        {
+          "insert": "by",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []
