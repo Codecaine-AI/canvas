@@ -15,7 +15,7 @@
  * connectionLabelChipRect). Pure, deterministic, Node-safe — no DOM.
  */
 
-import { routeConnection } from "../connectors/routing";
+import { chipPointOnRoute, routeConnectionOnBoard } from "../connectors/routing";
 import { placedLabelPoint } from "../connectors/label-placement";
 import { belowExtendedBoundsPx } from "../objects/text-slots";
 import { sectionTitleChipWorldRect } from "../objects/section/title-chip-geometry";
@@ -117,7 +117,7 @@ function routedConnectionBounds(
   const toObject = objectsById.get(connection.to.objectId);
   if (!fromObject || !toObject) return null;
 
-  const routed = routeConnection(fromObject, toObject, connection, obstacles, canvasStyle);
+  const routed = routeConnectionOnBoard({ objects: obstacles, connections: document.connections }, connection, fromObject, toObject, canvasStyle);
   const points = routed.points && routed.points.length > 0
     ? routed.points
     : [routed.start, routed.end];
@@ -131,7 +131,7 @@ function routedConnectionBounds(
   // the style draws it (connectors/label-chip.ts: a 26px mono chip in the
   // schematic themes, the 30px sans chip in figjam).
   if (label) {
-    rect = unionRects(rect, connectionLabelChipRect(label, placedLabelPoint(routed, connection, document, canvasStyle), canvasStyle));
+    rect = unionRects(rect, connectionLabelChipRect(label, chipPointOnRoute(placedLabelPoint(routed, connection, document, canvasStyle), routed, connection), canvasStyle));
   }
   return rect;
 }

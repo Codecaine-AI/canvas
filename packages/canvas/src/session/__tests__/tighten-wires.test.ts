@@ -92,6 +92,85 @@ describe("arrange · tighten_wires", () => {
     expect(c.y + c.height).toBeLessThanOrEqual(frame.y + frame.height - 40);
   });
 
+  test("slides a box so its wire runs straight when the total length stays the same", () => {
+    // a → b jogs 200px. Each of the two has a second wire that pulls it the
+    // other way, so every move that lines them up adds 200px elsewhere.
+    const document = makeDocument(
+      [
+        { ...box("page", 0, 0, 2000, 1400, "section"), text: "Page" },
+        { ...box("over-a", 100, 100, 280, 100), parentId: "page" },
+        { ...box("a", 100, 300, 280, 100), parentId: "page" },
+        { ...box("b", 700, 500, 280, 100), parentId: "page" },
+        { ...box("under-b", 700, 700, 280, 100), parentId: "page" },
+      ],
+      [connect("over-a-a", "over-a", "a"), connect("a-b", "a", "b"), connect("b-under-b", "b", "under-b")],
+    );
+    const session = makeTestSession(document, ["page"]);
+
+    const result = runOp(session, "tighten_wires", {});
+
+    expect(result.text).toMatch(/APPLIED · tighten_wires · .* · corners 2 → 0 · crossings 0 → 0/);
+    const a = objectOf(session.draft, "a").geometry;
+    const b = objectOf(session.draft, "b").geometry;
+    expect(a.y + a.height / 2).toBe(b.y + b.height / 2);
+  });
+
+  test("slides a section so the wire into it runs straight", () => {
+    // kernel → event jogs 260px. A slide of either section lines them up and
+    // makes one other wire 260px longer, so the length does not change.
+    const document = makeDocument(
+      [
+        { ...box("page", 0, 0, 2400, 1600, "section"), text: "Page" },
+        { ...box("engine", 100, 60, 280, 100), parentId: "page" },
+        { ...box("providers", 80, 560, 360, 240, "section"), text: "Providers", parentId: "page" },
+        { ...box("kernel", 120, 660, 280, 100), parentId: "providers" },
+        { ...box("gateway", 120, 900, 280, 100), parentId: "page" },
+        { ...box("records", 900, 100, 360, 480, "section"), text: "Records", parentId: "page" },
+        { ...box("row", 940, 180, 280, 100), parentId: "records" },
+        { ...box("event", 940, 400, 280, 100), parentId: "records" },
+      ],
+      [
+        connect("engine-row", "engine", "row"),
+        connect("row-event", "row", "event"),
+        connect("kernel-event", "kernel", "event"),
+        connect("kernel-gateway", "kernel", "gateway"),
+      ],
+    );
+    const session = makeTestSession(document, ["page"]);
+
+    runOp(session, "tighten_wires", {});
+
+    const kernel = objectOf(session.draft, "kernel").geometry;
+    const event = objectOf(session.draft, "event").geometry;
+    expect(kernel.y + kernel.height / 2).toBe(event.y + event.height / 2);
+    // Each section moved as one body.
+    const records = objectOf(session.draft, "records").geometry;
+    expect(event.y - records.y).toBe(300);
+    expect(objectOf(session.draft, "row").geometry.y - records.y).toBe(80);
+    expect(kernel.y - objectOf(session.draft, "providers").geometry.y).toBe(100);
+  });
+
+  test("counts a corner that merged wires share as one corner", () => {
+    // Two wires meet at (640, 400) and drop into the sink as one line.
+    const document = makeDocument(
+      [
+        { ...box("page", 0, 0, 1600, 1000, "section"), text: "Page" },
+        { ...box("left", 100, 100, 280, 100), parentId: "page" },
+        { ...box("right", 900, 100, 280, 100), parentId: "page" },
+        { ...box("sink", 500, 500, 280, 100), parentId: "page" },
+      ],
+      [
+        { id: "left-sink", from: { objectId: "left", anchor: "bottom" }, to: { objectId: "sink", anchor: "top" }, waypoints: [[240, 400], [640, 400]] },
+        { id: "right-sink", from: { objectId: "right", anchor: "bottom" }, to: { objectId: "sink", anchor: "top" }, waypoints: [[1040, 400], [640, 400]] },
+      ],
+    );
+    const session = makeTestSession(document, ["page"]);
+
+    const result = runOp(session, "tighten_wires", {});
+
+    expect(result.text).toMatch(/corners 3 → \d+|, 3 corners,/);
+  });
+
   test("refuses a board with no wires", () => {
     const session = makeTestSession(makeDocument([box("alpha", 0, 0, 160, 100)]), ["alpha"]);
 

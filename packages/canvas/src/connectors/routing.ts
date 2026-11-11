@@ -16,6 +16,8 @@ import {
 } from "../objects/geometry";
 import { PathGenerator, type OrthogonalObstacle } from "./pathfinding/path-generator";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
+import { onBackendChange } from "../theme/text-measure";
+import { assignLanes, LANE_GAP_PX, type LaneSpan, type LaneWire } from "./lanes";
 // Connector routing figures (moved from theme/tokens.ts in the theme
 // dispersal — this router is their consumer; the routing tests import them
 // from here). Logical px.
@@ -181,6 +183,157 @@ export function routeConnection(
   );
 }
 
+/** The objects and wires one board draws together. */
+export type RoutingBoard = {
+  objects: ReadonlyArray<InteractiveCanvasObject>;
+  connections: ReadonlyArray<InteractiveCanvasConnection>;
+};
+
+/**
+ * `connection` as its board draws it: routeConnection's route, then moved
+ * into lanes with the board's other wires (./lanes.ts), so two wires with two
+ * meanings never paint as one line. A connection or endpoint that is not the
+ * board's own (a drag preview's stand-in) gets routeConnection's route.
+ */
+export function routeConnectionOnBoard(
+  board: RoutingBoard,
+  connection: InteractiveCanvasConnection,
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): RoutedConnection {
+  const own = boardRoutes(board, canvasStyle).get(connection);
+  return own && own.fromObject === fromObject && own.toObject === toObject
+    ? own.routed
+    : routeConnection(fromObject, toObject, connection, board.objects, canvasStyle);
+}
+
+type BoardRoute = { fromObject: InteractiveCanvasObject; toObject: InteractiveCanvasObject; routed: RoutedConnection };
+type BoardRoutes = Map<InteractiveCanvasConnection, BoardRoute>;
+
+// One lane pass per board state: documents are immutable, so the two arrays
+// name the state. Styles are often fresh copies, so they key by value.
+const boardRouteCache = new WeakMap<
+  ReadonlyArray<InteractiveCanvasObject>,
+  WeakMap<ReadonlyArray<InteractiveCanvasConnection>, Map<string, BoardRoutes>>
+>();
+const styleKeys = new WeakMap<CanvasStyle, string>();
+// Icon captions set where wires attach, and their size follows the measuring backend.
+let backendRevision = 0;
+onBackendChange(() => {
+  backendRevision += 1;
+});
+
+function boardRoutes(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes {
+  let byConnections = boardRouteCache.get(board.objects);
+  if (!byConnections) boardRouteCache.set(board.objects, (byConnections = new WeakMap()));
+  let byStyle = byConnections.get(board.connections);
+  if (!byStyle) byConnections.set(board.connections, (byStyle = new Map()));
+  let styleKey = styleKeys.get(canvasStyle);
+  if (styleKey === undefined) styleKeys.set(canvasStyle, (styleKey = JSON.stringify(canvasStyle)));
+  const key = `${backendRevision}:${styleKey}`;
+  let routes = byStyle.get(key);
+  if (!routes) {
+    for (const old of [...byStyle.keys()]) {
+      if (!old.startsWith(`${backendRevision}:`)) byStyle.delete(old);
+    }
+    byStyle.set(key, (routes = routeBoard(board, canvasStyle)));
+  }
+  return routes;
+}
+
+function routeBoard(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes {
+  const byId = new Map(board.objects.map((object) => [object.id, object]));
+  const routes: BoardRoutes = new Map();
+  const wires: LaneWire[] = [];
+  const byWireId = new Map<string, InteractiveCanvasConnection>();
+  for (const connection of board.connections) {
+    const fromObject = byId.get(connection.from.objectId);
+    const toObject = byId.get(connection.to.objectId);
+    if (!fromObject || !toObject) continue;
+    const routed = routeConnection(fromObject, toObject, connection, board.objects, canvasStyle);
+    routes.set(connection, { fromObject, toObject, routed });
+    const points = routed.points;
+    if (!points || points.length < 2 || byWireId.has(connection.id)) continue;
+    byWireId.set(connection.id, connection);
+    const arrow = connection.arrow ?? "forward";
+    let keepOut: KeepOut | null = null;
+    wires.push({
+      id: connection.id,
+      from: fromObject.id,
+      to: toObject.id,
+      color: connection.color ?? "",
+      dash: connection.style ?? "solid",
+      headAtStart: arrow === "back" || arrow === "both",
+      headAtEnd: arrow === "forward" || arrow === "both",
+      points,
+      lanesFixed: validWaypoints(connection.waypoints) !== null,
+      startSpan: portSpan(fromObject, points[0]!, points[1]!, canvasStyle),
+      endSpan: portSpan(toObject, points[points.length - 1]!, points[points.length - 2]!, canvasStyle),
+      blockers: (candidate) => {
+        keepOut ??= { ...withoutSections(routeKeepOut(fromObject, toObject, routed.start, routed.end, board.objects, canvasStyle)), selves: [] };
+        return routeBlockers(candidate, keepOut).length;
+      },
+    });
+  }
+  for (const [id, points] of assignLanes(wires)) {
+    const connection = byWireId.get(id)!;
+    const solo = routes.get(connection)!;
+    const laned = routedConnectionFromPoints(points, points[0]!, points[points.length - 1]!, solo.routed.startAnchor, solo.routed.endAnchor);
+    routes.set(connection, { ...solo, routed: withCornerRadius(laned, canvasStyle.connectorCornerRadiusPx) });
+  }
+  return routes;
+}
+
+/** Room for a port on the side of `object` that the end run `tip -> corner` leaves, along that side. */
+function portSpan(
+  object: InteractiveCanvasObject,
+  tip: CanvasPoint,
+  corner: CanvasPoint,
+  canvasStyle: CanvasStyle,
+): LaneSpan | null {
+  const horizontal = Math.abs(tip.y - corner.y) <= ROUTE_EPSILON;
+  if (!horizontal && Math.abs(tip.x - corner.x) > ROUTE_EPSILON) return null;
+  const side: Anchor = horizontal ? (corner.x > tip.x ? "right" : "left") : corner.y > tip.y ? "bottom" : "top";
+  const span = edgeSlideSpan(object, side, canvasStyle);
+  if (!span || Math.abs(span.fixed - (horizontal ? tip.x : tip.y)) > WAYPOINT_ORTHOGONAL_EPSILON_PX) return null;
+  return { min: span.min, max: span.max };
+}
+
+/** Farthest a lane pass moves a wire from its own route: a few lanes. */
+const CHIP_FOLLOW_PX = LANE_GAP_PX * 4;
+
+/**
+ * A label chip centre kept on its wire. Label placement reads each wire's own
+ * route (routeConnection), so the chip of a wire the lane pass moved sits
+ * beside its line: this moves it the short way back on. A chip already on the
+ * line stays, and so does one its author pushed off the line (`offset`).
+ */
+export function chipPointOnRoute(
+  point: CanvasPoint,
+  routed: RoutedConnection,
+  connection: Pick<InteractiveCanvasConnection, "labelPosition">,
+): CanvasPoint {
+  const points = routed.points;
+  if (!points || points.length < 2 || connection.labelPosition?.offset) return point;
+  let best = point;
+  let bestDistance = Infinity;
+  for (let index = 1; index < points.length; index += 1) {
+    const a = points[index - 1]!;
+    const b = points[index]!;
+    const lengthSquared = (b.x - a.x) ** 2 + (b.y - a.y) ** 2;
+    if (lengthSquared <= ROUTE_EPSILON) continue;
+    const t = clamp(((point.x - a.x) * (b.x - a.x) + (point.y - a.y) * (b.y - a.y)) / lengthSquared, 0, 1);
+    const candidate = { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y) };
+    const candidateDistance = distance(point, candidate);
+    if (candidateDistance < bestDistance) {
+      bestDistance = candidateDistance;
+      best = candidate;
+    }
+  }
+  return bestDistance <= WAYPOINT_ORTHOGONAL_EPSILON_PX || bestDistance > CHIP_FOLLOW_PX ? point : best;
+}
+
 /** Where `connection` leaves and enters before any detour: its sides (explicit, else picked) and points. */
 function routeEnds(
   fromObject: InteractiveCanvasObject,
@@ -221,14 +374,27 @@ function routeConnectionPolyline(
   // router. Crossing an unrelated section's frame is allowed, as on stage.
   const explicitWaypoints = validWaypoints(connection.waypoints);
   if (explicitWaypoints) {
-    const waypointRoute = routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor, {
+    const endpointContext = {
       fromObject,
       toObject,
       canSlideStart: !connection.from.position,
       canSlideEnd: !connection.to.position,
       canvasStyle,
-    }, (route) => isClear(route, boxesOnly));
+    };
+    const accept = (route: RoutedConnection) => isClear(route, boxesOnly);
+    const waypointRoute = routeWaypoints(start, end, explicitWaypoints, startAnchor, endAnchor, endpointContext, accept);
     if (waypointRoute) return waypointRoute;
+    // A port that moved off its stored corner keeps the stored lanes: only
+    // the two end runs follow the ports.
+    const slid = slideEndCorners(
+      start,
+      end,
+      explicitWaypoints,
+      connectionBoundsForObject(fromObject, canvasStyle),
+      connectionBoundsForObject(toObject, canvasStyle),
+    );
+    const slidRoute = slid && routeWaypoints(start, end, slid, startAnchor, endAnchor, endpointContext, accept);
+    if (slidRoute) return slidRoute;
   }
 
   const straight = routeStraightIfAligned(
@@ -242,11 +408,14 @@ function routeConnectionPolyline(
   );
   const elbow = routeElbow(start, end, startAnchor, endAnchor, canvasStyle.connectorCornerRadiusPx);
   const tried: Array<RoutedConnection | null> = [straight, elbow];
+  // Two stubs that meet head on collapse into one run along the boxes' edges:
+  // that elbow is a last resort, not a route.
+  const elbowLeaves = leavesAlongSides(elbow, startAnchor, endAnchor);
 
   // Unrelated sections are kept out first, so a wire goes around a group it
   // does not belong to.
   if (straight && isClear(straight, keepOut)) return straight;
-  if (isClear(elbow, keepOut)) return elbow;
+  if (elbowLeaves && isClear(elbow, keepOut)) return elbow;
   const aStar = (level: KeepOut) =>
     exitsClear(start, startAnchor, end, endAnchor, level)
       ? routeOrthogonalAStar(fromObject, toObject, start, end, startAnchor, endAnchor, aStarObstacles(level), canvasStyle)
@@ -256,7 +425,7 @@ function routeConnectionPolyline(
   tried.push(strict);
   // When sections wall the route in, only boxes count.
   if (straight && isClear(straight, detourKeepOut)) return straight;
-  if (isClear(elbow, detourKeepOut)) return elbow;
+  if (elbowLeaves && isClear(elbow, detourKeepOut)) return elbow;
 
   // The facing sides are walled in. Cheapest first: an elbow from the other
   // sides an unpinned end may leave from; then A* with only boxes (a failed
@@ -671,6 +840,75 @@ function routeWaypoints(
     if (accept(route)) return route;
   }
   return null;
+}
+
+/**
+ * Stored corners moved to meet ends that no longer line up with them (a
+ * pinned port that moved, an icon whose tile is smaller than its slot). The
+ * first corner slides along its lane, the run to the second corner, until the
+ * start meets it squarely, and the last corner slides along its lane to meet
+ * the end. Every lane the author placed stays where it was put: only the two
+ * end runs follow their ports. Null when nothing moves, when a corner would
+ * slide past its neighbour (the lane would reverse), or when an end run would
+ * cut back through its own object or run along its edge.
+ */
+function slideEndCorners(
+  start: CanvasPoint,
+  end: CanvasPoint,
+  waypoints: ReadonlyArray<CanvasPoint>,
+  fromBounds: CanvasBounds,
+  toBounds: CanvasBounds,
+): CanvasPoint[] | null {
+  const corners = waypoints.map((point) => ({ ...point }));
+  const last = corners.length - 1;
+  const first = corners[0];
+  const final = corners[last];
+  if (!first || !final) return null;
+  const epsilon = WAYPOINT_ORTHOGONAL_EPSILON_PX;
+  if (isOrthogonalSegment(start, first, epsilon) && isOrthogonalSegment(final, end, epsilon)) return null;
+
+  if (last === 0) {
+    // One corner has no lane: it keeps the order of its two runs.
+    const horizontalFirst = Math.abs(first.y - start.y) <= Math.abs(first.x - start.x);
+    corners[0] = horizontalFirst ? { x: end.x, y: start.y } : { x: start.x, y: end.y };
+  } else {
+    const slidFirst = slideAlongLane(first, corners[1]!, start);
+    const slidFinal = slideAlongLane(final, corners[last - 1]!, end);
+    if (!slidFirst || !slidFinal) return null;
+    corners[0] = slidFirst;
+    corners[last] = slidFinal;
+    // Two corners share one lane: they must not slide past each other.
+    if (last === 1 && !sameHeading(first, final, slidFirst, slidFinal)) return null;
+  }
+
+  const leavesBody = (inner: CanvasPoint, outer: CanvasPoint, bounds: CanvasBounds) =>
+    boundsStrictlyContain(bounds, inner) || (!segmentCrossesInterior(inner, outer, bounds) && !runsAlongEdge(inner, outer, bounds));
+  if (!leavesBody(start, corners[0]!, fromBounds) || !leavesBody(end, corners[last]!, toBounds)) return null;
+  return corners;
+}
+
+/** Whether the axis-aligned run `a -> b` lies on the edge of `bounds` that `a` sits on. */
+function runsAlongEdge(a: CanvasPoint, b: CanvasPoint, bounds: CanvasBounds): boolean {
+  const epsilon = WAYPOINT_ORTHOGONAL_EPSILON_PX;
+  const onEdge = (value: number, low: number, size: number) => Math.abs(value - low) <= epsilon || Math.abs(value - low - size) <= epsilon;
+  return Math.abs(a.x - b.x) <= epsilon ? onEdge(a.x, bounds.x, bounds.width) : onEdge(a.y, bounds.y, bounds.height);
+}
+
+/** `corner` moved along its lane to `neighbour` until `endpoint` meets it squarely, or null when it would pass `neighbour`. */
+function slideAlongLane(corner: CanvasPoint, neighbour: CanvasPoint, endpoint: CanvasPoint): CanvasPoint | null {
+  const epsilon = WAYPOINT_ORTHOGONAL_EPSILON_PX;
+  if (isOrthogonalSegment(endpoint, corner, epsilon)) return corner;
+  const vertical = Math.abs(corner.x - neighbour.x) <= epsilon;
+  if (!vertical && Math.abs(corner.y - neighbour.y) > epsilon) return null;
+  const slid = vertical ? { x: corner.x, y: endpoint.y } : { x: endpoint.x, y: corner.y };
+  return sameHeading(corner, neighbour, slid, neighbour) ? slid : null;
+}
+
+/** Whether the run `c -> d` still heads the way the axis-aligned run `a -> b` does. */
+function sameHeading(a: CanvasPoint, b: CanvasPoint, c: CanvasPoint, d: CanvasPoint): boolean {
+  const before = Math.abs(b.x - a.x) > Math.abs(b.y - a.y) ? b.x - a.x : b.y - a.y;
+  const after = Math.abs(b.x - a.x) > Math.abs(b.y - a.y) ? d.x - c.x : d.y - c.y;
+  return Math.abs(before) > ROUTE_EPSILON && Math.abs(after) > ROUTE_EPSILON && Math.sign(before) === Math.sign(after);
 }
 
 type WaypointEndpointContext = {

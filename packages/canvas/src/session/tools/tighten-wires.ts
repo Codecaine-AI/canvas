@@ -13,16 +13,25 @@
  *
  * Method: coordinate descent on the routed length.
  * - A node's candidates are the places that make its wires short: the median
- *   of its neighbours' centres, each neighbour's x or y (a straight wire), and
- *   small nudges from where it stands. A candidate is legal when the box stays
+ *   of its neighbours' centres, each neighbour's x or y and the place that
+ *   lines up the two ends of each wire (a straight wire), and small nudges
+ *   from where it stands. A candidate is legal when the box stays
  *   inside its frame, clears every sibling box by SIBLING_GAP, lands on no
  *   other wire's path, and adds no wire or label fault (below).
- * - A top-level section's candidates are nudges and the offset that brings
- *   the inside ends of its outside wires toward their outside ends; two
- *   sections also try trading corners. A section moves as one body.
+ * - A top-level section's candidates are nudges, the offset that brings
+ *   the inside ends of its outside wires toward their outside ends, and the
+ *   offset that lines up the two ends of each outside wire; two sections also
+ *   try trading corners. A section moves as one body.
  * - Every candidate is scored by re-routing the wires it touches with the
- *   real router: routed length plus a penalty per crossing and per label chip
- *   that lands on a box. Only a strict improvement is kept.
+ *   real router: routed length plus a penalty per corner, per crossing and
+ *   per label chip that lands on a box. Only a strict improvement is kept.
+ * - The corner penalty is what makes a straight wire win. Length alone is
+ *   blind to it: a move that straightens one wire often lengthens another by
+ *   the same amount, and the board owner still wants the move ("I would
+ *   personally like this area to be lower so that the line from the kernel
+ *   to the trace envelope is straight"). A corner that merged wires share
+ *   counts once, so a wire of its own that goes straight is worth more than
+ *   one wire of a junction that does.
  *
  * Pure over the document: geometry in, geometry out. The gesture
  * (operations/tighten-wires.ts) lowers the result.
@@ -65,6 +74,9 @@ export interface TightenResult {
   /** Routed Manhattan length of every wire, before and after. */
   lengthBefore: number;
   lengthAfter: number;
+  /** Corners of every wire, before and after. */
+  bendsBefore: number;
+  bendsAfter: number;
   /** Wire pairs that cross, before and after. */
   crossingsBefore: number;
   crossingsAfter: number;
@@ -83,6 +95,8 @@ const FRAME_TOP_PADDING = FRAME_PADDING + 40;
 const SECTION_GAP = 80;
 /** What one crossing or one chip on a box costs, in px of wire. */
 const CROSSING_COST = 300;
+/** What one corner costs, in px of wire: a straight wire beats a bent wire of the same length. */
+const BEND_COST = 80;
 /** A move must save at least this much to be worth the churn. */
 const MIN_GAIN = 40;
 /** What turning a wire against its own direction costs, in px of wire. */
@@ -104,6 +118,21 @@ function manhattan(points: readonly Point[]): number {
 
 function orient(p: Point, q: Point, r: Point): number {
   return Math.sign((q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x));
+}
+
+/**
+ * Corners of the routes given: the points where a wire turns. Wires that turn
+ * at one point make one corner, the way a reader sees a junction.
+ */
+function bends(routes: Iterable<readonly Point[]>): number {
+  const corners = new Set<string>();
+  for (const points of routes) {
+    for (let index = 1; index < points.length - 1; index += 1) {
+      const point = points[index]!;
+      if (orient(points[index - 1]!, point, points[index + 1]!) !== 0) corners.add(`${Math.round(point.x)},${Math.round(point.y)}`);
+    }
+  }
+  return corners.size;
 }
 
 /** Proper crossing of two segments: interiors meet, no shared endpoint, no collinear overlap. */
@@ -149,6 +178,11 @@ function totalLength(routes: Routes): number {
   let total = 0;
   for (const points of routes.values()) total += manhattan(points);
   return total;
+}
+
+/** What the board's wires cost: their length, their corners and their crossings, in px of wire. */
+function wireCost(routes: Routes): number {
+  return totalLength(routes) + BEND_COST * bends(routes.values()) + CROSSING_COST * totalCrossings(routes);
 }
 
 function median(values: number[]): number {
@@ -322,12 +356,35 @@ function scoreEdges(
 ): { score: number; routed: Routes; faults: number } {
   const routed: Routes = new Map(routes);
   for (const edge of edges) routed.set(edge.id, routedPolyline(edge, document, canvasStyle));
-  let score = 0;
-  for (const edge of edges) {
-    score += manhattan(routed.get(edge.id)!) + CROSSING_COST * crossingsOf(edge.id, routed);
-  }
+  let score = BEND_COST * bends(edges.map((edge) => routed.get(edge.id)!));
+  for (const edge of edges) score += manhattan(routed.get(edge.id)!) + CROSSING_COST * crossingsOf(edge.id, routed);
   const faults = chipFaults(edges, document, routed, canvasStyle, otherChips) + brokenEdges(edges, document, routed, canvasStyle);
   return { score, routed, faults };
+}
+
+/**
+ * The slide of the box named that makes a wire straight: across the wire's
+ * two end runs, until its two ends line up. Null when the end runs point two
+ * ways (an elbow keeps a corner wherever its boxes stand), and for a self-loop.
+ * A slide along the end runs is never one: it lines the ends up on the box
+ * edges, and the wire would lie on them.
+ */
+function straighteningSlide(
+  edge: InteractiveCanvasConnection,
+  nearId: string,
+  routes: Routes,
+): { dx: number; dy: number } | null {
+  const points = routes.get(edge.id);
+  if (!points || points.length < 2 || edge.from.objectId === edge.to.objectId) return null;
+  const first = points[0]!;
+  const last = points[points.length - 1]!;
+  const horizontal = (a: Point, b: Point) => Math.abs(a.y - b.y) < Math.abs(a.x - b.x);
+  const startsHorizontal = horizontal(first, points[1]!);
+  if (startsHorizontal !== horizontal(points[points.length - 2]!, last)) return null;
+  const sign = edge.from.objectId === nearId ? 1 : -1;
+  return startsHorizontal
+    ? { dx: 0, dy: sign * (last.y - first.y) }
+    : { dx: sign * (last.x - first.x), dy: 0 };
 }
 
 function snapRect(rect: Rect): Rect {
@@ -365,6 +422,11 @@ function tightenNode(board: Board, node: InteractiveCanvasObject): Board | null 
     candidates.push({ x: box.x, y: point.y - box.height / 2 });
     candidates.push({ x: point.x - box.width / 2, y: ideal.y });
     candidates.push({ x: ideal.x, y: point.y - box.height / 2 });
+  }
+  // Where each wire's two ends line up: its ports can sit off the box centres.
+  for (const edge of incident) {
+    const slide = straighteningSlide(edge, node.id, routes);
+    if (slide) candidates.push({ x: box.x + slide.dx, y: box.y + slide.dy });
   }
   for (const step of NUDGES) {
     candidates.push({ x: box.x + step, y: box.y }, { x: box.x - step, y: box.y });
@@ -405,12 +467,12 @@ function tightenNode(board: Board, node: InteractiveCanvasObject): Board | null 
   // The incident score is an estimate: a moved box also bends other wires.
   // The best few candidates get the whole board re-routed and re-checked.
   const faultsNow = boardFaults(document, routes, canvasStyle);
-  const scoreNow = totalLength(routes) + CROSSING_COST * totalCrossings(routes);
+  const scoreNow = wireCost(routes);
   for (const candidate of ranked.slice(0, VERIFY_BEST)) {
     const moved = withGeometry(document, node.id, candidate.rect);
     const routed = routeAll(moved, canvasStyle);
     if (boardFaults(moved, routed, canvasStyle) > faultsNow) continue;
-    if (totalLength(routed) + CROSSING_COST * totalCrossings(routed) >= scoreNow - MIN_GAIN) continue;
+    if (wireCost(routed) >= scoreNow - MIN_GAIN) continue;
     return {
       document: moved,
       byId: new Map(moved.objects.map((object) => [object.id, object])),
@@ -428,7 +490,7 @@ function tightenNode(board: Board, node: InteractiveCanvasObject): Board | null 
 function boardScore(document: InteractiveCanvasDocument, canvasStyle: CanvasStyle): { score: number; routes: Routes; faults: number } {
   const routes = routeAll(document, canvasStyle);
   return {
-    score: totalLength(routes) + CROSSING_COST * totalCrossings(routes),
+    score: wireCost(routes),
     routes,
     faults: chipFaults(document.connections, document, routes, canvasStyle, []) + brokenEdges(document.connections, document, routes, canvasStyle),
   };
@@ -496,6 +558,9 @@ function tightenSections(board: Board, frame: InteractiveCanvasObject | null): B
       const inner = byId.get(fromIn ? edge.from.objectId : edge.to.objectId);
       if (outside) outsideEnds.push(centre(rectOf(outside)));
       if (inner) insideEnds.push(centre(rectOf(inner)));
+      // The slide that lines up this wire's two ends, so it runs straight.
+      const slide = straighteningSlide(edge, fromIn ? edge.from.objectId : edge.to.objectId, board.routes);
+      if (slide) consider(translated(document, section.id, slide), [section.id]);
     }
     if (outsideEnds.length > 0) {
       const dx = median(outsideEnds.map((p) => p.x)) - median(insideEnds.map((p) => p.x));
@@ -548,6 +613,7 @@ export function tightenWires(document: InteractiveCanvasDocument, options: Tight
     canvasStyle,
   };
   const lengthBefore = totalLength(board.routes);
+  const bendsBefore = bends(board.routes.values());
   const crossingsBefore = totalCrossings(board.routes);
 
   for (let pass = 0; pass < passes; pass += 1) {
@@ -593,6 +659,8 @@ export function tightenWires(document: InteractiveCanvasDocument, options: Tight
     movedIds,
     lengthBefore: Math.round(lengthBefore),
     lengthAfter: Math.round(totalLength(finalRoutes)),
+    bendsBefore,
+    bendsAfter: bends(finalRoutes.values()),
     crossingsBefore,
     crossingsAfter: totalCrossings(finalRoutes),
   };
