@@ -297,6 +297,11 @@ describe("ports on a board", () => {
       expect(b).toEqual(a);
     });
 
+    it("join when one wire is gray by default and the other gray by choice", () => {
+      const [a, b] = tips(loose, {}, { color: "gray", style: "dashed" });
+      expect(a).toEqual(b);
+    });
+
     it("stay apart when the wires share no dash, colour, source or section", () => {
       const [a, b] = tips(loose, { color: "red" }, { color: "blue", style: "dashed" });
       expect(Math.abs(a.y - b.y)).toBeCloseTo(16, 5);
@@ -317,13 +322,33 @@ describe("ports on a board", () => {
     expect(crossings(out, l) + crossings(out, r)).toBe(0);
   });
 
+  it("keeps a junction on its own side of a wire that runs straight in between", () => {
+    const objects = [box("t", 400, 200, 200, 100), box("r", 100, 500), box("b", 450, 500), box("o", 800, 500)];
+    const to = { objectId: "t", anchor: "bottom" } as const;
+    const routes = drawn(objects, [
+      wire("r", { objectId: "r" }, to, { color: "red" }),
+      wire("b", { objectId: "b" }, to, { color: "blue", style: "dashed" }),
+      wire("o", { objectId: "o" }, to, { color: "orange" }),
+    ]);
+    const [r, b, o] = [routes.get("r")!, routes.get("b")!, routes.get("o")!];
+    expect(b).toEqual([{ x: 500, y: 500 }, { x: 500, y: 300 }]);
+    expect(tip(r).x).toBeLessThan(500);
+    expect(tip(o).x).toBeGreaterThan(500);
+    expect(crossings(b, r) + crossings(b, o)).toBe(0);
+  });
+
   it("trades the sides two wires enter where that stops them crossing", () => {
     const objects = [box("t", 400, 200, 200, 100), box("p", 0, 400), box("q", 250, 560)];
+    const p = wire("p", { objectId: "p" }, { objectId: "t", anchor: "bottom" }, { color: "orange" });
     const q = wire("q", { objectId: "q" }, { objectId: "t", anchor: "left" }, { color: "gray" });
-    const free = drawn(objects, [wire("p", { objectId: "p" }, { objectId: "t", anchor: "bottom" }, { color: "orange" }), q]);
+    const free = drawn(objects, [p, q]);
     expect(crossings(free.get("p")!, free.get("q")!)).toBe(0);
     expect(tip(free.get("p")!)).toEqual({ x: 400, y: 250 });
     expect(tip(free.get("q")!)).toEqual({ x: 500, y: 300 });
+    // A second orange wire that stays at the bottom does not hold the trade back.
+    const below = wire("c", { objectId: "c", anchor: "top" }, { objectId: "t", anchor: "bottom" }, { color: "orange" });
+    const third = drawn([...objects, box("c", 450, 700)], [p, q, below]);
+    expect(crossings(third.get("p")!, third.get("q")!)).toBe(0);
     // A pinned end is the author's choice of side: it stays, and so does the crossing.
     const held = drawn(objects, [wire("p", { objectId: "p" }, { objectId: "t", anchor: "bottom", position: [0.5, 1] }, { color: "orange" }), q]);
     expect(tip(held.get("p")!)).toEqual({ x: 500, y: 300 });
@@ -354,8 +379,14 @@ describe("ports on a board", () => {
       { ...box("a", 260, 100), parentId: "group" },
       box("b", 440, 400),
     ];
-    const route = drawn(objects, [wire("w", { objectId: "a", anchor: "right" }, { objectId: "b", anchor: "left" })]).get("w")!;
+    const from = { objectId: "a", anchor: "right" } as const;
+    const w = wire("w", from, { objectId: "b", anchor: "left" });
+    const route = drawn(objects, [w]).get("w")!;
     // Alone the wire turns halfway, on the section's right border at x 400.
     expect(route).toEqual([{ x: 360, y: 130 }, { x: 416, y: 130 }, { x: 416, y: 430 }, { x: 440, y: 430 }]);
+    // A trunk of two wires leaves the border as one line.
+    const trunk = drawn([...objects, box("c", 440, 500)], [w, wire("v", from, { objectId: "c", anchor: "left" })]);
+    expect(trunk.get("w")).toEqual(route);
+    expect(trunk.get("v")).toEqual([{ x: 360, y: 130 }, { x: 416, y: 130 }, { x: 416, y: 530 }, { x: 440, y: 530 }]);
   });
 });

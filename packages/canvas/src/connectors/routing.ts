@@ -7,6 +7,7 @@
 import { centerOf, type CanvasBounds, type CanvasPoint } from "../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../state/schema";
 import type { Anchor } from "../state/schema/connections";
+import { FIRST_USE_COLORS } from "../state/schema/object-defaults";
 import {
   captionBandBounds,
   connectionBoundsForObject,
@@ -268,7 +269,7 @@ function routeBoard(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes 
       from: fromObject.id,
       to: toObject.id,
       fromSection: sourceSection(fromObject, toObject, byId),
-      color: connection.color ?? "",
+      color: connection.color ?? FIRST_USE_COLORS.connector,
       dash: connection.style ?? "solid",
       headAtStart: arrow === "back" || arrow === "both",
       headAtEnd: arrow === "forward" || arrow === "both",
@@ -306,9 +307,9 @@ type DrawnWire = {
 
 /**
  * Two wires that enter one box on two sides and cross on the way in trade
- * sides: each enters where the other did. The trade must remove a crossing,
- * add no blocker and leave no side with more colours than before. The sides
- * in use stay the same. A pinned end and a wire on stored lanes stay.
+ * sides: each enters where the other did. The trade must remove a crossing
+ * and add no blocker. The sides in use stay the same. A pinned end and a wire
+ * on stored lanes stay.
  */
 function tradeCrossedSides(
   drawn: ReadonlyArray<DrawnWire>,
@@ -351,16 +352,6 @@ function tradeCrossedSides(
           );
         if (crossings(tradedA, tradedB) >= crossings(a.routed, b.routed)) continue;
         if (blockersOf(a, tradedA) > blockersOf(a, a.routed) || blockersOf(b, tradedB) > blockersOf(b, b.routed)) continue;
-        const mixedSides = (routeOf: (wire: DrawnWire) => RoutedConnection) => {
-          const colors = new Map<Anchor, Set<string>>();
-          for (const wire of group) {
-            const side = routeOf(wire).endAnchor;
-            colors.set(side, (colors.get(side) ?? new Set()).add(wire.connection.color ?? ""));
-          }
-          return [...colors.values()].filter((onSide) => onSide.size > 1).length;
-        };
-        const traded = (wire: DrawnWire) => (wire === a ? tradedA : wire === b ? tradedB : wire.routed);
-        if (mixedSides(traded) > mixedSides((wire) => wire.routed)) continue;
         a.routed = tradedA;
         b.routed = tradedB;
       }
@@ -395,9 +386,10 @@ function sourceSection(
  * `connection` as its board draws it before the lane pass. An end meets its
  * side at the centre: the lane pass spreads the ends that must not share it.
  * A pin on a side holds only where it keeps the wire simpler: on stored lanes
- * that the centre cannot reach, or with fewer bends. Elsewhere it lets the end
- * without the arrowhead slide any distance, so the wire runs straight into the
- * centre the arrowhead sits on.
+ * that the centre cannot reach, or with fewer bends. Elsewhere the arrowhead
+ * moves to the centre and the other end slides any distance, so a wire the
+ * author pinned straight stays straight. A wire with no pin keeps both ends at
+ * the centre: there a box that moves into line straightens it.
  */
 function routeOnBoard(
   fromObject: InteractiveCanvasObject,

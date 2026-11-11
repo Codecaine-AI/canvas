@@ -7,8 +7,10 @@
  *   trunk: they stay on one line until they branch.
  * - Arrowheads that meet one side of one node from related wires (one dash,
  *   one colour, one source, or sources in one section) are one junction: the
- *   wires join and share the arrowhead. A junction never reaches across
- *   another port.
+ *   wires join and share the arrowhead. A junction stops at a port that a
+ *   wire leaves and at a wire that runs straight in. It reaches across an
+ *   arrowhead that turns in: the two wires cross once and the junction keeps
+ *   one arrowhead.
  * - Every other pair that would share a run gets lanes LANE_GAP_PX apart. An
  *   incoming and an outgoing wire never share a port.
  * - A run that lies on a section border moves to a lane beside it.
@@ -290,11 +292,12 @@ function lineUpPorts(members: ReadonlyArray<ReadonlyArray<End>>, others: Readonl
     }
   });
   const orderOf = (ends: ReadonlyArray<End>) => ends.reduce((sum, end) => sum + end.order, 0) / ends.length;
-  // A junction never reaches across another port: its wires would cross the wire there.
-  const dividers = [...groups.values()].filter((ends) => !ends[0]!.joins).map(orderOf);
+  // A junction stops at a port a wire leaves and at a wire that runs straight in: it would cross that wire at the node.
+  const walls = [...groups.values()].filter((ends) => !ends[0]!.joins || ends.some((end) => end.straight));
   const ports: Port[] = [...groups.values()]
     .flatMap((ends) => {
       if (!ends[0]!.joins) return [ends];
+      const dividers = walls.filter((wall) => wall !== ends).map(orderOf);
       const parts = new Map<number, End[]>();
       for (const end of ends) {
         const part = dividers.filter((order) => order < end.order).length;
@@ -690,7 +693,10 @@ function uncrossRuns(wires: ReadonlyArray<Wire>, axis: Axis, borderRuns: BorderR
 // ---------------------------------------------------------------------------
 // Borders: a run that lies on a section border reads as part of the frame.
 
-/** A run on `axis` that lies on a section border moves to the nearest lane beside it. */
+/**
+ * A run on `axis` that lies on a section border moves to the nearest lane
+ * beside it. The runs of its trunk or junction move with it.
+ */
 function leaveBorders(wires: ReadonlyArray<Wire>, axis: Axis, borderRuns: BorderRuns): void {
   const tried = new Set<string>();
   for (;;) {
@@ -701,13 +707,18 @@ function leaveBorders(wires: ReadonlyArray<Wire>, axis: Axis, borderRuns: Border
     });
     if (!run) return;
     tried.add(`${run.wire.wire.id}|${run.index}`);
+    const unit = [run];
+    for (const member of unit) unit.push(...segments.filter((other) => !unit.includes(other) && shareLine(member, other)));
+    const lengthOfAll = (moved: ReadonlyMap<Wire, CanvasPoint[]>) => [...moved.values()].reduce((sum, points) => sum + lengthOf(points), 0);
     for (let step = 1; step <= MAX_LANE_STEPS; step += 1) {
       const moves = [1, -1]
-        .map((direction) => shiftedRun(run, run.at + direction * step * LANE_GAP_PX, axis, segments, wires, borderRuns))
-        .filter((points): points is CanvasPoint[] => points !== null && borderRuns(points) < borderRuns(run.wire.points));
+        .map((direction) => shiftedRuns(unit, run.at + direction * step * LANE_GAP_PX, axis, wires, borderRuns))
+        .filter((moved): moved is Map<Wire, CanvasPoint[]> => moved !== null && borderRuns(moved.get(run.wire)!) < borderRuns(run.wire.points));
       if (moves.length === 0) continue;
-      run.wire.points = moves.reduce((least, points) => (lengthOf(points) < lengthOf(least) ? points : least));
-      run.wire.moved = true;
+      for (const [wire, points] of moves.reduce((least, moved) => (lengthOfAll(moved) < lengthOfAll(least) ? moved : least))) {
+        wire.points = points;
+        wire.moved = true;
+      }
       break;
     }
   }
@@ -787,8 +798,10 @@ function alignElbows(wires: ReadonlyArray<Wire>, axis: Axis, borderRuns: BorderR
         { turn: q, at: p.run.at - offset },
       ]
         .filter(({ turn }) => !settled.has(keyOf(turn)))
-        .map(({ turn, at }) => ({ turn, points: shiftedRun(turn.run, at, turnAxis, turnRuns, wires, borderRuns) }))
-        .filter((move): move is { turn: Turn; points: CanvasPoint[] } => move.points !== null);
+        // A run of a trunk or a junction stays with its mates.
+        .filter(({ turn }) => !hasMates(turn.run, turnRuns))
+        .map(({ turn, at }) => ({ turn, points: shiftedRuns([turn.run], at, turnAxis, wires, borderRuns)?.get(turn.run.wire) }))
+        .filter((move): move is { turn: Turn; points: CanvasPoint[] } => move.points !== undefined);
       if (moves.length === 0) continue;
       const cost = ({ turn, points }: (typeof moves)[number]) =>
         [turn.run.wire.wire.lanesFixed ? 1 : 0, lengthOf(points) - lengthOf(turn.run.wire.points)];
@@ -804,38 +817,44 @@ function alignElbows(wires: ReadonlyArray<Wire>, axis: Axis, borderRuns: BorderR
 }
 
 /**
- * The points of `run`'s wire with `run` moved to `at`. Null when the run is
- * held by a port or its mates, or the move adds a blocker, a crossing, a run
+ * The points of each wire of `runs` with those runs moved to `at`. Null when
+ * a port holds one of the runs, or the move adds a blocker, a crossing, a run
  * on a section border or a run that crowds another wire.
  */
-function shiftedRun(
-  run: Segment,
+function shiftedRuns(
+  runs: ReadonlyArray<Segment>,
   at: number,
   axis: Axis,
-  segments: ReadonlyArray<Segment>,
   wires: ReadonlyArray<Wire>,
   borderRuns: BorderRuns,
-): CanvasPoint[] | null {
-  const room = reachOf(run, axis);
-  if (!room || at < room.min - EPSILON || at > room.max + EPSILON || hasMates(run, segments)) return null;
-  const { wire } = run;
+): Map<Wire, CanvasPoint[]> | null {
   const side = across(axis);
-  const points = clonePoints(wire.points);
-  points[run.index]![side] = at;
-  points[run.index + 1]![side] = at;
-  if (blockedBy(wire, points) > wire.blocked || borderRuns(points) > borderRuns(wire.points)) return null;
-  const others = wires.filter((other) => other !== wire);
+  const moved = new Map<Wire, CanvasPoint[]>();
+  for (const run of runs) {
+    const room = reachOf(run, axis);
+    if (!room || at < room.min - EPSILON || at > room.max + EPSILON) return null;
+    const points = moved.get(run.wire) ?? clonePoints(run.wire.points);
+    points[run.index]![side] = at;
+    points[run.index + 1]![side] = at;
+    moved.set(run.wire, points);
+  }
+  const others = wires.filter((other) => !moved.has(other));
   const crossings = (path: ReadonlyArray<CanvasPoint>) => others.reduce((sum, other) => sum + crossingsBetween(path, other.points), 0);
-  if (crossings(points) > crossings(wire.points)) return null;
-  if (crowdedRuns({ ...wire, points }, others) > crowdedRuns(wire, others)) return null;
-  return points;
+  for (const [wire, points] of moved) {
+    if (blockedBy(wire, points) > wire.blocked || borderRuns(points) > borderRuns(wire.points)) return null;
+    if (crossings(points) > crossings(wire.points)) return null;
+    if (crowdedRuns({ ...wire, points }, others) > crowdedRuns(wire, others)) return null;
+  }
+  return moved;
 }
+
+/** Whether `a` and `b` are runs of one trunk or one junction on one line. */
+const shareLine = (a: Segment, b: Segment): boolean =>
+  a.wire !== b.wire && Math.abs(a.at - b.at) < CONFLICT_GAP_PX && overlap(a, b) >= -SAME_PX && areMates(a, b);
 
 /** A run of a trunk or a junction: it shares its line with a mate. */
 function hasMates(segment: Segment, segments: ReadonlyArray<Segment>): boolean {
-  return segments.some((other) =>
-    other.wire !== segment.wire && Math.abs(other.at - segment.at) < CONFLICT_GAP_PX &&
-    overlap(segment, other) >= -SAME_PX && areMates(segment, other));
+  return segments.some((other) => shareLine(segment, other));
 }
 
 /** How many runs of `others` a run of `wire` travels beside with no lane gap between, mates aside. */
