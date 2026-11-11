@@ -174,7 +174,7 @@ describe("a note that outgrows its section keeps it", () => {
     expect(outer.y + outer.height).toBeGreaterThanOrEqual(inner.y + inner.height);
   });
 
-  test("a frame whose growth would land it inside a neighbor keeps its parent, on update_text and in Studio", () => {
+  test("a frame whose growth would land it inside a neighbor keeps its parent: update_text pushes the neighbor clear, Studio keeps the frame", () => {
     // 24 lines grow frame to 400×720, and big would cover 72% of it.
     const LINES = Array(24).fill("line").join("\n");
     const neighbor = () => makeDocument([
@@ -186,11 +186,13 @@ describe("a note that outgrows its section keeps it", () => {
       document.objects.find((object) => object.id === id)!.parentId ?? null;
 
     const session = makeTestSession(neighbor(), ["frame"], { canvasStyle: CARD });
-    const before = session.draft;
     const result = runOp(session, "update_text", { id: "n", text: LINES });
-    expect(result.isError).toBe(true);
-    expect(result.text).toContain("frame would land inside big. Nothing changed.");
-    expect(session.draft).toBe(before);
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toContain("made room for frame: pushed big clear of it");
+    expect(parentOf(session.draft, "frame")).toBeNull();
+    const grown = geometryOf(session.draft, "frame");
+    expect(grown.height).toBeGreaterThanOrEqual(720);
+    expect(geometryOf(session.draft, "big").y).toBeGreaterThanOrEqual(grown.y + grown.height + 40);
 
     const state = createInteractiveCanvasState(neighbor());
     const object = state.document.objects.find((candidate) => candidate.id === "n");

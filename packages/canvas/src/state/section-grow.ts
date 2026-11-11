@@ -4,7 +4,14 @@
  * (state/actions/reducer.ts). One function, so a draft and its accept-time
  * replay derive the same frames.
  */
-import { GEOMETRY_NORMALIZATION_GRID, sectionFitGeometry, type SectionFitPadding } from "./geometry";
+import {
+  GEOMETRY_NORMALIZATION_GRID,
+  moveClosureIds,
+  sectionFitGeometry,
+  snapCanvasNumber,
+  type CanvasBounds,
+  type SectionFitPadding,
+} from "./geometry";
 import type { InteractiveCanvasDocument } from "./schema";
 import { reconcileSectionMembership } from "./section-membership";
 
@@ -45,8 +52,125 @@ function sectionDepth(document: InteractiveCanvasDocument, id: string): number {
   return depth;
 }
 
-/** A grow that was not made because it would change membership. */
-export type BlockedGrow = { section: string; captures: string[] };
+/**
+ * A grow that was not made because it would change membership. `pinned` names
+ * the locked objects that kept make-room from pushing the captures clear.
+ */
+export type BlockedGrow = { section: string; captures: string[]; pinned?: string[] };
+
+/** The siblings a grown section pushed clear of itself (each travels with what it holds). */
+export type MadeRoom = { section: string; pushed: string[] };
+
+/**
+ * The gutter a push leaves between a grown section and the neighbour it moves:
+ * the gutter they had, but never under MIN_GUTTER and never over KEPT_GUTTER.
+ * So a wide gutter is used up first (down to the room one labelled wire
+ * needs) and only then does the neighbour move, which keeps a board's rows and
+ * columns lined up until a grow really runs out of room.
+ */
+const MIN_GUTTER = 40;
+const KEPT_GUTTER = 100;
+
+/**
+ * Make room for a section that grew from `was`: every sibling in the way of a
+ * grown side moves away along that side's direction, with everything it holds,
+ * and pushes the siblings in its own way in turn. `document` holds the section
+ * at its grown geometry. A sibling is in the way of a side when it sits beyond
+ * that side's old edge, level with the frame, nearer than the gutter above.
+ *
+ * All or nothing: when a push would move a locked object, or carry a sibling
+ * past a locked ancestor's edge, nothing is pushed and the locks are named.
+ */
+function makeRoom(
+  document: InteractiveCanvasDocument,
+  sectionId: string,
+  was: CanvasBounds,
+): { document: InteractiveCanvasDocument; pushed: string[] } | { pinned: string[] } {
+  const byId = new Map(document.objects.map((object) => [object.id, object]));
+  const section = byId.get(sectionId)!;
+  const now = section.geometry;
+  const parentId = section.parentId ?? null;
+  // The nearest locked ancestor is a wall no push may cross; one locked "all" freezes what it holds.
+  let wall: CanvasBounds | null = null;
+  let wallId: string | null = null;
+  for (let id = parentId, hops = 0; id !== null && hops <= byId.size; id = byId.get(id)?.parentId ?? null, hops += 1) {
+    const ancestor = byId.get(id);
+    if (!ancestor) break;
+    if (ancestor.locked === "all") return { pinned: [ancestor.id] };
+    if (ancestor.locked && wall === null) {
+      wall = ancestor.geometry;
+      wallId = ancestor.id;
+    }
+  }
+  const sides = [
+    { axis: "x", sign: 1, grew: now.x + now.width > was.x + was.width },
+    { axis: "y", sign: 1, grew: now.y + now.height > was.y + was.height },
+    { axis: "x", sign: -1, grew: now.x < was.x },
+    { axis: "y", sign: -1, grew: now.y < was.y },
+  ] as const;
+  let current = document;
+  const pushed = new Set<string>();
+  const pinned = new Set<string>();
+  for (const { axis, sign, grew } of sides) {
+    if (!grew) continue;
+    const size = axis === "x" ? "width" : "height";
+    const cross = axis === "x" ? "y" : "x";
+    const crossSize = axis === "x" ? "height" : "width";
+    // Along the push direction: `near` is the edge that faces the pusher, `far` the one that leads.
+    const near = (rect: CanvasBounds) => (sign > 0 ? rect[axis] : -(rect[axis] + rect[size]));
+    const far = (rect: CanvasBounds) => (sign > 0 ? rect[axis] + rect[size] : -rect[axis]);
+    const level = (a: CanvasBounds, b: CanvasBounds) =>
+      Math.min(a[cross] + a[crossSize], b[cross] + b[crossSize]) > Math.max(a[cross], b[cross]);
+    const pushers = [{ rect: now, from: far(was), to: far(now) }];
+    // A sibling is only pushed by one whose middle sits before its own, so one pass in that order settles the cascade.
+    const siblings = current.objects
+      .filter((object) => object.id !== sectionId && (object.parentId ?? null) === parentId)
+      .sort((a, b) => near(a.geometry) + far(a.geometry) - (near(b.geometry) + far(b.geometry)));
+    const shifts = new Map<string, number>();
+    for (const sibling of siblings) {
+      const rect = sibling.geometry;
+      let shift = 0;
+      for (const pusher of pushers) {
+        if (!level(pusher.rect, rect) || (near(rect) + far(rect)) / 2 <= pusher.from) continue;
+        const gutter = Math.min(Math.max(near(rect) - pusher.from, MIN_GUTTER), KEPT_GUTTER);
+        shift = Math.max(shift, pusher.to + gutter - near(rect));
+      }
+      if (shift <= 0) continue;
+      shift = Math.ceil(shift / GRID) * GRID;
+      shifts.set(sibling.id, shift);
+      pushers.push({ rect, from: far(rect), to: far(rect) + shift });
+    }
+    if (shifts.size === 0) continue;
+    const delta = new Map<string, number>();
+    for (const [id, shift] of shifts) {
+      pushed.add(id);
+      for (const carried of moveClosureIds(current, [id])) {
+        delta.set(carried, sign * shift);
+        if (byId.get(carried)?.locked) pinned.add(carried);
+      }
+    }
+    current = {
+      ...current,
+      objects: current.objects.map((object) => {
+        const by = delta.get(object.id);
+        if (by === undefined) return object;
+        // A push is a geometry write, so it lands on the grid the reducer normalizes every write to.
+        const start = snapCanvasNumber(object.geometry[axis] + by, GEOMETRY_NORMALIZATION_GRID);
+        return { ...object, geometry: { ...object.geometry, [axis]: start } };
+      }),
+    };
+    if (wall && wallId) {
+      const outside = current.objects.some((object) => {
+        if (!shifts.has(object.id)) return false;
+        const g = object.geometry;
+        return g.x < wall.x || g.y < wall.y || g.x + g.width > wall.x + wall.width || g.y + g.height > wall.y + wall.height;
+      });
+      if (outside) pinned.add(wallId);
+    }
+  }
+  if (pinned.size > 0) return { pinned: [...pinned] };
+  return { document: current, pushed: [...pushed] };
+}
 
 /**
  * Every unlocked section whose child intrudes on its padding or title band
@@ -61,18 +185,33 @@ export type BlockedGrow = { section: string; captures: string[] };
  * the edit, Studio keeps the human's drop. `document` must already have
  * reconciled membership. Each id in `held` keeps the parent it names while
  * the grows are judged, so a frame and its ancestors can grow together.
+ *
+ * With `makeRoom` (the agent path), a grown section first pushes the siblings
+ * in its way clear (see makeRoom), so a grow into an unlocked neighbour is
+ * made rather than blocked. Each pushed sibling keeps its parent, which then
+ * grows to hold it and makes room in turn. The returned `held` is `held` plus
+ * those siblings. Studio does not pass it: a person's drop moves nothing else.
  */
 export function growSectionsToChildren(
   document: InteractiveCanvasDocument,
   held?: ReadonlyMap<string, string | null>,
-): { document: InteractiveCanvasDocument; grown: string[]; blocked: BlockedGrow[] } {
+  options: { makeRoom?: boolean } = {},
+): {
+  document: InteractiveCanvasDocument;
+  grown: string[];
+  blocked: BlockedGrow[];
+  pushed: MadeRoom[];
+  held: ReadonlyMap<string, string | null>;
+} {
   const sections = document.objects
     .filter((object) => object.type === "section")
     .map((section) => ({ id: section.id, depth: sectionDepth(document, section.id) }))
     .sort((a, b) => b.depth - a.depth);
   let current = document;
+  let keep: ReadonlyMap<string, string | null> = held ?? new Map();
   const grown: string[] = [];
   const blocked: BlockedGrow[] = [];
+  const pushed: MadeRoom[] = [];
   for (const { id } of sections) {
     const section = current.objects.find((object) => object.id === id)!;
     if (section.locked) continue;
@@ -126,17 +265,30 @@ export function growSectionsToChildren(
       objects: current.objects.map((object) => object.id === id ? { ...object, geometry } : object),
     };
     const parents = new Map(current.objects.map((object) => [object.id, object.parentId ?? null]));
-    const captures = reconcileHolding(candidate, held).objects
-      .filter((object) => parents.get(object.id) !== (object.parentId ?? null))
-      .map((object) => object.id);
+    const capturesIn = (grownDocument: InteractiveCanvasDocument, holding: ReadonlyMap<string, string | null>) =>
+      reconcileHolding(grownDocument, holding).objects
+        .filter((object) => parents.get(object.id) !== (object.parentId ?? null))
+        .map((object) => object.id);
+    const room = options.makeRoom ? makeRoom(candidate, id, rect) : null;
+    if (room && "document" in room && room.pushed.length > 0) {
+      const holding = new Map([...keep, ...room.pushed.map((pushedId) => [pushedId, parents.get(pushedId) ?? null] as const)]);
+      if (capturesIn(room.document, holding).length === 0) {
+        current = room.document;
+        keep = holding;
+        grown.push(id);
+        pushed.push({ section: id, pushed: room.pushed });
+        continue;
+      }
+    }
+    const captures = capturesIn(candidate, keep);
     if (captures.length > 0) {
-      blocked.push({ section: id, captures });
+      blocked.push(room && "pinned" in room ? { section: id, captures, pinned: room.pinned } : { section: id, captures });
       continue;
     }
     current = candidate;
     grown.push(id);
   }
-  return { document: current, grown, blocked };
+  return { document: current, grown, blocked, pushed, held: keep };
 }
 
 /**

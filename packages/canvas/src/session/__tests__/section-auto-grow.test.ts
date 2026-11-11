@@ -3,8 +3,9 @@
  * intrudes on its padding or title band grows outward to the fit_section air,
  * through its ancestors, with no fit_section call. It runs on both commit
  * paths (the agent's operations and Studio's reducer). It never shrinks, never
- * changes membership, and never touches a locked section; an agent edit whose
- * grow would capture a neighbor is refused.
+ * changes membership, and never touches a locked section. An agent edit whose
+ * grow runs into a neighbor pushes the neighbor clear (make-room.test.ts); it
+ * is refused only when a lock pins that neighbor.
  */
 import { describe, expect, test } from "bun:test";
 
@@ -38,6 +39,15 @@ function escapes(document: InteractiveCanvasDocument): string[] {
 
 function geometryOf(document: InteractiveCanvasDocument, id: string) {
   return document.objects.find((object) => object.id === id)!.geometry;
+}
+
+function parentOf(document: InteractiveCanvasDocument, id: string) {
+  return document.objects.find((object) => object.id === id)!.parentId ?? null;
+}
+
+/** A person's lock on the box: nothing may move it. */
+function pinned(object: InteractiveCanvasObject): InteractiveCanvasObject {
+  return { ...object, locked: "all" };
 }
 
 describe("section auto-grow", () => {
@@ -134,7 +144,7 @@ describe("section auto-grow", () => {
     expect(grown).toBe(document);
   });
 
-  test("an agent edit whose grow would capture a neighbor is refused and names it", () => {
+  test("an agent edit whose grow runs into a neighbor pushes the neighbor clear", () => {
     const baseline = makeDocument([
       section("page", -200, -200, 1600, 1000),
       section("a", 0, 0, 400, 300, "page"),
@@ -142,14 +152,16 @@ describe("section auto-grow", () => {
       child("neighbor", 420, 220, "page", 100, 60),
     ]);
     const session = makeTestSession(baseline, ["a"]);
-    const before = session.draft;
 
-    // kid would end 60px past a's right edge; a cannot grow without taking neighbor.
+    // kid ends 60px past a's right edge; a grows to 500, where neighbor sat.
     const result = runOp(session, "move", { id: "kid", by: { dx: 100, dy: 0 } });
 
-    expect(result.isError).toBe(true);
-    expect(result.text).toContain("growing would pull neighbor into it");
-    expect(session.draft).toBe(before);
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toContain("grew a to hold its children");
+    expect(result.text).toContain("made room for a: pushed neighbor clear of it");
+    expect(geometryOf(session.draft, "a")).toEqual({ x: 0, y: 0, width: 500, height: 300 });
+    expect(geometryOf(session.draft, "neighbor")).toEqual({ x: 540, y: 220, width: 100, height: 60 });
+    expect(parentOf(session.draft, "neighbor")).toBe("page");
     expect(escapes(session.draft)).toEqual([]);
   });
 
@@ -158,7 +170,7 @@ describe("section auto-grow", () => {
       section("page", -200, -200, 2000, 1200),
       section("a", 0, 0, 400, 300, "page"),
       child("kid", 300, 100, "a"),
-      child("neighbor", 410, 100, "page", 100, 100),
+      pinned(child("neighbor", 410, 100, "page", 100, 100)),
       child("other", 1000, 400, "page"),
     ]);
     const session = makeTestSession(baseline, ["a"]);
@@ -167,11 +179,11 @@ describe("section auto-grow", () => {
 
     expect(result.isError).toBeUndefined();
     expect(geometryOf(session.draft, "other").x).toBe(1040);
+    expect(geometryOf(session.draft, "a")).toEqual({ x: 0, y: 0, width: 400, height: 300 });
   });
 
-  test("an edit that pushes a child past a frame whose grow was already stuck is refused", () => {
-    // a's grow is stuck before the edit (kid sits in its right padding, and
-    // growing would pull neighbor in), but kid is still inside the frame.
+  test("a child pushed past a frame whose grow sat against a neighbor grows it and makes room", () => {
+    // kid sits in a's right padding and neighbor touches a's right edge.
     const baseline = makeDocument([
       section("page", -200, -200, 1600, 1000),
       section("a", 0, 0, 400, 300, "page"),
@@ -179,19 +191,17 @@ describe("section auto-grow", () => {
       child("neighbor", 400, 220, "page", 40, 60),
     ]);
     const session = makeTestSession(baseline, ["a"]);
-    const before = session.draft;
 
     const result = runOp(session, "move", { id: "kid", by: { dx: 40, dy: 0 } });
 
-    expect(result.isError).toBe(true);
-    expect(result.text).toContain("growing would pull neighbor into it");
-    expect(session.draft).toBe(before);
+    expect(result.isError).toBeUndefined();
+    expect(geometryOf(session.draft, "a")).toEqual({ x: 0, y: 0, width: 480, height: 300 });
+    expect(geometryOf(session.draft, "neighbor").x).toBe(520);
     expect(escapes(session.draft)).toEqual([]);
   });
 
-  test("a child's own overflow past a stuck frame cannot grow behind another child's larger overflow", () => {
-    // old already sits 40px past a's right edge, and a's grow is stuck on
-    // neighbor. Pushing kid 20px past that edge is still a new overflow.
+  test("a child's overflow grows its frame behind another child's larger overflow, and makes room", () => {
+    // old already sits 40px past a's right edge, with neighbor 20px beyond a.
     const baseline = makeDocument([
       section("page", -200, -200, 1600, 1200),
       section("a", 0, 0, 400, 500, "page"),
@@ -200,13 +210,75 @@ describe("section auto-grow", () => {
       child("neighbor", 420, 220, "page", 100, 60),
     ]);
     const session = makeTestSession(baseline, ["a"]);
-    const before = session.draft;
 
     const result = runOp(session, "move", { id: "kid", by: { dx: 60, dy: 0 } });
 
-    expect(result.isError).toBe(true);
-    expect(result.text).toContain("growing would pull neighbor into it");
-    expect(session.draft).toBe(before);
+    expect(result.isError).toBeUndefined();
+    expect(geometryOf(session.draft, "a")).toEqual({ x: 0, y: 0, width: 480, height: 500 });
+    expect(geometryOf(session.draft, "neighbor").x).toBe(520);
+    expect(escapes(session.draft)).toEqual([]);
+  });
+
+  describe("a locked neighbor stays put", () => {
+    test("an agent edit whose grow would capture it is refused and names the lock", () => {
+      const baseline = makeDocument([
+        section("page", -200, -200, 1600, 1000),
+        section("a", 0, 0, 400, 300, "page"),
+        child("kid", 200, 100, "a"),
+        pinned(child("neighbor", 420, 220, "page", 100, 60)),
+      ]);
+      const session = makeTestSession(baseline, ["a"]);
+      const before = session.draft;
+
+      // kid would end 60px past a's right edge; a cannot grow without taking neighbor.
+      const result = runOp(session, "move", { id: "kid", by: { dx: 100, dy: 0 } });
+
+      expect(result.isError).toBe(true);
+      expect(result.text).toContain("growing would pull neighbor into it");
+      expect(result.text).toContain('Release the lock on neighbor with lock mode "none"');
+      expect(session.draft).toBe(before);
+      expect(escapes(session.draft)).toEqual([]);
+    });
+
+    test("an edit that pushes a child past a frame whose grow was already stuck is refused", () => {
+      // a's grow is stuck before the edit (kid sits in its right padding, and
+      // growing would pull neighbor in), but kid is still inside the frame.
+      const baseline = makeDocument([
+        section("page", -200, -200, 1600, 1000),
+        section("a", 0, 0, 400, 300, "page"),
+        child("kid", 240, 100, "a"),
+        pinned(child("neighbor", 400, 220, "page", 40, 60)),
+      ]);
+      const session = makeTestSession(baseline, ["a"]);
+      const before = session.draft;
+
+      const result = runOp(session, "move", { id: "kid", by: { dx: 40, dy: 0 } });
+
+      expect(result.isError).toBe(true);
+      expect(result.text).toContain("growing would pull neighbor into it");
+      expect(session.draft).toBe(before);
+      expect(escapes(session.draft)).toEqual([]);
+    });
+
+    test("a child's own overflow past a stuck frame cannot grow behind another child's larger overflow", () => {
+      // old already sits 40px past a's right edge, and a's grow is stuck on
+      // neighbor. Pushing kid 20px past that edge is still a new overflow.
+      const baseline = makeDocument([
+        section("page", -200, -200, 1600, 1200),
+        section("a", 0, 0, 400, 500, "page"),
+        child("old", 280, 100, "a"),
+        child("kid", 200, 320, "a"),
+        pinned(child("neighbor", 420, 220, "page", 100, 60)),
+      ]);
+      const session = makeTestSession(baseline, ["a"]);
+      const before = session.draft;
+
+      const result = runOp(session, "move", { id: "kid", by: { dx: 60, dy: 0 } });
+
+      expect(result.isError).toBe(true);
+      expect(result.text).toContain("growing would pull neighbor into it");
+      expect(session.draft).toBe(before);
+    });
   });
 
   test("a child moved into the title band grows the top edge outward", () => {
