@@ -2782,7 +2782,7 @@
           }
         },
         {
-          "insert": " maps each rule of the skill text to a served sentence or a named drop."
+          "insert": " keeps each rule of the deleted skill as a frozen unit, mapped to a served sentence or a named drop."
         }
       ],
       "children": []
@@ -2872,7 +2872,7 @@
       },
       "text": [
         {
-          "insert": "The generated skill folder is deleted after the migration gate passes."
+          "insert": "The skill folder, its source and its generator were deleted after the migration gate passed."
         }
       ],
       "children": []
@@ -3119,7 +3119,7 @@
           }
         },
         {
-          "insert": " maps each skill rule to the topic that serves it, and holds the gate map and the fixed index fields."
+          "insert": " keeps each rule of the deleted skill as a frozen unit with the topic that serves it, and holds the gate map and the fixed index fields."
         }
       ],
       "children": []
