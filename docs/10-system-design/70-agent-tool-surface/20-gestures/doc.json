@@ -44,6 +44,7 @@
         "b-ts-ge-arrange-section-57",
         "b-ts-ge-arrange-section-frame-59",
         "b-ts-ge-arrange-section-refusals-58",
+        "b-ts-ge-arrange-tighten-60",
         "b-ts-ge-content-heading-19",
         "b-ts-ge-content-code-20",
         "b-ts-ge-content-text-21",
@@ -584,7 +585,7 @@
       },
       "text": [
         {
-          "insert": "move  ({ id: Id, to?: { x: number, y: number } | null,\n                 by?: { dx: number, dy: number } | null })   // exactly one of to or by\n\nresize({ id: Id, width?: number | null, height?: number | null,\n                 like?: Id | null })                         // like, or width and height\n\narrange({ ids: Id[],\n          align?: \"left\" | \"right\" | \"top\" | \"bottom\" | \"center_h\" | \"center_v\" | null,\n          space?: { axis: \"horizontal\" | \"vertical\", gap: number } | null })\n                                               // exactly one of align or space\n\narrange_section({ section: Id, rows: Id[][] })  // rows top to bottom, each left to right"
+          "insert": "move  ({ id: Id, to?: { x: number, y: number } | null,\n                 by?: { dx: number, dy: number } | null })   // exactly one of to or by\n\nresize({ id: Id, width?: number | null, height?: number | null,\n                 like?: Id | null })                         // like, or width and height\n\narrange({ ids: Id[],\n          align?: \"left\" | \"right\" | \"top\" | \"bottom\" | \"center_h\" | \"center_v\" | null,\n          space?: { axis: \"horizontal\" | \"vertical\", gap: number } | null })\n                                               // exactly one of align or space\n\narrange_section({ section: Id, rows: Id[][] })  // rows top to bottom, each left to right\ntighten_wires({ passes?: number })              // 1 to 4 rounds of moves, default 2"
         }
       ],
       "children": []
@@ -759,7 +760,7 @@
           }
         },
         {
-          "insert": "). A note names the needed size when the text clips, may clip within 1 px, or cannot be measured exactly, and the size still lands."
+          "insert": "). A shape or icon never lands smaller than its text needs, and its row and column peers grow with it."
         }
       ],
       "children": []
@@ -770,29 +771,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The verdict is the renderer's own wrap and clamp decision ("
-        },
-        {
-          "insert": "text-fit.ts",
-          "attributes": {
-            "code": true,
-            "reference": {
-              "kind": "source",
-              "path": "packages/canvas/src/board/text-fit.ts"
-            }
-          }
-        },
-        {
-          "insert": ") rather than a bare minimum constant. Text that would clip, may clip within 1 px of the box edge, or cannot be measured exactly attaches a note naming the size the content needs. "
-        },
-        {
-          "insert": "update_text",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " runs the mirror image of it from the other direction, so the agent hears about an illegible box at the moment it makes one. It hands the check the name and detail line as the write leaves them."
+          "insert": "A sticky or a section lands as asked. Its note names the size its text needs when the text clips, may clip within 1 px, or cannot be measured exactly. The check is the renderer's own wrap and clamp decision, not a bare minimum constant."
         }
       ],
       "children": []
@@ -1040,6 +1019,41 @@
         },
         {
           "insert": " refuses a rows id that names the section itself, another section, a sticky, a locked node, a node of another section, or nothing on the board. It also refuses an id listed twice, a section id that is not a section, and a section that a lock covers. Each refusal names the id and the call to make instead, and nothing moves."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-ge-arrange-tighten-60": {
+      "id": "b-ts-ge-arrange-tighten-60",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "tighten_wires",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " slides boxes toward the boxes they are wired to, from the layout as drawn. It keeps a move only when the drawn wires get shorter. Nothing changes section, nothing lands on another box or a wire, and a section moves as one body. It takes no ids, and "
+        },
+        {
+          "insert": "passes",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " sets the rounds, from 1 to 4. Call it once after every wire is drawn and before "
+        },
+        {
+          "insert": "canvas_check",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": "."
         }
       ],
       "children": []

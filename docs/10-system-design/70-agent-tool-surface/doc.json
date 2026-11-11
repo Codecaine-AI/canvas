@@ -1273,7 +1273,7 @@
       },
       "text": [
         {
-          "insert": "The one multi-id gesture that does exist, "
+          "insert": "The multi-id gestures that do exist, "
         },
         {
           "insert": "arrange",
@@ -1282,7 +1282,16 @@
           }
         },
         {
-          "insert": ", takes a list because the arrangement itself is the gesture."
+          "insert": " and "
+        },
+        {
+          "insert": "arrange_section",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", take lists because the arrangement itself is the gesture."
         }
       ],
       "children": []
