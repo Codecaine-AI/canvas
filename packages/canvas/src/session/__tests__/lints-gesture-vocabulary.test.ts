@@ -87,6 +87,27 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
         { ...box("plain", 80, 120, 160, 96, "process"), color: "gray", parentId: "frame" },
       ]),
     },
+    {
+      // shared-wire: a wire and its reply on one line. chip-on-border: a
+      // chip on a frame's edge. short-wire and hidden-arrowhead: a long
+      // label on a short wire.
+      name: "wires",
+      document: makeDocument([
+        { ...box("page", 0, 0, 2000, 1200, "section"), color: "white" },
+        { ...box("frame", 40, 40, 400, 400, "section"), color: "blue", parentId: "page" },
+        { ...box("inner", 200, 200, 160, 96, "process"), parentId: "frame" },
+        box("outer", 520, 200, 160, 96, "process"),
+        box("ask", 1000, 200, 160, 96, "process"),
+        box("answer", 1400, 200, 160, 96, "process"),
+        box("near-a", 1000, 600, 160, 96, "process"),
+        box("near-b", 1240, 600, 160, 96, "process"),
+      ], [
+        { ...connect("cross", "inner", "outer"), label: "crosses" },
+        connect("there", "ask", "answer"),
+        connect("back", "answer", "ask"),
+        { ...connect("tight", "near-a", "near-b"), label: "a label far longer than its wire" },
+      ]),
+    },
   ];
 }
 

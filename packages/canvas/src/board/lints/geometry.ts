@@ -21,8 +21,8 @@
  * CHIP_CLEARANCE: the air a chip wants on each side (authoring's label
  * budget and text-fit's corridor advice).
  *
- * No lint judges chips any more (label placement keeps them clear);
- * tighten_wires scores chips through chipFor.
+ * Label placement keeps chips clear; the check-only wire rules
+ * (rules/wires.ts) and tighten_wires read chips through chipFor.
  */
 import { routeConnection } from "../../connectors/routing.ts";
 import { connectionLabelChipMetrics } from "../../connectors/label-chip.ts";

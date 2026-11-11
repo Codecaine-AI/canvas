@@ -100,7 +100,7 @@ describe("layout-editor prompt contract", () => {
   test("overlap and integrity are the diagnostics on every edit; the color and wire checks run only at the finish", () => {
     expect(LAYOUT_RULES.map(rule => rule.id)).toEqual(["covered-content", "integrity"]);
     expect(FINISHING_RULES.map(rule => rule.id)).toEqual([
-      "covered-content", "integrity", "same-color", "gray-share",
+      "covered-content", "integrity", "same-color", "gray-share", "shared-wire", "chip-on-border", "short-wire", "hidden-arrowhead",
     ]);
     expect(content("node-section-success-criteria")).toContain("edited scope");
   });

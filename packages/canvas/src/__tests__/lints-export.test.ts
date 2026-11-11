@@ -23,7 +23,7 @@ describe("board lints export", () => {
     expect(formatDiagnostics(findings)).toMatch(/^DIAGNOSTICS · \d+ errors?/);
     expect(FINISHING_RULES.map((rule) => rule.id)).toEqual([
       ...LAYOUT_RULES.map((rule) => rule.id),
-      "same-color", "gray-share",
+      "same-color", "gray-share", "shared-wire", "chip-on-border", "short-wire", "hidden-arrowhead",
     ]);
     expect(entry.runDiagnostics).toBe(runDiagnostics);
   });
