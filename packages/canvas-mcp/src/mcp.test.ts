@@ -63,7 +63,7 @@ describe("canvas MCP server", () => {
     expect(tools.slice(0, 6).map((tool) => tool.name)).toEqual([
       "canvas_capabilities", "canvas_list", "canvas_open", "canvas_guidance", "canvas_create", "canvas_check",
     ]);
-    expect(tools).toHaveLength(6 + 20 + 4);
+    expect(tools).toHaveLength(6 + 20 + 5);
   });
 
   test("the prompt block fits 12 lines and 800 bytes, names canvas_capabilities first and says when to call it again", () => {

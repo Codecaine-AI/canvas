@@ -33,11 +33,12 @@
  * reached by their own names instead. (`section` and `sticky` are already out
  * of `SHAPE_OBJECT_TYPES`; they have their own place gestures.)
  */
-import { CANVAS_ICON_GLYPHS } from "../../state/schema";
+import { CANVAS_ICON_GLYPHS, CANVAS_ICON_IDS } from "../../state/schema";
 import type { CanvasIconGlyph, InteractiveCanvasObjectType } from "../../state/schema";
-import { StringEnum } from "@mariozechner/pi-ai";
+import { StringEnum, Type } from "@mariozechner/pi-ai";
 
 import { OBJECT_PREFERENCES } from "../../objects/registry";
+import { closeNames } from "./glyph-names";
 import { SHAPE_OBJECT_TYPES } from "../perception/op-surface";
 
 /** The document type that carries a glyph — never a placeable name. */
@@ -53,7 +54,11 @@ export type PlaceableShapeType = Exclude<
   "section" | "sticky" | "icon"
 >;
 
-/** Glyphs the model may place, each under its own name. */
+/**
+ * Glyphs the model may place, each under its own name: the core roster, which
+ * the `type` enum lists, and every brand catalog id, which it does not
+ * (find_icon finds them).
+ */
 export type PlaceableGlyphType = CanvasIconGlyph;
 
 /** One entry of the model-facing `type` vocabulary. */
@@ -72,19 +77,22 @@ export interface DocumentTypeFields {
   readonly icon?: CanvasIconGlyph;
 }
 
-const GLYPH_SET: ReadonlySet<string> = new Set<string>(CANVAS_ICON_GLYPHS);
+/** The core roster: the glyphs with a registry row. */
+const CORE_GLYPH_SET: ReadonlySet<string> = new Set<string>(CANVAS_ICON_GLYPHS);
+/** Every glyph a document may hold: the core roster and the brand catalog. */
+const GLYPH_SET: ReadonlySet<string> = new Set<string>(CANVAS_ICON_IDS);
 
 /** Registry names that are shape types, in registry (roster) order. */
 export const PLACEABLE_SHAPE_TYPES: readonly PlaceableShapeType[] = OBJECT_PREFERENCES
   .map((entry) => entry.name)
-  .filter((name): name is PlaceableShapeType => !GLYPH_SET.has(name));
+  .filter((name): name is PlaceableShapeType => !CORE_GLYPH_SET.has(name));
 
 /** Registry names that are glyphs, in registry (roster) order. */
 export const PLACEABLE_GLYPH_TYPES: readonly PlaceableGlyphType[] = OBJECT_PREFERENCES
   .map((entry) => entry.name)
-  .filter((name): name is PlaceableGlyphType => GLYPH_SET.has(name));
+  .filter((name): name is PlaceableGlyphType => CORE_GLYPH_SET.has(name));
 
-/** The model-facing `type` roster: shapes first, then the glyphs. */
+/** The model-facing `type` enum: shapes first, then the core glyphs. Catalog brands are placeable but not listed. */
 export const PLACEABLE_TYPES: readonly PlaceableTypeName[] = [
   ...PLACEABLE_SHAPE_TYPES,
   ...PLACEABLE_GLYPH_TYPES,
@@ -96,9 +104,9 @@ export const PLACEABLE_TYPES: readonly PlaceableTypeName[] = [
 
 const PLACEABLE_TYPE_SET: ReadonlySet<string> = new Set<string>(PLACEABLE_TYPES);
 
-/** Whether `value` is a name the tool surface accepts. */
+/** Whether `value` is a name the tool surface accepts: an enum name, or any brand catalog id. */
 export function isPlaceableType(value: unknown): value is PlaceableTypeName {
-  return typeof value === "string" && PLACEABLE_TYPE_SET.has(value);
+  return typeof value === "string" && (PLACEABLE_TYPE_SET.has(value) || GLYPH_SET.has(value));
 }
 
 /**
@@ -152,7 +160,7 @@ export function glyphForPlaceableType(placeableType: FoldedTypeName): CanvasIcon
 // Disjoint rosters: one string, one drawing. A glyph id that a shape type also
 // owns would make a bare name mean two things, so it fails loudly here —
 // rename the glyph or the shape before it ships.
-const overlapping = CANVAS_ICON_GLYPHS.filter((glyph) => SHAPE_OBJECT_TYPES.has(glyph));
+const overlapping = CANVAS_ICON_IDS.filter((glyph) => SHAPE_OBJECT_TYPES.has(glyph));
 if (overlapping.length > 0) {
   throw new Error(
     `Glyph ids collide with shape types: [${overlapping.join(", ")}]. The rosters must be `
@@ -164,7 +172,7 @@ if (overlapping.length > 0) {
 const unresolved = OBJECT_PREFERENCES
   .map((entry) => entry.name)
   .filter(
-    (name) => name === ICON_CARRIER || (!GLYPH_SET.has(name) && !SHAPE_OBJECT_TYPES.has(name)),
+    (name) => name === ICON_CARRIER || (!CORE_GLYPH_SET.has(name) && !SHAPE_OBJECT_TYPES.has(name)),
   );
 if (unresolved.length > 0) {
   throw new Error(
@@ -204,10 +212,38 @@ if (PLACEABLE_TYPE_SET.size !== PLACEABLE_TYPES.length) {
 // Tool schema
 // ---------------------------------------------------------------------------
 
+/** The shape of a brand catalog id; which ids exist is checked at the operation (glyph-names.ts). */
+export const BRAND_ICON_PATTERN = "^brand-[a-z0-9]+(-[a-z0-9]+)*$";
+
 /**
- * The `type` enum every place/swap gesture declares. Lives here rather than in
- * schemas.ts so the roster and the enum that publishes it cannot drift apart.
+ * The `type` every place/swap gesture declares: the enum of shapes and core
+ * glyphs, or any brand catalog id. The catalog holds hundreds of logos, so it
+ * is not listed: find_icon searches it, and the operation refuses an id it
+ * does not hold. Lives here rather than in schemas.ts so the roster and the
+ * schema that publishes it cannot drift apart.
  */
-export const PlaceableType = StringEnum([...PLACEABLE_TYPES], {
-  description: "The shape or icon to draw. Icons are types: pick the glyph name.",
-});
+export const PlaceableType = Type.Unsafe<PlaceableTypeName>(Type.Union([
+  StringEnum([...PLACEABLE_TYPES], {
+    description: "The shape or icon to draw. Icons are types: pick the glyph name.",
+  }),
+  Type.String({
+    pattern: BRAND_ICON_PATTERN,
+    description: "A brand logo from the catalog: the id find_icon returns, such as \"brand-clickhouse\".",
+  }),
+], {
+  description: "The shape or icon to draw. Icons are types: a glyph name from the list, or a brand id from find_icon.",
+}));
+
+const BRAND_ICON_RE = new RegExp(BRAND_ICON_PATTERN);
+
+/**
+ * The refusal for a `type` the brand pattern let through but no catalog row
+ * holds (`brand-postgress`): the near misses, and the tool that finds the id.
+ * Every other name is the enum's to refuse, at the schema.
+ */
+export function unknownPlaceableTypeMessage(field: string, value: string): string | null {
+  if (!BRAND_ICON_RE.test(value) || isPlaceableType(value)) return null;
+  const close = closeNames(value, CANVAS_ICON_IDS);
+  const hint = close.length > 0 ? `did you mean ${close.map((name) => `"${name}"`).join(", ")}?` : "no brand id is close to it.";
+  return `${field} "${value}" is not in the brand catalog — ${hint} Call find_icon with the product's name for its exact id.`;
+}

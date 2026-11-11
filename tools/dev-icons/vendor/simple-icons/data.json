@@ -1,0 +1,2291 @@
+[
+  {
+    "title": ".NET",
+    "slug": "dotnet",
+    "hex": "512BD4",
+    "source": "https://github.com/dotnet/brand/blob/c7d0f51b8ec59531332d05fb27a5b758a7a3d689/logo/dotnet-logo.svg",
+    "guidelines": "https://github.com/dotnet/brand/blob/c7d0f51b8ec59531332d05fb27a5b758a7a3d689/dotnet-styleGuide-2024.pdf",
+    "license": {
+      "type": "CC0-1.0"
+    }
+  },
+  {
+    "title": "1Password",
+    "slug": "1password",
+    "hex": "145FE4",
+    "source": "https://1password.com/press",
+    "guidelines": "https://1password.com/press"
+  },
+  {
+    "title": "Airtable",
+    "slug": "airtable",
+    "hex": "18BFFF",
+    "source": "https://airtable.com/newsroom"
+  },
+  {
+    "title": "Akamai",
+    "slug": "akamai",
+    "hex": "0096D6",
+    "source": "https://www.akamai.com"
+  },
+  {
+    "title": "Alacritty",
+    "slug": "alacritty",
+    "hex": "F46D01",
+    "source": "https://github.com/alacritty/alacritty/blob/6d8db6b9dfadd6164c4be7a053f25db8ef6b7998/extra/logo/alacritty-simple.svg",
+    "license": {
+      "type": "Apache-2.0"
+    }
+  },
+  {
+    "title": "Algolia",
+    "slug": "algolia",
+    "hex": "003DFF",
+    "source": "https://algolia.frontify.com/d/1AZwVNcFZiu7/style-guide#/basics/algolia-logo",
+    "guidelines": "https://algolia.frontify.com/d/1AZwVNcFZiu7/style-guide"
+  },
+  {
+    "title": "Alibaba Cloud",
+    "slug": "alibabacloud",
+    "hex": "FF6A00",
+    "source": "https://www.alibabagroup.com/en/ir/reports"
+  },
+  {
+    "title": "Alpine Linux",
+    "slug": "alpinelinux",
+    "hex": "0D597F",
+    "source": "https://alpinelinux.org"
+  },
+  {
+    "title": "Anaconda",
+    "slug": "anaconda",
+    "hex": "44A833",
+    "source": "https://www.anaconda.com"
+  },
+  {
+    "title": "Android",
+    "slug": "android",
+    "hex": "3DDC84",
+    "source": "https://partnermarketinghub.withgoogle.com/brands/android/visual-identity/visual-identity/logo-lock-ups",
+    "guidelines": "https://developer.android.com/distribute/marketing-tools/brand-guidelines#brand-android",
+    "license": {
+      "type": "CC-BY-3.0"
+    }
+  },
+  {
+    "title": "Angular",
+    "slug": "angular",
+    "hex": "0F0F11",
+    "source": "https://angular.dev/press-kit",
+    "guidelines": "https://angular.dev/press-kit",
+    "license": {
+      "type": "CC-BY-4.0"
+    }
+  },
+  {
+    "title": "Ansible",
+    "slug": "ansible",
+    "hex": "EE0000",
+    "source": "https://www.ansible.com/logos"
+  },
+  {
+    "title": "Anthropic",
+    "slug": "anthropic",
+    "hex": "191919",
+    "source": "https://www.anthropic.com"
+  },
+  {
+    "title": "Apache Airflow",
+    "slug": "apacheairflow",
+    "hex": "017CEE",
+    "source": "https://apache.org/logos",
+    "guidelines": "https://www.apache.org/foundation/marks",
+    "license": {
+      "type": "Apache-2.0"
+    }
+  },
+  {
+    "title": "Apache Cassandra",
+    "slug": "apachecassandra",
+    "hex": "1287B1",
+    "source": "https://www.apache.org/logos",
+    "guidelines": "https://www.apache.org/foundation/marks",
+    "license": {
+      "type": "Apache-2.0"
+    }
+  },
+  {
+    "title": "Apache Flink",
+    "slug": "apacheflink",
+    "hex": "E6526F",
+    "source": "https://apache.org/logos",
+    "guidelines": "https://www.apache.org/foundation/marks",
+    "license": {
+      "type": "Apache-2.0"
+    }
+  },
+  {
+    "title": "Apache Hadoop",
+    "slug": "apachehadoop",
+    "hex": "66CCFF",
+    "source": "https://apache.org/logos",
+    "guidelines": "https://www.apache.org/foundation/marks",
+    "license": {
+      "type": "Apache-2.0"
+    }
+  },
+  {
+    "title": "Apache Kafka",
+    "slug": "apachekafka",
+    "hex": "231F20",
+    "source": "https://apache.org/logos",
+    "guidelines": "https://www.apache.org/foundation/marks",
+    "license": {
+      "type": "Apache-2.0"
+    }
+  },
+  {
+    "title": "Apache Parquet",
+    "slug": "apacheparquet",
+    "hex": "50ABF1",
+    "source": "https://apache.org/logos",
+    "guidelines": "https://www.apache.org/foundation/marks",
+    "license": {
+      "type": "Apache-2.0"
+    }
+  },
+  {
+    "title": "Apache Pulsar",
+    "slug": "apachepulsar",
+    "hex": "188FFF",
+    "source": "https://apache.org/logos",
+    "guidelines": "https://www.apache.org/foundation/marks",
+    "license": {
+      "type": "Apache-2.0"
+    }
+  },
+  {
+    "title": "Apache Spark",
+    "slug": "apachespark",
+    "hex": "E25A1C",
+    "source": "https://apache.org/logos",
+    "guidelines": "https://www.apache.org/foundation/marks",
+    "license": {
+      "type": "Apache-2.0"
+    }
+  },
+  {
+    "title": "Apple",
+    "slug": "apple",
+    "hex": "000000",
+    "source": "https://www.apple.com"
+  },
+  {
+    "title": "Appwrite",
+    "slug": "appwrite",
+    "hex": "FD366E",
+    "source": "https://appwrite.io/assets",
+    "guidelines": "https://appwrite.io/assets"
+  },
+  {
+    "title": "Arch Linux",
+    "slug": "archlinux",
+    "hex": "1793D1",
+    "source": "https://www.archlinux.org/art",
+    "guidelines": "https://wiki.archlinux.org/index.php/DeveloperWiki:TrademarkPolicy#Logo_Usage_Guidelines"
+  },
+  {
+    "title": "Argo",
+    "slug": "argo",
+    "hex": "EF7B4D",
+    "source": "https://github.com/cncf/artwork/blob/c2e619cdf85e8bac090ceca7c0834c5cfedf9426/projects/argo/icon/black/argo-icon-black.svg"
+  },
+  {
+    "title": "Asana",
+    "slug": "asana",
+    "hex": "F06A6A",
+    "source": "https://asana.com/brand",
+    "guidelines": "https://asana.com/brand"
+  },
+  {
+    "title": "Astro",
+    "slug": "astro",
+    "hex": "BC52EE",
+    "source": "https://astro.build/press"
+  },
+  {
+    "title": "Atlassian",
+    "slug": "atlassian",
+    "hex": "0052CC",
+    "source": "https://atlassian.design/resources/logo-library",
+    "guidelines": "https://atlassian.design/foundations/logos"
+  },
+  {
+    "title": "Auth0",
+    "slug": "auth0",
+    "hex": "EB5424",
+    "source": "https://auth0.com"
+  },
+  {
+    "title": "Babel",
+    "slug": "babel",
+    "hex": "F9DC3E",
+    "source": "https://github.com/babel/website/blob/93330158b6ecca1ab88d3be8dbf661f5c2da6c76/website/static/img/babel-black.svg"
+  },
+  {
+    "title": "Backblaze",
+    "slug": "backblaze",
+    "hex": "E21E29",
+    "source": "https://www.backblaze.com/company/news.html",
+    "guidelines": "https://www.backblaze.com/company/news.html"
+  },
+  {
+    "title": "Better Stack",
+    "slug": "betterstack",
+    "hex": "000000",
+    "source": "https://betterstack.com"
+  },
+  {
+    "title": "Biome",
+    "slug": "biome",
+    "hex": "60A5FA",
+    "source": "https://github.com/biomejs/resources/blob/551f36498dfe34b24bc7755fcdd0fa501b757cf4/svg/icon-light-mono.svg",
+    "aliases": {
+      "old": [
+        "Rome"
+      ]
+    }
+  },
+  {
+    "title": "Bitbucket",
+    "slug": "bitbucket",
+    "hex": "0052CC",
+    "source": "https://atlassian.design/resources/logo-library",
+    "guidelines": "https://atlassian.design/foundations/logos"
+  },
+  {
+    "title": "Bitwarden",
+    "slug": "bitwarden",
+    "hex": "175DDC",
+    "source": "https://bitwarden.com/brand",
+    "guidelines": "https://bitwarden.com/brand"
+  },
+  {
+    "title": "Bruno",
+    "slug": "bruno",
+    "hex": "F4AA41",
+    "source": "https://www.usebruno.com"
+  },
+  {
+    "title": "Buildkite",
+    "slug": "buildkite",
+    "hex": "14CC80",
+    "source": "https://buildkite.com/brand-assets",
+    "guidelines": "https://buildkite.com/brand-assets"
+  },
+  {
+    "title": "Bun",
+    "slug": "bun",
+    "hex": "000000",
+    "source": "https://bun.sh/press-kit"
+  },
+  {
+    "title": "C",
+    "slug": "c",
+    "hex": "A8B9CC",
+    "source": "https://commons.wikimedia.org/wiki/File:The_C_Programming_Language_logo.svg"
+  },
+  {
+    "title": "C++",
+    "slug": "cplusplus",
+    "hex": "00599C",
+    "source": "https://github.com/isocpp/logos/tree/64ef037049f87ac74875dbe72695e59118b52186"
+  },
+  {
+    "title": "Caddy",
+    "slug": "caddy",
+    "hex": "1F88C0",
+    "source": "https://caddyserver.com"
+  },
+  {
+    "title": "Chef",
+    "slug": "chef",
+    "hex": "F09820",
+    "source": "https://www.chef.io"
+  },
+  {
+    "title": "CircleCI",
+    "slug": "circleci",
+    "hex": "343434",
+    "source": "https://circleci.com/press"
+  },
+  {
+    "title": "Claude",
+    "slug": "claude",
+    "hex": "D97757",
+    "source": "https://claude.ai"
+  },
+  {
+    "title": "Claude Code",
+    "slug": "claudecode",
+    "hex": "D97757",
+    "source": "https://code.claude.com"
+  },
+  {
+    "title": "Clerk",
+    "slug": "clerk",
+    "hex": "6C47FF",
+    "source": "https://clerk.com"
+  },
+  {
+    "title": "ClickHouse",
+    "slug": "clickhouse",
+    "hex": "FFCC01",
+    "source": "https://github.com/ClickHouse/ClickHouse/blob/12bd453a43819176d25ecf247033f6cb1af54beb/website/images/logo-clickhouse.svg"
+  },
+  {
+    "title": "ClickUp",
+    "slug": "clickup",
+    "hex": "7B68EE",
+    "source": "https://clickup.com/brand"
+  },
+  {
+    "title": "Cline",
+    "slug": "cline",
+    "hex": "18181B",
+    "source": "https://cline.bot/assets/branding/logos/cline-wordmark-black.svg"
+  },
+  {
+    "title": "Clojure",
+    "slug": "clojure",
+    "hex": "5881D8",
+    "source": "https://commons.wikimedia.org/wiki/File:Clojure_logo.svg"
+  },
+  {
+    "title": "Cloudflare",
+    "slug": "cloudflare",
+    "hex": "F38020",
+    "source": "https://www.cloudflare.com/logo/",
+    "guidelines": "https://www.cloudflare.com/trademark/"
+  },
+  {
+    "title": "Cloudflare Pages",
+    "slug": "cloudflarepages",
+    "hex": "F38020",
+    "source": "https://pages.cloudflare.com",
+    "guidelines": "https://www.cloudflare.com/trademark/"
+  },
+  {
+    "title": "Cloudflare Workers",
+    "slug": "cloudflareworkers",
+    "hex": "F38020",
+    "source": "https://www.cloudflare.com/developer-platform/products/",
+    "guidelines": "https://www.cloudflare.com/trademark/"
+  },
+  {
+    "title": "Cockroach Labs",
+    "slug": "cockroachlabs",
+    "hex": "6933FF",
+    "source": "https://www.cockroachlabs.com"
+  },
+  {
+    "title": "Codeberg",
+    "slug": "codeberg",
+    "hex": "2185D0",
+    "source": "https://codeberg.org/Codeberg/Design/src/commit/ac514aa9aaa2457d4af3c3e13df3ab136d22a49a/logo/special/codeberg-logo_special_fake-transaprency.svg",
+    "guidelines": "https://codeberg.org/Codeberg/Design",
+    "license": {
+      "type": "CC0-1.0"
+    }
+  },
+  {
+    "title": "Codecov",
+    "slug": "codecov",
+    "hex": "F01F7A",
+    "source": "https://codecov.io"
+  },
+  {
+    "title": "Coder",
+    "slug": "coder",
+    "hex": "090B0B",
+    "source": "https://coder.com/brand#3-logos",
+    "guidelines": "https://coder.com/brand"
+  },
+  {
+    "title": "CodeRabbit",
+    "slug": "coderabbit",
+    "hex": "FF570A",
+    "source": "https://www.coderabbit.ai/brand",
+    "guidelines": "https://www.coderabbit.ai/brand"
+  },
+  {
+    "title": "CodeSandbox",
+    "slug": "codesandbox",
+    "hex": "151515",
+    "source": "https://codesandbox.io/CodeSandbox-Press-Kit.zip"
+  },
+  {
+    "title": "Confluence",
+    "slug": "confluence",
+    "hex": "172B4D",
+    "source": "https://www.atlassian.com/company/news/press-kit"
+  },
+  {
+    "title": "Consul",
+    "slug": "consul",
+    "hex": "F24C53",
+    "source": "https://www.hashicorp.com/brand",
+    "guidelines": "https://www.hashicorp.com/brand"
+  },
+  {
+    "title": "containerd",
+    "slug": "containerd",
+    "hex": "575757",
+    "source": "https://cncf-branding.netlify.app/projects/containerd/"
+  },
+  {
+    "title": "Convex",
+    "slug": "convex",
+    "hex": "EE342F",
+    "source": "https://www.convex.dev/brand",
+    "guidelines": "https://www.convex.dev/brand"
+  },
+  {
+    "title": "Couchbase",
+    "slug": "couchbase",
+    "hex": "EA2328",
+    "source": "https://www.couchbase.com"
+  },
+  {
+    "title": "CrewAI",
+    "slug": "crewai",
+    "hex": "FF5A50",
+    "source": "https://github.com/crewAIInc/crewAI/blob/a7696d5aed7a85333735dde370fd9f0547aaabf5/docs/favicon.svg"
+  },
+  {
+    "title": "CSS",
+    "slug": "css",
+    "hex": "663399",
+    "source": "https://github.com/CSS-Next/logo.css/blob/bacc20878227204b283c68a6b935f8279e06b0cd/css.svg",
+    "guidelines": "https://github.com/CSS-Next/logo.css"
+  },
+  {
+    "title": "Cursor",
+    "slug": "cursor",
+    "hex": "000000",
+    "source": "https://cursor.com/brand"
+  },
+  {
+    "title": "Cypress",
+    "slug": "cypress",
+    "hex": "69D3A7",
+    "source": "https://www.cypress.io/press-kit"
+  },
+  {
+    "title": "D3",
+    "slug": "d3",
+    "hex": "F9A03C",
+    "source": "https://github.com/d3/d3-logo/tree/6d9c471aa852033501d00ca63fe73d9f8be82d1d",
+    "aliases": {
+      "aka": [
+        "D3.js"
+      ]
+    }
+  },
+  {
+    "title": "Dart",
+    "slug": "dart",
+    "hex": "0175C2",
+    "source": "https://github.com/dart-lang/site-shared/tree/18458ff440afd3d06f04e5cb871c4c5eda29c9d5/src/_assets/image/dart/logo"
+  },
+  {
+    "title": "Databricks",
+    "slug": "databricks",
+    "hex": "FF3621",
+    "source": "https://www.databricks.com",
+    "guidelines": "https://brand.databricks.com/Styleguide/Guide/"
+  },
+  {
+    "title": "Datadog",
+    "slug": "datadog",
+    "hex": "632CA6",
+    "source": "https://www.datadoghq.com/about/resources",
+    "guidelines": "https://www.datadoghq.com/about/resources/"
+  },
+  {
+    "title": "Debian",
+    "slug": "debian",
+    "hex": "A81D33",
+    "source": "https://www.debian.org/logos",
+    "guidelines": "https://www.debian.org/logos/",
+    "license": {
+      "type": "CC-BY-SA-3.0"
+    }
+  },
+  {
+    "title": "DeepSeek",
+    "slug": "deepseek",
+    "hex": "5786FE",
+    "source": "https://www.deepseek.com"
+  },
+  {
+    "title": "Deno",
+    "slug": "deno",
+    "hex": "000000",
+    "source": "https://github.com/denoland/docs/blob/5dee713844c7447f80acd4093caa9d350d80bf36/static/img/logo.svg",
+    "guidelines": "https://deno.com/brand",
+    "license": {
+      "type": "MIT"
+    }
+  },
+  {
+    "title": "Dependabot",
+    "slug": "dependabot",
+    "hex": "025E8C",
+    "source": "https://dependabot.com"
+  },
+  {
+    "title": "DigitalOcean",
+    "slug": "digitalocean",
+    "hex": "0080FF",
+    "source": "https://www.digitalocean.com/press/",
+    "guidelines": "https://www.digitalocean.com/press/"
+  },
+  {
+    "title": "Discord",
+    "slug": "discord",
+    "hex": "5865F2",
+    "source": "https://discord.com/branding",
+    "guidelines": "https://discord.com/branding"
+  },
+  {
+    "title": "Django",
+    "slug": "django",
+    "hex": "092E20",
+    "source": "https://www.djangoproject.com/community/logos/"
+  },
+  {
+    "title": "Docker",
+    "slug": "docker",
+    "hex": "2496ED",
+    "source": "https://www.docker.com/company/newsroom/media-resources"
+  },
+  {
+    "title": "Drizzle",
+    "slug": "drizzle",
+    "hex": "C5F74F",
+    "source": "https://orm.drizzle.team"
+  },
+  {
+    "title": "Dropbox",
+    "slug": "dropbox",
+    "hex": "0061FF",
+    "source": "https://www.dropbox.com/branding"
+  },
+  {
+    "title": "DuckDB",
+    "slug": "duckdb",
+    "hex": "FFF000",
+    "source": "https://duckdb.org"
+  },
+  {
+    "title": "Elastic",
+    "slug": "elastic",
+    "hex": "005571",
+    "source": "https://www.elastic.co/brand"
+  },
+  {
+    "title": "Elasticsearch",
+    "slug": "elasticsearch",
+    "hex": "005571",
+    "source": "https://www.elastic.co/brand"
+  },
+  {
+    "title": "Electron",
+    "slug": "electron",
+    "hex": "47848F",
+    "source": "https://www.electronjs.org"
+  },
+  {
+    "title": "ElevenLabs",
+    "slug": "elevenlabs",
+    "hex": "000000",
+    "source": "https://elevenlabs.io/brand",
+    "guidelines": "https://elevenlabs.io/brand"
+  },
+  {
+    "title": "Elixir",
+    "slug": "elixir",
+    "hex": "4B275F",
+    "source": "https://github.com/elixir-lang/elixir-lang.github.com/tree/031746384ee23b9be19298c92a9699c56cc05845/images/logo"
+  },
+  {
+    "title": "Envoy Proxy",
+    "slug": "envoyproxy",
+    "hex": "AC6199",
+    "source": "https://d33wubrfki0l68.cloudfront.net/6f16455dae972425b77c7e31642269b375ec250e/3bd11/img/envoy-logo.svg"
+  },
+  {
+    "title": "Erlang",
+    "slug": "erlang",
+    "hex": "A90533",
+    "source": "https://github.com/erlang/erlide_eclipse/blob/99d1d61fde8e32ef1630ca0e1b05a6822b3d6489/meta/media/erlang-logo.svg"
+  },
+  {
+    "title": "esbuild",
+    "slug": "esbuild",
+    "hex": "FFCF00",
+    "source": "https://github.com/evanw/esbuild/blob/ac542f913908d7326b65eb2e01f0559ed135a40e/images/logo.svg"
+  },
+  {
+    "title": "ESLint",
+    "slug": "eslint",
+    "hex": "4B32C3",
+    "source": "https://eslint.org"
+  },
+  {
+    "title": "Excalidraw",
+    "slug": "excalidraw",
+    "hex": "6965DB",
+    "source": "https://excalidraw.com"
+  },
+  {
+    "title": "Expo",
+    "slug": "expo",
+    "hex": "1C2024",
+    "source": "https://expo.dev/brand/",
+    "guidelines": "https://expo.dev/brand/"
+  },
+  {
+    "title": "Express",
+    "slug": "express",
+    "hex": "0A0A0A",
+    "source": "https://github.com/openjs-foundation/artwork/blob/3816245ebbf4707bdafde748350ac8476b6b5b62/projects/express/express-icon-black.svg",
+    "aliases": {
+      "aka": [
+        "Express.js"
+      ]
+    }
+  },
+  {
+    "title": "FastAPI",
+    "slug": "fastapi",
+    "hex": "009688",
+    "source": "https://github.com/tiangolo/fastapi/blob/ffb4f77a11f83132b521ba0aac6c95792c19e797/docs/en/docs/img/icon-white.svg"
+  },
+  {
+    "title": "Fastify",
+    "slug": "fastify",
+    "hex": "000000",
+    "source": "https://github.com/fastify/graphics/blob/91e8a3d4754807de3b69440f66c72a737a5fde94/fastify-1000px-square-02.svg"
+  },
+  {
+    "title": "Fastly",
+    "slug": "fastly",
+    "hex": "FF282D",
+    "source": "https://assets.fastly.com/style-guide/docs/"
+  },
+  {
+    "title": "Figma",
+    "slug": "figma",
+    "hex": "F24E1E",
+    "source": "https://www.figma.com/using-the-figma-brand/",
+    "guidelines": "https://www.figma.com/using-the-figma-brand/"
+  },
+  {
+    "title": "Firebase",
+    "slug": "firebase",
+    "hex": "DD2C00",
+    "source": "https://firebase.google.com/brand-guidelines",
+    "guidelines": "https://firebase.google.com/brand-guidelines"
+  },
+  {
+    "title": "Flask",
+    "slug": "flask",
+    "hex": "3BABC3",
+    "source": "https://github.com/pallets/flask/blob/85c5d93cbd049c4bd0679c36fd1ddcae8c37b642/docs/_static/flask-icon.svg"
+  },
+  {
+    "title": "Flutter",
+    "slug": "flutter",
+    "hex": "02569B",
+    "source": "https://flutter.dev/brand",
+    "guidelines": "https://flutter.dev/brand"
+  },
+  {
+    "title": "Fly.io",
+    "slug": "flydotio",
+    "hex": "24175B",
+    "source": "https://fly.io/docs/about/brand",
+    "guidelines": "https://fly.io/docs/about/brand"
+  },
+  {
+    "title": "Forgejo",
+    "slug": "forgejo",
+    "hex": "FB923C",
+    "source": "https://codeberg.org/forgejo/meta/raw/branch/readme/branding/logo/forgejo-monochrome.svg",
+    "guidelines": "https://codeberg.org/forgejo/meta/src/branch/readme/branding/README.md#logo",
+    "license": {
+      "type": "CC-BY-SA-4.0"
+    }
+  },
+  {
+    "title": "Ghostty",
+    "slug": "ghostty",
+    "hex": "3551F3",
+    "source": "https://github.com/ghostty-org/website/blob/7093f052a2f35e0247fcb828ede644ed74a749a0/public/ghostty-logo.svg"
+  },
+  {
+    "title": "Git",
+    "slug": "git",
+    "hex": "F03C2E",
+    "source": "https://git-scm.com/community/logos",
+    "license": {
+      "type": "CC-BY-3.0"
+    }
+  },
+  {
+    "title": "Gitea",
+    "slug": "gitea",
+    "hex": "609926",
+    "source": "https://github.com/go-gitea/gitea/blob/e0c753e770a64cda5e3900aa1da3d7e1f3263c9a/assets/logo.svg"
+  },
+  {
+    "title": "GitHub",
+    "slug": "github",
+    "hex": "181717",
+    "source": "https://github.com/logos",
+    "guidelines": "https://github.com/logos"
+  },
+  {
+    "title": "GitHub Actions",
+    "slug": "githubactions",
+    "hex": "2088FF",
+    "source": "https://github.com/features/actions"
+  },
+  {
+    "title": "GitHub Copilot",
+    "slug": "githubcopilot",
+    "hex": "000000",
+    "source": "https://primer.style/foundations/icons/copilot-24",
+    "license": {
+      "type": "MIT"
+    }
+  },
+  {
+    "title": "GitLab",
+    "slug": "gitlab",
+    "hex": "FC6D26",
+    "source": "https://about.gitlab.com/press/press-kit/",
+    "guidelines": "https://about.gitlab.com/handbook/marketing/corporate-marketing/brand-activation/trademark-guidelines/"
+  },
+  {
+    "title": "Gitpod",
+    "slug": "gitpod",
+    "hex": "FFAE33",
+    "source": "https://www.gitpod.io"
+  },
+  {
+    "title": "Gmail",
+    "slug": "gmail",
+    "hex": "EA4335",
+    "source": "https://fonts.gstatic.com/s/i/productlogos/gmail_2020q4/v8/192px.svg"
+  },
+  {
+    "title": "GNU Bash",
+    "slug": "gnubash",
+    "hex": "4EAA25",
+    "source": "https://github.com/odb/official-bash-logo/tree/61eff022f2dad3c7468f5deb4f06652d15f2c143",
+    "guidelines": "https://github.com/odb/official-bash-logo",
+    "license": {
+      "type": "MIT"
+    }
+  },
+  {
+    "title": "Go",
+    "slug": "go",
+    "hex": "00ADD8",
+    "source": "https://blog.golang.org/go-brand",
+    "guidelines": "https://blog.golang.org/go-brand"
+  },
+  {
+    "title": "Google Cloud",
+    "slug": "googlecloud",
+    "hex": "4285F4",
+    "source": "https://cloud.google.com"
+  },
+  {
+    "title": "Google Colab",
+    "slug": "googlecolab",
+    "hex": "F9AB00",
+    "source": "https://colab.research.google.com"
+  },
+  {
+    "title": "Google Docs",
+    "slug": "googledocs",
+    "hex": "4285F4",
+    "source": "https://www.google.com/docs/about"
+  },
+  {
+    "title": "Google Drive",
+    "slug": "googledrive",
+    "hex": "4285F4",
+    "source": "https://developers.google.com/drive/web/branding"
+  },
+  {
+    "title": "Google Gemini",
+    "slug": "googlegemini",
+    "hex": "8E75B2",
+    "source": "https://gemini.google.com",
+    "aliases": {
+      "old": [
+        "Google Bard"
+      ]
+    }
+  },
+  {
+    "title": "Google Sheets",
+    "slug": "googlesheets",
+    "hex": "34A853",
+    "source": "https://sheets.google.com"
+  },
+  {
+    "title": "Gradio",
+    "slug": "gradio",
+    "hex": "F97316",
+    "source": "https://www.gradio.app"
+  },
+  {
+    "title": "Grafana",
+    "slug": "grafana",
+    "hex": "F46800",
+    "source": "https://grafana.com"
+  },
+  {
+    "title": "GraphQL",
+    "slug": "graphql",
+    "hex": "E10098",
+    "source": "https://graphql.org/brand",
+    "guidelines": "https://graphql.org/brand"
+  },
+  {
+    "title": "HashiCorp",
+    "slug": "hashicorp",
+    "hex": "000000",
+    "source": "https://www.hashicorp.com",
+    "guidelines": "https://www.hashicorp.com/brand"
+  },
+  {
+    "title": "Haskell",
+    "slug": "haskell",
+    "hex": "5D4F85",
+    "source": "https://wiki.haskell.org/Thompson-Wheeler_logo"
+  },
+  {
+    "title": "Hasura",
+    "slug": "hasura",
+    "hex": "1EB4D4",
+    "source": "https://github.com/hasura/graphql-engine/blob/5e2f5d470cdc2a7e59db7a3d5e94475a00bb2ac6/docs/static/img/logo.svg"
+  },
+  {
+    "title": "Helm",
+    "slug": "helm",
+    "hex": "0F1689",
+    "source": "https://helm.sh"
+  },
+  {
+    "title": "Hetzner",
+    "slug": "hetzner",
+    "hex": "D50C2D",
+    "source": "https://www.hetzner.com"
+  },
+  {
+    "title": "Homebrew",
+    "slug": "homebrew",
+    "hex": "FBB040",
+    "source": "https://github.com/Homebrew/brew.sh/blob/2e576aaca83e62dda41a188597bb4bd20e75e385/assets/img/homebrew.svg"
+  },
+  {
+    "title": "Hono",
+    "slug": "hono",
+    "hex": "E36002",
+    "source": "https://github.com/honojs/hono/blob/76dbc74407329c46870af6aa4fab0c04036d8ae2/docs/images/hono-logo.svg"
+  },
+  {
+    "title": "HTML5",
+    "slug": "html5",
+    "hex": "E34F26",
+    "source": "https://www.w3.org/html/logo/"
+  },
+  {
+    "title": "htmx",
+    "slug": "htmx",
+    "hex": "3366CC",
+    "source": "https://github.com/bigskysoftware/htmx/blob/f690d928342b6334fa539cfbd4be515748d2ba0f/www/static/img/htmx_logo.2.png"
+  },
+  {
+    "title": "Hugging Face",
+    "slug": "huggingface",
+    "hex": "FFD21E",
+    "source": "https://huggingface.co/brand",
+    "guidelines": "https://huggingface.co/brand"
+  },
+  {
+    "title": "InfluxDB",
+    "slug": "influxdb",
+    "hex": "22ADF6",
+    "source": "https://influxdata.github.io/branding/logo/downloads/",
+    "guidelines": "https://influxdata.github.io/branding/logo/usage/"
+  },
+  {
+    "title": "Insomnia",
+    "slug": "insomnia",
+    "hex": "4000BF",
+    "source": "https://insomnia.rest"
+  },
+  {
+    "title": "IntelliJ IDEA",
+    "slug": "intellijidea",
+    "hex": "000000",
+    "source": "https://www.jetbrains.com/idea/",
+    "guidelines": "https://www.jetbrains.com/company/brand/"
+  },
+  {
+    "title": "iOS",
+    "slug": "ios",
+    "hex": "000000",
+    "source": "https://en.wikipedia.org/wiki/IOS"
+  },
+  {
+    "title": "Istio",
+    "slug": "istio",
+    "hex": "466BB0",
+    "source": "https://github.com/istio/istio/blob/5a047251817eb2523af297607b7614120812e47a/logo/istio-bluelogo-whitebackground-unframed.svg"
+  },
+  {
+    "title": "iTerm2",
+    "slug": "iterm2",
+    "hex": "000000",
+    "source": "https://github.com/gnachman/iTerm2/blob/6a857f3f5872eb1465ddc0dd83412015991e79ae/images/AppIcon/iTermIcon.sketch"
+  },
+  {
+    "title": "Jaeger",
+    "slug": "jaeger",
+    "hex": "66CFE3",
+    "source": "https://github.com/cncf/artwork/blob/e7e09686c20db6ddac06e482cf3338b0c8b2e22d/projects/jaeger/icon/black/jaeger-icon-black.svg",
+    "guidelines": "https://github.com/cncf/artwork/blob/e7e09686c20db6ddac06e482cf3338b0c8b2e22d/projects/jaeger/jaeger-logo-guide.pdf"
+  },
+  {
+    "title": "JavaScript",
+    "slug": "javascript",
+    "hex": "F7DF1E",
+    "source": "https://github.com/voodootikigod/logo.js/blob/1544bdeed6d618a6cfe4f0650d04ab8d9cfa76d9/js.svg",
+    "license": {
+      "type": "MIT"
+    }
+  },
+  {
+    "title": "Jenkins",
+    "slug": "jenkins",
+    "hex": "D24939",
+    "source": "https://get.jenkins.io/art/",
+    "guidelines": "https://www.jenkins.io/press/",
+    "license": {
+      "type": "CC-BY-SA-3.0"
+    }
+  },
+  {
+    "title": "Jest",
+    "slug": "jest",
+    "hex": "C21325",
+    "source": "https://jestjs.io"
+  },
+  {
+    "title": "JetBrains",
+    "slug": "jetbrains",
+    "hex": "000000",
+    "source": "https://www.jetbrains.com/company/brand/logos/",
+    "guidelines": "https://www.jetbrains.com/company/brand/"
+  },
+  {
+    "title": "Jira",
+    "slug": "jira",
+    "hex": "0052CC",
+    "source": "https://atlassian.design/resources/logo-library",
+    "guidelines": "https://atlassian.design/foundations/logos/"
+  },
+  {
+    "title": "JSON",
+    "slug": "json",
+    "hex": "000000",
+    "source": "https://commons.wikimedia.org/wiki/File:JSON_vector_logo.svg"
+  },
+  {
+    "title": "Julia",
+    "slug": "julia",
+    "hex": "9558B2",
+    "source": "https://github.com/JuliaLang/julia-logo-graphics/blob/b5551ca7946b4a25746c045c15fbb8806610f8d0/images/julia-dots.svg"
+  },
+  {
+    "title": "Jupyter",
+    "slug": "jupyter",
+    "hex": "F37626",
+    "source": "https://github.com/jupyter/design/blob/80716ee75dd7b2a6ec6abcd89922d020483589b1/logos/Logo%20Mark/logomark-whitebody-whitemoons/logomark-whitebody-whitemoons.svg",
+    "guidelines": "https://github.com/jupyter/design"
+  },
+  {
+    "title": "K3s",
+    "slug": "k3s",
+    "hex": "FFC61C",
+    "source": "https://k3s.io"
+  },
+  {
+    "title": "Kaggle",
+    "slug": "kaggle",
+    "hex": "20BEFF",
+    "source": "https://www.kaggle.com/brand-guidelines",
+    "guidelines": "https://www.kaggle.com/brand-guidelines"
+  },
+  {
+    "title": "Keras",
+    "slug": "keras",
+    "hex": "D00000",
+    "source": "https://keras.io"
+  },
+  {
+    "title": "Kibana",
+    "slug": "kibana",
+    "hex": "005571",
+    "source": "https://www.elastic.co/brand"
+  },
+  {
+    "title": "Kimi",
+    "slug": "kimi",
+    "hex": "000000",
+    "source": "https://moonshotai.github.io/Branding-Guide",
+    "guidelines": "https://moonshotai.github.io/Branding-Guide"
+  },
+  {
+    "title": "Kong",
+    "slug": "kong",
+    "hex": "003459",
+    "source": "https://konghq.com/brand-assets/",
+    "guidelines": "https://konghq.com/brand/"
+  },
+  {
+    "title": "Kotlin",
+    "slug": "kotlin",
+    "hex": "7F52FF",
+    "source": "https://www.jetbrains.com/company/brand/logos/",
+    "guidelines": "https://www.jetbrains.com/company/brand/",
+    "aliases": {
+      "loc": {
+        "ko-KR": "코틀린"
+      }
+    }
+  },
+  {
+    "title": "Kubernetes",
+    "slug": "kubernetes",
+    "hex": "326CE5",
+    "source": "https://github.com/kubernetes/kubernetes/tree/cac53883f4714452f3084a22e4be20d042a9df33/logo"
+  },
+  {
+    "title": "LangChain",
+    "slug": "langchain",
+    "hex": "7FC8FF",
+    "source": "https://www.langchain.com/langchain"
+  },
+  {
+    "title": "LangGraph",
+    "slug": "langgraph",
+    "hex": "7FC8FF",
+    "source": "https://www.langchain.com/langgraph"
+  },
+  {
+    "title": "Laravel",
+    "slug": "laravel",
+    "hex": "FF2D20",
+    "source": "https://github.com/laravel/art/tree/5a8325b064634b900f25dbb6f1cafd888b2d2211"
+  },
+  {
+    "title": "Linear",
+    "slug": "linear",
+    "hex": "5E6AD2",
+    "source": "https://linear.app"
+  },
+  {
+    "title": "Linkerd",
+    "slug": "linkerd",
+    "hex": "2BEDA7",
+    "source": "https://cncf-branding.netlify.app/projects/linkerd/"
+  },
+  {
+    "title": "Linux",
+    "slug": "linux",
+    "hex": "FCC624",
+    "source": "https://www.linuxfoundation.org/the-linux-mark/"
+  },
+  {
+    "title": "LM Studio",
+    "slug": "lmstudio",
+    "hex": "000000",
+    "source": "https://files.lmstudio.ai/lmstudio_icon2.svg",
+    "aliases": {
+      "aka": [
+        "Bionic",
+        "LM Studio Bionic",
+        "lmstudio"
+      ]
+    }
+  },
+  {
+    "title": "Lua",
+    "slug": "lua",
+    "hex": "000080",
+    "source": "https://www.lua.org/images/",
+    "guidelines": "https://www.lua.org/images/"
+  },
+  {
+    "title": "macOS",
+    "slug": "macos",
+    "hex": "000000",
+    "source": "https://commons.wikimedia.org/wiki/File:MacOS_wordmark_(2017).svg"
+  },
+  {
+    "title": "Mailgun",
+    "slug": "mailgun",
+    "hex": "F06B66",
+    "source": "https://mailgun.com"
+  },
+  {
+    "title": "MariaDB",
+    "slug": "mariadb",
+    "hex": "003545",
+    "source": "https://mariadb.com/about-us/logos/",
+    "guidelines": "https://mariadb.com/about-us/logos/"
+  },
+  {
+    "title": "Markdown",
+    "slug": "markdown",
+    "hex": "000000",
+    "source": "https://github.com/dcurtis/markdown-mark/tree/360a3657fef7f6ad0b303296a95ad52985caa0d3",
+    "guidelines": "https://github.com/dcurtis/markdown-mark",
+    "license": {
+      "type": "CC0-1.0"
+    }
+  },
+  {
+    "title": "MDX",
+    "slug": "mdx",
+    "hex": "1B1F24",
+    "source": "https://github.com/mdx-js/mdx/blob/b8a76c95deb14f7297bafdac1aa3eddd2b0fbb8f/docs/_static/icon.svg"
+  },
+  {
+    "title": "Meilisearch",
+    "slug": "meilisearch",
+    "hex": "FF5CAA",
+    "source": "https://www.meilisearch.com"
+  },
+  {
+    "title": "Meta",
+    "slug": "meta",
+    "hex": "0467DF",
+    "source": "https://www.meta.com",
+    "guidelines": "https://www.facebook.com/brand/resources/meta/company-brand"
+  },
+  {
+    "title": "Milvus",
+    "slug": "milvus",
+    "hex": "00A1EA",
+    "source": "https://github.com/milvus-io/artwork/blob/e30bffa2b0632b0d4cefcdd4e1a2c09fee5b0d28/icon/black/milvus-icon-black.svg"
+  },
+  {
+    "title": "MinIO",
+    "slug": "minio",
+    "hex": "C72E49",
+    "source": "https://min.io",
+    "guidelines": "https://min.io/logo"
+  },
+  {
+    "title": "Miro",
+    "slug": "miro",
+    "hex": "050038",
+    "source": "https://miro.com"
+  },
+  {
+    "title": "Mistral AI",
+    "slug": "mistralai",
+    "hex": "FA520F",
+    "source": "https://chat.mistral.ai"
+  },
+  {
+    "title": "Mixpanel",
+    "slug": "mixpanel",
+    "hex": "7856FF",
+    "source": "https://mixpanel.com",
+    "guidelines": "https://brand.mixpanel.com"
+  },
+  {
+    "title": "MLflow",
+    "slug": "mlflow",
+    "hex": "0194E2",
+    "source": "https://github.com/mlflow/mlflow/blob/855881f93703b15ffe643003fb4d7c84f0ec2502/assets/icon.svg"
+  },
+  {
+    "title": "Modal",
+    "slug": "modal",
+    "hex": "7FEE64",
+    "source": "https://modal.com"
+  },
+  {
+    "title": "Model Context Protocol",
+    "slug": "modelcontextprotocol",
+    "hex": "000000",
+    "source": "https://github.com/modelcontextprotocol/docs/blob/573dc60c2e7aab2605b29d0bf27194aa7b02e4fb/logo/light.svg",
+    "aliases": {
+      "aka": [
+        "MCP"
+      ]
+    }
+  },
+  {
+    "title": "MongoDB",
+    "slug": "mongodb",
+    "hex": "47A248",
+    "source": "https://www.mongodb.com/pressroom"
+  },
+  {
+    "title": "Moonshot AI",
+    "slug": "moonshotai",
+    "hex": "000000",
+    "source": "https://www.moonshot.cn"
+  },
+  {
+    "title": "MySQL",
+    "slug": "mysql",
+    "hex": "4479A1",
+    "source": "https://www.mysql.com/about/legal/logos.html",
+    "guidelines": "https://www.mysql.com/about/legal/logos.html"
+  },
+  {
+    "title": "n8n",
+    "slug": "n8n",
+    "hex": "EA4B71",
+    "source": "https://n8n.io/press"
+  },
+  {
+    "title": "NATS.io",
+    "slug": "natsdotio",
+    "hex": "27AAE1",
+    "source": "https://github.com/cncf/artwork/blob/88bc5e7a0cc7f3770ba6edddc92e1ab8a6006171/projects/nats/icon/black/nats-icon-black.svg"
+  },
+  {
+    "title": "Neo4j",
+    "slug": "neo4j",
+    "hex": "4581C3",
+    "source": "https://neo4j.com/brand/#logo",
+    "guidelines": "https://neo4j.com/brand/#logo"
+  },
+  {
+    "title": "Neon",
+    "slug": "neon",
+    "hex": "34D59A",
+    "source": "https://neon.com/brand",
+    "guidelines": "https://neon.com/brand"
+  },
+  {
+    "title": "Neovim",
+    "slug": "neovim",
+    "hex": "57A143",
+    "source": "https://neovim.io",
+    "license": {
+      "type": "CC-BY-SA-3.0"
+    }
+  },
+  {
+    "title": "NestJS",
+    "slug": "nestjs",
+    "hex": "E0234E",
+    "source": "https://nestjs.com"
+  },
+  {
+    "title": "Netlify",
+    "slug": "netlify",
+    "hex": "00C7B7",
+    "source": "https://www.netlify.com/press/",
+    "guidelines": "https://www.netlify.com/press/",
+    "aliases": {
+      "dup": [
+        {
+          "title": "Netlify CMS",
+          "hex": "C9FA4B",
+          "source": "https://www.netlifycms.org"
+        }
+      ]
+    }
+  },
+  {
+    "title": "New Relic",
+    "slug": "newrelic",
+    "hex": "1CE783",
+    "source": "https://newrelic.com/about/media-assets",
+    "guidelines": "https://newrelic.com/about/media-assets#guidelines"
+  },
+  {
+    "title": "Next.js",
+    "slug": "nextdotjs",
+    "hex": "000000",
+    "source": "https://vercel.com/design/brands#next-js",
+    "guidelines": "https://vercel.com/design/brands#next-js"
+  },
+  {
+    "title": "NGINX",
+    "slug": "nginx",
+    "hex": "009639",
+    "source": "https://www.nginx.com/press/",
+    "guidelines": "https://www.nginx.com/press/"
+  },
+  {
+    "title": "NixOS",
+    "slug": "nixos",
+    "hex": "5277C3",
+    "source": "https://brand.nixos.org/logos/nixos-logomark-black-flat-minimal.svg",
+    "guidelines": "https://brand.nixos.org/documents/nixos-branding-guide.pdf",
+    "license": {
+      "type": "CC-BY-4.0"
+    }
+  },
+  {
+    "title": "Node.js",
+    "slug": "nodedotjs",
+    "hex": "5FA04E",
+    "source": "https://nodejs.org/en/about/branding",
+    "guidelines": "https://nodejs.org/en/about/branding"
+  },
+  {
+    "title": "Nomad",
+    "slug": "nomad",
+    "hex": "00CA8E",
+    "source": "https://www.hashicorp.com/brand",
+    "guidelines": "https://www.hashicorp.com/brand"
+  },
+  {
+    "title": "Notion",
+    "slug": "notion",
+    "hex": "000000",
+    "source": "https://www.notion.so"
+  },
+  {
+    "title": "npm",
+    "slug": "npm",
+    "hex": "CB3837",
+    "source": "https://www.npmjs.com",
+    "guidelines": "https://docs.npmjs.com/policies/logos-and-usage"
+  },
+  {
+    "title": "NumPy",
+    "slug": "numpy",
+    "hex": "013243",
+    "source": "https://numpy.org/press-kit/",
+    "guidelines": "https://github.com/numpy/numpy/blob/main/branding/logo/logoguidelines.md"
+  },
+  {
+    "title": "Nuxt",
+    "slug": "nuxt",
+    "hex": "00DC82",
+    "source": "https://nuxt.com/design-kit",
+    "guidelines": "https://nuxt.com/design-kit",
+    "aliases": {
+      "aka": [
+        "Nuxt.js"
+      ]
+    }
+  },
+  {
+    "title": "NVIDIA",
+    "slug": "nvidia",
+    "hex": "76B900",
+    "source": "https://www.nvidia.com/en-us"
+  },
+  {
+    "title": "Nx",
+    "slug": "nx",
+    "hex": "143055",
+    "source": "https://nx.dev"
+  },
+  {
+    "title": "Obsidian",
+    "slug": "obsidian",
+    "hex": "7C3AED",
+    "source": "https://obsidian.md",
+    "guidelines": "https://obsidian.md/brand"
+  },
+  {
+    "title": "OCaml",
+    "slug": "ocaml",
+    "hex": "EC6813",
+    "source": "https://ocaml.org/logo",
+    "guidelines": "https://ocaml.org/logo",
+    "license": {
+      "type": "Unlicense"
+    }
+  },
+  {
+    "title": "Okta",
+    "slug": "okta",
+    "hex": "007DC1",
+    "source": "https://www.okta.com/press-room/media-assets/",
+    "guidelines": "https://www.okta.com/terms-of-use-for-okta-content/"
+  },
+  {
+    "title": "Ollama",
+    "slug": "ollama",
+    "hex": "000000",
+    "source": "https://github.com/ollama/ollama/issues/2152#issuecomment-1905286922"
+  },
+  {
+    "title": "OpenAPI Initiative",
+    "slug": "openapiinitiative",
+    "hex": "6BA539",
+    "source": "https://www.openapis.org/faq/style-guide",
+    "guidelines": "https://www.openapis.org/faq/style-guide"
+  },
+  {
+    "title": "OpenCV",
+    "slug": "opencv",
+    "hex": "5C3EE8",
+    "source": "https://opencv.org/resources/media-kit/",
+    "guidelines": "https://opencv.org/resources/media-kit/"
+  },
+  {
+    "title": "OpenJDK",
+    "slug": "openjdk",
+    "hex": "000000",
+    "source": "https://hg.openjdk.java.net/duke/duke/file/ca00f100dafc/vector/Agent.svg",
+    "license": {
+      "type": "BSD-3-Clause"
+    }
+  },
+  {
+    "title": "OpenRouter",
+    "slug": "openrouter",
+    "hex": "94A3B8",
+    "source": "https://openrouter.ai"
+  },
+  {
+    "title": "OpenSearch",
+    "slug": "opensearch",
+    "hex": "005EB8",
+    "source": "https://opensearch.org/trademark-brand-policy.html",
+    "guidelines": "https://opensearch.org/trademark-brand-policy.html"
+  },
+  {
+    "title": "OpenSSL",
+    "slug": "openssl",
+    "hex": "721412",
+    "source": "https://www.openssl.org"
+  },
+  {
+    "title": "OpenTelemetry",
+    "slug": "opentelemetry",
+    "hex": "000000",
+    "source": "https://cncf-branding.netlify.app/projects/opentelemetry/",
+    "guidelines": "https://cncf-branding.netlify.app/projects/opentelemetry/",
+    "license": {
+      "type": "CC-BY-4.0"
+    },
+    "aliases": {
+      "aka": [
+        "OTel"
+      ]
+    }
+  },
+  {
+    "title": "OpenTofu",
+    "slug": "opentofu",
+    "hex": "FFDA18",
+    "source": "https://github.com/opentofu/brand-artifacts/blob/0d4d0d6050ca0ff06471400bc3249a64c145f659/symbol-only/transparent/SVG/on-light-mono.svg",
+    "aliases": {
+      "aka": [
+        "OpenTF",
+        "Terraform"
+      ]
+    }
+  },
+  {
+    "title": "OVH",
+    "slug": "ovh",
+    "hex": "123F6D",
+    "source": "https://www.ovh.com/ca/en/newsroom/"
+  },
+  {
+    "title": "Packer",
+    "slug": "packer",
+    "hex": "02A8EF",
+    "source": "https://www.hashicorp.com/brand",
+    "guidelines": "https://www.hashicorp.com/brand"
+  },
+  {
+    "title": "PagerDuty",
+    "slug": "pagerduty",
+    "hex": "06AC38",
+    "source": "https://www.pagerduty.com/brand/",
+    "guidelines": "https://www.pagerduty.com/brand/"
+  },
+  {
+    "title": "pandas",
+    "slug": "pandas",
+    "hex": "150458",
+    "source": "https://pandas.pydata.org/about/citing.html",
+    "guidelines": "https://pandas.pydata.org/about/citing.html"
+  },
+  {
+    "title": "Perplexity",
+    "slug": "perplexity",
+    "hex": "1FB8CD",
+    "source": "https://www.perplexity.ai"
+  },
+  {
+    "title": "PHP",
+    "slug": "php",
+    "hex": "777BB4",
+    "source": "https://php.net/download-logos.php",
+    "license": {
+      "type": "CC-BY-SA-4.0"
+    }
+  },
+  {
+    "title": "Pi",
+    "slug": "pi",
+    "hex": "000000",
+    "source": "https://pi.dev/favicon.svg"
+  },
+  {
+    "title": "PlanetScale",
+    "slug": "planetscale",
+    "hex": "000000",
+    "source": "https://planetscale.com"
+  },
+  {
+    "title": "pnpm",
+    "slug": "pnpm",
+    "hex": "F69220",
+    "source": "https://pnpm.io/logos"
+  },
+  {
+    "title": "PocketBase",
+    "slug": "pocketbase",
+    "hex": "B8DBE4",
+    "source": "https://github.com/pocketbase/pocketbase/blob/4b64e0910b7dc527ff3de8cdacec074e40449e2e/ui/dist/images/logo.svg"
+  },
+  {
+    "title": "Podman",
+    "slug": "podman",
+    "hex": "892CA0",
+    "source": "https://podman.io"
+  },
+  {
+    "title": "Polars",
+    "slug": "polars",
+    "hex": "0075FF",
+    "source": "https://pola.rs"
+  },
+  {
+    "title": "PostgreSQL",
+    "slug": "postgresql",
+    "hex": "4169E1",
+    "source": "https://wiki.postgresql.org/wiki/Logo",
+    "guidelines": "https://www.postgresql.org/about/policies/trademarks/"
+  },
+  {
+    "title": "PostHog",
+    "slug": "posthog",
+    "hex": "000000",
+    "source": "https://posthog.com/handbook/company/brand-assets",
+    "guidelines": "https://posthog.com/handbook/company/brand-assets"
+  },
+  {
+    "title": "Postman",
+    "slug": "postman",
+    "hex": "FF6C37",
+    "source": "https://www.getpostman.com/resources/media-assets/"
+  },
+  {
+    "title": "Prefect",
+    "slug": "prefect",
+    "hex": "070E10",
+    "source": "https://www.prefect.io"
+  },
+  {
+    "title": "Presto",
+    "slug": "presto",
+    "hex": "5890FF",
+    "source": "https://github.com/prestodb/presto/blob/414ab2a6bbdcca6479c2615b048920adac34dd20/presto-docs/src/main/resources/logo/web/fb/dark-blue/Presto_FB_Lockups_DARKBLUE_BG-14.svg"
+  },
+  {
+    "title": "Prettier",
+    "slug": "prettier",
+    "hex": "F7B93E",
+    "source": "https://github.com/prettier/prettier-logo/blob/06997b307e0608ebee2044dafa0b9429d6b5a103/images/prettier-icon-clean-centred.svg"
+  },
+  {
+    "title": "Prisma",
+    "slug": "prisma",
+    "hex": "2D3748",
+    "source": "https://github.com/prisma/presskit/tree/4bcb64181f266723439d955d60afa1c55fefa715"
+  },
+  {
+    "title": "Prometheus",
+    "slug": "prometheus",
+    "hex": "E6522C",
+    "source": "https://prometheus.io"
+  },
+  {
+    "title": "Pulumi",
+    "slug": "pulumi",
+    "hex": "8A3391",
+    "source": "https://www.pulumi.com",
+    "guidelines": "https://www.pulumi.com/brand/"
+  },
+  {
+    "title": "Puppet",
+    "slug": "puppet",
+    "hex": "FFAE1A",
+    "source": "https://puppet.com/company/press-room/"
+  },
+  {
+    "title": "Puppeteer",
+    "slug": "puppeteer",
+    "hex": "40B5A4",
+    "source": "https://pptr.dev"
+  },
+  {
+    "title": "Python",
+    "slug": "python",
+    "hex": "3776AB",
+    "source": "https://www.python.org/community/logos/",
+    "guidelines": "https://www.python.org/community/logos/"
+  },
+  {
+    "title": "PyTorch",
+    "slug": "pytorch",
+    "hex": "EE4C2C",
+    "source": "https://github.com/pytorch/pytorch.github.io/blob/8f083bd12192ca12d5e1c1f3d236f4831d823d8f/assets/images/logo.svg",
+    "guidelines": "https://github.com/pytorch/pytorch.github.io/blob/381117ec296f002b2de475402ef29cca6c55e209/assets/brand-guidelines/PyTorch-Brand-Guidelines.pdf"
+  },
+  {
+    "title": "Qdrant",
+    "slug": "qdrant",
+    "hex": "DC244C",
+    "source": "https://qdrant.tech/img/brand-resources-logos/qdrant-brandmark-white.svg",
+    "guidelines": "https://qdrant.tech/brand-resources/"
+  },
+  {
+    "title": "QWen",
+    "slug": "qwen",
+    "hex": "6950EF",
+    "source": "https://qwen.ai"
+  },
+  {
+    "title": "R",
+    "slug": "r",
+    "hex": "276DC3",
+    "source": "https://www.r-project.org/logo/",
+    "license": {
+      "type": "CC-BY-SA-4.0"
+    }
+  },
+  {
+    "title": "RabbitMQ",
+    "slug": "rabbitmq",
+    "hex": "FF6600",
+    "source": "https://www.rabbitmq.com",
+    "guidelines": "https://www.rabbitmq.com/trademark-guidelines.html"
+  },
+  {
+    "title": "Radix UI",
+    "slug": "radixui",
+    "hex": "161618",
+    "source": "https://www.radix-ui.com"
+  },
+  {
+    "title": "Railway",
+    "slug": "railway",
+    "hex": "0B0D0E",
+    "source": "https://railway.app"
+  },
+  {
+    "title": "Rancher",
+    "slug": "rancher",
+    "hex": "0075A8",
+    "source": "https://rancher.com/brand-guidelines/",
+    "guidelines": "https://rancher.com/brand-guidelines/"
+  },
+  {
+    "title": "Raycast",
+    "slug": "raycast",
+    "hex": "FF6363",
+    "source": "https://www.raycast.com/press",
+    "guidelines": "https://www.raycast.com/press"
+  },
+  {
+    "title": "React",
+    "slug": "react",
+    "hex": "61DAFB",
+    "source": "https://github.com/facebook/create-react-app/blob/282c03f9525fdf8061ffa1ec50dce89296d916bd/test/fixtures/relative-paths/src/logo.svg",
+    "aliases": {
+      "dup": [
+        {
+          "title": "React Native",
+          "source": "https://reactnative.dev"
+        }
+      ]
+    }
+  },
+  {
+    "title": "Red Hat",
+    "slug": "redhat",
+    "hex": "EE0000",
+    "source": "https://www.redhat.com/en/about/brand/new-brand/details"
+  },
+  {
+    "title": "Redis",
+    "slug": "redis",
+    "hex": "FF4438",
+    "source": "https://redis.io/brand-guidelines",
+    "guidelines": "https://redis.io/brand-guidelines"
+  },
+  {
+    "title": "Remix",
+    "slug": "remix",
+    "hex": "000000",
+    "source": "https://drive.google.com/drive/u/0/folders/1pbHnJqg8Y1ATs0Oi8gARH7wccJGv4I2c"
+  },
+  {
+    "title": "Render",
+    "slug": "render",
+    "hex": "000000",
+    "source": "https://render.com"
+  },
+  {
+    "title": "Renovate",
+    "slug": "renovate",
+    "hex": "308BE3",
+    "source": "https://github.com/user-attachments/assets/8533178e-b2c4-4e15-bb3d-8df9e19e3760",
+    "guidelines": "https://docs.renovatebot.com/logo-brand-guidelines"
+  },
+  {
+    "title": "Replicate",
+    "slug": "replicate",
+    "hex": "000000",
+    "source": "https://replicate.com"
+  },
+  {
+    "title": "Replit",
+    "slug": "replit",
+    "hex": "F26207",
+    "source": "https://repl.it"
+  },
+  {
+    "title": "Resend",
+    "slug": "resend",
+    "hex": "000000",
+    "source": "https://resend.com/brand",
+    "guidelines": "https://resend.com/brand"
+  },
+  {
+    "title": "Retool",
+    "slug": "retool",
+    "hex": "3D3D3D",
+    "source": "https://retool.com"
+  },
+  {
+    "title": "rollup.js",
+    "slug": "rollupdotjs",
+    "hex": "EC4A3F",
+    "source": "https://rollupjs.org"
+  },
+  {
+    "title": "Ruby",
+    "slug": "ruby",
+    "hex": "CC342D",
+    "source": "https://www.ruby-lang.org/en/about/logo/",
+    "license": {
+      "type": "CC-BY-SA-2.5"
+    }
+  },
+  {
+    "title": "Ruby on Rails",
+    "slug": "rubyonrails",
+    "hex": "D30001",
+    "source": "https://github.com/simple-icons/simple-icons/issues/9619#issuecomment-1735150580",
+    "guidelines": "https://rubyonrails.org/trademarks/"
+  },
+  {
+    "title": "Rust",
+    "slug": "rust",
+    "hex": "000000",
+    "source": "https://www.rust-lang.org",
+    "guidelines": "https://www.rust-lang.org/policies/media-guide",
+    "license": {
+      "type": "CC-BY-SA-4.0"
+    }
+  },
+  {
+    "title": "Scala",
+    "slug": "scala",
+    "hex": "DC322F",
+    "source": "https://www.scala-lang.org"
+  },
+  {
+    "title": "Scaleway",
+    "slug": "scaleway",
+    "hex": "4F0599",
+    "source": "https://ultraviolet.scaleway.com",
+    "guidelines": "https://ultraviolet.scaleway.com"
+  },
+  {
+    "title": "scikit-learn",
+    "slug": "scikitlearn",
+    "hex": "F7931E",
+    "source": "https://github.com/scikit-learn/scikit-learn/blob/c5ef2e985c13119001aa697e446ebb3dbcb326e5/doc/logos/scikit-learn-logo.svg"
+  },
+  {
+    "title": "ScyllaDB",
+    "slug": "scylladb",
+    "hex": "6CD5E7",
+    "source": "https://www.scylladb.com/media-kit",
+    "guidelines": "https://www.scylladb.com/media-kit"
+  },
+  {
+    "title": "Selenium",
+    "slug": "selenium",
+    "hex": "43B02A",
+    "source": "https://github.com/SeleniumHQ/heroku-selenium/blob/2f66891ba030d3aa1f36ab1748c52ba4fb4e057d/selenium-green.svg"
+  },
+  {
+    "title": "Sentry",
+    "slug": "sentry",
+    "hex": "362D59",
+    "source": "https://sentry.io/branding/"
+  },
+  {
+    "title": "Sequelize",
+    "slug": "sequelize",
+    "hex": "52B0E7",
+    "source": "https://github.com/sequelize/website/blob/e6a482fa58a839b15ace80e3c8901ed2887be45e/static/img/logo-simple.svg"
+  },
+  {
+    "title": "shadcn/ui",
+    "slug": "shadcnui",
+    "hex": "000000",
+    "source": "https://ui.shadcn.com"
+  },
+  {
+    "title": "Snowflake",
+    "slug": "snowflake",
+    "hex": "29B5E8",
+    "source": "https://www.snowflake.com/brand-guidelines/",
+    "guidelines": "https://www.snowflake.com/brand-guidelines/"
+  },
+  {
+    "title": "Snyk",
+    "slug": "snyk",
+    "hex": "4C4A73",
+    "source": "https://snyk.io/press-kit"
+  },
+  {
+    "title": "Splunk",
+    "slug": "splunk",
+    "hex": "000000",
+    "source": "https://www.splunk.com"
+  },
+  {
+    "title": "Spring",
+    "slug": "spring",
+    "hex": "6DB33F",
+    "source": "https://spring.io/trademarks"
+  },
+  {
+    "title": "Spring Boot",
+    "slug": "springboot",
+    "hex": "6DB33F",
+    "source": "https://spring.io/projects"
+  },
+  {
+    "title": "SQLite",
+    "slug": "sqlite",
+    "hex": "003B57",
+    "source": "https://github.com/sqlite/sqlite/blob/43e862723ec680542ca6f608f9963c0993dd7324/art/sqlite370.eps"
+  },
+  {
+    "title": "StackBlitz",
+    "slug": "stackblitz",
+    "hex": "1269D3",
+    "source": "https://stackblitz.com"
+  },
+  {
+    "title": "Storybook",
+    "slug": "storybook",
+    "hex": "FF4785",
+    "source": "https://github.com/storybookjs/brand/tree/6f4d67f65f8275c53c310a73a8da6c6e96c8488c",
+    "license": {
+      "type": "MIT"
+    }
+  },
+  {
+    "title": "Streamlit",
+    "slug": "streamlit",
+    "hex": "FF4B4B",
+    "source": "https://www.streamlit.io/brand",
+    "guidelines": "https://www.streamlit.io/brand"
+  },
+  {
+    "title": "Stripe",
+    "slug": "stripe",
+    "hex": "635BFF",
+    "source": "https://stripe.com/newsroom/information"
+  },
+  {
+    "title": "Sublime Text",
+    "slug": "sublimetext",
+    "hex": "FF9800",
+    "source": "https://www.sublimetext.com"
+  },
+  {
+    "title": "Supabase",
+    "slug": "supabase",
+    "hex": "3FCF8E",
+    "source": "https://github.com/supabase/supabase/blob/4031a7549f5d46da7bc79c01d56be4177dc7c114/packages/common/assets/images/supabase-logo-wordmark--light.svg"
+  },
+  {
+    "title": "Svelte",
+    "slug": "svelte",
+    "hex": "FF3E00",
+    "source": "https://github.com/sveltejs/branding/blob/c4dfca6743572087a6aef0e109ffe3d95596e86a/svelte-logo.svg",
+    "aliases": {
+      "dup": [
+        {
+          "title": "Sapper",
+          "hex": "159497",
+          "source": "https://sapper.svelte.dev"
+        }
+      ]
+    }
+  },
+  {
+    "title": "Swagger",
+    "slug": "swagger",
+    "hex": "85EA2D",
+    "source": "https://swagger.io"
+  },
+  {
+    "title": "SWC",
+    "slug": "swc",
+    "hex": "F8C457",
+    "source": "https://github.com/swc-project/logo/blob/f26cac1b4a490e3bdf128d3b084bb57f4fab1aac/svg/swc_black.svg"
+  },
+  {
+    "title": "Swift",
+    "slug": "swift",
+    "hex": "F05138",
+    "source": "https://developer.apple.com/swift/resources/",
+    "guidelines": "https://developer.apple.com/swift/resources/"
+  },
+  {
+    "title": "Tailscale",
+    "slug": "tailscale",
+    "hex": "242424",
+    "source": "https://tailscale.com/press"
+  },
+  {
+    "title": "Tailwind CSS",
+    "slug": "tailwindcss",
+    "hex": "06B6D4",
+    "source": "https://tailwindcss.com/brand",
+    "guidelines": "https://tailwindcss.com/brand"
+  },
+  {
+    "title": "Telegram",
+    "slug": "telegram",
+    "hex": "26A5E4",
+    "source": "https://telegram.org/tour/screenshots"
+  },
+  {
+    "title": "Temporal",
+    "slug": "temporal",
+    "hex": "000000",
+    "source": "https://github.com/temporalio/temporaldotio/blob/b6b5f3ed1fda818d5d6c07e27ec15d51a61f2267/public/images/icons/temporal-no-text.svg"
+  },
+  {
+    "title": "TensorFlow",
+    "slug": "tensorflow",
+    "hex": "FF6F00",
+    "source": "https://www.tensorflow.org"
+  },
+  {
+    "title": "Terraform",
+    "slug": "terraform",
+    "hex": "844FBA",
+    "source": "https://www.hashicorp.com/brand",
+    "guidelines": "https://www.hashicorp.com/brand"
+  },
+  {
+    "title": "Three.js",
+    "slug": "threedotjs",
+    "hex": "000000",
+    "source": "https://github.com/mrdoob/three.js/blob/a567b810cfcb7f6a03e4faea99f03c53081da477/files/icon.svg"
+  },
+  {
+    "title": "Timescale",
+    "slug": "timescale",
+    "hex": "FDB515",
+    "source": "https://www.timescale.com"
+  },
+  {
+    "title": "tmux",
+    "slug": "tmux",
+    "hex": "1BB91F",
+    "source": "https://github.com/tmux/tmux/blob/e26356607e38cbb4676a7c91815ae2d5734443c3/logo/tmux-logo-1-color.svg"
+  },
+  {
+    "title": "TOML",
+    "slug": "toml",
+    "hex": "9C4121",
+    "source": "https://github.com/toml-lang/toml/blob/625f62b55c5acdfb9924c78e1d0bf4cf0be23d91/logos/toml.svg"
+  },
+  {
+    "title": "Traefik Proxy",
+    "slug": "traefikproxy",
+    "hex": "24A1C1",
+    "source": "https://traefik.io/traefik"
+  },
+  {
+    "title": "Travis CI",
+    "slug": "travisci",
+    "hex": "3EAAAF",
+    "source": "https://travis-ci.com/logo"
+  },
+  {
+    "title": "Trello",
+    "slug": "trello",
+    "hex": "0052CC",
+    "source": "https://atlassian.design/resources/logo-library",
+    "guidelines": "https://atlassian.design/foundations/logos"
+  },
+  {
+    "title": "Trino",
+    "slug": "trino",
+    "hex": "DD00A1",
+    "source": "https://github.com/trinodb/docs.trino.io/blob/653a46f6bdc64b5f67302dc9ab8a0c432ca25e70/352/_static/trino.svg"
+  },
+  {
+    "title": "tRPC",
+    "slug": "trpc",
+    "hex": "2596BE",
+    "source": "https://github.com/trpc/trpc/blob/e0df4a2d5b498dd953a65901e04915c6e3f7ecc5/www/static/img/logo-no-text.svg"
+  },
+  {
+    "title": "Turborepo",
+    "slug": "turborepo",
+    "hex": "FF1E56",
+    "source": "https://vercel.com/geist/brands",
+    "guidelines": "https://vercel.com/geist/brands"
+  },
+  {
+    "title": "Turso",
+    "slug": "turso",
+    "hex": "4FF8D2",
+    "source": "https://turso.tech"
+  },
+  {
+    "title": "TypeScript",
+    "slug": "typescript",
+    "hex": "3178C6",
+    "source": "https://www.typescriptlang.org/branding",
+    "guidelines": "https://www.typescriptlang.org/branding"
+  },
+  {
+    "title": "Ubuntu",
+    "slug": "ubuntu",
+    "hex": "E95420",
+    "source": "https://design.ubuntu.com/resources",
+    "guidelines": "https://design.ubuntu.com/brand"
+  },
+  {
+    "title": "Upstash",
+    "slug": "upstash",
+    "hex": "00E9A3",
+    "source": "https://upstash.com"
+  },
+  {
+    "title": "v0",
+    "slug": "v0",
+    "hex": "000000",
+    "source": "https://v0.dev"
+  },
+  {
+    "title": "Vagrant",
+    "slug": "vagrant",
+    "hex": "1868F2",
+    "source": "https://www.hashicorp.com/brand",
+    "guidelines": "https://www.hashicorp.com/brand"
+  },
+  {
+    "title": "Vault",
+    "slug": "vault",
+    "hex": "FFEC6E",
+    "source": "https://www.hashicorp.com/brand",
+    "guidelines": "https://www.hashicorp.com/brand"
+  },
+  {
+    "title": "Vercel",
+    "slug": "vercel",
+    "hex": "000000",
+    "source": "https://vercel.com/geist/brands",
+    "guidelines": "https://vercel.com/geist/brands"
+  },
+  {
+    "title": "Vim",
+    "slug": "vim",
+    "hex": "019733",
+    "source": "https://commons.wikimedia.org/wiki/File:Vimlogo.svg"
+  },
+  {
+    "title": "Vite",
+    "slug": "vite",
+    "hex": "9135FF",
+    "source": "https://github.com/voidzero-dev/community-design-resources/blob/55902097229cf01cf2a4ceb376f992f5cf306756/brand-assets/vite/vite-icon-color-bracketless.svg"
+  },
+  {
+    "title": "Vitest",
+    "slug": "vitest",
+    "hex": "00FF74",
+    "source": "https://github.com/voidzero-dev/community-design-resources/blob/55902097229cf01cf2a4ceb376f992f5cf306756/brand-assets/vitest/vitest-icon-color-bracketless.svg"
+  },
+  {
+    "title": "vLLM",
+    "slug": "vllm",
+    "hex": "30A2FF",
+    "source": "https://github.com/vllm-project/media-kit/blob/79b2ea5db25b723f2d81dae203a87c5b9a076722/vLLM-Logo.svg"
+  },
+  {
+    "title": "VSCodium",
+    "slug": "vscodium",
+    "hex": "2F80ED",
+    "source": "https://github.com/VSCodium/vscodium.github.io/blob/ed028c57f10e6432ec55dfc34d4db1a83fba941d/img/codium_cnl.svg"
+  },
+  {
+    "title": "Vultr",
+    "slug": "vultr",
+    "hex": "007BFC",
+    "source": "https://www.vultr.com/company/brand-assets",
+    "guidelines": "https://www.vultr.com/company/brand-assets"
+  },
+  {
+    "title": "Warp",
+    "slug": "warp",
+    "hex": "01A4FF",
+    "source": "https://warp.dev"
+  },
+  {
+    "title": "WebAssembly",
+    "slug": "webassembly",
+    "hex": "654FF0",
+    "source": "https://webassembly.org",
+    "aliases": {
+      "aka": [
+        "Wasm"
+      ]
+    }
+  },
+  {
+    "title": "Weights & Biases",
+    "slug": "weightsandbiases",
+    "hex": "FFBE00",
+    "source": "https://wandb.ai"
+  },
+  {
+    "title": "WezTerm",
+    "slug": "wezterm",
+    "hex": "4E49EE",
+    "source": "https://github.com/wez/wezterm/blob/fe78b5821fc106c1061f4c1cc454ff01e74bf97d/assets/icon/wezterm-icon.svg"
+  },
+  {
+    "title": "Windsurf",
+    "slug": "windsurf",
+    "hex": "0B100F",
+    "source": "https://windsurf.com/brand",
+    "guidelines": "https://windsurf.com/brand",
+    "aliases": {
+      "old": [
+        "Codeium"
+      ]
+    }
+  },
+  {
+    "title": "WireGuard",
+    "slug": "wireguard",
+    "hex": "88171A",
+    "source": "https://www.wireguard.com",
+    "guidelines": "https://www.wireguard.com/trademark-policy"
+  },
+  {
+    "title": "Xcode",
+    "slug": "xcode",
+    "hex": "147EFB",
+    "source": "https://developer.apple.com/develop"
+  },
+  {
+    "title": "YAML",
+    "slug": "yaml",
+    "hex": "CB171E",
+    "source": "https://commons.wikimedia.org/wiki/File:Official_YAML_Logo.svg"
+  },
+  {
+    "title": "Yarn",
+    "slug": "yarn",
+    "hex": "2C8EBB",
+    "source": "https://github.com/yarnpkg/assets/blob/76d30ca2aebed5b73ea8131d972218fb860bd32d/yarn-kitten-circle.svg",
+    "guidelines": "https://github.com/yarnpkg/assets/tree/76d30ca2aebed5b73ea8131d972218fb860bd32d",
+    "license": {
+      "type": "CC-BY-4.0"
+    }
+  },
+  {
+    "title": "Zapier",
+    "slug": "zapier",
+    "hex": "FF4F00",
+    "source": "https://www.figma.com/file/NQFxTCE5pGR3dHZt0DkOyy/Zapier-Brand-Guidelines-%5BExternal%5D?type=design&node-id=101-9701&mode=design",
+    "guidelines": "https://www.figma.com/file/NQFxTCE5pGR3dHZt0DkOyy/Zapier-Brand-Guidelines-%5BExternal%5D?type=design&node-id=101-9701&mode=design"
+  },
+  {
+    "title": "Zed Industries",
+    "slug": "zedindustries",
+    "hex": "084CCF",
+    "source": "https://github.com/zed-industries/zed/blob/ccc939124fa2f366b3029926447fd0a0c46a85c7/assets/icons/logo_96.svg"
+  },
+  {
+    "title": "ZeroTier",
+    "slug": "zerotier",
+    "hex": "FFB441",
+    "source": "https://www.zerotier.com",
+    "guidelines": "https://www.zerotier.com/media-kit"
+  },
+  {
+    "title": "Zig",
+    "slug": "zig",
+    "hex": "F7A41D",
+    "source": "https://github.com/ziglang/logo/blob/6446ba8e37a0651da720d8869e1ce9264fa0c0b9/zig-mark.svg",
+    "license": {
+      "type": "CC-BY-SA-4.0"
+    }
+  },
+  {
+    "title": "Zsh",
+    "slug": "zsh",
+    "hex": "F15A24",
+    "source": "https://github.com/Zsh-art/logo/blob/17617f2f6c70c65943a48745c91d997e7561f19d/svg/white_logomark.svg"
+  }
+]

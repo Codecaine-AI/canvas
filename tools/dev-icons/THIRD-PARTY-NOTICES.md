@@ -14,20 +14,24 @@ generated Tabler glyph data.
 ## Simple Icons (CC0 1.0)
 
 `simple-icons` 16.33.0, <https://simpleicons.org>. Released under CC0 1.0 Universal
-(`vendor/simple-icons/LICENSE.md`), except for the logos listed below.
+(`vendor/simple-icons/LICENSE.md`), except for the logos whose own license `vendor/VERSIONS.md` lists.
 
 The logos are trademarks of their respective owners. A brand glyph only names the product a board
 depicts. It implies no affiliation with or endorsement by the owner, and use stays subject to each
 owner's brand guidelines.
 
-Simple Icons records a separate license for three of the vendored logos. `manifest.json` declares
-each one, and `generate.ts --vendor` checks the declarations against the package's own data.
+Simple Icons records a separate license for some logos. `generate.ts` reads each logo's license from the
+pinned package's own data, refuses any license outside `ALLOWED_LOGO_LICENSES` (permissive and
+attribution-only licenses: no non-commercial, no-derivatives, custom or GPL terms), and lists every
+vendored logo that carries its own license, with that license, in `vendor/VERSIONS.md`. That table is
+the attribution for those logos. Each license's terms are at <https://spdx.org/licenses/>.
 
-| glyph | logo | license | source |
-|---|---|---|---|
-| `brand-git` | Git logo by Jason Long | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) | <https://git-scm.com/community/logos> |
-| `brand-rust` | Rust logo, Rust Foundation | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | <https://www.rust-lang.org/policies/media-guide> |
-| `brand-kafka` | Apache Kafka logo, The Apache Software Foundation | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | <https://apache.org/logos> |
+## Brands with no logo
+
+Simple Icons has no logo for some products the boards name, such as OpenAI, Codex, AWS, Slack and
+T3 Code. Their catalog rows in `manifest.json` draw a generic Tabler glyph instead and say why in
+`why`. No mark of theirs is vendored. A hand-drawn mark can replace a fallback only when its owner
+publishes it under a license that allows it.
 
 ## Full-color brand marks (CC0 1.0)
 

@@ -51,12 +51,16 @@ describe("the registry-driven roster", () => {
     }
   });
 
-  test("the tool schema publishes exactly the roster as one enum", () => {
-    const schema = PlaceableType as unknown as { type: string; enum: string[] };
-    expect(schema.type).toBe("string");
-    expect(schema.enum).toEqual([...PLACEABLE_TYPES]);
-    // StringEnum, not a union of consts — one `enum` on the wire.
-    expect(JSON.stringify(PlaceableType)).not.toContain("anyOf");
+  test("the tool schema publishes the roster as one enum, and the brand catalog as a pattern instead of a list", () => {
+    const schema = PlaceableType as unknown as { anyOf: [{ type: string; enum: string[] }, { type: string; pattern: string }] };
+    expect(schema.anyOf).toHaveLength(2);
+    expect(schema.anyOf[0].type).toBe("string");
+    expect(schema.anyOf[0].enum).toEqual([...PLACEABLE_TYPES]);
+    expect(schema.anyOf[1]).toMatchObject({ type: "string", pattern: "^brand-[a-z0-9]+(-[a-z0-9]+)*$" });
+    // The catalog's brands beyond the core roster are reachable, not listed.
+    expect(schema.anyOf[0].enum).not.toContain("brand-clickhouse");
+    expect(isPlaceableType("brand-clickhouse")).toBe(true);
+    expect(isPlaceableType("brand-clickhous")).toBe(false);
   });
 });
 

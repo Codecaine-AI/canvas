@@ -1,5 +1,7 @@
 "use client";
 
+import { CANVAS_BRAND_ICONS } from "./brand-icons.generated";
+
 export type InteractiveCanvasObjectType =
   // W6 — "rectangle" replaces the legacy "container" type: a dumb rounded-rect
   // shape with no children. Sections are the only grouping object now.
@@ -41,14 +43,18 @@ export type CanvasShapeDirection = "left" | "right" | "up" | "down";
 export type CanvasArrowShapeDirection = CanvasShapeDirection;
 
 /**
- * Icon glyph selector for `type: "icon"` (and a section's header icon) — the
- * single source of truth for the glyph roster, in roster order: the 30
- * operational-map glyphs, then the generic additions, then the `brand-*`
- * logos. objects/shapes/icon/icon-glyphs.ts derives ICON_GLYPH_IDS from this
- * list and holds the glyph registry (labels, categories, per-pack geometry)
- * beside the icon object def. Generic ids draw an outline glyph (Nucleo or
- * Tabler per the theme's icon pack); brand ids draw a filled Simple Icons
- * logo. Ids are persisted in documents: add freely, never rename or remove.
+ * The core glyph roster for `type: "icon"` (and a section's header icon), in
+ * roster order: the 30 operational-map glyphs, then the generic additions,
+ * then the featured `brand-*` logos. Every core id has an object-preferences
+ * registry row, so it is a name in place_shape's `type` enum and a row of the
+ * visual vocabulary. The brand catalog (CANVAS_BRAND_ICONS, generated from
+ * tools/dev-icons/manifest.json) holds every brand, these included: a catalog
+ * id is a legal icon too, found with find_icon rather than listed.
+ * objects/shapes/icon/icon-glyphs.ts holds the glyph registry (labels,
+ * categories, per-pack geometry) beside the icon object def. Generic ids draw
+ * an outline glyph (Nucleo or Tabler per the theme's icon pack); brand ids
+ * draw a filled Simple Icons logo, or a generic glyph when Simple Icons has
+ * none. Ids are persisted in documents: add freely, never rename or remove.
  */
 export const CANVAS_ICON_GLYPHS = [
   // The operational-map corpus (Nucleo glyphs in the default pack).
@@ -151,4 +157,17 @@ export const CANVAS_ICON_GLYPHS = [
   "brand-figma",
 ] as const;
 
-export type CanvasIconGlyph = (typeof CANVAS_ICON_GLYPHS)[number];
+/** A core roster id: one with a registry row, listed in place_shape's `type` enum. */
+export type CanvasCoreIconGlyph = (typeof CANVAS_ICON_GLYPHS)[number];
+
+/** A brand catalog id (tools/dev-icons/manifest.json). */
+export type CanvasBrandIcon = (typeof CANVAS_BRAND_ICONS)[number];
+
+/** Every icon id a document may hold: the core roster and the brand catalog. */
+export type CanvasIconGlyph = CanvasCoreIconGlyph | CanvasBrandIcon;
+
+/** Every icon id, in roster order: the core roster, then the catalog brands it does not hold, sorted. */
+export const CANVAS_ICON_IDS: readonly CanvasIconGlyph[] = [
+  ...CANVAS_ICON_GLYPHS,
+  ...CANVAS_BRAND_ICONS.filter((id) => !(CANVAS_ICON_GLYPHS as readonly string[]).includes(id)),
+];

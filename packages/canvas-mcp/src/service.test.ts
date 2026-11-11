@@ -218,10 +218,10 @@ describe("canvas service", () => {
       annotation.target.objectId === target && annotation.createdBy === "agent")).toBe(true);
 
     const names = service.listTools().map((tool) => tool.name);
-    expect(names).toHaveLength(30);
+    expect(names).toHaveLength(31);
     expect(names.slice(0, 6)).toEqual(["canvas_capabilities", "canvas_list", "canvas_open", "canvas_guidance", "canvas_create", "canvas_check"]);
     expect(names).not.toContain("finalize");
-    expect(names).toEqual(expect.arrayContaining(["look", "describe_board", "annotate", "resolve_request"]));
+    expect(names).toEqual(expect.arrayContaining(["look", "find_icon", "describe_board", "annotate", "resolve_request"]));
   });
 
   test("a null field reaches describe_board and annotate as absent, and an empty one is still refused", async () => {
@@ -526,5 +526,69 @@ describe("canvas service", () => {
     // Guidance is the lazy path: opening a board carries none of it.
     const opened = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(textOf(opened)).not.toContain(textOf(topic).split("\n").at(-1)!);
+  });
+});
+
+describe("find_icon and the brand catalog", () => {
+  /** The ids find_icon lists, in its order. */
+  function foundIds(text: string): string[] {
+    return [...text.matchAll(/^\d+\. (\S+) · /gm)].map((match) => match[1]!);
+  }
+
+  test("find_icon puts the right brand first for the product names drawers ask for", async () => {
+    const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = await workflowService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    const expected: Record<string, string> = {
+      claude: "brand-claude", anthropic: "brand-anthropic", openai: "brand-openai", github: "brand-github",
+      gitlab: "brand-gitlab", postgres: "brand-postgres", sqlite: "brand-sqlite", redis: "brand-redis",
+      docker: "brand-docker", kubernetes: "brand-kubernetes", aws: "brand-aws", gcp: "brand-google-cloud",
+      cloudflare: "brand-cloudflare", vercel: "brand-vercel", slack: "brand-slack", linear: "brand-linear",
+      notion: "brand-notion", stripe: "brand-stripe", "google gemini": "brand-gemini", typescript: "brand-typescript",
+      "claude code": "brand-claude-code", codex: "brand-codex", "T3 Code": "brand-t3-code", queue: "queue",
+    };
+    const misses: string[] = [];
+    for (const [query, id] of Object.entries(expected)) {
+      const first = foundIds(textOf(await service.call("find_icon", { query })))[0];
+      if (first !== id) misses.push(`${query} → ${first} (want ${id})`);
+    }
+    expect(misses).toEqual([]);
+  });
+
+  test("find_icon says how each match draws, and changes nothing", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = await workflowService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    const before = readFileSync(path, "utf8");
+
+    const postgres = await service.call("find_icon", { query: "postgres" });
+    expect(postgres.isError).toBeUndefined();
+    expect(textOf(postgres)).toContain("1. brand-postgres · PostgreSQL · logo #4169E1");
+    expect(textOf(await service.call("find_icon", { query: "aws" }))).toContain("1. brand-aws · AWS · no logo, draws the cloud glyph");
+    expect((await service.call("find_icon", { query: "  " })).isError).toBe(true);
+    expect(readFileSync(path, "utf8")).toBe(before);
+  });
+
+  test("place_shape and change_shape take a catalog id the type enum does not list, and refuse a misspelt one with the near miss", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = await workflowService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    const listed = service.listTools().find((tool) => tool.name === "place_shape")! as any;
+    expect(listed.inputSchema.properties.type.anyOf[0].enum).not.toContain("brand-clickhouse");
+
+    const placed = await service.call("place_shape", { id: "olap", type: "brand-clickhouse", at: [2000, 2000], text: "ClickHouse" });
+    expect(placed.isError).toBeUndefined();
+    expect(readDoc(path).objects.find((object: any) => object.id === "olap")).toMatchObject({ type: "icon", icon: "brand-clickhouse" });
+
+    const swapped = await service.call("change_shape", { id: "olap", patch: { type: "brand-codex" } });
+    expect(swapped.isError).toBeUndefined();
+    expect(readDoc(path).objects.find((object: any) => object.id === "olap")).toMatchObject({ type: "icon", icon: "brand-codex" });
+
+    const before = readFileSync(path, "utf8");
+    const misspelt = await service.call("place_shape", { id: "olap-2", type: "brand-clickhous", at: [2400, 2000] });
+    expect(misspelt.isError).toBe(true);
+    expect(textOf(misspelt)).toContain('type "brand-clickhous" is not in the brand catalog — did you mean "brand-clickhouse"');
+    expect(textOf(misspelt)).toContain("find_icon");
+    expect(readFileSync(path, "utf8")).toBe(before);
   });
 });

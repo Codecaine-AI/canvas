@@ -16,7 +16,7 @@ import type {
 import { isCanvasColor } from "./colors";
 import type { CanvasColor } from "./colors";
 import type { InteractiveCanvasDocument } from "./document";
-import { CANVAS_ICON_GLYPHS } from "./object-types";
+import { CANVAS_ICON_IDS } from "./object-types";
 import type {
   CanvasIconGlyph,
   CanvasShapeDirection,
@@ -112,9 +112,10 @@ function isTriangleDirection(value: unknown): value is "up" | "down" {
   return value === "up" || value === "down";
 }
 
-// The glyph roster is read from CANVAS_ICON_GLYPHS (object-types.ts) so ids
-// added to the vocabulary validate without a second list to keep in sync.
-const CANVAS_ICON_GLYPH_SET: ReadonlySet<string> = new Set(CANVAS_ICON_GLYPHS);
+// The glyph roster is read from CANVAS_ICON_IDS (object-types.ts: the core
+// roster and the brand catalog) so ids added to either validate without a
+// second list to keep in sync.
+const CANVAS_ICON_GLYPH_SET: ReadonlySet<string> = new Set(CANVAS_ICON_IDS);
 
 function isCanvasIconGlyph(value: unknown): value is CanvasIconGlyph {
   return typeof value === "string" && CANVAS_ICON_GLYPH_SET.has(value);

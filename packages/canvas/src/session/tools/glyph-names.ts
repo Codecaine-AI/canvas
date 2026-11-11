@@ -6,10 +6,11 @@
  * "data base") costs one turn and comes back with the names it was reaching
  * for instead of a bare "not allowed".
  *
- * The roster is the schema's own CANVAS_ICON_GLYPHS, so a glyph added there is
- * accepted and suggested here with no second list to keep in sync.
+ * The roster is the schema's own CANVAS_ICON_IDS (the core roster and the
+ * brand catalog), so a glyph added there is accepted and suggested here with
+ * no second list to keep in sync.
  */
-import { CANVAS_ICON_GLYPHS, type CanvasIconGlyph } from "../../state/schema";
+import { CANVAS_ICON_IDS, type CanvasIconGlyph } from "../../state/schema";
 
 /** Brand logos share one prefix: `brand-postgres` draws the PostgreSQL logo. */
 export const BRAND_GLYPH_PREFIX = "brand-";
@@ -17,7 +18,7 @@ export const BRAND_GLYPH_PREFIX = "brand-";
 /** The word a section-icon parameter takes for "no glyph". */
 export const NO_GLYPH = "none";
 
-const GLYPHS: readonly CanvasIconGlyph[] = CANVAS_ICON_GLYPHS;
+const GLYPHS: readonly CanvasIconGlyph[] = CANVAS_ICON_IDS;
 const GLYPH_SET: ReadonlySet<string> = new Set<string>(GLYPHS);
 
 /** Whether `value` is a glyph id from the roster. */
@@ -40,7 +41,7 @@ function normalize(value: string): string {
  * string alignment), since a swapped pair is the commonest typo ("agnet").
  * The roster is small and the inputs are short, so the full table is cheap.
  */
-function editDistance(a: string, b: string): number {
+export function editDistance(a: string, b: string): number {
   const table = Array.from({ length: a.length + 1 }, (_, i) =>
     Array.from({ length: b.length + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0)));
   for (let i = 1; i <= a.length; i += 1) {
@@ -67,7 +68,8 @@ function closeness(input: string, glyph: string): number | null {
   const bare = isBrandGlyph(glyph) ? glyph.slice(BRAND_GLYPH_PREFIX.length) : glyph;
   if (input === glyph) return 0;
   if (input === bare) return 1;
-  if (input.length >= 3 && (glyph.includes(input) || input.includes(bare))) return 2;
+  // A short brand ("brand-r", "brand-go") is inside too many words to count as contained.
+  if (input.length >= 3 && (glyph.includes(input) || (bare.length >= 3 && input.includes(bare)))) return 2;
   const distance = Math.min(editDistance(input, glyph), editDistance(input, bare));
   const tolerance = Math.max(1, Math.floor(input.length / 3));
   return distance <= tolerance ? 2 + distance : null;
@@ -109,5 +111,6 @@ export function unknownGlyphMessage(field: string, value: string): string {
     : "no glyph is close to it.";
   return `${field} "${value}" is not a glyph name — ${hint} Glyph names are the icon types`
     + ` place_shape accepts: generic pictograms such as "database", and brand logos named`
-    + ` "${BRAND_GLYPH_PREFIX}<product>" such as "${BRAND_GLYPH_PREFIX}postgres".`;
+    + ` "${BRAND_GLYPH_PREFIX}<product>" such as "${BRAND_GLYPH_PREFIX}postgres".`
+    + ` Call find_icon with the product's name for its exact id.`;
 }
