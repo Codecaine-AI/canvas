@@ -449,6 +449,14 @@ export function createOpContext(
       if ("note" in resolved) {
         return { status: "noop", note: resolved.note };
       }
+      const notes = resolved.uneven.map(({ row, why }) =>
+        `row ${row.join(", ")} keeps uneven gaps: ${why}. Lay the section out again with arrange_section, or move the nodes.`);
+      const frame = resolved.moves.at(-1)!.geometry;
+      const now = draft.objects.find((object) => object.id === id)!.geometry;
+      // A fit that changes nothing still says why a row stays uneven.
+      if (resolved.moves.length === 1 && notes.length > 0 && JSON.stringify(frame) === JSON.stringify(now)) {
+        return { status: "noop", note: `the frame already fits. ${notes.join(" ")}` };
+      }
       let document = draft;
       for (const { id: objectId, geometry } of resolved.moves) {
         document = applyOperationToDraft(document, {
@@ -457,18 +465,12 @@ export function createOpContext(
           patch: { geometry },
         }).document;
       }
-      const frame = resolved.moves.at(-1)!.geometry;
       const rows = resolved.evened.map((row) => ` · evened ${row.join(", ")}`).join("");
       return {
         status: "applied",
         draft: document,
         summary: `fit_section ${id} → frame ${frame.x},${frame.y} ${frame.width}×${frame.height}${rows}`,
-        ...(resolved.uneven.length > 0
-          ? {
-              notes: resolved.uneven.map(({ row, why }) =>
-                `row ${row.join(", ")} keeps uneven gaps: ${why}. Lay the section out again with arrange_section, or move the nodes.`),
-            }
-          : {}),
+        ...(notes.length > 0 ? { notes } : {}),
       };
     },
 

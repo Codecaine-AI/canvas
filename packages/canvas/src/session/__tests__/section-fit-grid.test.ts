@@ -170,11 +170,38 @@ describe("fit_section evens a row", () => {
 
   test("a row keeps its gaps, with the reason, when evening would squeeze a wire label", () => {
     const wire = { ...connect("w", "a", "b"), label: "returns the parsed findings list" };
-    const { text, gap } = fit([node("a", 400), node("b", 760), node("c", 940)], [wire]);
+    const { session, text, gap } = fit([node("a", 400), node("b", 760), node("c", 940)], [wire]);
 
     // Unlabelled, the 200px gap would shrink to the average, 110px.
-    expect(text).toContain("row a, b, c keeps uneven gaps: a wire label would lose its room");
+    const reason = "row a, b, c keeps uneven gaps: a wire label would lose its room";
+    expect(text).toContain(reason);
     expect(gap("a", "b")).toBe(200);
+    const again = runOp(session, "fit_section", { id: "frame" }).text;
+    expect(again).toContain("NO-OP");
+    expect(again).toContain(reason);
+  });
+
+  test("a label in the row under a moved node keeps its room too", () => {
+    const wire = { ...connect("w", "e", "f"), label: "returns the parsed findings list" };
+    const nodes = [
+      node("a", 200), node("b", 380), node("c", 720),
+      node("d", 200, 400), node("e", 380, 400), node("f", 800, 400),
+    ];
+    const { text, geometry } = fit(nodes, [wire]);
+
+    // Evening a, b, c alone would carry e 80px toward f.
+    expect(text).toContain("row a, b, c keeps uneven gaps: a wire label would lose its room");
+    expect(geometry("e").x).toBe(380);
+  });
+
+  test("two rows that share their end centerlines are both evened in one call", () => {
+    const { session, gap } = fit([
+      node("a", 200), node("b", 380), node("c", 720),
+      node("d", 200, 400), node("e", 540, 400), node("f", 720, 400),
+    ]);
+
+    for (const [left, right] of [["a", "b"], ["b", "c"], ["d", "e"], ["e", "f"]]) expect(gap(left!, right!)).toBe(100);
+    expect(runOp(session, "fit_section", { id: "frame" }).text).toContain("NO-OP");
   });
 
   test("the end nodes of a long row hold to the pixel", () => {

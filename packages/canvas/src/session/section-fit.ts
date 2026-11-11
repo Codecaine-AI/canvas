@@ -43,6 +43,9 @@ export interface SectionFit {
 /** The gap a labelled wire needs past its chip's length. The same rule as arrange_section (tools/operations/arrange.ts). */
 const LABELLED_GAP_AIR_PX = 24 + ARROW_KEEP_OUT_PX + 2 * CONNECTOR_END_GAP_PX;
 
+/** A row is even when its gaps differ by this or less: a node lands within half a write-grid step of its place. */
+const EVEN_ROW_SPREAD_PX = 2 * GEOMETRY_NORMALIZATION_GRID;
+
 function union(rects: readonly Rect[]): Rect {
   const x = Math.min(...rects.map((rect) => rect.x));
   const y = Math.min(...rects.map((rect) => rect.y));
@@ -136,13 +139,13 @@ function rowsOf(nodes: readonly Box[]): Box[][] {
  * A node is a shape or an icon with no lock: notes and child sections stay.
  * A row is spread between its two end nodes, which hold their place. Nodes
  * that share a centre line (a column) move together, so a wire that runs
- * straight down a column stays straight. The longest row goes first, and a row that
- * shares a column with a row placed before it is left as it is.
+ * straight down a column stays straight. The longest row goes first.
  *
- * A row is left as it is when evening it would narrow a gap below what its
- * wire label needs (or below what it is now, when that is less), make another
- * row less even, put a box on a neighbour it did not touch before, or
- * `refuse` names a reason.
+ * A row is left as it is when it needs a column somewhere else than a row
+ * placed before it, or when evening it would narrow a gap in any row below
+ * what its wire label needs (or below what it is now, when that is less),
+ * make another row less even, put a box on a neighbour it did not touch
+ * before, or `refuse` names a reason.
  */
 function evenRows(
   children: readonly InteractiveCanvasObject[],
@@ -191,9 +194,18 @@ function evenRows(
   };
   const byNode = (shifts: Shifts): Map<string, number> =>
     new Map(nodes.flatMap((node) => (shifts.get(node.column) ? [[node.id, shifts.get(node.column)!]] : [])));
-  const rows = rowsOf(nodes).filter((row) => row.length >= 3);
+  const everyRow = rowsOf(nodes);
+  const rows = everyRow.filter((row) => row.length >= 3);
+  let placed: Shifts = none;
   const harm = (shifts: Shifts): string | null => {
-    if (rows.some((row) => spreadOf(row, shifts) > Math.max(spreadOf(row, none), GEOMETRY_NORMALIZATION_GRID))) {
+    const squeezed = everyRow.some((row) => {
+      const now = gapsOf(row, none);
+      return gapsOf(row, shifts).some((gap, index) =>
+        gap + GEOMETRY_NORMALIZATION_GRID
+          < Math.min(now[index]!, labelled.get(`${row[index]!.id}>${row[index + 1]!.id}`) ?? 0));
+    });
+    if (squeezed) return "a wire label would lose its room";
+    if (rows.some((row) => spreadOf(row, shifts) > Math.max(spreadOf(row, placed), EVEN_ROW_SPREAD_PX))) {
       return "another row would get less even";
     }
     const lands = boxes.some((box, index) =>
@@ -204,19 +216,12 @@ function evenRows(
     return lands ? "a box would land on its neighbour" : refuse(byNode(shifts));
   };
 
-  let placed: Shifts = none;
   const evened: string[][] = [];
   const why = new Map<Box[], string>();
   for (const row of [...rows].sort((a, b) => b.length - a.length)) {
-    if (spreadOf(row, placed) <= GEOMETRY_NORMALIZATION_GRID) continue;
-    if (row.some((node) => placed.has(node.column))) {
-      why.set(row, "it shares a centerline with a row that moved");
-      continue;
-    }
+    if (spreadOf(row, placed) <= EVEN_ROW_SPREAD_PX) continue;
     const gaps = gapsOf(row, none);
     const gap = gaps.reduce((sum, value) => sum + value, 0) / gaps.length;
-    const squeezed = gaps.some((value, index) =>
-      gap < Math.min(value, labelled.get(`${row[index]!.id}>${row[index + 1]!.id}`) ?? 0));
     const trial = new Map(placed);
     let x = row[0]!.rect.x;
     for (const node of row) {
@@ -224,8 +229,9 @@ function evenRows(
       x += node.rect.width + gap;
     }
     const reason = gap <= 0 ? "its nodes overlap"
-      : squeezed ? "a wire label would lose its room"
-      : harm(trial);
+      : row.some((node) => placed.has(node.column) && placed.get(node.column) !== trial.get(node.column))
+        ? "it shares a centerline with a row that moved"
+        : harm(trial);
     if (reason) {
       why.set(row, reason);
       continue;
@@ -237,7 +243,7 @@ function evenRows(
     shifts: byNode(placed),
     evened,
     uneven: rows
-      .filter((row) => spreadOf(row, placed) > GEOMETRY_NORMALIZATION_GRID)
+      .filter((row) => spreadOf(row, placed) > EVEN_ROW_SPREAD_PX)
       .map((row) => ({ row: row.map((node) => node.id), why: why.get(row)! })),
   };
 }
