@@ -211,7 +211,7 @@ function evenRows(
   for (const row of [...rows].sort((a, b) => b.length - a.length)) {
     if (spreadOf(row, placed) <= GEOMETRY_NORMALIZATION_GRID) continue;
     if (row.some((node) => placed.has(node.column))) {
-      why.set(row, "it shares a centre line with a row that moved");
+      why.set(row, "it shares a centerline with a row that moved");
       continue;
     }
     const gaps = gapsOf(row, none);

@@ -29,8 +29,8 @@ export const fitSection = defineOperationTool({
   name: "fit_section",
   description:
     "Close a section around the children already inside it, with the same air on the left and right "
-    + "and above and below, so the children sit centred. A row of three or more nodes gets equal gaps: "
-    + "its end nodes hold and the others spread between them, and nodes on one centre line move together. "
+    + "and above and below, so the children sit centered. A row of three or more nodes gets equal gaps: "
+    + "its end nodes hold and the others spread between them, and nodes on one centerline move together. "
     + "A row it cannot even without harm is named with the reason. No box is resized, and the frame "
     + "never stretches to fill its parent. Fits only the named section — ancestors keep their slack "
     + "until you fit them too.",
