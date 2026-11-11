@@ -255,6 +255,34 @@ describe("canvas service", () => {
     expect(saved.map((object: any) => object.geometry.width)).toEqual([400, 400]);
   });
 
+  test("a null mode reaches arrange and route as absent through the tool boundary", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = createCanvasService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    await service.call("place_sticky", { id: "row-a", text: "A", at: [960, 1600] });
+    await service.call("place_sticky", { id: "row-b", text: "B", at: [1400, 1640] });
+    await service.call("connect", { id: "row-edge", from: { objectId: "row-a" }, to: { objectId: "row-b" } });
+
+    const aligned = await service.call("arrange", { ids: ["row-a", "row-b"], align: "top", space: null });
+    expect(textOf(aligned)).toContain("APPLIED · arrange align top · row-a, row-b → top edges at y=1600");
+    const spaced = await service.call("arrange", {
+      ids: ["row-a", "row-b"],
+      align: null,
+      space: { axis: "horizontal", gap: 80 },
+    });
+    expect(textOf(spaced)).toContain("APPLIED · arrange space horizontal gap 80");
+    const neither = await service.call("arrange", { ids: ["row-a", "row-b"], align: null, space: null });
+    expect(textOf(neither)).toContain("send exactly one of align or space");
+
+    const reset = await service.call("route", { id: "row-edge", points: null, shift: null, reset: true });
+    expect(textOf(reset)).toContain("NO-OP · route row-edge — this edge is already on the auto-router");
+    const notReset = await service.call("route", { id: "row-edge", points: null, shift: null, reset: false });
+    expect(textOf(notReset)).toContain("send exactly one of points, shift or reset");
+
+    const saved = readDoc(path).objects.filter((object: any) => object.id.startsWith("row-"));
+    expect(saved.map((object: any) => object.geometry.y)).toEqual([1600, 1600]);
+  });
+
   test("canvas_open reads canvases/canvas-style.json, and look renders with it", async () => {
     const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
     const stylePath = join(workspace, "canvases", "canvas-style.json");

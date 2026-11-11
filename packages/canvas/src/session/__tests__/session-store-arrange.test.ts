@@ -377,9 +377,9 @@ describe("arrange · align", () => {
       ["a"],
     );
 
-    const result = runOp(session, "align", { ids: ["a", "b", "c"], edge: "left" });
+    const result = runOp(session, "arrange", { ids: ["a", "b", "c"], align: "left" });
 
-    expect(result.text).toContain("APPLIED · align left · a, b, c → left edges at x=40");
+    expect(result.text).toContain("APPLIED · arrange align left · a, b, c → left edges at x=40");
     for (const id of ["a", "b", "c"]) {
       expect(objectOf(session.draft, id).geometry.x).toBe(40);
     }
@@ -391,7 +391,7 @@ describe("arrange · align", () => {
       ["a"],
     );
 
-    runOp(session, "align", { ids: ["a", "b"], edge: "center_h" });
+    runOp(session, "arrange", { ids: ["a", "b"], align: "center_h" });
 
     const a = objectOf(session.draft, "a").geometry;
     const b = objectOf(session.draft, "b").geometry;
@@ -408,7 +408,7 @@ describe("arrange · align", () => {
       ["frame"],
     );
 
-    const result = runOp(session, "align", { ids: ["frame", "solo"], edge: "left" });
+    const result = runOp(session, "arrange", { ids: ["frame", "solo"], align: "left" });
 
     expect(result.text).toContain("(carrying 1)");
     expect(objectOf(session.draft, "frame").geometry.x).toBe(40);
@@ -420,29 +420,29 @@ describe("arrange · align", () => {
   test("edge ids are refused, and so is a selection with nothing to align against", () => {
     const session = makeTestSession(framedBoard(), ["frame"]);
 
-    const edge = runOp(session, "align", { ids: ["a", "a-b"], edge: "left" });
+    const edge = runOp(session, "arrange", { ids: ["a", "a-b"], align: "left" });
     expect(edge.isError).toBe(true);
     expect(edge.text).toContain('ids "a-b" is an edge');
 
     // Schema-level: the model never gets to send one id.
-    const ids = (findOperationTool("align")!.parameters as {
+    const ids = (findOperationTool("arrange")!.parameters as {
       properties: { ids: { minItems: number } };
     }).properties.ids;
     expect(ids.minItems).toBe(2);
 
     // State-level: two ids that collapse to one mover say so rather than
     // silently doing nothing.
-    const collapsed = runOp(session, "align", { ids: ["frame", "a"], edge: "left" });
+    const collapsed = runOp(session, "arrange", { ids: ["frame", "a"], align: "left" });
     expect(collapsed.isError).toBe(true);
-    expect(collapsed.text).toContain("align needs at least two boxes that move independently");
+    expect(collapsed.text).toContain("arrange needs at least two boxes that move independently");
 
-    const single = runOp(session, "align", { ids: ["a"], edge: "left" });
+    const single = runOp(session, "arrange", { ids: ["a"], align: "left" });
     expect(single.isError).toBe(true);
     expect(single.text).toContain("one box has nothing to arrange against");
   });
 });
 
-describe("arrange · space_out", () => {
+describe("arrange · space", () => {
   test("re-pitches to a snapped clear gap, first box holding", () => {
     const session = makeTestSession(
       makeDocument([
@@ -453,15 +453,14 @@ describe("arrange · space_out", () => {
       ["a"],
     );
 
-    const result = runOp(session, "space_out", {
+    const result = runOp(session, "arrange", {
       ids: ["a", "b", "c"],
-      axis: "horizontal",
-      gap: 117,
+      space: { axis: "horizontal", gap: 117 },
     });
 
     // 117 snaps to 120; a holds at 0, b starts at 160 + 120, c at 440 + 120.
     expect(result.text).toContain(
-      "APPLIED · space_out horizontal gap 120 · a x=0, b x=280, c x=560",
+      "APPLIED · arrange space horizontal gap 120 · a x=0, b x=280, c x=560",
     );
     expect(objectOf(session.draft, "b").geometry.x).toBe(280);
     expect(objectOf(session.draft, "c").geometry.x).toBe(560);
@@ -480,15 +479,14 @@ describe("arrange · space_out", () => {
       ["page"],
     );
 
-    const result = runOp(session, "space_out", {
+    const result = runOp(session, "arrange", {
       ids: ["above", "frame"],
-      axis: "vertical",
-      gap: 40,
+      space: { axis: "vertical", gap: 40 },
     });
 
     // `above` holds at y=40; the frame slides up to 140 + 40 and takes its
     // child with it, so the child's offset inside the frame is unchanged.
-    expect(result.text).toContain("APPLIED · space_out vertical gap 40 · above y=40, frame y=180");
+    expect(result.text).toContain("APPLIED · arrange space vertical gap 40 · above y=40, frame y=180");
     expect(result.text).toContain("(carrying 1)");
     expect(objectOf(session.draft, "frame").geometry.y).toBe(180);
     expect(objectOf(session.draft, "kid").geometry.y).toBe(220);
@@ -498,10 +496,9 @@ describe("arrange · space_out", () => {
   test("edge ids are refused", () => {
     const session = makeTestSession(framedBoard(), ["frame"]);
 
-    const result = runOp(session, "space_out", {
+    const result = runOp(session, "arrange", {
       ids: ["a", "a-b"],
-      axis: "horizontal",
-      gap: 40,
+      space: { axis: "horizontal", gap: 40 },
     });
 
     expect(result.isError).toBe(true);
@@ -514,6 +511,63 @@ describe("arrange · space_out", () => {
  * apply, so a result's ROUTES block is the routing a committed proposal will
  * actually produce rather than a draft-only fiction.
  */
+describe("arrange · modes", () => {
+  function row() {
+    return makeTestSession(
+      makeDocument([box("a", 0, 0, 160, 100), box("b", 300, 40, 160, 100)]),
+      ["a"],
+    );
+  }
+
+  test("a call with neither align nor space, or with both, is refused and moves nothing", () => {
+    const session = row();
+    const draftBefore = session.draft;
+
+    const neither = runOp(session, "arrange", { ids: ["a", "b"] });
+    const nulls = runOp(session, "arrange", { ids: ["a", "b"], align: null, space: null });
+    const both = runOp(session, "arrange", {
+      ids: ["a", "b"],
+      align: "top",
+      space: { axis: "horizontal", gap: 40 },
+    });
+
+    expect(neither.text).toBe(
+      "ERROR · arrange — send exactly one of align or space — align puts the boxes on one"
+      + " shared edge, space sets one clear gap between them.",
+    );
+    expect(nulls.text).toBe(neither.text);
+    expect(both.text).toBe("ERROR · arrange — send exactly one of align or space, not both.");
+    expect(session.draft).toBe(draftBefore);
+  });
+
+  test("a null mode counts as absent, so the other mode runs", () => {
+    const session = row();
+
+    const aligned = runOp(session, "arrange", { ids: ["a", "b"], align: "top", space: null });
+    expect(aligned.text).toContain("APPLIED · arrange align top · a, b → top edges at y=0");
+
+    const spaced = runOp(session, "arrange", {
+      ids: ["a", "b"],
+      align: null,
+      space: { axis: "horizontal", gap: 40 },
+    });
+    expect(spaced.text).toContain("APPLIED · arrange space horizontal gap 40 · a x=0, b x=200");
+  });
+
+  test("a no-op names the align edge or the space axis", () => {
+    const session = makeTestSession(
+      makeDocument([box("a", 0, 0, 160, 100), box("b", 200, 0, 160, 100)]),
+      ["a"],
+    );
+
+    const aligned = runOp(session, "arrange", { ids: ["a", "b"], align: "top" });
+    const spaced = runOp(session, "arrange", { ids: ["a", "b"], space: { axis: "horizontal", gap: 40 } });
+
+    expect(aligned.text).toBe("NO-OP · arrange top — the board already matches this, so nothing changed.");
+    expect(spaced.text).toBe("NO-OP · arrange horizontal — the board already matches this, so nothing changed.");
+  });
+});
+
 describe("arrange · D6 waypoint reconciliation", () => {
   function waypointedBoard(): InteractiveCanvasDocument {
     const document = framedBoard();

@@ -201,11 +201,11 @@ describe("edges are gated by the region their ends sit in", () => {
       'id "in-edge" meets "inside", which is inside "ops" (locked all)',
     );
     expectLockRefusal(
-      runOp(session, "reroute", { id: "in-edge", points: [[300, 240]] }),
+      runOp(session, "route", { id: "in-edge", points: [[300, 240]] }),
       'is inside "ops" (locked all)',
     );
     expectLockRefusal(
-      runOp(session, "reset_route", { id: "in-edge" }),
+      runOp(session, "route", { id: "in-edge", reset: true }),
       'is inside "ops" (locked all)',
     );
     expectLockRefusal(
@@ -296,11 +296,11 @@ describe("the rest of the roster under a locked-all frame", () => {
       'id "inside" is inside "ops" (locked all)',
     );
     expectLockRefusal(
-      runOp(session, "align", { ids: ["inside", "inside-2"], edge: "top" }),
+      runOp(session, "arrange", { ids: ["inside", "inside-2"], align: "top" }),
       'ids "inside" is inside "ops" (locked all)',
     );
     expectLockRefusal(
-      runOp(session, "space_out", { ids: ["inside", "inside-2"], axis: "horizontal", gap: 40 }),
+      runOp(session, "arrange", { ids: ["inside", "inside-2"], space: { axis: "horizontal", gap: 40 } }),
       'ids "inside" is inside "ops" (locked all)',
     );
     expectLockRefusal(
@@ -328,7 +328,7 @@ describe("the rest of the roster under a locked-all frame", () => {
     const session = lockedSession();
     const draftBefore = session.draft;
 
-    const result = runOp(session, "align", { ids: ["free", "inside"], edge: "left" });
+    const result = runOp(session, "arrange", { ids: ["free", "inside"], align: "left" });
 
     expectLockRefusal(result, 'ids "inside" is inside "ops" (locked all)');
     expect(session.draft).toBe(draftBefore);

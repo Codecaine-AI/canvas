@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/state-grammar.ts (sha256 fd7b1c611570d189586c3484f6cbc9846d7f6b5b0fab260f472b8a81eed5fe3f), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/state-grammar.ts (sha256 66c9d75d3347efdfe2c0a38a99b4d66568923881d37278bfec68c0ae5b3bd23c), packages/canvas/src/authoring/style-guide/aesthetic.ts (sha256 3b9d417e22ed340888c59a17095e46a4fa238dc09e295372c45afaa51d1cac18). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Operating Context
 
@@ -38,7 +38,7 @@ The reading key for MCP results, and the house style.
                 - pos=
                 - wp=
                 - lp=along[@offset] (the label chip's pin)
-        - edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index
+        - edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = the segment a route shift names
         - segment indices are never renumbered
             - take the sN for a shift from the newest printing of that edge, never an older one
         - text is never truncated

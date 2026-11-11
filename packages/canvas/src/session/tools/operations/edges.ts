@@ -1,19 +1,18 @@
 /**
- * The Edges group — `style_edge`, `change_connection`, `reroute`,
- * `shift_segment`, `reset_route`, `move_label`
+ * The Edges group — `style_edge`, `change_connection`, `route`, `move_label`
  * (docs/10-system-design/70-agent-tool-surface/20-gestures §Edges).
  *
  * THREE DIFFERENT GESTURES, THREE DIFFERENT TOOLS. Restyling a wire,
  * repointing it, and cleaning up its route are separate motions on the real
  * canvas, so they are separate calls here: `style_edge` never touches where an
  * edge lands, `change_connection` never touches how it is drawn, and neither
- * of them owns the elbows. Color and label are absent from all six — they are
+ * of them owns the elbows. Color and label are absent from all four — they are
  * `change_color` and `update_text`, one home per concern, which is exactly why
  * `style_edge` has no key to reach for.
  *
- * THE ROUTE, COARSE AND FINE. `reroute` replaces the interior waypoints
- * wholesale; `shift_segment` slides one elbow; `reset_route` throws the manual
- * routing away. The fine instrument is not a reimplementation: it drives the
+ * THE ROUTE, COARSE AND FINE. `route` takes one mode per call: `points`
+ * replaces the interior waypoints wholesale, `shift` slides one elbow, and
+ * `reset` throws the manual routing away. The fine instrument is not a reimplementation: it drives the
  * canvas package's own bend machinery (`connectorBendSegments` →
  * `dragOrthogonalSegment` → `commitBendPolyline`) with a synthetic drag, so a
  * model-driven shift and a pointer-driven one land the same document patch —
@@ -31,7 +30,7 @@
  * sure each op actually trips it.
  *
  *  - `change_connection` marks it via the endpoint / anchor / position lines,
- *  - `reroute`, `shift_segment` and `reset_route` via the `wp` waypoint line,
+ *  - `route`, in all three modes, via the `wp` waypoint line,
  *  - `style_edge` and `move_label` move no geometry at all, so `documentDelta`
  *    now marks an edge touched when one of its WIRE channels moves —
  *    `style`, `arrow`, `labelPosition`, the three these two gestures write.
@@ -40,7 +39,7 @@
  *
  * ## Where validation draws its lines
  *
- * `reroute` is the only op here whose input can describe a path the router
+ * `route`'s `points` is the only input here that can describe a path the router
  * will not draw, and a silently ignored route is worse than a rejection: the
  * edge would keep auto-routing while the model believed it had placed the
  * wire. So validation asks the ROUTER, not a rulebook — it snaps the points,
@@ -50,7 +49,7 @@
  * non-orthogonal polyline, including the two legs joining the endpoints, and
  * a route through another box or an end's own caption — the refusal names it).
  *
- * `shift_segment` rejects an index the edge does not have, and a segment the
+ * `route`'s `shift` rejects an index the edge does not have, and a segment the
  * bend machinery refuses to drag — a near-diagonal run, which edge-route.ts
  * documents as having no bend handle on stage either.
  *
@@ -65,7 +64,7 @@
  * additionally gates the endpoint it is repointing TO, so a wire cannot be
  * dragged into a frozen region from outside it.
  */
-import { Type } from "@mariozechner/pi-ai";
+import { Type, type Static } from "@mariozechner/pi-ai";
 
 import type {
   InteractiveCanvasConnection,
@@ -92,13 +91,14 @@ import {
 import { routedPolyline } from "../../../board/lints/geometry";
 import { snapCoordinate, snapPoint } from "../grid";
 import { defineOperationTool } from "./operation-tool";
-import type { OpContext } from "./op-context";
+import type { OpContext, OpOutcome } from "./op-context";
 import {
   EdgeStylePatch,
   Id,
   LabelAlong,
   Point,
   RepointPatch,
+  nullable,
 } from "../schemas";
 import type { ConnectionPatch, Endpoint } from "../schemas";
 
@@ -243,7 +243,7 @@ export const changeConnection = defineOperationTool({
 });
 
 // ---------------------------------------------------------------------------
-// reroute
+// route · points
 // ---------------------------------------------------------------------------
 
 /**
@@ -325,7 +325,7 @@ function blockedRouteMessage(
     ...captions.map((id) => `runs through ${id}'s own caption (the name under its icon)`),
   ];
   return `these corners route ${connection.id} so it ${parts.join(" and ")} — a wire must pass around every`
-    + " box but its ends. Move the corners clear of it, or reset_route to let the router find the way.";
+    + " box but its ends. Move the corners clear of it, or send route with reset to let the router find the way.";
 }
 
 /** Where the router attaches this edge when nothing is steering it. */
@@ -349,66 +349,56 @@ function fmtPoint(point: WorldPoint | readonly [number, number]): string {
   return `${Math.round(x)},${Math.round(y)}`;
 }
 
-export const reroute = defineOperationTool({
-  name: "reroute",
-  description:
-    "Replace an edge's whole route. `points` are the interior corners only — the two ends stay attached where they are. Every leg must be horizontal or vertical, including the two that join the endpoints, and no leg may cross a box other than the two ends or run through an end's own caption; coordinates snap to the board grid.",
-  fields: {
-    id: Id,
-    points: Type.Array(Point, {
-      minItems: 1,
-      description:
-        "The interior corners, in order from the `from` end. Each consecutive pair must share an x or a y.",
-    }),
-  },
-  validate: (ctx, p) => {
-    const errors = [...ctx.requireConnection(p.id), ...ctx.requireUnlockedEdge(p.id)];
-    if (errors.length > 0) return errors;
-    const connection = connectionOf(ctx, p.id)!;
+/** The `points` mode's checks, after the shared connection and lock gates. */
+function validatePoints(
+  ctx: OpContext,
+  id: string,
+  requested: readonly Point[],
+): string[] {
+  const connection = connectionOf(ctx, id)!;
+  const points = reroutePoints(requested);
+  if (points.length === 0) {
+    return ["points collapsed to nothing once snapped to the grid — give at least one corner, or send reset to hand the edge back to the router."];
+  }
 
-    const points = reroutePoints(p.points);
-    if (points.length === 0) {
-      return ["points collapsed to nothing once snapped to the grid — give at least one corner, or use reset_route to hand the edge back to the router."];
-    }
-
-    for (let index = 1; index < points.length; index += 1) {
-      const previous = points[index - 1]!;
-      const current = points[index]!;
-      if (isOrthogonalPair(previous, current)) continue;
-      return [
-        `points ${index - 1}→${index} (${fmtPoint(previous)} → ${fmtPoint(current)}) is diagonal —`
-        + " consecutive corners must share an x or a y. Insert the corner between them.",
-      ];
-    }
-
-    if (routerAcceptsWaypoints(connection, ctx.draft, points, ctx.canvasStyle)) return [];
-
-    const blocked = blockedRouteMessage(connection, ctx.draft, points, ctx.canvasStyle);
-    if (blocked) return [blocked];
-
-    const attachment = autoAttachment(connection, ctx.draft, ctx.canvasStyle);
-    if (!attachment) {
-      return [`connectionId "${p.id}" has no routable path — one of its endpoint objects is missing.`];
-    }
+  for (let index = 1; index < points.length; index += 1) {
+    const previous = points[index - 1]!;
+    const current = points[index]!;
+    if (isOrthogonalPair(previous, current)) continue;
     return [
-      `these corners cannot be joined to the edge's ends without a diagonal leg: the router attaches`
-      + ` ${connection.from.objectId} at ${fmtPoint(attachment.start)} and ${connection.to.objectId}`
-      + ` at ${fmtPoint(attachment.end)}, so the first corner must share an x or a y with`
-      + ` ${fmtPoint(attachment.start)} and the last with ${fmtPoint(attachment.end)}.`,
+      `points ${index - 1}→${index} (${fmtPoint(previous)} → ${fmtPoint(current)}) is diagonal —`
+      + " consecutive corners must share an x or a y. Insert the corner between them.",
     ];
-  },
-  apply: (ctx, p) => {
-    const points = reroutePoints(p.points);
-    return ctx.mergeConnection(
-      p.id,
-      { waypoints: points } as ConnectionPatch,
-      `reroute ${p.id}`,
-    );
-  },
-});
+  }
+
+  if (routerAcceptsWaypoints(connection, ctx.draft, points, ctx.canvasStyle)) return [];
+
+  const blocked = blockedRouteMessage(connection, ctx.draft, points, ctx.canvasStyle);
+  if (blocked) return [blocked];
+
+  const attachment = autoAttachment(connection, ctx.draft, ctx.canvasStyle);
+  if (!attachment) {
+    return [`connectionId "${id}" has no routable path — one of its endpoint objects is missing.`];
+  }
+  return [
+    `these corners cannot be joined to the edge's ends without a diagonal leg: the router attaches`
+    + ` ${connection.from.objectId} at ${fmtPoint(attachment.start)} and ${connection.to.objectId}`
+    + ` at ${fmtPoint(attachment.end)}, so the first corner must share an x or a y with`
+    + ` ${fmtPoint(attachment.start)} and the last with ${fmtPoint(attachment.end)}.`,
+  ];
+}
+
+/** The `points` mode: replace the interior corners wholesale. */
+function applyPoints(ctx: OpContext, id: string, requested: readonly Point[]): OpOutcome {
+  return ctx.mergeConnection(
+    id,
+    { waypoints: reroutePoints(requested) } as ConnectionPatch,
+    `route ${id} points`,
+  );
+}
 
 // ---------------------------------------------------------------------------
-// shift_segment
+// route · shift
 // ---------------------------------------------------------------------------
 
 /**
@@ -416,7 +406,7 @@ export const reroute = defineOperationTool({
  * there. A bend drag that pulls a wire off its anchor point pins the endpoint
  * at the fraction of the object's side it now meets; the agent path writes the
  * same pin so a model-driven shift and a pointer-driven one are the same edit.
- * `reset_route` is the tool that clears these again.
+ * `route`'s `reset` mode is what clears these again.
  */
 function bendEndpointPatch(
   endpoint: InteractiveCanvasConnection["from"],
@@ -467,128 +457,114 @@ function clampUnit(value: number): number {
   return Math.max(0, Math.min(1, value));
 }
 
-export const shiftSegment = defineOperationTool({
-  name: "shift_segment",
-  description:
-    "Slide one segment of an edge's route sideways, the way dragging its handle does. `segment` is the sN index the route prints; `to` is the segment's new x when it is vertical and its new y when it is horizontal, snapped to the board grid. The result prints the edge's new route, so a second shift can chain off it.",
-  fields: {
-    id: Id,
-    segment: Type.Integer({
-      minimum: 0,
-      description: "The sN index from the edge's printed route.",
-    }),
-    to: Type.Number({
-      description: "The segment's new fixed coordinate: x for a vertical segment, y for a horizontal one.",
-    }),
-  },
-  validate: (ctx, p) => {
-    const errors = [...ctx.requireConnection(p.id), ...ctx.requireUnlockedEdge(p.id)];
-    if (errors.length > 0) return errors;
-    const connection = connectionOf(ctx, p.id)!;
-    const points = routedPolyline(connection, ctx.draft, ctx.canvasStyle);
-    const printed = numberedRouteOf(connection, ctx.draft, ctx.canvasStyle);
-    if (points.length < 2) {
-      return [`connectionId "${p.id}" has no routed path to shift — one of its endpoint objects is missing.`];
-    }
+/** The `shift` mode's checks, after the shared connection and lock gates. */
+function validateShift(ctx: OpContext, id: string, shift: RouteShift): string[] {
+  const connection = connectionOf(ctx, id)!;
+  const points = routedPolyline(connection, ctx.draft, ctx.canvasStyle);
+  const printed = numberedRouteOf(connection, ctx.draft, ctx.canvasStyle);
+  if (points.length < 2) {
+    return [`connectionId "${id}" has no routed path to shift — one of its endpoint objects is missing.`];
+  }
 
-    const numbered = numberedSegmentsForPolyline(points);
-    const named = numbered.find((segment) => segment.index === p.segment);
-    if (!named) {
-      const available = numbered.map((segment) => `s${segment.index}`).join(", ");
-      return [
-        `segment ${p.segment} is not on this edge — its route is ${printed}`
-        + ` (${available.length > 0 ? `segments ${available}` : "no shiftable segments"}).`,
-      ];
-    }
+  const numbered = numberedSegmentsForPolyline(points);
+  const named = numbered.find((segment) => segment.index === shift.segment);
+  if (!named) {
+    const available = numbered.map((segment) => `s${segment.index}`).join(", ");
+    return [
+      `segment ${shift.segment} is not on this edge — its route is ${printed}`
+      + ` (${available.length > 0 ? `segments ${available}` : "no shiftable segments"}).`,
+    ];
+  }
 
-    // The bend machinery drops anything `segmentAxis` will not call
-    // axis-aligned. edge-route.ts still PRINTS such a run under its dominant
-    // axis so perception describes the whole wire, but there is no handle on
-    // stage for it and no drag to drive here.
-    const draggable = new Set(connectorBendSegments(points).map((segment) => segment.index));
-    if (!draggable.has(p.segment)) {
-      return [
-        `segment s${p.segment} runs diagonally, so it has no bend handle to slide —`
-        + ` this happens when an endpoint pin pulls the wire off-axis. Use reroute to set the`
-        + ` whole path, or reset_route to start over. The route is ${printed}.`,
-      ];
-    }
-    return [];
-  },
-  apply: (ctx, p) => {
-    const connection = connectionOf(ctx, p.id)!;
-    const points = routedPolyline(connection, ctx.draft, ctx.canvasStyle);
-    const segment = connectorBendSegments(points)
-      .find((candidate) => candidate.index === p.segment)!;
+  // The bend machinery drops anything `segmentAxis` will not call
+  // axis-aligned. edge-route.ts still PRINTS such a run under its dominant
+  // axis so perception describes the whole wire, but there is no handle on
+  // stage for it and no drag to drive here.
+  const draggable = new Set(connectorBendSegments(points).map((segment) => segment.index));
+  if (!draggable.has(shift.segment)) {
+    return [
+      `segment s${shift.segment} runs diagonally, so it has no bend handle to slide —`
+      + ` this happens when an endpoint pin pulls the wire off-axis. Send points to set the`
+      + ` whole path, or reset to start over. The route is ${printed}.`,
+    ];
+  }
+  return [];
+}
 
-    const target = snapCoordinate(p.to);
-    const current = segment.axis === "horizontal"
-      ? (segment.start.y + segment.end.y) / 2
-      : (segment.start.x + segment.end.x) / 2;
-    const offset = target - current;
-    if (Math.abs(offset) <= AXIS_EPSILON) {
-      const coordinate = segment.axis === "horizontal" ? "y" : "x";
-      return {
-        status: "noop",
-        note: `segment s${p.segment} already sits at ${coordinate}=${Math.round(target)}.`,
-      };
-    }
+/** The `shift` mode: slide one segment the way dragging its handle does. */
+function applyShift(ctx: OpContext, id: string, shift: RouteShift): OpOutcome {
+  const connection = connectionOf(ctx, id)!;
+  const points = routedPolyline(connection, ctx.draft, ctx.canvasStyle);
+  const segment = connectorBendSegments(points)
+    .find((candidate) => candidate.index === shift.segment)!;
 
-    // The UI's own drag, driven programmatically. No snap tolerance: the
-    // pointer path's magnet-to-neighbour behaviour exists because a hand
-    // cannot hit a coordinate exactly, and the model can.
-    const dragged = dragOrthogonalSegment(
-      points,
-      p.segment,
-      segment.axis === "horizontal" ? { dx: 0, dy: offset } : { dx: offset, dy: 0 },
-    );
-    const commit = commitBendPolyline(dragged);
+  const target = snapCoordinate(shift.to);
+  const current = segment.axis === "horizontal"
+    ? (segment.start.y + segment.end.y) / 2
+    : (segment.start.x + segment.end.x) / 2;
+  const offset = target - current;
+  if (Math.abs(offset) <= AXIS_EPSILON) {
+    const coordinate = segment.axis === "horizontal" ? "y" : "x";
+    return {
+      status: "noop",
+      note: `segment s${shift.segment} already sits at ${coordinate}=${Math.round(target)}.`,
+    };
+  }
 
-    const notes: string[] = [];
-    let patch: ConnectionPatch;
-    if (commit.clearedWaypoints) {
-      notes.push("the shift straightened the wire, so its manual route is gone and the router owns it again");
-      patch = { waypoints: undefined } as ConnectionPatch;
-    } else {
-      // The same endpoint re-pins the pointer commit path writes: a shift that
-      // pulls the wire off its anchor point has to say where it now meets the
-      // box, or the router would pull the whole route back on the next read.
-      const fromObject = objectOf(ctx.draft, connection.from.objectId);
-      const toObject = objectOf(ctx.draft, connection.to.objectId);
-      const first = commit.points[0];
-      const last = commit.points[commit.points.length - 1];
-      const from = fromObject && first
-        ? bendEndpointPatch(connection.from, fromObject, first, ctx.canvasStyle)
-        : undefined;
-      const to = toObject && last
-        ? bendEndpointPatch(connection.to, toObject, last, ctx.canvasStyle)
-        : undefined;
-      patch = {
-        waypoints: commit.waypoints,
-        ...(from ? { from: from as Endpoint } : {}),
-        ...(to ? { to: to as Endpoint } : {}),
-      } as ConnectionPatch;
-    }
+  // The UI's own drag, driven programmatically. No snap tolerance: the
+  // pointer path's magnet-to-neighbour behaviour exists because a hand
+  // cannot hit a coordinate exactly, and the model can.
+  const dragged = dragOrthogonalSegment(
+    points,
+    shift.segment,
+    segment.axis === "horizontal" ? { dx: 0, dy: offset } : { dx: offset, dy: 0 },
+  );
+  const commit = commitBendPolyline(dragged);
 
-    return ctx.mergeConnection(p.id, patch, `shift_segment ${p.id}`, notes);
-  },
-});
+  const notes: string[] = [];
+  let patch: ConnectionPatch;
+  if (commit.clearedWaypoints) {
+    notes.push("the shift straightened the wire, so its manual route is gone and the router owns it again");
+    patch = { waypoints: undefined } as ConnectionPatch;
+  } else {
+    // The same endpoint re-pins the pointer commit path writes: a shift that
+    // pulls the wire off its anchor point has to say where it now meets the
+    // box, or the router would pull the whole route back on the next read.
+    const fromObject = objectOf(ctx.draft, connection.from.objectId);
+    const toObject = objectOf(ctx.draft, connection.to.objectId);
+    const first = commit.points[0];
+    const last = commit.points[commit.points.length - 1];
+    const from = fromObject && first
+      ? bendEndpointPatch(connection.from, fromObject, first, ctx.canvasStyle)
+      : undefined;
+    const to = toObject && last
+      ? bendEndpointPatch(connection.to, toObject, last, ctx.canvasStyle)
+      : undefined;
+    patch = {
+      waypoints: commit.waypoints,
+      ...(from ? { from: from as Endpoint } : {}),
+      ...(to ? { to: to as Endpoint } : {}),
+    } as ConnectionPatch;
+  }
+
+  return ctx.mergeConnection(id, patch, `route ${id} shift s${shift.segment}`, notes);
+}
 
 // ---------------------------------------------------------------------------
-// reset_route
+// route · reset
 // ---------------------------------------------------------------------------
 
 /**
  * Everything a manual route leaves on a connection, and therefore everything
  * this clears:
  *
- *  - `waypoints` — the interior corners, written by `reroute` and by the bend
+ *  - `waypoints` — the interior corners, written by `points` and by the bend
  *    commit path (`commitBendPolyline` → `polylineInteriorWaypoints`).
  *  - `from.position` / `to.position` — the 0..1 pins a bend drag writes when
  *    the shift pulls a wire off its anchor point (`bendEndpointPatch`, and the
  *    `reconcileWaypointEndpoint` slide that motivates it). Left behind, these
  *    keep steering the "auto" route and are the usual cause of the diagonal
- *    stub `shift_segment` refuses to touch.
+ *    stub a `shift` refuses to touch.
  *
  * What it deliberately KEEPS is `from.anchor` / `to.anchor`: choosing which
  * side of a box an edge leaves is a stated intent, not routing debris, and the
@@ -603,35 +579,85 @@ function withoutPositionPin(
   };
 }
 
-export const resetRoute = defineOperationTool({
-  name: "reset_route",
+/** The `reset` mode: hand the edge back to the auto-router. */
+function applyReset(ctx: OpContext, id: string): OpOutcome {
+  const connection = connectionOf(ctx, id)!;
+  const hasWaypoints = connection.waypoints !== undefined;
+  const hasPins = connection.from.position !== undefined || connection.to.position !== undefined;
+  if (!hasWaypoints && !hasPins) {
+    return {
+      status: "noop",
+      note: "this edge is already on the auto-router — it carries no manual corners and no endpoint pins.",
+    };
+  }
+  const patch = {
+    waypoints: undefined,
+    ...(connection.from.position !== undefined
+      ? { from: withoutPositionPin(connection.from) as Endpoint }
+      : {}),
+    ...(connection.to.position !== undefined
+      ? { to: withoutPositionPin(connection.to) as Endpoint }
+      : {}),
+  } as ConnectionPatch;
+  return ctx.mergeConnection(id, patch, `route ${id} reset`);
+}
+
+// ---------------------------------------------------------------------------
+// route
+// ---------------------------------------------------------------------------
+
+const RouteShift = Type.Object(
+  {
+    segment: Type.Integer({
+      minimum: 0,
+      description: "The sN index from the edge's printed route.",
+    }),
+    to: Type.Number({
+      description: "The segment's new fixed coordinate: x for a vertical segment, y for a horizontal one.",
+    }),
+  },
+  { additionalProperties: false },
+);
+type RouteShift = Static<typeof RouteShift>;
+
+const ROUTE_MODES = ["points", "shift", "reset"] as const;
+
+export const route = defineOperationTool({
+  name: "route",
   description:
-    "Hand an edge back to the auto-router: its manual corners and any endpoint pins a route left behind are dropped. A side you chose with an anchor is kept.",
-  fields: { id: Id },
+    "Set an edge's route. Send exactly one of points, shift or reset; a null one counts as absent. points replaces the whole route: they are the interior corners only, the two ends stay attached where they are, every leg must be horizontal or vertical, including the two that join the endpoints, no leg may cross a box other than the two ends or run through an end's own caption, and coordinates snap to the board grid. shift slides one segment sideways, the way dragging its handle does: segment is the sN index the route prints, and to is the segment's new x when it is vertical and its new y when it is horizontal, snapped to the board grid. reset hands the edge back to the auto-router: its manual corners and any endpoint pins a route left behind are dropped, and a side you chose with an anchor is kept. The result prints the edge's new route, so a second shift can chain off it.",
+  fields: {
+    id: Id,
+    points: nullable(
+      Type.Array(Point, {
+        minItems: 1,
+        description:
+          "The interior corners, in order from the `from` end. Each consecutive pair must share an x or a y.",
+      }),
+      "Replace the interior corners with these.",
+    ),
+    shift: nullable(RouteShift, "Slide one numbered segment to a new coordinate."),
+    reset: nullable(Type.Literal(true), "Send true to hand the edge back to the auto-router."),
+  },
   validate: (ctx, p) => {
-    const errors = ctx.requireConnection(p.id);
-    return errors.length > 0 ? errors : ctx.requireUnlockedEdge(p.id);
+    const errors = [...ctx.requireConnection(p.id), ...ctx.requireUnlockedEdge(p.id)];
+    const sent = ROUTE_MODES.filter((mode) => p[mode] != null);
+    if (sent.length !== 1) {
+      errors.push(
+        sent.length === 0
+          ? "send exactly one of points, shift or reset — points sets the corners, shift slides one segment, reset hands the edge back to the router."
+          : `send exactly one of points, shift or reset, not ${sent.join(" and ")}.`,
+      );
+    }
+    if (errors.length > 0) return errors;
+    if (p.points != null) return validatePoints(ctx, p.id, p.points);
+    if (p.shift != null) return validateShift(ctx, p.id, p.shift);
+    return [];
   },
   apply: (ctx, p) => {
-    const connection = connectionOf(ctx, p.id)!;
-    const hasWaypoints = connection.waypoints !== undefined;
-    const hasPins = connection.from.position !== undefined || connection.to.position !== undefined;
-    if (!hasWaypoints && !hasPins) {
-      return {
-        status: "noop",
-        note: "this edge is already on the auto-router — it carries no manual corners and no endpoint pins.",
-      };
-    }
-    const patch = {
-      waypoints: undefined,
-      ...(connection.from.position !== undefined
-        ? { from: withoutPositionPin(connection.from) as Endpoint }
-        : {}),
-      ...(connection.to.position !== undefined
-        ? { to: withoutPositionPin(connection.to) as Endpoint }
-        : {}),
-    } as ConnectionPatch;
-    return ctx.mergeConnection(p.id, patch, `reset_route ${p.id}`);
+    if (p.points != null) return applyPoints(ctx, p.id, p.points);
+    if (p.shift != null) return applyShift(ctx, p.id, p.shift);
+    return applyReset(ctx, p.id);
   },
 });
 

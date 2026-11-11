@@ -192,13 +192,13 @@ describe("finalize committed — waypoint steering", () => {
     );
     const session = makeTestSession(baseline, ["a", "b"]);
 
-    const applied = runOp(session, "reroute", {
+    const applied = runOp(session, "route", {
       id: "edge",
       points: [[300, 40], [300, 240]],
     });
 
     expect(applied.isError).not.toBe(true);
-    expect(applied.text).toContain("APPLIED · reroute edge");
+    expect(applied.text).toContain("APPLIED · route edge");
     // The steer is a real diff: DELTA names the steered connection.
     expect(applied.text).toContain("edge  wp none → 300,40");
 

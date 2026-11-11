@@ -3,7 +3,7 @@
  * numbering shared by the digest's edge lines, the ROUTES block, and (from
  * S3.6) the routing ops' results.
  *
- * The parity block below is the contract `shift_segment` stands on: an index
+ * The parity block below is the contract `route`'s `shift` stands on: an index
  * this module prints must be an index `connectorBendSegments` enumerates, or
  * the model would name a segment the editor cannot move.
  */
@@ -133,7 +133,7 @@ describe("numberedSegmentsForPolyline · off-axis and degenerate legs", () => {
   });
 });
 
-describe("segment-index parity with connectorBendSegments (the shift_segment contract)", () => {
+describe("segment-index parity with connectorBendSegments (the route shift contract)", () => {
   const parityDocuments = () => {
     const straight = makeDocument(
       [box("a", 0, 0), box("b", 400, 0)],

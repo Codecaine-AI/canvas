@@ -9,12 +9,12 @@
  *     e1: A ─(s0 h y=240)→ (s1 v x=520) ─(s2 h y=300)→ B
  *
  * A horizontal segment is defined by its y, a vertical one by its x — that
- * single number is the one `shift_segment(id, segment, to)` writes, so the
+ * single number is the one `route(id, shift: { segment, to })` writes, so the
  * printed coordinate is literally the value the model is about to change.
  * Horizontal segments carry the `─…→` wire glyph; vertical segments print
  * bare, because a vertical run cannot be drawn inline.
  *
- * ## The indexing rule (the contract `shift_segment` depends on)
+ * ## The indexing rule (the contract `route`'s `shift` depends on)
  *
  * `index` is the polyline POINT-PAIR index: segment `sN` runs from
  * `points[N]` to `points[N+1]`. This is exactly `ConnectorBendSegment.index`
@@ -65,7 +65,7 @@ const AXIS_EPSILON = 0.01;
 export type RouteSegmentAxis = "h" | "v";
 
 export interface NumberedRouteSegment {
-  /** Point-pair index — the index `shift_segment` accepts. */
+  /** Point-pair index — the index `route`'s `shift` accepts. */
   index: number;
   axis: RouteSegmentAxis;
   /** The coordinate the segment is pinned at: y when `h`, x when `v`. */

@@ -64,9 +64,11 @@ export const Id = Type.String({
 // turns null into "", `[Number, Null]` turns it into 0, and the Null-first
 // orders turn "" or 0 into null. Either way the call would mean something it
 // did not say. A primitive mode is therefore the JSON type pair, which reaches
-// the tool as sent. A sub-object mode is the union `[Object, Null]`: Convert
-// keeps a null object null, and the type pair would refuse null under the
-// object's own `required`.
+// the tool as sent; an enum mode lists null among its values. A sub-object,
+// array or literal mode is the union `[Schema, Null]`: Convert keeps a null one
+// null, and the type pair would refuse null under an object's own `required`.
+// Convert turns a falsy non-null value of the wrong type into null there, so
+// `reset: false` counts as absent as well.
 
 /** An optional string where null counts as absent. */
 export function nullableString(description: string) {
@@ -85,8 +87,15 @@ export function nullableNumber(description: string) {
   return Type.Optional(Type.Unsafe<number | null>({ type: ["number", "null"], description }));
 }
 
-/** An optional sub-object mode where null counts as absent. */
-export function nullableObject<T extends TSchema>(schema: T, description: string) {
+/** An optional enum where null counts as absent. One `enum`, as rule 1 asks. */
+export function nullableEnum<const T extends readonly string[]>(values: T, description: string) {
+  return Type.Optional(
+    Type.Unsafe<T[number] | null>({ type: ["string", "null"], enum: [...values, null], description }),
+  );
+}
+
+/** An optional sub-object, array or literal mode where null counts as absent. */
+export function nullable<T extends TSchema>(schema: T, description: string) {
   return Type.Optional(Type.Union([schema, Type.Null()], { description }));
 }
 
@@ -446,7 +455,7 @@ export type CloneParams = Static<typeof CloneParams>;
 /**
  * `connect` — the separate call after placement, matching the two steps a
  * person performs. Line and arrowheads are here because they are part of
- * drawing the edge; the route is not (`reroute` / `shift_segment` own it) and
+ * drawing the edge; the route is not (`route` owns it) and
  * neither is the label's placement (`move_label`).
  */
 export const ConnectParams = Type.Object(
@@ -607,9 +616,9 @@ export type ShapeSwapPatch = Static<typeof ShapeSwapPatch>;
 //    one home per concern — so neither has a key here to reach for.
 //  - `RepointPatch` carries the two ENDS. It cannot express a route, so a
 //    repoint can never smuggle in waypoints.
-//  - the route is `reroute` (wholesale) / `shift_segment` (one elbow) /
-//    `reset_route` (back to the auto-router), whose parameters are scalars
-//    and a point list declared inline by their descriptors.
+//  - the route is `route`: `points` (wholesale), `shift` (one elbow) or
+//    `reset` (back to the auto-router), whose fields are a point list, two
+//    scalars and a flag declared inline by its descriptor.
 //  - `LabelAlong` is `move_label`'s one polymorphic field: a fraction, or the
 //    word that clears the pin.
 

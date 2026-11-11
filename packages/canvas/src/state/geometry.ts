@@ -306,7 +306,7 @@ export function moveClosureIds(
  * The subset of `objectIds` that moves under its own delta: listed ids, minus
  * any that a listed section already carries as a descendant.
  *
- * This is what makes a multi-delta gesture (align, space_out) well defined on
+ * This is what makes a multi-delta gesture (`arrange`, either mode) well defined on
  * an overlapping selection. A child of a listed section has no independent
  * position to align or re-pitch — it travels with its frame — so it drops out
  * here rather than receiving a second, contradictory delta. Order and
@@ -554,8 +554,8 @@ export function distributeObjects(
  * subsequent box slides so the CLEAR gap to its predecessor's trailing edge is
  * exactly `gap`. The span grows or shrinks as needed and two boxes are enough.
  *
- * Cross-axis positions are untouched — align owns the cross axis, space_out
- * owns the flow axis. Sections re-pitch by their own frame box and carry their
+ * Cross-axis positions are untouched — the align mode of `arrange` owns the
+ * cross axis, its space mode owns the flow axis. Sections re-pitch by their own frame box and carry their
  * contents (moveRootIds + translateRoots), and a child of a listed section
  * drops out rather than being re-pitched inside the frame that is already
  * carrying it.

@@ -31,7 +31,7 @@ subject is a canvas at all. This skill says how to draw one.
    section with its title, icon and color. `place_shape` for every
    node inside its section with its name and color.
    `arrange_section` for every section with its node rows, then
-   `space_out` the sections. Then `connect` every wire and call
+   `arrange` the sections with `space`. Then `connect` every wire and call
    `tighten_wires` once.
 3. Finish. Call `canvas_check`, read its whole-board PNG, and `look` at
    any section whose text you cannot read in it. Fix every error

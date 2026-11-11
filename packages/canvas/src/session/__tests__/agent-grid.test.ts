@@ -162,10 +162,10 @@ describe("every geometry a gesture writes lands on the grid", () => {
     expectOnGrid(geometryOf(session, "a"), ["x", "y"]);
   });
 
-  test("align snaps the shared coordinate the row agrees on", () => {
+  test("arrange align snaps the shared coordinate the row agrees on", () => {
     const session = offGridSession();
 
-    const result = runOp(session, "align", { ids: ["a", "b"], edge: "left" });
+    const result = runOp(session, "arrange", { ids: ["a", "b"], align: "left" });
 
     expect(geometryOf(session, "a").x).toBe(20);
     expect(geometryOf(session, "b").x).toBe(20);
@@ -174,10 +174,10 @@ describe("every geometry a gesture writes lands on the grid", () => {
     expect(result.text).toContain("left edges at x=20");
   });
 
-  test("align keeps the shared edge exactly shared while snapping it", () => {
+  test("arrange align keeps the shared edge exactly shared while snapping it", () => {
     const session = offGridSession();
 
-    const result = runOp(session, "align", { ids: ["a", "b"], edge: "right" });
+    const result = runOp(session, "arrange", { ids: ["a", "b"], align: "right" });
 
     const a = geometryOf(session, "a");
     const b = geometryOf(session, "b");
@@ -186,13 +186,12 @@ describe("every geometry a gesture writes lands on the grid", () => {
     expect(result.text).toContain(`right edges at x=${a.x + a.width}`);
   });
 
-  test("space_out snaps each position it computes", () => {
+  test("arrange space snaps each position it computes", () => {
     const session = offGridSession();
 
-    const result = runOp(session, "space_out", {
+    const result = runOp(session, "arrange", {
       ids: ["a", "b"],
-      axis: "horizontal",
-      gap: 40,
+      space: { axis: "horizontal", gap: 40 },
     });
 
     // The first box holds where it was drawn — nothing writes it — and the

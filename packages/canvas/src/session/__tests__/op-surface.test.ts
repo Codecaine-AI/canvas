@@ -2,7 +2,7 @@
  * The DELTA VOCABULARY gate (session/perception/op-surface.ts).
  *
  * A document diff cannot name the gesture that caused it — `move` to, `move`
- * by, `align`, and `space_out` all land as the same geometry change —
+ * by, and `arrange` in either mode all land as the same geometry change —
  * so the diff speaks a separate, neutral vocabulary: added / changed / removed
  * per entity kind, plus the one section-fit shape. This file pins that
  * vocabulary from both directions: internal patch ops classify into the right

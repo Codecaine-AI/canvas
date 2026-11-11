@@ -1,5 +1,5 @@
 /**
- * The Arrange group — `move`, `resize`, `align`, `space_out`, `arrange_section`
+ * The Arrange group — `move`, `resize`, `arrange`, `arrange_section`
  * (docs/10-system-design/70-agent-tool-surface/20-gestures §Arrange).
  *
  * These are the gestures that write geometry and nothing else, so they
@@ -25,8 +25,8 @@
  * these gestures WRITE lands on the agent grid (grid.ts, AGENT_GRID = 20), so
  * it is the RESULT that is quantized, never merely the argument: a `move` `by`
  * off an off-grid box snaps the corner it lands on rather than the delta it was
- * given, `align` snaps the shared coordinate the whole row agrees on, and
- * `space_out` snaps each position it computes (which makes the gap approximate
+ * given, `arrange` `align` snaps the shared coordinate the whole row agrees on,
+ * and `arrange` `space` snaps each position it computes (which makes the gap approximate
  * when a box starts off-grid — the summary reports the positions that landed,
  * so the next gesture reasons from the board's real numbers). 20-multiples pass
  * through the write path's own grid-4 normalization untouched, which is what
@@ -87,9 +87,10 @@ import { defineOperationTool } from "./operation-tool";
 import {
   ArrangeSectionParams,
   Id,
+  nullable,
+  nullableEnum,
   nullableId,
   nullableNumber,
-  nullableObject,
 } from "../schemas";
 
 // ---------------------------------------------------------------------------
@@ -258,8 +259,8 @@ export const move = defineOperationTool({
     "Move a box. Send exactly one of to or by; a null one counts as absent. to puts the box's top-left corner at a point on the board, and by nudges it by an offset from where it already is. A section takes everything it holds with it, so what it contains never changes. The result lands on the board's grid and reports where the box actually is.",
   fields: {
     id: Id,
-    to: nullableObject(MovePoint, "Put the top-left corner at this point."),
-    by: nullableObject(MoveOffset, "Move the box by this offset."),
+    to: nullable(MovePoint, "Put the top-left corner at this point."),
+    by: nullable(MoveOffset, "Move the box by this offset."),
   },
   validate: (ctx, p) => {
     const errors = ctx.requirePositionable(p.id);
@@ -420,16 +421,12 @@ export const resize = defineOperationTool({
 });
 
 // ---------------------------------------------------------------------------
-// align
+// arrange · align
 // ---------------------------------------------------------------------------
 
-const AlignEdge = StringEnum(
-  ["left", "right", "top", "bottom", "center_h", "center_v"],
-  {
-    description:
-      "The edge the boxes share afterwards. center_h puts every box on one center x, center_v on one center y.",
-  },
-);
+const ALIGN_EDGES = ["left", "right", "top", "bottom", "center_h", "center_v"] as const;
+const ALIGN_EDGE_DESCRIPTION =
+  "The edge the boxes share afterwards. center_h puts every box on one center x, center_v on one center y.";
 
 const ArrangeIds = Type.Array(Id, {
   minItems: 2,
@@ -483,45 +480,8 @@ function alignedCoordinate(
   return `centers at y=${value}`;
 }
 
-export const align = defineOperationTool({
-  name: "align",
-  description:
-    "Put a row or column of boxes on one shared edge. This is the cross-axis gesture — it never changes spacing along the flow. Sections align by their own frame and carry their contents; edges are not targets, they re-route themselves. A child of a listed section travels with its frame and is not an independent target; at least two independent targets must remain.",
-  fields: { ids: ArrangeIds, edge: AlignEdge },
-  validate: (ctx, p) => requireIndependentRoots(ctx, p.ids, "align"),
-  apply: (ctx, p) => {
-    const edge = p.edge as CanvasAlignEdge;
-    // The move roots are what actually aligned; a child of a listed section
-    // travelled with its frame, so it is neither named nor measured here.
-    const roots = moveRootIds(ctx.draft, p.ids);
-    const aligned = alignWithDescendants(ctx.draft, p.ids, edge);
-    // Put the shared coordinate on the grid by nudging the WHOLE row by one
-    // drift: every root moves by the same amount, so the edge they now share
-    // stays exactly shared and lands on a 20.
-    const alignedRoot = aligned.objects.find((object) => object.id === roots[0])!;
-    const shared = sharedAlignCoordinate(alignedRoot.geometry, edge);
-    const drift = snapCoordinate(shared) - shared;
-    const horizontal = alignsHorizontally(edge);
-    const snappedAlignment = retranslate(
-      aligned,
-      new Map(roots.map((id) => [
-        id,
-        horizontal ? { dx: drift, dy: 0 } : { dx: 0, dy: drift },
-      ])),
-    );
-    const { document, changedIds } = lowerGeometry(ctx.draft, snappedAlignment.objects);
-    const measured = document.objects.find((object) => object.id === roots[0])!;
-    return {
-      status: "applied",
-      draft: document,
-      summary: `align ${p.edge} · ${roots.join(", ")} → ${alignedCoordinate(measured, edge)}`
-        + carriedSuffix(changedIds, roots),
-    };
-  },
-});
-
 // ---------------------------------------------------------------------------
-// space_out
+// arrange · space
 // ---------------------------------------------------------------------------
 
 const SpaceAxis = StringEnum(["horizontal", "vertical"], {
@@ -569,50 +529,102 @@ function snapRun(
   return retranslate(spaced, deltas);
 }
 
-export const spaceOut = defineOperationTool({
-  name: "space_out",
-  description:
-    "Re-pitch boxes in place so the clear gap between neighbours is exactly what you ask for. In positional order along the flow the first box holds and every later one slides; the run grows or shrinks to suit, and the cross axis is untouched. It opens a corridor between boxes in one call. Sections re-pitch by their own frame and carry their contents; edges are not targets, they re-route themselves.",
-  fields: {
-    ids: ArrangeIds,
+/** The `align` mode: one shared edge, snapped as a whole row. */
+function alignRow(ctx: OpContext, ids: readonly string[], align: CanvasAlignEdge): OpOutcome {
+  // The move roots are what actually aligned; a child of a listed section
+  // travelled with its frame, so it is neither named nor measured here.
+  const roots = moveRootIds(ctx.draft, ids);
+  const aligned = alignWithDescendants(ctx.draft, ids, align);
+  // Put the shared coordinate on the grid by nudging the WHOLE row by one
+  // drift: every root moves by the same amount, so the edge they now share
+  // stays exactly shared and lands on a 20.
+  const alignedRoot = aligned.objects.find((object) => object.id === roots[0])!;
+  const shared = sharedAlignCoordinate(alignedRoot.geometry, align);
+  const drift = snapCoordinate(shared) - shared;
+  const horizontal = alignsHorizontally(align);
+  const snappedAlignment = retranslate(
+    aligned,
+    new Map(roots.map((id) => [
+      id,
+      horizontal ? { dx: drift, dy: 0 } : { dx: 0, dy: drift },
+    ])),
+  );
+  const { document, changedIds } = lowerGeometry(ctx.draft, snappedAlignment.objects);
+  const measured = document.objects.find((object) => object.id === roots[0])!;
+  return {
+    status: "applied",
+    draft: document,
+    summary: `arrange align ${align} · ${roots.join(", ")} → ${alignedCoordinate(measured, align)}`
+      + carriedSuffix(changedIds, roots),
+  };
+}
+
+/** The `space` mode: re-pitch the run so every clear gap is `gap`. */
+function spaceRun(
+  ctx: OpContext,
+  ids: readonly string[],
+  space: { axis: "horizontal" | "vertical"; gap: number },
+): OpOutcome {
+  const gap = snapGap(space.gap);
+  const horizontal = space.axis === "horizontal";
+  const roots = moveRootIds(ctx.draft, ids);
+  const spaced = spaceOutObjects(ctx.draft, ids, space.axis, gap);
+  const { document, changedIds } = lowerGeometry(
+    ctx.draft,
+    snapRun(spaced, roots, horizontal, gap).objects,
+  );
+  const byId = new Map(document.objects.map((object) => [object.id, object]));
+  // Positional order along the flow is what the gesture re-pitched by, so it
+  // is the order the summary reports the landed run in.
+  const run = roots
+    .map((id) => byId.get(id)!)
+    .sort((a, b) =>
+      horizontal ? a.geometry.x - b.geometry.x : a.geometry.y - b.geometry.y)
+    .map((object) =>
+      `${object.id} ${horizontal ? "x" : "y"}=`
+      + num(horizontal ? object.geometry.x : object.geometry.y))
+    .join(", ");
+  return {
+    status: "applied",
+    draft: document,
+    summary: `arrange space ${space.axis} gap ${num(gap)} · ${run}`
+      + carriedSuffix(changedIds, roots),
+  };
+}
+
+const ArrangeSpace = Type.Object(
+  {
     axis: SpaceAxis,
     gap: Type.Number({
       description: "The clear space to leave between neighbouring boxes, in board units.",
     }),
   },
-  validate: (ctx, p) => requireIndependentRoots(ctx, p.ids, "space_out"),
-  apply: (ctx, p) => {
-    const gap = snapGap(p.gap);
-    const horizontal = p.axis === "horizontal";
-    const roots = moveRootIds(ctx.draft, p.ids);
-    const spaced = spaceOutObjects(
-      ctx.draft,
-      p.ids,
-      p.axis as "horizontal" | "vertical",
-      gap,
-    );
-    const { document, changedIds } = lowerGeometry(
-      ctx.draft,
-      snapRun(spaced, roots, horizontal, gap).objects,
-    );
-    const byId = new Map(document.objects.map((object) => [object.id, object]));
-    // Positional order along the flow is what the gesture re-pitched by, so it
-    // is the order the summary reports the landed run in.
-    const run = roots
-      .map((id) => byId.get(id)!)
-      .sort((a, b) =>
-        horizontal ? a.geometry.x - b.geometry.x : a.geometry.y - b.geometry.y)
-      .map((object) =>
-        `${object.id} ${horizontal ? "x" : "y"}=`
-        + num(horizontal ? object.geometry.x : object.geometry.y))
-      .join(", ");
-    return {
-      status: "applied",
-      draft: document,
-      summary: `space_out ${p.axis} gap ${num(gap)} · ${run}`
-        + carriedSuffix(changedIds, roots),
-    };
+  { additionalProperties: false },
+);
+
+export const arrange = defineOperationTool({
+  name: "arrange",
+  description:
+    "Arrange a row or column of boxes. Send exactly one of align or space; a null one counts as absent. align puts the boxes on one shared edge or centerline: it is the cross-axis mode and never changes spacing along the flow. space re-pitches them in place so the clear gap between neighbours is exactly gap: in positional order along the axis the first box holds and every later one slides, the run grows or shrinks to suit, and the cross axis is untouched. space opens a corridor between boxes in one call. Sections arrange by their own frame and carry their contents; edges are not targets, they re-route themselves. A child of a listed section travels with its frame and is not an independent target; at least two independent targets must remain.",
+  fields: {
+    ids: ArrangeIds,
+    align: nullableEnum(ALIGN_EDGES, ALIGN_EDGE_DESCRIPTION),
+    space: nullable(ArrangeSpace, "Re-pitch the run along this axis to this clear gap."),
   },
+  validate: (ctx, p) => {
+    const errors = requireIndependentRoots(ctx, p.ids, "arrange");
+    if ((p.align == null) === (p.space == null)) {
+      errors.push(
+        p.align == null
+          ? "send exactly one of align or space — align puts the boxes on one shared edge, space sets one clear gap between them."
+          : "send exactly one of align or space, not both.",
+      );
+    }
+    return errors;
+  },
+  apply: (ctx, p) => p.align != null
+    ? alignRow(ctx, p.ids, p.align as CanvasAlignEdge)
+    : spaceRun(ctx, p.ids, p.space as { axis: "horizontal" | "vertical"; gap: number }),
 });
 
 // ---------------------------------------------------------------------------
@@ -640,7 +652,7 @@ function rowIdErrors(ctx: OpContext, sectionId: string, id: string): string[] {
   if (kind === "section") {
     return [
       `rows id "${id}" is a section — arrange_section lays out the nodes inside one frame;`
-      + ` arrange "${id}" on its own, and place the frame itself with move.`,
+      + ` arrange_section "${id}" on its own, and place the frame itself with move.`,
     ];
   }
   if (kind === "sticky") {
@@ -653,7 +665,7 @@ function rowIdErrors(ctx: OpContext, sectionId: string, id: string): string[] {
   if (parentId !== undefined && parentId !== sectionId) {
     return [
       `rows id "${id}" belongs to section "${parentId}" — arrange_section arranges one section's`
-      + ` nodes; arrange "${parentId}" instead, or move "${id}" out of it first.`,
+      + ` nodes; arrange_section "${parentId}" instead, or move "${id}" out of it first.`,
     ];
   }
   return ctx.requireUnlocked(id, "rows id");
@@ -683,7 +695,7 @@ interface Cell {
  *
  * Each footprint is centered in its cell, so a row of mixed sizes shares one
  * center line and its wires run straight. That shared center is the gesture,
- * as it is for `align` center: a corner falls half an extent from it and is
+ * as it is for `arrange`'s `align` center: a corner falls half an extent from it and is
  * not snapped to the agent grid (the write path still puts it on its own grid
  * of 4).
  */

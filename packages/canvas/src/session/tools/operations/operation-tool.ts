@@ -67,7 +67,9 @@ function operationLabel(name: string): string {
  * Anchor a legal no-op to the entity the model named without making target
  * metadata part of every operation spec. A gesture's `id` is its target, so it
  * wins over any other string field (`resize`'s `like` source can come first in
- * the call); the fallbacks serve gestures that name their target otherwise.
+ * the call); the fallbacks serve gestures that name their target otherwise:
+ * the first string field (`arrange`'s `align` edge), else the first sub-object's
+ * `id` or first string (`arrange`'s `space` axis). An id list names no target.
  */
 function operationTarget(params: Record<string, unknown>): string | undefined {
   if (typeof params.id === "string") return params.id;
@@ -75,9 +77,11 @@ function operationTarget(params: Record<string, unknown>): string | undefined {
     if (typeof value === "string") return value;
   }
   for (const value of Object.values(params)) {
-    if (value === null || typeof value !== "object") continue;
-    const id = (value as { id?: unknown }).id;
-    return typeof id === "string" ? id : undefined;
+    if (value === null || typeof value !== "object" || Array.isArray(value)) continue;
+    const record = value as Record<string, unknown>;
+    if (typeof record.id === "string") return record.id;
+    const named = Object.values(record).find((entry) => typeof entry === "string");
+    return typeof named === "string" ? named : undefined;
   }
   return undefined;
 }

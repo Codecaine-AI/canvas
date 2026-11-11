@@ -3,12 +3,10 @@
  * roster (docs/10-system-design/70-agent-tool-surface), in six groups:
  *
  *   Place     place_section, place_sticky, place_shape, clone, connect
- *   Arrange   move, resize, align, space_out, arrange_section,
- *             tighten_wires
+ *   Arrange   move, resize, arrange, arrange_section, tighten_wires
  *   Content   update_text, change_color, change_shape
  *   Sections  fit_section, change_section_border, lock
- *   Edges     style_edge, change_connection, reroute, shift_segment,
- *             reset_route, move_label
+ *   Edges     style_edge, change_connection, route, move_label
  *   Delete    delete
  *
  * Every tool names a motion a person makes on the canvas rather than a CRUD
@@ -28,11 +26,10 @@ import type { TSchema } from "@mariozechner/pi-ai";
 import type { LayoutToolRenderResult } from "../runtime";
 import type { OperationHost } from "./operation-tool";
 import {
-  align,
+  arrange,
   arrangeSection,
   move,
   resize,
-  spaceOut,
 } from "./arrange";
 import { tightenWiresTool } from "./tighten-wires";
 import {
@@ -44,9 +41,7 @@ import { deleteEntity } from "./delete";
 import {
   changeConnection,
   moveLabel,
-  reroute,
-  resetRoute,
-  shiftSegment,
+  route,
   styleEdge,
 } from "./edges";
 import {
@@ -75,7 +70,7 @@ export interface OperationTool {
 }
 
 export {
-  align,
+  arrange,
   arrangeSection,
   changeColor,
   changeConnection,
@@ -91,11 +86,8 @@ export {
   placeSection,
   placeShape,
   placeSticky,
-  reroute,
-  resetRoute,
   resize,
-  shiftSegment,
-  spaceOut,
+  route,
   styleEdge,
   tightenWiresTool,
   updateText,
@@ -115,8 +107,7 @@ export const operationTools: readonly OperationTool[] = [
   // and fits the frame, so a section needs no coordinates per node.
   move,
   resize,
-  align,
-  spaceOut,
+  arrange,
   arrangeSection,
   // The last Arrange gesture (./tighten-wires.ts): every box slid toward
   // what it is wired to, kept only where the drawn wires get shorter.
@@ -131,15 +122,13 @@ export const operationTools: readonly OperationTool[] = [
   fitSection,
   changeSectionBorder,
   lock,
-  // Edges (./edges.ts). Restyle, repoint, and the three routing instruments
-  // plus the label pin. Every one of them returns the edge's fresh numbered
+  // Edges (./edges.ts). Restyle, repoint, the route in its three modes, and
+  // the label pin. Every one of them returns the edge's fresh numbered
   // polyline, which is what lets a second shift in the same turn chain off the
   // first instead of off a stale digest.
   styleEdge,
   changeConnection,
-  reroute,
-  shiftSegment,
-  resetRoute,
+  route,
   moveLabel,
   // Delete (./delete.ts). One verb, three cascades.
   deleteEntity,

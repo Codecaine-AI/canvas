@@ -122,14 +122,14 @@ describe("DELTA block", () => {
 
   test("makes connection steering visible: waypoints, anchors, and position fractions", () => {
     // 80-high boxes so the auto-attachment points land on the agent grid, which
-    // is what lets `reroute` draw a corner the router will accept.
+    // is what lets `route` `points` draw a corner the router will accept.
     const baseline = makeDocument(
       [box("alpha", 0, 0, 160, 80), box("beta", 480, 160, 160, 80)],
       [connect("alpha-beta", "alpha", "beta")],
     );
     const session = makeTestSession(baseline, ["alpha", "beta"]);
 
-    const routed = runOp(session, "reroute", {
+    const routed = runOp(session, "route", {
       id: "alpha-beta",
       points: [[240, 40], [240, 200]],
     });

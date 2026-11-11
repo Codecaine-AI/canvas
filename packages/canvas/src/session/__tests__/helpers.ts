@@ -38,8 +38,7 @@ export type OperationToolName =
   // Arrange
   | "move"
   | "resize"
-  | "align"
-  | "space_out"
+  | "arrange"
   | "arrange_section"
   | "tighten_wires"
   // Content & appearance
@@ -53,9 +52,7 @@ export type OperationToolName =
   // Edges
   | "style_edge"
   | "change_connection"
-  | "reroute"
-  | "shift_segment"
-  | "reset_route"
+  | "route"
   | "move_label"
   // Delete
   | "delete";

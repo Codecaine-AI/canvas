@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 82c524bf88508351b185b0a74fea23384adb336204f06bdab8f6f2b1189244f2). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 01a0eb8f46c622ca99592728d27c25229dada87d06f57508d9f16dc8d15cc4a4). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -174,7 +174,7 @@
         1. place_section for each section, with its title, icon, and color in one call. Leave wide room between sections. Step 4 closes it.
         2. place_shape for each node inside its section, with its name and color in one call. Keep the default size: 280×100 for a shape, 300×120 for an icon. clone a finished node for each peer of the same role.
         3. arrange_section for each section, with its node ids as rows. It sets the gaps (200 across a row, 100 down a column) and fits the frame, so you write no coordinates.
-        4. space_out each row of sections with gap 200, then align their tops.
+        4. arrange each row of sections with space and gap 200, then arrange the same row with align top.
         5. connect every wire, then call tighten_wires once.
         6. canvas_check, then fix its errors. Overlap and integrity are the only checks: overlap is a box on a box, or a section on a section, and integrity fires only when something bypassed the automatic fixes. Wire routes, label chips, text fit, and section fit are automatic.
     </build_order>

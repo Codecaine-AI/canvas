@@ -549,8 +549,8 @@ export function routeThroughBoxIds(
 /**
  * What the router would refuse to draw through for `connection` routed along
  * `waypoints`: the boxes and own captions the waypoint route crosses, or
- * `null` when no orthogonal route joins the corners to the ends. `reroute`
- * asks this so its refusal can name the box.
+ * `null` when no orthogonal route joins the corners to the ends. `route`
+ * asks this in its points mode, so its refusal can name the box.
  */
 export function waypointRouteBlockers(
   fromObject: InteractiveCanvasObject,

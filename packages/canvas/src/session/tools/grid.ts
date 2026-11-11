@@ -6,7 +6,7 @@
  * number that reaches board geometry is a multiple of 20". For an absolute
  * argument the two are the same thing; for a relative one they are not, and the
  * result is what counts: a `move` by 20 off a box at x=16 lands it at 40, not at
- * 36, and `align` snaps the shared coordinate the row agrees on rather than the
+ * 36, and `arrange`'s `align` snaps the shared coordinate the row agrees on rather than the
  * deltas that get it there. A descriptor that snapped only its inputs would
  * leave every hand-drawn box permanently off-grid, which is precisely the
  * board the grid exists to clean up. 20-multiples then survive the write path's
@@ -41,11 +41,11 @@
  *  - the size a box ends up with — `size` on `place_section`, `width` /
  *    `height` on `resize`, both dimensions copied by `resize`'s `like`, and the
  *    size a `clone` copies — snapSize
- *  - the shared coordinate `align` puts a row on, and each position
- *    `space_out` computes for a box — snapCoordinate
- *  - `gap` on `space_out` — snapGap
- *  - waypoint coordinates in `reroute` (`points`) and the `to` target of
- *    `shift_segment` — snapPoint / snapCoordinate
+ *  - the shared coordinate `arrange`'s `align` puts a row on, and each
+ *    position its `space` computes for a box — snapCoordinate
+ *  - `gap` in `arrange`'s `space` — snapGap
+ *  - waypoint coordinates in `route`'s `points` and the `to` target of its
+ *    `shift` — snapPoint / snapCoordinate
  *  - `move_label`'s `offset` — a perpendicular displacement in px — snapCoordinate
  *
  * WHAT IS EXEMPT (deliberately unsnapped — these are not world distances):
@@ -54,7 +54,7 @@
  *  - text metrics — the readability checks on `resize` / `update_text`
  *    measure real glyph runs, not grid units
  *  - geometry a gesture does NOT write: the untouched dimension of a
- *    width-only `resize`, the first box of a `space_out` run, and the
+ *    width-only `resize`, the first box of an `arrange` `space` run, and the
  *    descendants a frame carries (they travel by their root's snapped delta,
  *    keeping their exact relative geometry — an off-grid child of an off-grid
  *    frame stays where it was put relative to the frame)
@@ -100,7 +100,7 @@ export function snapSize(
 }
 
 /**
- * Rounds a `space_out` gap. A gap of 0 is meaningful (boxes flush against one
+ * Rounds an `arrange` `space` gap. A gap of 0 is meaningful (boxes flush against one
  * another), so unlike a size this clamps at 0 rather than at one grid unit;
  * negative gaps are not a gesture and collapse to 0.
  */

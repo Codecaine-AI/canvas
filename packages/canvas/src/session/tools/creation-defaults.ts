@@ -8,7 +8,7 @@
  * these numbers are load-bearing, not a convenience: they are the entire
  * answer to "how big is a new node". The agent never reasons about size at
  * placement; sizing afterward is `resize` (explicit or `like`), and spacing is
- * `space_out` — deliberate steps like everything else. `place_shape` may
+ * `arrange` with `space` — deliberate steps like everything else. `place_shape` may
  * carry a color since climb round 4 (one call per node instead of three);
  * the color here is what it lands in when the call names none.
  *
