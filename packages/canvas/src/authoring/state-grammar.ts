@@ -15,6 +15,9 @@
  *   2. Entries are keys, not essays. What a line means and how to read it —
  *      behavioral rules live in the system prompt, kind semantics in
  *      <capabilities>.
+ *
+ * Only blocks an MCP drawer receives get a key: a key for a block no tool
+ * prints costs tokens on every read and gives the drawer nothing to act on.
  */
 import {
   DIGEST_DEFAULTS_LEGEND,
@@ -47,9 +50,7 @@ function tagBlock(tag: string, bullets: readonly Bullet[]): string {
 
 const HEADER =
   "How board state reads. This is the key, one entry per block.\n\n"
-  + "- The <state> block and every tool result carry bare values in a fixed grammar.\n"
-  + "- Counts ride as attributes on the blocks themselves.\n"
-  + "- An empty block is a self-closing tag.";
+  + "- The board digest and every tool result carry bare values in a fixed grammar.";
 
 const ALWAYS_ON_RULES = LAYOUT_RULES.map((rule) => rule.id).join(", ");
 
@@ -107,45 +108,20 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
     ],
   },
   {
-    tag: "recent_ops",
-    bullets: [
-      {
-        text: "one line per call this run, newest last: tN tool target detail",
-        children: ["the durable ledger", "NO-OP and ERROR calls are marked as such"],
-      },
-    ],
-  },
-  {
-    tag: "diff",
-    bullets: [
-      {
-        text: "the cumulative base→draft change, one line per changed entity:",
-        children: ["addSection id · updateObject id  moved · recolored · … · removeConnection id"],
-      },
-      {
-        text: "built from the exact edits a committed finalize proposes",
-        children: ["it always equals what committing would ship"],
-      },
-    ],
-  },
-  {
     tag: "lints",
     bullets: [
       {
         text: "one open finding per line:",
         children: [
-          "grouped under <errors>, <warnings> and <notes>",
-          "recomputed every request",
+          "grouped under ERRORS, WARNINGS and NOTES",
+          "recomputed after every edit",
           "E1 rule: what is wrong and where (a suggested fix)",
         ],
       },
       "ids are stable only until the draft changes, then they reassign from E1/W1",
       `always-on rules: ${ALWAYS_ON_RULES}`,
-      {
-        text: "every open E* in your edited scope blocks a committed finalize",
-        children: ["the finding names the problem, the fix is yours to choose"],
-      },
-      "W* warnings and N* notes never block: they ride along in the proposal",
+      "fix every open E* before you call the board done: the finding names the problem, the fix is yours to choose",
+      "W* warnings and N* notes never block",
       {
         text: "overlap and integrity are the only checks: overlap is a box on a box, or a section on a section",
         children: [
@@ -169,31 +145,6 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       {
         text: "answer a thread by editing board content, then dispose it with resolve_request",
         children: ["the disposal note is what the operator sees"],
-      },
-    ],
-  },
-  {
-    tag: "views",
-    bullets: [
-      {
-        text: "names the attached images in order:",
-        children: [
-          "(1) the board as it stands now",
-          "then up to three prior change renders, newest first, each captioned with the gesture that made it",
-        ],
-      },
-      "a failed current-board render is reported here and the previous render is kept",
-    ],
-  },
-  {
-    tag: "recent_conversation",
-    bullets: [
-      {
-        text: "the capped tail of the run's messages",
-        children: [
-          "the <state> block above it always carries the current picture",
-          "<recent_ops> carries the durable history",
-        ],
       },
     ],
   },
@@ -250,10 +201,6 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
       {
         text: "ERROR · …",
         children: ["the call was not legal", "read the line, fix the call, send it again"],
-      },
-      {
-        text: "a result is sized to its operation",
-        children: ["the standing picture is never restated there, because the next <state> block carries it"],
       },
     ],
   },

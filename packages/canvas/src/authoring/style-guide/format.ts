@@ -1,14 +1,11 @@
 /**
- * Renders ALL registered style topics (./index STYLE_TOPICS) and the craft
- * targets as nested XML blocks: the aesthetic guidance source the canvas
- * skill is generated from (../sources).
+ * Renders ALL registered style topics (./index STYLE_TOPICS) as nested XML
+ * blocks: the aesthetic guidance source (../sources).
  *
  * Static by design: no per-session variation. The system prompt only
  * summarizes its core taste.
  */
-import { CRAFT_TARGETS, STYLE_TOPICS } from "./index";
-import type { CraftTargets } from "./index";
-import { formatCraftTargets } from "./craft-targets";
+import { STYLE_TOPICS } from "./index";
 export { formatCraftTargets } from "./craft-targets";
 
 const INDENT = "    ";
@@ -23,11 +20,13 @@ function topicBlock(id: string, prose: string): string {
   return `<${tag}>\n${body}\n</${tag}>`;
 }
 
-/** A framing line, then prose topics and craft targets as nested XML blocks. */
-export function formatStyleGuide(targets: CraftTargets = CRAFT_TARGETS): string {
+/**
+ * A framing line, then the prose topics as nested XML blocks. The craft targets
+ * are served once, in topic canvas_conventions, not here as well.
+ */
+export function formatStyleGuide(): string {
   const topics = STYLE_TOPICS
     .map((topic) => topicBlock(topic.id, topic.prose))
     .join("\n\n");
-  const craft = topicBlock("craft-targets", formatCraftTargets(targets));
-  return `The house style preferences: deliberate defaults for visual judgment, not laws.\n\n${topics}\n\n${craft}`;
+  return `The house style preferences: deliberate defaults for visual judgment, not laws.\n\n${topics}`;
 }
