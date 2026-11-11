@@ -82,7 +82,7 @@ export type {
   ConnectorDragOverlay,
 } from "./connectors/types";
 export * from "./connectors/routing";
-export * from "./stage/editor/features/snapping/snapping";
+export * from "./board/smart-guides/snapping";
 export * from "./stage/editor/InteractiveCanvasEditor";
 export * from "./stage/viewer/InteractiveCanvasViewer";
 export * from "./state/schema";

@@ -6,7 +6,7 @@ import {
   type InteractionState,
 } from "../../../pipeline/state";
 import type { CanvasPointerEvent } from "../../../../../interaction/interaction";
-import type { SnapCorrection } from "../snapping";
+import type { SnapCorrection } from "../../../../../board/smart-guides/snapping";
 import type {
   InteractiveCanvasConnection,
   InteractiveCanvasDocument,

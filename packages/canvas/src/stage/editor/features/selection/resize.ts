@@ -9,7 +9,7 @@
  */
 import type { CanvasAction } from "../../../../state/actions";
 import type { CanvasPoint } from "../../../../state/geometry";
-import { computeSnapGuides, type SnapGuide } from "../snapping/snapping";
+import { computeSnapGuides, type SnapGuide } from "../../../../board/smart-guides/snapping";
 import { gatherSnapCandidates } from "../../../../interaction/hit-testing";
 import { hitBoundsForObject } from "../../../../objects/geometry";
 import { grownToAspect, naturalAspectOf } from "../../../../objects/natural-aspect";

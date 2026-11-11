@@ -40,8 +40,8 @@
  * function/branch is control-flow-and-math-identical to upstream.
  */
 
-import { almostEqual } from "../../../../connectors/pathfinding/gfx-types";
-import { DEFAULT_CANVAS_STYLE, stageMarkColors } from "../../../../theme/canvas-style";
+import { almostEqual } from "../../connectors/pathfinding/gfx-types";
+import { DEFAULT_CANVAS_STYLE, stageMarkColors } from "../../theme/canvas-style";
 
 /** Plain axis-aligned bounds — this repo's `CanvasBounds` shape (`{x, y, width, height}`). */
 export type SnapBounds = {

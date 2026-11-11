@@ -1,6 +1,6 @@
 "use client";
 
-import type { SnapGuide } from "./snapping";
+import type { SnapGuide } from "../../../../board/smart-guides/snapping";
 import { worldToScreen, type ViewportState } from "../../../viewport";
 
 /**

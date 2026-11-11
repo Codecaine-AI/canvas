@@ -4,7 +4,7 @@ import { CanvasStageWithInteraction as CanvasStage } from "./canvas-stage-test-u
 import type { InteractionOverlay } from "../editor/pipeline/state";
 import type { InteractiveCanvasDocument } from "../../state/schema";
 import { renderFigjam } from "../../theme/__tests__/figjam";
-import { DISTRIBUTION_GUIDE_COLOR } from "../editor/features/snapping/snapping";
+import { DISTRIBUTION_GUIDE_COLOR } from "../../board/smart-guides/snapping";
 
 afterEach(() => {
   cleanup();

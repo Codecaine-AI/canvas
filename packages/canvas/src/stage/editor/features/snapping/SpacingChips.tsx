@@ -1,7 +1,7 @@
 "use client";
 
 import { flat } from "@codecaine-ai/design-system";
-import type { SpacingHint } from "./snapping";
+import type { SpacingHint } from "../../../../board/smart-guides/snapping";
 import { worldToScreen, type ViewportState } from "../../../viewport";
 import { stageMarkColors } from "../../../../theme/canvas-style";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";

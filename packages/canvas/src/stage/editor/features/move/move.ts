@@ -21,7 +21,7 @@ import {
   type SnapCorrection,
   type SnapGuide,
   type SpacingHint,
-} from "../snapping/snapping";
+} from "../../../../board/smart-guides/snapping";
 import { gatherSnapCandidates, objectGeometryMap } from "../../../../interaction/hit-testing";
 import {
   SNAP_THRESHOLD_SCREEN_PX,

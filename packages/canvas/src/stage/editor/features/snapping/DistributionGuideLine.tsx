@@ -1,6 +1,6 @@
 "use client";
 
-import { DISTRIBUTION_TICK_BAR, type DistributionGuideSegment } from "./snapping";
+import { DISTRIBUTION_TICK_BAR, type DistributionGuideSegment } from "../../../../board/smart-guides/snapping";
 import { worldToScreen, type ViewportState } from "../../../viewport";
 import { stageMarkColors } from "../../../../theme/canvas-style";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";

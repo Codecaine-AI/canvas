@@ -9,7 +9,7 @@ import type {
 
 /**
  * The INTERACTION grid: what a human drag/resize/nudge lands on in the UI
- * (stage/editor/features/snapping/, use-canvas-hotkeys' Shift+Arrow step, and
+ * (board/smart-guides/snapping.ts, use-canvas-hotkeys' Shift+Arrow step, and
  * the reducer's own move/resize handlers). It is deliberately NOT the grid the
  * write path normalizes to — see GEOMETRY_NORMALIZATION_GRID.
  */
