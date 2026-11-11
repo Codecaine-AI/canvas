@@ -43,17 +43,19 @@ describe("check-only lints", () => {
     expect(found(board(2), "gray-share")).toEqual(["gray is 3 of 4 sections and nodes (75%) (change_color frame violet)"]);
   });
 
-  test("shared-wire: a wire and its reply on one line, but not one trunk in one stroke", () => {
-    const nodes = [page(), box("ask", 200, 200), box("answer", 800, 200), box("other", 800, 600)];
-    expect(found(makeDocument(nodes, [connect("there", "ask", "answer"), connect("back", "answer", "ask")]), "shared-wire"))
-      .toEqual([expect.stringMatching(/^there and back share \d+px at \d+,\d+ \(route back 16px aside\)$/)]);
-    // Two wires that leave one node in one stroke read as one trunk.
-    const fan = [connect("a", "ask", "answer"), connect("b", "ask", "other")];
-    const trunk = makeDocument(nodes, fan);
-    expect(found(trunk, "shared-wire")).toEqual([]);
-    // In two strokes they are two meanings on one line.
-    const mixed = makeDocument(nodes, [fan[0]!, { ...fan[1]!, style: "dashed" }]);
-    expect(found(mixed, "shared-wire")).toEqual(["a and b share 220px at 384,248 (route b 16px aside)"]);
+  test("shared-wire: two colours joined on one line into one port, but not one stroke", () => {
+    // The lane pass moves a reply and a fan of two strokes 16px apart. It keeps
+    // wires that end on one port with one dash as one junction, whatever their colour.
+    const nodes = [page(), box("a", 200, 200), box("b", 200, 600), box("target", 800, 400)];
+    const into = (color?: "red") => [
+      { ...connect("solid", "a", "target"), to: { objectId: "target", anchor: "left" as const } },
+      { ...connect("other", "b", "target"), to: { objectId: "target", anchor: "left" as const }, ...(color ? { color } : {}) },
+    ];
+    expect(found(makeDocument(nodes, into("red")), "shared-wire")).toEqual(["solid and other share 220px at 580,448 (route other 16px aside)"]);
+    // One stroke into one node is one junction.
+    expect(found(makeDocument(nodes, into()), "shared-wire")).toEqual([]);
+    // A wire and its reply paint in two lanes.
+    expect(found(makeDocument(nodes, [connect("there", "a", "target"), connect("back", "target", "a")]), "shared-wire")).toEqual([]);
   });
 
   test("chip-on-border: a chip across a frame line, and none once the chip sits clear", () => {
@@ -78,12 +80,13 @@ describe("check-only lints", () => {
   });
 
   test("hidden-arrowhead: two heads of two strokes on one spot", () => {
+    // The lane pass gives a dashed wire its own port, but joins two colours of one dash into one head.
     const nodes = [page(), box("a", 200, 200), box("b", 200, 600), box("target", 800, 400)];
-    const into = (style?: "dashed") => [
+    const into = (color?: "red") => [
       { ...connect("solid", "a", "target"), to: { objectId: "target", anchor: "left" as const } },
-      { ...connect("other", "b", "target"), to: { objectId: "target", anchor: "left" as const }, ...(style ? { style } : {}) },
+      { ...connect("other", "b", "target"), to: { objectId: "target", anchor: "left" as const }, ...(color ? { color } : {}) },
     ];
-    expect(found(makeDocument(nodes, into("dashed")), "hidden-arrowhead")).toEqual(["other's arrowhead is on solid's (end it at another point)"]);
+    expect(found(makeDocument(nodes, into("red")), "hidden-arrowhead")).toEqual(["other's arrowhead is on solid's (end it at another point)"]);
     // One stroke into one node is one trunk with one head.
     expect(found(makeDocument(nodes, into()), "hidden-arrowhead")).toEqual([]);
   });

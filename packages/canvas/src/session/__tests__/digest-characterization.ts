@@ -80,10 +80,10 @@ EDGES
       node-b decision "Second node" orange 480,400 190×110
     sticky-all sticky "Sticky text" 820,100 180×180
 EDGES
-  edge-forward node-a→node-b "forward label" blue · node-a ─(s0 h y=210)→ ─(s1 h y=210)→ (s2 v x=378) ─(s3 h y=455)→ ─(s4 h y=455)→ node-b
-  edge-none node-a→node-b "none label" dashed red arrow=none · node-a ─(s0 h y=210)→ ─(s1 h y=210)→ (s2 v x=378) ─(s3 h y=455)→ ─(s4 h y=455)→ node-b
-  edge-back node-b→node-a "back label" arrow=back wp=400,300→320,280 · node-b ─(s0 h y=455)→ ─(s1 h y=455)→ (s2 v x=378) ─(s3 h y=210)→ ─(s4 h y=210)→ node-a
-  edge-both node-b→node-a — arrow=both · node-b ─(s0 h y=455)→ ─(s1 h y=455)→ (s2 v x=378) ─(s3 h y=210)→ ─(s4 h y=210)→ node-a`,
+  edge-forward node-a→node-b "forward label" blue · node-a ─(s0 h y=194)→ (s1 v x=410) ─(s2 h y=439)→ node-b
+  edge-none node-a→node-b "none label" dashed red arrow=none · node-a ─(s0 h y=210)→ (s1 v x=394) ─(s2 h y=455)→ node-b
+  edge-back node-b→node-a "back label" arrow=back wp=400,300→320,280 · node-b ─(s0 h y=471)→ (s1 v x=378) ─(s2 h y=226)→ node-a
+  edge-both node-b→node-a — arrow=both · node-b ─(s0 h y=471)→ (s1 v x=378) ─(s2 h y=242)→ node-a`,
 };
 
 const CLEAN = "DIAGNOSTICS · clean";
