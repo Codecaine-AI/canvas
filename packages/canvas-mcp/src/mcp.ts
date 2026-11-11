@@ -14,7 +14,6 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { identityFromEnv, newRunId, openActionLog, type ActionLog } from "@codecaine-ai/action-log";
-import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
 import { resolve } from "node:path";
 
 import { version } from "../package.json";
@@ -87,8 +86,6 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
       log ??= openActionLog();
       const threadId = (args as { thread_id?: unknown }).thread_id;
       if (name === "canvas_open" && !result.isError && typeof threadId === "string" && threadId) log.bindThread(runId, threadId);
-      // One guidance snapshot serves every call of this process, so every record carries it.
-      const snapshotId = getCanvasAuthoringGuidance().snapshotId;
       log.record({
         runId,
         threadId: identity.threadId,
@@ -96,7 +93,8 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
         tool: name,
         target: targetOf(name, args, result, activeBefore),
         result: summarize(result),
-        snapshotId,
+        // The service pins one guidance snapshot per process, so every record names the guidance it served.
+        snapshotId: service.guidanceSnapshot(),
         at: new Date(),
       });
     } catch (error) {

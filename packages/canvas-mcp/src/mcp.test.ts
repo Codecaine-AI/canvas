@@ -15,6 +15,7 @@ import { join } from "node:path";
 import { operationTools, workflowTools } from "@codecaine-ai/canvas/toolkit";
 
 import { openActionLog } from "@codecaine-ai/action-log";
+import { getCanvasAuthoringGuidance, VISUAL_PATTERNS, type VisualPattern } from "@codecaine-ai/canvas/authoring";
 import { createCanvasMcpServer, INSTRUCTIONS } from "./mcp";
 import { jsonSchema } from "./service";
 
@@ -206,7 +207,7 @@ describe("canvas MCP server", () => {
     const byId = await (await session(bare))("standalone");
     expect(byId.isError).toBe(false);
     expect(byId.text).toContain(` · ${join(boards, "standalone.canvas.json")} · sha256:`);
-  }, 30_000);
+  });
 
   test("stdio: an edit's APPLIED line, lint delta, and fix guidance reach what Claude Code and Codex show", async () => {
     const workspace = tempWorkspace();
@@ -320,6 +321,32 @@ describe("canvas MCP action log", () => {
     expect(records.every((record) => record.snapshotId === records[1]!.snapshotId && record.snapshotId)).toBe(true);
     await client.callTool({ name: "canvas_open", arguments: { canvas: "no-such-board", thread_id: "thread-refused" } });
     expect(log.query({ threadId: "thread-refused" })).toHaveLength(0);
+  });
+
+  test("every record names the snapshot canvas_capabilities served, even after a guidance source changes", async () => {
+    const path = logPath();
+    process.env.T3CODE_THREAD_ID = "thread-snapshot";
+    const client = await connect();
+    const index = await client.callTool({ name: "canvas_capabilities", arguments: {} });
+    const served: string = JSON.parse((index.content as Array<{ text: string }>)[0]!.text).guidance_snapshot;
+    // A new visual pattern changes the guidance a fresh process would serve.
+    const patterns = VISUAL_PATTERNS as VisualPattern[];
+    patterns.push({ ...patterns[0]!, id: "snapshot-probe", name: "Snapshot Probe" });
+    cleanups.push(() => void patterns.pop());
+    expect(getCanvasAuthoringGuidance().snapshotId).not.toBe(served);
+
+    await client.callTool({ name: "canvas_guidance", arguments: { topic: "workflow" } });
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow" } });
+    await client.callTool({ name: "place_sticky", arguments: { id: "snapshot-note", text: "Logged", at: [960, 1600] } });
+
+    const log = openActionLog({ path });
+    cleanups.push(() => log.close());
+    expect(log.query({ threadId: "thread-snapshot" }).map((record) => [record.tool, record.result.split(" ")[0], record.snapshotId])).toEqual([
+      ["canvas_capabilities", "ok", served],
+      ["canvas_guidance", "ok", served],
+      ["canvas_open", "ok", served],
+      ["place_sticky", "ok", served],
+    ]);
   });
 
   test("two opens in flight at once each log the board they opened", async () => {

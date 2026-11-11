@@ -578,6 +578,10 @@ export function createCanvasService(options: CanvasServiceOptions) {
     activeCanvas(): CanvasFileSession | null {
       return active;
     },
+    /** The guidance snapshot this process serves: canvas_capabilities reports it, the gate checks it, the action log records it. */
+    guidanceSnapshot(): string {
+      return currentGuidance().snapshotId;
+    },
     /** The resources this server lists for resources/list. */
     listResources() {
       return RESOURCES;
