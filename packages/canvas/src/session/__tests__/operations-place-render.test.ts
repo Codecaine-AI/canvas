@@ -83,7 +83,8 @@ function placementFixture() {
       {
         id: "section",
         text: "Frame",
-        color: creationDefaultFor("section").color,
+        // Studio paints a section with no color named by the same picker (withPlacedSectionColor).
+        color: session.draft.objects.find((object) => object.id === "section")!.color,
       },
     ),
   ];

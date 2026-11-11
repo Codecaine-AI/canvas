@@ -10,10 +10,10 @@
  *   (TOUCH_GUTTER) with some part of the gap between them clear of other
  *   siblings. Siblings with whitespace between them may share a hue: the gap
  *   is the separator, and same-role sections keep one color.
- * - A section that holds nodes of several hues never paints one of them:
- *   that node would lose its figure against the ground. A category section
- *   (every colored node it holds directly shares one hue) may take that
- *   hue: the frame then names the category, which is the board's meaning.
+ * - A section never paints the color of a node or sticky it holds directly,
+ *   gray included: that node would lose its figure against the ground. Ford:
+ *   "we don't want the same color in the areas that they're in because it's
+ *   then hard to read".
  *
  * Two sections look alike when either holds:
  * - they paint the same ink (sectionHue). Layer-cake (schematic) deepens one
@@ -26,9 +26,10 @@
  *
  * The chooser (place_section, Studio placement and copies, every suggestion)
  * keeps meaning first: hues the board's nodes and wires use are its key and
- * stay off the list, warm hues stay for the emphasis a drawer picks, and a
- * board carries at most MAX_SECTION_HUES chromatic section hues plus gray.
- * It never recolors a section by itself.
+ * come after the free cool hues, warm hues stay for the emphasis a drawer
+ * picks, and a board carries at most MAX_SECTION_HUES chromatic section hues
+ * plus gray. Gray comes after every cool hue (Ford, on four boards: "less
+ * grey"). It never recolors a section by itself.
  *
  * The page is exempt as a parent, and only the page: the page frame
  * (PAGE_FRAME_ID), or a parentless section stored white (a page-colored
@@ -49,12 +50,13 @@ import { kindOf } from "./helpers";
 import { PAGE_FRAME_ID } from "./page-frame";
 
 /**
- * The hues the chooser hands out, in order. Gray is the neutral and costs no
- * hue; teal comes last, since at one tone it sits close to both blue and
- * green. Warm hues (orange, yellow, pink, red) are not here: they read as
+ * The hues the chooser hands out, in order. Teal comes after the other cool
+ * hues, since at one tone it sits close to both blue and green. Gray is the
+ * neutral: it costs no hue, so it comes last, when no cool hue keeps the
+ * rules. Warm hues (orange, yellow, pink, red) are not here: they read as
  * emphasis, which the drawer chooses.
  */
-const CHOOSER_HUES: readonly CanvasColor[] = ["gray", "blue", "violet", "green", "teal"];
+const CHOOSER_HUES: readonly CanvasColor[] = ["blue", "violet", "green", "teal", "gray"];
 
 /** The emphasis hues, picked by the chooser only when nothing cooler keeps the rules. */
 const WARM_HUES: readonly CanvasColor[] = ["orange", "yellow", "pink", "red"];
@@ -258,21 +260,9 @@ function isChromatic(color: CanvasColor): boolean {
   return color !== "gray" && color !== "white";
 }
 
-/** The chromatic hues of the nodes section `id` holds directly (gray and white nodes and stickies aside). */
-function heldNodeHues(document: InteractiveCanvasDocument, id: string): Set<CanvasColor> {
-  return new Set(document.objects
-    .filter((object) => object.parentId === id && kindOf(object) === "node" && object.color && isChromatic(object.color))
-    .map((object) => object.color!));
-}
-
-/**
- * The hue of a category section: the one chromatic hue every colored node
- * it holds directly shares. Null when it holds no colored node, or several
- * hues.
- */
-export function categoryHue(document: InteractiveCanvasDocument, id: string): CanvasColor | null {
-  const held = heldNodeHues(document, id);
-  return held.size === 1 ? [...held][0]! : null;
+/** The nodes and stickies section `id` holds directly. */
+function heldObjects(document: InteractiveCanvasDocument, id: string): InteractiveCanvasObject[] {
+  return document.objects.filter((object) => object.parentId === id && kindOf(object) !== "section" && object.color);
 }
 
 /** The board's color key: the chromatic hues its nodes and wires use. */
@@ -295,18 +285,17 @@ function nearTwins(a: CanvasColor, b: CanvasColor): boolean {
 /**
  * The color for section `id` when its call names none, judged on a document
  * whose membership is already reconciled. Hard rules: it looks like neither
- * its parent section, a section it holds, nor a sibling it touches, and,
- * holding nodes of several hues, it takes none of them. A copy keeps its
+ * its parent section, a section it holds, nor a sibling it touches, and it
+ * takes no color of a node or sticky it holds directly. A copy keeps its
  * `source` color whenever that keeps the hard rules: the drawer chose it.
- * A category section then takes its category's hue whenever that keeps the
- * rules, past the hue cap: the category carries meaning. Otherwise the
- * first of CHOOSER_HUES the board's nodes and wires leave free, keeping the
- * board to MAX_SECTION_HUES chromatic section hues, and not teal beside a
- * touching blue or green (nor those beside a touching teal) while another
+ * Otherwise the first of CHOOSER_HUES the board's nodes and wires leave free,
+ * then gray while gray stays at most half the board's sections, then a cool
+ * hue the key uses, then gray, keeping
+ * the board to MAX_SECTION_HUES chromatic section hues, and not teal beside
+ * a touching blue or green (nor those beside a touching teal) while another
  * fits; `prefer` (Studio's last pick) wins over the first only when it
- * passes those same limits. With nothing free under the cap, the hue of
- * the farthest sibling it does not touch (a cool one first), then a cool
- * hue the key uses; warm hues come last.
+ * passes those same limits. With nothing under the cap, the hue of the
+ * farthest sibling it does not touch (a cool one first); warm hues come last.
  */
 export function pickSectionColor(
   document: InteractiveCanvasDocument,
@@ -324,22 +313,27 @@ export function pickSectionColor(
   const children = document.objects.filter((object) => kindOf(object) === "section" && object.parentId === id);
   const siblings = siblingSectionsOf(document, byId, section);
   const near = touchingSiblingsOf(section, siblings);
-  const held = heldNodeHues(document, id);
-  const category = held.size === 1 ? [...held][0]! : null;
+  const held = new Set(heldObjects(document, id).map((object) => object.color!));
   const neighbors = [...(parent ? [parent] : []), ...children, ...near];
   const keeps = (color: CanvasColor) =>
-    (category !== null || !held.has(sectionHue({ color }, style)))
+    !held.has(sectionHue({ color }, style))
     && neighbors.every((other) => !looksAlike({ color, depth }, paintedOf(other, depths), style));
   if (source && keeps(source)) return source;
-  if (category && keeps(category)) return category;
 
   const key = keyHues(document);
-  const used = new Set(document.objects
+  const others = document.objects
     .filter((object) => object.id !== id && kindOf(object) === "section" && !isPageSection(object))
-    .map((object) => sectionHue(paintedOf(object, depths), style))
-    .filter(isChromatic));
+    .map((object) => sectionHue(paintedOf(object, depths), style));
+  const used = new Set(others.filter(isChromatic));
   const underCap = (color: CanvasColor) => !isChromatic(color) || used.has(color) || used.size < MAX_SECTION_HUES;
-  const pool = CHOOSER_HUES.filter((color) => !key.has(color) && keeps(color) && underCap(color));
+  // Free cool hues first; then gray while it stays at most half the board's
+  // sections; then cool hues the key uses (the section never holds its own
+  // hue, so its nodes keep their figure); then gray.
+  const grayFits = (others.filter((hue) => hue === "gray").length + 1) * 2 <= others.length + 1;
+  const free = CHOOSER_HUES.filter((color) => color !== "gray" && !key.has(color));
+  const keyed = CHOOSER_HUES.filter((color) => color !== "gray" && key.has(color));
+  const ordered: CanvasColor[] = grayFits ? [...free, "gray", ...keyed] : [...free, ...keyed, "gray"];
+  const pool = ordered.filter((color) => keeps(color) && underCap(color));
   const isCalm = (color: CanvasColor) => near.every((other) => !nearTwins(color, sectionHue(paintedOf(other, depths), style)));
   const calm = pool.find(isCalm);
   if (prefer && pool.includes(prefer) && (calm === undefined || isCalm(prefer))) return prefer;
@@ -428,19 +422,21 @@ export function siblingClashes(
   });
 }
 
-/** A section holding nodes of several hues, painted one of them. */
+/** A section painted the color of nodes or stickies it holds directly. */
 export interface HeldNodeClash {
   section: string;
-  /** The first node it holds in that hue. */
+  /** The first object it holds in that color. */
   node: string;
+  /** Every node and sticky it holds directly in that color. */
+  held: string[];
   color: CanvasColor;
-  /** A color that keeps the section apart from its parent, children, touching siblings and nodes. */
+  /** A color that keeps the section apart from its parent, children, touching siblings and what it holds. */
   suggestion: CanvasColor;
 }
 
 /**
- * Every section that holds nodes of several hues directly and paints one of
- * them, so that node keeps only its border. A category section is exempt.
+ * Every section (the page exempt) that paints the color of a node or sticky
+ * it holds directly, gray included: that object keeps only its border.
  */
 export function heldNodeClashes(
   document: InteractiveCanvasDocument,
@@ -450,11 +446,15 @@ export function heldNodeClashes(
   for (const section of document.objects) {
     if (kindOf(section) !== "section" || isPageSection(section)) continue;
     const hue = sectionHue(section, style);
-    if (!isChromatic(hue) || categoryHue(document, section.id) !== null) continue;
-    const node = document.objects.find((object) =>
-      object.parentId === section.id && kindOf(object) === "node" && object.color === hue);
-    if (!node) continue;
-    clashes.push({ section: section.id, node: node.id, color: hue, suggestion: pickSectionColor(document, section.id, style) });
+    const held = heldObjects(document, section.id).filter((object) => object.color === hue).map((object) => object.id);
+    if (held.length === 0) continue;
+    clashes.push({
+      section: section.id,
+      node: held[0]!,
+      held,
+      color: hue,
+      suggestion: pickSectionColor(document, section.id, style),
+    });
   }
   return clashes;
 }

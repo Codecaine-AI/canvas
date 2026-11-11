@@ -21,7 +21,10 @@ describe("board lints export", () => {
     const findings = runDiagnostics(document, FINISHING_RULES);
     expect(findings.some((finding) => finding.rule === "covered-content" && finding.severity === "error")).toBe(true);
     expect(formatDiagnostics(findings)).toMatch(/^DIAGNOSTICS · \d+ errors?/);
-    expect(FINISHING_RULES.map((rule) => rule.id)).toEqual(LAYOUT_RULES.map((rule) => rule.id));
+    expect(FINISHING_RULES.map((rule) => rule.id)).toEqual([
+      ...LAYOUT_RULES.map((rule) => rule.id),
+      "same-color", "gray-share", "shared-wire", "chip-on-border", "short-wire", "hidden-arrowhead",
+    ]);
     expect(entry.runDiagnostics).toBe(runDiagnostics);
   });
 });

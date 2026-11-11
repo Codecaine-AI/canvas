@@ -172,6 +172,22 @@ describe("canvas_create and canvas_check", () => {
     expect(check.text).toMatch(/^ {2}sticky payload clips its text: .*shorten the text\)$/m);
   });
 
+  test("the color and wire checks report at canvas_check, never on an edit", async () => {
+    const workspace = tempDir();
+    const service = await workflowService({ workspace });
+    await call(service, "canvas_create", { canvas: "check-only", title: "Check only" });
+    await call(service, "place_section", { id: "agents", text: "Agents", at: [40, 40], size: { width: 600, height: 400 }, color: "blue" });
+    // Ford: "Don't use blue inside of a blue area."
+    const placed = await call(service, "place_shape", { id: "planner", type: "process", at: [120, 160], color: "blue" });
+    await call(service, "place_shape", { id: "store", type: "process", at: [1000, 160] });
+    const wired = await call(service, "connect", { id: "e1", from: { objectId: "planner" }, to: { objectId: "store" }, label: "plan" });
+    for (const edit of [placed, wired]) expect(textOf(edit)).not.toMatch(/same-color|shared-wire|chip-on-border|short-wire|hidden-arrowhead/);
+
+    const check = checked(await call(service, "canvas_check", {}));
+    expect(check.errors).toBe(0);
+    expect(check.text).toMatch(/^ {4}W\d+ same-color: agents is blue, as is planner in it \(change_color agents \w+\)$/m);
+  });
+
   test("a chart.mmd redraws on a board with equal node and edge counts", async () => {
     const service = await workflowService({ workspace: tempDir() });
     const chart = parseChart(CHECKOUT_CHART);
