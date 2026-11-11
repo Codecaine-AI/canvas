@@ -117,7 +117,7 @@ describe("background pins the frame and nothing else", () => {
     const retitled = runOp(session, "update_text", { id: "page", text: "New page" });
     expectLockRefusal(retitled, 'id "page" is locked (background)');
 
-    const restroked = runOp(session, "change_section_border", { id: "page", border: "dashed" });
+    const restroked = runOp(session, "change_shape", { id: "page", patch: { border: "dashed" } });
     expectLockRefusal(restroked, 'id "page" is locked (background)');
   });
 
@@ -317,7 +317,7 @@ describe("the rest of the roster under a locked-all frame", () => {
     );
     expectLockRefusal(runOp(session, "fit_section", { id: "ops" }), 'id "ops" is locked (all)');
     expectLockRefusal(
-      runOp(session, "change_section_border", { id: "ops", border: "none" }),
+      runOp(session, "change_shape", { id: "ops", patch: { border: "none" } }),
       'id "ops" is locked (all)',
     );
     expectLockRefusal(runOp(session, "delete", { id: "ops" }), 'id "ops" is locked (all)');

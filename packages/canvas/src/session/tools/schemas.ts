@@ -507,26 +507,6 @@ export type ArrangeSectionParams = Static<typeof ArrangeSectionParams>;
 // ---------------------------------------------------------------------------
 
 /**
- * A section frame's stroke. Already in the document model as
- * `style.strokeStyle` (packages/canvas/src/state/schema/style.ts), so
- * `change_section_border` is plumbing rather than a schema change. The UI
- * flyout offers only solid/dashed; the model and the handler both accept
- * "none", per docs/10-system-design/70-agent-tool-surface/20-gestures §Sections.
- */
-export const SectionBorder = StringEnum(["solid", "dashed", "none"], {
-  description: "How the frame's border is stroked.",
-});
-
-export const ChangeSectionBorderParams = Type.Object(
-  {
-    id: Id,
-    border: SectionBorder,
-  },
-  { ...Seal, description: "Restroke a section frame's border." },
-);
-export type ChangeSectionBorderParams = Static<typeof ChangeSectionBorderParams>;
-
-/**
  * The two lock strengths the document model carries, plus `"none"`, which
  * deletes the lock. `"background"` pins the frame itself and leaves its
  * contents draggable; `"all"` freezes every descendant too.
@@ -581,10 +561,17 @@ export type DeleteParams = Static<typeof DeleteParams>;
  * spending a turn on a rejection.
  *
  * `icon` is a SECTION's header glyph — the one glyph that is not a type,
- * because a frame stays a frame whatever it wears. It is the only key a
- * section accepts, and the one key a shape refuses (a shape's glyph is its
- * `type`), so "pick a glyph" has one gesture whatever it lands on. A free
- * string for the same reason as `SectionIcon`, plus the word that removes it.
+ * because a frame stays a frame whatever it wears. A free string for the same
+ * reason as `SectionIcon`, plus the word that removes it.
+ *
+ * `border` is a SECTION's frame stroke, already in the document model as
+ * `style.strokeStyle` (packages/canvas/src/state/schema/style.ts). The UI
+ * flyout offers only solid/dashed; the model and the handler both accept
+ * "none", per docs/10-system-design/70-agent-tool-surface/20-gestures §Sections.
+ * A null border counts as absent.
+ *
+ * `icon` and `border` are the two keys a section accepts, and the two keys a
+ * shape refuses: a shape's glyph is its `type`, and a shape has no frame.
  */
 export const ShapeSwapPatch = Type.Object(
   {
@@ -595,10 +582,16 @@ export const ShapeSwapPatch = Type.Object(
         "Sections only: the frame's header glyph — any glyph name place_shape accepts, or \"none\" to"
         + " remove it. A shape's or icon's glyph is its `type`, not this.",
     })),
+    border: nullableEnum(
+      ["solid", "dashed", "none"],
+      "Sections only: how the frame's border is stroked. \"none\" leaves the frame invisible but"
+      + " fully real. A null border counts as absent.",
+    ),
   },
   {
     ...Patch,
-    description: "What the shape becomes (type, direction), or a section's header glyph (icon). Name at least one.",
+    description:
+      "What the shape becomes (type, direction), or a section's header glyph (icon) and border. Name at least one.",
   },
 );
 export type ShapeSwapPatch = Static<typeof ShapeSwapPatch>;

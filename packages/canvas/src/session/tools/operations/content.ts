@@ -24,9 +24,10 @@
  * a section is not a diamond and a sticky is not a cylinder. It is also the one
  * gesture that writes the folded type vocabulary, so it is the one place that
  * has to get the icon⇄shape transition right — see `shapeSwapPatch` below. Its
- * one section exception is the header glyph (`patch.icon`): picking a glyph is
- * one gesture whatever it lands on, and a frame's glyph is the only part of a
- * frame this tool can change — see `requireSwapTarget`.
+ * section exception is the frame's look: the header glyph (`patch.icon`),
+ * because picking a glyph is one gesture whatever it lands on, and the border
+ * stroke (`patch.border`). Those two are the only parts of a frame this tool
+ * can change — see `requireSwapTarget`.
  *
  * TEXT FIT. `update_text` and `change_shape` run auto-size (auto-size.ts)
  * over the object: when the renderer's own wrap/clamp decision
@@ -246,45 +247,60 @@ function shapeSwapPatch(
 }
 
 /**
- * The kind gate for `change_shape`, with its one section exception.
+ * The kind gate for `change_shape`, with its section exception.
  *
- * A SHAPE (icons included) takes `type` and `direction` and refuses `icon`:
- * its glyph is its type, so the refusal spells the call that does what was
- * meant. A SECTION takes `icon` and nothing else — a frame is not a shape, but
- * its header glyph is a glyph pick like any other, and this is the gesture
- * that picks glyphs. Stickies and edges keep `requireShape`'s redirects.
+ * A SHAPE (icons included) takes `type` and `direction` and refuses `icon`
+ * and `border`: its glyph is its type, so that refusal spells the call that
+ * does what was meant, and a shape has no frame to stroke. A SECTION takes
+ * `icon` and `border` and nothing else — a frame is not a shape, but its
+ * header glyph is a glyph pick like any other and its border is its look.
+ * Stickies and edges keep `requireShape`'s redirects. A null `border` counts
+ * as absent.
  */
 function requireSwapTarget(ctx: OpContext, id: string, patch: ShapeSwap): string[] {
   const target = ctx.draft.objects.find((object) => object.id === id);
+  const border = patch.border ?? undefined;
   if (target && entityKindOf(target) === "section") {
     if (patch.type !== undefined || patch.direction !== undefined) {
       return [
         `id "${id}" is a section — a frame is not a shape; change_shape sets only its header glyph`
-        + " (patch.icon), and change_section_border restrokes it.",
+        + " (patch.icon) and its border (patch.border).",
       ];
     }
-    if (patch.icon === undefined) {
-      return [`id "${id}" is a section — name its header glyph in patch.icon, or "${NO_GLYPH}" to remove it.`];
+    if (patch.icon === undefined && border === undefined) {
+      return [
+        `id "${id}" is a section — name its header glyph in patch.icon ("${NO_GLYPH}" removes it),`
+        + " or its border in patch.border.",
+      ];
     }
-    if (patch.icon !== NO_GLYPH && !isGlyphName(patch.icon)) {
+    if (patch.icon !== undefined && patch.icon !== NO_GLYPH && !isGlyphName(patch.icon)) {
       return [unknownGlyphMessage("patch.icon", patch.icon)];
     }
     return [];
   }
   const errors = ctx.requireShape(id);
-  if (errors.length > 0 || patch.icon === undefined) return errors;
-  // A glyph that is a type is swapped by naming it as the type; say exactly that.
-  const glyph = isGlyphName(patch.icon) ? patch.icon : "<glyph>";
-  return [
-    `patch.icon is a section's header glyph — a shape's glyph is its type: send change_shape `
-    + `${JSON.stringify({ id, patch: { type: glyph } })} instead.`,
-  ];
+  if (errors.length > 0) return errors;
+  if (patch.icon !== undefined) {
+    // A glyph that is a type is swapped by naming it as the type; say exactly that.
+    const glyph = isGlyphName(patch.icon) ? patch.icon : "<glyph>";
+    return [
+      `patch.icon is a section's header glyph — a shape's glyph is its type: send change_shape `
+      + `${JSON.stringify({ id, patch: { type: glyph } })} instead.`,
+    ];
+  }
+  if (border !== undefined) {
+    return [`patch.border is a section's frame stroke — a ${target!.type} has no frame to restroke.`];
+  }
+  if (patch.type === undefined && patch.direction === undefined) {
+    return ["patch names nothing to change — send type or direction for a shape."];
+  }
+  return [];
 }
 
 export const changeShape = defineOperationTool({
   name: "change_shape",
   description:
-    "Swap what a shape is, and which way it points. Icons are types: name the glyph and the object becomes that icon; name a shape and any glyph on it is dropped. A direction the new type does not support is dropped with a note. On a section, patch.icon sets the frame's header glyph (\"none\" removes it) — the one thing a section takes here. Stickies and edges are not targets.",
+    "Swap what a shape is, and which way it points. Icons are types: name the glyph and the object becomes that icon; name a shape and any glyph on it is dropped. A direction the new type does not support is dropped with a note. On a section, patch.icon sets the frame's header glyph (\"none\" removes it) and patch.border restrokes the frame — the two things a section takes here. A border of \"none\" leaves the frame invisible but fully real: it still owns its region, and membership is geometric, so nothing inside it changes hands. A shape refuses patch.border, and a null border counts as absent. Stickies and edges are not targets.",
   fields: { id: Id, patch: ShapeSwapPatch },
   validate: (ctx, p) => {
     const errors = requireSwapTarget(ctx, p.id, p.patch);
@@ -293,9 +309,25 @@ export const changeShape = defineOperationTool({
   apply: (ctx, p) => {
     const target = ctx.draft.objects.find((object) => object.id === p.id)!;
     if (entityKindOf(target) === "section") {
-      // An own `icon: undefined` is how the applier removes the glyph.
-      const icon = p.patch.icon === NO_GLYPH ? undefined : p.patch.icon;
-      return ctx.mergeObject(p.id, { icon } as ObjectPatch, `change_shape ${p.id}`);
+      const border = p.patch.border ?? undefined;
+      const patch = {
+        // An own `icon: undefined` is how the applier removes the glyph, so the
+        // key is present only when the call named a glyph.
+        ...(p.patch.icon !== undefined
+          ? { icon: p.patch.icon === NO_GLYPH ? undefined : p.patch.icon }
+          : {}),
+        // A style patch merges PER KEY on the way down (mergeObjectPatch in
+        // packages/canvas/src/state/actions/objects.ts), so naming only
+        // strokeStyle restrokes the border and leaves the frame's `shape` and
+        // stroke width exactly where they were. Sending the whole style bag
+        // would be the way to lose them.
+        ...(border !== undefined ? { style: { strokeStyle: border } } : {}),
+      } as ObjectPatch;
+      return ctx.mergeObject(
+        p.id,
+        patch,
+        `change_shape ${p.id}${border !== undefined ? ` border ${border}` : ""}`,
+      );
     }
     const { patch, notes } = shapeSwapPatch(target, p.patch);
     // A new shape is a new text slot (a diamond's inscribed rect is narrower

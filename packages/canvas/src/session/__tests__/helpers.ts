@@ -47,7 +47,6 @@ export type OperationToolName =
   | "change_shape"
   // Sections
   | "fit_section"
-  | "change_section_border"
   | "lock"
   // Edges
   | "style_edge"

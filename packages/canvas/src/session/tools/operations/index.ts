@@ -5,7 +5,7 @@
  *   Place     place_section, place_sticky, place_shape, clone, connect
  *   Arrange   move, resize, arrange, arrange_section, tighten_wires
  *   Content   update_text, change_color, change_shape
- *   Sections  fit_section, change_section_border, lock
+ *   Sections  fit_section, lock
  *   Edges     style_edge, change_connection, route, move_label
  *   Delete    delete
  *
@@ -52,7 +52,6 @@ import {
   placeSticky,
 } from "./place";
 import {
-  changeSectionBorder,
   fitSection,
   lock,
 } from "./sections";
@@ -74,7 +73,6 @@ export {
   arrangeSection,
   changeColor,
   changeConnection,
-  changeSectionBorder,
   changeShape,
   clone,
   connect,
@@ -117,10 +115,9 @@ export const operationTools: readonly OperationTool[] = [
   updateText,
   changeColor,
   changeShape,
-  // Sections (./sections.ts). A frame as a frame: close it, restroke it,
-  // protect or release its region.
+  // Sections (./sections.ts). A frame as a frame: close it, and protect or
+  // release its region.
   fitSection,
-  changeSectionBorder,
   lock,
   // Edges (./edges.ts). Restyle, repoint, the route in its three modes, and
   // the label pin. Every one of them returns the edge's fresh numbered

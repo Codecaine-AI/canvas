@@ -1,12 +1,13 @@
 /**
- * The Sections group — `fit_section`, `change_section_border`, `lock`
+ * The Sections group — `fit_section`, `lock`
  * (docs/10-system-design/70-agent-tool-surface/20-gestures §Sections).
  *
- * Three gestures that act on a frame AS a frame: close it around what it holds,
- * restroke its border, and protect or release its region. Everything a section
- * shares with the other kinds lives elsewhere — its title is `update_text`, its
- * fill is `change_color`, its box is the Arrange group, and opening a new frame
- * is `place_section`. That is why nothing here takes a geometry or a text.
+ * Two gestures that act on a frame AS a frame: close it around what it holds,
+ * and protect or release its region. Everything a section shares with the
+ * other kinds lives elsewhere — its title is `update_text`, its fill is
+ * `change_color`, its header glyph and border are `change_shape`, its box is
+ * the Arrange group, and opening a new frame is `place_section`. That is why
+ * nothing here takes a geometry or a text.
  *
  * The shared operation factory owns the execution pipeline around these thin
  * descriptors, including containment reconciliation, diffing, linting,
@@ -15,12 +16,11 @@
  * LOCK MANAGEMENT IS EXEMPT FROM THE LOCK GATE. `lock` is the one gesture a
  * lock does not gate: changing the mode of a frame's own lock, or lifting it
  * with mode "none", is the management of the lock rather than an edit under it.
- * Everything else here — fitting a frame, restroking it — runs
- * `requireUnlocked` like every other mutator on the roster.
+ * Everything else here — fitting a frame — runs `requireUnlocked` like every
+ * other mutator on the roster.
  */
 import { defineOperationTool } from "./operation-tool";
 import {
-  ChangeSectionBorderParams,
   Id,
   LockParams,
 } from "../schemas";
@@ -39,43 +39,21 @@ export const fitSection = defineOperationTool({
 });
 
 // ---------------------------------------------------------------------------
-// Lock and the border stroke
+// Lock
 // ---------------------------------------------------------------------------
 //
-// All three gate on `requireSection`, and that gate is load-bearing: the
+// Both gate on `requireSection`, and that gate is load-bearing: the
 // document schema and the studio validator both accept `locked` on any object,
 // so nothing below the tool boundary would stop a shape from being locked.
 // Locking is a section-level idea — you protect a region of the board, not one
 // box — and the agent-side check is where that intent is enforced on this path,
 // alongside the context menu's own section gate on the UI path.
 //
-// Neither of these two touches geometry, so neither needs the agent grid; and
-// membership reconciliation still runs after both of them, in the shared
-// factory stage (operation-tool.ts), which is why no descriptor here mentions
-// it. A border restroke or a lock cannot move an edge, so reconciliation is a
-// no-op on this path by construction rather than by omission.
-
-export const changeSectionBorder = defineOperationTool({
-  name: "change_section_border",
-  description:
-    "Restroke a frame's border. \"none\" leaves the frame invisible but fully "
-    + "real: it still owns its region, and membership is geometric, so nothing "
-    + "inside it changes hands.",
-  fields: ChangeSectionBorderParams.properties,
-  validate: (ctx, p) => {
-    const errors = ctx.requireSection(p.id);
-    return errors.length > 0 ? errors : ctx.requireUnlocked(p.id);
-  },
-  apply: (ctx, p) => ctx.applyLowered(
-    // A style patch merges PER KEY on the way down (mergeObjectPatch in
-    // packages/canvas/src/state/actions/objects.ts), so naming only
-    // strokeStyle restrokes the border and leaves the frame's `shape` and
-    // stroke width exactly where they were. Sending the whole style bag would
-    // be the way to lose them.
-    { type: "updateObject", objectId: p.id, patch: { style: { strokeStyle: p.border } } },
-    `change_section_border ${p.id} ${p.border}`,
-  ),
-});
+// A lock does not touch geometry, so it needs no agent grid; and membership
+// reconciliation still runs after it, in the shared factory stage
+// (operation-tool.ts), which is why no descriptor here mentions it. A lock
+// cannot move an edge, so reconciliation is a no-op on this path by
+// construction rather than by omission.
 
 export const lock = defineOperationTool({
   name: "lock",

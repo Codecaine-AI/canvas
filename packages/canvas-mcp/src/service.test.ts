@@ -207,6 +207,7 @@ describe("canvas service", () => {
       annotation.target.objectId === target && annotation.createdBy === "agent")).toBe(true);
 
     const names = service.listTools().map((tool) => tool.name);
+    expect(names).toHaveLength(29);
     expect(names).not.toContain("finalize");
     expect(names).toEqual(expect.arrayContaining(["look", "describe_board", "annotate", "resolve_request"]));
   });
@@ -281,6 +282,27 @@ describe("canvas service", () => {
 
     const saved = readDoc(path).objects.filter((object: any) => object.id.startsWith("row-"));
     expect(saved.map((object: any) => object.geometry.y)).toEqual([1600, 1600]);
+  });
+
+  test("a null border reaches change_shape as absent through the tool boundary", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = createCanvasService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    await service.call("place_section", { id: "border-frame", text: "Frame", at: [960, 1600] });
+    await service.call("place_shape", { id: "border-box", type: "rectangle", at: [1600, 1600] });
+
+    const dashed = await service.call("change_shape", { id: "border-frame", patch: { border: "dashed" } });
+    expect(textOf(dashed)).toContain("APPLIED · change_shape border-frame border dashed");
+    const glyph = await service.call("change_shape", { id: "border-frame", patch: { icon: "server", border: null } });
+    expect(textOf(glyph)).toContain("APPLIED · change_shape border-frame");
+    const refused = await service.call("change_shape", { id: "border-box", patch: { border: "dashed" } });
+    expect(textOf(refused)).toContain("has no frame to restroke");
+    const typed = await service.call("change_shape", { id: "border-box", patch: { type: "decision", border: null } });
+    expect(textOf(typed)).toContain("APPLIED · change_shape border-box");
+
+    const saved = readDoc(path).objects.find((object: any) => object.id === "border-frame");
+    expect(saved.icon).toBe("server");
+    expect(saved.style.strokeStyle).toBe("dashed");
   });
 
   test("canvas_open reads canvases/canvas-style.json, and look renders with it", async () => {

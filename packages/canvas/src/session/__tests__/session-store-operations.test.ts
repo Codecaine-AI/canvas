@@ -273,7 +273,7 @@ describe("session operations", () => {
     expect(shape.isError).toBe(true);
     expect(shape.text).toBe(
       'ERROR · fit_section — id "child" is a rectangle, not a frame —'
-      + " fit_section, change_section_border and lock act on sections;"
+      + " fit_section and lock act on sections;"
       + " place_section opens one.",
     );
 

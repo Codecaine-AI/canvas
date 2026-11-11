@@ -12,7 +12,7 @@
  *
  * A KIND GATE OWES A REDIRECT. When a gesture is refused because the id names
  * the wrong kind, the diagnostic names the gesture that WOULD do the comparable
- * thing to that kind — a frame is restroked with `change_section_border`, a note
+ * thing to that kind — a frame is restroked with `change_shape`'s `border`, a note
  * is rewritten with `update_text` — so a refusal costs one turn instead of a
  * hunt through the roster. Every name in these messages must be a tool that is
  * actually on the roster (operations/index.ts).
@@ -91,12 +91,11 @@ export interface OpContext {
   requirePositionable(id: string, field?: string): string[];
   /**
    * Require a section — the gate for the Sections group (`fit_section`,
-   * `change_section_border`, `lock`), all three of which act on a
-   * frame AS a frame. Other kinds are redirected to the gesture that does the
+   * `lock`), both of which act on a frame AS a frame. Other kinds are redirected to the gesture that does the
    * comparable thing to them, or to `place_section` when what was wanted was a
    * frame there is none of.
    *
-   * `field` names the parameter in the diagnostic. All three take a plain `id`,
+   * `field` names the parameter in the diagnostic. Both take a plain `id`,
    * so the default is almost always right; the parameter stays because the
    * arrange gestures reach for the same wording under other names.
    */
@@ -105,8 +104,8 @@ export interface OpContext {
    * Require a shape — the gate for `change_shape` alone, since a section is not
    * a diamond and a sticky is not a cylinder. The redirects name what those two
    * kinds CAN be restyled with. (`change_shape` answers a section itself before
-   * reaching this gate: a frame's header glyph is the one thing it changes on a
-   * section — operations/content.ts `requireSwapTarget`.)
+   * reaching this gate: a frame's header glyph and border are the two things it
+   * changes on a section — operations/content.ts `requireSwapTarget`.)
    */
   requireShape(id: string): string[];
   requireConnection(id: string): string[];
@@ -333,8 +332,8 @@ export function createOpContext(
       if (kind === "section") return [];
       return [
         `${field} "${id}" is ${kind === "sticky" ? "a sticky" : `a ${target.type}`},`
-        + " not a frame — fit_section, change_section_border and lock act on"
-        + " sections; place_section opens one.",
+        + " not a frame — fit_section and lock act on sections;"
+        + " place_section opens one.",
       ];
     },
 
@@ -353,7 +352,7 @@ export function createOpContext(
       if (kind === "section") {
         return [
           `id "${id}" is a section — a frame is not a shape; restroke it with`
-          + " change_section_border, or re-size it with resize.",
+          + " change_shape patch.border, or re-size it with resize.",
         ];
       }
       return [

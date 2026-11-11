@@ -37,7 +37,7 @@ function tempWorkspace(): string {
 }
 
 describe("canvas MCP server", () => {
-  test("tools/list exposes all 21 operation tools with their exact names, descriptions, and schemas", async () => {
+  test("tools/list exposes all 20 operation tools with their exact names, descriptions, and schemas", async () => {
     const server = createCanvasMcpServer({ workspace: tempWorkspace() });
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -48,7 +48,7 @@ describe("canvas MCP server", () => {
     const { tools } = await client.listTools();
     const byName = new Map(tools.map((tool) => [tool.name, tool]));
 
-    expect(operationTools).toHaveLength(21);
+    expect(operationTools).toHaveLength(20);
     for (const operation of operationTools) {
       const listed = byName.get(operation.name);
       expect(listed, operation.name).toBeDefined();
@@ -60,7 +60,7 @@ describe("canvas MCP server", () => {
     }
     expect(byName.has("finalize")).toBe(false);
     expect(tools.slice(0, 3).map((tool) => tool.name)).toEqual(["canvas_list", "canvas_open", "canvas_guidance"]);
-    expect(tools).toHaveLength(5 + 21 + 4);
+    expect(tools).toHaveLength(5 + 20 + 4);
   });
 
   test("tools/list carries the name fields and the section header glyph; no placement or copy takes a detail", async () => {
@@ -84,7 +84,7 @@ describe("canvas MCP server", () => {
     // update_text still accepts a detail so it can drop one with a note; only the id is required.
     expect(Object.keys(schema("update_text").properties)).toEqual(["id", "text", "detail"]);
     expect(schema("update_text").required).toEqual(["id"]);
-    expect(Object.keys(schema("change_shape").properties.patch.properties)).toEqual(["type", "direction", "icon"]);
+    expect(Object.keys(schema("change_shape").properties.patch.properties)).toEqual(["type", "direction", "icon", "border"]);
   });
 
   test("no listed schema carries a draft-07 tuple, which the Anthropic API rejects", async () => {
