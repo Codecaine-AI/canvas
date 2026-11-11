@@ -182,7 +182,10 @@ describe("canvas service", () => {
     await service.call("canvas_open", { canvas: SOURCE_ID });
     const invalid = await service.call("move", { id: "page-frame", by: [16, 0] });
     expect(invalid.isError).toBe(true);
-    expect(textOf(invalid)).toContain("Validation failed");
+    expect(textOf(invalid)).toContain("by must be an object, or null to leave it out");
+    const malformed = await service.call("move", { id: "page-frame", by: { dx: "far", dy: 0 } });
+    expect(malformed.isError).toBe(true);
+    expect(textOf(malformed)).toContain("Validation failed");
     expect(readFileSync(path, "utf8")).toBe(before);
   });
 
@@ -278,7 +281,7 @@ describe("canvas service", () => {
     const reset = await service.call("route", { id: "row-edge", points: null, shift: null, reset: true });
     expect(textOf(reset)).toContain("NO-OP · route row-edge — this edge is already on the auto-router");
     const notReset = await service.call("route", { id: "row-edge", points: null, shift: null, reset: false });
-    expect(textOf(notReset)).toContain("send exactly one of points, shift or reset");
+    expect(textOf(notReset)).toContain('reset must be true, or null to leave it out — not false.');
 
     const saved = readDoc(path).objects.filter((object: any) => object.id.startsWith("row-"));
     expect(saved.map((object: any) => object.geometry.y)).toEqual([1600, 1600]);
@@ -303,6 +306,77 @@ describe("canvas service", () => {
     const saved = readDoc(path).objects.find((object: any) => object.id === "border-frame");
     expect(saved.icon).toBe("server");
     expect(saved.style.strokeStyle).toBe("dashed");
+  });
+
+  // Only an omitted mode and a null one count as absent. A wrong-typed mode
+  // would otherwise convert to null and let the call run the other mode.
+  test.each([
+    {
+      tool: "describe_board",
+      wrong: [{ title: 7, description: "# Kept" }, { title: "Renamed", description: false }],
+      absent: { title: "Renamed", description: null },
+      applied: "APPLIED · describe_board",
+    },
+    {
+      tool: "annotate",
+      wrong: [{ objectId: 0, body: "Why?" }, { objectId: "mode-a", thread: false, body: "Why?" }],
+      absent: { objectId: "mode-a", thread: null, body: "Why?" },
+      applied: "APPLIED · annotate annotation-",
+    },
+    {
+      tool: "move",
+      wrong: [{ id: "mode-a", to: "", by: { dx: 40, dy: 0 } }, { id: "mode-a", to: { x: 0, y: 0 }, by: 0 }],
+      absent: { id: "mode-a", to: null, by: { dx: 40, dy: 0 } },
+      applied: "APPLIED · move mode-a +40,+0",
+    },
+    {
+      tool: "resize",
+      wrong: [{ id: "mode-a", width: "", height: 200 }, { id: "mode-a", like: 0, width: 200 }, { id: "mode-a", width: "400" }],
+      absent: { id: "mode-a", like: null, width: 400, height: null },
+      applied: "APPLIED · resize mode-a → 400×",
+    },
+    {
+      tool: "arrange",
+      wrong: [{ ids: ["mode-a", "mode-b"], align: "top", space: 0 }, { ids: ["mode-a", "mode-b"], align: "", space: { axis: "horizontal", gap: 40 } }],
+      absent: { ids: ["mode-a", "mode-b"], align: "top", space: null },
+      applied: "APPLIED · arrange align top",
+    },
+    {
+      tool: "route",
+      wrong: [
+        { id: "mode-edge", points: "", reset: true },
+        { id: "mode-edge", points: 0, reset: true },
+        { id: "mode-edge", shift: { segment: 1, to: 1000 }, reset: false },
+      ],
+      absent: { id: "mode-edge", points: null, shift: { segment: 1, to: 1000 }, reset: null },
+      applied: "APPLIED · route mode-edge shift s1",
+    },
+    {
+      tool: "change_shape",
+      wrong: [{ id: "mode-frame", patch: { icon: "server", border: false } }, { id: "mode-frame", patch: { icon: "server", border: 0 } }],
+      absent: { id: "mode-frame", patch: { icon: "server", border: null } },
+      applied: "APPLIED · change_shape mode-frame",
+    },
+  ])("$tool refuses a wrong-typed mode and reads a null one as absent", async ({ tool, wrong, absent, applied }) => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = createCanvasService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    await service.call("place_section", { id: "mode-frame", text: "Frame", at: [960, 2000] });
+    await service.call("place_sticky", { id: "mode-a", text: "A", at: [960, 1600] });
+    await service.call("place_sticky", { id: "mode-b", text: "B", at: [1400, 1640] });
+    await service.call("connect", { id: "mode-edge", from: { objectId: "mode-a" }, to: { objectId: "mode-b" } });
+    const before = readFileSync(path, "utf8");
+
+    for (const args of wrong) {
+      const refused = await service.call(tool, args);
+      expect(refused.isError).toBe(true);
+      expect(textOf(refused)).toContain("Only an omitted field or null counts as absent.");
+    }
+    expect(readFileSync(path, "utf8")).toBe(before);
+
+    const ran = await service.call(tool, absent);
+    expect(ran.isError).toBeUndefined();
+    expect(textOf(ran)).toContain(applied);
   });
 
   test("canvas_open reads canvases/canvas-style.json, and look renders with it", async () => {

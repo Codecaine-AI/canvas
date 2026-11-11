@@ -57,7 +57,8 @@ export const Id = Type.String({
 //
 // A merged tool takes one optional value or sub-object per mode, and a null
 // one counts as absent, so a client that sends every key with null for the
-// unused ones still sends one mode.
+// unused ones still sends one mode. Only an omitted mode and a null one count
+// as absent: any other value of the wrong type is refused.
 //
 // pi-ai's `validateToolArguments` runs `Value.Convert` before it checks, and
 // Convert rewrites a primitive's null inside a TypeBox union: `[String, Null]`
@@ -67,8 +68,14 @@ export const Id = Type.String({
 // the tool as sent; an enum mode lists null among its values. A sub-object,
 // array or literal mode is the union `[Schema, Null]`: Convert keeps a null one
 // null, and the type pair would refuse null under an object's own `required`.
-// Convert turns a falsy non-null value of the wrong type into null there, so
-// `reset: false` counts as absent as well.
+//
+// Convert still bends a WRONG-TYPED mode: it turns "", 0 or false into null for
+// a sub-object, array or literal mode, and "" into null for a number. So the
+// toolkit boundary (`callToolkitTool`, toolkit/index.ts) checks each raw mode
+// value against the mode's own schema before Convert runs, and refuses
+// `points: ""`, `reset: false` or `width: ""` instead of reading them as absent.
+// A field whose schema admits null is a mode, which is why only these helpers
+// admit null.
 
 /** An optional string where null counts as absent. */
 export function nullableString(description: string) {
