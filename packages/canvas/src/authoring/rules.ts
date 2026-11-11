@@ -8,11 +8,29 @@
  * drawn boards: "less grey", "Don't use blue inside of a blue area.",
  * "Prefer using real icons where we can", and "once the board gets really
  * full, it needs to, like, re... Just move sections and other things around."
+ * The outline rules answer his round 1 review: "it doesn't necessarily need
+ * to fit the base rectangle shape that we start with."
  */
 import { NAME_TARGET_WORDS } from "../board/text-rules";
 import { AGENT_GRID } from "../session/tools/grid";
 import type { AuthoringTopic } from "./design";
 import { CRAFT_TARGETS } from "./style-guide/craft-targets";
+
+/**
+ * The Layout section, one rule a line. A rule a layout tool needs the drawer
+ * to know goes at the end of this list. The served guidance has a byte cap
+ * (authoring-guidance.test.ts), so each new line replaces text elsewhere.
+ */
+const LAYOUT_RULES: readonly string[] = [
+  `Geometry lands on a ${AGENT_GRID} unit grid.`,
+  `A flow node is ${CRAFT_TARGETS.nodeWidth} by ${CRAFT_TARGETS.nodeHeight}.`,
+  `\`arrange_section\` sets the gaps: ${CRAFT_TARGETS.nodeGapRow} across a row and ${CRAFT_TARGETS.nodeGapColumn} down a column.`,
+  "When the board gets full or a section must grow, make room: `arrange` the sections in reading order with `flow: {axis: \"x\" or \"y\", gap}`.",
+  "The board's outline follows the flow, not a rectangle. An empty corner is fine.",
+  "A section keeps the size of its content. Never stretch a section or a node to fill a row.",
+  "Center a section on the node or section it connects to.",
+  "After you move, add or delete a node in a section, call `fit_section`. It centers the children and evens each row.",
+];
 
 export function canvasRules(): AuthoringTopic {
   return {
@@ -43,13 +61,9 @@ export function canvasRules(): AuthoringTopic {
       "- A node draws no text beyond its name. Put a fact a reader needs (a size, a tool name) in the name, a wire label or a sticky.",
       "- Put each sticky beside the node it explains.",
       "",
-      "## Geometry",
+      "## Layout",
       "",
-      `- Geometry lands on a ${AGENT_GRID} unit grid.`,
-      `- A flow node is ${CRAFT_TARGETS.nodeWidth} by ${CRAFT_TARGETS.nodeHeight}.`,
-      `- \`arrange_section\` sets the gaps: ${CRAFT_TARGETS.nodeGapRow} across a row and ${CRAFT_TARGETS.nodeGapColumn} down a column.`,
-      "- When the board gets full or a section must grow, make room: `arrange` the sections in reading order with `flow: {axis: \"x\" or \"y\", gap}`.",
-      "- Leave no empty column or band larger than a section.",
+      ...LAYOUT_RULES.map((rule) => `- ${rule}`),
       "",
       "## Wires",
       "",

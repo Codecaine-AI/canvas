@@ -18,7 +18,7 @@ export function canvasConventions(): AuthoringTopic {
     text: `<identity>
     - Use descriptive string IDs for sections, objects, stickies, and connections.
     - Give each new section a stable numbered prefix and a descriptive name, such as s01-ingestion or s02-retrieval. Reuse the full section prefix for its objects, stickies, and internal connections.
-    - IDs must be unique across objects and connections. Section prefixes do not create separate ID spaces.
+    - IDs must be unique across objects and connections.
     - Preserve existing IDs when editing existing content.
 
     Creation actions accept the IDs you choose and reject collisions.
@@ -33,11 +33,9 @@ export function canvasConventions(): AuthoringTopic {
         | Retrieval section | s02-retrieval | Retrieval |
         | Cross-section connection | s01-ingestion-to-s02-retrieval | indexed records |
 
-        Use descriptive strings rather than IDs such as object1 or shape2. The group number identifies the section; the remaining words identify the entity's purpose. Visible labels stay short and do not need the ID prefix.
+        Use descriptive strings rather than IDs such as object1 or shape2. Visible labels stay short and do not need the ID prefix.
 
-        Keep group numbers stable when sections move or the reading order changes. For additions to an existing diagram, follow its naming convention and preserve its IDs. Choose an unused group prefix for a new section and check every complete ID for collisions.
-
-        Prefixes group names for readability; they do not create containment or connect objects. Section membership remains geometric, and connections use actual endpoint IDs.
+        Keep group numbers stable when sections move or the reading order changes. For additions to an existing diagram, follow its naming convention.
     </naming_examples>
 </identity>
 
@@ -50,11 +48,11 @@ export function canvasConventions(): AuthoringTopic {
 <containment>
     Membership is geometric: whatever sits inside a frame's bounds is that section's child.
 
-    Position is the membership signal. You do not supply a parent ID.
+    You do not supply a parent ID.
 
     The base section is the page. It grows by itself like any section. Only sections contain other entities.
 
-    A section grows by itself to hold a child that crosses its edge, and never shrinks by itself. arrange_section lays out a section's nodes in rows and fits the frame. fit_section fits a frame around its current children. Neither fits the ancestors.
+    A section grows by itself to hold a child that crosses its edge, and never shrinks by itself. arrange_section lays out a section's nodes in rows and fits the frame. fit_section closes a frame around its current children, centers them and evens each row. Neither fits the ancestors.
 </containment>
 
 <connection_binding>

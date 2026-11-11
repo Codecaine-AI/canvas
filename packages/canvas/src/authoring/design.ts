@@ -80,11 +80,11 @@ export const DESIGN_TOPICS: readonly AuthoringTopic[] = [
     <board_size>
         The board is judged as one image of its whole extent. Up to ${JUDGE_PNG_MAX_EDGE} × ${JUDGE_PNG_MAX_EDGE}px that image is real size. Past it the image scales down and every label prints smaller.
 
-        - Lay 4 or more sections out in 2 or 3 rows that grow down, never in one long row.
+        - Lay 4 or more sections out in 2 or 3 rows that grow down, never in one long row. Rows can differ in width: the outline follows the flow, not a rectangle.
         - Size each section to its content. A section with three nodes is small, not a full-width band.
+        - Center a section on the node or section it connects to, so the wire between them runs straight.
         - To fit, move sections closer or stack a long row into 2 rows. Never shrink a node or cut a label.
         - When a section must grow or the board gets full, make room before you add: \`arrange\` the sections in reading order with \`flow: {axis: "x" or "y", gap}\`, then call tighten_wires again.
-        - Leave no empty column or band larger than a section.
     </board_size>
 
     <build_order>

@@ -133,12 +133,15 @@ describe("shared Canvas authoring guidance", () => {
     expect(rules).toContain("A wire label says what the wire carries. It never repeats a node or section name.");
   });
 
-  test("a full board makes room with arrange flow, and no empty band outgrows a section", () => {
+  test("a full board makes room with arrange flow, and its outline follows the flow, not a rectangle", () => {
     for (const id of ["rules", "diagram_design"]) {
       const text = topicText(id);
       expect(text, id).toContain('`flow: {axis: "x" or "y", gap}`');
-      expect(text, id).toContain("Leave no empty column or band larger than a section.");
+      expect(text, id).toContain("outline follows the flow, not a rectangle");
+      expect(text, id).toContain("Center a section on the node or section it connects to");
+      expect(text, id).not.toContain("Leave no empty column or band");
     }
+    expect(topicText("rules")).toContain("Never stretch a section or a node to fill a row.");
   });
 
   test("the state grammar keys only blocks the MCP tools print", () => {
