@@ -447,6 +447,7 @@ describe("section gestures", () => {
 
     const result = runOp(session, "change_shape", { id: "step", patch: { border: "dashed" } });
 
+    expect(result.isError).toBe(true);
     expect(result.text).toBe(
       "ERROR · change_shape — patch.border is a section's frame stroke — a rectangle has no frame to restroke.",
     );
