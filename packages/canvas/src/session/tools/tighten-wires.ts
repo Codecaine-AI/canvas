@@ -34,7 +34,10 @@
  *   one wire of a junction that does.
  *
  * Pure over the document: geometry in, geometry out. The gesture
- * (operations/tighten-wires.ts) lowers the result.
+ * (operations/tighten-wires.ts) lowers the result, then runs the straighten
+ * pass (./straighten-wires.ts) for the jogs this descent leaves: it works on
+ * the 20px grid and keeps a move that saves MIN_GAIN, and a jog of a few
+ * pixels is under both.
  */
 import type {
   InteractiveCanvasConnection,
@@ -83,7 +86,7 @@ export interface TightenResult {
 }
 
 /** Air a sibling box keeps, so boxes read apart. */
-const SIBLING_GAP = 40;
+export const SIBLING_GAP = 40;
 /** Air a box keeps from a box it is wired to: the craft column gap, room for a label. */
 const WIRED_GAP = CRAFT_TARGETS.nodeGapColumn;
 /** Air a moved box keeps from a wire it is not on, so the wire need not bend round it. */
@@ -92,7 +95,7 @@ const WIRE_CLEARANCE = 16;
 const FRAME_PADDING = CRAFT_TARGETS.framePadding;
 const FRAME_TOP_PADDING = FRAME_PADDING + 40;
 /** Air between top-level sections. */
-const SECTION_GAP = 80;
+export const SECTION_GAP = 80;
 /** What one crossing or one chip on a box costs, in px of wire. */
 const CROSSING_COST = 300;
 /** What one corner costs, in px of wire: a straight wire beats a bent wire of the same length. */
@@ -106,9 +109,9 @@ const VERIFY_BEST = 3;
 const NUDGES = [20, 40, 100, 200];
 const SECTION_NUDGES = [40, 100, 200, 400];
 
-type Routes = Map<string, Point[]>;
+export type Routes = Map<string, Point[]>;
 
-function manhattan(points: readonly Point[]): number {
+export function manhattan(points: readonly Point[]): number {
   let total = 0;
   for (let index = 1; index < points.length; index += 1) {
     total += Math.abs(points[index]!.x - points[index - 1]!.x) + Math.abs(points[index]!.y - points[index - 1]!.y);
@@ -124,7 +127,7 @@ function orient(p: Point, q: Point, r: Point): number {
  * Corners of the routes given: the points where a wire turns. Wires that turn
  * at one point make one corner, the way a reader sees a junction.
  */
-function bends(routes: Iterable<readonly Point[]>): number {
+export function bends(routes: Iterable<readonly Point[]>): number {
   const corners = new Set<string>();
   for (const points of routes) {
     for (let index = 1; index < points.length - 1; index += 1) {
@@ -163,7 +166,7 @@ function crossingsOf(edgeId: string, routes: Routes): number {
   return count;
 }
 
-function totalCrossings(routes: Routes): number {
+export function totalCrossings(routes: Routes): number {
   const ids = [...routes.keys()];
   let count = 0;
   for (let i = 0; i < ids.length; i += 1) {
@@ -174,7 +177,7 @@ function totalCrossings(routes: Routes): number {
   return count;
 }
 
-function totalLength(routes: Routes): number {
+export function totalLength(routes: Routes): number {
   let total = 0;
   for (const points of routes.values()) total += manhattan(points);
   return total;
@@ -223,7 +226,7 @@ interface Board {
   canvasStyle: CanvasStyle;
 }
 
-function routeAll(document: InteractiveCanvasDocument, canvasStyle: CanvasStyle): Routes {
+export function routeAll(document: InteractiveCanvasDocument, canvasStyle: CanvasStyle): Routes {
   return new Map(document.connections.map((edge) => [edge.id, routedPolyline(edge, document, canvasStyle)]));
 }
 
@@ -331,7 +334,7 @@ function runsForward(edge: InteractiveCanvasConnection, byId: ReadonlyMap<string
 }
 
 /** Every wire and label fault on the whole board. */
-function boardFaults(document: InteractiveCanvasDocument, routes: Routes, canvasStyle: CanvasStyle): number {
+export function boardFaults(document: InteractiveCanvasDocument, routes: Routes, canvasStyle: CanvasStyle): number {
   let faults = brokenEdges(document.connections, document, routes, canvasStyle);
   const chips = allChips(document, canvasStyle);
   for (const edge of document.connections) {
