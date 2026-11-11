@@ -319,6 +319,20 @@ describe("placeConnectionLabels tags in line", () => {
     expect(point.x + width / 2).toBeLessThanOrEqual(400 - 16);
   });
 
+  it("keeps the chip in the white space when the gap is too tight for line on both sides", () => {
+    // The same gap, x 300..400, and a chip that leaves less than 16px a side.
+    const document = doc(
+      [section("s", -40, -80, 340, 200), section("t", 400, -80, 640, 200), box("a", 180, 0), box("b", 880, 0)],
+      [wire("ab", "a", "b", "request")],
+    );
+    const point = placeConnectionLabels(document).get("ab")!;
+    const { width } = connectionLabelChipMetrics("request");
+    expect(width).toBeGreaterThan(100 - 2 * 16);
+    expect(point.x - width / 2).toBeGreaterThan(300);
+    expect(point.x + width / 2).toBeLessThan(400);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
   // a's right side to c's top: across to x = 450, then down. The middle of the wire is the corner.
   const elbow = (labelPosition?: InteractiveCanvasConnection["labelPosition"]) =>
     doc([A, box("c", 400, 380)], [wire("ac", "a", "c", "request", { to: { objectId: "c", anchor: "top" }, labelPosition })]);

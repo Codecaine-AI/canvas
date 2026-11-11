@@ -23,13 +23,15 @@
  *    so with no clear spot the least-bad one wins — a chip squeezed between
  *    its endpoints keeps bridging both rather than sliding onto one;
  * 3. bend: 1 when the chip does not fit on one straight segment;
- * 4. crowded (clear chips only): 1 when a section frame edge is within
+ * 4. foreign (clear chips only): 1 when it sits inside a section that does
+ *    not hold both of its wire's ends, so a wire that leaves a section
+ *    carries its chip in the white space outside it, also when the gap is
+ *    tight (Ford: "all the tags could then be, like, in the white space or
+ *    something so that there's a consistent tag location");
+ * 5. crowded (clear chips only): 1 when a section frame edge is within
  *    FRAME_AIR_PX of it, so a chip between two frames shows line on both
  *    sides and reads as one gap's chip, or a corner of its own wire within
  *    BEND_AIR_PX, so a chip moved off a bend does not stop at its rounding;
- * 5. foreign (clear chips only): 1 when it sits inside a section that does
- *    not hold both of its wire's ends, so a wire that leaves a section
- *    carries its chip in the white space outside it;
  * 6. near misses (clear chips only): the hit count for the chip grown
  *    NEAR_MISS_PX a side, so a clear chip also keeps some air;
  * 7. distance from the preferred point.
@@ -47,7 +49,7 @@
  * group while one line still holds every chip clear; a wire with runs in two
  * groups stays in the larger. A group's chips all take one line, clear of
  * every chip outside the group (those do not move): the one with the fewest
- * crowded, then foreign, then near-miss chips, then the least total move
+ * foreign, then crowded, then near-miss chips, then the least total move
  * from each wire's preferred point. Pinned chips join no group.
  *
  * Pin rule: a pinned chip with no hits stays exactly at its pin, unless it
@@ -608,15 +610,15 @@ function computePlacements(
     return label.corners.some((corner) =>
       corner.x > turn.x && corner.x < turn.x + turn.width && corner.y > turn.y && corner.y < turn.y + turn.height);
   };
-  /** Where a clear chip would rather not sit: tight to a frame edge or a corner of its wire, inside a section its wire only passes, short of air. */
+  /** Where a clear chip would rather not sit: inside a section its wire only passes, tight to a frame edge or a corner of its wire, short of air. */
   const taste = (
     label: Label, center: CanvasPoint, others?: Iterable<Rect>,
-  ): [crowded: number, foreign: number, nearMisses: number] => {
+  ): [foreign: number, crowded: number, nearMisses: number] => {
     const aired = rectAt(label, center, FRAME_AIR_PX);
     const rect = rectAt(label, center);
     return [
-      frames.some((frame) => wireRunInRect(frame, aired) > 0) || tightToCorner(label, center) ? 1 : 0,
       sections.some((section) => !label.home.has(section.id) && intersects(rect, section.geometry)) ? 1 : 0,
+      frames.some((frame) => wireRunInRect(frame, aired) > 0) || tightToCorner(label, center) ? 1 : 0,
       hits(label, center, NEAR_MISS_PX, others).count,
     ];
   };
@@ -631,15 +633,15 @@ function computePlacements(
       const { count, covered } = hits(label, point);
       // Taste matters only once a chip is clear; a blocked chip's ties go to the preferred point.
       // A pin that moves wants air, to the corner it moves off too, but has no say on frames and sections.
-      const [crowded, foreign, nearMisses] = count > 0
+      const [foreign, crowded, nearMisses] = count > 0
         ? [0, 0, 0]
-        : pinned ? [tightToCorner(label, point) ? 1 : 0, 0, hits(label, point, NEAR_MISS_PX).count] : taste(label, point);
+        : pinned ? [0, tightToCorner(label, point) ? 1 : 0, hits(label, point, NEAR_MISS_PX).count] : taste(label, point);
       return [
         count > 0 ? 1 : 0,
         covered,
         bend,
-        crowded,
         foreign,
+        crowded,
         nearMisses,
         Math.hypot(point.x - preferred.x, point.y - preferred.y),
       ];
@@ -855,7 +857,7 @@ function overlapArea(a: Rect, b: Rect): number {
   return w > 0 && h > 0 ? w * h : 0;
 }
 
-type Score = [blocked: number, covered: number, bend: number, crowded: number, foreign: number, nearMisses: number, distance: number];
+type Score = [blocked: number, covered: number, bend: number, foreign: number, crowded: number, nearMisses: number, distance: number];
 
 function lexLess(a: readonly number[], b: readonly number[]): boolean {
   for (let i = 0; i < a.length; i += 1) {
