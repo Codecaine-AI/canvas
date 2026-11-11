@@ -276,6 +276,21 @@ describe("placeConnectionLabels tags in line", () => {
     expect(blockedLabelIds(document)).toEqual([]);
   });
 
+  it("lines up the chips of two lanes of one bundle, 30px apart", () => {
+    // Level runs at y = 10 and y = 40 with their middles at x = 300 and x = 400. The chips are 26px high.
+    const document = doc(
+      [box("a", 0, 0, 100, 20), box("b", 500, 0, 100, 20), box("c", 0, 30, 100, 20), box("d", 700, 30, 100, 20)],
+      [
+        wire("ab", "a", "b", "first"),
+        wire("cd", "a", "b", "second", { from: { objectId: "c", anchor: "right" }, to: { objectId: "d", anchor: "left" } }),
+      ],
+    );
+    const placed = placeConnectionLabels(document);
+    expect([placed.get("ab")!.y, placed.get("cd")!.y]).toEqual([10, 40]);
+    expect(placed.get("cd")!.x).toBe(placed.get("ab")!.x);
+    expect(blockedLabelIds(document)).toEqual([]);
+  });
+
   it("brings the chips of long runs to the chip of a short run", () => {
     // The short run is x 200..500; the two long runs are x 200..2000, with their middles at x = 1100.
     const document = doc(

@@ -123,8 +123,8 @@ const FRAME_AIR_PX = 16;
 const BEND_AIR_PX = 12;
 /** Two label runs whose chips on one line leave more than this between them are not side by side. */
 const GROUP_MAX_APART_PX = 240;
-/** The air two chips on one line across their runs keep between them. */
-const GROUP_CHIP_AIR_PX = 8;
+/** The air two chips on one line across their runs keep between them: what the 26px chips of two lanes 30px apart leave. */
+const GROUP_CHIP_AIR_PX = 4;
 /** How far apart the lines a group may share are tried. */
 const GROUP_LINE_STEP_PX = 2;
 /**
