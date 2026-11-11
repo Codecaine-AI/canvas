@@ -23,7 +23,8 @@ import { commitDraft } from "../../perception/live-draft-view";
 import { lintDeltaBlock, type SessionEventSink } from "../../perception/perception";
 import type { LayoutSession } from "../../session";
 import type { LayoutToolTextResult } from "../runtime";
-import { defineWorkflowTool, nullableString } from "./workflow-tool";
+import { nullableString } from "../schemas";
+import { defineWorkflowTool } from "./workflow-tool";
 
 /** What `describe_board` was sent. A null field counts as absent. */
 export interface DescribeBoardFields {

@@ -12,21 +12,6 @@ import type { LayoutToolRenderResult, LayoutToolRuntime } from "../runtime";
 type WorkflowFields = Record<string, TSchema>;
 
 /**
- * An optional string field where null counts as absent, so a client that
- * sends every key with null for the unused ones still sends one meaning.
- *
- * The schema is the JSON type pair `["string", "null"]`, not a TypeBox union:
- * pi-ai's `validateToolArguments` runs `Value.Convert` before it checks, and
- * Convert rewrites a `[String, Null]` union's null to "" and a
- * `[Null, String]` union's "" to null. Either would change what the call
- * means, so a null would be refused as an empty string, or an empty string
- * would pass as absent. The type pair reaches the tool exactly as sent.
- */
-export function nullableString(description: string) {
-  return Type.Optional(Type.Unsafe<string | null>({ type: ["string", "null"], description }));
-}
-
-/**
  * Decode the tool's Type.Object shape without importing TypeBox's TObject or
  * TProperties helpers, which pi-ai does not re-export.
  */

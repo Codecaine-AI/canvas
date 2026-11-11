@@ -8,7 +8,7 @@
  * connector anchors and export framing all read that one stored height.
  *
  * Writers: the agent's auto-size pass (session/tools/operations/auto-size.ts:
- * place_sticky, update_text, change_shape, resize, match_size), Studio's text
+ * place_sticky, update_text, change_shape, resize), Studio's text
  * editor and Inspector text field (noteTextPatch), and Studio's resize
  * gesture (stage/editor/features/selection/resize.ts). A resize keeps a
  * dragged height at or above the needed one; every other write sets it

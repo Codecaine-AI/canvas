@@ -5,7 +5,7 @@
  * THE RULE IS ABOUT WHAT LANDS. Not "the arguments are rounded" but "every
  * number that reaches board geometry is a multiple of 20". For an absolute
  * argument the two are the same thing; for a relative one they are not, and the
- * result is what counts: `move_by 20` off a box at x=16 lands it at 40, not at
+ * result is what counts: a `move` by 20 off a box at x=16 lands it at 40, not at
  * 36, and `align` snaps the shared coordinate the row agrees on rather than the
  * deltas that get it there. A descriptor that snapped only its inputs would
  * leave every hand-drawn box permanently off-grid, which is precisely the
@@ -36,10 +36,10 @@
  *  - the corner a placement lands on — `at` on `place_section` /
  *    `place_sticky` / `place_shape`, and `clone`'s corner however it was named
  *    (`at`, `by`, or the default paste offset) — snapPoint
- *  - the corner a move lands on — `move_to`'s target, and `move_by`'s
+ *  - the corner a move lands on — `move`'s `to` target, and its `by`
  *    destination (current position + delta) — snapPoint
  *  - the size a box ends up with — `size` on `place_section`, `width` /
- *    `height` on `resize`, both dimensions copied by `match_size`, and the
+ *    `height` on `resize`, both dimensions copied by `resize`'s `like`, and the
  *    size a `clone` copies — snapSize
  *  - the shared coordinate `align` puts a row on, and each position
  *    `space_out` computes for a box — snapCoordinate
@@ -51,8 +51,8 @@
  * WHAT IS EXEMPT (deliberately unsnapped — these are not world distances):
  *  - `Endpoint.position` — a 0..1 fraction along an object's side
  *  - `move_label`'s `along` — a 0..1 fraction of the routed path
- *  - text metrics — the readability checks on `resize` / `match_size` /
- *    `update_text` measure real glyph runs, not grid units
+ *  - text metrics — the readability checks on `resize` / `update_text`
+ *    measure real glyph runs, not grid units
  *  - geometry a gesture does NOT write: the untouched dimension of a
  *    width-only `resize`, the first box of a `space_out` run, and the
  *    descendants a frame carries (they travel by their root's snapped delta,
@@ -74,8 +74,8 @@ export function snapCoordinate(value: number, grid: number = AGENT_GRID): number
 }
 
 /**
- * Rounds an [x, y] pair — a placement `at`, a `move_to` target, a `move_by`
- * delta, or a routing waypoint. Deltas snap the same way absolutes do, so a
+ * Rounds an [x, y] pair — a placement `at`, a `move` `to` target, a `move`
+ * `by` destination, or a routing waypoint. Deltas snap the same way absolutes do, so a
  * chain of nudges never accumulates off-grid drift.
  */
 export function snapPoint(

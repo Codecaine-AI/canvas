@@ -1,8 +1,8 @@
 /**
  * The DELTA VOCABULARY gate (session/perception/op-surface.ts).
  *
- * A document diff cannot name the gesture that caused it — `move_to`,
- * `move_by`, `align`, and `space_out` all land as the same geometry change —
+ * A document diff cannot name the gesture that caused it — `move` to, `move`
+ * by, `align`, and `space_out` all land as the same geometry change —
  * so the diff speaks a separate, neutral vocabulary: added / changed / removed
  * per entity kind, plus the one section-fit shape. This file pins that
  * vocabulary from both directions: internal patch ops classify into the right
@@ -153,12 +153,12 @@ describe("gestures land as the delta their edit implies", () => {
     expect(deltas.map(deltaTargetId)).toEqual(["s2"]);
   });
 
-  test("move_to and move_by are the same delta — the diff cannot tell them apart", () => {
+  test("move to and move by are the same delta — the diff cannot tell them apart", () => {
     const absolute = deltasOf(referenceDocument(), (session) => {
-      runOp(session, "move_to", { id: "alpha", x: 200, y: 120 });
+      runOp(session, "move", { id: "alpha", to: { x: 200, y: 120 } });
     });
     const relative = deltasOf(referenceDocument(), (session) => {
-      runOp(session, "move_by", { id: "alpha", dx: 100, dy: 0 });
+      runOp(session, "move", { id: "alpha", by: { dx: 100, dy: 0 } });
     });
     expect(absolute).toEqual(relative);
     expect(absolute.map((delta) => delta.type)).toEqual(["updateObject"]);

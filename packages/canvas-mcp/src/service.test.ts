@@ -69,7 +69,7 @@ describe("canvas service", () => {
     expect(cleanText).not.toContain("BROKEN WIRES");
   });
 
-  test("place_sticky then move_by save each edit to the canvas file", async () => {
+  test("place_sticky then move save each edit to the canvas file", async () => {
     const original = realCanvas();
     const { workspace, path } = workspaceWith(SOURCE_ID, original);
     const service = createCanvasService({ workspace });
@@ -87,7 +87,7 @@ describe("canvas service", () => {
     expect(afterPlace.objects.find((object: any) => object.id === "mcp-note")?.geometry)
       .toMatchObject({ x: 960, y: 1600 });
 
-    const moved = await service.call("move_by", { id: "mcp-note", dx: 64, dy: 32 });
+    const moved = await service.call("move", { id: "mcp-note", by: { dx: 64, dy: 32 } });
     expect(moved.isError).toBeUndefined();
     // No residual: replaying the patch through the canvas reducer reproduced the draft.
     expect(textOf(placed)).not.toContain("NOTE ·");
@@ -129,7 +129,7 @@ describe("canvas service", () => {
 
     const placed = await service.call("place_sticky", { id: "frameless-note", text: "No frame", at: [960, 1600] });
     expect(placed.isError).toBeUndefined();
-    const moved = await service.call("move_by", { id: "frameless-note", dx: 32, dy: 0 });
+    const moved = await service.call("move", { id: "frameless-note", by: { dx: 32, dy: 0 } });
     expect(moved.isError).toBeUndefined();
     expect(textOf(moved)).toContain("SAVED ·");
     expect(textOf(moved)).not.toContain("NOTE ·");
@@ -157,7 +157,7 @@ describe("canvas service", () => {
     expect(readFileSync(path, "utf8")).toBe(externalText);
 
     // The session stays refused, even for a call that would not write.
-    const stillRefused = await service.call("move_by", { id: "late-note", dx: 16, dy: 0 });
+    const stillRefused = await service.call("move", { id: "late-note", by: { dx: 16, dy: 0 } });
     expect(stillRefused.isError).toBe(true);
     expect(readFileSync(path, "utf8")).toBe(externalText);
 
@@ -175,12 +175,12 @@ describe("canvas service", () => {
     const before = readFileSync(path, "utf8");
     const service = createCanvasService({ workspace });
 
-    const closed = await service.call("move_by", { id: "page-frame", dx: 16, dy: 0 });
+    const closed = await service.call("move", { id: "page-frame", by: { dx: 16, dy: 0 } });
     expect(closed.isError).toBe(true);
     expect(textOf(closed)).toContain("canvas_open");
 
     await service.call("canvas_open", { canvas: SOURCE_ID });
-    const invalid = await service.call("move_by", { id: "page-frame", by: [16, 0] });
+    const invalid = await service.call("move", { id: "page-frame", by: [16, 0] });
     expect(invalid.isError).toBe(true);
     expect(textOf(invalid)).toContain("Validation failed");
     expect(readFileSync(path, "utf8")).toBe(before);
@@ -233,6 +233,26 @@ describe("canvas service", () => {
     expect(saved.description).not.toBe("# Kept");
     const thread = saved.annotations.find((annotation: any) => annotation.target.objectId === target);
     expect(thread.replies.map((reply: any) => reply.body)).toEqual(["Yes."]);
+  });
+
+  test("a null mode reaches move and resize as absent through the tool boundary", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = createCanvasService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    await service.call("place_sticky", { id: "null-a", text: "A", at: [960, 1600] });
+    await service.call("place_sticky", { id: "null-b", text: "B", at: [1360, 1600] });
+
+    const nudged = await service.call("move", { id: "null-a", to: null, by: { dx: 40, dy: 0 } });
+    expect(textOf(nudged)).toContain("APPLIED · move null-a +40,+0 → (1000, 1600)");
+    const widened = await service.call("resize", { id: "null-a", like: null, width: 400, height: null });
+    expect(textOf(widened)).toContain("APPLIED · resize null-a → 400×");
+    const matched = await service.call("resize", { id: "null-b", like: "null-a", width: null, height: null });
+    expect(textOf(matched)).toContain("(matching null-a)");
+    const empty = await service.call("resize", { id: "null-b", like: null, width: null, height: null });
+    expect(textOf(empty)).toContain("asks for no change");
+
+    const saved = readDoc(path).objects.filter((object: any) => object.id.startsWith("null-"));
+    expect(saved.map((object: any) => object.geometry.width)).toEqual([400, 400]);
   });
 
   test("canvas_open reads canvases/canvas-style.json, and look renders with it", async () => {

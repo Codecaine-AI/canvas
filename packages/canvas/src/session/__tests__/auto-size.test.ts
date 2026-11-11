@@ -212,13 +212,13 @@ describe("auto-size · review fixes", () => {
     expect(fits(objectOf(session.draft, "a"))).toBe(true);
   });
 
-  test("match_size never writes its like source", () => {
+  test("resize like never writes its like source", () => {
     const session = makeTestSession(pageBoard([
       { ...box("a", 200, 200, 160, 240, "process"), text: LONG },
       box("source", 600, 200, 160, 80, "process"),
     ]), ["page"]);
 
-    runOp(session, "match_size", { id: "a", like: "source" });
+    runOp(session, "resize", { id: "a", like: "source" });
 
     expect(objectOf(session.draft, "source").geometry).toEqual({ x: 600, y: 200, width: 160, height: 80 });
     expect(fits(objectOf(session.draft, "a"))).toBe(true);

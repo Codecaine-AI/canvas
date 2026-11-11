@@ -150,15 +150,15 @@ describe("every geometry a gesture writes lands on the grid", () => {
     }
   }
 
-  test("move_by snaps the corner it lands on, not the nudge it was given", () => {
+  test("move by snaps the corner it lands on, not the nudge it was given", () => {
     const session = offGridSession();
 
-    const result = runOp(session, "move_by", { id: "a", dx: 20, dy: 20 });
+    const result = runOp(session, "move", { id: "a", by: { dx: 20, dy: 20 } });
 
     // 16 + 20 = 36, which is not on the grid; the box lands at 40 and the
     // summary reports the delta that was actually applied.
     expect(geometryOf(session, "a")).toMatchObject({ x: 40, y: 40 });
-    expect(result.text).toContain("APPLIED · move_by a +24,+24 → (40, 40)");
+    expect(result.text).toContain("APPLIED · move a +24,+24 → (40, 40)");
     expectOnGrid(geometryOf(session, "a"), ["x", "y"]);
   });
 
@@ -220,21 +220,21 @@ describe("every geometry a gesture writes lands on the grid", () => {
     expectOnGrid(geometryOf(session, "copy"), ["x", "y", "width", "height"]);
   });
 
-  test("match_size snaps both dimensions measured from an off-grid source", () => {
+  test("resize like snaps both dimensions measured from an off-grid source", () => {
     const session = offGridSession();
 
-    const result = runOp(session, "match_size", { id: "b", like: "a" });
+    const result = runOp(session, "resize", { id: "b", like: "a" });
 
     expect(geometryOf(session, "b")).toMatchObject({ width: 180, height: 120 });
-    expect(result.text).toContain("APPLIED · match_size b → 180×120 (matching a)");
+    expect(result.text).toContain("APPLIED · resize b → 180×120 (matching a)");
   });
 
-  test("move_to and the placements land on the grid from off-grid arguments", () => {
+  test("move to and the placements land on the grid from off-grid arguments", () => {
     const session = offGridSession();
 
-    const moved = runOp(session, "move_to", { id: "a", x: 241, y: 477 });
+    const moved = runOp(session, "move", { id: "a", to: { x: 241, y: 477 } });
     expect(geometryOf(session, "a")).toMatchObject({ x: 240, y: 480 });
-    expect(moved.text).toContain("APPLIED · move_to a → (240, 480)");
+    expect(moved.text).toContain("APPLIED · move a → (240, 480)");
 
     const placed = runOp(session, "place_sticky", { id: "note", text: "n", at: [313, 47] });
     expect(geometryOf(session, "note")).toMatchObject({ x: 320, y: 40 });
@@ -261,10 +261,10 @@ describe("every geometry a gesture writes lands on the grid", () => {
     expect(sized.width).toBe(220);
     expect(resized.text).toContain(`resize odd → ${sized.width}×${sized.height}`);
 
-    const moved = runOp(session, "move_to", { id: "odd", x: 13, y: 13 });
+    const moved = runOp(session, "move", { id: "odd", to: { x: 13, y: 13 } });
     const placed = geometryOf(session, "odd");
     expect(placed).toMatchObject({ x: 20, y: 20 });
-    expect(moved.text).toContain(`move_to odd → (${placed.x}, ${placed.y})`);
+    expect(moved.text).toContain(`move odd → (${placed.x}, ${placed.y})`);
   });
 
   test("a carried descendant travels by its root's snapped delta, relative geometry intact", () => {
@@ -276,7 +276,7 @@ describe("every geometry a gesture writes lands on the grid", () => {
       ["frame"],
     );
 
-    runOp(session, "move_by", { id: "frame", dx: 20, dy: 20 });
+    runOp(session, "move", { id: "frame", by: { dx: 20, dy: 20 } });
 
     // The frame's own corner is written, so it lands on the grid …
     expect(geometryOf(session, "frame")).toMatchObject({ x: 40, y: 40 });

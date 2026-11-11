@@ -47,15 +47,15 @@ function framedBoard(): InteractiveCanvasDocument {
   );
 }
 
-describe("arrange · move_to", () => {
+describe("arrange · move to", () => {
   test("puts the top-left where asked, on the grid, and reports what landed", () => {
     const session = makeTestSession(makeDocument([box("alpha", 0, 0, 160, 100)]), ["alpha"]);
 
-    const result = runOp(session, "move_to", { id: "alpha", x: 241, y: 477 });
+    const result = runOp(session, "move", { id: "alpha", to: { x: 241, y: 477 } });
 
     expect(result.isError).toBeUndefined();
     // The APPLIED line reports the POST-SNAP geometry, not the request.
-    expect(result.text).toContain("APPLIED · move_to alpha → (240, 480)");
+    expect(result.text).toContain("APPLIED · move alpha → (240, 480)");
     expect(objectOf(session.draft, "alpha").geometry).toEqual({
       x: 240,
       y: 480,
@@ -67,10 +67,10 @@ describe("arrange · move_to", () => {
   test("a section carries its contents, and containment is unchanged", () => {
     const session = makeTestSession(framedBoard(), ["frame"]);
 
-    const result = runOp(session, "move_to", { id: "frame", x: 200, y: 100 });
+    const result = runOp(session, "move", { id: "frame", to: { x: 200, y: 100 } });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · move_to frame → (200, 100) (carrying 2)");
+    expect(result.text).toContain("APPLIED · move frame → (200, 100) (carrying 2)");
     // Every member of the closed set moved by the same delta …
     expect(objectOf(session.draft, "frame").geometry).toMatchObject({ x: 200, y: 100 });
     expect(objectOf(session.draft, "a").geometry).toMatchObject({ x: 240, y: 160 });
@@ -84,35 +84,74 @@ describe("arrange · move_to", () => {
     const session = makeTestSession(framedBoard(), ["frame"]);
     const draftBefore = session.draft;
 
-    const result = runOp(session, "move_to", { id: "a-b", x: 100, y: 100 });
+    const result = runOp(session, "move", { id: "a-b", to: { x: 100, y: 100 } });
 
     expect(result.isError).toBe(true);
-    expect(result.text).toContain("ERROR · move_to");
+    expect(result.text).toContain("ERROR · move");
     expect(result.text).toContain('id "a-b" is an edge');
     expect(result.text).toContain("re-routes itself");
     expect(session.draft).toBe(draftBefore);
   });
 });
 
-describe("arrange · move_by", () => {
+describe("arrange · move by", () => {
   test("nudges by a snapped delta and reports where the box ended up", () => {
     const session = makeTestSession(makeDocument([box("alpha", 100, 100, 160, 100)]), ["alpha"]);
 
-    const result = runOp(session, "move_by", { id: "alpha", dx: 17, dy: -33 });
+    const result = runOp(session, "move", { id: "alpha", by: { dx: 17, dy: -33 } });
 
     // 17 → 20 and -33 → -40: deltas snap the same way absolutes do, so a chain
     // of nudges never accumulates off-grid drift.
-    expect(result.text).toContain("APPLIED · move_by alpha +20,-40 → (120, 60)");
+    expect(result.text).toContain("APPLIED · move alpha +20,-40 → (120, 60)");
     expect(objectOf(session.draft, "alpha").geometry).toMatchObject({ x: 120, y: 60 });
   });
 
   test("a section nudge carries its contents too", () => {
     const session = makeTestSession(framedBoard(), ["frame"]);
 
-    runOp(session, "move_by", { id: "frame", dx: 20, dy: 20 });
+    runOp(session, "move", { id: "frame", by: { dx: 20, dy: 20 } });
 
     expect(objectOf(session.draft, "a").geometry).toMatchObject({ x: 60, y: 80 });
     expect(objectOf(session.draft, "b").geometry).toMatchObject({ x: 400, y: 80 });
+  });
+});
+
+describe("arrange · move modes", () => {
+  test("a call with neither to nor by, or with both, is refused and moves nothing", () => {
+    const session = makeTestSession(makeDocument([box("alpha", 100, 100, 160, 100)]), ["alpha"]);
+    const draftBefore = session.draft;
+
+    const neither = runOp(session, "move", { id: "alpha" });
+    const nulls = runOp(session, "move", { id: "alpha", to: null, by: null });
+    const both = runOp(session, "move", { id: "alpha", to: { x: 0, y: 0 }, by: { dx: 20, dy: 0 } });
+
+    expect(neither.text).toBe(
+      "ERROR · move — send exactly one of to or by — to puts the top-left corner at a point,"
+      + " by nudges the box by an offset.",
+    );
+    expect(nulls.text).toBe(neither.text);
+    expect(both.text).toBe("ERROR · move — send exactly one of to or by, not both.");
+    expect(session.draft).toBe(draftBefore);
+    expect(session.events).toEqual([]);
+  });
+
+  test("a null mode counts as absent, so the other mode runs", () => {
+    const session = makeTestSession(makeDocument([box("alpha", 100, 100, 160, 100)]), ["alpha"]);
+
+    const nudged = runOp(session, "move", { id: "alpha", to: null, by: { dx: 20, dy: 0 } });
+    expect(nudged.text).toContain("APPLIED · move alpha +20,+0 → (120, 100)");
+
+    const placed = runOp(session, "move", { id: "alpha", to: { x: 400, y: 200 }, by: null });
+    expect(placed.text).toContain("APPLIED · move alpha → (400, 200)");
+  });
+
+  test("a move to where the box already is names the box in its no-op", () => {
+    const session = makeTestSession(makeDocument([box("alpha", 100, 100, 160, 100)]), ["alpha"]);
+
+    const result = runOp(session, "move", { to: { x: 100, y: 100 }, id: "alpha" });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toBe("NO-OP · move alpha — the board already matches this, so nothing changed.");
   });
 });
 
@@ -203,16 +242,16 @@ describe("arrange · resize", () => {
   });
 });
 
-describe("arrange · match_size", () => {
+describe("arrange · resize like", () => {
   test("copies both dimensions from another box and reports the match", () => {
     const session = makeTestSession(
       makeDocument([box("alpha", 0, 0, 160, 100), box("beta", 400, 0, 300, 160)]),
       ["alpha"],
     );
 
-    const result = runOp(session, "match_size", { id: "alpha", like: "beta" });
+    const result = runOp(session, "resize", { id: "alpha", like: "beta" });
 
-    expect(result.text).toContain("APPLIED · match_size alpha → 300×160 (matching beta)");
+    expect(result.text).toContain("APPLIED · resize alpha → 300×160 (matching beta)");
     expect(objectOf(session.draft, "alpha").geometry).toMatchObject({ width: 300, height: 160 });
   });
 
@@ -220,7 +259,7 @@ describe("arrange · match_size", () => {
     const session = makeTestSession(makeDocument([box("alpha", 0, 0, 160, 100)]), ["alpha"]);
     const draftBefore = session.draft;
 
-    const result = runOp(session, "match_size", { id: "alpha", like: "alpha" });
+    const result = runOp(session, "resize", { id: "alpha", like: "alpha" });
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("cannot be its own size source");
@@ -231,13 +270,60 @@ describe("arrange · match_size", () => {
   test("the size source must be a box that is on the board", () => {
     const session = makeTestSession(framedBoard(), ["frame"]);
 
-    const edge = runOp(session, "match_size", { id: "a", like: "a-b" });
+    const edge = runOp(session, "resize", { id: "a", like: "a-b" });
     expect(edge.isError).toBe(true);
     expect(edge.text).toContain('like "a-b" is an edge');
 
-    const missing = runOp(session, "match_size", { id: "a", like: "ghost" });
+    const missing = runOp(session, "resize", { id: "a", like: "ghost" });
     expect(missing.isError).toBe(true);
     expect(missing.text).toContain('like "ghost" is not on the board');
+  });
+
+  test("like together with width or height is refused, and nothing resizes", () => {
+    const session = makeTestSession(
+      makeDocument([box("alpha", 0, 0, 160, 100), box("beta", 400, 0, 300, 160)]),
+      ["alpha"],
+    );
+    const draftBefore = session.draft;
+
+    const withWidth = runOp(session, "resize", { id: "alpha", like: "beta", width: 200 });
+    const withHeight = runOp(session, "resize", { id: "alpha", like: "beta", height: 200 });
+
+    expect(withWidth.text).toBe(
+      "ERROR · resize — like copies both dimensions, so send it without width or height.",
+    );
+    expect(withHeight.text).toBe(withWidth.text);
+    expect(session.draft).toBe(draftBefore);
+  });
+
+  test("a null like, width or height counts as absent", () => {
+    const session = makeTestSession(
+      makeDocument([box("alpha", 0, 0, 160, 100), box("beta", 400, 0, 300, 160)]),
+      ["alpha"],
+    );
+
+    const matched = runOp(session, "resize", { id: "alpha", like: "beta", width: null, height: null });
+    expect(matched.text).toContain("APPLIED · resize alpha → 300×160 (matching beta)");
+
+    const widened = runOp(session, "resize", { id: "alpha", like: null, width: 400, height: null });
+    expect(widened.text).toContain("APPLIED · resize alpha → 400×160");
+
+    const nothing = runOp(session, "resize", { id: "alpha", like: null, width: null, height: null });
+    expect(nothing.text).toBe(
+      "ERROR · resize — resize needs a width, a height or like — as written it asks for no change.",
+    );
+  });
+
+  test("a no-op names the resized box, not the like source that came first", () => {
+    const session = makeTestSession(
+      makeDocument([box("alpha", 0, 0, 300, 160), box("beta", 400, 0, 300, 160)]),
+      ["alpha"],
+    );
+
+    const result = runOp(session, "resize", { like: "beta", id: "alpha" });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toBe("NO-OP · resize alpha — the board already matches this, so nothing changed.");
   });
 
   test("matching a source too small for the text lands at the needed size", () => {
@@ -250,12 +336,12 @@ describe("arrange · match_size", () => {
       ["alpha"],
     );
 
-    const result = runOp(session, "match_size", { id: "alpha", like: "small" });
+    const result = runOp(session, "resize", { id: "alpha", like: "small" });
 
     expect(result.isError).toBeUndefined();
     const landed = objectOf(session.draft, "alpha").geometry;
     expect(textFitReport(objectOf(session.draft, "alpha"), landed, wordy.text).fits).toBe(true);
-    expect(result.text).toContain(`APPLIED · match_size alpha → ${landed.width}×${landed.height} (matching small)`);
+    expect(result.text).toContain(`APPLIED · resize alpha → ${landed.width}×${landed.height} (matching small)`);
     expect(result.text).toContain("grew alpha to");
   });
 
@@ -271,11 +357,11 @@ describe("arrange · match_size", () => {
       ["frame"],
     );
 
-    runOp(session, "match_size", { id: "frame", like: "small" });
+    runOp(session, "resize", { id: "frame", like: "small" });
     expect(objectOf(session.draft, "inside").parentId).toBe("frame");
     expect(objectOf(session.draft, "outer").parentId).toBeNull();
 
-    runOp(session, "match_size", { id: "frame", like: "large" });
+    runOp(session, "resize", { id: "frame", like: "large" });
     expect(objectOf(session.draft, "outer").parentId).toBe("frame");
   });
 });
@@ -442,7 +528,7 @@ describe("arrange · D6 waypoint reconciliation", () => {
 
     // Both endpoint owners ride the frame, so the move is rigid: the fan shape
     // the human drew is preserved rather than thrown away.
-    const result = runOp(session, "move_to", { id: "frame", x: 100, y: 200 });
+    const result = runOp(session, "move", { id: "frame", to: { x: 100, y: 200 } });
 
     expect(result.isError).toBeUndefined();
     expect(connectionOf(session.draft, "a-b").waypoints).toEqual([[340, 500], [440, 500]]);
@@ -453,7 +539,7 @@ describe("arrange · D6 waypoint reconciliation", () => {
   test("moving one endpoint owner drops the waypoints and ROUTES shows the re-route", () => {
     const session = makeTestSession(waypointedBoard(), ["frame"]);
 
-    const result = runOp(session, "move_to", { id: "b", x: 380, y: 300 });
+    const result = runOp(session, "move", { id: "b", to: { x: 380, y: 300 } });
 
     expect(result.isError).toBeUndefined();
     // Asymmetric: the stored polyline would sweep through stale space, so it

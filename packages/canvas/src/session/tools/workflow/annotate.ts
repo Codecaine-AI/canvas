@@ -36,7 +36,8 @@ import { commitDraft } from "../../perception/live-draft-view";
 import type { SessionEventSink } from "../../perception/perception";
 import type { LayoutSession } from "../../session";
 import type { LayoutToolTextResult } from "../runtime";
-import { defineWorkflowTool, nullableString } from "./workflow-tool";
+import { nullableString } from "../schemas";
+import { defineWorkflowTool } from "./workflow-tool";
 
 /** What `annotate` was sent. A null `objectId` or `thread` counts as absent. */
 export interface AnnotateFields {

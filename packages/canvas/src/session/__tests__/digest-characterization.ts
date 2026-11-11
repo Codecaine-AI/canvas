@@ -106,5 +106,5 @@ export const DIAGNOSTICS_TEXT_SNAPSHOTS: Readonly<Record<string, string>> = {
   E2 covered-content: b1 and b2 overlap by 75% of the smaller box; covers the text center of b1 and b2 (move b2 clear of b1)`,
   "perception-quickfix": CLEAN,
   "comprehensive-all-blocks": `DIAGNOSTICS · 1 error · 0 warnings
-  E1 covered-content: sections nested-frame and section-all overlap by 304×192px (move_to section-all clear of nested-frame, or move the children that make one of them grow)`,
+  E1 covered-content: sections nested-frame and section-all overlap by 304×192px (move section-all clear of nested-frame, or move the children that make one of them grow)`,
 };

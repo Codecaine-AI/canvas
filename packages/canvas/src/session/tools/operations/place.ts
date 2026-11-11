@@ -29,7 +29,7 @@
  *    packages/canvas/src/state/section-membership.ts). So a place or a clone
  *    inside a frozen region drops the object on the board, not into the region,
  *    and there is nothing for a validate-time gate to add. `clone`'s SOURCE is
- *    read the same way `match_size`'s `like` source is — measured, never
+ *    read the same way `resize`'s `like` source is — measured, never
  *    written — so a locked box can still be copied. `connect` is the exception among the
  *    five: it writes a new edge, but an edge belongs to the regions its ends
  *    sit in, so it gates on those (`requireUnlockedEndpoint`).

@@ -5,7 +5,7 @@
  *
  * This is deliberately NOT the model-facing tool roster — that lives in
  * ./operations (`operationTools`), and the capabilities block keys off it. A
- * diff cannot recover a gesture: `move_to`, `move_by`, `align`, and
+ * diff cannot recover a gesture: `move` (either mode), `align`, and
  * `space_out` all land in the document as the same geometry change, so asking
  * a diff to name the tool would mean guessing. What a diff CAN say is what
  * this file says — added / changed / removed, per entity kind, plus the one

@@ -26,7 +26,7 @@
  * consume the parsed arguments.
  */
 import { StringEnum, Type } from "@mariozechner/pi-ai";
-import type { Static } from "@mariozechner/pi-ai";
+import type { Static, TSchema } from "@mariozechner/pi-ai";
 
 import { CANVAS_COLORS, CANVAS_ICON_GLYPHS } from "../../state/schema";
 
@@ -45,10 +45,50 @@ const Patch = { additionalProperties: false, minProperties: 1 } as const;
 
 /** Board ids: the document's own id grammar, enforced at the tool boundary
  * rather than several layers below it. */
+const ID_PATTERN = "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,96}$";
 export const Id = Type.String({
-  pattern: "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,96}$",
+  pattern: ID_PATTERN,
   description: "A board id: letters, digits, and _ . : - after a leading alphanumeric.",
 });
+
+// ---------------------------------------------------------------------------
+// Nullable modes — a null field counts as absent
+// ---------------------------------------------------------------------------
+//
+// A merged tool takes one optional value or sub-object per mode, and a null
+// one counts as absent, so a client that sends every key with null for the
+// unused ones still sends one mode.
+//
+// pi-ai's `validateToolArguments` runs `Value.Convert` before it checks, and
+// Convert rewrites a primitive's null inside a TypeBox union: `[String, Null]`
+// turns null into "", `[Number, Null]` turns it into 0, and the Null-first
+// orders turn "" or 0 into null. Either way the call would mean something it
+// did not say. A primitive mode is therefore the JSON type pair, which reaches
+// the tool as sent. A sub-object mode is the union `[Object, Null]`: Convert
+// keeps a null object null, and the type pair would refuse null under the
+// object's own `required`.
+
+/** An optional string where null counts as absent. */
+export function nullableString(description: string) {
+  return Type.Optional(Type.Unsafe<string | null>({ type: ["string", "null"], description }));
+}
+
+/** An optional board id where null counts as absent. */
+export function nullableId(description: string) {
+  return Type.Optional(
+    Type.Unsafe<string | null>({ type: ["string", "null"], pattern: ID_PATTERN, description }),
+  );
+}
+
+/** An optional number where null counts as absent. */
+export function nullableNumber(description: string) {
+  return Type.Optional(Type.Unsafe<number | null>({ type: ["number", "null"], description }));
+}
+
+/** An optional sub-object mode where null counts as absent. */
+export function nullableObject<T extends TSchema>(schema: T, description: string) {
+  return Type.Optional(Type.Union([schema, Type.Null()], { description }));
+}
 
 /** The closed color roster, read off the canvas package so the tool surface
  * cannot drift from the palette. */

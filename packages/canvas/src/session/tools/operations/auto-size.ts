@@ -3,7 +3,7 @@
  * one size.
  *
  * Every gesture that sets a node's text or size (`place_shape`, `clone`,
- * `update_text`, `change_shape`, `resize`, `match_size`) ends here with the
+ * `update_text`, `change_shape`, `resize`) ends here with the
  * ids it touched. Two rules, in order:
  *
  * 1. GROW TO FIT. When the renderer's own wrap/clamp verdict
@@ -12,9 +12,8 @@
  *    It never shrinks. It keeps its center, so a node in a
  *    row stays in that row: an on-grid side grows by whole 40px steps (two
  *    grid units), so its corner stays on the grid and its center does not
- *    move, however many edits it takes to get there. `resize` and
- *    `match_size` hold the top-left corner instead, like the gestures
- *    themselves. A resize below the needed size therefore lands at the needed
+ *    move, however many edits it takes to get there. `resize`, in both its
+ *    modes, holds the top-left corner instead, like the gesture itself. A resize below the needed size therefore lands at the needed
  *    size, never clipped.
  *
  * 2. PEERS GROW WITH IT. When rule 1 grew a node, or the node was just
@@ -27,7 +26,7 @@
  *    the node itself keeps the anchor of rule 1. Nothing shrinks and nothing
  *    else moves. A box whose match would newly overlap another box it does
  *    not overlap now keeps its size, and the note names the box in the way.
- *    `match_size` never writes its `like` source. So a node placed into a
+ *    `resize` never writes its `like` source. So a node placed into a
  *    row that already grew joins the row's size.
  *
  *    Why the dimension across the line, not along it: a row of equal heights
@@ -44,7 +43,7 @@
  * 0. A CARD NOTE (a note on the schematic themes) comes before all three:
  *    its height becomes the height its text needs, padding included, on the
  *    grid (objects/sticky/note-fit.ts), shrinking as well as growing; under
- *    `resize` and `match_size` a taller asked height stays. Top-left held,
+ *    `resize`, in both its modes, a taller asked height stays. Top-left held,
  *    width as set, never a peer.
  *
  * Left alone: paper stickies (their square is their own business), sections (their

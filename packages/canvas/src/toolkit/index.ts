@@ -1,7 +1,7 @@
 /**
  * The layout editor's toolkit, bound to a canvas file.
  *
- * A board is edited through one surface: the 24 gesture tools
+ * A board is edited through one surface: the 22 gesture tools
  * (`operationTools`) and the workflow tools (`workflowTools`), dispatched
  * through a `LayoutToolRuntime` bound to a `LayoutSession`.
  * `createToolRuntime(host)` asks its host for "the current session" and every
@@ -104,7 +104,7 @@ export interface ToolkitTool {
 }
 
 /**
- * The file-session surface, in the agent's registration order: the 24 gestures
+ * The file-session surface, in the agent's registration order: the 22 gestures
  * first, then every workflow tool except the run-only ones. `resolve_request`
  * stays — its disposition is a reply and a status change on the annotation
  * thread, which is document content and persists like any edit.

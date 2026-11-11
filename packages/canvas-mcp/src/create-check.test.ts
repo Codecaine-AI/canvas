@@ -206,7 +206,7 @@ describe("canvas_create and canvas_check", () => {
 
     const before = JSON.parse(readFileSync(sidecar, "utf8"));
     const target = before.objects.find((object: { type: string }) => object.type !== "section");
-    const moved = await call(service, "move_by", { id: target.id, dx: 40, dy: 0 });
+    const moved = await call(service, "move", { id: target.id, by: { dx: 40, dy: 0 } });
     expect(textOf(moved)).toContain(`SAVED · ${shown}`);
     const after = JSON.parse(readFileSync(sidecar, "utf8"));
     // The gesture snaps to the grid, so the saved x moved right and matches the draft.
@@ -285,7 +285,7 @@ describe("canvas_create and canvas_check", () => {
     expect(refused.content.some((item) => item.type === "image")).toBe(false);
 
     // Every gesture now gives the same refusal.
-    const gesture = await service.call("move_by", { id: "a", dx: 16, dy: 0 });
+    const gesture = await service.call("move", { id: "a", by: { dx: 16, dy: 0 } });
     expect(gesture.isError).toBe(true);
     expect(textOf(gesture)).toBe(textOf(refused));
 

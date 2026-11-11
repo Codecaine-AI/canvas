@@ -72,11 +72,11 @@ function expectLockRefusal(
 }
 
 describe("the reviewer's three repro cases", () => {
-  test("move_by on a child of a locked-all section is refused", () => {
+  test("move on a child of a locked-all section is refused", () => {
     const session = lockedSession();
     const draftBefore = session.draft;
 
-    const result = runOp(session, "move_by", { id: "inside", dx: 20, dy: 0 });
+    const result = runOp(session, "move", { id: "inside", by: { dx: 20, dy: 0 } });
 
     expectLockRefusal(result, 'id "inside" is inside "ops" (locked all)');
     expect(session.draft).toBe(draftBefore);
@@ -93,11 +93,11 @@ describe("the reviewer's three repro cases", () => {
     expect(session.draft).toBe(draftBefore);
   });
 
-  test("move_by on the locked frame itself is refused", () => {
+  test("move on the locked frame itself is refused", () => {
     const session = lockedSession();
     const draftBefore = session.draft;
 
-    const result = runOp(session, "move_by", { id: "ops", dx: 20, dy: 20 });
+    const result = runOp(session, "move", { id: "ops", by: { dx: 20, dy: 20 } });
 
     expectLockRefusal(result, 'id "ops" is locked (all)');
     expect(session.draft).toBe(draftBefore);
@@ -108,7 +108,7 @@ describe("background pins the frame and nothing else", () => {
   test("the frame refuses its own mutation", () => {
     const session = makeTestSession(backgroundBoard(), ["page"]);
 
-    const moved = runOp(session, "move_by", { id: "page", dx: 20, dy: 20 });
+    const moved = runOp(session, "move", { id: "page", by: { dx: 20, dy: 20 } });
     expectLockRefusal(moved, 'id "page" is locked (background)');
 
     const resized = runOp(session, "resize", { id: "page", width: 800 });
@@ -124,7 +124,7 @@ describe("background pins the frame and nothing else", () => {
   test("what the frame holds stays editable — boxes, text, and the wires between them", () => {
     const session = makeTestSession(backgroundBoard(), ["page"]);
 
-    const moved = runOp(session, "move_by", { id: "child", dx: 20, dy: 0 });
+    const moved = runOp(session, "move", { id: "child", by: { dx: 20, dy: 0 } });
     expect(moved.isError).toBeUndefined();
     expect(session.draft.objects.find((object) => object.id === "child")?.geometry)
       .toMatchObject({ x: 120, y: 100 });
@@ -156,7 +156,7 @@ describe("lock management is exempt from the lock", () => {
     expect(session.draft.objects.find((object) => object.id === "ops")?.locked)
       .toBeUndefined();
     // And the region it protected is editable again, in the same turn.
-    const moved = runOp(session, "move_by", { id: "inside", dx: 20, dy: 0 });
+    const moved = runOp(session, "move", { id: "inside", by: { dx: 20, dy: 0 } });
     expect(moved.isError).toBeUndefined();
   });
 
@@ -284,7 +284,7 @@ describe("the rest of the roster under a locked-all frame", () => {
     const draftBefore = session.draft;
 
     expectLockRefusal(
-      runOp(session, "move_to", { id: "inside", x: 200, y: 200 }),
+      runOp(session, "move", { id: "inside", to: { x: 200, y: 200 } }),
       'id "inside" is inside "ops" (locked all)',
     );
     expectLockRefusal(
@@ -292,7 +292,7 @@ describe("the rest of the roster under a locked-all frame", () => {
       'id "inside" is inside "ops" (locked all)',
     );
     expectLockRefusal(
-      runOp(session, "match_size", { id: "inside", like: "free" }),
+      runOp(session, "resize", { id: "inside", like: "free" }),
       'id "inside" is inside "ops" (locked all)',
     );
     expectLockRefusal(
@@ -334,7 +334,7 @@ describe("the rest of the roster under a locked-all frame", () => {
     expect(session.draft).toBe(draftBefore);
   });
 
-  test("a locked box can still be read: cloned, and used as a match_size source", () => {
+  test("a locked box can still be read: cloned, and used as a resize like source", () => {
     const document = lockedBoard();
     const source = document.objects.find((object) => object.id === "inside")!;
     source.geometry = { ...source.geometry, width: 240, height: 140 };
@@ -346,9 +346,9 @@ describe("the rest of the roster under a locked-all frame", () => {
     expect(session.draft.objects.find((object) => object.id === "copy")?.locked)
       .toBeUndefined();
 
-    const matched = runOp(session, "match_size", { id: "free", like: "inside" });
+    const matched = runOp(session, "resize", { id: "free", like: "inside" });
     expect(matched.isError).toBeUndefined();
-    expect(matched.text).toContain("APPLIED · match_size free → 240×140 (matching inside)");
+    expect(matched.text).toContain("APPLIED · resize free → 240×140 (matching inside)");
     expect(session.draft.objects.find((object) => object.id === "free")?.geometry)
       .toMatchObject({ width: 240, height: 140 });
   });

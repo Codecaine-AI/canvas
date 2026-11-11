@@ -81,10 +81,9 @@ export interface OpContext {
   /**
    * Require an id that names something with a BOX — an object or a section,
    * but not a connection. This is `requireBoardEntity` minus edges, and it is
-   * the gate for the arrange gestures (`move_to`, `move_by`, `resize`,
-   * `match_size`, `align`, `space_out`): a wire has no position or size of its
-   * own, it is derived from the two boxes it joins, so the redirect points at
-   * those.
+   * the gate for the arrange gestures (`move`, `resize`, `align`,
+   * `space_out`): a wire has no position or size of its own, it is derived
+   * from the two boxes it joins, so the redirect points at those.
    *
    * `field` names the parameter in the diagnostic, since these gestures take
    * ids under several names (`id`, `ids`, `like`).

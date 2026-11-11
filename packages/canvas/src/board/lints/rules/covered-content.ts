@@ -143,7 +143,7 @@ export const rule: LayoutRule = {
           at: [a.id, b.id],
           where: shared,
           message: `sections ${a.id} and ${b.id} overlap by ${Math.round(shared.width)}×${Math.round(shared.height)}px`,
-          suggestion: `move_to ${b.id} clear of ${a.id}, or move the children that make one of them grow`,
+          suggestion: `move ${b.id} clear of ${a.id}, or move the children that make one of them grow`,
         });
       }
     }
@@ -184,7 +184,7 @@ export const rule: LayoutRule = {
           at: [section.id, node.id],
           where: bounds(pieces),
           message: `section ${section.id} covers ${Math.round(fraction * 100)}% of ${node.id}, which it does not hold${centered ? ", including its text center" : ""}`,
-          suggestion: `move_to ${node.id} clear of ${section.id}, or move the children that make ${section.id} grow`,
+          suggestion: `move ${node.id} clear of ${section.id}, or move the children that make ${section.id} grow`,
         });
       }
     }

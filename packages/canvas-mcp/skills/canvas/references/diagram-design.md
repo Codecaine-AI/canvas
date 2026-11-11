@@ -1,4 +1,4 @@
-<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 0cd5bd8f0045cdbd51b06d9b755929aeebd5d3ee3dbab6e24af2f9ef91fc4ae8). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
+<!-- Generated from packages/canvas/src/authoring/design.ts (sha256 82c524bf88508351b185b0a74fea23384adb336204f06bdab8f6f2b1189244f2). Do not edit. Regenerate with `bun packages/canvas-mcp/src/cli.ts guidance --write`. -->
 
 # Diagram Design
 
@@ -191,7 +191,7 @@
         - Before you place the first section, count the wires between each pair of sections. Put the pair with the most wires side by side, so no wire has a third section between its ends.
         - Lay out sections in the order the main flow visits them, so the main path runs one way.
         - Put the target of a return or retry next to its source, and a failure end (a reject, a dead letter) beside the step that fails.
-        - A wire that runs around or through a section holding neither end needs a move, not a waypoint: move_to the receiving node beside the sender, or a section beside its partner.
+        - A wire that runs around or through a section holding neither end needs a move, not a waypoint: move the receiving node beside the sender, or a section beside its partner.
         - Give every decision and retry all its exits, and draw each failure path to its end.
     </returns_retries_and_failures>
 </layout_and_connections>

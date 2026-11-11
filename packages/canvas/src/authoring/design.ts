@@ -110,7 +110,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         - Before you place the first section, count the wires between each pair of sections. Put the pair with the most wires side by side, so no wire has a third section between its ends.
         - Lay out sections in the order the main flow visits them, so the main path runs one way.
         - Put the target of a return or retry next to its source, and a failure end (a reject, a dead letter) beside the step that fails.
-        - A wire that runs around or through a section holding neither end needs a move, not a waypoint: move_to the receiving node beside the sender, or a section beside its partner.
+        - A wire that runs around or through a section holding neither end needs a move, not a waypoint: move the receiving node beside the sender, or a section beside its partner.
         - Give every decision and retry all its exits, and draw each failure path to its end.
     </returns_retries_and_failures>
 </layout_and_connections>`,

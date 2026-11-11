@@ -36,10 +36,8 @@ export type OperationToolName =
   | "clone"
   | "connect"
   // Arrange
-  | "move_to"
-  | "move_by"
+  | "move"
   | "resize"
-  | "match_size"
   | "align"
   | "space_out"
   | "arrange_section"

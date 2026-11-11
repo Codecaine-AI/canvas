@@ -37,7 +37,7 @@ function tempWorkspace(): string {
 }
 
 describe("canvas MCP server", () => {
-  test("tools/list exposes all 26 operation tools with their exact names, descriptions, and schemas", async () => {
+  test("tools/list exposes all 24 operation tools with their exact names, descriptions, and schemas", async () => {
     const server = createCanvasMcpServer({ workspace: tempWorkspace() });
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -48,7 +48,7 @@ describe("canvas MCP server", () => {
     const { tools } = await client.listTools();
     const byName = new Map(tools.map((tool) => [tool.name, tool]));
 
-    expect(operationTools).toHaveLength(26);
+    expect(operationTools).toHaveLength(24);
     for (const operation of operationTools) {
       const listed = byName.get(operation.name);
       expect(listed, operation.name).toBeDefined();
@@ -60,7 +60,7 @@ describe("canvas MCP server", () => {
     }
     expect(byName.has("finalize")).toBe(false);
     expect(tools.slice(0, 3).map((tool) => tool.name)).toEqual(["canvas_list", "canvas_open", "canvas_guidance"]);
-    expect(tools).toHaveLength(5 + 26 + 4);
+    expect(tools).toHaveLength(5 + 24 + 4);
   });
 
   test("tools/list carries the name fields and the section header glyph; no placement or copy takes a detail", async () => {
@@ -228,16 +228,16 @@ describe("canvas MCP server", () => {
     expect(shown(placed)).toContain("APPLIED · place_shape fb-shape");
 
     // Dropped onto predefined-get-next-question: the overlap is the edit's one new error.
-    const raised = await client.callTool({ name: "move_to", arguments: { id: "fb-shape", x: 1917, y: 1988 } });
+    const raised = await client.callTool({ name: "move", arguments: { id: "fb-shape", to: { x: 1917, y: 1988 } } });
     expect(raised.isError).toBeFalsy();
-    expect(shown(raised)).toContain("APPLIED · move_to fb-shape");
+    expect(shown(raised)).toContain("APPLIED · move fb-shape");
     expect(shown(raised)).toMatch(/LINTS · \+1 error \(\d+ open\)/);
     expect(shown(raised)).toMatch(/\+ E\d+ covered-content: .*fb-shape.*predefined-get-next-question|\+ E\d+ covered-content: .*predefined-get-next-question.*fb-shape/);
     expect(shown(raised)).toContain("clear of");
 
     // Moved clear, nothing new: the resolved finding is not printed.
-    const cleared = await client.callTool({ name: "move_to", arguments: { id: "fb-shape", x: 960, y: 1600 } });
-    expect(shown(cleared)).toContain("APPLIED · move_to fb-shape");
+    const cleared = await client.callTool({ name: "move", arguments: { id: "fb-shape", to: { x: 960, y: 1600 } } });
+    expect(shown(cleared)).toContain("APPLIED · move fb-shape");
     expect(shown(cleared)).toMatch(/LINTS · (clean|no new errors)/);
     expect(shown(cleared)).not.toContain("covered-content");
   }, 30_000);

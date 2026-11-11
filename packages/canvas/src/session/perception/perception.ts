@@ -423,7 +423,7 @@ function updateConnectionDescriptors(
  * The cumulative base → draft diff, one compact line per document change,
  * rendered from the operations `diffDocuments` returns. Entity lines lead with
  * a DELTA verb (./op-surface.ts), not a tool name: a diff can say a box was
- * added, changed, or removed, and cannot say which gesture did it — `move_to`
+ * added, changed, or removed, and cannot say which gesture did it — `move`
  * and `align` leave the same trace. The description and annotation-thread
  * lines name their document channel directly. What was CALLED is the op
  * ledger's story, not this block's.
