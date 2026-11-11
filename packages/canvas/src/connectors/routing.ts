@@ -16,6 +16,8 @@ import {
 } from "../objects/geometry";
 import { PathGenerator, type OrthogonalObstacle } from "./pathfinding/path-generator";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
+import { onBackendChange } from "../theme/text-measure";
+import { assignLanes, LANE_GAP_PX, type LaneSpan, type LaneWire } from "./lanes";
 // Connector routing figures (moved from theme/tokens.ts in the theme
 // dispersal — this router is their consumer; the routing tests import them
 // from here). Logical px.
@@ -179,6 +181,157 @@ export function routeConnection(
     routeConnectionPolyline(fromObject, toObject, connection, obstacles, canvasStyle),
     canvasStyle.connectorCornerRadiusPx,
   );
+}
+
+/** The objects and wires one board draws together. */
+export type RoutingBoard = {
+  objects: ReadonlyArray<InteractiveCanvasObject>;
+  connections: ReadonlyArray<InteractiveCanvasConnection>;
+};
+
+/**
+ * `connection` as its board draws it: routeConnection's route, then moved
+ * into lanes with the board's other wires (./lanes.ts), so two wires with two
+ * meanings never paint as one line. A connection or endpoint that is not the
+ * board's own (a drag preview's stand-in) gets routeConnection's route.
+ */
+export function routeConnectionOnBoard(
+  board: RoutingBoard,
+  connection: InteractiveCanvasConnection,
+  fromObject: InteractiveCanvasObject,
+  toObject: InteractiveCanvasObject,
+  canvasStyle: CanvasStyle = DEFAULT_CANVAS_STYLE,
+): RoutedConnection {
+  const own = boardRoutes(board, canvasStyle).get(connection);
+  return own && own.fromObject === fromObject && own.toObject === toObject
+    ? own.routed
+    : routeConnection(fromObject, toObject, connection, board.objects, canvasStyle);
+}
+
+type BoardRoute = { fromObject: InteractiveCanvasObject; toObject: InteractiveCanvasObject; routed: RoutedConnection };
+type BoardRoutes = Map<InteractiveCanvasConnection, BoardRoute>;
+
+// One lane pass per board state: documents are immutable, so the two arrays
+// name the state. Styles are often fresh copies, so they key by value.
+const boardRouteCache = new WeakMap<
+  ReadonlyArray<InteractiveCanvasObject>,
+  WeakMap<ReadonlyArray<InteractiveCanvasConnection>, Map<string, BoardRoutes>>
+>();
+const styleKeys = new WeakMap<CanvasStyle, string>();
+// Icon captions set where wires attach, and their size follows the measuring backend.
+let backendRevision = 0;
+onBackendChange(() => {
+  backendRevision += 1;
+});
+
+function boardRoutes(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes {
+  let byConnections = boardRouteCache.get(board.objects);
+  if (!byConnections) boardRouteCache.set(board.objects, (byConnections = new WeakMap()));
+  let byStyle = byConnections.get(board.connections);
+  if (!byStyle) byConnections.set(board.connections, (byStyle = new Map()));
+  let styleKey = styleKeys.get(canvasStyle);
+  if (styleKey === undefined) styleKeys.set(canvasStyle, (styleKey = JSON.stringify(canvasStyle)));
+  const key = `${backendRevision}:${styleKey}`;
+  let routes = byStyle.get(key);
+  if (!routes) {
+    for (const old of [...byStyle.keys()]) {
+      if (!old.startsWith(`${backendRevision}:`)) byStyle.delete(old);
+    }
+    byStyle.set(key, (routes = routeBoard(board, canvasStyle)));
+  }
+  return routes;
+}
+
+function routeBoard(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes {
+  const byId = new Map(board.objects.map((object) => [object.id, object]));
+  const routes: BoardRoutes = new Map();
+  const wires: LaneWire[] = [];
+  const byWireId = new Map<string, InteractiveCanvasConnection>();
+  for (const connection of board.connections) {
+    const fromObject = byId.get(connection.from.objectId);
+    const toObject = byId.get(connection.to.objectId);
+    if (!fromObject || !toObject) continue;
+    const routed = routeConnection(fromObject, toObject, connection, board.objects, canvasStyle);
+    routes.set(connection, { fromObject, toObject, routed });
+    const points = routed.points;
+    if (!points || points.length < 2 || byWireId.has(connection.id)) continue;
+    byWireId.set(connection.id, connection);
+    const arrow = connection.arrow ?? "forward";
+    let keepOut: KeepOut | null = null;
+    wires.push({
+      id: connection.id,
+      from: fromObject.id,
+      to: toObject.id,
+      color: connection.color ?? "",
+      dash: connection.style ?? "solid",
+      headAtStart: arrow === "back" || arrow === "both",
+      headAtEnd: arrow === "forward" || arrow === "both",
+      points,
+      lanesFixed: validWaypoints(connection.waypoints) !== null,
+      startSpan: portSpan(fromObject, points[0]!, points[1]!, canvasStyle),
+      endSpan: portSpan(toObject, points[points.length - 1]!, points[points.length - 2]!, canvasStyle),
+      blockers: (candidate) => {
+        keepOut ??= { ...withoutSections(routeKeepOut(fromObject, toObject, routed.start, routed.end, board.objects, canvasStyle)), selves: [] };
+        return routeBlockers(candidate, keepOut).length;
+      },
+    });
+  }
+  for (const [id, points] of assignLanes(wires)) {
+    const connection = byWireId.get(id)!;
+    const solo = routes.get(connection)!;
+    const laned = routedConnectionFromPoints(points, points[0]!, points[points.length - 1]!, solo.routed.startAnchor, solo.routed.endAnchor);
+    routes.set(connection, { ...solo, routed: withCornerRadius(laned, canvasStyle.connectorCornerRadiusPx) });
+  }
+  return routes;
+}
+
+/** Room for a port on the side of `object` that the end run `tip -> corner` leaves, along that side. */
+function portSpan(
+  object: InteractiveCanvasObject,
+  tip: CanvasPoint,
+  corner: CanvasPoint,
+  canvasStyle: CanvasStyle,
+): LaneSpan | null {
+  const horizontal = Math.abs(tip.y - corner.y) <= ROUTE_EPSILON;
+  if (!horizontal && Math.abs(tip.x - corner.x) > ROUTE_EPSILON) return null;
+  const side: Anchor = horizontal ? (corner.x > tip.x ? "right" : "left") : corner.y > tip.y ? "bottom" : "top";
+  const span = edgeSlideSpan(object, side, canvasStyle);
+  if (!span || Math.abs(span.fixed - (horizontal ? tip.x : tip.y)) > WAYPOINT_ORTHOGONAL_EPSILON_PX) return null;
+  return { min: span.min, max: span.max };
+}
+
+/** Farthest a lane pass moves a wire from its own route: a few lanes. */
+const CHIP_FOLLOW_PX = LANE_GAP_PX * 4;
+
+/**
+ * A label chip centre kept on its wire. Label placement reads each wire's own
+ * route (routeConnection), so the chip of a wire the lane pass moved sits
+ * beside its line: this moves it the short way back on. A chip already on the
+ * line stays, and so does one its author pushed off the line (`offset`).
+ */
+export function chipPointOnRoute(
+  point: CanvasPoint,
+  routed: RoutedConnection,
+  connection: Pick<InteractiveCanvasConnection, "labelPosition">,
+): CanvasPoint {
+  const points = routed.points;
+  if (!points || points.length < 2 || connection.labelPosition?.offset) return point;
+  let best = point;
+  let bestDistance = Infinity;
+  for (let index = 1; index < points.length; index += 1) {
+    const a = points[index - 1]!;
+    const b = points[index]!;
+    const lengthSquared = (b.x - a.x) ** 2 + (b.y - a.y) ** 2;
+    if (lengthSquared <= ROUTE_EPSILON) continue;
+    const t = clamp(((point.x - a.x) * (b.x - a.x) + (point.y - a.y) * (b.y - a.y)) / lengthSquared, 0, 1);
+    const candidate = { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y) };
+    const candidateDistance = distance(point, candidate);
+    if (candidateDistance < bestDistance) {
+      bestDistance = candidateDistance;
+      best = candidate;
+    }
+  }
+  return bestDistance <= WAYPOINT_ORTHOGONAL_EPSILON_PX || bestDistance > CHIP_FOLLOW_PX ? point : best;
 }
 
 /** Where `connection` leaves and enters before any detour: its sides (explicit, else picked) and points. */
