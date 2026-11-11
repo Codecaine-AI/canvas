@@ -4,7 +4,7 @@ import { useCallback, useState, type Dispatch, type SetStateAction } from "react
 import { objectDefFor } from "../../../../objects/object-def";
 import type { CanvasAction } from "../../../../state/actions";
 import type { CanvasPoint } from "../../../../state/geometry";
-import { routeConnection } from "../../../../connectors/routing";
+import { chipPointOnRoute, routeConnectionOnBoard } from "../../../../connectors/routing";
 import { placedLabelPoint } from "../../../../connectors/label-placement";
 import { useCanvasStyle } from "../../../../theme/canvas-style-context";
 import { noteTextPatch } from "../../../../objects/sticky/note-fit";
@@ -70,16 +70,15 @@ export function useTextEditing({ document, dispatch }: UseTextEditingArgs): Text
   const labelEditToObject = labelEditConnection
     ? document.objects.find((object) => object.id === labelEditConnection.to.objectId)
     : undefined;
-  const labelEditPoint =
+  const labelEditRoute =
     labelEditConnection && labelEditFromObject && labelEditToObject
+      ? routeConnectionOnBoard(document, labelEditConnection, labelEditFromObject, labelEditToObject, canvasStyle)
+      : null;
+  const labelEditPoint =
+    labelEditConnection && labelEditRoute
       // The inline editor opens over the chip, so it reads the same effective
       // placed point the chip is drawn at (connectors/label-placement.ts).
-      ? placedLabelPoint(
-          routeConnection(labelEditFromObject, labelEditToObject, labelEditConnection, document.objects, canvasStyle),
-          labelEditConnection,
-          document,
-          canvasStyle,
-        )
+      ? chipPointOnRoute(placedLabelPoint(labelEditRoute, labelEditConnection, document, canvasStyle), labelEditRoute, labelEditConnection)
       : null;
 
   const openConnectionLabelEditor = useCallback(

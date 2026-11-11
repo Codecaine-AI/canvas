@@ -7,7 +7,7 @@
 import type { CanvasAction, CanvasSelection } from "../../../state/actions";
 import { objectById } from "../../../state/geometry";
 import { connectorBendSegments } from "../../../connectors/bend-editing";
-import { routeConnection } from "../../../connectors/routing";
+import { routeConnectionOnBoard } from "../../../connectors/routing";
 import { createMoveGesture, stepFromMove } from "../features/move/move";
 import { stepFromResize } from "../features/selection/resize";
 import { stepFromDragSelect } from "../features/selection/drag-select";
@@ -218,7 +218,7 @@ function stepFromIdle(
     const toObject = objectById(ctx.document, connection.to.objectId);
     if (!fromObject || !toObject) return toIdle();
 
-    const routed = routeConnection(fromObject, toObject, connection, ctx.document.objects, ctx.canvasStyle);
+    const routed = routeConnectionOnBoard(ctx.document, connection, fromObject, toObject, ctx.canvasStyle);
     const points = routed.points ?? [];
     if (!connectorBendSegments(points).some((segment) => segment.index === hit.segmentIndex)) {
       return toIdle();

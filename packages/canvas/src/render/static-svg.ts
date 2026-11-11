@@ -54,7 +54,7 @@ import {
   outlineSpecFor,
   ARROW_SHAPE_GEOMETRY,
 } from "../objects/geometry";
-import { routeConnection, CONNECTOR_END_GAP_PX } from "../connectors/routing";
+import { chipPointOnRoute, routeConnectionOnBoard, CONNECTOR_END_GAP_PX } from "../connectors/routing";
 import { placedLabelPoint } from "../connectors/label-placement";
 import { connectorDashArray, sectionDashedFrame } from "../connectors/def";
 import { ARROWHEAD_TIP_OVERSHOOT_RATIO, arrowheadStrokeRatio } from "../connectors/arrowhead";
@@ -1300,7 +1300,7 @@ function renderConnector(
   const toObject = objectsById.get(connection.to.objectId);
   if (!fromObject || !toObject) return "";
 
-  const routed = routeConnection(fromObject, toObject, connection, obstacles, canvasStyle);
+  const routed = routeConnectionOnBoard({ objects: obstacles, connections: document.connections }, connection, fromObject, toObject, canvasStyle);
   const strokeWidth = canvasStyle.connectorStrokeWidthPx;
   const stroke = resolveConnectorPaint(connection.color ?? FIRST_USE_COLORS.connector, canvasStyle).stroke;
   const dashed = connection.style === "dashed";
@@ -1340,7 +1340,7 @@ function renderConnector(
   // (connectors/Connector.tsx), which reads the same helper.
   const label = connection.label?.trim() ? connection.label : null;
   if (label) {
-    const labelPoint = placedLabelPoint(routed, connection, document, canvasStyle);
+    const labelPoint = chipPointOnRoute(placedLabelPoint(routed, connection, document, canvasStyle), routed, connection);
     const chip = connectionLabelChipRect(label, labelPoint, canvasStyle);
     const metrics = connectionLabelChipMetrics(label, canvasStyle);
     const { x, y } = labelPoint;

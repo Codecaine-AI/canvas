@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test";
 import type { CanvasPoint } from "../../state/geometry";
 import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../../state/schema";
 import { chipPointOnRoute, routeConnection, routeConnectionOnBoard } from "../routing";
+import { renderDocumentToSvg } from "../../render/static-svg";
 
 function box(id: string, x: number, y: number, width = 100, height = 60): InteractiveCanvasObject {
   return { id, type: "process", text: id, geometry: { x, y, width, height } };
@@ -210,5 +211,20 @@ describe("lanes on a board", () => {
       expect(followed.x).toBeCloseTo(chip.x, 5);
       expect(followed.y).toBeCloseTo(laned.points![0]!.y, 5);
     }
+  });
+
+  it("paints each wire in its lane in the static render", () => {
+    const objects = [source, upper, lower];
+    const connections = [
+      wire("solid", { objectId: "source", anchor: "right" }, { objectId: "upper", anchor: "left" }),
+      wire("dashed", { objectId: "source", anchor: "right" }, { objectId: "lower", anchor: "left" }, { style: "dashed" }),
+    ];
+    const { svg } = renderDocumentToSvg({ schemaVersion: 1, id: "lanes", mode: "diagram", objects, connections });
+    const board = { objects, connections };
+    for (const [connection, target] of [[connections[0]!, upper], [connections[1]!, lower]] as const) {
+      expect(svg).toContain(`d="${routeConnectionOnBoard(board, connection, source, target).path}"`);
+    }
+    // The dashed wire moved, so the route it had alone is not painted.
+    expect(svg).not.toContain(`d="${routeConnection(source, lower, connections[1]!, objects).path}"`);
   });
 });
