@@ -1,10 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { mergeFindings, parseFindings, parseGrid, regionGrid, revisePrompt, type Finding } from "./critic.ts";
-import { drawerArgs, sessionIdOf } from "./draw.ts";
+import { criticPrompt, mergeFindings, parseFindings, parseGrid, parseRounds, regionGrid, type Finding } from "./critic.ts";
+import { drawerArgs, replyOf, sessionIdOf } from "./drawer.ts";
 
 const finding = (overrides: Partial<Finding>): Finding => ({
-  kind: "routing", ids: [], labels: [], problem: "Two wires share a segment.", fix: "Route them apart.", severity: 2, ...overrides,
+  kind: "routing", ids: [], labels: [], problem: "Two wires share a segment.", fix: "Route them apart.", severity: "should", ...overrides,
 });
 
 describe("climb critic regions", () => {
@@ -31,33 +31,54 @@ describe("climb critic regions", () => {
     expect(parseGrid("3x2")).toEqual({ cols: 3, rows: 2 });
     expect(() => parseGrid("3by2")).toThrow("--critic-grid");
   });
+
+  test("the rounds flag is the loop's budget, 3 unless set", () => {
+    expect(parseRounds(undefined)).toBe(3);
+    expect(parseRounds("1")).toBe(1);
+    expect(() => parseRounds("0")).toThrow("--critic-rounds");
+  });
+
+  test("a critic gets the guide crop, what the lint already said and what earlier rounds settled", () => {
+    const region = { id: "r02", x: 1200, y: 0, width: 1400, height: 900 };
+    const inventory = { objects: ["b · shape · blue · in page (white) · \"B\""], connections: ["w · a → b"] };
+    const bare = criticPrompt(region, inventory);
+    expect(bare).toContain("Image 2 is image 1 with the board's smart guides drawn in pink.");
+    expect(bare).toContain("Image 3 is the whole board");
+    expect(bare).not.toContain("Do not report them again");
+    expect(bare).not.toContain("Earlier rounds");
+    const prompt = criticPrompt(region, inventory, {
+      checked: ["G1 b is 20px off a's center line, so w bends (move b by dy -20)"],
+      earlier: ["[routing] w: The wire bends twice. Drawer: declined, the bend clears the label"],
+    });
+    expect(prompt).toContain("Do not report them again:\nG1 b is 20px off a's center line, so w bends (move b by dy -20)");
+    expect(prompt).toContain("the drawer's reason does not hold:\n[routing] w: The wire bends twice. Drawer: declined, the bend clears the label");
+  });
 });
 
 describe("climb critic findings", () => {
   test("an answer off the schema is refused", () => {
     expect(parseFindings(JSON.stringify({ findings: [finding({ ids: ["a"] })] }))).toHaveLength(1);
     expect(() => parseFindings(JSON.stringify({ findings: [{ ...finding({}), kind: "theme" }] }))).toThrow("unknown kind");
-    expect(() => parseFindings(JSON.stringify({ findings: [{ ...finding({}), severity: 4 }] }))).toThrow("severity");
+    expect(() => parseFindings(JSON.stringify({ findings: [{ ...finding({}), severity: 2 }] }))).toThrow("severity must be blocker, should or nit");
     expect(() => parseFindings("{}")).toThrow("findings");
   });
 
   test("one fault seen by two overlapping regions reaches the drawer once", () => {
     const boardIds = new Set(["wire-a", "wire-b", "node-c"]);
     const merged = mergeFindings([
-      { region: "r01", findings: [finding({ ids: ["wire-a", "wire-b"], severity: 1 }), finding({ kind: "colour", ids: ["node-c"] })] },
-      { region: "r02", findings: [finding({ ids: ["wire-b", "ghost"], severity: 3, problem: "The wires overlap." })] },
+      { region: "r01", findings: [finding({ ids: ["wire-a", "wire-b"], severity: "nit" }), finding({ kind: "colour", ids: ["node-c"] })] },
+      { region: "r02", findings: [finding({ ids: ["wire-b", "ghost"], severity: "blocker", problem: "The wires overlap." })] },
     ], boardIds);
     expect(merged).toHaveLength(2);
     expect(merged[0]).toMatchObject({
-      kind: "routing", severity: 3, problem: "The wires overlap.", ids: ["wire-a", "wire-b"], labels: ["ghost"], regions: ["r01", "r02"],
+      kind: "routing", severity: "blocker", problem: "The wires overlap.", ids: ["wire-a", "wire-b"], labels: ["ghost"], regions: ["r01", "r02"],
     });
-    expect(merged[1]).toMatchObject({ kind: "colour", ids: ["node-c"], regions: ["r01"] });
-    expect(revisePrompt("b1", merged)).toContain(`1. [routing, severity 3] wire-a, wire-b, "ghost": The wires overlap. Fix: Route them apart.`);
+    expect(merged[1]).toMatchObject({ kind: "colour", severity: "should", ids: ["node-c"], regions: ["r01"] });
   });
 });
 
-describe("climb draw revise session", () => {
-  test("the critic's first pass keeps its session, and the revise pass resumes it", () => {
+describe("climb drawer session", () => {
+  test("the first pass keeps its session, a revise pass resumes it, and its closing reply is read back", () => {
     expect(drawerArgs("/tmp/b", "draw", "/s.json")).toContain("--no-session-persistence");
     expect(drawerArgs("/tmp/b", "draw", "/s.json", { persist: true })).not.toContain("--no-session-persistence");
     const revise = drawerArgs("/tmp/b", "fix", "/s.json", { persist: false, resume: "abc-123" });
@@ -68,5 +89,7 @@ describe("climb draw revise session", () => {
     ].join("\n");
     expect(sessionIdOf(transcript)).toBe("abc-123");
     expect(sessionIdOf("not json\n")).toBeNull();
+    expect(replyOf(`${transcript}\n{"type":"result","subtype":"success","result":"F1 fixed"}\n{"type":"torn`)).toBe("F1 fixed");
+    expect(replyOf(transcript)).toBe("");
   });
 });

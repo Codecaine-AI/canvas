@@ -29,9 +29,11 @@ interface Toolkit {
   openCanvasFile(path: string): CanvasFile;
   checkCanvasFile(file: CanvasFile, label: string): { isError?: boolean; text: string; pngs?: Buffer[] };
 }
+/** One canvas_check finding. */
+export interface Lint { rule: string; severity: string; at: string[]; message: string; suggestion?: string }
 interface Lints {
   FINISHING_RULES: readonly unknown[];
-  sessionDiagnostics(session: unknown, rules: readonly unknown[]): Array<{ rule: string; severity: string }>;
+  sessionDiagnostics(session: unknown, rules: readonly unknown[]): Lint[];
 }
 interface Headless { useHarfBuzz(): Promise<void> }
 export interface WorldRect { x: number; y: number; width: number; height: number }
@@ -206,9 +208,11 @@ export async function runRender(argv: string[]): Promise<void> {
     const bySeverity = (severity: string) => countBy(diagnostics.filter((d) => d.severity === severity), (d) => d.rule);
     const transcriptPath = resolve(briefDir, "transcript.jsonl");
     const transcript = transcriptMetrics(existsSync(transcriptPath) ? readFileSync(transcriptPath, "utf8") : "");
-    // The critic's revise pass (draw.ts), in its own transcript; tool calls and tokens above are the first pass only.
-    const revisePath = resolve(briefDir, "revise-transcript.jsonl");
-    const revise = existsSync(revisePath) ? transcriptMetrics(readFileSync(revisePath, "utf8")) : null;
+    // The critic loop's revise passes (critic-loop.ts), one transcript a round; tool calls and tokens above are the first pass only.
+    const revise = (draw.critic?.rounds ?? []).filter((entry) => entry.revise).map((entry) => ({
+      round: entry.round,
+      ...transcriptMetrics(readFileSync(resolve(briefDir, "critic", `round-${entry.round}`, "revise-transcript.jsonl"), "utf8")),
+    }));
     const metrics = {
       brief,
       round,

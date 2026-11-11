@@ -1,29 +1,34 @@
 /**
- * The region critic: a fuzzy lint between the drawer's first pass and its
- * revise pass. Ford's idea: "having a secondary agent, like, look at in
- * detail at pieces and then kind of, like, provide feedback could be good."
+ * One review of a board, a round of the critic loop (critic-loop.ts): the
+ * lints canvas_check runs, then the region critics, a fuzzy lint beside the
+ * strict one. Ford's idea: "having a secondary agent, like, look at in detail
+ * at pieces and then kind of, like, provide feedback could be good."
  *
  * The board renders once as an overview and once per region: overlapping
  * rectangles at 1:1 world scale that cover the whole board. One critic per
  * region (GPT-6.1 Sol through the Codex CLI, low effort, fast mode) reads the
- * overview with its region outlined plus the region crop, and returns JSON
- * findings on layout and structure. The findings merge across regions, so a
- * fault two overlapping regions both see reaches the drawer once.
- *
- * `climb critic --board <path> --out <dir>` runs the step alone on a frozen
- * board; `climb draw --critic on` runs it inside a draw (draw.ts).
+ * region crop, the same crop with the smart guides drawn on it (the pink
+ * lines Studio shows in a drag: what is in line, and what sits a few px off)
+ * and the overview with its region outlined. It returns JSON findings on
+ * layout and structure, each a blocker, a should or a nit. The findings merge
+ * across regions, so a fault two overlapping regions both see reaches the
+ * drawer once.
  */
 import { spawn } from "node:child_process";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { Semaphore } from "../semaphore.ts";
-import { CANVAS_REPO_ROOT, parseFlags } from "./paths.ts";
-import { loadCanvas, renderBoardPng, type CanvasFile, type CanvasModules, type WorldRect } from "./render.ts";
+import { CANVAS_REPO_ROOT } from "./paths.ts";
+import { loadCanvas, renderBoardPng, type CanvasFile, type CanvasModules, type Lint, type WorldRect } from "./render.ts";
 
 export const CRITIC_MODEL = "gpt-6.1-sol";
 export const CRITIC_EFFORT = "low";
-const CRITIC_TIMEOUT_MS = 80_000;
+/** With the renders before it, one review stays under 90 s. A critic that runs out gives no answer. */
+const CRITIC_TIMEOUT_MS = 70_000;
+export const DEFAULT_ROUNDS = 3;
+/** The lint whose findings the guide crop tags (G1, G2, ...). */
+const NEAR_MISS_RULE = "near-miss";
 /** The long edge of an "auto" grid region, and the overlap between neighbour regions, in world px. */
 const AUTO_REGION_MAX = 1400;
 const REGION_OVERLAP = 120;
@@ -34,6 +39,10 @@ const MAX_FINDINGS_PER_REGION = 10;
 export const FINDING_KINDS = ["placement", "empty_space", "routing", "label_chip", "nesting", "colour", "icon"] as const;
 export type FindingKind = (typeof FINDING_KINDS)[number];
 
+/** Most severe first, as the Sol loop grades a code review. */
+export const SEVERITIES = ["blocker", "should", "nit"] as const;
+export type Severity = (typeof SEVERITIES)[number];
+
 export interface Finding {
   kind: FindingKind;
   /** Board object or connection ids. */
@@ -42,15 +51,27 @@ export interface Finding {
   labels: string[];
   problem: string;
   fix: string;
-  /** 3: a reader misreads it; 2: clearly wrong; 1: a polish nit. */
-  severity: 1 | 2 | 3;
+  /** blocker: a reader misreads it, or it is broken or hidden; should: clearly off, and a tool call fixes it; nit: polish. */
+  severity: Severity;
 }
 export interface MergedFinding extends Finding { regions: string[] }
 
 export interface Region extends WorldRect { id: string }
 export type GridSpec = "auto" | { cols: number; rows: number };
 
-export interface CriticOptions { grid: GridSpec; count: number | undefined }
+export interface CriticOptions { grid: GridSpec; count: number | undefined; rounds: number }
+
+/** The canvas modules a review calls: loadCanvas's, and this checkout's guide overlay. */
+export interface ReviewCanvas extends CanvasModules {
+  overlay: {
+    renderGuideOverlay(board: unknown, options: { canvasStyle?: unknown; region?: WorldRect }): { png: Buffer; legend: string[] };
+  };
+}
+
+export async function loadReviewCanvas(): Promise<ReviewCanvas> {
+  const overlay = resolve(CANVAS_REPO_ROOT, "packages/canvas/src/session/perception/guide-overlay.ts");
+  return { ...(await loadCanvas(CANVAS_REPO_ROOT)), overlay: (await import(overlay)) as ReviewCanvas["overlay"] };
+}
 
 /** `--critic-grid auto` or `<cols>x<rows>` (3x2). */
 export function parseGrid(value: string | undefined): GridSpec {
@@ -68,6 +89,14 @@ export function parseCount(value: string | undefined): number | undefined {
   const count = Number(value);
   if (!Number.isInteger(count) || count < 1) throw new Error(`--critic-count must be a whole number of critics (6, ...), not ${value}`);
   return count;
+}
+
+/** `--critic-rounds <n>`: the most rounds the critic loop runs. */
+export function parseRounds(value: string | undefined): number {
+  if (value === undefined) return DEFAULT_ROUNDS;
+  const rounds = Number(value);
+  if (!Number.isInteger(rounds) || rounds < 1) throw new Error(`--critic-rounds must be a whole number of rounds (3, ...), not ${value}`);
+  return rounds;
 }
 
 /** Equal spans of `count` along `length`, neighbours overlapping by REGION_OVERLAP. */
@@ -104,8 +133,8 @@ const short = (text: string | undefined) => {
   return line.length > 60 ? `${line.slice(0, 59)}…` : line;
 };
 
-/** The board's objects and connections that touch a region, one line each, for the critic to name by id. */
-export function regionInventory(board: Board, region: WorldRect): { objects: string[]; connections: string[] } {
+/** The board's objects and connections that touch a region, one line each, for the critic to name by id, and their ids. */
+export function regionInventory(board: Board, region: WorldRect): { objects: string[]; connections: string[]; ids: Set<string> } {
   const inside = board.objects.filter((object) => object.geometry && overlaps(object.geometry, region));
   const ids = new Set(inside.map((object) => object.id));
   const colourOf = new Map(board.objects.map((object) => [object.id, object.color]));
@@ -118,21 +147,36 @@ export function regionInventory(board: Board, region: WorldRect): { objects: str
     parent(object.parentId),
     JSON.stringify(short(object.text)),
   ].filter(Boolean).join(" · "));
-  const connections = board.connections
-    .filter((wire) => ids.has(wire.from.objectId) || ids.has(wire.to.objectId))
+  const wires = board.connections.filter((wire) => ids.has(wire.from.objectId) || ids.has(wire.to.objectId));
+  const connections = wires
     .map((wire) => `${wire.id} · ${wire.from.objectId} → ${wire.to.objectId}${wire.label ? ` · ${JSON.stringify(short(wire.label))}` : ""}`);
-  return { objects, connections };
+  return { objects, connections, ids: new Set([...ids, ...wires.map((wire) => wire.id)]) };
 }
 
-export function criticPrompt(region: Region, inventory: { objects: string[]; connections: string[] }): string {
+/** What a critic is told beside its region's inventory. */
+export interface RegionNotes {
+  /** What canvas_check already gave the drawer on this region: the tagged guides of image 2, then the other lints. */
+  checked: string[];
+  /** Earlier rounds' findings on this region's items, each with the drawer's answer. */
+  earlier: string[];
+}
+
+export function criticPrompt(
+  region: Region,
+  inventory: { objects: string[]; connections: string[] },
+  notes: RegionNotes = { checked: [], earlier: [] },
+): string {
   const right = region.x + region.width;
   const bottom = region.y + region.height;
   return [
     `Image 1 is region ${region.id} of a diagram board, at full size: board x ${region.x} to ${right}, y ${region.y} to ${bottom}.`,
-    "Image 2 is the whole board, scaled down, with that region outlined in red. Use image 2 for context only.",
+    "Image 2 is image 1 with the board's smart guides drawn in pink. A faint line runs along edges and centres that are in line."
+    + " A strong line with a tag (G1, G2, ...) is a near-miss: the line an item, a gap or an arrowhead sits a few px off.",
+    "Image 3 is the whole board, scaled down, with that region outlined in red. Use image 3 for context only.",
     "",
     "List every layout and structure fault you see in image 1. You are a fuzzy lint: a strict lint already ran, so look for what it misses.",
     "Look at each section, item, wire and wire label in turn. Report a fault the moment it looks wrong to a careful designer. Do not stop at the first few.",
+    "Use image 2 to judge what is in line: an item on none of the lines its neighbours share, a row with unequal gaps, a wire that bends because its two ends are off one line.",
     "",
     "Kinds:",
     "- placement: items off-centre or out of line in their section, uneven gaps, an item in the wrong group.",
@@ -144,11 +188,22 @@ export function criticPrompt(region: Region, inventory: { objects: string[]; con
     "- icon: a plain box where a real icon or brand logo would read better, or an icon that does not fit its meaning.",
     "Out of scope: the exact shade the theme paints each colour, border widths, corner radius and fonts.",
     "",
+    "Severity:",
+    "- blocker: a reader misreads the board, or something is broken, hidden or cut off.",
+    "- should: clearly off to a careful designer, and a tool call or two fixes it.",
+    "- nit: polish or taste. The board can ship with it.",
+    "",
     "Other critics review the neighbour regions. Review the part of a cut-off item that image 1 shows.",
     "Name items by the ids below. Put the visible text in labels when no id matches.",
     "Give each finding a one-line fix the drawer can make with the canvas tools (move, resize, arrange_section, route, change_color, change_shape, move_label and the rest).",
-    `Give at most ${MAX_FINDINGS_PER_REGION} findings, most severe first. Severity: 3 = a reader misreads it, 2 = clearly wrong, 1 = a polish nit.`,
+    `Give at most ${MAX_FINDINGS_PER_REGION} findings, most severe first.`,
     "Do not run commands or read files.",
+    ...(notes.checked.length ? ["", "The strict lint already gave the drawer these. Do not report them again:", ...notes.checked] : []),
+    ...(notes.earlier.length ? [
+      "",
+      "Earlier rounds reported these, and the drawer answered each. Report one again only when image 1 still shows it and the drawer's reason does not hold:",
+      ...notes.earlier,
+    ] : []),
     "",
     "Objects in this region (id · type · colour · icon · parent (its colour) · text):",
     ...(inventory.objects.length ? inventory.objects : ["(none)"]),
@@ -176,7 +231,7 @@ export const FINDINGS_SCHEMA = {
           labels: { type: "array", items: { type: "string" } },
           problem: { type: "string" },
           fix: { type: "string" },
-          severity: { type: "integer", enum: [1, 2, 3] },
+          severity: { type: "string", enum: SEVERITIES },
         },
       },
     },
@@ -196,7 +251,7 @@ export function parseFindings(text: string): Finding[] {
       return list.map((item) => item.trim()).filter(Boolean);
     };
     if (!FINDING_KINDS.includes(finding.kind as FindingKind)) throw where(`unknown kind ${JSON.stringify(finding.kind)}`);
-    if (finding.severity !== 1 && finding.severity !== 2 && finding.severity !== 3) throw where(`severity must be 1, 2 or 3`);
+    if (!SEVERITIES.includes(finding.severity as Severity)) throw where(`severity must be blocker, should or nit`);
     for (const key of ["problem", "fix"]) {
       if (typeof finding[key] !== "string" || !(finding[key] as string).trim()) throw where(`"${key}" must be a non-empty string`);
     }
@@ -206,11 +261,12 @@ export function parseFindings(text: string): Finding[] {
       labels: strings("labels"),
       problem: (finding.problem as string).trim(),
       fix: (finding.fix as string).trim(),
-      severity: finding.severity,
+      severity: finding.severity as Severity,
     };
   });
 }
 
+const rank = (finding: { severity: Severity }) => SEVERITIES.indexOf(finding.severity);
 const normal = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 
 /**
@@ -245,36 +301,14 @@ export function mergeFindings(byRegion: Array<{ region: string; findings: Findin
   }
   const unique = (items: string[]) => [...new Set(items)];
   return groups.map((group) => {
-    const lead = group.reduce((best, entry) => entry.severity > best.severity ? entry : best);
+    const lead = group.reduce((best, entry) => rank(entry) < rank(best) ? entry : best);
     return {
       ...lead,
       ids: unique(group.flatMap((entry) => entry.ids)),
       labels: unique(group.flatMap((entry) => entry.labels)),
       regions: unique(group.flatMap((entry) => entry.regions)).sort(),
     };
-  }).sort((a, b) => b.severity - a.severity || b.regions.length - a.regions.length);
-}
-
-/** One numbered line per finding, as the drawer reads them. */
-export function findingLines(findings: MergedFinding[]): string[] {
-  return findings.map((finding, index) => {
-    const names = [...finding.ids, ...finding.labels.map((label) => JSON.stringify(label))].join(", ");
-    return `${index + 1}. [${finding.kind}, severity ${finding.severity}] ${names ? `${names}: ` : ""}${finding.problem} Fix: ${finding.fix}`;
-  });
-}
-
-/** The drawer's revise turn, in its own session, after the critics. */
-export function revisePrompt(brief: string, findings: MergedFinding[]): string {
-  return [
-    "Reviewers looked at your board region by region and found the layout faults below.",
-    "Fix each finding you agree with, using the canvas tools. Skip a finding that is wrong or that would break something else.",
-    `The canvas server restarted. Open the board again with canvas_open, canvas id "${brief}", and read any guidance topic it asks for.`,
-    "Run canvas_check when you are done. Stop when the board is finished.",
-    "",
-    "<findings>",
-    ...findingLines(findings),
-    "</findings>",
-  ].join("\n");
+  }).sort((a, b) => rank(a) - rank(b) || b.regions.length - a.regions.length);
 }
 
 export function criticArgs(dir: string, prompt: string, images: string[], schemaPath: string, outputPath: string): string[] {
@@ -313,12 +347,19 @@ export interface CritiqueRecord {
   grid: { cols: number; rows: number } | "auto";
   count: number;
   startedAt: string;
-  /** Wall clock for the whole step: renders, every critic and the merge. */
+  /** Wall clock for the whole review: lints, renders, every critic and the merge. */
   durationMs: number;
+  /** The lints and the renders. */
   renderMs: number;
+  /** What canvas_check finds on the board. */
+  lints: Lint[];
   regions: RegionRecord[];
+  /** The critics' findings, merged. */
   findings: MergedFinding[];
 }
+
+/** An earlier round's finding as a critic reads it: the finding and the drawer's answer, in one line. */
+export interface EarlierFinding { ids: string[]; regions: string[]; line: string }
 
 async function runCritic(args: string[], timeoutMs: number): Promise<{ exitCode: number | null; timedOut: boolean; stderr: string }> {
   // Codex reads a piped stdin into the prompt, so stdin is closed.
@@ -344,16 +385,19 @@ function outlinedSvg(svg: string, region: WorldRect, scale: number): string {
 }
 
 /**
- * Render `boardPath`, run one critic per non-empty region and merge the
- * findings. Writes into `outDir`: overview.png, regions/<id>.png,
- * regions/<id>-overview.png, regions/<id>.json (the raw answer),
- * critique.json (a CritiqueRecord) and findings.md.
+ * Lint and render `boardPath`, run one critic per non-empty region and merge
+ * the findings. Writes into `outDir`: overview.png, guides.png (the overview
+ * with the smart guides), regions/<id>.png, regions/<id>-guides.png,
+ * regions/<id>-overview.png, regions/<id>.json (the raw answer) and
+ * critique.json (a CritiqueRecord).
  */
 export async function critiqueBoard(options: {
-  canvas: CanvasModules;
+  canvas: ReviewCanvas;
   boardPath: string;
   outDir: string;
   critic: CriticOptions;
+  /** Earlier rounds' findings. Each goes to the critics whose region holds one of its items, or with no ids, to the regions that reported it. */
+  earlier?: EarlierFinding[];
 }): Promise<CritiqueRecord> {
   const { canvas, boardPath, outDir } = options;
   const started = Date.now();
@@ -366,8 +410,11 @@ export async function critiqueBoard(options: {
   const file: CanvasFile = canvas.toolkit.openCanvasFile(boardPath);
   const board = file.persisted as Board;
   const style = file.session.canvasStyle;
+  const lints = canvas.lints.sessionDiagnostics(file.session, canvas.lints.FINISHING_RULES)
+    .map(({ rule, severity, at, message, suggestion }): Lint => ({ rule, severity, at, message, suggestion }));
   const overview = renderBoardPng(canvas, file, undefined);
   writeFileSync(resolve(outDir, "overview.png"), overview.png);
+  writeFileSync(resolve(outDir, "guides.png"), canvas.overlay.renderGuideOverlay(board, { canvasStyle: style }).png);
   const overviewSvg = canvas.render.renderBoardView(board, { width: overview.size.width, canvasStyle: style }).svg;
 
   const camera = canvas.render.boardCameraAtWorldScale(board, style);
@@ -378,9 +425,23 @@ export async function critiqueBoard(options: {
     const scene = { bounds: region, objects: board.objects, connections: board.connections, obstacles: board.objects, chipZoom: 1 };
     const crop = canvas.render.renderSceneToSvg(board, scene, { width: region.width, height: region.height, canvasStyle: style });
     writeFileSync(png, canvas.rasterize.rasterizeSvgToPng(crop.svg).png);
+    const guides = canvas.overlay.renderGuideOverlay(board, { canvasStyle: style, region });
+    const guided = resolve(regionsDir, `${region.id}-guides.png`);
+    writeFileSync(guided, guides.png);
     const context = resolve(regionsDir, `${region.id}-overview.png`);
     writeFileSync(context, canvas.rasterize.rasterizeSvgToPng(outlinedSvg(overviewSvg, region, overview.size.scale)).png);
-    return [{ region, inventory, png, context }];
+    const here = (ids: string[]) => ids.some((id) => inventory.ids.has(id));
+    const notes: RegionNotes = {
+      checked: [
+        ...guides.legend,
+        ...lints.filter((lint) => lint.rule !== NEAR_MISS_RULE && here(lint.at))
+          .map((lint) => `${lint.rule}: ${lint.message}${lint.suggestion ? ` (${lint.suggestion})` : ""}`),
+      ],
+      earlier: (options.earlier ?? [])
+        .filter((finding) => finding.ids.length ? here(finding.ids) : finding.regions.includes(region.id))
+        .map((finding) => finding.line),
+    };
+    return [{ region, inventory, images: [png, guided, context], notes }];
   });
   const renderMs = Date.now() - started;
 
@@ -389,8 +450,8 @@ export async function critiqueBoard(options: {
   const regions = await Promise.all(jobs.map((job) => gate.run(async (): Promise<RegionRecord> => {
     const answer = resolve(regionsDir, `${job.region.id}.json`);
     const begun = Date.now();
-    const prompt = criticPrompt(job.region, job.inventory);
-    const run = await runCritic(criticArgs(regionsDir, prompt, [job.png, job.context], schemaPath, answer), CRITIC_TIMEOUT_MS);
+    const prompt = criticPrompt(job.region, job.inventory, job.notes);
+    const run = await runCritic(criticArgs(regionsDir, prompt, job.images, schemaPath, answer), CRITIC_TIMEOUT_MS);
     let findings: Finding[] = [];
     let error: string | null = null;
     try {
@@ -421,11 +482,11 @@ export async function critiqueBoard(options: {
     startedAt: new Date(started).toISOString(),
     durationMs: Date.now() - started,
     renderMs,
+    lints,
     regions,
     findings,
   };
   writeFileSync(resolve(outDir, "critique.json"), `${JSON.stringify(record, null, 2)}\n`);
-  writeFileSync(resolve(outDir, "findings.md"), `${findingLines(findings).join("\n")}\n`);
   return record;
 }
 
@@ -433,21 +494,7 @@ export function critiqueSummary(record: CritiqueRecord): string {
   const failed = record.regions.filter((region) => region.error !== null);
   const raw = record.regions.reduce((sum, region) => sum + region.findings.length, 0);
   const slowest = Math.max(0, ...record.regions.map((region) => region.durationMs));
-  return `${record.regions.length} regions · ${raw} findings, ${record.findings.length} after merge`
+  return `${record.lints.length} lints · ${record.regions.length} regions · ${raw} findings, ${record.findings.length} after merge`
     + ` · ${(record.durationMs / 1000).toFixed(1)} s wall (render ${(record.renderMs / 1000).toFixed(1)} s, slowest critic ${(slowest / 1000).toFixed(1)} s)`
     + `${failed.length ? ` · ${failed.length} unparsed: ${failed.map((region) => region.region.id).join(", ")}` : ""}`;
-}
-
-/** `climb critic --board <path> --out <dir> [--critic-grid auto|3x2] [--critic-count n]`: the critic step alone, no drawer. */
-export async function runCritique(argv: string[]): Promise<void> {
-  const flags = parseFlags(argv, ["--board", "--out", "--critic-grid", "--critic-count"]);
-  const boardPath = flags.get("--board");
-  const outDir = flags.get("--out");
-  if (!boardPath || !outDir) throw new Error("climb critic needs --board <canvas.json> and --out <dir>");
-  const critic = { grid: parseGrid(flags.get("--critic-grid")), count: parseCount(flags.get("--critic-count")) };
-  mkdirSync(resolve(outDir), { recursive: true });
-  const canvas = await loadCanvas(CANVAS_REPO_ROOT);
-  const record = await critiqueBoard({ canvas, boardPath: resolve(boardPath), outDir: resolve(outDir), critic });
-  process.stdout.write(`${critiqueSummary(record)}\n`);
-  if (record.regions.some((region) => region.error !== null)) process.exitCode = 1;
 }
