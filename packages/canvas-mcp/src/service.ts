@@ -1,10 +1,11 @@
 /**
  * The canvas MCP's tool surface and dispatch, independent of any transport.
  *
- * Five tools belong to this server: `canvas_list`, `canvas_open`, and
- * `canvas_create` choose the board (an id under canvases/, or for open, any
- * board file inside the workspace such as a docs page's sidecar), `canvas_check` lints and renders
- * the whole board, and `canvas_guidance` serves the authoring standards.
+ * Six tools belong to this server: `canvas_capabilities` returns the index of
+ * tools, topics and gates; `canvas_list`, `canvas_open`, and `canvas_create`
+ * choose the board (an id under canvases/, or for open, any board file inside
+ * the workspace such as a docs page's sidecar); `canvas_check` lints and
+ * renders the whole board; and `canvas_guidance` serves the authoring topics.
  * Everything else is the layout-editor agent's own toolkit, re-exposed
  * verbatim from `@codecaine-ai/canvas/toolkit`: the same names, the same
  * descriptions, the same parameter schemas, and the same code behind them. A
@@ -15,12 +16,21 @@
  * canvas — or the same one again — replaces it with a fresh read of the file,
  * which is also how a caller recovers after an external save made the session
  * stale.
+ *
+ * THE EDIT GATE. Canvas has no task id, so the gate is per server process, as
+ * the open board is: every tool outside `UNGATED` refuses with `WORKFLOW_GATE`
+ * until this process served topic `workflow` at the current guidance snapshot.
  */
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, statSync } from "node:fs";
 import { basename, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 import { useHarfBuzz } from "@codecaine-ai/text-measure/headless";
-import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
+import {
+  CONTACT_SHEET_URI,
+  getCanvasAuthoringGuidance,
+  vocabularyContactSheet,
+} from "@codecaine-ai/canvas/authoring";
 import { JUDGE_PNG_MAX_EDGE } from "@codecaine-ai/canvas/render";
 import {
   boardStateSnapshot,
@@ -34,6 +44,9 @@ import {
   type CanvasFileSession,
   type CanvasStyle,
 } from "@codecaine-ai/canvas/toolkit";
+
+import { version } from "../package.json";
+import { CAPABILITIES, UNGATED, WORKFLOW_GATE, requiredTopics } from "./guidance-manifest";
 
 export type CanvasToolContent =
   | { type: "text"; text: string }
@@ -171,6 +184,13 @@ export function styleLine(canvasStyle: CanvasStyle): string {
 /** The server-owned tools, declared ahead of the toolkit roster. */
 const SERVER_TOOLS: CanvasToolDeclaration[] = [
   {
+    name: "canvas_capabilities",
+    title: "Canvas capabilities",
+    description:
+      "Return the canvas index: the server and guidance versions, the tool order, each guidance topic with its size and the tools it unlocks, the board count and the contact-sheet resource. Call it once per thread before the first canvas tool, and again after an error, context compaction or a stale result.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+  },
+  {
     name: "canvas_list",
     title: "List canvases",
     description:
@@ -181,7 +201,7 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_open",
     title: "Open canvas",
     description:
-      "Open a canvas as the board every other canvas tool edits, reading it fresh from disk. Returns the board description, the full digest (every section, object, connection, and route with its id and geometry), and the open lint findings, plus the file hash. Also re-reads the workspace style settings (canvases/canvas-style.json: the visual theme — figjam, schematic-light, or schematic-dark — and its overrides) that renders and lints use; the STYLE line reports the active theme. The theme is the person's workspace choice: no tool changes it, and color still encodes what kind of thing an object is. Call it again to reload after the file changed elsewhere; any edit you make afterwards saves to the file immediately.",
+      "Open a board as the one every other canvas tool edits: a canvas id from canvas_list, or the path of a .canvas.json file inside the workspace. Returns the OPENED line, the STYLE line and the board state.",
     inputSchema: {
       type: "object",
       properties: {
@@ -206,13 +226,13 @@ const SERVER_TOOLS: CanvasToolDeclaration[] = [
     name: "canvas_guidance",
     title: "Canvas design guidance",
     description:
-      "Read the canvas authoring standards the layout editor designs by. With no topic, returns the topic list with approximate sizes; with a topic id, returns that topic in full. Read the relevant topics before building or restructuring a diagram.",
+      "Read one canvas guidance topic in full, or list the topics when you omit topic. Every edit tool is refused until this server process reads topic \"workflow\".",
     inputSchema: {
       type: "object",
       properties: {
         topic: {
           type: "string",
-          description: "A topic id from the list, e.g. \"diagram_design\". Omit to list the topics.",
+          description: "A topic id from the list, e.g. \"workflow\" or \"rules\". Omit to list the topics.",
         },
       },
       additionalProperties: false,
@@ -256,11 +276,40 @@ const TOOLKIT_DECLARATIONS: CanvasToolDeclaration[] = toolkitTools.map((tool) =>
 
 const TOOLKIT_NAMES = new Set(toolkitTools.map((tool) => tool.name));
 
+let servedTextHook: ((text: string) => string) | undefined;
+/**
+ * Test hook: rewrite the text `canvas_guidance` serves for a topic, so the
+ * mutation test can strip one unit and watch its contract fail. Call with no
+ * argument to restore the served text.
+ */
+export function setServedTextHook(hook?: (text: string) => string): void {
+  servedTextHook = hook;
+}
+
+/** The topic text `canvas_guidance` serves: its heading, then its text. */
+const servedTopic = (topic: { title: string; text: string }) => `# ${topic.title}\n\n${topic.text}`;
+
+/** The resources this server lists: the contact sheet that renders every glyph. */
+const RESOURCES = [
+  {
+    uri: CONTACT_SHEET_URI,
+    name: "contact-sheet",
+    title: "Contact sheet",
+    description: "Every glyph rendered in the default style, as one PNG.",
+    mimeType: "image/png",
+  },
+];
+
 /** Workspace-bound canvas service: tool declarations plus one active canvas session. */
 export function createCanvasService(options: CanvasServiceOptions) {
   const project = resolve(options.project ?? options.workspace);
   const canvasesDir = resolve(options.canvasesDir ?? join(project, "canvases"));
   let active: CanvasFileSession | null = null;
+  /** The guidance snapshot this process serves, read once. */
+  let guidanceNow: ReturnType<typeof getCanvasAuthoringGuidance> | undefined;
+  const currentGuidance = () => (guidanceNow ??= getCanvasAuthoringGuidance());
+  /** The snapshot at which this process served topic workflow, or null before the read. */
+  let workflowRead: string | null = null;
 
   function canvasPath(id: string): string {
     return join(canvasesDir, `${id}${CANVAS_SUFFIX}`);
@@ -435,7 +484,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
   }
 
   function guidance(args: Record<string, unknown>): CanvasToolResult {
-    const snapshot = getCanvasAuthoringGuidance();
+    const snapshot = currentGuidance();
     const topic = typeof args.topic === "string" ? args.topic.trim() : "";
     if (topic === "") {
       const topics = snapshot.topics.map((entry) => ({
@@ -459,7 +508,44 @@ export function createCanvasService(options: CanvasServiceOptions) {
         true,
       );
     }
-    return text(`# ${found.title}\n\n${found.text}`);
+    if (found.id === "workflow") workflowRead = snapshot.snapshotId;
+    const served = servedTopic(found);
+    return text(servedTextHook ? servedTextHook(served) : served);
+  }
+
+  function boardCount(): number {
+    return existsSync(canvasesDir) ? readdirSync(canvasesDir).filter((name) => name.endsWith(CANVAS_SUFFIX)).length : 0;
+  }
+
+  /** The CapabilitiesIndex: the fixed fields of the manifest, and the live ones. One page fits 4,096 bytes. */
+  function capabilities(): CanvasToolResult {
+    const snapshot = currentGuidance();
+    const tools = [...SERVER_TOOLS, ...TOOLKIT_DECLARATIONS];
+    const gated = (topic: string) => tools.map((tool) => tool.name).filter((name) => requiredTopics(name).includes(topic));
+    const boards = boardCount();
+    const index = {
+      protocol_version: CAPABILITIES.protocol_version,
+      server_version: version,
+      tool_contract_hash: `sha256:${createHash("sha256").update(JSON.stringify(tools)).digest("hex")}`,
+      guidance_snapshot: snapshot.snapshotId,
+      scope: { workspace: options.workspace, ...(project !== resolve(options.workspace) ? { project } : {}) },
+      guidance_tool: CAPABILITIES.guidance_tool,
+      entry_tool: CAPABILITIES.entry_tool,
+      completion_tools: CAPABILITIES.completion_tools,
+      operations: CAPABILITIES.operations,
+      topics: snapshot.topics.map((topic) => ({
+        id: topic.id,
+        title: topic.title,
+        bytes: Buffer.byteLength(servedTopic(topic)),
+        required_for: gated(topic.id),
+      })),
+      discovery_tools: [
+        { name: "canvas_list", purpose: `List the ${boards} board${boards === 1 ? "" : "s"} in canvases/, with each id, title and object count.` },
+      ],
+      features: RESOURCES.map((resource) => resource.uri),
+      next_cursor: null,
+    };
+    return text(JSON.stringify(index));
   }
 
   async function toolkit(name: string, args: Record<string, unknown>): Promise<CanvasToolResult> {
@@ -492,8 +578,25 @@ export function createCanvasService(options: CanvasServiceOptions) {
     activeCanvas(): CanvasFileSession | null {
       return active;
     },
+    /** The resources this server lists for resources/list. */
+    listResources() {
+      return RESOURCES;
+    },
+    /** One resource's contents for resources/read, or null for an unknown uri. */
+    async readResource(uri: string): Promise<{ uri: string; mimeType: string; blob: string } | null> {
+      if (uri !== CONTACT_SHEET_URI) return null;
+      // The contact sheet measures its captions; measure exactly, as the guidance generator does.
+      await useHarfBuzz();
+      const sheet = vocabularyContactSheet();
+      if (!sheet) throw new Error("vocabularyContactSheet could not render the default-style contact sheet");
+      return { uri, mimeType: "image/png", blob: sheet.toString("base64") };
+    },
     async call(name: string, rawArgs: unknown): Promise<CanvasToolResult> {
       const args = record(rawArgs);
+      const known = name === "canvas_create" || TOOLKIT_NAMES.has(name) || SERVER_TOOLS.some((tool) => tool.name === name);
+      if (known && requiredTopics(name).includes("workflow") && workflowRead !== currentGuidance().snapshotId) {
+        return text(WORKFLOW_GATE, true);
+      }
       try {
         // Lints, text fit and renders measure through text-measure. startMcp
         // loads HarfBuzz up front; a service built directly (tests, other
@@ -501,6 +604,7 @@ export function createCanvasService(options: CanvasServiceOptions) {
         // shares it.
         await useHarfBuzz();
         switch (name) {
+          case "canvas_capabilities": return capabilities();
           case "canvas_list": return listCanvases();
           case "canvas_open": return openCanvas(args);
           case "canvas_guidance": return guidance(args);

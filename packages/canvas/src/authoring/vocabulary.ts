@@ -46,6 +46,12 @@ function catalogGroups(): CatalogGroup[] {
   ];
 }
 
+/** How many object kinds the catalog lists, and in how many groups. */
+export function catalogCounts(): { kinds: number; groups: number } {
+  const groups = catalogGroups();
+  return { kinds: groups.reduce((sum, group) => sum + group.entries.length, 0), groups: groups.length };
+}
+
 function formatCatalogGroup({ name, lead, entries }: CatalogGroup): string {
   const bullets = entries.map(entry => `- ${xml(entry.name)} (${xml(entry.color)})
     - Meaning: ${xml(entry.meaning)}

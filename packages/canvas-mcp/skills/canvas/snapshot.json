@@ -1,7 +1,17 @@
 {
   "schemaVersion": 1,
-  "snapshotId": "sha256:7de54b510467e6891419396f53c8f5c2828e5f3ae6a89f81218e7b0955714a81",
+  "snapshotId": "sha256:bb310fc30f253c06d15d80093f11638aa7a33fcb01d4d5a0d890740f284485f9",
   "sources": [
+    {
+      "id": "workflow",
+      "path": "packages/canvas/src/authoring/workflow.ts",
+      "sha256": "6ae156eb7bdae76677917cd75e70557dcbeb303f662aa3d484caab0d250e1b18"
+    },
+    {
+      "id": "rules",
+      "path": "packages/canvas/src/authoring/rules.ts",
+      "sha256": "b46d290d2bc97a3e5844e230a55a7197cdacc1f0d5dd3cf523481500c1bb2053"
+    },
     {
       "id": "prompt",
       "path": "packages/canvas/src/authoring/prompt/prompt.json",

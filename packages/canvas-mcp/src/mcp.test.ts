@@ -15,7 +15,7 @@ import { join } from "node:path";
 import { operationTools, workflowTools } from "@codecaine-ai/canvas/toolkit";
 
 import { openActionLog } from "@codecaine-ai/action-log";
-import { createCanvasMcpServer,MCP_INSTRUCTIONS } from "./mcp";
+import { createCanvasMcpServer, INSTRUCTIONS } from "./mcp";
 import { jsonSchema } from "./service";
 
 const REPO_CANVASES = join(import.meta.dir, "..", "..", "..", "canvases");
@@ -44,7 +44,7 @@ describe("canvas MCP server", () => {
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
     cleanups.push(() => client.close());
 
-    expect(client.getInstructions()).toBe(MCP_INSTRUCTIONS);
+    expect(client.getInstructions()).toBe(INSTRUCTIONS);
     const { tools } = await client.listTools();
     const byName = new Map(tools.map((tool) => [tool.name, tool]));
 
@@ -59,8 +59,20 @@ describe("canvas MCP server", () => {
       expect(byName.get(workflow.name)?.inputSchema).toEqual(jsonSchema(workflow.parameters));
     }
     expect(byName.has("finalize")).toBe(false);
-    expect(tools.slice(0, 3).map((tool) => tool.name)).toEqual(["canvas_list", "canvas_open", "canvas_guidance"]);
-    expect(tools).toHaveLength(5 + 20 + 4);
+    expect(tools.slice(0, 6).map((tool) => tool.name)).toEqual([
+      "canvas_capabilities", "canvas_list", "canvas_open", "canvas_guidance", "canvas_create", "canvas_check",
+    ]);
+    expect(tools).toHaveLength(6 + 20 + 4);
+  });
+
+  test("the prompt block fits 12 lines and 800 bytes, names canvas_capabilities first and says when to call it again", () => {
+    const lines = INSTRUCTIONS.split("\n");
+    expect(lines.length).toBeLessThanOrEqual(12);
+    expect(Buffer.byteLength(INSTRUCTIONS)).toBeLessThanOrEqual(800);
+    expect(lines.find((line) => line.includes("canvas_capabilities"))).toContain("before the first canvas tool");
+    expect(lines.at(-1)).toBe(
+      "After an error, context compaction or a stale result, call canvas_capabilities again and re-read the topics you need.",
+    );
   });
 
   test("tools/list carries the name fields and the section header glyph; no placement or copy takes a detail", async () => {
@@ -129,6 +141,7 @@ describe("canvas MCP server", () => {
     const opened = await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow" } });
     expect(opened.isError).toBeFalsy();
     expect((opened.content as Array<{ text: string }>)[0]!.text).toContain("OPENED · v2-flow");
+    await client.callTool({ name: "canvas_guidance", arguments: { topic: "workflow" } });
 
     const placed = await client.callTool({
       name: "place_sticky",
@@ -137,7 +150,7 @@ describe("canvas MCP server", () => {
     expect(placed.isError).toBeFalsy();
     const saved = JSON.parse(readFileSync(path, "utf8"));
     expect(saved.objects.some((object: { id: string }) => object.id === "stdio-note")).toBe(true);
-  }, 30_000);
+  });
 
   test("stdio: --workspace contains every path, the project resolves first, and --canvases holds the ids", async () => {
     const root = mkdtempSync(join(tmpdir(), "canvas-mcp-roots-"));
@@ -219,6 +232,7 @@ describe("canvas MCP server", () => {
     const opened = await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow" } });
     expect(shown(opened)).toContain("OPENED · v2-flow");
     expect(shown(opened)).toContain("BOARD");
+    await client.callTool({ name: "canvas_guidance", arguments: { topic: "workflow" } });
 
     const placed = await client.callTool({
       name: "place_shape",
@@ -240,7 +254,7 @@ describe("canvas MCP server", () => {
     expect(shown(cleared)).toContain("APPLIED · move fb-shape");
     expect(shown(cleared)).toMatch(/LINTS · (clean|no new errors)/);
     expect(shown(cleared)).not.toContain("covered-content");
-  }, 30_000);
+  });
 });
 
 describe("canvas MCP action log", () => {
@@ -286,8 +300,8 @@ describe("canvas MCP action log", () => {
     delete process.env.T3CODE_THREAD_ID;
     const client = await connect();
     await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-arg" } });
+    await client.callTool({ name: "canvas_guidance", arguments: { topic: "workflow" } });
     await client.callTool({ name: "place_sticky", arguments: { id: "log-note", text: "Logged", at: [960, 1600] } });
-    await client.callTool({ name: "canvas_guidance", arguments: {} });
     await client.callTool({ name: "canvas_open", arguments: { canvas: "no-such-board" } });
     await client.callTool({ name: "canvas_create", arguments: { canvas: "v2-flow", title: "Taken" } });
     await client.callTool({ name: "canvas_open", arguments: { canvas: "canvases/v2-flow.canvas.json" } });
@@ -297,13 +311,13 @@ describe("canvas MCP action log", () => {
     const records = log.query({ threadId: "thread-arg" });
     expect(records.map((record) => [record.tool, record.target, record.result])).toEqual([
       ["canvas_open", "v2-flow", "ok"],
-      ["place_sticky", "v2-flow", expect.stringMatching(/^ok/)],
       ["canvas_guidance", "-", "ok"],
+      ["place_sticky", "v2-flow", expect.stringMatching(/^ok/)],
       ["canvas_open", "no-such-board", "refused"],
       ["canvas_create", "v2-flow", "refused"],
       ["canvas_open", "v2-flow", "ok"],
     ]);
-    expect(records.every((record) => record.snapshotId === records[2]!.snapshotId && record.snapshotId)).toBe(true);
+    expect(records.every((record) => record.snapshotId === records[1]!.snapshotId && record.snapshotId)).toBe(true);
     await client.callTool({ name: "canvas_open", arguments: { canvas: "no-such-board", thread_id: "thread-refused" } });
     expect(log.query({ threadId: "thread-refused" })).toHaveLength(0);
   });
@@ -333,6 +347,7 @@ describe("canvas MCP action log", () => {
     copyFileSync(join(workspace, "canvases", "v2-flow.canvas.json"), join(workspace, "canvases", "board-b.canvas.json"));
     const client = await connect(workspace);
     await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-edit-race" } });
+    await client.callTool({ name: "canvas_guidance", arguments: { topic: "workflow" } });
     await Promise.all([
       client.callTool({ name: "canvas_open", arguments: { canvas: "board-b" } }),
       client.callTool({ name: "place_sticky", arguments: { id: "race-note", text: "Raced", at: [960, 1600] } }),

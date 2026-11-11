@@ -12,6 +12,14 @@ import { join } from "node:path";
 
 import { createCanvasService } from "./service";
 
+/** A service whose process read topic workflow, so its edit tools are open. */
+async function workflowService(options: Parameters<typeof createCanvasService>[0]) {
+  const service = createCanvasService(options);
+  await service.call("canvas_guidance", { topic: "workflow" });
+  return service;
+}
+
+
 const REPO_CANVASES = join(import.meta.dir, "..", "..", "..", "canvases");
 const SOURCE_ID = "v2-flow";
 
@@ -72,7 +80,7 @@ describe("canvas service", () => {
   test("place_sticky then move save each edit to the canvas file", async () => {
     const original = realCanvas();
     const { workspace, path } = workspaceWith(SOURCE_ID, original);
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     const opened = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(opened.isError).toBeUndefined();
@@ -121,7 +129,7 @@ describe("canvas service", () => {
       annotations: [],
     };
     const { workspace, path } = workspaceWith("frameless", frameless);
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     await service.call("canvas_open", { canvas: "frameless" });
     expect(service.activeCanvas()?.injectedFrameId).toBe("page-frame");
@@ -142,7 +150,7 @@ describe("canvas service", () => {
 
   test("an external write makes the next edit refuse until canvas_open", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
 
     // Someone else saves the board (Studio, a text editor) after the open.
@@ -173,7 +181,7 @@ describe("canvas service", () => {
   test("toolkit tools refuse before canvas_open and on invalid arguments", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
     const before = readFileSync(path, "utf8");
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     const closed = await service.call("move", { id: "page-frame", by: { dx: 16, dy: 0 } });
     expect(closed.isError).toBe(true);
@@ -191,7 +199,7 @@ describe("canvas service", () => {
 
   test("workflow tools: look returns renders; describe_board and annotate persist", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
 
     const looked = await service.call("look", { view: "page-frame" });
@@ -210,14 +218,15 @@ describe("canvas service", () => {
       annotation.target.objectId === target && annotation.createdBy === "agent")).toBe(true);
 
     const names = service.listTools().map((tool) => tool.name);
-    expect(names).toHaveLength(29);
+    expect(names).toHaveLength(30);
+    expect(names.slice(0, 6)).toEqual(["canvas_capabilities", "canvas_list", "canvas_open", "canvas_guidance", "canvas_create", "canvas_check"]);
     expect(names).not.toContain("finalize");
     expect(names).toEqual(expect.arrayContaining(["look", "describe_board", "annotate", "resolve_request"]));
   });
 
   test("a null field reaches describe_board and annotate as absent, and an empty one is still refused", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
     const target = readDoc(path).objects.find((object: any) => object.id !== "page-frame").id;
 
@@ -241,7 +250,7 @@ describe("canvas service", () => {
 
   test("a null mode reaches move and resize as absent through the tool boundary", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
     await service.call("place_sticky", { id: "null-a", text: "A", at: [960, 1600] });
     await service.call("place_sticky", { id: "null-b", text: "B", at: [1360, 1600] });
@@ -261,7 +270,7 @@ describe("canvas service", () => {
 
   test("a null mode reaches arrange and route as absent through the tool boundary", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
     await service.call("place_sticky", { id: "row-a", text: "A", at: [960, 1600] });
     await service.call("place_sticky", { id: "row-b", text: "B", at: [1400, 1640] });
@@ -289,7 +298,7 @@ describe("canvas service", () => {
 
   test("a null border reaches change_shape as absent through the tool boundary", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
     await service.call("place_section", { id: "border-frame", text: "Frame", at: [960, 1600] });
     await service.call("place_shape", { id: "border-box", type: "rectangle", at: [1600, 1600] });
@@ -359,7 +368,7 @@ describe("canvas service", () => {
     },
   ])("$tool refuses a wrong-typed mode and reads a null one as absent", async ({ tool, wrong, absent, applied }) => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
     await service.call("place_section", { id: "mode-frame", text: "Frame", at: [960, 2000] });
     await service.call("place_sticky", { id: "mode-a", text: "A", at: [960, 1600] });
@@ -382,7 +391,7 @@ describe("canvas service", () => {
   test("canvas_open reads canvases/canvas-style.json, and look renders with it", async () => {
     const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
     const stylePath = join(workspace, "canvases", "canvas-style.json");
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     /** sha256 of the close-up PNG `look` returns — the pixels, compared by digest. */
     const lookPng = async (): Promise<string> => {
       const looked = await service.call("look", { view: "section-interview-inputs" });
@@ -431,7 +440,7 @@ describe("canvas service", () => {
   test("no lint judges a name's wording, a person's or the agent's", async () => {
     // v2-flow, as its author left it, holds two long names.
     const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     const opened = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(textOf(opened)).toContain('"Does Response Provide Enough Context to Answer the Research Objective"');
@@ -449,7 +458,7 @@ describe("canvas service", () => {
 
   test("a section's header glyph saves to the file and reads back in the digest; a node detail is dropped, never saved", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
 
     const placed = await service.call("place_section", {
@@ -502,7 +511,7 @@ describe("canvas service", () => {
 
   test("canvas_list and canvas_guidance", async () => {
     const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     const listed = await service.call("canvas_list", {});
     expect(textOf(listed)).toBe(`CANVASES · 1 in canvases\n  ${SOURCE_ID}  ${JSON.stringify(realCanvas().title)}  ${realCanvas().objects.length} objects`);

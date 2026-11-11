@@ -9,6 +9,14 @@ import { join } from "node:path";
 
 import { createCanvasService, type CanvasToolResult } from "./service";
 
+/** A service whose process read topic workflow, so its edit tools are open. */
+async function workflowService(options: Parameters<typeof createCanvasService>[0]) {
+  const service = createCanvasService(options);
+  await service.call("canvas_guidance", { topic: "workflow" });
+  return service;
+}
+
+
 const REPO_CANVASES = join(import.meta.dir, "..", "..", "..", "canvases");
 
 const dirs: string[] = [];
@@ -106,7 +114,7 @@ function parseChart(chart: string) {
 describe("canvas_create and canvas_check", () => {
   test("a new board goes from empty to lint-clean through the tools alone", async () => {
     const workspace = tempDir();
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     const created = await call(service, "canvas_create", { canvas: "pr3-flow", title: "Request flow" });
     expect(textOf(created)).toMatch(/^CREATED · pr3-flow "Request flow" · canvases\/pr3-flow\.canvas\.json · sha256:[0-9a-f]{64}\n/);
@@ -146,7 +154,7 @@ describe("canvas_create and canvas_check", () => {
 
   test("a sticky whose text clips is a TEXT note, never a finding", async () => {
     const workspace = tempDir();
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await call(service, "canvas_create", { canvas: "sticky-clip", title: "Sticky clip" });
     const rows = Array.from({ length: 30 }, (_, index) => `row ${index + 1}`).join("\n");
     await call(service, "place_sticky", { id: "payload", text: rows, at: [80, 120] });
@@ -165,7 +173,7 @@ describe("canvas_create and canvas_check", () => {
   });
 
   test("a chart.mmd redraws on a board with equal node and edge counts", async () => {
-    const service = createCanvasService({ workspace: tempDir() });
+    const service = await workflowService({ workspace: tempDir() });
     const chart = parseChart(CHECKOUT_CHART);
     await call(service, "canvas_create", { canvas: "pr3-checkout-states", title: "Checkout states" });
 
@@ -198,7 +206,7 @@ describe("canvas_create and canvas_check", () => {
     const sidecar = join(page, "v2-flow.canvas.json");
     writeFileSync(sidecar, readFileSync(join(REPO_CANVASES, "v2-flow.canvas.json")));
     const shown = "docs/20-flows/assets/canvases/v2-flow.canvas.json";
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     const opened = await call(service, "canvas_open", { canvas: sidecar });
     expect(textOf(opened).split("\n")[0]).toStartWith(`OPENED · v2-flow "`);
@@ -251,7 +259,7 @@ describe("canvas_create and canvas_check", () => {
     const board = readFileSync(join(REPO_CANVASES, "v2-flow.canvas.json"));
     writeFileSync(outside, board);
     symlinkSync(outside, join(workspace, "canvases", "link.canvas.json"));
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     for (const canvas of ["../outside.canvas.json", outside, "canvases/link.canvas.json", "link"]) {
       const refused = await service.call("canvas_open", { canvas });
@@ -272,7 +280,7 @@ describe("canvas_create and canvas_check", () => {
   });
 
   test("canvas_check refuses a conflicted board until canvas_open reloads it", async () => {
-    const service = createCanvasService({ workspace: tempDir() });
+    const service = await workflowService({ workspace: tempDir() });
     await call(service, "canvas_create", { canvas: "conflict", title: "Conflict" });
     const path = service.activeCanvas()!.canvasPath;
     await call(service, "place_shape", { id: "a", type: "process", at: [80, 140] });

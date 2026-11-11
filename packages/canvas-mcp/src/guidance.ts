@@ -1,8 +1,8 @@
 /**
  * The canvas skill generator: owns the whole `skills/canvas` folder. It copies
- * the hand-written `src/skill/SKILL.md` and renders the source manifest into
- * the references. Every reference is the same text `canvas_guidance` serves or
- * the kernel injected, and snapshot.json carries the same snapshot id
+ * the hand-written `src/skill/SKILL.md` and writes six of the ten served topics
+ * into the references (`canvasGuidanceTopics`). Every reference is the same
+ * text `canvas_guidance` serves, and snapshot.json carries the same snapshot id
  * `canvas_guidance` returns, so the skill's compare step can tell a stale
  * install from a current one. snapshot.json also hashes SKILL.md, which is not
  * a `canvas_guidance` source and so stays out of the snapshot id.
@@ -14,8 +14,8 @@ import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve, sep } from "node:path";
 
 import {
-  VISUAL_PATTERNS,
   canvasGuidanceSources,
+  canvasGuidanceTopics,
   guidanceSnapshot,
   vocabularyContactSheet,
   type GuidanceSource,
@@ -27,73 +27,26 @@ const SKILL_SOURCE = resolve(import.meta.dir, "skill/SKILL.md");
 const SKILL_SOURCE_PATH = "packages/canvas-mcp/src/skill/SKILL.md";
 const REGENERATE = "bun packages/canvas-mcp/src/cli.ts guidance --write";
 
-/** `canvas_guidance` topic id → reference file. */
+/** `canvas_guidance` topic id → reference file. Each file is the topic exactly as `canvas_guidance` serves it. */
 const TOPIC_FILES: Record<string, string> = {
+  operating_context: "references/operating-context.md",
+  visual_patterns: "references/visual-patterns.md",
   diagram_design: "references/diagram-design.md",
   visual_vocabulary: "references/vocabulary.md",
   color_palette: "references/colors.md",
   canvas_conventions: "references/conventions.md",
 };
 
-const tagged = (tag: string, text: string) =>
-  `<${tag}>\n${text.split("\n").map(line => line ? `    ${line}` : line).join("\n")}\n</${tag}>`;
-
 function stamp(sources: readonly { path: string; sha256: string }[]): string {
   const from = sources.map(source => `${source.path} (sha256 ${source.sha256})`).join(", ");
   return `<!-- Generated from ${from}. Do not edit. Regenerate with \`${REGENERATE}\`. -->\n\n`;
 }
 
-function operatingContext(source: (id: string) => GuidanceSource): string {
-  return [
-    "# Operating Context",
-    "",
-    "The reading key for MCP results, and the house style.",
-    "",
-    "- `canvas_open` returns the board digest and lints, every edit returns its delta and lint changes,",
-    "  and `look` renders one region. The state grammar says how to read them.",
-    "- The aesthetic topic is the house style.",
-    "",
-    "## State Grammar",
-    "",
-    tagged("state_grammar", source("state_grammar").text),
-    "",
-    "## Aesthetic",
-    "",
-    tagged("style_guide", source("aesthetic").text),
-    "",
-  ].join("\n");
-}
-
-function visualPatterns(): string {
-  return [
-    "# Visual Patterns",
-    "",
-    `The ${VISUAL_PATTERNS.length} patterns a diagram composes. Each sketch is conceptual, not literal coordinates.`,
-    ...VISUAL_PATTERNS.flatMap(pattern => [
-      "",
-      `## ${pattern.name} (\`${pattern.id}\`)`,
-      "",
-      pattern.description,
-      "",
-      "```text",
-      pattern.ascii,
-      "```",
-      "",
-      `Use case: ${pattern.useCase}`,
-    ]),
-    "",
-  ].join("\n");
-}
-
 /** Every generated file, keyed by its path under the skill folder. Deterministic. */
 export function renderCanvasSkill(sources: readonly GuidanceSource[] = canvasGuidanceSources()): Map<string, string | Uint8Array> {
   const snapshot = guidanceSnapshot(sources);
-  const hashOf = (...ids: string[]) => ids.map(id => snapshot.sources.find(source => source.id === id)!);
-  const source = (id: string) => {
-    const found = sources.find(entry => entry.id === id);
-    if (!found) throw new Error(`canvas guidance manifest has no "${id}" source`);
-    return found;
-  };
+  const hashOf = (ids: readonly string[]) => ids.map(id => snapshot.sources.find(source => source.id === id)!);
+  const topics = canvasGuidanceTopics(sources);
   const sheet = vocabularyContactSheet();
   if (!sheet) throw new Error("vocabularyContactSheet could not render the default-style contact sheet");
 
@@ -103,12 +56,10 @@ export function renderCanvasSkill(sources: readonly GuidanceSource[] = canvasGui
   const files = new Map<string, string | Uint8Array>();
   files.set("SKILL.md", skill);
   files.set("snapshot.json", `${JSON.stringify({ schemaVersion: 1, snapshotId: snapshot.snapshotId, sources: snapshot.sources, skill: skillHash }, null, 2)}\n`);
-  files.set("references/operating-context.md", stamp(hashOf("state_grammar", "aesthetic")) + operatingContext(source));
-  files.set("references/visual-patterns.md", stamp(hashOf("visual_patterns")) + visualPatterns());
   for (const [id, file] of Object.entries(TOPIC_FILES)) {
-    const topic = source(id);
+    const topic = topics.find(entry => entry.id === id)!;
     // The same heading and text `canvas_guidance { topic }` returns.
-    files.set(file, `${stamp(hashOf(id))}# ${topic.title ?? id}\n\n${topic.text}\n`);
+    files.set(file, `${stamp(hashOf(topic.sources))}# ${topic.title}\n\n${topic.text}\n`);
   }
   files.set("assets/contact-sheet.png", new Uint8Array(sheet));
   return files;

@@ -4,6 +4,8 @@
  *
  *   codecaine-canvas mcp [--workspace <dir>] [--canvases <dir>]   serve the canvas tools over stdio
  *   codecaine-canvas guidance [--write | --check]   print, write or check the canvas skill folder
+ *   codecaine-canvas instructions                    print the prompt block (MCP instructions)
+ *   codecaine-canvas manifest                        print the rule-unit manifest as JSON
  *
  * Three roots, one role each:
  * - Containment root: `--workspace`, else the project root. canvas_open opens
@@ -20,7 +22,8 @@ import { join, resolve } from "node:path";
 import { useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 
 import { guidanceCommand } from "./guidance";
-import { startMcp } from "./mcp";
+import { guidanceManifest } from "./guidance-manifest";
+import { INSTRUCTIONS, startMcp } from "./mcp";
 import { loadCodecaineEnv } from "./codecaine-env";
 // Background and client-launched processes do not inherit the shell. See codecaine-env.ts.
 loadCodecaineEnv();
@@ -59,8 +62,14 @@ try {
       await useHarfBuzz();
       process.exitCode = await guidanceCommand(args);
       break;
+    case "instructions":
+      console.log(INSTRUCTIONS);
+      break;
+    case "manifest":
+      console.log(JSON.stringify(await guidanceManifest(), null, 2));
+      break;
     default:
-      console.error("Codecaine Canvas\n\n  mcp [--workspace PATH] [--canvases DIR]   Serve the canvas editing tools over stdio (boards in the project's canvases/, else PATH/canvases, else DIR)\n  guidance [--write | --check]   Print the guidance snapshot, write skills/canvas, or exit 1 when it is stale");
+      console.error("Codecaine Canvas\n\n  mcp [--workspace PATH] [--canvases DIR]   Serve the canvas editing tools over stdio (boards in the project's canvases/, else PATH/canvases, else DIR)\n  guidance [--write | --check]   Print the guidance snapshot, write skills/canvas, or exit 1 when it is stale\n  instructions   Print the prompt block (MCP instructions)\n  manifest   Print the rule-unit manifest as JSON");
       if (command !== "help") process.exitCode = 1;
   }
 } catch (error) {
