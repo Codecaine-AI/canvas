@@ -200,6 +200,21 @@ export function findBoardGuides(
   const alone = (port: Port) => ports.every((other) =>
     other.box !== port.box || other.side !== port.side || samePort(other, port));
   const degree = (box: Box) => ports.filter((port) => port.box === box).length;
+  /** Whether `route reset` puts `wire`'s end on the center of `box`'s side: it drops the stored corners and side pins. */
+  const resetCenters = (wire: InteractiveCanvasConnection, box: Box): boolean => {
+    if (wire.waypoints === undefined && wire.from.position === undefined && wire.to.position === undefined) return false;
+    const { waypoints: _corners, ...kept } = wire;
+    const { position: _fromPin, ...from } = wire.from;
+    const { position: _toPin, ...to } = wire.to;
+    const bare = { ...kept, from, to };
+    const board = { ...document, connections: document.connections.map((other) => (other === wire ? bare : other)) };
+    const points = simplified(routedPolyline(bare, board, canvasStyle));
+    if (points.length < 2) return false;
+    const [tip, next] = wire.to.objectId === box.object.id
+      ? [points[points.length - 1]!, points[points.length - 2]!] : [points[0]!, points[1]!];
+    const snap = snapOn({ ...tip, width: 0, height: 0 }, [box.rect], NEAR_MISS_PX, "center", vertical(sideOf(tip, next)) ? "y" : "x");
+    return snap !== null && Math.abs(snap.delta) <= ARROW_SLACK_PX;
+  };
   const partnersOf = (box: Box) => [...portsOfWire.values()]
     .filter(([a, b]) => a.box === box || b.box === box)
     .map(([a, b]) => (a.box === box ? b.box : a.box));
@@ -480,11 +495,12 @@ export function findBoardGuides(
     const apart = isFrame(partner) ? null : snapOn(partner.rect, [port.box.rect], NEAR_MISS_PX, "center", axis);
     if (!apart) continue;
     if (heads.has(key) || settled.has(`${from.box.object.id}:${axis}`) || settled.has(`${to.box.object.id}:${axis}`)) continue;
-    // On one line already, the wire's own stored corner holds it off: the router runs it down the line.
+    // On one line already, only the wire's own stored corner or pin is left to move, so its reset must center the
+    // head. A lane the router gave the wire to keep off another's run stays.
     const { wire } = holder;
-    const fix: GuideFix = Math.abs(apart.delta) <= ON_LINE_PX
-      ? { tool: "route", args: { id: wire.id, reset: true } }
-      : arrangeFix(partner, port.box, axis, 1);
+    const aligned = Math.abs(apart.delta) <= ON_LINE_PX;
+    if (aligned && !resetCenters(wire, port.box)) continue;
+    const fix: GuideFix = aligned ? { tool: "route", args: { id: wire.id, reset: true } } : arrangeFix(partner, port.box, axis, 1);
     heads.add(key);
     const center = { x: port.box.rect.x + port.box.rect.width / 2, y: port.box.rect.y + port.box.rect.height / 2 };
     const out = AGENT_GRID * 4;

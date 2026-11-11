@@ -167,6 +167,15 @@ describe("near-miss: the smart guides at canvas_check", () => {
     // A straight wire 15px off the center of b's side, from a box whose center is 100px away: no snap lines them up.
     expect(found(makeDocument([page(), box("a", 200, 220, 280, 300), node("b", 800, 220)],
       [{ ...connect("w", "a", "b"), waypoints: [[640, 285]] }]))).toEqual([]);
+    // Boxes on one line, where a lane the router gave the wire to keep off v's run holds the head off: no reset centers it.
+    const laned = (waypoints?: [number, number][]) => makeDocument(
+      [page(), node("a", 200, 220), node("b", 840, 220), box("c", 500, 40, 80, 100), box("d", 740, 600, 80, 100)],
+      [{ ...connect("w", "a", "b"), ...(waypoints ? { waypoints } : {}) }, {
+        ...connect("v", "c", "d"), from: { objectId: "c", anchor: "bottom" as const }, to: { objectId: "d", anchor: "top" as const },
+        waypoints: [[540, 270], [780, 270]],
+      }]);
+    expect(found(laned())).toEqual([]);
+    expect(found(laned([[700, 270]]))).toEqual([]);
     // Gaps of 112 and 100, where the one move that evens them would bend the top box's straight wire.
     const column = [page(), node("a", 200, 208), node("b", 200, 420), node("c", 200, 620), node("root", 800, 208)];
     expect(found(makeDocument(column))).toEqual(["b sits 112px from a and 100px from c (move a by dy 12)"]);
