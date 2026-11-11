@@ -1,0 +1,453 @@
+/**
+ * The region critic: a fuzzy lint between the drawer's first pass and its
+ * revise pass. Ford's idea: "having a secondary agent, like, look at in
+ * detail at pieces and then kind of, like, provide feedback could be good."
+ *
+ * The board renders once as an overview and once per region: overlapping
+ * rectangles at 1:1 world scale that cover the whole board. One critic per
+ * region (GPT-6.1 Sol through the Codex CLI, low effort, fast mode) reads the
+ * overview with its region outlined plus the region crop, and returns JSON
+ * findings on layout and structure. The findings merge across regions, so a
+ * fault two overlapping regions both see reaches the drawer once.
+ *
+ * `climb critic --board <path> --out <dir>` runs the step alone on a frozen
+ * board; `climb draw --critic on` runs it inside a draw (draw.ts).
+ */
+import { spawn } from "node:child_process";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+import { Semaphore } from "../semaphore.ts";
+import { CANVAS_REPO_ROOT, parseFlags } from "./paths.ts";
+import { loadCanvas, renderBoardPng, type CanvasFile, type CanvasModules, type WorldRect } from "./render.ts";
+
+export const CRITIC_MODEL = "gpt-6.1-sol";
+export const CRITIC_EFFORT = "low";
+const CRITIC_TIMEOUT_MS = 80_000;
+/** The long edge of an "auto" grid region, and the overlap between neighbour regions, in world px. */
+const AUTO_REGION_MAX = 1400;
+const REGION_OVERLAP = 120;
+/** The overview outline of the critic's own region, in overview px. */
+const OUTLINE_PX = 4;
+const MAX_FINDINGS_PER_REGION = 10;
+
+export const FINDING_KINDS = ["placement", "empty_space", "routing", "label_chip", "nesting", "colour", "icon"] as const;
+export type FindingKind = (typeof FINDING_KINDS)[number];
+
+export interface Finding {
+  kind: FindingKind;
+  /** Board object or connection ids. */
+  ids: string[];
+  /** Visible labels, for items the critic could not match to an id. */
+  labels: string[];
+  problem: string;
+  fix: string;
+  /** 3: a reader misreads it; 2: clearly wrong; 1: a polish nit. */
+  severity: 1 | 2 | 3;
+}
+export interface MergedFinding extends Finding { regions: string[] }
+
+export interface Region extends WorldRect { id: string }
+export type GridSpec = "auto" | { cols: number; rows: number };
+
+export interface CriticOptions { grid: GridSpec; count: number | undefined }
+
+/** `--critic-grid auto` or `<cols>x<rows>` (3x2). */
+export function parseGrid(value: string | undefined): GridSpec {
+  if (value === undefined || value === "auto") return "auto";
+  const match = /^(\d+)x(\d+)$/.exec(value);
+  const cols = Number(match?.[1]);
+  const rows = Number(match?.[2]);
+  if (!match || cols < 1 || rows < 1) throw new Error(`--critic-grid must be auto or <cols>x<rows> (3x2), not ${value}`);
+  return { cols, rows };
+}
+
+/** `--critic-count <n>`: how many critics run at once. Undefined runs one per region, all at once. */
+export function parseCount(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  const count = Number(value);
+  if (!Number.isInteger(count) || count < 1) throw new Error(`--critic-count must be a whole number of critics (6, ...), not ${value}`);
+  return count;
+}
+
+/** Equal spans of `count` along `length`, neighbours overlapping by REGION_OVERLAP. */
+function spans(start: number, length: number, count: number): Array<{ start: number; size: number }> {
+  const size = count === 1 ? length : Math.ceil((length + (count - 1) * REGION_OVERLAP) / count);
+  return Array.from({ length: count }, (_, index) => ({
+    start: Math.round(start + (count === 1 ? 0 : (index * (length - size)) / (count - 1))),
+    size: Math.min(size, Math.ceil(length)),
+  }));
+}
+
+/**
+ * Overlapping regions that cover the board camera, row by row. "auto" takes
+ * the fewest regions whose long edge is at most AUTO_REGION_MAX.
+ */
+export function regionGrid(camera: WorldRect, grid: GridSpec): Region[] {
+  const fit = (length: number) => length <= AUTO_REGION_MAX ? 1 : Math.ceil((length - REGION_OVERLAP) / (AUTO_REGION_MAX - REGION_OVERLAP));
+  const { cols, rows } = grid === "auto" ? { cols: fit(camera.width), rows: fit(camera.height) } : grid;
+  const regions: Region[] = [];
+  for (const y of spans(camera.y, camera.height, rows)) for (const x of spans(camera.x, camera.width, cols)) {
+    regions.push({ id: `r${String(regions.length + 1).padStart(2, "0")}`, x: x.start, y: y.start, width: x.size, height: y.size });
+  }
+  return regions;
+}
+
+interface BoardObject { id: string; type: string; text?: string; color?: string; icon?: unknown; parentId?: string | null; geometry: WorldRect }
+interface BoardConnection { id: string; from: { objectId: string }; to: { objectId: string }; label?: string }
+interface Board { objects: BoardObject[]; connections: BoardConnection[] }
+
+const overlaps = (a: WorldRect, b: WorldRect) =>
+  a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+const short = (text: string | undefined) => {
+  const line = (text ?? "").replace(/\s+/g, " ").trim();
+  return line.length > 60 ? `${line.slice(0, 59)}…` : line;
+};
+
+/** The board's objects and connections that touch a region, one line each, for the critic to name by id. */
+export function regionInventory(board: Board, region: WorldRect): { objects: string[]; connections: string[] } {
+  const inside = board.objects.filter((object) => object.geometry && overlaps(object.geometry, region));
+  const ids = new Set(inside.map((object) => object.id));
+  const colourOf = new Map(board.objects.map((object) => [object.id, object.color]));
+  const parent = (id: string | null | undefined) => id ? `in ${id} (${colourOf.get(id) ?? "-"})` : "in board";
+  const objects = inside.map((object) => [
+    object.id,
+    object.type,
+    object.color ?? "-",
+    object.icon === undefined ? null : "icon",
+    parent(object.parentId),
+    JSON.stringify(short(object.text)),
+  ].filter(Boolean).join(" · "));
+  const connections = board.connections
+    .filter((wire) => ids.has(wire.from.objectId) || ids.has(wire.to.objectId))
+    .map((wire) => `${wire.id} · ${wire.from.objectId} → ${wire.to.objectId}${wire.label ? ` · ${JSON.stringify(short(wire.label))}` : ""}`);
+  return { objects, connections };
+}
+
+export function criticPrompt(region: Region, inventory: { objects: string[]; connections: string[] }): string {
+  const right = region.x + region.width;
+  const bottom = region.y + region.height;
+  return [
+    `Image 1 is region ${region.id} of a diagram board, at full size: board x ${region.x} to ${right}, y ${region.y} to ${bottom}.`,
+    "Image 2 is the whole board, scaled down, with that region outlined in red. Use image 2 for context only.",
+    "",
+    "List every layout and structure fault you see in image 1. You are a fuzzy lint: a strict lint already ran, so look for what it misses.",
+    "Look at each section, item, wire and wire label in turn. Report a fault the moment it looks wrong to a careful designer. Do not stop at the first few.",
+    "",
+    "Kinds:",
+    "- placement: items off-centre or out of line in their section, uneven gaps, an item in the wrong group.",
+    "- empty_space: large empty areas, or items crushed together.",
+    "- routing: wires that cross, take detours, bend more than they need to, overlap each other, or hide their arrowhead.",
+    "- label_chip: a wire label on a section border, on another wire or far from its wire, or a wire too short for its label.",
+    "- nesting: an item in the wrong container, or a container that adds nothing.",
+    "- colour: a colour choice that does not help a reader tell items and groups apart.",
+    "- icon: a plain box where a real icon or brand logo would read better, or an icon that does not fit its meaning.",
+    "Out of scope: the exact shade the theme paints each colour, border widths, corner radius and fonts.",
+    "",
+    "Other critics review the neighbour regions. Review the part of a cut-off item that image 1 shows.",
+    "Name items by the ids below. Put the visible text in labels when no id matches.",
+    "Give each finding a one-line fix the drawer can make with the canvas tools (move, resize, arrange_section, route, change_color, change_shape, move_label and the rest).",
+    `Give at most ${MAX_FINDINGS_PER_REGION} findings, most severe first. Severity: 3 = a reader misreads it, 2 = clearly wrong, 1 = a polish nit.`,
+    "Do not run commands or read files.",
+    "",
+    "Objects in this region (id · type · colour · icon · parent (its colour) · text):",
+    ...(inventory.objects.length ? inventory.objects : ["(none)"]),
+    "",
+    "Wires that touch them (id · from → to · label):",
+    ...(inventory.connections.length ? inventory.connections : ["(none)"]),
+  ].join("\n");
+}
+
+/** The Codex `--output-schema`: OpenAI strict structured output, so every field is required. */
+export const FINDINGS_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["findings"],
+  properties: {
+    findings: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["kind", "ids", "labels", "problem", "fix", "severity"],
+        properties: {
+          kind: { type: "string", enum: FINDING_KINDS },
+          ids: { type: "array", items: { type: "string" } },
+          labels: { type: "array", items: { type: "string" } },
+          problem: { type: "string" },
+          fix: { type: "string" },
+          severity: { type: "integer", enum: [1, 2, 3] },
+        },
+      },
+    },
+  },
+} as const;
+
+/** One critic's answer, refusing anything off FINDINGS_SCHEMA. */
+export function parseFindings(text: string): Finding[] {
+  const value = JSON.parse(text) as { findings?: unknown };
+  if (!Array.isArray(value.findings)) throw new Error(`"findings" must be a list`);
+  return value.findings.map((raw, index): Finding => {
+    const finding = raw as Record<string, unknown>;
+    const where = (detail: string) => new Error(`findings[${index}]: ${detail}`);
+    const strings = (key: string) => {
+      const list = finding[key];
+      if (!Array.isArray(list) || !list.every((item) => typeof item === "string")) throw where(`"${key}" must be a list of strings`);
+      return list.map((item) => item.trim()).filter(Boolean);
+    };
+    if (!FINDING_KINDS.includes(finding.kind as FindingKind)) throw where(`unknown kind ${JSON.stringify(finding.kind)}`);
+    if (finding.severity !== 1 && finding.severity !== 2 && finding.severity !== 3) throw where(`severity must be 1, 2 or 3`);
+    for (const key of ["problem", "fix"]) {
+      if (typeof finding[key] !== "string" || !(finding[key] as string).trim()) throw where(`"${key}" must be a non-empty string`);
+    }
+    return {
+      kind: finding.kind as FindingKind,
+      ids: strings("ids"),
+      labels: strings("labels"),
+      problem: (finding.problem as string).trim(),
+      fix: (finding.fix as string).trim(),
+      severity: finding.severity,
+    };
+  });
+}
+
+const normal = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+/**
+ * One list across regions. Two findings are the same fault when they share
+ * a kind and an id (or, with no ids, a label): overlapping regions see the
+ * same item. Ids not on the board move to labels. The merged finding keeps
+ * the most severe finding's words, every id and label, and every region
+ * that reported it; the list runs most severe first, then most regions.
+ */
+export function mergeFindings(byRegion: Array<{ region: string; findings: Finding[] }>, boardIds: ReadonlySet<string>): MergedFinding[] {
+  const groups: MergedFinding[][] = [];
+  const keyOwner = new Map<string, MergedFinding[]>();
+  for (const { region, findings } of byRegion) {
+    for (const finding of findings) {
+      const ids = finding.ids.filter((id) => boardIds.has(id));
+      const labels = [...finding.labels, ...finding.ids.filter((id) => !boardIds.has(id))];
+      const entry: MergedFinding = { ...finding, ids, labels, regions: [region] };
+      const keys = ids.length > 0 ? ids.map((id) => `${finding.kind} id ${id}`) : labels.map((label) => `${finding.kind} label ${normal(label)}`);
+      if (keys.length === 0) keys.push(`${finding.kind} fix ${normal(finding.fix)}`);
+      // Join every group this finding shares a key with.
+      const hit = [...new Set(keys.map((key) => keyOwner.get(key)).filter((group): group is MergedFinding[] => group !== undefined))];
+      const group = hit[0] ?? [];
+      if (hit.length === 0) groups.push(group);
+      for (const other of hit.slice(1)) {
+        group.push(...other);
+        groups.splice(groups.indexOf(other), 1);
+        for (const [key, owner] of keyOwner) if (owner === other) keyOwner.set(key, group);
+      }
+      group.push(entry);
+      for (const key of keys) keyOwner.set(key, group);
+    }
+  }
+  const unique = (items: string[]) => [...new Set(items)];
+  return groups.map((group) => {
+    const lead = group.reduce((best, entry) => entry.severity > best.severity ? entry : best);
+    return {
+      ...lead,
+      ids: unique(group.flatMap((entry) => entry.ids)),
+      labels: unique(group.flatMap((entry) => entry.labels)),
+      regions: unique(group.flatMap((entry) => entry.regions)).sort(),
+    };
+  }).sort((a, b) => b.severity - a.severity || b.regions.length - a.regions.length);
+}
+
+/** One numbered line per finding, as the drawer reads them. */
+export function findingLines(findings: MergedFinding[]): string[] {
+  return findings.map((finding, index) => {
+    const names = [...finding.ids, ...finding.labels.map((label) => JSON.stringify(label))].join(", ");
+    return `${index + 1}. [${finding.kind}, severity ${finding.severity}] ${names ? `${names}: ` : ""}${finding.problem} Fix: ${finding.fix}`;
+  });
+}
+
+/** The drawer's revise turn, in its own session, after the critics. */
+export function revisePrompt(brief: string, findings: MergedFinding[]): string {
+  return [
+    "Reviewers looked at your board region by region and found the layout faults below.",
+    "Fix each finding you agree with, using the canvas tools. Skip a finding that is wrong or that would break something else.",
+    `The canvas server restarted. Open the board again with canvas_open, canvas id "${brief}", and read any guidance topic it asks for.`,
+    "Run canvas_check when you are done. Stop when the board is finished.",
+    "",
+    "<findings>",
+    ...findingLines(findings),
+    "</findings>",
+  ].join("\n");
+}
+
+export function criticArgs(dir: string, prompt: string, images: string[], schemaPath: string, outputPath: string): string[] {
+  return [
+    "exec",
+    "-m", CRITIC_MODEL,
+    "-c", `model_reasoning_effort="${CRITIC_EFFORT}"`,
+    "-c", `service_tier="fast"`,
+    "--enable", "fast_mode",
+    "--skip-git-repo-check",
+    "--ephemeral",
+    "-s", "read-only",
+    "-C", dir,
+    ...images.flatMap((image) => ["-i", image]),
+    "--output-schema", schemaPath,
+    "-o", outputPath,
+    prompt,
+  ];
+}
+
+export interface RegionRecord {
+  region: Region;
+  png: string;
+  objects: number;
+  durationMs: number;
+  exitCode: number | null;
+  timedOut: boolean;
+  /** Why the answer did not parse, or null when it did. */
+  error: string | null;
+  findings: Finding[];
+}
+export interface CritiqueRecord {
+  board: string;
+  model: string;
+  effort: string;
+  grid: { cols: number; rows: number } | "auto";
+  count: number;
+  startedAt: string;
+  /** Wall clock for the whole step: renders, every critic and the merge. */
+  durationMs: number;
+  renderMs: number;
+  regions: RegionRecord[];
+  findings: MergedFinding[];
+}
+
+async function runCritic(args: string[], timeoutMs: number): Promise<{ exitCode: number | null; timedOut: boolean; stderr: string }> {
+  // Codex reads a piped stdin into the prompt, so stdin is closed.
+  const child = spawn("codex", args, { stdio: ["ignore", "ignore", "pipe"] });
+  let stderr = "";
+  child.stderr.on("data", (chunk: Buffer) => { stderr += chunk.toString("utf8"); });
+  let timedOut = false;
+  const timer = setTimeout(() => { timedOut = true; child.kill("SIGTERM"); }, timeoutMs);
+  const exitCode = await new Promise<number | null>((done, fail) => {
+    child.on("error", fail);
+    child.on("close", (code) => done(code));
+  });
+  clearTimeout(timer);
+  return { exitCode, timedOut, stderr };
+}
+
+/** The overview with one region outlined: a rect drawn into the board SVG's world-coordinate viewBox. */
+function outlinedSvg(svg: string, region: WorldRect, scale: number): string {
+  const stroke = OUTLINE_PX / scale;
+  const rect = `<rect x="${region.x}" y="${region.y}" width="${region.width}" height="${region.height}" fill="none" stroke="#e5243b" stroke-width="${stroke}"/>`;
+  const end = svg.lastIndexOf("</svg>");
+  return `${svg.slice(0, end)}${rect}${svg.slice(end)}`;
+}
+
+/**
+ * Render `boardPath`, run one critic per non-empty region and merge the
+ * findings. Writes into `outDir`: overview.png, regions/<id>.png,
+ * regions/<id>-overview.png, regions/<id>.json (the raw answer),
+ * critique.json (a CritiqueRecord) and findings.md.
+ */
+export async function critiqueBoard(options: {
+  canvas: CanvasModules;
+  boardPath: string;
+  outDir: string;
+  critic: CriticOptions;
+}): Promise<CritiqueRecord> {
+  const { canvas, boardPath, outDir } = options;
+  const started = Date.now();
+  const regionsDir = resolve(outDir, "regions");
+  rmSync(regionsDir, { recursive: true, force: true });
+  mkdirSync(regionsDir, { recursive: true });
+  const schemaPath = resolve(outDir, "findings.schema.json");
+  writeFileSync(schemaPath, `${JSON.stringify(FINDINGS_SCHEMA, null, 2)}\n`);
+
+  const file: CanvasFile = canvas.toolkit.openCanvasFile(boardPath);
+  const board = file.persisted as Board;
+  const style = file.session.canvasStyle;
+  const overview = renderBoardPng(canvas, file, undefined);
+  writeFileSync(resolve(outDir, "overview.png"), overview.png);
+  const overviewSvg = canvas.render.renderBoardView(board, { width: overview.size.width, canvasStyle: style }).svg;
+
+  const camera = canvas.render.boardCameraAtWorldScale(board, style);
+  const jobs = regionGrid(camera, options.critic.grid).flatMap((region) => {
+    const inventory = regionInventory(board, region);
+    if (inventory.objects.length === 0) return [];
+    const png = resolve(regionsDir, `${region.id}.png`);
+    const scene = { bounds: region, objects: board.objects, connections: board.connections, obstacles: board.objects, chipZoom: 1 };
+    const crop = canvas.render.renderSceneToSvg(board, scene, { width: region.width, height: region.height, canvasStyle: style });
+    writeFileSync(png, canvas.rasterize.rasterizeSvgToPng(crop.svg).png);
+    const context = resolve(regionsDir, `${region.id}-overview.png`);
+    writeFileSync(context, canvas.rasterize.rasterizeSvgToPng(outlinedSvg(overviewSvg, region, overview.size.scale)).png);
+    return [{ region, inventory, png, context }];
+  });
+  const renderMs = Date.now() - started;
+
+  const count = options.critic.count ?? Math.max(1, jobs.length);
+  const gate = new Semaphore(count);
+  const regions = await Promise.all(jobs.map((job) => gate.run(async (): Promise<RegionRecord> => {
+    const answer = resolve(regionsDir, `${job.region.id}.json`);
+    const begun = Date.now();
+    const prompt = criticPrompt(job.region, job.inventory);
+    const run = await runCritic(criticArgs(regionsDir, prompt, [job.png, job.context], schemaPath, answer), CRITIC_TIMEOUT_MS);
+    let findings: Finding[] = [];
+    let error: string | null = null;
+    try {
+      findings = parseFindings(readFileSync(answer, "utf8"));
+    } catch (failure) {
+      error = run.timedOut ? "timed out" : `${failure instanceof Error ? failure.message : String(failure)}\n${run.stderr.slice(-2000)}`;
+    }
+    return {
+      region: job.region,
+      png: `regions/${job.region.id}.png`,
+      objects: job.inventory.objects.length,
+      durationMs: Date.now() - begun,
+      exitCode: run.exitCode,
+      timedOut: run.timedOut,
+      error,
+      findings,
+    };
+  })));
+
+  const boardIds = new Set([...board.objects.map((object) => object.id), ...board.connections.map((wire) => wire.id)]);
+  const findings = mergeFindings(regions.map((record) => ({ region: record.region.id, findings: record.findings })), boardIds);
+  const record: CritiqueRecord = {
+    board: boardPath,
+    model: CRITIC_MODEL,
+    effort: CRITIC_EFFORT,
+    grid: options.critic.grid,
+    count,
+    startedAt: new Date(started).toISOString(),
+    durationMs: Date.now() - started,
+    renderMs,
+    regions,
+    findings,
+  };
+  writeFileSync(resolve(outDir, "critique.json"), `${JSON.stringify(record, null, 2)}\n`);
+  writeFileSync(resolve(outDir, "findings.md"), `${findingLines(findings).join("\n")}\n`);
+  return record;
+}
+
+export function critiqueSummary(record: CritiqueRecord): string {
+  const failed = record.regions.filter((region) => region.error !== null);
+  const raw = record.regions.reduce((sum, region) => sum + region.findings.length, 0);
+  const slowest = Math.max(0, ...record.regions.map((region) => region.durationMs));
+  return `${record.regions.length} regions · ${raw} findings, ${record.findings.length} after merge`
+    + ` · ${(record.durationMs / 1000).toFixed(1)} s wall (render ${(record.renderMs / 1000).toFixed(1)} s, slowest critic ${(slowest / 1000).toFixed(1)} s)`
+    + `${failed.length ? ` · ${failed.length} unparsed: ${failed.map((region) => region.region.id).join(", ")}` : ""}`;
+}
+
+/** `climb critic --board <path> --out <dir> [--critic-grid auto|3x2] [--critic-count n]`: the critic step alone, no drawer. */
+export async function runCritique(argv: string[]): Promise<void> {
+  const flags = parseFlags(argv, ["--board", "--out", "--critic-grid", "--critic-count"]);
+  const boardPath = flags.get("--board");
+  const outDir = flags.get("--out");
+  if (!boardPath || !outDir) throw new Error("climb critic needs --board <canvas.json> and --out <dir>");
+  const critic = { grid: parseGrid(flags.get("--critic-grid")), count: parseCount(flags.get("--critic-count")) };
+  mkdirSync(resolve(outDir), { recursive: true });
+  const canvas = await loadCanvas(CANVAS_REPO_ROOT);
+  const record = await critiqueBoard({ canvas, boardPath: resolve(boardPath), outDir: resolve(outDir), critic });
+  process.stdout.write(`${critiqueSummary(record)}\n`);
+  if (record.regions.some((region) => region.error !== null)) process.exitCode = 1;
+}

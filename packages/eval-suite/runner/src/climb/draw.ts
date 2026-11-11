@@ -7,13 +7,20 @@
  * CLAUDE.md discovery, hooks, plugins or skills, and no built-in tools. Auth
  * comes from the user settings file passed with `--settings` (its
  * `apiKeyHelper`), the only setting bare mode reads from it that matters here.
+ *
+ * `--critic on` adds the region critic (critic.ts) after the first pass: the
+ * critics review the board, and the drawer gets their merged findings for one
+ * revise pass in the same session (`--resume`). `critic/` in the brief folder
+ * keeps the findings, their timings, before.canvas.json, before.png and
+ * after.png.
  */
 import { spawn } from "node:child_process";
-import { createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, rmSync, rmdirSync, writeFileSync } from "node:fs";
+import { copyFileSync, createWriteStream, existsSync, mkdirSync, readFileSync, renameSync, rmSync, rmdirSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 
 import { Semaphore } from "../semaphore.ts";
+import { critiqueBoard, critiqueSummary, parseCount, parseGrid, revisePrompt, type CriticOptions } from "./critic.ts";
 import {
   CANVAS_REPO_ROOT,
   DEFAULT_CLIMB_ROOT,
@@ -23,6 +30,7 @@ import {
   roundDir,
   roundNumber,
 } from "./paths.ts";
+import { loadCanvas, renderBoardPng, type CanvasModules } from "./render.ts";
 
 export const DRAWER_MODEL = "claude-opus-5-5";
 export const DRAWER_EFFORT = "high";
@@ -56,6 +64,20 @@ export interface DrawRecord {
   startedAt: string;
   /** The board file relative to the brief folder, or null when the drawer made none. */
   board: string | null;
+  /** The critic step and the revise pass, or null when the critic was off or the first pass failed. */
+  critic: CriticRecord | null;
+}
+
+export interface CriticRecord {
+  regions: number;
+  unparsed: number;
+  findings: number;
+  /** Wall clock for the critic step: renders, critics and the merge. */
+  critiqueMs: number;
+  /** The revise pass, or null when the critics found nothing. */
+  revise: { exitCode: number | null; signal: string | null; timedOut: boolean; durationMs: number } | null;
+  /** Why the critic step stopped, or null when it ran through. */
+  error: string | null;
 }
 
 export function drawerPrompt(brief: string, briefText: string): string {
@@ -78,7 +100,11 @@ function drawerEnv(dir: string): NodeJS.ProcessEnv {
   return env;
 }
 
-export function drawerArgs(dir: string, prompt: string, settingsPath: string): string[] {
+/**
+ * `session.persist` keeps the session on disk so a revise pass can resume
+ * it; `session.resume` is that session's id.
+ */
+export function drawerArgs(dir: string, prompt: string, settingsPath: string, session: { persist: boolean; resume?: string } = { persist: false }): string[] {
   const mcpConfig = {
     mcpServers: {
       [MCP_SERVER]: {
@@ -99,10 +125,87 @@ export function drawerArgs(dir: string, prompt: string, settingsPath: string): s
     "--tools", "",
     "--allowedTools", `mcp__${MCP_SERVER}`,
     "--disable-slash-commands",
-    "--no-session-persistence",
+    ...(session.persist ? [] : ["--no-session-persistence"]),
+    ...(session.resume ? ["--resume", session.resume] : []),
     "--output-format", "stream-json",
     "--verbose",
   ];
+}
+
+/** The session id of a Claude Code `stream-json` transcript: its first event that names one. */
+export function sessionIdOf(jsonl: string): string | null {
+  for (const line of jsonl.split("\n")) {
+    if (!line.trim()) continue;
+    try {
+      const id = (JSON.parse(line) as { session_id?: unknown }).session_id;
+      if (typeof id === "string" && id) return id;
+    } catch { /* a torn last line */ }
+  }
+  return null;
+}
+
+/** One drawer process, its stdout to `transcriptPath` and its stderr appended to stderr.log. */
+async function runDrawer(dir: string, args: string[], transcriptPath: string, timeoutMs: number): Promise<{
+  exitCode: number | null; signal: NodeJS.Signals | null; timedOut: boolean; durationMs: number;
+}> {
+  const started = Date.now();
+  const transcript = createWriteStream(transcriptPath);
+  const stderr = createWriteStream(resolve(dir, "stderr.log"), { flags: "a" });
+  const child = spawn("claude", args, { cwd: dir, env: drawerEnv(dir), stdio: ["ignore", "pipe", "pipe"] });
+  child.stdout.pipe(transcript);
+  child.stderr.pipe(stderr);
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    child.kill("SIGTERM");
+  }, timeoutMs);
+  const [exitCode, signal] = await new Promise<[number | null, NodeJS.Signals | null]>((done, fail) => {
+    child.on("error", fail);
+    child.on("close", (code, sig) => done([code, sig]));
+  });
+  clearTimeout(timer);
+  await Promise.all([transcript, stderr].map((stream) => new Promise((done) => stream.end(done))));
+  return { exitCode, signal, timedOut, durationMs: Date.now() - started };
+}
+
+/**
+ * The critic step on the first pass's board, then one revise pass in the
+ * drawer's own session. Writes `critic/` in the brief folder.
+ */
+async function critiqueAndRevise(options: {
+  brief: string;
+  dir: string;
+  boardPath: string;
+  settingsPath: string;
+  timeoutMs: number;
+  canvas: CanvasModules;
+  critic: CriticOptions;
+}): Promise<CriticRecord> {
+  const { brief, dir, boardPath, canvas } = options;
+  const outDir = resolve(dir, "critic");
+  mkdirSync(outDir, { recursive: true });
+  copyFileSync(boardPath, resolve(outDir, "before.canvas.json"));
+  const critique = await critiqueBoard({ canvas, boardPath, outDir, critic: options.critic });
+  renameSync(resolve(outDir, "overview.png"), resolve(outDir, "before.png"));
+  process.stdout.write(`${brief}: critic · ${critiqueSummary(critique)}\n`);
+  const record: CriticRecord = {
+    regions: critique.regions.length,
+    unparsed: critique.regions.filter((region) => region.error !== null).length,
+    findings: critique.findings.length,
+    critiqueMs: critique.durationMs,
+    revise: null,
+    error: null,
+  };
+  if (critique.findings.length === 0) return record;
+
+  const session = sessionIdOf(readFileSync(resolve(dir, "transcript.jsonl"), "utf8"));
+  if (!session) throw new Error(`${brief}: the first pass's transcript names no session to resume`);
+  const args = drawerArgs(dir, revisePrompt(brief, critique.findings), options.settingsPath, { persist: false, resume: session });
+  const revise = await runDrawer(dir, args, resolve(dir, "revise-transcript.jsonl"), options.timeoutMs);
+  record.revise = revise;
+  writeFileSync(resolve(outDir, "after.png"), renderBoardPng(canvas, canvas.toolkit.openCanvasFile(boardPath), undefined).png);
+  process.stdout.write(`${brief}: revise · exit ${revise.exitCode ?? revise.signal}${revise.timedOut ? " (timed out)" : ""} · ${Math.round(revise.durationMs / 1000)} s\n`);
+  return record;
 }
 
 async function drawOne(options: {
@@ -111,6 +214,8 @@ async function drawOne(options: {
   climbRoot: string;
   settingsPath: string;
   timeoutMs: number;
+  /** The critic's settings and the canvas modules it renders with, or undefined when the critic is off. */
+  critic?: { options: CriticOptions; canvas: CanvasModules };
 }): Promise<DrawRecord> {
   const { brief, round } = options;
   const dir = resolve(roundDir(options.climbRoot, round), brief);
@@ -129,29 +234,26 @@ async function drawOne(options: {
 
   const prompt = drawerPrompt(brief, readFileSync(briefPath(brief), "utf8"));
   const startedAt = new Date();
-  const transcript = createWriteStream(resolve(dir, "transcript.jsonl"));
-  const stderr = createWriteStream(resolve(dir, "stderr.log"));
-  const child = spawn("claude", drawerArgs(dir, prompt, options.settingsPath), {
-    cwd: dir,
-    env: drawerEnv(dir),
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  child.stdout.pipe(transcript);
-  child.stderr.pipe(stderr);
-  let timedOut = false;
-  const timer = setTimeout(() => {
-    timedOut = true;
-    child.kill("SIGTERM");
-  }, options.timeoutMs);
-  const [exitCode, signal] = await new Promise<[number | null, NodeJS.Signals | null]>((done, fail) => {
-    child.on("error", fail);
-    child.on("close", (code, sig) => done([code, sig]));
-  });
-  clearTimeout(timer);
-  await Promise.all([transcript, stderr].map((stream) => new Promise((done) => stream.end(done))));
+  const args = drawerArgs(dir, prompt, options.settingsPath, { persist: options.critic !== undefined });
+  const { exitCode, signal, timedOut } = await runDrawer(dir, args, resolve(dir, "transcript.jsonl"), options.timeoutMs);
+
+  // The critic and the revise pass work on the board where the drawer's canvas server keeps it.
+  const created = resolve(canvasesDir, `${brief}.canvas.json`);
+  let critic: CriticRecord | null = null;
+  if (options.critic && exitCode === 0 && existsSync(created)) {
+    try {
+      critic = await critiqueAndRevise({
+        brief, dir, boardPath: created, settingsPath: options.settingsPath, timeoutMs: options.timeoutMs,
+        canvas: options.critic.canvas, critic: options.critic.options,
+      });
+    } catch (error) {
+      // The first pass's board stands; draw.json says the critic step failed.
+      critic = { regions: 0, unparsed: 0, findings: 0, critiqueMs: 0, revise: null, error: error instanceof Error ? error.message : String(error) };
+      process.stdout.write(`${brief}: critic failed · ${critic.error}\n`);
+    }
+  }
 
   // The board moves up beside its transcript; the empty canvases folder goes.
-  const created = resolve(canvasesDir, `${brief}.canvas.json`);
   const board = `${brief}.canvas.json`;
   const hasBoard = existsSync(created);
   if (hasBoard) renameSync(created, resolve(dir, board));
@@ -168,6 +270,7 @@ async function drawOne(options: {
     durationMs: Date.now() - startedAt.getTime(),
     startedAt: startedAt.toISOString(),
     board: hasBoard ? board : null,
+    critic,
   };
   writeFileSync(recordPath, `${JSON.stringify(record, null, 2)}\n`);
   const seconds = Math.round(record.durationMs / 1000);
@@ -176,7 +279,7 @@ async function drawOne(options: {
 }
 
 export async function runDraw(argv: string[]): Promise<void> {
-  const flags = parseFlags(argv, ["--round", "--set", "--briefs", "--climb-root", "--settings", "--timeout-min"]);
+  const flags = parseFlags(argv, ["--round", "--set", "--briefs", "--climb-root", "--settings", "--timeout-min", "--critic", "--critic-grid", "--critic-count"]);
   const round = roundNumber(flags.get("--round"));
   const sets = readSets();
   const setName = flags.get("--set") ?? (flags.has("--briefs") ? undefined : "climb");
@@ -197,10 +300,14 @@ export async function runDraw(argv: string[]): Promise<void> {
   const settingsPath = flags.get("--settings") ?? resolve(homedir(), ".claude", "settings.json");
   if (!existsSync(settingsPath)) throw new Error(`No Claude Code settings file at ${settingsPath} (pass --settings)`);
   const climbRoot = resolve(flags.get("--climb-root") ?? DEFAULT_CLIMB_ROOT);
+  const criticFlag = flags.get("--critic") ?? "off";
+  if (criticFlag !== "on" && criticFlag !== "off") throw new Error(`--critic must be on or off, not ${criticFlag}`);
+  const criticOptions = { grid: parseGrid(flags.get("--critic-grid")), count: parseCount(flags.get("--critic-count")) };
+  const critic = criticFlag === "on" ? { options: criticOptions, canvas: await loadCanvas(CANVAS_REPO_ROOT) } : undefined;
 
   const gate = new Semaphore(MAX_PARALLEL);
   const records = await Promise.all(briefs.map((brief) => gate.run(() =>
-    drawOne({ brief, round, climbRoot, settingsPath, timeoutMs: timeoutMinutes * 60_000 }))));
+    drawOne({ brief, round, climbRoot, settingsPath, timeoutMs: timeoutMinutes * 60_000, critic }))));
   const failed = records.filter((record) => record.exitCode !== 0 || !record.board);
   if (failed.length > 0) {
     process.stderr.write(`${failed.length} of ${records.length} drawers failed: ${failed.map((record) => record.brief).join(", ")}\n`);

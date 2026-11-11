@@ -24,7 +24,7 @@ import type { DrawRecord } from "./draw.ts";
 import { CANVAS_REPO_ROOT, DEFAULT_CLIMB_ROOT, parseFlags, roundDir, roundNumber } from "./paths.ts";
 
 /** The slice of `@codecaine-ai/canvas` this command calls. */
-interface CanvasFile { session: { canvasStyle: unknown }; persisted: unknown }
+export interface CanvasFile { session: { canvasStyle: unknown }; persisted: unknown }
 interface Toolkit {
   openCanvasFile(path: string): CanvasFile;
   checkCanvasFile(file: CanvasFile, label: string): { isError?: boolean; text: string; pngs?: Buffer[] };
@@ -34,16 +34,22 @@ interface Lints {
   sessionDiagnostics(session: unknown, rules: readonly unknown[]): Array<{ rule: string; severity: string }>;
 }
 interface Headless { useHarfBuzz(): Promise<void> }
-interface WorldRect { x: number; y: number; width: number; height: number }
+export interface WorldRect { x: number; y: number; width: number; height: number }
 interface Render {
   renderBoardView(board: unknown, opts: { width: number; canvasStyle?: unknown }): { svg: string; camera: WorldRect };
+  boardCameraAtWorldScale(board: unknown, canvasStyle?: unknown): WorldRect;
+  renderSceneToSvg(
+    board: unknown,
+    scene: { bounds: WorldRect; objects: unknown[]; connections: unknown[]; obstacles: unknown[]; chipZoom: number },
+    opts: { width: number; height: number; canvasStyle?: unknown },
+  ): { svg: string };
 }
 interface Rasterize { rasterizeSvgToPng(svg: string): { png: Buffer; width: number; height: number } }
 interface Views { BOARD_VIEW_WIDTH: number }
 
-interface CanvasModules { toolkit: Toolkit; lints: Lints; render: Render; rasterize: Rasterize; views: Views }
+export interface CanvasModules { toolkit: Toolkit; lints: Lints; render: Render; rasterize: Rasterize; views: Views }
 
-async function loadCanvas(root: string): Promise<CanvasModules> {
+export async function loadCanvas(root: string): Promise<CanvasModules> {
   const packages = resolve(root, "packages");
   const headless = (await import(resolve(packages, "text-measure/src/headless.ts"))) as Headless;
   // Lints and renders measure text; measure it exactly, as the canvas MCP does.
@@ -62,7 +68,7 @@ async function loadCanvas(root: string): Promise<CanvasModules> {
  * (renderAtJudgeSize, the same render `canvas_check` returns) when
  * `viewWidth` is undefined.
  */
-function renderBoardPng(
+export function renderBoardPng(
   canvas: CanvasModules,
   file: CanvasFile,
   viewWidth: number | undefined,
@@ -200,6 +206,9 @@ export async function runRender(argv: string[]): Promise<void> {
     const bySeverity = (severity: string) => countBy(diagnostics.filter((d) => d.severity === severity), (d) => d.rule);
     const transcriptPath = resolve(briefDir, "transcript.jsonl");
     const transcript = transcriptMetrics(existsSync(transcriptPath) ? readFileSync(transcriptPath, "utf8") : "");
+    // The critic's revise pass (draw.ts), in its own transcript; tool calls and tokens above are the first pass only.
+    const revisePath = resolve(briefDir, "revise-transcript.jsonl");
+    const revise = existsSync(revisePath) ? transcriptMetrics(readFileSync(revisePath, "utf8")) : null;
     const metrics = {
       brief,
       round,
@@ -216,6 +225,8 @@ export async function runRender(argv: string[]): Promise<void> {
         notesByRule: bySeverity("note"),
       },
       ...transcript,
+      critic: draw.critic ?? null,
+      revise,
       durationMs: draw.durationMs,
       model: draw.model,
       effort: draw.effort,
