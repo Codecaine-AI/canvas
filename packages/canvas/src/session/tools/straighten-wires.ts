@@ -29,7 +29,8 @@
  * - The candidates are each end, and each section above an end up to the
  *   section that holds both, slid across the wire by the offset. A section
  *   moves with what it holds. An end with a straight wire the slide would
- *   bend is also tried with its row: the boxes those wires join to it.
+ *   bend is also tried with its row: the boxes those wires join to it slide,
+ *   and grow, with it.
  * - Each candidate is settled the way an edit is (a section grows to hold a
  *   moved child and makes room), then judged on the real routes. It is legal
  *   when the wire loses its jog and has fewer corners (none, unless it also
@@ -40,7 +41,8 @@
  *   fewer corners (so a jog never just moves to another wire), no two wires
  *   cross that did not cross before, and it has no more wire length, wire
  *   faults or findings of any check rule than before. After an edit, no box
- *   that edit placed goes back where it stood.
+ *   that edit placed goes back where it stood, or a grid step of growth off
+ *   it.
  * - Of the legal candidates, the one that bends the fewest other wires wins.
  *   Ties go to the one that leaves a box the edit just placed where it is,
  *   then moves no row, then takes no grid step out of its frame's padding,
@@ -139,9 +141,9 @@ interface Candidate {
   /** Sections between the unit and the wire's end: 0 for the end itself. */
   depth: number;
   slide: number;
-  /** The unit also grows one grid step across the wire. */
+  /** The unit, and its row, also grow one grid step across the wire. */
   grows: boolean;
-  /** The boxes that slide with the unit, so the straight wires that join them stay straight. */
+  /** The boxes that slide and grow with the unit, so the straight wires that join them stay straight. */
   row: string[];
 }
 
@@ -228,15 +230,21 @@ function sameGeometry(a: Rect, b: Rect): boolean {
   return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
 
+/** Whether a box is back where it stood: in the same place, or a grid step of growth off it. */
+function backWhereItStood(stood: Rect | undefined, now: Rect): boolean {
+  return stood !== undefined
+    && (["x", "y", "width", "height"] as const).every((side) => Math.abs(now[side] - stood[side]) <= GRID);
+}
+
 /** The clear space between two boxes; negative when they overlap, by how deep. */
 function gapBetween(a: Rect, b: Rect): number {
   return Math.max(a.x - (b.x + b.width), b.x - (a.x + a.width), a.y - (b.y + b.height), b.y - (a.y + a.height));
 }
 
 /**
- * The boxes that slide with an end so that no straight wire bends: each box
- * joined to it, one after another, by a wire that runs straight the way the
- * jog's wire does.
+ * The boxes that slide, and grow, with an end so that no straight wire bends:
+ * each box joined to it, one after another, by a wire that runs straight the
+ * way the jog's wire does.
  */
 function rowOf(end: string, jog: Jog, current: InteractiveCanvasDocument, now: Standing): string[] {
   const row = new Set([end]);
@@ -271,20 +279,20 @@ function candidatesFor(jog: Jog, current: InteractiveCanvasDocument, now: Standi
     for (const [depth, unit] of chain.entries()) {
       // A section that holds both ends carries the jog with it.
       if (other.includes(unit)) break;
+      const joined = depth === 0 ? rowOf(unit.id, jog, current, now) : [];
+      // A row that reaches the other end carries the jog with it.
+      const rows: string[][] = joined.length > 0 && !joined.includes(other[0]!.id) ? [[], joined] : [[]];
       const whole = snapCanvasNumber(slide, GRID);
-      if (whole !== 0) {
-        out.push({ unit, depth, slide: whole, grows: false, row: [] });
-        const row = depth === 0 ? rowOf(unit.id, jog, current, now) : [];
-        // A row that reaches the other end carries the jog with it.
-        if (row.length > 0 && !row.includes(other[0]!.id)) out.push({ unit, depth, slide: whole, grows: false, row });
-      }
       // A node whose centre sits half a grid step off the other end's: one
       // grid step of size moves the centre that half step.
       const half = snapCanvasNumber(slide - GRID / 2, GRID);
-      if (
-        depth === 0 && kindOf(unit) === "node"
-        && Math.abs(slide - whole) >= ON_AXIS && Math.abs(slide - GRID / 2 - half) < ON_AXIS
-      ) out.push({ unit, depth, slide: half, grows: true, row: [] });
+      const offGrid = Math.abs(slide - whole) >= ON_AXIS && Math.abs(slide - GRID / 2 - half) < ON_AXIS;
+      for (const row of rows) {
+        if (whole !== 0) out.push({ unit, depth, slide: whole, grows: false, row });
+        if (offGrid && depth === 0 && [unit.id, ...row].every((id) => kindOf(byId.get(id)!) === "node")) {
+          out.push({ unit, depth, slide: half, grows: true, row });
+        }
+      }
     }
   }
   return out;
@@ -360,7 +368,7 @@ function settled(
   const size = axis === "x" ? "width" : "height";
   const sliding = [unit.id, ...row];
   const objects = translateWithDescendants(current, sliding, axis === "x" ? { dx: slide, dy: 0 } : { dx: 0, dy: slide })
-    .map((object) => (grows && object.id === unit.id
+    .map((object) => (grows && sliding.includes(object.id)
       ? { ...object, geometry: { ...object.geometry, [size]: object.geometry[size] + GRID } }
       : object));
   const was = new Map(current.objects.map((object) => [object.id, object]));
@@ -393,7 +401,7 @@ function crowds(
   current: InteractiveCanvasDocument,
   next: InteractiveCanvasDocument,
   changed: ReadonlySet<string>,
-  grown: string | null,
+  grown: ReadonlySet<string>,
 ): boolean {
   const was = new Map(current.objects.map((object) => [object.id, object]));
   const holds = (ancestor: string, id: string) => {
@@ -409,7 +417,7 @@ function crowds(
       const before = gapBetween(was.get(object.id)!.geometry, was.get(other.id)!.geometry);
       const after = gapBetween(object.geometry, other.geometry);
       const kept = kindOf(object) === "section" && kindOf(other) === "section" ? SECTION_GAP : SIBLING_GAP;
-      const slack = object.id === grown || other.id === grown ? GRID : 0;
+      const slack = grown.has(object.id) || grown.has(other.id) ? GRID : 0;
       if (after < Math.min(before, kept) - slack || after < Math.min(before, 1)) return true;
     }
   }
@@ -471,17 +479,15 @@ function judge(
 ): Verdict | null {
   const next = settled(current, now.routes, jog, candidate, stuck);
   if (!next) return null;
-  // A move that puts a box the edit placed back where it stood takes the edit back.
-  if (edit && next.objects.some((object) => {
-    const stood = edit.stood.get(object.id);
-    return edit.boxes.has(object.id) && stood !== undefined && sameGeometry(stood, object.geometry);
-  })) return null;
   const was = new Map(current.objects.map((object) => [object.id, object]));
   const changed = new Set(next.objects
     .filter((object) => !sameGeometry(was.get(object.id)!.geometry, object.geometry))
     .map((object) => object.id));
+  // A move that takes a box the edit placed back where it stood takes the edit back.
+  if (edit && next.objects.some((object) => changed.has(object.id) && edit.boxes.has(object.id)
+    && backWhereItStood(edit.stood.get(object.id), object.geometry))) return null;
   for (const id of changed) if (lockHolding(current, id)) return null;
-  if (crowds(current, next, changed, candidate.grows ? candidate.unit.id : null)) return null;
+  if (crowds(current, next, changed, new Set(candidate.grows ? [candidate.unit.id, ...candidate.row] : []))) return null;
   // A box that grows a grid step can take that step out of its frame's padding, and no more.
   const squeezed = squeeze(current, next, candidate);
   if (squeezed > (candidate.grows ? GRID : 0)) return null;

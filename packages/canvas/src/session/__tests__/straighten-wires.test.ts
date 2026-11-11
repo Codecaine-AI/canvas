@@ -84,6 +84,26 @@ describe("straighten · on every edit", () => {
     expect(straight(session, "pick-ok")).toBe(true);
   });
 
+  test("a decision on a straight wire grows with the box that wire joins to it, so both wires end straight", () => {
+    // The locked base holds ok on its axis, 2px off the axis of top and pick.
+    const session = board(
+      [
+        box("top", 200, 100, 280, 140, "octagon"),
+        box("pick", 200, 400, 280, 120, "decision"),
+        box("ok", 192, 700, 300, 140, "octagon"),
+        { ...box("base", 200, 1000, 284, 120, "decision"), locked: "all" as const },
+      ],
+      [connect("top-pick", "top", "pick"), connect("ok-base", "ok", "base")],
+    );
+
+    const result = runOp(session, "connect", { id: "pick-ok", from: { objectId: "pick" }, to: { objectId: "ok" } });
+
+    expect(result.text).toContain("straightened pick-ok: made pick 4px wider, which also moved or grew top");
+    expect(at(session, "top")).toEqual({ x: 200, y: 100, width: 284, height: 140 });
+    expect(at(session, "pick")).toEqual({ x: 200, y: 400, width: 284, height: 120 });
+    for (const id of ["top-pick", "pick-ok", "ok-base"]) expect(straight(session, id)).toBe(true);
+  });
+
   test("a locked neighbour stays: the moved box takes its axis", () => {
     const session = board(
       [{ ...box("a", 200, 300, 280, 100), locked: "all" }, box("b", 800, 300, 280, 100)],
@@ -108,6 +128,21 @@ describe("straighten · on every edit", () => {
     expect(result.text).toContain("APPLIED · move b");
     expect(result.text).not.toContain("straightened");
     expect(at(session, "b")).toMatchObject({ x: 800, y: 320 });
+  });
+
+  test("a move back with a grid step of growth also takes the edit back: the box stays", () => {
+    // The octagon's centre is 2px under or over the decision's, so the way back also grows the decision 4px.
+    for (const height of [104, 96]) {
+      const session = board(
+        [{ ...box("ok", 200, 300, 300, height, "octagon"), locked: "all" }, box("pick", 800, 300, 280, 100, "decision")],
+        [connect("ok-pick", "ok", "pick")],
+      );
+
+      const result = runOp(session, "move", { id: "pick", by: { dx: 0, dy: 20 } });
+
+      expect(result.text).not.toContain("straightened");
+      expect(at(session, "pick")).toEqual({ x: 800, y: 320, width: 280, height: 100 });
+    }
   });
 
   /** Two straight pairs, w-a and b-x, 12px off one axis. */
