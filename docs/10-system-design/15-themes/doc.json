@@ -1133,8 +1133,58 @@
           }
         },
         {
-          "insert": " centers the glyph on a square tile with 3px corners, inset about 22% of the side and never wider than 56px. "
+          "insert": " mode draws the glyph on a square tile."
+        }
+      ],
+      "children": [
+        "b-themes-paint-icons-tile-corners",
+        "b-themes-paint-icons-tile-inset",
+        "b-themes-paint-icons-tile-solid",
+        "b-themes-paint-icons-tile-tint"
+      ]
+    },
+    "b-themes-paint-icons-tile-corners": {
+      "id": "b-themes-paint-icons-tile-corners",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The tile has 2px corners, and its side is never wider than "
         },
+        {
+          "insert": "iconTileMaxPx",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ", 56px in the schematic presets."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-icons-tile-inset": {
+      "id": "b-themes-paint-icons-tile-inset",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A line glyph sits 20% of the side in from each edge, a brand logo 14%, and no glyph grows wider than 56px."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-icons-tile-solid": {
+      "id": "b-themes-paint-icons-tile-solid",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
           "insert": "iconTileFill",
           "attributes": {
@@ -1142,7 +1192,7 @@
           }
         },
         {
-          "insert": " picks the tile body: "
+          "insert": " picks the tile body. "
         },
         {
           "insert": "solid",
@@ -1151,7 +1201,7 @@
           }
         },
         {
-          "insert": " is the ink under a glyph in "
+          "insert": " paints the ink under a glyph in "
         },
         {
           "insert": "iconTileGlyphColor",
@@ -1160,8 +1210,18 @@
           }
         },
         {
-          "insert": ", and "
-        },
+          "insert": "."
+        }
+      ],
+      "children": []
+    },
+    "b-themes-paint-icons-tile-tint": {
+      "id": "b-themes-paint-icons-tile-tint",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
           "insert": "tint",
           "attributes": {
