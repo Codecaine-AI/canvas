@@ -57,7 +57,7 @@ export type LaneWire = {
   id: string;
   from: string;
   to: string;
-  /** The nearest section that holds the source and not the target. Null when there is none. */
+  /** The nearest section that holds the source. Null when there is none but the page. */
   fromSection: string | null;
   color: string;
   dash: string;
@@ -291,7 +291,9 @@ function lineUpPorts(members: ReadonlyArray<ReadonlyArray<End>>, others: Readonl
       else groups.set(key, [end]);
     }
   });
-  const orderOf = (ends: ReadonlyArray<End>) => ends.reduce((sum, end) => sum + end.order, 0) / ends.length;
+  // A port with a wire that runs straight in sorts where that wire is: it does not move.
+  const orderOf = (ends: ReadonlyArray<End>) =>
+    ends.some((end) => end.straight) ? 0 : ends.reduce((sum, end) => sum + end.order, 0) / ends.length;
   // A junction stops at a port a wire leaves and at a wire that runs straight in: it would cross that wire at the node.
   const walls = [...groups.values()].filter((ends) => !ends[0]!.joins || ends.some((end) => end.straight));
   const ports: Port[] = [...groups.values()]

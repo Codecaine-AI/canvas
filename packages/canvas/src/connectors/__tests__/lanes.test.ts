@@ -277,15 +277,26 @@ describe("ports on a board", () => {
       expect(a).toEqual(b);
     });
 
+    // The three boxes on a page. A section `groupWidth` wide holds the two sources, and past 400 the sink too.
+    const onPage = (groupWidth?: number): InteractiveCanvasObject[] => [
+      { id: "page", type: "section", text: "page", geometry: { x: -100, y: -100, width: 800, height: 700 } },
+      ...(groupWidth ? [{ id: "group", type: "section" as const, text: "group", parentId: "page", geometry: { x: -40, y: -60, width: groupWidth, height: 560 } }] : []),
+      ...loose.map((object) => ({ ...object, parentId: groupWidth && object.geometry.x < groupWidth - 40 ? "group" : "page" })),
+    ];
+
     it("join when the sources sit in one section", () => {
-      const grouped: InteractiveCanvasObject[] = [
-        sink,
-        { id: "group", type: "section", text: "group", geometry: { x: -40, y: -60, width: 200, height: 560 } },
-        { ...box("top", 0, 0), parentId: "group" },
-        { ...box("bottom", 0, 400), parentId: "group" },
-      ];
-      const [a, b] = tips(grouped, { color: "red" }, { color: "blue", style: "dashed" });
+      const [a, b] = tips(onPage(200), { color: "red" }, { color: "blue", style: "dashed" });
       expect(a).toEqual(b);
+    });
+
+    it("join when that section holds the target too", () => {
+      const [a, b] = tips(onPage(600), { color: "red" }, { color: "blue", style: "dashed" });
+      expect(a).toEqual(b);
+    });
+
+    it("stay apart when the one section they share is the page", () => {
+      const [a, b] = tips(onPage(), { color: "red" }, { color: "blue", style: "dashed" });
+      expect(Math.abs(a.y - b.y)).toBeCloseTo(16, 5);
     });
 
     it("join when the author pinned them a few pixels apart", () => {
@@ -335,6 +346,22 @@ describe("ports on a board", () => {
     expect(tip(r).x).toBeLessThan(500);
     expect(tip(o).x).toBeGreaterThan(500);
     expect(crossings(b, r) + crossings(b, o)).toBe(0);
+  });
+
+  it("keeps a wire on its own side of a wire that runs straight in and has joined others", () => {
+    // Dashed c and d join straight b from the two sides. Solid f turns in from the left, beyond d.
+    const objects = [box("t", 400, 200, 200, 100), box("b", 450, 1500), box("c", 700, 500), box("d", 150, 400), box("f", 0, 1000)];
+    const to = { objectId: "t", anchor: "bottom" } as const;
+    const dashed = { color: "blue", style: "dashed" } as const;
+    const routes = drawn(objects, [
+      wire("b", { objectId: "b", anchor: "top" }, to, dashed),
+      wire("c", { objectId: "c", anchor: "top" }, to, dashed),
+      wire("d", { objectId: "d", anchor: "top" }, to, dashed),
+      wire("f", { objectId: "f", anchor: "top" }, to, { color: "red" }),
+    ]);
+    const [b, c, f] = [routes.get("b")!, routes.get("c")!, routes.get("f")!];
+    expect(tip(f).x).toBeLessThan(500);
+    expect(crossings(f, b) + crossings(f, c)).toBe(0);
   });
 
   it("trades the sides two wires enter where that stops them crossing", () => {

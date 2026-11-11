@@ -256,6 +256,8 @@ function routeBoard(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes 
     drawn.push({ connection, fromObject, toObject, routed: routeOnBoard(fromObject, toObject, connection, board.objects, canvasStyle) });
   }
   tradeCrossedSides(drawn, board.objects, canvasStyle);
+  const roots = board.objects.filter((object) => object.type === "section" && object.parentId == null);
+  const page = roots.length === 1 ? roots[0] : undefined;
   for (const { connection, fromObject, toObject, routed: solo } of drawn) {
     const routed = withCornerRadius(solo, canvasStyle.connectorCornerRadiusPx);
     routes.set(connection, { fromObject, toObject, routed });
@@ -268,7 +270,7 @@ function routeBoard(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes 
       id: connection.id,
       from: fromObject.id,
       to: toObject.id,
-      fromSection: sourceSection(fromObject, toObject, byId),
+      fromSection: sourceSection(fromObject, byId, page),
       color: connection.color ?? FIRST_USE_COLORS.connector,
       dash: connection.style ?? "solid",
       headAtStart: arrow === "back" || arrow === "both",
@@ -360,26 +362,22 @@ function tradeCrossedSides(
 }
 
 /**
- * The nearest section that holds `source`, unless it holds `target` too: the
- * place a wire comes from, as its target sees it. The page holds both ends of
- * every wire, so it is never that place.
+ * The nearest section that holds `source`: the place a wire comes from. The
+ * page, a board's one section with no parent, holds every source, so it is
+ * never that place.
  */
 function sourceSection(
   source: InteractiveCanvasObject,
-  target: InteractiveCanvasObject,
   byId: ReadonlyMap<string, InteractiveCanvasObject>,
+  page: InteractiveCanvasObject | undefined,
 ): string | null {
-  const ancestors = (object: InteractiveCanvasObject) => {
-    const ids: string[] = [];
-    let parent = byId.get(object.parentId ?? "");
-    while (parent && !ids.includes(parent.id)) {
-      ids.push(parent.id);
-      parent = byId.get(parent.parentId ?? "");
-    }
-    return ids;
-  };
-  const section = ancestors(source).find((id) => byId.get(id)!.type === "section");
-  return section === undefined || ancestors(target).includes(section) ? null : section;
+  const seen = new Set<InteractiveCanvasObject>();
+  let parent = byId.get(source.parentId ?? "");
+  while (parent && parent.type !== "section" && !seen.has(parent)) {
+    seen.add(parent);
+    parent = byId.get(parent.parentId ?? "");
+  }
+  return parent?.type === "section" && parent !== page ? parent.id : null;
 }
 
 /**
