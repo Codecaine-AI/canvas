@@ -78,6 +78,15 @@ function fixtures(): { name: string; document: InteractiveCanvasDocument }[] {
         connect("escape", "inside", "outside"),
       ]),
     },
+    {
+      // same-color and gray-share: a gray section holding a gray node.
+      name: "color",
+      document: makeDocument([
+        { ...box("page", 0, 0, 1200, 800, "section"), color: "white" },
+        { ...box("frame", 40, 40, 600, 400, "section"), color: "gray", parentId: "page" },
+        { ...box("plain", 80, 120, 160, 96, "process"), color: "gray", parentId: "frame" },
+      ]),
+    },
   ];
 }
 

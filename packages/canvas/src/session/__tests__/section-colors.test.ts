@@ -1,15 +1,15 @@
 /**
  * A section never shares its parent section's color, nor a touching
- * sibling's, nor, holding nodes of several hues, one of theirs (a category
- * section, whose colored nodes share one hue, may take it), so the
+ * sibling's, nor the color of a node or sticky it holds directly, so the
  * hierarchy, the group edges and the nodes read (board/section-colors.ts). The tools prevent the
  * break — place_section picks a color that keeps the rules, and every edit
  * that would make a new break is refused — and the integrity lint reports one
  * a Studio edit or an older file left behind. Two sections look alike when
  * they paint the same ink or the same fill. The page (the page frame, or a
  * parentless section stored white) is exempt, and nothing else is. The
- * chooser keeps the board's meaning: node and wire hues and warm hues stay
- * off its list, and a board carries at most three chromatic section hues.
+ * chooser keeps the board's meaning: free cool hues come before the node and
+ * wire hues, gray comes after the cool hues, warm hues stay for the drawer,
+ * and a board carries at most three chromatic section hues.
  */
 import { describe, expect, test } from "bun:test";
 
@@ -66,6 +66,12 @@ function integrity(document: InteractiveCanvasDocument, style = canvasThemePrese
     .filter((finding) => finding.rule === "integrity");
 }
 
+/** The check's same-color findings: a section in the color of a node or sticky it holds. */
+function sameColor(document: InteractiveCanvasDocument, style = canvasThemePreset("schematic-light")) {
+  return runDiagnostics(document, FINISHING_RULES, { canvasStyle: style })
+    .filter((finding) => finding.rule === "same-color");
+}
+
 describe("place_section picks a color when the call names none", () => {
   test("a section placed in a gray parent never takes gray", () => {
     const session = makeTestSession(board(), ["page"]);
@@ -76,18 +82,34 @@ describe("place_section picks a color when the call names none", () => {
     expect(result.text).toContain(`place_section lenses 100,880 400×120 ${colorOf(session, "lenses")}`);
   });
 
-  test("a section placed in a blue parent may be gray again", () => {
+  test("a section placed in a blue parent takes the next cool hue before gray", () => {
     const session = makeTestSession(board(), ["page"]);
     runOp(session, "place_section", { id: "reviewers", text: "Reviewers", at: [120, 200], size: { width: 400, height: 200 } });
     expect(session.draft.objects.find((object) => object.id === "reviewers")?.parentId).toBe("rounds");
-    expect(colorOf(session, "reviewers")).toBe("gray");
+    expect(colorOf(session, "reviewers")).toBe("violet");
   });
 
-  test("a top-level section with whitespace around it stays gray, like its siblings", () => {
+  test("a top-level section with whitespace around it takes the first cool hue, not gray", () => {
     const session = makeTestSession(board(), ["page"]);
     // 60px from pack and 160px under outside: the gap separates them.
     runOp(session, "place_section", { id: "first", text: "First", at: [1600, 600], size: { width: 300, height: 200 } });
-    expect(colorOf(session, "first")).toBe("gray");
+    expect(colorOf(session, "first")).toBe("blue");
+  });
+
+  test("with every cool hue in the key, gray stays at most half the sections, then a key hue", () => {
+    const doc = makeDocument([
+      section("page", [0, 0, 4000, 3200], "white", null),
+      section("a", [40, 40, 400, 300], "violet", "page"),
+      ...(["blue", "violet", "green", "teal"] as const)
+        .map((color, index) => node(`role-${color}`, [100 + index * 200, 2000, 120, 80], color, "page")),
+    ]);
+    const session = makeTestSession(doc, ["page"]);
+    // One gray section of two is half: gray fits.
+    runOp(session, "place_section", { id: "b", text: "B", at: [1000, 40], size: { width: 400, height: 300 } });
+    expect(colorOf(session, "b")).toBe("gray");
+    // Two of three would be over half: the first key hue instead.
+    runOp(session, "place_section", { id: "c", text: "C", at: [2000, 40], size: { width: 400, height: 300 } });
+    expect(colorOf(session, "c")).toBe("blue");
   });
 
   test("a top-level section that touches a gray sibling takes the first free cool hue", () => {
@@ -377,8 +399,9 @@ describe("touching sibling sections never share a look", () => {
     // 30px under outside (teal): they touch.
     const result = runOp(session, "clone", { sourceId: "outside", id: "outside-2", at: [1600, 470] });
     expect(result.isError).toBeUndefined();
-    expect(colorOf(session, "outside-2")).toBe("gray");
-    expect(result.text).toContain("the copy takes gray: teal would match its parent, a touching sibling or a node it holds");
+    // Blue would sit beside the touching teal: violet.
+    expect(colorOf(session, "outside-2")).toBe("violet");
+    expect(result.text).toContain("the copy takes violet: teal would match its parent, a touching sibling or a node it holds");
   });
 
   test("a section copy set apart from its source keeps the source's color", () => {
@@ -390,7 +413,8 @@ describe("touching sibling sections never share a look", () => {
   test("Studio's last-picked color loses to a touching sibling that paints it", () => {
     const style = canvasThemePreset("schematic-light");
     const action = { type: "canvas.addObject", objectType: "section", geometry: { x: 1600, y: 470, width: 400, height: 300 } } as const;
-    expect((withPlacedSectionColor(board(), action as never, style, "teal") as { color?: CanvasColor }).color).toBe("gray");
+    // Blue would sit beside the touching teal: violet.
+    expect((withPlacedSectionColor(board(), action as never, style, "teal") as { color?: CanvasColor }).color).toBe("violet");
     const apart = { ...action, geometry: { ...action.geometry, y: 600 } };
     expect((withPlacedSectionColor(board(), apart as never, style, "teal") as { color?: CanvasColor }).color).toBe("teal");
   });
@@ -434,56 +458,76 @@ describe("the chooser keeps the board's meaning", () => {
     expect(pickSectionColor(doc, "first", style)).toBe("green");
   });
 
-  test("a section holding nodes of several hues never takes one of them, and integrity reports one that does", () => {
+  test("a section never takes the color of a node or sticky it holds, and the check reports one that does", () => {
     const doc = touchingBoard();
     doc.objects.push(node("agent", [1620, 100, 200, 100], "teal", "outside"));
     doc.objects.push(node("store", [1620, 250, 200, 100], "violet", "outside"));
-    const findings = integrity(doc);
-    expect(findings).toHaveLength(1);
-    expect(findings[0]).toMatchObject({ at: ["outside", "agent"] });
-    expect(findings[0]!.message).toBe(
-      "outside paints teal, the color of agent it holds among nodes of other colors"
-        + ": a section must differ from its nodes unless they all share one color",
-    );
     // Not gray (touches pack), not teal or violet (its nodes): blue.
-    expect(findings[0]!.suggestion).toBe("change_color outside to another color, such as blue");
+    expect(pickSectionColor(doc, "outside", style)).toBe("blue");
+    expect(integrity(doc)).toEqual([]);
+    const findings = sameColor(doc);
+    expect(findings.map((finding) => [finding.at, finding.message, finding.suggestion])).toEqual([
+      [["outside", "agent"], "outside is teal, as is agent inside it", "change_color outside blue"],
+    ]);
   });
 
-  test("a recolor into one hue of a section's mixed nodes is refused; into a category's one hue it applies", () => {
+  test("one hue shared by every node a section holds is no exemption", () => {
+    const doc = makeDocument([
+      section("page", [0, 0, 2600, 1400], "white", null),
+      section("a", [40, 40, 400, 300], "blue", "page"),
+      section("b", [40, 800, 400, 300], "green", "page"),
+      section("c", [1000, 40, 400, 300], "teal", "page"),
+      section("pause", [1800, 800, 600, 400], "gray", "page"),
+      node("wait", [1840, 880, 120, 80], "orange", "pause"),
+      node("approve", [2000, 880, 120, 80], "orange", "pause"),
+      node("label", [2160, 880, 120, 80], "gray", "pause"),
+    ]);
+    // Ford: "Don't use orange instead of an orange area." Nor gray, which it holds too.
+    expect(pickSectionColor(doc, "pause", style)).toBe("blue");
+    expect(sameColor(doc).map((finding) => finding.message)).toEqual(["pause is gray, as is label inside it"]);
+    doc.objects[4] = { ...doc.objects[4]!, color: "orange" };
+    expect(sameColor(doc).map((finding) => finding.message)).toEqual(["pause is orange, as is wait, approve inside it"]);
+  });
+
+  test("a sticky counts: a section never takes the color of a note it holds", () => {
+    const doc = makeDocument([
+      section("page", [0, 0, 2000, 1400], "white", null),
+      section("notes", [40, 40, 600, 400], "yellow", "page"),
+      { ...box("note", 100, 100, 160, 96, "sticky"), color: "yellow", parentId: "notes" },
+    ]);
+    expect(sameColor(doc).map((finding) => finding.at)).toEqual([["notes", "note"]]);
+    expect(pickSectionColor(doc, "notes", style)).not.toBe("yellow");
+  });
+
+  test("a recolor into the color of a node the section holds is refused, even when all its nodes share it", () => {
     const category = board();
     category.objects.push(node("agent", [120, 200, 200, 100], "violet", "rounds"));
-    const allowed = makeTestSession(category, ["page"]);
-    expect(runOp(allowed, "change_color", { id: "rounds", color: "violet" }).isError).toBeUndefined();
-
-    const mixed = board();
-    mixed.objects.push(node("agent", [120, 200, 200, 100], "violet", "rounds"));
-    mixed.objects.push(node("store", [400, 200, 200, 100], "green", "rounds"));
-    const session = makeTestSession(mixed, ["page"]);
+    const session = makeTestSession(category, ["page"]);
+    const before = session.draft;
     const result = runOp(session, "change_color", { id: "rounds", color: "violet" });
     expect(result.isError).toBe(true);
-    expect(result.text).toContain("rounds would paint violet, the color of agent it holds among nodes of other colors");
+    expect(result.text).toContain("rounds would paint violet, the color of agent it holds");
+    expect(session.draft).toBe(before);
   });
 
-  test("a node edit is never refused for a section's color: it applies, and integrity names the section with a color", () => {
-    /** A blue category section holding blue nodes. */
-    const category = () => makeDocument([
+  test("a node edit is never refused for a section's color: it applies, and the check names the section with a color", () => {
+    const doc = () => makeDocument([
       section("page", [0, 0, 4000, 3200], "white", null),
       section("cat", [40, 40, 1200, 800], "blue", "page"),
-      node("blue-node", [100, 150, 120, 80], "blue", "cat"),
-      node("second-blue", [700, 150, 120, 80], "blue", "cat"),
+      node("green-node", [100, 150, 120, 80], "green", "cat"),
     ]);
     const edits: [string, Record<string, unknown>][] = [
-      ["place_shape", { id: "green-node", type: "process", text: "Green role", color: "green", at: [400, 300] }],
-      ["change_color", { id: "blue-node", color: "green" }],
+      ["place_shape", { id: "blue-node", type: "process", text: "Blue role", color: "blue", at: [400, 300] }],
+      ["change_color", { id: "green-node", color: "blue" }],
     ];
     for (const [name, params] of edits) {
-      const session = makeTestSession(category(), ["page"]);
+      const session = makeTestSession(doc(), ["page"]);
       expect(runOp(session, name, params).isError).toBeUndefined();
-      // The section keeps its color; the lint reports the clash and a color to use.
+      // The section keeps its color; the check reports the clash and a color to use.
       expect(colorOf(session, "cat")).toBe("blue");
-      const findings = integrity(session.draft);
+      const findings = sameColor(session.draft);
       expect(findings.map((finding) => finding.at?.[0])).toEqual(["cat"]);
-      expect(findings[0]!.suggestion).toBe("change_color cat to another color, such as gray");
+      expect(findings[0]!.suggestion).toMatch(/^change_color cat (violet|green)$/);
     }
   });
 
@@ -497,9 +541,9 @@ describe("the chooser keeps the board's meaning", () => {
       node("blue-role", [100, 1500, 120, 80], "blue", "page"),
     ]);
     const place = { type: "canvas.addObject", objectType: "section", geometry: { x: 40, y: 40, width: 400, height: 300 } } as const;
-    // Red is warm, blue is the key's, teal would be a fourth hue: gray fits.
+    // Red is warm, blue is the key's, teal would be a fourth hue: violet, a hue the board already carries.
     for (const remembered of ["red", "blue", "teal"] as const) {
-      expect((withPlacedSectionColor(doc, place as never, style, remembered) as { color?: CanvasColor }).color).toBe("gray");
+      expect((withPlacedSectionColor(doc, place as never, style, remembered) as { color?: CanvasColor }).color).toBe("violet");
     }
     // A hue already on the board passes the cap, so the preference holds.
     expect((withPlacedSectionColor(doc, place as never, style, "green") as { color?: CanvasColor }).color).toBe("green");
@@ -511,25 +555,6 @@ describe("the chooser keeps the board's meaning", () => {
       section("x", [480, 40, 400, 640], "gray", "page"),
     ]);
     expect(pickSectionColor(beside, "x", style, "teal")).toBe("violet");
-  });
-
-  test("a category section takes the one hue its colored nodes share, past the hue cap, with no finding", () => {
-    const doc = makeDocument([
-      section("page", [0, 0, 2600, 1400], "white", null),
-      section("a", [40, 40, 400, 300], "blue", "page"),
-      section("b", [40, 800, 400, 300], "green", "page"),
-      section("c", [1000, 40, 400, 300], "teal", "page"),
-      section("pause", [1800, 800, 600, 400], "gray", "page"),
-      node("wait", [1840, 880, 120, 80], "orange", "pause"),
-      node("approve", [2000, 880, 120, 80], "orange", "pause"),
-      // Gray nodes and stickies do not make it mixed.
-      node("label", [2160, 880, 120, 80], "gray", "pause"),
-      { ...box("note", 1840, 1000, 160, 96, "sticky"), color: "yellow", parentId: "pause" },
-    ]);
-    // Blue, green and teal fill the three-hue cap; the Pause category still gets its orange.
-    expect(pickSectionColor(doc, "pause", style)).toBe("orange");
-    doc.objects[4] = { ...doc.objects[4]!, color: "orange" };
-    expect(integrity(doc)).toEqual([]);
   });
 
   test("two touching category sections in one hue still clash", () => {

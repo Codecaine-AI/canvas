@@ -97,10 +97,11 @@ describe("layout-editor prompt contract", () => {
     }
   });
 
-  test("overlap and integrity are the diagnostics, in both stages; categorical hue is not one", () => {
-    for (const rules of [LAYOUT_RULES, FINISHING_RULES]) {
-      expect(rules.map(rule => rule.id)).toEqual(["covered-content", "integrity"]);
-    }
+  test("overlap and integrity are the diagnostics on every edit; the color and wire checks run only at the finish", () => {
+    expect(LAYOUT_RULES.map(rule => rule.id)).toEqual(["covered-content", "integrity"]);
+    expect(FINISHING_RULES.map(rule => rule.id)).toEqual([
+      "covered-content", "integrity", "same-color", "gray-share",
+    ]);
     expect(content("node-section-success-criteria")).toContain("edited scope");
   });
 });

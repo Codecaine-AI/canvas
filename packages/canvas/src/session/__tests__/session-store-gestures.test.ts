@@ -40,7 +40,8 @@ describe("place gestures", () => {
     expect(placed.type).toBe("section");
     expect(placed.text).toBe("Flow");
     expect(placed.geometry).toEqual({ x: 240, y: 480, width: 480, height: 360 });
-    expect(placed.color).toBe(CREATION_DEFAULTS.section.color);
+    // No color named: the picker's first cool hue, since gray comes last.
+    expect(placed.color).toBe("blue");
   });
 
   test("place_section snaps a drawn size too, and clamps nothing else", () => {

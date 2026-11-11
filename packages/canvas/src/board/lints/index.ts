@@ -2,9 +2,11 @@
  * The always-on and finishing layout-lint registries.
  *
  * LAYOUT_RULES runs on every edit and at spawn. FINISHING_RULES is what the
- * finalize gate and canvas_check run; today it is the same set.
+ * finalize gate and canvas_check run: the layout rules plus the check-only
+ * warnings (rules/color.ts), which measure how the finished
+ * board reads and would drown every edit's result if they ran there.
  *
- * A lint reports only a defect the system cannot prevent: content covering
+ * A layout lint reports only a defect the system cannot prevent: content covering
  * content (covered-content: box on box, section on section). Everything else
  * is structural: the router keeps wires out of boxes and their own captions,
  * the renderer places label chips clear, nodes grow to fit their text,
@@ -23,10 +25,11 @@
 import type { LayoutRule } from "./types";
 
 import { rule as coveredContent } from "./rules/covered-content";
+import { rules as colorRules } from "./rules/color";
 import { rule as integrity } from "./rules/integrity";
 
 export const LAYOUT_RULES: readonly LayoutRule[] = [coveredContent, integrity];
 
-export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES];
+export const FINISHING_RULES: readonly LayoutRule[] = [...LAYOUT_RULES, ...colorRules];
 
 export type { Diagnostic, LayoutRule, LintContext, Severity } from "./types";
