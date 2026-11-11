@@ -16,7 +16,8 @@
  *   sections, each edge on its own;
  * - uneven-gap: a box between its two neighbours in a row or column;
  * - off-center: the one row a section holds, against the section's center line;
- * - arrow-off-center: an arrowhead alone on a side, against that side's center.
+ * - arrow-off-center: an arrowhead alone on a side (one wire, or one merged
+ *   junction), against that side's center, where a straight wire holds it off.
  */
 import { simplified } from "../../connectors/lanes";
 import { AGENT_GRID } from "../../state/geometry";
@@ -52,7 +53,7 @@ export interface GuideSegment { x1: number; y1: number; x2: number; y2: number }
 
 /** One call of a board tool, with the arguments the tool takes. */
 export interface GuideFix {
-  tool: "move" | "arrange" | "resize" | "route";
+  tool: "move" | "arrange" | "resize";
   args: Record<string, unknown>;
 }
 
@@ -128,7 +129,6 @@ export function fixText(steps: readonly GuideFix[]): string {
     if (space) words.push(`space ${space.axis} gap ${space.gap}`);
     if (args.width !== undefined) words.push(`width ${String(args.width)}`);
     if (args.height !== undefined) words.push(`height ${String(args.height)}`);
-    if (args.reset) words.push("reset");
     return `${tool} ${target} ${words.join(" ")}`;
   }).join(", then ");
 }
@@ -469,28 +469,24 @@ export function findBoardGuides(
     const snap = snapOn(tip, [port.box.rect], NEAR_MISS_PX, "center", axis);
     if (!snap || Math.abs(snap.delta) <= ARROW_SLACK_PX) continue;
     const key = `${port.box.object.id}:${port.side}`;
-    const [from, to] = portsOfWire.get(port.wire.id)!;
-    // Two boxes a snap apart already carry the move that centers this head.
-    if (heads.has(key) || settled.has(`${from.box.object.id}:${axis}`) || settled.has(`${to.box.object.id}:${axis}`)) continue;
-    // A wire the drawer routed or pinned goes back to the router. A straight wire the router ran takes its two boxes onto one line.
-    const pinned = ports.filter((other) => samePort(other, port)).map((other) => other.wire)
-      .filter((wire) => (wire.waypoints?.length ?? 0) > 0 || wire.from.position != null || wire.to.position != null);
+    // The router centers a head unless that costs the wire a bend (connectors/routing.ts), and it sits a junction on
+    // the port of its straight wire (connectors/lanes.ts). So a straight wire holds a head off the center.
+    const holder = ports.find((other) => other.straight && samePort(other, port));
+    if (!holder) continue;
+    const [from, to] = portsOfWire.get(holder.wire.id)!;
     const partner = from.box === port.box ? to.box : from.box;
-    const fix: GuideFix[] = pinned.length > 0
-      ? pinned.map((wire) => ({ tool: "route", args: { id: wire.id, reset: true } }))
-      : port.straight && !isFrame(partner)
-        ? [arrangeFix(partner, port.box, axis, 1)]
-        : [];
-    if (fix.length === 0) continue;
+    // Its two boxes go onto one line, when they sit a snap apart. Two boxes may already carry that move.
+    if (isFrame(partner) || !snapOn(partner.rect, [port.box.rect], NEAR_MISS_PX, "center", axis)) continue;
+    if (heads.has(key) || settled.has(`${from.box.object.id}:${axis}`) || settled.has(`${to.box.object.id}:${axis}`)) continue;
     heads.add(key);
     const center = { x: port.box.rect.x + port.box.rect.width / 2, y: port.box.rect.y + port.box.rect.height / 2 };
     const out = AGENT_GRID * 4;
     nearMisses.push({
       kind: "arrow-off-center",
-      at: [port.wire.id, port.box.object.id],
+      at: [holder.wire.id, port.box.object.id],
       offBy: Math.abs(snap.delta),
-      message: `${port.wire.id}'s arrowhead is ${px(snap.delta)} off the center of ${port.box.object.id}'s ${port.side} side`,
-      fix,
+      message: `${holder.wire.id}'s arrowhead is ${px(snap.delta)} off the center of ${port.box.object.id}'s ${port.side} side`,
+      fix: [arrangeFix(partner, port.box, axis, 1)],
       guides: [{
         x1: center.x - (port.side === "left" ? port.box.rect.width / 2 + out : 0),
         y1: center.y - (port.side === "top" ? port.box.rect.height / 2 + out : 0),

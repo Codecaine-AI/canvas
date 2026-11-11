@@ -74,10 +74,12 @@ const BOARDS: { name: string; document: InteractiveCanvasDocument; finding: stri
   },
   {
     // Ford: "We should prefer unless otherwise stated, that, like, the arrow goes into the center of the objects."
-    name: "an arrowhead the drawer pinned off the center of a side",
-    document: makeDocument([page(), node("a", 200, 200), node("b", 800, 600)],
-      [{ ...connect("w", "a", "b"), to: { objectId: "b", anchor: "top", position: [0.45, 0] } }]),
-    finding: "w's arrowhead is 14px off the center of b's top side (route w reset)",
+    name: "an arrowhead a straight wire holds off the center of a side",
+    document: makeDocument([
+      page(), frame("left", 100, 100, 500, 400), frame("right", 760, 100, 440, 400),
+      { ...icon("t", 200, 200), parentId: "left" }, { ...node("b", 840, 220), parentId: "right" },
+    ], [{ ...connect("w", "t", "b"), waypoints: [[700, 260]] }]),
+    finding: "w's arrowhead is 10px off the center of b's left side (arrange t, b align center_v)",
   },
   // Boxes a hand put off the agent's grid: `move` and `resize` land on it, so the call named must still reach the line.
   {
@@ -131,17 +133,20 @@ describe("near-miss: the smart guides at canvas_check", () => {
     });
   }
 
-  test("each call a finding names, made with the board tools, clears the finding", async () => {
-    for (const { name, document } of BOARDS) {
-      const file = opened(document);
-      const [miss, ...rest] = findBoardGuides(file.session.draft, style).nearMisses;
-      expect(rest, name).toEqual([]);
-      for (const step of miss!.fix) {
-        const result = await callToolkitTool(file, step.tool, step.args);
-        expect(result.isError ?? false, `${name}: ${result.text}`).toBe(false);
-      }
-      expect(checkCanvasFile(file, "board").text, name).not.toContain("near-miss");
+  /** Makes the calls the board's one finding names, with the board tools, then checks the board again. */
+  async function fixed(name: string, document: InteractiveCanvasDocument): Promise<string> {
+    const file = opened(document);
+    const [miss, ...rest] = findBoardGuides(file.session.draft, style).nearMisses;
+    expect(rest, name).toEqual([]);
+    for (const step of miss!.fix) {
+      const result = await callToolkitTool(file, step.tool, step.args);
+      expect(result.isError ?? false, `${name}: ${result.text}`).toBe(false);
     }
+    return checkCanvasFile(file, "board").text;
+  }
+
+  test("each call a finding names, made with the board tools, clears the finding", async () => {
+    for (const { name, document } of BOARDS) expect(await fixed(name, document), name).not.toContain("near-miss");
   });
 
   test("a board on its lines, or far off them, is left alone", () => {
@@ -149,22 +154,27 @@ describe("near-miss: the smart guides at canvas_check", () => {
     expect(found(makeDocument([page(), node("a", 200, 200), node("b", 800, 200)], [connect("w", "a", "b")]))).toEqual([]);
     expect(found(makeDocument([page(), node("a", 200, 200), node("b", 800, 260)], [connect("w", "a", "b")]))).toEqual([]);
     expect(found(makeDocument([page(), node("a", 200, 200), node("b", 600, 200), node("c", 1000, 200)]))).toEqual([]);
-    // An arrowhead the router placed, and one far from the center on purpose.
-    const pinned = (at: number) => makeDocument([page(), node("a", 200, 200), node("b", 800, 600)],
-      [{ ...connect("w", "a", "b"), to: { objectId: "b", anchor: "top" as const, position: [at, 0] as [number, number] } }]);
-    expect(found(pinned(0.5))).toEqual([]);
-    expect(found(pinned(0.25))).toEqual([]);
+    // A side pin the router drops, so the head paints on the center. One it keeps, because the center costs a bend.
+    const pinned = (...more: InteractiveCanvasObject[]) => makeDocument([page(), node("a", 200, 200), node("b", 800, 600), ...more],
+      [{ ...connect("w", "a", "b"), to: { objectId: "b", anchor: "top" as const, position: [0.45, 0] as [number, number] } }]);
+    expect(found(pinned())).toEqual([]);
+    expect(found(pinned(box("k", 930, 380, 120, 100)))).toEqual([]);
+    // A straight wire 15px off the center of b's side, from a box whose center is 100px away: no snap lines them up.
+    expect(found(makeDocument([page(), box("a", 200, 220, 280, 300), node("b", 800, 220)],
+      [{ ...connect("w", "a", "b"), waypoints: [[640, 285]] }]))).toEqual([]);
     // Gaps of 112 and 100, where the one move that evens them would bend the top box's straight wire.
     const column = [page(), node("a", 200, 208), node("b", 200, 420), node("c", 200, 620), node("root", 800, 208)];
     expect(found(makeDocument(column))).toEqual(["b sits 112px from a and 100px from c (move a by dy 12)"]);
     expect(found(makeDocument(column, [connect("w", "root", "a")]))).toEqual([]);
   });
 
-  test("several wires into one port are one arrowhead, named once", () => {
+  test("several wires into one port are one arrowhead, named once by the straight wire that holds it", async () => {
     // Ford keeps the merged junction: "The lines just appear more aesthetic."
-    const to = { objectId: "b", anchor: "top" as const, position: [0.45, 0] as [number, number] };
-    const document = makeDocument([page(), node("a", 200, 200), node("c", 1400, 200), node("b", 800, 600)],
-      [{ ...connect("w", "a", "b"), to }, { ...connect("v", "c", "b"), to }]);
-    expect(found(document)).toEqual(["w's arrowhead is 14px off the center of b's top side (route w reset, then route v reset)"]);
+    const document = makeDocument([
+      page(), frame("left", 100, 100, 500, 600), frame("right", 760, 100, 440, 600),
+      { ...icon("m", 200, 440), parentId: "left" }, { ...icon("t", 200, 200), parentId: "left" }, { ...node("b", 840, 220), parentId: "right" },
+    ], [{ ...connect("v", "m", "b"), waypoints: [[700, 500], [700, 260]] }, { ...connect("w", "t", "b"), waypoints: [[700, 260]] }]);
+    expect(found(document)).toEqual(["w's arrowhead is 10px off the center of b's left side (arrange t, b align center_v)"]);
+    expect(await fixed("junction", document)).not.toContain("near-miss");
   });
 });
