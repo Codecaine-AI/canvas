@@ -6,7 +6,7 @@
  * - shared-wire: two wires run within SHARED_GAP_PX of each other on one
  *   axis for more than SHARED_MIN_RUN_PX in total. Runs the lane pass merges
  *   on purpose (connectors/lanes.ts runsAreMates: a trunk of one meaning, or a
- *   junction of one dash into one port) are fine. The pass leaves the rest
+ *   junction of related arrowheads into one port) are fine. The pass leaves the rest
  *   where it finds no free lane: two end runs, or a run boxes hem in;
  * - chip-on-border: a label chip that a section's frame line runs through;
  * - short-wire: a labelled wire shorter than its chip (along the segment it
@@ -15,7 +15,7 @@
  *   short to show a shaft before it, or on the same spot as another wire's
  *   head where the two are not one junction.
  */
-import { CONNECTOR_END_GAP_PX } from "../../../connectors/routing";
+import { CONNECTOR_END_GAP_PX, laneMeaningsOf } from "../../../connectors/routing";
 import { ARROWHEAD_TIP_OVERSHOOT_RATIO, arrowheadStrokeRatio } from "../../../connectors/arrowhead";
 import { runsAreMates, simplified, type LaneMeaning } from "../../../connectors/lanes";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../../theme/canvas-style";
@@ -56,19 +56,6 @@ interface Head {
 }
 
 const round = (value: number) => Math.round(value);
-
-/** The wire as the lane pass reads it (connectors/routing.ts routeBoard). */
-function meaningOf(edge: InteractiveCanvasConnection): LaneMeaning {
-  const arrow = edge.arrow ?? "forward";
-  return {
-    from: edge.from.objectId,
-    to: edge.to.objectId,
-    color: edge.color ?? "",
-    dash: edge.style ?? "solid",
-    headAtStart: arrow === "back" || arrow === "both",
-    headAtEnd: arrow === "forward" || arrow === "both",
-  };
-}
 
 /** Run `i` of `a` and run `j` of `b` are a trunk or a junction the lane pass merges on purpose. */
 const mates = (a: Wire, i: number, b: Wire, j: number) => runsAreMates(a.meaning, a.points, i, b.meaning, b.points, j);
@@ -191,6 +178,7 @@ function measure(document: InteractiveCanvasDocument, context?: LintContext): Me
   const style = context?.canvasStyle ?? DEFAULT_CANVAS_STYLE;
   const cached = measured.get(document);
   if (cached?.style === style) return cached;
+  const meaningOf = laneMeaningsOf(document);
   const wires: Wire[] = document.connections
     .map((edge) => ({ edge, points: simplified(routedPolyline(edge, document, style)), meaning: meaningOf(edge) }))
     .filter((wire) => wire.points.length >= 2);

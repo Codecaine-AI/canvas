@@ -8,6 +8,7 @@ import { describe, expect, test } from "bun:test";
 import { FINISHING_RULES, LAYOUT_RULES } from "../../board/lints";
 import { runDiagnostics } from "../../board/lints/run";
 import type { InteractiveCanvasDocument, InteractiveCanvasObject } from "../../state/schema";
+import { FIRST_USE_COLORS } from "../../state/schema/object-defaults";
 import { canvasThemePreset } from "../../theme/canvas-style";
 import { box, connect, makeDocument } from "./synthetic";
 
@@ -56,6 +57,22 @@ describe("check-only lints", () => {
       { ...connect("other", "b", "target"), to: { objectId: "target", anchor: "left" as const }, color: "red" as const },
     ];
     expect(found(makeDocument(nodes, junction), "shared-wire")).toEqual([]);
+    // It joins two dashes and two colours too, when their sources sit in one section.
+    const grouped = [
+      page(), { ...box("group", 140, 140, 400, 620, "section"), color: "blue" as const, parentId: "page" },
+      { ...box("a", 200, 200), parentId: "group" }, { ...box("b", 200, 600), parentId: "group" }, box("target", 800, 400),
+    ];
+    const unlike = [
+      { ...connect("solid", "a", "target"), color: "red" as const },
+      { ...connect("dashed", "b", "target"), color: "blue" as const, style: "dashed" as const },
+    ];
+    expect(found(makeDocument(grouped, unlike), "shared-wire")).toEqual([]);
+    // And two dashes of one colour, where one wire names the colour a wire gets by default.
+    const defaults = [
+      { ...connect("solid", "a", "target"), color: FIRST_USE_COLORS.connector },
+      { ...connect("dashed", "b", "target"), style: "dashed" as const },
+    ];
+    expect(found(makeDocument(nodes, defaults), "shared-wire")).toEqual([]);
     // A wire and its reply paint in two lanes.
     expect(found(makeDocument(nodes, [connect("there", "a", "target"), connect("back", "target", "a")]), "shared-wire")).toEqual([]);
   });

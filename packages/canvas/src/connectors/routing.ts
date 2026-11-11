@@ -18,7 +18,9 @@ import {
 import { PathGenerator, type OrthogonalObstacle } from "./pathfinding/path-generator";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../theme/canvas-style";
 import { onBackendChange } from "../theme/text-measure";
-import { assignLanes, crossingsBetween, LANE_GAP_PX, simplified, type LaneBorder, type LaneSpan, type LaneWire } from "./lanes";
+import {
+  assignLanes, crossingsBetween, LANE_GAP_PX, simplified, type LaneBorder, type LaneMeaning, type LaneSpan, type LaneWire,
+} from "./lanes";
 // Connector routing figures (moved from theme/tokens.ts in the theme
 // dispersal — this router is their consumer; the routing tests import them
 // from here). Logical px.
@@ -256,25 +258,17 @@ function routeBoard(board: RoutingBoard, canvasStyle: CanvasStyle): BoardRoutes 
     drawn.push({ connection, fromObject, toObject, routed: routeOnBoard(fromObject, toObject, connection, board.objects, canvasStyle) });
   }
   tradeCrossedSides(drawn, board.objects, canvasStyle);
-  const roots = board.objects.filter((object) => object.type === "section" && object.parentId == null);
-  const page = roots.length === 1 ? roots[0] : undefined;
+  const meaningOf = laneMeaningsOf(board);
   for (const { connection, fromObject, toObject, routed: solo } of drawn) {
     const routed = withCornerRadius(solo, canvasStyle.connectorCornerRadiusPx);
     routes.set(connection, { fromObject, toObject, routed });
     const points = routed.points;
     if (!points || points.length < 2 || byWireId.has(connection.id)) continue;
     byWireId.set(connection.id, connection);
-    const arrow = connection.arrow ?? "forward";
     let keepOut: KeepOut | null = null;
     wires.push({
       id: connection.id,
-      from: fromObject.id,
-      to: toObject.id,
-      fromSection: sourceSection(fromObject, byId, page),
-      color: connection.color ?? FIRST_USE_COLORS.connector,
-      dash: connection.style ?? "solid",
-      headAtStart: arrow === "back" || arrow === "both",
-      headAtEnd: arrow === "forward" || arrow === "both",
+      ...meaningOf(connection),
       points,
       lanesFixed: validWaypoints(connection.waypoints) !== null,
       startSpan: portSpan(fromObject, points[0]!, points[1]!, canvasStyle),
@@ -359,6 +353,29 @@ function tradeCrossedSides(
       }
     }
   }
+}
+
+/**
+ * Reads each wire of `board` as the lane pass does: what decides which wires
+ * may share a line. A lint that asks the same question reads it here.
+ */
+export function laneMeaningsOf(board: RoutingBoard): (connection: InteractiveCanvasConnection) => LaneMeaning {
+  const byId = new Map(board.objects.map((object) => [object.id, object]));
+  const roots = board.objects.filter((object) => object.type === "section" && object.parentId == null);
+  const page = roots.length === 1 ? roots[0] : undefined;
+  return (connection) => {
+    const source = byId.get(connection.from.objectId);
+    const arrow = connection.arrow ?? "forward";
+    return {
+      from: connection.from.objectId,
+      to: connection.to.objectId,
+      fromSection: source ? sourceSection(source, byId, page) : null,
+      color: connection.color ?? FIRST_USE_COLORS.connector,
+      dash: connection.style ?? "solid",
+      headAtStart: arrow === "back" || arrow === "both",
+      headAtEnd: arrow === "forward" || arrow === "both",
+    };
+  };
 }
 
 /**

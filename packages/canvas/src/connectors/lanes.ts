@@ -410,8 +410,7 @@ const overlap = (a: Segment, b: Segment): number => Math.min(a.hi, b.hi) - Math.
 const near = (a: CanvasPoint, b: CanvasPoint, by: number): boolean => Math.abs(a.x - b.x) < by && Math.abs(a.y - b.y) < by;
 
 /** What decides whether two wires may share a line: their ends and their meaning. */
-export type LaneMeaning = Pick<LaneWire, "from" | "to" | "color" | "dash" | "headAtStart" | "headAtEnd"> &
-  Partial<Pick<LaneWire, "fromSection">>;
+export type LaneMeaning = Pick<LaneWire, "from" | "to" | "fromSection" | "color" | "dash" | "headAtStart" | "headAtEnd">;
 
 const areMates = (a: Segment, b: Segment): boolean =>
   runsAreMates(a.wire.wire, a.wire.points, a.index, b.wire.wire, b.wire.points, b.index);
@@ -420,8 +419,7 @@ const areMates = (a: Segment, b: Segment): boolean =>
  * Whether run `a` of `p` and run `b` of `q` belong to one trunk (one meaning,
  * one start, the same way so far) or one junction (one end, the same way from
  * here on, and two related arrowheads there or one dash). The lane pass paints
- * mates on one line on purpose. Without `fromSection` it cannot tell that two
- * sources sit in one section.
+ * mates on one line on purpose.
  * `p` and `q` hold no repeats and no points inside a straight run (`simplified`).
  */
 export function runsAreMates(
