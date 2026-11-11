@@ -1206,7 +1206,7 @@
       },
       "text": [
         {
-          "insert": "fit_section          ({ id: Id })\nchange_section_border({ id: Id, border: \"solid\" | \"dashed\" | \"none\" })\n\nlock  ({ id: Id, mode: \"all\" | \"background\" })   // sections only\nunlock({ id: Id })                               // sections only"
+          "insert": "fit_section          ({ id: Id })\nchange_section_border({ id: Id, border: \"solid\" | \"dashed\" | \"none\" })\n\nlock({ id: Id, mode: \"all\" | \"background\" | \"none\" })   // sections only"
         }
       ],
       "children": []
@@ -1314,7 +1314,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Locking is a section-level gesture: you protect a region of the board, not a single box. Both "
+          "insert": "Locking is a section-level gesture: you protect a region of the board, not a single box. "
         },
         {
           "insert": "lock",
@@ -1323,16 +1323,7 @@
           }
         },
         {
-          "insert": " and "
-        },
-        {
-          "insert": "unlock",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": " require a section id, and that gate is load-bearing: the document schema accepts "
+          "insert": " requires a section id in every mode. That gate is load-bearing, because the document schema accepts "
         },
         {
           "insert": "locked",
@@ -1341,7 +1332,7 @@
           }
         },
         {
-          "insert": " on any object, so the tool boundary is where the section-level intent is enforced on this path, alongside the context menu's own section gate on the UI path. "
+          "insert": " on any object. The tool boundary enforces the section-level intent on this path, and the context menu has its own section gate on the UI path. "
         },
         {
           "insert": "\"background\"",
@@ -1359,7 +1350,16 @@
           }
         },
         {
-          "insert": " freezes the frame and every descendant. A lock a person set is a don't-touch signal: lift one only when the request cannot be carried out otherwise, and say that you did."
+          "insert": " freezes the frame and every descendant. "
+        },
+        {
+          "insert": "\"none\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": " deletes the lock. A lock a person set is a don't-touch signal: release one only when the request cannot be carried out otherwise, and say that you did."
         }
       ],
       "children": []
@@ -1390,12 +1390,12 @@
             "never. Reading a box writes nothing, so a locked box is a valid source. The gate falls on the target"
           ],
           [
-            "lock / unlock",
+            "lock, in every mode, none included",
             "never. The release has to stay reachable"
           ],
           [
             "a placement (place_*, clone)",
-            "never. A new id cannot be under a lock, and the frame it appears to land in is decided by membership reconcile, which already refuses to adopt into a section locked \"all\""
+            "never. A new id cannot be under a lock. Membership reconcile decides the frame it lands in, and reconcile refuses to adopt into a section locked \"all\""
           ]
         ],
         "title": "The lock matrix"
@@ -1421,7 +1421,7 @@
           }
         },
         {
-          "insert": ", transcribed from the UI's own manipulation test so both paths refuse the same edits. Every refusal names the frame holding the lock "
+          "insert": ", transcribed from the UI's own manipulation test so both paths refuse the same edits. Every refusal names the frame that holds the lock "
         },
         {
           "insert": "and",
@@ -1430,16 +1430,25 @@
           }
         },
         {
-          "insert": " "
+          "insert": " the one call that lifts it, "
         },
         {
-          "insert": "unlock",
+          "insert": "lock",
           "attributes": {
             "code": true
           }
         },
         {
-          "insert": " as the one call that lifts it: a gate the model cannot see its way out of costs a turn."
+          "insert": " with mode "
+        },
+        {
+          "insert": "\"none\"",
+          "attributes": {
+            "code": true
+          }
+        },
+        {
+          "insert": ". A gate that the model cannot see its way out of costs a turn."
         }
       ],
       "children": []

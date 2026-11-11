@@ -37,6 +37,7 @@
         "b-overview-step-done-11",
         "b-overview-handoff-observation-12",
         "b-overview-pipeline-13",
+        "b-overview-pipeline-13b",
         "b-overview-facts-heading-14",
         "b-overview-fact-view-15",
         "b-overview-fact-intent-16",
@@ -216,7 +217,7 @@
       },
       "text": [
         {
-          "insert": "Twenty-five typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool."
+          "insert": "Twenty-six typed mutators are factored by editing gesture rather than by kind (place, arrange, content, sections, edges, delete), and each call is one gesture. look is the read-only inspection tool."
         }
       ],
       "children": []
@@ -318,7 +319,18 @@
       "props": {},
       "text": [
         {
-          "insert": "There are exactly thirty-two tools, factored by editing gesture rather than by kind: twenty-five board mutators across place, arrange, content, sections, edges, and delete; plus look, add_annotation, reply_annotation, resolve_request, update_description, set_board_title, and finalize. The full roster is below. The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. There is no separate rules section; required behavior lives in phase constraints. workflow organizes work into five state-driven phases: orientate, plan, build, qa, and finalize, with each phase carrying its objective, steps, and constraints. Build places the section skeleton first, fills one section at a time while judging a render, closes each finished region with fit_section, then adds connections, labels, and styling. QA judges the whole board from the render attached to the state block and each touched section from a framed look, and finalize disposes requests and resolves diagnostics."
+          "insert": "There are exactly thirty-three tools, factored by editing gesture rather than by kind. Twenty-six are board mutators across place, arrange, content, sections, edges, and delete. The other seven are look, add_annotation, reply_annotation, resolve_request, update_description, set_board_title, and finalize. The full roster is below."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-pipeline-13b": {
+      "id": "b-overview-pipeline-13b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The system prompt has four top-level sections: purpose, board_model, state_grammar, and workflow. There is no separate rules section, because required behavior lives in phase constraints. workflow organizes work into five state-driven phases: orientate, plan, build, qa, and finalize. Each phase carries its objective, steps, and constraints. Build places the section skeleton first, fills one section at a time while judging a render, closes each finished region with fit_section, then adds connections, labels, and styling. QA judges the whole board from the render attached to the state block and each touched section from a framed look. finalize disposes requests and resolves diagnostics."
         }
       ],
       "children": []
@@ -444,9 +456,63 @@
           "attributes": {
             "bold": true
           }
-        },
+        }
+      ],
+      "children": [
+        "b-overview-fact-intent-16-a",
+        "b-overview-fact-intent-16-b",
+        "b-overview-fact-intent-16-c",
+        "b-overview-fact-intent-16-d"
+      ]
+    },
+    "b-overview-fact-intent-16-a": {
+      "id": "b-overview-fact-intent-16-a",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
         {
-          "insert": " The model writes twenty-five editing gestures. They lower to the six object-and-connection patch kinds used by the draft applier, document differ, and studio proposal wire. Geometry the model writes snaps to its own 20 grid before lowering, and parentId supplied by the model is not authoritative because containment is reconciled from placement."
+          "insert": "The model writes twenty-six editing gestures."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-intent-16-b": {
+      "id": "b-overview-fact-intent-16-b",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "The gestures lower to the six object-and-connection patch kinds that the draft applier, the document differ, and the studio proposal wire use."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-intent-16-c": {
+      "id": "b-overview-fact-intent-16-c",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "Geometry the model writes snaps to its own 20 grid before lowering."
+        }
+      ],
+      "children": []
+    },
+    "b-overview-fact-intent-16-d": {
+      "id": "b-overview-fact-intent-16-d",
+      "type": "list-item",
+      "props": {
+        "ordered": false
+      },
+      "text": [
+        {
+          "insert": "A parentId that the model supplies is not authoritative, because containment is reconciled from placement."
         }
       ],
       "children": []
@@ -708,7 +774,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The surface is thirty-two tools: twenty-five board-mutating gestures in six groups, listed by "
+          "insert": "The surface is thirty-three tools: twenty-six board-mutating gestures in six groups, listed by "
         },
         {
           "insert": "operationTools",
@@ -736,7 +802,7 @@
           }
         },
         {
-          "insert": ". Those two arrays are the single source the agent catalog registers from and the "
+          "insert": ". Those two arrays are the single source that the agent catalog registers from and that the "
         },
         {
           "insert": "<capabilities>",
@@ -745,7 +811,7 @@
           }
         },
         {
-          "insert": " block derives from, so a tool defined in a group module is not on the surface until it is listed there. The table below is their registration order, which is roughly the order a board gets built; "
+          "insert": " block derives from. A tool defined in a group module is not on the surface until one of the arrays lists it. The table below is their registration order, which is roughly the order a board gets built. "
         },
         {
           "insert": "test/tool-schema-parity.test.ts",
@@ -834,6 +900,11 @@
             "lay one section's nodes out in named rows at the craft-target gaps, then fit the frame around them"
           ],
           [
+            "tighten_wires",
+            "Arrange",
+            "slide boxes toward what they are wired to, kept only where the drawn wires get shorter"
+          ],
+          [
             "update_text",
             "Content & appearance",
             "write a name, a sticky's body, or an edge's label"
@@ -862,11 +933,6 @@
             "lock",
             "Sections",
             "protect a region, either the frame alone or the frame and everything in it"
-          ],
-          [
-            "unlock",
-            "Sections",
-            "release a section's lock"
           ],
           [
             "style_edge",
@@ -1276,7 +1342,7 @@
       },
       "text": [
         {
-          "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty-five gestures are the only way the draft changes."
+          "insert": "A capability the roster does not name is a capability the agent does not have. There is no escape hatch tool, no raw patch, and no free-form document write: the twenty-six gestures are the only way the draft changes."
         }
       ],
       "children": []
@@ -1335,7 +1401,7 @@
       },
       "text": [
         {
-          "insert": "The file host carries thirty-one of the thirty-two tools. "
+          "insert": "The file host carries thirty-two of the thirty-three tools. "
         },
         {
           "insert": "finalize",

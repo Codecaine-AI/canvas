@@ -158,7 +158,7 @@
       },
       "text": [
         {
-          "insert": "createSession\n  → read + hash baseline\n  → resolve selected object ids\n  → create draft and inject a page frame when needed\n  → merge annotations into the request queue\n  → boot current text context + images\n  → run model against the thirty-two tools\n  → proposal-ready | abandoned | error\n  → operator accepts or rejects a proposal"
+          "insert": "createSession\n  → read + hash baseline\n  → resolve selected object ids\n  → create draft and inject a page frame when needed\n  → merge annotations into the request queue\n  → boot current text context + images\n  → run model against the thirty-three tools\n  → proposal-ready | abandoned | error\n  → operator accepts or rejects a proposal"
         }
       ],
       "children": []
@@ -571,7 +571,7 @@
       },
       "text": [
         {
-          "insert": "The thirty-two-tool runtime"
+          "insert": "The Thirty-Three-Tool Runtime"
         }
       ],
       "children": []
@@ -582,7 +582,7 @@
       "props": {},
       "text": [
         {
-          "insert": "The model has exactly thirty-two tools, factored by editing gesture rather than by kind. Twenty-five board mutators (place, arrange, content and appearance, sections, edges, delete) are built from one shared operation factory. look, add_annotation, reply_annotation, resolve_request, update_description, set_board_title, and finalize complete the surface. The per-gesture contracts are documented in "
+          "insert": "The model has exactly thirty-three tools, factored by editing gesture rather than by kind. Twenty-six board mutators (place, arrange, content and appearance, sections, edges, delete) are built from one shared operation factory. look, add_annotation, reply_annotation, resolve_request, update_description, set_board_title, and finalize complete the surface. The per-gesture contracts are documented in "
         },
         {
           "insert": "The agent tool surface",
@@ -621,7 +621,7 @@
           }
         },
         {
-          "insert": ", with the twenty-five mutators under operations/ and look, the annotation threads, request disposal, board title, description, and finalize under workflow/."
+          "insert": ", with the twenty-six mutators under operations/ and look, the annotation threads, request disposal, board title, description, and finalize under workflow/."
         }
       ],
       "children": []
@@ -702,7 +702,7 @@
           }
         },
         {
-          "insert": " holds the neutral delta vocabulary a document diff is allowed to speak: added, changed, removed per entity kind, plus the one section-fit shape a resolver produces. It is deliberately not the tool roster: move_to, move_by, align, and space_out all land in the document as the same geometry change, so a diff cannot recover which gesture produced it. Twenty-five gesture specs own per-operation state validation, and OpContext owns lowering onto the internal patch grammar."
+          "insert": " holds the neutral delta vocabulary a document diff is allowed to speak: added, changed, removed per entity kind, plus the one section-fit shape a resolver produces. It is deliberately not the tool roster. The gestures move_to, move_by, align, and space_out write the same geometry change to the document. A diff cannot recover which gesture produced that change. Twenty-six gesture specs own per-operation state validation, and OpContext owns lowering onto the internal patch grammar."
         }
       ],
       "children": []
@@ -715,7 +715,7 @@
       },
       "text": [
         {
-          "insert": "place     place_section · place_sticky · place_shape · clone · connect\narrange   move_to · move_by · resize · match_size · align · space_out\ncontent   update_text · change_color · change_shape\nsections  fit_section · change_section_border · lock · unlock\nedges     style_edge · change_connection · reroute · shift_segment · reset_route · move_label\ndelete    delete\n\ndelta     addSection · updateSection · removeSection · fitSection\n          addSticky · updateSticky · removeSticky\n          addObject · updateObject · removeObject\n          addConnection · updateConnection · removeConnection"
+          "insert": "place     place_section · place_sticky · place_shape · clone · connect\narrange   move_to · move_by · resize · match_size · align · space_out\ncontent   update_text · change_color · change_shape\nsections  fit_section · change_section_border · lock\nedges     style_edge · change_connection · reroute · shift_segment · reset_route · move_label\ndelete    delete\n\ndelta     addSection · updateSection · removeSection · fitSection\n          addSticky · updateSticky · removeSticky\n          addObject · updateObject · removeObject\n          addConnection · updateConnection · removeConnection"
         }
       ],
       "children": []
@@ -772,7 +772,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Locks are enforced, not merely advised: a frame's own locked value refuses that frame's mutation in either mode, an ancestor locked all gates every descendant, and an edge is gated when either endpoint sits inside a locked-all closure. A background lock pins one frame's box and never gates an edge. Every refusal names the frame holding the lock and unlock as the one call that lifts it. Placements are ungated, because a new id cannot be under a lock and membership reconcile already refuses to adopt into a locked-all section."
+          "insert": "Locks are enforced, not merely advised. A frame's own locked value refuses that frame's mutation in either mode, and an ancestor locked all gates every descendant. An edge is gated when either endpoint sits inside a locked-all closure. A background lock pins one frame's box and never gates an edge. Every refusal names the frame that holds the lock and the one call that lifts it, lock with mode none. Placements are ungated, because a new id cannot be under a lock and membership reconcile already refuses to adopt into a locked-all section."
         }
       ],
       "children": []
