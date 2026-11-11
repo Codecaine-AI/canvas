@@ -1930,19 +1930,10 @@
           }
         },
         {
-          "insert": ", "
+          "insert": " and "
         },
         {
           "insert": "resize",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and "
-        },
-        {
-          "insert": "match_size",
           "attributes": {
             "code": true
           }

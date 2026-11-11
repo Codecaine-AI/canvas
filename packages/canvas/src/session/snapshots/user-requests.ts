@@ -13,7 +13,7 @@
  * block, re-rendered from the live queue on every request by the
  * layout-editor's state/ sidecar (and seeded from the store's pre-formatted
  * `sessionData.userRequests` when the live session is out of reach), and the
- * REQUESTS block that resolve_request / add_annotation return. Both render the
+ * REQUESTS block that resolve_request / annotate return. Both render the
  * thread: the opening post with its author, then one indented line per reply,
  * oldest first.
  *

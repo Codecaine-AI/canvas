@@ -1,6 +1,5 @@
 /**
- * The Arrange group — `move_to`, `move_by`, `resize`, `match_size`, `align`,
- * `space_out`, `arrange_section`
+ * The Arrange group — `move`, `resize`, `arrange`, `arrange_section`
  * (docs/10-system-design/70-agent-tool-surface/20-gestures §Arrange).
  *
  * These are the gestures that write geometry and nothing else, so they
@@ -13,7 +12,7 @@
  * closed set rigidly). Because every member of that set moves by the same
  * delta, relative geometry is preserved and containment cannot change on a
  * move; the factory's membership reconcile is an identity afterwards (asserted
- * in the tests). `resize` and `match_size` are the deliberate exceptions: a
+ * in the tests). `resize`, in both its modes, is the deliberate exception: a
  * frame's NEW edges decide what it contains, so the same reconcile adopts and
  * releases there.
  *
@@ -24,10 +23,10 @@
  *
  * THE GRID IS ABOUT WHAT LANDS, NOT WHAT WAS ASKED FOR. Every geometry field
  * these gestures WRITE lands on the agent grid (grid.ts, AGENT_GRID = 20), so
- * it is the RESULT that is quantized, never merely the argument: a `move_by`
+ * it is the RESULT that is quantized, never merely the argument: a `move` `by`
  * off an off-grid box snaps the corner it lands on rather than the delta it was
- * given, `align` snaps the shared coordinate the whole row agrees on, and
- * `space_out` snaps each position it computes (which makes the gap approximate
+ * given, `arrange` `align` snaps the shared coordinate the whole row agrees on,
+ * and `arrange` `space` snaps each position it computes (which makes the gap approximate
  * when a box starts off-grid — the summary reports the positions that landed,
  * so the next gesture reasons from the board's real numbers). 20-multiples pass
  * through the write path's own grid-4 normalization untouched, which is what
@@ -40,16 +39,16 @@
  * is the whole meaning of carrying them.
  *
  * LOCKS GATE EVERY ONE OF THESE. A box under a lock refuses to move or resize
- * (`requireUnlocked`, op-context.ts); `match_size`'s `like` source is only
+ * (`requireUnlocked`, op-context.ts); `resize`'s `like` source is only
  * measured, never written, so a locked box can still be matched.
  *
- * SIZE HAS RULES. `resize` and `match_size` measure the new box against the
- * text already in it with the renderer's own wrap/clamp decision
- * (board/text-fit.ts). A shape or icon asked to be smaller than its text needs
- * lands at the needed size instead, top-left still held, and its row and
- * column peers grow with it (auto-size.ts) — the mirror image of `update_text`
- * growing a box for new text. A sticky or section still lands as asked, with
- * the verdict as a note.
+ * SIZE HAS RULES. `resize`, with explicit dimensions or with `like`, measures
+ * the new box against the text already in it with the renderer's own
+ * wrap/clamp decision (board/text-fit.ts). A shape or icon asked to be smaller
+ * than its text needs lands at the needed size instead, top-left still held,
+ * and its row and column peers grow with it (auto-size.ts) — the mirror image
+ * of `update_text` growing a box for new text. A sticky or section still lands
+ * as asked, with the verdict as a note.
  */
 import { StringEnum, Type } from "@mariozechner/pi-ai";
 
@@ -85,7 +84,14 @@ import {
 } from "../grid";
 import type { OpContext, OpOutcome } from "./op-context";
 import { defineOperationTool } from "./operation-tool";
-import { ArrangeSectionParams, Id } from "../schemas";
+import {
+  ArrangeSectionParams,
+  Id,
+  nullable,
+  nullableEnum,
+  nullableId,
+  nullableNumber,
+} from "../schemas";
 
 // ---------------------------------------------------------------------------
 // Shared plumbing
@@ -207,11 +213,11 @@ function carriedSuffix(changedIds: readonly string[], rootIds: readonly string[]
 }
 
 // ---------------------------------------------------------------------------
-// move_to / move_by
+// move
 // ---------------------------------------------------------------------------
 
 /**
- * The one body both move forms share: a rigid delta, expanded over any listed
+ * The one body both move modes share: a rigid delta, expanded over any listed
  * section's descendants, lowered, and summarized by where the named box landed.
  */
 function translate(
@@ -231,53 +237,62 @@ function translate(
   };
 }
 
-export const moveTo = defineOperationTool({
-  name: "move_to",
-  description:
-    "Put a box's top-left corner at a point on the board. A section takes everything it holds with it, so what it contains never changes. The point lands on the board's grid, and the result reports where the box actually is.",
-  fields: {
-    id: Id,
+const MovePoint = Type.Object(
+  {
     x: Type.Number({ description: "New left edge, in board coordinates." }),
     y: Type.Number({ description: "New top edge, in board coordinates." }),
   },
-  validate: (ctx, p) => {
-    const errors = ctx.requirePositionable(p.id);
-    return errors.length > 0 ? errors : ctx.requireUnlocked(p.id);
-  },
-  apply: (ctx, p) => {
-    const target = objectOf(ctx, p.id);
-    // An absolute target IS the coordinate that lands, so snapping the
-    // argument and snapping the result are the same operation here.
-    const [x, y] = snapPoint([p.x, p.y]);
-    return translate(
-      ctx,
-      p.id,
-      { dx: x - target.geometry.x, dy: y - target.geometry.y },
-      (landed) => `move_to ${p.id} → ${point(landed.x, landed.y)}`,
-    );
-  },
-});
+  { additionalProperties: false },
+);
 
-export const moveBy = defineOperationTool({
-  name: "move_by",
-  description:
-    "Nudge a box by an offset from where it already is. A section takes everything it holds with it, so what it contains never changes. The offset lands on the board's grid, and the result reports where the box ended up.",
-  fields: {
-    id: Id,
+const MoveOffset = Type.Object(
+  {
     dx: Type.Number({ description: "Rightward offset; negative moves left." }),
     dy: Type.Number({ description: "Downward offset; negative moves up." }),
   },
+  { additionalProperties: false },
+);
+
+export const move = defineOperationTool({
+  name: "move",
+  description:
+    "Move a box. Send exactly one of to or by; a null one counts as absent. to puts the box's top-left corner at a point on the board, and by nudges it by an offset from where it already is. A section takes everything it holds with it, so what it contains never changes. The result lands on the board's grid and reports where the box actually is.",
+  fields: {
+    id: Id,
+    to: nullable(MovePoint, "Put the top-left corner at this point."),
+    by: nullable(MoveOffset, "Move the box by this offset."),
+  },
   validate: (ctx, p) => {
     const errors = ctx.requirePositionable(p.id);
-    return errors.length > 0 ? errors : ctx.requireUnlocked(p.id);
+    if (errors.length === 0) errors.push(...ctx.requireUnlocked(p.id));
+    if ((p.to == null) === (p.by == null)) {
+      errors.push(
+        p.to == null
+          ? "send exactly one of to or by — to puts the top-left corner at a point, by nudges the box by an offset."
+          : "send exactly one of to or by, not both.",
+      );
+    }
+    return errors;
   },
   apply: (ctx, p) => {
     const current = objectOf(ctx, p.id).geometry;
+    if (p.to != null) {
+      // An absolute target IS the coordinate that lands, so snapping the
+      // argument and snapping the result are the same operation here.
+      const [x, y] = snapPoint([p.to.x, p.to.y]);
+      return translate(
+        ctx,
+        p.id,
+        { dx: x - current.x, dy: y - current.y },
+        (landed) => `move ${p.id} → ${point(landed.x, landed.y)}`,
+      );
+    }
+    const by = p.by!;
     // Snap the CORNER THE NUDGE LANDS ON, not the nudge. Snapping the delta
     // would leave an off-grid box off-grid forever (16 + 20 = 36), and a nudge
     // off a hand-drawn box is exactly when the grid earns its keep. The
     // reported delta is therefore the one that was actually applied.
-    const [x, y] = snapPoint([current.x + p.dx, current.y + p.dy]);
+    const [x, y] = snapPoint([current.x + by.dx, current.y + by.dy]);
     const dx = x - current.x;
     const dy = y - current.y;
     return translate(
@@ -285,19 +300,19 @@ export const moveBy = defineOperationTool({
       p.id,
       { dx, dy },
       (landed) =>
-        `move_by ${p.id} ${signed(dx)},${signed(dy)} → ${point(landed.x, landed.y)}`,
+        `move ${p.id} ${signed(dx)},${signed(dy)} → ${point(landed.x, landed.y)}`,
     );
   },
 });
 
 // ---------------------------------------------------------------------------
-// resize / match_size
+// resize
 // ---------------------------------------------------------------------------
 
 /**
  * Lower a size change and report the dimensions that actually landed.
  *
- * Both size gestures hold the top-left corner still, take their readability
+ * Both size modes hold the top-left corner still, take their readability
  * verdict from the landed box, and rely on the operation factory's shared
  * membership reconcile so a section's new edges adopt and release contents.
  */
@@ -335,43 +350,66 @@ function applySize(
 export const resize = defineOperationTool({
   name: "resize",
   description:
-    "Re-size a box to explicit dimensions, holding its top-left corner still so it grows or shrinks toward its bottom-right. Matching another box is match_size's job. A section's new edges decide what it now contains, so it can adopt or release as it changes. Dimensions land on the board's grid. A shape, icon, or schematic note is never made smaller than its text needs: below that it lands at the needed size, and the same-type shapes in its row (height) and column (width) grow to match, keeping their centers, unless that would make them overlap another box.",
+    "Re-size a box, holding its top-left corner still so it grows or shrinks toward its bottom-right. Send width, height or both for explicit dimensions, or like to copy another box's width and height; like refuses width or height beside it, and a null field counts as absent. The like source is only measured, never resized, so it can be locked. A section's new edges decide what it now contains, so it can adopt or release as it changes. Dimensions land on the board's grid. A shape, icon, or schematic note is never made smaller than its text needs: below that it lands at the needed size, and the same-type shapes in its row (height) and column (width) grow to match, keeping their centers, unless that would make them overlap another box.",
   fields: {
     id: Id,
-    width: Type.Optional(
-      Type.Number({
-        description: "New width. Omit to keep the current one.",
-      }),
-    ),
-    height: Type.Optional(
-      Type.Number({
-        description: "New height. Omit to keep the current one.",
-      }),
+    width: nullableNumber("New width. Omit it, or send null, to keep the current one."),
+    height: nullableNumber("New height. Omit it, or send null, to keep the current one."),
+    like: nullableId(
+      "A different box whose width and height are copied. Send it without width or height.",
     ),
   },
   validate: (ctx, p) => {
     const errors = ctx.requirePositionable(p.id);
     if (errors.length === 0) errors.push(...ctx.requireUnlocked(p.id));
-    const hasDimensions = p.width !== undefined || p.height !== undefined;
-    if (!hasDimensions) {
+    const hasDimensions = p.width != null || p.height != null;
+    if (p.like != null) {
+      if (hasDimensions) {
+        errors.push("like copies both dimensions, so send it without width or height.");
+      }
+      errors.push(...ctx.requirePositionable(p.like, "like"));
+      if (p.like === p.id) {
+        errors.push(
+          "a box cannot be its own size source — use resize with width or height for explicit dimensions.",
+        );
+      }
+    } else if (!hasDimensions) {
       errors.push(
-        "resize needs a width or a height — as written it asks for no change.",
+        "resize needs a width, a height or like — as written it asks for no change.",
       );
     }
     return errors;
   },
   apply: (ctx, p) => {
+    if (p.like != null) {
+      const like = p.like;
+      // `like` is measured, never written. A locked source is valid because
+      // matching changes only the target.
+      const source = resolveSizeLike(ctx.draft, like)!;
+      // Matching a peer copies its size onto the grid, including when the
+      // source is a hand-drawn off-grid box.
+      return applySize(
+        ctx,
+        p.id,
+        snapSize(source),
+        (landed) =>
+          `resize ${p.id} → ${num(landed.width)}×${num(landed.height)} (matching ${like})`,
+        // Peer growth never resizes the measured source.
+        [like],
+      );
+    }
     const current = objectOf(ctx, p.id).geometry;
-    const requested = {
-      width: p.width ?? current.width,
-      height: p.height ?? current.height,
-    };
-    const snapped = snapSize(requested);
+    const width = p.width ?? undefined;
+    const height = p.height ?? undefined;
+    const snapped = snapSize({
+      width: width ?? current.width,
+      height: height ?? current.height,
+    });
     // Snap only what the gesture actually asked for: a width-only resize must
     // not drag a legacy off-grid height onto the grid behind the model's back.
     const size = {
-      width: p.width !== undefined ? snapped.width : current.width,
-      height: p.height !== undefined ? snapped.height : current.height,
+      width: width !== undefined ? snapped.width : current.width,
+      height: height !== undefined ? snapped.height : current.height,
     };
     return applySize(
       ctx,
@@ -382,57 +420,13 @@ export const resize = defineOperationTool({
   },
 });
 
-export const matchSize = defineOperationTool({
-  name: "match_size",
-  description:
-    "Make a box the same width and height as another box, holding its top-left corner still. The source is only measured, so it can be locked. A section's new edges decide what it now contains, so it can adopt or release as it changes. Both dimensions land on the board's grid. A shape or icon is never made smaller than its text needs: below that it lands at the needed size.",
-  fields: {
-    id: Id,
-    like: Type.String({
-      ...Id,
-      description: "The different box whose width and height are copied.",
-    }),
-  },
-  validate: (ctx, p) => {
-    const errors = ctx.requirePositionable(p.id);
-    if (errors.length === 0) errors.push(...ctx.requireUnlocked(p.id));
-    errors.push(...ctx.requirePositionable(p.like, "like"));
-    if (p.like === p.id) {
-      errors.push(
-        "a box cannot be its own size source — use resize with width or height for explicit dimensions.",
-      );
-    }
-    return errors;
-  },
-  apply: (ctx, p) => {
-    // `like` is measured, never written. A locked source is valid because
-    // matching changes only the target.
-    const source = resolveSizeLike(ctx.draft, p.like)!;
-    // Matching a peer copies its size onto the grid, including when the source
-    // is a hand-drawn off-grid box.
-    const size = snapSize(source);
-    return applySize(
-      ctx,
-      p.id,
-      size,
-      (landed) =>
-        `match_size ${p.id} → ${num(landed.width)}×${num(landed.height)} (matching ${p.like})`,
-      [p.like],
-    );
-  },
-});
-
 // ---------------------------------------------------------------------------
-// align
+// arrange · align
 // ---------------------------------------------------------------------------
 
-const AlignEdge = StringEnum(
-  ["left", "right", "top", "bottom", "center_h", "center_v"],
-  {
-    description:
-      "The edge the boxes share afterwards. center_h puts every box on one center x, center_v on one center y.",
-  },
-);
+const ALIGN_EDGES = ["left", "right", "top", "bottom", "center_h", "center_v"] as const;
+const ALIGN_EDGE_DESCRIPTION =
+  "The edge the boxes share afterwards. center_h puts every box on one center x, center_v on one center y.";
 
 const ArrangeIds = Type.Array(Id, {
   minItems: 2,
@@ -486,45 +480,8 @@ function alignedCoordinate(
   return `centers at y=${value}`;
 }
 
-export const align = defineOperationTool({
-  name: "align",
-  description:
-    "Put a row or column of boxes on one shared edge. This is the cross-axis gesture — it never changes spacing along the flow. Sections align by their own frame and carry their contents; edges are not targets, they re-route themselves. A child of a listed section travels with its frame and is not an independent target; at least two independent targets must remain.",
-  fields: { ids: ArrangeIds, edge: AlignEdge },
-  validate: (ctx, p) => requireIndependentRoots(ctx, p.ids, "align"),
-  apply: (ctx, p) => {
-    const edge = p.edge as CanvasAlignEdge;
-    // The move roots are what actually aligned; a child of a listed section
-    // travelled with its frame, so it is neither named nor measured here.
-    const roots = moveRootIds(ctx.draft, p.ids);
-    const aligned = alignWithDescendants(ctx.draft, p.ids, edge);
-    // Put the shared coordinate on the grid by nudging the WHOLE row by one
-    // drift: every root moves by the same amount, so the edge they now share
-    // stays exactly shared and lands on a 20.
-    const alignedRoot = aligned.objects.find((object) => object.id === roots[0])!;
-    const shared = sharedAlignCoordinate(alignedRoot.geometry, edge);
-    const drift = snapCoordinate(shared) - shared;
-    const horizontal = alignsHorizontally(edge);
-    const snappedAlignment = retranslate(
-      aligned,
-      new Map(roots.map((id) => [
-        id,
-        horizontal ? { dx: drift, dy: 0 } : { dx: 0, dy: drift },
-      ])),
-    );
-    const { document, changedIds } = lowerGeometry(ctx.draft, snappedAlignment.objects);
-    const measured = document.objects.find((object) => object.id === roots[0])!;
-    return {
-      status: "applied",
-      draft: document,
-      summary: `align ${p.edge} · ${roots.join(", ")} → ${alignedCoordinate(measured, edge)}`
-        + carriedSuffix(changedIds, roots),
-    };
-  },
-});
-
 // ---------------------------------------------------------------------------
-// space_out
+// arrange · space
 // ---------------------------------------------------------------------------
 
 const SpaceAxis = StringEnum(["horizontal", "vertical"], {
@@ -572,50 +529,102 @@ function snapRun(
   return retranslate(spaced, deltas);
 }
 
-export const spaceOut = defineOperationTool({
-  name: "space_out",
-  description:
-    "Re-pitch boxes in place so the clear gap between neighbours is exactly what you ask for. In positional order along the flow the first box holds and every later one slides; the run grows or shrinks to suit, and the cross axis is untouched. It opens a corridor between boxes in one call. Sections re-pitch by their own frame and carry their contents; edges are not targets, they re-route themselves.",
-  fields: {
-    ids: ArrangeIds,
+/** The `align` mode: one shared edge, snapped as a whole row. */
+function alignRow(ctx: OpContext, ids: readonly string[], align: CanvasAlignEdge): OpOutcome {
+  // The move roots are what actually aligned; a child of a listed section
+  // travelled with its frame, so it is neither named nor measured here.
+  const roots = moveRootIds(ctx.draft, ids);
+  const aligned = alignWithDescendants(ctx.draft, ids, align);
+  // Put the shared coordinate on the grid by nudging the WHOLE row by one
+  // drift: every root moves by the same amount, so the edge they now share
+  // stays exactly shared and lands on a 20.
+  const alignedRoot = aligned.objects.find((object) => object.id === roots[0])!;
+  const shared = sharedAlignCoordinate(alignedRoot.geometry, align);
+  const drift = snapCoordinate(shared) - shared;
+  const horizontal = alignsHorizontally(align);
+  const snappedAlignment = retranslate(
+    aligned,
+    new Map(roots.map((id) => [
+      id,
+      horizontal ? { dx: drift, dy: 0 } : { dx: 0, dy: drift },
+    ])),
+  );
+  const { document, changedIds } = lowerGeometry(ctx.draft, snappedAlignment.objects);
+  const measured = document.objects.find((object) => object.id === roots[0])!;
+  return {
+    status: "applied",
+    draft: document,
+    summary: `arrange align ${align} · ${roots.join(", ")} → ${alignedCoordinate(measured, align)}`
+      + carriedSuffix(changedIds, roots),
+  };
+}
+
+/** The `space` mode: re-pitch the run so every clear gap is `gap`. */
+function spaceRun(
+  ctx: OpContext,
+  ids: readonly string[],
+  space: { axis: "horizontal" | "vertical"; gap: number },
+): OpOutcome {
+  const gap = snapGap(space.gap);
+  const horizontal = space.axis === "horizontal";
+  const roots = moveRootIds(ctx.draft, ids);
+  const spaced = spaceOutObjects(ctx.draft, ids, space.axis, gap);
+  const { document, changedIds } = lowerGeometry(
+    ctx.draft,
+    snapRun(spaced, roots, horizontal, gap).objects,
+  );
+  const byId = new Map(document.objects.map((object) => [object.id, object]));
+  // Positional order along the flow is what the gesture re-pitched by, so it
+  // is the order the summary reports the landed run in.
+  const run = roots
+    .map((id) => byId.get(id)!)
+    .sort((a, b) =>
+      horizontal ? a.geometry.x - b.geometry.x : a.geometry.y - b.geometry.y)
+    .map((object) =>
+      `${object.id} ${horizontal ? "x" : "y"}=`
+      + num(horizontal ? object.geometry.x : object.geometry.y))
+    .join(", ");
+  return {
+    status: "applied",
+    draft: document,
+    summary: `arrange space ${space.axis} gap ${num(gap)} · ${run}`
+      + carriedSuffix(changedIds, roots),
+  };
+}
+
+const ArrangeSpace = Type.Object(
+  {
     axis: SpaceAxis,
     gap: Type.Number({
       description: "The clear space to leave between neighbouring boxes, in board units.",
     }),
   },
-  validate: (ctx, p) => requireIndependentRoots(ctx, p.ids, "space_out"),
-  apply: (ctx, p) => {
-    const gap = snapGap(p.gap);
-    const horizontal = p.axis === "horizontal";
-    const roots = moveRootIds(ctx.draft, p.ids);
-    const spaced = spaceOutObjects(
-      ctx.draft,
-      p.ids,
-      p.axis as "horizontal" | "vertical",
-      gap,
-    );
-    const { document, changedIds } = lowerGeometry(
-      ctx.draft,
-      snapRun(spaced, roots, horizontal, gap).objects,
-    );
-    const byId = new Map(document.objects.map((object) => [object.id, object]));
-    // Positional order along the flow is what the gesture re-pitched by, so it
-    // is the order the summary reports the landed run in.
-    const run = roots
-      .map((id) => byId.get(id)!)
-      .sort((a, b) =>
-        horizontal ? a.geometry.x - b.geometry.x : a.geometry.y - b.geometry.y)
-      .map((object) =>
-        `${object.id} ${horizontal ? "x" : "y"}=`
-        + num(horizontal ? object.geometry.x : object.geometry.y))
-      .join(", ");
-    return {
-      status: "applied",
-      draft: document,
-      summary: `space_out ${p.axis} gap ${num(gap)} · ${run}`
-        + carriedSuffix(changedIds, roots),
-    };
+  { additionalProperties: false },
+);
+
+export const arrange = defineOperationTool({
+  name: "arrange",
+  description:
+    "Arrange a row or column of boxes. Send exactly one of align or space; a null one counts as absent. align puts the boxes on one shared edge or centerline: it is the cross-axis mode and never changes spacing along the flow. space re-pitches them in place so the clear gap between neighbours is exactly gap: in positional order along the axis the first box holds and every later one slides, the run grows or shrinks to suit, and the cross axis is untouched. space opens a corridor between boxes in one call. Sections arrange by their own frame and carry their contents; edges are not targets, they re-route themselves. A child of a listed section travels with its frame and is not an independent target; at least two independent targets must remain.",
+  fields: {
+    ids: ArrangeIds,
+    align: nullableEnum(ALIGN_EDGES, ALIGN_EDGE_DESCRIPTION),
+    space: nullable(ArrangeSpace, "Re-pitch the run along this axis to this clear gap."),
   },
+  validate: (ctx, p) => {
+    const errors = requireIndependentRoots(ctx, p.ids, "arrange");
+    if ((p.align == null) === (p.space == null)) {
+      errors.push(
+        p.align == null
+          ? "send exactly one of align or space — align puts the boxes on one shared edge, space sets one clear gap between them."
+          : "send exactly one of align or space, not both.",
+      );
+    }
+    return errors;
+  },
+  apply: (ctx, p) => p.align != null
+    ? alignRow(ctx, p.ids, p.align as CanvasAlignEdge)
+    : spaceRun(ctx, p.ids, p.space as { axis: "horizontal" | "vertical"; gap: number }),
 });
 
 // ---------------------------------------------------------------------------
@@ -643,20 +652,20 @@ function rowIdErrors(ctx: OpContext, sectionId: string, id: string): string[] {
   if (kind === "section") {
     return [
       `rows id "${id}" is a section — arrange_section lays out the nodes inside one frame;`
-      + ` arrange "${id}" on its own, and place the frame itself with move_to.`,
+      + ` arrange_section "${id}" on its own, and place the frame itself with move.`,
     ];
   }
   if (kind === "sticky") {
     return [
       `rows id "${id}" is a sticky — a note is not a node in the flow; leave it out and put it`
-      + " beside the frame with move_to.",
+      + " beside the frame with move.",
     ];
   }
   const parentId = object.parentId ?? undefined;
   if (parentId !== undefined && parentId !== sectionId) {
     return [
       `rows id "${id}" belongs to section "${parentId}" — arrange_section arranges one section's`
-      + ` nodes; arrange "${parentId}" instead, or move_to "${id}" out of it first.`,
+      + ` nodes; arrange_section "${parentId}" instead, or move "${id}" out of it first.`,
     ];
   }
   return ctx.requireUnlocked(id, "rows id");
@@ -686,7 +695,7 @@ interface Cell {
  *
  * Each footprint is centered in its cell, so a row of mixed sizes shares one
  * center line and its wires run straight. That shared center is the gesture,
- * as it is for `align` center: a corner falls half an extent from it and is
+ * as it is for `arrange`'s `align` center: a corner falls half an extent from it and is
  * not snapped to the agent grid (the write path still puts it on its own grid
  * of 4).
  */
@@ -812,7 +821,7 @@ export const arrangeSection = defineOperationTool({
         ? {
             notes: [
               `not arranged: ${leftOut.join(", ")} — they kept their place and can now sit outside or under`
-              + " the frame; list them in rows, or move them out with move_to",
+              + " the frame; list them in rows, or move them out with move",
             ],
           }
         : {}),

@@ -351,7 +351,7 @@ export function resolveFitSection(
 }
 
 /**
- * `match_size(..., like: id)` — the size of the object being matched.
+ * `resize(..., like: id)` — the size of the object being matched.
  *
  * The whole gesture is "make peers match" without hand-copied numbers, so the
  * resolution is exactly this lookup; the descriptor owns the rest of the

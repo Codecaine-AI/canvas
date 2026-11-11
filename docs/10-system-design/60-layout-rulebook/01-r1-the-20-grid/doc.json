@@ -21,6 +21,7 @@
         "b-r1-the-20-grid-opening",
         "b-r1-card-2",
         "b-r1-enforce-3",
+        "b-r1-enforce-3b",
         "b-r1-evidence-4"
       ]
     },
@@ -55,7 +56,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Mechanism: the "
+          "insert": "The mechanism is the "
         },
         {
           "insert": "aesthetic",
@@ -68,7 +69,7 @@
           }
         },
         {
-          "insert": " tells the agent to work in grid units and to match peers exactly: match_size copies a peer's dimensions, and every other coordinate comes from exact digest geometry. The gesture tools run every geometry-bearing value through "
+          "insert": ", which tells the agent to work in grid units and to match peers exactly. The resize gesture with like copies a peer's dimensions, and every other coordinate comes from exact digest geometry. The gesture tools run every geometry-bearing value through "
         },
         {
           "insert": "AGENT_GRID = 20",
@@ -82,7 +83,18 @@
           }
         },
         {
-          "insert": " before it is lowered onto a document patch, and they snap rather than refuse: an off-grid value is corrected to the nearest multiple and the result reports the geometry that landed, so a correction is something the agent reads back rather than something it is told about. Not every number is a world distance (an endpoint fraction and a label's position along a routed path stay off the grid), and "
+          "insert": " before it is lowered onto a document patch. They snap rather than refuse: an off-grid value is corrected to the nearest multiple, and the result reports the geometry that landed. A correction is therefore something the agent reads back rather than something it is told about."
+        }
+      ],
+      "children": []
+    },
+    "b-r1-enforce-3b": {
+      "id": "b-r1-enforce-3b",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "Not every number is a world distance: an endpoint fraction and a label's position along a routed path stay off the grid. "
         },
         {
           "insert": "the grid and creation defaults",

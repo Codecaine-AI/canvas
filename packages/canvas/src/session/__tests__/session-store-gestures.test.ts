@@ -360,13 +360,13 @@ describe("section gestures", () => {
     style: { shape: "section" as const },
   };
 
-  test("change_section_border restrokes the frame and keeps the rest of the style bag", () => {
+  test("change_shape patch.border restrokes the frame and keeps the rest of the style bag", () => {
     const session = makeTestSession(makeDocument([frame]), ["frame"]);
 
-    const result = runOp(session, "change_section_border", { id: "frame", border: "dashed" });
+    const result = runOp(session, "change_shape", { id: "frame", patch: { border: "dashed" } });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · change_section_border frame dashed");
+    expect(result.text).toContain("APPLIED · change_shape frame border dashed");
     expect(session.draft.objects.find((object) => object.id === "frame")?.style)
       .toEqual({ shape: "section", strokeStyle: "dashed" });
   });
@@ -375,7 +375,7 @@ describe("section gestures", () => {
     const baseline = makeDocument([frame]);
     const session = makeTestSession(baseline, ["frame"]);
 
-    runOp(session, "change_section_border", { id: "frame", border: "none" });
+    runOp(session, "change_shape", { id: "frame", patch: { border: "none" } });
 
     // The proposal is the baseline→draft diff, and the studio replays it
     // through the live reducer. `style` has to survive both hops or the change
@@ -395,7 +395,7 @@ describe("section gestures", () => {
       .toEqual({ shape: "section", strokeStyle: "none" });
   });
 
-  test("lock and unlock write and clear the section's lock", () => {
+  test("lock writes the section's lock, and mode none clears it", () => {
     const session = makeTestSession(makeDocument([frame]), ["frame"]);
 
     const locked = runOp(session, "lock", { id: "frame", mode: "background" });
@@ -404,21 +404,21 @@ describe("section gestures", () => {
     expect(session.draft.objects.find((object) => object.id === "frame")?.locked)
       .toBe("background");
 
-    const released = runOp(session, "unlock", { id: "frame" });
+    const released = runOp(session, "lock", { id: "frame", mode: "none" });
     expect(released.isError).toBeUndefined();
-    expect(released.text).toContain("APPLIED · unlock frame");
+    expect(released.text).toContain("APPLIED · lock frame none");
     expect(session.draft.objects.find((object) => object.id === "frame")?.locked)
       .toBeUndefined();
   });
 
-  test("unlocking an unlocked frame is a no-op, not an error", () => {
+  test("lock mode none on a frame with no lock is a no-op, not an error", () => {
     const session = makeTestSession(makeDocument([frame]), ["frame"]);
     const draftBefore = session.draft;
 
-    const result = runOp(session, "unlock", { id: "frame" });
+    const result = runOp(session, "lock", { id: "frame", mode: "none" });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("NO-OP · unlock frame");
+    expect(result.text).toContain("NO-OP · lock frame");
     expect(session.draft).toBe(draftBefore);
     expect(session.events).toEqual([]);
   });
@@ -441,13 +441,44 @@ describe("section gestures", () => {
     expect(session.events).toEqual([]);
   });
 
-  test("change_section_border is refused on a shape too", () => {
+  test("patch.border is refused on a shape, which has no frame", () => {
     const session = makeTestSession(boardWith(box("step", 200, 200)), ["page"]);
+    const draftBefore = session.draft;
 
-    const result = runOp(session, "change_section_border", { id: "step", border: "dashed" });
+    const result = runOp(session, "change_shape", { id: "step", patch: { border: "dashed" } });
 
     expect(result.isError).toBe(true);
-    expect(result.text).toContain("ERROR · change_section_border");
+    expect(result.text).toBe(
+      "ERROR · change_shape — patch.border is a section's frame stroke — a rectangle has no frame to restroke.",
+    );
+    expect(session.draft).toBe(draftBefore);
+  });
+
+  test("a null border counts as absent, so the glyph alone lands and nothing else is restroked", () => {
+    const session = makeTestSession(makeDocument([frame]), ["frame"]);
+
+    const glyph = runOp(session, "change_shape", { id: "frame", patch: { icon: "server", border: null } });
+    expect(glyph.text).toContain("APPLIED · change_shape frame");
+    expect(glyph.text).not.toContain("border");
+    const saved = session.draft.objects.find((object) => object.id === "frame");
+    expect(saved?.icon).toBe("server");
+    expect(saved?.style).toEqual({ shape: "section" });
+
+    const nothing = runOp(session, "change_shape", { id: "frame", patch: { border: null } });
+    expect(nothing.text).toContain("name its header glyph in patch.icon");
+  });
+
+  test("one call sets a section's glyph and its border, and leaves the glyph when only the border is named", () => {
+    const session = makeTestSession(makeDocument([{ ...frame, icon: "server" }]), ["frame"]);
+
+    const both = runOp(session, "change_shape", { id: "frame", patch: { icon: "database", border: "dashed" } });
+    expect(both.text).toContain("APPLIED · change_shape frame border dashed");
+    const borderOnly = runOp(session, "change_shape", { id: "frame", patch: { border: "solid" } });
+    expect(borderOnly.isError).toBeUndefined();
+
+    const saved = session.draft.objects.find((object) => object.id === "frame");
+    expect(saved?.icon).toBe("database");
+    expect(saved?.style).toEqual({ shape: "section", strokeStyle: "solid" });
   });
 });
 

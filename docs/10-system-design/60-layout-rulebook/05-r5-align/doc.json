@@ -60,13 +60,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Mechanism:",
-          "attributes": {
-            "bold": true
-          }
-        },
-        {
-          "insert": " the "
+          "insert": "The mechanism is the "
         },
         {
           "insert": "aesthetic",
@@ -79,7 +73,7 @@
           }
         },
         {
-          "insert": " asks peer rows and columns to reuse one exact gap with centers on one line. The agent performs the geometry edits directly: align puts a set of boxes on one edge or centerline, space_out sets the repeated gap along the flow axis, match_size copies a peer's dimensions, and any remaining coordinate comes from the latest BOARD digest. There is no automatic alignment pass and no dedicated alignment diagnostic."
+          "insert": ", which asks peer rows and columns to reuse one exact gap with centers on one line. The agent performs the geometry edits directly. The arrange gesture puts a set of boxes on one edge or centerline with align, and it sets the repeated gap along the flow axis with space. The resize gesture with like copies a peer's dimensions, and any remaining coordinate comes from the latest BOARD digest. There is no automatic alignment pass and no dedicated alignment diagnostic."
         }
       ],
       "children": []

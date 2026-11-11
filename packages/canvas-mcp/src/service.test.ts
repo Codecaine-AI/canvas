@@ -12,6 +12,14 @@ import { join } from "node:path";
 
 import { createCanvasService } from "./service";
 
+/** A service whose process read topic workflow, so its edit tools are open. */
+async function workflowService(options: Parameters<typeof createCanvasService>[0]) {
+  const service = createCanvasService(options);
+  await service.call("canvas_guidance", { topic: "workflow" });
+  return service;
+}
+
+
 const REPO_CANVASES = join(import.meta.dir, "..", "..", "..", "canvases");
 const SOURCE_ID = "v2-flow";
 
@@ -69,10 +77,10 @@ describe("canvas service", () => {
     expect(cleanText).not.toContain("BROKEN WIRES");
   });
 
-  test("place_sticky then move_by save each edit to the canvas file", async () => {
+  test("place_sticky then move save each edit to the canvas file", async () => {
     const original = realCanvas();
     const { workspace, path } = workspaceWith(SOURCE_ID, original);
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     const opened = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(opened.isError).toBeUndefined();
@@ -87,7 +95,7 @@ describe("canvas service", () => {
     expect(afterPlace.objects.find((object: any) => object.id === "mcp-note")?.geometry)
       .toMatchObject({ x: 960, y: 1600 });
 
-    const moved = await service.call("move_by", { id: "mcp-note", dx: 64, dy: 32 });
+    const moved = await service.call("move", { id: "mcp-note", by: { dx: 64, dy: 32 } });
     expect(moved.isError).toBeUndefined();
     // No residual: replaying the patch through the canvas reducer reproduced the draft.
     expect(textOf(placed)).not.toContain("NOTE ·");
@@ -121,7 +129,7 @@ describe("canvas service", () => {
       annotations: [],
     };
     const { workspace, path } = workspaceWith("frameless", frameless);
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     await service.call("canvas_open", { canvas: "frameless" });
     expect(service.activeCanvas()?.injectedFrameId).toBe("page-frame");
@@ -129,7 +137,7 @@ describe("canvas service", () => {
 
     const placed = await service.call("place_sticky", { id: "frameless-note", text: "No frame", at: [960, 1600] });
     expect(placed.isError).toBeUndefined();
-    const moved = await service.call("move_by", { id: "frameless-note", dx: 32, dy: 0 });
+    const moved = await service.call("move", { id: "frameless-note", by: { dx: 32, dy: 0 } });
     expect(moved.isError).toBeUndefined();
     expect(textOf(moved)).toContain("SAVED ·");
     expect(textOf(moved)).not.toContain("NOTE ·");
@@ -142,7 +150,7 @@ describe("canvas service", () => {
 
   test("an external write makes the next edit refuse until canvas_open", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
 
     // Someone else saves the board (Studio, a text editor) after the open.
@@ -157,7 +165,7 @@ describe("canvas service", () => {
     expect(readFileSync(path, "utf8")).toBe(externalText);
 
     // The session stays refused, even for a call that would not write.
-    const stillRefused = await service.call("move_by", { id: "late-note", dx: 16, dy: 0 });
+    const stillRefused = await service.call("move", { id: "late-note", by: { dx: 16, dy: 0 } });
     expect(stillRefused.isError).toBe(true);
     expect(readFileSync(path, "utf8")).toBe(externalText);
 
@@ -173,22 +181,25 @@ describe("canvas service", () => {
   test("toolkit tools refuse before canvas_open and on invalid arguments", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
     const before = readFileSync(path, "utf8");
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
-    const closed = await service.call("move_by", { id: "page-frame", dx: 16, dy: 0 });
+    const closed = await service.call("move", { id: "page-frame", by: { dx: 16, dy: 0 } });
     expect(closed.isError).toBe(true);
     expect(textOf(closed)).toContain("canvas_open");
 
     await service.call("canvas_open", { canvas: SOURCE_ID });
-    const invalid = await service.call("move_by", { id: "page-frame", by: [16, 0] });
+    const invalid = await service.call("move", { id: "page-frame", by: [16, 0] });
     expect(invalid.isError).toBe(true);
-    expect(textOf(invalid)).toContain("Validation failed");
+    expect(textOf(invalid)).toContain("by must be an object, or null to leave it out");
+    const malformed = await service.call("move", { id: "page-frame", by: { dx: "far", dy: 0 } });
+    expect(malformed.isError).toBe(true);
+    expect(textOf(malformed)).toContain("Validation failed");
     expect(readFileSync(path, "utf8")).toBe(before);
   });
 
-  test("workflow tools: look returns renders; set_board_title and add_annotation persist", async () => {
+  test("workflow tools: look returns renders; describe_board and annotate persist", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
 
     const looked = await service.call("look", { view: "page-frame" });
@@ -196,9 +207,9 @@ describe("canvas service", () => {
     expect(looked.content.some((item) => item.type === "image" && item.mimeType === "image/png")).toBe(true);
     expect(textOf(looked)).not.toContain("SAVED");
 
-    await service.call("set_board_title", { title: "Retitled by MCP" });
+    await service.call("describe_board", { title: "Retitled by MCP" });
     const target = readDoc(path).objects.find((object: any) => object.id !== "page-frame").id;
-    const asked = await service.call("add_annotation", { objectId: target, body: "Is this step still needed?" });
+    const asked = await service.call("annotate", { objectId: target, body: "Is this step still needed?" });
     expect(asked.isError).toBeUndefined();
 
     const saved = readDoc(path);
@@ -207,14 +218,180 @@ describe("canvas service", () => {
       annotation.target.objectId === target && annotation.createdBy === "agent")).toBe(true);
 
     const names = service.listTools().map((tool) => tool.name);
+    expect(names).toHaveLength(30);
+    expect(names.slice(0, 6)).toEqual(["canvas_capabilities", "canvas_list", "canvas_open", "canvas_guidance", "canvas_create", "canvas_check"]);
     expect(names).not.toContain("finalize");
-    expect(names).toEqual(expect.arrayContaining(["look", "update_description", "set_board_title", "add_annotation", "reply_annotation", "resolve_request"]));
+    expect(names).toEqual(expect.arrayContaining(["look", "describe_board", "annotate", "resolve_request"]));
+  });
+
+  test("a null field reaches describe_board and annotate as absent, and an empty one is still refused", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = await workflowService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    const target = readDoc(path).objects.find((object: any) => object.id !== "page-frame").id;
+
+    const renamed = await service.call("describe_board", { title: "Renamed", description: null });
+    expect(renamed.isError).toBeUndefined();
+    expect(textOf(renamed)).not.toContain("DELTA · description");
+    const emptied = await service.call("describe_board", { title: "", description: "# Kept" });
+    expect(textOf(emptied)).toBe("describe_board rejected: title must be a non-empty string — the board is never left nameless.");
+
+    const asked = await service.call("annotate", { objectId: target, thread: null, body: "Still needed?" });
+    expect(asked.isError).toBeUndefined();
+    const replied = await service.call("annotate", { objectId: null, thread: "R1", body: "Yes." });
+    expect(replied.isError).toBeUndefined();
+
+    const saved = readDoc(path);
+    expect(saved.title).toBe("Renamed");
+    expect(saved.description).not.toBe("# Kept");
+    const thread = saved.annotations.find((annotation: any) => annotation.target.objectId === target);
+    expect(thread.replies.map((reply: any) => reply.body)).toEqual(["Yes."]);
+  });
+
+  test("a null mode reaches move and resize as absent through the tool boundary", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = await workflowService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    await service.call("place_sticky", { id: "null-a", text: "A", at: [960, 1600] });
+    await service.call("place_sticky", { id: "null-b", text: "B", at: [1360, 1600] });
+
+    const nudged = await service.call("move", { id: "null-a", to: null, by: { dx: 40, dy: 0 } });
+    expect(textOf(nudged)).toContain("APPLIED · move null-a +40,+0 → (1000, 1600)");
+    const widened = await service.call("resize", { id: "null-a", like: null, width: 400, height: null });
+    expect(textOf(widened)).toContain("APPLIED · resize null-a → 400×");
+    const matched = await service.call("resize", { id: "null-b", like: "null-a", width: null, height: null });
+    expect(textOf(matched)).toContain("(matching null-a)");
+    const empty = await service.call("resize", { id: "null-b", like: null, width: null, height: null });
+    expect(textOf(empty)).toContain("asks for no change");
+
+    const saved = readDoc(path).objects.filter((object: any) => object.id.startsWith("null-"));
+    expect(saved.map((object: any) => object.geometry.width)).toEqual([400, 400]);
+  });
+
+  test("a null mode reaches arrange and route as absent through the tool boundary", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = await workflowService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    await service.call("place_sticky", { id: "row-a", text: "A", at: [960, 1600] });
+    await service.call("place_sticky", { id: "row-b", text: "B", at: [1400, 1640] });
+    await service.call("connect", { id: "row-edge", from: { objectId: "row-a" }, to: { objectId: "row-b" } });
+
+    const aligned = await service.call("arrange", { ids: ["row-a", "row-b"], align: "top", space: null });
+    expect(textOf(aligned)).toContain("APPLIED · arrange align top · row-a, row-b → top edges at y=1600");
+    const spaced = await service.call("arrange", {
+      ids: ["row-a", "row-b"],
+      align: null,
+      space: { axis: "horizontal", gap: 80 },
+    });
+    expect(textOf(spaced)).toContain("APPLIED · arrange space horizontal gap 80");
+    const neither = await service.call("arrange", { ids: ["row-a", "row-b"], align: null, space: null });
+    expect(textOf(neither)).toContain("send exactly one of align or space");
+
+    const reset = await service.call("route", { id: "row-edge", points: null, shift: null, reset: true });
+    expect(textOf(reset)).toContain("NO-OP · route row-edge — this edge is already on the auto-router");
+    const notReset = await service.call("route", { id: "row-edge", points: null, shift: null, reset: false });
+    expect(textOf(notReset)).toContain('reset must be true, or null to leave it out — not false.');
+
+    const saved = readDoc(path).objects.filter((object: any) => object.id.startsWith("row-"));
+    expect(saved.map((object: any) => object.geometry.y)).toEqual([1600, 1600]);
+  });
+
+  test("a null border reaches change_shape as absent through the tool boundary", async () => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = await workflowService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    await service.call("place_section", { id: "border-frame", text: "Frame", at: [960, 1600] });
+    await service.call("place_shape", { id: "border-box", type: "rectangle", at: [1600, 1600] });
+
+    const dashed = await service.call("change_shape", { id: "border-frame", patch: { border: "dashed" } });
+    expect(textOf(dashed)).toContain("APPLIED · change_shape border-frame border dashed");
+    const glyph = await service.call("change_shape", { id: "border-frame", patch: { icon: "server", border: null } });
+    expect(textOf(glyph)).toContain("APPLIED · change_shape border-frame");
+    const refused = await service.call("change_shape", { id: "border-box", patch: { border: "dashed" } });
+    expect(textOf(refused)).toContain("has no frame to restroke");
+    const typed = await service.call("change_shape", { id: "border-box", patch: { type: "decision", border: null } });
+    expect(textOf(typed)).toContain("APPLIED · change_shape border-box");
+
+    const saved = readDoc(path).objects.find((object: any) => object.id === "border-frame");
+    expect(saved.icon).toBe("server");
+    expect(saved.style.strokeStyle).toBe("dashed");
+  });
+
+  // Only an omitted mode and a null one count as absent. A wrong-typed mode
+  // would otherwise convert to null and let the call run the other mode.
+  test.each([
+    {
+      tool: "describe_board",
+      wrong: [{ title: 7, description: "# Kept" }, { title: "Renamed", description: false }],
+      absent: { title: "Renamed", description: null },
+      applied: "APPLIED · describe_board",
+    },
+    {
+      tool: "annotate",
+      wrong: [{ objectId: 0, body: "Why?" }, { objectId: "mode-a", thread: false, body: "Why?" }],
+      absent: { objectId: "mode-a", thread: null, body: "Why?" },
+      applied: "APPLIED · annotate annotation-",
+    },
+    {
+      tool: "move",
+      wrong: [{ id: "mode-a", to: "", by: { dx: 40, dy: 0 } }, { id: "mode-a", to: { x: 0, y: 0 }, by: 0 }],
+      absent: { id: "mode-a", to: null, by: { dx: 40, dy: 0 } },
+      applied: "APPLIED · move mode-a +40,+0",
+    },
+    {
+      tool: "resize",
+      wrong: [{ id: "mode-a", width: "", height: 200 }, { id: "mode-a", like: 0, width: 200 }, { id: "mode-a", width: "400" }],
+      absent: { id: "mode-a", like: null, width: 400, height: null },
+      applied: "APPLIED · resize mode-a → 400×",
+    },
+    {
+      tool: "arrange",
+      wrong: [{ ids: ["mode-a", "mode-b"], align: "top", space: 0 }, { ids: ["mode-a", "mode-b"], align: "", space: { axis: "horizontal", gap: 40 } }],
+      absent: { ids: ["mode-a", "mode-b"], align: "top", space: null },
+      applied: "APPLIED · arrange align top",
+    },
+    {
+      tool: "route",
+      wrong: [
+        { id: "mode-edge", points: "", reset: true },
+        { id: "mode-edge", points: 0, reset: true },
+        { id: "mode-edge", shift: { segment: 1, to: 1000 }, reset: false },
+      ],
+      absent: { id: "mode-edge", points: null, shift: { segment: 1, to: 1000 }, reset: null },
+      applied: "APPLIED · route mode-edge shift s1",
+    },
+    {
+      tool: "change_shape",
+      wrong: [{ id: "mode-frame", patch: { icon: "server", border: false } }, { id: "mode-frame", patch: { icon: "server", border: 0 } }],
+      absent: { id: "mode-frame", patch: { icon: "server", border: null } },
+      applied: "APPLIED · change_shape mode-frame",
+    },
+  ])("$tool refuses a wrong-typed mode and reads a null one as absent", async ({ tool, wrong, absent, applied }) => {
+    const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
+    const service = await workflowService({ workspace });
+    await service.call("canvas_open", { canvas: SOURCE_ID });
+    await service.call("place_section", { id: "mode-frame", text: "Frame", at: [960, 2000] });
+    await service.call("place_sticky", { id: "mode-a", text: "A", at: [960, 1600] });
+    await service.call("place_sticky", { id: "mode-b", text: "B", at: [1400, 1640] });
+    await service.call("connect", { id: "mode-edge", from: { objectId: "mode-a" }, to: { objectId: "mode-b" } });
+    const before = readFileSync(path, "utf8");
+
+    for (const args of wrong) {
+      const refused = await service.call(tool, args);
+      expect(refused.isError).toBe(true);
+      expect(textOf(refused)).toContain("Only an omitted field or null counts as absent.");
+    }
+    expect(readFileSync(path, "utf8")).toBe(before);
+
+    const ran = await service.call(tool, absent);
+    expect(ran.isError).toBeUndefined();
+    expect(textOf(ran)).toContain(applied);
   });
 
   test("canvas_open reads canvases/canvas-style.json, and look renders with it", async () => {
     const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
     const stylePath = join(workspace, "canvases", "canvas-style.json");
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     /** sha256 of the close-up PNG `look` returns — the pixels, compared by digest. */
     const lookPng = async (): Promise<string> => {
       const looked = await service.call("look", { view: "section-interview-inputs" });
@@ -263,7 +440,7 @@ describe("canvas service", () => {
   test("no lint judges a name's wording, a person's or the agent's", async () => {
     // v2-flow, as its author left it, holds two long names.
     const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     const opened = await service.call("canvas_open", { canvas: SOURCE_ID });
     expect(textOf(opened)).toContain('"Does Response Provide Enough Context to Answer the Research Objective"');
@@ -281,7 +458,7 @@ describe("canvas service", () => {
 
   test("a section's header glyph saves to the file and reads back in the digest; a node detail is dropped, never saved", async () => {
     const { workspace, path } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
     await service.call("canvas_open", { canvas: SOURCE_ID });
 
     const placed = await service.call("place_section", {
@@ -334,7 +511,7 @@ describe("canvas service", () => {
 
   test("canvas_list and canvas_guidance", async () => {
     const { workspace } = workspaceWith(SOURCE_ID, realCanvas());
-    const service = createCanvasService({ workspace });
+    const service = await workflowService({ workspace });
 
     const listed = await service.call("canvas_list", {});
     expect(textOf(listed)).toBe(`CANVASES · 1 in canvases\n  ${SOURCE_ID}  ${JSON.stringify(realCanvas().title)}  ${realCanvas().objects.length} objects`);

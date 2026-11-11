@@ -5,31 +5,27 @@ import { formatBoardDigest } from "../../board/digest";
 import { boardStateSnapshot } from "../snapshots/context";
 import { boardDiffBlock, lookPerception } from "../perception/perception";
 import { emitSessionEvent } from "../session";
-import { toolUpdateDescription } from "../tools";
+import { toolDescribeBoard } from "../tools";
 import { makeTestSession } from "./helpers";
 import { box, makeDocument } from "./synthetic";
 
-describe("update_description", () => {
+describe("describe_board", () => {
   test("replaces the description verbatim and emits the mutating-operation event pair", () => {
     const baseline = makeDocument([box("alpha", 0, 0)]);
     const session = makeTestSession(baseline, ["alpha"], { proposalCount: 4 });
     const description = "  # Flow\n\nAlpha → beta.\n";
 
-    const result = toolUpdateDescription(
-      session,
-      description,
-      emitSessionEvent,
-    );
+    const result = toolDescribeBoard(session, { description }, emitSessionEvent);
 
     const [applied, delta, lints, ...rest] = result.text.split("\n");
     expect([applied, delta, rest]).toEqual([
-      "APPLIED · update_description",
+      "APPLIED · describe_board",
       `DELTA · description none → ${description.length} chars`,
       [],
     ]);
     // Every edit result carries its lint delta. A description moves no lint.
     expect(lints).toMatch(/^LINTS · (clean|\+0 −0 \(\d+ open\))$/);
-    expect(result.details).toEqual({ operation: "update_description" });
+    expect(result.details).toEqual({ operation: "describe_board" });
     expect(session.draft.description).toBe(description);
     expect(session.events.map((event) => event.type)).toEqual(["proposal", "delta"]);
     expect(session.events[0]).toEqual({
@@ -41,8 +37,27 @@ describe("update_description", () => {
       type: "delta",
       sessionId: session.id,
       n: 4,
-      delta: "update_description",
+      delta: "describe_board",
     });
+  });
+
+  test("renames and redescribes in one save, one delta line per field", () => {
+    const baseline = makeDocument([box("alpha", 0, 0)]);
+    const session = makeTestSession(baseline, ["alpha"]);
+
+    const result = toolDescribeBoard(
+      session,
+      { title: " Voice pipeline ", description: "# Voice" },
+      emitSessionEvent,
+    );
+
+    expect(result.text.split("\n").slice(0, 3)).toEqual([
+      "APPLIED · describe_board",
+      'DELTA · title "Synthetic" → "Voice pipeline"',
+      "DELTA · description none → 7 chars",
+    ]);
+    expect(session.draft).toMatchObject({ title: "Voice pipeline", description: "# Voice" });
+    expect(session.events.map((event) => event.type)).toEqual(["proposal", "delta"]);
   });
 
   test("reports an exact no-op without emitting events", () => {
@@ -50,12 +65,21 @@ describe("update_description", () => {
     baseline.description = "# Flow";
     const session = makeTestSession(baseline, ["alpha"]);
 
-    const result = toolUpdateDescription(session, "# Flow", emitSessionEvent);
+    const result = toolDescribeBoard(session, { description: "# Flow" }, emitSessionEvent);
+    const both = toolDescribeBoard(
+      session,
+      { title: "Synthetic", description: "# Flow" },
+      emitSessionEvent,
+    );
 
     expect(result.text).toBe(
-      "NO-OP · update_description — the board description already reads exactly this.",
+      "NO-OP · describe_board — the board description already reads exactly this.",
     );
     expect(result.isError).toBeUndefined();
+    expect(both.text).toBe(
+      "NO-OP · describe_board — the board is already called that,"
+      + " and the board description already reads exactly this.",
+    );
     expect(session.events).toEqual([]);
   });
 
@@ -64,19 +88,61 @@ describe("update_description", () => {
     baseline.description = "# Flow";
     const session = makeTestSession(baseline, ["alpha"]);
 
-    const whitespace = toolUpdateDescription(session, " \n ", emitSessionEvent);
-    const nonString = toolUpdateDescription(
+    const whitespace = toolDescribeBoard(session, { description: " \n " }, emitSessionEvent);
+    const nonString = toolDescribeBoard(
       session,
-      undefined as unknown as string,
+      { description: 42 as unknown as string },
       emitSessionEvent,
     );
 
     expect(whitespace).toEqual({
       isError: true,
-      text: "update_description rejected: description must be a non-empty string.",
+      text: "describe_board rejected: description must be a non-empty string.",
     });
     expect(nonString).toEqual(whitespace);
     expect(session.draft.description).toBe("# Flow");
+    expect(session.events).toEqual([]);
+  });
+
+  test("refuses a call with neither field, and a null field counts as absent", () => {
+    const baseline = makeDocument([box("alpha", 0, 0)]);
+    baseline.description = "# Flow";
+    const session = makeTestSession(baseline, ["alpha"]);
+    const before = session.draft;
+
+    const neither = toolDescribeBoard(session, {}, emitSessionEvent);
+    const nulls = toolDescribeBoard(session, { title: null, description: null }, emitSessionEvent);
+    expect(neither).toEqual({
+      isError: true,
+      text: "describe_board rejected: send title, description or both.",
+    });
+    expect(nulls).toEqual(neither);
+    expect(session.draft).toBe(before);
+
+    const renamed = toolDescribeBoard(session, { title: "Renamed", description: null }, emitSessionEvent);
+    expect(renamed.text).toContain('DELTA · title "Synthetic" → "Renamed"');
+    expect(renamed.text).not.toContain("DELTA · description");
+    expect(session.draft.description).toBe("# Flow");
+  });
+
+  test("a bad field refuses the whole call, so the good one is not saved either", () => {
+    const baseline = makeDocument([box("alpha", 0, 0)]);
+    const session = makeTestSession(baseline, ["alpha"]);
+    const before = session.draft;
+
+    const half = toolDescribeBoard(session, { title: "Renamed", description: "  " }, emitSessionEvent);
+    const both = toolDescribeBoard(session, { title: " ", description: "" }, emitSessionEvent);
+
+    expect(half).toEqual({
+      isError: true,
+      text: "describe_board rejected: description must be a non-empty string.",
+    });
+    expect(both.text).toBe([
+      "describe_board rejected:",
+      "  - title must be a non-empty string — the board is never left nameless.",
+      "  - description must be a non-empty string.",
+    ].join("\n"));
+    expect(session.draft).toBe(before);
     expect(session.events).toEqual([]);
   });
 });

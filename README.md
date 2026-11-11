@@ -18,7 +18,7 @@ packages/
   studio/     @codecaine-ai/studio — a minimal standalone Vite+React app
               for creating/editing boards without a host app.
   canvas-mcp/ @codecaine-ai/canvas-mcp — the MCP server agents edit boards
-              through, and the generator for its canvas skill.
+              through. It serves its own guidance topics.
 canvases/     Studio-backed `.canvas.json` boards and sample documents.
 docs/         00-overview.md — engine architecture, one page.
 board-design-reference/
@@ -44,11 +44,12 @@ make studio                    # build and open the Mac Electron app
 
 Agents edit boards through the canvas MCP server (`packages/canvas-mcp`),
 which serves the layout toolkit from `@codecaine-ai/canvas/toolkit` and the
-canvas skill generated from `@codecaine-ai/canvas/authoring`.
+guidance topics from `@codecaine-ai/canvas/authoring`. An agent calls
+`canvas_capabilities` first and reads topic `workflow` before its first edit.
 
 ```bash
 bun packages/canvas-mcp/src/cli.ts mcp               # stdio MCP server
-bun packages/canvas-mcp/src/cli.ts guidance --check  # the canvas skill is current
+bun packages/canvas-mcp/src/cli.ts instructions       # the MCP prompt block
 ```
 
 See `PROVENANCE.md` for what was extracted from Spectre and the BlockSuite

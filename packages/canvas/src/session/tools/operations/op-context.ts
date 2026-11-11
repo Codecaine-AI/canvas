@@ -12,16 +12,16 @@
  *
  * A KIND GATE OWES A REDIRECT. When a gesture is refused because the id names
  * the wrong kind, the diagnostic names the gesture that WOULD do the comparable
- * thing to that kind — a frame is restroked with `change_section_border`, a note
+ * thing to that kind — a frame is restroked with `change_shape`'s `border`, a note
  * is rewritten with `update_text` — so a refusal costs one turn instead of a
  * hunt through the roster. Every name in these messages must be a tool that is
  * actually on the roster (operations/index.ts).
  *
  * A LOCK GATE OWES ITS RELEASE. The lock gates below are the second family of
  * refusal, and they name both the lock that stopped the gesture and the one
- * call that lifts it (`unlock`), because a lock is a person's mark on a region
- * and the model has to decide whether the request really requires editing
- * there — see `requireUnlocked` for the full rule.
+ * call that lifts it (`lock` mode "none"), because a lock is a person's mark
+ * on a region and the model has to decide whether the request really requires
+ * editing there — see `requireUnlocked` for the full rule.
  */
 import type { InteractiveCanvasDocument } from "../../../state/schema";
 import { DEFAULT_CANVAS_STYLE, type CanvasStyle } from "../../../theme/canvas-style";
@@ -81,10 +81,9 @@ export interface OpContext {
   /**
    * Require an id that names something with a BOX — an object or a section,
    * but not a connection. This is `requireBoardEntity` minus edges, and it is
-   * the gate for the arrange gestures (`move_to`, `move_by`, `resize`,
-   * `match_size`, `align`, `space_out`): a wire has no position or size of its
-   * own, it is derived from the two boxes it joins, so the redirect points at
-   * those.
+   * the gate for the arrange gestures (`move`, `resize`, `arrange`): a wire
+   * has no position or size of its own, it is derived from the two boxes it
+   * joins, so the redirect points at those.
    *
    * `field` names the parameter in the diagnostic, since these gestures take
    * ids under several names (`id`, `ids`, `like`).
@@ -92,12 +91,11 @@ export interface OpContext {
   requirePositionable(id: string, field?: string): string[];
   /**
    * Require a section — the gate for the Sections group (`fit_section`,
-   * `change_section_border`, `lock`, `unlock`), all four of which act on a
-   * frame AS a frame. Other kinds are redirected to the gesture that does the
+   * `lock`), both of which act on a frame AS a frame. Other kinds are redirected to the gesture that does the
    * comparable thing to them, or to `place_section` when what was wanted was a
    * frame there is none of.
    *
-   * `field` names the parameter in the diagnostic. All four take a plain `id`,
+   * `field` names the parameter in the diagnostic. Both take a plain `id`,
    * so the default is almost always right; the parameter stays because the
    * arrange gestures reach for the same wording under other names.
    */
@@ -106,8 +104,8 @@ export interface OpContext {
    * Require a shape — the gate for `change_shape` alone, since a section is not
    * a diamond and a sticky is not a cylinder. The redirects name what those two
    * kinds CAN be restyled with. (`change_shape` answers a section itself before
-   * reaching this gate: a frame's header glyph is the one thing it changes on a
-   * section — operations/content.ts `requireSwapTarget`.)
+   * reaching this gate: a frame's header glyph and border are the two things it
+   * changes on a section — operations/content.ts `requireSwapTarget`.)
    */
   requireShape(id: string): string[];
   requireConnection(id: string): string[];
@@ -206,15 +204,15 @@ export interface OpContext {
 /**
  * The half-sentence every lock refusal ends with. It has to carry two things:
  * that the lock is a person's don't-touch mark (not an accident of state), and
- * the one call that lifts it, so the model can weigh unlocking against the
+ * the one call that lifts it, so the model can weigh releasing it against the
  * request instead of hunting for a way around the refusal.
  */
 const LOCK_RELEASE =
-  "a lock is a don't-touch signal; unlock it first if the request requires editing here";
+  "a lock is a don't-touch signal; release it first with lock mode \"none\" if the request requires editing here";
 
 /** What a lock gate found: the frame holding the lock, its mode, and whose it is. */
 export interface LockHold {
-  /** The object carrying the `locked` value — the id `unlock` takes. */
+  /** The object carrying the `locked` value — the id `lock` mode "none" takes. */
   holderId: string;
   mode: "all" | "background";
   /** True when the gated object IS the holder (its own lock, either mode). */
@@ -334,8 +332,8 @@ export function createOpContext(
       if (kind === "section") return [];
       return [
         `${field} "${id}" is ${kind === "sticky" ? "a sticky" : `a ${target.type}`},`
-        + " not a frame — fit_section, change_section_border, lock and unlock act on"
-        + " sections; place_section opens one.",
+        + " not a frame — fit_section and lock act on sections;"
+        + " place_section opens one.",
       ];
     },
 
@@ -354,7 +352,7 @@ export function createOpContext(
       if (kind === "section") {
         return [
           `id "${id}" is a section — a frame is not a shape; restroke it with`
-          + " change_section_border, or re-size it with resize.",
+          + " change_shape patch.border, or re-size it with resize.",
         ];
       }
       return [

@@ -168,7 +168,7 @@ describe("session operations", () => {
     const baseline = makeDocument([sectionA, sectionB, child]);
     const session = makeTestSession(baseline, ["section-a", "section-b"]);
 
-    const moved = runOp(session, "move_to", { id: "child", x: 580, y: 120 });
+    const moved = runOp(session, "move", { id: "child", to: { x: 580, y: 120 } });
     const placed = runOp(session, "place_shape", {
       id: "new-child",
       type: "rectangle",
@@ -273,7 +273,7 @@ describe("session operations", () => {
     expect(shape.isError).toBe(true);
     expect(shape.text).toBe(
       'ERROR · fit_section — id "child" is a rectangle, not a frame —'
-      + " fit_section, change_section_border, lock and unlock act on sections;"
+      + " fit_section and lock act on sections;"
       + " place_section opens one.",
     );
 
@@ -337,10 +337,10 @@ describe("session operations", () => {
     ], [{ ...connect("edge", "alpha", "beta"), label: "go" }]);
     const session = makeTestSession(baseline, ["alpha", "beta"]);
 
-    const result = runOp(session, "move_to", { id: "beta", x: 80, y: 0 });
+    const result = runOp(session, "move", { id: "beta", to: { x: 80, y: 0 } });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · move_to beta → (80, 0)");
+    expect(result.text).toContain("APPLIED · move beta → (80, 0)");
     expect(result.text).toContain("DELTA");
     expect(result.text).toContain("beta  320,0 → 80,0");
     expect(result.text).toContain("LINTS · +1 error (1 open)");

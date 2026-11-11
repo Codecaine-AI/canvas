@@ -50,7 +50,7 @@ describe("section auto-grow", () => {
     const session = makeTestSession(baseline, ["outer"]);
 
     // kid lands at 700..860: 20px past outer's right edge, still its child.
-    const result = runOp(session, "move_by", { id: "kid", dx: 600, dy: 0 });
+    const result = runOp(session, "move", { id: "kid", by: { dx: 600, dy: 0 } });
 
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain("grew outer to hold its children");
@@ -70,7 +70,7 @@ describe("section auto-grow", () => {
     const session = makeTestSession(baseline, ["outer"]);
 
     // kid lands at 760..920, past inner (880); inner then crosses outer (940).
-    runOp(session, "move_by", { id: "kid", dx: 640, dy: 0 });
+    runOp(session, "move", { id: "kid", by: { dx: 640, dy: 0 } });
 
     expect(geometryOf(session.draft, "inner")).toEqual({ x: 80, y: 80, width: 880, height: 400 });
     expect(geometryOf(session.draft, "outer")).toEqual({ x: 40, y: 40, width: 960, height: 700 });
@@ -88,7 +88,7 @@ describe("section auto-grow", () => {
     const session = makeTestSession(baseline, ["lane"]);
 
     // lane lands at 440..1040, 40px past the frame's right edge.
-    runOp(session, "move_by", { id: "lane", dx: 400, dy: 0 });
+    runOp(session, "move", { id: "lane", by: { dx: 400, dy: 0 } });
 
     expect(geometryOf(session.draft, "page-frame")).toEqual({ x: 0, y: 0, width: 1080, height: 700 });
     expect(escapes(session.draft)).toEqual([]);
@@ -145,7 +145,7 @@ describe("section auto-grow", () => {
     const before = session.draft;
 
     // kid would end 60px past a's right edge; a cannot grow without taking neighbor.
-    const result = runOp(session, "move_by", { id: "kid", dx: 100, dy: 0 });
+    const result = runOp(session, "move", { id: "kid", by: { dx: 100, dy: 0 } });
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("growing would pull neighbor into it");
@@ -163,7 +163,7 @@ describe("section auto-grow", () => {
     ]);
     const session = makeTestSession(baseline, ["a"]);
 
-    const result = runOp(session, "move_by", { id: "other", dx: 40, dy: 0 });
+    const result = runOp(session, "move", { id: "other", by: { dx: 40, dy: 0 } });
 
     expect(result.isError).toBeUndefined();
     expect(geometryOf(session.draft, "other").x).toBe(1040);
@@ -181,7 +181,7 @@ describe("section auto-grow", () => {
     const session = makeTestSession(baseline, ["a"]);
     const before = session.draft;
 
-    const result = runOp(session, "move_by", { id: "kid", dx: 40, dy: 0 });
+    const result = runOp(session, "move", { id: "kid", by: { dx: 40, dy: 0 } });
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("growing would pull neighbor into it");
@@ -202,7 +202,7 @@ describe("section auto-grow", () => {
     const session = makeTestSession(baseline, ["a"]);
     const before = session.draft;
 
-    const result = runOp(session, "move_by", { id: "kid", dx: 60, dy: 0 });
+    const result = runOp(session, "move", { id: "kid", by: { dx: 60, dy: 0 } });
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("growing would pull neighbor into it");
@@ -218,7 +218,7 @@ describe("section auto-grow", () => {
     const session = makeTestSession(baseline, ["a"]);
 
     // kid lands at y=20, inside the 27px title chip's band and still inside the frame.
-    runOp(session, "move_by", { id: "kid", dx: 0, dy: -80 });
+    runOp(session, "move", { id: "kid", by: { dx: 0, dy: -80 } });
 
     // Top = kid top - (40 padding + 40 title band); the other sides keep their air.
     expect(geometryOf(session.draft, "a")).toEqual({ x: 0, y: -60, width: 400, height: 360 });
@@ -264,7 +264,7 @@ describe("section auto-grow", () => {
     ]);
     const session = makeTestSession(baseline, ["lane"]);
 
-    runOp(session, "move_by", { id: "moving", dx: 60, dy: 0 });
+    runOp(session, "move", { id: "moving", by: { dx: 60, dy: 0 } });
     const replayed = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
       type: "canvas.applyAgentPatch",
       operations: diffDocuments(baseline, session.draft),
@@ -288,7 +288,7 @@ describe("section auto-grow", () => {
     ]);
     const session = makeTestSession(baseline, ["lane"]);
 
-    runOp(session, "move_by", { id: "moving", dx: -60, dy: 0 });
+    runOp(session, "move", { id: "moving", by: { dx: -60, dy: 0 } });
     const replayed = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
       type: "canvas.applyAgentPatch",
       operations: diffDocuments(baseline, session.draft),
@@ -308,7 +308,7 @@ describe("section auto-grow", () => {
     ]);
     const session = makeTestSession(baseline, ["hand"]);
 
-    runOp(session, "move_by", { id: "kid", dx: 220, dy: 0 });
+    runOp(session, "move", { id: "kid", by: { dx: 220, dy: 0 } });
     const replayed = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
       type: "canvas.applyAgentPatch",
       operations: diffDocuments(baseline, session.draft),
@@ -336,13 +336,13 @@ describe("section auto-grow in Studio", () => {
     child("kid", 100, 120, "outer"),
   ]);
 
-  test("a keyboard move across the edge grows the section like the move_by tool", () => {
+  test("a keyboard move across the edge grows the section like the move tool", () => {
     let state = createInteractiveCanvasState(baseline());
     state = reduceInteractiveCanvasState(state, { type: "canvas.select", selection: { kind: "objects", objectIds: ["kid"] } });
     state = reduceInteractiveCanvasState(state, { type: "canvas.moveSelection", dx: 600, dy: 0, snap: false });
 
     const session = makeTestSession(baseline(), ["outer"]);
-    runOp(session, "move_by", { id: "kid", dx: 600, dy: 0 });
+    runOp(session, "move", { id: "kid", by: { dx: 600, dy: 0 } });
 
     expect(geometryOf(state.document, "outer")).toEqual({ x: 40, y: 40, width: 860, height: 600 });
     expect(geometryOf(state.document, "outer")).toEqual(geometryOf(session.draft, "outer"));

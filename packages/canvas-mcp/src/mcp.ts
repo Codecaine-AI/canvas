@@ -6,21 +6,33 @@
  */
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import {
+  CallToolRequestSchema,
+  ListResourcesRequestSchema,
+  ListToolsRequestSchema,
+  ReadResourceRequestSchema,
+} from "@modelcontextprotocol/sdk/types.js";
 import { activeBackend, useHarfBuzz } from "@codecaine-ai/text-measure/headless";
 import { identityFromEnv, newRunId, openActionLog, type ActionLog } from "@codecaine-ai/action-log";
-import { getCanvasAuthoringGuidance } from "@codecaine-ai/canvas/authoring";
 import { resolve } from "node:path";
 
 import { version } from "../package.json";
 import { type CanvasServiceOptions, type CanvasToolResult, createCanvasService } from "./service";
 
-/** Sent once at initialize; kept short because clients inline it into every session. */
-export const MCP_INSTRUCTIONS =
-  "Call canvas_open with a canvas id (canvas_list shows them) or a page's .canvas.json sidecar path, or canvas_create for a new board, before any other canvas tool; it returns the board digest and lint findings the edit tools work against. "
-  + "Every edit is saved to the opened file the moment it applies, and an edit is refused if the file changed elsewhere until you call canvas_open again. "
-  + "Call canvas_check before you call a board done: it runs every lint and returns a PNG of the whole board. "
-  + "Call canvas_guidance for the diagram design standards, one topic at a time, before laying out or restructuring a board.";
+/**
+ * The canvas prompt block. MCP clients get it as the server instructions at initialize, and `cli.ts instructions`
+ * prints it for agent-config. It says when to use the canvas tools and which tool to call first. The rules live in
+ * canvas_guidance topics. At most 12 lines and 800 bytes (mcp.test.ts).
+ */
+export const INSTRUCTIONS = [
+  "Use the canvas tools to read and edit Codecaine Canvas boards. Never write a .canvas.json file directly.",
+  "Call canvas_capabilities once per thread before the first canvas tool, for the tools, topics and gates.",
+  'Read canvas_guidance topic "workflow" before your first edit. Every edit tool is refused until then.',
+  "Open a board with canvas_open, or start one with canvas_create. Each edit saves at once.",
+  'Read topics "rules" and "diagram_design" before you lay out a board, and the other topics when a step needs them.',
+  "Call canvas_check before you call a board done.",
+  "After an error, context compaction or a stale result, call canvas_capabilities again and re-read the topics you need.",
+].join("\n");
 
 /**
  * The target a call acted on: the board the result names in `_meta.canvasId` (a successful open
@@ -29,7 +41,7 @@ export const MCP_INSTRUCTIONS =
  * can interleave, so nothing here reads the active board after the call.
  */
 function targetOf(name: string, args: unknown, result: CanvasToolResult, activeBefore: string | undefined): string {
-  if (name === "canvas_list" || name === "canvas_guidance") return "-";
+  if (name === "canvas_capabilities" || name === "canvas_list" || name === "canvas_guidance") return "-";
   if (result._meta?.canvasId) return result._meta.canvasId;
   if (name === "canvas_open" || name === "canvas_create") {
     const raw = (args as { canvas?: unknown })?.canvas;
@@ -51,9 +63,15 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
   const service = createCanvasService({ ...options, workspace: resolve(options.workspace) });
   const server = new Server(
     { name: "codecaine-canvas", version },
-    { capabilities: { tools: {} }, instructions: MCP_INSTRUCTIONS },
+    { capabilities: { tools: {}, resources: {} }, instructions: INSTRUCTIONS },
   );
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: service.listTools() }));
+  server.setRequestHandler(ListResourcesRequestSchema, async () => ({ resources: service.listResources() }));
+  server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+    const contents = await service.readResource(request.params.uri);
+    if (!contents) throw new Error(`Unknown resource: ${request.params.uri}. resources/list names the canvas resources.`);
+    return { contents: [contents] };
+  });
   const runId = newRunId();
   const identity = identityFromEnv();
   let log: ActionLog | undefined;
@@ -68,8 +86,6 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
       log ??= openActionLog();
       const threadId = (args as { thread_id?: unknown }).thread_id;
       if (name === "canvas_open" && !result.isError && typeof threadId === "string" && threadId) log.bindThread(runId, threadId);
-      // One guidance snapshot serves every call of this process, so every record carries it.
-      const snapshotId = getCanvasAuthoringGuidance().snapshotId;
       log.record({
         runId,
         threadId: identity.threadId,
@@ -77,7 +93,8 @@ export function createCanvasMcpServer(options: CanvasServiceOptions): Server {
         tool: name,
         target: targetOf(name, args, result, activeBefore),
         result: summarize(result),
-        snapshotId,
+        // The service pins one guidance snapshot per process, so every record names the guidance it served.
+        snapshotId: service.guidanceSnapshot(),
         at: new Date(),
       });
     } catch (error) {

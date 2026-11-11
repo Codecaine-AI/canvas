@@ -15,7 +15,8 @@ import { join } from "node:path";
 import { operationTools, workflowTools } from "@codecaine-ai/canvas/toolkit";
 
 import { openActionLog } from "@codecaine-ai/action-log";
-import { createCanvasMcpServer,MCP_INSTRUCTIONS } from "./mcp";
+import { getCanvasAuthoringGuidance, VISUAL_PATTERNS, type VisualPattern } from "@codecaine-ai/canvas/authoring";
+import { createCanvasMcpServer, INSTRUCTIONS } from "./mcp";
 import { jsonSchema } from "./service";
 
 const REPO_CANVASES = join(import.meta.dir, "..", "..", "..", "canvases");
@@ -37,18 +38,18 @@ function tempWorkspace(): string {
 }
 
 describe("canvas MCP server", () => {
-  test("tools/list exposes all 27 operation tools with their exact names, descriptions, and schemas", async () => {
+  test("tools/list exposes all 20 operation tools with their exact names, descriptions, and schemas", async () => {
     const server = createCanvasMcpServer({ workspace: tempWorkspace() });
     const client = new Client({ name: "canvas-mcp-test", version: "1.0.0" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
     cleanups.push(() => client.close());
 
-    expect(client.getInstructions()).toBe(MCP_INSTRUCTIONS);
+    expect(client.getInstructions()).toBe(INSTRUCTIONS);
     const { tools } = await client.listTools();
     const byName = new Map(tools.map((tool) => [tool.name, tool]));
 
-    expect(operationTools).toHaveLength(27);
+    expect(operationTools).toHaveLength(20);
     for (const operation of operationTools) {
       const listed = byName.get(operation.name);
       expect(listed, operation.name).toBeDefined();
@@ -59,8 +60,20 @@ describe("canvas MCP server", () => {
       expect(byName.get(workflow.name)?.inputSchema).toEqual(jsonSchema(workflow.parameters));
     }
     expect(byName.has("finalize")).toBe(false);
-    expect(tools.slice(0, 3).map((tool) => tool.name)).toEqual(["canvas_list", "canvas_open", "canvas_guidance"]);
-    expect(tools).toHaveLength(5 + 27 + 6);
+    expect(tools.slice(0, 6).map((tool) => tool.name)).toEqual([
+      "canvas_capabilities", "canvas_list", "canvas_open", "canvas_guidance", "canvas_create", "canvas_check",
+    ]);
+    expect(tools).toHaveLength(6 + 20 + 4);
+  });
+
+  test("the prompt block fits 12 lines and 800 bytes, names canvas_capabilities first and says when to call it again", () => {
+    const lines = INSTRUCTIONS.split("\n");
+    expect(lines.length).toBeLessThanOrEqual(12);
+    expect(Buffer.byteLength(INSTRUCTIONS)).toBeLessThanOrEqual(800);
+    expect(lines.find((line) => line.includes("canvas_capabilities"))).toContain("before the first canvas tool");
+    expect(lines.at(-1)).toBe(
+      "After an error, context compaction or a stale result, call canvas_capabilities again and re-read the topics you need.",
+    );
   });
 
   test("tools/list carries the name fields and the section header glyph; no placement or copy takes a detail", async () => {
@@ -84,7 +97,7 @@ describe("canvas MCP server", () => {
     // update_text still accepts a detail so it can drop one with a note; only the id is required.
     expect(Object.keys(schema("update_text").properties)).toEqual(["id", "text", "detail"]);
     expect(schema("update_text").required).toEqual(["id"]);
-    expect(Object.keys(schema("change_shape").properties.patch.properties)).toEqual(["type", "direction", "icon"]);
+    expect(Object.keys(schema("change_shape").properties.patch.properties)).toEqual(["type", "direction", "icon", "border"]);
   });
 
   test("no listed schema carries a draft-07 tuple, which the Anthropic API rejects", async () => {
@@ -129,6 +142,7 @@ describe("canvas MCP server", () => {
     const opened = await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow" } });
     expect(opened.isError).toBeFalsy();
     expect((opened.content as Array<{ text: string }>)[0]!.text).toContain("OPENED · v2-flow");
+    await client.callTool({ name: "canvas_guidance", arguments: { topic: "workflow" } });
 
     const placed = await client.callTool({
       name: "place_sticky",
@@ -137,7 +151,7 @@ describe("canvas MCP server", () => {
     expect(placed.isError).toBeFalsy();
     const saved = JSON.parse(readFileSync(path, "utf8"));
     expect(saved.objects.some((object: { id: string }) => object.id === "stdio-note")).toBe(true);
-  }, 30_000);
+  });
 
   test("stdio: --workspace contains every path, the project resolves first, and --canvases holds the ids", async () => {
     const root = mkdtempSync(join(tmpdir(), "canvas-mcp-roots-"));
@@ -193,7 +207,7 @@ describe("canvas MCP server", () => {
     const byId = await (await session(bare))("standalone");
     expect(byId.isError).toBe(false);
     expect(byId.text).toContain(` · ${join(boards, "standalone.canvas.json")} · sha256:`);
-  }, 30_000);
+  });
 
   test("stdio: an edit's APPLIED line, lint delta, and fix guidance reach what Claude Code and Codex show", async () => {
     const workspace = tempWorkspace();
@@ -219,6 +233,7 @@ describe("canvas MCP server", () => {
     const opened = await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow" } });
     expect(shown(opened)).toContain("OPENED · v2-flow");
     expect(shown(opened)).toContain("BOARD");
+    await client.callTool({ name: "canvas_guidance", arguments: { topic: "workflow" } });
 
     const placed = await client.callTool({
       name: "place_shape",
@@ -228,19 +243,19 @@ describe("canvas MCP server", () => {
     expect(shown(placed)).toContain("APPLIED · place_shape fb-shape");
 
     // Dropped onto predefined-get-next-question: the overlap is the edit's one new error.
-    const raised = await client.callTool({ name: "move_to", arguments: { id: "fb-shape", x: 1917, y: 1988 } });
+    const raised = await client.callTool({ name: "move", arguments: { id: "fb-shape", to: { x: 1917, y: 1988 } } });
     expect(raised.isError).toBeFalsy();
-    expect(shown(raised)).toContain("APPLIED · move_to fb-shape");
+    expect(shown(raised)).toContain("APPLIED · move fb-shape");
     expect(shown(raised)).toMatch(/LINTS · \+1 error \(\d+ open\)/);
     expect(shown(raised)).toMatch(/\+ E\d+ covered-content: .*fb-shape.*predefined-get-next-question|\+ E\d+ covered-content: .*predefined-get-next-question.*fb-shape/);
     expect(shown(raised)).toContain("clear of");
 
     // Moved clear, nothing new: the resolved finding is not printed.
-    const cleared = await client.callTool({ name: "move_to", arguments: { id: "fb-shape", x: 960, y: 1600 } });
-    expect(shown(cleared)).toContain("APPLIED · move_to fb-shape");
+    const cleared = await client.callTool({ name: "move", arguments: { id: "fb-shape", to: { x: 960, y: 1600 } } });
+    expect(shown(cleared)).toContain("APPLIED · move fb-shape");
     expect(shown(cleared)).toMatch(/LINTS · (clean|no new errors)/);
     expect(shown(cleared)).not.toContain("covered-content");
-  }, 30_000);
+  });
 });
 
 describe("canvas MCP action log", () => {
@@ -286,8 +301,8 @@ describe("canvas MCP action log", () => {
     delete process.env.T3CODE_THREAD_ID;
     const client = await connect();
     await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-arg" } });
+    await client.callTool({ name: "canvas_guidance", arguments: { topic: "workflow" } });
     await client.callTool({ name: "place_sticky", arguments: { id: "log-note", text: "Logged", at: [960, 1600] } });
-    await client.callTool({ name: "canvas_guidance", arguments: {} });
     await client.callTool({ name: "canvas_open", arguments: { canvas: "no-such-board" } });
     await client.callTool({ name: "canvas_create", arguments: { canvas: "v2-flow", title: "Taken" } });
     await client.callTool({ name: "canvas_open", arguments: { canvas: "canvases/v2-flow.canvas.json" } });
@@ -297,15 +312,41 @@ describe("canvas MCP action log", () => {
     const records = log.query({ threadId: "thread-arg" });
     expect(records.map((record) => [record.tool, record.target, record.result])).toEqual([
       ["canvas_open", "v2-flow", "ok"],
-      ["place_sticky", "v2-flow", expect.stringMatching(/^ok/)],
       ["canvas_guidance", "-", "ok"],
+      ["place_sticky", "v2-flow", expect.stringMatching(/^ok/)],
       ["canvas_open", "no-such-board", "refused"],
       ["canvas_create", "v2-flow", "refused"],
       ["canvas_open", "v2-flow", "ok"],
     ]);
-    expect(records.every((record) => record.snapshotId === records[2]!.snapshotId && record.snapshotId)).toBe(true);
+    expect(records.every((record) => record.snapshotId === records[1]!.snapshotId && record.snapshotId)).toBe(true);
     await client.callTool({ name: "canvas_open", arguments: { canvas: "no-such-board", thread_id: "thread-refused" } });
     expect(log.query({ threadId: "thread-refused" })).toHaveLength(0);
+  });
+
+  test("every record names the snapshot canvas_capabilities served, even after a guidance source changes", async () => {
+    const path = logPath();
+    process.env.T3CODE_THREAD_ID = "thread-snapshot";
+    const client = await connect();
+    const index = await client.callTool({ name: "canvas_capabilities", arguments: {} });
+    const served: string = JSON.parse((index.content as Array<{ text: string }>)[0]!.text).guidance_snapshot;
+    // A new visual pattern changes the guidance a fresh process would serve.
+    const patterns = VISUAL_PATTERNS as VisualPattern[];
+    patterns.push({ ...patterns[0]!, id: "snapshot-probe", name: "Snapshot Probe" });
+    cleanups.push(() => void patterns.pop());
+    expect(getCanvasAuthoringGuidance().snapshotId).not.toBe(served);
+
+    await client.callTool({ name: "canvas_guidance", arguments: { topic: "workflow" } });
+    await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow" } });
+    await client.callTool({ name: "place_sticky", arguments: { id: "snapshot-note", text: "Logged", at: [960, 1600] } });
+
+    const log = openActionLog({ path });
+    cleanups.push(() => log.close());
+    expect(log.query({ threadId: "thread-snapshot" }).map((record) => [record.tool, record.result.split(" ")[0], record.snapshotId])).toEqual([
+      ["canvas_capabilities", "ok", served],
+      ["canvas_guidance", "ok", served],
+      ["canvas_open", "ok", served],
+      ["place_sticky", "ok", served],
+    ]);
   });
 
   test("two opens in flight at once each log the board they opened", async () => {
@@ -333,6 +374,7 @@ describe("canvas MCP action log", () => {
     copyFileSync(join(workspace, "canvases", "v2-flow.canvas.json"), join(workspace, "canvases", "board-b.canvas.json"));
     const client = await connect(workspace);
     await client.callTool({ name: "canvas_open", arguments: { canvas: "v2-flow", thread_id: "thread-edit-race" } });
+    await client.callTool({ name: "canvas_guidance", arguments: { topic: "workflow" } });
     await Promise.all([
       client.callTool({ name: "canvas_open", arguments: { canvas: "board-b" } }),
       client.callTool({ name: "place_sticky", arguments: { id: "race-note", text: "Raced", at: [960, 1600] } }),

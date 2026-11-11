@@ -96,8 +96,8 @@ const BLOCKS: ReadonlyArray<{ tag: string; bullets: readonly Bullet[] }> = [
         text: "<description> is the board's own markdown account",
         children: [
           "the board shows what is there, the description says what it means",
-          "update_description replaces it",
-          "set_board_title renames the board",
+          "describe_board with description replaces it",
+          "describe_board with title renames the board",
         ],
       },
       {

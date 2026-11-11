@@ -55,7 +55,7 @@ describe("DELTA block", () => {
     ]);
     const session = makeTestSession(baseline, ["alpha", "beta", "gamma"]);
 
-    const moved = runOp(session, "move_to", { id: "beta", x: 320, y: 240 });
+    const moved = runOp(session, "move", { id: "beta", to: { x: 320, y: 240 } });
     const recolored = runOp(session, "change_color", { id: "alpha", color: "blue" });
     const added = runOp(session, "place_shape", {
       id: "note",
@@ -65,7 +65,7 @@ describe("DELTA block", () => {
     const removed = runOp(session, "delete", { id: "gamma" });
 
     expect(moved.isError).toBeUndefined();
-    expect(moved.text).toContain("APPLIED · move_to beta");
+    expect(moved.text).toContain("APPLIED · move beta");
     expect(moved.text).toContain("DELTA");
     expect(moved.text).toContain("beta  320,0 → 320,240");
     expect(recolored.text).toContain("APPLIED · change_color alpha");
@@ -83,7 +83,7 @@ describe("DELTA block", () => {
     const baseline = makeDocument([sectionA, sectionB, child]);
     const session = makeTestSession(baseline, ["section-a", "section-b"]);
 
-    const result = runOp(session, "move_to", { id: "child", x: 580, y: 120 });
+    const result = runOp(session, "move", { id: "child", to: { x: 580, y: 120 } });
 
     expect(result.isError).toBeUndefined();
     expect(result.text).toContain("child  80,112 → 580,120");
@@ -122,14 +122,14 @@ describe("DELTA block", () => {
 
   test("makes connection steering visible: waypoints, anchors, and position fractions", () => {
     // 80-high boxes so the auto-attachment points land on the agent grid, which
-    // is what lets `reroute` draw a corner the router will accept.
+    // is what lets `route` `points` draw a corner the router will accept.
     const baseline = makeDocument(
       [box("alpha", 0, 0, 160, 80), box("beta", 480, 160, 160, 80)],
       [connect("alpha-beta", "alpha", "beta")],
     );
     const session = makeTestSession(baseline, ["alpha", "beta"]);
 
-    const routed = runOp(session, "reroute", {
+    const routed = runOp(session, "route", {
       id: "alpha-beta",
       points: [[240, 40], [240, 200]],
     });
@@ -166,7 +166,7 @@ describe("ROUTES block", () => {
     );
     const session = makeTestSession(baseline, ["alpha", "beta", "gamma"]);
 
-    const result = runOp(session, "move_to", { id: "alpha", x: 0, y: 240 });
+    const result = runOp(session, "move", { id: "alpha", to: { x: 0, y: 240 } });
 
     expect(result.isError).toBeUndefined();
     const routes = result.text.split("ROUTES")[1]!;
@@ -225,7 +225,7 @@ describe("BOARD DIFF block", () => {
     const session = makeTestSession(baseline, ["alpha", "beta", "gamma"]);
 
     runOp(session, "update_text", { id: "alpha", text: "first pass" });
-    runOp(session, "move_to", { id: "alpha", x: 0, y: 240 });
+    runOp(session, "move", { id: "alpha", to: { x: 0, y: 240 } });
     runOp(session, "delete", { id: "gamma" });
     // Off alpha's and beta's row, so auto-size matches no peer (auto-size.ts).
     runOp(session, "place_shape", { id: "note", type: "rectangle", at: [960, 600] });
@@ -300,7 +300,7 @@ describe("LINTS delta", () => {
     );
 
     // Introduce a second covered-content error (beta 75% onto alpha).
-    const introduced = runOp(session, "move_to", { id: "beta", x: 1040, y: 0 });
+    const introduced = runOp(session, "move", { id: "beta", to: { x: 1040, y: 0 } });
     expect(introduced.isError).toBeUndefined();
     expect(introduced.text).toContain("LINTS · +1 error (2 open)");
     expect(introduced.text).toContain("+ E2 covered-content");
@@ -320,7 +320,7 @@ describe("LINTS delta", () => {
     expect(stepBack).not.toContain("LINTS ·");
 
     // Fix it: a resolved finding is not printed, only the open count drops.
-    const resolved = runOp(session, "move_to", { id: "beta", x: 1480, y: 0 });
+    const resolved = runOp(session, "move", { id: "beta", to: { x: 1480, y: 0 } });
     expect(resolved.isError).toBeUndefined();
     expect(resolved.text).toContain("LINTS · no new errors (1 open)");
     expect(resolved.text).not.toContain("covered-content");
@@ -341,7 +341,7 @@ describe("LINTS delta", () => {
     // Establish the clean lint state with a channel edit.
     runOp(session, "change_color", { id: "alpha", color: "teal" });
 
-    const introduced = runOp(session, "move_to", { id: "beta", x: 40, y: 0 });
+    const introduced = runOp(session, "move", { id: "beta", to: { x: 40, y: 0 } });
     expect(introduced.text).toContain("LINTS · +1 error (1 open)");
     expect(introduced.text).toContain("  + E1 covered-content:");
   });
@@ -354,7 +354,7 @@ describe("LINTS delta", () => {
     look(session, "alpha");
 
     // Lay beta half over alpha: the remedy is prose.
-    const introduced = runOp(session, "move_to", { id: "beta", x: 80, y: 0 });
+    const introduced = runOp(session, "move", { id: "beta", to: { x: 80, y: 0 } });
     expect(introduced.text).toContain("LINTS · +1 error (1 open)");
     expect(introduced.text).toContain("+ E1 covered-content: alpha and beta overlap by 50% of the smaller box");
     expect(introduced.text).toContain("(move beta clear of alpha)");
@@ -380,7 +380,7 @@ describe("LINTS delta", () => {
 
     // Fix pair a. The surviving b-pair finding renumbers E2 → E1,
     // but it is the same finding: not new, not resolved.
-    const resolved = runOp(session, "move_to", { id: "a2", x: 480, y: 0 });
+    const resolved = runOp(session, "move", { id: "a2", to: { x: 480, y: 0 } });
     expect(resolved.text).toContain("LINTS · no new errors (1 open)");
     expect(resolved.text).not.toContain("+ E1 covered-content");
     expect(session.lastDiagnostics!.map((diagnostic) => diagnostic.id)).toEqual(["E1"]);
@@ -394,7 +394,7 @@ describe("rendered perception", () => {
     const baseline = makeDocument([section, child]);
     const session = makeTestSession(baseline, ["home"]);
 
-    const edited = runOp(session, "move_to", { id: "child", x: 100, y: 120 });
+    const edited = runOp(session, "move", { id: "child", to: { x: 100, y: 120 } });
     expect(edited.isError).toBeUndefined();
     expect(edited.pngs).toBeUndefined();
 
@@ -412,7 +412,7 @@ describe("rendered perception", () => {
     const baseline = makeDocument([section, child]);
     const session = makeTestSession(baseline, ["home"]);
 
-    const result = runOp(session, "move_to", { id: "child", x: 100, y: 120 });
+    const result = runOp(session, "move", { id: "child", to: { x: 100, y: 120 } });
 
     // An edit is text. Rasters cost a render each and the model asks for them
     // deliberately, with `look`.
@@ -442,7 +442,7 @@ describe("rendered perception", () => {
     const baseline = makeDocument([box("alpha", 0, 0), box("beta", 480, 0)]);
     const session = makeTestSession(baseline, ["alpha", "beta"]);
 
-    const geometric = runOp(session, "move_to", { id: "beta", x: 480, y: 240 });
+    const geometric = runOp(session, "move", { id: "beta", to: { x: 480, y: 240 } });
     expect(geometric.isError).toBeUndefined();
     expect(geometric.pngs).toBeUndefined();
 

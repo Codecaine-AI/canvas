@@ -26,7 +26,7 @@
  * consume the parsed arguments.
  */
 import { StringEnum, Type } from "@mariozechner/pi-ai";
-import type { Static } from "@mariozechner/pi-ai";
+import type { Static, TSchema } from "@mariozechner/pi-ai";
 
 import { CANVAS_COLORS, CANVAS_ICON_GLYPHS } from "../../state/schema";
 
@@ -45,10 +45,66 @@ const Patch = { additionalProperties: false, minProperties: 1 } as const;
 
 /** Board ids: the document's own id grammar, enforced at the tool boundary
  * rather than several layers below it. */
+const ID_PATTERN = "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,96}$";
 export const Id = Type.String({
-  pattern: "^[A-Za-z0-9][A-Za-z0-9_.:-]{0,96}$",
+  pattern: ID_PATTERN,
   description: "A board id: letters, digits, and _ . : - after a leading alphanumeric.",
 });
+
+// ---------------------------------------------------------------------------
+// Nullable modes — a null field counts as absent
+// ---------------------------------------------------------------------------
+//
+// A merged tool takes one optional value or sub-object per mode, and a null
+// one counts as absent, so a client that sends every key with null for the
+// unused ones still sends one mode. Only an omitted mode and a null one count
+// as absent: any other value of the wrong type is refused.
+//
+// pi-ai's `validateToolArguments` runs `Value.Convert` before it checks, and
+// Convert rewrites a primitive's null inside a TypeBox union: `[String, Null]`
+// turns null into "", `[Number, Null]` turns it into 0, and the Null-first
+// orders turn "" or 0 into null. Either way the call would mean something it
+// did not say. A primitive mode is therefore the JSON type pair, which reaches
+// the tool as sent; an enum mode lists null among its values. A sub-object,
+// array or literal mode is the union `[Schema, Null]`: Convert keeps a null one
+// null, and the type pair would refuse null under an object's own `required`.
+//
+// Convert still bends a WRONG-TYPED mode: it turns "", 0 or false into null for
+// a sub-object, array or literal mode, and "" into null for a number. So the
+// toolkit boundary (`callToolkitTool`, toolkit/index.ts) checks each raw mode
+// value against the mode's own schema before Convert runs, and refuses
+// `points: ""`, `reset: false` or `width: ""` instead of reading them as absent.
+// A field whose schema admits null is a mode, which is why only these helpers
+// admit null.
+
+/** An optional string where null counts as absent. */
+export function nullableString(description: string) {
+  return Type.Optional(Type.Unsafe<string | null>({ type: ["string", "null"], description }));
+}
+
+/** An optional board id where null counts as absent. */
+export function nullableId(description: string) {
+  return Type.Optional(
+    Type.Unsafe<string | null>({ type: ["string", "null"], pattern: ID_PATTERN, description }),
+  );
+}
+
+/** An optional number where null counts as absent. */
+export function nullableNumber(description: string) {
+  return Type.Optional(Type.Unsafe<number | null>({ type: ["number", "null"], description }));
+}
+
+/** An optional enum where null counts as absent. One `enum`, as rule 1 asks. */
+export function nullableEnum<const T extends readonly string[]>(values: T, description: string) {
+  return Type.Optional(
+    Type.Unsafe<T[number] | null>({ type: ["string", "null"], enum: [...values, null], description }),
+  );
+}
+
+/** An optional sub-object, array or literal mode where null counts as absent. */
+export function nullable<T extends TSchema>(schema: T, description: string) {
+  return Type.Optional(Type.Union([schema, Type.Null()], { description }));
+}
 
 /** The closed color roster, read off the canvas package so the tool surface
  * cannot drift from the palette. */
@@ -406,7 +462,7 @@ export type CloneParams = Static<typeof CloneParams>;
 /**
  * `connect` — the separate call after placement, matching the two steps a
  * person performs. Line and arrowheads are here because they are part of
- * drawing the edge; the route is not (`reroute` / `shift_segment` own it) and
+ * drawing the edge; the route is not (`route` owns it) and
  * neither is the label's placement (`move_label`).
  */
 export const ConnectParams = Type.Object(
@@ -458,32 +514,13 @@ export type ArrangeSectionParams = Static<typeof ArrangeSectionParams>;
 // ---------------------------------------------------------------------------
 
 /**
- * A section frame's stroke. Already in the document model as
- * `style.strokeStyle` (packages/canvas/src/state/schema/style.ts), so
- * `change_section_border` is plumbing rather than a schema change. The UI
- * flyout offers only solid/dashed; the model and the handler both accept
- * "none", per docs/10-system-design/70-agent-tool-surface/20-gestures §Sections.
+ * The two lock strengths the document model carries, plus `"none"`, which
+ * deletes the lock. `"background"` pins the frame itself and leaves its
+ * contents draggable; `"all"` freezes every descendant too.
  */
-export const SectionBorder = StringEnum(["solid", "dashed", "none"], {
-  description: "How the frame's border is stroked.",
-});
-
-export const ChangeSectionBorderParams = Type.Object(
-  {
-    id: Id,
-    border: SectionBorder,
-  },
-  { ...Seal, description: "Restroke a section frame's border." },
-);
-export type ChangeSectionBorderParams = Static<typeof ChangeSectionBorderParams>;
-
-/**
- * The two lock strengths the document model carries. `"background"` pins the
- * frame itself and leaves its contents draggable; `"all"` freezes every
- * descendant too.
- */
-export const LockMode = StringEnum(["all", "background"], {
-  description: "How much the lock covers: the frame alone, or the frame and everything in it.",
+export const LockMode = StringEnum(["all", "background", "none"], {
+  description:
+    "How much the lock covers: the frame alone, the frame and everything in it, or nothing (\"none\" deletes the lock).",
 });
 
 export const LockParams = Type.Object(
@@ -491,15 +528,9 @@ export const LockParams = Type.Object(
     id: Id,
     mode: LockMode,
   },
-  { ...Seal, description: "Lock a section." },
+  { ...Seal, description: "Set or delete a section's lock." },
 );
 export type LockParams = Static<typeof LockParams>;
-
-export const UnlockParams = Type.Object(
-  { id: Id },
-  { ...Seal, description: "Release a section's lock." },
-);
-export type UnlockParams = Static<typeof UnlockParams>;
 
 // ---------------------------------------------------------------------------
 // Gesture payloads — Delete
@@ -537,10 +568,17 @@ export type DeleteParams = Static<typeof DeleteParams>;
  * spending a turn on a rejection.
  *
  * `icon` is a SECTION's header glyph — the one glyph that is not a type,
- * because a frame stays a frame whatever it wears. It is the only key a
- * section accepts, and the one key a shape refuses (a shape's glyph is its
- * `type`), so "pick a glyph" has one gesture whatever it lands on. A free
- * string for the same reason as `SectionIcon`, plus the word that removes it.
+ * because a frame stays a frame whatever it wears. A free string for the same
+ * reason as `SectionIcon`, plus the word that removes it.
+ *
+ * `border` is a SECTION's frame stroke, already in the document model as
+ * `style.strokeStyle` (packages/canvas/src/state/schema/style.ts). The UI
+ * flyout offers only solid/dashed; the model and the handler both accept
+ * "none", per docs/10-system-design/70-agent-tool-surface/20-gestures §Sections.
+ * A null border counts as absent.
+ *
+ * `icon` and `border` are the two keys a section accepts, and the two keys a
+ * shape refuses: a shape's glyph is its `type`, and a shape has no frame.
  */
 export const ShapeSwapPatch = Type.Object(
   {
@@ -551,10 +589,16 @@ export const ShapeSwapPatch = Type.Object(
         "Sections only: the frame's header glyph — any glyph name place_shape accepts, or \"none\" to"
         + " remove it. A shape's or icon's glyph is its `type`, not this.",
     })),
+    border: nullableEnum(
+      ["solid", "dashed", "none"],
+      "Sections only: how the frame's border is stroked. \"none\" leaves the frame invisible but"
+      + " fully real. A null border counts as absent.",
+    ),
   },
   {
     ...Patch,
-    description: "What the shape becomes (type, direction), or a section's header glyph (icon). Name at least one.",
+    description:
+      "What the shape becomes (type, direction), or a section's header glyph (icon) and border. Name at least one.",
   },
 );
 export type ShapeSwapPatch = Static<typeof ShapeSwapPatch>;
@@ -572,9 +616,9 @@ export type ShapeSwapPatch = Static<typeof ShapeSwapPatch>;
 //    one home per concern — so neither has a key here to reach for.
 //  - `RepointPatch` carries the two ENDS. It cannot express a route, so a
 //    repoint can never smuggle in waypoints.
-//  - the route is `reroute` (wholesale) / `shift_segment` (one elbow) /
-//    `reset_route` (back to the auto-router), whose parameters are scalars
-//    and a point list declared inline by their descriptors.
+//  - the route is `route`: `points` (wholesale), `shift` (one elbow) or
+//    `reset` (back to the auto-router), whose fields are a point list, two
+//    scalars and a flag declared inline by its descriptor.
 //  - `LabelAlong` is `move_label`'s one polymorphic field: a fraction, or the
 //    word that clears the pin.
 

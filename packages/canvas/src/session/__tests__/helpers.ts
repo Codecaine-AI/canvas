@@ -36,12 +36,9 @@ export type OperationToolName =
   | "clone"
   | "connect"
   // Arrange
-  | "move_to"
-  | "move_by"
+  | "move"
   | "resize"
-  | "match_size"
-  | "align"
-  | "space_out"
+  | "arrange"
   | "arrange_section"
   | "tighten_wires"
   // Content & appearance
@@ -50,15 +47,11 @@ export type OperationToolName =
   | "change_shape"
   // Sections
   | "fit_section"
-  | "change_section_border"
   | "lock"
-  | "unlock"
   // Edges
   | "style_edge"
   | "change_connection"
-  | "reroute"
-  | "shift_segment"
-  | "reset_route"
+  | "route"
   | "move_label"
   // Delete
   | "delete";

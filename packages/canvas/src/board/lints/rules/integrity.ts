@@ -32,10 +32,10 @@ import type { LayoutRule } from "../types";
 const GUIDANCE = `Integrity fires only when something bypassed the automatic fixes (a Studio edit,
 an older file, a route with no clear path). Blocking (error tier):
 - a box whose text overflows it — resize it to the size the finding names;
-- a child outside its section — move_to it back inside, or resize the section;
+- a child outside its section — move it back inside, or resize the section;
 - a nested section in its parent section's color — change_color one of them so the levels differ;
 - a self-loop, dangling or zero-length wire — delete it, or reconnect it with change_connection;
-- a wire drawn through a box because no clear route exists — move_to the box or an end so a path opens.`;
+- a wire drawn through a box because no clear route exists — move the box or an end so a path opens.`;
 
 /** The remedy for an overflowing name: grow to the needed size, else shorten it. */
 function textFix(id: string, report: TextFitReport): string {
@@ -55,7 +55,7 @@ const round = (value: number) => Math.round(value * 100) / 100;
 const WIRE_FIX: Record<ReturnType<typeof brokenWires>[number]["kind"], (id: string) => string> = {
   "self-loop": (id) => `delete ${id}; put the self-transition in the node's text`,
   dangling: (id) => `delete ${id}, or reconnect it with change_connection`,
-  "zero-length": (id) => `move_to one end of ${id} clear of the other, or delete ${id}`,
+  "zero-length": (id) => `move one end of ${id} clear of the other, or delete ${id}`,
 };
 
 export const rule: LayoutRule = {
@@ -95,7 +95,7 @@ export const rule: LayoutRule = {
           at: [child.id, section.id],
           where: rectOf(child),
           message: `${child.id} extends ${round(overflow)}px outside its section ${section.id}`,
-          suggestion: `move_to ${child.id} back inside ${section.id}, or resize ${section.id} to hold it`,
+          suggestion: `move ${child.id} back inside ${section.id}, or resize ${section.id} to hold it`,
         });
       }
     }
@@ -167,7 +167,7 @@ export const rule: LayoutRule = {
         severity: "error",
         at: [edge.id, ...through],
         message: `wire ${edge.id} (${from.id}→${to.id}) is drawn through ${through.join(", ")}: no clear route exists`,
-        suggestion: `move_to ${through.join(" or ")} out of the way so a clear path opens`,
+        suggestion: `move ${through.join(" or ")} out of the way so a clear path opens`,
       });
     }
 

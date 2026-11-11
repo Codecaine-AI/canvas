@@ -7,8 +7,8 @@
  * docs/10-system-design/70-agent-tool-surface/30-grid-and-defaults), so
  * these numbers are load-bearing, not a convenience: they are the entire
  * answer to "how big is a new node". The agent never reasons about size at
- * placement; sizing afterward is `resize` / `match_size`, and spacing is
- * `space_out` — deliberate steps like everything else. `place_shape` may
+ * placement; sizing afterward is `resize` (explicit or `like`), and spacing is
+ * `arrange` with `space` — deliberate steps like everything else. `place_shape` may
  * carry a color since climb round 4 (one call per node instead of three);
  * the color here is what it lands in when the call names none.
  *
@@ -20,7 +20,7 @@
  *     defaults starts out failing the targets the agent is graded on.
  *  2. Round to a multiple of the agent's 20 grid
  *     (session/tools/grid.ts), so a placed object is already on-grid
- *     and every later `move_by`/`resize`/`match_size` keeps it there.
+ *     and every later `move`/`resize` keeps it there.
  *
  * Neither source table is edited: `CRAFT_TARGETS` is prompt guidance and
  * `OBJECT_TYPE_DEFAULTS` is the UI's own contract. This module is the

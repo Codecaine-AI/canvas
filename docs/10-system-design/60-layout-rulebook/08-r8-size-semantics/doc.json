@@ -63,7 +63,7 @@
       "props": {},
       "text": [
         {
-          "insert": "Sizing starts from a stated target rather than from a blank page: a node aims for 288×96 and is never narrower than 224. That target belongs to every node equally. It is a rectangle to grow from, not a cap and not a lookup keyed by object type. Grow whichever dimension the content needs, then use match_size to match peers to the largest member without hand-copying its dimensions. What a box says decides its size, and what kind of thing it is decides nothing."
+          "insert": "Sizing starts from a stated target rather than from a blank page: a node aims for 288×96 and is never narrower than 224. That target belongs to every node equally. It is a rectangle to grow from, not a cap and not a lookup keyed by object type. Grow whichever dimension the content needs, then use resize with like to match peers to the largest member without hand-copying its dimensions. What a box says decides its size, and what kind of thing it is decides nothing."
         }
       ],
       "children": []
@@ -132,16 +132,7 @@
           }
         },
         {
-          "insert": ", "
-        },
-        {
-          "insert": "match_size",
-          "attributes": {
-            "code": true
-          }
-        },
-        {
-          "insert": ", and "
+          "insert": " and "
         },
         {
           "insert": "update_text",

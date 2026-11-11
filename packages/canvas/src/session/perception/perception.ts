@@ -259,7 +259,7 @@ export function documentDelta(
       );
       touchedConnectionIds.add(connection.id);
     }
-    // Steering channels reroute the wire, so they are geometric and route-reported.
+    // Steering channels re-route the wire, so they are geometric and route-reported.
     if (fmtEndpointAnchors(previous) !== fmtEndpointAnchors(connection)) {
       lines.push(
         `${connection.id}  anchors ${fmtEndpointAnchors(previous)}`
@@ -423,8 +423,8 @@ function updateConnectionDescriptors(
  * The cumulative base → draft diff, one compact line per document change,
  * rendered from the operations `diffDocuments` returns. Entity lines lead with
  * a DELTA verb (./op-surface.ts), not a tool name: a diff can say a box was
- * added, changed, or removed, and cannot say which gesture did it — `move_to`
- * and `align` leave the same trace. The description and annotation-thread
+ * added, changed, or removed, and cannot say which gesture did it — `move`
+ * and `arrange` leave the same trace. The description and annotation-thread
  * lines name their document channel directly. What was CALLED is the op
  * ledger's story, not this block's.
  */

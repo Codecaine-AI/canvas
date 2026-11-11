@@ -1,6 +1,6 @@
 /**
  * The arrange engine (gesture-surface phase 2): descendant-carrying
- * translation, the gap-based space_out re-pitch, descendant-carrying align,
+ * translation, the gap-based space re-pitch of `arrange`, descendant-carrying align,
  * and the on-grid fit padding. Engine-level only — the tools that call these
  * are a later slice, so everything here drives the exported functions
  * directly.

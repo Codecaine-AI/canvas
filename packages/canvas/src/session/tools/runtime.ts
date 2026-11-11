@@ -14,6 +14,9 @@
  * kernel run context (containerId → session), so the tool sidecar stays a
  * thin schema + dispatch layer.
  */
+import type { AnnotateFields } from "./workflow/annotate";
+import type { DescribeBoardFields } from "./workflow/describe-board";
+
 /**
  * `look`'s framing knob: one id, or several framed together as one region.
  * The framed region comes back rendered and measured; the board itself always
@@ -54,22 +57,18 @@ export interface LayoutToolRuntime {
    */
   look(request: LookRequest): LayoutToolRenderResult;
   /**
-   * Replace the board's standing markdown account of what it represents, its
-   * pieces, and how it reads.
+   * Rename the board (the TopBar rename, from the agent side), replace its
+   * standing markdown account of what it represents, its pieces, and how it
+   * reads, or both, in one save. A null field counts as absent.
    */
-  updateDescription(description: string): LayoutToolTextResult;
-  /** Rename the board — the TopBar rename, from the agent side. */
-  setBoardTitle(title: string): LayoutToolTextResult;
+  describeBoard(fields: DescribeBoardFields): LayoutToolTextResult;
   /**
-   * Open an agent-authored annotation thread on one object: a question left
-   * for the user, which never blocks the run.
+   * Write in an annotation thread. `objectId` opens an agent-authored thread on
+   * one object: a question left for the user, which never blocks the run.
+   * `thread` appends a reply to an existing thread, leaving its status alone —
+   * the conversational move; resolve_request is still the closing one.
    */
-  addAnnotation(objectId: string, body: string): LayoutToolTextResult;
-  /**
-   * Append a reply to an existing thread, leaving its status alone — the
-   * conversational move; resolve_request is still the closing one.
-   */
-  replyAnnotation(id: string, body: string): LayoutToolTextResult;
+  annotate(fields: AnnotateFields): LayoutToolTextResult;
   /** Dispose one user-request queue entry (done/declined + note). */
   resolveRequest(
     id: string,

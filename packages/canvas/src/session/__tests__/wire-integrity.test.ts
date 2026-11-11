@@ -5,14 +5,14 @@ import { makeTestSession, runOp } from "./helpers";
 import { box, connect, makeDocument } from "./synthetic";
 
 describe("wire integrity at edit time", () => {
-  test("move_to that puts a wire's two ends on one center is refused and changes nothing", () => {
+  test("move with to that puts a wire's two ends on one center is refused and changes nothing", () => {
     const baseline = makeDocument([box("a", 0, 0, 160, 96), box("b", 400, 0, 160, 96)], [connect("a-b", "a", "b")]);
     const session = makeTestSession(baseline, ["a", "b"]);
 
-    const result = runOp(session, "move_to", { id: "b", x: 0, y: 0 });
+    const result = runOp(session, "move", { id: "b", to: { x: 0, y: 0 } });
 
     expect(result.isError).toBe(true);
-    expect(result.text).toContain("ERROR · move_to — refused: it would break a wire");
+    expect(result.text).toContain("ERROR · move — refused: it would break a wire");
     expect(result.text).toContain("a-b has zero length: a and b share one center");
     expect(session.draft).toBe(baseline);
   });
@@ -39,7 +39,7 @@ describe("wire integrity at edit time", () => {
     );
     const session = makeTestSession(baseline, ["c"]);
 
-    const result = runOp(session, "move_to", { id: "c", x: 800, y: 0 });
+    const result = runOp(session, "move", { id: "c", to: { x: 800, y: 0 } });
 
     expect(result.isError).toBeUndefined();
     expect(brokenWires(session.draft).map((wire) => wire.kind)).toEqual(["zero-length"]);

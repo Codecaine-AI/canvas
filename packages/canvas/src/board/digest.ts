@@ -37,13 +37,13 @@ export const DIGEST_DEFAULTS_LEGEND =
   "elided defaults: color gray (sticky yellow) · edge solid gray arrow=forward · shape per type";
 
 /**
- * The numbered-segment notation: `sN` is the segment index `shift_segment`
+ * The numbered-segment notation: `sN` is the segment index `route`'s `shift`
  * takes, `h`/`v` its orientation, and the printed coordinate is the one a
  * shift rewrites (a horizontal segment is pinned by its y, a vertical one by
  * its x).
  */
 export const DIGEST_ROUTE_LEGEND =
-  "edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = shift_segment index";
+  "edge route after ·: ─(sN h y=…)→ horizontal · (sN v x=…) vertical · sN = the segment a route shift names";
 
 /** The object-line grammar. */
 export const DIGEST_GRAMMAR =

@@ -94,10 +94,10 @@ describe("finalize committed — lint gate (scoped errors)", () => {
     ]);
     const session = makeTestSession(baseline, ["a", "b"], { canvasStyle: FIGJAM_CANVAS_STYLE });
 
-    const result = runOp(session, "move_to", { id: "b", x: 40, y: 0 });
+    const result = runOp(session, "move", { id: "b", to: { x: 40, y: 0 } });
 
     expect(result.isError).not.toBe(true);
-    expect(result.text).toContain("APPLIED · move_to b");
+    expect(result.text).toContain("APPLIED · move b");
     expect(result.text).toContain("DELTA");
     expect(result.text).toContain("LINTS · +1 error (1 open)");
     expect(result.text).toContain("a and b overlap by");
@@ -192,13 +192,13 @@ describe("finalize committed — waypoint steering", () => {
     );
     const session = makeTestSession(baseline, ["a", "b"]);
 
-    const applied = runOp(session, "reroute", {
+    const applied = runOp(session, "route", {
       id: "edge",
       points: [[300, 40], [300, 240]],
     });
 
     expect(applied.isError).not.toBe(true);
-    expect(applied.text).toContain("APPLIED · reroute edge");
+    expect(applied.text).toContain("APPLIED · route edge");
     // The steer is a real diff: DELTA names the steered connection.
     expect(applied.text).toContain("edge  wp none → 300,40");
 

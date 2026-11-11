@@ -36,7 +36,9 @@
         "b-ts-pi-ctx-body-13",
         "b-ts-pi-ctx-lowering-14",
         "b-ts-pi-ctx-redirect-15",
+        "b-ts-pi-ctx-redirect-examples-15a",
         "b-ts-pi-ctx-lock-16",
+        "b-ts-pi-ctx-lock-mirror-16a",
         "b-ts-pi-errors-heading-17",
         "b-ts-pi-errors-table-18",
         "b-ts-pi-envelope-heading-19",
@@ -322,7 +324,18 @@
       },
       "text": [
         {
-          "insert": "When a gesture is refused because the id names the wrong kind, the diagnostic names the gesture that would do the comparable thing to that kind: a frame is restroked with change_section_border, a note is rewritten with update_text, an edge has no box to arrange so the redirect points at the two objects it joins. A refusal then costs one turn instead of a hunt through the roster. Every tool named in one of these messages must actually be on the roster, or the redirect sends the model somewhere that does not exist."
+          "insert": "When a gesture is refused because the id names the wrong kind, the diagnostic names the gesture that would do the comparable thing to that kind. A refusal then costs one turn instead of a hunt through the roster."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-pi-ctx-redirect-examples-15a": {
+      "id": "b-ts-pi-ctx-redirect-examples-15a",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "A frame is restroked with the border of change_shape, and a note is rewritten with update_text. An edge has no box to arrange, so the redirect points at the two objects it joins. Every tool named in one of these messages must actually be on the roster, or the redirect sends the model somewhere that does not exist."
         }
       ],
       "children": []
@@ -336,7 +349,18 @@
       },
       "text": [
         {
-          "insert": "Lock refusals are the second family. They carry two things: that the lock is a person's don't-touch mark rather than an accident of state, and the one call that lifts it. The message names the frame holding the lock and points at unlock, so the model can weigh unlocking against the request instead of hunting for a way around the refusal. The rule mirrors the interactive surface's own, which is the point: a gesture the pointer cannot perform is a gesture the agent cannot perform either."
+          "insert": "A lock refusal names the frame that holds the lock and the one call that lifts it, lock with mode none. The lock is a person's don't-touch mark, so the model must weigh the release against the request."
+        }
+      ],
+      "children": []
+    },
+    "b-ts-pi-ctx-lock-mirror-16a": {
+      "id": "b-ts-pi-ctx-lock-mirror-16a",
+      "type": "paragraph",
+      "props": {},
+      "text": [
+        {
+          "insert": "The lock rule is the same rule that the interactive surface uses. A gesture that the pointer cannot perform is a gesture that the agent cannot perform."
         }
       ],
       "children": []

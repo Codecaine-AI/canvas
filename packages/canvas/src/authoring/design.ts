@@ -93,7 +93,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         1. place_section for each section, with its title, icon, and color in one call. Leave wide room between sections. Step 4 closes it.
         2. place_shape for each node inside its section, with its name and color in one call. Keep the default size: ${defaultSize("shape")} for a shape, ${defaultSize("icon")} for an icon. clone a finished node for each peer of the same role.
         3. arrange_section for each section, with its node ids as rows. It sets the gaps (${CRAFT_TARGETS.nodeGapRow} across a row, ${CRAFT_TARGETS.nodeGapColumn} down a column) and fits the frame, so you write no coordinates.
-        4. space_out each row of sections with gap ${CRAFT_TARGETS.sectionGutterSideBySide}, then align their tops.
+        4. arrange each row of sections with space and gap ${CRAFT_TARGETS.sectionGutterSideBySide}, then arrange the same row with align top.
         5. connect every wire, then call tighten_wires once.
         6. canvas_check, then fix its errors. Overlap and integrity are the only checks: overlap is a box on a box, or a section on a section, and integrity fires only when something bypassed the automatic fixes. Wire routes, label chips, text fit, and section fit are automatic.
     </build_order>
@@ -110,7 +110,7 @@ ${renderVisualPatterns().split("\n").map(line => `    ${line}`).join("\n")}
         - Before you place the first section, count the wires between each pair of sections. Put the pair with the most wires side by side, so no wire has a third section between its ends.
         - Lay out sections in the order the main flow visits them, so the main path runs one way.
         - Put the target of a return or retry next to its source, and a failure end (a reject, a dead letter) beside the step that fails.
-        - A wire that runs around or through a section holding neither end needs a move, not a waypoint: move_to the receiving node beside the sender, or a section beside its partner.
+        - A wire that runs around or through a section holding neither end needs a move, not a waypoint: move the receiving node beside the sender, or a section beside its partner.
         - Give every decision and retry all its exits, and draw each failure path to its end.
     </returns_retries_and_failures>
 </layout_and_connections>`,

@@ -1,6 +1,6 @@
 /**
- * The Edges gestures — `style_edge`, `change_connection`, `reroute`,
- * `shift_segment`, `reset_route`, `move_label`.
+ * The Edges gestures — `style_edge`, `change_connection`, `route` (in its
+ * `points`, `shift` and `reset` modes), `move_label`.
  *
  * What these pin, in order of how easy each is to break:
  *  - the SEPARATION of the three motions: restyle touches no route, repoint
@@ -10,11 +10,11 @@
  *    result rather than off a digest that aged the moment the first applied.
  *    The chaining case is exercised literally: shift, then shift again using
  *    the index the first result printed;
- *  - the validation lines: a diagonal reroute, endpoint legs the router would
+ *  - the validation lines: a diagonal `points` route, endpoint legs the router would
  *    silently ignore, a segment index the edge does not have, a segment with no
  *    bend handle, `along` outside 0..1, and distinctness judged against the
  *    edge as it will stand rather than against the patch alone;
- *  - what `reset_route` clears (waypoints AND endpoint position pins) and what
+ *  - what a `reset` route clears (waypoints AND endpoint position pins) and what
  *    it keeps (explicit anchors);
  *  - and that all of it survives the commit replay: the draft an edge op wrote
  *    is the document a committed proposal reduces to.
@@ -158,7 +158,7 @@ describe("change_connection", () => {
 
   test("a stored route is dropped when the ends move, as the reducer does", () => {
     const session = edgeSession();
-    runOp(session, "reroute", { id: "e1", points: [[420, 160], [420, 400]] });
+    runOp(session, "route", { id: "e1", points: [[420, 160], [420, 400]] });
     expect(edgeOf(session).waypoints).toBeDefined();
 
     const result = runOp(session, "change_connection", {
@@ -173,7 +173,7 @@ describe("change_connection", () => {
 
   test("a repoint that does not move an end keeps the stored route", () => {
     const session = edgeSession();
-    runOp(session, "reroute", { id: "e1", points: [[420, 160], [420, 400]] });
+    runOp(session, "route", { id: "e1", points: [[420, 160], [420, 400]] });
 
     const result = runOp(session, "change_connection", {
       id: "e1",
@@ -231,25 +231,25 @@ describe("change_connection", () => {
 });
 
 // ---------------------------------------------------------------------------
-// reroute
+// route · points
 // ---------------------------------------------------------------------------
 
-describe("reroute", () => {
+describe("route points", () => {
   test("replaces the interior corners wholesale, snapped to the grid", () => {
     const session = edgeSession();
 
     // 155 and 395 are off-grid on purpose: snap, don't reject.
-    const result = runOp(session, "reroute", { id: "e1", points: [[421, 155], [421, 395]] });
+    const result = runOp(session, "route", { id: "e1", points: [[421, 155], [421, 395]] });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · reroute e1");
+    expect(result.text).toContain("APPLIED · route e1");
     expect(edgeOf(session).waypoints).toEqual([[420, 160], [420, 400]]);
   });
 
   test("the result carries the route the new corners produced", () => {
     const session = edgeSession();
 
-    const result = runOp(session, "reroute", { id: "e1", points: [[420, 160], [420, 400]] });
+    const result = runOp(session, "route", { id: "e1", points: [[420, 160], [420, 400]] });
 
     expect(result.text).toContain("ROUTES");
     expect(result.text).toContain("(s1 v x=420)");
@@ -259,7 +259,7 @@ describe("reroute", () => {
   test("a diagonal pair of corners is refused, naming the pair", () => {
     const session = edgeSession();
 
-    const result = runOp(session, "reroute", { id: "e1", points: [[420, 160], [500, 400]] });
+    const result = runOp(session, "route", { id: "e1", points: [[420, 160], [500, 400]] });
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("is diagonal");
@@ -273,7 +273,7 @@ describe("reroute", () => {
     // Orthogonal among themselves, but neither end can reach them without a
     // diagonal leg — the router would fall back to auto-routing and the model
     // would believe it had placed the wire.
-    const result = runOp(session, "reroute", { id: "e1", points: [[420, 220], [420, 300]] });
+    const result = runOp(session, "route", { id: "e1", points: [[420, 220], [420, 300]] });
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("without a diagonal leg");
@@ -288,7 +288,7 @@ describe("reroute", () => {
     const session = makeTestSession(board, ["frame"]);
 
     // Orthogonal and joined to both ends, but the vertical at x=420 runs through m.
-    const result = runOp(session, "reroute", { id: "e1", points: [[420, 160], [420, 400]] });
+    const result = runOp(session, "route", { id: "e1", points: [[420, 160], [420, 400]] });
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("crosses m");
@@ -298,20 +298,20 @@ describe("reroute", () => {
 });
 
 // ---------------------------------------------------------------------------
-// shift_segment
+// route · shift
 // ---------------------------------------------------------------------------
 
-describe("shift_segment", () => {
+describe("route shift", () => {
   test("slides one segment perpendicular to itself and prints the new route", () => {
     const session = edgeSession();
     expect(routeOf(session)).toBe(
       "a ─(s0 h y=150)→ ─(s1 h y=150)→ (s2 v x=450) ─(s3 h y=390)→ ─(s4 h y=390)→ b",
     );
 
-    const result = runOp(session, "shift_segment", { id: "e1", segment: 2, to: 520 });
+    const result = runOp(session, "route", { id: "e1", shift: { segment: 2, to: 520 } });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · shift_segment e1");
+    expect(result.text).toContain("APPLIED · route e1");
     // The spec's own example line, verbatim.
     expect(result.text).toContain("(s1 v x=520)");
     expect(edgeOf(session).waypoints).toEqual([[520, 150], [520, 390]]);
@@ -320,13 +320,13 @@ describe("shift_segment", () => {
   test("a second shift chains off the index the first result printed", () => {
     const session = edgeSession();
 
-    const first = runOp(session, "shift_segment", { id: "e1", segment: 2, to: 520 });
+    const first = runOp(session, "route", { id: "e1", shift: { segment: 2, to: 520 } });
     expect(first.text).toContain("(s1 v x=520)");
 
     // The route renumbered when the shift simplified it — s2 became s1. The
     // model reads that off the result, not off the digest, which is the whole
     // point of returning the fresh polyline.
-    const second = runOp(session, "shift_segment", { id: "e1", segment: 1, to: 640 });
+    const second = runOp(session, "route", { id: "e1", shift: { segment: 1, to: 640 } });
 
     expect(second.isError).toBeUndefined();
     expect(second.text).toContain("(s1 v x=640)");
@@ -336,7 +336,7 @@ describe("shift_segment", () => {
   test("the target coordinate snaps to the grid", () => {
     const session = edgeSession();
 
-    runOp(session, "shift_segment", { id: "e1", segment: 2, to: 517 });
+    runOp(session, "route", { id: "e1", shift: { segment: 2, to: 517 } });
 
     expect(routeOf(session)).toContain("(s1 v x=520)");
   });
@@ -344,7 +344,7 @@ describe("shift_segment", () => {
   test("a segment index the edge does not have is refused, with the route to read", () => {
     const session = edgeSession();
 
-    const result = runOp(session, "shift_segment", { id: "e1", segment: 9, to: 520 });
+    const result = runOp(session, "route", { id: "e1", shift: { segment: 9, to: 520 } });
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("segment 9 is not on this edge");
@@ -373,7 +373,7 @@ describe("shift_segment", () => {
     );
     const session = makeTestSession(document, ["frame"]);
 
-    const result = runOp(session, "shift_segment", { id: "e1", segment: 0, to: 300 });
+    const result = runOp(session, "route", { id: "e1", shift: { segment: 0, to: 300 } });
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("runs diagonally");
@@ -382,22 +382,22 @@ describe("shift_segment", () => {
 
   test("shifting a segment to where it already is is a no-op, not an edit", () => {
     const session = edgeSession();
-    runOp(session, "shift_segment", { id: "e1", segment: 2, to: 520 });
+    runOp(session, "route", { id: "e1", shift: { segment: 2, to: 520 } });
 
-    const result = runOp(session, "shift_segment", { id: "e1", segment: 1, to: 520 });
+    const result = runOp(session, "route", { id: "e1", shift: { segment: 1, to: 520 } });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("NO-OP · shift_segment e1");
+    expect(result.text).toContain("NO-OP · route e1");
     expect(result.text).toContain("already sits at x=520");
     expect(edgeOf(session).waypoints).toEqual([[520, 150], [520, 390]]);
   });
 });
 
 // ---------------------------------------------------------------------------
-// reset_route
+// route · reset
 // ---------------------------------------------------------------------------
 
-describe("reset_route", () => {
+describe("route reset", () => {
   test("clears the corners AND the endpoint pins, and keeps explicit anchors", () => {
     const document = makeDocument(
       [
@@ -416,10 +416,10 @@ describe("reset_route", () => {
     );
     const session = makeTestSession(document, ["frame"]);
 
-    const result = runOp(session, "reset_route", { id: "e1" });
+    const result = runOp(session, "route", { id: "e1", reset: true });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("APPLIED · reset_route e1");
+    expect(result.text).toContain("APPLIED · route e1");
     const edge = edgeOf(session);
     expect(edge.waypoints).toBeUndefined();
     expect(edge.from.position).toBeUndefined();
@@ -431,9 +431,9 @@ describe("reset_route", () => {
 
   test("the result carries the auto-routed polyline the edge went back to", () => {
     const session = edgeSession();
-    runOp(session, "shift_segment", { id: "e1", segment: 2, to: 520 });
+    runOp(session, "route", { id: "e1", shift: { segment: 2, to: 520 } });
 
-    const result = runOp(session, "reset_route", { id: "e1" });
+    const result = runOp(session, "route", { id: "e1", reset: true });
 
     expect(result.text).toContain("ROUTES");
     expect(result.text).toContain("(s2 v x=450)");
@@ -443,14 +443,63 @@ describe("reset_route", () => {
   test("an edge already on the auto-router is a no-op that still returns the route", () => {
     const session = edgeSession();
 
-    const result = runOp(session, "reset_route", { id: "e1" });
+    const result = runOp(session, "route", { id: "e1", reset: true });
 
     expect(result.isError).toBeUndefined();
-    expect(result.text).toContain("NO-OP · reset_route e1");
+    expect(result.text).toContain("NO-OP · route e1");
     expect(result.text).toContain("already on the auto-router");
     // The descriptor's own no-op reports the polyline too: the model asked
     // where this wire runs, and "nothing to do" is not that answer.
     expect(result.text).toContain(`  route ${routeOf(session)}`);
+  });
+});
+
+describe("route modes", () => {
+  test("a call with no mode, or with two, is refused and changes nothing", () => {
+    const session = edgeSession();
+    const draftBefore = session.draft;
+
+    const none = runOp(session, "route", { id: "e1" });
+    const nulls = runOp(session, "route", { id: "e1", points: null, shift: null, reset: null });
+    const two = runOp(session, "route", {
+      id: "e1",
+      points: [[400, 150], [400, 350]],
+      reset: true,
+    });
+
+    expect(none.text).toBe(
+      "ERROR · route — send exactly one of points, shift or reset — points sets the corners,"
+      + " shift slides one segment, reset hands the edge back to the router.",
+    );
+    expect(nulls.text).toBe(none.text);
+    expect(two.text).toBe("ERROR · route — send exactly one of points, shift or reset, not points and reset.");
+    expect(session.draft).toBe(draftBefore);
+  });
+
+  test("a null mode counts as absent, so the other mode runs", () => {
+    const session = edgeSession();
+
+    const shifted = runOp(session, "route", {
+      id: "e1",
+      points: null,
+      shift: { segment: 2, to: 520 },
+      reset: null,
+    });
+    expect(shifted.text).toContain("APPLIED · route e1 shift s2");
+
+    const reset = runOp(session, "route", { id: "e1", points: null, shift: null, reset: true });
+    expect(reset.text).toContain("APPLIED · route e1 reset");
+    expect(edgeOf(session).waypoints).toBeUndefined();
+  });
+
+  test("a no-op names the edge from id, whatever comes first in the call", () => {
+    const session = edgeSession();
+    runOp(session, "route", { id: "e1", shift: { segment: 2, to: 520 } });
+
+    const result = runOp(session, "route", { shift: { segment: 1, to: 520 }, id: "e1" });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.text.split("\n")[0]).toBe("NO-OP · route e1 — segment s1 already sits at x=520.");
   });
 });
 
@@ -523,7 +572,7 @@ describe("edge state survives the commit replay", () => {
     const session = makeTestSession(baseline, ["frame"]);
 
     runOp(session, "style_edge", { id: "e1", patch: { style: "dashed", arrow: "both" } });
-    runOp(session, "shift_segment", { id: "e1", segment: 2, to: 520 });
+    runOp(session, "route", { id: "e1", shift: { segment: 2, to: 520 } });
     runOp(session, "move_label", { id: "e1", along: 0.25, offset: 12 });
 
     const next = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
@@ -541,7 +590,7 @@ describe("edge state survives the commit replay", () => {
       .toBe(formatNumberedRoute(edgeOf(session), session.draft));
   });
 
-  test("a reset_route replays as a cleared route, pins and all", () => {
+  test("a route reset replays as a cleared route, pins and all", () => {
     const baseline = makeDocument(
       [
         { ...box("frame", 0, 0, 900, 700, "section"), text: "Frame" },
@@ -558,7 +607,7 @@ describe("edge state survives the commit replay", () => {
       ],
     );
     const session = makeTestSession(baseline, ["frame"]);
-    runOp(session, "reset_route", { id: "e1" });
+    runOp(session, "route", { id: "e1", reset: true });
 
     const next = reduceInteractiveCanvasState(createInteractiveCanvasState(baseline), {
       type: "canvas.applyAgentPatch",

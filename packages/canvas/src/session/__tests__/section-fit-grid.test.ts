@@ -1,5 +1,5 @@
 /**
- * fit_section on the 20 grid (gesture-surface S2.4), plus the `match_size`
+ * fit_section on the 20 grid (gesture-surface S2.4), plus the `resize` `like`
  * size lookup. The agent fit pads by grid multiples and snaps the fitted rect
  * outward, so a frame closed around on-grid children lands on the grid and a
  * frame closed around hand-drawn ones only ever gains air.
@@ -123,7 +123,7 @@ describe("snapRectOutward", () => {
   });
 });
 
-describe("match_size lookup", () => {
+describe("resize like lookup", () => {
   test("reads the source object's size, and null for an unknown id", () => {
     const document = makeDocument([box("model", 0, 0, 300, 60), box("peer", 400, 0, 180, 40)]);
     expect(resolveSizeLike(document, "model")).toEqual({ width: 300, height: 60 });

@@ -1,7 +1,7 @@
 /**
  * The layout editor's toolkit, bound to a canvas file.
  *
- * A board is edited through one surface: the 25 gesture tools
+ * A board is edited through one surface: the 18 gesture tools
  * (`operationTools`) and the workflow tools (`workflowTools`), dispatched
  * through a `LayoutToolRuntime` bound to a `LayoutSession`.
  * `createToolRuntime(host)` asks its host for "the current session" and every
@@ -104,7 +104,7 @@ export interface ToolkitTool {
 }
 
 /**
- * The file-session surface, in the agent's registration order: the 25 gestures
+ * The file-session surface, in the agent's registration order: the 18 gestures
  * first, then every workflow tool except the run-only ones. `resolve_request`
  * stays — its disposition is a reply and a status change on the annotation
  * thread, which is document content and persists like any edit.
@@ -512,6 +512,87 @@ function enumMissHints(schema: unknown, args: unknown, path = ""): string[] {
     key in record ? enumMissHints(child, record[key], path === "" ? key : `${path}.${key}`) : []);
 }
 
+type SchemaNode = {
+  type?: string | string[];
+  const?: unknown;
+  enum?: unknown[];
+  anyOf?: SchemaNode[];
+  properties?: Record<string, SchemaNode>;
+};
+
+/** Whether a schema node lets `null` through — the mark of a merged tool's mode. */
+function admitsNull(node: SchemaNode): boolean {
+  return node.type === "null"
+    || (Array.isArray(node.type) && node.type.includes("null"))
+    || node.const === null
+    || (Array.isArray(node.enum) && node.enum.includes(null))
+    || (node.anyOf ?? []).some(admitsNull);
+}
+
+function jsonTypeMatches(type: string, value: unknown): boolean {
+  if (type === "integer") return Number.isInteger(value);
+  if (type === "array") return Array.isArray(value);
+  if (type === "object") return value !== null && typeof value === "object" && !Array.isArray(value);
+  return typeof value === type;
+}
+
+/** What a non-null mode value must be, read off the schema, for the refusal. */
+function expectedOf(node: SchemaNode): string {
+  const options = (node.anyOf ?? [node]).filter((option) => !(option.type === "null" || option.const === null));
+  return options.map((option) => {
+    if ("const" in option) return JSON.stringify(option.const);
+    if (Array.isArray(option.enum)) {
+      return `one of ${option.enum.filter((value) => value !== null).map((value) => JSON.stringify(value)).join(", ")}`;
+    }
+    const types = (Array.isArray(option.type) ? option.type : [option.type]).filter((type) => type !== "null");
+    return types.map((type) => (type === "array" || type === "object" || type === "integer" ? `an ${type}` : `a ${type}`)).join(" or ");
+  }).join(" or ");
+}
+
+/** Whether a raw, non-null value is one the mode's own schema names. */
+function modeValueMatches(node: SchemaNode, value: unknown): boolean {
+  return (node.anyOf ?? [node]).some((option) => {
+    if (option.type === "null" || option.const === null) return false;
+    if ("const" in option) return value === option.const;
+    if (Array.isArray(option.enum)) return option.enum.includes(value);
+    const types = (Array.isArray(option.type) ? option.type : [option.type]).filter(
+      (type): type is string => typeof type === "string" && type !== "null",
+    );
+    return types.some((type) => jsonTypeMatches(type, value));
+  });
+}
+
+/**
+ * Refuse a merged tool's mode that was sent with the wrong type, before
+ * `validateToolArguments` converts it.
+ *
+ * A mode is any field whose schema admits null (the nullable helpers in
+ * session/tools/schemas.ts). Only an omitted mode and a null one count as
+ * absent. pi-ai's `Value.Convert` would otherwise turn `""`, `0` or `false`
+ * into null for a sub-object, array or literal mode, and `""` into null for a
+ * number, so a malformed mode would silently read as absent and the call would
+ * run the other mode. The walk checks the raw value against the mode's own
+ * schema and descends into plain sub-objects (`change_shape`'s `patch`), but
+ * never into a mode's own fields: a coordinate inside `to` converts as before.
+ */
+function malformedModes(schema: unknown, args: unknown, path = ""): string[] {
+  const node = schema as SchemaNode | null;
+  if (node === null || typeof node !== "object" || node.properties === undefined) return [];
+  if (args === null || typeof args !== "object" || Array.isArray(args)) return [];
+  const record = args as Record<string, unknown>;
+  return Object.entries(node.properties).flatMap(([key, child]) => {
+    if (!(key in record)) return [];
+    const at = path === "" ? key : `${path}.${key}`;
+    const value = record[key];
+    if (!admitsNull(child)) return malformedModes(child, value, at);
+    if (value === null || modeValueMatches(child, value)) return [];
+    return [
+      `${at} must be ${expectedOf(child)}, or null to leave it out — not ${JSON.stringify(value)}.`
+      + " Only an omitted field or null counts as absent.",
+    ];
+  });
+}
+
 /** The result of one toolkit call, with what the persist step did. */
 export interface ToolkitCallResult extends LayoutToolRenderResult {
   persisted?: PersistResult;
@@ -538,6 +619,15 @@ export async function callToolkitTool(
   }
   if (file.conflicted) {
     return { isError: true, text: new CanvasFileConflictError(file.canvasPath).message };
+  }
+  const malformed = malformedModes(tool.parameters, args);
+  if (malformed.length > 0) {
+    return {
+      isError: true,
+      text: malformed.length === 1
+        ? `ERROR · ${name} — ${malformed[0]}`
+        : [`ERROR · ${name}`, ...malformed.map((line) => `  - ${line}`)].join("\n"),
+    };
   }
   let params: Record<string, unknown>;
   try {

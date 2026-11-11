@@ -3,12 +3,10 @@
  * roster (docs/10-system-design/70-agent-tool-surface), in six groups:
  *
  *   Place     place_section, place_sticky, place_shape, clone, connect
- *   Arrange   move_to, move_by, resize, match_size, align, space_out,
- *             arrange_section, tighten_wires
+ *   Arrange   move, resize, arrange, arrange_section, tighten_wires
  *   Content   update_text, change_color, change_shape
- *   Sections  fit_section, change_section_border, lock, unlock
- *   Edges     style_edge, change_connection, reroute, shift_segment,
- *             reset_route, move_label
+ *   Sections  fit_section, lock
+ *   Edges     style_edge, change_connection, route, move_label
  *   Delete    delete
  *
  * Every tool names a motion a person makes on the canvas rather than a CRUD
@@ -28,13 +26,10 @@ import type { TSchema } from "@mariozechner/pi-ai";
 import type { LayoutToolRenderResult } from "../runtime";
 import type { OperationHost } from "./operation-tool";
 import {
-  align,
+  arrange,
   arrangeSection,
-  matchSize,
-  moveBy,
-  moveTo,
+  move,
   resize,
-  spaceOut,
 } from "./arrange";
 import { tightenWiresTool } from "./tighten-wires";
 import {
@@ -46,9 +41,7 @@ import { deleteEntity } from "./delete";
 import {
   changeConnection,
   moveLabel,
-  reroute,
-  resetRoute,
-  shiftSegment,
+  route,
   styleEdge,
 } from "./edges";
 import {
@@ -59,10 +52,8 @@ import {
   placeSticky,
 } from "./place";
 import {
-  changeSectionBorder,
   fitSection,
   lock,
-  unlock,
 } from "./sections";
 
 export interface OperationTool {
@@ -78,32 +69,25 @@ export interface OperationTool {
 }
 
 export {
-  align,
+  arrange,
   arrangeSection,
   changeColor,
   changeConnection,
-  changeSectionBorder,
   changeShape,
   clone,
   connect,
   deleteEntity,
   fitSection,
   lock,
-  matchSize,
-  moveBy,
+  move,
   moveLabel,
-  moveTo,
   placeSection,
   placeShape,
   placeSticky,
-  reroute,
-  resetRoute,
   resize,
-  shiftSegment,
-  spaceOut,
+  route,
   styleEdge,
   tightenWiresTool,
-  unlock,
   updateText,
 };
 
@@ -119,12 +103,9 @@ export const operationTools: readonly OperationTool[] = [
   // whole, connection ids are rejected, everything snaps first and the result
   // reports what landed. arrange_section lays one frame's nodes out in rows
   // and fits the frame, so a section needs no coordinates per node.
-  moveTo,
-  moveBy,
+  move,
   resize,
-  matchSize,
-  align,
-  spaceOut,
+  arrange,
   arrangeSection,
   // The last Arrange gesture (./tighten-wires.ts): every box slid toward
   // what it is wired to, kept only where the drawn wires get shorter.
@@ -134,21 +115,17 @@ export const operationTools: readonly OperationTool[] = [
   updateText,
   changeColor,
   changeShape,
-  // Sections (./sections.ts). A frame as a frame: close it, restroke it,
-  // protect or release its region.
+  // Sections (./sections.ts). A frame as a frame: close it, and protect or
+  // release its region.
   fitSection,
-  changeSectionBorder,
   lock,
-  unlock,
-  // Edges (./edges.ts). Restyle, repoint, and the three routing instruments
-  // plus the label pin. Every one of them returns the edge's fresh numbered
+  // Edges (./edges.ts). Restyle, repoint, the route in its three modes, and
+  // the label pin. Every one of them returns the edge's fresh numbered
   // polyline, which is what lets a second shift in the same turn chain off the
   // first instead of off a stale digest.
   styleEdge,
   changeConnection,
-  reroute,
-  shiftSegment,
-  resetRoute,
+  route,
   moveLabel,
   // Delete (./delete.ts). One verb, three cascades.
   deleteEntity,

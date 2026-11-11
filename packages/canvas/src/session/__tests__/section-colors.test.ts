@@ -129,7 +129,7 @@ describe("an edit that nests a section in its own color is refused", () => {
     const session = makeTestSession(doc, ["page"]);
     const before = session.draft;
     // outside (gray, 600×400) dropped inside pack (gray) clear of rounds.
-    const result = runOp(session, "move_to", { id: "outside", x: 120, y: 900 });
+    const result = runOp(session, "move", { id: "outside", to: { x: 120, y: 900 } });
     expect(result.isError).toBe(true);
     expect(result.text).toContain("outside would share gray with its parent section pack");
     expect(session.draft).toBe(before);

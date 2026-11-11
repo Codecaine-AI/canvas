@@ -44,7 +44,7 @@ describe("integrity lint: what bypassed the automatic fixes", () => {
     const findings = integrity(moved);
     expect(findings).toHaveLength(1);
     expect(findings[0]).toMatchObject({ at: ["kid", "a"], message: "kid extends 60px outside its section a" });
-    expect(findings[0]!.suggestion).toContain("move_to kid back inside a");
+    expect(findings[0]!.suggestion).toContain("move kid back inside a");
   });
 
   test("a Studio move of a sticky onto its other end is one zero-length wire error", () => {
