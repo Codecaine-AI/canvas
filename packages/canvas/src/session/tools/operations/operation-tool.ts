@@ -17,6 +17,7 @@ import { heldNodeClashes, sameHueNests, sharedLook, sharedSiblingLook, siblingCl
 import type { LayoutToolRenderResult } from "../runtime";
 import { commitDraft } from "../../perception/live-draft-view";
 import type { OpContext, OpOutcome } from "./op-context";
+import { describeStraightening, straightenWires } from "../straighten-wires";
 import {
   operationPerception,
   type SessionEventSink,
@@ -199,7 +200,7 @@ export function runOperation<TFields extends OperationFields>(
     };
   }
   const next = reconcileSectionMembership(
-    reconcileConnectionWaypoints(before, grow.document),
+    reconcileConnectionWaypoints(outcome.straightened ? outcome.draft : before, grow.document),
   );
   // The grows were judged with `held` kept. A parent that cannot grow to hold
   // its child (locked, or stopped at a locked frame's edge), or a grown frame
@@ -285,13 +286,23 @@ export function runOperation<TFields extends OperationFields>(
       details,
     };
   }
+  // An edit that leaves a wire with a small jog between two boxes a little
+  // off one axis is finished here: the straighten pass moves one of them onto
+  // the axis (../straighten-wires.ts has the method and why it runs on every
+  // edit). It only sees the wires this edit touched, and it keeps what the
+  // refusals above checked: no wire breaks, nothing changes section and no
+  // section comes to touch another.
+  const straight = outcome.straightened
+    ? { document: next, moves: [] }
+    : straightenWires(next, { canvasStyle: ctx.canvasStyle, since: before });
+  const straightNotes = straight.moves.map(describeStraightening);
   session.proposalCount += 1;
-  commitDraft(session, next, outcome.summary, { recordChange: true });
+  commitDraft(session, straight.document, outcome.summary, { recordChange: true });
   const result = operationPerception(
     session,
     before,
     `APPLIED · ${outcome.summary}`,
-    { notes, details },
+    { notes: straightNotes.length === 0 ? notes : [...(notes ?? []), ...straightNotes], details },
   );
 
   host.emit(session, {

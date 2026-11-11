@@ -1,0 +1,250 @@
+/**
+ * The straighten pass: an edit that leaves a wire with a small jog between
+ * two boxes a little off one axis ends with one of them on the axis, and the
+ * result names the move.
+ */
+import { describe, expect, test } from "bun:test";
+
+import { routedPolyline } from "../../board/lints/geometry";
+import type { InteractiveCanvasConnection, InteractiveCanvasObject } from "../../state/schema";
+import { makeTestSession, runOp } from "./helpers";
+import { box, connect, makeDocument } from "./synthetic";
+
+type Session = ReturnType<typeof makeTestSession>;
+
+/** A page that holds every box given no other parent. */
+function board(objects: InteractiveCanvasObject[], connections: InteractiveCanvasConnection[] = []): Session {
+  const page = { ...box("page", 0, 0, 2400, 1400, "section"), text: "Page" };
+  const held = objects.map((object) => ({ ...object, parentId: object.parentId ?? "page" }));
+  return makeTestSession(makeDocument([page, ...held], connections), ["page"]);
+}
+
+function at(session: Session, id: string) {
+  return session.draft.objects.find((object) => object.id === id)!.geometry;
+}
+
+function wire(session: Session, id: string) {
+  return session.draft.connections.find((edge) => edge.id === id)!;
+}
+
+/** Whether the wire as drawn is one run: every point on one x or on one y. */
+function straight(session: Session, id: string): boolean {
+  const points = routedPolyline(wire(session, id), session.draft, session.canvasStyle);
+  return points.every((point) => Math.abs(point.x - points[0]!.x) < 0.5)
+    || points.every((point) => Math.abs(point.y - points[0]!.y) < 0.5);
+}
+
+/** Two boxes side by side on one axis, wired. */
+function pair(): Session {
+  return board([box("a", 200, 300, 280, 100), box("b", 800, 300, 280, 100)], [connect("a-b", "a", "b")]);
+}
+
+describe("straighten · on every edit", () => {
+  test("a box moved a little off its neighbour's axis stays, and the neighbour comes onto its axis", () => {
+    const session = pair();
+
+    const result = runOp(session, "move", { id: "b", by: { dx: 100, dy: 20 } });
+
+    expect(result.isError).toBeUndefined();
+    expect(result.text).toContain("straightened a-b: moved a 20px down");
+    expect(at(session, "b")).toMatchObject({ x: 900, y: 320 });
+    expect(at(session, "a")).toMatchObject({ x: 200, y: 320 });
+    expect(straight(session, "a-b")).toBe(true);
+  });
+
+  test("a new wire between boxes 12px off one axis goes straight", () => {
+    const session = board([box("a", 200, 300, 280, 100), box("b", 800, 312, 280, 100)]);
+
+    const result = runOp(session, "connect", { id: "a-b", from: { objectId: "a" }, to: { objectId: "b" } });
+
+    expect(result.text).toMatch(/straightened a-b: moved (a 12px down|b 12px up)/);
+    expect(at(session, "a").y).toBe(at(session, "b").y);
+    expect(straight(session, "a-b")).toBe(true);
+  });
+
+  test("an offset of 40px is an elbow the drawer chose: nothing moves", () => {
+    const session = pair();
+
+    const result = runOp(session, "move", { id: "b", by: { dx: 0, dy: 40 } });
+
+    expect(result.text).not.toContain("straightened");
+    expect(at(session, "a")).toMatchObject({ x: 200, y: 300 });
+    expect(at(session, "b")).toMatchObject({ x: 800, y: 340 });
+  });
+
+  test("a decision whose centre is 2px off the box under it grows 4px: no slide on the grid lines them up", () => {
+    const session = board([box("pick", 200, 200, 280, 120, "decision"), box("ok", 192, 500, 300, 140, "octagon")]);
+
+    const result = runOp(session, "connect", { id: "pick-ok", from: { objectId: "pick" }, to: { objectId: "ok" } });
+
+    expect(result.text).toContain("straightened pick-ok: made pick 4px wider");
+    expect(at(session, "pick")).toEqual({ x: 200, y: 200, width: 284, height: 120 });
+    expect(at(session, "ok")).toEqual({ x: 192, y: 500, width: 300, height: 140 });
+    expect(straight(session, "pick-ok")).toBe(true);
+  });
+
+  test("a locked neighbour stays: the moved box takes its axis", () => {
+    const session = board(
+      [{ ...box("a", 200, 300, 280, 100), locked: "all" }, box("b", 800, 300, 280, 100)],
+      [connect("a-b", "a", "b")],
+    );
+
+    const result = runOp(session, "move", { id: "b", by: { dx: 100, dy: 20 } });
+
+    expect(result.text).toContain("straightened a-b: moved b 20px up");
+    expect(at(session, "a")).toMatchObject({ x: 200, y: 300 });
+    expect(at(session, "b")).toMatchObject({ x: 900, y: 300 });
+  });
+
+  test("the pass never undoes the edit: a move it could only take back keeps its jog", () => {
+    const session = board(
+      [{ ...box("a", 200, 300, 280, 100), locked: "all" }, box("b", 800, 300, 280, 100)],
+      [connect("a-b", "a", "b")],
+    );
+
+    const result = runOp(session, "move", { id: "b", by: { dx: 0, dy: 20 } });
+
+    expect(result.text).toContain("APPLIED · move b");
+    expect(result.text).not.toContain("straightened");
+    expect(at(session, "b")).toMatchObject({ x: 800, y: 320 });
+  });
+
+  test("a jog stays when each end has a straight wire the move would bend", () => {
+    const session = board(
+      [box("w", 100, 300, 280, 100), box("a", 500, 300, 280, 100), box("b", 1000, 312, 280, 100), box("x", 1400, 312, 280, 100)],
+      [connect("w-a", "w", "a"), connect("b-x", "b", "x")],
+    );
+    const before = session.draft.objects;
+
+    const result = runOp(session, "connect", { id: "a-b", from: { objectId: "a" }, to: { objectId: "b" } });
+
+    expect(result.text).not.toContain("straightened");
+    expect(session.draft.objects).toEqual(before);
+    expect(straight(session, "w-a")).toBe(true);
+    expect(straight(session, "b-x")).toBe(true);
+  });
+
+  test("a jog stays when either move would crowd a neighbour", () => {
+    const session = board([
+      box("a", 200, 300, 280, 100), box("over-a", 200, 160, 280, 100), box("under-a", 200, 440, 280, 100),
+      box("b", 800, 312, 280, 100), box("over-b", 800, 172, 280, 100), box("under-b", 800, 452, 280, 100),
+    ]);
+    const before = session.draft.objects;
+
+    const result = runOp(session, "connect", { id: "a-b", from: { objectId: "a" }, to: { objectId: "b" } });
+
+    expect(result.text).not.toContain("straightened");
+    expect(session.draft.objects).toEqual(before);
+  });
+
+  test("a frame moves with its box, so the box keeps its place in the frame", () => {
+    const session = board(
+      [
+        box("exec", 600, 200, 280, 100),
+        box("other", 600, 400, 280, 100),
+        { ...box("db", 1160, 100, 360, 240, "section"), text: "Database" },
+        { ...box("events", 1200, 180, 280, 100), parentId: "db" },
+      ],
+      [connect("exec-other", "exec", "other")],
+    );
+
+    const result = runOp(session, "connect", { id: "exec-events", from: { objectId: "exec" }, to: { objectId: "events" } });
+
+    expect(result.text).toContain("straightened exec-events: moved db 20px down");
+    expect(at(session, "db")).toEqual({ x: 1160, y: 120, width: 360, height: 240 });
+    expect(at(session, "events")).toMatchObject({ x: 1200, y: 200 });
+    expect(at(session, "exec")).toMatchObject({ x: 600, y: 200 });
+    expect(straight(session, "exec-events")).toBe(true);
+  });
+
+  test("arrange_section ends with the wire into the section straight", () => {
+    const session = board(
+      [
+        box("src", 100, 208, 280, 100),
+        { ...box("frame", 600, 100, 800, 500, "section"), text: "Frame" },
+        { ...box("p", 700, 380, 280, 100), parentId: "frame" },
+        { ...box("q", 1040, 180, 280, 100), parentId: "frame" },
+      ],
+      [connect("src-p", "src", "p")],
+    );
+
+    const result = runOp(session, "arrange_section", { section: "frame", rows: [["p", "q"]] });
+
+    expect(result.text).toContain("APPLIED · arrange_section frame");
+    expect(result.text).toMatch(/straightened src-p: moved src \d+px up/);
+    // The row keeps the place arrange_section gave it.
+    expect(at(session, "p").y).toBe(at(session, "q").y);
+    expect(at(session, "src").y).toBe(at(session, "p").y);
+    expect(straight(session, "src-p")).toBe(true);
+  });
+});
+
+describe("straighten · wires routed by hand", () => {
+  test("a jog the drawer routed stays until tighten_wires, which takes it out with its corners", () => {
+    const session = board([box("a", 200, 300, 280, 100), box("b", 620, 320, 280, 100)], [connect("a-b", "a", "b")]);
+    const before = session.draft.objects;
+
+    const routed = runOp(session, "route", { id: "a-b", points: [[540, 360], [540, 380]] });
+
+    expect(routed.text).toContain("APPLIED · route a-b");
+    expect(routed.text).not.toContain("straightened");
+    expect(wire(session, "a-b").waypoints).toEqual([[540, 360], [540, 380]]);
+    expect(session.draft.objects).toEqual(before);
+
+    const tightened = runOp(session, "tighten_wires", {});
+
+    expect(tightened.text).toMatch(/straightened a-b: moved (a 20px down|b 20px up)/);
+    expect(wire(session, "a-b").waypoints ?? []).toEqual([]);
+    expect(straight(session, "a-b")).toBe(true);
+  });
+
+  /** w-a holds a in place, so only b can move for the new wire a-b; b-c is routed by hand. */
+  function handRouted(c: InteractiveCanvasObject, points: [number, number][]): Session {
+    const session = board(
+      [box("w", 100, 300, 280, 100), box("a", 500, 300, 280, 100), box("b", 1000, 320, 280, 100), c],
+      [connect("w-a", "w", "a"), connect("b-c", "b", "c")],
+    );
+    expect(runOp(session, "route", { id: "b-c", points }).text).toContain("APPLIED · route b-c");
+    return session;
+  }
+
+  test("a box slides along the hand-routed run that leaves it, and that wire keeps its corners", () => {
+    // b-c leaves b's bottom edge: b moves up and down along that run.
+    const session = handRouted(box("c", 1300, 700, 280, 100), [[1140, 600], [1440, 600]]);
+
+    const result = runOp(session, "connect", { id: "a-b", from: { objectId: "a" }, to: { objectId: "b" } });
+
+    expect(result.text).toContain("straightened a-b: moved b 20px up");
+    expect(wire(session, "b-c").waypoints).toEqual([[1140, 600], [1440, 600]]);
+    expect(straight(session, "a-b")).toBe(true);
+  });
+
+  test("a box stays when the move would cost another wire its hand route", () => {
+    // b-c leaves b's right edge: a move up or down breaks its first run.
+    const session = handRouted(box("c", 1500, 500, 280, 100), [[1400, 360], [1400, 560]]);
+    const before = session.draft.objects;
+
+    const result = runOp(session, "connect", { id: "a-b", from: { objectId: "a" }, to: { objectId: "b" } });
+
+    expect(result.text).not.toContain("straightened");
+    expect(session.draft.objects).toEqual(before);
+    expect(wire(session, "b-c").waypoints).toEqual([[1400, 360], [1400, 560]]);
+  });
+});
+
+describe("straighten · at the end of tighten_wires", () => {
+  test("a board the slide leaves alone still loses a 2px jog", () => {
+    const session = board(
+      [box("pick", 200, 200, 280, 120, "decision"), box("ok", 192, 500, 300, 140, "octagon")],
+      [connect("pick-ok", "pick", "ok")],
+    );
+    expect(straight(session, "pick-ok")).toBe(false);
+
+    const result = runOp(session, "tighten_wires", {});
+
+    expect(result.text).toMatch(/APPLIED · tighten_wires · 1 box moved · wire \d+px → \d+px \(−\d+%\) · corners 2 → 0/);
+    expect(result.text).toContain("straightened pick-ok: made pick 4px wider");
+    expect(straight(session, "pick-ok")).toBe(true);
+    expect(runOp(session, "tighten_wires", {}).text).toContain("NO-OP · tighten_wires");
+  });
+});
