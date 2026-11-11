@@ -1,19 +1,11 @@
 /**
- * The rule-unit manifest of the canvas skill: the hand-written `src/skill/SKILL.md`, which guidance.ts copies into
- * the skill folder, and the six references the generator writes. Each unit keeps a run of skill lines as the skill
- * wrote them, and names the served guidance that now carries it: a `canvas_guidance` topic, or a drop with a reason.
- * A hand-written unit is a frozen literal. A generated reference is one unit that spans its whole file, because its
- * topic serves the same text, and it reads that text from the file. capabilities.test.ts runs each unit's contract
- * against the served text and strips each unit to prove its contract fails. cli.ts manifest prints the units as JSON
- * for the prose judge.
+ * The rule-unit manifest of the deleted skill. Each unit keeps a run of the hand-written SKILL.md lines as the skill
+ * wrote them, with the file and line range it came from, and names the served guidance that now carries it: a
+ * `canvas_guidance` topic, or a drop with a reason. The units are frozen literals, because the skill folder, its
+ * source and its generator are gone. capabilities.test.ts runs each unit's contract against the served text and
+ * strips each unit to prove its contract fails. cli.ts manifest prints the units as JSON for the prose judge.
  */
-import { readFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
-
 import { OPEN_TOOLS } from "@codecaine-ai/canvas/authoring";
-
-/** The canvas-mcp package folder. Every unit file is a path under it. */
-export const PACKAGE_ROOT = resolve(import.meta.dir, "..");
 
 /** The eval scenario that exercises a unit. The gate runners build one task per scenario. */
 export const SCENARIOS = {
@@ -24,8 +16,8 @@ export const SCENARIOS = {
 } as const;
 export type ScenarioId = keyof typeof SCENARIOS;
 
-/** metadata: skill frontmatter. rule, step, link: hand-written prose. generated: a whole generated reference file. */
-export type UnitKind = "metadata" | "rule" | "step" | "link" | "generated";
+/** metadata: skill frontmatter. rule, step, link: hand-written prose. */
+export type UnitKind = "metadata" | "rule" | "step" | "link";
 /**
  * Where the unit is served now. A drop to instruments is allowed only for a unit that routes output to another
  * system. A drop to skill-folder is allowed only for a unit that maintains the skill folder itself, which goes away
@@ -46,41 +38,24 @@ export type Behavior = {
 export type ManifestUnit = {
   id: string;
   kind: UnitKind;
-  /** Path under PACKAGE_ROOT. */
+  /** The deleted skill file the unit came from, as a path under the canvas-mcp package. */
   file: string;
   /** First and last line, 1-based and inclusive. */
   lines: readonly [number, number];
-  /** The pinned sha256 of the whole file. */
-  sha256: string;
-  /** The unit's lines as the file holds them, or the true rule when the unit carries a correction. */
+  /** The unit's lines as the file held them, or the true rule when the unit carries a correction. */
   text: string;
   /**
    * Set when the skill stated a rule that the code does not do. `text` then holds the true rule, so the prose judge
    * compares the served text against it, and `skillText` records the skill's lines as written.
    */
   correction?: { skillText: string; source: string };
-  /** Exact phrases of the served text that carry the unit's rule. A generated unit and a skill-folder drop have none. */
+  /** Exact phrases of the served text that carry the unit's rule. A skill-folder drop has none. */
   anchors: readonly string[];
   scenario: ScenarioId;
   destination: Destination;
   behavior?: Behavior;
 };
-type UnitSpec = Omit<ManifestUnit, "sha256" | "text"> & { text?: string };
-
 const SKILL = "src/skill/SKILL.md";
-const REFERENCES = "skills/canvas/references";
-
-/** The sha256 of each skill file the units cover. A changed file fails the line-span test until the units move with it. */
-export const PINNED_SHA256: Readonly<Record<string, string>> = {
-  [SKILL]: "79949cc4a4f07da005fb42408794838374e51e700b5be6279b145e551ea61c36",
-  [`${REFERENCES}/colors.md`]: "d1b8b33b2f5d7e17bb69695595b5ada9f757d0941fa6221a0435786ce692a3df",
-  [`${REFERENCES}/conventions.md`]: "c10a569f4f7df24c20bf1f358788f1acc0ace5c16016a27a1dbb5a2808319c48",
-  [`${REFERENCES}/diagram-design.md`]: "85baf121a0afb3676976aa2966fe3c0b45679d29f8f7ccfb64889d2e1ef41105",
-  [`${REFERENCES}/operating-context.md`]: "19ed18d1658651c7748fb9c507ec4b47edf2e7da82ff0bb328270fe099495368",
-  [`${REFERENCES}/visual-patterns.md`]: "7d606f6116467761206a2b21d510c086f5a969280f449e60ad01c4e86e55a12d",
-  [`${REFERENCES}/vocabulary.md`]: "415659dd5213ef59d9d101b08b46df33bfce9e6026c7d18624d862f97324f3b2",
-};
-
 /** The text every edit tool returns until the server process reads topic workflow. */
 export const WORKFLOW_GATE =
   "Read the canvas workflow before your first edit: call canvas_guidance('workflow'), that is canvas_guidance with topic \"workflow\". Required once per server process.";
@@ -88,11 +63,7 @@ export const WORKFLOW_GATE =
 const workflow = { topic: "workflow" } as const;
 const rules = { topic: "rules" } as const;
 
-/** A generated reference file is one unit when its destination serves the same text. */
-const generated = (name: string, topic: string, scenario: ScenarioId, lines: number): UnitSpec =>
-  ({ id: `reference.${name}`, kind: "generated", file: `${REFERENCES}/${name}.md`, lines: [1, lines], anchors: [], scenario, destination: { topic } });
-
-const UNITS: readonly UnitSpec[] = [
+const UNITS: readonly ManifestUnit[] = [
   {
     id: "skill.frontmatter", kind: "metadata", file: SKILL, lines: [1, 12], scenario: "draw-board", destination: workflow,
     text: "---\nname: canvas\ndescription: \"Draw and edit Codecaine Canvas boards through the\n  codecaine-canvas MCP: system architecture, flow and pipeline diagrams,\n  state charts and ownership maps. Use after the instruments skill\n  routes a diagram to canvas, when Ford says canvas or board, or before\n  any place_*, connect or look call.\"\ncompatibility: \"Needs the codecaine-canvas MCP server.\"\nmetadata:\n  version: \"0.1.0\"\n  product: canvas\n---",
@@ -232,21 +203,11 @@ const UNITS: readonly UnitSpec[] = [
     anchors: ["The resource `codecaine://canvas/contact-sheet` renders every glyph in the default style"],
     behavior: { resource: "codecaine://canvas/contact-sheet" },
   },
-  generated("operating-context", "operating_context", "draw-board", 197),
-  generated("visual-patterns", "visual_patterns", "choose-kinds", 134),
-  generated("diagram-design", "diagram_design", "draw-board", 197),
-  generated("vocabulary", "visual_vocabulary", "choose-kinds", 572),
-  generated("colors", "color_palette", "choose-kinds", 21),
-  generated("conventions", "canvas_conventions", "edit-board", 80),
 ];
 
-/** The full manifest. Each unit carries its file's pinned sha256, and a generated unit carries its whole file as text. */
-export async function guidanceManifest(root = PACKAGE_ROOT): Promise<ManifestUnit[]> {
-  return Promise.all(UNITS.map(async unit => ({
-    ...unit,
-    sha256: PINNED_SHA256[unit.file]!,
-    text: unit.text ?? (await readFile(join(root, unit.file), "utf8")).split("\n").slice(0, unit.lines[1]).join("\n"),
-  })));
+/** The full manifest, as frozen literals. */
+export async function guidanceManifest(): Promise<ManifestUnit[]> {
+  return UNITS.map(unit => ({ ...unit }));
 }
 
 /** The tools that stay open before the workflow read. Every other tool on the server is an edit and needs topic workflow. */

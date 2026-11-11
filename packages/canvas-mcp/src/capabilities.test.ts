@@ -1,10 +1,9 @@
 /**
- * The canvas skill's rule-unit manifest against the skill files and the served topics, the canvas_capabilities
- * index, the edit gate and the contact-sheet resource. Every check runs in process, with no network call.
+ * The rule-unit manifest of the deleted skill against the served topics, the canvas_capabilities index, the edit
+ * gate and the contact-sheet resource. Every check runs in process, with no network call.
  */
 import { createHash } from "node:crypto";
 import { copyFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
-import { readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
@@ -18,8 +17,6 @@ import { CRAFT_TARGETS } from "../../canvas/src/authoring/style-guide/craft-targ
 import { AGENT_GRID } from "../../canvas/src/session/tools/grid";
 import pkg from "../package.json";
 import {
-  PACKAGE_ROOT,
-  PINNED_SHA256,
   SCENARIOS,
   UNGATED,
   WORKFLOW_GATE,
@@ -32,42 +29,9 @@ const manifest = await guidanceManifest();
 const sha256 = (text: string) => createHash("sha256").update(text).digest("hex");
 const TOPICS = getCanvasAuthoringGuidance().topics.map((topic) => topic.id);
 const REPO_CANVASES = join(import.meta.dir, "..", "..", "..", "canvases");
-/** A file's lines without the empty string after its last newline. */
-const fileLines = (text: string) => { const lines = text.split("\n"); return lines.at(-1) === "" ? lines.slice(0, -1) : lines; };
 /** The text of a result's text blocks. */
 const textOf = (result: { content: Array<{ type: string; text?: string }> }) =>
   result.content.map((block) => (block.type === "text" ? block.text : "")).join("\n");
-
-/** The seven skill files the manifest covers, read from disk. */
-async function skillFiles(): Promise<Record<string, string>> {
-  const files = ["src/skill/SKILL.md", ...await Array.fromAsync(new Bun.Glob("skills/canvas/references/*.md").scan({ cwd: PACKAGE_ROOT }))].sort();
-  return Object.fromEntries(await Promise.all(files.map(async (file) => [file, await readFile(join(PACKAGE_ROOT, file), "utf8")] as const)));
-}
-
-/** Every way the units fail to cover the files: a missing pin or a changed sha256, a non-blank line in no unit or in two, and a unit whose lines are not its text. */
-function lineSpanFindings(files: Record<string, string>, units: readonly ManifestUnit[], pins: Readonly<Record<string, string>>): string[] {
-  const findings: string[] = [];
-  for (const file of new Set([...Object.keys(files), ...Object.keys(pins)])) {
-    const text = files[file];
-    if (text === undefined) { findings.push(`${file}: pinned but missing`); continue; }
-    if (sha256(text) !== pins[file]) findings.push(`${file}: sha256 ${sha256(text)} is not the pinned ${pins[file] ?? "(none)"}`);
-    const lines = fileLines(text);
-    const owners = lines.map(() => [] as string[]);
-    for (const unit of units.filter((unit) => unit.file === file)) {
-      const [first, last] = unit.lines;
-      if (first < 1 || last > lines.length || first > last) { findings.push(`${unit.id}: lines ${first}-${last} are outside ${file} (${lines.length} lines)`); continue; }
-      for (let line = first; line <= last; line++) owners[line - 1]!.push(unit.id);
-      // A corrected unit's text is the true rule; the skill's own lines are its skillText.
-      if ((unit.correction?.skillText ?? unit.text) !== lines.slice(first - 1, last).join("\n")) findings.push(`${unit.id}: text differs from ${file}:${first}-${last}`);
-      if (unit.kind === "generated" && (first !== 1 || last !== lines.length)) findings.push(`${unit.id}: a generated unit spans the whole file`);
-    }
-    lines.forEach((line, index) => {
-      if (line.trim() !== "" && owners[index]!.length === 0) findings.push(`${file}:${index + 1} is in no unit`);
-      if (owners[index]!.length > 1) findings.push(`${file}:${index + 1} is in ${owners[index]!.join(" and ")}`);
-    });
-  }
-  return findings;
-}
 
 describe("coverage", () => {
   test("every unit has a destination topic or a named drop, and no other destination", () => {
@@ -81,28 +45,11 @@ describe("coverage", () => {
     expect(findings).toEqual([]);
     expect(new Set(manifest.map((unit) => unit.id)).size).toBe(manifest.length);
     expect(manifest.filter((unit) => !(unit.scenario in SCENARIOS)).map((unit) => unit.id)).toEqual([]);
-    // Prose is proved by its anchors. A generated unit is proved by its whole text, and a skill-folder drop by nothing.
-    const unanchored = (unit: ManifestUnit) => unit.kind === "generated" || ("drop" in unit.destination && unit.destination.drop === "skill-folder");
+    // Prose is proved by its anchors, and a skill-folder drop by nothing.
+    const unanchored = (unit: ManifestUnit) => "drop" in unit.destination && unit.destination.drop === "skill-folder";
     expect(manifest.filter((unit) => unanchored(unit) !== (unit.anchors.length === 0)).map((unit) => unit.id)).toEqual([]);
     // A correction names the code that proves it.
     expect(manifest.filter((unit) => unit.correction && !/:\d+/.test(unit.correction.source)).map((unit) => unit.id)).toEqual([]);
-  });
-
-  test("every non-blank line of SKILL.md and the six references sits in one unit, and each file keeps its pinned sha256", async () => {
-    const files = await skillFiles();
-    expect(Object.keys(files)).toHaveLength(7);
-    expect(lineSpanFindings(files, manifest, PINNED_SHA256)).toEqual([]);
-  });
-
-  test("the line-span check fails on an uncovered line, a changed file and a file with no pin", async () => {
-    const files = await skillFiles();
-    const dropped = manifest.find((unit) => unit.id === "skill.rules.edges")!;
-    expect(lineSpanFindings(files, manifest.filter((unit) => unit !== dropped), PINNED_SHA256)).toEqual([`src/skill/SKILL.md:${dropped.lines[0]} is in no unit`]);
-    expect(lineSpanFindings({ ...files, "src/skill/SKILL.md": `${files["src/skill/SKILL.md"]}\n` }, manifest, PINNED_SHA256)[0]).toStartWith("src/skill/SKILL.md: sha256 ");
-    expect(lineSpanFindings({ ...files, "skills/canvas/references/new.md": "# New\n" }, manifest, PINNED_SHA256)).toEqual([
-      `skills/canvas/references/new.md: sha256 ${sha256("# New\n")} is not the pinned (none)`,
-      "skills/canvas/references/new.md:1 is in no unit",
-    ]);
   });
 });
 
@@ -123,13 +70,9 @@ const CODE_COUNTS: Readonly<Record<string, number>> = {
 /** The tools in tools/list, the resources in resources/list, and the text an edit gets before the workflow read. */
 type Observed = { tools: ReadonlySet<string>; resources: ReadonlySet<string>; refusal: string };
 
-/** A generated file without the generator's stamp line and the blank line after it, as `canvas_guidance` serves it. */
-const generatedBody = (text: string) => fileLines(text).slice(2).join("\n");
-
 /** Every way the served text fails to keep a unit. */
 function contractFindings(unit: ManifestUnit, served: string, observed: Observed): string[] {
   const findings: string[] = [];
-  if (unit.kind === "generated" && served !== generatedBody(unit.text)) findings.push(`${unit.id}: the served topic differs from ${unit.file}`);
   for (const anchor of unit.anchors) if (!served.includes(anchor)) findings.push(`${unit.id}: the served text lacks "${anchor}"`);
   for (const tool of unit.behavior?.tools ?? []) {
     if (!observed.tools.has(tool)) findings.push(`${unit.id}: ${tool} is not in tools/list`);
@@ -147,7 +90,7 @@ function contractFindings(unit: ManifestUnit, served: string, observed: Observed
 
 /** The test hook body: the served text without the unit's lines and anchor phrases. */
 const strip = (unit: ManifestUnit) => (text: string) => {
-  const body = unit.kind === "generated" ? fileLines(generatedBody(unit.text)) : unit.text.split("\n");
+  const body = unit.text.split("\n");
   const lines = new Set(body.map((line) => line.trim()).filter((line) => line !== ""));
   let out = text.split("\n").filter((line) => !lines.has(line.trim())).join("\n");
   for (const anchor of unit.anchors) while (out.includes(anchor)) out = out.replaceAll(anchor, "");
